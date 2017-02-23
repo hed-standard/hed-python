@@ -21,6 +21,9 @@ Version 1.0.2 Released 12/21/2016
 * Fixed tag epoching search bar and several minor bugs. 
 * Added menu for saving multiple datasets.
 
+Version 1.0.3 Released 2/22/2017
 
-
-
+* Changed NOT operator to AND NOT operator in epochhed function.
+* Group tilde count is correctly checked during validation.
+* Fixed preserve prefix option when set to true.
+* Multi-lined fieldMap descriptions parse correctly.
