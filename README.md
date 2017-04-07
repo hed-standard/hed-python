@@ -17,7 +17,7 @@ N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and re
 
 Version 1.0.4 Not Released 
 
-* Nested groups are validated correctly
+* Nested groups are validated 
 * Added pop_updatehed function
 * Added validatestr function 
 * Restructured top-level directory
