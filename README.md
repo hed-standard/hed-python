@@ -15,6 +15,13 @@ N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and re
 
 ### Releases
 
+Version 1.0.4 Not Released 
+
+* Nested groups are validated correctly
+* Added pop_updatehed function
+* Added validatestr function 
+* Restructured top-level directory
+
 Version 1.0.3 Released 2/22/2017
 
 * Changed NOT operator to AND NOT operator in epochhed function.
