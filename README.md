@@ -8,7 +8,7 @@ You can run HEDTools as a standalone toolbox or as a plugin for EEGLAB. In both 
 
 #### Running as a standalone application
 
-If your data files are .mat files, you can simply unzip the EEGLABPlugin/HEDTools1.0.4.zip anywhere you choose. Execute the *setup* script to set the paths each time you run MATLAB. Alternatively, you can add the code contained in setup to your startup script.
+If your data files are .mat files, you can simply unzip the EEGLABPlugin/HEDTools1.0.4.zip anywhere you choose. Execute the *setup* script to set the paths each time you run MATLAB. Alternatively, you can add the code contained in *setup* to your startup script.
 
 #### Running with .set data file types
 
