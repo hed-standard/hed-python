@@ -1,6 +1,8 @@
 # HEDTools
 Tools to support event annotation using hierarchical event descriptor (HED) tags. The user manual can be found online at:  [http://vislab.github.io/HEDTools/](http://vislab.github.io/HEDTools/).
 
+### Notes
+
 **Note:** For convenience, EEGLABPlugin directory contains the latest released version of the
 HEDTools that can be unzipped into your EEGLAB plugins directory. 
 
