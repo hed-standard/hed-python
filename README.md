@@ -38,7 +38,11 @@ N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and re
 
 ### Releases
 
-Version 1.0.4 Not Released 
+Version 2.0 Released 7/16/2017
+* epochhed and findhedtags search functionality has been re-implemented. Added exclusive tags feature and removed boolean search functionality. 
+* implemented validateworksheethedtags function for validating the HED tags in an Excel spreadsheet.
+
+Version 1.0.4 Released 4/17/2017 
 
 * Nested groups are validated 
 * Added pop_updatehed function
