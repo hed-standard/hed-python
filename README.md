@@ -38,7 +38,10 @@ N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and re
 
 ### Releases
 
-Version 2.0 Released 7/16/2017
+Version 2.0.1 Released 7/22/2017
+* HEDTools is distributed with HED schema 6.0.3
+
+Version 2.0.0 Released 7/16/2017
 * epochhed and findhedtags search functionality has been re-implemented. Added exclusive tags feature and removed boolean search functionality. 
 * implemented validateworksheethedtags function for validating the HED tags in an Excel spreadsheet.
 
