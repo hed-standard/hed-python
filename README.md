@@ -38,6 +38,10 @@ N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and re
 
 ### Releases
 
+Version 2.0.2 Released 9/11/2017
+* HEDTools is distributed with HED schema 6.0.4
+* findhedevents function is more robust
+
 Version 2.0.1 Released 7/22/2017
 * HEDTools is distributed with HED schema 6.0.3
 
