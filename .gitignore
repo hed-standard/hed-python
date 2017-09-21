@@ -95,6 +95,8 @@ docs/_build/
 #machine specific files
 .vimrc
 
+# Pycharm
+.idea/
 
 ############
 ## Windows
