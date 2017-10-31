@@ -38,6 +38,9 @@ N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and re
 
 ### Releases
 
+Version 2.0.3 Released 10/31/2017
+* Fixed tsvhed2map prefix issue 
+
 Version 2.0.2 Released 9/11/2017
 * HEDTools is distributed with HED schema 6.0.4
 * findhedevents function is more robust
