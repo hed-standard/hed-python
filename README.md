@@ -38,6 +38,10 @@ N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and re
 
 ### Releases
 
+Version 2.0.4 Released 11/9/2017
+* HED tag validation messages for groups only print out the tag that raised an issue
+* Renamed validatestr function to validatehedstr  
+
 Version 2.0.3 Released 10/31/2017
 * Fixed tsvhed2map prefix issue 
 
