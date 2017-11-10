@@ -8,7 +8,7 @@ You can run HEDTools as a standalone toolbox or as a plugin for EEGLAB. In both 
 
 #### Running as a standalone application
 
-If your data files are .mat files, you can simply unzip the EEGLABPlugin/HEDTools1.0.4.zip anywhere you choose. Execute the *setup* script to set the paths each time you run MATLAB. Alternatively, you can add the code contained in *setup* to your startup script.
+If your data files are .mat files, you can simply unzip the EEGLABPlugin/HEDToolsx.x.x.zip anywhere you choose. Execute the *setup* script to set the paths each time you run MATLAB. Alternatively, you can add the code contained in *setup* to your startup script.
 
 #### Running with .set data file types
 
@@ -16,11 +16,11 @@ If you wish to use EEGLAB, you should follow the directions above also.
 
 #### Running as a plugin to EEGLAB
 
-To install HEDTools unzip the HEDTools1.0.4.zip file inside the EEGLAB plugin directory. If you don’t install HEDTools via the EEGLAB menu, you can find this file at:
+To install HEDTools unzip the HEDToolsx.x.x.zip file inside the EEGLAB plugin directory. If you don’t install HEDTools via the EEGLAB menu, you can find this file at:
 
 https://github.com/VisLab/HEDTools/tree/master/EEGLABPlugin
 
-When you start EEGLAB again, HEDTools should be ready to use. Note: EEGLAB requires that each EEGLAB plugin be in its own subdirectory in the plugins directory of EEGLAB. Thus, if you have unzipped HEDTools correctly, you should see …/eeglab/plugins/HEDTools1.0.4/eegplugin_hedtools.m.
+When you start EEGLAB again, HEDTools should be ready to use. Note: EEGLAB requires that each EEGLAB plugin be in its own subdirectory in the plugins directory of EEGLAB. Thus, if you have unzipped HEDTools correctly, you should see …/eeglab/plugins/HEDToolsx.x.x/eegplugin_hedtools.m.
 
 ### Notes
 
@@ -37,6 +37,9 @@ N. Bigdely-Shamlo, J. Cockfield, S. Makeig, T. Rognon, C. LaValle, M. Miyakoshi,
 N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and real-world EEG data for large-scale analysis: A containerized approach, Frontiers in Neuroinformatics 1 08 March 2016 | http://dx.doi.org/10.3389/fninf.2016.00007. PMID: 27014048, PMCID: PMC4782059.
 
 ### Releases
+
+Version 2.0.5 Released 11/10/2017
+* HEDTools is compatible with jsonlab version 1.5
 
 Version 2.0.4 Released 11/9/2017
 * HED tag validation messages for groups only print out the tag that raised an issue
