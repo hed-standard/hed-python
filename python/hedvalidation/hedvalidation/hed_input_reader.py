@@ -12,10 +12,10 @@ Created on Oct 2, 2017
 
 import xlrd;
 import os;
-from hedvalidation import error_reporter;
-from hedvalidation.hed_dictionary import HedDictionary
-from hedvalidation.tag_validator import TagValidator;
-from hedvalidation.hed_string_delimiter import HedStringDelimiter;
+import error_reporter;
+from hed_dictionary import HedDictionary
+from tag_validator import TagValidator;
+from hed_string_delimiter import HedStringDelimiter;
 
 class HedInputReader:
 
