@@ -33,7 +33,8 @@ class HedInputReader:
                                  'Description': 'Event/Description/', 'Label': 'Event/Label/',
                                  'Long': 'Event/Long name/'};
 
-    def __init__(self, hed_input, tag_columns=[2], has_headers=True, prefixed_needed_tag_columns={}, worksheet_name=''):
+    def __init__(self, hed_input, tag_columns=[2], has_headers=True, check_for_warnings=False,
+                 prefixed_needed_tag_columns={}, worksheet_name=''):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -65,6 +66,7 @@ class HedInputReader:
         self._prefixed_needed_tag_columns = HedInputReader.subtract_1_from_dictionary_keys(prefixed_needed_tag_columns);
         self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns);
         self._has_headers = has_headers;
+        self.check_for_warnings = check_for_warnings;
         self._worksheet_name = worksheet_name;
         self._hed_dictionary = HedDictionary(HedInputReader.HED_XML_FILE);
         self._tag_validator = TagValidator(self._hed_dictionary);
@@ -313,7 +315,9 @@ class HedInputReader:
         formatted_tag_set = hed_string_delimiter.get_formatted_tags();
         original_and_formatted_tags = zip(tag_set, formatted_tag_set);
         for original_tag, formatted_tag in original_and_formatted_tags:
-            validation_issues += self._tag_validator.run_individual_tag_validators(original_tag, formatted_tag);
+            validation_issues += \
+                self._tag_validator.run_individual_tag_validators(original_tag, formatted_tag,
+                                                                  check_for_warnings=self.check_for_warnings);
         return validation_issues;
 
     @staticmethod
