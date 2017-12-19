@@ -21,24 +21,24 @@ if __name__ == '__main__':
     # Example 2: Valid CSV file
     prefixed_needed_tag_columns = {2: 'Long', 3: 'Description', 4: 'Label', 5: 'Category', 7: 'Attribute'}
     hed_input_reader = HedInputReader(tx_14_path, tag_columns=[6],
-                                      prefixed_needed_tag_columns=prefixed_needed_tag_columns);
+                                      required_tag_columns=prefixed_needed_tag_columns);
     print('TX14 HED Tags v9.87.csv abc issues:\n' + hed_input_reader.get_validation_issues());
 
     # Example 3: Valid XLSX file
     prefixed_needed_tag_columns = {2: 'Long', 3: 'Description', 4: 'Label', 5: 'Category', 7: 'Attribute'}
     hed_input_reader = HedInputReader(bcit_rsvp, tag_columns=[6],
-                                      prefixed_needed_tag_columns=prefixed_needed_tag_columns);
+                                      required_tag_columns=prefixed_needed_tag_columns);
     print('BCIT RSVP HED Tags v46.0.xlsx abc issues:\n' + hed_input_reader.get_validation_issues());
 
     # Example 4: Valid XLSX file
     prefixed_needed_tag_columns = {2: 'Long', 3: 'Description', 4: 'Label', 5: 'Category', 7: 'Attribute'}
     hed_input_reader = HedInputReader(tx_16_path, tag_columns=[6],
-                                      prefixed_needed_tag_columns=prefixed_needed_tag_columns);
+                                      required_tag_columns=prefixed_needed_tag_columns);
     print('TX16 HED Tags v5.9.xlsx abc issues:\n' + hed_input_reader.get_validation_issues());
 
     # Example 5: Valid XLSX file
     prefixed_needed_tag_columns = {2: 'Label', 3: 'Description'};
-    hed_input_reader = HedInputReader(ncturwn, tag_columns=[4], prefixed_needed_tag_columns=prefixed_needed_tag_columns,
+    hed_input_reader = HedInputReader(ncturwn, tag_columns=[4], required_tag_columns=prefixed_needed_tag_columns,
                                       worksheet_name=ncturwn_lkt_worksheet);
     print('EventCodesNCTURWN_Revised.xlsx abc LKT Events worksheet issues:\n' +
           hed_input_reader.get_validation_issues());
