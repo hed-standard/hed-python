@@ -195,13 +195,14 @@ class TagValidator:
         """
         validation_warning = '';
         tag_names = original_tag.split("/");
-        if not self.tag_takes_value(formatted_tag):
+        if self.tag_takes_value(formatted_tag):
+            tag_names = tag_names[:-1];
             for tag_name in tag_names:
                 correct_tag_name = tag_name.capitalize();
                 if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
                     validation_warning = warning_reporter.report_warning_type("cap", tag=original_tag);
                     break;
-            return validation_warning;
+        return validation_warning;
 
     def is_extension_allowed_tag(self, formatted_tag):
         """Checks to see if the tag has the 'extensionAllowed' attribute. It will strip the tag until there are no more
@@ -475,9 +476,11 @@ class TagValidator:
         validation_error = '';
         required_tag_prefixes = self.hed_dictionary_dictionaries[TagValidator.REQUIRED_ERROR_TYPE];
         for required_tag_prefix in required_tag_prefixes:
+            capitalized_required_tag_prefix = \
+                self.hed_dictionary_dictionaries[TagValidator.REQUIRED_ERROR_TYPE][required_tag_prefix];
             if sum([x.startswith(required_tag_prefix) for x in formatted_top_level_tags]) < 1:
                 validation_error += error_reporter.report_error_type(TagValidator.REQUIRED_ERROR_TYPE,
-                                                                     tag_prefix=required_tag_prefix);
+                                                                     tag_prefix=capitalized_required_tag_prefix);
         return validation_error;
 
     def check_if_multiple_unique_tags_exist(self, original_tag_list, formatted_tag_list):
