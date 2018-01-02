@@ -19,9 +19,7 @@ class Test(unittest.TestCase):
         cls.comma_separated_string_with_double_quotes = 'a,b,c,"d,e,f"';
         cls.comma_delimited_list_with_double_quotes = ['a', 'b', 'c', "d,e,f"];
         cls.comma_delimiter = ',';
-        cls.attribute_key = 'Attribute';
         cls.category_key = 'Category';
-        cls.attribute_tag = 'Onset';
         cls.hed_string_with_multiple_unique_tags = 'event/label/this is a label,event/label/this is another label';
         cls.hed_string_with_invalid_tags = 'this/is/not/a/valid/tag1,this/is/not/a/valid/tag2';
         cls.hed_string_with_too_many_tildes = '(this/is/not/a/valid/tag1~this/is/not/a/valid/tag2' \
@@ -73,9 +71,10 @@ class Test(unittest.TestCase):
     def test__append_validation_issues_if_found(self):
         row_number = random.randint(0,100);
         self.assertFalse(self.validation_issues);
-        validation_issues = self.generic_hed_input_reader._append_validation_issues_if_found(self.validation_issues,
-                                                                                             row_number,
-                                                                                             self.hed_string_with_invalid_tags);
+        validation_issues = \
+            self.generic_hed_input_reader._append_validation_issues_if_found(self.validation_issues,
+                                                                             row_number,
+                                                                             self.hed_string_with_invalid_tags);
         self.assertIsInstance(validation_issues, basestring);
         self.assertTrue(validation_issues);
 
@@ -124,13 +123,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(split_string, list);
         self.assertEqual(split_string, self.comma_delimited_list_with_double_quotes);
 
-    def test_prepend_path_to_prefixed_needed_tag_column(self):
-        prepended_hed_string = HedInputReader.prepend_path_to_prefixed_needed_tag_column(self.attribute_tag,
-                                                                                         self.attribute_key);
-        self.assertIsInstance(prepended_hed_string, basestring);
-        self.assertEqual(prepended_hed_string, self.attribute_onset_tag);
-        prepended_hed_string = HedInputReader.prepend_path_to_prefixed_needed_tag_column(self.category_tags,
-                                                                                         self.category_key);
+    def test_prepend_prefix_to_required_tag_column_if_needed(self):
+        prepended_hed_string = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(self.category_tags,
+                                                                                              self.category_key);
         self.assertIsInstance(prepended_hed_string, basestring);
         self.assertEqual(prepended_hed_string, self.category_partipant_and_stimulus_tags);
 
