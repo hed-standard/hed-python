@@ -332,7 +332,7 @@ class HedInputReader:
          Returns
          -------
          list
-             A list containing the combined required tag columns and the tag columns. 
+             A list containing the combined required tag columns and the tag columns.
 
          """
         return tag_columns + list(set(required_tag_columns.keys()) - set(tag_columns));
@@ -481,7 +481,7 @@ class HedInputReader:
             row_hed_tags = split_row_list[hed_tag_column];
             if row_hed_tags:
                 if hed_tag_column in prefixed_needed_tag_columns:
-                    row_hed_tags = HedInputReader.prepend_path_to_prefixed_needed_tag_column(
+                    row_hed_tags = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(
                         row_hed_tags, prefixed_needed_tag_columns[hed_tag_column]);
                 hed_tags.append(row_hed_tags);
         return ','.join(hed_tags);
@@ -514,7 +514,7 @@ class HedInputReader:
             row_hed_tags = HedInputReader.convert_column_to_unicode_if_not(worksheet_row[hed_tag_column].value);
             if row_hed_tags:
                 if hed_tag_column in prefixed_needed_tag_columns:
-                    row_hed_tags = HedInputReader.prepend_path_to_prefixed_needed_tag_column(
+                    row_hed_tags = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(
                         row_hed_tags, prefixed_needed_tag_columns[hed_tag_column]);
                 hed_tags.append(row_hed_tags);
         return ','.join(hed_tags);
@@ -557,30 +557,35 @@ class HedInputReader:
         return sorted(filter(lambda x: x < row_column_count, hed_tag_columns));
 
     @staticmethod
-    def prepend_path_to_prefixed_needed_tag_column(hed_tags, prefix_hed_tag_key):
-        """Prepends the tag paths to the tag column tags that need them.
+    def prepend_prefix_to_required_tag_column_if_needed(required_tag_column_tags, required_tag_prefix_key):
+        """Prepends the tag paths to the required tag column tags that need them.
 
         Parameters
         ----------
-        hed_tags: string
-            A string containing HED tags associated with a particular column that needs a tag prefix prepended to its
-            tags.
-        prefix_hed_tag_key: string
-            A string dictionary key that corresponds to the tag prefix that will be prepended to the column tags.
+        required_tag_column_tags: string
+            A string containing HED tags associated with a required tag column that may need a tag prefix prepended to
+            its tags.
+        required_tag_prefix_key: string
+            A string dictionary key that corresponds to the required tag prefix that may be prepended to the tags in a
+            required tag column if needed.
         Returns
         -------
         string
-            A comma separated string that contains the HED tags with the tag prefix prepended to each of them.
+            A comma separated string that contains the required HED tags with the tag prefix prepended to them if
+            needed.
 
         """
-        prepended_hed_tags = [];
-        split_hed_tags = hed_tags.split(',');
-        split_hed_tags = [x.strip() for x in split_hed_tags];
-        for hed_tag in split_hed_tags:
-            if hed_tag:
-                prepended_hed_tag = HedInputReader.REQUIRED_TAG_COLUMN_TO_PATH[prefix_hed_tag_key] + hed_tag;
-                prepended_hed_tags.append(prepended_hed_tag);
-        return ','.join(prepended_hed_tags);
+        required_tags_with_prefix = [];
+        required_tags = required_tag_column_tags.split(',');
+        required_tags = [x.strip() for x in required_tags];
+        required_tag_prefix = HedInputReader.REQUIRED_TAG_COLUMN_TO_PATH[required_tag_prefix_key];
+        for required_tag in required_tags:
+            if required_tag and not required_tag.lower().startswith(required_tag_prefix.lower()):
+                required_tag_with_prefix = required_tag_prefix + required_tag;
+                required_tags_with_prefix.append(required_tag_with_prefix);
+            else:
+                required_tags_with_prefix.append(required_tag);
+        return ','.join(required_tags_with_prefix);
 
     @staticmethod
     def split_delimiter_separated_string_with_quotes(delimiter_separated_string, delimiter):
