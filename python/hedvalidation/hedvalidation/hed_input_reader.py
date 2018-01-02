@@ -86,8 +86,8 @@ class HedInputReader:
 
         """
         tag_columns = HedInputReader.subtract_1_from_list_elements(tag_columns);
-        tag_columns = HedInputReader.add_prefixed_needed_tag_columns_to_tag_columns(tag_columns,
-                                                                                    self._required_tag_columns);
+        tag_columns = HedInputReader.add_required_tag_columns_to_tag_columns(tag_columns,
+                                                                             self._required_tag_columns);
         return tag_columns;
 
 
@@ -320,8 +320,22 @@ class HedInputReader:
         return validation_issues;
 
     @staticmethod
-    def add_prefixed_needed_tag_columns_to_tag_columns(tag_columns, prefixed_needed_tag_columns):
-        return tag_columns + list(set(prefixed_needed_tag_columns.keys()) - set(tag_columns));
+    def add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns):
+        """Adds the required tag columns to the tag columns.
+
+         Parameters
+         ----------
+        tag_columns: list
+            A list containing the tag column indices.
+         required_tag_columns: dictionary
+            A dictionary containing the required tag columns.
+         Returns
+         -------
+         list
+             A list containing the combined required tag columns and the tag columns. 
+
+         """
+        return tag_columns + list(set(required_tag_columns.keys()) - set(tag_columns));
 
     @staticmethod
     def row_contains_headers(has_headers, row_number):
