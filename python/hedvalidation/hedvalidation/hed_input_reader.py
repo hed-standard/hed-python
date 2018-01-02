@@ -581,10 +581,8 @@ class HedInputReader:
         required_tag_prefix = HedInputReader.REQUIRED_TAG_COLUMN_TO_PATH[required_tag_prefix_key];
         for required_tag in required_tags:
             if required_tag and not required_tag.lower().startswith(required_tag_prefix.lower()):
-                required_tag_with_prefix = required_tag_prefix + required_tag;
-                required_tags_with_prefix.append(required_tag_with_prefix);
-            else:
-                required_tags_with_prefix.append(required_tag);
+                required_tag = required_tag_prefix + required_tag;
+            required_tags_with_prefix.append(required_tag);
         return ','.join(required_tags_with_prefix);
 
     @staticmethod
