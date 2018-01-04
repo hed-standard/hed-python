@@ -75,7 +75,6 @@ class TagValidator:
         validation_issues = '';
         validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag);
         validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
-        validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
         validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag);
         if check_for_warnings:
             validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
@@ -172,7 +171,7 @@ class TagValidator:
         """
         validation_error = '';
         if self.is_extension_allowed_tag(formatted_tag) or self.tag_takes_value(formatted_tag) or \
-                        formatted_tag == TagValidator.TILDE:
+            formatted_tag == TagValidator.TILDE:
             pass;
         elif not self.hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
