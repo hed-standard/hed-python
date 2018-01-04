@@ -310,7 +310,7 @@ class TagValidator:
 
         """
         validation_error = '';
-        if self.is_unit_class_tag(formatted_tag):
+        if not self.tag_is_valid(formatted_tag) and self.is_unit_class_tag(formatted_tag):
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag));
             tag_unit_values = self.get_tag_name(formatted_tag);
             if not re.search(TagValidator.DIGIT_EXPRESSION, tag_unit_values) and \
