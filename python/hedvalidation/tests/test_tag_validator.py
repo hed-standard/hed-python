@@ -24,6 +24,7 @@ class Test(unittest.TestCase):
                                'event/category/participant response';
         cls.invalid_hed_string = 'event/label/hed string, event/description/this is a hed string, ' \
                                  'event/category/participant response, (()))';
+        cls.valid_formatted_tag_without_attribute = 'event/category/participant response';
         cls.tilde = '~';
         cls.comma = ','
         cls.at_sign = '@';
@@ -213,6 +214,12 @@ class Test(unittest.TestCase):
         self.assertTrue(is_a_delimiter);
         is_a_delimiter = TagValidator.character_is_delimiter(self.at_sign);
         self.assertFalse(is_a_delimiter);
+
+    def test_tag_is_valid(self):
+        tag_is_valid = self.tag_validator.tag_is_valid(self.valid_formatted_tag_without_attribute);
+        self.assertTrue(tag_is_valid);
+        tag_is_valid = self.tag_validator.tag_is_valid(self.invalid_formatted_tag);
+        self.assertFalse(tag_is_valid)
 
 if __name__ == '__main__':
     unittest.main();
