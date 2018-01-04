@@ -38,6 +38,9 @@ N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and re
 
 ### Releases
 
+Version 2.1.0 Released 1/4/2018
+* HEDTools validation functions report missing commas and unequal number of tag group parentheses.
+
 Version 2.0.5 Released 11/10/2017
 * HEDTools is compatible with jsonlab version 1.5
 
