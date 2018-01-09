@@ -383,7 +383,10 @@ class TagValidator:
             unit_classes = self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
             unit_classes = unit_classes.split(',');
             for unit_class in unit_classes:
-                units += (self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class]);
+                try:
+                    units += (self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class]);
+                except:
+                    continue;
         return map(str.lower, units);
 
     def get_unit_class_default_unit(self, formatted_tag):
