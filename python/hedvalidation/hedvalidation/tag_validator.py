@@ -24,6 +24,7 @@ class TagValidator:
     REQUIRED_ERROR_TYPE = 'required';
     TAG_DICTIONARY_KEY = 'tags';
     TILDE_ERROR_TYPE = 'tilde';
+    TIME_UNIT_CLASS = 'time';
     UNIQUE_ERROR_TYPE = 'unique';
     VALID_ERROR_TYPE = 'valid';
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed';
@@ -314,6 +315,7 @@ class TagValidator:
         if not self.tag_is_valid(formatted_tag) and self.is_unit_class_tag(formatted_tag):
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag));
             tag_unit_values = self.get_tag_name(formatted_tag);
+            if TagValidator.TIME_UNIT_CLASS in tag_unit_class_units
             if not re.search(TagValidator.DIGIT_EXPRESSION, tag_unit_values) and \
                     not tag_unit_values.startswith(tag_unit_class_units) and \
                     not tag_unit_values.endswith(tag_unit_class_units):
@@ -363,6 +365,29 @@ class TagValidator:
         if tag_slash_indices:
             tag_name = tag[tag_slash_indices[-1] + 1:]
         return tag_name;
+
+
+    def get_tag_unit_classes(self, formatted_tag):
+        """Gets the unit classes associated with a particular tag.
+
+        Parameters
+        ----------
+        formatted_tag: string
+            The tag that is used to do the validation.
+        Returns
+        -------
+        list
+            A list containing the unit classes associated with a particular tag. A empty list will be returned if
+            the tag doesn't have unit classes associated with it.
+
+        """
+        unit_classes = [];
+        unit_class_tag = self.replace_tag_name_with_pound(formatted_tag);
+        if self.is_unit_class_tag(formatted_tag):
+            unit_classes = self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
+            unit_classes = unit_classes.split(',');
+        return unit_classes;
+
 
     def get_tag_unit_class_units(self, formatted_tag):
         """Gets the unit class units associated with a particular tag.
