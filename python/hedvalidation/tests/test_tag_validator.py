@@ -52,6 +52,8 @@ class Test(unittest.TestCase):
         cls.extension_allowed_descendant_tag = 'Item/Object/Tool/Hammer';
         cls.missing_comma_hed_string = '(Item/2D shape/Sector, Attribute/Visual/Color/Red) f ' \
                                        '(Item/2D shape/Ellipse/Circle, Attribute/Visual/Color / Red)';
+        cls.valid_formatted_time_string_tag = 'item/2d shape/clock face/8:30';
+        cls.invalid_formatted_time_string_tag = 'item/2d shape/clock face/54:54';
         cls.valid_time_string = '12:24';
         cls.invalid_time_string = '54:54';
 
@@ -190,6 +192,16 @@ class Test(unittest.TestCase):
         validation_error = \
             self.tag_validator.check_if_tag_unit_class_units_are_valid(self.invalid_formatted_unit_class_tag,
                                                                        self.invalid_formatted_unit_class_tag);
+        self.assertTrue(validation_error);
+        self.assertIsInstance(validation_error, basestring);
+        validation_error = \
+            self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_formatted_time_string_tag,
+                                                                       self.valid_formatted_time_string_tag);
+        self.assertFalse(validation_error);
+        self.assertIsInstance(validation_error, basestring);
+        validation_error = \
+            self.tag_validator.check_if_tag_unit_class_units_are_valid(self.invalid_formatted_time_string_tag,
+                                                                       self.invalid_formatted_time_string_tag);
         self.assertTrue(validation_error);
         self.assertIsInstance(validation_error, basestring);
 
