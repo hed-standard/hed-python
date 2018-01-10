@@ -11,6 +11,7 @@ import re;
 from itertools import compress;
 import error_reporter;
 import warning_reporter;
+import time;
 
 
 class TagValidator:
@@ -433,7 +434,6 @@ class TagValidator:
         last_tag_slash_index = formatted_tag.rfind('/');
         if last_tag_slash_index != -1:
             numeric_tag = formatted_tag[:last_tag_slash_index] + '/#';
-            print(numeric_tag);
             return self.hed_dictionary.tag_has_attribute(numeric_tag, TagValidator.IS_NUMERIC_ATTRIBUTE);
         return False;
 
@@ -639,3 +639,23 @@ class TagValidator:
                                                                 opening_bracket_count=number_of_opening_brackets,
                                                                 closing_bracket_count=number_of_closing_brackets);
         return validation_error;
+
+    @staticmethod
+    def is_hh_mm_time(time_string):
+        """Checks to see if the specified string is valid HH:MM time string.
+
+        Parameters
+        ----------
+        time_string: string
+            A time string.
+        Returns
+        -------
+        string
+            True if the time string is valid. False, if otherwise.
+
+        """
+        try:
+            time.strptime(time_string, '%H:%M')
+        except ValueError:
+            return False;
+        return True;
