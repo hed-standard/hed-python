@@ -313,10 +313,12 @@ class TagValidator:
         """
         validation_error = '';
         if not self.tag_is_valid(formatted_tag) and self.is_unit_class_tag(formatted_tag):
-            tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag));
+            tag_unit_classes = self.get_tag_unit_classes(formatted_tag);
             tag_unit_values = self.get_tag_name(formatted_tag);
-            if TagValidator.TIME_UNIT_CLASS in tag_unit_class_units
-            if not re.search(TagValidator.DIGIT_EXPRESSION, tag_unit_values) and \
+            tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag));
+            if TagValidator.TIME_UNIT_CLASS in tag_unit_classes and TagValidator.is_hh_mm_time(tag_unit_values):
+                pass;
+            elif not re.search(TagValidator.DIGIT_EXPRESSION, tag_unit_values) and \
                     not tag_unit_values.startswith(tag_unit_class_units) and \
                     not tag_unit_values.endswith(tag_unit_class_units):
                 validation_error = error_reporter.report_error_type('unitClass', tag=original_tag,
