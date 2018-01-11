@@ -3592,10 +3592,10 @@
          <name>Rapid serial object transformation</name>
       </node>
       <node>
-         <name>Reading</name>
+         <name>Reading (Covert)</name>
       </node>
       <node>
-         <name>Reading</name>
+         <name>Reading (Overt)</name>
       </node>
       <node>
          <name>Reading paradigm</name>
