@@ -57,6 +57,9 @@ class Test(unittest.TestCase):
         cls.valid_time_string = '12:24';
         cls.invalid_time_string = '54:54';
         cls.valid_formatted_tag_with_parentheses = 'paradigm/reading (covert)';
+        cls.last_non_empty_character_not_delimiter = ')';
+        cls.last_non_empty_character_delimiter = ',';
+        cls.current_character = 'f';
 
     def test_check_if_tag_is_valid(self):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
@@ -225,7 +228,6 @@ class Test(unittest.TestCase):
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, basestring);
 
-
     def test_character_is_delimiter(self):
         is_a_delimiter = TagValidator.character_is_delimiter(self.comma);
         self.assertTrue(is_a_delimiter);
@@ -245,6 +247,16 @@ class Test(unittest.TestCase):
         self.assertTrue(validation_error, basestring);
         validation_error = TagValidator.is_hh_mm_time(self.invalid_time_string);
         self.assertFalse(validation_error, basestring);
+
+    def test_comma_is_missing_after_closing_bracket(self):
+        comma_is_missing = \
+            self.tag_validator._comma_is_missing_after_closing_bracket(self.last_non_empty_character_not_delimiter,
+                                                                       self.current_character);
+        self.assertTrue(comma_is_missing);
+        comma_is_missing = \
+            self.tag_validator._comma_is_missing_after_closing_bracket(self.last_non_empty_character_delimiter,
+                                                                       self.current_character);
+        self.assertFalse(comma_is_missing);
 
 if __name__ == '__main__':
     unittest.main();
