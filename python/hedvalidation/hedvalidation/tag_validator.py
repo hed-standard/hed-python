@@ -116,7 +116,7 @@ class TagValidator:
          """
         validation_issues = '';
         validation_issues += TagValidator.count_tag_group_brackets(hed_string);
-        validation_issues += TagValidator.find_missing_commas_in_hed_string(hed_string);
+        validation_issues += self.find_missing_commas_in_hed_string(hed_string);
         return validation_issues;
 
     def run_tag_level_validators(self, original_tag_list, formatted_tag_list):
@@ -590,8 +590,7 @@ class TagValidator:
             return tag[:end_index]
         return tag;
 
-    @staticmethod
-    def find_missing_commas_in_hed_string(hed_string):
+    def find_missing_commas_in_hed_string(self, hed_string):
         """Reports a validation error if there are missing commas before and after groups.
 
         Parameters
@@ -607,16 +606,21 @@ class TagValidator:
         validation_error = '';
         current_tag = '';
         last_non_empty_character = '';
-        for character in hed_string:
+        for character_index, character in enumerate(hed_string):
             current_tag += character;
             if not character.isspace():
                 if TagValidator.character_is_delimiter(character):
                     current_tag = '';
                 if last_non_empty_character and not TagValidator.character_is_delimiter(last_non_empty_character) and \
                                 character == TagValidator.OPENING_GROUP_BRACKET:
-                    current_tag = current_tag[:-1].strip();
-                    validation_error = error_reporter.report_error_type(TagValidator.COMMA_ERROR_TYPE, tag=current_tag);
-                    break;
+                    current_tag = current_tag[:-1];
+                    tag_with_parentheses = current_tag + hed_string[character_index:];
+                    if not self.tag_is_valid(tag_with_parentheses):
+                        TagValidator.get_next_set_of_parentheses_in_string(tag_with_parentheses);
+                        current_tag = current_tag.strip();
+                        validation_error = error_reporter.report_error_type(TagValidator.COMMA_ERROR_TYPE,
+                                                                            tag=current_tag);
+                        break;
                 if last_non_empty_character == TagValidator.CLOSING_GROUP_BRACKET and not \
                         TagValidator.character_is_delimiter(character):
                     current_tag = current_tag[:-1].strip();
@@ -624,6 +628,30 @@ class TagValidator:
                     break;
                 last_non_empty_character = character;
         return validation_error;
+
+    @staticmethod
+    def get_next_set_of_parentheses_in_string(hed_string):
+        """Gets the next set of parentheses in the provided string.
+
+        Parameters
+        ----------
+        hed_string: string
+            A HED string.
+        Returns
+        -------
+        string
+            The next set of parentheses in the HED string. If not found, then the entire HED string is returned.
+
+        """
+        set_of_parentheses = '';
+        opening_parenthesis_found = False;
+        for character in hed_string:
+            set_of_parentheses += character
+            if character == TagValidator.OPENING_GROUP_BRACKET:
+                opening_parenthesis_found = True;
+            if character == TagValidator.CLOSING_GROUP_BRACKET and opening_parenthesis_found:
+                return set_of_parentheses;
+        return set_of_parentheses;
 
     @staticmethod
     def character_is_delimiter(character):
