@@ -14,8 +14,8 @@ class Test(unittest.TestCase):
         cls.tag_validator = TagValidator(cls.hed_dictionary);
         random_require_child_key = \
             random.randint(2, len(cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY]));
-        cls.required_child_tag = \
-            cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY][cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY].keys()[random_require_child_key]];
+        cls.required_child_tag = cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY]\
+            [cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY].keys()[random_require_child_key]];
         cls.invalid_original_tag = 'This/Is/A/Tag';
         cls.invalid_formatted_tag = 'this/is/a/tag';
         cls.valid_original_tag = 'Event/Label';
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
         cls.invalid_formatted_time_string_tag = 'item/2d shape/clock face/54:54';
         cls.valid_time_string = '12:24';
         cls.invalid_time_string = '54:54';
-
+        cls.valid_formatted_tag_with_parentheses = 'paradigm/reading (covert)';
 
     def test_check_if_tag_is_valid(self):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
@@ -214,12 +214,17 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_error, basestring);
 
     def test_find_missing_commas_in_hed_string(self):
-        validation_error = TagValidator.find_missing_commas_in_hed_string(self.valid_hed_string);
+        validation_error = self.tag_validator.find_missing_commas_in_hed_string(self.valid_hed_string);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, basestring);
-        validation_error = TagValidator.find_missing_commas_in_hed_string(self.missing_comma_hed_string);
+        validation_error = self.tag_validator.find_missing_commas_in_hed_string(self.missing_comma_hed_string);
         self.assertTrue(validation_error);
         self.assertIsInstance(validation_error, basestring);
+        validation_error = \
+            self.tag_validator.find_missing_commas_in_hed_string(self.valid_formatted_tag_with_parentheses);
+        self.assertFalse(validation_error);
+        self.assertIsInstance(validation_error, basestring);
+
 
     def test_character_is_delimiter(self):
         is_a_delimiter = TagValidator.character_is_delimiter(self.comma);
@@ -234,7 +239,6 @@ class Test(unittest.TestCase):
         self.assertTrue(tag_is_valid);
         tag_is_valid = self.tag_validator.tag_is_valid(self.invalid_formatted_tag);
         self.assertFalse(tag_is_valid);
-
 
     def test_is_hh_mm_time(self):
         validation_error = TagValidator.is_hh_mm_time(self.valid_time_string);
