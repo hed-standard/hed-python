@@ -643,6 +643,7 @@ class TagValidator:
         rest_of_hed_string = hed_string[character_index:];
         current_tag_with_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(current_tag +
                                                                                               rest_of_hed_string);
+        current_tag_with_parentheses = current_tag_with_parentheses.lower();
         return self.tag_is_valid(current_tag_with_parentheses);
 
     @staticmethod
