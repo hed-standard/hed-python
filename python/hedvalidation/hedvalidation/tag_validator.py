@@ -611,11 +611,11 @@ class TagValidator:
             if not character.isspace():
                 if TagValidator.character_is_delimiter(character):
                     current_tag = '';
-                if TagValidator._comma_is_missing_before_opening_bracket(last_non_empty_character, character) and not \
+                if TagValidator.comma_is_missing_before_opening_bracket(last_non_empty_character, character) and not \
                         self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     break;
-                if TagValidator._comma_is_missing_after_closing_bracket(last_non_empty_character, character):
+                if TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     break;
                 last_non_empty_character = character;
@@ -664,7 +664,7 @@ class TagValidator:
         return error_reporter.report_error_type(TagValidator.COMMA_ERROR_TYPE, tag=error_tag);
 
     @staticmethod
-    def _comma_is_missing_before_opening_bracket(last_non_empty_character, current_character):
+    def comma_is_missing_before_opening_bracket(last_non_empty_character, current_character):
         """Checks to see if a comma is missing before a opening bracket in a HED string. This is a helper function for
            the find_missing_commas_in_hed_string function.
 
@@ -684,7 +684,7 @@ class TagValidator:
             current_character == TagValidator.OPENING_GROUP_BRACKET;
 
     @staticmethod
-    def _comma_is_missing_after_closing_bracket(last_non_empty_character, current_character):
+    def comma_is_missing_after_closing_bracket(last_non_empty_character, current_character):
         """Checks to see if a comma is missing after a closing bracket in a HED string. This is a helper function for
            the find_missing_commas_in_hed_string function.
 
