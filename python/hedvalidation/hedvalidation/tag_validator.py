@@ -611,22 +611,77 @@ class TagValidator:
             if not character.isspace():
                 if TagValidator.character_is_delimiter(character):
                     current_tag = '';
-                if last_non_empty_character and not TagValidator.character_is_delimiter(last_non_empty_character) and \
-                                character == TagValidator.OPENING_GROUP_BRACKET:
-                    current_tag = current_tag[:-1];
-                    tag_with_parentheses = current_tag + hed_string[character_index:];
-                    if not self.tag_is_valid(tag_with_parentheses):
-                        TagValidator.get_next_set_of_parentheses_in_string(tag_with_parentheses);
-                        current_tag = current_tag.strip();
-                        validation_error = error_reporter.report_error_type(TagValidator.COMMA_ERROR_TYPE,
-                                                                            tag=current_tag);
-                        break;
+                if TagValidator._comma_is_missing_before_opening_bracket(last_non_empty_character, character) and not \
+                        self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
+                    validation_error = TagValidator.report_missing_comma_error(current_tag);
+                    break;
                 if TagValidator._comma_is_missing_after_closing_bracket(last_non_empty_character, character):
-                    current_tag = current_tag[:-1].strip();
-                    validation_error = error_reporter.report_error_type(TagValidator.COMMA_ERROR_TYPE, tag=current_tag);
+                    validation_error = TagValidator.report_missing_comma_error(current_tag);
                     break;
                 last_non_empty_character = character;
         return validation_error;
+
+    def _is_valid_tag_with_parentheses(self, hed_string, current_tag, character_index):
+        """Checks to see if the current tag with the next set of parentheses in the HED string is valid. Some tags have
+           parentheses and this function is implemented to avoid reporting a missing comma error.
+
+        Parameters
+        ----------
+        hed_string: string
+            A HED string.
+        current_tag: string
+            The current tag in the HED string.
+        character_index: integer
+            The index of the current character.
+        Returns
+        -------
+        boolean
+            True, if the current tag with the next set of parentheses in the HED string is valid. False, if otherwise.
+
+        """
+        current_tag = current_tag[:-1];
+        rest_of_hed_string = hed_string[character_index:];
+        current_tag_with_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(current_tag +
+                                                                                              rest_of_hed_string);
+        return self.tag_is_valid(current_tag_with_parentheses);
+
+    @staticmethod
+    def report_missing_comma_error(error_tag):
+        """Reports a error that is related with a missing comma.
+
+        Parameters
+        ----------
+        error_tag: string
+            The tag that caused the error.
+        Returns
+        -------
+        string
+            The error message associated with a missing comma.
+
+
+        """
+        error_tag = error_tag[:-1].strip();
+        return error_reporter.report_error_type(TagValidator.COMMA_ERROR_TYPE, tag=error_tag);
+
+    @staticmethod
+    def _comma_is_missing_before_opening_bracket(last_non_empty_character, current_character):
+        """Checks to see if a comma is missing before a opening bracket in a HED string. This is a helper function for
+           the find_missing_commas_in_hed_string function.
+
+        Parameters
+        ----------
+        last_non_empty_character: character
+            The last non-empty string in the HED string.
+        current_character: string
+            The current character in the HED string.
+        Returns
+        -------
+        boolean
+            True if a comma is missing before a opening bracket. False, if otherwise.
+
+        """
+        return last_non_empty_character and not TagValidator.character_is_delimiter(last_non_empty_character) and \
+            current_character == TagValidator.OPENING_GROUP_BRACKET;
 
     @staticmethod
     def _comma_is_missing_after_closing_bracket(last_non_empty_character, current_character):
@@ -641,16 +696,16 @@ class TagValidator:
             The current character in the HED string.
         Returns
         -------
-        string
-            The next set of parentheses in the HED string. If not found, then the entire HED string is returned.
+        boolean
+            True if a comma is missing after a closing bracket. False, if otherwise.
 
         """
         return last_non_empty_character == TagValidator.CLOSING_GROUP_BRACKET and not \
             TagValidator.character_is_delimiter(current_character);
 
     @staticmethod
-    def get_next_set_of_parentheses_in_string(hed_string):
-        """Gets the next set of parentheses in the provided string.
+    def get_next_set_of_parentheses_in_hed_string(hed_string):
+        """Gets the next set of parentheses in the provided HED string.
 
         Parameters
         ----------
