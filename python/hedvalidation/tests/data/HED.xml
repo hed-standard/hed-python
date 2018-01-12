@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<HED version="6.0.4">
+<HED version="6.0.5">
    <node>
       <name>Event</name>
       <node position="1" predicateType="passThrough" requireChild="true" required="true">
@@ -1291,14 +1291,14 @@
             <name>Motion</name>
             <node>
                <name>Down</name>
-               <node isNumeric="true" takesValue="true" unitClass="velocity">
+               <node isNumeric="true" takesValue="true" unitClass="speed">
                   <name>#</name>
                   <description>e.g. 3 degrees-per-second</description>
                </node>
             </node>
             <node>
                <name>Up</name>
-               <node isNumeric="true" takesValue="true" unitClass="velocity">
+               <node isNumeric="true" takesValue="true" unitClass="speed">
                   <name>#</name>
                   <description>e.g. 3 degrees-per-second</description>
                </node>
@@ -1307,14 +1307,14 @@
                <name>Horizontal</name>
                <node>
                   <name>Right</name>
-                  <node isNumeric="true" takesValue="true" unitClass="velocity">
+                  <node isNumeric="true" takesValue="true" unitClass="speed">
                      <name>#</name>
                      <description>e.g. 3 degrees-per-second</description>
                   </node>
                </node>
                <node>
                   <name>Left</name>
-                  <node isNumeric="true" takesValue="true" unitClass="velocity">
+                  <node isNumeric="true" takesValue="true" unitClass="speed">
                      <name>#</name>
                      <description>e.g. 3 degrees-per-second</description>
                   </node>
