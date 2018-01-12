@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
         cls.tag_validator = TagValidator(cls.hed_dictionary);
         random_require_child_key = \
             random.randint(2, len(cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY]));
-        cls.required_child_tag = cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY]\
+        cls.required_child_tag = cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY] \
             [cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY].keys()[random_require_child_key]];
         cls.invalid_original_tag = 'This/Is/A/Tag';
         cls.invalid_formatted_tag = 'this/is/a/tag';
@@ -22,6 +22,8 @@ class Test(unittest.TestCase):
         cls.valid_formatted_tag = 'event/label';
         cls.valid_hed_string = 'event/label/hed string, event/description/this is a hed string, ' \
                                'event/category/participant response';
+        cls.valid_hed_string_with_group = 'event/label/hed string, event/description/this is a hed string, ' \
+                                          'event/category/participant response, (this/is/a/tag, this/is/another/tag)';
         cls.invalid_hed_string = 'event/label/hed string, event/description/this is a hed string, ' \
                                  'event/category/participant response, (()))';
         cls.valid_formatted_tag_without_attribute = 'event/category/participant response';
@@ -40,15 +42,15 @@ class Test(unittest.TestCase):
         cls.valid_original_unique_tag_list = ['Event/Label/This is a label',
                                               'Event/Description/This is a description'];
         cls.valid_formatted_unique_tag_list = ['event/label/this is a label',
-             'event/description/this is a description'];
+                                               'event/description/this is a description'];
         cls.invalid_original_unique_tag_list = ['Event/Label/This is a label', 'Event/Label/This is another label',
-             'Event/Description/This is a description'];
+                                                'Event/Description/This is a description'];
         cls.invalid_formatted_unique_tag_list = ['event/label/this is a label', 'event/label/this is another label',
-             'event/description/this is a description'];
+                                                 'event/description/this is a description'];
         cls.valid_formatted_required_tag_list = ['event/label/this is a label', 'event/category/participant response',
-             'event/description/this is a description'];
+                                                 'event/description/this is a description'];
         cls.invalid_formatted_required_tag_list = ['event/label/this is a label',
-             'event/description/this is a description'];
+                                                   'event/description/this is a description'];
         cls.extension_allowed_descendant_tag = 'Item/Object/Tool/Hammer';
         cls.missing_comma_hed_string = '(Item/2D shape/Sector, Attribute/Visual/Color/Red) f ' \
                                        '(Item/2D shape/Ellipse/Circle, Attribute/Visual/Color / Red)';
@@ -60,6 +62,7 @@ class Test(unittest.TestCase):
         cls.last_non_empty_character_not_delimiter = ')';
         cls.last_non_empty_character_delimiter = ',';
         cls.current_character = 'f';
+        cls.current_opening_bracket_character = '(';
 
     def test_check_if_tag_is_valid(self):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
@@ -250,13 +253,34 @@ class Test(unittest.TestCase):
 
     def test_comma_is_missing_after_closing_bracket(self):
         comma_is_missing = \
-            self.tag_validator._comma_is_missing_after_closing_bracket(self.last_non_empty_character_not_delimiter,
-                                                                       self.current_character);
+            self.tag_validator.comma_is_missing_after_closing_bracket(self.last_non_empty_character_not_delimiter,
+                                                                      self.current_character);
         self.assertTrue(comma_is_missing);
         comma_is_missing = \
-            self.tag_validator._comma_is_missing_after_closing_bracket(self.last_non_empty_character_delimiter,
-                                                                       self.current_character);
+            self.tag_validator.comma_is_missing_after_closing_bracket(self.last_non_empty_character_delimiter,
+                                                                      self.current_character);
         self.assertFalse(comma_is_missing);
+
+    def test_comma_is_missing_before_opening_bracket(self):
+        comma_is_missing = \
+            self.tag_validator.comma_is_missing_before_opening_bracket(self.last_non_empty_character_not_delimiter,
+                                                                       self.current_opening_bracket_character);
+        self.assertTrue(comma_is_missing);
+        comma_is_missing = \
+            self.tag_validator.comma_is_missing_before_opening_bracket(self.last_non_empty_character_delimiter,
+                                                                       self.current_opening_bracket_character);
+        self.assertFalse(comma_is_missing);
+
+    def test_get_next_set_of_parentheses_in_hed_string(self):
+        next_set_of_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(self.valid_hed_string);
+        self.assertTrue(next_set_of_parentheses);
+        next_set_of_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(self.valid_hed_string_with_group);
+        self.assertTrue(next_set_of_parentheses);
+
+    def test_report_missing_comma_error(self):
+        missing_comma_error = TagValidator.report_missing_comma_error(self.invalid_original_tag);
+        self.assertTrue(missing_comma_error);
+
 
 if __name__ == '__main__':
     unittest.main();
