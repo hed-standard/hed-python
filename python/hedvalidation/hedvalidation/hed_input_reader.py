@@ -28,12 +28,12 @@ class HedInputReader:
     FILE_INPUT = 'file';
     TAB_DELIMITER = '\t';
     COMMA_DELIMITER = ',';
-    HED_XML_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/HED.xml');
+    DEFAULT_HED_XML_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/HED.xml');
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
                                    'Label': 'Event/Label/'};
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name=''):
+                 required_tag_columns={}, worksheet_name='', hed_xml_file=DEFAULT_HED_XML_FILE):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -67,7 +67,7 @@ class HedInputReader:
         self._has_column_names = has_column_names;
         self._check_for_warnings = check_for_warnings;
         self._worksheet_name = worksheet_name;
-        self._hed_dictionary = HedDictionary(HedInputReader.HED_XML_FILE);
+        self._hed_dictionary = HedDictionary(hed_xml_file);
         self._tag_validator = TagValidator(self._hed_dictionary);
         self.validation_issues = self._validate_hed_input();
 
