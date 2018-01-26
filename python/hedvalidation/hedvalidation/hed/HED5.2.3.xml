@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<HED version="6.0.5">
+<HED version="5.2.3">
    <node>
       <name>Event</name>
       <node position="1" predicateType="passThrough" requireChild="true" required="true">
@@ -41,6 +41,90 @@
             <name>Experimental stimulus</name>
             <node>
                <name>Instruction</name>
+               <node>
+                  <name>Attend</name>
+               </node>
+               <node>
+                  <name>Fixate</name>
+               </node>
+               <node>
+                  <name>Recall</name>
+               </node>
+               <node>
+                  <name>Generate</name>
+               </node>
+               <node>
+                  <name>Repeat</name>
+               </node>
+               <node>
+                  <name>Hold breath</name>
+               </node>
+               <node>
+                  <name>Breathe</name>
+               </node>
+               <node>
+                  <name>Imagine</name>
+               </node>
+               <node>
+                  <name>Rest</name>
+               </node>
+               <node>
+                  <name>Count</name>
+               </node>
+               <node>
+                  <name>Walk</name>
+                  <node>
+                     <name>Faster</name>
+                  </node>
+                  <node>
+                     <name>Slower</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Move</name>
+                  <node>
+                     <name>Upper torso</name>
+                  </node>
+                  <node>
+                     <name>Lower torso</name>
+                  </node>
+                  <node>
+                     <name>Whole body</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Speak</name>
+               </node>
+               <node>
+                  <name>Sing</name>
+               </node>
+               <node>
+                  <name>Detect</name>
+               </node>
+               <node>
+                  <name>Name</name>
+               </node>
+               <node>
+                  <name>Smile</name>
+               </node>
+               <node>
+                  <name>Discriminate</name>
+               </node>
+               <node>
+                  <name>Read</name>
+               </node>
+               <node>
+                  <name>Track</name>
+               </node>
+               <node>
+                  <name>Encode</name>
+               </node>
+               <node>
+                  <name>Eye-blink inhibit</name>
+               </node>
+               <node>
+                  <name>Take survey</name>
+               </node>
             </node>
          </node>
          <node>
@@ -481,7 +565,7 @@
       <node>
          <name>Natural scene</name>
          <node>
-            <name>Aerial</name>
+            <name>Arial</name>
             <node>
                <name>Satellite</name>
             </node>
@@ -1291,14 +1375,14 @@
             <name>Motion</name>
             <node>
                <name>Down</name>
-               <node isNumeric="true" takesValue="true" unitClass="speed">
+               <node isNumeric="true" takesValue="true" unitClass="velocity">
                   <name>#</name>
                   <description>e.g. 3 degrees-per-second</description>
                </node>
             </node>
             <node>
                <name>Up</name>
-               <node isNumeric="true" takesValue="true" unitClass="speed">
+               <node isNumeric="true" takesValue="true" unitClass="velocity">
                   <name>#</name>
                   <description>e.g. 3 degrees-per-second</description>
                </node>
@@ -1307,14 +1391,14 @@
                <name>Horizontal</name>
                <node>
                   <name>Right</name>
-                  <node isNumeric="true" takesValue="true" unitClass="speed">
+                  <node isNumeric="true" takesValue="true" unitClass="velocity">
                      <name>#</name>
                      <description>e.g. 3 degrees-per-second</description>
                   </node>
                </node>
                <node>
                   <name>Left</name>
-                  <node isNumeric="true" takesValue="true" unitClass="speed">
+                  <node isNumeric="true" takesValue="true" unitClass="velocity">
                      <name>#</name>
                      <description>e.g. 3 degrees-per-second</description>
                   </node>
@@ -1643,10 +1727,6 @@
          <description>This tag is to be grouped with Participant/Effect/Cognitive to specify the intended cognitive effect (of the experimenter). This is to differentiate the resulting group with Participant/Effect which specifies the actual effect on the participant. For example, in an RSVP experiment if an image is intended to be perceived as a target, (Participant/Effect/Cognitive/Target, Attribute/Intended effect) group is added. If the image was perceived by the subject as a target (e.g. they pressed a button to indicate so), then the tag Participant/Effect/Cognitive/Target is also added: Participant/Effect/Cognitive/Target, (Participant/Effect/Cognitive/Target, Attribute/Intended effect). otherwise the Participant/Effect/Cognitive/Target tag is not included outside of the group.</description>
       </node>
       <node>
-         <name>Instruction</name>
-         <description>This tag is placed in events of type Event/Category/Experimental stimulus/Instruction, grouped with one or more Action/ tags to replace the detailed specification XXX in Event/Category/Experimental stimulus/Instruction/XXX) in previous versions. Usage example:  Event/Category/Experimental stimulus/Instruction, (Action/Fixate, Attribute/Instruction)</description>
-      </node>
-      <node>
          <name>Participant indication</name>
          <description>This tag is placed in events of type Event/Category/Participant response and grouped with Participant/Effect/Cognitive/.. tags to specify the type of cognitive effect the participant has experienced. For example, in an RSVP paradigm, the subject can indicate the detection of a target with a button press. The HED string associated with this button press must include (Attribute/Participant indication, Participant/Effect/Cognitive/Target,...)</description>
       </node>
@@ -1731,12 +1811,6 @@
          <node>
             <name>Pass by</name>
             <description>Passing by another object or the participant</description>
-         </node>
-         <node>
-            <name>Accelerate</name>
-         </node>
-         <node>
-            <name>Decelerate</name>
          </node>
       </node>
       <node requireChild="true">
@@ -2147,69 +2221,6 @@
       </node>
       <node>
          <name>Read</name>
-      </node>
-      <node>
-         <name>Attend</name>
-      </node>
-      <node>
-         <name>Recall</name>
-      </node>
-      <node>
-         <name>Generate</name>
-      </node>
-      <node>
-         <name>Repeat</name>
-      </node>
-      <node>
-         <name>Hold breath</name>
-      </node>
-      <node>
-         <name>Breathe</name>
-      </node>
-      <node>
-         <name>Rest</name>
-      </node>
-      <node>
-         <name>Count</name>
-      </node>
-      <node>
-         <name>Move</name>
-         <node>
-            <name>Upper torso</name>
-         </node>
-         <node>
-            <name>Lower torso</name>
-         </node>
-         <node>
-            <name>Whole body</name>
-         </node>
-      </node>
-      <node>
-         <name>Speak</name>
-      </node>
-      <node>
-         <name>Sing</name>
-      </node>
-      <node>
-         <name>Detect</name>
-      </node>
-      <node>
-         <name>Name</name>
-      </node>
-      <node>
-         <name>Smile</name>
-      </node>
-      <node>
-         <name>Discriminate</name>
-      </node>
-      <node>
-         <name>Track</name>
-      </node>
-      <node>
-         <name>Encode</name>
-      </node>
-      <node>
-         <name>Eye-blink inhibit</name>
       </node>
    </node>
    <node predicateType="passThrough">
@@ -3003,6 +3014,9 @@
          <name>Action imitation task</name>
       </node>
       <node>
+         <name>Action observation paradigm</name>
+      </node>
+      <node>
          <name>Action observation task</name>
       </node>
       <node>
@@ -3222,7 +3236,7 @@
          <name>Dot pattern expectancy task</name>
       </node>
       <node>
-         <name>Drawing</name>
+         <name>Drawing (Cognitive Atlas Term)</name>
       </node>
       <node>
          <name>Drawing paradigm</name>
@@ -3279,7 +3293,7 @@
          <name>Face n-back task</name>
       </node>
       <node>
-         <name>Fagerstrom test for nicotine dependence</name>
+         <name>Fagerstrom test for nicotine dependence (Cognitive Atlas Term)</name>
       </node>
       <node>
          <name>Film viewing</name>
@@ -3332,9 +3346,6 @@
       <node>
          <name>ID screening</name>
          <description>Visual examination of multiple fields of an ID or document to detect invalid or suspicious fields. For example at a security checkpoint.</description>
-      </node>
-      <node>
-         <name>Imagined emotion</name>
       </node>
       <node>
          <name>Imagined movement</name>
@@ -3400,9 +3411,6 @@
          <name>Macauthur communicative development inventory</name>
       </node>
       <node>
-         <name>Machine failure detection task</name>
-      </node>
-      <node>
          <name>Matching familiar figures test</name>
       </node>
       <node>
@@ -3424,7 +3432,7 @@
          <name>Micturition task</name>
       </node>
       <node>
-         <name>Mini mental state examination</name>
+         <name>Mini mental state examination (Cognitive Atlas Term)</name>
       </node>
       <node>
          <name>Mirror tracing test</name>
@@ -3538,9 +3546,6 @@
          <name>Pattern comparison</name>
       </node>
       <node>
-         <name>Perturbed driving</name>
-      </node>
-      <node>
          <name>Phonological discrimination</name>
       </node>
       <node>
@@ -3586,6 +3591,9 @@
          <name>Pyramids and palm trees task</name>
       </node>
       <node>
+         <name>Perturbed driving</name>
+      </node>
+      <node>
          <name>Rapid automatized naming test</name>
       </node>
       <node>
@@ -3623,12 +3631,6 @@
       </node>
       <node>
          <name>Rest</name>
-         <node>
-            <name>Rest eyes open</name>
-         </node>
-         <node>
-            <name>Rest eyes closed</name>
-         </node>
       </node>
       <node>
          <name>Retrieval-induced forgetting task</name>
