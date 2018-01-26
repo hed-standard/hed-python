@@ -5,11 +5,10 @@ Created on Feb 27, 2017
 
 @author: Jeremy Cockfield 
 '''
-from hedemailer.hedconversion.parsewiki import hed_wiki_2_xml_tree, get_hed_change_log, prettify
-import os
-import tempfile
-import urllib
-
+from parsewiki import hed_wiki_2_xml_tree, get_hed_change_log, prettify;
+import os;
+import tempfile;
+import urllib;
 HED_WIKI_URL = 'https://raw.githubusercontent.com/wiki/BigEEGConsortium/HED-Schema/HED-Schema.mediawiki'
 
 # Write data from a URL into a file     
