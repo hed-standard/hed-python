@@ -27,7 +27,7 @@ def get_change_log_entry(tag_line):
 def get_tag_name(tag_line):     
     if tag_line.find('extend here') != -1:
         return '';
-    name = re.compile('([<>=#\-a-zA-Z0-9$:]+\s*)+');
+    name = re.compile('([<>=#\-a-zA-Z0-9$:()]+\s*)+');
     match = name.search(tag_line);
     if match:
         return match.group().strip();
