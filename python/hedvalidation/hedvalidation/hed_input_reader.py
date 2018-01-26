@@ -9,16 +9,17 @@ Created on Oct 2, 2017
 
 '''
 
-
-import xlrd;
 import os;
+import re;
+import xlrd;
 import error_reporter;
 from hed_dictionary import HedDictionary
-from tag_validator import TagValidator;
 from hed_string_delimiter import HedStringDelimiter;
+from tag_validator import TagValidator;
+from distutils.version import StrictVersion;
+
 
 class HedInputReader:
-
     TSV_EXTENSION = ['tsv', 'txt'];
     CSV_EXTENSION = ['csv'];
     EXCEL_EXTENSION = ['xls', 'xlsx'];
@@ -28,9 +29,11 @@ class HedInputReader:
     FILE_INPUT = 'file';
     TAB_DELIMITER = '\t';
     COMMA_DELIMITER = ',';
+    HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/');
     DEFAULT_HED_XML_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/HED.xml');
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
                                    'Label': 'Event/Label/'};
+    HED_VERSION_EXPRESSION = 'HED(\d+.\d+.\d+)';
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
                  required_tag_columns={}, worksheet_name='', hed_xml_file=DEFAULT_HED_XML_FILE):
@@ -89,7 +92,6 @@ class HedInputReader:
         tag_columns = HedInputReader.add_required_tag_columns_to_tag_columns(tag_columns,
                                                                              self._required_tag_columns);
         return tag_columns;
-
 
     def _validate_hed_input(self):
         """Validates the HED tags in a string or a file.
@@ -537,7 +539,6 @@ class HedInputReader:
             column_value = unicode(column_value);
         return column_value;
 
-
     @staticmethod
     def remove_tag_columns_greater_than_row_column_count(row_column_count, hed_tag_columns):
         """Removes the HED tag columns that are greater than the row column count.
@@ -629,7 +630,7 @@ class HedInputReader:
             A list of containing each element subtracted by 1.
 
         """
-        return [x-1 for x in integer_list];
+        return [x - 1 for x in integer_list];
 
     @staticmethod
     def subtract_1_from_dictionary_keys(integer_key_dictionary):
@@ -645,7 +646,7 @@ class HedInputReader:
             A dictionary with the keys subtracted by 1.
 
         """
-        return {key-1: value for key, value in integer_key_dictionary.iteritems()};
+        return {key - 1: value for key, value in integer_key_dictionary.iteritems()};
 
     @staticmethod
     def file_path_has_extension(file_path):
@@ -680,3 +681,65 @@ class HedInputReader:
 
         """
         return file_path.rsplit('.', 1)[-1].lower();
+
+    @staticmethod
+    def get_latest_hed_version_path():
+        """Finds the latest HED XML version in the hed directory.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        string
+            The path to the latest HED version the hed directory.
+
+        """
+
+        hed_versions = [];
+        compiled_expression = re.compile(HedInputReader.HED_VERSION_EXPRESSION);
+        for _, _, hed_files in os.walk(HedInputReader.HED_DIRECTORY):
+            for hed_file in hed_files:
+                expression_match = compiled_expression.match(hed_file);
+                hed_versions.append(expression_match.group(1));
+
+    @staticmethod
+    def get_latest_semantic_version_in_list(semantic_version_list):
+        """Gets the latest semantic version in a list.
+
+        Parameters
+        ----------
+        semantic_version_list: list
+             A list containing semantic versions.
+        Returns
+        -------
+        string
+            The latest semantic version in the list.
+
+        """
+        if not semantic_version_list:
+            return '';
+        latest_semantic_version = semantic_version_list[0];
+        if len(semantic_version_list) > 1:
+            for semantic_version in semantic_version_list[1:]:
+                latest_semantic_version = HedInputReader.compare_semantic_versions(latest_semantic_version,
+                                                                                   semantic_version);
+        return latest_semantic_version;
+
+    @staticmethod
+    def compare_semantic_versions(first_semantic_version, second_semantic_version):
+        """Compares two semantic versions.
+
+        Parameters
+        ----------
+        first_semantic_version: string
+             The first semantic version.
+        second_semantic_version: string
+             The second semantic version.
+        Returns
+        -------
+        string
+            The later semantic version.
+
+        """
+        return first_semantic_version if StrictVersion(first_semantic_version) > StrictVersion(
+            second_semantic_version) else second_semantic_version;
