@@ -34,9 +34,11 @@ class HedInputReader:
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
                                    'Label': 'Event/Label/'};
     HED_VERSION_EXPRESSION = 'HED(\d+.\d+.\d+)';
+    HED_XML_PREFIX = 'HED';
+    HED_XML_EXTENSION = '.xml';
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name='', hed_xml_file=DEFAULT_HED_XML_FILE):
+                 required_tag_columns={}, worksheet_name='', hed_xml_file=''):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -58,6 +60,8 @@ class HedInputReader:
             the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
             that needs Event/Category/ prepended to them, the seventh column contains tags that needs
             Attribute/ prepended to them.
+        hed_xml_file: string
+            A path to a HED XML file.
         Returns
         -------
         HedInputReader object
@@ -70,9 +74,27 @@ class HedInputReader:
         self._has_column_names = has_column_names;
         self._check_for_warnings = check_for_warnings;
         self._worksheet_name = worksheet_name;
-        self._hed_dictionary = HedDictionary(hed_xml_file);
+        self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
         self._tag_validator = TagValidator(self._hed_dictionary);
         self.validation_issues = self._validate_hed_input();
+
+    def _get_hed_dictionary(self, hed_xml_file):
+        """Gets a HEDDictionary object based on the hed xml file specified. If no HED file is specified then the latest
+           file will be retrieved.
+
+        Parameters
+        ----------
+        hed_xml_file: string
+            A path to a HED XML file.
+        Returns
+        -------
+        HedDictionary object
+            A HedDictionary object.
+
+        """
+        if not hed_xml_file:
+            hed_xml_file = HedInputReader.get_latest_hed_version_path();
+        return HedDictionary(hed_xml_file);
 
     def _convert_tag_columns_to_processing_format(self, tag_columns):
         """Converts the tag columns list to a list that allows it to be internally processed. 1 is subtracted from
@@ -701,6 +723,9 @@ class HedInputReader:
             for hed_file in hed_files:
                 expression_match = compiled_expression.match(hed_file);
                 hed_versions.append(expression_match.group(1));
+        latest_hed_version = HedInputReader.get_latest_semantic_version_in_list(hed_versions);
+        return os.path.join(HedInputReader.HED_DIRECTORY,
+                            HedInputReader.HED_XML_PREFIX+latest_hed_version+HedInputReader.HED_XML_EXTENSION);
 
     @staticmethod
     def get_latest_semantic_version_in_list(semantic_version_list):
