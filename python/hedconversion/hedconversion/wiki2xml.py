@@ -60,14 +60,18 @@ def convert_hed_wiki_2_xml():
     return hed_info_dictionary;
 
 # Creates a HED XML file from a HED wiki schema. 
-def create_hed_xml_file(hed_wiki_file_location):
-        hed_xml_file = tempfile.NamedTemporaryFile(delete=False);
-        hed_xml_file_location = hed_xml_file.name;
-        hed_xml_tree = hed_wiki_2_xml_tree(hed_wiki_file_location);
-        xml_string = prettify(hed_xml_tree);
-        hed_xml_file.write(xml_string);
-        hed_xml_file.close();
-#         write_xml_tree_2_xml_file(hed_xml_tree, hed_xml_file_location);
+def create_hed_xml_file(hed_wiki_file_location, hed_file_location=''):
+        if not hed_file_location:
+            hed_xml_file = tempfile.NamedTemporaryFile(delete=False);
+        else:
+            hed_xml_file = open(hed_file_location, 'w');
+        try:
+            hed_xml_file_location = hed_xml_file.name;
+            hed_xml_tree = hed_wiki_2_xml_tree(hed_wiki_file_location);
+            xml_string = prettify(hed_xml_tree);
+            hed_xml_file.write(xml_string);
+        finally:
+            hed_xml_file.close();
         return hed_xml_file_location, hed_xml_tree;
 
 # Creates a HED wiki schema file from the github wiki schemas.  
