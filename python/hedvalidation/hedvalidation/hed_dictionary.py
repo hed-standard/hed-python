@@ -23,6 +23,7 @@ class HedDictionary:
     UNIT_CLASS_UNITS_ELEMENT = 'units';
     UNIT_CLASS_DICTIONARY_KEYS = ['default', 'units'];
     UNITS_ELEMENT = 'units';
+    VERSION_ATTRIBUTE = 'version';
     dictionaries = None;
     root_element = None;
 
@@ -463,3 +464,21 @@ class HedDictionary:
         if tag.lower() in self.dictionaries[tag_attribute]:
                 return True;
         return False;
+
+    @staticmethod
+    def get_hed_xml_version(hed_xml_file_path):
+        """Gets the version number from a HED XML file.
+
+        Parameters
+        ----------
+        hed_xml_file_path: string
+            The path to a HED XML file.
+        Returns
+        -------
+        string
+            The version number of the HED XML file.
+
+        """
+        tree = parse(hed_xml_file_path);
+        root_node = tree.getroot();
+        return root_node.attrib[HedDictionary.VERSION_ATTRIBUTE];
