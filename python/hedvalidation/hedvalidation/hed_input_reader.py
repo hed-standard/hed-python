@@ -720,8 +720,24 @@ class HedInputReader:
         hed_versions = HedInputReader.get_all_hed_versions();
         latest_hed_version = HedInputReader.get_latest_semantic_version_in_list(hed_versions);
         return os.path.join(HedInputReader.HED_DIRECTORY,
-                            HedInputReader.HED_XML_PREFIX+latest_hed_version+HedInputReader.HED_XML_EXTENSION);
+                            HedInputReader.HED_XML_PREFIX + latest_hed_version + HedInputReader.HED_XML_EXTENSION);
 
+    @staticmethod
+    def get_path_from_hed_version(hed_version):
+        """Gets the HED XML file path in the hed directory that corresponds to the hed version specified.
+
+        Parameters
+        ----------
+        hed_version: string
+             The HED version that is in the hed directory.
+        Returns
+        -------
+        string
+            The HED XML file path in the hed directory that corresponds to the hed version specified.
+
+        """
+        return os.path.join(HedInputReader.HED_DIRECTORY,
+                            HedInputReader.HED_XML_PREFIX + hed_version + HedInputReader.HED_XML_EXTENSION);
 
     @staticmethod
     def get_all_hed_versions():
