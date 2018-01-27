@@ -30,6 +30,7 @@ class Test(unittest.TestCase):
         cls.validation_issues = '';
         cls.semantic_version_one = '1.2.3';
         cls.semantic_version_two = '1.2.4';
+        cls.semantic_version_three = '1.2.5';
         cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5'];
 
 
@@ -150,6 +151,11 @@ class Test(unittest.TestCase):
     def test_get_all_hed_versions(self):
         hed_versions = HedInputReader.get_all_hed_versions();
         self. assertIsInstance(hed_versions, list);
+
+    def test_get_latest_semantic_version_in_list(self):
+        latest_version = HedInputReader.get_latest_semantic_version_in_list(self.semantic_version_list);
+        self. assertIsInstance(latest_version, basestring);
+        self.assertEqual(latest_version, self.semantic_version_three)
 
 
 if __name__ == '__main__':
