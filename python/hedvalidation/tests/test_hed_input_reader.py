@@ -155,7 +155,12 @@ class Test(unittest.TestCase):
     def test_get_latest_semantic_version_in_list(self):
         latest_version = HedInputReader.get_latest_semantic_version_in_list(self.semantic_version_list);
         self. assertIsInstance(latest_version, basestring);
-        self.assertEqual(latest_version, self.semantic_version_three)
+        self.assertEqual(latest_version, self.semantic_version_three);
+
+    def test_compare_semantic_versions(self):
+        latest_version = HedInputReader.compare_semantic_versions(self.semantic_version_one, self.semantic_version_two);
+        self. assertIsInstance(latest_version, basestring);
+        self.assertEqual(latest_version, self.semantic_version_two);
 
 
 if __name__ == '__main__':
