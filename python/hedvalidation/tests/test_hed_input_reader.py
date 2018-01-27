@@ -32,6 +32,7 @@ class Test(unittest.TestCase):
         cls.semantic_version_two = '1.2.4';
         cls.semantic_version_three = '1.2.5';
         cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5'];
+        cls.hed_directory_version = '4.0.5';
 
 
     def test__convert_tag_columns_to_processing_format(self):
@@ -151,7 +152,6 @@ class Test(unittest.TestCase):
     def test_get_all_hed_versions(self):
         hed_versions = HedInputReader.get_all_hed_versions();
         self. assertIsInstance(hed_versions, list);
-        print(hed_versions)
 
     def test_get_latest_semantic_version_in_list(self):
         latest_version = HedInputReader.get_latest_semantic_version_in_list(self.semantic_version_list);
@@ -163,6 +163,9 @@ class Test(unittest.TestCase):
         self. assertIsInstance(latest_version, basestring);
         self.assertEqual(latest_version, self.semantic_version_two);
 
+    def test_get_path_from_hed_version(self):
+        hed_version_path = HedInputReader.get_path_from_hed_version(self.hed_directory_version);
+        self. assertIsInstance(hed_version_path, basestring);
 
 if __name__ == '__main__':
     unittest.main();
