@@ -146,7 +146,10 @@ class Test(unittest.TestCase):
     def test_get_latest_hed_version_path(self):
         latest_hed_version_path = HedInputReader.get_latest_hed_version_path();
         self. assertIsInstance(latest_hed_version_path, basestring);
-        print(latest_hed_version_path)
+
+    def test_get_all_hed_versions(self):
+        hed_versions = HedInputReader.get_all_hed_versions();
+        self. assertIsInstance(hed_versions, list);
 
 
 if __name__ == '__main__':
