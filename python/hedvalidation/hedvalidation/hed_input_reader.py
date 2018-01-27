@@ -742,7 +742,7 @@ class HedInputReader:
             for hed_file in hed_files:
                 expression_match = compiled_expression.match(hed_file);
                 hed_versions.append(expression_match.group(1));
-        return sorted(hed_versions,key=StrictVersion, reverse=True);
+        return sorted(hed_versions, key=StrictVersion, reverse=True);
 
     @staticmethod
     def get_latest_semantic_version_in_list(semantic_version_list):
