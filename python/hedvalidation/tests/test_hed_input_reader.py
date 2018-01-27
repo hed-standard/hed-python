@@ -28,6 +28,10 @@ class Test(unittest.TestCase):
         cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus';
         cls.category_tags = 'Participant response, Stimulus';
         cls.validation_issues = '';
+        cls.semantic_version_one = '1.2.3';
+        cls.semantic_version_two = '1.2.4';
+        cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5'];
+
 
     def test__convert_tag_columns_to_processing_format(self):
         processing_tag_columns = self.generic_hed_input_reader._convert_tag_columns_to_processing_format(
@@ -131,13 +135,18 @@ class Test(unittest.TestCase):
 
     def test_remove_tag_columns_greater_than_row_column_count(self):
         rows_less_than_row_column_count = HedInputReader.remove_tag_columns_greater_than_row_column_count(
-            self.zero_based_row_column_count, self.zero_based_tag_columns);
+        self.zero_based_row_column_count, self.zero_based_tag_columns);
         self.assertIsInstance(rows_less_than_row_column_count, list);
         self.assertEqual(rows_less_than_row_column_count, self.zero_based_tag_columns_less_than_row_column_count);
 
     def test_convert_column_to_unicode_if_not(self):
         unicode_value = HedInputReader.convert_column_to_unicode_if_not(self.float_value);
         self.assertIsInstance(unicode_value, unicode)
+
+    def test_get_latest_hed_version_path(self):
+        latest_hed_version_path = HedInputReader.get_latest_hed_version_path();
+        self. assertIsInstance(latest_hed_version_path, basestring);
+        print(latest_hed_version_path)
 
 
 if __name__ == '__main__':
