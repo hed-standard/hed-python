@@ -151,6 +151,7 @@ class Test(unittest.TestCase):
     def test_get_all_hed_versions(self):
         hed_versions = HedInputReader.get_all_hed_versions();
         self. assertIsInstance(hed_versions, list);
+        print(hed_versions)
 
     def test_get_latest_semantic_version_in_list(self):
         latest_version = HedInputReader.get_latest_semantic_version_in_list(self.semantic_version_list);
