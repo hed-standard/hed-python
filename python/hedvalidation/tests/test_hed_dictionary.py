@@ -125,5 +125,9 @@ class Test(unittest.TestCase):
         root_element = self.hed_dictionary.get_root_element();
         self.assertIsInstance(root_element, defusedxml.lxml.RestrictedElement);
 
+    def test_get_hed_xml_version(self):
+        hed_version = HedDictionary.get_hed_xml_version(self.hed_xml);
+        self.assertIsInstance(hed_version, basestring);
+
 if __name__ == '__main__':
     unittest.main();
