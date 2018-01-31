@@ -8,10 +8,11 @@ Created on Oct 2, 2017
 '''
 
 import re;
+import time;
 from itertools import compress;
+
 import error_reporter;
 import warning_reporter;
-import time;
 
 
 class TagValidator:
