@@ -32,7 +32,7 @@ class HedInputReader:
     HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/');
     DEFAULT_HED_XML_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/HED.xml');
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
-                                   'Label': 'Event/Label/'};
+                                   'Label': 'Event/Label/', 'Long': 'Event/Long name/'};
     HED_VERSION_EXPRESSION = 'HED(\d+.\d+.\d+)';
     HED_XML_PREFIX = 'HED';
     HED_XML_EXTENSION = '.xml';
