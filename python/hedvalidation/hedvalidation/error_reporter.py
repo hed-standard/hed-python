@@ -8,8 +8,8 @@ Created on Oct 2, 2017
 '''
 
 
-def report_error_type(error_type, error_row=1, tag='', tag_prefix='', unit_class_units='', opening_bracket_count=0,
-                      closing_bracket_count=0):
+def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefix='', unit_class_units='',
+                      opening_bracket_count=0, closing_bracket_count=0):
     """Reports the abc error based on the type of error.
 
     Parameters
@@ -35,7 +35,7 @@ def report_error_type(error_type, error_row=1, tag='', tag_prefix='', unit_class
                    'closing brackets\n' % (opening_bracket_count, closing_bracket_count),
         'comma': '\tERROR: Comma missing after - \"%s\"\n' % tag,
         'isNumeric': '\tERROR: Invalid numeric tag - \"%s\"\n' % tag,
-        'row': 'Issues on row %s:\n' % str(error_row),
+        'row': 'Issues on row %s column %s:\n' % (str(error_row), str(error_column)),
         'required': '\tERROR: Tag with prefix \"%s\" is required\n' % tag_prefix,
         'requireChild':'\tERROR: Descendant tag required - \"%s\"\n' % tag,
         'tilde': '\tERROR: Too many tildes - group \"%s\"\n' % tag,
