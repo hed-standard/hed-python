@@ -27,6 +27,7 @@ class TagValidator:
     TILDE_ERROR_TYPE = 'tilde';
     TIME_UNIT_CLASS = 'time';
     UNIQUE_ERROR_TYPE = 'unique';
+    DUPLICATE_ERROR_TYPE = 'duplicate';
     VALID_ERROR_TYPE = 'valid';
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed';
     TAKES_VALUE_ATTRIBUTE = 'takesValue';
@@ -138,6 +139,7 @@ class TagValidator:
          """
         validation_issues = '';
         validation_issues += self.check_if_multiple_unique_tags_exist(original_tag_list, formatted_tag_list);
+        validation_issues += self.check_if_duplicate_tags_exist(original_tag_list, formatted_tag_list);
         return validation_issues;
 
     def run_top_level_validators(self, formatted_top_level_tags):
@@ -553,6 +555,36 @@ class TagValidator:
                     validation_error += error_reporter.report_error_type(TagValidator.UNIQUE_ERROR_TYPE,
                                                                          tag=unique_original_tag,
                                                                          tag_prefix=unique_tag_prefix);
+        return validation_error;
+
+    def check_if_duplicate_tags_exist(self, original_tag_list, formatted_tag_list):
+        """Reports a validation error if two or more tags are the same.
+
+        Parameters
+        ----------
+        original_tag_list: list
+            A list containing tags that are used to report the error.
+        formatted_tag_list: list
+            A list containing tags that are used to do the validation.
+        Returns
+        -------
+        string
+            A validation error string. If no errors are found then an empty string is returned.
+
+        """
+        validation_error = '';
+        duplicate_indices = set([]);
+        for tag_index, tag in enumerate(formatted_tag_list):
+            all_indices = range(len(formatted_tag_list));
+            for duplicate_index in all_indices:
+                if tag_index == duplicate_index:
+                    continue;
+                if formatted_tag_list[tag_index] == formatted_tag_list[duplicate_index] and \
+                                tag_index not in duplicate_indices and duplicate_index not in duplicate_indices:
+                    duplicate_indices.add(tag_index);
+                    duplicate_indices.add(duplicate_index);
+                    validation_error += error_reporter.report_error_type(TagValidator.DUPLICATE_ERROR_TYPE,
+                                                                         tag=original_tag_list[tag_index]);
         return validation_error;
 
     def get_tag_slash_indices(self, tag, slash='/'):
