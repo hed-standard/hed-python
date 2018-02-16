@@ -34,8 +34,9 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
         'bracket': '\tERROR: Number of opening and closing brackets are unequal. %s opening brackets. %s '
                    'closing brackets\n' % (opening_bracket_count, closing_bracket_count),
         'comma': '\tERROR: Comma missing after - \"%s\"\n' % tag,
+        'duplicate': '\tERROR: Duplicate tag - \"%s\"\n' % tag,
         'isNumeric': '\tERROR: Invalid numeric tag - \"%s\"\n' % tag,
-        'row': 'Issues on row %s column %s:\n' % str(error_row),
+        'row': 'Issues on row %s:\n' % str(error_row),
         'column': 'Issues on row %s column %s:\n' % (str(error_row), str(error_column)),
         'required': '\tERROR: Tag with prefix \"%s\" is required\n' % tag_prefix,
         'requireChild':'\tERROR: Descendant tag required - \"%s\"\n' % tag,
