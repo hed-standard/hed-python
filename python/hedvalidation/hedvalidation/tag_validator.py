@@ -576,7 +576,8 @@ class TagValidator:
             for duplicate_index in all_indices:
                 if tag_index == duplicate_index:
                     continue;
-                if formatted_tag_list[tag_index] == formatted_tag_list[duplicate_index] and \
+                if formatted_tag_list[tag_index] != TagValidator.TILDE and \
+                    formatted_tag_list[tag_index] == formatted_tag_list[duplicate_index] and \
                                 tag_index not in duplicate_indices and duplicate_index not in duplicate_indices:
                     duplicate_indices.add(tag_index);
                     duplicate_indices.add(duplicate_index);
