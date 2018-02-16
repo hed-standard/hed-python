@@ -261,7 +261,6 @@ class TagValidator:
         takes_value_tag = self.replace_tag_name_with_pound(formatted_tag);
         return self.hed_dictionary.tag_has_attribute(takes_value_tag,
                                                      TagValidator.TAKES_VALUE_ATTRIBUTE);
-        return False;
 
     def is_unit_class_tag(self, formatted_tag):
         """Checks to see if the tag has the 'unitClass' attribute.
@@ -677,6 +676,8 @@ class TagValidator:
         current_tag_with_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(current_tag +
                                                                                               rest_of_hed_string);
         current_tag_with_parentheses = current_tag_with_parentheses.lower();
+        if self.tag_takes_value(current_tag_with_parentheses):
+            return True;
         return self.tag_is_valid(current_tag_with_parentheses);
 
     @staticmethod
