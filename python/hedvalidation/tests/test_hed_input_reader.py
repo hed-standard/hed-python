@@ -33,6 +33,9 @@ class Test(unittest.TestCase):
         cls.semantic_version_three = '1.2.5';
         cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5'];
         cls.hed_directory_version = '4.0.5';
+        cls.column_to_hed_tags_dictionary = {};
+        cls.row_with_hed_tags = ['event1', 'tag1', 'tag2'];
+        cls.row_hed_tag_columns = [1, 2];
 
 
     def test__convert_tag_columns_to_processing_format(self):
@@ -58,7 +61,7 @@ class Test(unittest.TestCase):
 
     def test__validate_top_levels_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_invalid_tags);
-        validation_issues = self.generic_hed_input_reader._validate_top_levels_in_hed_string(hed_string_delimiter);
+        validation_issues = self.generic_hed_input_reader._validate_top_level_in_hed_string(hed_string_delimiter);
         self.assertIsInstance(validation_issues, basestring);
         self.assertTrue(validation_issues);
 
@@ -80,9 +83,37 @@ class Test(unittest.TestCase):
         validation_issues = \
             self.generic_hed_input_reader._append_validation_issues_if_found(self.validation_issues,
                                                                              row_number,
-                                                                             self.hed_string_with_invalid_tags);
+                                                                             self.hed_string_with_invalid_tags,
+                                                                             self.column_to_hed_tags_dictionary);
         self.assertIsInstance(validation_issues, basestring);
         self.assertTrue(validation_issues);
+
+    def test__append_row_validation_issues_if_found(self):
+        row_number = random.randint(0,100);
+        self.assertFalse(self.validation_issues);
+        validation_issues = \
+            self.generic_hed_input_reader._append_row_validation_issues_if_found(self.validation_issues,
+                                                                                 row_number,
+                                                                                 self.hed_string_with_invalid_tags);
+        self.assertIsInstance(validation_issues, basestring);
+        self.assertTrue(validation_issues);
+
+    def test__append_column_validation_issues_if_found(self):
+        row_number = random.randint(0,100);
+        self.assertFalse(self.validation_issues);
+        validation_issues = \
+            self.generic_hed_input_reader._append_column_validation_issues_if_found(self.validation_issues,
+                                                                                    row_number,
+                                                                                    self.column_to_hed_tags_dictionary);
+        self.assertIsInstance(validation_issues, basestring);
+        self.assertFalse(validation_issues);
+
+    def test_validate_column_hed_string(self):
+        self.assertFalse(self.validation_issues);
+        validation_issues = self.generic_hed_input_reader.validate_column_hed_string(self.hed_string_with_invalid_tags);
+        self.assertIsInstance(validation_issues, basestring);
+        self.assertTrue(validation_issues);
+
 
     def test_get_validation_issues(self):
         validation_issues = self.generic_hed_input_reader.get_validation_issues();
@@ -166,6 +197,16 @@ class Test(unittest.TestCase):
     def test_get_path_from_hed_version(self):
         hed_version_path = HedInputReader.get_path_from_hed_version(self.hed_directory_version);
         self. assertIsInstance(hed_version_path, basestring);
+
+    def test_get_row_hed_tags(self):
+        hed_string, column_to_hed_tags_dictionary = HedInputReader.get_row_hed_tags(self.row_with_hed_tags,
+                                                                                    self.row_hed_tag_columns,
+                                                                                    is_worksheet=False);
+        self.assertIsInstance(hed_string, basestring);
+        self.assertTrue(hed_string)
+        self.assertIsInstance(column_to_hed_tags_dictionary, dict);
+        self.assertTrue(column_to_hed_tags_dictionary);
+
 
 if __name__ == '__main__':
     unittest.main();
