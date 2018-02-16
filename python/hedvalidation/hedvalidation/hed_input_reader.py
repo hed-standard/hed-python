@@ -123,7 +123,7 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues that were found.
+             The issues that were found.
 
          """
         if HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
@@ -140,7 +140,7 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues that were found.
+             The issues that were found.
 
          """
         file_extension = HedInputReader.get_file_extension(self._hed_input);
@@ -152,14 +152,14 @@ class HedInputReader:
         return validation_issues;
 
     def get_validation_issues(self):
-        """Gets the abc issues.
+        """Gets the issues.
 
          Parameters
          ----------
          Returns
          -------
          string
-             The abc issues that were found.
+             The issues that were found.
 
          """
         return self.validation_issues;
@@ -172,7 +172,7 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues that were found in the text file.
+             The issues that were found in the text file.
 
          """
         validation_issues = '';
@@ -195,7 +195,7 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues that were found in a excel worksheet.
+             The issues that were found in a excel worksheet.
 
          """
         validation_issues = '';
@@ -205,33 +205,110 @@ class HedInputReader:
             worksheet_row = opened_worksheet.row(row_number);
             if HedInputReader.row_contains_headers(self._has_column_names, row_number):
                 continue;
-            hed_string = HedInputReader.get_hed_string_from_worksheet_row(worksheet_row, self._tag_columns,
-                                                                          self._required_tag_columns);
-            validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, hed_string);
+            row_hed_string, column_to_hed_tags_dictionary = HedInputReader.get_hed_tags_from_worksheet_row(
+                    worksheet_row, self._tag_columns, self._required_tag_columns);
+            validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
+                                                                        column_to_hed_tags_dictionary);
         return validation_issues;
 
-    def _append_validation_issues_if_found(self, validation_issues, row_number, hed_string):
-        """Appends the abc issues associated with a particular row in a spreadsheet.
+    def _append_validation_issues_if_found(self, validation_issues, row_number, row_hed_string,
+                                           column_to_hed_tags_dictionary):
+        """Appends the issues associated with a particular row and/or column in a spreadsheet.
 
          Parameters
          ----------
         validation_issues: string
-            A abc string that contains all the issues found in the spreadsheet.
-         row_number: integer
+            A  string that contains all the issues found in the spreadsheet.
+        row_number: integer
             The row number that the issues are associated with.
-        hed_string: string
-            A HED string.
+        row_hed_string: string
+            The HED string associated with a row.
+        column_to_hed_tags_dictionary
+            A dictionary which associates columns with HED tags
          Returns
          -------
          string
-             The abc issues with the appended issues found in the particular row.
+             The issues with the appended issues found in the particular row.
 
          """
-        if hed_string:
-            row_validation_issues = self._validate_hed_string(hed_string);
-            if row_validation_issues:
-                validation_issues += HedInputReader.generate_row_issue_message(row_number) + row_validation_issues;
+        validation_issues = self._append_row_validation_issues_if_found(validation_issues, row_number,
+                                                                        row_hed_string);
+        validation_issues = self._append_column_validation_issues_if_found(validation_issues, row_number,
+                                                                           column_to_hed_tags_dictionary);
         return validation_issues;
+
+    def _append_row_validation_issues_if_found(self, validation_issues, row_number, row_hed_string):
+        """Appends the issues associated with a particular row in a spreadsheet.
+
+         Parameters
+         ----------
+        validation_issues: string
+            A  string that contains all the issues found in the spreadsheet.
+        row_number: integer
+            The row number that the issues are associated with.
+        row_hed_string: string
+            The HED string associated with a row.
+         Returns
+         -------
+         string
+             The issues with the appended issues found in the particular row.
+
+         """
+        if row_hed_string:
+            hed_string_delimiter = HedStringDelimiter(row_hed_string);
+            row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter);
+            if row_validation_issues:
+                    validation_issues += HedInputReader.generate_row_issue_message(row_number) + row_validation_issues;
+        return validation_issues;
+
+    def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
+        """Appends the issues associated with a particular row column in a spreadsheet.
+
+         Parameters
+         ----------
+        validation_issues: string
+            A  string that contains all the issues found in the spreadsheet.
+        row_number: integer
+            The row number that the issues are associated with.
+        column_to_hed_tags_dictionary
+            A dictionary which associates columns with HED tags
+         Returns
+         -------
+         string
+             The issues with the appended issues found in the particular row column.
+
+         """
+        if column_to_hed_tags_dictionary:
+            for column_number in column_to_hed_tags_dictionary.keys():
+                column_hed_string = column_to_hed_tags_dictionary[column_number];
+                column_validation_issues = self.validate_column_hed_string(column_hed_string);
+                if column_validation_issues:
+                    validation_issues += HedInputReader.generate_column_issue_message(row_number, column_number) + \
+                                         column_validation_issues;
+        return validation_issues;
+
+    def validate_column_hed_string(self, column_hed_string):
+        """Appends the issues associated with a particular row in a spreadsheet.
+
+         Parameters
+         ----------
+        column_hed_string: string
+            The HED string associated with a row column.
+         Returns
+         -------
+         string
+             The issues associated with a particular row column.
+
+         """
+        validation_issues = '';
+        validation_issues += self._tag_validator.run_hed_string_validators(column_hed_string);
+        if not validation_issues:
+            hed_string_delimiter = HedStringDelimiter(column_hed_string);
+            validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
+            validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
+            validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
+        return validation_issues;
+
 
     def _validate_hed_string(self, hed_string):
         """Validates the tags in a HED string.
@@ -243,15 +320,15 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues associated with the HED string.
+             The issues associated with the HED string.
 
          """
         validation_issues = '';
-        hed_string_delimiter = HedStringDelimiter(hed_string);
         validation_issues += self._tag_validator.run_hed_string_validators(hed_string);
         if not validation_issues:
+            hed_string_delimiter = HedStringDelimiter(hed_string);
             validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
-            validation_issues += self._validate_top_levels_in_hed_string(hed_string_delimiter);
+            validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
         return validation_issues;
@@ -267,7 +344,7 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues associated with each level in the HED string.
+             The issues associated with each level in the HED string.
 
          """
         validation_issues = '';
@@ -281,7 +358,7 @@ class HedInputReader:
         validation_issues += self._tag_validator.run_tag_level_validators(top_level_tags, formatted_top_level_tags);
         return validation_issues;
 
-    def _validate_top_levels_in_hed_string(self, hed_string_delimiter):
+    def _validate_top_level_in_hed_string(self, hed_string_delimiter):
         """Validates the top-level tags in a HED string.
 
          Parameters
@@ -291,7 +368,7 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues associated with the top-level tags in the HED string.
+             The issues associated with the top-level tags in the HED string.
 
          """
         validation_issues = '';
@@ -309,7 +386,7 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues associated with the groups in the HED string.
+             The issues associated with the groups in the HED string.
 
          """
         validation_issues = '';
@@ -330,7 +407,7 @@ class HedInputReader:
          Returns
          -------
          string
-             The abc issues associated with the individual tags in the HED string.
+             The issues associated with the individual tags in the HED string.
 
          """
         validation_issues = '';
@@ -396,6 +473,27 @@ class HedInputReader:
         if has_headers:
             row_number += 1;
         return error_reporter.report_error_type('row', error_row=row_number);
+
+    @staticmethod
+    def generate_column_issue_message(row_number, column_number, has_headers=True):
+        """Generates a column issue message that is associated with a particular column in a spreadsheet.
+
+         Parameters
+         ----------
+         row_number: integer
+            The row number that the issue is associated with.
+         column_number: integer
+            The column number that the issue is associated with.
+         Returns
+         -------
+         string
+             The column issue message.
+
+         """
+        if has_headers:
+            row_number += 1;
+        column_number +=1;
+        return error_reporter.report_error_type('column', error_row=row_number, error_column=column_number);
 
     @staticmethod
     def file_is_a_text_file(file_extension):
@@ -496,23 +594,17 @@ class HedInputReader:
             A HED string containing the concatenated HED tag columns.
 
         """
-        hed_tags = [];
-        split_row_list = HedInputReader.split_delimiter_separated_string_with_quotes(text_file_row, column_delimiter);
-        row_column_count = len(split_row_list);
+        text_file_row = HedInputReader.split_delimiter_separated_string_with_quotes(text_file_row, column_delimiter);
+        row_column_count = len(text_file_row);
         hed_tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
                                                                                           hed_tag_columns);
-        for hed_tag_column in hed_tag_columns:
-            row_hed_tags = split_row_list[hed_tag_column];
-            if row_hed_tags:
-                if hed_tag_column in prefixed_needed_tag_columns:
-                    row_hed_tags = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(
-                        row_hed_tags, prefixed_needed_tag_columns[hed_tag_column]);
-                hed_tags.append(row_hed_tags);
-        return ','.join(hed_tags);
+        HedInputReader.get_row_hed_tags(text_file_row, hed_tag_columns,
+                                        prefixed_needed_tag_columns=prefixed_needed_tag_columns,
+                                        is_worksheet=False);
 
     @staticmethod
-    def get_hed_string_from_worksheet_row(worksheet_row, hed_tag_columns, prefixed_needed_tag_columns={}):
-        """Reads in the current row of HED tags from the text file. The hed tag columns will be concatenated to form a
+    def get_hed_tags_from_worksheet_row(worksheet_row, hed_tag_columns, prefixed_needed_tag_columns={}):
+        """Reads in the current row of HED tags from the Excel file. The hed tag columns will be concatenated to form a
            HED string.
 
         Parameters
@@ -527,21 +619,53 @@ class HedInputReader:
         Returns
         -------
         string
-            A HED string containing the concatenated HED tag columns.
+            A tuple containing a HED string containing the concatenated HED tag columns and a dictionary which
+            associates columns with HED tags.
 
         """
-        hed_tags = [];
         row_column_count = len(worksheet_row);
         hed_tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
                                                                                           hed_tag_columns);
+        return HedInputReader.get_row_hed_tags(worksheet_row, hed_tag_columns,
+                                               prefixed_needed_tag_columns=prefixed_needed_tag_columns);
+
+    @staticmethod
+    def get_row_hed_tags(spreadsheet_row, hed_tag_columns, prefixed_needed_tag_columns={}, is_worksheet=True):
+        """Reads in the current row of HED tags from a spreadsheet file. The hed tag columns will be concatenated to
+           form a HED string.
+
+        Parameters
+        ----------
+        spreadsheet_row: list
+            A list containing the values in the spreadsheet rows.
+        hed_tag_columns: list
+            A list of integers containing the columns that contain the HED tags.
+        prefixed_needed_tag_columns: dictionary
+            A dictionary containing the HED tag column names that corresponds to tags that need to be prefixed with a
+            parent tag path.
+        is_worksheet: boolean
+            True if the spreadsheet is an Excel worksheet. False if it is a text file.
+        Returns
+        -------
+        string
+            A tuple containing a HED string containing the concatenated HED tag columns and a dictionary which
+            associates columns with HED tags.
+
+        """
+        column_to_hed_tags_dictionary = {};
         for hed_tag_column in hed_tag_columns:
-            row_hed_tags = HedInputReader.convert_column_to_unicode_if_not(worksheet_row[hed_tag_column].value);
-            if row_hed_tags:
-                if hed_tag_column in prefixed_needed_tag_columns:
-                    row_hed_tags = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(
-                        row_hed_tags, prefixed_needed_tag_columns[hed_tag_column]);
-                hed_tags.append(row_hed_tags);
-        return ','.join(hed_tags);
+            if is_worksheet:
+                column_hed_tags = HedInputReader.convert_column_to_unicode_if_not(spreadsheet_row[hed_tag_column].value);
+            else:
+                column_hed_tags = spreadsheet_row[hed_tag_column];
+            if not column_hed_tags:
+                continue;
+            elif hed_tag_column in prefixed_needed_tag_columns:
+                    column_hed_tags = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(
+                        column_hed_tags, prefixed_needed_tag_columns[hed_tag_column]);
+            column_to_hed_tags_dictionary[hed_tag_column] = column_hed_tags;
+        hed_string = ','.join(column_to_hed_tags_dictionary.values());
+        return hed_string, column_to_hed_tags_dictionary;
 
     @staticmethod
     def convert_column_to_unicode_if_not(column_value):
@@ -801,3 +925,7 @@ class HedInputReader:
         """
         return first_semantic_version if StrictVersion(first_semantic_version) > StrictVersion(
             second_semantic_version) else second_semantic_version;
+
+if __name__ == '__main__':
+    a = ['1','2'];
+    print(','.join(a));
