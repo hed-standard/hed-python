@@ -69,6 +69,8 @@ class Test(unittest.TestCase):
                                                    'Attribute/Visual/Color/Red'];
         cls.invalid_formatted_duplicate_tag_list = ['item/2D shape/sector', 'attribute/visual/color/red',
                                                     'attribute/visual/color/red'];
+        cls.hed_string_ending_with_parentheses = 'Event/Description/Correct to respond to the stimulus (Button Down)';
+
 
     def test_check_if_tag_is_valid(self):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
@@ -234,6 +236,10 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_error, basestring);
         validation_error = \
             self.tag_validator.find_missing_commas_in_hed_string(self.valid_formatted_tag_with_parentheses);
+        self.assertFalse(validation_error);
+        self.assertIsInstance(validation_error, basestring);
+        validation_error = \
+            self.tag_validator.find_missing_commas_in_hed_string(self.hed_string_ending_with_parentheses);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, basestring);
 
