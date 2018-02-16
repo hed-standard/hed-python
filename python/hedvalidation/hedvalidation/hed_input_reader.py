@@ -257,6 +257,7 @@ class HedInputReader:
         if row_hed_string:
             hed_string_delimiter = HedStringDelimiter(row_hed_string);
             row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter);
+            row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
             if row_validation_issues:
                     validation_issues += HedInputReader.generate_row_issue_message(row_number) + row_validation_issues;
         return validation_issues;
@@ -305,7 +306,6 @@ class HedInputReader:
         if not validation_issues:
             hed_string_delimiter = HedStringDelimiter(column_hed_string);
             validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
-            validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
         return validation_issues;
 
