@@ -549,11 +549,10 @@ class TagValidator:
         for unique_tag_prefix in unique_tag_prefixes:
             unique_tag_prefix_boolean_mask = [x.startswith(unique_tag_prefix) for x in formatted_tag_list];
             if sum(unique_tag_prefix_boolean_mask) > 1:
-                unique_original_tag_list = list(compress(original_tag_list, unique_tag_prefix_boolean_mask));
-                for unique_original_tag in unique_original_tag_list:
-                    validation_error += error_reporter.report_error_type(TagValidator.UNIQUE_ERROR_TYPE,
-                                                                         tag=unique_original_tag,
-                                                                         tag_prefix=unique_tag_prefix);
+                # unique_original_tag_list = list(compress(original_tag_list, unique_tag_prefix_boolean_mask));
+                # for unique_original_tag in unique_original_tag_list:
+                validation_error += error_reporter.report_error_type(TagValidator.UNIQUE_ERROR_TYPE,
+                                                                         tag_prefix=self.hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE][unique_tag_prefix]);
         return validation_error;
 
     def check_if_duplicate_tags_exist(self, original_tag_list, formatted_tag_list):
