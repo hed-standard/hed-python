@@ -63,6 +63,12 @@ class Test(unittest.TestCase):
         cls.last_non_empty_character_delimiter = ',';
         cls.current_character = 'f';
         cls.current_opening_bracket_character = '(';
+        cls.valid_original_duplicate_tag_list = ['Item/2D shape/Sector', 'Attribute/Visual/Color/Red'];
+        cls.valid_formatted_duplicate_tag_list = ['item/2D shape/sector', 'attribute/visual/color/red'];
+        cls.invalid_original_duplicate_tag_list = ['Item/2D shape/Sector', 'Attribute/Visual/Color/Red',
+                                                   'Attribute/Visual/Color/Red'];
+        cls.invalid_formatted_duplicate_tag_list = ['item/2D shape/sector', 'attribute/visual/color/red',
+                                                    'attribute/visual/color/red'];
 
     def test_check_if_tag_is_valid(self):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
@@ -281,6 +287,15 @@ class Test(unittest.TestCase):
         missing_comma_error = TagValidator.report_missing_comma_error(self.invalid_original_tag);
         self.assertTrue(missing_comma_error);
 
+    def test_check_if_duplicate_tags_exist(self):
+        validation_error = self.tag_validator.check_if_duplicate_tags_exist(self.valid_original_duplicate_tag_list,
+                                                                            self.valid_formatted_duplicate_tag_list);
+        self.assertIsInstance(validation_error, basestring);
+        self.assertFalse(validation_error);
+        validation_error = self.tag_validator.check_if_duplicate_tags_exist(
+            self.invalid_original_duplicate_tag_list, self.invalid_formatted_duplicate_tag_list);
+        self.assertIsInstance(validation_error, basestring);
+        self.assertTrue(validation_error);
 
 if __name__ == '__main__':
     unittest.main();
