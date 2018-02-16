@@ -41,7 +41,7 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
         'required': '\tERROR: Tag with prefix \"%s\" is required\n' % tag_prefix,
         'requireChild':'\tERROR: Descendant tag required - \"%s\"\n' % tag,
         'tilde': '\tERROR: Too many tildes - group \"%s\"\n' % tag,
-        'unique': '\tERROR: Multiple unique tags (prefix \"%s\") - \"%s\"\n' % (tag_prefix, tag),
+        'unique': '\tERROR: Multiple unique tags with prefix - \"%s\"\n' % tag_prefix,
         'unitClass': '\tERROR: Invalid unit - \"%s\" valid units are "%s"\n' % (tag, unit_class_units),
         'valid': '\tERROR: Invalid HED tag - \"%s\"\n' % tag
 
