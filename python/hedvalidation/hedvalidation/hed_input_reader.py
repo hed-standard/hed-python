@@ -177,14 +177,16 @@ class HedInputReader:
          """
         validation_issues = '';
         with open(self._hed_input) as opened_text_file:
-            for text_file_row_number, text_file_row in enumerate(opened_text_file):
-                if HedInputReader.row_contains_headers(self._has_column_names, text_file_row_number):
+            for row_number, text_file_row in enumerate(opened_text_file):
+                if HedInputReader.row_contains_headers(self._has_column_names, row_number):
                     continue;
-                hed_string = HedInputReader.get_hed_string_from_text_file_row(text_file_row, self._tag_columns,
-                                                                              column_delimiter,
-                                                                              self._required_tag_columns);
-                validation_issues = self._append_validation_issues_if_found(validation_issues, text_file_row_number,
-                                                                            hed_string);
+                row_hed_string, column_to_hed_tags_dictionary = HedInputReader.get_hed_string_from_text_file_row(
+                    text_file_row, self._tag_columns,
+                    column_delimiter,
+                    self._required_tag_columns);
+                validation_issues = self._append_validation_issues_if_found(validation_issues, row_number,
+                                                                            row_hed_string,
+                                                                            column_to_hed_tags_dictionary);
         return validation_issues;
 
     def _validate_hed_tags_in_excel_worksheet(self):
@@ -598,7 +600,7 @@ class HedInputReader:
         row_column_count = len(text_file_row);
         hed_tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
                                                                                           hed_tag_columns);
-        HedInputReader.get_row_hed_tags(text_file_row, hed_tag_columns,
+        return HedInputReader.get_row_hed_tags(text_file_row, hed_tag_columns,
                                         prefixed_needed_tag_columns=prefixed_needed_tag_columns,
                                         is_worksheet=False);
 
