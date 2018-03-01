@@ -5,7 +5,7 @@ from hedvalidation import warning_reporter
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.warning_types = ['cap', 'unitClass'];
+        cls.warning_types = ['cap', 'required', 'unitClass'];
 
     def test_report_warning_type(self):
         for warning_type in self.warning_types:
