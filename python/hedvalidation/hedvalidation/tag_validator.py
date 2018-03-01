@@ -66,9 +66,9 @@ class TagValidator:
          ----------
          original_tag: string
             A original tag.
-        formatted_tag: string
+         formatted_tag: string
             A format tag.
-        check_for_warnings: boolean
+         check_for_warnings: boolean
             True, if to include issues found from the warning validators. False, if otherwise.
          Returns
          -------
