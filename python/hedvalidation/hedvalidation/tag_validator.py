@@ -142,13 +142,15 @@ class TagValidator:
         validation_issues += self.check_if_duplicate_tags_exist(original_tag_list, formatted_tag_list);
         return validation_issues;
 
-    def run_top_level_validators(self, formatted_top_level_tags):
+    def run_top_level_validators(self, formatted_top_level_tags, check_for_warnings=False):
         """Runs the validators on tags at the top-level in a HED string.
 
          Parameters
          ----------
          formatted_top_level_tags: list
             A list containing the top-level tags in a HED string.
+         check_for_warnings: boolean
+            True, if to include issues found from the warning validators. False, if otherwise.
          Returns
          -------
          string
@@ -156,7 +158,8 @@ class TagValidator:
 
          """
         validation_issues = '';
-        validation_issues += self.check_for_required_tags(formatted_top_level_tags);
+        if check_for_warnings:
+            validation_issues += self.check_for_required_tags(formatted_top_level_tags);
         return validation_issues;
 
     def check_if_tag_is_valid(self, original_tag, formatted_tag):
