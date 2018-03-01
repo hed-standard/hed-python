@@ -529,7 +529,7 @@ class TagValidator:
                 self.hed_dictionary_dictionaries[TagValidator.REQUIRED_ERROR_TYPE][required_tag_prefix];
             if sum([x.startswith(required_tag_prefix) for x in formatted_top_level_tags]) < 1:
                 validation_warning += warning_reporter.report_error_type(TagValidator.REQUIRED_ERROR_TYPE,
-                                                                       tag_prefix=capitalized_required_tag_prefix);
+                                                                         tag_prefix=capitalized_required_tag_prefix);
         return validation_warning;
 
     def check_if_multiple_unique_tags_exist(self, original_tag_list, formatted_tag_list):
