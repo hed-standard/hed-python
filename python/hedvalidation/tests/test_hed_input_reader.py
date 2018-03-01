@@ -22,6 +22,7 @@ class Test(unittest.TestCase):
         cls.category_key = 'Category';
         cls.hed_string_with_multiple_unique_tags = 'event/label/this is a label,event/label/this is another label';
         cls.hed_string_with_invalid_tags = 'this/is/not/a/valid/tag1,this/is/not/a/valid/tag2';
+        cls.hed_string_with_no_required_tags = 'no/required/tags1,no/required/tags2';
         cls.hed_string_with_too_many_tildes = '(this/is/not/a/valid/tag1~this/is/not/a/valid/tag2' \
                                                  '~this/is/not/a/valid/tag3~this/is/not/a/valid/tag4)';
         cls.attribute_onset_tag = 'Attribute/Onset';
@@ -60,10 +61,10 @@ class Test(unittest.TestCase):
         self.assertTrue(validation_issues);
 
     def test__validate_top_levels_in_hed_string(self):
-        hed_string_delimiter = HedStringDelimiter(self.hed_string_with_invalid_tags);
+        hed_string_delimiter = HedStringDelimiter(self.hed_string_with_no_required_tags);
         validation_issues = self.generic_hed_input_reader._validate_top_level_in_hed_string(hed_string_delimiter);
         self.assertIsInstance(validation_issues, basestring);
-        self.assertTrue(validation_issues);
+        self.assertFalse(validation_issues);
 
     def test__validate_tag_levels_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_multiple_unique_tags);
@@ -86,7 +87,7 @@ class Test(unittest.TestCase):
                                                                              self.hed_string_with_invalid_tags,
                                                                              self.column_to_hed_tags_dictionary);
         self.assertIsInstance(validation_issues, basestring);
-        self.assertTrue(validation_issues);
+        self.assertFalse(validation_issues);
 
     def test__append_row_validation_issues_if_found(self):
         row_number = random.randint(0,100);
@@ -96,7 +97,7 @@ class Test(unittest.TestCase):
                                                                                  row_number,
                                                                                  self.hed_string_with_invalid_tags);
         self.assertIsInstance(validation_issues, basestring);
-        self.assertTrue(validation_issues);
+        self.assertFalse(validation_issues);
 
     def test__append_column_validation_issues_if_found(self):
         row_number = random.randint(0,100);

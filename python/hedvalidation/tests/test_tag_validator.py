@@ -106,12 +106,12 @@ class Test(unittest.TestCase):
         self.assertTrue(validation_error);
 
     def test_check_for_required_tags(self):
-        validation_error = self.tag_validator.check_for_required_tags(self.valid_formatted_required_tag_list);
-        self.assertIsInstance(validation_error, basestring);
-        self.assertFalse(validation_error);
-        validation_error = self.tag_validator.check_for_required_tags(self.invalid_formatted_required_tag_list);
-        self.assertIsInstance(validation_error, basestring);
-        self.assertTrue(validation_error);
+        validation_warning = self.tag_validator.check_for_required_tags(self.valid_formatted_required_tag_list);
+        self.assertIsInstance(validation_warning, basestring);
+        self.assertFalse(validation_warning);
+        validation_warning = self.tag_validator.check_for_required_tags(self.invalid_formatted_required_tag_list);
+        self.assertIsInstance(validation_warning, basestring);
+        self.assertTrue(validation_warning);
 
     def test_get_tag_slash_indices(self):
         tag_slash_indices = self.tag_validator.get_tag_slash_indices(self.valid_formatted_tag);
