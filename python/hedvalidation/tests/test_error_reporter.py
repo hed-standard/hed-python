@@ -6,7 +6,7 @@ from hedvalidation import error_reporter
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.error_types = ['bracket', 'row', 'isNumeric', 'required', 'requireChild', 'tilde', 'unique', 'unitClass', 'valid'];
+        self.error_types = ['bracket', 'row', 'isNumeric', 'requireChild', 'tilde', 'unique', 'unitClass', 'valid'];
 
     def test_report_error_type(self):
         for error_type in self.error_types:
