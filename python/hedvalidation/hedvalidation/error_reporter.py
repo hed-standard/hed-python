@@ -18,12 +18,18 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
         The type of abc error.
     error_row: int
         The row number that the error occurred on.
+    error_column: int
+        The column number that the error occurred on.
     tag: string
         The tag that generated the error. The original tag not the formatted one.
     tag_prefix: string
         The tag prefix that generated the error.
     unit_class_units: string
         The unit class units that are associated with the error.
+    opening_bracket_count: int
+        The number of opening brackets.
+    closing_bracket_count: string
+        The number of closing brackets.
     Returns
     -------
     string
@@ -36,9 +42,8 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
         'comma': '\tERROR: Comma missing after - \"%s\"\n' % tag,
         'duplicate': '\tERROR: Duplicate tag - \"%s\"\n' % tag,
         'isNumeric': '\tERROR: Invalid numeric tag - \"%s\"\n' % tag,
-        'row': 'Issues on row %s:\n' % str(error_row),
-        'column': 'Issues on row %s column %s:\n' % (str(error_row), str(error_column)),
-        'required': '\tERROR: Tag with prefix \"%s\" is required\n' % tag_prefix,
+        'row': 'Issues in row %s:\n' % str(error_row),
+        'column': 'Issues in row %s column %s:\n' % (str(error_row), str(error_column)),
         'requireChild':'\tERROR: Descendant tag required - \"%s\"\n' % tag,
         'tilde': '\tERROR: Too many tildes - group \"%s\"\n' % tag,
         'unique': '\tERROR: Multiple unique tags with prefix - \"%s\"\n' % tag_prefix,
