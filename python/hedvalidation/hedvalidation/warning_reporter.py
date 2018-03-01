@@ -8,7 +8,7 @@ Created on Oct 2, 2017
 '''
 
 
-def report_warning_type(warning_type, tag='', default_unit=''):
+def report_warning_type(warning_type, tag='', default_unit='', tag_prefix=''):
     """Reports the abc warning based on the type of warning.
 
     Parameters
@@ -19,6 +19,8 @@ def report_warning_type(warning_type, tag='', default_unit=''):
         The tag that generated the warning. The original tag not the formatted one.
     default_unit: string
         The default unit class unit associated with the warning.
+    tag_prefix: string
+        The tag prefix that generated the error.
     Returns
     -------
     string
@@ -27,6 +29,7 @@ def report_warning_type(warning_type, tag='', default_unit=''):
     """
     warning_types = {
         'cap': '\tWARNING: First word not capitalized or camel case - "%s"\n' % tag,
+        'required': '\tWARNING: Tag with prefix \"%s\" is required\n' % tag_prefix,
         'unitClass': '\tWARNING: No unit specified. Using "%s" as the default - "%s"\n' % (default_unit, tag)
     }
     return warning_types.get(warning_type, None);
