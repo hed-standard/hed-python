@@ -235,8 +235,8 @@ class HedInputReader:
          """
         validation_issues = self._append_row_validation_issues_if_found(validation_issues, row_number,
                                                                         row_hed_string);
-        validation_issues = self._append_column_validation_issues_if_found(validation_issues, row_number,
-                                                                           column_to_hed_tags_dictionary);
+        validation_issues += self._append_column_validation_issues_if_found(validation_issues, row_number,
+                                                                            column_to_hed_tags_dictionary);
         return validation_issues;
 
     def _append_row_validation_issues_if_found(self, validation_issues, row_number, row_hed_string):
@@ -375,7 +375,8 @@ class HedInputReader:
          """
         validation_issues = '';
         formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags();
-        validation_issues += self._tag_validator.run_top_level_validators(formatted_top_level_tags);
+        validation_issues += self._tag_validator.run_top_level_validators(
+            formatted_top_level_tags, check_for_warnings = self._check_for_warnings);
         return validation_issues;
 
     def _validate_groups_in_hed_string(self, hed_string_delimiter):
