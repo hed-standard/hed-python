@@ -235,8 +235,8 @@ class HedInputReader:
          """
         validation_issues = self._append_row_validation_issues_if_found(validation_issues, row_number,
                                                                         row_hed_string);
-        validation_issues += self._append_column_validation_issues_if_found(validation_issues, row_number,
-                                                                            column_to_hed_tags_dictionary);
+        validation_issues = self._append_column_validation_issues_if_found(validation_issues, row_number,
+                                                                           column_to_hed_tags_dictionary);
         return validation_issues;
 
     def _append_row_validation_issues_if_found(self, validation_issues, row_number, row_hed_string):
