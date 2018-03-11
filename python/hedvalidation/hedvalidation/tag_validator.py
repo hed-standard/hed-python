@@ -420,7 +420,7 @@ class TagValidator:
                     units += (self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class]);
                 except:
                     continue;
-        return map(str.lower, units);
+        return list(map(str.lower, units));
 
     def get_unit_class_default_unit(self, formatted_tag):
         """Gets the default unit class unit that is associated with the specified tag.
