@@ -15,7 +15,8 @@ class Test(unittest.TestCase):
         random_require_child_key = \
             random.randint(2, len(cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY]));
         cls.required_child_tag = cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY] \
-            [cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY].keys()[random_require_child_key]];
+            [list(cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY].keys())[
+                random_require_child_key]];
         cls.invalid_original_tag = 'This/Is/A/Tag';
         cls.invalid_formatted_tag = 'this/is/a/tag';
         cls.valid_original_tag = 'Event/Label';
@@ -71,46 +72,45 @@ class Test(unittest.TestCase):
                                                     'attribute/visual/color/red'];
         cls.hed_string_ending_with_parentheses = 'Event/Description/Correct to respond to the stimulus (Button Down)';
 
-
     def test_check_if_tag_is_valid(self):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
                                                                     self.invalid_formatted_tag);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertTrue(validation_error);
         validation_error = self.tag_validator.check_if_tag_is_valid(self.valid_original_tag, self.valid_formatted_tag);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertFalse(validation_error);
 
     def test_check_if_tag_requires_child(self):
         validation_error = self.tag_validator.check_if_tag_requires_child(self.required_child_tag,
                                                                           self.required_child_tag);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertFalse(validation_error);
 
     def test_check_number_of_group_tildes(self):
         validation_error = self.tag_validator.check_number_of_group_tildes(self.valid_tag_group_string);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertFalse(validation_error);
         validation_error = self.tag_validator.check_number_of_group_tildes(self.invalid_tag_group_string);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertTrue(validation_error);
 
     def test_check_if_multiple_unique_tags_exist(self):
         validation_error = self.tag_validator.check_if_multiple_unique_tags_exist(self.valid_original_unique_tag_list,
                                                                                   self.valid_formatted_unique_tag_list);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertFalse(validation_error);
         validation_error = self.tag_validator.check_if_multiple_unique_tags_exist(
             self.invalid_original_unique_tag_list, self.invalid_formatted_unique_tag_list);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertTrue(validation_error);
 
     def test_check_for_required_tags(self):
         validation_warning = self.tag_validator.check_for_required_tags(self.valid_formatted_required_tag_list);
-        self.assertIsInstance(validation_warning, basestring);
+        self.assertIsInstance(validation_warning, str);
         self.assertFalse(validation_warning);
         validation_warning = self.tag_validator.check_for_required_tags(self.invalid_formatted_required_tag_list);
-        self.assertIsInstance(validation_warning, basestring);
+        self.assertIsInstance(validation_warning, str);
         self.assertTrue(validation_warning);
 
     def test_get_tag_slash_indices(self):
@@ -120,7 +120,7 @@ class Test(unittest.TestCase):
     def test_get_tag_substring_by_end_index(self):
         tag_slash_indices = self.tag_validator.get_tag_slash_indices(self.valid_formatted_tag);
         tag = self.tag_validator.get_tag_substring_by_end_index(self.valid_formatted_tag, tag_slash_indices[0]);
-        self.assertIsInstance(tag, basestring);
+        self.assertIsInstance(tag, str);
         self.assertNotEqual(self.valid_formatted_tag, tag);
         tag = self.tag_validator.get_tag_substring_by_end_index(self.valid_formatted_tag, 0);
         self.assertEqual(self.valid_formatted_tag, tag);
@@ -171,77 +171,77 @@ class Test(unittest.TestCase):
     def test_get_tag_name(self):
         tag_name = self.tag_validator.get_tag_name(self.valid_original_tag);
         self.assertTrue(tag_name);
-        self.assertIsInstance(tag_name, basestring);
+        self.assertIsInstance(tag_name, str);
 
     def test_get_unit_class_default_unit(self):
         default_unit = self.tag_validator.get_unit_class_default_unit(self.valid_original_tag);
         self.assertFalse(default_unit);
-        self.assertIsInstance(default_unit, basestring);
+        self.assertIsInstance(default_unit, str);
         default_unit = self.tag_validator.get_unit_class_default_unit(self.valid_formatted_unit_class_tag);
         self.assertTrue(default_unit);
-        self.assertIsInstance(default_unit, basestring);
+        self.assertIsInstance(default_unit, str);
 
     def test_check_if_tag_unit_class_units_exist(self):
         validation_warning = self.tag_validator.check_if_tag_unit_class_units_exist(self.valid_formatted_unit_class_tag,
                                                                                     self.valid_formatted_unit_class_tag);
         self.assertFalse(validation_warning);
-        self.assertIsInstance(validation_warning, basestring);
+        self.assertIsInstance(validation_warning, str);
         validation_warning = \
             self.tag_validator.check_if_tag_unit_class_units_exist(self.valid_formatted_unit_class_tag_no_units,
                                                                    self.valid_formatted_unit_class_tag_no_units);
         self.assertTrue(validation_warning);
-        self.assertIsInstance(validation_warning, basestring);
+        self.assertIsInstance(validation_warning, str);
 
     def test_check_if_tag_unit_class_units_are_valid(self):
         validation_error = \
             self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_formatted_unit_class_tag,
                                                                        self.valid_formatted_unit_class_tag);
         self.assertFalse(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         validation_error = \
             self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_formatted_unit_class_tag_no_units,
                                                                        self.valid_formatted_unit_class_tag_no_units);
         self.assertFalse(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         validation_error = \
             self.tag_validator.check_if_tag_unit_class_units_are_valid(self.invalid_formatted_unit_class_tag,
                                                                        self.invalid_formatted_unit_class_tag);
         self.assertTrue(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         validation_error = \
             self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_formatted_time_string_tag,
                                                                        self.valid_formatted_time_string_tag);
         self.assertFalse(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         validation_error = \
             self.tag_validator.check_if_tag_unit_class_units_are_valid(self.invalid_formatted_time_string_tag,
                                                                        self.invalid_formatted_time_string_tag);
         self.assertTrue(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
 
     def test_count_tag_group_brackets(self):
         validation_error = TagValidator.count_tag_group_brackets(self.valid_hed_string);
         self.assertFalse(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         validation_error = TagValidator.count_tag_group_brackets(self.invalid_hed_string);
         self.assertTrue(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
 
     def test_find_missing_commas_in_hed_string(self):
         validation_error = self.tag_validator.find_missing_commas_in_hed_string(self.valid_hed_string);
         self.assertFalse(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         validation_error = self.tag_validator.find_missing_commas_in_hed_string(self.missing_comma_hed_string);
         self.assertTrue(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         validation_error = \
             self.tag_validator.find_missing_commas_in_hed_string(self.valid_formatted_tag_with_parentheses);
         self.assertFalse(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         validation_error = \
             self.tag_validator.find_missing_commas_in_hed_string(self.hed_string_ending_with_parentheses);
         self.assertFalse(validation_error);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
 
     def test_character_is_delimiter(self):
         is_a_delimiter = TagValidator.character_is_delimiter(self.comma);
@@ -259,9 +259,9 @@ class Test(unittest.TestCase):
 
     def test_is_hh_mm_time(self):
         validation_error = TagValidator.is_hh_mm_time(self.valid_time_string);
-        self.assertTrue(validation_error, basestring);
+        self.assertTrue(validation_error, str);
         validation_error = TagValidator.is_hh_mm_time(self.invalid_time_string);
-        self.assertFalse(validation_error, basestring);
+        self.assertFalse(validation_error, str);
 
     def test_comma_is_missing_after_closing_bracket(self):
         comma_is_missing = \
@@ -286,7 +286,8 @@ class Test(unittest.TestCase):
     def test_get_next_set_of_parentheses_in_hed_string(self):
         next_set_of_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(self.valid_hed_string);
         self.assertTrue(next_set_of_parentheses);
-        next_set_of_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(self.valid_hed_string_with_group);
+        next_set_of_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(
+            self.valid_hed_string_with_group);
         self.assertTrue(next_set_of_parentheses);
 
     def test_report_missing_comma_error(self):
@@ -296,12 +297,13 @@ class Test(unittest.TestCase):
     def test_check_if_duplicate_tags_exist(self):
         validation_error = self.tag_validator.check_if_duplicate_tags_exist(self.valid_original_duplicate_tag_list,
                                                                             self.valid_formatted_duplicate_tag_list);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertFalse(validation_error);
         validation_error = self.tag_validator.check_if_duplicate_tags_exist(
             self.invalid_original_duplicate_tag_list, self.invalid_formatted_duplicate_tag_list);
-        self.assertIsInstance(validation_error, basestring);
+        self.assertIsInstance(validation_error, str);
         self.assertTrue(validation_error);
+
 
 if __name__ == '__main__':
     unittest.main();

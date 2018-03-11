@@ -11,7 +11,7 @@ class Test(unittest.TestCase):
     def test_report_error_type(self):
         for error_type in self.error_types:
             error_report = error_reporter.report_error_type(error_type);
-            self.assertIsInstance(error_report, basestring);
+            self.assertIsInstance(error_report, str);
 
 if __name__ == '__main__':
     unittest.main();

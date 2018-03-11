@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         random_node = random.randint(2, len(nodes));
         tag_element = nodes[random_node];
         parent_tag_name = self.hed_dictionary.get_parent_tag_name(tag_element);
-        self.assertIsInstance(parent_tag_name, basestring);
+        self.assertIsInstance(parent_tag_name, str);
         self.assertTrue(parent_tag_name);
 
     def test__get_tag_from_tag_element(self):
@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         random_node = random.randint(2, len(nodes));
         tag_element = nodes[random_node];
         tag_name = self.hed_dictionary._get_tag_path_from_tag_element(tag_element);
-        self.assertIsInstance(tag_name, basestring);
+        self.assertIsInstance(tag_name, str);
         self.assertTrue(tag_name);
 
     def test_get_parent_tag_name(self):
@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         random_node = random.randint(2, len(nodes));
         tag_element = nodes[random_node];
         parent_tag_name = self.hed_dictionary._get_parent_tag_name(tag_element);
-        self.assertIsInstance(parent_tag_name, basestring);
+        self.assertIsInstance(parent_tag_name, str);
 
     def test_get_tag_path_from_tag_element(self):
         root_element = self.hed_dictionary.get_root_element();
@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
         random_node = random.randint(2, len(tag_elements));
         tag_element = tag_elements[random_node];
         tag = self.hed_dictionary._get_tag_path_from_tag_element(tag_element);
-        self.assertIsInstance(tag, basestring);
+        self.assertIsInstance(tag, str);
         self.assertTrue(tag);
 
     def test_get_all_ancestor_tag_names(self):
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
     def test_tag_has_attribute(self):
         dictionaries = self.hed_dictionary.get_dictionaries();
         for tag_attribute in self.tag_attributes:
-            tag_attribute_keys = dictionaries[tag_attribute].keys();
+            tag_attribute_keys = list(dictionaries[tag_attribute].keys());
             if tag_attribute_keys:
                 tag = tag_attribute_keys[0];
                 tag_has_attribute = self.hed_dictionary.tag_has_attribute(tag, tag_attribute);
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
 
     def test_get_hed_xml_version(self):
         hed_version = HedDictionary.get_hed_xml_version(self.hed_xml);
-        self.assertIsInstance(hed_version, basestring);
+        self.assertIsInstance(hed_version, str);
 
 if __name__ == '__main__':
     unittest.main();

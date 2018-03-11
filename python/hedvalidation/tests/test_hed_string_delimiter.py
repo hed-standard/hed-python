@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
 
     def test_format_hed_tag(self):
         formatted_tag = HedStringDelimiter.format_hed_tag(self.unformatted_tag);
-        self.assertIsInstance(formatted_tag, basestring);
+        self.assertIsInstance(formatted_tag, str);
         self.assertEqual(formatted_tag, self.formatted_tag);
 
     def test_get_tags(self):
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
         hed_string_delimiter = HedStringDelimiter(self.mixed_hed_string);
         hed_string = hed_string_delimiter.get_hed_string();
         self.assertTrue(hed_string);
-        self.assertIsInstance(hed_string, basestring);
+        self.assertIsInstance(hed_string, str);
         self.assertEqual(hed_string, self.mixed_hed_string);
 
     def test_get_split_hed_string_list(self):
