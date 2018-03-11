@@ -208,7 +208,7 @@ class HedInputReader:
             if HedInputReader.row_contains_headers(self._has_column_names, row_number):
                 continue;
             row_hed_string, column_to_hed_tags_dictionary = HedInputReader.get_hed_tags_from_worksheet_row(
-                    worksheet_row, self._tag_columns, self._required_tag_columns);
+                worksheet_row, self._tag_columns, self._required_tag_columns);
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
                                                                         column_to_hed_tags_dictionary);
         return validation_issues;
@@ -261,7 +261,7 @@ class HedInputReader:
             row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter);
             row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
             if row_validation_issues:
-                    validation_issues += HedInputReader.generate_row_issue_message(row_number) + row_validation_issues;
+                validation_issues += HedInputReader.generate_row_issue_message(row_number) + row_validation_issues;
         return validation_issues;
 
     def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
@@ -310,7 +310,6 @@ class HedInputReader:
             validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
         return validation_issues;
-
 
     def _validate_hed_string(self, hed_string):
         """Validates the tags in a HED string.
@@ -376,7 +375,7 @@ class HedInputReader:
         validation_issues = '';
         formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags();
         validation_issues += self._tag_validator.run_top_level_validators(
-            formatted_top_level_tags, check_for_warnings = self._check_for_warnings);
+            formatted_top_level_tags, check_for_warnings=self._check_for_warnings);
         return validation_issues;
 
     def _validate_groups_in_hed_string(self, hed_string_delimiter):
@@ -495,7 +494,7 @@ class HedInputReader:
          """
         if has_headers:
             row_number += 1;
-        column_number +=1;
+        column_number += 1;
         return error_reporter.report_error_type('column', error_row=row_number, error_column=column_number);
 
     @staticmethod
@@ -602,8 +601,8 @@ class HedInputReader:
         hed_tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
                                                                                           hed_tag_columns);
         return HedInputReader.get_row_hed_tags(text_file_row, hed_tag_columns,
-                                        prefixed_needed_tag_columns=prefixed_needed_tag_columns,
-                                        is_worksheet=False);
+                                               prefixed_needed_tag_columns=prefixed_needed_tag_columns,
+                                               is_worksheet=False);
 
     @staticmethod
     def get_hed_tags_from_worksheet_row(worksheet_row, hed_tag_columns, prefixed_needed_tag_columns={}):
@@ -658,36 +657,17 @@ class HedInputReader:
         column_to_hed_tags_dictionary = {};
         for hed_tag_column in hed_tag_columns:
             if is_worksheet:
-                # column_hed_tags = HedInputReader.convert_column_to_unicode_if_not(spreadsheet_row[hed_tag_column].value);
                 column_hed_tags = spreadsheet_row[hed_tag_column].value;
             else:
                 column_hed_tags = spreadsheet_row[hed_tag_column];
             if not column_hed_tags:
                 continue;
             elif hed_tag_column in prefixed_needed_tag_columns:
-                    column_hed_tags = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(
-                        column_hed_tags, prefixed_needed_tag_columns[hed_tag_column]);
+                column_hed_tags = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(
+                    column_hed_tags, prefixed_needed_tag_columns[hed_tag_column]);
             column_to_hed_tags_dictionary[hed_tag_column] = column_hed_tags;
         hed_string = ','.join(column_to_hed_tags_dictionary.values());
         return hed_string, column_to_hed_tags_dictionary;
-
-    # @staticmethod
-    # def convert_column_to_unicode_if_not(column_value):
-    #     """Converts a column value to a unicode string if it is not.
-    #
-    #       Parameters
-    #       ----------
-    #       column_value: scalar value
-    #           A scalar column value. This will mostly be a numerical value.
-    #       Returns
-    #       -------
-    #       string
-    #           A unicode string representing the column value.
-    #
-    #       """
-    #     if not isinstance(column_value, unicode):
-    #         column_value = unicode(column_value);
-    #     return column_value;
 
     @staticmethod
     def remove_tag_columns_greater_than_row_column_count(row_column_count, hed_tag_columns):
@@ -930,6 +910,7 @@ class HedInputReader:
         return first_semantic_version if StrictVersion(first_semantic_version) > StrictVersion(
             second_semantic_version) else second_semantic_version;
 
+
 if __name__ == '__main__':
-    a = ['1','2'];
+    a = ['1', '2'];
     print(','.join(a));
