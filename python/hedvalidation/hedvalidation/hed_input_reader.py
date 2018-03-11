@@ -12,10 +12,10 @@ Created on Oct 2, 2017
 import os;
 import re;
 import xlrd;
-import error_reporter;
-from hed_dictionary import HedDictionary
-from hed_string_delimiter import HedStringDelimiter;
-from tag_validator import TagValidator;
+from . import error_reporter;
+from .hed_dictionary import HedDictionary
+from .hed_string_delimiter import HedStringDelimiter;
+from .tag_validator import TagValidator;
 from distutils.version import StrictVersion;
 
 
@@ -203,7 +203,7 @@ class HedInputReader:
         validation_issues = '';
         opened_worksheet = HedInputReader.open_workbook_worksheet(self._hed_input, worksheet_name=self._worksheet_name);
         number_of_rows = opened_worksheet.nrows;
-        for row_number in xrange(number_of_rows):
+        for row_number in range(number_of_rows):
             worksheet_row = opened_worksheet.row(row_number);
             if HedInputReader.row_contains_headers(self._has_column_names, row_number):
                 continue;
@@ -658,7 +658,8 @@ class HedInputReader:
         column_to_hed_tags_dictionary = {};
         for hed_tag_column in hed_tag_columns:
             if is_worksheet:
-                column_hed_tags = HedInputReader.convert_column_to_unicode_if_not(spreadsheet_row[hed_tag_column].value);
+                # column_hed_tags = HedInputReader.convert_column_to_unicode_if_not(spreadsheet_row[hed_tag_column].value);
+                column_hed_tags = spreadsheet_row[hed_tag_column].value;
             else:
                 column_hed_tags = spreadsheet_row[hed_tag_column];
             if not column_hed_tags:
@@ -670,23 +671,23 @@ class HedInputReader:
         hed_string = ','.join(column_to_hed_tags_dictionary.values());
         return hed_string, column_to_hed_tags_dictionary;
 
-    @staticmethod
-    def convert_column_to_unicode_if_not(column_value):
-        """Converts a column value to a unicode string if it is not.
-
-          Parameters
-          ----------
-          column_value: scalar value
-              A scalar column value. This will mostly be a numerical value.
-          Returns
-          -------
-          string
-              A unicode string representing the column value.
-
-          """
-        if not isinstance(column_value, unicode):
-            column_value = unicode(column_value);
-        return column_value;
+    # @staticmethod
+    # def convert_column_to_unicode_if_not(column_value):
+    #     """Converts a column value to a unicode string if it is not.
+    #
+    #       Parameters
+    #       ----------
+    #       column_value: scalar value
+    #           A scalar column value. This will mostly be a numerical value.
+    #       Returns
+    #       -------
+    #       string
+    #           A unicode string representing the column value.
+    #
+    #       """
+    #     if not isinstance(column_value, unicode):
+    #         column_value = unicode(column_value);
+    #     return column_value;
 
     @staticmethod
     def remove_tag_columns_greater_than_row_column_count(row_column_count, hed_tag_columns):
@@ -795,7 +796,7 @@ class HedInputReader:
             A dictionary with the keys subtracted by 1.
 
         """
-        return {key - 1: value for key, value in integer_key_dictionary.iteritems()};
+        return {key - 1: value for key, value in integer_key_dictionary.items()};
 
     @staticmethod
     def file_path_has_extension(file_path):

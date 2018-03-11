@@ -11,8 +11,8 @@ import re;
 import time;
 from itertools import compress;
 
-import error_reporter;
-import warning_reporter;
+from . import error_reporter;
+from . import warning_reporter;
 
 
 class TagValidator:
