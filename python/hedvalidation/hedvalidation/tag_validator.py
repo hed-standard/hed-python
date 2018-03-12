@@ -18,9 +18,9 @@ from . import warning_reporter;
 class TagValidator:
     BRACKET_ERROR_TYPE = 'bracket';
     COMMA_ERROR_TYPE = 'comma';
-    CAMEL_CASE_EXPRESSION = '([A-Z-]+\s*[a-z-]*)+';
+    CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+';
     DEFAULT_UNIT_ATTRIBUTE = 'default';
-    DIGIT_EXPRESSION = '^\d+$';
+    DIGIT_EXPRESSION = r'^\d+$';
     REQUIRE_CHILD_ERROR_TYPE = 'requireChild';
     REQUIRED_ERROR_TYPE = 'required';
     TAG_DICTIONARY_KEY = 'tags';
