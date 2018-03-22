@@ -910,8 +910,3 @@ class HedInputReader:
         """
         return first_semantic_version if StrictVersion(first_semantic_version) > StrictVersion(
             second_semantic_version) else second_semantic_version;
-
-
-if __name__ == '__main__':
-    a = tempfile.gettempdir()
-    print(a)
