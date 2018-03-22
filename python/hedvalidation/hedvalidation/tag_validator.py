@@ -9,10 +9,8 @@ Created on Oct 2, 2017
 
 import re;
 import time;
-from itertools import compress;
-
-from . import error_reporter;
-from . import warning_reporter;
+from hedvalidation import error_reporter;
+from hedvalidation import warning_reporter;
 
 
 class TagValidator:
