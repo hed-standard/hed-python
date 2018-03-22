@@ -38,17 +38,17 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
     """
     error_types = {
         'bracket': '\tERROR: Number of opening and closing brackets are unequal. %s opening brackets. %s '
-                   'closing brackets\r\n' % (opening_bracket_count, closing_bracket_count),
-        'comma': '\tERROR: Comma missing after - \"%s\"\r\n' % tag,
-        'duplicate': '\tERROR: Duplicate tag - \"%s\"\r\n' % tag,
-        'isNumeric': '\tERROR: Invalid numeric tag - \"%s\"\r\n' % tag,
-        'row': 'Issues in row %s:\r\n' % str(error_row),
-        'column': 'Issues in row %s column %s:\r\n' % (str(error_row), str(error_column)),
-        'requireChild':'\tERROR: Descendant tag required - \"%s\"\r\n' % tag,
-        'tilde': '\tERROR: Too many tildes - group \"%s\"\r\n' % tag,
-        'unique': '\tERROR: Multiple unique tags with prefix - \"%s\"\r\n' % tag_prefix,
-        'unitClass': '\tERROR: Invalid unit - \"%s\" valid units are "%s"\r\n' % (tag, unit_class_units),
-        'valid': '\tERROR: Invalid HED tag - \"%s\"\r\n' % tag
+                   'closing brackets\n' % (opening_bracket_count, closing_bracket_count),
+        'comma': '\tERROR: Comma missing after - \"%s\"\n' % tag,
+        'duplicate': '\tERROR: Duplicate tag - \"%s\"\n' % tag,
+        'isNumeric': '\tERROR: Invalid numeric tag - \"%s\"\n' % tag,
+        'row': 'Issues in row %s:\n' % str(error_row),
+        'column': 'Issues in row %s column %s:\n' % (str(error_row), str(error_column)),
+        'requireChild':'\tERROR: Descendant tag required - \"%s\"\n' % tag,
+        'tilde': '\tERROR: Too many tildes - group \"%s\"\n' % tag,
+        'unique': '\tERROR: Multiple unique tags with prefix - \"%s\"\n' % tag_prefix,
+        'unitClass': '\tERROR: Invalid unit - \"%s\" valid units are "%s"\n' % (tag, unit_class_units),
+        'valid': '\tERROR: Invalid HED tag - \"%s\"\n' % tag
 
     }
     return error_types.get(error_type, None);
