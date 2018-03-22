@@ -12,10 +12,11 @@ Created on Oct 2, 2017
 import os;
 import re;
 import xlrd;
-from . import error_reporter;
-from .hed_dictionary import HedDictionary
-from .hed_string_delimiter import HedStringDelimiter;
-from .tag_validator import TagValidator;
+import tempfile;
+from hedvalidation import error_reporter;
+from hedvalidation.hed_dictionary import HedDictionary
+from hedvalidation.hed_string_delimiter import HedStringDelimiter;
+from hedvalidation.tag_validator import TagValidator;
 from distutils.version import StrictVersion;
 
 
@@ -912,5 +913,5 @@ class HedInputReader:
 
 
 if __name__ == '__main__':
-    a = ['1', '2'];
-    print(','.join(a));
+    a = tempfile.gettempdir()
+    print(a)
