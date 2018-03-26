@@ -647,7 +647,8 @@ class TagValidator:
                         self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     break;
-                if TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character):
+                if TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character) and not \
+                        self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     break;
                 last_non_empty_character = character;
