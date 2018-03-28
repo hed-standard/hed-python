@@ -12,7 +12,6 @@ Created on Oct 2, 2017
 import os;
 import re;
 import xlrd;
-import tempfile;
 from hedvalidation import error_reporter;
 from hedvalidation.hed_dictionary import HedDictionary
 from hedvalidation.hed_string_delimiter import HedStringDelimiter;
@@ -181,10 +180,8 @@ class HedInputReader:
             for row_number, text_file_row in enumerate(opened_text_file):
                 if HedInputReader.row_contains_headers(self._has_column_names, row_number):
                     continue;
-                row_hed_string, column_to_hed_tags_dictionary = HedInputReader.get_hed_string_from_text_file_row(
-                    text_file_row, self._tag_columns,
-                    column_delimiter,
-                    self._required_tag_columns);
+                row_hed_string, column_to_hed_tags_dictionary = self.get_hed_string_from_text_file_row(
+                    text_file_row, column_delimiter);
                 validation_issues = self._append_validation_issues_if_found(validation_issues, row_number,
                                                                             row_hed_string,
                                                                             column_to_hed_tags_dictionary);
@@ -208,8 +205,7 @@ class HedInputReader:
             worksheet_row = opened_worksheet.row(row_number);
             if HedInputReader.row_contains_headers(self._has_column_names, row_number):
                 continue;
-            row_hed_string, column_to_hed_tags_dictionary = HedInputReader.get_hed_tags_from_worksheet_row(
-                worksheet_row, self._tag_columns, self._required_tag_columns);
+            row_hed_string, column_to_hed_tags_dictionary = self.get_hed_tags_from_worksheet_row(worksheet_row);
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
                                                                         column_to_hed_tags_dictionary);
         return validation_issues;
@@ -574,9 +570,7 @@ class HedInputReader:
             return workbook.sheet_by_index(0);
         return workbook.sheet_by_name(worksheet_name);
 
-    @staticmethod
-    def get_hed_string_from_text_file_row(text_file_row, hed_tag_columns, column_delimiter,
-                                          prefixed_needed_tag_columns={}):
+    def get_hed_string_from_text_file_row(self, text_file_row, column_delimiter):
         """Reads in the current row of HED tags from the text file. The hed tag columns will be concatenated to form a
            HED string.
 
@@ -584,13 +578,8 @@ class HedInputReader:
         ----------
         text_file_row: string
             The row in the text file that contains the HED tags.
-        hed_tag_columns: list
-            A list of integers containing the columns that contain the HED tags.
         column_delimiter: string
             A delimiter used to split the columns.
-        prefixed_needed_tag_columns: dictionary
-            A dictionary containing the HED tag column names that corresponds to tags that need to be prefixed with a
-            parent tag path.
         Returns
         -------
         string
@@ -599,14 +588,11 @@ class HedInputReader:
         """
         text_file_row = HedInputReader.split_delimiter_separated_string_with_quotes(text_file_row, column_delimiter);
         row_column_count = len(text_file_row);
-        hed_tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
-                                                                                          hed_tag_columns);
-        return HedInputReader.get_row_hed_tags(text_file_row, hed_tag_columns,
-                                               prefixed_needed_tag_columns=prefixed_needed_tag_columns,
-                                               is_worksheet=False);
+        self._tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
+                                                                                            self._tag_columns);
+        return self.get_row_hed_tags(text_file_row, is_worksheet=False);
 
-    @staticmethod
-    def get_hed_tags_from_worksheet_row(worksheet_row, hed_tag_columns, prefixed_needed_tag_columns={}):
+    def get_hed_tags_from_worksheet_row(self, worksheet_row):
         """Reads in the current row of HED tags from the Excel file. The hed tag columns will be concatenated to form a
            HED string.
 
@@ -614,11 +600,6 @@ class HedInputReader:
         ----------
         worksheet_row: list
             A list containing the values in the worksheet rows.
-        hed_tag_columns: list
-            A list of integers containing the columns that contain the HED tags.
-        prefixed_needed_tag_columns: dictionary
-            A dictionary containing the HED tag column names that corresponds to tags that need to be prefixed with a
-            parent tag path.
         Returns
         -------
         string
@@ -627,13 +608,11 @@ class HedInputReader:
 
         """
         row_column_count = len(worksheet_row);
-        hed_tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
-                                                                                          hed_tag_columns);
-        return HedInputReader.get_row_hed_tags(worksheet_row, hed_tag_columns,
-                                               prefixed_needed_tag_columns=prefixed_needed_tag_columns);
+        self._tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
+                                                                                            self._tag_columns);
+        return self.get_row_hed_tags(worksheet_row);
 
-    @staticmethod
-    def get_row_hed_tags(spreadsheet_row, hed_tag_columns, prefixed_needed_tag_columns={}, is_worksheet=True):
+    def get_row_hed_tags(self, spreadsheet_row, is_worksheet=True):
         """Reads in the current row of HED tags from a spreadsheet file. The hed tag columns will be concatenated to
            form a HED string.
 
@@ -641,11 +620,6 @@ class HedInputReader:
         ----------
         spreadsheet_row: list
             A list containing the values in the spreadsheet rows.
-        hed_tag_columns: list
-            A list of integers containing the columns that contain the HED tags.
-        prefixed_needed_tag_columns: dictionary
-            A dictionary containing the HED tag column names that corresponds to tags that need to be prefixed with a
-            parent tag path.
         is_worksheet: boolean
             True if the spreadsheet is an Excel worksheet. False if it is a text file.
         Returns
@@ -656,16 +630,16 @@ class HedInputReader:
 
         """
         column_to_hed_tags_dictionary = {};
-        for hed_tag_column in hed_tag_columns:
+        for hed_tag_column in self._tag_columns:
             if is_worksheet:
                 column_hed_tags = spreadsheet_row[hed_tag_column].value;
             else:
                 column_hed_tags = spreadsheet_row[hed_tag_column];
             if not column_hed_tags:
                 continue;
-            elif hed_tag_column in prefixed_needed_tag_columns:
-                column_hed_tags = HedInputReader.prepend_prefix_to_required_tag_column_if_needed(
-                    column_hed_tags, prefixed_needed_tag_columns[hed_tag_column]);
+            elif hed_tag_column in self._required_tag_columns:
+                column_hed_tags = self.prepend_prefix_to_required_tag_column_if_needed(
+                    column_hed_tags, self._required_tag_columns[hed_tag_column]);
             column_to_hed_tags_dictionary[hed_tag_column] = column_hed_tags;
         hed_string = ','.join(column_to_hed_tags_dictionary.values());
         return hed_string, column_to_hed_tags_dictionary;
@@ -688,8 +662,7 @@ class HedInputReader:
         """
         return sorted(filter(lambda x: x < row_column_count, hed_tag_columns));
 
-    @staticmethod
-    def prepend_prefix_to_required_tag_column_if_needed(required_tag_column_tags, required_tag_prefix_key):
+    def prepend_prefix_to_required_tag_column_if_needed(self, required_tag_column_tags, required_tag_prefix_key):
         """Prepends the tag paths to the required tag column tags that need them.
 
         Parameters
@@ -707,15 +680,17 @@ class HedInputReader:
             needed.
 
         """
-        required_tags_with_prefix = [];
-        required_tags = required_tag_column_tags.split(',');
-        required_tags = [x.strip() for x in required_tags];
         required_tag_prefix = HedInputReader.REQUIRED_TAG_COLUMN_TO_PATH[required_tag_prefix_key];
-        for required_tag in required_tags:
-            if required_tag and not required_tag.lower().startswith(required_tag_prefix.lower()):
-                required_tag = required_tag_prefix + required_tag;
-            required_tags_with_prefix.append(required_tag);
-        return ','.join(required_tags_with_prefix);
+        if not self._tag_validator.tag_has_unique_prefix(required_tag_prefix):
+            required_tags_with_prefix = [];
+            required_tags = required_tag_column_tags.split(',');
+            required_tags = [x.strip() for x in required_tags];
+            for required_tag in required_tags:
+                if required_tag and not required_tag.lower().startswith(required_tag_prefix.lower()):
+                    required_tag = required_tag_prefix + required_tag;
+                required_tags_with_prefix.append(required_tag);
+            return ','.join(required_tags_with_prefix);
+        return required_tag_prefix + required_tag_column_tags;
 
     @staticmethod
     def split_delimiter_separated_string_with_quotes(delimiter_separated_string, delimiter):
