@@ -177,7 +177,7 @@ class TagValidator:
         """
         validation_error = '';
         if self.is_extension_allowed_tag(formatted_tag) or self.tag_takes_value(formatted_tag) or \
-            formatted_tag == TagValidator.TILDE:
+                        formatted_tag == TagValidator.TILDE:
             pass;
         elif not self.hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
@@ -371,7 +371,6 @@ class TagValidator:
             tag_name = tag[tag_slash_indices[-1] + 1:]
         return tag_name;
 
-
     def get_tag_unit_classes(self, formatted_tag):
         """Gets the unit classes associated with a particular tag.
 
@@ -392,7 +391,6 @@ class TagValidator:
             unit_classes = self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
             unit_classes = unit_classes.split(',');
         return unit_classes;
-
 
     def get_tag_unit_class_units(self, formatted_tag):
         """Gets the unit class units associated with a particular tag.
@@ -485,7 +483,6 @@ class TagValidator:
             validation_error = error_reporter.report_error_type(TagValidator.TILDE_ERROR_TYPE, tag_group);
         return validation_error;
 
-
     def check_if_tag_requires_child(self, original_tag, formatted_tag):
         """Reports a validation error if the tag provided has the 'requireChild' attribute.
 
@@ -527,7 +524,7 @@ class TagValidator:
                 self.hed_dictionary_dictionaries[TagValidator.REQUIRED_ERROR_TYPE][required_tag_prefix];
             if sum([x.startswith(required_tag_prefix) for x in formatted_top_level_tags]) < 1:
                 validation_warning += warning_reporter.report_warning_type(TagValidator.REQUIRED_ERROR_TYPE,
-                                                                         tag_prefix=capitalized_required_tag_prefix);
+                                                                           tag_prefix=capitalized_required_tag_prefix);
         return validation_warning;
 
     def check_if_multiple_unique_tags_exist(self, original_tag_list, formatted_tag_list):
@@ -578,7 +575,7 @@ class TagValidator:
                 if tag_index == duplicate_index:
                     continue;
                 if formatted_tag_list[tag_index] != TagValidator.TILDE and \
-                    formatted_tag_list[tag_index] == formatted_tag_list[duplicate_index] and \
+                                formatted_tag_list[tag_index] == formatted_tag_list[duplicate_index] and \
                                 tag_index not in duplicate_indices and duplicate_index not in duplicate_indices:
                     duplicate_indices.add(tag_index);
                     duplicate_indices.add(duplicate_index);
@@ -638,21 +635,50 @@ class TagValidator:
         validation_error = '';
         current_tag = '';
         last_non_empty_character = '';
-        for character_index, character in enumerate(hed_string):
+        character_indices_iterator = iter(range(len(hed_string)));
+        for character_index in character_indices_iterator:
+            character = hed_string[character_index];
             current_tag += character;
             if not character.isspace():
                 if TagValidator.character_is_delimiter(character):
                     current_tag = '';
-                if TagValidator.comma_is_missing_before_opening_bracket(last_non_empty_character, character) and not \
+                if character == TagValidator.OPENING_GROUP_BRACKET and \
                         self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
+                    index_after_parentheses = self._get_index_after_parentheses(hed_string, current_tag,
+                                                                                character_index);
+                    character_indices_iterator = self.skip_iterations(character_indices_iterator, character_index,
+                                                                      index_after_parentheses);
+                    current_tag = '';
+                elif TagValidator.comma_is_missing_before_opening_bracket(last_non_empty_character, character):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     break;
-                if TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character) and not \
-                        self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
+                elif TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     break;
                 last_non_empty_character = character;
         return validation_error;
+
+    def skip_iterations(self, iterator, start, end):
+        """Skips a number of iterations based on the start and end index.
+
+        Parameters
+        ----------
+        iterator: iterator
+            A iterator object.
+        start: integer
+            The start position in the iterator to start skipping.
+        end: integer
+            The end position in the iterator to stop skipping.
+        Returns
+        -------
+        iterator
+            An iterator with the iterations skipped.
+
+        """
+        iterations_to_skip = end - start;
+        for iteration in range(iterations_to_skip):
+            next(iterator, None);
+        return iterator;
 
     def _is_valid_tag_with_parentheses(self, hed_string, current_tag, character_index):
         """Checks to see if the current tag with the next set of parentheses in the HED string is valid. Some tags have
@@ -674,12 +700,19 @@ class TagValidator:
         """
         current_tag = current_tag[:-1];
         rest_of_hed_string = hed_string[character_index:];
-        current_tag_with_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(current_tag +
-                                                                                              rest_of_hed_string);
+        current_tag_with_parentheses, _ = TagValidator.get_next_set_of_parentheses_in_hed_string(
+            current_tag + rest_of_hed_string);
         current_tag_with_parentheses = current_tag_with_parentheses.lower();
         if self.tag_takes_value(current_tag_with_parentheses):
             return True;
         return self.tag_is_valid(current_tag_with_parentheses);
+
+    def _get_index_after_parentheses(self, hed_string, current_tag, character_index):
+        current_tag = current_tag[:-1];
+        rest_of_hed_string = hed_string[character_index:];
+        _, parentheses_length = TagValidator.get_next_set_of_parentheses_in_hed_string(current_tag +
+                                                                                       rest_of_hed_string);
+        return parentheses_length;
 
     @staticmethod
     def report_missing_comma_error(error_tag):
@@ -717,7 +750,7 @@ class TagValidator:
 
         """
         return last_non_empty_character and not TagValidator.character_is_delimiter(last_non_empty_character) and \
-            current_character == TagValidator.OPENING_GROUP_BRACKET;
+               current_character == TagValidator.OPENING_GROUP_BRACKET;
 
     @staticmethod
     def comma_is_missing_after_closing_bracket(last_non_empty_character, current_character):
@@ -750,9 +783,11 @@ class TagValidator:
         Returns
         -------
         string
-            The next set of parentheses in the HED string. If not found, then the entire HED string is returned.
+            A tuple containing the next set of parentheses in the HED string and the length of the string in the
+            parentheses. If not found, then the entire HED string is returned.
 
         """
+        parentheses_length = 0;
         set_of_parentheses = '';
         opening_parenthesis_found = False;
         for character in hed_string:
@@ -760,8 +795,9 @@ class TagValidator:
             if character == TagValidator.OPENING_GROUP_BRACKET:
                 opening_parenthesis_found = True;
             if character == TagValidator.CLOSING_GROUP_BRACKET and opening_parenthesis_found:
-                return set_of_parentheses;
-        return set_of_parentheses;
+                return set_of_parentheses, parentheses_length;
+            parentheses_length += 1;
+        return set_of_parentheses, parentheses_length;
 
     @staticmethod
     def character_is_delimiter(character):
@@ -824,3 +860,10 @@ class TagValidator:
         except ValueError:
             return False;
         return True;
+
+
+if __name__ == '__main__':
+    song = ['always', 'look', 'on', 'the', 'bright', 'side', 'of', 'life']
+    song_iter = iter(song)
+    for sing in song_iter:
+        print(sing)
