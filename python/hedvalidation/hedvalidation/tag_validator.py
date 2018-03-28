@@ -644,8 +644,8 @@ class TagValidator:
                     current_tag = '';
                 if character == TagValidator.OPENING_GROUP_BRACKET and \
                         self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
-                    index_after_parentheses = self._get_index_after_parentheses(hed_string, current_tag,
-                                                                                character_index);
+                    index_after_parentheses = self._get_index_at_end_of_parentheses(hed_string, current_tag,
+                                                                                    character_index);
                     character_indices_iterator = self.skip_iterations(character_indices_iterator, character_index,
                                                                       index_after_parentheses);
                     current_tag = '';
@@ -707,7 +707,24 @@ class TagValidator:
             return True;
         return self.tag_is_valid(current_tag_with_parentheses);
 
-    def _get_index_after_parentheses(self, hed_string, current_tag, character_index):
+    def _get_index_at_end_of_parentheses(self, hed_string, current_tag, character_index):
+        """Checks to see if the current tag with the next set of parentheses in the HED string is valid. Some tags have
+           parentheses and this function is implemented to avoid reporting a missing comma error.
+
+        Parameters
+        ----------
+        hed_string: string
+            A HED string.
+        current_tag: string
+            The current tag in the HED string.
+        character_index: integer
+            The index of the current character.
+        Returns
+        -------
+        integer
+            The position at the end of the next set of parentheses.
+
+        """
         current_tag = current_tag[:-1];
         rest_of_hed_string = hed_string[character_index:];
         _, parentheses_length = TagValidator.get_next_set_of_parentheses_in_hed_string(current_tag +
