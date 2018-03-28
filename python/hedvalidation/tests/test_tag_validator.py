@@ -228,18 +228,18 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_error, str);
 
     def test_find_missing_commas_in_hed_string(self):
-        validation_error = self.tag_validator.find_missing_commas_in_hed_string(self.valid_hed_string);
+        validation_error = self.tag_validator.find_comma_issues_in_hed_string(self.valid_hed_string);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
-        validation_error = self.tag_validator.find_missing_commas_in_hed_string(self.missing_comma_hed_string);
+        validation_error = self.tag_validator.find_comma_issues_in_hed_string(self.missing_comma_hed_string);
         self.assertTrue(validation_error);
         self.assertIsInstance(validation_error, str);
         validation_error = \
-            self.tag_validator.find_missing_commas_in_hed_string(self.valid_formatted_tag_with_parentheses);
+            self.tag_validator.find_comma_issues_in_hed_string(self.valid_formatted_tag_with_parentheses);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
         validation_error = \
-            self.tag_validator.find_missing_commas_in_hed_string(self.hed_string_ending_with_parentheses);
+            self.tag_validator.find_comma_issues_in_hed_string(self.hed_string_ending_with_parentheses);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
 
