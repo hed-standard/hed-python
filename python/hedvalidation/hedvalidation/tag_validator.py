@@ -116,7 +116,7 @@ class TagValidator:
          """
         validation_issues = '';
         validation_issues += TagValidator.count_tag_group_brackets(hed_string);
-        validation_issues += self.find_missing_commas_in_hed_string(hed_string);
+        validation_issues += self.find_comma_issues_in_hed_string(hed_string);
         return validation_issues;
 
     def run_tag_level_validators(self, original_tag_list, formatted_tag_list):
@@ -552,6 +552,25 @@ class TagValidator:
                     tag_prefix=self.hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE][unique_tag_prefix]);
         return validation_error;
 
+    def tag_has_unique_prefix(self, tag):
+        """Checks to see if the tag starts with a prefix.
+
+        Parameters
+        ----------
+        tag: string
+            A tag.
+        Returns
+        -------
+        boolean
+            True if the tag starts with a unique prefix. False if otherwise.
+
+        """
+        unique_tag_prefixes = self.hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE];
+        for unique_tag_prefix in unique_tag_prefixes:
+            if tag.lower().startswith(unique_tag_prefix):
+                return True;
+        return False;
+
     def check_if_duplicate_tags_exist(self, original_tag_list, formatted_tag_list):
         """Reports a validation error if two or more tags are the same.
 
@@ -619,8 +638,8 @@ class TagValidator:
             return tag[:end_index]
         return tag;
 
-    def find_missing_commas_in_hed_string(self, hed_string):
-        """Reports a validation error if there are missing commas before and after groups.
+    def find_comma_issues_in_hed_string(self, hed_string):
+        """Reports a validation error if there are missing commas or commas in tags that take values.
 
         Parameters
         ----------
