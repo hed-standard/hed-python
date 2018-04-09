@@ -3,11 +3,6 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 
 Once an experiment is annotated using HED, this HEDTools repository provides a suite of powerful tools for MATLAB and python to extract, search, and combine events based on these annotations. The user manual can be found online at: http://vislab.github.io/HEDTools/. 
 
-
-
-Tools to support event annotation using hierarchical event descriptor (HED) tags. The user manual can be found online at:  [http://vislab.github.io/HEDTools/](http://vislab.github.io/HEDTools/).
-
-
 ### Installation
 
 You can run HEDTools as a standalone toolbox or as a plugin for EEGLAB. In both cases, you should install EEGLAB unless you plan to use HEDTools only to validate tags from spreadsheets.
