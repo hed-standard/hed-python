@@ -60,7 +60,7 @@ class TagValidator:
         self._error_count = 0;
         self._warning_count = 0;
 
-    def increment_validation_issue(self, is_error=True):
+    def _increment_issue_count(self, is_error=True):
         """Increments the validation issue count
 
          Parameters
@@ -934,7 +934,7 @@ class TagValidator:
             validation_error = error_reporter.report_error_type(TagValidator.BRACKET_ERROR_TYPE,
                                                                 opening_bracket_count=number_of_opening_brackets,
                                                                 closing_bracket_count=number_of_closing_brackets);
-            self.increment_validation_issue
+            self._increment_issue_count
         return validation_error;
 
     @staticmethod
