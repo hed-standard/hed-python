@@ -117,6 +117,18 @@ class Test(unittest.TestCase):
         tag_slash_indices = self.tag_validator.get_tag_slash_indices(self.valid_formatted_tag);
         self.assertIsInstance(tag_slash_indices, list);
 
+    def test_get_error_count(self):
+        error_count = self.tag_validator.get_error_count();
+        self.assertEqual(error_count, 0);
+
+    def test_get_warning_count(self):
+        warning_count = self.tag_validator.get_warning_count();
+        self.assertEqual(warning_count, 0);
+
+    def test_get_issue_count(self):
+        issue_count = self.tag_validator.get_issue_count();
+        self.assertEqual(issue_count, 0);
+
     def test_get_tag_substring_by_end_index(self):
         tag_slash_indices = self.tag_validator.get_tag_slash_indices(self.valid_formatted_tag);
         tag = self.tag_validator.get_tag_substring_by_end_index(self.valid_formatted_tag, tag_slash_indices[0]);
