@@ -77,6 +77,20 @@ class HedInputReader:
         self._tag_validator = TagValidator(self._hed_dictionary);
         self.validation_issues = self._validate_hed_input();
 
+    def _get_tag_validator(self):
+        """Gets a TagValidator object.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        TagValidator object
+            A TagValidator object.
+
+        """
+        return self._tag_validator;
+
     def _get_hed_dictionary(self, hed_xml_file):
         """Gets a HEDDictionary object based on the hed xml file specified. If no HED file is specified then the latest
            file will be retrieved.
