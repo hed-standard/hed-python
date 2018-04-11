@@ -37,8 +37,6 @@ class TagValidator:
     DOUBLE_QUOTE = '"';
     COMMA = ',';
     TILDE = '~';
-    hed_dictionary = None;
-    hed_dictionary_dictionaries = None;
 
     def __init__(self, hed_dictionary):
         """Constructor for the Tag_Validator class.
@@ -54,8 +52,8 @@ class TagValidator:
             A Tag_Validator object.
 
         """
-        self.hed_dictionary = hed_dictionary;
-        self.hed_dictionary_dictionaries = hed_dictionary.get_dictionaries();
+        self._hed_dictionary = hed_dictionary;
+        self._hed_dictionary_dictionaries = hed_dictionary.get_dictionaries();
         self._issue_count = 0;
         self._error_count = 0;
         self._warning_count = 0;
@@ -238,7 +236,7 @@ class TagValidator:
         if self.is_extension_allowed_tag(formatted_tag) or self.tag_takes_value(formatted_tag) or \
                 formatted_tag == TagValidator.TILDE:
             pass;
-        elif not self.hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
+        elif not self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
             self._increment_issue_count();
         return validation_error;
@@ -256,7 +254,7 @@ class TagValidator:
             True if the tag is a valid HED tag. False, if otherwise.
 
         """
-        return self.hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag);
+        return self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag);
 
     def check_capitalization(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag isn't correctly capitalized.
@@ -302,8 +300,8 @@ class TagValidator:
         tag_slash_indices = self.get_tag_slash_indices(formatted_tag);
         for tag_slash_index in tag_slash_indices:
             tag_substring = self.get_tag_substring_by_end_index(formatted_tag, tag_slash_index);
-            if self.hed_dictionary.tag_has_attribute(tag_substring,
-                                                     TagValidator.EXTENSION_ALLOWED_ATTRIBUTE):
+            if self._hed_dictionary.tag_has_attribute(tag_substring,
+                                                      TagValidator.EXTENSION_ALLOWED_ATTRIBUTE):
                 return True;
         return False;
 
@@ -321,8 +319,8 @@ class TagValidator:
 
         """
         takes_value_tag = self.replace_tag_name_with_pound(formatted_tag);
-        return self.hed_dictionary.tag_has_attribute(takes_value_tag,
-                                                     TagValidator.TAKES_VALUE_ATTRIBUTE);
+        return self._hed_dictionary.tag_has_attribute(takes_value_tag,
+                                                      TagValidator.TAKES_VALUE_ATTRIBUTE);
 
     def is_unit_class_tag(self, formatted_tag):
         """Checks to see if the tag has the 'unitClass' attribute.
@@ -338,8 +336,8 @@ class TagValidator:
 
         """
         takes_value_tag = self.replace_tag_name_with_pound(formatted_tag);
-        return self.hed_dictionary.tag_has_attribute(takes_value_tag,
-                                                     TagValidator.UNIT_CLASS_ATTRIBUTE);
+        return self._hed_dictionary.tag_has_attribute(takes_value_tag,
+                                                      TagValidator.UNIT_CLASS_ATTRIBUTE);
 
     def replace_tag_name_with_pound(self, formatted_tag):
         """Replaces the tag name with the pound sign.
@@ -451,7 +449,7 @@ class TagValidator:
         unit_classes = [];
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag);
         if self.is_unit_class_tag(formatted_tag):
-            unit_classes = self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
+            unit_classes = self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
             unit_classes = unit_classes.split(',');
         return unit_classes;
 
@@ -472,11 +470,11 @@ class TagValidator:
         units = [];
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag);
         if self.is_unit_class_tag(formatted_tag):
-            unit_classes = self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
+            unit_classes = self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
             unit_classes = unit_classes.split(',');
             for unit_class in unit_classes:
                 try:
-                    units += (self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class]);
+                    units += (self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class]);
                 except:
                     continue;
         return list(map(str.lower, units));
@@ -498,15 +496,15 @@ class TagValidator:
         default_unit = '';
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag);
         if self.is_unit_class_tag(formatted_tag):
-            has_default_attribute = self.hed_dictionary.tag_has_attribute(formatted_tag,
-                                                                          TagValidator.DEFAULT_UNIT_ATTRIBUTE);
+            has_default_attribute = self._hed_dictionary.tag_has_attribute(formatted_tag,
+                                                                           TagValidator.DEFAULT_UNIT_ATTRIBUTE);
             if has_default_attribute:
-                default_unit = self.hed_dictionary_dictionaries[TagValidator.DEFAULT_UNIT_ATTRIBUTE][formatted_tag];
-            elif unit_class_tag in self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE]:
+                default_unit = self._hed_dictionary_dictionaries[TagValidator.DEFAULT_UNIT_ATTRIBUTE][formatted_tag];
+            elif unit_class_tag in self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE]:
                 unit_classes = \
-                    self.hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag].split(',');
+                    self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag].split(',');
                 first_unit_class = unit_classes[0];
-                default_unit = self.hed_dictionary_dictionaries[TagValidator.DEFAULT_UNIT_ATTRIBUTE][first_unit_class];
+                default_unit = self._hed_dictionary_dictionaries[TagValidator.DEFAULT_UNIT_ATTRIBUTE][first_unit_class];
         return default_unit;
 
     def is_numeric_tag(self, formatted_tag):
@@ -525,7 +523,7 @@ class TagValidator:
         last_tag_slash_index = formatted_tag.rfind('/');
         if last_tag_slash_index != -1:
             numeric_tag = formatted_tag[:last_tag_slash_index] + '/#';
-            return self.hed_dictionary.tag_has_attribute(numeric_tag, TagValidator.IS_NUMERIC_ATTRIBUTE);
+            return self._hed_dictionary.tag_has_attribute(numeric_tag, TagValidator.IS_NUMERIC_ATTRIBUTE);
         return False;
 
     def check_number_of_group_tildes(self, tag_group):
@@ -563,7 +561,7 @@ class TagValidator:
 
         """
         validation_error = '';
-        if self.hed_dictionary_dictionaries[TagValidator.REQUIRE_CHILD_ERROR_TYPE].get(formatted_tag):
+        if self._hed_dictionary_dictionaries[TagValidator.REQUIRE_CHILD_ERROR_TYPE].get(formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.REQUIRE_CHILD_ERROR_TYPE,
                                                                 tag=original_tag);
             self._increment_issue_count();
@@ -583,10 +581,10 @@ class TagValidator:
 
         """
         validation_warning = '';
-        required_tag_prefixes = self.hed_dictionary_dictionaries[TagValidator.REQUIRED_ERROR_TYPE];
+        required_tag_prefixes = self._hed_dictionary_dictionaries[TagValidator.REQUIRED_ERROR_TYPE];
         for required_tag_prefix in required_tag_prefixes:
             capitalized_required_tag_prefix = \
-                self.hed_dictionary_dictionaries[TagValidator.REQUIRED_ERROR_TYPE][required_tag_prefix];
+                self._hed_dictionary_dictionaries[TagValidator.REQUIRED_ERROR_TYPE][required_tag_prefix];
             if sum([x.startswith(required_tag_prefix) for x in formatted_top_level_tags]) < 1:
                 validation_warning += warning_reporter.report_warning_type(TagValidator.REQUIRED_ERROR_TYPE,
                                                                            tag_prefix=capitalized_required_tag_prefix);
@@ -609,13 +607,13 @@ class TagValidator:
 
         """
         validation_error = '';
-        unique_tag_prefixes = self.hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE];
+        unique_tag_prefixes = self._hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE];
         for unique_tag_prefix in unique_tag_prefixes:
             unique_tag_prefix_boolean_mask = [x.startswith(unique_tag_prefix) for x in formatted_tag_list];
             if sum(unique_tag_prefix_boolean_mask) > 1:
                 validation_error += error_reporter.report_error_type(
                     TagValidator.UNIQUE_ERROR_TYPE,
-                    tag_prefix=self.hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE][unique_tag_prefix]);
+                    tag_prefix=self._hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE][unique_tag_prefix]);
                 self._increment_issue_count();
         return validation_error;
 
@@ -632,7 +630,7 @@ class TagValidator:
             True if the tag starts with a unique prefix. False if otherwise.
 
         """
-        unique_tag_prefixes = self.hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE];
+        unique_tag_prefixes = self._hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE];
         for unique_tag_prefix in unique_tag_prefixes:
             if tag.lower().startswith(unique_tag_prefix):
                 return True;

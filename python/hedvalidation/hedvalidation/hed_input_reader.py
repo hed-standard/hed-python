@@ -75,7 +75,7 @@ class HedInputReader:
         self._worksheet_name = worksheet_name;
         self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
         self._tag_validator = TagValidator(self._hed_dictionary);
-        self.validation_issues = self._validate_hed_input();
+        self._validation_issues = self._validate_hed_input();
 
     def get_tag_validator(self):
         """Gets a TagValidator object.
@@ -174,7 +174,7 @@ class HedInputReader:
              The issues that were found.
 
          """
-        return self.validation_issues;
+        return self._validation_issues;
 
     def _validate_hed_tags_in_text_file(self, column_delimiter):
         """Validates the HED tags in a text file.
