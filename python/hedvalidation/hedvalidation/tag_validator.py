@@ -56,9 +56,9 @@ class TagValidator:
         """
         self.hed_dictionary = hed_dictionary;
         self.hed_dictionary_dictionaries = hed_dictionary.get_dictionaries();
-        self.validation_issue_count = 0;
-        self.validataion_error_count = 0;
-        self.validation_warning_count = 0;
+        self._issue_count = 0;
+        self._error_count = 0;
+        self._warning_count = 0;
 
     def increment_validation_issue(self, is_error):
         """Increments the validation issue count
@@ -71,11 +71,50 @@ class TagValidator:
          -------
 
          """
-        self.validation_issue_count += 1;
+        self._issue_count += 1;
         if is_error:
-            self.validataion_error_count += 1;
+            self._error_count += 1;
         else:
-            self.validation_warning_count += 1;
+            self._warning_count += 1;
+
+    def get_issue_count(self):
+        """Gets the issue count
+
+         Parameters
+         ----------
+
+         Returns
+         -------
+         integer
+            The issue count
+         """
+        return self._issue_count;
+
+    def get_warning_count(self):
+        """Gets the warning count
+
+         Parameters
+         ----------
+
+         Returns
+         -------
+         integer
+            The warning count
+         """
+        return self._warning_count;
+
+    def get_error_count(self):
+        """Gets the error count
+
+         Parameters
+         ----------
+
+         Returns
+         -------
+         integer
+            The error count
+         """
+        return self._error_count;
 
     def run_individual_tag_validators(self, original_tag, formatted_tag, check_for_warnings=False):
         """Runs the validators on the individual tags in a HED string.
