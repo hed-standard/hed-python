@@ -174,7 +174,7 @@ class TagValidator:
 
          """
         validation_issues = '';
-        validation_issues += self.TagValidator.count_tag_group_brackets(hed_string);
+        validation_issues += self.count_tag_group_brackets(hed_string);
         validation_issues += self.find_comma_issues_in_hed_string(hed_string);
         return validation_issues;
 
