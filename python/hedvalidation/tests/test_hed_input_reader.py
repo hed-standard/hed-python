@@ -146,13 +146,6 @@ class Test(unittest.TestCase):
         original_list_length = len(self.one_based_tag_columns);
         self.assertEqual(original_list_sum - new_list_sum, original_list_length);
 
-    def test_split_delimiter_separated_string_with_quotes(self):
-        split_string = HedInputReader.split_delimiter_separated_string_with_quotes(
-            self.comma_separated_string_with_double_quotes,
-            self.comma_delimiter);
-        self.assertIsInstance(split_string, list);
-        self.assertEqual(split_string, self.comma_delimited_list_with_double_quotes);
-
     def test_prepend_prefix_to_required_tag_column_if_needed(self):
         prepended_hed_string = self.generic_hed_input_reader.prepend_prefix_to_required_tag_column_if_needed(
             self.category_tags, self.category_key);
