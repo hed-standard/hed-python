@@ -77,7 +77,7 @@ class HedInputReader:
         self._tag_validator = TagValidator(self._hed_dictionary);
         self.validation_issues = self._validate_hed_input();
 
-    def _get_tag_validator(self):
+    def get_tag_validator(self):
         """Gets a TagValidator object.
 
         Parameters
