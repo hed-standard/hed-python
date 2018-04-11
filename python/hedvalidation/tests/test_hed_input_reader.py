@@ -118,12 +118,6 @@ class Test(unittest.TestCase):
         validation_issues = self.generic_hed_input_reader.get_validation_issues();
         self.assertIsInstance(validation_issues, str);
 
-    def test_get_delimiter_from_text_file_extension(self):
-        text_file_extension = HedInputReader.get_file_extension(self.text_file_with_extension)
-        text_file_delimiter = HedInputReader.get_delimiter_from_text_file_extension(text_file_extension);
-        self.assertIsInstance(text_file_delimiter, str);
-        self.assertEqual(text_file_delimiter, HedInputReader.TAB_DELIMITER);
-
     def test_get_file_extension(self):
         file_extension = HedInputReader.get_file_extension(self.text_file_with_extension);
         self.assertIsInstance(file_extension, str);
