@@ -118,15 +118,18 @@ class Test(unittest.TestCase):
         self.assertIsInstance(tag_slash_indices, list);
 
     def test_get_error_count(self):
-        error_count = self.tag_validator.get_error_count();
+        tag_validator = TagValidator(self.hed_dictionary);
+        error_count = tag_validator.get_error_count();
         self.assertEqual(error_count, 0);
 
     def test_get_warning_count(self):
-        warning_count = self.tag_validator.get_warning_count();
+        tag_validator = TagValidator(self.hed_dictionary);
+        warning_count = tag_validator.get_warning_count();
         self.assertEqual(warning_count, 0);
 
     def test_get_issue_count(self):
-        issue_count = self.tag_validator.get_issue_count();
+        tag_validator = TagValidator(self.hed_dictionary);
+        issue_count = tag_validator.get_issue_count();
         self.assertEqual(issue_count, 0);
 
     def test_get_tag_substring_by_end_index(self):
@@ -232,10 +235,10 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_error, str);
 
     def test_count_tag_group_brackets(self):
-        validation_error = TagValidator.count_tag_group_brackets(self.valid_hed_string);
+        validation_error = self.tag_validator.count_tag_group_brackets(self.valid_hed_string);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
-        validation_error = TagValidator.count_tag_group_brackets(self.invalid_hed_string);
+        validation_error = self.tag_validator.count_tag_group_brackets(self.invalid_hed_string);
         self.assertTrue(validation_error);
         self.assertIsInstance(validation_error, str);
 
