@@ -1,6 +1,6 @@
 '''
 This module contains the HedInputReader class which is used to validate the tags in a HED string or a file. The file
-types include .tsv, .txt, .csv, .xls, and .xlsx. To get the validation issues after creating a HedInputReader class call
+types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after creating a HedInputReader class call
 the get_validation_issues() function.
 
 Created on Oct 2, 2017
@@ -21,10 +21,9 @@ from distutils.version import StrictVersion;
 
 class HedInputReader:
     TSV_EXTENSION = ['tsv', 'txt'];
-    CSV_EXTENSION = ['csv'];
     EXCEL_EXTENSION = ['xls', 'xlsx'];
-    FILE_EXTENSION = ['csv', 'tsv', 'txt', 'xls', 'xlsx'];
-    TEXT_EXTENSION = ['csv', 'tsv', 'txt'];
+    FILE_EXTENSION = ['tsv', 'txt', 'xls', 'xlsx'];
+    TEXT_EXTENSION = ['tsv', 'txt'];
     STRING_INPUT = 'string';
     FILE_INPUT = 'file';
     TAB_DELIMITER = '\t';
@@ -145,8 +144,7 @@ class HedInputReader:
          """
         file_extension = HedInputReader.get_file_extension(self._hed_input);
         if HedInputReader.file_is_a_text_file(file_extension):
-            column_delimiter = HedInputReader.get_delimiter_from_text_file_extension(file_extension);
-            validation_issues = self._validate_hed_tags_in_text_file(column_delimiter);
+            validation_issues = self._validate_hed_tags_in_text_file(HedInputReader.TAB_DELIMITER);
         else:
             validation_issues = self._validate_hed_tags_in_excel_worksheet();
         return validation_issues;
@@ -527,28 +525,6 @@ class HedInputReader:
         return hed_input_has_extension and hed_input_file_extension in HedInputReader.FILE_EXTENSION;
 
     @staticmethod
-    def get_delimiter_from_text_file_extension(file_extension):
-        """Gets the delimiter that is associated with the file extension.
-
-        Parameters
-        ----------
-        file_extension: string
-            A file extension.
-        Returns
-        -------
-        string
-            The delimiter that is associated with the file extension. For example, .txt and .tsv will return tab
-            as the delimiter and .csv will return comma as the delimiter.
-
-        """
-        delimiter = '';
-        if file_extension in HedInputReader.TSV_EXTENSION:
-            delimiter = HedInputReader.TAB_DELIMITER;
-        elif file_extension in HedInputReader.CSV_EXTENSION:
-            delimiter = HedInputReader.COMMA_DELIMITER;
-        return delimiter;
-
-    @staticmethod
     def open_workbook_worksheet(workbook_path, worksheet_name=''):
         """Opens an Excel workbook worksheet.
 
@@ -586,7 +562,7 @@ class HedInputReader:
             A HED string containing the concatenated HED tag columns.
 
         """
-        text_file_row = HedInputReader.split_delimiter_separated_string_with_quotes(text_file_row, column_delimiter);
+        text_file_row = [x.strip() for x in text_file_row.split(column_delimiter)];
         row_column_count = len(text_file_row);
         self._tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
                                                                                             self._tag_columns);
@@ -691,36 +667,6 @@ class HedInputReader:
                 required_tags_with_prefix.append(required_tag);
             return ','.join(required_tags_with_prefix);
         return required_tag_prefix + required_tag_column_tags;
-
-    @staticmethod
-    def split_delimiter_separated_string_with_quotes(delimiter_separated_string, delimiter):
-        """Splits a comma separated-string.
-
-        Parameters
-        ----------
-        delimiter_separated_string
-            A delimiter separated string.
-        delimiter
-            A delimiter used to split the string.
-        Returns
-        -------
-        list
-            A list containing the individual tags and tag groups in the HED string. Nested tag groups are not split.
-
-        """
-        split_string = [];
-        number_of_double_quotes = 0;
-        current_tag = '';
-        for character in delimiter_separated_string:
-            if character == HedStringDelimiter.DOUBLE_QUOTE_CHARACTER:
-                number_of_double_quotes += 1;
-            elif number_of_double_quotes % 2 == 0 and character == delimiter:
-                split_string.append(current_tag.strip());
-                current_tag = '';
-            else:
-                current_tag += character;
-        split_string.append(current_tag.strip());
-        return split_string;
 
     @staticmethod
     def subtract_1_from_list_elements(integer_list):
