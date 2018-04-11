@@ -56,6 +56,26 @@ class TagValidator:
         """
         self.hed_dictionary = hed_dictionary;
         self.hed_dictionary_dictionaries = hed_dictionary.get_dictionaries();
+        self.validation_issue_count = 0;
+        self.validataion_error_count = 0;
+        self.validation_warning_count = 0;
+
+    def increment_validation_issue(self, is_error):
+        """Increments the validation issue count
+
+         Parameters
+         ----------
+         is_error: boolean
+            True if the issue is an error, False if it is not.
+         Returns
+         -------
+
+         """
+        self.validation_issue_count += 1;
+        if is_error:
+            self.validataion_error_count += 1;
+        else:
+            self.validation_warning_count += 1;
 
     def run_individual_tag_validators(self, original_tag, formatted_tag, check_for_warnings=False):
         """Runs the validators on the individual tags in a HED string.
@@ -177,7 +197,7 @@ class TagValidator:
         """
         validation_error = '';
         if self.is_extension_allowed_tag(formatted_tag) or self.tag_takes_value(formatted_tag) or \
-                        formatted_tag == TagValidator.TILDE:
+                formatted_tag == TagValidator.TILDE:
             pass;
         elif not self.hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
@@ -594,8 +614,8 @@ class TagValidator:
                 if tag_index == duplicate_index:
                     continue;
                 if formatted_tag_list[tag_index] != TagValidator.TILDE and \
-                                formatted_tag_list[tag_index] == formatted_tag_list[duplicate_index] and \
-                                tag_index not in duplicate_indices and duplicate_index not in duplicate_indices:
+                        formatted_tag_list[tag_index] == formatted_tag_list[duplicate_index] and \
+                        tag_index not in duplicate_indices and duplicate_index not in duplicate_indices:
                     duplicate_indices.add(tag_index);
                     duplicate_indices.add(duplicate_index);
                     validation_error += error_reporter.report_error_type(TagValidator.DUPLICATE_ERROR_TYPE,
