@@ -240,6 +240,7 @@ class TagValidator:
             pass;
         elif not self.hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
+            self._increment_issue_count();
         return validation_error;
 
     def tag_is_valid(self, formatted_tag):
@@ -280,6 +281,7 @@ class TagValidator:
             correct_tag_name = tag_name.capitalize();
             if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
                 validation_warning = warning_reporter.report_warning_type("cap", tag=original_tag);
+                self._increment_issue_count(is_error=False);
                 break;
         return validation_warning;
 
@@ -385,6 +387,7 @@ class TagValidator:
                     not tag_unit_values.endswith(tag_unit_class_units):
                 validation_error = error_reporter.report_error_type('unitClass', tag=original_tag,
                                                                     unit_class_units=','.join(tag_unit_class_units));
+                self._increment_issue_count();
         return validation_error;
 
     def check_if_tag_unit_class_units_exist(self, original_tag, formatted_tag):
@@ -409,6 +412,7 @@ class TagValidator:
                 default_unit = self.get_unit_class_default_unit(formatted_tag);
                 validation_warning = warning_reporter.report_warning_type('unitClass', tag=original_tag,
                                                                           default_unit=default_unit);
+                self._increment_issue_count(is_error=False);
         return validation_warning;
 
     def get_tag_name(self, tag):
@@ -540,6 +544,7 @@ class TagValidator:
         validation_error = '';
         if tag_group.count('~') > 2:
             validation_error = error_reporter.report_error_type(TagValidator.TILDE_ERROR_TYPE, tag_group);
+            self._increment_issue_count();
         return validation_error;
 
     def check_if_tag_requires_child(self, original_tag, formatted_tag):
@@ -561,6 +566,7 @@ class TagValidator:
         if self.hed_dictionary_dictionaries[TagValidator.REQUIRE_CHILD_ERROR_TYPE].get(formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.REQUIRE_CHILD_ERROR_TYPE,
                                                                 tag=original_tag);
+            self._increment_issue_count();
         return validation_error;
 
     def check_for_required_tags(self, formatted_top_level_tags):
@@ -584,6 +590,7 @@ class TagValidator:
             if sum([x.startswith(required_tag_prefix) for x in formatted_top_level_tags]) < 1:
                 validation_warning += warning_reporter.report_warning_type(TagValidator.REQUIRED_ERROR_TYPE,
                                                                            tag_prefix=capitalized_required_tag_prefix);
+                self._increment_issue_count(is_error=False);
         return validation_warning;
 
     def check_if_multiple_unique_tags_exist(self, original_tag_list, formatted_tag_list):
@@ -609,6 +616,7 @@ class TagValidator:
                 validation_error += error_reporter.report_error_type(
                     TagValidator.UNIQUE_ERROR_TYPE,
                     tag_prefix=self.hed_dictionary_dictionaries[TagValidator.UNIQUE_ERROR_TYPE][unique_tag_prefix]);
+                self._increment_issue_count();
         return validation_error;
 
     def tag_has_unique_prefix(self, tag):
@@ -659,6 +667,7 @@ class TagValidator:
                     duplicate_indices.add(duplicate_index);
                     validation_error += error_reporter.report_error_type(TagValidator.DUPLICATE_ERROR_TYPE,
                                                                          tag=original_tag_list[tag_index]);
+                    self._increment_issue_count();
         return validation_error;
 
     def get_tag_slash_indices(self, tag, slash='/'):
@@ -729,9 +738,11 @@ class TagValidator:
                     current_tag = '';
                 elif TagValidator.comma_is_missing_before_opening_bracket(last_non_empty_character, character):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
+                    self._increment_issue_count();
                     break;
                 elif TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
+                    self._increment_issue_count();
                     break;
                 last_non_empty_character = character;
         return validation_error;
@@ -912,7 +923,6 @@ class TagValidator:
             return True;
         return False;
 
-    @staticmethod
     def count_tag_group_brackets(self, hed_string):
         """Reports a validation error if there are an unequal number of opening or closing parentheses. This is the
          first check before the tags are parsed.
