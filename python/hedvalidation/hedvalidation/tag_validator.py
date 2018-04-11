@@ -174,7 +174,7 @@ class TagValidator:
 
          """
         validation_issues = '';
-        validation_issues += TagValidator.count_tag_group_brackets(hed_string);
+        validation_issues += self.TagValidator.count_tag_group_brackets(hed_string);
         validation_issues += self.find_comma_issues_in_hed_string(hed_string);
         return validation_issues;
 
@@ -913,7 +913,7 @@ class TagValidator:
         return False;
 
     @staticmethod
-    def count_tag_group_brackets(hed_string):
+    def count_tag_group_brackets(self, hed_string):
         """Reports a validation error if there are an unequal number of opening or closing parentheses. This is the
          first check before the tags are parsed.
 
@@ -934,7 +934,7 @@ class TagValidator:
             validation_error = error_reporter.report_error_type(TagValidator.BRACKET_ERROR_TYPE,
                                                                 opening_bracket_count=number_of_opening_brackets,
                                                                 closing_bracket_count=number_of_closing_brackets);
-            self._increment_issue_count
+            self._increment_issue_count();
         return validation_error;
 
     @staticmethod
