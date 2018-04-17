@@ -80,6 +80,12 @@ class Test(unittest.TestCase):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.valid_original_tag, self.valid_formatted_tag);
         self.assertIsInstance(validation_error, str);
         self.assertFalse(validation_error);
+        validation_error = self.tag_validator.check_if_tag_is_valid(
+            self.invalid_original_tag, self.invalid_formatted_tag, previous_original_tag=self.valid_takes_value_tag,
+            previous_formatted_tag=self.valid_takes_value_tag);
+        print(validation_error)
+        self.assertIsInstance(validation_error, str);
+        self.assertTrue(validation_error);
 
     def test_check_if_tag_requires_child(self):
         validation_error = self.tag_validator.check_if_tag_requires_child(self.required_child_tag,
