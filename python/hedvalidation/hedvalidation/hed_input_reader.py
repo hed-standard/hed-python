@@ -424,12 +424,37 @@ class HedInputReader:
         validation_issues = '';
         tag_set = hed_string_delimiter.get_tags();
         formatted_tag_set = hed_string_delimiter.get_formatted_tags();
-        original_and_formatted_tags = zip(tag_set, formatted_tag_set);
-        for original_tag, formatted_tag in original_and_formatted_tags:
+        original_and_formatted_tags = list(zip(tag_set, formatted_tag_set));
+        for index, (original_tag, formatted_tag) in enumerate(original_and_formatted_tags):
+            previous_original_tag, previous_formatted_tag = HedInputReader.get_previous_original_and_formatted_tag(
+                original_and_formatted_tags, index);
             validation_issues += \
                 self._tag_validator.run_individual_tag_validators(original_tag, formatted_tag,
                                                                   check_for_warnings=self._check_for_warnings);
         return validation_issues;
+
+    @staticmethod
+    def get_previous_original_and_formatted_tag(original_and_formatted_tags, loop_index):
+        """Retrieves the previous original and formatted tag from a list of tuples.
+
+         Parameters
+         ----------
+        original_and_formatted_tags: list
+            A list of tuples containing the original and formatted tags.
+        loop_index: int
+            The current index in the loop.
+         Returns
+         -------
+         tuple
+             A tuple containing the previous original and formatted tag.
+
+         """
+        previous_original_tag = '';
+        previous_formatted_tag = '';
+        if loop_index > 0:
+            previous_original_tag = original_and_formatted_tags[loop_index - 1][0];
+            previous_formatted_tag = original_and_formatted_tags[loop_index - 1][1];
+        return previous_original_tag, previous_formatted_tag;
 
     @staticmethod
     def add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns):
