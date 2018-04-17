@@ -16,6 +16,7 @@ from hedvalidation import warning_reporter;
 class TagValidator:
     BRACKET_ERROR_TYPE = 'bracket';
     COMMA_ERROR_TYPE = 'comma';
+    COMMA_VALID_ERROR_TYPE = 'commaValid';
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+';
     DEFAULT_UNIT_ATTRIBUTE = 'default';
     DIGIT_EXPRESSION = r'^\d+$';
@@ -114,7 +115,8 @@ class TagValidator:
          """
         return self._error_count;
 
-    def run_individual_tag_validators(self, original_tag, formatted_tag, check_for_warnings=False):
+    def run_individual_tag_validators(self, original_tag, formatted_tag, previous_original_tag='',
+                                      previous_formatted_tag='', check_for_warnings=False):
         """Runs the validators on the individual tags in a HED string.
 
          Parameters
@@ -132,7 +134,8 @@ class TagValidator:
 
          """
         validation_issues = '';
-        validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag);
+        validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag, previous_original_tag,
+                                                        previous_formatted_tag);
         validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
         validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag);
         if check_for_warnings:
@@ -217,7 +220,7 @@ class TagValidator:
             validation_issues += self.check_for_required_tags(formatted_top_level_tags);
         return validation_issues;
 
-    def check_if_tag_is_valid(self, original_tag, formatted_tag):
+    def check_if_tag_is_valid(self, original_tag, formatted_tag, previous_original_tag='', previous_formatted_tag=''):
         """Reports a validation error if the tag provided is not a valid tag or doesn't take a value.
 
         Parameters
@@ -226,6 +229,10 @@ class TagValidator:
             The original tag that is used to report the error.
         formatted_tag: string
             The tag that is used to do the validation.
+        previous_original_tag: string
+            The previous original tag that is used to report the error.
+        previous_formatted_tag: string
+            The previous tag that is used to do the validation.
         Returns
         -------
         string
@@ -237,7 +244,12 @@ class TagValidator:
                 formatted_tag == TagValidator.TILDE:
             pass;
         elif not self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
-            validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
+            if self.tag_takes_value(previous_formatted_tag):
+                validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
+                                                                    tag=original_tag,
+                                                                    previous_tag=previous_original_tag);
+            else:
+                validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
             self._increment_issue_count();
         return validation_error;
 
