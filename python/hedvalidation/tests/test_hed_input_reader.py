@@ -37,6 +37,8 @@ class Test(unittest.TestCase):
         cls.column_to_hed_tags_dictionary = {};
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2'];
         cls.row_hed_tag_columns = [1, 2];
+        cls.original_and_formatted_tag = [('Event/Label/Test', 'event/label/test'),
+                                          ('Event/Description/Test', 'event/description/test')];
 
     def test__convert_tag_columns_to_processing_format(self):
         processing_tag_columns = self.generic_hed_input_reader._convert_tag_columns_to_processing_format(
@@ -187,6 +189,13 @@ class Test(unittest.TestCase):
         self.assertTrue(hed_string)
         self.assertIsInstance(column_to_hed_tags_dictionary, dict);
         self.assertTrue(column_to_hed_tags_dictionary);
+
+    def test_get_previous_original_and_formatted_tag(self):
+        loop_index = 1;
+        previous_original_tag, previous_formatted_tag = HedInputReader.get_previous_original_and_formatted_tag(
+            self.original_and_formatted_tag, loop_index);
+        self.assertEqual(previous_original_tag, self.original_and_formatted_tag[0][0]);
+        self.assertEqual(previous_formatted_tag, self.original_and_formatted_tag[0][1])
 
 
 if __name__ == '__main__':
