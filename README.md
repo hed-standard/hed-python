@@ -38,6 +38,11 @@ N. Bigdely-Shamlo, J. Cockfield, S. Makeig, T. Rognon, C. LaValle, M. Miyakoshi,
 N. Bigdely-Shamlo, S. Makeig, and K. Robbins (2016). Preparing laboratory and real-world EEG data for large-scale analysis: A containerized approach, Frontiers in Neuroinformatics 1 08 March 2016 | http://dx.doi.org/10.3389/fninf.2016.00007. PMID: 27014048, PMCID: PMC4782059.
 
 ### Releases
+Version 2.3.0 Released 5/14/2018
+* HEDTools is distributed with HED schema 7.0.1.
+* HEDTools validation checks for duplicate tags and comma errors.
+* Refactored validation code. 
+
 Version 2.2.0 Released 1/18/2018
 * HEDTools validation functions accept time unit class tags.
 * Tags with parentheses no longer report a missing comma error.
