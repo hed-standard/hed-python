@@ -147,7 +147,7 @@ class TagValidator:
             validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
             validation_issues += self.check_capitalization(original_tag, formatted_tag);
         if self._leaf_extensions:
-            pass
+            validation_issues += self.check_if_tag_is_leaf_extension(original_tag, formatted_tag);
         return validation_issues;
 
     def run_tag_group_validators(self, tag_group):
@@ -269,7 +269,7 @@ class TagValidator:
         validation_error = '';
         if self.is_extension_allowed_tag(formatted_tag) or self.tag_takes_value(formatted_tag) or \
                 formatted_tag == TagValidator.TILDE:
-            self.check_if_tag_is_leaf_extension(original_tag, formatted_tag)
+            pass;
         elif not self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
             if self.tag_takes_value(previous_formatted_tag):
                 validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
