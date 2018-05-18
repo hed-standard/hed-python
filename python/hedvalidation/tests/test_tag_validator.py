@@ -71,6 +71,10 @@ class Test(unittest.TestCase):
         cls.invalid_formatted_duplicate_tag_list = ['item/2D shape/sector', 'attribute/visual/color/red',
                                                     'attribute/visual/color/red'];
         cls.hed_string_ending_with_parentheses = 'Event/Description/Correct to respond to the stimulus (Button Down)';
+        cls.valid_leaf_extension_tag = 'Attribute/Role';
+        cls.valid_formatted_leaf_extension_tag = 'attribute/role';
+        cls.invalid_leaf_extension_tag = 'Attribute/Character Role/White Mage';
+        cls.invalid_formatted_leaf_extension_tag = 'attribute/character role/white mage';
 
     def test_check_if_tag_is_valid(self):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
@@ -321,6 +325,16 @@ class Test(unittest.TestCase):
         self.assertFalse(validation_error);
         validation_error = self.tag_validator.check_if_duplicate_tags_exist(
             self.invalid_original_duplicate_tag_list, self.invalid_formatted_duplicate_tag_list);
+        self.assertIsInstance(validation_error, str);
+        self.assertTrue(validation_error);
+
+    def test_check_if_tag_is_leaf_extension(self):
+        validation_error = self.tag_validator.check_if_tag_is_leaf_extension(self.valid_leaf_extension_tag,
+                                                                             self.valid_formatted_leaf_extension_tag);
+        self.assertIsInstance(validation_error, str);
+        self.assertFalse(validation_error);
+        validation_error = self.tag_validator.check_if_tag_is_leaf_extension(self.invalid_leaf_extension_tag,
+                                                                             self.invalid_formatted_leaf_extension_tag);
         self.assertIsInstance(validation_error, str);
         self.assertTrue(validation_error);
 
