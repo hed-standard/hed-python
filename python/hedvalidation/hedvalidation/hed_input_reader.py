@@ -37,7 +37,7 @@ class HedInputReader:
     HED_XML_EXTENSION = '.xml';
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name='', hed_xml_file='', leaf_extensions=''):
+                 required_tag_columns={}, worksheet_name='', hed_xml_file='', leaf_extensions=False):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -71,10 +71,10 @@ class HedInputReader:
         self._required_tag_columns = HedInputReader.subtract_1_from_dictionary_keys(required_tag_columns);
         self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns);
         self._has_column_names = has_column_names;
-        self._check_for_warnings = check_for_warnings;
         self._worksheet_name = worksheet_name;
         self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
-        self._tag_validator = TagValidator(self._hed_dictionary);
+        self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings,
+                                           leaf_extensions=leaf_extensions);
         self._validation_issues = self._validate_hed_input();
 
     def get_tag_validator(self):
@@ -383,8 +383,7 @@ class HedInputReader:
          """
         validation_issues = '';
         formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags();
-        validation_issues += self._tag_validator.run_top_level_validators(
-            formatted_top_level_tags, check_for_warnings=self._check_for_warnings);
+        validation_issues += self._tag_validator.run_top_level_validators(formatted_top_level_tags);
         return validation_issues;
 
     def _validate_groups_in_hed_string(self, hed_string_delimiter):
@@ -431,8 +430,7 @@ class HedInputReader:
             validation_issues += \
                 self._tag_validator.run_individual_tag_validators(original_tag, formatted_tag,
                                                                   previous_original_tag=previous_original_tag,
-                                                                  previous_formatted_tag=previous_formatted_tag,
-                                                                  check_for_warnings=self._check_for_warnings);
+                                                                  previous_formatted_tag=previous_formatted_tag);
         return validation_issues;
 
     @staticmethod
