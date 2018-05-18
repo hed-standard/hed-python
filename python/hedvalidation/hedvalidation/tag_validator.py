@@ -39,7 +39,7 @@ class TagValidator:
     COMMA = ',';
     TILDE = '~';
 
-    def __init__(self, hed_dictionary):
+    def __init__(self, hed_dictionary, check_for_warnings=False):
         """Constructor for the Tag_Validator class.
 
         Parameters
@@ -55,6 +55,7 @@ class TagValidator:
         """
         self._hed_dictionary = hed_dictionary;
         self._hed_dictionary_dictionaries = hed_dictionary.get_dictionaries();
+        self._check_for_warnings = check_for_warnings;
         self._issue_count = 0;
         self._error_count = 0;
         self._warning_count = 0;
