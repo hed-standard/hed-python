@@ -37,7 +37,7 @@ class HedInputReader:
     HED_XML_EXTENSION = '.xml';
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name='', hed_xml_file='', leaf_extensions=False):
+                 required_tag_columns={}, worksheet_name='', hed_xml_file='', leaf_extensions=''):
         """Constructor for the HedInputReader class.
 
         Parameters

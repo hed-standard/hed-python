@@ -39,7 +39,7 @@ class TagValidator:
     COMMA = ',';
     TILDE = '~';
 
-    def __init__(self, hed_dictionary, check_for_warnings=False):
+    def __init__(self, hed_dictionary):
         """Constructor for the Tag_Validator class.
 
         Parameters
@@ -55,7 +55,6 @@ class TagValidator:
         """
         self._hed_dictionary = hed_dictionary;
         self._hed_dictionary_dictionaries = hed_dictionary.get_dictionaries();
-        self._check_for_warnings = check_for_warnings;
         self._issue_count = 0;
         self._error_count = 0;
         self._warning_count = 0;
@@ -117,7 +116,7 @@ class TagValidator:
         return self._error_count;
 
     def run_individual_tag_validators(self, original_tag, formatted_tag, previous_original_tag='',
-                                      previous_formatted_tag=''):
+                                      previous_formatted_tag='', check_for_warnings=False):
         """Runs the validators on the individual tags in a HED string.
 
          Parameters
@@ -126,20 +125,26 @@ class TagValidator:
             A original tag.
          formatted_tag: string
             A format tag.
+         check_for_warnings: boolean
+            True, if to include issues found from the warning validators. False, if otherwise.
          Returns
          -------
          string
              The validation issues associated with the top-level in the HED string.
 
          """
-        validation_issues = self.check_if_tag_is_valid(original_tag, formatted_tag, previous_original_tag,
-                                                       previous_formatted_tag);
+        validation_issues = '';
+        validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag, previous_original_tag,
+                                                        previous_formatted_tag);
         validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
         validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag);
+        if check_for_warnings:
+            validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
+            validation_issues += self.check_capitalization(original_tag, formatted_tag);
         return validation_issues;
 
-    def run_tag_group_error_validators(self, tag_group):
-        """Runs the error validators on the groups in a HED string.
+    def run_tag_group_validators(self, tag_group):
+        """Runs the validators on the groups in a HED string.
 
          Parameters
          ----------
@@ -151,11 +156,13 @@ class TagValidator:
              The validation issues associated with the groups in a HED string.
 
          """
-        return self.check_number_of_group_tildes(tag_group);
+        validation_issues = '';
+        validation_issues += self.check_number_of_group_tildes(tag_group);
+        return validation_issues;
 
-    def run_hed_string_error_validators(self, hed_string):
-        """Runs the error validators on the HED string. If this is passed then all the other validators are run on the
-           tags and groups in the HED string.
+    def run_hed_string_validators(self, hed_string):
+        """Runs the validators on the HED string. If this is passed then all the other validators are run on the tags
+           and groups in the HED string.
 
          Parameters
          ----------
@@ -167,12 +174,13 @@ class TagValidator:
              The validation issues associated with a HED string.
 
          """
-        validation_issues = self.count_tag_group_brackets(hed_string);
+        validation_issues = '';
+        validation_issues += self.count_tag_group_brackets(hed_string);
         validation_issues += self.find_comma_issues_in_hed_string(hed_string);
         return validation_issues;
 
-    def run_tag_level_error_validators(self, original_tag_list, formatted_tag_list):
-        """Runs the error validators on tags at each level in a HED string. This pertains to the top-level, all groups,
+    def run_tag_level_validators(self, original_tag_list, formatted_tag_list):
+        """Runs the validators on tags at each level in a HED string. This pertains to the top-level, all groups,
            and nested groups.
 
          Parameters
@@ -187,12 +195,13 @@ class TagValidator:
              The validation issues associated with each level in a HED string.
 
          """
-        validation_issues = self.check_if_multiple_unique_tags_exist(original_tag_list, formatted_tag_list);
+        validation_issues = '';
+        validation_issues += self.check_if_multiple_unique_tags_exist(original_tag_list, formatted_tag_list);
         validation_issues += self.check_if_duplicate_tags_exist(original_tag_list, formatted_tag_list);
         return validation_issues;
 
-    def run_top_level_error_validators(self, formatted_top_level_tags, check_for_warnings=False):
-        """Runs the error validators on tags at the top-level in a HED string.
+    def run_top_level_validators(self, formatted_top_level_tags, check_for_warnings=False):
+        """Runs the validators on tags at the top-level in a HED string.
 
          Parameters
          ----------
@@ -209,42 +218,6 @@ class TagValidator:
         validation_issues = '';
         if check_for_warnings:
             validation_issues += self.check_for_required_tags(formatted_top_level_tags);
-        return validation_issues;
-
-    def run_top_level_warning_validators(self, formatted_top_level_tags):
-        """Runs the warning validators on tags at the top-level in a HED string.
-
-         Parameters
-         ----------
-         formatted_top_level_tags: list
-            A list containing the top-level tags in a HED string.
-         Returns
-         -------
-         string
-             The validation issues associated with the top-level in a HED string.
-
-         """
-        return self.check_for_required_tags(formatted_top_level_tags);
-
-    def run_individual_tag_warning_validators(self, original_tag, formatted_tag):
-        """Runs the warning validators on the individual tags in a HED string.
-
-         Parameters
-         ----------
-         original_tag: string
-            A original tag.
-         formatted_tag: string
-            A format tag.
-         check_for_warnings: boolean
-            True, if to include issues found from the warning validators. False, if otherwise.
-         Returns
-         -------
-         string
-             The validation issues associated with the top-level in the HED string.
-
-         """
-        validation_issues = self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
-        validation_issues += self.check_capitalization(original_tag, formatted_tag);
         return validation_issues;
 
     def check_if_tag_is_valid(self, original_tag, formatted_tag, previous_original_tag='', previous_formatted_tag=''):
