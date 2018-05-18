@@ -26,6 +26,7 @@ class TagValidator:
     TILDE_ERROR_TYPE = 'tilde';
     TIME_UNIT_CLASS = 'time';
     UNIQUE_ERROR_TYPE = 'unique';
+    LEAF_EXTENSION_ERROR_TYPE = 'leafExtension';
     DUPLICATE_ERROR_TYPE = 'duplicate';
     VALID_ERROR_TYPE = 'valid';
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed';
@@ -145,6 +146,8 @@ class TagValidator:
         if self._check_for_warnings:
             validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
             validation_issues += self.check_capitalization(original_tag, formatted_tag);
+        if self._leaf_extensions:
+            pass
         return validation_issues;
 
     def run_tag_group_validators(self, tag_group):
@@ -222,6 +225,28 @@ class TagValidator:
             validation_issues += self.check_for_required_tags(formatted_top_level_tags);
         return validation_issues;
 
+    def check_if_tag_is_leaf_extension(self, original_tag, formatted_tag):
+        """Reports a validation error if the tag provided is not a valid leaf extension.
+
+        Parameters
+        ----------
+        original_tag: string
+            The original tag that is used to report the error.
+        formatted_tag: string
+            The tag that is used to do the validation.
+        Returns
+        -------
+        string
+            A validation error string. If no errors are found then an empty string is returned.
+
+        """
+        validation_error = '';
+        if self.is_extension_allowed_tag(formatted_tag) and not self.is_leaf_extension_allowed_tag(formatted_tag):
+            validation_error = error_reporter.report_error_type(TagValidator.LEAF_EXTENSION_ERROR_TYPE,
+                                                                tag=original_tag);
+            self._increment_issue_count();
+        return validation_error;
+
     def check_if_tag_is_valid(self, original_tag, formatted_tag, previous_original_tag='', previous_formatted_tag=''):
         """Reports a validation error if the tag provided is not a valid tag or doesn't take a value.
 
@@ -244,7 +269,7 @@ class TagValidator:
         validation_error = '';
         if self.is_extension_allowed_tag(formatted_tag) or self.tag_takes_value(formatted_tag) or \
                 formatted_tag == TagValidator.TILDE:
-            pass;
+            self.check_if_tag_is_leaf_extension(original_tag, formatted_tag)
         elif not self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
             if self.tag_takes_value(previous_formatted_tag):
                 validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
@@ -317,6 +342,26 @@ class TagValidator:
             if self._hed_dictionary.tag_has_attribute(tag_substring,
                                                       TagValidator.EXTENSION_ALLOWED_ATTRIBUTE):
                 return True;
+        return False;
+
+    def is_leaf_extension_allowed_tag(self, formatted_tag):
+        """Checks to see if the parent of the tag has the 'extensionAllowed' attribute.
+
+        Parameters
+        ----------
+        formatted_tag: string
+            The tag that is used to do the validation.
+        Returns
+        -------
+        boolean
+            True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
+
+        """
+        tag_slash_indices = self.get_tag_slash_indices(formatted_tag);
+        tag_slash_index = tag_slash_indices[-1];
+        tag_substring = self.get_tag_substring_by_end_index(formatted_tag, tag_slash_index);
+        if self._hed_dictionary.tag_has_attribute(tag_substring, TagValidator.EXTENSION_ALLOWED_ATTRIBUTE):
+            return True;
         return False;
 
     def tag_takes_value(self, formatted_tag):
