@@ -146,8 +146,8 @@ class TagValidator:
         if self._check_for_warnings:
             validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
             validation_issues += self.check_capitalization(original_tag, formatted_tag);
-        if self._leaf_extensions:
-            validation_issues += self.check_if_tag_is_leaf_extension(original_tag, formatted_tag);
+        # if self._leaf_extensions:
+        #     validation_issues += self.check_if_tag_is_leaf_extension(original_tag, formatted_tag);
         return validation_issues;
 
     def run_tag_group_validators(self, tag_group):
@@ -267,17 +267,22 @@ class TagValidator:
 
         """
         validation_error = '';
-        if self.is_extension_allowed_tag(formatted_tag) or self.tag_takes_value(formatted_tag) or \
-                formatted_tag == TagValidator.TILDE:
-            pass;
-        elif not self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag):
-            if self.tag_takes_value(previous_formatted_tag):
-                validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
-                                                                    tag=original_tag,
-                                                                    previous_tag=previous_original_tag);
-            else:
-                validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
-            self._increment_issue_count();
+        is_extension_tag = self.is_extension_allowed_tag(formatted_tag);
+        if self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag) or \
+                self.tag_takes_value(formatted_tag) or formatted_tag == TagValidator.TILDE:
+            return validation_error;
+        elif not self._leaf_extensions and is_extension_tag:
+            return validation_error;
+        elif self._leaf_extensions and is_extension_tag and not self.is_leaf_extension_allowed_tag(formatted_tag):
+            validation_error = error_reporter.report_error_type(TagValidator.LEAF_EXTENSION_ERROR_TYPE,
+                                                                tag=original_tag);
+        elif not is_extension_tag and self.tag_takes_value(previous_formatted_tag):
+            validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
+                                                                tag=original_tag,
+                                                                previous_tag=previous_original_tag);
+        else:
+            validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag);
+        self._increment_issue_count();
         return validation_error;
 
     def tag_is_valid(self, formatted_tag):
