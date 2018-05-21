@@ -146,8 +146,6 @@ class TagValidator:
         if self._check_for_warnings:
             validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
             validation_issues += self.check_capitalization(original_tag, formatted_tag);
-        # if self._leaf_extensions:
-        #     validation_issues += self.check_if_tag_is_leaf_extension(original_tag, formatted_tag);
         return validation_issues;
 
     def run_tag_group_validators(self, tag_group):
