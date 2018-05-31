@@ -5,7 +5,7 @@ Created on Feb 27, 2017
 
 @author: Jeremy Cockfield 
 '''
-from parsewiki import hed_wiki_2_xml_tree, get_hed_change_log, prettify;
+from hedconversion import parsewiki;
 import os;
 import tempfile;
 import urllib;
@@ -27,7 +27,7 @@ def write_xml_tree_2_xml_file(xml_tree, xml_file_location):
     xml_file = None;
     try:
         xml_file = open(xml_file_location, 'w');
-        xml_string = prettify(xml_tree);
+        xml_string = parsewiki.prettify(xml_tree);
         xml_file.write(xml_string);
     finally:
         if xml_file: 
@@ -50,7 +50,7 @@ def convert_hed_wiki_2_xml():
     try:
         hed_wiki_file_location = create_hed_wiki_file();
         hed_xml_file_location, hed_xml_tree = create_hed_xml_file(hed_wiki_file_location);
-        hed_change_log = get_hed_change_log(hed_wiki_file_location);
+        hed_change_log = parsewiki.get_hed_change_log(hed_wiki_file_location);
         hed_info_dictionary = {"hed_xml_tree":hed_xml_tree,"hed_change_log":hed_change_log,
                                "hed_wiki_file_location":hed_wiki_file_location,
                                "hed_xml_file_location":hed_xml_file_location};
@@ -67,8 +67,8 @@ def create_hed_xml_file(hed_wiki_file_location, hed_file_location=''):
             hed_xml_file = open(hed_file_location, 'w');
         try:
             hed_xml_file_location = hed_xml_file.name;
-            hed_xml_tree = hed_wiki_2_xml_tree(hed_wiki_file_location);
-            xml_string = prettify(hed_xml_tree);
+            hed_xml_tree = parsewiki.hed_wiki_2_xml_tree(hed_wiki_file_location);
+            xml_string = parsewiki.prettify(hed_xml_tree);
             hed_xml_file.write(xml_string);
         finally:
             hed_xml_file.close();

@@ -5,12 +5,12 @@ Created on Feb 28, 2017
 
 @author: Jeremy Cockfield
 '''
-from xml.etree.ElementTree import Element, SubElement
-from xml.etree import ElementTree as et
-import parsetag
-from xml.dom import minidom
-import codecs
-import os
+from xml.etree.ElementTree import Element, SubElement;
+from xml.etree import ElementTree as et;
+from hedconversion import parsetag;
+from xml.dom import minidom;
+import codecs;
+import os;
 
 ATTRIBUTE_DEFINITION_STRING = '\'\'\'Attribute Definitions:'
 CHANGE_LOG_STRING = 'Changelog'
