@@ -5,16 +5,14 @@ Created on Feb 27, 2017
 
 @author: Jeremy Cockfield 
 '''
-from hedemailer import utils;
+from hedemailer import utils, constants;
 from hedconversion import parsewiki;
 import tempfile;
-
-HED_WIKI_URL = 'https://raw.githubusercontent.com/wiki/BigEEGConsortium/HED-Schema/HED-Schema.mediawiki'
 
 
 # Downloads the wiki HED schema from github
 def download_hed_wiki(wiki_file_location):
-    utils.url_to_file(HED_WIKI_URL, wiki_file_location);
+    utils.url_to_file(constants.HED_WIKI_URL, wiki_file_location);
     return wiki_file_location;
 
 
@@ -30,9 +28,9 @@ def convert_hed_wiki_2_xml():
     hed_wiki_file_location = create_hed_wiki_file();
     hed_xml_file_location, hed_xml_tree = create_hed_xml_file(hed_wiki_file_location);
     hed_change_log = parsewiki.get_hed_change_log(hed_wiki_file_location);
-    hed_info_dictionary = {"hed_xml_tree": hed_xml_tree, "hed_change_log": hed_change_log,
-                           "hed_wiki_file_location": hed_wiki_file_location,
-                           "hed_xml_file_location": hed_xml_file_location};
+    hed_info_dictionary = {constants.HED_XML_TREE_KEY: hed_xml_tree, constants.HED_CHANGE_LOG_KEY: hed_change_log,
+                           constants.HED_WIKI_LOCATION_KEY: hed_wiki_file_location,
+                           constants.HED_XML_LOCATION_KEY: hed_xml_file_location};
     return hed_info_dictionary;
 
 
