@@ -9,42 +9,114 @@ Created on Feb 28, 2017
 from xml.etree.ElementTree import SubElement;
 import re;
 
-# Cleans up the unicode characters in wiki 
-def clean_up_tag_line(tag_line):
-    tag_line = re.sub('</?nowiki>', '', tag_line);
+extend_here_line = 'extend here';
+unit_class_attribute = 'unitClass';
+no_wiki_tag = '</?nowiki>'
+tag_name_element = 'name';
+tag_name_regexp = '([<>=#\-a-zA-Z0-9$:()]+\s*)+';
+tag_description_element = 'description';
+tag_element = 'node';
+true_attribute = 'true';
+unit_class_element = 'unitClass';
+unit_class_name_element = 'name';
+unit_class_units_element = 'units';
+
+
+def remove_nowiki_tag_from_line(tag_line):
+    """Removes the nowiki tag from the  line.
+
+    Parameters
+    ----------
+    tag_line: string
+        A tag line.
+
+    Returns
+    -------
+    string
+        The line with the nowiki tag removed.
+    """
+    tag_line = re.sub(no_wiki_tag, '', tag_line);
     return tag_line;
 
-# Gets the change log entry from a line
-def get_change_log_entry(tag_line):
+
+def get_change_log_entry(change_log_line):
+    """Gets the change log entry from the line.
+
+    Parameters
+    ----------
+    change_log_line: string
+        line containing a change log entry.
+
+    Returns
+    -------
+    string
+        The change log entry.
+    """
     name = re.compile('[^*]+$');
+    match = name.search(change_log_line);
+    if match:
+        return match.group().strip();
+    else:
+        return '';
+
+
+def get_tag_name(tag_line):
+    """Gets the tag name from the tag line.
+
+    Parameters
+    ----------
+    tag_line: string
+        A tag line.
+
+    Returns
+    -------
+    string
+        The tag name.
+    """
+    if tag_line.find(extend_here_line) != -1:
+        return '';
+    name = re.compile(tag_name_regexp);
     match = name.search(tag_line);
     if match:
         return match.group().strip();
     else:
         return '';
 
-# Clean this up so that it can be done in one expression (this is a difficult one?) The format of the wiki is inconsistent 
-def get_tag_name(tag_line):     
-    if tag_line.find('extend here') != -1:
-        return '';
-    name = re.compile('([<>=#\-a-zA-Z0-9$:()]+\s*)+');
-    match = name.search(tag_line);
-    if match:
-        return match.group().strip();
-    else:
-        return '';
-    
-# Gets the tag attributes from a line 
+
 def get_tag_attributes(tag_line):
+    """Gets the tag attributes from a line.
+
+    Parameters
+    ----------
+    tag_line: string
+        A tag line.
+
+    Returns
+    -------
+    list
+        A list containing the tag attributes.
+    """
     attributes = re.compile('\{.*\}');
     match = attributes.search(tag_line);
     if match:
         return [x.strip() for x in re.sub('[{}]', '', match.group()).split(',')];
     else:
-        return '';    
+        return '';
 
-# Gets the tag description from a line     
+
 def get_tag_description(tag_line):
+    """Gets the tag description from a line.
+
+    Parameters
+    ----------
+    tag_line: string
+        A tag line.
+
+    Returns
+    -------
+    string
+        The tag description.
+    """
     description = re.compile('\[.*\]');
     match = description.search(tag_line);
     if match:
@@ -52,8 +124,20 @@ def get_tag_description(tag_line):
     else:
         return '';
 
-# Gets the tag level from a line         
+
 def get_tag_level(tag_line):
+    """Gets the tag level from a line in a wiki file.
+
+    Parameters
+    ----------
+    tag_line: string
+        A tag line.
+
+    Returns
+    -------
+    string
+        Gets the tag level. The number of asterisks determine what level the tag is on.
+    """
     level = re.compile('\*+');
     match = level.search(tag_line);
     if match:
@@ -61,48 +145,92 @@ def get_tag_level(tag_line):
     else:
         return 1;
 
-# Adds a tag to a element tree node 
+
 def add_tag_node(parent_node, tag_line):
+    """Adds a tag to its parent.
+
+    Parameters
+    ----------
+    parent_node: Element
+        The parent tag.
+    tag_line: string
+        A tag line.
+
+    Returns
+    -------
+    string
+        The tag line with the nowiki tag remove.
+    """
     tag_node = None;
     tag_name = get_tag_name(tag_line);
     if tag_name:
         tag_description = get_tag_description(tag_line);
         tag_attributes = get_tag_attributes(tag_line);
-        tag_node = SubElement(parent_node, 'node');
-        name_node = SubElement(tag_node, 'name');
+        tag_node = SubElement(parent_node, tag_element);
+        name_node = SubElement(tag_node, tag_name_element);
         name_node.text = tag_name;
-        if tag_description:  
-            description_node = SubElement(tag_node, 'description');
+        if tag_description:
+            description_node = SubElement(tag_node, tag_description_element);
             description_node.text = tag_description;
         if tag_attributes:
             add_tag_node_attributes(tag_node, tag_attributes);
-    return tag_node
+    return tag_node;
 
-# Adds a unit class to a element tree node     
+
 def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_attributes):
+    """Adds a unit class to its parent.
+
+    Parameters
+    ----------
+    parent_node: Element
+        The parent of the unit class.
+    unit_class: Element
+        The unit class.
+    unit_class_units: list
+        A list of unit class units.
+    unit_class_attributes: list
+        A list of unit class attributes.
+
+    Returns
+    -------
+    Element
+        The unit class element.
+    """
     delimiter = ',';
-    unit_class_node = SubElement(parent_node, 'unitClass');
-    name_node = SubElement(unit_class_node, 'name');
+    unit_class_node = SubElement(parent_node, unit_class_element);
+    name_node = SubElement(unit_class_node, unit_class_name_element);
     name_node.text = unit_class;
-    units_node = SubElement(unit_class_node, 'units');
+    units_node = SubElement(unit_class_node, unit_class_units_element);
     units_node.text = delimiter.join(unit_class_units);
     if unit_class_attributes:
         add_tag_node_attributes(unit_class_node, unit_class_attributes);
     return unit_class_node;
 
-# Adds the attributes to a tag       
+
 def add_tag_node_attributes(tag_node, tag_attributes):
-    unitClassStr = 'unitClass';
+    """Adds the attributes to a tag.
+
+    Parameters
+    ----------
+    tag_node: Element
+        A tag element.
+    tag_attributes: list
+        A list containing the tag attributes.
+
+    Returns
+    -------
+
+    """
     unitClasses = [];
     delimiter = ',';
     for attribute in tag_attributes:
-        if attribute.startswith(unitClassStr):
+        if attribute.startswith(unit_class_attribute):
             split_attribute = attribute.split('=');
             unitClasses.append(split_attribute[1]);
         elif attribute.find('=') > -1:
             split_attribute = attribute.split('=');
             tag_node.set(split_attribute[0], split_attribute[1]);
         else:
-            tag_node.set(attribute, 'true');
+            tag_node.set(attribute, true_attribute);
     if unitClasses:
-        tag_node.set(unitClassStr, delimiter.join(unitClasses));
+        tag_node.set(unit_class_attribute, delimiter.join(unitClasses));
