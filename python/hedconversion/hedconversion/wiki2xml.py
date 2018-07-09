@@ -10,21 +10,53 @@ from hedconversion import parsewiki;
 import tempfile;
 
 
-# Downloads the wiki HED schema from github
-def download_hed_wiki(wiki_file_location):
-    utils.url_to_file(constants.HED_WIKI_URL, wiki_file_location);
-    return wiki_file_location;
+def download_hed_wiki(wiki_file_path):
+    """Downloads the HED wiki from github into a specified file.
+
+    Parameters
+    ----------
+    wiki_file_path: string
+        The file path where the wiki file is stored.
+
+    Returns
+    -------
+    string
+        The tag line with the nowiki tag remove.
+    """
+    utils.url_to_file(constants.HED_WIKI_URL, wiki_file_path);
+    return wiki_file_path;
 
 
-# Writes a XML element tree object into a XML file
-def write_xml_tree_2_xml_file(xml_tree, xml_file_location):
-    with open(xml_file_location, 'w') as xml_file:
-        xml_string = parsewiki.prettify(xml_tree);
+def write_xml_tree_2_xml_file(xml_tree, xml_file_path):
+    """Writes a XML element tree object into a XML file.
+
+    Parameters
+    ----------
+    xml_tree: Element
+        A element representing an XML file.
+    xml_file_path: string
+        The path to an XML file.
+
+    Returns
+    -------
+
+    """
+    with open(xml_file_path, 'w') as xml_file:
+        xml_string = parsewiki.xml_element_2_str(xml_tree);
         xml_file.write(xml_string);
 
 
-# Converts the HED wiki schema into a XML file.
 def convert_hed_wiki_2_xml():
+    """Converts the HED wiki into a XML file.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    dictionary
+        The tag line with the nowiki tag remove.
+    """
     hed_wiki_file_location = create_hed_wiki_file();
     hed_xml_file_location, hed_xml_tree = create_hed_xml_file(hed_wiki_file_location);
     hed_change_log = parsewiki.get_hed_change_log(hed_wiki_file_location);
@@ -34,18 +66,38 @@ def convert_hed_wiki_2_xml():
     return hed_info_dictionary;
 
 
-# Creates a HED XML file from a HED wiki schema.
-def create_hed_xml_file(hed_wiki_file_location):
+def create_hed_xml_file(hed_wiki_file_path):
+    """Creates a HED XML file from a HED wiki.
+
+    Parameters
+    ----------
+    hed_wiki_file_path: string
+        The path to the HED wiki file.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the path to the HED XML file and a HED XML tree.
+    """
     with tempfile.NamedTemporaryFile(mode='w', delete=False) as hed_xml_file:
         hed_xml_file_location = hed_xml_file.name;
-        hed_xml_tree = parsewiki.hed_wiki_2_xml_tree(hed_wiki_file_location);
-        xml_string = parsewiki.prettify(hed_xml_tree);
+        hed_xml_tree = parsewiki.hed_wiki_2_xml_tree(hed_wiki_file_path);
+        xml_string = parsewiki.xml_element_2_str(hed_xml_tree);
         hed_xml_file.write(xml_string);
         return hed_xml_file_location, hed_xml_tree;
 
 
-# Creates a HED wiki schema file from the github wiki schemas.
 def create_hed_wiki_file():
+    """Creates a HED wiki file from the github wiki.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    string
+        The tag line with the nowiki tag remove.
+    """
     with tempfile.NamedTemporaryFile(delete=False) as hed_wiki_file:
         hed_wiki_file_location = hed_wiki_file.name;
         download_hed_wiki(hed_wiki_file_location);
