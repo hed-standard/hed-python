@@ -23,25 +23,58 @@ END_STRING = '!# end hed'
 hed_node = Element('HED')
 
 
-# Prints an element tree 
-def prettify(elem):
+def xml_element_2_str(elem):
+    """Converts an XML element to an XML string.
+
+    Parameters
+    ----------
+    elem: Element
+        An XML element.
+
+    Returns
+    -------
+    string
+        A XML string representing the XML element.
+
+    """
     rough_string = et.tostring(elem, method='xml');
     reparsed = minidom.parseString(rough_string);
     return reparsed.toprettyxml(indent="   ");
-    # return prettified_string[:prettified_string.rfind('\n')];
 
 
-# Removes the last line from a string
-def remove_last_line_from_string(s):
-    return s[:s.rfind('\n')];
+def remove_last_newline_from_string(str):
+    """Removes the last newline character from a string.
+
+    Parameters
+    ----------
+    str: string
+        A string.
+
+    Returns
+    -------
+    string
+        The string with last new line character removed.
+
+    """
+    return str[:str.rfind('\n')];
 
 
-# Adds the tags to an element tree containing the HED
 def add_tags(wiki_file):
+    """Adds the tags to the HED element.
+
+    Parameters
+    ----------
+    wiki_file: file object.
+        A file object that points to the HED wiki file.
+
+    Returns
+    -------
+
+    """
     tag_levels = {};
     line = wiki_file.readline();
     while line:
-        line = parsetag.clean_up_tag_line(line.strip());
+        line = parsetag.remove_nowiki_tag_from_line(line.strip());
         if not line:
             pass
         elif line.startswith(UNIT_CLASS_STRING):
@@ -56,18 +89,27 @@ def add_tags(wiki_file):
             child_tag = parsetag.add_tag_node(parent_tag, line);
             tag_levels[level] = child_tag;
         line = wiki_file.readline();
-    return
 
 
-# Adds the unit classes to an element tree containing the HED
 def add_unit_classes(wiki_file):
+    """Adds the unit classes to the HED element.
+
+    Parameters
+    ----------
+    wiki_file: file object.
+        A file object that points to the HED wiki file.
+
+    Returns
+    -------
+
+    """
     unit_class_node = SubElement(hed_node, 'unitClasses');
     unit_class = '';
     unit_class_units = [];
     unit_class_attributes = '';
     line = wiki_file.readline();
     while line:
-        line = parsetag.clean_up_tag_line(line.strip());
+        line = parsetag.remove_nowiki_tag_from_line(line.strip());
         if not line:
             pass
         elif line.startswith(END_STRING):
@@ -87,11 +129,22 @@ def add_unit_classes(wiki_file):
     parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes);
 
 
-# Converts a HED wiki file into a element tree
-def hed_wiki_2_xml_tree(wiki_file_location):
+def hed_wiki_2_xml_tree(wiki_file_path):
+    """Converts a HED wiki file into a XML tree.
+
+    Parameters
+    ----------
+    wiki_file_path: string
+        The location of the HED wiki file.
+
+    Returns
+    -------
+    Element
+        A XML element containing the entire HED.
+    """
     hed_node.clear();
-    if os.path.exists(wiki_file_location):
-        with open(wiki_file_location, 'r') as wiki_file:
+    if os.path.exists(wiki_file_path):
+        with open(wiki_file_path, 'r') as wiki_file:
             line = wiki_file.readline();
             while line:
                 line = line.strip();
@@ -104,11 +157,22 @@ def hed_wiki_2_xml_tree(wiki_file_location):
                     add_tags(wiki_file);
                     break
                 line = wiki_file.readline();
-    return hed_node
+    return hed_node;
 
 
-# Stores the wiki change log in a list
 def put_change_log_in_list(wiki_file):
+    """Puts the change log from a HED wiki file in a list.
+
+    Parameters
+    ----------
+    wiki_file: file object.
+        A file object that points to the HED wiki file.
+
+    Returns
+    -------
+    list
+        A list containing the change log of the HED wiki file.
+    """
     change_log = [];
     index = 0;
     line = wiki_file.readline();
@@ -129,11 +193,22 @@ def put_change_log_in_list(wiki_file):
     return change_log;
 
 
-# Gets the change log from a wiki HED file
-def get_hed_change_log(wiki_file_location):
+def get_hed_change_log(wiki_file_path):
+    """Gets the change log from a HED wiki file.
+
+    Parameters
+    ----------
+    wiki_file_path: string
+        The location of the HED wiki file.
+
+    Returns
+    -------
+    list
+        A list containing the change log of the HED wiki file.
+    """
     change_log = [];
-    if os.path.exists(wiki_file_location):
-        with open(wiki_file_location, 'r') as wiki_file:
+    if os.path.exists(wiki_file_path):
+        with open(wiki_file_path, 'r') as wiki_file:
             line = wiki_file.readline();
             while line:
                 line = line.strip();
@@ -148,7 +223,18 @@ def get_hed_change_log(wiki_file_location):
     return change_log;
 
 
-# Gets the HED wiki version
 def get_wiki_version(version_line):
+    """Gets the HED version from the wiki file.
+
+    Parameters
+    ----------
+    version_line: string
+        The line in the wiki file that contains the version.
+
+    Returns
+    -------
+    string
+        The HED version from the wiki file.
+    """
     split = version_line.split(':');
     return split[1].strip();
