@@ -9,11 +9,15 @@ Created on Feb 28, 2017
 from xml.etree.ElementTree import SubElement;
 import re;
 
+attributes_expression = r'\{.*\}'
+description_expression = r'\[.*\]';
 extend_here_line = 'extend here';
+level_expression = r'\*+';
 unit_class_attribute = 'unitClass';
 no_wiki_tag = '</?nowiki>'
+square_bracket_removal_expression = r'[\[\]]';
 tag_name_element = 'name';
-tag_name_regexp = '([<>=#\-a-zA-Z0-9$:()]+\s*)+';
+tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()]+\s*)+';
 tag_description_element = 'description';
 tag_element = 'node';
 true_attribute = 'true';
@@ -96,7 +100,7 @@ def get_tag_attributes(tag_line):
     list
         A list containing the tag attributes.
     """
-    attributes = re.compile('\{.*\}');
+    attributes = re.compile(attributes_expression);
     match = attributes.search(tag_line);
     if match:
         return [x.strip() for x in re.sub('[{}]', '', match.group()).split(',')];
@@ -117,10 +121,10 @@ def get_tag_description(tag_line):
     string
         The tag description.
     """
-    description = re.compile('\[.*\]');
+    description = re.compile(description_expression);
     match = description.search(tag_line);
     if match:
-        return re.sub('[\[\]]', '', match.group()).strip();
+        return re.sub(square_bracket_removal_expression, '', match.group()).strip();
     else:
         return '';
 
@@ -138,7 +142,7 @@ def get_tag_level(tag_line):
     string
         Gets the tag level. The number of asterisks determine what level the tag is on.
     """
-    level = re.compile('\*+');
+    level = re.compile(level_expression);
     match = level.search(tag_line);
     if match:
         return match.group().count('*');
