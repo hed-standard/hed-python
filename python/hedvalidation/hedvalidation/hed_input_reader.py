@@ -705,7 +705,11 @@ class HedInputReader:
                     required_tag = required_tag_prefix + required_tag;
                 required_tags_with_prefix.append(required_tag);
             return ','.join(required_tags_with_prefix);
-        return required_tag_prefix + required_tag_column_tags;
+			
+        if required_tag_prefix and not required_tag_column_tags.lower().startswith(required_tag_prefix.lower()):
+            required_tag_column_tags = required_tag_prefix + required_tag_column_tags
+
+        return required_tag_column_tags
 
     @staticmethod
     def subtract_1_from_list_elements(integer_list):
