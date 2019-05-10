@@ -791,13 +791,21 @@ class TagValidator:
             if not character.isspace():
                 if TagValidator.character_is_delimiter(character):
                     current_tag = '';
-                if character == TagValidator.OPENING_GROUP_BRACKET and \
-                        self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
-                    index_after_parentheses = self._get_index_at_end_of_parentheses(hed_string, current_tag,
-                                                                                    character_index);
-                    character_indices_iterator = self.skip_iterations(character_indices_iterator, character_index,
-                                                                      index_after_parentheses);
-                    current_tag = '';
+                if character == TagValidator.OPENING_GROUP_BRACKET:
+                    # If we have an opening group bracket by itself without a tag, it's actually starting a new group.
+                    if current_tag.strip() == TagValidator.OPENING_GROUP_BRACKET:
+                        current_tag = ''
+                    elif self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
+                        index_after_parentheses = self._get_index_at_end_of_parentheses(
+                            hed_string, current_tag, character_index)
+                        character_indices_iterator = self.skip_iterations(
+                            character_indices_iterator, character_index, index_after_parentheses)
+                        current_tag = ''
+                    else:
+                        validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE,
+                                                                            tag=current_tag)
+                        self._increment_issue_count()
+                        break
                 elif TagValidator.comma_is_missing_before_opening_bracket(last_non_empty_character, character):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     self._increment_issue_count();
@@ -880,7 +888,8 @@ class TagValidator:
         rest_of_hed_string = hed_string[character_index:];
         _, parentheses_length = TagValidator.get_next_set_of_parentheses_in_hed_string(current_tag +
                                                                                        rest_of_hed_string);
-        return parentheses_length;
+        final_index = character_index - len(current_tag) + parentheses_length
+        return final_index
 
     @staticmethod
     def report_missing_comma_error(error_tag):
@@ -963,7 +972,7 @@ class TagValidator:
             if character == TagValidator.OPENING_GROUP_BRACKET:
                 opening_parenthesis_found = True;
             if character == TagValidator.CLOSING_GROUP_BRACKET and opening_parenthesis_found:
-                return set_of_parentheses, parentheses_length;
+                return set_of_parentheses, parentheses_length + 1;
             parentheses_length += 1;
         return set_of_parentheses, parentheses_length;
 

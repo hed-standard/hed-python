@@ -59,7 +59,15 @@ class Test(unittest.TestCase):
         cls.invalid_formatted_time_string_tag = 'item/2d shape/clock face/54:54';
         cls.valid_time_string = '12:24';
         cls.invalid_time_string = '54:54';
+
+        # Todo: update this for 7.0 schema.  I don't know any valid tags with parentheses
         cls.valid_formatted_tag_with_parentheses = 'paradigm/reading (covert)';
+        cls.invalid_formatted_tag_with_parentheses = 'Item/2D shape/Sector (covert)';
+        cls.valid_formatted_tag_with_parentheses_group = 'event/label/hed string, event/description/this is a hed string, ' \
+                                                         'event/category/participant response, ' \
+                                                         '(item/2D shape/sector, Attribute/Visual/Color/Red)'
+        cls.valid_group_tag_with_parentheses = '(paradigm/reading (covert), paradigm/reading (overt))'
+
         cls.last_non_empty_character_not_delimiter = ')';
         cls.last_non_empty_character_delimiter = ',';
         cls.current_character = 'f';
@@ -263,6 +271,14 @@ class Test(unittest.TestCase):
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
         validation_error = \
+            self.tag_validator.find_comma_issues_in_hed_string(self.invalid_formatted_tag_with_parentheses);
+        self.assertTrue(validation_error);
+        self.assertIsInstance(validation_error, str);
+        validation_error = \
+            self.tag_validator.find_comma_issues_in_hed_string(self.valid_formatted_tag_with_parentheses_group);
+        self.assertFalse(validation_error);
+        self.assertIsInstance(validation_error, str);
+        validation_error = \
             self.tag_validator.find_comma_issues_in_hed_string(self.hed_string_ending_with_parentheses);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
@@ -308,11 +324,15 @@ class Test(unittest.TestCase):
         self.assertFalse(comma_is_missing);
 
     def test_get_next_set_of_parentheses_in_hed_string(self):
-        next_set_of_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(self.valid_hed_string);
-        self.assertTrue(next_set_of_parentheses);
-        next_set_of_parentheses = TagValidator.get_next_set_of_parentheses_in_hed_string(
+        hed_string, end_point = TagValidator.get_next_set_of_parentheses_in_hed_string(self.valid_hed_string);
+        self.assertTrue(len(self.valid_hed_string) == end_point);
+        hed_string, end_point = TagValidator.get_next_set_of_parentheses_in_hed_string(
             self.valid_hed_string_with_group);
-        self.assertTrue(next_set_of_parentheses);
+        self.assertTrue(len(self.valid_hed_string_with_group) == end_point)
+        hed_string, end_point = TagValidator.get_next_set_of_parentheses_in_hed_string(
+            self.valid_group_tag_with_parentheses);
+        self.assertTrue(len(self.valid_group_tag_with_parentheses) != end_point);
+
 
     def test_report_missing_comma_error(self):
         missing_comma_error = TagValidator.report_missing_comma_error(self.invalid_original_tag);
