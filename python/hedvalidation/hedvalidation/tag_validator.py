@@ -15,6 +15,7 @@ from hedvalidation import warning_reporter;
 
 class TagValidator:
     BRACKET_ERROR_TYPE = 'bracket';
+    CHARACTER_ERROR_TYPE = 'character'
     COMMA_ERROR_TYPE = 'comma';
     COMMA_VALID_ERROR_TYPE = 'commaValid';
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+';
@@ -39,6 +40,7 @@ class TagValidator:
     DOUBLE_QUOTE = '"';
     COMMA = ',';
     TILDE = '~';
+    INVALID_CHARS = '[]{}'
 
     def __init__(self, hed_dictionary, check_for_warnings=False, leaf_extensions=False):
         """Constructor for the Tag_Validator class.
@@ -180,6 +182,7 @@ class TagValidator:
 
          """
         validation_issues = '';
+        validation_issues += self.find_invalid_character_issues(hed_string)
         validation_issues += self.count_tag_group_brackets(hed_string);
         validation_issues += self.find_comma_issues_in_hed_string(hed_string);
         return validation_issues;
@@ -904,10 +907,26 @@ class TagValidator:
         string
             The error message associated with a missing comma.
 
-
         """
         error_tag = error_tag[:-1].strip();
         return error_reporter.report_error_type(TagValidator.COMMA_ERROR_TYPE, tag=error_tag);
+
+    @staticmethod
+    def report_invalid_character_error(error_tag):
+        """Reports a error that is related with an invalid character
+
+        Parameters
+        ----------
+        error_tag: string
+            The tag that caused the error.
+        Returns
+        -------
+        string
+            The error message associated with a missing comma.
+
+        """
+        error_tag = error_tag.strip();
+        return error_reporter.report_error_type(TagValidator.CHARACTER_ERROR_TYPE, tag=error_tag);
 
     @staticmethod
     def comma_is_missing_before_opening_bracket(last_non_empty_character, current_character):
@@ -993,6 +1012,27 @@ class TagValidator:
         if character == TagValidator.COMMA or character == TagValidator.TILDE:
             return True;
         return False;
+
+    def find_invalid_character_issues(self, hed_string):
+        """Reports an error if it finds any invalid characters as defined by TagValidator.INVALID_CHARS
+
+        Parameters
+        ----------
+        hed_string: string
+            A hed string.
+        Returns
+        -------
+        string
+            A validation error string. If no errors are found then an empty string is returned.
+
+        """
+        validation_error = ''
+        for character in hed_string:
+            if character in TagValidator.INVALID_CHARS:
+                validation_error = TagValidator.report_invalid_character_error(character)
+                self._increment_issue_count()
+
+        return validation_error
 
     def count_tag_group_brackets(self, hed_string):
         """Reports a validation error if there are an unequal number of opening or closing parentheses. This is the

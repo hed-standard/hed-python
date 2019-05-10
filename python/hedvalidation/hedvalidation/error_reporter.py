@@ -30,7 +30,7 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
         The unit class units that are associated with the error.
     opening_bracket_count: int
         The number of opening brackets.
-    closing_bracket_count: string
+    closing_bracket_count: int
         The number of closing brackets.
     Returns
     -------
@@ -39,8 +39,9 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
 
     """
     error_types = {
-        'bracket': '\tERROR: Number of opening and closing brackets are unequal. %s opening brackets. %s '
-                   'closing brackets\n' % (opening_bracket_count, closing_bracket_count),
+        'bracket': '\tERROR: Number of opening and closing parentheses are unequal. %s opening parentheses. %s '
+                   'closing parentheses\n' % (opening_bracket_count, closing_bracket_count),
+        'character': '\tERROR: Invalid character \"%s\"\n' % tag,
         'comma': '\tERROR: Comma missing after - \"%s\"\n' % tag,
         'commaValid': '\tERROR: Either \"%s\" contains a comma when it should not or \"%s\" is not a valid tag\n'
                       % (previous_tag, tag),

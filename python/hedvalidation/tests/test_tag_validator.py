@@ -84,6 +84,8 @@ class Test(unittest.TestCase):
         cls.invalid_leaf_extension_tag = 'Attribute/Character Role/White Mage';
         cls.invalid_formatted_leaf_extension_tag = 'attribute/character role/white mage';
 
+        cls.invalid_tag_with_bad_characters = 'event/description/this is a hed string [badbrackets]'
+
     def test_check_if_tag_is_valid(self):
         validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
                                                                     self.invalid_formatted_tag);
@@ -358,6 +360,13 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_error, str);
         self.assertTrue(validation_error);
 
+    def test_check_if_tag_has_invalid_characters(self):
+        validation_error = self.tag_validator.find_invalid_character_issues(self.valid_hed_string)
+        self.assertIsInstance(validation_error, str)
+        self.assertFalse(validation_error)
+        validation_error = self.tag_validator.find_invalid_character_issues(self.invalid_tag_with_bad_characters)
+        self.assertIsInstance(validation_error, str)
+        self.assertTrue(validation_error)
 
 if __name__ == '__main__':
     unittest.main();
