@@ -67,6 +67,8 @@ class Test(unittest.TestCase):
                                                          'event/category/participant response, ' \
                                                          '(item/2D shape/sector, Attribute/Visual/Color/Red)'
         cls.valid_group_tag_with_parentheses = '(paradigm/reading (covert), paradigm/reading (overt))'
+        cls.valid_formatted_tag_with_complex_parentheses = '((Item/ID/Description value,Item/ID/Local)~' \
+                                                            '(Item/ID/Local,Item/Group ID/Description value))'
 
         cls.last_non_empty_character_not_delimiter = ')';
         cls.last_non_empty_character_delimiter = ',';
@@ -284,6 +286,10 @@ class Test(unittest.TestCase):
             self.tag_validator.find_comma_issues_in_hed_string(self.hed_string_ending_with_parentheses);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
+        validation_error = \
+            self.tag_validator.find_comma_issues_in_hed_string(self.valid_formatted_tag_with_complex_parentheses);
+        self.assertFalse(validation_error);
+        self.assertIsInstance(validation_error, str)
 
     def test_character_is_delimiter(self):
         is_a_delimiter = TagValidator.character_is_delimiter(self.comma);

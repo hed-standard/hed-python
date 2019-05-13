@@ -966,7 +966,8 @@ class TagValidator:
 
         """
         return last_non_empty_character == TagValidator.CLOSING_GROUP_BRACKET and not \
-            TagValidator.character_is_delimiter(current_character);
+            (TagValidator.character_is_delimiter(current_character)
+             or current_character == TagValidator.CLOSING_GROUP_BRACKET);
 
     @staticmethod
     def get_next_set_of_parentheses_in_hed_string(hed_string):
