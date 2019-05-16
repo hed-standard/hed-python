@@ -447,13 +447,44 @@ class TagValidator:
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag));
             if TagValidator.TIME_UNIT_CLASS in tag_unit_classes and TagValidator.is_hh_mm_time(tag_unit_values):
                 pass;
-            elif not re.search(TagValidator.DIGIT_EXPRESSION, tag_unit_values) and \
-                    not tag_unit_values.startswith(tag_unit_class_units) and \
-                    not tag_unit_values.endswith(tag_unit_class_units):
+            elif re.search(TagValidator.DIGIT_EXPRESSION,
+                           TagValidator.strip_off_units_if_valid(tag_unit_values, tag_unit_class_units)):
+                pass
+            else:
                 validation_error = error_reporter.report_error_type('unitClass', tag=original_tag,
                                                                     unit_class_units=','.join(tag_unit_class_units));
                 self._increment_issue_count();
         return validation_error;
+
+    @staticmethod
+    def strip_off_units_if_valid(tag_unit_values, tag_unit_class_units):
+        """Checks to see if the specified string has a valid unit, and removes it if so
+
+        Parameters
+        ----------
+        tag_unit_values: string
+            A unit tag with or without a unit class
+        tag_unit_class_units
+            A list of valid units for this tag
+        Returns
+        -------
+        string
+            A tag_unit_values with the valid unit removed, if one was present.
+            Otherwise, returns tag_unit_values
+
+        """
+        return_tag = tag_unit_values
+        for units in tag_unit_class_units:
+            if tag_unit_values.startswith(units):
+                return_tag = tag_unit_values[len(units):]
+                return_tag = return_tag.strip()
+                break
+            if tag_unit_values.endswith(units):
+                return_tag = tag_unit_values[:-len(units)]
+                return_tag = return_tag.strip()
+                break
+
+        return return_tag
 
     def check_if_tag_unit_class_units_exist(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag provided has a unit class but no units are not specified.
