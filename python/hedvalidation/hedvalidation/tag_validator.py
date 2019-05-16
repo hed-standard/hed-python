@@ -20,7 +20,7 @@ class TagValidator:
     COMMA_VALID_ERROR_TYPE = 'commaValid';
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+';
     DEFAULT_UNIT_ATTRIBUTE = 'default';
-    DIGIT_EXPRESSION = r'^[\d\.]+$';
+    DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$';
     REQUIRE_CHILD_ERROR_TYPE = 'requireChild';
     REQUIRED_ERROR_TYPE = 'required';
     TAG_DICTIONARY_KEY = 'tags';

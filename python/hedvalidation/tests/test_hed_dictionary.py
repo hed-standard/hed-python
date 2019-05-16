@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
     def test_get_parent_tag_name(self):
         root_element = self.hed_dictionary.get_root_element(self.hed_xml);
         nodes = root_element.xpath('.//node');
-        random_node = random.randint(2, len(nodes));
+        random_node = random.randint(2, len(nodes) - 1);
         tag_element = nodes[random_node];
         parent_tag_name = self.hed_dictionary.get_parent_tag_name(tag_element);
         self.assertIsInstance(parent_tag_name, str);
@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
     def test__get_tag_from_tag_element(self):
         root_element = self.hed_dictionary.get_root_element();
         nodes = root_element.xpath('.//node');
-        random_node = random.randint(2, len(nodes));
+        random_node = random.randint(2, len(nodes) - 1);
         tag_element = nodes[random_node];
         tag_name = self.hed_dictionary._get_tag_path_from_tag_element(tag_element);
         self.assertIsInstance(tag_name, str);
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
     def test_get_parent_tag_name(self):
         root_element = self.hed_dictionary.get_root_element();
         nodes = root_element.xpath('.//node');
-        random_node = random.randint(2, len(nodes));
+        random_node = random.randint(2, len(nodes) - 1);
         tag_element = nodes[random_node];
         parent_tag_name = self.hed_dictionary._get_parent_tag_name(tag_element);
         self.assertIsInstance(parent_tag_name, str);
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
     def test_get_tag_path_from_tag_element(self):
         root_element = self.hed_dictionary.get_root_element();
         tag_elements = root_element.xpath('.//node');
-        random_node = random.randint(2, len(tag_elements));
+        random_node = random.randint(2, len(tag_elements) - 1);
         tag_element = tag_elements[random_node];
         tag = self.hed_dictionary._get_tag_path_from_tag_element(tag_element);
         self.assertIsInstance(tag, str);
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
     def test_get_all_ancestor_tag_names(self):
         root_element = self.hed_dictionary.get_root_element();
         nodes = root_element.xpath('.//node');
-        random_node = random.randint(2, len(nodes));
+        random_node = random.randint(2, len(nodes) - 1);
         tag_element = nodes[random_node];
         all_ancestor_tags = self.hed_dictionary._get_ancestor_tag_names(tag_element);
         self.assertIsInstance(all_ancestor_tags, list);

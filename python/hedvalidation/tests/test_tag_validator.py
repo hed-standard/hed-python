@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
         cls.hed_dictionary = HedDictionary(cls.hed_xml);
         cls.tag_validator = TagValidator(cls.hed_dictionary);
         random_require_child_key = \
-            random.randint(2, len(cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY]));
+            random.randint(2, len(cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY]) - 1);
         cls.required_child_tag = cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY] \
             [list(cls.hed_dictionary.get_dictionaries()[cls.REQUIRE_CHILD_DICTIONARY_KEY].keys())[
                 random_require_child_key]];
@@ -35,8 +35,11 @@ class Test(unittest.TestCase):
         cls.valid_formatted_is_numeric_tag = 'attribute/repetition/20';
         cls.valid_unit_class_tag = 'Attribute/Temporal rate/20 Hz';
         cls.valid_formatted_unit_class_tag = 'attribute/temporal rate/20 hz';
-        cls.invalid_formatted_unit_class_tag = 'attribute/temporal rate/20 sdfkjsdfkjdfskjs';
-        cls.valid_formatted_unit_class_tag_no_units = 'attribute/temporal rate/20';
+        cls.invalid_formatted_unit_class_tag_list = ['attribute/temporal rate/20 sdfkjsdfkjdfskjs',
+                                                 'attribute/temporal rate/20.2e-1 sdfkjsdfkjdfskjs']
+        cls.valid_formatted_unit_class_tag_no_units_list = ['attribute/temporal rate/20e2',
+                                                        'attribute/temporal rate/20.0']
+
         cls.valid_takes_value_tag = 'event/label/This is a label';
         cls.valid_tag_group_string = 'This/Is/A/Tag ~ This/Is/Another/Tag ~ This/Is/A/Different/Tag';
         cls.invalid_tag_group_string = 'This/Is/A/Tag ~ ~ This/Is/Another/Tag ~ This/Is/A/Different/Tag';
@@ -222,11 +225,13 @@ class Test(unittest.TestCase):
                                                                                     self.valid_formatted_unit_class_tag);
         self.assertFalse(validation_warning);
         self.assertIsInstance(validation_warning, str);
-        validation_warning = \
-            self.tag_validator.check_if_tag_unit_class_units_exist(self.valid_formatted_unit_class_tag_no_units,
-                                                                   self.valid_formatted_unit_class_tag_no_units);
-        self.assertTrue(validation_warning);
-        self.assertIsInstance(validation_warning, str);
+
+        for tag in self.valid_formatted_unit_class_tag_no_units_list:
+            validation_warning = \
+                self.tag_validator.check_if_tag_unit_class_units_exist(tag,
+                                                                       tag);
+            self.assertTrue(validation_warning);
+            self.assertIsInstance(validation_warning, str);
 
     def test_check_if_tag_unit_class_units_are_valid(self):
         validation_error = \
@@ -234,16 +239,18 @@ class Test(unittest.TestCase):
                                                                        self.valid_formatted_unit_class_tag);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
-        validation_error = \
-            self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_formatted_unit_class_tag_no_units,
-                                                                       self.valid_formatted_unit_class_tag_no_units);
-        self.assertFalse(validation_error);
-        self.assertIsInstance(validation_error, str);
-        validation_error = \
-            self.tag_validator.check_if_tag_unit_class_units_are_valid(self.invalid_formatted_unit_class_tag,
-                                                                       self.invalid_formatted_unit_class_tag);
-        self.assertTrue(validation_error);
-        self.assertIsInstance(validation_error, str);
+        for tag in self.valid_formatted_unit_class_tag_no_units_list:
+            validation_error = \
+                self.tag_validator.check_if_tag_unit_class_units_are_valid(tag,
+                                                                           tag);
+            self.assertFalse(validation_error);
+            self.assertIsInstance(validation_error, str);
+        for tag in self.invalid_formatted_unit_class_tag_list:
+            validation_error = \
+                self.tag_validator.check_if_tag_unit_class_units_are_valid(tag,
+                                                                           tag);
+            self.assertTrue(validation_error);
+            self.assertIsInstance(validation_error, str);
         validation_error = \
             self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_formatted_time_string_tag,
                                                                        self.valid_formatted_time_string_tag);
