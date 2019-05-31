@@ -188,7 +188,7 @@ class HedInputReader:
 
          """
         validation_issues = '';
-        with open(self._hed_input) as opened_text_file:
+        with open(self._hed_input, 'r', encoding='utf-8') as opened_text_file:
             for row_number, text_file_row in enumerate(opened_text_file):
                 if HedInputReader.row_contains_headers(self._has_column_names, row_number):
                     continue;

@@ -41,7 +41,7 @@ def write_xml_tree_2_xml_file(xml_tree, xml_file_path):
     -------
 
     """
-    with open(xml_file_path, 'w') as xml_file:
+    with open(xml_file_path, 'w', encoding='utf-8') as xml_file:
         xml_string = parsewiki.xml_element_2_str(xml_tree);
         xml_file.write(xml_string);
 
@@ -79,7 +79,7 @@ def create_hed_xml_file(hed_wiki_file_path):
     tuple
         A tuple containing the path to the HED XML file and a HED XML tree.
     """
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as hed_xml_file:
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as hed_xml_file:
         hed_xml_file_location = hed_xml_file.name;
         hed_xml_tree = parsewiki.hed_wiki_2_xml_tree(hed_wiki_file_path);
         xml_string = parsewiki.xml_element_2_str(hed_xml_tree);
