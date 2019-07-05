@@ -28,8 +28,8 @@ class HedInputReader:
     FILE_INPUT = 'file';
     TAB_DELIMITER = '\t';
     COMMA_DELIMITER = ',';
-    HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/');
-    DEFAULT_HED_XML_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/HED.xml');
+    HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../hed-specification/hedxml/');
+    DEFAULT_HED_XML_FILE = os.path.join(HED_DIRECTORY, 'HEDLatest.xml');
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
                                    'Label': 'Event/Label/', 'Long': 'Event/Long name/'};
     HED_VERSION_EXPRESSION = r'HED(\d+.\d+.\d+)';
@@ -830,7 +830,8 @@ class HedInputReader:
         for _, _, hed_files in os.walk(HedInputReader.HED_DIRECTORY):
             for hed_file in hed_files:
                 expression_match = compiled_expression.match(hed_file);
-                hed_versions.append(expression_match.group(1));
+                if expression_match is not None:
+                    hed_versions.append(expression_match.group(1));
         return sorted(hed_versions, key=StrictVersion, reverse=True);
 
     @staticmethod
