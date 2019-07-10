@@ -14,6 +14,7 @@ from defusedxml.lxml import parse;
 
 class HedDictionary:
     DEFAULT_UNIT_ATTRIBUTE = 'default';
+    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'default_units'
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed';
     TAG_DICTIONARY_KEYS = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
                            'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass'];
@@ -21,7 +22,7 @@ class HedDictionary:
     TAG_UNIT_CLASS_ATTRIBUTE = 'unitClass';
     UNIT_CLASS_ELEMENT = 'unitClass';
     UNIT_CLASS_UNITS_ELEMENT = 'units';
-    UNIT_CLASS_DICTIONARY_KEYS = ['default', 'units'];
+    UNIT_CLASS_DICTIONARY_KEYS = ['default_units', 'units'];
     UNITS_ELEMENT = 'units';
     VERSION_ATTRIBUTE = 'version';
     dictionaries = None;
@@ -147,7 +148,7 @@ class HedDictionary:
             unit_class_elements = self._get_elements_by_name(HedDictionary.UNIT_CLASS_ELEMENT);
             if HedDictionary.UNITS_ELEMENT == UNIT_CLASS_DICTIONARY_KEY:
                 unit_class_dictionary = self._populate_unit_class_units_dictionary(unit_class_elements);
-            elif HedDictionary.DEFAULT_UNIT_ATTRIBUTE == UNIT_CLASS_DICTIONARY_KEY:
+            elif HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE == UNIT_CLASS_DICTIONARY_KEY:
                 unit_class_dictionary = self._populate_unit_class_default_unit_dictionary(unit_class_elements);
             unit_class_dictionaries[UNIT_CLASS_DICTIONARY_KEY] = unit_class_dictionary;
         return unit_class_dictionaries;

@@ -35,6 +35,7 @@ class Test(unittest.TestCase):
         cls.valid_formatted_is_numeric_tag = 'attribute/repetition/20';
         cls.valid_unit_class_tag = 'Attribute/Temporal rate/20 Hz';
         cls.valid_formatted_unit_class_tag = 'attribute/temporal rate/20 hz';
+        cls.valid_formatted_unit_class_tag_with_default = 'attribute/blink/time shut/#';
         cls.invalid_formatted_unit_class_tag_list = ['attribute/temporal rate/20 sdfkjsdfkjdfskjs',
                                                  'attribute/temporal rate/20.2e-1 sdfkjsdfkjdfskjs']
         cls.valid_formatted_unit_class_tag_no_units_list = ['attribute/temporal rate/20e2',
@@ -217,6 +218,9 @@ class Test(unittest.TestCase):
         self.assertFalse(default_unit);
         self.assertIsInstance(default_unit, str);
         default_unit = self.tag_validator.get_unit_class_default_unit(self.valid_formatted_unit_class_tag);
+        self.assertTrue(default_unit);
+        self.assertIsInstance(default_unit, str);
+        default_unit = self.tag_validator.get_unit_class_default_unit(self.valid_formatted_unit_class_tag_with_default);
         self.assertTrue(default_unit);
         self.assertIsInstance(default_unit, str);
 

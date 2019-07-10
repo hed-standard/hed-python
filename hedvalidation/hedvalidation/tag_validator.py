@@ -20,6 +20,7 @@ class TagValidator:
     COMMA_VALID_ERROR_TYPE = 'commaValid';
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+';
     DEFAULT_UNIT_ATTRIBUTE = 'default';
+    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'default_units'
     DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$';
     REQUIRE_CHILD_ERROR_TYPE = 'requireChild';
     REQUIRED_ERROR_TYPE = 'required';
@@ -595,15 +596,15 @@ class TagValidator:
         default_unit = '';
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag);
         if self.is_unit_class_tag(formatted_tag):
-            has_default_attribute = self._hed_dictionary.tag_has_attribute(formatted_tag,
+            has_default_attribute = self._hed_dictionary.tag_has_attribute(unit_class_tag,
                                                                            TagValidator.DEFAULT_UNIT_ATTRIBUTE);
             if has_default_attribute:
-                default_unit = self._hed_dictionary_dictionaries[TagValidator.DEFAULT_UNIT_ATTRIBUTE][formatted_tag];
+                default_unit = self._hed_dictionary_dictionaries[TagValidator.DEFAULT_UNIT_ATTRIBUTE][unit_class_tag];
             elif unit_class_tag in self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE]:
                 unit_classes = \
                     self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag].split(',');
                 first_unit_class = unit_classes[0];
-                default_unit = self._hed_dictionary_dictionaries[TagValidator.DEFAULT_UNIT_ATTRIBUTE][first_unit_class];
+                default_unit = self._hed_dictionary_dictionaries[TagValidator.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][first_unit_class];
         return default_unit;
 
     def is_numeric_tag(self, formatted_tag):
