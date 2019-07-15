@@ -66,7 +66,7 @@ docker rm -f $CONTAINER_NAME
 run_new_container()
 {
 echo Running new container...
-docker run --restart=always --name $CONTAINER_NAME -p $HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
+docker run --restart=always --name $CONTAINER_NAME -d -p $HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
 }
 
 cleanup_directory()
@@ -97,4 +97,4 @@ switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-#cleanup_directory
+cleanup_directory
