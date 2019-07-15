@@ -17,4 +17,4 @@ mkdir -p /run/apache2 && \
 mkdir -p /var/log/hedtools && \
 chown -R apache:apache /var/log/hedtools
 ENTRYPOINT /usr/sbin/httpd -D FOREGROUND -f /etc/apache2/httpd.conf
-ENV HEDTOOLS_CONFIG_CLASS=config.ProductionConfig
+#ENV HEDTOOLS_CONFIG_CLASS=config.ProductionConfig
