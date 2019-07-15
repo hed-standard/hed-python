@@ -1,8 +1,6 @@
 from flask import Flask;
-from flask_wtf.csrf import CSRFProtect;
 import importlib;
 from config import Config;
-
 
 class AppFactory:
     @staticmethod
@@ -10,7 +8,6 @@ class AppFactory:
         static_url_path = AppFactory.get_static_url_path(config_class);
         app = Flask(__name__, static_url_path=static_url_path);
         app.config.from_object(config_class);
-        CSRFProtect(app);
         return app;
 
     @staticmethod

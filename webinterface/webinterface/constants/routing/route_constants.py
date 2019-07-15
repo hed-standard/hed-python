@@ -9,5 +9,6 @@ HOME_ROUTE = '/';
 MAJOR_HED_VERSION_ROUTE = '/get-major-hed-versions';
 SPREADSHEET_COLUMN_INFO_ROUTE = '/get-spreadsheet-columns-info';
 SUBMIT_ROUTE = '/submit';
+PLUGIN_SUBMIT_ROUTE = '/eegvalidation';
 VALIDATION_ROUTE = '/validation';
 WORKSHEET_COLUMN_INFO = '/get-worksheets-info';

@@ -2,6 +2,7 @@ import os;
 from webinterface.app_factory import AppFactory;
 from logging.handlers import RotatingFileHandler;
 from logging import ERROR;
+from flask_wtf.csrf import CSRFProtect;
 
 CONFIG_ENVIRON_NAME = 'HEDTOOLS_CONFIG_CLASS';
 
@@ -31,8 +32,11 @@ app = configure_app();
 with app.app_context():
     from webinterface import utils;
     from webinterface.routes import route_blueprint;
-
+    from webinterface.routes import get_EEG_events_validation_results
     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX']);
+    csrf = CSRFProtect(app);
+    csrf.exempt(get_EEG_events_validation_results)
+
     utils.create_upload_directory(app.config['UPLOAD_FOLDER']);
     setup_logging();
 

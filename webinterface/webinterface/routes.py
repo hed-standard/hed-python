@@ -224,6 +224,25 @@ def get_validation_results():
                                        validation_status[error_constants.ERROR_KEY]);
     return json.dumps(validation_status);
 
+@route_blueprint.route(route_constants.PLUGIN_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_EEG_events_validation_results():
+    """Validate the hed strings associated with EEG events after submission from HEDTools EEGLAB plugin and return json string containing the output.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        string
+        A serialized JSON string containing information related to the EEG events' hed-strings. If the validation fails then a
+        500 error message is returned.
+    """
+    validation_status = utils.report_EEG_events_validation_status(request);
+
+    if error_constants.ERROR_KEY in validation_status:
+        return utils.handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
+                                       validation_status[error_constants.ERROR_KEY]);
+    return json.dumps(validation_status);
 
 @route_blueprint.route(route_constants.VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
 def render_validation_form():
