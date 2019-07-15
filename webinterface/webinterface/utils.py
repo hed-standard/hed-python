@@ -1,4 +1,5 @@
 import os;
+import json;
 import tempfile;
 import xlrd;
 import traceback;
@@ -168,6 +169,57 @@ def report_spreadsheet_validation_status(form_request_object):
         delete_file_if_it_exist(hed_file_path);
     return validation_status;
 
+def report_EEG_events_validation_status(request):
+    """Reports validation status of hed strings associated with EEG events
+       received from EEGLAB plugin HEDTools
+
+    Parameters
+    ----------
+    request: Request object
+        A Request object containing user data submitted by HEDTools.
+        Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
+
+    Returns
+    -------
+    string
+        A serialized JSON string containing information related to the hed strings validation result. If the validation fails then a
+        500 error message is returned.
+    """
+    validation_status = {}
+
+    # Parse uploaded data
+    form_data = request.form
+    check_for_warnings = form_data["check_for_warnings"] == '1' if "check_for_warnings" in form_data else False
+    # if hed_xml_file was submitted, it's accessed by request.files, otherwise empty
+    if "hed_xml_file" in request.files and _get_file_extension(request.files["hed_xml_file"].filename) == "xml":
+        hed_xml_file = _save_hed_to_upload_folder_if_present(request.files["hed_xml_file"])
+    else:
+        hed_xml_file = ''
+
+    try:
+        # parse hed_strings from json
+        hed_strings = json.loads(form_data["hed_strings"])
+        hed_strings = hed_strings["hed_strings"]
+        # Validate each hed string (corresponding to each event)
+        strings_with_issues_count = 0 # count number of strings that have issues
+        strings_with_issues = []
+        for i in range(len(hed_strings)):
+            hed_input_reader = HedInputReader(hed_strings[i],
+                                              check_for_warnings=check_for_warnings,
+                                              hed_xml_file=hed_xml_file)
+            issues = hed_input_reader.get_validation_issues();
+            if len(issues) > 0:
+                strings_with_issues_count = strings_with_issues_count + 1
+                strings_with_issues.append("Issue in event %d: %s" % (i+1, issues)) # MATLAB index starts at 1
+        # Prepare response
+        validation_status["issues_count"] = strings_with_issues_count
+        validation_status["issues"] = strings_with_issues
+    except:
+        validation_status[error_constants.ERROR_KEY] = traceback.format_exc()
+    finally:
+        delete_file_if_it_exist(hed_xml_file);
+
+    return validation_status
 
 def _get_uploaded_file_paths_from_forms(form_request_object):
     """Gets the other paths of the uploaded files in the form.
