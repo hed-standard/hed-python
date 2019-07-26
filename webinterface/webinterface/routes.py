@@ -224,7 +224,7 @@ def get_validation_results():
                                        validation_status[error_constants.ERROR_KEY]);
     return json.dumps(validation_status);
 
-@route_blueprint.route(route_constants.PLUGIN_SUBMIT_ROUTE, strict_slashes=False, methods=['GET'])
+@route_blueprint.route(route_constants.EEG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_EEG_events_validation_results():
     """Validate the hed strings associated with EEG events after submission from HEDTools EEGLAB plugin and return json string containing the output.
 
@@ -259,3 +259,19 @@ def render_validation_form():
 
     """
     return render_template(page_constants.VALIDATION_PAGE);
+
+@route_blueprint.route(route_constants.EEG_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
+def render_eeg_validation_form():
+    """Handles the site root and EEG Validation tab functionality.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
+        displayed. If the HTTP method is a POST then the validation form is submitted.
+
+    """
+    return render_template(page_constants.EEG_VALIDATION_PAGE);
