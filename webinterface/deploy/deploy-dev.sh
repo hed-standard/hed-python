@@ -5,19 +5,19 @@
 ##### Constants
 
 ROOT_DIR=${PWD}
-GIT_DIR="${PWD}/hed-python"
+GIT_DIR="${PWD}/hed-python-dung"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
-GIT_REPO_URL="https://github.com/hed-standard/hed-python"
+GIT_REPO_URL="https://github.com/dungscout96/hed-python-dung"
 GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
-DEPLOY_DIR="hed-python/webinterface/deploy"
+DEPLOY_DIR="hed-python-dung/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
-WEBINTERFACE_CODE_DIR="hed-python/webinterface/webinterface/"
-VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidation/"
+WEBINTERFACE_CODE_DIR="hed-python-dung/webinterface/webinterface"
+VALIDATOR_CODE_DIR="hed-python-dung/hedvalidation/hedvalidation"
 
 GIT_HED_DIR="${PWD}/hed-specification"
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
@@ -44,6 +44,7 @@ cp $WSGI_FILE $CODE_DEPLOY_DIR
 cp -r $WEBINTERFACE_CODE_DIR $CODE_DEPLOY_DIR
 cp -r $VALIDATOR_CODE_DIR $CODE_DEPLOY_DIR
 cp -r $GIT_HED_DIR $CODE_DEPLOY_DIR
+ls -al $CODE_DEPLOY_DIR
 }
 switch_to_web_directory()
 {
@@ -65,7 +66,7 @@ docker rm -f $CONTAINER_NAME
 run_new_container()
 {
 echo Running new container...
-docker run --restart=always --name $CONTAINER_NAME -d -p $HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
+docker run --restart=always --name $CONTAINER_NAME -p $HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
 }
 
 cleanup_directory()
