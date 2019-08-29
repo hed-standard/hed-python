@@ -28,7 +28,6 @@ class TagValidator:
     TILDE_ERROR_TYPE = 'tilde';
     TIME_UNIT_CLASS = 'time';
     UNIQUE_ERROR_TYPE = 'unique';
-    LEAF_EXTENSION_ERROR_TYPE = 'leafExtension';
     DUPLICATE_ERROR_TYPE = 'duplicate';
     VALID_ERROR_TYPE = 'valid';
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed';
@@ -43,7 +42,7 @@ class TagValidator:
     TILDE = '~';
     INVALID_CHARS = '[]{}'
 
-    def __init__(self, hed_dictionary, check_for_warnings=False, leaf_extensions=False):
+    def __init__(self, hed_dictionary, check_for_warnings=False):
         """Constructor for the Tag_Validator class.
 
         Parameters
@@ -60,7 +59,6 @@ class TagValidator:
         self._hed_dictionary = hed_dictionary;
         self._hed_dictionary_dictionaries = hed_dictionary.get_dictionaries();
         self._check_for_warnings = check_for_warnings;
-        self._leaf_extensions = leaf_extensions;
         self._issue_count = 0;
         self._error_count = 0;
         self._warning_count = 0;
@@ -227,28 +225,6 @@ class TagValidator:
             validation_issues += self.check_for_required_tags(formatted_top_level_tags);
         return validation_issues;
 
-    def check_if_tag_is_leaf_extension(self, original_tag, formatted_tag):
-        """Reports a validation error if the tag provided is not a valid leaf extension.
-
-        Parameters
-        ----------
-        original_tag: string
-            The original tag that is used to report the error.
-        formatted_tag: string
-            The tag that is used to do the validation.
-        Returns
-        -------
-        string
-            A validation error string. If no errors are found then an empty string is returned.
-
-        """
-        validation_error = '';
-        if self.is_extension_allowed_tag(formatted_tag) and not self.is_leaf_extension_allowed_tag(formatted_tag):
-            validation_error = error_reporter.report_error_type(TagValidator.LEAF_EXTENSION_ERROR_TYPE,
-                                                                tag=original_tag);
-            self._increment_issue_count();
-        return validation_error;
-
     def check_if_tag_is_valid(self, original_tag, formatted_tag, previous_original_tag='', previous_formatted_tag=''):
         """Reports a validation error if the tag provided is not a valid tag or doesn't take a value.
 
@@ -273,13 +249,9 @@ class TagValidator:
         if self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag) or \
                 self.tag_takes_value(formatted_tag) or formatted_tag == TagValidator.TILDE:
             pass;
-        elif not self._leaf_extensions and is_extension_tag:
+        elif is_extension_tag:
             pass;
-        elif self._leaf_extensions and is_extension_tag and not self.is_leaf_extension_allowed_tag(formatted_tag):
-            validation_error = error_reporter.report_error_type(TagValidator.LEAF_EXTENSION_ERROR_TYPE,
-                                                                tag=original_tag);
-            self._increment_issue_count();
-        elif not is_extension_tag and self.tag_takes_value(previous_formatted_tag):
+        elif not is_extension_tag and self.tag_takes_value(previous_formatted_tag) and TagValidator.COMMA in previous_formatted_tag:
             validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
                                                                 tag=original_tag,
                                                                 previous_tag=previous_original_tag);
@@ -351,26 +323,6 @@ class TagValidator:
             if self._hed_dictionary.tag_has_attribute(tag_substring,
                                                       TagValidator.EXTENSION_ALLOWED_ATTRIBUTE):
                 return True;
-        return False;
-
-    def is_leaf_extension_allowed_tag(self, formatted_tag):
-        """Checks to see if the parent of the tag has the 'extensionAllowed' attribute.
-
-        Parameters
-        ----------
-        formatted_tag: string
-            The tag that is used to do the validation.
-        Returns
-        -------
-        boolean
-            True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
-
-        """
-        tag_slash_indices = self.get_tag_slash_indices(formatted_tag);
-        tag_slash_index = tag_slash_indices[-1];
-        tag_substring = self.get_tag_substring_by_end_index(formatted_tag, tag_slash_index);
-        if self._hed_dictionary.tag_has_attribute(tag_substring, TagValidator.EXTENSION_ALLOWED_ATTRIBUTE):
-            return True;
         return False;
 
     def tag_takes_value(self, formatted_tag):
@@ -831,12 +783,6 @@ class TagValidator:
                     # If we have an opening group bracket by itself without a tag, it's actually starting a new group.
                     if current_tag.strip() == TagValidator.OPENING_GROUP_BRACKET:
                         current_tag = ''
-                    elif self._is_valid_tag_with_parentheses(hed_string, current_tag, character_index):
-                        index_after_parentheses = self._get_index_at_end_of_parentheses(
-                            hed_string, current_tag, character_index)
-                        character_indices_iterator = self.skip_iterations(
-                            character_indices_iterator, character_index, index_after_parentheses)
-                        current_tag = ''
                     else:
                         validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE,
                                                                             tag=current_tag)
@@ -874,58 +820,6 @@ class TagValidator:
         for iteration in range(iterations_to_skip):
             next(iterator, None);
         return iterator;
-
-    def _is_valid_tag_with_parentheses(self, hed_string, current_tag, character_index):
-        """Checks to see if the current tag with the next set of parentheses in the HED string is valid. Some tags have
-           parentheses and this function is implemented to avoid reporting a missing comma error.
-
-        Parameters
-        ----------
-        hed_string: string
-            A HED string.
-        current_tag: string
-            The current tag in the HED string.
-        character_index: integer
-            The index of the current character.
-        Returns
-        -------
-        boolean
-            True, if the current tag with the next set of parentheses in the HED string is valid. False, if otherwise.
-
-        """
-        current_tag = current_tag[:-1];
-        rest_of_hed_string = hed_string[character_index:];
-        current_tag_with_parentheses, _ = TagValidator.get_next_set_of_parentheses_in_hed_string(
-            current_tag + rest_of_hed_string);
-        current_tag_with_parentheses = current_tag_with_parentheses.lower();
-        if self.tag_takes_value(current_tag_with_parentheses):
-            return True;
-        return self.tag_is_valid(current_tag_with_parentheses);
-
-    def _get_index_at_end_of_parentheses(self, hed_string, current_tag, character_index):
-        """Checks to see if the current tag with the next set of parentheses in the HED string is valid. Some tags have
-           parentheses and this function is implemented to avoid reporting a missing comma error.
-
-        Parameters
-        ----------
-        hed_string: string
-            A HED string.
-        current_tag: string
-            The current tag in the HED string.
-        character_index: integer
-            The index of the current character.
-        Returns
-        -------
-        integer
-            The position at the end of the next set of parentheses.
-
-        """
-        current_tag = current_tag[:-1];
-        rest_of_hed_string = hed_string[character_index:];
-        _, parentheses_length = TagValidator.get_next_set_of_parentheses_in_hed_string(current_tag +
-                                                                                       rest_of_hed_string);
-        final_index = character_index - len(current_tag) + parentheses_length
-        return final_index
 
     @staticmethod
     def report_missing_comma_error(error_tag):
@@ -1001,33 +895,6 @@ class TagValidator:
         return last_non_empty_character == TagValidator.CLOSING_GROUP_BRACKET and not \
             (TagValidator.character_is_delimiter(current_character)
              or current_character == TagValidator.CLOSING_GROUP_BRACKET);
-
-    @staticmethod
-    def get_next_set_of_parentheses_in_hed_string(hed_string):
-        """Gets the next set of parentheses in the provided HED string.
-
-        Parameters
-        ----------
-        hed_string: string
-            A HED string.
-        Returns
-        -------
-        string
-            A tuple containing the next set of parentheses in the HED string and the length of the string in the
-            parentheses. If not found, then the entire HED string is returned.
-
-        """
-        parentheses_length = 0;
-        set_of_parentheses = '';
-        opening_parenthesis_found = False;
-        for character in hed_string:
-            set_of_parentheses += character
-            if character == TagValidator.OPENING_GROUP_BRACKET:
-                opening_parenthesis_found = True;
-            if character == TagValidator.CLOSING_GROUP_BRACKET and opening_parenthesis_found:
-                return set_of_parentheses, parentheses_length + 1;
-            parentheses_length += 1;
-        return set_of_parentheses, parentheses_length;
 
     @staticmethod
     def character_is_delimiter(character):

@@ -47,7 +47,6 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
                       % (previous_tag, tag),
         'duplicate': '\tERROR: Duplicate tag - \"%s\"\n' % tag,
         'isNumeric': '\tERROR: Invalid numeric tag - \"%s\"\n' % tag,
-        'leafExtension': '\tERROR: Invalid tag. Extensions are only allowed for leaf tags - \"%s\"\n' % tag,
         'row': 'Issues in row %s:\n' % str(error_row),
         'column': 'Issues in row %s column %s:\n' % (str(error_row), str(error_column)),
         'requireChild': '\tERROR: Descendant tag required - \"%s\"\n' % tag,

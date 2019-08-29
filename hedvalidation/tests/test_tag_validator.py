@@ -64,13 +64,12 @@ class Test(unittest.TestCase):
         cls.valid_time_string = '12:24';
         cls.invalid_time_string = '54:54';
 
-        # Todo: update this for 7.0 schema.  I don't know any valid tags with parentheses
-        cls.valid_formatted_tag_with_parentheses = 'paradigm/reading (covert)';
+        cls.valid_formatted_tag_with_parentheses = 'paradigm/reading - covert';
         cls.invalid_formatted_tag_with_parentheses = 'Item/2D shape/Sector (covert)';
         cls.valid_formatted_tag_with_parentheses_group = 'event/label/hed string, event/description/this is a hed string, ' \
                                                          'event/category/participant response, ' \
                                                          '(item/2D shape/sector, Attribute/Visual/Color/Red)'
-        cls.valid_group_tag_with_parentheses = '(paradigm/reading (covert), paradigm/reading (overt))'
+        cls.valid_group_tag_with_parentheses = '(paradigm/reading - covert, paradigm/reading - overt)'
         cls.valid_formatted_tag_with_complex_parentheses = '((Item/ID/Description value,Item/ID/Local)~' \
                                                             '(Item/ID/Local,Item/Group ID/Description value))'
 
@@ -84,11 +83,7 @@ class Test(unittest.TestCase):
                                                    'Attribute/Visual/Color/Red'];
         cls.invalid_formatted_duplicate_tag_list = ['item/2D shape/sector', 'attribute/visual/color/red',
                                                     'attribute/visual/color/red'];
-        cls.hed_string_ending_with_parentheses = 'Event/Description/Correct to respond to the stimulus (Button Down)';
-        cls.valid_leaf_extension_tag = 'Attribute/Role';
-        cls.valid_formatted_leaf_extension_tag = 'attribute/role';
-        cls.invalid_leaf_extension_tag = 'Attribute/Character Role/White Mage';
-        cls.invalid_formatted_leaf_extension_tag = 'attribute/character role/white mage';
+        cls.hed_string_ending_with_parentheses = 'Event/Description/Correct to respond to the stimulus - Button Down';
 
         cls.invalid_tag_with_bad_characters = 'event/description/this is a hed string [badbrackets]'
 
@@ -342,17 +337,6 @@ class Test(unittest.TestCase):
                                                                        self.current_opening_bracket_character);
         self.assertFalse(comma_is_missing);
 
-    def test_get_next_set_of_parentheses_in_hed_string(self):
-        hed_string, end_point = TagValidator.get_next_set_of_parentheses_in_hed_string(self.valid_hed_string);
-        self.assertTrue(len(self.valid_hed_string) == end_point);
-        hed_string, end_point = TagValidator.get_next_set_of_parentheses_in_hed_string(
-            self.valid_hed_string_with_group);
-        self.assertTrue(len(self.valid_hed_string_with_group) == end_point)
-        hed_string, end_point = TagValidator.get_next_set_of_parentheses_in_hed_string(
-            self.valid_group_tag_with_parentheses);
-        self.assertTrue(len(self.valid_group_tag_with_parentheses) != end_point);
-
-
     def test_report_missing_comma_error(self):
         missing_comma_error = TagValidator.report_missing_comma_error(self.invalid_original_tag);
         self.assertTrue(missing_comma_error);
@@ -364,16 +348,6 @@ class Test(unittest.TestCase):
         self.assertFalse(validation_error);
         validation_error = self.tag_validator.check_if_duplicate_tags_exist(
             self.invalid_original_duplicate_tag_list, self.invalid_formatted_duplicate_tag_list);
-        self.assertIsInstance(validation_error, str);
-        self.assertTrue(validation_error);
-
-    def test_check_if_tag_is_leaf_extension(self):
-        validation_error = self.tag_validator.check_if_tag_is_leaf_extension(self.valid_leaf_extension_tag,
-                                                                             self.valid_formatted_leaf_extension_tag);
-        self.assertIsInstance(validation_error, str);
-        self.assertFalse(validation_error);
-        validation_error = self.tag_validator.check_if_tag_is_leaf_extension(self.invalid_leaf_extension_tag,
-                                                                             self.invalid_formatted_leaf_extension_tag);
         self.assertIsInstance(validation_error, str);
         self.assertTrue(validation_error);
 

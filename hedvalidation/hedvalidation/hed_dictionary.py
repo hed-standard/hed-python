@@ -113,10 +113,10 @@ class HedDictionary:
         for TAG_DICTIONARY_KEY in HedDictionary.TAG_DICTIONARY_KEYS:
             tags, tag_elements = self.get_tags_by_attribute(TAG_DICTIONARY_KEY);
             if HedDictionary.EXTENSION_ALLOWED_ATTRIBUTE == TAG_DICTIONARY_KEY:
-                leaf_tags = self._get_all_leaf_tags();
-                leaf_tags_dictionary = self._string_list_2_lowercase_dictionary(leaf_tags);
+                child_tags = self._get_all_child_tags(tag_elements)
+                child_tags_dictionary = self._string_list_2_lowercase_dictionary(child_tags);
                 tag_dictionary = self._string_list_2_lowercase_dictionary(tags);
-                tag_dictionary.update(leaf_tags_dictionary);
+                tag_dictionary.update(child_tags_dictionary);
             elif HedDictionary.DEFAULT_UNIT_ATTRIBUTE == TAG_DICTIONARY_KEY or \
                  HedDictionary.TAG_UNIT_CLASS_ATTRIBUTE == TAG_DICTIONARY_KEY:
                 tag_dictionary = self._populate_tag_to_attribute_dictionary(tags, tag_elements, TAG_DICTIONARY_KEY);
@@ -420,11 +420,13 @@ class HedDictionary:
             elements = parent_element.xpath('.//%s' % element_name);
         return elements;
 
-    def _get_all_leaf_tags(self, element_name='node', exclude_take_value_tags=True):
-        """Gets the tag elements that are leaf nodes.
+    def _get_all_child_tags(self, tag_elements=None, element_name='node', exclude_take_value_tags=True):
+        """Gets the tag elements that are children of the given nodes
 
         Parameters
         ----------
+        tag_elements: list of nodes
+            The list to return all child tags from
         element_name: string
             The name of the XML tag elements. The default is 'node'.
         exclude_take_value_tags: boolean
@@ -433,19 +435,20 @@ class HedDictionary:
         Returns
         -------
         list
-            A list containing the tags that are leaf nodes.
+            A list containing the tags that are child nodes.
 
         """
-        leaf_tags = [];
-        tag_elements = self._get_elements_by_name(element_name);
+        child_tags = []
+        if tag_elements is None:
+            tag_elements = self._get_elements_by_name(element_name)
         for tag_element in tag_elements:
-            tag_element_children = self._get_elements_by_name(element_name, tag_element);
-            if len(tag_element_children) == 0:
-                tag = self._get_tag_path_from_tag_element(tag_element);
+            tag_element_children = self._get_elements_by_name(element_name, tag_element)
+            for child_tag_element in tag_element_children:
+                tag = self._get_tag_path_from_tag_element(child_tag_element)
                 if exclude_take_value_tags and tag[-1] == '#':
-                    continue;
-                leaf_tags.append(tag);
-        return leaf_tags;
+                    continue
+                child_tags.append(tag)
+        return child_tags
 
     def tag_has_attribute(self, tag, tag_attribute):
         """Checks to see if the tag has a specific attribute.

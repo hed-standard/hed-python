@@ -37,7 +37,7 @@ class HedInputReader:
     HED_XML_EXTENSION = '.xml';
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name='', hed_xml_file='', leaf_extensions=False):
+                 required_tag_columns={}, worksheet_name='', hed_xml_file=''):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -73,8 +73,7 @@ class HedInputReader:
         self._has_column_names = has_column_names;
         self._worksheet_name = worksheet_name;
         self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
-        self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings,
-                                           leaf_extensions=leaf_extensions);
+        self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings);
         self._validation_issues = self._validate_hed_input();
 
     def get_tag_validator(self):

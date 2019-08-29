@@ -101,12 +101,12 @@ class Test(unittest.TestCase):
         for hed_dictionary_key in dictionaries:
             self.assertIsInstance(dictionaries[hed_dictionary_key], dict);
 
-    def test_get_all_leaf_tags(self):
-        leaf_tags = self.hed_dictionary._get_all_leaf_tags();
-        leaf_tags_with_take_value_tags = self.hed_dictionary._get_all_leaf_tags(exclude_take_value_tags=False);
-        self.assertIsInstance(leaf_tags, list);
-        self.assertIsInstance(leaf_tags_with_take_value_tags, list);
-        self.assertNotEqual(len(leaf_tags), len(leaf_tags_with_take_value_tags));
+    def test_get_all_child_tags(self):
+        child_tags = self.hed_dictionary._get_all_child_tags();
+        child_tags_with_take_value_tags = self.hed_dictionary._get_all_child_tags(exclude_take_value_tags=False);
+        self.assertIsInstance(child_tags, list);
+        self.assertIsInstance(child_tags_with_take_value_tags, list);
+        self.assertNotEqual(len(child_tags), len(child_tags_with_take_value_tags));
 
     def test_tag_has_attribute(self):
         dictionaries = self.hed_dictionary.get_dictionaries();
