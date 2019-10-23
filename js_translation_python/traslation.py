@@ -12,13 +12,11 @@ class Tests(unittest.TestCase):
             'valid': \
                 '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px'
         }
-
         expectedResults = {
             'extraOpening': False,
             'extraClose': False,
             'valid': True
         }
-
         expectedIssues = {
             #I think this is right
             'extraOpening': [error_reporter.report_error_type('parentheses', open_bracket_count=2, closing_bracket_count=1)],
@@ -127,6 +125,7 @@ class Tests(unittest.TestCase):
             'illegalComma': False
         }
         expectedIssues = {
+            #NOT COMPLETE
             'takesValue': [],
             'full': [],
             'extensionsAllowed': [],
@@ -171,6 +170,7 @@ class Tests(unittest.TestCase):
             'missingChild' : False
         }
         expectedIssues = {
+            #NOT COMPLETE
             'hasChild' : [],
             'missingChild' : [error_reporter.report_error_type()]
         }
@@ -192,14 +192,61 @@ class Tests(unittest.TestCase):
             'timeValue': True
         }
         expectedIssues = {
+            #NOT COMPLETE
             'hasRequiredUnit': [],
             'missingRequiredUnit': [error_reporter.report_error_type()],
             'notRequiredNumber': [],
             'notRequiredScientific': [],
             'timeValue': []
         }
+        validator(testString, expectedResults, expectedIssues)
 
-
-
-
-
+    def correct_units(self):
+        testString = {
+            'correctUnit' : 'Event/Duration/3 ms',
+            'correctUnitScientific' : 'Event/Duration/3.5e1 ms',
+            'incorrectUnit' : 'Event/Duration/3 cm',
+            'notRequiredNumber' : 'Attribute/Color/Red/0.5',
+            'notRequiredScientific' : 'Attribute/Color/Red/5e-1',
+            'properTime' : 'Item/2D shape/Clock face/8:30',
+            'invalidTime' : 'Item/2D shape/Clock face/54:54'
+        }
+        expectedResults = {
+            'correctUnit': True,
+            'correctUnitScientific': True,
+            'incorrectUnit': False,
+            'notRequiredNumber': True,
+            'notRequiredScientific': True,
+            'properTime': True,
+            'invalidTime': False
+        }
+        legalTimeUnits = [
+            's',
+            'second',
+            'seconds',
+            'centiseconds',
+            'centisecond',
+            'cs',
+            'hour:min',
+            'day',
+            'days',
+            'ms',
+            'milliseconds',
+            'millisecond',
+            'minute',
+            'minutes',
+            'hour',
+            'hours',
+            ]
+        expectedIssues = {
+            #NOT COMPLETE
+            'correctUnit': [],
+            'correctUnitScientific': [],
+            'incorrectUnit': [error_reporter.report_error_type()],
+            'notRequiredNumber': [],
+            'notRequiredScientific': [],
+            'properTime': [],
+            'invalidTime': [error_reporter.report_error_type()]
+        }
+        validator(testString, expectedResults, expectedIssues)
+    def no_duplicates(self):
