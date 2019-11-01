@@ -30,6 +30,10 @@ class DevelopmentConfig(Config):
     TESTING = False;
 
 
+class ProductionConfig(Config):
+    DEBUG = False;
+    TESTING = False;
+
 class TestConfig(Config):
     DEBUG = False;
     TESTING = True;
