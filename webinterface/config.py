@@ -17,7 +17,7 @@ class Config(object):
         f.write(str(os.urandom(24)))
         f.close()
     f = open('/var/log/hedtools/tmp.txt', 'r')
-    SECRET_KEY = f.read() #os.getenv('SECRET_KEY')#os.urandom(16) #'\xb3\xc7\xea\xda\x9d\xcd\xd3\x87q\xf1\xa5\x00\xacG\x1b\x9e\xec\x02p\x96\x0b\r\xdf\xac'; # os.urandom(24);
+    SECRET_KEY = f.read() #os.getenv('SECRET_KEY') # os.urandom(24);
     f.close()
     STATIC_URL_PATH = None;
     STATIC_URL_PATH_ATTRIBUTE_NAME = 'STATIC_URL_PATH';
