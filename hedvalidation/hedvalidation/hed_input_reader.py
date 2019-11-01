@@ -319,26 +319,51 @@ class HedInputReader:
             validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
         return validation_issues;
 
+    def _validate_hed_string_from_dict(self, hed_string_dict):
+        report = '';
+        for key in hed_string_dict.keys():
+            hed_string = hed_string_dict[key]["hed_string"]
+            hed_string_delimiter = HedStringDelimiter(hed_string);
+            validation_issues = '';
+            if hed_string_dict[key]["type"] != "eventSpecific":
+                validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
+            validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
+
+            tag_validator_issues = self._tag_validator.run_hed_string_validators(hed_string);
+            if not tag_validator_issues:
+                tag_validator_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
+                tag_validator_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
+                validation_issues += tag_validator_issues
+
+            if validation_issues:
+                eventFile = "";
+                if hed_string_dict[key]["type"] == "fieldValue":
+                    report += "Issues with tags of event field %s, code '%s':\n" % (hed_string_dict[key]["typeValue"], key) + validation_issues
+                elif hed_string_dict[key]["type"] == "eventSpecific":
+                    if not eventFile or eventFile != hed_string_dict[key]["typeValue"]:
+                        report += "Issues with event-specific tags of %s:\n" % hed_string_dict[key]["typeValue"]
+                    report += "At row %s:\n" % key + validation_issues
+        return report
+
     def _validate_hed_string(self, hed_string):
         """Validates the tags in a HED string.
 
          Parameters
          ----------
          hed_string: string
-            A HED string.
+            A HED string or an array of HED string.
          Returns
          -------
          string
              The issues associated with the HED string.
 
          """
-        validation_issues = '';
-        validation_issues += self._tag_validator.run_hed_string_validators(hed_string);
+        validation_issues = self._tag_validator.run_hed_string_validators(hed_string);
         if not validation_issues:
             hed_string_delimiter = HedStringDelimiter(hed_string);
-            validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
+            validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
         return validation_issues;
 
