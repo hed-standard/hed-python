@@ -138,7 +138,9 @@ class HedInputReader:
              The issues that were found.
 
          """
-        if HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
+        if type(self._hed_input) is dict:
+            validation_issues = self._validate_hed_string_from_dict(self._hed_input)
+        elif HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
             validation_issues = self._validate_hed_tags_in_file();
         else:
             validation_issues = self._validate_hed_string(self._hed_input);
