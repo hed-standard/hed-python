@@ -200,14 +200,11 @@ def report_EEG_events_validation_status(request):
         # parse hed_strings from json
         hed_strings = json.loads(form_data["hed_strings"])
         # Validate
-        strings_with_issues_count = 0 # count number of strings that have issues
         hed_input_reader = HedInputReader(hed_strings,
                                           check_for_warnings=check_for_warnings,
                                           hed_xml_file=hed_xml_file)
         issues = hed_input_reader.get_validation_issues();
-        # print(issues)
         # Prepare response
-        validation_status["issues_count"] = 1
         validation_status["issues"] = issues
     except:
         validation_status[error_constants.ERROR_KEY] = traceback.format_exc()
