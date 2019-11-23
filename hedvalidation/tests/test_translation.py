@@ -165,33 +165,84 @@ class Tests(unittest.TestCase):
             'nonExtensionsAllowed': report_error_type('valid', tag=testString['nonExtensionsAllowed']),
             'illegalComma': report_error_type('comma', previous_tag='Event/Label/This is a label', tag='This/Is/A/Tag')
         }
+        #alex used semantic validation
         self.validate(testString,expectedResults,expectedIssues)
+    # can not be finished without sematic validator
+    # def test_proper_capitalization(self):
+    #     # errors with camelCase test string not being a valid test string
+    #     testString = {
+    #         'proper' : 'Event/Category/Experimental stimulus',
+    #         'camelCase' : 'DoubleEvent/Something',
+    #         'takesValue' : 'Attribute/Temporal rate/20 Hz',
+    #         'numeric' : 'Attribute/Repetition/20',
+    #         'lowercase' : 'Event/something'
+    #     }
+    #     expectedResults = {
+    #         'proper': True,
+    #         'camelCase': True,
+    #         'takesValue': True,
+    #         'numeric': True,
+    #         'lowercase': False
+    #     }
+    #     expectedIssues = {
+    #         #NOT COMPLETE
+    #         'proper': '',
+    #         'camelCase': '',
+    #         'takesValue': '',
+    #         'numeric': '',
+    #         'lowercase': report_error_type('capitalization', tag=testString['lowercase'])
+    #     }
+    #     # needs to use semantic valdiation
+    #     self.validate(testString, expectedResults, expectedIssues)
 
-    def test_proper_capitalization(self):
-        # errors with camelCase test string not being a valid test string
-        testString = {
-            'proper' : 'Event/Category/Experimental stimulus',
-            'camelCase' : 'DoubleEvent/Something',
-            'takesValue' : 'Attribute/Temporal rate/20 Hz',
-            'numeric' : 'Attribute/Repetition/20',
-            'lowercase' : 'Event/something'
-        }
-        expectedResults = {
-            'proper': True,
-            'camelCase': True,
-            'takesValue': True,
-            'numeric': True,
-            'lowercase': False
-        }
-        expectedIssues = {
-            #NOT COMPLETE
-            'proper': '',
-            'camelCase': '',
-            'takesValue': '',
-            'numeric': '',
-            'lowercase': report_error_type('capitalization', tag=testString['lowercase'])
-        }
-        self.validate(testString, expectedResults, expectedIssues)
+    # # needs semantic validator
+    # def test_no_more_than_two_tildes(self):
+    #     testStrings = {
+    #         'noTildeGroup': 'Event/Category/Experimental stimulus,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
+    #         'oneTildeGroup': 'Event/Category/Experimental stimulus,(Item/Object/Vehicle/Car ~ Attribute/Object control/Perturb)',
+    #         'twoTildeGroup': 'Event/Category/Experimental stimulus,(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar, Attribute/Visual/Color/Red)',
+    #         'invalidTildeGroup': 'Event/Category/Experimental stimulus,(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar, Attribute/Visual/Color/Red ~ Attribute/Object control/Perturb)',
+    #     }
+    #     expectedResults = {
+    #         'noTildeGroup': True,
+    #         'oneTildeGroup': True,
+    #         'twoTildeGroup': True,
+    #         'invalidTildeGroup': False
+    #     }
+    #     expectedIssues = {
+    #         'noTildeGroup': '',
+    #         'oneTildeGroup': '',
+    #         'twoTildeGroup': '',
+    #         'invalidTildeGroup': report_error_type('tilde', tag='Event/Category/Experimental stimulus,(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar, Attribute/Visual/Color/Red ~ Attribute/Object control/Perturb)')
+    #     }
+    #     # uses seemantic validaiton
+    #     self.validate(testStrings, expectedResults, expectedIssues)
+
+    # requires semantic validator
+    # def test_includes_all_required_tags(self):
+    #     testStrings = {
+    #         'complete': 'Event/Label/Bus,Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+    #         'missingLabel': 'Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+    #         'missingCategory': 'Event/Label/Bus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+    #         'missingDescription': 'Event/Label/Bus,Event/Category/Experimental stimulus,Item/Object/Vehicle/Bus',
+    #         'missingAllRequired': 'Item/Object/Vehicle/Bus',
+    #     }
+    #     expectedResults = {
+    #         'complete': True,
+    #         'missingLabel': False,
+    #         'missingCategory': False,
+    #         'missingDescription': False,
+    #         'missingAllRequired': False,
+    #     }
+    #     expectedIssues = {
+    #         'complete': report_error_type(),
+    #         'missingLabel': report_error_type(),
+    #         'missingCategory': report_error_type(),
+    #         'missingDescription': report_error_type(),
+    #         'missingAllRequired': report_error_type(),
+    #     }
+    #     # uses semnatic validator
+    #     self.validate(testStrings, expectedResults, expectedIssues)
 
     # def child_required(self):
     #     testString = {
@@ -282,4 +333,40 @@ class Tests(unittest.TestCase):
     #         'invalidTime': [error_reporter.report_error_type()]
     #     }
     #     validator(testString, expectedResults, expectedIssues)
-    # def no_duplicates(self):
+    # def test_no_duplicates(self):
+    #         testStrings = {
+    #             'topLevelDuplicate': 'Event/Category/Experimental stimulus,Event/Category/Experimental stimulus',
+    #             'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Experimental stimulus,Attribute/Visual/Color/Purple,Event/Category/Experimental stimulus)',
+    #             'noDuplicate': 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple',
+    #             'legalDuplicate':'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
+    #         }
+    #         expectedResults = {
+    #             'topLevelDuplicate': False,
+    #             'groupDuplicate': False,
+    #             'legalDuplicate': True,
+    #             'noDuplicate': True
+    #         }
+    #         expectedIssues = {
+    #             'topLevelDuplicate':  report_error_type(),
+    #             'groupDuplicate': report_error_type(),
+    #             'legalDuplicate': report_error_type(),
+    #             'noDuplicate': True
+    #         }
+            # alex used semantic validation here
+    #        validator(testStrings, expectedResults, expectedIssues)
+    # def multiple_copies_unique_tags(self):
+    #     testStrings = {
+    #         'legal': 'Event/Description/Rail vehicles,Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
+    #         'multipleDesc': 'Event/Description/Rail vehicles,Event/Description/Locomotive-pulled or multiple units,Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)'
+    #     }
+    #     expectedResults = {
+    #         'legal': True,
+    #         'multipleDesc': False
+    #     }
+    #     expectedIssues = {
+    #         'legal': report_error_type(),
+    #         'multipleDesc': report_error_type()
+    #     }
+    #     # alex used seantic validation here
+    #     validator(testStrings, expectedResults, expectedIssues)
+
