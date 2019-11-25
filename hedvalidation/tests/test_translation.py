@@ -60,14 +60,14 @@ class Tests(unittest.TestCase):
     # Validator does not properly report errors with commas and does not report any error for extra tildes
     def test_malformed_delimiters(self):
         testStrings = {
-            # 'missingOpeningComma' : \
-            #     '/Action/Reach/To touch(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            # 'missingCLosingComma' : \
-            #     '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            # 'extraOpeningComma' : \
-            #     ',/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            # 'extraClosingComma' : \
-            #     '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px,',
+            'missingOpeningComma' : \
+                '/Action/Reach/To touch(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+            'missingCLosingComma' : \
+                '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+            'extraOpeningComma' : \
+                ',/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+            'extraClosingComma' : \
+                '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px,',
             'extraOpeningTilde' : \
                 '~/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
             'extraClosingTilde' : \
@@ -85,10 +85,10 @@ class Tests(unittest.TestCase):
         }
 
         expectedResults = {
-            # 'missingOpeningComma' : False,
-            # 'missingClosingComma' : False,
-            # 'extraOpeningComma' : False,
-            # 'extraClosingComma' : False,
+            'missingOpeningComma' : False,
+            'missingClosingComma' : False,
+            'extraOpeningComma' : False,
+            'extraClosingComma' : False,
             'extraOpeningTilde' : False,
             'extraClosingTilde' : False,
             # 'multipleExtraOpeningDelimiters' : False,
@@ -99,10 +99,10 @@ class Tests(unittest.TestCase):
         }
         expectedIssues = {
             #NOT COMPLETE
-            # 'missingOpeningComma' : report_error_type('comma'),
-            # 'missingClosingComma': report_error_type('comma'),
-            # 'extraOpeningComma': report_error_type('comma'),
-            # 'extraClosingComma': report_error_type('comma'),
+            'missingOpeningComma' : report_error_type('comma'),
+            'missingClosingComma': report_error_type('comma'),
+            'extraOpeningComma': report_error_type('comma'),
+            'extraClosingComma': report_error_type('comma'),
             'extraOpeningTilde': report_error_type('tilde'),
             'extraClosingTilde': report_error_type('tilde'),
             # 'multipleExtraOpeningDelimiters': report_error_type('comma'),
