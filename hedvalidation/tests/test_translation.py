@@ -22,7 +22,7 @@ class Tests(unittest.TestCase):
 
             self.assertTrue(has_no_issues == hed_tag_string)
 
-    def validate_syntactic(self, testStrings, expectedIssues, expectedResults, testFunction):
+    def validate_syntactic_base(self, testStrings, expectedIssues, expectedResults, testFunction):
         for testKey in testStrings:
             testIssues = []
             parsedTestStrings = HedStringDelimiter(testStrings[testKey])
