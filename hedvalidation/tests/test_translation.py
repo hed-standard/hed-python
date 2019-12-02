@@ -5,6 +5,7 @@ import os;
 from hedvalidation.hed_string_delimiter import HedStringDelimiter;
 from hedvalidation.hed_input_reader import HedInputReader;
 from hedvalidation.error_reporter import report_error_type;
+from hedvalidation.warning_reporter import report_warning_type;
 from hedvalidation.tag_validator import TagValidator;
 from hedvalidation.hed_dictionary import HedDictionary;
 
@@ -12,6 +13,9 @@ class Tests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.generic_hed_input_reader = HedInputReader('Attribute/onset')
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml');
+        hed_dictionary = HedDictionary(hed_xml);
+        self.tagValidator = TagValidator(hed_dictionary)
 
     def validate(self, test_strings, expected_results, expected_issues):
         for test in test_strings:
@@ -27,12 +31,13 @@ class Tests(unittest.TestCase):
 
     def validate_syntactic_base(self, testStrings, expectedIssues, expectedResults, testFunction):
         for testKey in testStrings:
-            testIssues = []
             parsedTestStrings = HedStringDelimiter(testStrings[testKey])
-
             testResult = testFunction(str(parsedTestStrings), str(testStrings[testKey]))
-            self.assertEqual(testResult, expectedResults[testKey], testStrings[testKey])
-            self.assertCountEqual(testIssues, expectedIssues[testKey], testStrings[testKey])
+            expectedIssue = expectedIssues[testKey]
+            expectedResult = expectedResults[testKey]
+            has_no_issues = (testResult == "")
+            self.assertEqual(testResult, expectedIssues[testKey], testStrings[testKey])
+            self.assertCountEqual(testResult, expectedIssues[testKey], testStrings[testKey])
 
     def test_mismatched_parentheses(self):
         testStrings =   {
@@ -169,11 +174,8 @@ class Tests(unittest.TestCase):
         self.validate(testString,expectedResults,expectedIssues)
 
     def validate_syntactic(self,testStrings, expectedResults, expectedIssues, checkForWarnings):
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml');
-        hed_dictionary = HedDictionary(hed_xml);
-        tagValidator = TagValidator(hed_dictionary)
         self.validate_syntactic_base(testStrings,expectedResults,expectedIssues, lambda parsedString, originalTag:
-        tagValidator.run_individual_tag_validators(formatted_tag=parsedString, original_tag=originalTag))
+        self.tagValidator.check_capitalization(formatted_tag=parsedString, original_tag=originalTag))
 
     def test_proper_capitalization(self):
         # errors with camelCase test string not being a valid test string
@@ -197,10 +199,10 @@ class Tests(unittest.TestCase):
             'camelCase': '',
             'takesValue': '',
             'numeric': '',
-            'lowercase': report_error_type('capitalization', tag=testString['lowercase'])
+            'lowercase': report_warning_type('cap', tag=testString['lowercase'])
         }
         # needs to use semantic valdiation
-        self.validate_syntactic(testString, expectedResults, expectedIssues, True)
+        self.validate_syntactic(testStrings=testString, expectedIssues=expectedResults, expectedResults=expectedIssues, checkForWarnings=True)
 
     # # needs semantic validator
     # def test_no_more_than_two_tildes(self):

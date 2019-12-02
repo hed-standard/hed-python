@@ -54,7 +54,6 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
         'unique': '\tERROR: Multiple unique tags with prefix - \"%s\"\n' % tag_prefix,
         'unitClass': '\tERROR: Invalid unit - \"%s\" valid units are "%s"\n' % (tag, unit_class_units),
         'valid': '\tERROR: Invalid tag - \"%s\"\n' % tag,
-        'capitalization': '\tWARNING: First word not capitalized or camel case \"%s\"\n' % tag
 
     }
     return error_types.get(error_type, None);
