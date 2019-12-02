@@ -1,9 +1,12 @@
 import random;
 import unittest;
+import os;
 
 from hedvalidation.hed_string_delimiter import HedStringDelimiter;
 from hedvalidation.hed_input_reader import HedInputReader;
 from hedvalidation.error_reporter import report_error_type;
+from hedvalidation.tag_validator import TagValidator;
+from hedvalidation.hed_dictionary import HedDictionary;
 
 class Tests(unittest.TestCase):
     @classmethod
@@ -27,7 +30,7 @@ class Tests(unittest.TestCase):
             testIssues = []
             parsedTestStrings = HedStringDelimiter(testStrings[testKey])
 
-            testResult = testFunction(parsedTestStrings, testIssues)
+            testResult = testFunction(str(parsedTestStrings), str(testStrings[testKey]))
             self.assertEqual(testResult, expectedResults[testKey], testStrings[testKey])
             self.assertCountEqual(testIssues, expectedIssues[testKey], testStrings[testKey])
 
@@ -164,33 +167,40 @@ class Tests(unittest.TestCase):
         }
         #alex used semantic validation
         self.validate(testString,expectedResults,expectedIssues)
-    # can not be finished without sematic validator
-    # def test_proper_capitalization(self):
-    #     # errors with camelCase test string not being a valid test string
-    #     testString = {
-    #         'proper' : 'Event/Category/Experimental stimulus',
-    #         'camelCase' : 'DoubleEvent/Something',
-    #         'takesValue' : 'Attribute/Temporal rate/20 Hz',
-    #         'numeric' : 'Attribute/Repetition/20',
-    #         'lowercase' : 'Event/something'
-    #     }
-    #     expectedResults = {
-    #         'proper': True,
-    #         'camelCase': True,
-    #         'takesValue': True,
-    #         'numeric': True,
-    #         'lowercase': False
-    #     }
-    #     expectedIssues = {
-    #         #NOT COMPLETE
-    #         'proper': '',
-    #         'camelCase': '',
-    #         'takesValue': '',
-    #         'numeric': '',
-    #         'lowercase': report_error_type('capitalization', tag=testString['lowercase'])
-    #     }
-    #     # needs to use semantic valdiation
-    #     self.validate(testString, expectedResults, expectedIssues)
+
+    def validate_syntactic(self,testStrings, expectedResults, expectedIssues, checkForWarnings):
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml');
+        hed_dictionary = HedDictionary(hed_xml);
+        tagValidator = TagValidator(hed_dictionary)
+        self.validate_syntactic_base(testStrings,expectedResults,expectedIssues, lambda parsedString, originalTag:
+        tagValidator.run_individual_tag_validators(formatted_tag=parsedString, original_tag=originalTag))
+
+    def test_proper_capitalization(self):
+        # errors with camelCase test string not being a valid test string
+        testString = {
+            'proper' : 'Event/Category/Experimental stimulus',
+            'camelCase' : 'DoubleEvent/Something',
+            'takesValue' : 'Attribute/Temporal rate/20 Hz',
+            'numeric' : 'Attribute/Repetition/20',
+            'lowercase' : 'Event/something'
+        }
+        expectedResults = {
+            'proper': True,
+            'camelCase': True,
+            'takesValue': True,
+            'numeric': True,
+            'lowercase': False
+        }
+        expectedIssues = {
+            #NOT COMPLETE
+            'proper': '',
+            'camelCase': '',
+            'takesValue': '',
+            'numeric': '',
+            'lowercase': report_error_type('capitalization', tag=testString['lowercase'])
+        }
+        # needs to use semantic valdiation
+        self.validate_syntactic(testString, expectedResults, expectedIssues, True)
 
     # # needs semantic validator
     # def test_no_more_than_two_tildes(self):
