@@ -36,8 +36,8 @@ class Tests(unittest.TestCase):
             expectedIssue = expectedIssues[testKey]
             expectedResult = expectedResults[testKey]
             has_no_issues = (testResult == "")
-            self.assertEqual(testResult, expectedIssues[testKey], testStrings[testKey])
-            self.assertCountEqual(testResult, expectedIssues[testKey], testStrings[testKey])
+            self.assertEqual(testResult, expectedIssue, testStrings[testKey])
+            self.assertCountEqual(testResult, expectedIssue, testStrings[testKey])
 
     def test_mismatched_parentheses(self):
         testStrings =   {
@@ -204,7 +204,7 @@ class Tests(unittest.TestCase):
         # needs to use semantic valdiation
         self.validate_syntactic(testStrings=testString, expectedIssues=expectedResults, expectedResults=expectedIssues, checkForWarnings=True)
 
-    # # needs semantic validator
+    # # need to address issue 3 before this test will preform properly
     # def test_no_more_than_two_tildes(self):
     #     testStrings = {
     #         'noTildeGroup': 'Event/Category/Experimental stimulus,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
@@ -227,31 +227,35 @@ class Tests(unittest.TestCase):
     #     # uses seemantic validaiton
     #     self.validate(testStrings, expectedResults, expectedIssues)
 
+    def validate_syntactic_1(self,testStrings, expectedResults, expectedIssues):
+        self.validate_syntactic_base(testStrings, expectedResults, expectedIssues, lambda parsedString, originalTag:
+       self.tagValidator.run_top_level_validators(formatted_top_level_tags=parsedString))
+
     # requires semantic validator
-    # def test_includes_all_required_tags(self):
-    #     testStrings = {
-    #         'complete': 'Event/Label/Bus,Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-    #         'missingLabel': 'Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-    #         'missingCategory': 'Event/Label/Bus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-    #         'missingDescription': 'Event/Label/Bus,Event/Category/Experimental stimulus,Item/Object/Vehicle/Bus',
-    #         'missingAllRequired': 'Item/Object/Vehicle/Bus',
-    #     }
-    #     expectedResults = {
-    #         'complete': True,
-    #         'missingLabel': False,
-    #         'missingCategory': False,
-    #         'missingDescription': False,
-    #         'missingAllRequired': False,
-    #     }
-    #     expectedIssues = {
-    #         'complete': report_error_type(),
-    #         'missingLabel': report_error_type(),
-    #         'missingCategory': report_error_type(),
-    #         'missingDescription': report_error_type(),
-    #         'missingAllRequired': report_error_type(),
-    #     }
-    #     # uses semnatic validator
-    #     self.validate(testStrings, expectedResults, expectedIssues)
+    def test_includes_all_required_tags(self):
+        testStrings = {
+            'complete': 'Event/Label/Bus,Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+            'missingLabel': 'Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+            'missingCategory': 'Event/Label/Bus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+            'missingDescription': 'Event/Label/Bus,Event/Category/Experimental stimulus,Item/Object/Vehicle/Bus',
+            'missingAllRequired': 'Item/Object/Vehicle/Bus',
+        }
+        expectedResults = {
+            'complete': True,
+            'missingLabel': False,
+            'missingCategory': False,
+            'missingDescription': False,
+            'missingAllRequired': False,
+        }
+        expectedIssues = {
+            'complete': "",
+            'missingLabel': "report_error_type()",
+            'missingCategory': "report_error_type()",
+            'missingDescription': "report_error_type()",
+            'missingAllRequired': "report_error_type()",
+        }
+        # uses semnatic validator
+        self.validate_syntactic_1(testStrings, expectedResults, expectedIssues)
 
     # def child_required(self):
     #     testString = {
