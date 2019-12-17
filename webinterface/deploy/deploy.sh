@@ -8,7 +8,7 @@ ROOT_DIR=${PWD}
 GIT_DIR="${PWD}/hed-python"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
-GIT_REPO_URL="https://github.com/hed-standard/hed-python"
+GIT_REPO_URL="https://github.com/dungscout96/hed-python-dung"
 GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
@@ -27,7 +27,7 @@ GIT_HED_REPO_FOLDER="hedxml"
 
 clone_github_repo(){
 echo Cloning repo ... 
-git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
+git clone -b $GIT_REPO_BRANCH $GIT_REPO_URL hed-python
 }
 
 clone_hed_github_repo(){
