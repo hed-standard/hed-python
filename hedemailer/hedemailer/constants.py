@@ -10,7 +10,7 @@ EMAIL_TO_KEY = 'To';
 EMAIL_BCC_KEY = 'Bcc';
 EMAIL_LIST_DELIMITER = ', ';
 EMAIL_SENT_RESPONSE = json.dumps({'success': True, 'message': EMAILS_SENT}), 200, {'ContentType': 'application/json'};
-GOLLUM = 'gollum';
+GOLLUM = 'push';
 NO_EMAILS_SENT = 'No email(s) sent. Not in the correct format. Content type needs to be in JSON and X-GitHub-Event'
 ' must be gollum';
 NO_EMAILS_SENT_RESPONSE = json.dumps({'success': True, 'message': NO_EMAILS_SENT}), 200, {
