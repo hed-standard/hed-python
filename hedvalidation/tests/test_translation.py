@@ -36,8 +36,11 @@ class Tests(unittest.TestCase):
             expectedIssue = expectedIssues[testKey]
             expectedResult = expectedResults[testKey]
             has_no_issues = (testResult == "")
-            self.assertEqual(testResult, expectedIssue, testStrings[testKey])
-            self.assertCountEqual(testResult, expectedIssue, testStrings[testKey])
+            if has_no_issues is True and expectedResult is True:
+                continue
+            else:
+                self.assertEqual(testResult, expectedIssue, testStrings[testKey])
+                self.assertCountEqual(testResult, expectedIssue, testStrings[testKey])
 
     def test_mismatched_parentheses(self):
         testStrings =   {
@@ -229,13 +232,13 @@ class Tests(unittest.TestCase):
     #     # uses seemantic validaiton
     #     self.validate(testStrings, expectedResults, expectedIssues)
 ########################################################################
+    # validator is not reporting an error with these tags
     # inside of the error reporter there is nothing to deal with required prefix missing
 ########################################################################
     # def validate_syntactic_1(self,testStrings, expectedResults, expectedIssues):
     #     self.validate_syntactic_base(testStrings, expectedResults, expectedIssues, lambda parsedString, originalTag:
     #    self.tagValidator.run_top_level_validators(formatted_top_level_tags=parsedString))
     #
-    # # requires semantic validator
     # def test_includes_all_required_tags(self):
     #     testStrings = {
     #         'complete': 'Event/Label/Bus,Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
@@ -253,15 +256,16 @@ class Tests(unittest.TestCase):
     #     }
     #     expectedIssues = {
     #         'complete': "",
-    #         'missingLabel': "report_error_type()",
-    #         'missingCategory': "report_error_type()",
-    #         'missingDescription': "report_error_type()",
-    #         'missingAllRequired': "report_error_type()",
+    #         'missingLabel': report_error_type('valid', tag=testStrings['missingLabel']),
+    #         'missingCategory': report_error_type('valid', tag=testStrings['missingCategory']),
+    #         'missingDescription': report_error_type('valid', tag=testStrings['missingDescription']),
+    #         'missingAllRequired': report_error_type('valid', tag=testStrings['missingAllRequired']),
     #     }
-    #     # uses semnatic validator
-    #     self.validate_syntactic_1(testStrings, expectedResults, expectedIssues)
-
-    def child_required(self):
+    #     self.validate_syntactic_1(testStrings, expectedIssues, expectedResults)
+####################################################################################
+    # Alexander has specific error messages being reported for missing children
+####################################################################################
+    def test_child_required(self):
         testString = {
             'hasChild' : 'Event/Category/Experimental stimulus',
             'missingChild' : 'Event/Category'
@@ -272,10 +276,10 @@ class Tests(unittest.TestCase):
         }
         expectedIssues = {
             #NOT COMPLETE
-            'hasChild' : [],
-            'missingChild' : [error_reporter.report_error_type()]
+            'hasChild' : '',
+            'missingChild' : report_error_type('valid', tag=testString['missingChild'])
         }
-        validator(testString,expectedResults, expectedIssues)
+        self.validate(testString, expectedResults, expectedIssues)
     #
     # def required_units(self):
     #     testString = {
