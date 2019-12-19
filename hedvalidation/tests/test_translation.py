@@ -64,6 +64,7 @@ class Tests(unittest.TestCase):
         }
 
         self.validate(testStrings, expectedResults, expectedIssues)
+
 ##########################################################################################################################################
     # Validator does not properly report errors with commas and does not report any error for extra tildes. (issue 3)
 ###########################################################################################################################################
@@ -207,6 +208,7 @@ class Tests(unittest.TestCase):
         }
         # needs to use semantic valdiation
         self.validate_syntactic(testStrings=testString, expectedIssues=expectedResults, expectedResults=expectedIssues, checkForWarnings=True)
+
 #######################################################################################################
     # # need to address issue 3 before this test will preform properly
 #######################################################################################################
@@ -231,6 +233,7 @@ class Tests(unittest.TestCase):
     #     }
     #     # uses seemantic validaiton
     #     self.validate(testStrings, expectedResults, expectedIssues)
+
 ########################################################################
     # validator is not reporting an error with these tags
     # inside of the error reporter there is nothing to deal with required prefix missing
@@ -280,31 +283,34 @@ class Tests(unittest.TestCase):
             'missingChild' : report_error_type('valid', tag=testString['missingChild'])
         }
         self.validate(testString, expectedResults, expectedIssues)
-    #
-    # def required_units(self):
-    #     testString = {
-    #         'hasRequiredUnit' : 'Event/Duration/3 ms',
-    #         'missingRequiredUnit' : 'Event/Duration/3',
-    #         'notRequiredNumber' : 'Attribute/Color/Red/0.5',
-    #         'notRequiredScientific' : 'Attribute/Color/Red/5.2e-1',
-    #         'timeValue' : 'Item/2D shape/Clock face/8:30'
-    #     }
-    #     expectedResults = {
-    #         'hasRequiredUnit': True,
-    #         'missingRequiredUnit': False,
-    #         'notRequiredNumber': True,
-    #         'notRequiredScientific': True,
-    #         'timeValue': True
-    #     }
-    #     expectedIssues = {
-    #         #NOT COMPLETE
-    #         'hasRequiredUnit': [],
-    #         'missingRequiredUnit': [error_reporter.report_error_type()],
-    #         'notRequiredNumber': [],
-    #         'notRequiredScientific': [],
-    #         'timeValue': []
-    #     }
-    #     validator(testString, expectedResults, expectedIssues)
+
+#################################################################################
+    # Validator is returning no issue for the missing required units hed string
+#################################################################################
+    def test_required_units(self):
+        testString = {
+            'hasRequiredUnit' : 'Event/Duration/3 ms',
+            'missingRequiredUnit' : 'Event/Duration/3',
+            'notRequiredNumber' : 'Attribute/Color/Red/0.5',
+            'notRequiredScientific' : 'Attribute/Color/Red/5.2e-1',
+            'timeValue' : 'Item/2D shape/Clock face/8:30'
+        }
+        expectedResults = {
+            'hasRequiredUnit': True,
+            'missingRequiredUnit': False,
+            'notRequiredNumber': True,
+            'notRequiredScientific': True,
+            'timeValue': True
+        }
+        expectedIssues = {
+            #NOT COMPLETE
+            'hasRequiredUnit': "",
+            'missingRequiredUnit': report_error_type('unitClass', tag=testString['missingRequiredUnit'], unit_class_units='s'),
+            'notRequiredNumber': "",
+            'notRequiredScientific': "",
+            'timeValue': ""
+        }
+        self.validate(testString, expectedResults, expectedIssues)
     #
     # def correct_units(self):
     #     testString = {
