@@ -138,9 +138,9 @@ def add_hed_xml_attachment_text(main_body_text, hed_resource_dictionary):
         The main body text of the email with the appended HED attachment text.
     """
     main_body_text += constants.HED_ATTACHMENT_TEXT;
-    main_body_text += constants.HED_VERSION_TEXT + hed_resource_dictionary[constants.HED_XML_TREE_KEY].get(
-        constants.HED_XML_VERSION_KEY);
-    main_body_text += constants.CHANGE_LOG_TEXT + hed_resource_dictionary[constants.HED_CHANGE_LOG_KEY][0];
+#     main_body_text += constants.HED_VERSION_TEXT + hed_resource_dictionary[constants.HED_XML_TREE_KEY].get(
+#         constants.HED_XML_VERSION_KEY);
+#     main_body_text += constants.CHANGE_LOG_TEXT + hed_resource_dictionary[constants.HED_CHANGE_LOG_KEY][0];
     return main_body_text;
 
 
