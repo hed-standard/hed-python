@@ -31,6 +31,7 @@ def create_standard_email(github_payload_dictionary, email_list):
     mime_email[constants.EMAIL_FROM_KEY] = app_config[constants.CONFIG_EMAIL_FROM_KEY];
     mime_email[constants.EMAIL_TO_KEY] = app_config[constants.CONFIG_EMAIL_TO_KEY];
     mime_email[constants.EMAIL_BCC_KEY] = constants.EMAIL_LIST_DELIMITER.join(email_list);
+    main_body_text = ""
 #     main_body_text = constants.HELLO_WIKI_TEXT + \
 #                      github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_TITLE_KEY] + \
 #                      constants.HAS_BEEN_TEXT + \
