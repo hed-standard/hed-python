@@ -61,8 +61,9 @@ class Tests(unittest.TestCase):
         }
 
         self.validate(testStrings, expectedResults, expectedIssues)
-
-    # Validator does not properly report errors with commas and does not report any error for extra tildes. issues need to be addressed
+##########################################################################################################################################
+    # Validator does not properly report errors with commas and does not report any error for extra tildes. (issue 3)
+###########################################################################################################################################
     # def test_malformed_delimiters(self):
     #     testStrings = {
     #         'missingOpeningComma' : \
@@ -203,8 +204,9 @@ class Tests(unittest.TestCase):
         }
         # needs to use semantic valdiation
         self.validate_syntactic(testStrings=testString, expectedIssues=expectedResults, expectedResults=expectedIssues, checkForWarnings=True)
-
+#######################################################################################################
     # # need to address issue 3 before this test will preform properly
+#######################################################################################################
     # def test_no_more_than_two_tildes(self):
     #     testStrings = {
     #         'noTildeGroup': 'Event/Category/Experimental stimulus,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
@@ -226,52 +228,54 @@ class Tests(unittest.TestCase):
     #     }
     #     # uses seemantic validaiton
     #     self.validate(testStrings, expectedResults, expectedIssues)
-
-    def validate_syntactic_1(self,testStrings, expectedResults, expectedIssues):
-        self.validate_syntactic_base(testStrings, expectedResults, expectedIssues, lambda parsedString, originalTag:
-       self.tagValidator.run_top_level_validators(formatted_top_level_tags=parsedString))
-
-    # requires semantic validator
-    def test_includes_all_required_tags(self):
-        testStrings = {
-            'complete': 'Event/Label/Bus,Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-            'missingLabel': 'Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-            'missingCategory': 'Event/Label/Bus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-            'missingDescription': 'Event/Label/Bus,Event/Category/Experimental stimulus,Item/Object/Vehicle/Bus',
-            'missingAllRequired': 'Item/Object/Vehicle/Bus',
-        }
-        expectedResults = {
-            'complete': True,
-            'missingLabel': False,
-            'missingCategory': False,
-            'missingDescription': False,
-            'missingAllRequired': False,
-        }
-        expectedIssues = {
-            'complete': "",
-            'missingLabel': "report_error_type()",
-            'missingCategory': "report_error_type()",
-            'missingDescription': "report_error_type()",
-            'missingAllRequired': "report_error_type()",
-        }
-        # uses semnatic validator
-        self.validate_syntactic_1(testStrings, expectedResults, expectedIssues)
-
-    # def child_required(self):
-    #     testString = {
-    #         'hasChild' : 'Event/Category/Experimental stimulus',
-    #         'missingChild' : 'Event/Category'
+########################################################################
+    # inside of the error reporter there is nothing to deal with required prefix missing
+########################################################################
+    # def validate_syntactic_1(self,testStrings, expectedResults, expectedIssues):
+    #     self.validate_syntactic_base(testStrings, expectedResults, expectedIssues, lambda parsedString, originalTag:
+    #    self.tagValidator.run_top_level_validators(formatted_top_level_tags=parsedString))
+    #
+    # # requires semantic validator
+    # def test_includes_all_required_tags(self):
+    #     testStrings = {
+    #         'complete': 'Event/Label/Bus,Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+    #         'missingLabel': 'Event/Category/Experimental stimulus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+    #         'missingCategory': 'Event/Label/Bus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
+    #         'missingDescription': 'Event/Label/Bus,Event/Category/Experimental stimulus,Item/Object/Vehicle/Bus',
+    #         'missingAllRequired': 'Item/Object/Vehicle/Bus',
     #     }
     #     expectedResults = {
-    #         'hasChild' : True,
-    #         'missingChild' : False
+    #         'complete': True,
+    #         'missingLabel': False,
+    #         'missingCategory': False,
+    #         'missingDescription': False,
+    #         'missingAllRequired': False,
     #     }
     #     expectedIssues = {
-    #         #NOT COMPLETE
-    #         'hasChild' : [],
-    #         'missingChild' : [error_reporter.report_error_type()]
+    #         'complete': "",
+    #         'missingLabel': "report_error_type()",
+    #         'missingCategory': "report_error_type()",
+    #         'missingDescription': "report_error_type()",
+    #         'missingAllRequired': "report_error_type()",
     #     }
-    #     validator(testString,expectedResults, expectedIssues)
+    #     # uses semnatic validator
+    #     self.validate_syntactic_1(testStrings, expectedResults, expectedIssues)
+
+    def child_required(self):
+        testString = {
+            'hasChild' : 'Event/Category/Experimental stimulus',
+            'missingChild' : 'Event/Category'
+        }
+        expectedResults = {
+            'hasChild' : True,
+            'missingChild' : False
+        }
+        expectedIssues = {
+            #NOT COMPLETE
+            'hasChild' : [],
+            'missingChild' : [error_reporter.report_error_type()]
+        }
+        validator(testString,expectedResults, expectedIssues)
     #
     # def required_units(self):
     #     testString = {
