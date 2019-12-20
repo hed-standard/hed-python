@@ -37,7 +37,7 @@ def create_standard_email(github_payload_dictionary, email_list):
                      constants.CHECK_OUT_CHANGES_TEXT + \
                      github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_URL_KEY] + \
                      constants.PERIOD_TEXT + \
-                     + "\n\n" + \
+                     "\n\n" + \
                      github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_MESSAGE_KEY]
 
     return mime_email, main_body_text;
