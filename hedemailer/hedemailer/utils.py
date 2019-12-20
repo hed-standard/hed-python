@@ -8,14 +8,13 @@ from hedemailer import constants;
 
 app_config = current_app.config;
 
-
 def create_standard_email(github_payload_dictionary, email_list):
     """Create a standard part of the HED schema email.
 
     Parameters
     ----------
     github_payload_dictionary: dictionary
-        A dictionary containing a Github payload.
+        A dictionary containing a Github push payload.
     email_list: string
         A list containing the emails from a file.
 
@@ -31,16 +30,17 @@ def create_standard_email(github_payload_dictionary, email_list):
     mime_email[constants.EMAIL_FROM_KEY] = app_config[constants.CONFIG_EMAIL_FROM_KEY];
     mime_email[constants.EMAIL_TO_KEY] = app_config[constants.CONFIG_EMAIL_TO_KEY];
     mime_email[constants.EMAIL_BCC_KEY] = constants.EMAIL_LIST_DELIMITER.join(email_list);
-    main_body_text = ""
-#     main_body_text = constants.HELLO_WIKI_TEXT + \
-#                      github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_TITLE_KEY] + \
-#                      constants.HAS_BEEN_TEXT + \
-#                      github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_ACTION_KEY] + \
-#                      constants.CHECK_OUT_CHANGES_TEXT + \
-#                      github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_HTML_URL_KEY] + \
-#                      constants.PERIOD_TEXT;
-    return mime_email, main_body_text;
+    main_body_text = constants.HELLO_WIKI_TEXT + \
+                     "HED-schema.mediawiki" + \
+                     constants.HAS_BEEN_TEXT + \
+                     "modified" + \
+                     constants.CHECK_OUT_CHANGES_TEXT + \
+                     github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_URL_KEY] + \
+                     constants.PERIOD_TEXT + \
+                     + "\n\n" + \
+                     github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_MESSAGE_KEY]
 
+    return mime_email, main_body_text;
 
 def create_hed_schema_email(mime_email, main_body_text):
     """Create HED schema email.
@@ -85,23 +85,21 @@ def clean_up_hed_resources(hed_resource_dictionary):
         if constants.HED_WIKI_LOCATION_KEY in hed_resource_dictionary:
             delete_file_if_exist(hed_resource_dictionary[constants.HED_WIKI_LOCATION_KEY]);
 
-
-def wiki_page_is_hed_schema(github_payload_dictionary):
-    """Checks to see if the WIKI page is a HED schema WIKI page.
+def push_page_is_hed_schema(github_payload_dictionary):
+    """Checks to see if the commited page is the wiki page..
 
     Parameters
     ----------
     github_payload_dictionary: dictionary
-        A dictionary containing a Github payload.
+        A dictionary containing a Github push payload.
 
     Returns
     -------
     boolean
         True if the WIKI page is a HED schema WIKI page.
     """
-    return True
     return github_payload_dictionary and app_config[constants.CONFIG_HED_WIKI_PAGE_KEY] == \
-           github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_TITLE_KEY];
+           github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_MODIFIED_KEY][0];
 
 
 #

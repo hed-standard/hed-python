@@ -11,7 +11,7 @@ import socket
 class Config(object):
     EMAIL_LIST = '/path/to/email/list';
     FROM = 'github-notifications@' + socket.getfqdn();
-    HED_WIKI_PAGE = 'HED Schema';
+    HED_WIKI_PAGE = 'HED-schema.mediawiki'
     TO = 'github-mailing-list@' + socket.getfqdn();
 
 
