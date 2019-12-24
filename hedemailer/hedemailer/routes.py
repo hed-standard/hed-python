@@ -20,7 +20,10 @@ def process_hed_payload():
     try:
         if not utils.request_is_github_gollum_event(request):
             return constants.NO_EMAILS_SENT_RESPONSE;
+        print("Trying to send email...")
         if hed_emailer.send_email(request):
+            print("Sent email...")
             return constants.EMAIL_SENT_RESPONSE;
     except Exception as ex:
+        print("Hit Exception...")
         return constants.generate_exception_response(ex);

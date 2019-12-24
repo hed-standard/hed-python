@@ -27,10 +27,13 @@ def send_email(request):
     dictionary
         A dictionary containing information about the HED
     """
+    print("Starting to send email...")
     github_payload_string = str(request.data, 'utf-8');
     github_payload_dictionary = json.loads(github_payload_string);
     email_list = utils.get_email_list_from_file(app_config[constants.CONFIG_EMAIL_LIST]);
+    print("Starting to send email 2...")
     if email_list:
+        print("Starting to send email 3...")
         mime_email, hed_resource_dictionary = _create_email(github_payload_dictionary,
                                                             app_config[constants.CONFIG_EMAIL_LIST]);
         _send_email_from_smtp_server(mime_email, email_list);
