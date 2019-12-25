@@ -34,11 +34,12 @@ def create_standard_email(github_payload_dictionary, email_list):
                      "HED-schema.mediawiki" + \
                      constants.HAS_BEEN_TEXT + \
                      "modified" + \
-                     constants.CHECK_OUT_CHANGES_TEXT + \
-                     github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_URL_KEY] + \
-                     constants.PERIOD_TEXT + \
-                     "\n\n" + \
-                     github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_MESSAGE_KEY]
+                     constants.CHECK_OUT_CHANGES_TEXT
+                     # constants.CHECK_OUT_CHANGES_TEXT + \
+                     # github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_URL_KEY] + \
+                     # constants.PERIOD_TEXT + \
+                     # "\n\n" + \
+                     # github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_MESSAGE_KEY]
 
     return mime_email, main_body_text;
 
@@ -98,6 +99,7 @@ def push_page_is_hed_schema(github_payload_dictionary):
     boolean
         True if the WIKI page is a HED schema WIKI page.
     """
+    return True
     return github_payload_dictionary and app_config[constants.CONFIG_HED_WIKI_PAGE_KEY] == \
            github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_MODIFIED_KEY][0];
 
