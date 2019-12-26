@@ -30,16 +30,18 @@ def create_standard_email(github_payload_dictionary, email_list):
     mime_email[constants.EMAIL_FROM_KEY] = app_config[constants.CONFIG_EMAIL_FROM_KEY];
     mime_email[constants.EMAIL_TO_KEY] = app_config[constants.CONFIG_EMAIL_TO_KEY];
     mime_email[constants.EMAIL_BCC_KEY] = constants.EMAIL_LIST_DELIMITER.join(email_list);
-    main_body_text = constants.HELLO_WIKI_TEXT + \
-                     "HED-schema.mediawiki" + \
-                     constants.HAS_BEEN_TEXT + \
-                     "modified" + \
-                     constants.CHECK_OUT_CHANGES_TEXT
-                     # constants.CHECK_OUT_CHANGES_TEXT + \
-                     # github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_URL_KEY] + \
-                     # constants.PERIOD_TEXT + \
-                     # "\n\n" + \
-                     # github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_COMMITS_MESSAGE_KEY]
+    commit_info = get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False)
+    if len(commit_info) > 0:
+        message_to_use, url_to_use = commit_info[-1]
+        main_body_text = constants.HELLO_WIKI_TEXT + \
+                         "HED-schema.mediawiki" + \
+                         constants.HAS_BEEN_TEXT + \
+                         "modified" + \
+                         constants.CHECK_OUT_CHANGES_TEXT + \
+                         url_to_use + \
+                         constants.PERIOD_TEXT + \
+                         "\n\n" + \
+                         message_to_use
 
     return mime_email, main_body_text;
 
@@ -99,10 +101,32 @@ def push_page_is_hed_schema(github_payload_dictionary):
     boolean
         True if the WIKI page is a HED schema WIKI page.
     """
-    return True
-    return github_payload_dictionary and app_config[constants.CONFIG_HED_WIKI_PAGE_KEY] == \
-           github_payload_dictionary[constants.PUSH_COMMITS_KEY][0][constants.PUSH_MODIFIED_KEY][0];
 
+    return len(get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=True)) > 0
+
+def get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False):
+    if not github_payload_dictionary:
+        return
+
+    return_info = []
+    wiki_page = app_config[constants.CONFIG_HED_WIKI_PAGE_KEY]
+
+    for commit in github_payload_dictionary[constants.PUSH_COMMITS_KEY]:
+        should_add_commit = False
+        if not get_only_wiki_file:
+            should_add_commit = True
+        else:
+            for filename in commit[constants.PUSH_MODIFIED_KEY]:
+                if wiki_page == filename:
+                    should_add_commit = True
+                    break
+
+        if should_add_commit:
+            message = commit[constants.PUSH_COMMITS_MESSAGE_KEY]
+            url = commit[constants.PUSH_COMMITS_URL_KEY]
+            return_info.append(message, url)
+
+    return return_info
 
 #
 def request_is_github_gollum_event(request):
