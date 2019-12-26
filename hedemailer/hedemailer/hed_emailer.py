@@ -55,6 +55,7 @@ def _create_email(github_payload_dictionary, email_list):
     """
     hed_resource_dictionary = {};
     mime_email, main_body_text = utils.create_standard_email(github_payload_dictionary, email_list);
+    return mime_email, hed_resource_dictionary;
     if utils.push_page_is_hed_schema(github_payload_dictionary):
         hed_resource_dictionary = utils.create_hed_schema_email(mime_email, main_body_text);
     else:
