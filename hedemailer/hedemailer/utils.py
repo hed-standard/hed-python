@@ -89,21 +89,6 @@ def clean_up_hed_resources(hed_resource_dictionary):
         if constants.HED_WIKI_LOCATION_KEY in hed_resource_dictionary:
             delete_file_if_exist(hed_resource_dictionary[constants.HED_WIKI_LOCATION_KEY]);
 
-def push_page_is_hed_schema(github_payload_dictionary):
-    """Checks to see if the commited page is the wiki page..
-
-    Parameters
-    ----------
-    github_payload_dictionary: dictionary
-        A dictionary containing a Github push payload.
-
-    Returns
-    -------
-    boolean
-        True if the WIKI page is a HED schema WIKI page.
-    """
-    return len(get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=True)) > 0
-
 def get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False):
     if not github_payload_dictionary:
         return []
@@ -127,6 +112,21 @@ def get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False
             return_info.append((message, url))
 
     return return_info
+
+def push_page_is_hed_schema(github_payload_dictionary):
+    """Checks to see if the commited page is the wiki page..
+
+    Parameters
+    ----------
+    github_payload_dictionary: dictionary
+        A dictionary containing a Github push payload.
+
+    Returns
+    -------
+    boolean
+        True if the WIKI page is a HED schema WIKI page.
+    """
+    return len(get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=True)) > 0
 
 #
 def request_is_github_gollum_event(request):
