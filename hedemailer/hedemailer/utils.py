@@ -102,7 +102,6 @@ def push_page_is_hed_schema(github_payload_dictionary):
     boolean
         True if the WIKI page is a HED schema WIKI page.
     """
-    return True
     return len(get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=True)) > 0
 
 def get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False):
