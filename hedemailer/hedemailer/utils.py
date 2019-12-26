@@ -124,7 +124,7 @@ def get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False
         if should_add_commit:
             message = commit[constants.PUSH_COMMITS_MESSAGE_KEY]
             url = commit[constants.PUSH_COMMITS_URL_KEY]
-            return_info.append(message, url)
+            return_info.append((message, url))
 
     return return_info
 
