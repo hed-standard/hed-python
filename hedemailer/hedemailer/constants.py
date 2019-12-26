@@ -12,9 +12,10 @@ EMAIL_LIST_DELIMITER = ', ';
 EMAIL_SENT_RESPONSE = json.dumps({'success': True, 'message': EMAILS_SENT}), 200, {'ContentType': 'application/json'};
 GOLLUM = 'push';
 NO_EMAILS_SENT = 'No email(s) sent. Not in the correct format. Content type needs to be in JSON and X-GitHub-Event'
-' must be gollum';
+' must be push';
 NO_EMAILS_SENT_RESPONSE = json.dumps({'success': True, 'message': NO_EMAILS_SENT}), 200, {
     'ContentType': 'application/json'};
+NO_EMAIL_LIST_ERROR = "Email list file either doesn't exist or contained no email addresses"
 HEADER_EVENT_TYPE = 'X-GitHub-Event';
 HEADER_CONTENT_TYPE = 'content-type';
 CONTENT_DISPOSITION_HEADER = 'Content-Disposition';

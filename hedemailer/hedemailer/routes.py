@@ -20,10 +20,10 @@ def process_hed_payload():
     try:
         if not utils.request_is_github_gollum_event(request):
             return constants.NO_EMAILS_SENT_RESPONSE;
-        if hed_emailer.send_email(request):
+        result_message = hed_emailer.send_email(request)
+        if result_message is None:
             return constants.EMAIL_SENT_RESPONSE;
         else:
-            # Debug code.  Is this why it's crashing out with no error?
-            return constants.NO_EMAILS_SENT_RESPONSE
+            return constants.generate_exception_response(result_message)
     except Exception as ex:
         return constants.generate_exception_response(ex);

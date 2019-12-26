@@ -34,7 +34,10 @@ def send_email(request):
         mime_email, hed_resource_dictionary = _create_email(github_payload_dictionary,
                                                             app_config[constants.CONFIG_EMAIL_LIST]);
         _send_email_from_smtp_server(mime_email, email_list);
-    return hed_resource_dictionary;
+    else:
+        return constants.NO_EMAIL_LIST_ERROR
+
+    return None
 
 
 def _create_email(github_payload_dictionary, email_list):
