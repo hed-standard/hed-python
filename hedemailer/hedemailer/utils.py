@@ -43,6 +43,10 @@ def create_standard_email(github_payload_dictionary, email_list):
                          "\n\n" + \
                          message_to_use
 
+        for message, url in reversed(commit_info[:-1]):
+            main_body_text += "\n"
+            main_body_text += message
+
     return mime_email, main_body_text;
 
 def create_hed_schema_email(mime_email, main_body_text):
