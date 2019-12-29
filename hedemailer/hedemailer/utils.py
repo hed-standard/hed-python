@@ -89,6 +89,20 @@ def clean_up_hed_resources(hed_resource_dictionary):
             delete_file_if_exist(hed_resource_dictionary[constants.HED_WIKI_LOCATION_KEY]);
 
 def get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False):
+    """Checks to see if the commited page is the wiki page..
+
+    Parameters
+    ----------
+    github_payload_dictionary: dictionary
+        A dictionary containing a Github push payload.
+    get_only_wiki_file: bool
+        If true, only gather push commit entries that alter the main wiki file.
+
+    Returns
+    -------
+    list
+        return a list of (message, url) pairs for each commit entry.
+    """
     if not github_payload_dictionary:
         return []
 
@@ -128,8 +142,8 @@ def push_page_is_hed_schema(github_payload_dictionary):
     return len(get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=True)) > 0
 
 #
-def request_is_github_gollum_event(request):
-    """Checks to see if the request is a gollum event type.
+def request_is_github_push_event(request):
+    """Checks to see if the request is a push event type.
 
     Parameters
     ----------
@@ -139,10 +153,10 @@ def request_is_github_gollum_event(request):
     Returns
     -------
     boolean
-        True if the request is a github gollum event. False, if otherwise.
+        True if the request is a github push event. False, if otherwise.
     """
     return request.headers.get(constants.HEADER_CONTENT_TYPE) == constants.JSON_CONTENT_TYPE and \
-           request.headers.get(constants.HEADER_EVENT_TYPE) == constants.GOLLUM;
+           request.headers.get(constants.HEADER_EVENT_TYPE) == constants.PUSH;
 
 
 def add_hed_xml_attachment_text(main_body_text, hed_resource_dictionary):
