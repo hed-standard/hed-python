@@ -30,19 +30,18 @@ def create_standard_email(github_payload_dictionary, email_list):
     mime_email[constants.EMAIL_FROM_KEY] = app_config[constants.CONFIG_EMAIL_FROM_KEY];
     mime_email[constants.EMAIL_TO_KEY] = app_config[constants.CONFIG_EMAIL_TO_KEY];
     mime_email[constants.EMAIL_BCC_KEY] = constants.EMAIL_LIST_DELIMITER.join(email_list);
-    # commit_info = get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False)
-    # if len(commit_info) > 0:
-    #     message_to_use, url_to_use = commit_info[-1]
-    #     main_body_text = constants.HELLO_WIKI_TEXT + \
-    #                      "HED-schema.mediawiki" + \
-    #                      constants.HAS_BEEN_TEXT + \
-    #                      "modified" + \
-    #                      constants.CHECK_OUT_CHANGES_TEXT + \
-    #                      url_to_use + \
-    #                      constants.PERIOD_TEXT + \
-    #                      "\n\n" + \
-    #                      message_to_use
-    main_body_text = "Test Email"
+    commit_info = get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False)
+    if len(commit_info) > 0:
+        message_to_use, url_to_use = commit_info[-1]
+        main_body_text = constants.HELLO_WIKI_TEXT + \
+                         "HED-schema.mediawiki" + \
+                         constants.HAS_BEEN_TEXT + \
+                         "modified" + \
+                         constants.CHECK_OUT_CHANGES_TEXT + \
+                         url_to_use + \
+                         constants.PERIOD_TEXT + \
+                         "\n\n" + \
+                         message_to_use
 
     return mime_email, main_body_text;
 
