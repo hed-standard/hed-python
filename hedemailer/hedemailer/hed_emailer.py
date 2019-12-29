@@ -60,7 +60,6 @@ def _create_email(github_payload_dictionary, email_list):
     mime_email, main_body_text = utils.create_standard_email(github_payload_dictionary, email_list);
     main_body = MIMEText(main_body_text);
     mime_email.attach(main_body);
-    return mime_email, hed_resource_dictionary;
     if utils.push_page_is_hed_schema(github_payload_dictionary):
         hed_resource_dictionary = utils.create_hed_schema_email(mime_email, main_body_text);
     else:
