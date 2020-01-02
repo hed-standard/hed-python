@@ -46,7 +46,7 @@ def write_xml_tree_2_xml_file(xml_tree, xml_file_path):
         xml_file.write(xml_string);
 
 
-def convert_hed_wiki_2_xml():
+def convert_hed_wiki_2_xml(use_local_wiki_file=None):
     """Converts the HED wiki into a XML file.
 
     Parameters
@@ -57,6 +57,11 @@ def convert_hed_wiki_2_xml():
     dictionary
         The tag line with the nowiki tag remove.
     """
+    if use_local_wiki_file is None:
+        hed_wiki_file_location = create_hed_wiki_file();
+    else:
+        hed_wiki_file_location = use_local_wiki_file
+
     hed_wiki_file_location = create_hed_wiki_file();
     hed_xml_file_location, hed_xml_tree = create_hed_xml_file(hed_wiki_file_location);
     hed_change_log = parsewiki.get_hed_change_log(hed_wiki_file_location);
