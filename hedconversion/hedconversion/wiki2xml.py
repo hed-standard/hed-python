@@ -62,7 +62,6 @@ def convert_hed_wiki_2_xml(use_local_wiki_file=None):
     else:
         hed_wiki_file_location = use_local_wiki_file
 
-    hed_wiki_file_location = create_hed_wiki_file();
     hed_xml_file_location, hed_xml_tree = create_hed_xml_file(hed_wiki_file_location);
     hed_change_log = parsewiki.get_hed_change_log(hed_wiki_file_location);
     hed_info_dictionary = {constants.HED_XML_TREE_KEY: hed_xml_tree, constants.HED_CHANGE_LOG_KEY: hed_change_log,
