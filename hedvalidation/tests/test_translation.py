@@ -311,89 +311,87 @@ class Tests(unittest.TestCase):
             'timeValue': ""
         }
         self.validate(testString, expectedResults, expectedIssues)
-    #
-    # def correct_units(self):
-    #     testString = {
-    #         'correctUnit' : 'Event/Duration/3 ms',
-    #         'correctUnitScientific' : 'Event/Duration/3.5e1 ms',
-    #         'incorrectUnit' : 'Event/Duration/3 cm',
-    #         'notRequiredNumber' : 'Attribute/Color/Red/0.5',
-    #         'notRequiredScientific' : 'Attribute/Color/Red/5e-1',
-    #         'properTime' : 'Item/2D shape/Clock face/8:30',
-    #         'invalidTime' : 'Item/2D shape/Clock face/54:54'
-    #     }
-    #     expectedResults = {
-    #         'correctUnit': True,
-    #         'correctUnitScientific': True,
-    #         'incorrectUnit': False,
-    #         'notRequiredNumber': True,
-    #         'notRequiredScientific': True,
-    #         'properTime': True,
-    #         'invalidTime': False
-    #     }
-    #     legalTimeUnits = [
-    #         's',
-    #         'second',
-    #         'seconds',
-    #         'centiseconds',
-    #         'centisecond',
-    #         'cs',
-    #         'hour:min',
-    #         'day',
-    #         'days',
-    #         'ms',
-    #         'milliseconds',
-    #         'millisecond',
-    #         'minute',
-    #         'minutes',
-    #         'hour',
-    #         'hours',
-    #         ]
-    #     expectedIssues = {
-    #         #NOT COMPLETE
-    #         'correctUnit': [],
-    #         'correctUnitScientific': [],
-    #         'incorrectUnit': [error_reporter.report_error_type()],
-    #         'notRequiredNumber': [],
-    #         'notRequiredScientific': [],
-    #         'properTime': [],
-    #         'invalidTime': [error_reporter.report_error_type()]
-    #     }
-    #     validator(testString, expectedResults, expectedIssues)
-    # def test_no_duplicates(self):
-    #         testStrings = {
-    #             'topLevelDuplicate': 'Event/Category/Experimental stimulus,Event/Category/Experimental stimulus',
-    #             'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Experimental stimulus,Attribute/Visual/Color/Purple,Event/Category/Experimental stimulus)',
-    #             'noDuplicate': 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple',
-    #             'legalDuplicate':'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
-    #         }
-    #         expectedResults = {
-    #             'topLevelDuplicate': False,
-    #             'groupDuplicate': False,
-    #             'legalDuplicate': True,
-    #             'noDuplicate': True
-    #         }
-    #         expectedIssues = {
-    #             'topLevelDuplicate':  report_error_type(),
-    #             'groupDuplicate': report_error_type(),
-    #             'legalDuplicate': report_error_type(),
-    #             'noDuplicate': True
-    #         }
-            # alex used semantic validation here
-    #        validator(testStrings, expectedResults, expectedIssues)
-    # def multiple_copies_unique_tags(self):
-    #     testStrings = {
-    #         'legal': 'Event/Description/Rail vehicles,Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
-    #         'multipleDesc': 'Event/Description/Rail vehicles,Event/Description/Locomotive-pulled or multiple units,Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)'
-    #     }
-    #     expectedResults = {
-    #         'legal': True,
-    #         'multipleDesc': False
-    #     }
-    #     expectedIssues = {
-    #         'legal': report_error_type(),
-    #         'multipleDesc': report_error_type()
-    #     }
-    #     # alex used seantic validation here
-    #     validator(testStrings, expectedResults, expectedIssues)
+
+    def correct_units(self):
+        testString = {
+            'correctUnit' : 'Event/Duration/3 ms',
+            'correctUnitScientific' : 'Event/Duration/3.5e1 ms',
+            'incorrectUnit' : 'Event/Duration/3 cm',
+            'notRequiredNumber' : 'Attribute/Color/Red/0.5',
+            'notRequiredScientific' : 'Attribute/Color/Red/5e-1',
+            'properTime' : 'Item/2D shape/Clock face/8:30',
+            'invalidTime' : 'Item/2D shape/Clock face/54:54'
+        }
+        expectedResults = {
+            'correctUnit': True,
+            'correctUnitScientific': True,
+            'incorrectUnit': False,
+            'notRequiredNumber': True,
+            'notRequiredScientific': True,
+            'properTime': True,
+            'invalidTime': False
+        }
+        legalTimeUnits = [
+            's',
+            'second',
+            'seconds',
+            'centiseconds',
+            'centisecond',
+            'cs',
+            'hour:min',
+            'day',
+            'days',
+            'ms',
+            'milliseconds',
+            'millisecond',
+            'minute',
+            'minutes',
+            'hour',
+            'hours',
+            ]
+        expectedIssues = {
+            #NOT COMPLETE
+            'correctUnit': '',
+            'correctUnitScientific': '',
+            'incorrectUnit': report_error_type(testString['incorrectUnit'], ",".join(list(legalTimeUnits).sort())),
+            'notRequiredNumber': '',
+            'notRequiredScientific': '',
+            'properTime': '',
+            'invalidTime': report_error_type(testString['invalidTime'], ",".join(list(legalTimeUnits).sort()))
+        }
+        self.validate(testString, expectedResults, expectedIssues)
+    def test_no_duplicates(self):
+            testStrings = {
+                'topLevelDuplicate': 'Event/Category/Experimental stimulus,Event/Category/Experimental stimulus',
+                'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Experimental stimulus,Attribute/Visual/Color/Purple,Event/Category/Experimental stimulus)',
+                'noDuplicate': 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple',
+                'legalDuplicate':'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
+            }
+            expectedResults = {
+                'topLevelDuplicate': False,
+                'groupDuplicate': False,
+                'legalDuplicate': True,
+                'noDuplicate': True
+            }
+            expectedIssues = {
+                'topLevelDuplicate':  report_error_type('duplicate', testStrings['topLevelDuplicate']),
+                'groupDuplicate': report_error_type('duplicate', testStrings['groupDuplicate']),
+                'legalDuplicate': '',
+                'noDuplicate': ''
+            }
+            self.validate(testStrings, expectedResults, expectedIssues)
+    def multiple_copies_unique_tags(self):
+        testStrings = {
+            'legal': 'Event/Description/Rail vehicles,Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
+            'multipleDesc': 'Event/Description/Rail vehicles,Event/Description/Locomotive-pulled or multiple units,Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)'
+        }
+        expectedResults = {
+            'legal': True,
+            'multipleDesc': False
+        }
+        expectedIssues = {
+            'legal': '',
+            'multipleDesc': report_error_type()
+        }
+        self.validate(testStrings, expectedResults, expectedIssues)
 
