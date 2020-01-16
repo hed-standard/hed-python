@@ -137,11 +137,11 @@ class HedInputReader:
          string
              The issues that were found.
 
-         """
-        if HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
+        """
+        if isinstance(self._hed_input, list):
+            validation_issues = self._validate_hed_strings(self._hed_input);
+        elif HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
             validation_issues = self._validate_hed_tags_in_file();
-        else:
-            validation_issues = self._validate_hed_string(self._hed_input);
         return validation_issues;
 
     def _validate_hed_tags_in_file(self):
@@ -319,28 +319,33 @@ class HedInputReader:
             validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
         return validation_issues;
 
-    def _validate_hed_string(self, hed_string):
-        """Validates the tags in a HED string.
+    def _validate_hed_strings(self, hed_strings):
+        """Validates the tags in an array of HED strings
 
          Parameters
          ----------
-         hed_string: string
-            A HED string.
+         hed_string: string array
+            An array of HED string.
          Returns
          -------
          string
-             The issues associated with the HED string.
+             The issues associated with the HED strings
 
          """
-        validation_issues = '';
-        validation_issues += self._tag_validator.run_hed_string_validators(hed_string);
-        if not validation_issues:
-            hed_string_delimiter = HedStringDelimiter(hed_string);
-            validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
-            validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
-            validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
-            validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
-        return validation_issues;
+        eeg_issues = []
+        for i in range(0, len(hed_strings)):
+            hed_string = hed_strings[i]
+            validation_issues = self._tag_validator.run_hed_string_validators(hed_string);
+            if not validation_issues:
+                hed_string_delimiter = HedStringDelimiter(hed_string);
+                validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
+                validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
+                validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
+                validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
+            if validation_issues:
+                validation_issues = "Issue in event " + str(i+1) + ":" + validation_issues
+                eeg_issues.append(validation_issues)
+        return eeg_issues;
 
     def _validate_tag_levels_in_hed_string(self, hed_string_delimiter):
         """Validates the tags at each level in a HED string. This pertains to the top-level, all groups, and nested
