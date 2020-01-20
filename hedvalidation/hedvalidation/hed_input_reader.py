@@ -343,7 +343,7 @@ class HedInputReader:
                 validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
                 validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
             if validation_issues:
-                validation_issues = "Issue in event " + str(i+1) + ":" + validation_issues
+                validation_issues = "Issue in event " + str(i+1) + ":\n" + validation_issues
                 eeg_issues.append(validation_issues)
         return eeg_issues;
 
