@@ -24,6 +24,7 @@ true_attribute = 'true';
 unit_class_element = 'unitClass';
 unit_class_name_element = 'name';
 unit_class_units_element = 'units';
+unit_class_unit_element = 'unit'
 
 
 def remove_nowiki_tag_from_line(tag_line):
@@ -181,7 +182,7 @@ def add_tag_node(parent_node, tag_line):
     return tag_node;
 
 
-def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_attributes):
+def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_attributes, unit_class_unit_attributes):
     """Adds a unit class to its parent.
 
     Parameters
@@ -194,18 +195,22 @@ def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_at
         A list of unit class units.
     unit_class_attributes: list
         A list of unit class attributes.
+    unit_class_unit_attributes: list
+        A list of attributes for a specific unit
 
     Returns
     -------
     Element
         The unit class element.
     """
-    delimiter = ',';
     unit_class_node = SubElement(parent_node, unit_class_element);
     name_node = SubElement(unit_class_node, unit_class_name_element);
     name_node.text = unit_class;
-    units_node = SubElement(unit_class_node, unit_class_units_element);
-    units_node.text = delimiter.join(unit_class_units);
+    units_node = SubElement(unit_class_node, unit_class_units_element)
+    for unit, attributes in zip(unit_class_units, unit_class_unit_attributes):
+        unit_node = SubElement(units_node, unit_class_unit_element)
+        add_tag_node_attributes(unit_node, attributes)
+        unit_node.text = unit
     if unit_class_attributes:
         add_tag_node_attributes(unit_class_node, unit_class_attributes);
     return unit_class_node;

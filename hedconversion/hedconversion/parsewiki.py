@@ -107,6 +107,7 @@ def add_unit_classes(wiki_file):
     unit_class = '';
     unit_class_units = [];
     unit_class_attributes = '';
+    unit_class_units_attributes = []
     line = wiki_file.readline();
     while line:
         line = parsetag.remove_nowiki_tag_from_line(line.strip());
@@ -118,15 +119,18 @@ def add_unit_classes(wiki_file):
             level = parsetag.get_tag_level(line);
             if level == 1:
                 if unit_class_units:
-                    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes);
+                    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes, unit_class_units_attributes);
                 unit_class = parsetag.get_tag_name(line);
                 unit_class_attributes = parsetag.get_tag_attributes(line);
                 unit_class_units = [];
+                unit_class_units_attributes = []
             else:
                 unit_class_unit = parsetag.get_tag_name(line);
+                unit_class_unit_attributes = parsetag.get_tag_attributes(line);
                 unit_class_units.append(unit_class_unit);
+                unit_class_units_attributes.append(unit_class_unit_attributes)
         line = wiki_file.readline();
-    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes);
+    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes, unit_class_units_attributes);
 
 
 def hed_wiki_2_xml_tree(wiki_file_path):
