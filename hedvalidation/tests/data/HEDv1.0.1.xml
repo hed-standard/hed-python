@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<HED version="6.0.5">
+<?xml version="1.0" ?>
+<HED version="v1.0.0-restruct">
    <node>
       <name>Event</name>
       <node position="1" predicateType="passThrough" requireChild="true" required="true">
@@ -11,7 +11,7 @@
          </node>
          <node>
             <name>Participant response</name>
-            <description>The purpose of this event was to record the state or response of a participant. Note: participant actions may occur in other kinds of events, such as the experimenter records a terrain change as an event and the participant happens to be walking. In this case the event category would be Environmental. In contrast, if the participant started walking in response to an instruction or to some other stimulus, the event would be recorded as Participant response</description>
+            <description>The purpose of this event was to record the state or response of a participant. Note: participant actions may occur in other kinds of events, such as the experimenter records a terrain change as an event and the participant happens to be walking. In this case the event category would be Environmental. In contrast, if the participant started walking in response to an instruction or to some other stimulus, the event would be recorded as Participant response.</description>
          </node>
          <node>
             <name>Technical error</name>
@@ -263,7 +263,7 @@
                </node>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Person</name>
             <node>
                <name>Pedestrian</name>
@@ -278,7 +278,7 @@
                <name>Experimenter</name>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Animal</name>
          </node>
          <node>
@@ -305,7 +305,7 @@
                <name>Water</name>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Clothing</name>
             <node>
                <name>Personal</name>
@@ -324,10 +324,10 @@
          <node>
             <name>Speedometer</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Construction zone</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>3D shape</name>
          </node>
          <node>
@@ -340,7 +340,7 @@
             </node>
          </node>
       </node>
-      <node extensionAllowed="true">
+      <node>
          <name>2D shape</name>
          <description>Geometric shapes</description>
          <node>
@@ -371,7 +371,7 @@
          <node>
             <name>Single point</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Clock face</name>
             <description>Used to study things like hemispheric neglect. The tag is related to the clock-drawing-test</description>
             <node takesValue="true" unitClass="time">
@@ -380,7 +380,7 @@
             </node>
          </node>
       </node>
-      <node extensionAllowed="true">
+      <node>
          <name>Pattern</name>
          <node>
             <name>Checkerboard</name>
@@ -516,7 +516,7 @@
          <description>The Self-Assessment Manikin</description>
       </node>
    </node>
-   <node>
+   <node extensionAllowed="true">
       <name>Sensory presentation</name>
       <description>Object manifestation</description>
       <node>
@@ -562,6 +562,12 @@
             </node>
             <node>
                <name>Instrumental</name>
+            </node>
+            <node>
+               <name>Tone</name>
+            </node>
+            <node>
+               <name>Genre</name>
             </node>
          </node>
          <node>
@@ -699,6 +705,9 @@
             <name>Rendering type</name>
             <node>
                <name>Screen</name>
+               <node>
+                  <name>Head-mounted display</name>
+               </node>
                <node>
                   <name>View port</name>
                   <description>Two or more views on the same object --- for example one from top one from street view</description>
@@ -1513,7 +1522,7 @@
          </node>
          <node predicateType="passThrough">
             <name>Family</name>
-            <node extensionAllowed="true">
+            <node>
                <name>Asian</name>
                <node>
                   <name>Chinese</name>
@@ -1522,7 +1531,7 @@
                   <name>Japanese</name>
                </node>
             </node>
-            <node extensionAllowed="true">
+            <node>
                <name>Latin</name>
                <node>
                   <name>English</name>
@@ -1754,7 +1763,7 @@
          <name>Extraneous</name>
          <description>Button presses that are not meaningful for example due to intrinsic mechanical causes after a meaningful press</description>
       </node>
-      <node extensionAllowed="true" requireChild="true">
+      <node requireChild="true">
          <name>Role</name>
          <description>The role of the agent (participant, character, AI..)</description>
          <node>
@@ -2123,9 +2132,6 @@
       </node>
       <node>
          <name>Swallow</name>
-      </node>
-      <node>
-         <name>Turn</name>
       </node>
       <node>
          <name>Flex</name>
@@ -2984,7 +2990,7 @@
          <name>Virtual world</name>
       </node>
    </node>
-   <node requireChild="true">
+   <node extensionAllowed="true" requireChild="true">
       <name>Custom</name>
       <description>This node can be used to organize events in an alternative (parallel) hierarchy. You can define your custom tags and hierarchies without any restriction under this node. These tags will still be matched to each other as for example  /Custom/Dance/Waltz is considered a subtype of /Custom/DanceExample.</description>
    </node>
@@ -3042,10 +3048,10 @@
          <name>Backward masking</name>
       </node>
       <node>
-         <name>Balloon analogue risk task</name>
+         <name>Balloon analogue risk task - BART</name>
       </node>
       <node>
-         <name>Behavioral investment allocation strategy</name>
+         <name>Behavioral investment allocation strategy - BIAS</name>
       </node>
       <node>
          <name>Behavioral rating inventory of executive function</name>
@@ -3580,6 +3586,9 @@
          <name>Pseudoword naming task</name>
       </node>
       <node>
+         <name>Psychomotor vigilance task</name>
+      </node>
+      <node>
          <name>Pursuit rotor task</name>
       </node>
       <node>
@@ -3592,10 +3601,10 @@
          <name>Rapid serial object transformation</name>
       </node>
       <node>
-         <name>Reading (Covert)</name>
+         <name>Reading - Covert</name>
       </node>
       <node>
-         <name>Reading (Overt)</name>
+         <name>Reading - Overt</name>
       </node>
       <node>
          <name>Reading paradigm</name>
@@ -3610,10 +3619,10 @@
          <name>Reading span task</name>
       </node>
       <node>
-         <name>Recitation-repetition (Covert)</name>
+         <name>Recitation-repetition - Covert</name>
       </node>
       <node>
-         <name>Recitation-repetition (Overt)</name>
+         <name>Recitation-repetition - Overt</name>
       </node>
       <node>
          <name>Remember-know task</name>
@@ -3699,13 +3708,13 @@
          <name>pixels</name>
          <units>pixels,px,pixel</units>
       </unitClass>
-      <unitClass default="cm-per-sec">
+      <unitClass default="cm-per-s">
          <name>speed</name>
          <units>m-per-s,mph,kph,cm-per-s</units>
       </unitClass>
       <unitClass default="s">
          <name>time</name>
-         <units>s,second,seconds,centiseconds,cs,hour:min,day,days,ms,milliseconds,minute,minutes,hour,hours</units>
+         <units>s,second,seconds,centiseconds,centisecond,cs,hour:min,day,days,ms,milliseconds,millisecond,minute,minutes,hour,hours</units>
       </unitClass>
       <unitClass default="cm2">
          <name>area</name>

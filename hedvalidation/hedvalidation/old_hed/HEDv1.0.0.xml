@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<HED version="4.0.5">
+<?xml version="1.0" ?>
+<HED version="v1.0.0-restruct">
    <node>
       <name>Event</name>
       <node position="1" predicateType="passThrough" requireChild="true" required="true">
@@ -11,7 +11,7 @@
          </node>
          <node>
             <name>Participant response</name>
-            <description>The purpose of this event was to record the state or response of a participant. Note: participant actions may occur in other kinds of events, such as the experimenter records a terrain change as an event and the participant happens to be walking. In this case the event category would be Environmental. In contrast, if the participant started walking in response to an instruction or to some other stimulus, the event would be recorded as Participant response</description>
+            <description>The purpose of this event was to record the state or response of a participant. Note: participant actions may occur in other kinds of events, such as the experimenter records a terrain change as an event and the participant happens to be walking. In this case the event category would be Environmental. In contrast, if the participant started walking in response to an instruction or to some other stimulus, the event would be recorded as Participant response.</description>
          </node>
          <node>
             <name>Technical error</name>
@@ -41,90 +41,6 @@
             <name>Experimental stimulus</name>
             <node>
                <name>Instruction</name>
-               <node>
-                  <name>Attend</name>
-               </node>
-               <node>
-                  <name>Fixate</name>
-               </node>
-               <node>
-                  <name>Recall</name>
-               </node>
-               <node>
-                  <name>Generate</name>
-               </node>
-               <node>
-                  <name>Repeat</name>
-               </node>
-               <node>
-                  <name>Hold breath</name>
-               </node>
-               <node>
-                  <name>Breathe</name>
-               </node>
-               <node>
-                  <name>Imagine</name>
-               </node>
-               <node>
-                  <name>Rest</name>
-               </node>
-               <node>
-                  <name>Count</name>
-               </node>
-               <node>
-                  <name>Walk</name>
-                  <node>
-                     <name>Faster</name>
-                  </node>
-                  <node>
-                     <name>Slower</name>
-                  </node>
-               </node>
-               <node>
-                  <name>Move</name>
-                  <node>
-                     <name>Upper torso</name>
-                  </node>
-                  <node>
-                     <name>Lower torso</name>
-                  </node>
-                  <node>
-                     <name>Whole body</name>
-                  </node>
-               </node>
-               <node>
-                  <name>Speak</name>
-               </node>
-               <node>
-                  <name>Sing</name>
-               </node>
-               <node>
-                  <name>Detect</name>
-               </node>
-               <node>
-                  <name>Name</name>
-               </node>
-               <node>
-                  <name>Smile</name>
-               </node>
-               <node>
-                  <name>Discriminate</name>
-               </node>
-               <node>
-                  <name>Read</name>
-               </node>
-               <node>
-                  <name>Track</name>
-               </node>
-               <node>
-                  <name>Encode</name>
-               </node>
-               <node>
-                  <name>Eye-blink inhibit</name>
-               </node>
-               <node>
-                  <name>Take survey</name>
-               </node>
             </node>
          </node>
          <node>
@@ -347,7 +263,7 @@
                </node>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Person</name>
             <node>
                <name>Pedestrian</name>
@@ -362,7 +278,7 @@
                <name>Experimenter</name>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Animal</name>
          </node>
          <node>
@@ -389,7 +305,7 @@
                <name>Water</name>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Clothing</name>
             <node>
                <name>Personal</name>
@@ -408,10 +324,10 @@
          <node>
             <name>Speedometer</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Construction zone</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>3D shape</name>
          </node>
          <node>
@@ -424,7 +340,7 @@
             </node>
          </node>
       </node>
-      <node extensionAllowed="true">
+      <node>
          <name>2D shape</name>
          <description>Geometric shapes</description>
          <node>
@@ -455,7 +371,7 @@
          <node>
             <name>Single point</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Clock face</name>
             <description>Used to study things like hemispheric neglect. The tag is related to the clock-drawing-test</description>
             <node takesValue="true" unitClass="time">
@@ -464,7 +380,7 @@
             </node>
          </node>
       </node>
-      <node extensionAllowed="true">
+      <node>
          <name>Pattern</name>
          <node>
             <name>Checkerboard</name>
@@ -565,7 +481,7 @@
       <node>
          <name>Natural scene</name>
          <node>
-            <name>Arial</name>
+            <name>Aerial</name>
             <node>
                <name>Satellite</name>
             </node>
@@ -600,7 +516,7 @@
          <description>The Self-Assessment Manikin</description>
       </node>
    </node>
-   <node>
+   <node extensionAllowed="true">
       <name>Sensory presentation</name>
       <description>Object manifestation</description>
       <node>
@@ -646,6 +562,12 @@
             </node>
             <node>
                <name>Instrumental</name>
+            </node>
+            <node>
+               <name>Tone</name>
+            </node>
+            <node>
+               <name>Genre</name>
             </node>
          </node>
          <node>
@@ -784,6 +706,9 @@
             <node>
                <name>Screen</name>
                <node>
+                  <name>Head-mounted display</name>
+               </node>
+               <node>
                   <name>View port</name>
                   <description>Two or more views on the same object --- for example one from top one from street view</description>
                   <node predicateType="passThrough">
@@ -846,7 +771,8 @@
          <name>Offset</name>
       </node>
       <node>
-         <name>Imagined This is used to identity that the (sub)event only happened in participant</name>
+         <name>Imagined</name>
+         <description>This is used to identity that the (sub)event only happened in participant's imagination, e.g.  imagined movements in motor imagery paradigms.</description>
       </node>
       <node requireChild="true">
          <name>State ID</name>
@@ -1050,10 +976,10 @@
       <node requireChild="true">
          <name>Location</name>
          <description>Spot or center of an area. Use Area were you are referring to something with significant extent and emphasizing its boundaries, like a city</description>
-      </node>
-      <node takesValue="true">
-         <name>:</name>
-         <description>location label</description>
+         <node takesValue="true">
+            <name>#</name>
+            <description>location label</description>
+         </node>
          <node>
             <name>Screen</name>
             <description>Specify displacements from each subnode in pixels or degrees or meters. Specify units such as Attribute/Location/Screen/Top/12 px</description>
@@ -1315,23 +1241,30 @@
       <node>
          <name>Blink</name>
          <node requireChild="true">
-            <name>Time shut The amount of time the eyelid remains closed (typically measured as 90</name>
-            <description>in seconds</description>
-            <node isNumeric="true" takesValue="true" unitClass="time">
+            <name>Time shut</name>
+            <description>The amount of time the eyelid remains closed (typically measured as 90% of the blink amplitude), in seconds.</description>
+            <node default="s" isNumeric="true" takesValue="true" unitClass="time">
                <name>#</name>
             </node>
          </node>
          <node requireChild="true">
-            <name>PAVR Amplitude-Velocity ratio</name>
-            <description>in centoseconds</description>
-            <node default="centoseconds" isNumeric="true" takesValue="true" unitClass="time">
+            <name>Duration</name>
+            <description>Duration of blink, usually the half-height blink duration in seconds taken either from base or zero of EEG signal. For eye-trackers, usually denotes interval when pupil covered by eyelid.</description>
+            <node default="s" isNumeric="true" takesValue="true" unitClass="time">
                <name>#</name>
             </node>
          </node>
          <node requireChild="true">
-            <name>NAVR Negative Amplitude-Velocity ratio</name>
-            <description>in centoseconds</description>
-            <node default="centoseconds" isNumeric="true" takesValue="true" unitClass="time">
+            <name>PAVR</name>
+            <description>Amplitude-Velocity ratio, in centiseconds</description>
+            <node default="centiseconds" isNumeric="true" takesValue="true" unitClass="time">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>NAVR</name>
+            <description>Negative Amplitude-Velocity ratio, in centiseconds</description>
+            <node default="centiseconds" isNumeric="true" takesValue="true" unitClass="time">
                <name>#</name>
             </node>
          </node>
@@ -1367,14 +1300,14 @@
             <name>Motion</name>
             <node>
                <name>Down</name>
-               <node isNumeric="true" takesValue="true" unitClass="velocity">
+               <node isNumeric="true" takesValue="true" unitClass="speed">
                   <name>#</name>
                   <description>e.g. 3 degrees-per-second</description>
                </node>
             </node>
             <node>
                <name>Up</name>
-               <node isNumeric="true" takesValue="true" unitClass="velocity">
+               <node isNumeric="true" takesValue="true" unitClass="speed">
                   <name>#</name>
                   <description>e.g. 3 degrees-per-second</description>
                </node>
@@ -1383,14 +1316,14 @@
                <name>Horizontal</name>
                <node>
                   <name>Right</name>
-                  <node isNumeric="true" takesValue="true" unitClass="velocity">
+                  <node isNumeric="true" takesValue="true" unitClass="speed">
                      <name>#</name>
                      <description>e.g. 3 degrees-per-second</description>
                   </node>
                </node>
                <node>
                   <name>Left</name>
-                  <node isNumeric="true" takesValue="true" unitClass="velocity">
+                  <node isNumeric="true" takesValue="true" unitClass="speed">
                      <name>#</name>
                      <description>e.g. 3 degrees-per-second</description>
                   </node>
@@ -1589,7 +1522,7 @@
          </node>
          <node predicateType="passThrough">
             <name>Family</name>
-            <node extensionAllowed="true">
+            <node>
                <name>Asian</name>
                <node>
                   <name>Chinese</name>
@@ -1598,7 +1531,7 @@
                   <name>Japanese</name>
                </node>
             </node>
-            <node extensionAllowed="true">
+            <node>
                <name>Latin</name>
                <node>
                   <name>English</name>
@@ -1711,12 +1644,16 @@
          </node>
          <node>
             <name>Background</name>
-            <description>presented in the background such as background music, background image, etc.</description>
+            <description>presented in the background such as background music, background image, etc. The main factor here is that background presentations are to be ignored, e.g. ignore math question auditory stimuli.</description>
          </node>
       </node>
       <node>
          <name>Intended effect</name>
          <description>This tag is to be grouped with Participant/Effect/Cognitive to specify the intended cognitive effect (of the experimenter). This is to differentiate the resulting group with Participant/Effect which specifies the actual effect on the participant. For example, in an RSVP experiment if an image is intended to be perceived as a target, (Participant/Effect/Cognitive/Target, Attribute/Intended effect) group is added. If the image was perceived by the subject as a target (e.g. they pressed a button to indicate so), then the tag Participant/Effect/Cognitive/Target is also added: Participant/Effect/Cognitive/Target, (Participant/Effect/Cognitive/Target, Attribute/Intended effect). otherwise the Participant/Effect/Cognitive/Target tag is not included outside of the group.</description>
+      </node>
+      <node>
+         <name>Instruction</name>
+         <description>This tag is placed in events of type Event/Category/Experimental stimulus/Instruction, grouped with one or more Action/ tags to replace the detailed specification XXX in Event/Category/Experimental stimulus/Instruction/XXX) in previous versions. Usage example:  Event/Category/Experimental stimulus/Instruction, (Action/Fixate, Attribute/Instruction)</description>
       </node>
       <node>
          <name>Participant indication</name>
@@ -1804,6 +1741,12 @@
             <name>Pass by</name>
             <description>Passing by another object or the participant</description>
          </node>
+         <node>
+            <name>Accelerate</name>
+         </node>
+         <node>
+            <name>Decelerate</name>
+         </node>
       </node>
       <node requireChild="true">
          <name>Association</name>
@@ -1820,7 +1763,7 @@
          <name>Extraneous</name>
          <description>Button presses that are not meaningful for example due to intrinsic mechanical causes after a meaningful press</description>
       </node>
-      <node extensionAllowed="true" requireChild="true">
+      <node requireChild="true">
          <name>Role</name>
          <description>The role of the agent (participant, character, AI..)</description>
          <node>
@@ -1938,8 +1881,32 @@
       <node>
          <name>Eye blink</name>
          <node>
+            <name>Left base</name>
+            <description>The time of the first detectable eyelid movement on closing.</description>
+         </node>
+         <node>
+            <name>Left zero</name>
+            <description>The last time at which the EEG/EOG signal crosses zero during eyelid closing.</description>
+         </node>
+         <node>
+            <name>Left half height</name>
+            <description>The time at which the EEG/EOG signal reaches half maximum height during eyelid closing.</description>
+         </node>
+         <node>
             <name>Max</name>
             <description>The time at which the eyelid is the most closed.</description>
+         </node>
+         <node>
+            <name>Right half height</name>
+            <description>The time at which the EEG/EOG signal reaches half maximum height during eyelid opening.</description>
+         </node>
+         <node>
+            <name>Right zero</name>
+            <description>The first time at which the EEG/EOG signal crosses zero during eyelid opening.</description>
+         </node>
+         <node>
+            <name>Right base</name>
+            <description>The time of the last detectable eyelid movement on opening.</description>
          </node>
       </node>
       <node>
@@ -2007,6 +1974,15 @@
       <node>
          <name>Course correction</name>
          <description>Change the direction of a reach in the middle to adjust for a moving target.</description>
+      </node>
+      <node>
+         <name>Interact</name>
+         <node>
+            <name>With human</name>
+         </node>
+      </node>
+      <node>
+         <name>Take survey</name>
       </node>
       <node>
          <name>Stretch</name>
@@ -2158,9 +2134,6 @@
          <name>Swallow</name>
       </node>
       <node>
-         <name>Turn</name>
-      </node>
-      <node>
          <name>Flex</name>
       </node>
       <node>
@@ -2180,6 +2153,69 @@
       </node>
       <node>
          <name>Read</name>
+      </node>
+      <node>
+         <name>Attend</name>
+      </node>
+      <node>
+         <name>Recall</name>
+      </node>
+      <node>
+         <name>Generate</name>
+      </node>
+      <node>
+         <name>Repeat</name>
+      </node>
+      <node>
+         <name>Hold breath</name>
+      </node>
+      <node>
+         <name>Breathe</name>
+      </node>
+      <node>
+         <name>Rest</name>
+      </node>
+      <node>
+         <name>Count</name>
+      </node>
+      <node>
+         <name>Move</name>
+         <node>
+            <name>Upper torso</name>
+         </node>
+         <node>
+            <name>Lower torso</name>
+         </node>
+         <node>
+            <name>Whole body</name>
+         </node>
+      </node>
+      <node>
+         <name>Speak</name>
+      </node>
+      <node>
+         <name>Sing</name>
+      </node>
+      <node>
+         <name>Detect</name>
+      </node>
+      <node>
+         <name>Name</name>
+      </node>
+      <node>
+         <name>Smile</name>
+      </node>
+      <node>
+         <name>Discriminate</name>
+      </node>
+      <node>
+         <name>Track</name>
+      </node>
+      <node>
+         <name>Encode</name>
+      </node>
+      <node>
+         <name>Eye-blink inhibit</name>
       </node>
    </node>
    <node predicateType="passThrough">
@@ -2954,7 +2990,7 @@
          <name>Virtual world</name>
       </node>
    </node>
-   <node requireChild="true">
+   <node extensionAllowed="true" requireChild="true">
       <name>Custom</name>
       <description>This node can be used to organize events in an alternative (parallel) hierarchy. You can define your custom tags and hierarchies without any restriction under this node. These tags will still be matched to each other as for example  /Custom/Dance/Waltz is considered a subtype of /Custom/DanceExample.</description>
    </node>
@@ -2971,9 +3007,6 @@
       <description>See Tasks in http://www.cognitiveatlas.org/tasks and CogPo definitions of paradigms</description>
       <node>
          <name>Action imitation task</name>
-      </node>
-      <node>
-         <name>Action observation paradigm</name>
       </node>
       <node>
          <name>Action observation task</name>
@@ -3015,10 +3048,10 @@
          <name>Backward masking</name>
       </node>
       <node>
-         <name>Balloon analogue risk task (BART)</name>
+         <name>Balloon analogue risk task - BART</name>
       </node>
       <node>
-         <name>Behavioral investment allocation strategy (BIAS)</name>
+         <name>Behavioral investment allocation strategy - BIAS</name>
       </node>
       <node>
          <name>Behavioral rating inventory of executive function</name>
@@ -3195,7 +3228,7 @@
          <name>Dot pattern expectancy task</name>
       </node>
       <node>
-         <name>Drawing (Cognitive Atlas Term)</name>
+         <name>Drawing</name>
       </node>
       <node>
          <name>Drawing paradigm</name>
@@ -3252,7 +3285,7 @@
          <name>Face n-back task</name>
       </node>
       <node>
-         <name>Fagerstrom test for nicotine dependence (Cognitive Atlas Term)</name>
+         <name>Fagerstrom test for nicotine dependence</name>
       </node>
       <node>
          <name>Film viewing</name>
@@ -3305,6 +3338,9 @@
       <node>
          <name>ID screening</name>
          <description>Visual examination of multiple fields of an ID or document to detect invalid or suspicious fields. For example at a security checkpoint.</description>
+      </node>
+      <node>
+         <name>Imagined emotion</name>
       </node>
       <node>
          <name>Imagined movement</name>
@@ -3370,6 +3406,9 @@
          <name>Macauthur communicative development inventory</name>
       </node>
       <node>
+         <name>Machine failure detection task</name>
+      </node>
+      <node>
          <name>Matching familiar figures test</name>
       </node>
       <node>
@@ -3391,7 +3430,7 @@
          <name>Micturition task</name>
       </node>
       <node>
-         <name>Mini mental state examination (Cognitive Atlas Term)</name>
+         <name>Mini mental state examination</name>
       </node>
       <node>
          <name>Mirror tracing test</name>
@@ -3505,6 +3544,9 @@
          <name>Pattern comparison</name>
       </node>
       <node>
+         <name>Perturbed driving</name>
+      </node>
+      <node>
          <name>Phonological discrimination</name>
       </node>
       <node>
@@ -3544,13 +3586,13 @@
          <name>Pseudoword naming task</name>
       </node>
       <node>
+         <name>Psychomotor vigilance task</name>
+      </node>
+      <node>
          <name>Pursuit rotor task</name>
       </node>
       <node>
          <name>Pyramids and palm trees task</name>
-      </node>
-      <node>
-         <name>Perturbed driving</name>
       </node>
       <node>
          <name>Rapid automatized naming test</name>
@@ -3559,10 +3601,10 @@
          <name>Rapid serial object transformation</name>
       </node>
       <node>
-         <name>Reading (Covert)</name>
+         <name>Reading - Covert</name>
       </node>
       <node>
-         <name>Reading (Overt)</name>
+         <name>Reading - Overt</name>
       </node>
       <node>
          <name>Reading paradigm</name>
@@ -3577,10 +3619,10 @@
          <name>Reading span task</name>
       </node>
       <node>
-         <name>Recitation-repetition (Covert)</name>
+         <name>Recitation-repetition - Covert</name>
       </node>
       <node>
-         <name>Recitation-repetition (Overt)</name>
+         <name>Recitation-repetition - Overt</name>
       </node>
       <node>
          <name>Remember-know task</name>
@@ -3590,6 +3632,12 @@
       </node>
       <node>
          <name>Rest</name>
+         <node>
+            <name>Rest eyes open</name>
+         </node>
+         <node>
+            <name>Rest eyes closed</name>
+         </node>
       </node>
       <node>
          <name>Retrieval-induced forgetting task</name>
@@ -3660,13 +3708,13 @@
          <name>pixels</name>
          <units>pixels,px,pixel</units>
       </unitClass>
-      <unitClass default="cm-per-sec">
+      <unitClass default="cm-per-s">
          <name>speed</name>
          <units>m-per-s,mph,kph,cm-per-s</units>
       </unitClass>
       <unitClass default="s">
          <name>time</name>
-         <units>s,second,seconds,centoseconds,hour:min,day,days,ms,milliseconds,minute,minutes,hour,hours</units>
+         <units>s,second,seconds,centiseconds,centisecond,cs,hour:min,day,days,ms,milliseconds,millisecond,minute,minutes,hour,hours</units>
       </unitClass>
       <unitClass default="cm2">
          <name>area</name>

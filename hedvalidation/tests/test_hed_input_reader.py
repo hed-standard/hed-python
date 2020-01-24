@@ -8,7 +8,7 @@ from hedvalidation.hed_input_reader import HedInputReader;
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.generic_hed_input_reader = HedInputReader('Attribute/Onset');
+        cls.generic_hed_input_reader = HedInputReader('Attribute/Temporal/Onset');
         cls.text_file_with_extension = 'file_with_extension.txt';
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'};
         cls.float_value = 1.1;

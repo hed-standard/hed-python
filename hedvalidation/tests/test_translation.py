@@ -12,8 +12,8 @@ from hedvalidation.hed_dictionary import HedDictionary;
 class Tests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.generic_hed_input_reader = HedInputReader('Attribute/onset')
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml');
+        self.generic_hed_input_reader = HedInputReader('Attribute/Temporal/Onset')
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HEDv1.0.1.xml');
         hed_dictionary = HedDictionary(hed_xml);
         self.tagValidator = TagValidator(hed_dictionary)
 
@@ -25,7 +25,7 @@ class Tests(unittest.TestCase):
             validation_issues = self.generic_hed_input_reader._validate_hed_string(test_strings[test])
 
             has_no_issues = (validation_issues == "")
-            matching_errors = validation_issues == target_result
+            matching_errors = (validation_issues == target_result)
 
             self.assertTrue(has_no_issues == hed_tag_string)
 
@@ -305,7 +305,7 @@ class Tests(unittest.TestCase):
         expectedIssues = {
             #NOT COMPLETE
             'hasRequiredUnit': "",
-            'missingRequiredUnit': report_error_type('unitClass', tag=testString['missingRequiredUnit'], unit_class_units='s'),
+            'missingRequiredUnit': report_warning_type('unitClass',testString['missingRequiredUnit'],'s'),
             'notRequiredNumber': "",
             'notRequiredScientific': "",
             'timeValue': ""

@@ -10,7 +10,7 @@ from hedvalidation.hed_dictionary import HedDictionary;
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml');
+        cls.hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HEDv1.0.1.xml');
         cls.hed_dictionary = HedDictionary(cls.hed_xml);
         cls.unit_class_tag = 'unitClass';
         cls.tag_attributes = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType',
