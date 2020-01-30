@@ -17,7 +17,7 @@ unit_class_attribute = 'unitClass';
 no_wiki_tag = '</?nowiki>'
 square_bracket_removal_expression = r'[\[\]]';
 tag_name_element = 'name';
-tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()]+\s*)+';
+tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()\^]+\s*)+';
 tag_description_element = 'description';
 tag_element = 'node';
 true_attribute = 'true';
