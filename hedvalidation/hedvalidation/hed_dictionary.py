@@ -18,9 +18,11 @@ class HedDictionary:
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed';
     TAG_DICTIONARY_KEYS = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
                            'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass'];
+    UNIT_CLASS_DICTIONARY_KEYS = ['SIUnit', 'unitSymbol']
     TAGS_DICTIONARY_KEY = 'tags';
     TAG_UNIT_CLASS_ATTRIBUTE = 'unitClass';
     UNIT_CLASS_ELEMENT = 'unitClass';
+    UNIT_CLASS_UNIT_ELEMENT = 'unit';
     UNIT_CLASS_UNITS_ELEMENT = 'units';
     UNIT_CLASS_DICTIONARY_KEYS = ['default_units', 'units'];
     UNITS_ELEMENT = 'units';
@@ -128,7 +130,8 @@ class HedDictionary:
             tag_dictionaries[TAG_DICTIONARY_KEY] = tag_dictionary;
         return tag_dictionaries;
 
-    def _populate_unit_class_dictionaries(self):
+############ rewrite#############################
+    def _populate_unit_class_dictionaries(self): #look at js file utils/hed.js and rewrite based on that or validator/schema.js
         """Populates a dictionary of dictionaries associated with all of the unit classes, unit class units, and unit
            class default units.
 
@@ -142,6 +145,12 @@ class HedDictionary:
             default units.
 
         """
+        ############################################## NEW ######################################################
+        # unit_class_Elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT)
+        # self._populate_unit_class_default_unit_dictionary(unit_class_Elements)
+        # self._populate_unit_class_units_dictionary(unit_class_Elements)
+
+        ############################################### OLD ####################################################
         unit_class_dictionaries = {};
         for UNIT_CLASS_DICTIONARY_KEY in HedDictionary.UNIT_CLASS_DICTIONARY_KEYS:
             unit_class_dictionary = {};
@@ -167,6 +176,18 @@ class HedDictionary:
             A dictionary that contains all the unit class units.
 
         """
+        ################################## NEW #######################################################
+        # self.dictionaries[self.UNITS_ELEMENT] = {}
+        # for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
+        #     self.dictionaries[unit_class_key] = {}
+        # for unit_class_element in unit_class_elements:
+        #     element_name = self._get_element_tag_value(unit_class_element)
+        #     element_units = unit_class_element[unit_class_element][0][unit_class_element]
+        #     self.dictionaries[self.UNITS_ELEMENT][0][element_name] = element_units
+        #     for element_unit in element_units:
+        #         # confused on lines 110 - 114 in schema.js but they go here
+
+        ################################### OLD ######################################################
         unit_class_units_dictionary = {};
         for unit_class_element in unit_class_elements:
             unit_class_element_name = self._get_element_tag_value(unit_class_element);
@@ -174,6 +195,8 @@ class HedDictionary:
                                                                    HedDictionary.UNIT_CLASS_UNITS_ELEMENT);
             unit_class_units_dictionary[unit_class_element_name] = unit_class_element_units.split(',');
         return unit_class_units_dictionary;
+
+############################################################################################################################
 
     def _populate_unit_class_default_unit_dictionary(self, unit_class_elements):
         """Populates a dictionary that contains unit class default units.

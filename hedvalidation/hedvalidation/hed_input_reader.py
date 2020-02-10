@@ -37,7 +37,7 @@ class HedInputReader:
     HED_XML_EXTENSION = '.xml';
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name='', hed_xml_file=''):
+                 required_tag_columns={}, worksheet_name='', hed_xml_file='', run_semantic_validation=True):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -72,9 +72,11 @@ class HedInputReader:
         self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns);
         self._has_column_names = has_column_names;
         self._worksheet_name = worksheet_name;
-        self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
-        self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings);
+        if run_semantic_validation:
+            self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
+        self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings, run_semantic_validation=run_semantic_validation);
         self._validation_issues = self._validate_hed_input();
+        self._run_semantic_validation = run_semantic_validation;
 
     def get_tag_validator(self):
         """Gets a TagValidator object.
@@ -367,7 +369,7 @@ class HedInputReader:
         validation_issues += self._tag_validator.run_tag_level_validators(top_level_tags, formatted_top_level_tags);
         return validation_issues;
 
-    def _validate_top_level_in_hed_string(self, hed_string_delimiter):
+    def _validate_top_level_in_hed_string(self, hed_string_delimiter):  #modify based on validator
         """Validates the top-level tags in a HED string.
 
          Parameters

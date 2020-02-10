@@ -12,22 +12,33 @@ from hedvalidation.hed_dictionary import HedDictionary;
 class Tests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.generic_hed_input_reader = HedInputReader('Attribute/Temporal/Onset')
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HEDv1.0.1.xml');
-        hed_dictionary = HedDictionary(hed_xml);
-        self.tagValidator = TagValidator(hed_dictionary)
+        self.generic_hed_input_reader = HedInputReader('Event/Category/')
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml');
+        self.hed_dictionary = HedDictionary(hed_xml);
+        self.tagValidator = TagValidator(self.hed_dictionary)
 
     def validate(self, test_strings, expected_results, expected_issues):
         for test in test_strings:
-            hed_tag_string = expected_results[test]
-            target_result = expected_issues[test]
+            expected_issue = expected_issues[test]
 
             validation_issues = self.generic_hed_input_reader._validate_hed_string(test_strings[test])
 
-            has_no_issues = (validation_issues == "")
-            matching_errors = (validation_issues == target_result)
+            self.assertEqual(validation_issues, expected_issue, test_strings[test])
+            self.assertCountEqual(validation_issues, expected_issue, test_strings[test])
 
-            self.assertTrue(has_no_issues == hed_tag_string)
+    def validate_semantic_base(self, test_strings, expected_issues, expected_results, testFunction):
+        for test in test_strings:
+            test_result = testFunction(test_strings[test])
+            expected_issue = expected_issues[test]
+            expected_result = expected_results[test]
+            has_no_issues = (test_result == "")
+
+            if has_no_issues is True and expected_result is True:
+                self.assertTrue(has_no_issues, test_strings[test])
+            else:
+                self.assertEqual(test_result, expected_issue, test_strings[test])
+                self.assertCountEqual(test_result, expected_issue, test_strings[test])
+
 
     def validate_syntactic_base(self, testStrings, expectedIssues, expectedResults, testFunction):
         for testKey in testStrings:
@@ -37,7 +48,7 @@ class Tests(unittest.TestCase):
             expectedResult = expectedResults[testKey]
             has_no_issues = (testResult == "")
             if has_no_issues is True and expectedResult is True:
-                continue
+                self.assertTrue(has_no_issues,testStrings[testKey])
             else:
                 self.assertEqual(testResult, expectedIssue, testStrings[testKey])
                 self.assertCountEqual(testResult, expectedIssue, testStrings[testKey])
@@ -150,13 +161,24 @@ class Tests(unittest.TestCase):
         }
         self.validate(testStrings, expectedResults, expectedIssues)
 
+    def validate_syntactic_new(self, test_strings, expected_issues, expected_results, check_for_warnings):
+        self.syntacticHedInputReader = HedInputReader('Event/Category/', check_for_warnings=check_for_warnings, run_semantic_validation= False)
+        self.validate_syntactic_base(test_strings,expected_issues,expected_results, \
+                                     lambda hed_input: self.syntacticHedInputReader._validate_hed_string(hed_input))
+
+    def validate_semantic(self, test_strings, expected_issues, expected_results, check_for_warnings):
+        self.semanticHedInputReader = HedInputReader('Event/Category/', check_for_warnings=check_for_warnings)
+        self.validate_semantic_base(test_strings, expected_issues, expected_results, \
+                                    lambda hed_input: self.semanticHedInputReader._validate_hed_string(hed_input))
+
+#COME BACK TO THIS
     def test_exist_in_schema(self):
         testString = {
-            'takesValue' : 'Event/Duration/3 ms',
+            'takesValue' : 'Attribute/Duration/3 ms',
             'full' : 'Attribute/Object side/Left',
             'extensionsAllowed' : 'Item/Object/Person/Driver',
-            'leafExtension' : 'Action/Hum/Song',
-            'nonExtensionsAllowed' : 'Item/Nonsense',
+            'leafExtension' : 'Event/Category/Initial context/Something',
+            'nonExtensionsAllowed' : 'Event/Nonsense',
             'illegalComma' : 'Event/Label/This is a label,This/Is/A/Tag'
         }
         expectedResults = {
@@ -173,10 +195,10 @@ class Tests(unittest.TestCase):
             'extensionsAllowed': '',
             'leafExtension': report_error_type('valid', tag=testString['leafExtension']),
             'nonExtensionsAllowed': report_error_type('valid', tag=testString['nonExtensionsAllowed']),
-            'illegalComma': report_error_type('comma', previous_tag='Event/Label/This is a label', tag='This/Is/A/Tag')
+            'illegalComma': report_error_type('commaValid', previous_tag='Event/Label/This is a label', tag='This/Is/A/Tag')
         }
         #alex used semantic validation
-        self.validate(testString,expectedResults,expectedIssues)
+        self.validate_semantic(testString, expectedIssues, expectedResults, False)
 
     def validate_syntactic(self,testStrings, expectedResults, expectedIssues, checkForWarnings):
         self.validate_syntactic_base(testStrings,expectedResults,expectedIssues, lambda parsedString, originalTag:
@@ -265,12 +287,13 @@ class Tests(unittest.TestCase):
     #         'missingAllRequired': report_error_type('valid', tag=testStrings['missingAllRequired']),
     #     }
     #     self.validate_syntactic_1(testStrings, expectedIssues, expectedResults)
+
 ####################################################################################
     # Alexander has specific error messages being reported for missing children
 ####################################################################################
     def test_child_required(self):
         testString = {
-            'hasChild' : 'Event/Category/Experimental stimulus',
+            'hasChild' : 'Event/Category/Experiment',
             'missingChild' : 'Event/Category'
         }
         expectedResults = {

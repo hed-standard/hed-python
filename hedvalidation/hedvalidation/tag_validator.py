@@ -42,7 +42,7 @@ class TagValidator:
     TILDE = '~';
     INVALID_CHARS = '[]{}'
 
-    def __init__(self, hed_dictionary, check_for_warnings=False):
+    def __init__(self, hed_dictionary, check_for_warnings=False, run_semantic_validation=True):
         """Constructor for the Tag_Validator class.
 
         Parameters
@@ -62,6 +62,7 @@ class TagValidator:
         self._issue_count = 0;
         self._error_count = 0;
         self._warning_count = 0;
+        self._run_semantic_validation = run_semantic_validation
 
     def _increment_issue_count(self, is_error=True):
         """Increments the validation issue count
@@ -140,12 +141,14 @@ class TagValidator:
 
          """
         validation_issues = '';
-        validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag, previous_original_tag,
-                                                        previous_formatted_tag);
-        validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
-        validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag);
+        if self._run_semantic_validation:
+            validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag, previous_original_tag,
+                                                            previous_formatted_tag);
+            validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
+            validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag);
         if self._check_for_warnings:
             validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
+        if self._check_for_warnings:
             validation_issues += self.check_capitalization(original_tag, formatted_tag);
         return validation_issues;
 
@@ -203,7 +206,8 @@ class TagValidator:
 
          """
         validation_issues = '';
-        validation_issues += self.check_if_multiple_unique_tags_exist(original_tag_list, formatted_tag_list);
+        if self._run_semantic_validation:
+            validation_issues += self.check_if_multiple_unique_tags_exist(original_tag_list, formatted_tag_list);
         validation_issues += self.check_if_duplicate_tags_exist(original_tag_list, formatted_tag_list);
         return validation_issues;
 
@@ -221,7 +225,7 @@ class TagValidator:
 
          """
         validation_issues = '';
-        if self._check_for_warnings:
+        if self._check_for_warnings and self._run_semantic_validation:
             validation_issues += self.check_for_required_tags(formatted_top_level_tags);
         return validation_issues;
 
@@ -251,7 +255,7 @@ class TagValidator:
             pass;
         elif is_extension_tag:
             pass;
-        elif not is_extension_tag and self.tag_takes_value(previous_formatted_tag) and TagValidator.COMMA in previous_formatted_tag:
+        elif not is_extension_tag and self.tag_takes_value(previous_formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
                                                                 tag=original_tag,
                                                                 previous_tag=previous_original_tag);
@@ -409,12 +413,12 @@ class TagValidator:
                 self._increment_issue_count();
         return validation_error;
 
-    @staticmethod
-    def strip_off_units_if_valid(tag_unit_values, tag_unit_class_units):
+
+    def strip_off_units_if_valid(tag_unit_value, tag_unit_class_units):                #implement actual pluralization java script utils/hed.js
         """Checks to see if the specified string has a valid unit, and removes it if so
 
         Parameters
-        ----------
+        ----------_
         tag_unit_values: string
             A unit tag with or without a unit class
         tag_unit_class_units
@@ -426,19 +430,23 @@ class TagValidator:
             Otherwise, returns tag_unit_values
 
         """
-        return_tag = tag_unit_values
+        return_tag = tag_unit_value
         tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
         for units in tag_unit_class_units:
-            if tag_unit_values.startswith(units):
-                return_tag = tag_unit_values[len(units):]
+            if tag_unit_value.startswith(units):
+                return_tag = tag_unit_value[len(units):]
                 return_tag = return_tag.strip()
-                break
-            if tag_unit_values.endswith(units):
-                return_tag = tag_unit_values[:-len(units)]
+                return return_tag
+            if tag_unit_value.endswith(units):
+                return_tag = tag_unit_value[:-len(units)]
                 return_tag = return_tag.strip()
-                break
+                return return_tag
 
         return return_tag
+
+############################ WRITE THIS #########################################
+    #def get_valid_unit_derivitive(self, unit):
+
 
     def check_if_tag_unit_class_units_exist(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag provided has a unit class but no units are not specified.
@@ -788,10 +796,6 @@ class TagValidator:
                                                                             tag=current_tag)
                         self._increment_issue_count()
                         break
-                elif TagValidator.comma_is_missing_before_opening_bracket(last_non_empty_character, character):
-                    validation_error = TagValidator.report_missing_comma_error(current_tag);
-                    self._increment_issue_count();
-                    break;
                 elif TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     self._increment_issue_count();

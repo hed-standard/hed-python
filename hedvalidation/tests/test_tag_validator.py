@@ -8,7 +8,7 @@ from hedvalidation.hed_dictionary import HedDictionary;
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HEDv1.0.1.xml');
+        cls.hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml');
         cls.REQUIRE_CHILD_DICTIONARY_KEY = 'requireChild';
         cls.hed_dictionary = HedDictionary(cls.hed_xml);
         cls.tag_validator = TagValidator(cls.hed_dictionary);
