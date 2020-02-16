@@ -20,7 +20,7 @@ class TagValidator:
     COMMA_VALID_ERROR_TYPE = 'commaValid';
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+';
     DEFAULT_UNIT_ATTRIBUTE = 'default';
-    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'default_units'
+    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
     DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$';
     REQUIRE_CHILD_ERROR_TYPE = 'requireChild';
     REQUIRED_ERROR_TYPE = 'required';
@@ -532,6 +532,7 @@ class TagValidator:
         if self.is_unit_class_tag(formatted_tag):
             unit_classes = self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
             unit_classes = unit_classes.split(',');
+
             for unit_class in unit_classes:
                 try:
                     units += (self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class]);

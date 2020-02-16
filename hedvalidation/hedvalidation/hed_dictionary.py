@@ -14,7 +14,7 @@ from defusedxml.lxml import parse;
 
 class HedDictionary:
     DEFAULT_UNIT_ATTRIBUTE = 'default';
-    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'default_units'
+    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed';
     TAG_DICTIONARY_KEYS = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
                            'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass'];
@@ -24,11 +24,8 @@ class HedDictionary:
     UNIT_CLASS_ELEMENT = 'unitClass';
     UNIT_CLASS_UNIT_ELEMENT = 'unit';
     UNIT_CLASS_UNITS_ELEMENT = 'units';
-    UNIT_CLASS_DICTIONARY_KEYS = ['default_units', 'units'];
     UNITS_ELEMENT = 'units';
     VERSION_ATTRIBUTE = 'version';
-    dictionaries = None;
-    root_element = None;
 
     def __init__(self, hed_xml_file_path):
         """Constructor for the Hed_Dictionary class.
@@ -45,7 +42,7 @@ class HedDictionary:
 
         """
         self.root_element = self._find_root_element(hed_xml_file_path);
-        self.dictionaries = self._populate_dictionaries();
+        self._populate_dictionaries();
 
 
     def get_root_element(self):
@@ -92,12 +89,9 @@ class HedDictionary:
             attributes.
 
         """
-        dictionaries = {};
-        tag_dictionaries = self._populate_tag_dictionaries();
-        unit_class_dictionaries = self._populate_unit_class_dictionaries();
-        dictionaries.update(tag_dictionaries);
-        dictionaries.update(unit_class_dictionaries);
-        return dictionaries;
+        self.dictionaries = {};
+        self._populate_tag_dictionaries();
+        self._populate_unit_class_dictionaries();
 
     def _populate_tag_dictionaries(self):
         """Populates a dictionary of dictionaries associated with tags and their attributes.
@@ -111,7 +105,6 @@ class HedDictionary:
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
-        tag_dictionaries = {};
         for TAG_DICTIONARY_KEY in HedDictionary.TAG_DICTIONARY_KEYS:
             tags, tag_elements = self.get_tags_by_attribute(TAG_DICTIONARY_KEY);
             if HedDictionary.EXTENSION_ALLOWED_ATTRIBUTE == TAG_DICTIONARY_KEY:
@@ -127,11 +120,10 @@ class HedDictionary:
                 tag_dictionary = self._string_list_2_lowercase_dictionary(tags);
             else:
                 tag_dictionary = self._string_list_2_lowercase_dictionary(tags);
-            tag_dictionaries[TAG_DICTIONARY_KEY] = tag_dictionary;
-        return tag_dictionaries;
+            self.dictionaries[TAG_DICTIONARY_KEY] = tag_dictionary;
 
-############ rewrite#############################
-    def _populate_unit_class_dictionaries(self): #look at js file utils/hed.js and rewrite based on that or validator/schema.js
+
+    def _populate_unit_class_dictionaries(self):
         """Populates a dictionary of dictionaries associated with all of the unit classes, unit class units, and unit
            class default units.
 
@@ -145,22 +137,9 @@ class HedDictionary:
             default units.
 
         """
-        ############################################## NEW ######################################################
-        # unit_class_Elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT)
-        # self._populate_unit_class_default_unit_dictionary(unit_class_Elements)
-        # self._populate_unit_class_units_dictionary(unit_class_Elements)
-
-        ############################################### OLD ####################################################
-        unit_class_dictionaries = {};
-        for UNIT_CLASS_DICTIONARY_KEY in HedDictionary.UNIT_CLASS_DICTIONARY_KEYS:
-            unit_class_dictionary = {};
-            unit_class_elements = self._get_elements_by_name(HedDictionary.UNIT_CLASS_ELEMENT);
-            if HedDictionary.UNITS_ELEMENT == UNIT_CLASS_DICTIONARY_KEY:
-                unit_class_dictionary = self._populate_unit_class_units_dictionary(unit_class_elements);
-            elif HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE == UNIT_CLASS_DICTIONARY_KEY:
-                unit_class_dictionary = self._populate_unit_class_default_unit_dictionary(unit_class_elements);
-            unit_class_dictionaries[UNIT_CLASS_DICTIONARY_KEY] = unit_class_dictionary;
-        return unit_class_dictionaries;
+        unit_class_Elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT);
+        self._populate_unit_class_default_unit_dictionary(unit_class_Elements);
+        self._populate_unit_class_units_dictionary(unit_class_Elements);
 
     def _populate_unit_class_units_dictionary(self, unit_class_elements):
         """Populates a dictionary that contains unit class units.
@@ -176,27 +155,18 @@ class HedDictionary:
             A dictionary that contains all the unit class units.
 
         """
-        ################################## NEW #######################################################
-        # self.dictionaries[self.UNITS_ELEMENT] = {}
-        # for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
-        #     self.dictionaries[unit_class_key] = {}
-        # for unit_class_element in unit_class_elements:
-        #     element_name = self._get_element_tag_value(unit_class_element)
-        #     element_units = unit_class_element[unit_class_element][0][unit_class_element]
-        #     self.dictionaries[self.UNITS_ELEMENT][0][element_name] = element_units
-        #     for element_unit in element_units:
-        #         # confused on lines 110 - 114 in schema.js but they go here
-
-        ################################### OLD ######################################################
-        unit_class_units_dictionary = {};
+        self.dictionaries[self.UNITS_ELEMENT] = {}
+        for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
+            self.dictionaries[unit_class_key] = {}
         for unit_class_element in unit_class_elements:
-            unit_class_element_name = self._get_element_tag_value(unit_class_element);
-            unit_class_element_units = self._get_element_tag_value(unit_class_element,
-                                                                   HedDictionary.UNIT_CLASS_UNITS_ELEMENT);
-            unit_class_units_dictionary[unit_class_element_name] = unit_class_element_units.split(',');
-        return unit_class_units_dictionary;
-
-############################################################################################################################
+            element_name = self._get_element_tag_value(unit_class_element)
+            element_units = self._get_elements_by_name('unit', unit_class_element);
+            element_unit_names = list(map(lambda element: element.text, element_units));
+            self.dictionaries[self.UNITS_ELEMENT][element_name] = element_unit_names
+            for element_unit in element_units:
+                lowercase_unit = element_unit.text.lower()
+                for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
+                    self.dictionaries[unit_class_key][lowercase_unit] = element_unit.get(unit_class_key)
 
     def _populate_unit_class_default_unit_dictionary(self, unit_class_elements):
         """Populates a dictionary that contains unit class default units.
@@ -212,12 +182,11 @@ class HedDictionary:
             A dictionary that contains all the unit class default units.
 
         """
-        unit_class_default_unit_dictionary = {};
+        self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE] = {};
         for unit_class_element in unit_class_elements:
             unit_class_element_name = self._get_element_tag_value(unit_class_element);
-            unit_class_default_unit_dictionary[unit_class_element_name] = \
-                unit_class_element.attrib[HedDictionary.DEFAULT_UNIT_ATTRIBUTE];
-        return unit_class_default_unit_dictionary;
+            self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = \
+                unit_class_element.attrib[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE];
 
     def _populate_tag_to_attribute_dictionary(self, tag_list, tag_element_list, attribute_name):
         """Populates the dictionaries associated with default unit tags in the attribute dictionary.
@@ -488,7 +457,7 @@ class HedDictionary:
             True if the tag has the specified attribute. False, if otherwise.
 
         """
-        if tag.lower() in self.dictionaries[tag_attribute]:
+        if self.dictionaries[tag_attribute].get(tag):
                 return True;
         return False;
 

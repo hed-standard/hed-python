@@ -76,12 +76,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(lowercase_dictionary, dict);
         self.assertTrue(lowercase_dictionary);
 
-    def test_populate_tag_dictionaries(self):
-        tag_dictionaries = self.hed_dictionary._populate_tag_dictionaries();
-        self.assertIsInstance(tag_dictionaries, dict);
-        for attribute_dictionary_key in tag_dictionaries:
-            self.assertIsInstance(tag_dictionaries[attribute_dictionary_key], dict);
-
     def test_get_elements_by_attribute(self):
         for tag_attribute in self.tag_attributes:
             elements = self.hed_dictionary._get_elements_by_attribute(tag_attribute);
@@ -97,9 +91,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(tag_elements, list);
 
     def test_populate_dictionaries(self):
-        dictionaries = self.hed_dictionary._populate_dictionaries();
-        for hed_dictionary_key in dictionaries:
-            self.assertIsInstance(dictionaries[hed_dictionary_key], dict);
+        self.hed_dictionary._populate_dictionaries();
+        for hed_dictionary_key in self.hed_dictionary.dictionaries:
+            self.assertIsInstance(self.hed_dictionary.dictionaries[hed_dictionary_key], dict);
 
     def test_get_all_child_tags(self):
         child_tags = self.hed_dictionary._get_all_child_tags();

@@ -312,8 +312,8 @@ class Tests(unittest.TestCase):
 #################################################################################
     def test_required_units(self):
         testString = {
-            'hasRequiredUnit' : 'Event/Duration/3 ms',
-            'missingRequiredUnit' : 'Event/Duration/3',
+            'hasRequiredUnit' : 'Attribute/Duration/3 ms',
+            'missingRequiredUnit' : 'Attribute/Duration/3',
             'notRequiredNumber' : 'Attribute/Color/Red/0.5',
             'notRequiredScientific' : 'Attribute/Color/Red/5.2e-1',
             'timeValue' : 'Item/2D shape/Clock face/8:30'
