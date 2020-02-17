@@ -9,9 +9,11 @@ Created on Oct 2, 2017
 
 import re;
 import time;
+import inflect;
 from hedvalidation import error_reporter;
 from hedvalidation import warning_reporter;
 
+pluralize = inflect.engine()
 
 class TagValidator:
     BRACKET_ERROR_TYPE = 'bracket';
@@ -35,6 +37,7 @@ class TagValidator:
     IS_NUMERIC_ATTRIBUTE = 'isNumeric';
     UNIT_CLASS_ATTRIBUTE = 'unitClass';
     UNIT_CLASS_UNITS_ELEMENT = 'units';
+    UNIT_SYMBOL_TYPE = 'unitSymbol'
     OPENING_GROUP_BRACKET = '(';
     CLOSING_GROUP_BRACKET = ')';
     DOUBLE_QUOTE = '"';
@@ -413,7 +416,13 @@ class TagValidator:
                 self._increment_issue_count();
         return validation_error;
 
+    ############################ WRITE THIS #########################################
+    def get_valid_unit_derivative(self, unit):
+        derivativeUnits = [unit];
+        if unit not in self._hed_dictionary[self.UNIT_SYMBOL_TYPE]:
+            derivativeUnits.append(pluralize.plural(unit));
 
+        return derivativeUnits;
     def strip_off_units_if_valid(tag_unit_value, tag_unit_class_units):                #implement actual pluralization java script utils/hed.js
         """Checks to see if the specified string has a valid unit, and removes it if so
 
@@ -430,23 +439,33 @@ class TagValidator:
             Otherwise, returns tag_unit_values
 
         """
-        return_tag = tag_unit_value
-        tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
-        for units in tag_unit_class_units:
-            if tag_unit_value.startswith(units):
-                return_tag = tag_unit_value[len(units):]
-                return_tag = return_tag.strip()
-                return return_tag
-            if tag_unit_value.endswith(units):
-                return_tag = tag_unit_value[:-len(units)]
-                return_tag = return_tag.strip()
-                return return_tag
+    ############################## OLD #########################################
+        # return_tag = tag_unit_value
+        # tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
+        # for units in tag_unit_class_units:
+        #     if tag_unit_value.startswith(units):
+        #         return_tag = tag_unit_value[len(units):]
+        #         return_tag = return_tag.strip()
+        #         return return_tag
+        #     if tag_unit_value.endswith(units):
+        #         return_tag = tag_unit_value[:-len(units)]
+        #         return_tag = return_tag.strip()
+        #         return return_tag
+        #
+        # return return_tag
 
-        return return_tag
+    ################################## NEW ######################################
+        # Alexander sorts the tag_unit_class_units comparing the lengths
+        # should self be added as a parameter to this function?
+        for unit in tag_unit_class_units:
+            derivative_units = self.get_valid_unit_derivitive(unit);
+            for derivative_unit in derivative_units:
+                if str(tag_unit_value).startswith(derivative_unit):
+                    return str(tag_unit_value)[len(derivative_unit):].trim();
+                elif str(tag_unit_value).endswith(derivative_unit):
+                    return str(tag_unit_value)[0 -len(derivative_unit)];
 
-############################ WRITE THIS #########################################
-    #def get_valid_unit_derivitive(self, unit):
-
+        return tag_unit_value;
 
     def check_if_tag_unit_class_units_exist(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag provided has a unit class but no units are not specified.
