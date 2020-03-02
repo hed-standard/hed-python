@@ -25,6 +25,7 @@ unit_class_element = 'unitClass';
 unit_class_name_element = 'name';
 unit_class_units_element = 'units';
 unit_class_unit_element = 'unit'
+unit_modifier_element = 'unitModifier';
 
 
 def remove_nowiki_tag_from_line(tag_line):
@@ -214,6 +215,29 @@ def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_at
     if unit_class_attributes:
         add_tag_node_attributes(unit_class_node, unit_class_attributes);
     return unit_class_node;
+
+
+def add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes):
+    """Adds a unit modifier to its parent.
+
+    Parameters
+    ----------
+    parent_node: Element
+        The parent of the unit modifier.
+    unit_modifier: Element
+        The unit modifier.
+    unit_modifier_attributes: list
+        A list of unit modifier attributes.
+
+    Returns
+    -------
+    Element
+        The unit modifier element.
+    """
+    unit_modifier_node = SubElement(parent_node, unit_modifier_element);
+    unit_modifier_node.text = unit_modifier;
+    add_tag_node_attributes(unit_modifier_node, unit_modifier_attributes);
+    return unit_modifier_node;
 
 
 def add_tag_node_attributes(tag_node, tag_attributes):

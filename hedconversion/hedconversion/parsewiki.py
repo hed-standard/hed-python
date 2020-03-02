@@ -133,6 +133,33 @@ def add_unit_classes(wiki_file):
     parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes, unit_class_units_attributes);
 
 
+def add_unit_modifiers(wiki_file):
+    """Adds the unit modifiers to the HED element.
+
+    Parameters
+    ----------
+    wiki_file: file object.
+        A file object that points to the HED wiki file.
+
+    Returns
+    -------
+
+    """
+    unit_modifier_node = SubElement(hed_node, 'unitModifiers');
+    line = wiki_file.readline();
+    while line:
+        line = parsetag.remove_nowiki_tag_from_line(line.strip());
+        if not line:
+            pass
+        elif line.startswith(END_STRING):
+            break
+        else:
+            unit_modifier = parsetag.get_tag_name(line);
+            unit_modifier_attributes = parsetag.get_tag_attributes(line);
+            parsetag.add_unit_modifier_node(unit_modifier_node, unit_modifier, unit_modifier_attributes);
+        line = wiki_file.readline();
+
+
 def hed_wiki_2_xml_tree(wiki_file_path):
     """Converts a HED wiki file into a XML tree.
 
