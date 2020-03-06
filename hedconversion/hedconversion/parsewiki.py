@@ -19,6 +19,7 @@ HED_NODE_NAME = 'HED'
 HED_VERSION_STRING = 'HED version:'
 START_STRING = '!# start hed'
 UNIT_CLASS_STRING = '\'\'\'Unit classes'
+UNIT_MODIFIER_STRING = '\'\'\'Unit modifiers'
 END_STRING = '!# end hed'
 hed_node = Element('HED')
 
@@ -79,6 +80,9 @@ def add_tags(wiki_file):
             pass
         elif line.startswith(UNIT_CLASS_STRING):
             add_unit_classes(wiki_file);
+            break
+        elif line.startswith(UNIT_MODIFIER_STRING):
+            add_unit_modifiers(wiki_file);
             break
         elif line.startswith(ROOT_TAG):
             root_tag = parsetag.add_tag_node(hed_node, line);
