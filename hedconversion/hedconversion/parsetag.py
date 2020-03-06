@@ -236,7 +236,8 @@ def add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes)
     """
     unit_modifier_node = SubElement(parent_node, unit_modifier_element);
     unit_modifier_node.text = unit_modifier;
-    add_tag_node_attributes(unit_modifier_node, unit_modifier_attributes);
+    if unit_modifier_attributes:
+        add_tag_node_attributes(unit_modifier_node, unit_modifier_attributes);
     return unit_modifier_node;
 
 
