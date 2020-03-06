@@ -17,7 +17,7 @@ unit_class_attribute = 'unitClass';
 no_wiki_tag = '</?nowiki>'
 square_bracket_removal_expression = r'[\[\]]';
 tag_name_element = 'name';
-tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()\^]+\s*)+';
+tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()\^µ]+\s*)+';
 tag_description_element = 'description';
 tag_element = 'node';
 true_attribute = 'true';
@@ -26,6 +26,8 @@ unit_class_name_element = 'name';
 unit_class_units_element = 'units';
 unit_class_unit_element = 'unit'
 unit_modifier_element = 'unitModifier';
+unit_modifier_name_element = 'name';
+unit_modifier_description_element = 'description';
 
 
 def remove_nowiki_tag_from_line(tag_line):
@@ -217,7 +219,7 @@ def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_at
     return unit_class_node;
 
 
-def add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes):
+def add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes, unit_modifier_description):
     """Adds a unit modifier to its parent.
 
     Parameters
@@ -228,6 +230,8 @@ def add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes)
         The unit modifier.
     unit_modifier_attributes: list
         A list of unit modifier attributes.
+    unit_modifier_description: string
+        The unit modifier description.
 
     Returns
     -------
@@ -235,7 +239,11 @@ def add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes)
         The unit modifier element.
     """
     unit_modifier_node = SubElement(parent_node, unit_modifier_element);
-    unit_modifier_node.text = unit_modifier;
+    name_node = SubElement(unit_modifier_node, unit_modifier_name_element);
+    name_node.text = unit_modifier;
+    if unit_modifier_description:
+        description_node = SubElement(unit_modifier_node, unit_modifier_description_element);
+        description_node.text = unit_modifier_description;
     if unit_modifier_attributes:
         add_tag_node_attributes(unit_modifier_node, unit_modifier_attributes);
     return unit_modifier_node;

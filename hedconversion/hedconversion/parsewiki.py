@@ -157,7 +157,8 @@ def add_unit_modifiers(wiki_file):
         else:
             unit_modifier = parsetag.get_tag_name(line);
             unit_modifier_attributes = parsetag.get_tag_attributes(line);
-            parsetag.add_unit_modifier_node(unit_modifier_node, unit_modifier, unit_modifier_attributes);
+            unit_modifier_description = parsetag.get_tag_description(line);
+            parsetag.add_unit_modifier_node(unit_modifier_node, unit_modifier, unit_modifier_attributes, unit_modifier_description);
         line = wiki_file.readline();
 
 
