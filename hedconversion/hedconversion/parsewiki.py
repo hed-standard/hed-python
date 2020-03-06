@@ -78,12 +78,11 @@ def add_tags(wiki_file):
         line = parsetag.remove_nowiki_tag_from_line(line.strip());
         if not line:
             pass
-        elif line.startswith(UNIT_CLASS_STRING):
-            add_unit_classes(wiki_file);
-            break
         elif line.startswith(UNIT_MODIFIER_STRING):
             add_unit_modifiers(wiki_file);
             break
+        elif line.startswith(UNIT_CLASS_STRING):
+            add_unit_classes(wiki_file);
         elif line.startswith(ROOT_TAG):
             root_tag = parsetag.add_tag_node(hed_node, line);
             tag_levels[0] = root_tag;
@@ -116,8 +115,6 @@ def add_unit_classes(wiki_file):
     while line:
         line = parsetag.remove_nowiki_tag_from_line(line.strip());
         if not line:
-            pass
-        elif line.startswith(END_STRING):
             break
         else:
             level = parsetag.get_tag_level(line);
