@@ -13,7 +13,8 @@ import inflect;
 from hedvalidation import error_reporter;
 from hedvalidation import warning_reporter;
 
-pluralize = inflect.engine()
+pluralize = inflect.engine();
+pluralize.defnoun("hertz", "hertz");
 
 class TagValidator:
     BRACKET_ERROR_TYPE = 'bracket';
@@ -268,7 +269,7 @@ class TagValidator:
             self._increment_issue_count();
         return validation_error;
 
-    def tag_is_valid(self, formatted_tag):
+    def tag_exists_in_schema(self, formatted_tag):
         """Checks to see if the tag is a valid HED tag.
 
         Parameters
@@ -401,14 +402,18 @@ class TagValidator:
 
         """
         validation_error = '';
-        if not self.tag_is_valid(formatted_tag) and self.is_unit_class_tag(formatted_tag):
+        if not self.tag_exists_in_schema(formatted_tag) and self.is_unit_class_tag(formatted_tag):
             tag_unit_classes = self.get_tag_unit_classes(formatted_tag);
-            tag_unit_values = self.get_tag_name(formatted_tag);
+            formatted_tag_unit_value = self.get_tag_name(formatted_tag);
+            original_tag_unit_value = self.get_tag_name(original_tag);
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag));
-            if TagValidator.TIME_UNIT_CLASS in tag_unit_classes and TagValidator.is_hh_mm_time(tag_unit_values):
+            if (TagValidator.TIME_UNIT_CLASS in tag_unit_classes
+                    and TagValidator.is_hh_mm_time(formatted_tag_unit_value)):
                 pass;
             elif re.search(TagValidator.DIGIT_EXPRESSION,
-                           TagValidator.strip_off_units_if_valid(tag_unit_values, tag_unit_class_units)):
+                           self.strip_off_units_if_valid(original_tag_unit_value,
+                                                         formatted_tag_unit_value,
+                                                         tag_unit_class_units)):
                 pass
             else:
                 validation_error = error_reporter.report_error_type('unitClass', tag=original_tag,
@@ -416,18 +421,27 @@ class TagValidator:
                 self._increment_issue_count();
         return validation_error;
 
-    ############################ WRITE THIS #########################################
-    def get_valid_unit_derivative(self, unit):
+    def get_valid_unit_derivative(self, unit):      #change name to get_valid_unit_plural
+        """
+        Parameters
+        ----------
+        unit: String
+            unit to generate plural forms
+        Returns
+        -------
+        list
+            list of derivative units
+        """
         derivativeUnits = [unit];
-        if unit not in self._hed_dictionary[self.UNIT_SYMBOL_TYPE]:
+        if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit) is None:
             derivativeUnits.append(pluralize.plural(unit));
-
         return derivativeUnits;
-    def strip_off_units_if_valid(tag_unit_value, tag_unit_class_units):                #implement actual pluralization java script utils/hed.js
+
+    def strip_off_units_if_valid(self, original_tag_unit_value, formatted_tag_unit_value, tag_unit_class_units):
         """Checks to see if the specified string has a valid unit, and removes it if so
 
         Parameters
-        ----------_
+        ----------
         tag_unit_values: string
             A unit tag with or without a unit class
         tag_unit_class_units
@@ -439,33 +453,21 @@ class TagValidator:
             Otherwise, returns tag_unit_values
 
         """
-    ############################## OLD #########################################
-        # return_tag = tag_unit_value
-        # tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
-        # for units in tag_unit_class_units:
-        #     if tag_unit_value.startswith(units):
-        #         return_tag = tag_unit_value[len(units):]
-        #         return_tag = return_tag.strip()
-        #         return return_tag
-        #     if tag_unit_value.endswith(units):
-        #         return_tag = tag_unit_value[:-len(units)]
-        #         return_tag = return_tag.strip()
-        #         return return_tag
-        #
-        # return return_tag
-
-    ################################## NEW ######################################
-        # Alexander sorts the tag_unit_class_units comparing the lengths
-        # should self be added as a parameter to this function?
+        tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
         for unit in tag_unit_class_units:
-            derivative_units = self.get_valid_unit_derivitive(unit);
+            derivative_units = self.get_valid_unit_derivative(unit);
             for derivative_unit in derivative_units:
-                if str(tag_unit_value).startswith(derivative_unit):
-                    return str(tag_unit_value)[len(derivative_unit):].trim();
-                elif str(tag_unit_value).endswith(derivative_unit):
-                    return str(tag_unit_value)[0 -len(derivative_unit)];
-
-        return tag_unit_value;
+                if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
+                    if str(original_tag_unit_value).startswith(derivative_unit):
+                        return str(formatted_tag_unit_value)[len(derivative_unit):].strip();
+                    elif str(original_tag_unit_value).endswith(derivative_unit):
+                        return str(formatted_tag_unit_value)[0:-len(derivative_unit)].strip();
+                else:
+                    if str(formatted_tag_unit_value).startswith(derivative_unit):
+                        return str(formatted_tag_unit_value)[len(derivative_unit):].strip();
+                    elif str(formatted_tag_unit_value).endswith(derivative_unit):
+                        return str(formatted_tag_unit_value)[0:-len(derivative_unit)].strip();
+        return formatted_tag_unit_value;
 
     def check_if_tag_unit_class_units_exist(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag provided has a unit class but no units are not specified.
@@ -557,7 +559,7 @@ class TagValidator:
                     units += (self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class]);
                 except:
                     continue;
-        return list(map(str.lower, units));
+        return units;
 
     def get_unit_class_default_unit(self, formatted_tag):
         """Gets the default unit class unit that is associated with the specified tag.

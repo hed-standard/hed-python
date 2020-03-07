@@ -164,9 +164,9 @@ class HedDictionary:
             element_unit_names = list(map(lambda element: element.text, element_units));
             self.dictionaries[self.UNITS_ELEMENT][element_name] = element_unit_names
             for element_unit in element_units:
-                lowercase_unit = element_unit.text.lower()
+                unit_name = element_unit.text
                 for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
-                    self.dictionaries[unit_class_key][lowercase_unit] = element_unit.get(unit_class_key)
+                    self.dictionaries[unit_class_key][unit_name] = element_unit.get(unit_class_key)
 
     def _populate_unit_class_default_unit_dictionary(self, unit_class_elements):
         """Populates a dictionary that contains unit class default units.

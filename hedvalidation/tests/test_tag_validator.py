@@ -234,7 +234,7 @@ class Test(unittest.TestCase):
 
     def test_check_if_tag_unit_class_units_are_valid(self):
         validation_error = \
-            self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_formatted_unit_class_tag,
+            self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_unit_class_tag,
                                                                        self.valid_formatted_unit_class_tag);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
@@ -306,9 +306,9 @@ class Test(unittest.TestCase):
         self.assertFalse(is_a_delimiter);
 
     def test_tag_is_valid(self):
-        tag_is_valid = self.tag_validator.tag_is_valid(self.valid_formatted_tag_without_attribute);
+        tag_is_valid = self.tag_validator.tag_exists_in_schema(self.valid_formatted_tag_without_attribute);
         self.assertTrue(tag_is_valid);
-        tag_is_valid = self.tag_validator.tag_is_valid(self.invalid_formatted_tag);
+        tag_is_valid = self.tag_validator.tag_exists_in_schema(self.invalid_formatted_tag);
         self.assertFalse(tag_is_valid);
 
     def test_is_hh_mm_time(self):
