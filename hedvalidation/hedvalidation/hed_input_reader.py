@@ -340,6 +340,7 @@ class HedInputReader:
             hed_string_delimiter = HedStringDelimiter(hed_string);
             validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
+            validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
         return validation_issues;

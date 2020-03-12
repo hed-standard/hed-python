@@ -19,11 +19,13 @@ class HedDictionary:
     TAG_DICTIONARY_KEYS = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
                            'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass'];
     UNIT_CLASS_DICTIONARY_KEYS = ['SIUnit', 'unitSymbol']
+    UNIT_MODIFIER_DICTIONARY_KEYS = ['SIUnitModifier', 'SIUnitSymbolModifier']
     TAGS_DICTIONARY_KEY = 'tags';
     TAG_UNIT_CLASS_ATTRIBUTE = 'unitClass';
     UNIT_CLASS_ELEMENT = 'unitClass';
     UNIT_CLASS_UNIT_ELEMENT = 'unit';
     UNIT_CLASS_UNITS_ELEMENT = 'units';
+    UNIT_MODIFIER_ELEMENT = 'unitModifier';
     UNITS_ELEMENT = 'units';
     VERSION_ATTRIBUTE = 'version';
 
@@ -92,6 +94,7 @@ class HedDictionary:
         self.dictionaries = {};
         self._populate_tag_dictionaries();
         self._populate_unit_class_dictionaries();
+        #   self._populate_unit_modifier_dictionaries();
 
     def _populate_tag_dictionaries(self):
         """Populates a dictionary of dictionaries associated with tags and their attributes.
@@ -140,6 +143,24 @@ class HedDictionary:
         unit_class_Elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT);
         self._populate_unit_class_default_unit_dictionary(unit_class_Elements);
         self._populate_unit_class_units_dictionary(unit_class_Elements);
+
+    # def _populate_unit_modifier_dictionaries(self):
+    #     """
+    #
+    #     Returns
+    #     -------
+    #
+    #     """
+    #     unit_modifier_elements = self._get_elements_by_name(self.UNIT_MODIFIER_ELEMENT);
+    #     #loop through keys and create empty dictionaries
+    #     for unit_modifier_key in self.UNIT_MODIFIER_DICTIONARY_KEYS:
+    #         self.dictionaries[unit_modifier_key] = {};
+    #     #copy second for loop to loop over unit modifier elements
+    #     for unit_modifier_element in unit_modifier_elements:
+    #         unit_modifier_name = self._get_element_tag_value(unit_modifier_element);
+    #         # loop through unit modifier dictionary keys
+    #         for unit_modifier_key in self.UNIT_MODIFIER_DICTIONARY_KEYS:
+    #             self.dictionaries[unit_modifier_key][unit_modifier_name] = unit_modifier_element.get(unit_modifier_key);
 
     def _populate_unit_class_units_dictionary(self, unit_class_elements):
         """Populates a dictionary that contains unit class units.

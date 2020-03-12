@@ -437,6 +437,23 @@ class TagValidator:
             derivativeUnits.append(pluralize.plural(unit));
         return derivativeUnits;
 
+
+    #split this function up
+        #move if for loop to its own function strip_off_units_if_valid
+            #strip_off_units_if_valid(self, unit_value, formated_unit_value, is_unit_symbol, unit) this fuction should return a tuple
+            #line2: found_unit = false
+            #tuple: (boolean, String with unit and prefix stripped off)
+            #found_unit,stripped_value = self.strip_off_units_if_valid(PARAMERTERS)
+            #at end of inner for loop after else:
+                #if found_unit:
+                    #return stripped_value
+            #change all ifs and elifs (startswith and endswith)
+                #if str(original_tag_unit_value).startswith(derivative_unit): --> if unit_value.startswith(unit):
+            #change str(formatted_tag_unit_value)[len(derivative_unit):].strip(); --> #change formated_unit_value[len(unit):].strip();
+
+            #returns a tuple of found_unit and stripped_value
+    #rename to validate_units
+    #add multiple and sub multiple checks in this function
     def strip_off_units_if_valid(self, original_tag_unit_value, formatted_tag_unit_value, tag_unit_class_units):
         """Checks to see if the specified string has a valid unit, and removes it if so
 
