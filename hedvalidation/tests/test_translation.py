@@ -386,7 +386,7 @@ class Tests(unittest.TestCase):
         self.syntacticTagValidator = TagValidator(self.hed_dictionary, check_for_warnings, False)
         for test_key in test_strings:
             hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
-            testResult = self.syntacticTagValidator.run_top_level_validators(hed_string_delimiter.top_level_tags)
+            testResult = self.generic_hed_input_reader._validate_tag_levels_in_hed_string(hed_string_delimiter)
             expectedIssue = expected_issues[test_key]
             expectedResult = expected_results[test_key]
             has_no_issues = (testResult == "")
@@ -396,7 +396,6 @@ class Tests(unittest.TestCase):
                 self.assertEqual(testResult, expectedIssue, test_strings[test_key])
                 self.assertCountEqual(testResult, expectedIssue, test_strings[test_key])
 
-#test is not working properly
     def test_no_duplicates(self):
         testStrings = {
             'topLevelDuplicate': 'Event/Category/Experimental stimulus,Event/Category/Experimental stimulus',

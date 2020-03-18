@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="v1.1.1-devunit">
+<HED version="v1.2.0-devunit">
    <node>
       <name>Event</name>
       <node position="1" requireChild="true" required="true">
@@ -3590,14 +3590,10 @@
       <unitClass defaultUnits="s">
          <name>time</name>
          <units>
-            <unit SIUnit="true" unitSymbol="true">s</unit>
             <unit SIUnit="true">second</unit>
-            <unit SIUnit="true">centisecond</unit>
-            <unit unitSymbol="true">cs</unit>
+            <unit SIUnit="true" unitSymbol="true">s</unit>
             <unit unitSymbol="true">hour:min</unit>
             <unit>day</unit>
-            <unit SIUnit="true" unitSymbol="true">ms</unit>
-            <unit SIUnit="true">millisecond</unit>
             <unit>minute</unit>
             <unit>hour</unit>
          </units>
@@ -3605,79 +3601,66 @@
       <unitClass defaultUnits="Hz">
          <name>frequency</name>
          <units>
-            <unit SIUnit="true" unitSymbol="true">Hz</unit>
-            <unit SIUnit="true" unitSymbol="true">MHz</unit>
             <unit SIUnit="true">hertz</unit>
-            <unit SIUnit="true" unitSymbol="true">kHz</unit>
+            <unit SIUnit="true" unitSymbol="true">Hz</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="radian">
          <name>angle</name>
          <units>
-            <unit>degree</unit>
             <unit SIUnit="true">radian</unit>
+            <unit SIUnit="true" unitSymbol="true">rad</unit>
+            <unit>degree</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="cm">
          <name>physicalLength</name>
          <units>
+            <unit SIUnit="true">metre</unit>
             <unit SIUnit="true" unitSymbol="true">m</unit>
-            <unit SIUnit="true" unitSymbol="true">cm</unit>
-            <unit SIUnit="true" unitSymbol="true">km</unit>
-            <unit SIUnit="true" unitSymbol="true">mm</unit>
             <unit>foot</unit>
-            <unit SIUnit="true">meter</unit>
             <unit>mile</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="px">
          <name>pixels</name>
          <units>
-            <unit unitSymbol="true">px</unit>
             <unit>pixel</unit>
+            <unit unitSymbol="true">px</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="cm^2">
+      <unitClass defaultUnits="m^2">
          <name>area</name>
          <units>
-            <unit unitSymbol="true">m^2</unit>
-            <unit unitSymbol="true">cm^2</unit>
-            <unit unitSymbol="true">km^2</unit>
+            <unit SIUnit="true" unitSymbol="true">m^2</unit>
             <unit unitSymbol="true">px^2</unit>
             <unit>pixel^2</unit>
-            <unit unitSymbol="true">mm^2</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="cm^3">
+      <unitClass defaultUnits="m^3">
          <name>volume</name>
          <units>
-            <unit unitSymbol="true">m^3</unit>
-            <unit unitSymbol="true">cm^3</unit>
-            <unit unitSymbol="true">mm^3</unit>
-            <unit unitSymbol="true">km^3</unit>
+            <unit SIUnit="true" unitSymbol="true">m^3</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="cm-per-s">
          <name>speed</name>
          <units>
-            <unit unitSymbol="true">m-per-s</unit>
+            <unit SIUnit="true" unitSymbol="true">m-per-s</unit>
             <unit unitSymbol="true">mph</unit>
             <unit unitSymbol="true">kph</unit>
-            <unit unitSymbol="true">cm-per-s</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="cm-per-s^2">
+      <unitClass defaultUnits="m-per-s^2">
          <name>acceleration</name>
          <units>
-            <unit unitSymbol="true">m-per-s^2</unit>
-            <unit unitSymbol="true">cm-per-s^2</unit>
+            <unit SIUnit="true" unitSymbol="true">m-per-s^2</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="cm-per-s^3">
+      <unitClass defaultUnits="m-per-s^3">
          <name>jerk</name>
          <units>
             <unit unitSymbol="true">m-per-s^3</unit>
-            <unit unitSymbol="true">cm-per-s^3</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="dB">
@@ -3693,13 +3676,11 @@
             <unit SIUnit="true" unitSymbol="true">cd</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="mb">
+      <unitClass defaultUnits="B">
          <name>memorySize</name>
          <units>
-            <unit SIUnit="true" unitSymbol="true">Mb</unit>
-            <unit SIUnit="true" unitSymbol="true">kb</unit>
-            <unit SIUnit="true" unitSymbol="true">gb</unit>
-            <unit SIUnit="true" unitSymbol="true">tb</unit>
+            <unit SIUnit="true">byte</unit>
+            <unit SIUnit="true" unitSymbol="true">B</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="$">
@@ -3712,4 +3693,166 @@
          </units>
       </unitClass>
    </unitClasses>
+   <unitModifiers>
+      <unitModifier SIUnitModifier="true">
+         <name>deca</name>
+         <description>SI unit multiple representing 10^1</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>da</name>
+         <description>SI unit multiple representing 10^1</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>hecto</name>
+         <description>SI unit multiple representing 10^2</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>h</name>
+         <description>SI unit multiple representing 10^2</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>kilo</name>
+         <description>SI unit multiple representing 10^3</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>k</name>
+         <description>SI unit multiple representing 10^3</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>mega</name>
+         <description>SI unit multiple representing 10^6</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>M</name>
+         <description>SI unit multiple representing 10^6</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>giga</name>
+         <description>SI unit multiple representing 10^9</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>G</name>
+         <description>SI unit multiple representing 10^9</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>tera</name>
+         <description>SI unit multiple representing 10^12</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>T</name>
+         <description>SI unit multiple representing 10^12</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>peta</name>
+         <description>SI unit multiple representing 10^15</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>P</name>
+         <description>SI unit multiple representing 10^15</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>exa</name>
+         <description>SI unit multiple representing 10^18</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>E</name>
+         <description>SI unit multiple representing 10^18</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>zetta</name>
+         <description>SI unit multiple representing 10^21</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>Z</name>
+         <description>SI unit multiple representing 10^21</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>yotta</name>
+         <description>SI unit multiple representing 10^24</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>Y</name>
+         <description>SI unit multiple representing 10^24</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>deci</name>
+         <description>SI unit submultiple representing 10^-1</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>d</name>
+         <description>SI unit submultiple representing 10^-1</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>centi</name>
+         <description>SI unit submultiple representing 10^-2</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>c</name>
+         <description>SI unit submultiple representing 10^-2</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>milli</name>
+         <description>SI unit submultiple representing 10^-3</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>m</name>
+         <description>SI unit submultiple representing 10^-3</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>micro</name>
+         <description>SI unit submultiple representing 10^-6</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>µ</name>
+         <description>SI unit submultiple representing 10^-6</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>nano</name>
+         <description>SI unit submultiple representing 10^-9</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>n</name>
+         <description>SI unit submultiple representing 10^-9</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>pico</name>
+         <description>SI unit submultiple representing 10^-12</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>p</name>
+         <description>SI unit submultiple representing 10^-12</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>femto</name>
+         <description>SI unit submultiple representing 10^-15</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>f</name>
+         <description>SI unit submultiple representing 10^-15</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>atto</name>
+         <description>SI unit submultiple representing 10^-18</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>a</name>
+         <description>SI unit submultiple representing 10^-18</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>zepto</name>
+         <description>SI unit submultiple representing 10^-21</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>z</name>
+         <description>SI unit submultiple representing 10^-21</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>yocto</name>
+         <description>SI unit submultiple representing 10^-24</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>y</name>
+         <description>SI unit submultiple representing 10^-24</description>
+      </unitModifier>
+   </unitModifiers>
 </HED>

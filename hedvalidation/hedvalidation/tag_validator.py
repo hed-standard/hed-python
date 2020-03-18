@@ -45,6 +45,8 @@ class TagValidator:
     COMMA = ',';
     TILDE = '~';
     INVALID_CHARS = '[]{}'
+    SI_UNIT_MODIFIER_KEY = 'SIUnitModifier'
+    SI_UNIT_SYMBOL_MODIFIER_KEY = 'SIUnitSymbolModifier'
 
     def __init__(self, hed_dictionary, check_for_warnings=False, run_semantic_validation=True):
         """Constructor for the Tag_Validator class.
@@ -411,7 +413,7 @@ class TagValidator:
                     and TagValidator.is_hh_mm_time(formatted_tag_unit_value)):
                 pass;
             elif re.search(TagValidator.DIGIT_EXPRESSION,
-                           self.strip_off_units_if_valid(original_tag_unit_value,
+                           self.validate_units(original_tag_unit_value,
                                                          formatted_tag_unit_value,
                                                          tag_unit_class_units)):
                 pass
@@ -437,30 +439,40 @@ class TagValidator:
             derivativeUnits.append(pluralize.plural(unit));
         return derivativeUnits;
 
+    def strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
+        found_unit = False
+        stripped_value = ''
 
-    #split this function up
-        #move if for loop to its own function strip_off_units_if_valid
-            #strip_off_units_if_valid(self, unit_value, formated_unit_value, is_unit_symbol, unit) this fuction should return a tuple
-            #line2: found_unit = false
-            #tuple: (boolean, String with unit and prefix stripped off)
-            #found_unit,stripped_value = self.strip_off_units_if_valid(PARAMERTERS)
-            #at end of inner for loop after else:
-                #if found_unit:
-                    #return stripped_value
-            #change all ifs and elifs (startswith and endswith)
-                #if str(original_tag_unit_value).startswith(derivative_unit): --> if unit_value.startswith(unit):
-            #change str(formatted_tag_unit_value)[len(derivative_unit):].strip(); --> #change formated_unit_value[len(unit):].strip();
+        if str(unit_value).startswith(unit):
+            found_unit = True;
+            stripped_value = str(unit_value)[len(unit):].strip();
+        elif str(unit_value).endswith(unit):
+            found_unit = True;
+            stripped_value = str(unit_value)[0:-len(unit)].strip();
 
-            #returns a tuple of found_unit and stripped_value
-    #rename to validate_units
-    #add multiple and sub multiple checks in this function
-    def strip_off_units_if_valid(self, original_tag_unit_value, formatted_tag_unit_value, tag_unit_class_units):
+        if found_unit:
+            modifierKey = ''
+            if is_unit_symbol:
+                modifierKey = self.SI_UNIT_SYMBOL_MODIFIER_KEY;
+            else:
+                modifierKey = self.SI_UNIT_MODIFIER_KEY;
+
+            for unit_modifier in self._hed_dictionary_dictionaries[modifierKey]:
+                if stripped_value.startswith(unit_modifier):
+                    stripped_value = stripped_value[len(unit_modifier):].strip();
+                elif stripped_value.endswith(unit_modifier):
+                    stripped_value = stripped_value[0:-len(unit_modifier)].strip();
+        return found_unit, stripped_value;
+
+    def validate_units(self, original_tag_unit_value, formatted_tag_unit_value, tag_unit_class_units):
         """Checks to see if the specified string has a valid unit, and removes it if so
 
         Parameters
         ----------
-        tag_unit_values: string
-            A unit tag with or without a unit class
+        original_tag_unit_value
+            The unformatted value of the tag
+        formatted_tag_unit_value
+            The formatted value of the tag
         tag_unit_class_units
             A list of valid units for this tag
         Returns
@@ -475,15 +487,16 @@ class TagValidator:
             derivative_units = self.get_valid_unit_derivative(unit);
             for derivative_unit in derivative_units:
                 if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
-                    if str(original_tag_unit_value).startswith(derivative_unit):
-                        return str(formatted_tag_unit_value)[len(derivative_unit):].strip();
-                    elif str(original_tag_unit_value).endswith(derivative_unit):
-                        return str(formatted_tag_unit_value)[0:-len(derivative_unit)].strip();
+                    found_unit, stripped_value = self.strip_off_units_if_valid(original_tag_unit_value,
+                                                                               derivative_unit,
+                                                                               True);
                 else:
-                    if str(formatted_tag_unit_value).startswith(derivative_unit):
-                        return str(formatted_tag_unit_value)[len(derivative_unit):].strip();
-                    elif str(formatted_tag_unit_value).endswith(derivative_unit):
-                        return str(formatted_tag_unit_value)[0:-len(derivative_unit)].strip();
+                    found_unit, stripped_value = self.strip_off_units_if_valid(formatted_tag_unit_value,
+                                                                               derivative_unit,
+                                                                               False);
+                if found_unit:
+                    return stripped_value;
+
         return formatted_tag_unit_value;
 
     def check_if_tag_unit_class_units_exist(self, original_tag, formatted_tag):
