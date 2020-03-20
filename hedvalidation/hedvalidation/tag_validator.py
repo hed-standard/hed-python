@@ -439,7 +439,7 @@ class TagValidator:
             derivativeUnits.append(pluralize.plural(unit));
         return derivativeUnits;
 
-    def strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
+    def __strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
         """
 
         Parameters
@@ -499,13 +499,13 @@ class TagValidator:
             derivative_units = self.get_valid_unit_plural(unit);
             for derivative_unit in derivative_units:
                 if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
-                    found_unit, stripped_value = self.strip_off_units_if_valid(original_tag_unit_value,
-                                                                               derivative_unit,
-                                                                               True);
+                    found_unit, stripped_value = self.__strip_off_units_if_valid(original_tag_unit_value,
+                                                                                 derivative_unit,
+                                                                                 True);
                 else:
-                    found_unit, stripped_value = self.strip_off_units_if_valid(formatted_tag_unit_value,
-                                                                               derivative_unit,
-                                                                               False);
+                    found_unit, stripped_value = self.__strip_off_units_if_valid(formatted_tag_unit_value,
+                                                                                 derivative_unit,
+                                                                                 False);
                 if found_unit:
                     return stripped_value;
 
