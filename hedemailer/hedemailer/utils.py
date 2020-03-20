@@ -66,7 +66,7 @@ def create_hed_schema_email(mime_email, main_body_text):
     """
     hed_resource_dictionary = {};
     try:
-        hed_resource_dictionary = wiki2xml.convert_hed_wiki_2_xml(app_config[constants.HED_WIKI_URL_KEY]);
+        hed_resource_dictionary = wiki2xml.convert_hed_wiki_2_xml(app_config[constants.CONFIG_HED_WIKI_URL_KEY]);
         main_body_text = add_hed_xml_attachment_text(main_body_text, hed_resource_dictionary);
         main_body = MIMEText(main_body_text);
         mime_email.attach(main_body);
