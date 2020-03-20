@@ -355,20 +355,10 @@ class Tests(unittest.TestCase):
         legalTimeUnits = [
             's',
             'second',
-            'seconds',
-            'centiseconds',
-            'centisecond',
-            'cs',
             'hour:min',
             'day',
-            'days',
-            'ms',
-            'milliseconds',
-            'millisecond',
             'minute',
-            'minutes',
             'hour',
-            'hours',
         ]
         expectedIssues = {
             # NOT COMPLETE

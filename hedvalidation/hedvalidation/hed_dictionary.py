@@ -140,9 +140,9 @@ class HedDictionary:
             default units.
 
         """
-        unit_class_Elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT);
-        self._populate_unit_class_default_unit_dictionary(unit_class_Elements);
-        self._populate_unit_class_units_dictionary(unit_class_Elements);
+        unit_class_elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT);
+        self._populate_unit_class_default_unit_dictionary(unit_class_elements);
+        self._populate_unit_class_units_dictionary(unit_class_elements);
 
     def _populate_unit_modifier_dictionaries(self):
         """

@@ -152,8 +152,8 @@ class TagValidator:
                                                             previous_formatted_tag);
             validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
             validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag);
-        if self._check_for_warnings:
-            validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
+            if self._check_for_warnings:
+                validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
         if self._check_for_warnings:
             validation_issues += self.check_capitalization(original_tag, formatted_tag);
         return validation_issues;
@@ -414,8 +414,8 @@ class TagValidator:
                 pass;
             elif re.search(TagValidator.DIGIT_EXPRESSION,
                            self.validate_units(original_tag_unit_value,
-                                                         formatted_tag_unit_value,
-                                                         tag_unit_class_units)):
+                                               formatted_tag_unit_value,
+                                               tag_unit_class_units)):
                 pass
             else:
                 validation_error = error_reporter.report_error_type('unitClass', tag=original_tag,
@@ -423,7 +423,7 @@ class TagValidator:
                 self._increment_issue_count();
         return validation_error;
 
-    def get_valid_unit_derivative(self, unit):      #change name to get_valid_unit_plural
+    def get_valid_unit_plural(self, unit):
         """
         Parameters
         ----------
@@ -432,7 +432,7 @@ class TagValidator:
         Returns
         -------
         list
-            list of derivative units
+            list of plural units
         """
         derivativeUnits = [unit];
         if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit) is None:
@@ -440,6 +440,18 @@ class TagValidator:
         return derivativeUnits;
 
     def strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
+        """
+
+        Parameters
+        ----------
+        unit_value      -value of unit
+        unit            -what the unit is
+        is_unit_symbol  -unit symbol boolean
+
+        Returns
+        -------
+        tuple of the found unit and the stripped value
+        """
         found_unit = False
         stripped_value = ''
 
@@ -484,7 +496,7 @@ class TagValidator:
         """
         tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
         for unit in tag_unit_class_units:
-            derivative_units = self.get_valid_unit_derivative(unit);
+            derivative_units = self.get_valid_unit_plural(unit);
             for derivative_unit in derivative_units:
                 if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
                     found_unit, stripped_value = self.strip_off_units_if_valid(original_tag_unit_value,

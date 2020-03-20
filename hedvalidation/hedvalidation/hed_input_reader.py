@@ -72,8 +72,7 @@ class HedInputReader:
         self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns);
         self._has_column_names = has_column_names;
         self._worksheet_name = worksheet_name;
-        if run_semantic_validation:
-            self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
+        self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
         self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings, run_semantic_validation=run_semantic_validation);
         self._validation_issues = self._validate_hed_input();
         self._run_semantic_validation = run_semantic_validation;
@@ -340,7 +339,6 @@ class HedInputReader:
             hed_string_delimiter = HedStringDelimiter(hed_string);
             validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
-            validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
             validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
         return validation_issues;
@@ -370,7 +368,7 @@ class HedInputReader:
         validation_issues += self._tag_validator.run_tag_level_validators(top_level_tags, formatted_top_level_tags);
         return validation_issues;
 
-    def _validate_top_level_in_hed_string(self, hed_string_delimiter):  #modify based on validator
+    def _validate_top_level_in_hed_string(self, hed_string_delimiter):
         """Validates the top-level tags in a HED string.
 
          Parameters
