@@ -8,7 +8,7 @@ ROOT_DIR=${PWD}
 GIT_DIR="${PWD}/hed-python"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_REPO_BRANCH="master"
-SERVER_CONFIG_DIR="$HOME/hedemailer_config"
+SERVER_CONFIG_DIR=${ROOT_DIR}
 CONFIG_FILE="${SERVER_CONFIG_DIR}/config.py"
 WSGI_FILE="${GIT_DIR}/hedemailer/deploy/hedemailer.wsgi"
 
