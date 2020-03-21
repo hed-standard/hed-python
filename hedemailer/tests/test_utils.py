@@ -33,10 +33,10 @@ class Test(unittest.TestCase):
 
     def test_wiki_page_is_hed_schema(self):
         github_payload_dictionary = {};
-        is_hed_schema = hedemailer.utils.wiki_page_is_hed_schema(github_payload_dictionary)
+        is_hed_schema = hedemailer.utils.push_page_is_hed_schema(github_payload_dictionary)
         self.assertFalse(is_hed_schema, 'Wiki page should not be HED schema');
         github_payload_dictionary = {};
-        is_hed_schema = hedemailer.utils.wiki_page_is_hed_schema(github_payload_dictionary)
+        is_hed_schema = hedemailer.utils.push_page_is_hed_schema(github_payload_dictionary)
         self.assertFalse(is_hed_schema, 'Wiki page should be HED schema');
 
     def test_delete_file_if_exist(self):

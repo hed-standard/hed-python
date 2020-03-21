@@ -10,20 +10,23 @@ from hedconversion import parsewiki;
 import tempfile;
 
 
-def download_hed_wiki(wiki_file_path):
+def download_hed_wiki(wiki_file_path, hed_wiki_url):
     """Downloads the HED wiki from github into a specified file.
 
     Parameters
     ----------
     wiki_file_path: string
-        The file path where the wiki file is stored.
+        The file path where the wiki file is stored locally
+
+    hed_wiki_url: string
+        The URL to the .mediawiki file containing the spec.
 
     Returns
     -------
     string
         The tag line with the nowiki tag remove.
     """
-    utils.url_to_file(constants.HED_WIKI_URL, wiki_file_path);
+    utils.url_to_file(hed_wiki_url, wiki_file_path);
     return wiki_file_path;
 
 
@@ -46,7 +49,7 @@ def write_xml_tree_2_xml_file(xml_tree, xml_file_path):
         xml_file.write(xml_string);
 
 
-def convert_hed_wiki_2_xml():
+def convert_hed_wiki_2_xml(hed_wiki_url, use_local_wiki_file=None):
     """Converts the HED wiki into a XML file.
 
     Parameters
@@ -57,7 +60,11 @@ def convert_hed_wiki_2_xml():
     dictionary
         The tag line with the nowiki tag remove.
     """
-    hed_wiki_file_location = create_hed_wiki_file();
+    if use_local_wiki_file is None:
+        hed_wiki_file_location = create_hed_wiki_file(hed_wiki_url);
+    else:
+        hed_wiki_file_location = use_local_wiki_file
+
     hed_xml_file_location, hed_xml_tree = create_hed_xml_file(hed_wiki_file_location);
     hed_change_log = parsewiki.get_hed_change_log(hed_wiki_file_location);
     hed_info_dictionary = {constants.HED_XML_TREE_KEY: hed_xml_tree, constants.HED_CHANGE_LOG_KEY: hed_change_log,
@@ -87,7 +94,7 @@ def create_hed_xml_file(hed_wiki_file_path):
         return hed_xml_file_location, hed_xml_tree;
 
 
-def create_hed_wiki_file():
+def create_hed_wiki_file(hed_wiki_url):
     """Creates a HED wiki file from the github wiki.
 
     Parameters
@@ -100,5 +107,5 @@ def create_hed_wiki_file():
     """
     with tempfile.NamedTemporaryFile(delete=False) as hed_wiki_file:
         hed_wiki_file_location = hed_wiki_file.name;
-        download_hed_wiki(hed_wiki_file_location);
+        download_hed_wiki(hed_wiki_file_location, hed_wiki_url);
         return hed_wiki_file_location;
