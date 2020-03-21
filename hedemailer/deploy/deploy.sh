@@ -10,7 +10,7 @@ GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_REPO_BRANCH="master"
 SERVER_CONFIG_DIR=${ROOT_DIR}
 CONFIG_FILE="${SERVER_CONFIG_DIR}/config.py"
-WSGI_FILE="${GIT_DIR}/hedemailer/deploy/hedemailer.wsgi"
+WSGI_FILE="${SERVER_CONFIG_DIR}/hedemailer.wsgi"
 
 
 HEDEMAILER_CODE_DIR="$GIT_DIR/hedemailer"
