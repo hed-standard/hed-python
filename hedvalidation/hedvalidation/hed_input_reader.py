@@ -28,7 +28,7 @@ class HedInputReader:
     FILE_INPUT = 'file';
     TAB_DELIMITER = '\t';
     COMMA_DELIMITER = ',';
-    HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../hed-specification/hedxml/');
+    HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/');
     DEFAULT_HED_XML_FILE = os.path.join(HED_DIRECTORY, 'HEDLatest.xml');
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
                                    'Label': 'Event/Label/', 'Long': 'Event/Long name/'};
@@ -37,7 +37,7 @@ class HedInputReader:
     HED_XML_EXTENSION = '.xml';
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name='', hed_xml_file=''):
+                 required_tag_columns={}, worksheet_name='', hed_xml_file='', run_semantic_validation=True):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -72,9 +72,17 @@ class HedInputReader:
         self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns);
         self._has_column_names = has_column_names;
         self._worksheet_name = worksheet_name;
-        self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
-        self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings);
+        if run_semantic_validation:
+            self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
+            self._tag_validator = TagValidator(hed_dictionary=self._hed_dictionary,
+                                               check_for_warnings=check_for_warnings,
+                                               run_semantic_validation=True);
+        else:
+            self._tag_validator = TagValidator(check_for_warnings=check_for_warnings,
+                                               run_semantic_validation=False);
+
         self._validation_issues = self._validate_hed_input();
+        self._run_semantic_validation = run_semantic_validation;
 
     def get_tag_validator(self):
         """Gets a TagValidator object.

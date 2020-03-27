@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
                                                  'event/description/this is a description'];
         cls.invalid_formatted_required_tag_list = ['event/label/this is a label',
                                                    'event/description/this is a description'];
-        cls.extension_allowed_descendant_tag = 'Item/Object/Tool/Hammer';
+        cls.extension_allowed_descendant_tag = 'item/object/tool/hammer';
         cls.missing_comma_hed_string = '(Item/2D shape/Sector, Attribute/Visual/Color/Red) f ' \
                                        '(Item/2D shape/Ellipse/Circle, Attribute/Visual/Color / Red)';
         cls.valid_formatted_time_string_tag = 'item/2d shape/clock face/8:30';
@@ -173,11 +173,11 @@ class Test(unittest.TestCase):
         self.assertFalse(takes_value_tag);
 
     def test_is_numeric_tag(self):
-        numeric_tag = self.tag_validator.is_numeric_tag(self.valid_is_numeric_tag);
+        numeric_tag = self.tag_validator.is_numeric_tag(self.valid_formatted_is_numeric_tag);
         self.assertTrue(numeric_tag);
 
     def test_is_unit_class_tag(self):
-        unit_class_tag = self.tag_validator.is_unit_class_tag(self.valid_unit_class_tag);
+        unit_class_tag = self.tag_validator.is_unit_class_tag(self.valid_formatted_unit_class_tag);
         self.assertTrue(unit_class_tag);
 
     def test_check_capitalization(self):
@@ -234,7 +234,7 @@ class Test(unittest.TestCase):
 
     def test_check_if_tag_unit_class_units_are_valid(self):
         validation_error = \
-            self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_formatted_unit_class_tag,
+            self.tag_validator.check_if_tag_unit_class_units_are_valid(self.valid_unit_class_tag,
                                                                        self.valid_formatted_unit_class_tag);
         self.assertFalse(validation_error);
         self.assertIsInstance(validation_error, str);
@@ -306,9 +306,9 @@ class Test(unittest.TestCase):
         self.assertFalse(is_a_delimiter);
 
     def test_tag_is_valid(self):
-        tag_is_valid = self.tag_validator.tag_is_valid(self.valid_formatted_tag_without_attribute);
+        tag_is_valid = self.tag_validator.tag_exists_in_schema(self.valid_formatted_tag_without_attribute);
         self.assertTrue(tag_is_valid);
-        tag_is_valid = self.tag_validator.tag_is_valid(self.invalid_formatted_tag);
+        tag_is_valid = self.tag_validator.tag_exists_in_schema(self.invalid_formatted_tag);
         self.assertFalse(tag_is_valid);
 
     def test_is_hh_mm_time(self):

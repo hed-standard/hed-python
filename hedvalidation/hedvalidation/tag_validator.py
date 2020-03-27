@@ -9,9 +9,12 @@ Created on Oct 2, 2017
 
 import re;
 import time;
+import inflect;
 from hedvalidation import error_reporter;
 from hedvalidation import warning_reporter;
 
+pluralize = inflect.engine();
+pluralize.defnoun("hertz", "hertz");
 
 class TagValidator:
     BRACKET_ERROR_TYPE = 'bracket';
@@ -20,7 +23,7 @@ class TagValidator:
     COMMA_VALID_ERROR_TYPE = 'commaValid';
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+';
     DEFAULT_UNIT_ATTRIBUTE = 'default';
-    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'default_units'
+    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
     DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$';
     REQUIRE_CHILD_ERROR_TYPE = 'requireChild';
     REQUIRED_ERROR_TYPE = 'required';
@@ -35,14 +38,17 @@ class TagValidator:
     IS_NUMERIC_ATTRIBUTE = 'isNumeric';
     UNIT_CLASS_ATTRIBUTE = 'unitClass';
     UNIT_CLASS_UNITS_ELEMENT = 'units';
+    UNIT_SYMBOL_TYPE = 'unitSymbol'
     OPENING_GROUP_BRACKET = '(';
     CLOSING_GROUP_BRACKET = ')';
     DOUBLE_QUOTE = '"';
     COMMA = ',';
     TILDE = '~';
     INVALID_CHARS = '[]{}'
+    SI_UNIT_MODIFIER_KEY = 'SIUnitModifier'
+    SI_UNIT_SYMBOL_MODIFIER_KEY = 'SIUnitSymbolModifier'
 
-    def __init__(self, hed_dictionary, check_for_warnings=False):
+    def __init__(self, hed_dictionary=None, check_for_warnings=False, run_semantic_validation=True):
         """Constructor for the Tag_Validator class.
 
         Parameters
@@ -62,6 +68,7 @@ class TagValidator:
         self._issue_count = 0;
         self._error_count = 0;
         self._warning_count = 0;
+        self._run_semantic_validation = run_semantic_validation
 
     def _increment_issue_count(self, is_error=True):
         """Increments the validation issue count
@@ -140,12 +147,14 @@ class TagValidator:
 
          """
         validation_issues = '';
-        validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag, previous_original_tag,
-                                                        previous_formatted_tag);
-        validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
-        validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag);
+        if self._run_semantic_validation:
+            validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag, previous_original_tag,
+                                                            previous_formatted_tag);
+            validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag);
+            validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag);
+            if self._check_for_warnings:
+                validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
         if self._check_for_warnings:
-            validation_issues += self.check_if_tag_unit_class_units_exist(original_tag, formatted_tag);
             validation_issues += self.check_capitalization(original_tag, formatted_tag);
         return validation_issues;
 
@@ -203,7 +212,8 @@ class TagValidator:
 
          """
         validation_issues = '';
-        validation_issues += self.check_if_multiple_unique_tags_exist(original_tag_list, formatted_tag_list);
+        if self._run_semantic_validation:
+            validation_issues += self.check_if_multiple_unique_tags_exist(original_tag_list, formatted_tag_list);
         validation_issues += self.check_if_duplicate_tags_exist(original_tag_list, formatted_tag_list);
         return validation_issues;
 
@@ -221,7 +231,7 @@ class TagValidator:
 
          """
         validation_issues = '';
-        if self._check_for_warnings:
+        if self._check_for_warnings and self._run_semantic_validation:
             validation_issues += self.check_for_required_tags(formatted_top_level_tags);
         return validation_issues;
 
@@ -251,7 +261,7 @@ class TagValidator:
             pass;
         elif is_extension_tag:
             pass;
-        elif not is_extension_tag and self.tag_takes_value(previous_formatted_tag) and TagValidator.COMMA in previous_formatted_tag:
+        elif not is_extension_tag and self.tag_takes_value(previous_formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
                                                                 tag=original_tag,
                                                                 previous_tag=previous_original_tag);
@@ -261,7 +271,7 @@ class TagValidator:
             self._increment_issue_count();
         return validation_error;
 
-    def tag_is_valid(self, formatted_tag):
+    def tag_exists_in_schema(self, formatted_tag):
         """Checks to see if the tag is a valid HED tag.
 
         Parameters
@@ -394,14 +404,18 @@ class TagValidator:
 
         """
         validation_error = '';
-        if not self.tag_is_valid(formatted_tag) and self.is_unit_class_tag(formatted_tag):
+        if not self.tag_exists_in_schema(formatted_tag) and self.is_unit_class_tag(formatted_tag):
             tag_unit_classes = self.get_tag_unit_classes(formatted_tag);
-            tag_unit_values = self.get_tag_name(formatted_tag);
+            formatted_tag_unit_value = self.get_tag_name(formatted_tag);
+            original_tag_unit_value = self.get_tag_name(original_tag);
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag));
-            if TagValidator.TIME_UNIT_CLASS in tag_unit_classes and TagValidator.is_hh_mm_time(tag_unit_values):
+            if (TagValidator.TIME_UNIT_CLASS in tag_unit_classes
+                    and TagValidator.is_hh_mm_time(formatted_tag_unit_value)):
                 pass;
             elif re.search(TagValidator.DIGIT_EXPRESSION,
-                           TagValidator.strip_off_units_if_valid(tag_unit_values, tag_unit_class_units)):
+                           self.validate_units(original_tag_unit_value,
+                                               formatted_tag_unit_value,
+                                               tag_unit_class_units)):
                 pass
             else:
                 validation_error = error_reporter.report_error_type('unitClass', tag=original_tag,
@@ -409,14 +423,68 @@ class TagValidator:
                 self._increment_issue_count();
         return validation_error;
 
-    @staticmethod
-    def strip_off_units_if_valid(tag_unit_values, tag_unit_class_units):
+    def get_valid_unit_plural(self, unit):
+        """
+        Parameters
+        ----------
+        unit: String
+            unit to generate plural forms
+        Returns
+        -------
+        list
+            list of plural units
+        """
+        derivativeUnits = [unit];
+        if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit) is None:
+            derivativeUnits.append(pluralize.plural(unit));
+        return derivativeUnits;
+
+    def __strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
+        """
+
+        Parameters
+        ----------
+        unit_value      -value of unit
+        unit            -what the unit is
+        is_unit_symbol  -unit symbol boolean
+
+        Returns
+        -------
+        tuple of the found unit and the stripped value
+        """
+        found_unit = False
+        stripped_value = ''
+
+        if str(unit_value).startswith(unit):
+            found_unit = True;
+            stripped_value = str(unit_value)[len(unit):].strip();
+        elif str(unit_value).endswith(unit):
+            found_unit = True;
+            stripped_value = str(unit_value)[0:-len(unit)].strip();
+
+        if found_unit:
+            modifierKey = ''
+            if is_unit_symbol:
+                modifierKey = self.SI_UNIT_SYMBOL_MODIFIER_KEY;
+            else:
+                modifierKey = self.SI_UNIT_MODIFIER_KEY;
+
+            for unit_modifier in self._hed_dictionary_dictionaries[modifierKey]:
+                if stripped_value.startswith(unit_modifier):
+                    stripped_value = stripped_value[len(unit_modifier):].strip();
+                elif stripped_value.endswith(unit_modifier):
+                    stripped_value = stripped_value[0:-len(unit_modifier)].strip();
+        return found_unit, stripped_value;
+
+    def validate_units(self, original_tag_unit_value, formatted_tag_unit_value, tag_unit_class_units):
         """Checks to see if the specified string has a valid unit, and removes it if so
 
         Parameters
         ----------
-        tag_unit_values: string
-            A unit tag with or without a unit class
+        original_tag_unit_value
+            The unformatted value of the tag
+        formatted_tag_unit_value
+            The formatted value of the tag
         tag_unit_class_units
             A list of valid units for this tag
         Returns
@@ -426,19 +494,22 @@ class TagValidator:
             Otherwise, returns tag_unit_values
 
         """
-        return_tag = tag_unit_values
         tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
-        for units in tag_unit_class_units:
-            if tag_unit_values.startswith(units):
-                return_tag = tag_unit_values[len(units):]
-                return_tag = return_tag.strip()
-                break
-            if tag_unit_values.endswith(units):
-                return_tag = tag_unit_values[:-len(units)]
-                return_tag = return_tag.strip()
-                break
+        for unit in tag_unit_class_units:
+            derivative_units = self.get_valid_unit_plural(unit);
+            for derivative_unit in derivative_units:
+                if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
+                    found_unit, stripped_value = self.__strip_off_units_if_valid(original_tag_unit_value,
+                                                                                 derivative_unit,
+                                                                                 True);
+                else:
+                    found_unit, stripped_value = self.__strip_off_units_if_valid(formatted_tag_unit_value,
+                                                                                 derivative_unit,
+                                                                                 False);
+                if found_unit:
+                    return stripped_value;
 
-        return return_tag
+        return formatted_tag_unit_value;
 
     def check_if_tag_unit_class_units_exist(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag provided has a unit class but no units are not specified.
@@ -524,12 +595,13 @@ class TagValidator:
         if self.is_unit_class_tag(formatted_tag):
             unit_classes = self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag];
             unit_classes = unit_classes.split(',');
+
             for unit_class in unit_classes:
                 try:
                     units += (self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class]);
                 except:
                     continue;
-        return list(map(str.lower, units));
+        return units;
 
     def get_unit_class_default_unit(self, formatted_tag):
         """Gets the default unit class unit that is associated with the specified tag.
@@ -756,7 +828,7 @@ class TagValidator:
             return tag[:end_index]
         return tag;
 
-    def find_comma_issues_in_hed_string(self, hed_string):
+    def find_comma_issues_in_hed_string(self, hed_string): #rewrite this to fix issue 3
         """Reports a validation error if there are missing commas or commas in tags that take values.
 
         Parameters
@@ -788,10 +860,6 @@ class TagValidator:
                                                                             tag=current_tag)
                         self._increment_issue_count()
                         break
-                elif TagValidator.comma_is_missing_before_opening_bracket(last_non_empty_character, character):
-                    validation_error = TagValidator.report_missing_comma_error(current_tag);
-                    self._increment_issue_count();
-                    break;
                 elif TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character):
                     validation_error = TagValidator.report_missing_comma_error(current_tag);
                     self._increment_issue_count();

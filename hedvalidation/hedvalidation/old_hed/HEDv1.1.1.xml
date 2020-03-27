@@ -1,119 +1,79 @@
-<?xml version="1.0" encoding="utf-8"?>
-<HED version="6.0.5">
+<?xml version="1.0" ?>
+<HED version="v1.1.1-devunit">
    <node>
       <name>Event</name>
-      <node position="1" predicateType="passThrough" requireChild="true" required="true">
+      <node position="1" requireChild="true" required="true">
          <name>Category</name>
-         <description>This is meant to designate the reason this event was recorded</description>
+         <description>This is meant to designate the reason this event was recorded. Every event should have at least one category, but may have multiple categories.</description>
          <node>
             <name>Initial context</name>
             <description>The purpose is to set the starting context for the experiment --- and if there is no initial context event---this information would be stored as a dataset tag</description>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Participant response</name>
             <description>The purpose of this event was to record the state or response of a participant. Note: participant actions may occur in other kinds of events, such as the experimenter records a terrain change as an event and the participant happens to be walking. In this case the event category would be Environmental. In contrast, if the participant started walking in response to an instruction or to some other stimulus, the event would be recorded as Participant response</description>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Technical error</name>
             <description>Experimenters forgot to turn on something or the cord snagged and something may be wrong with the data</description>
-            <node takesValue="true">
-               <name>#</name>
-               <description>Description as string</description>
-            </node>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Participant failure</name>
             <description>Situation in which participant acts outside of the constraints of the experiment -- such as driving outside the boundary of a simulation experiment or using equipment incorrectly</description>
-            <node takesValue="true">
-               <name>#</name>
-               <description>Description as string</description>
-            </node>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Environmental</name>
             <description>Change in experimental context such as walking on dirt versus sidewalk</description>
-            <node takesValue="true">
-               <name>#</name>
-               <description>Description as a string</description>
-            </node>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Experimental stimulus</name>
+            <description>Primary category for time-locked stimulus events.</description>
             <node>
                <name>Instruction</name>
             </node>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Experimental procedure</name>
             <description>For example doing a saliva swab on the person</description>
-            <node takesValue="true">
-               <name>#</name>
-               <description>Description as string</description>
-            </node>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Incidental</name>
             <description>Not a part of the task as perceived by/instructed to the participant --- for example an airplane flew by and made noise or a random person showed up on the street</description>
-            <node takesValue="true">
-               <name>#</name>
-               <description>Description as string</description>
-            </node>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Miscellaneous</name>
-            <description>Events that are only have informational value and cannot be put in other event categories</description>
-            <node takesValue="true">
-               <name>#</name>
-               <description>Description as a string</description>
-            </node>
+            <description>Events that are only have informational value and cannot be put in other event categories.</description>
          </node>
-         <node>
+         <node extensionAllowed="true">
             <name>Experiment control</name>
             <description>Information about states and events of the software program that controls the experiment</description>
-            <node predicateType="propertyOf">
+            <node>
                <name>Sequence</name>
-               <node requireChild="true">
-                  <name>Permutation ID</name>
-                  <node takesValue="true">
-                     <name>#</name>
-                     <description>Permutation number/code used for permuted experiment parts</description>
-                  </node>
-               </node>
+               <description>Used to designate that this event is part of a sequence of control events</description>
                <node>
                   <name>Experiment</name>
-                  <description>Use Attribute/Onset and Attribute/Offset  to indicate start and end of the experiment</description>
+                  <description>Use Attribute/Onset and Attribute/Offset to indicate start and end of the experiment. Use Attribute/ID/Value/# to designate an identifier of the experiment.</description>
                </node>
                <node>
                   <name>Block</name>
-                  <description>Each block has the same general context and contains several trials -- use Attribute/Onset and Attribute/Offset to specify start and end</description>
-                  <node takesValue="true">
-                     <name>#</name>
-                     <description>Block number or identifier</description>
-                  </node>
+                  <description>Each block has the same general context and contains several trials -- use Attribute/Onset and Attribute/Offset to specify start and end.  Use Attribute/ID/Value/# to designate an identifier of the block.</description>
                </node>
                <node>
                   <name>Trial</name>
-                  <description>Use Attribute/Onset and Attribute/Offset to specify start and end</description>
-                  <node takesValue="true">
-                     <name>#</name>
-                     <description>Trial number or identifier</description>
-                  </node>
+                  <description>Use Attribute/Onset and Attribute/Offset to specify start and end. Use Attribute/ID/Value/# to designate an identifier of the trial.</description>
                </node>
                <node>
                   <name>Pause</name>
-                  <description>Use Attribute/Onset and Attribute/Offset to specify start and end</description>
+                  <description>Use Attribute/Onset and Attribute/Offset to specify start and end. Use Attribute/ID/Value/# to designate an identifier of the pause.</description>
                </node>
             </node>
             <node>
                <name>Task</name>
-               <node takesValue="true">
-                  <name>#</name>
-                  <description>Label here</description>
-               </node>
+               <description>Use Attribute/Onset and Attribute/Offset to specify start and end. Use Attribute/ID/Value/# to designate an identifier of the task.</description>
             </node>
             <node>
                <name>Activity</name>
-               <description>Experiment-specific actions such as moving a piece in a chess game</description>
+               <description>Experiment-specific actions such as moving a piece in a chess game. Use Attribute/Onset and Attribute/Offset to specify start and end. Use Attribute/ID/Value/# to designate an identifier of the task.</description>
                <node>
                   <name>Participant action</name>
                </node>
@@ -126,13 +86,6 @@
                </node>
                <node>
                   <name>Trigger</name>
-               </node>
-               <node predicateType="propertyOf">
-                  <name>Tag</name>
-                  <node takesValue="true">
-                     <name>#</name>
-                     <description>Actual tag: string or integer</description>
-                  </node>
                </node>
             </node>
             <node>
@@ -159,29 +112,6 @@
             </node>
          </node>
       </node>
-      <node predicateType="propertyOf">
-         <name>ID</name>
-         <description>A number or string label that uniquely identifies an event instance from all others in the recording (a UUID is strongly preferred).</description>
-         <node takesValue="true">
-            <name>#</name>
-            <description>ID of the event</description>
-         </node>
-      </node>
-      <node predicateType="propertyOf">
-         <name>Group ID</name>
-         <description>A number or string label that uniquely identifies a group of events associated with each other.</description>
-         <node takesValue="true">
-            <name>#</name>
-            <description>ID of the group</description>
-         </node>
-      </node>
-      <node predicateType="propertyOf" requireChild="true">
-         <name>Duration</name>
-         <description>An offset that is implicit after duration time passed from the onset</description>
-         <node isNumeric="true" takesValue="true" unitClass="time">
-            <name>#</name>
-         </node>
-      </node>
       <node position="3" predicateType="propertyOf" requireChild="true" required="true" unique="true">
          <name>Description</name>
          <description>Same as HED 1.0 description for human-readable text</description>
@@ -204,29 +134,8 @@
          </node>
       </node>
    </node>
-   <node>
+   <node extensionAllowed="true">
       <name>Item</name>
-      <node predicateType="propertyOf" requireChild="true">
-         <name>ID</name>
-         <description>Optional</description>
-         <node takesValue="true">
-            <name>#</name>
-         </node>
-         <node>
-            <name>Local</name>
-            <description>For IDs with local scope --- that is IDs only defined in the scope of a single event. The local ID 5 in events 1 and 2 may refer to two different objects. The global IDs  directly under ID/ tag refer to the same object through the whole experiment</description>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-      </node>
-      <node predicateType="propertyOf" requireChild="true">
-         <name>Group ID</name>
-         <description>Optional</description>
-         <node takesValue="true">
-            <name>#</name>
-         </node>
-      </node>
       <node extensionAllowed="true">
          <name>Object</name>
          <description>Visually discernable objects. This item excludes sounds that are Items but not objects</description>
@@ -263,7 +172,7 @@
                </node>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Person</name>
             <node>
                <name>Pedestrian</name>
@@ -278,7 +187,7 @@
                <name>Experimenter</name>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Animal</name>
          </node>
          <node>
@@ -305,7 +214,7 @@
                <name>Water</name>
             </node>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Clothing</name>
             <node>
                <name>Personal</name>
@@ -324,10 +233,10 @@
          <node>
             <name>Speedometer</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Construction zone</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>3D shape</name>
          </node>
          <node>
@@ -340,7 +249,7 @@
             </node>
          </node>
       </node>
-      <node extensionAllowed="true">
+      <node>
          <name>2D shape</name>
          <description>Geometric shapes</description>
          <node>
@@ -371,7 +280,7 @@
          <node>
             <name>Single point</name>
          </node>
-         <node extensionAllowed="true">
+         <node>
             <name>Clock face</name>
             <description>Used to study things like hemispheric neglect. The tag is related to the clock-drawing-test</description>
             <node takesValue="true" unitClass="time">
@@ -380,7 +289,7 @@
             </node>
          </node>
       </node>
-      <node extensionAllowed="true">
+      <node>
          <name>Pattern</name>
          <node>
             <name>Checkerboard</name>
@@ -516,7 +425,7 @@
          <description>The Self-Assessment Manikin</description>
       </node>
    </node>
-   <node>
+   <node extensionAllowed="true">
       <name>Sensory presentation</name>
       <description>Object manifestation</description>
       <node>
@@ -562,6 +471,12 @@
             </node>
             <node>
                <name>Instrumental</name>
+            </node>
+            <node>
+               <name>Tone</name>
+            </node>
+            <node>
+               <name>Genre</name>
             </node>
          </node>
          <node>
@@ -700,15 +615,11 @@
             <node>
                <name>Screen</name>
                <node>
+                  <name>Head-mounted display</name>
+               </node>
+               <node>
                   <name>View port</name>
                   <description>Two or more views on the same object --- for example one from top one from street view</description>
-                  <node predicateType="passThrough">
-                     <name>ID</name>
-                     <node takesValue="true">
-                        <name>#</name>
-                        <description>A descriptive label for the viewport</description>
-                     </node>
-                  </node>
                </node>
                <node>
                   <name>2D</name>
@@ -754,6 +665,49 @@
    </node>
    <node extensionAllowed="true" requireChild="true">
       <name>Attribute</name>
+      <node requireChild="true">
+         <name>ID</name>
+         <description>Tag to identify any aspect of an event. Use parentheses to group an ID Value tag with an ID Type tag to qualify the kind of ID that the value represents.</description>
+         <node requireChild="true">
+            <name>Value</name>
+            <description>Use this tag by itself or in a parenthesized expression with an ID Type tag.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Type</name>
+            <description>Use this tag to define the type of ID in more detail.</description>
+            <node>
+               <name>Group</name>
+               <description>ID that identifies a group of events associated with each other.</description>
+            </node>
+            <node>
+               <name>Local</name>
+               <description>For IDs only defined in the scope of a single event. The local ID 5 in events 1 and 2 may refer to two different objects. The global IDs  directly under ID tag refer to the same object through the whole experiment</description>
+            </node>
+            <node>
+               <name>Participant</name>
+               <description>ID identifies a subject.</description>
+            </node>
+            <node>
+               <name>Permutation</name>
+               <description>ID is used to identify an ordering as for example to indicate block order in an experimental design.</description>
+            </node>
+            <node>
+               <name>Reference object</name>
+               <description>ID is used to a reference object to specify location with respect to.</description>
+            </node>
+            <node>
+               <name>State</name>
+               <description>ID is used to identify a group of events that are changing the state of a variable as for example when the onset means the offset of any other and a change in the state</description>
+            </node>
+            <node>
+               <name>Synchronization</name>
+               <description>ID is used to tag an event for synchronizing data streams.</description>
+            </node>
+         </node>
+      </node>
       <node>
          <name>Onset</name>
          <description>Default</description>
@@ -761,17 +715,16 @@
       <node>
          <name>Offset</name>
       </node>
+      <node requireChild="true">
+         <name>Duration</name>
+         <description>An offset that is implicit after duration time passed from the onset</description>
+         <node isNumeric="true" takesValue="true" unitClass="time">
+            <name>#</name>
+         </node>
+      </node>
       <node>
          <name>Imagined</name>
          <description>This is used to identity that the (sub)event only happened in participant's imagination, e.g.  imagined movements in motor imagery paradigms.</description>
-      </node>
-      <node requireChild="true">
-         <name>State ID</name>
-         <description>This is used to identify a group of events that are changing the state of a variable where the onset means the offset of any other and a change in the state</description>
-         <node takesValue="true">
-            <name>#</name>
-            <description>ID which could be a number or any string</description>
-         </node>
       </node>
       <node requireChild="true">
          <name>Repetition</name>
@@ -847,13 +800,6 @@
       <node requireChild="true">
          <name>Object side</name>
          <description>Could be the left,  right, or both sides of a person or a vehicle</description>
-         <node predicateType="propertyOf" requireChild="true">
-            <name>Reference object ID</name>
-            <description>Place object ID after this</description>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
          <node>
             <name>Right</name>
          </node>
@@ -1080,12 +1026,6 @@
             </node>
             <node>
                <name>Relative to participant</name>
-               <node requireChild="true">
-                  <name>Participant ID</name>
-                  <node takesValue="true">
-                     <name>#</name>
-                  </node>
-               </node>
                <node>
                   <name>Left</name>
                </node>
@@ -1513,7 +1453,7 @@
          </node>
          <node predicateType="passThrough">
             <name>Family</name>
-            <node extensionAllowed="true">
+            <node>
                <name>Asian</name>
                <node>
                   <name>Chinese</name>
@@ -1522,7 +1462,7 @@
                   <name>Japanese</name>
                </node>
             </node>
-            <node extensionAllowed="true">
+            <node>
                <name>Latin</name>
                <node>
                   <name>English</name>
@@ -1754,7 +1694,7 @@
          <name>Extraneous</name>
          <description>Button presses that are not meaningful for example due to intrinsic mechanical causes after a meaningful press</description>
       </node>
-      <node extensionAllowed="true" requireChild="true">
+      <node requireChild="true">
          <name>Role</name>
          <description>The role of the agent (participant, character, AI..)</description>
          <node>
@@ -1768,9 +1708,9 @@
          </node>
       </node>
    </node>
-   <node>
+   <node extensionAllowed="true">
       <name>Action</name>
-      <description>May or may not be associated with a prior stimulus and can be extended</description>
+      <description>May or may not be associated with a prior stimulus.</description>
       <node>
          <name>Involuntary</name>
          <description>Like sneezing or tripping on something or hiccuping</description>
@@ -2125,9 +2065,6 @@
          <name>Swallow</name>
       </node>
       <node>
-         <name>Turn</name>
-      </node>
-      <node>
          <name>Flex</name>
       </node>
       <node>
@@ -2212,16 +2149,8 @@
          <name>Eye-blink inhibit</name>
       </node>
    </node>
-   <node predicateType="passThrough">
+   <node extensionAllowed="true">
       <name>Participant</name>
-      <node predicateType="propertyOf" requireChild="true">
-         <name>ID</name>
-         <description>If not given assume 1</description>
-         <node isNumeric="true" takesValue="true">
-            <name>#</name>
-            <description>Numeric value of an ID</description>
-         </node>
-      </node>
       <node>
          <name>Effect</name>
          <description>How the stimulus effects the participants</description>
@@ -2866,13 +2795,9 @@
          </node>
       </node>
    </node>
-   <node extensionAllowed="true" requireChild="true">
+   <node extensionAllowed="true">
       <name>Experiment context</name>
       <description>Describes the context of the whole experiment or large portions of it and also includes tags that are common across all events</description>
-      <node takesValue="true">
-         <name>#</name>
-         <description>Add common tags across all stimuli/ and/or responses here if all experimental events share /State/Drowsy, you can place it here instead of tagging each event individually</description>
-      </node>
       <node>
          <name>With chin rest</name>
       </node>
@@ -2984,7 +2909,7 @@
          <name>Virtual world</name>
       </node>
    </node>
-   <node requireChild="true">
+   <node extensionAllowed="true" requireChild="true">
       <name>Custom</name>
       <description>This node can be used to organize events in an alternative (parallel) hierarchy. You can define your custom tags and hierarchies without any restriction under this node. These tags will still be matched to each other as for example  /Custom/Dance/Waltz is considered a subtype of /Custom/DanceExample.</description>
    </node>
@@ -3042,10 +2967,10 @@
          <name>Backward masking</name>
       </node>
       <node>
-         <name>Balloon analogue risk task (BART)</name>
+         <name>Balloon analogue risk task - BART</name>
       </node>
       <node>
-         <name>Behavioral investment allocation strategy (BIAS)</name>
+         <name>Behavioral investment allocation strategy - BIAS</name>
       </node>
       <node>
          <name>Behavioral rating inventory of executive function</name>
@@ -3580,6 +3505,9 @@
          <name>Pseudoword naming task</name>
       </node>
       <node>
+         <name>Psychomotor vigilance task</name>
+      </node>
+      <node>
          <name>Pursuit rotor task</name>
       </node>
       <node>
@@ -3592,10 +3520,10 @@
          <name>Rapid serial object transformation</name>
       </node>
       <node>
-         <name>Reading (Covert)</name>
+         <name>Reading - Covert</name>
       </node>
       <node>
-         <name>Reading (Overt)</name>
+         <name>Reading - Overt</name>
       </node>
       <node>
          <name>Reading paradigm</name>
@@ -3610,10 +3538,10 @@
          <name>Reading span task</name>
       </node>
       <node>
-         <name>Recitation-repetition (Covert)</name>
+         <name>Recitation-repetition - Covert</name>
       </node>
       <node>
-         <name>Recitation-repetition (Overt)</name>
+         <name>Recitation-repetition - Overt</name>
       </node>
       <node>
          <name>Remember-know task</name>
@@ -3659,61 +3587,129 @@
       </node>
    </node>
    <unitClasses>
-      <unitClass default="cm-per-s2">
-         <name>acceleration</name>
-         <units>m-per-s2,cm-per-s2</units>
-      </unitClass>
-      <unitClass default="$">
-         <name>currency</name>
-         <units>dollars,$,points,fraction</units>
-      </unitClass>
-      <unitClass default="radians">
-         <name>angle</name>
-         <units>degrees,degree,radian,radians</units>
-      </unitClass>
-      <unitClass default="Hz">
-         <name>frequency</name>
-         <units>Hz,mHz,Hertz,kHz</units>
-      </unitClass>
-      <unitClass default="dB">
-         <name>intensity</name>
-         <units>dB</units>
-      </unitClass>
-      <unitClass default="cm-per-s3">
-         <name>jerk</name>
-         <units>m-per-s3,cm-per-s3</units>
-      </unitClass>
-      <unitClass default="cd">
-         <name>luminousIntensity</name>
-         <units>candela,cd</units>
-      </unitClass>
-      <unitClass default="mb">
-         <name>memorySize</name>
-         <units>mb,kb,gb,tb</units>
-      </unitClass>
-      <unitClass default="cm">
-         <name>physicalLength</name>
-         <units>m,cm,km,mm,feet,foot,meter,meters,mile,miles</units>
-      </unitClass>
-      <unitClass default="px">
-         <name>pixels</name>
-         <units>pixels,px,pixel</units>
-      </unitClass>
-      <unitClass default="cm-per-sec">
-         <name>speed</name>
-         <units>m-per-s,mph,kph,cm-per-s</units>
-      </unitClass>
-      <unitClass default="s">
+      <unitClass defaultUnits="s">
          <name>time</name>
-         <units>s,second,seconds,centiseconds,cs,hour:min,day,days,ms,milliseconds,minute,minutes,hour,hours</units>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">s</unit>
+            <unit SIUnit="true">second</unit>
+            <unit SIUnit="true">centisecond</unit>
+            <unit unitSymbol="true">cs</unit>
+            <unit unitSymbol="true">hour:min</unit>
+            <unit>day</unit>
+            <unit SIUnit="true" unitSymbol="true">ms</unit>
+            <unit SIUnit="true">millisecond</unit>
+            <unit>minute</unit>
+            <unit>hour</unit>
+         </units>
       </unitClass>
-      <unitClass default="cm2">
+      <unitClass defaultUnits="Hz">
+         <name>frequency</name>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">Hz</unit>
+            <unit SIUnit="true" unitSymbol="true">MHz</unit>
+            <unit SIUnit="true">hertz</unit>
+            <unit SIUnit="true" unitSymbol="true">kHz</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="radian">
+         <name>angle</name>
+         <units>
+            <unit>degree</unit>
+            <unit SIUnit="true">radian</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="cm">
+         <name>physicalLength</name>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">m</unit>
+            <unit SIUnit="true" unitSymbol="true">cm</unit>
+            <unit SIUnit="true" unitSymbol="true">km</unit>
+            <unit SIUnit="true" unitSymbol="true">mm</unit>
+            <unit>foot</unit>
+            <unit SIUnit="true">meter</unit>
+            <unit>mile</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="px">
+         <name>pixels</name>
+         <units>
+            <unit unitSymbol="true">px</unit>
+            <unit>pixel</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="cm^2">
          <name>area</name>
-         <units>m2,cm2,km2,pixels2,px2,pixel2,mm2</units>
+         <units>
+            <unit unitSymbol="true">m^2</unit>
+            <unit unitSymbol="true">cm^2</unit>
+            <unit unitSymbol="true">km^2</unit>
+            <unit unitSymbol="true">px^2</unit>
+            <unit>pixel^2</unit>
+            <unit unitSymbol="true">mm^2</unit>
+         </units>
       </unitClass>
-      <unitClass default="cm3">
+      <unitClass defaultUnits="cm^3">
          <name>volume</name>
-         <units>m3,cm3,mm3,km3</units>
+         <units>
+            <unit unitSymbol="true">m^3</unit>
+            <unit unitSymbol="true">cm^3</unit>
+            <unit unitSymbol="true">mm^3</unit>
+            <unit unitSymbol="true">km^3</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="cm-per-s">
+         <name>speed</name>
+         <units>
+            <unit unitSymbol="true">m-per-s</unit>
+            <unit unitSymbol="true">mph</unit>
+            <unit unitSymbol="true">kph</unit>
+            <unit unitSymbol="true">cm-per-s</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="cm-per-s^2">
+         <name>acceleration</name>
+         <units>
+            <unit unitSymbol="true">m-per-s^2</unit>
+            <unit unitSymbol="true">cm-per-s^2</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="cm-per-s^3">
+         <name>jerk</name>
+         <units>
+            <unit unitSymbol="true">m-per-s^3</unit>
+            <unit unitSymbol="true">cm-per-s^3</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="dB">
+         <name>intensity</name>
+         <units>
+            <unit unitSymbol="true">dB</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="cd">
+         <name>luminousIntensity</name>
+         <units>
+            <unit SIUnit="true">candela</unit>
+            <unit SIUnit="true" unitSymbol="true">cd</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="mb">
+         <name>memorySize</name>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">Mb</unit>
+            <unit SIUnit="true" unitSymbol="true">kb</unit>
+            <unit SIUnit="true" unitSymbol="true">gb</unit>
+            <unit SIUnit="true" unitSymbol="true">tb</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="$">
+         <name>currency</name>
+         <units>
+            <unit>dollar</unit>
+            <unit unitSymbol="true">$</unit>
+            <unit>point</unit>
+            <unit>fraction</unit>
+         </units>
       </unitClass>
    </unitClasses>
 </HED>
