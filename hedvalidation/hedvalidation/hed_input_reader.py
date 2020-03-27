@@ -72,8 +72,15 @@ class HedInputReader:
         self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns);
         self._has_column_names = has_column_names;
         self._worksheet_name = worksheet_name;
-        self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
-        self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings, run_semantic_validation=run_semantic_validation);
+        if run_semantic_validation:
+            self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
+            self._tag_validator = TagValidator(hed_dictionary=self._hed_dictionary,
+                                               check_for_warnings=check_for_warnings,
+                                               run_semantic_validation=True);
+        else:
+            self._tag_validator = TagValidator(check_for_warnings=check_for_warnings,
+                                               run_semantic_validation=False);
+
         self._validation_issues = self._validate_hed_input();
         self._run_semantic_validation = run_semantic_validation;
 

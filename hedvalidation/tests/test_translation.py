@@ -123,15 +123,21 @@ class Tests(unittest.TestCase):
     #     }
     #     expectedIssues = {
     #         #NOT COMPLETE
-    #         'missingOpeningComma' : report_error_type('comma'),
-    #         'missingClosingComma': report_error_type('comma'),
-    #         'extraOpeningComma': report_error_type('comma'),
-    #         'extraClosingComma': report_error_type('comma'),
-    #         'extraOpeningTilde': report_error_type('tilde'),
-    #         'extraClosingTilde': report_error_type('tilde'),
-    #         'multipleExtraOpeningDelimiters': report_error_type('comma'),
-    #         'multipleExtraClosingDelimiters': report_error_type('comma'),
-    #         'multipleExtraMiddleDelimiters': report_error_type('comma'),
+    #         'missingOpeningComma' : report_error_type('valid', tag='/Action/Reach/To touch('),
+    #         'missingClosingComma': report_error_type('coma', tag='/Participant/Effect/Body part/Arm)'),
+    #         'extraOpeningComma': report_error_type('extraDelimiter', character=',', index=0,
+    #                                                hed_string=testStrings['extraOpeningComma']),
+    #         'extraClosingComma': report_error_type('extraDelimiter', character=',',
+    #                                                index=len(testStrings['extraClosingComma'])-1,
+    #                                                hed_string=testStrings['extraClosingComma']),
+    #         'extraOpeningTilde': report_error_type('extraDelimiter', character='~', index=0,
+    #                                                hed_string=testStrings['extraOpeningTilde']),
+    #         'extraClosingTilde': report_error_type('extraDelimiter', character='~',
+    #                                                index=len(testStrings['extraClosingTilde'])-1,
+    #                                                hed_string=testStrings['extraClosingTilde']),
+    #         'multipleExtraOpeningDelimiters': report_error_type('extraDelimiter',),
+    #         'multipleExtraClosingDelimiters': report_error_type('extraDelimiter'),
+    #         'multipleExtraMiddleDelimiters': report_error_type('extraDelimiter'),
     #         'valid': '',
     #         'validNestedParentheses': ''
     #     }

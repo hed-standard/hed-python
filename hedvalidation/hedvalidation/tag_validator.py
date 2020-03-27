@@ -48,7 +48,7 @@ class TagValidator:
     SI_UNIT_MODIFIER_KEY = 'SIUnitModifier'
     SI_UNIT_SYMBOL_MODIFIER_KEY = 'SIUnitSymbolModifier'
 
-    def __init__(self, hed_dictionary, check_for_warnings=False, run_semantic_validation=True):
+    def __init__(self, hed_dictionary=None, check_for_warnings=False, run_semantic_validation=True):
         """Constructor for the Tag_Validator class.
 
         Parameters
@@ -828,7 +828,7 @@ class TagValidator:
             return tag[:end_index]
         return tag;
 
-    def find_comma_issues_in_hed_string(self, hed_string):
+    def find_comma_issues_in_hed_string(self, hed_string): #rewrite this to fix issue 3
         """Reports a validation error if there are missing commas or commas in tags that take values.
 
         Parameters
