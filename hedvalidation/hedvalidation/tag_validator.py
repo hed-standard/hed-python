@@ -841,31 +841,67 @@ class TagValidator:
             A validation error string. If no errors are found then an empty string is returned.
 
         """
-        validation_error = '';
+        last_non_empty_valid_character = '';
+        last_non_empty_valid_index = 0;
         current_tag = '';
-        last_non_empty_character = '';
-        character_indices_iterator = iter(range(len(hed_string)));
-        for character_index in character_indices_iterator:
-            character = hed_string[character_index];
-            current_tag += character;
-            if not character.isspace():
-                if TagValidator.character_is_delimiter(character):
+        issues = '';
+
+        for i in range(len(hed_string)):
+            current_character = hed_string[i];
+            current_tag += current_character;
+            if not current_character:
+                continue;
+            if TagValidator.character_is_delimiter(current_character):
+                if current_tag.strip() == current_character:
+                    issues += str(error_reporter.report_error_type('extraDelimiter',
+                                                               character=current_character,
+                                                               index=i,
+                                                               hed_string= hed_string));
                     current_tag = '';
-                if character == TagValidator.OPENING_GROUP_BRACKET:
-                    # If we have an opening group bracket by itself without a tag, it's actually starting a new group.
-                    if current_tag.strip() == TagValidator.OPENING_GROUP_BRACKET:
-                        current_tag = ''
-                    else:
-                        validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE,
-                                                                            tag=current_tag)
-                        self._increment_issue_count()
-                        break
-                elif TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character):
-                    validation_error = TagValidator.report_missing_comma_error(current_tag);
-                    self._increment_issue_count();
-                    break;
-                last_non_empty_character = character;
-        return validation_error;
+                    continue;
+                current_tag = '';
+            elif current_character is self.OPENING_GROUP_BRACKET:
+                if current_tag.strip() is self.OPENING_GROUP_BRACKET:
+                    current_tag = '';
+                else:
+                    issues += str(error_reporter.report_error_type('valid', tag=current_tag));
+            elif TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_valid_character,
+                                                                     current_character):
+                issues += str(error_reporter.report_error_type('coma', tag=current_tag));
+                break;
+            last_non_empty_valid_character = current_character;
+            last_non_empty_valid_index = i;
+            if TagValidator.character_is_delimiter(last_non_empty_valid_character):
+                issues += str(error_reporter.report_error_type('extraDelimiter',
+                                                               character=last_non_empty_valid_character,
+                                                               index=last_non_empty_valid_index,
+                                                               hed_string= hed_string))
+
+        # validation_error = '';
+        # current_tag = '';
+        # last_non_empty_character = '';
+        # character_indices_iterator = iter(range(len(hed_string)));
+        # for character_index in character_indices_iterator:
+        #     character = hed_string[character_index];
+        #     current_tag += character;
+        #     if not character.isspace():
+        #         if TagValidator.character_is_delimiter(character):
+        #             current_tag = '';
+        #         if character == TagValidator.OPENING_GROUP_BRACKET:
+        #             # If we have an opening group bracket by itself without a tag, it's actually starting a new group.
+        #             if current_tag.strip() == TagValidator.OPENING_GROUP_BRACKET:
+        #                 current_tag = ''
+        #             else:
+        #                 validation_error = error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE,
+        #                                                                     tag=current_tag)
+        #                 self._increment_issue_count()
+        #                 break
+        #         elif TagValidator.comma_is_missing_after_closing_bracket(last_non_empty_character, character):
+        #             validation_error = TagValidator.report_missing_comma_error(current_tag);
+        #             self._increment_issue_count();
+        #             break;
+        #         last_non_empty_character = character;
+        # return validation_error;
 
     def skip_iterations(self, iterator, start, end):
         """Skips a number of iterations based on the start and end index.
