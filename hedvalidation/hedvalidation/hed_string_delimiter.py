@@ -176,7 +176,7 @@ class HedStringDelimiter:
                                                           index=full_hed_string.index(
                                                               self.OPENING_ATTRIBUTE_GROUP_CHARACTER),
                                                           hed_string=full_hed_string)
-                return issues;
+                return issues
             elif trimmed_hed_string.index(self.OPENING_ATTRIBUTE_GROUP_CHARACTER) > trimmed_hed_string.index(
                     self.CLOSING_ATTRIBUTE_GROUP_CHARACTER):
                 issues + error_reporter.report_error_type('invalidCharacter',
@@ -189,16 +189,16 @@ class HedStringDelimiter:
                                                           index=full_hed_string.index(
                                                               self.CLOSING_ATTRIBUTE_GROUP_CHARACTER),
                                                           hed_string=full_hed_string)
-                return issues;
-            return issues;
+                return issues
+            return issues
         elif self.CLOSING_ATTRIBUTE_GROUP_CHARACTER in trimmed_hed_string:
             issues + error_reporter.report_error_type('invalidCharacter',
                                                       character=self.CLOSING_ATTRIBUTE_GROUP_CHARACTER,
                                                       index=full_hed_string.index(
                                                           self.CLOSING_ATTRIBUTE_GROUP_CHARACTER),
                                                       hed_string=full_hed_string)
-            return issues;
-        return issues;
+            return issues
+        return issues
 
     def _find_group_tags(self, tag_group_list):  # rewrite for parsing attribute groups change
         """Finds the tags that are in groups and put them in a set. The groups themselves are also put into a list.
