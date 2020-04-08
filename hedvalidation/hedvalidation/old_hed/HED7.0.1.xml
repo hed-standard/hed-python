@@ -2296,7 +2296,7 @@
             <node>
                <name>Threat</name>
                <node>
-                  <name>To self</name>
+                  <name>To cls</name>
                </node>
                <node>
                   <name>To others</name>
@@ -2417,7 +2417,7 @@
                   <description>Feedback was provided by evaluating subject reaction time</description>
                </node>
                <node>
-                  <name>To self</name>
+                  <name>To cls</name>
                   <description>Default</description>
                </node>
                <node>

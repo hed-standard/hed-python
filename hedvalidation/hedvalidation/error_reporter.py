@@ -1,11 +1,11 @@
-'''
+"""
 This module is used to report errors found in the validation.
 
 Created on Oct 2, 2017
 
 @author: Jeremy Cockfield
 
-'''
+"""
 
 
 def report_error_type(error_type, error_row=1, error_column=1, hed_string='', tag='', tag_prefix='', previous_tag='',
@@ -62,5 +62,6 @@ def report_error_type(error_type, error_row=1, error_column=1, hed_string='', ta
         'valid': '\tERROR: Invalid tag - \"%s\"\n' % tag,
         'extraDelimiter': '\tERROR: Extra delimiter \"%s\" at index %s of string \"%s\"'
                           % (character, index, hed_string),
+        'invalidCharacter': '\tERROR: ',
     }
-    return error_types.get(error_type, None);
+    return error_types.get(error_type, None)

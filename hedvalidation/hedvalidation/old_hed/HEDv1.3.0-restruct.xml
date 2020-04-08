@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="v1.2.0-devunit">
+<HED version="v1.3.0-restruct">
    <node>
       <name>Event</name>
       <node position="1" requireChild="true" required="true">
@@ -140,6 +140,27 @@
          <name>Object</name>
          <description>Visually discernable objects. This item excludes sounds that are Items but not objects</description>
          <node>
+            <name>Inanimate</name>
+            <node>
+               <name>Bell</name>
+            </node>
+            <node>
+               <name>Buzzer</name>
+            </node>
+            <node>
+               <name>Cash register</name>
+            </node>
+            <node>
+               <name>Clicker</name>
+            </node>
+            <node>
+               <name>Fire alarm</name>
+            </node>
+            <node>
+               <name>Siren</name>
+            </node>
+         </node>
+         <node>
             <name>Vehicle</name>
             <node>
                <name>Bicycle</name>
@@ -189,6 +210,18 @@
          </node>
          <node>
             <name>Animal</name>
+            <node>
+               <name>Bird</name>
+            </node>
+            <node>
+               <name>Dog</name>
+            </node>
+            <node>
+               <name>Insect</name>
+            </node>
+            <node>
+               <name>Squirrel</name>
+            </node>
          </node>
          <node>
             <name>Plant</name>
@@ -388,41 +421,41 @@
          </node>
       </node>
       <node>
-         <name>Natural scene</name>
+         <name>Multimedia</name>
          <node>
-            <name>Aerial</name>
+            <name>Photograph</name>
             <node>
-               <name>Satellite</name>
+               <name>Natural scene</name>
+               <node>
+                  <name>Aerial</name>
+               </node>
+               <node>
+                  <name>Satellite</name>
+               </node>
             </node>
          </node>
-      </node>
-      <node>
-         <name>Drawing</name>
-         <description>Cartoon or sketch</description>
          <node>
-            <name>Line drawing</name>
+            <name>Drawing</name>
+            <description>Cartoon or sketch</description>
+            <node>
+               <name>Line drawing</name>
+            </node>
          </node>
-      </node>
-      <node>
-         <name>Film clip</name>
+         <node>
+            <name>Film clip</name>
+         </node>
+         <node>
+            <name>Sound clip</name>
+         </node>
          <node>
             <name>Commercial TV</name>
          </node>
          <node>
             <name>Animation</name>
          </node>
-      </node>
-      <node>
-         <name>IAPS</name>
-         <description>International Affective Picture System</description>
-      </node>
-      <node>
-         <name>IADS</name>
-         <description>International Affective Digital Sounds</description>
-      </node>
-      <node>
-         <name>SAM</name>
-         <description>The Self-Assessment Manikin</description>
+         <node>
+            <name>Movie</name>
+         </node>
       </node>
    </node>
    <node extensionAllowed="true">
@@ -432,28 +465,8 @@
          <name>Auditory</name>
          <description>Sound</description>
          <node>
-            <name>Nameable</name>
-         </node>
-         <node>
-            <name>Cash register</name>
-         </node>
-         <node>
-            <name>Ding</name>
-            <description>Often associated with positive valence</description>
-         </node>
-         <node>
-            <name>Buzz</name>
-            <description>Often associated with negative valence</description>
-         </node>
-         <node>
-            <name>Fire alarm</name>
-         </node>
-         <node>
-            <name>Click</name>
-            <node>
-               <name>ABR</name>
-               <description>Auditory Brainstem Response</description>
-            </node>
+            <name>ABR</name>
+            <description>Auditory Brainstem Response</description>
          </node>
          <node>
             <name>Tone</name>
@@ -487,24 +500,6 @@
             <node>
                <name>Colored</name>
                <description>Not white --- for example a 1/f spectrum</description>
-            </node>
-         </node>
-         <node>
-            <name>Human voice</name>
-         </node>
-         <node extensionAllowed="true">
-            <name>Animal voice</name>
-            <node>
-               <name>Bird</name>
-            </node>
-            <node>
-               <name>Dog</name>
-            </node>
-            <node>
-               <name>Insect</name>
-            </node>
-            <node>
-               <name>Squirrel</name>
             </node>
          </node>
          <node>
@@ -597,149 +592,562 @@
             </node>
          </node>
       </node>
-      <node>
-         <name>Olfactory</name>
-         <description>Odor</description>
-      </node>
-      <node>
-         <name>Taste</name>
-      </node>
-      <node>
-         <name>Tactile</name>
-         <description>Pressure</description>
-      </node>
-      <node>
-         <name>Visual</name>
-         <node predicateType="passThrough" requireChild="true">
-            <name>Rendering type</name>
-            <node>
-               <name>Screen</name>
-               <node>
-                  <name>Head-mounted display</name>
-               </node>
-               <node>
-                  <name>View port</name>
-                  <description>Two or more views on the same object --- for example one from top one from street view</description>
-               </node>
-               <node>
-                  <name>2D</name>
-               </node>
-               <node>
-                  <name>3D</name>
-               </node>
-               <node>
-                  <name>Movie</name>
-                  <node>
-                     <name>Video-tape</name>
-                  </node>
-                  <node>
-                     <name>Motion-capture</name>
-                     <description>Stick figure of motion capture of someone else</description>
-                     <node>
-                        <name>Point light</name>
-                     </node>
-                     <node>
-                        <name>Stick figure</name>
-                     </node>
-                     <node>
-                        <name>Outline</name>
-                     </node>
-                  </node>
-                  <node>
-                     <name>Flickering</name>
-                  </node>
-                  <node>
-                     <name>Steady state</name>
-                  </node>
-               </node>
-            </node>
-            <node>
-               <name>Real-world</name>
-            </node>
-            <node>
-               <name>LED</name>
-               <description>Stimulus is turning on/off one or a few LEDs</description>
-            </node>
-         </node>
-      </node>
    </node>
    <node extensionAllowed="true" requireChild="true">
       <name>Attribute</name>
       <node requireChild="true">
          <name>ID</name>
          <description>Tag to identify any aspect of an event. Use parentheses to group an ID Value tag with an ID Type tag to qualify the kind of ID that the value represents.</description>
-         <node requireChild="true">
-            <name>Value</name>
-            <description>Use this tag by itself or in a parenthesized expression with an ID Type tag.</description>
+         <node>
+            <name>Collection</name>
+            <description>Identifier for an object in a specified collection</description>
+            <node>
+               <name>IAPS</name>
+               <description>International Affective Picture System</description>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>IADS</name>
+               <description>International Affective Digital Sounds</description>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>SAM</name>
+               <description>The Self-Assessment Manikin</description>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Group</name>
+            <description>ID that identifies a group of events associated with each other.</description>
             <node takesValue="true">
                <name>#</name>
             </node>
          </node>
          <node requireChild="true">
-            <name>Type</name>
-            <description>Use this tag to define the type of ID in more detail.</description>
-            <node>
-               <name>Group</name>
-               <description>ID that identifies a group of events associated with each other.</description>
+            <name>Index</name>
+            <description>Use this tag with a value for IDs that don't fall into another category.</description>
+            <node takesValue="true">
+               <name>#</name>
             </node>
-            <node>
-               <name>Local</name>
-               <description>For IDs only defined in the scope of a single event. The local ID 5 in events 1 and 2 may refer to two different objects. The global IDs  directly under ID tag refer to the same object through the whole experiment</description>
+         </node>
+         <node>
+            <name>Local</name>
+            <description>For IDs only defined in the scope of a single event. The local ID 5 in events 1 and 2 may refer to two different objects. The global IDs  directly under ID tag refer to the same object through the whole experiment</description>
+            <node takesValue="true">
+               <name>#</name>
             </node>
-            <node>
-               <name>Participant</name>
-               <description>ID identifies a subject.</description>
+         </node>
+         <node>
+            <name>Participant</name>
+            <description>ID identifies a subject.</description>
+            <node takesValue="true">
+               <name>#</name>
             </node>
-            <node>
-               <name>Permutation</name>
-               <description>ID is used to identify an ordering as for example to indicate block order in an experimental design.</description>
+         </node>
+         <node>
+            <name>Permutation</name>
+            <description>ID is used to identify an ordering as for example to indicate block order in an experimental design.</description>
+            <node takesValue="true">
+               <name>#</name>
             </node>
-            <node>
-               <name>Reference object</name>
-               <description>ID is used to a reference object to specify location with respect to.</description>
+         </node>
+         <node>
+            <name>Reference object</name>
+            <description>ID is used to a reference object to specify location with respect to.</description>
+            <node takesValue="true">
+               <name>#</name>
             </node>
-            <node>
-               <name>State</name>
-               <description>ID is used to identify a group of events that are changing the state of a variable as for example when the onset means the offset of any other and a change in the state</description>
+         </node>
+         <node>
+            <name>State</name>
+            <description>ID is used to identify a group of events that are changing the state of a variable as for example when the onset means the offset of any other and a change in the state</description>
+            <node takesValue="true">
+               <name>#</name>
             </node>
-            <node>
-               <name>Synchronization</name>
-               <description>ID is used to tag an event for synchronizing data streams.</description>
+         </node>
+         <node>
+            <name>Synchronization</name>
+            <description>ID is used to tag an event for synchronizing data streams.</description>
+            <node takesValue="true">
+               <name>#</name>
             </node>
          </node>
       </node>
-      <node>
-         <name>Onset</name>
-         <description>Default</description>
-      </node>
-      <node>
-         <name>Offset</name>
+      <node requireChild="true">
+         <name>Sensory presentation</name>
+         <description>Object manifestation</description>
+         <node>
+            <name>Auditory</name>
+         </node>
+         <node>
+            <name>Olfactory</name>
+         </node>
+         <node>
+            <name>Tactile</name>
+         </node>
+         <node>
+            <name>Taste</name>
+         </node>
+         <node>
+            <name>Visual</name>
+            <node predicateType="passThrough" requireChild="true">
+               <name>Rendering type</name>
+               <node>
+                  <name>Screen</name>
+                  <node>
+                     <name>Head-mounted display</name>
+                  </node>
+                  <node>
+                     <name>View port</name>
+                     <description>Two or more views on the same object --- for example one from top one from street view</description>
+                  </node>
+                  <node>
+                     <name>2D</name>
+                  </node>
+                  <node>
+                     <name>3D</name>
+                  </node>
+                  <node>
+                     <name>Movie</name>
+                     <node>
+                        <name>Video-tape</name>
+                     </node>
+                     <node>
+                        <name>Motion-capture</name>
+                        <description>Stick figure of motion capture of someone else</description>
+                        <node>
+                           <name>Point light</name>
+                        </node>
+                        <node>
+                           <name>Stick figure</name>
+                        </node>
+                        <node>
+                           <name>Outline</name>
+                        </node>
+                     </node>
+                     <node>
+                        <name>Flickering</name>
+                     </node>
+                     <node>
+                        <name>Steady state</name>
+                     </node>
+                  </node>
+               </node>
+               <node>
+                  <name>Real-world</name>
+               </node>
+               <node>
+                  <name>LED</name>
+                  <description>Stimulus is turning on/off one or a few LEDs</description>
+               </node>
+            </node>
+         </node>
       </node>
       <node requireChild="true">
-         <name>Duration</name>
-         <description>An offset that is implicit after duration time passed from the onset</description>
-         <node isNumeric="true" takesValue="true" unitClass="time">
-            <name>#</name>
+         <name>Spatial</name>
+         <node requireChild="true">
+            <name>Direction</name>
+            <description>Coordinate system is inferred from Attribute/Location. To specify a vector combine subnodes with number --- for example Attribute/Top/10, Attribute/Direction/Left/5 to create a vector with coordinates 10 and 5</description>
+            <node>
+               <name>Bottom</name>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Left</name>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Right</name>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Top</name>
+               <description>Combine Attribute/Direction/Top and Attribute/Direction/Left to mean the upper left</description>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Angle</name>
+               <description>Clockwise angle in degrees from vertical</description>
+               <node isNumeric="true" takesValue="true" unitClass="angle">
+                  <name>#</name>
+                  <description>Clockwise angle in degrees from vertical</description>
+               </node>
+            </node>
+            <node>
+               <name>North</name>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>South</name>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>East</name>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>West</name>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Forward</name>
+               <description>Like a car moving forward</description>
+            </node>
+            <node>
+               <name>Backward</name>
+               <description>Like a car moving backward</description>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Location</name>
+            <description>Spot or center of an area. Use Area were you are referring to something with significant extent and emphasizing its boundaries, like a city</description>
+            <node takesValue="true">
+               <name>#</name>
+               <description>location label</description>
+            </node>
+            <node>
+               <name>Lane</name>
+               <description>For example a car lane</description>
+               <node>
+                  <name>Cruising</name>
+               </node>
+               <node>
+                  <name>Leftmost</name>
+               </node>
+               <node>
+                  <name>Left of expected</name>
+               </node>
+               <node>
+                  <name>Oncoming</name>
+               </node>
+               <node>
+                  <name>Passing</name>
+                  <description>The lane that cars use to take over other cars</description>
+               </node>
+               <node>
+                  <name>Rightmost</name>
+               </node>
+               <node>
+                  <name>Right of expected</name>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Real-world coordinates</name>
+               <node>
+                  <name>Room</name>
+                  <node requireChild="true">
+                     <name>xyz</name>
+                     <description>have a subnode, e.g. Attribute/Location/Real-world coordinates/Room/xyz/10 50 30</description>
+                     <node takesValue="true">
+                        <name>#</name>
+                     </node>
+                  </node>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Reference frame</name>
+               <node>
+                  <name>Relative to participant</name>
+                  <node requireChild="true">
+                     <name>Azimuth</name>
+                     <node isNumeric="true" takesValue="true" unitClass="angle">
+                        <name>#</name>
+                        <description>Clockwise with units preferably in degrees</description>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Back</name>
+                  </node>
+                  <node requireChild="true">
+                     <name>Distance</name>
+                     <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                        <name>#</name>
+                        <description>Distance is in meters by default</description>
+                     </node>
+                     <node>
+                        <name>Far</name>
+                     </node>
+                     <node>
+                        <name>Moderate</name>
+                     </node>
+                     <node>
+                        <name>Near</name>
+                     </node>
+                  </node>
+                  <node requireChild="true">
+                     <name>Elevation</name>
+                     <node isNumeric="true" takesValue="true" unitClass="angle">
+                        <name>#</name>
+                        <description>Preferably in degrees</description>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Front</name>
+                  </node>
+                  <node>
+                     <name>Left</name>
+                  </node>
+                  <node>
+                     <name>Right</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Specified absolute reference</name>
+               </node>
+            </node>
+            <node>
+               <name>Screen</name>
+               <description>Specify displacements from each subnode in pixels or degrees or meters. Specify units such as Attribute/Spatial/Location/Screen/Top/12 px</description>
+               <node>
+                  <name>Angle</name>
+                  <node isNumeric="true" takesValue="true" unitClass="angle">
+                     <name>#</name>
+                     <description>Clockwise angle in degrees from vertical</description>
+                  </node>
+               </node>
+               <node>
+                  <name>Bottom</name>
+                  <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Center</name>
+                  <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Center displacement</name>
+                  <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength">
+                     <name>#</name>
+                     <description>Displacement from screen center, in any direction, in degrees, cm, or other lengths</description>
+                  </node>
+                  <node>
+                     <name>Horizontal</name>
+                     <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength">
+                        <name>#</name>
+                        <description>Displacement from screen center in any direction</description>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Vertical</name>
+                     <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength">
+                        <name>#</name>
+                        <description>Displacement from screen center in any direction</description>
+                     </node>
+                  </node>
+               </node>
+               <node>
+                  <name>Left</name>
+                  <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Right</name>
+               </node>
+               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                  <name>#</name>
+               </node>
+               <node>
+                  <name>Top</name>
+                  <description>You can combine Attribute/Location/Top and Attribute/Location/Left to designate UpperLeft and so on</description>
+                  <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
+                     <name>#</name>
+                  </node>
+               </node>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Object orientation</name>
+            <node>
+               <name>Rotated</name>
+               <node requireChild="true">
+                  <name>Degrees</name>
+                  <node isNumeric="true" takesValue="true" unitClass="angle">
+                     <name>#</name>
+                     <description>Preferably in degrees</description>
+                  </node>
+               </node>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Object side</name>
+            <description>Could be the left,  right, or both sides of a person or a vehicle</description>
+            <node>
+               <name>Back</name>
+            </node>
+            <node>
+               <name>Bottom</name>
+            </node>
+            <node>
+               <name>Bow</name>
+               <description>Front of a ship</description>
+            </node>
+            <node>
+               <name>Driver side</name>
+               <description>Side of a car</description>
+            </node>
+            <node>
+               <name>Front</name>
+            </node>
+            <node>
+               <name>Left</name>
+            </node>
+            <node>
+               <name>Passenger side</name>
+               <description>Side of a car</description>
+            </node>
+            <node>
+               <name>Port</name>
+            </node>
+            <node>
+               <name>Right</name>
+            </node>
+            <node>
+               <name>Stern</name>
+               <description>Back of the ship</description>
+            </node>
+            <node>
+               <name>Starboard</name>
+            </node>
+            <node>
+               <name>Top</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Size</name>
+            <node requireChild="true">
+               <name>Angle</name>
+               <node isNumeric="true" takesValue="true" unitClass="angle">
+                  <name>#</name>
+                  <description>In degrees or other units of angle</description>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Area</name>
+               <node isNumeric="true" takesValue="true" unitClass="area">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Height</name>
+               <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <name>#</name>
+                  <description>Default units are meters</description>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Length</name>
+               <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <name>#</name>
+                  <description>In meters or other units of length</description>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Volume</name>
+               <node isNumeric="true" takesValue="true" unitClass="volume">
+                  <name>#</name>
+                  <description>In cubic-meters or other units of volume</description>
+               </node>
+            </node>
+            <node>
+               <name>Width</name>
+               <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <name>#</name>
+                  <description>in meters</description>
+               </node>
+            </node>
+         </node>
+      </node>
+      <node requireChild="true">
+         <name>Temporal</name>
+         <node requireChild="true">
+            <name>Duration</name>
+            <description>An offset that is implicit after duration time passed from the onset</description>
+            <node isNumeric="true" takesValue="true" unitClass="time">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Onset</name>
+            <description>Default</description>
+         </node>
+         <node>
+            <name>Offset</name>
+         </node>
+         <node requireChild="true">
+            <name>Repetition</name>
+            <description>When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others</description>
+            <node isNumeric="true" takesValue="true">
+               <name>#</name>
+               <description>Number starting from 1 where 1 indicates the first occurrence and 2 indicates the second occurrence</description>
+            </node>
+         </node>
+         <node>
+            <name>Response start delay</name>
+            <description>The time interval between this (stimulus) event and the start of the response event specified, usually by grouping with the event ID of the response start event.</description>
+            <node takesValue="true" unitClass="time">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Response end delay</name>
+            <description>The time interval between this (stimulus) event and the end of the response event specified, usually by grouping with the event ID of the response end event.</description>
+            <node takesValue="true" unitClass="time">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Rate</name>
+            <description>Number of occurrences in a unit of time.</description>
+            <node isNumeric="true" takesValue="true" unitClass="frequency">
+               <name>#</name>
+               <description>In Hz</description>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Uncertainty</name>
+            <description>Use to specify the amount of uncertainty in the timing of the event. Please notice that this is different from Attribute/Probability tag which relates to the occurrence of event and can be interpretative as the integral of probability density across a distribution whose shape (temporal extent) is specified by Attribute/Temporal uncertainty</description>
+            <node isNumeric="true" takesValue="true" unitClass="time">
+               <name>#</name>
+            </node>
+            <node requireChild="true">
+               <name>Standard deviation</name>
+               <description>implies that the distribution of temporal uncertainty is Gaussian with the provided standard deviation (in seconds).</description>
+               <node isNumeric="true" takesValue="true" unitClass="time">
+                  <name>#</name>
+               </node>
+            </node>
          </node>
       </node>
       <node>
          <name>Imagined</name>
          <description>This is used to identity that the (sub)event only happened in participant's imagination, e.g.  imagined movements in motor imagery paradigms.</description>
-      </node>
-      <node requireChild="true">
-         <name>Repetition</name>
-         <description>When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others</description>
-         <node isNumeric="true" takesValue="true">
-            <name>#</name>
-            <description>Number starting from 1 where 1 indicates the first occurrence and 2 indicates the second occurrence</description>
-         </node>
-      </node>
-      <node predicateType="propertyOf">
-         <name>Temporal rate</name>
-         <node isNumeric="true" takesValue="true" unitClass="frequency">
-            <name>#</name>
-            <description>In Hz</description>
-         </node>
       </node>
       <node requireChild="true">
          <name>Condition</name>
@@ -776,357 +1184,12 @@
          </node>
       </node>
       <node>
-         <name>Response start delay</name>
-         <description>The time interval between this (stimulus) event and the start of the response event specified, usually by grouping with the event ID of the response start event.</description>
-         <node takesValue="true" unitClass="time">
-            <name>#</name>
-         </node>
-      </node>
-      <node>
-         <name>Response end delay</name>
-         <description>The time interval between this (stimulus) event and the end of the response event specified, usually by grouping with the event ID of the response end event.</description>
-         <node takesValue="true" unitClass="time">
-            <name>#</name>
-         </node>
-      </node>
-      <node>
          <name>Social</name>
          <description>Involving interactions among multiple agents such as humans or dogs or robots</description>
       </node>
       <node>
          <name>Peak</name>
          <description>Peak velocity or  acceleration or jerk</description>
-      </node>
-      <node requireChild="true">
-         <name>Object side</name>
-         <description>Could be the left,  right, or both sides of a person or a vehicle</description>
-         <node>
-            <name>Right</name>
-         </node>
-         <node>
-            <name>Left</name>
-         </node>
-         <node>
-            <name>Front</name>
-         </node>
-         <node>
-            <name>Back</name>
-         </node>
-         <node>
-            <name>Top</name>
-         </node>
-         <node>
-            <name>Bottom</name>
-         </node>
-         <node>
-            <name>Starboard</name>
-         </node>
-         <node>
-            <name>Port</name>
-         </node>
-         <node>
-            <name>Passenger side</name>
-            <description>Side of a car</description>
-         </node>
-         <node>
-            <name>Driver side</name>
-            <description>Side of a car</description>
-         </node>
-         <node>
-            <name>Bow</name>
-            <description>Front of a ship</description>
-         </node>
-         <node>
-            <name>Stern</name>
-            <description>Back of the ship</description>
-         </node>
-      </node>
-      <node requireChild="true">
-         <name>Direction</name>
-         <description>Coordinate system is inferred from Attribute/Location. To specify a vector combine subnodes with number --- for example Attribute/Top/10, Attribute/Direction/Left/5 to create a vector with coordinates 10 and 5</description>
-         <node>
-            <name>Top</name>
-            <description>Combine Attribute/Direction/Top and Attribute/Direction/Left to mean the upper left</description>
-            <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>Bottom</name>
-            <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>Left</name>
-            <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>Right</name>
-            <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>Angle</name>
-            <description>Clockwise angle in degrees from vertical</description>
-            <node isNumeric="true" takesValue="true" unitClass="angle">
-               <name>#</name>
-               <description>Clockwise angle in degrees from vertical</description>
-            </node>
-         </node>
-         <node>
-            <name>North</name>
-            <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>South</name>
-            <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>East</name>
-            <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>West</name>
-            <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>Forward</name>
-            <description>Like a car moving forward</description>
-         </node>
-         <node>
-            <name>Backward</name>
-            <description>Like a car moving backward</description>
-         </node>
-      </node>
-      <node requireChild="true">
-         <name>Location</name>
-         <description>Spot or center of an area. Use Area were you are referring to something with significant extent and emphasizing its boundaries, like a city</description>
-         <node takesValue="true">
-            <name>#</name>
-            <description>location label</description>
-         </node>
-         <node>
-            <name>Screen</name>
-            <description>Specify displacements from each subnode in pixels or degrees or meters. Specify units such as Attribute/Location/Screen/Top/12 px</description>
-            <node>
-               <name>Center</name>
-               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Top</name>
-               <description>You can combine Attribute/Location/Top and Attribute/Location/Left to designate UpperLeft and so on</description>
-               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Bottom</name>
-               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Left</name>
-               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Right</name>
-               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength,pixels">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Angle</name>
-               <node isNumeric="true" takesValue="true" unitClass="angle">
-                  <name>#</name>
-                  <description>Clockwise angle in degrees from vertical</description>
-               </node>
-            </node>
-            <node>
-               <name>Center displacement</name>
-               <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength">
-                  <name>#</name>
-                  <description>displacement from screen center, in any direction, in degrees, cm, or other lengths</description>
-               </node>
-               <node>
-                  <name>Horizontal</name>
-                  <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength">
-                     <name>#</name>
-                     <description>Displacement from screen center in any direction</description>
-                  </node>
-               </node>
-               <node>
-                  <name>Vertical</name>
-                  <node isNumeric="true" takesValue="true" unitClass="angle,physicalLength">
-                     <name>#</name>
-                     <description>Displacement from screen center in any direction</description>
-                  </node>
-               </node>
-            </node>
-         </node>
-         <node>
-            <name>Lane</name>
-            <description>For example a car lane</description>
-            <node>
-               <name>Rightmost</name>
-            </node>
-            <node>
-               <name>Leftmost</name>
-            </node>
-            <node>
-               <name>Right of expected</name>
-            </node>
-            <node>
-               <name>Left of expected</name>
-            </node>
-            <node>
-               <name>Cruising</name>
-            </node>
-            <node>
-               <name>Passing</name>
-               <description>The lane that cars use to take over other cars</description>
-            </node>
-            <node>
-               <name>Oncoming</name>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Real-world coordinates</name>
-            <node>
-               <name>Room</name>
-               <node requireChild="true">
-                  <name>xyz</name>
-                  <description>have a subnode, e.g. Attribute/Location/Real-world coordinates/Room/xyz/10 50 30</description>
-                  <node takesValue="true">
-                     <name>#</name>
-                  </node>
-               </node>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Reference frame</name>
-            <node>
-               <name>Specified absolute reference</name>
-            </node>
-            <node>
-               <name>Relative to participant</name>
-               <node>
-                  <name>Left</name>
-               </node>
-               <node>
-                  <name>Front</name>
-               </node>
-               <node>
-                  <name>Right</name>
-               </node>
-               <node>
-                  <name>Back</name>
-               </node>
-               <node requireChild="true">
-                  <name>Distance</name>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-                     <name>#</name>
-                     <description>Distance is in meters by default</description>
-                  </node>
-                  <node>
-                     <name>Near</name>
-                  </node>
-                  <node>
-                     <name>Moderate</name>
-                  </node>
-                  <node>
-                     <name>Far</name>
-                  </node>
-               </node>
-               <node requireChild="true">
-                  <name>Azimuth</name>
-                  <node isNumeric="true" takesValue="true" unitClass="angle">
-                     <name>#</name>
-                     <description>Clockwise with units preferably in degrees</description>
-                  </node>
-               </node>
-               <node requireChild="true">
-                  <name>Elevation</name>
-                  <node isNumeric="true" takesValue="true" unitClass="angle">
-                     <name>#</name>
-                     <description>Preferably in degrees</description>
-                  </node>
-               </node>
-            </node>
-         </node>
-      </node>
-      <node requireChild="true">
-         <name>Object orientation</name>
-         <node>
-            <name>Rotated</name>
-            <node requireChild="true">
-               <name>Degrees</name>
-               <node isNumeric="true" takesValue="true" unitClass="angle">
-                  <name>#</name>
-                  <description>Preferably in degrees</description>
-               </node>
-            </node>
-         </node>
-      </node>
-      <node requireChild="true">
-         <name>Size</name>
-         <node requireChild="true">
-            <name>Length</name>
-            <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-               <name>#</name>
-               <description>In meters or other units of length</description>
-            </node>
-         </node>
-         <node>
-            <name>Width</name>
-            <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-               <name>#</name>
-               <description>in meters</description>
-            </node>
-         </node>
-         <node>
-            <name>Height</name>
-            <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-               <name>#</name>
-               <description>Default units are meters</description>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Area</name>
-            <node isNumeric="true" takesValue="true" unitClass="area">
-               <name>#</name>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Volume</name>
-            <node isNumeric="true" takesValue="true" unitClass="volume">
-               <name>#</name>
-               <description>In cubic-meters or other units of volume</description>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Angle</name>
-            <node isNumeric="true" takesValue="true" unitClass="angle">
-               <name>#</name>
-               <description>In degrees or other units of angle</description>
-            </node>
-         </node>
       </node>
       <node requireChild="true">
          <name>Item count</name>
@@ -1546,20 +1609,6 @@
          <description>Use to specify the level of certainty about the occurrence of the event. Use either numerical values as the child node or 'low', 'high', etc.</description>
       </node>
       <node requireChild="true">
-         <name>Temporal uncertainty</name>
-         <description>Use to specify the amount of uncertainty in the timing of the event. Please notice that this is different from Attribute/Probability tag which relates to the occurrence of event and can be interpretative as the integral of probability density across a distribution whose shape (temporal extent) is specified by Attribute/Temporal uncertainty</description>
-         <node isNumeric="true" takesValue="true" unitClass="time">
-            <name>#</name>
-         </node>
-         <node requireChild="true">
-            <name>Standard deviation</name>
-            <description>implies that the distribution of temporal uncertainty is Gaussian with the provided standard deviation (in seconds).</description>
-            <node isNumeric="true" takesValue="true" unitClass="time">
-               <name>#</name>
-            </node>
-         </node>
-      </node>
-      <node requireChild="true">
          <name>Presentation</name>
          <description>Attributes associated with visual, auditory, tactile, etc. presentation of an stimulus</description>
          <node requireChild="true">
@@ -1627,6 +1676,9 @@
          </node>
          <node>
             <name>Size</name>
+         </node>
+         <node>
+            <name>Number</name>
             <node isNumeric="true" takesValue="true" unitClass="memorySize">
                <name>#</name>
                <description>Numeric value with default units of mb</description>
@@ -1942,60 +1994,15 @@
          <node>
             <name>Intramodal</name>
             <description>In the same modality but with a change in details  such as changing from paying attention to red dots and instead of blue dots</description>
-            <node>
-               <name>Visual</name>
-            </node>
-            <node>
-               <name>Auditory</name>
-            </node>
-            <node>
-               <name>Tactile</name>
-            </node>
-            <node>
-               <name>Taste</name>
-            </node>
-            <node>
-               <name>Smell</name>
-            </node>
          </node>
          <node>
             <name>Intermodal</name>
             <description>Between modalities such as changing from audio to visual</description>
             <node>
                <name>From modality</name>
-               <node>
-                  <name>Visual</name>
-               </node>
-               <node>
-                  <name>Auditory</name>
-               </node>
-               <node>
-                  <name>Tactile</name>
-               </node>
-               <node>
-                  <name>Taste</name>
-               </node>
-               <node>
-                  <name>Smell</name>
-               </node>
             </node>
             <node>
                <name>To modality</name>
-               <node>
-                  <name>Visual</name>
-               </node>
-               <node>
-                  <name>Auditory</name>
-               </node>
-               <node>
-                  <name>Tactile</name>
-               </node>
-               <node>
-                  <name>Taste</name>
-               </node>
-               <node>
-                  <name>Smell</name>
-               </node>
             </node>
          </node>
       </node>
@@ -2225,7 +2232,7 @@
             <node>
                <name>Threat</name>
                <node>
-                  <name>To cls</name>
+                  <name>To self</name>
                </node>
                <node>
                   <name>To others</name>
@@ -2346,7 +2353,7 @@
                   <description>Feedback was provided by evaluating subject reaction time</description>
                </node>
                <node>
-                  <name>To cls</name>
+                  <name>To self</name>
                   <description>Default</description>
                </node>
                <node>
@@ -2756,21 +2763,6 @@
             <node>
                <name>Sustained</name>
                <description>Paying attention for a continuous time</description>
-            </node>
-            <node>
-               <name>Auditory</name>
-            </node>
-            <node>
-               <name>Visual</name>
-            </node>
-            <node>
-               <name>Tactile</name>
-            </node>
-            <node>
-               <name>Taste</name>
-            </node>
-            <node>
-               <name>Smell</name>
             </node>
             <node>
                <name>To a location</name>
@@ -3587,272 +3579,61 @@
       </node>
    </node>
    <unitClasses>
-      <unitClass defaultUnits="s">
-         <name>time</name>
-         <units>
-            <unit SIUnit="true">second</unit>
-            <unit SIUnit="true" unitSymbol="true">s</unit>
-            <unit unitSymbol="true">hour:min</unit>
-            <unit>day</unit>
-            <unit>minute</unit>
-            <unit>hour</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="Hz">
-         <name>frequency</name>
-         <units>
-            <unit SIUnit="true">hertz</unit>
-            <unit SIUnit="true" unitSymbol="true">Hz</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="radian">
-         <name>angle</name>
-         <units>
-            <unit SIUnit="true">radian</unit>
-            <unit SIUnit="true" unitSymbol="true">rad</unit>
-            <unit>degree</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="cm">
-         <name>physicalLength</name>
-         <units>
-            <unit SIUnit="true">metre</unit>
-            <unit SIUnit="true" unitSymbol="true">m</unit>
-            <unit>foot</unit>
-            <unit>mile</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="px">
-         <name>pixels</name>
-         <units>
-            <unit>pixel</unit>
-            <unit unitSymbol="true">px</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m^2">
-         <name>area</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m^2</unit>
-            <unit unitSymbol="true">px^2</unit>
-            <unit>pixel^2</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m^3">
-         <name>volume</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m^3</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="cm-per-s">
-         <name>speed</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m-per-s</unit>
-            <unit unitSymbol="true">mph</unit>
-            <unit unitSymbol="true">kph</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m-per-s^2">
+      <unitClass default="cm-per-s2">
          <name>acceleration</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m-per-s^2</unit>
-         </units>
+         <units>m-per-s2,cm-per-s2</units>
       </unitClass>
-      <unitClass defaultUnits="m-per-s^3">
-         <name>jerk</name>
-         <units>
-            <unit unitSymbol="true">m-per-s^3</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="dB">
-         <name>intensity</name>
-         <units>
-            <unit unitSymbol="true">dB</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="cd">
-         <name>luminousIntensity</name>
-         <units>
-            <unit SIUnit="true">candela</unit>
-            <unit SIUnit="true" unitSymbol="true">cd</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="B">
-         <name>memorySize</name>
-         <units>
-            <unit SIUnit="true">byte</unit>
-            <unit SIUnit="true" unitSymbol="true">B</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="$">
+      <unitClass default="$">
          <name>currency</name>
-         <units>
-            <unit>dollar</unit>
-            <unit unitSymbol="true">$</unit>
-            <unit>point</unit>
-            <unit>fraction</unit>
-         </units>
+         <units>dollars,$,points,fraction</units>
+      </unitClass>
+      <unitClass default="radians">
+         <name>angle</name>
+         <units>degrees,degree,radian,radians</units>
+      </unitClass>
+      <unitClass default="Hz">
+         <name>frequency</name>
+         <units>Hz,mHz,Hertz,kHz</units>
+      </unitClass>
+      <unitClass default="dB">
+         <name>intensity</name>
+         <units>dB</units>
+      </unitClass>
+      <unitClass default="cm-per-s3">
+         <name>jerk</name>
+         <units>m-per-s3,cm-per-s3</units>
+      </unitClass>
+      <unitClass default="cd">
+         <name>luminousIntensity</name>
+         <units>candela,cd</units>
+      </unitClass>
+      <unitClass default="mb">
+         <name>memorySize</name>
+         <units>mb,kb,gb,tb</units>
+      </unitClass>
+      <unitClass default="cm">
+         <name>physicalLength</name>
+         <units>m,cm,km,mm,feet,foot,meter,meters,mile,miles</units>
+      </unitClass>
+      <unitClass default="px">
+         <name>pixels</name>
+         <units>pixels,px,pixel</units>
+      </unitClass>
+      <unitClass default="cm-per-s">
+         <name>speed</name>
+         <units>m-per-s,mph,kph,cm-per-s</units>
+      </unitClass>
+      <unitClass default="s">
+         <name>time</name>
+         <units>s,second,seconds,centiseconds,centisecond,cs,hour:min,day,days,ms,milliseconds,millisecond,minute,minutes,hour,hours</units>
+      </unitClass>
+      <unitClass default="cm2">
+         <name>area</name>
+         <units>m2,cm2,km2,pixels2,px2,pixel2,mm2</units>
+      </unitClass>
+      <unitClass default="cm3">
+         <name>volume</name>
+         <units>m3,cm3,mm3,km3</units>
       </unitClass>
    </unitClasses>
-   <unitModifiers>
-      <unitModifier SIUnitModifier="true">
-         <name>deca</name>
-         <description>SI unit multiple representing 10^1</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>da</name>
-         <description>SI unit multiple representing 10^1</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>hecto</name>
-         <description>SI unit multiple representing 10^2</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>h</name>
-         <description>SI unit multiple representing 10^2</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>kilo</name>
-         <description>SI unit multiple representing 10^3</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>k</name>
-         <description>SI unit multiple representing 10^3</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>mega</name>
-         <description>SI unit multiple representing 10^6</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>M</name>
-         <description>SI unit multiple representing 10^6</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>giga</name>
-         <description>SI unit multiple representing 10^9</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>G</name>
-         <description>SI unit multiple representing 10^9</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>tera</name>
-         <description>SI unit multiple representing 10^12</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>T</name>
-         <description>SI unit multiple representing 10^12</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>peta</name>
-         <description>SI unit multiple representing 10^15</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>P</name>
-         <description>SI unit multiple representing 10^15</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>exa</name>
-         <description>SI unit multiple representing 10^18</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>E</name>
-         <description>SI unit multiple representing 10^18</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>zetta</name>
-         <description>SI unit multiple representing 10^21</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>Z</name>
-         <description>SI unit multiple representing 10^21</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>yotta</name>
-         <description>SI unit multiple representing 10^24</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>Y</name>
-         <description>SI unit multiple representing 10^24</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>deci</name>
-         <description>SI unit submultiple representing 10^-1</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>d</name>
-         <description>SI unit submultiple representing 10^-1</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>centi</name>
-         <description>SI unit submultiple representing 10^-2</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>c</name>
-         <description>SI unit submultiple representing 10^-2</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>milli</name>
-         <description>SI unit submultiple representing 10^-3</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>m</name>
-         <description>SI unit submultiple representing 10^-3</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>micro</name>
-         <description>SI unit submultiple representing 10^-6</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>µ</name>
-         <description>SI unit submultiple representing 10^-6</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>nano</name>
-         <description>SI unit submultiple representing 10^-9</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>n</name>
-         <description>SI unit submultiple representing 10^-9</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>pico</name>
-         <description>SI unit submultiple representing 10^-12</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>p</name>
-         <description>SI unit submultiple representing 10^-12</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>femto</name>
-         <description>SI unit submultiple representing 10^-15</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>f</name>
-         <description>SI unit submultiple representing 10^-15</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>atto</name>
-         <description>SI unit submultiple representing 10^-18</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>a</name>
-         <description>SI unit submultiple representing 10^-18</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>zepto</name>
-         <description>SI unit submultiple representing 10^-21</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>z</name>
-         <description>SI unit submultiple representing 10^-21</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>yocto</name>
-         <description>SI unit submultiple representing 10^-24</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>y</name>
-         <description>SI unit submultiple representing 10^-24</description>
-      </unitModifier>
-   </unitModifiers>
 </HED>
