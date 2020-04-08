@@ -41,7 +41,8 @@ def create_standard_email(github_payload_dictionary, email_list):
                          constants.CHECK_OUT_CHANGES_TEXT + \
                          url_to_use + \
                          constants.PERIOD_TEXT + \
-                         "\n" + \
+                         "\n\n" + \
+                         constants.SOURCE_MEDIAWIKI_TEXT + \
                          media_wiki_url + \
                          "\n\n" + \
                          message_to_use
