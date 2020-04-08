@@ -31,6 +31,7 @@ def create_standard_email(github_payload_dictionary, email_list):
     mime_email[constants.EMAIL_TO_KEY] = app_config[constants.CONFIG_EMAIL_TO_KEY];
     mime_email[constants.EMAIL_BCC_KEY] = constants.EMAIL_LIST_DELIMITER.join(email_list);
     commit_info = get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False)
+    media_wiki_url = app_config[constants.CONFIG_HED_WIKI_URL_KEY]
     if len(commit_info) > 0:
         message_to_use, url_to_use = commit_info[-1]
         main_body_text = constants.HELLO_WIKI_TEXT + \
@@ -40,6 +41,9 @@ def create_standard_email(github_payload_dictionary, email_list):
                          constants.CHECK_OUT_CHANGES_TEXT + \
                          url_to_use + \
                          constants.PERIOD_TEXT + \
+                         "\n\n" + \
+                         constants.SOURCE_MEDIAWIKI_TEXT + \
+                         media_wiki_url + \
                          "\n\n" + \
                          message_to_use
 

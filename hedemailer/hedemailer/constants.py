@@ -45,6 +45,7 @@ HELLO_WIKI_TEXT = 'Hello,\nThe wiki page ';
 WIKI_TITLE_KEY = 'title';
 HAS_BEEN_TEXT = ' has been ';
 CHECK_OUT_CHANGES_TEXT = '. Please checkout the changes at ';
+SOURCE_MEDIAWIKI_TEXT = 'Media wiki source file located at '
 NO_CHANGES_DETECTED_EMAIL = 'No relevant changes found in most recent push event.'
 WIKI_HTML_URL_KEY = 'html_url';
 PERIOD_TEXT = '.';
