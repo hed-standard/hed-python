@@ -75,54 +75,16 @@ class TestHedTagGroups(TestHed):
         self.validator(testStrings, expectedResults, expectedIssues)
 
 
-# class FullHedString(TestHed):
-#     def validator(self, test_strings, expected_results, expected_issues):
-#         for
-
-
-class Tests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.generic_hed_input_reader = HedInputReader('Event/Category/')
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        cls.hed_dictionary = HedDictionary(hed_xml)
-        cls.tagValidator = TagValidator(cls.hed_dictionary)
-
-    def validate(self, test_strings, expected_results, expected_issues):
-        for test in test_strings:
-            expected_issue = expected_issues[test]
-
-            validation_issues = self.generic_hed_input_reader._validate_hed_string(test_strings[test])
-
-            self.assertEqual(validation_issues, expected_issue, test_strings[test])
-            self.assertCountEqual(validation_issues, expected_issue, test_strings[test])
-
-    def validate_semantic_base(self, test_strings, expected_issues, expected_results, testFunction):
+class FullHedString(TestHed):
+    def validator(self, test_strings, expected_results, expected_issues):
         for test_key in test_strings:
-            hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
-            test_result = testFunction(hed_string_delimiter)
+            test_issues = TagValidator.run_hed_string_validators(self.semantic_warning_tag_validator,
+                                                                 hed_string=test_strings[test_key])
+            test_result = not test_issues
             expected_issue = expected_issues[test_key]
             expected_result = expected_results[test_key]
-            has_no_issues = (test_result == "")
-
-            if has_no_issues is True and expected_result is True:
-                self.assertTrue(has_no_issues, test_strings[test_key])
-            else:
-                self.assertEqual(test_result, expected_issue, test_strings[test_key])
-                self.assertCountEqual(test_result, expected_issue, test_strings[test_key])
-
-    def validate_syntactic_base(self, test_strings, expected_issues, expected_results, testFunction):
-        for test_key in test_strings:
-            hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
-            testResult = testFunction(str(hed_string_delimiter), str(test_strings[test_key]))
-            expectedIssue = expected_issues[test_key]
-            expectedResult = expected_results[test_key]
-            has_no_issues = (testResult == "")
-            if has_no_issues is True and expectedResult is True:
-                self.assertTrue(has_no_issues, test_strings[test_key])
-            else:
-                self.assertEqual(testResult, expectedIssue, test_strings[test_key])
-                self.assertCountEqual(testResult, expectedIssue, test_strings[test_key])
+            self.assertEqual(test_result, expected_result, test_strings[test_key])
+            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
     def test_mismatched_parentheses(self):
         testStrings = {
@@ -150,11 +112,8 @@ class Tests(unittest.TestCase):
             'valid': ''
         }
 
-        self.validate(testStrings, expectedResults, expectedIssues)
+        self.validator(testStrings, expectedResults, expectedIssues)
 
-    ##########################################################################################################################################
-    # Validator does not properly report errors with commas and does not report any error for extra tildes. (issue 3)
-    ###########################################################################################################################################
     def test_malformed_delimiters(self):
         testStrings = {
             'missingOpeningComma':
@@ -266,8 +225,7 @@ class Tests(unittest.TestCase):
             'valid': '',
             'validNestedParentheses': ''
         }
-
-        self.validate(testStrings, expectedResults, expectedIssues)
+        self.validator(testStrings, expectedResults, expectedIssues)
 
     def test_invalid_characters(self):
         testStrings = {
@@ -293,13 +251,33 @@ class Tests(unittest.TestCase):
             'openingBracket': report_error_type('character', tag='['),
             'closingBracket': report_error_type('character', tag=']')
         }
-        self.validate(testStrings, expectedResults, expectedIssues)
+        self.validator(testStrings, expectedResults, expectedIssues)
 
-    def validate_semantic(self, test_strings, expected_issues, expected_results, check_for_warnings):
-        self.semanticHedInputReader = HedInputReader('Event/Category/', check_for_warnings=check_for_warnings)
-        self.validate_semantic_base(test_strings, expected_issues, expected_results,
-                                    lambda hed_input: self.semanticHedInputReader.
-                                    _validate_individual_tags_in_hed_string(hed_input))
+
+class IndividualHedTags(TestHed):
+    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
+        if check_for_warnings is True:
+            self.validator_base(test_strings, expected_results, expected_issues, lambda hed_string_delimiter: ''.join(
+                [self.syntactic_warning_tag_validator.run_individual_tag_validators(*args) for args in
+                 zip(hed_string_delimiter.get_tags(),
+                     hed_string_delimiter.get_formatted_tags())]))
+        else:
+            self.validator_base(test_strings, expected_results, expected_issues, lambda hed_string_delimiter: ''.join(
+                [self.syntactic_tag_validator.run_individual_tag_validators(*args) for args in
+                 zip(hed_string_delimiter.get_tags(),
+                     hed_string_delimiter.get_formatted_tags())]))
+
+    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
+        if check_for_warnings is True:
+            self.validator_base(test_strings, expected_results, expected_issues, lambda hed_string_delimiter: ''.join(
+                [self.semantic_warning_tag_validator.run_individual_tag_validators(*args) for args in
+                 zip(hed_string_delimiter.get_tags(),
+                     hed_string_delimiter.get_formatted_tags())]))
+        else:
+            self.validator_base(test_strings, expected_results, expected_issues, lambda hed_string_delimiter: ''.join(
+                [self.semantic_tag_validator.run_individual_tag_validators(*args) for args in
+                 zip(hed_string_delimiter.get_tags(),
+                     hed_string_delimiter.get_formatted_tags())]))
 
     def test_exist_in_schema(self):
         testString = {
@@ -327,14 +305,7 @@ class Tests(unittest.TestCase):
             'illegalComma': report_error_type('commaValid', previous_tag='Event/Label/This is a label',
                                               tag='This/Is/A/Tag')
         }
-        self.validate_semantic(testString, expectedIssues, expectedResults, False)
-
-    def validate_syntactic(self, test_strings, expected_issues, expected_results, check_for_warnings=False):
-        self.syntacticTagValidator = TagValidator(self.hed_dictionary, check_for_warnings, False)
-        self.validate_syntactic_base(test_strings, expected_results, expected_issues,
-                                     lambda parsed_string, original_tag:
-                                     self.syntacticTagValidator.check_capitalization(formatted_tag=parsed_string,
-                                                                                     original_tag=original_tag))
+        self.validator_semantic(testString, expectedResults, expectedIssues, False)
 
     def test_proper_capitalization(self):
         testString = {
@@ -359,7 +330,225 @@ class Tests(unittest.TestCase):
             'numeric': '',
             'lowercase': report_warning_type('cap', tag=testString['lowercase'])
         }
-        self.validate_syntactic(testString, expectedIssues, expectedIssues)
+        self.validator_syntactic(testString, expectedResults, expectedIssues, True)
+
+    def test_child_required(self):
+        testString = {
+            'hasChild': 'Event/Category/Experimental stimulus',
+            'missingChild': 'Event/Category'
+        }
+        expectedResults = {
+            'hasChild': True,
+            'missingChild': False
+        }
+        expectedIssues = {
+            # NOT COMPLETE
+            'hasChild': '',
+            'missingChild': report_error_type('requireChild', tag=testString['missingChild'])
+        }
+        self.validator_semantic(testString, expectedResults, expectedIssues, True)
+
+    def test_required_units(self):
+        testString = {
+            'hasRequiredUnit': 'Attribute/Duration/3 ms',
+            'missingRequiredUnit': 'Attribute/Duration/3',
+            'notRequiredNumber': 'Attribute/Color/Red/0.5',
+            'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
+            'timeValue': 'Item/2D shape/Clock face/8:30'
+        }
+        expectedResults = {
+            'hasRequiredUnit': True,
+            'missingRequiredUnit': False,
+            'notRequiredNumber': True,
+            'notRequiredScientific': True,
+            'timeValue': True
+        }
+        expectedIssues = {
+            'hasRequiredUnit': "",
+            'missingRequiredUnit': report_warning_type('unitClass', tag=testString['missingRequiredUnit'],
+                                                       default_unit='s'),
+            'notRequiredNumber': "",
+            'notRequiredScientific': "",
+            'timeValue': ""
+        }
+        self.validator_semantic(testString, expectedResults, expectedIssues, True)
+
+    def correct_units(self):
+        testString = {
+            'correctUnit': 'Event/Duration/3 ms',
+            'correctUnitScientific': 'Event/Duration/3.5e1 ms',
+            'incorrectUnit': 'Event/Duration/3 cm',
+            'notRequiredNumber': 'Attribute/Color/Red/0.5',
+            'notRequiredScientific': 'Attribute/Color/Red/5e-1',
+            'properTime': 'Item/2D shape/Clock face/8:30',
+            'invalidTime': 'Item/2D shape/Clock face/54:54'
+        }
+        expectedResults = {
+            'correctUnit': True,
+            'correctUnitScientific': True,
+            'incorrectUnit': False,
+            'notRequiredNumber': True,
+            'notRequiredScientific': True,
+            'properTime': True,
+            'invalidTime': False
+        }
+        legalTimeUnits = [
+            's',
+            'second',
+            'seconds',
+            'centiseconds',
+            'centisecond',
+            'cs',
+            'hour:min',
+            'day',
+            'days',
+            'ms',
+            'milliseconds',
+            'millisecond',
+            'minute',
+            'minutes',
+            'hour',
+            'hours',
+        ]
+        expectedIssues = {
+            # NOT COMPLETE
+            'correctUnit': '',
+            'correctUnitScientific': '',
+            'incorrectUnit': report_error_type(testString['incorrectUnit'], ",".join(list(legalTimeUnits).sort())),
+            'notRequiredNumber': '',
+            'notRequiredScientific': '',
+            'properTime': '',
+            'invalidTime': report_error_type(testString['invalidTime'], ",".join(list(legalTimeUnits).sort()))
+        }
+        self.validate_semantic(testString, expectedResults, expectedIssues, True)
+
+
+class HedTagLevels(TestHed):
+    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
+        if check_for_warnings is True:
+            self.validator_base(test_strings, expected_results, expected_issues,
+                                lambda
+                                    hed_string_delimiter: self.syntactic_warning_tag_validator.run_tag_level_validators(
+                                    hed_string_delimiter.get_tags(),
+                                    hed_string_delimiter.get_formatted_tags()))
+        else:
+            self.validator_base(test_strings, expected_results, expected_issues,
+                                lambda hed_string_delimiter: self.syntactic_tag_validator.run_tag_level_validators(
+                                    hed_string_delimiter.get_tags(),
+                                    hed_string_delimiter.get_formatted_tags()))
+
+    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
+        if check_for_warnings is True:
+            self.validator_base(test_strings, expected_results, expected_issues,
+                                lambda
+                                    hed_string_delimiter: self.semantic_warning_tag_validator.run_tag_level_validators(
+                                    hed_string_delimiter.get_tags(),
+                                    hed_string_delimiter.get_formatted_tags()))
+        else:
+            self.validator_base(test_strings, expected_results, expected_issues,
+                                lambda hed_string_delimiter: self.semantic_tag_validator.run_tag_level_validators(
+                                    hed_string_delimiter.get_tags(),
+                                    hed_string_delimiter.get_formatted_tags()))
+
+    def test_no_duplicates(self):
+        testStrings = {
+            'topLevelDuplicate': 'Event/Category/Experimental stimulus,Event/Category/Experimental stimulus',
+            'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Experimental stimulus,'
+                              'Attribute/Visual/Color/Purple,Event/Category/Experimental stimulus)',
+            'noDuplicate': 'Event/Category/Experimental stimulus,'
+                           'Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple',
+            'legalDuplicate': 'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,'
+                              'Event/Category/Experimental stimulus)',
+        }
+        expectedResults = {
+            'topLevelDuplicate': False,
+            'groupDuplicate': False,
+            'legalDuplicate': True,
+            'noDuplicate': True
+        }
+        expectedIssues = {
+            'topLevelDuplicate': report_error_type('duplicate', tag='Event/Category/Experimental stimulus'),
+            'groupDuplicate': report_error_type('duplicate', tag='Event/Category/Experimental stimulus'),
+            'legalDuplicate': '',
+            'noDuplicate': ''
+        }
+        self.validator_syntactic(testStrings, expectedResults, expectedIssues, False)
+
+    def test_multiple_copies_unique_tags(self):
+        testStrings = {
+            'legal': 'Event/Description/Rail vehicles,Item/Object/Vehicle/Train,'
+                     '(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
+            'multipleDesc': 'Event/Description/Rail vehicles,'
+                            'Event/Description/Locomotive-pulled or multiple units,'
+                            'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)'
+        }
+        expectedResults = {
+            'legal': True,
+            'multipleDesc': False
+        }
+        expectedIssues = {
+            'legal': '',
+            'multipleDesc': report_error_type('unique', tag_prefix='event/description')
+        }
+        self.validator_semantic(testStrings, expectedResults, expectedIssues, True)
+
+
+class Tests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.generic_hed_input_reader = HedInputReader('Event/Category/')
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
+        cls.hed_dictionary = HedDictionary(hed_xml)
+        cls.tagValidator = TagValidator(cls.hed_dictionary)
+
+    def validate(self, test_strings, expected_results, expected_issues):
+        for test in test_strings:
+            expected_issue = expected_issues[test]
+
+            validation_issues = self.generic_hed_input_reader._validate_hed_string(test_strings[test])
+
+            self.assertEqual(validation_issues, expected_issue, test_strings[test])
+            self.assertCountEqual(validation_issues, expected_issue, test_strings[test])
+
+    def validate_semantic_base(self, test_strings, expected_issues, expected_results, testFunction):
+        for test_key in test_strings:
+            hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
+            test_result = testFunction(hed_string_delimiter)
+            expected_issue = expected_issues[test_key]
+            expected_result = expected_results[test_key]
+            has_no_issues = (test_result == "")
+
+            if has_no_issues is True and expected_result is True:
+                self.assertTrue(has_no_issues, test_strings[test_key])
+            else:
+                self.assertEqual(test_result, expected_issue, test_strings[test_key])
+                self.assertCountEqual(test_result, expected_issue, test_strings[test_key])
+
+    def validate_syntactic_base(self, test_strings, expected_issues, expected_results, testFunction):
+        for test_key in test_strings:
+            hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
+            testResult = testFunction(str(hed_string_delimiter), str(test_strings[test_key]))
+            expectedIssue = expected_issues[test_key]
+            expectedResult = expected_results[test_key]
+            has_no_issues = (testResult == "")
+            if has_no_issues is True and expectedResult is True:
+                self.assertTrue(has_no_issues, test_strings[test_key])
+            else:
+                self.assertEqual(testResult, expectedIssue, test_strings[test_key])
+                self.assertCountEqual(testResult, expectedIssue, test_strings[test_key])
+
+    def validate_semantic(self, test_strings, expected_issues, expected_results, check_for_warnings):
+        self.semanticHedInputReader = HedInputReader('Event/Category/', check_for_warnings=check_for_warnings)
+        self.validate_semantic_base(test_strings, expected_issues, expected_results,
+                                    lambda hed_input: self.semanticHedInputReader.
+                                    _validate_individual_tags_in_hed_string())
+
+    def validate_syntactic(self, test_strings, expected_issues, expected_results, check_for_warnings=False):
+        self.syntacticTagValidator = TagValidator(self.hed_dictionary, check_for_warnings, False)
+        self.validate_syntactic_base(test_strings, expected_results, expected_issues,
+                                     lambda parsed_string, original_tag:
+                                     self.syntacticTagValidator.check_capitalization(formatted_tag=parsed_string,
+                                                                                     original_tag=original_tag))
 
     def test_includes_all_required_tags(self):
         testStrings = {
@@ -386,143 +575,3 @@ class Tests(unittest.TestCase):
             'missingAllRequired': report_error_type('valid', tag=testStrings['missingAllRequired']),
         }
         self.validate_semantic(testStrings, expectedResults, expectedIssues, True)
-
-    ####################################################################################
-    # Alexander has specific error messages being reported for missing children
-    ####################################################################################
-
-    def test_child_required(self):
-        testString = {
-            'hasChild': 'Event/Category/Experimental stimulus',
-            'missingChild': 'Event/Category'
-        }
-        expectedResults = {
-            'hasChild': True,
-            'missingChild': False
-        }
-        expectedIssues = {
-            # NOT COMPLETE
-            'hasChild': '',
-            'missingChild': report_error_type('requireChild', tag=testString['missingChild'])
-        }
-        self.validate_semantic(testString, expectedIssues, expectedResults, True)
-
-    def test_required_units(self):
-        testString = {
-            'hasRequiredUnit': 'Attribute/Duration/3 ms',
-            'missingRequiredUnit': 'Attribute/Duration/3',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
-            'timeValue': 'Item/2D shape/Clock face/8:30'
-        }
-        expectedResults = {
-            'hasRequiredUnit': True,
-            'missingRequiredUnit': False,
-            'notRequiredNumber': True,
-            'notRequiredScientific': True,
-            'timeValue': True
-        }
-        expectedIssues = {
-            'hasRequiredUnit': "",
-            'missingRequiredUnit': report_warning_type('unitClass', tag=testString['missingRequiredUnit'],
-                                                       default_unit='s'),
-            'notRequiredNumber': "",
-            'notRequiredScientific': "",
-            'timeValue': ""
-        }
-        self.validate_semantic(testString, expectedIssues, expectedResults, True)
-
-    def correct_units(self):
-        testString = {
-            'correctUnit': 'Event/Duration/3 ms',
-            'correctUnitScientific': 'Event/Duration/3.5e1 ms',
-            'incorrectUnit': 'Event/Duration/3 cm',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5e-1',
-            'properTime': 'Item/2D shape/Clock face/8:30',
-            'invalidTime': 'Item/2D shape/Clock face/54:54'
-        }
-        expectedResults = {
-            'correctUnit': True,
-            'correctUnitScientific': True,
-            'incorrectUnit': False,
-            'notRequiredNumber': True,
-            'notRequiredScientific': True,
-            'properTime': True,
-            'invalidTime': False
-        }
-        legalTimeUnits = [
-            's',
-            'second',
-            'hour:min',
-            'day',
-            'minute',
-            'hour',
-        ]
-        expectedIssues = {
-            # NOT COMPLETE
-            'correctUnit': '',
-            'correctUnitScientific': '',
-            'incorrectUnit': report_error_type(testString['incorrectUnit'], ",".join(list(legalTimeUnits).sort())),
-            'notRequiredNumber': '',
-            'notRequiredScientific': '',
-            'properTime': '',
-            'invalidTime': report_error_type(testString['invalidTime'], ",".join(list(legalTimeUnits).sort()))
-        }
-        self.validate_semantic(testString, expectedResults, expectedIssues, True)
-
-    def validate_syntactic_duplicates(self, test_strings, expected_issues, expected_results, check_for_warnings):
-        self.syntacticTagValidator = TagValidator(self.hed_dictionary, check_for_warnings, False)
-        for test_key in test_strings:
-            hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
-            testResult = self.generic_hed_input_reader._validate_tag_levels_in_hed_string(hed_string_delimiter)
-            expectedIssue = expected_issues[test_key]
-            expectedResult = expected_results[test_key]
-            has_no_issues = (testResult == "")
-            if has_no_issues is True and expectedResult is True:
-                self.assertTrue(has_no_issues, test_strings[test_key])
-            else:
-                self.assertEqual(testResult, expectedIssue, test_strings[test_key])
-                self.assertCountEqual(testResult, expectedIssue, test_strings[test_key])
-
-    def test_no_duplicates(self):
-        testStrings = {
-            'topLevelDuplicate': 'Event/Category/Experimental stimulus,Event/Category/Experimental stimulus',
-            'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Experimental stimulus,'
-                              'Attribute/Visual/Color/Purple,Event/Category/Experimental stimulus)',
-            'noDuplicate': 'Event/Category/Experimental stimulus,'
-                           'Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple',
-            'legalDuplicate': 'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,'
-                              'Event/Category/Experimental stimulus)',
-        }
-        expectedResults = {
-            'topLevelDuplicate': False,
-            'groupDuplicate': False,
-            'legalDuplicate': True,
-            'noDuplicate': True
-        }
-        expectedIssues = {
-            'topLevelDuplicate': report_error_type('duplicate', tag='Event/Category/Experimental stimulus'),
-            'groupDuplicate': report_error_type('duplicate', tag='Event/Category/Experimental stimulus'),
-            'legalDuplicate': '',
-            'noDuplicate': ''
-        }
-        self.validate_syntactic_duplicates(testStrings, expectedIssues, expectedResults, True)
-
-    def multiple_copies_unique_tags(self):
-        testStrings = {
-            'legal': 'Event/Description/Rail vehicles,Item/Object/Vehicle/Train,'
-                     '(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)',
-            'multipleDesc': 'Event/Description/Rail vehicles,'
-                            'Event/Description/Locomotive-pulled or multiple units,'
-                            'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Experimental stimulus)'
-        }
-        expectedResults = {
-            'legal': True,
-            'multipleDesc': False
-        }
-        expectedIssues = {
-            'legal': '',
-            'multipleDesc': report_error_type('unique', tag_prefix='event/description')
-        }
-        self.validate_semantic(testStrings, expectedResults, expectedIssues)
