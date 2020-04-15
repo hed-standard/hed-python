@@ -8,14 +8,13 @@ from hedemailer import constants;
 
 app_config = current_app.config;
 
-
 def create_standard_email(github_payload_dictionary, email_list):
     """Create a standard part of the HED schema email.
 
     Parameters
     ----------
     github_payload_dictionary: dictionary
-        A dictionary containing a Github payload.
+        A dictionary containing a Github push payload.
     email_list: string
         A list containing the emails from a file.
 
@@ -31,15 +30,30 @@ def create_standard_email(github_payload_dictionary, email_list):
     mime_email[constants.EMAIL_FROM_KEY] = app_config[constants.CONFIG_EMAIL_FROM_KEY];
     mime_email[constants.EMAIL_TO_KEY] = app_config[constants.CONFIG_EMAIL_TO_KEY];
     mime_email[constants.EMAIL_BCC_KEY] = constants.EMAIL_LIST_DELIMITER.join(email_list);
-    main_body_text = constants.HELLO_WIKI_TEXT + \
-                     github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_TITLE_KEY] + \
-                     constants.HAS_BEEN_TEXT + \
-                     github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_ACTION_KEY] + \
-                     constants.CHECK_OUT_CHANGES_TEXT + \
-                     github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_HTML_URL_KEY] + \
-                     constants.PERIOD_TEXT;
-    return mime_email, main_body_text;
+    commit_info = get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False)
+    media_wiki_url = app_config[constants.CONFIG_HED_WIKI_URL_KEY]
+    if len(commit_info) > 0:
+        message_to_use, url_to_use = commit_info[-1]
+        main_body_text = constants.HELLO_WIKI_TEXT + \
+                         "HED-schema.mediawiki" + \
+                         constants.HAS_BEEN_TEXT + \
+                         "modified" + \
+                         constants.CHECK_OUT_CHANGES_TEXT + \
+                         url_to_use + \
+                         constants.PERIOD_TEXT + \
+                         "\n\n" + \
+                         constants.SOURCE_MEDIAWIKI_TEXT + \
+                         media_wiki_url + \
+                         "\n\n" + \
+                         message_to_use
 
+        for message, url in reversed(commit_info[:-1]):
+            main_body_text += "\n"
+            main_body_text += message
+    else:
+        main_body_text = constants.NO_CHANGES_DETECTED_EMAIL
+
+    return mime_email, main_body_text;
 
 def create_hed_schema_email(mime_email, main_body_text):
     """Create HED schema email.
@@ -56,7 +70,7 @@ def create_hed_schema_email(mime_email, main_body_text):
     """
     hed_resource_dictionary = {};
     try:
-        hed_resource_dictionary = wiki2xml.convert_hed_wiki_2_xml();
+        hed_resource_dictionary = wiki2xml.convert_hed_wiki_2_xml(app_config[constants.CONFIG_HED_WIKI_URL_KEY]);
         main_body_text = add_hed_xml_attachment_text(main_body_text, hed_resource_dictionary);
         main_body = MIMEText(main_body_text);
         mime_email.attach(main_body);
@@ -84,27 +98,62 @@ def clean_up_hed_resources(hed_resource_dictionary):
         if constants.HED_WIKI_LOCATION_KEY in hed_resource_dictionary:
             delete_file_if_exist(hed_resource_dictionary[constants.HED_WIKI_LOCATION_KEY]);
 
-
-def wiki_page_is_hed_schema(github_payload_dictionary):
-    """Checks to see if the WIKI page is a HED schema WIKI page.
+def get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=False):
+    """Checks to see if the commited page is the wiki page..
 
     Parameters
     ----------
     github_payload_dictionary: dictionary
-        A dictionary containing a Github payload.
+        A dictionary containing a Github push payload.
+    get_only_wiki_file: bool
+        If true, only gather push commit entries that alter the main wiki file.
+
+    Returns
+    -------
+    list
+        return a list of (message, url) pairs for each commit entry.
+    """
+    if not github_payload_dictionary:
+        return []
+
+    return_info = []
+    wiki_page = app_config[constants.CONFIG_HED_WIKI_PAGE_KEY]
+
+    for commit in github_payload_dictionary[constants.PUSH_COMMITS_KEY]:
+        should_add_commit = False
+        if not get_only_wiki_file:
+            should_add_commit = True
+        else:
+            for filename in commit[constants.PUSH_MODIFIED_KEY]:
+                if wiki_page == filename:
+                    should_add_commit = True
+                    break
+
+        if should_add_commit:
+            message = commit[constants.PUSH_COMMITS_MESSAGE_KEY]
+            url = commit[constants.PUSH_COMMITS_URL_KEY]
+            return_info.append((message, url))
+
+    return return_info
+
+def push_page_is_hed_schema(github_payload_dictionary):
+    """Checks to see if the commited page is the wiki page..
+
+    Parameters
+    ----------
+    github_payload_dictionary: dictionary
+        A dictionary containing a Github push payload.
 
     Returns
     -------
     boolean
         True if the WIKI page is a HED schema WIKI page.
     """
-    return github_payload_dictionary and app_config[constants.CONFIG_HED_WIKI_PAGE_KEY] == \
-           github_payload_dictionary[constants.WIKI_PAGES_KEY][0][constants.WIKI_TITLE_KEY];
-
+    return len(get_info_from_push_event(github_payload_dictionary, get_only_wiki_file=True)) > 0
 
 #
-def request_is_github_gollum_event(request):
-    """Checks to see if the request is a gollum event type.
+def request_is_github_push_event(request):
+    """Checks to see if the request is a push event type.
 
     Parameters
     ----------
@@ -114,10 +163,10 @@ def request_is_github_gollum_event(request):
     Returns
     -------
     boolean
-        True if the request is a github gollum event. False, if otherwise.
+        True if the request is a github push event. False, if otherwise.
     """
     return request.headers.get(constants.HEADER_CONTENT_TYPE) == constants.JSON_CONTENT_TYPE and \
-           request.headers.get(constants.HEADER_EVENT_TYPE) == constants.GOLLUM;
+           request.headers.get(constants.HEADER_EVENT_TYPE) == constants.PUSH;
 
 
 def add_hed_xml_attachment_text(main_body_text, hed_resource_dictionary):
@@ -136,9 +185,9 @@ def add_hed_xml_attachment_text(main_body_text, hed_resource_dictionary):
         The main body text of the email with the appended HED attachment text.
     """
     main_body_text += constants.HED_ATTACHMENT_TEXT;
-    main_body_text += constants.HED_VERSION_TEXT + hed_resource_dictionary[constants.HED_XML_TREE_KEY].get(
-        constants.HED_XML_VERSION_KEY);
-    main_body_text += constants.CHANGE_LOG_TEXT + hed_resource_dictionary[constants.HED_CHANGE_LOG_KEY][0];
+#     main_body_text += constants.HED_VERSION_TEXT + hed_resource_dictionary[constants.HED_XML_TREE_KEY].get(
+#         constants.HED_XML_VERSION_KEY);
+#     main_body_text += constants.CHANGE_LOG_TEXT + hed_resource_dictionary[constants.HED_CHANGE_LOG_KEY][0];
     return main_body_text;
 
 

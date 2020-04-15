@@ -18,9 +18,10 @@ def process_hed_payload():
         A JSON response.
     """
     try:
-        if not utils.request_is_github_gollum_event(request):
+        if not utils.request_is_github_push_event(request):
             return constants.NO_EMAILS_SENT_RESPONSE;
-        if hed_emailer.send_email(request):
-            return constants.EMAIL_SENT_RESPONSE;
+
+        hed_emailer.send_email(request)
+        return constants.EMAIL_SENT_RESPONSE;
     except Exception as ex:
         return constants.generate_exception_response(ex);

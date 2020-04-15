@@ -200,20 +200,11 @@ def report_EEG_events_validation_status(request):
         # parse hed_strings from json
         hed_strings = json.loads(form_data["hed_strings"])
         hed_strings = hed_strings["hed_strings"]
-        # Validate each hed string (corresponding to each event)
-        strings_with_issues_count = 0 # count number of strings that have issues
-        strings_with_issues = []
-        for i in range(len(hed_strings)):
-            hed_input_reader = HedInputReader(hed_strings[i],
-                                              check_for_warnings=check_for_warnings,
-                                              hed_xml_file=hed_xml_file)
-            issues = hed_input_reader.get_validation_issues();
-            if len(issues) > 0:
-                strings_with_issues_count = strings_with_issues_count + 1
-                strings_with_issues.append("Issue in event %d: %s" % (i+1, issues)) # MATLAB index starts at 1
+        hed_input_reader = HedInputReader(hed_strings, check_for_warnings=check_for_warnings, hed_xml_file=hed_xml_file)
+        issues = hed_input_reader.get_validation_issues()
+
         # Prepare response
-        validation_status["issues_count"] = strings_with_issues_count
-        validation_status["issues"] = strings_with_issues
+        validation_status["issues"] = issues # expect issues to be a string array, each array is in form "Issue in event _: issue"
     except:
         validation_status[error_constants.ERROR_KEY] = traceback.format_exc()
     finally:

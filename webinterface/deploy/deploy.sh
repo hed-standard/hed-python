@@ -16,8 +16,8 @@ DEPLOY_DIR="hed-python/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
-WEBINTERFACE_CODE_DIR="hed-python/webinterface/webinterface/"
-VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidation/"
+WEBINTERFACE_CODE_DIR="hed-python/webinterface/webinterface"
+VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidation"
 
 GIT_HED_DIR="${PWD}/hed-specification"
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
@@ -26,7 +26,7 @@ GIT_HED_REPO_FOLDER="hedxml"
 ##### Functions
 
 clone_github_repo(){
-echo Cloning repo ... 
+echo Cloning repo ...
 git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
 }
 

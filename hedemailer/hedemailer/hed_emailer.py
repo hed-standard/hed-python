@@ -30,11 +30,13 @@ def send_email(request):
     github_payload_string = str(request.data, 'utf-8');
     github_payload_dictionary = json.loads(github_payload_string);
     email_list = utils.get_email_list_from_file(app_config[constants.CONFIG_EMAIL_LIST]);
-    if email_list:
-        mime_email, hed_resource_dictionary = _create_email(github_payload_dictionary,
-                                                            app_config[constants.CONFIG_EMAIL_LIST]);
-        _send_email_from_smtp_server(mime_email, email_list);
-    return hed_resource_dictionary;
+    if not email_list:
+        raise Exception(constants.NO_VALID_EMAIL_ADDRESSES_IN_FILE)
+    mime_email, hed_resource_dictionary = _create_email(github_payload_dictionary,
+                                                        app_config[constants.CONFIG_EMAIL_LIST]);
+    _send_email_from_smtp_server(mime_email, email_list);
+
+    return hed_resource_dictionary
 
 
 def _create_email(github_payload_dictionary, email_list):
@@ -55,7 +57,7 @@ def _create_email(github_payload_dictionary, email_list):
     """
     hed_resource_dictionary = {};
     mime_email, main_body_text = utils.create_standard_email(github_payload_dictionary, email_list);
-    if utils.wiki_page_is_hed_schema(github_payload_dictionary):
+    if utils.push_page_is_hed_schema(github_payload_dictionary):
         hed_resource_dictionary = utils.create_hed_schema_email(mime_email, main_body_text);
     else:
         main_body = MIMEText(main_body_text);
