@@ -50,11 +50,6 @@ class Test(unittest.TestCase):
         validation_issues = self.generic_hed_input_reader._validate_hed_input()
         self.assertIsInstance(validation_issues, str)
 
-    def test_validate_hed_string(self):
-        validation_issues = self.generic_hed_input_reader._validate_hed_string(self.hed_string_with_invalid_tags)
-        self.assertIsInstance(validation_issues, str)
-        self.assertTrue(validation_issues)
-
     def test__validate_individual_tags_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_invalid_tags)
         validation_issues = self.generic_hed_input_reader._validate_individual_tags_in_hed_string(hed_string_delimiter)

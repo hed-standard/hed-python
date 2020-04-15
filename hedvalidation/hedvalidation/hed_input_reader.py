@@ -145,11 +145,12 @@ class HedInputReader:
          string
              The issues that were found.
         """
+        validation_issues = ''
         if isinstance(self._hed_input, list):
-            validation_issues = self._validate_hed_strings(self._hed_input);
+            validation_issues = self._validate_hed_strings(self._hed_input)
         elif HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
-            validation_issues = self._validate_hed_tags_in_file();
-        return validation_issues;
+            validation_issues = self._validate_hed_tags_in_file()
+        return validation_issues
 
     def _validate_hed_tags_in_file(self):
         """Validates the HED tags in a file.
