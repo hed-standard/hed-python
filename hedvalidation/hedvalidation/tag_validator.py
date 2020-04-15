@@ -261,10 +261,9 @@ class TagValidator:
         is_extension_tag = self.is_extension_allowed_tag(formatted_tag)
         if self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag) or \
                 self.tag_takes_value(formatted_tag) or formatted_tag == TagValidator.TILDE:
-            pass
-        elif is_extension_tag:
-            pass
-        elif not is_extension_tag and self.tag_takes_value(previous_formatted_tag):
+            return validation_error
+
+        if not is_extension_tag and self.tag_takes_value(previous_formatted_tag):
             validation_error = error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
                                                                 tag=original_tag,
                                                                 previous_tag=previous_original_tag)
