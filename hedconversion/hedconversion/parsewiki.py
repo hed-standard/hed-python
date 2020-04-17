@@ -19,6 +19,7 @@ HED_NODE_NAME = 'HED'
 HED_VERSION_STRING = 'HED version:'
 START_STRING = '!# start hed'
 UNIT_CLASS_STRING = '\'\'\'Unit classes'
+UNIT_MODIFIER_STRING = '\'\'\'Unit modifiers'
 END_STRING = '!# end hed'
 hed_node = Element('HED')
 
@@ -77,9 +78,11 @@ def add_tags(wiki_file):
         line = parsetag.remove_nowiki_tag_from_line(line.strip());
         if not line:
             pass
+        elif line.startswith(UNIT_MODIFIER_STRING):
+            add_unit_modifiers(wiki_file);
+            break
         elif line.startswith(UNIT_CLASS_STRING):
             add_unit_classes(wiki_file);
-            break
         elif line.startswith(ROOT_TAG):
             root_tag = parsetag.add_tag_node(hed_node, line);
             tag_levels[0] = root_tag;
@@ -107,6 +110,43 @@ def add_unit_classes(wiki_file):
     unit_class = '';
     unit_class_units = [];
     unit_class_attributes = '';
+    unit_class_units_attributes = []
+    line = wiki_file.readline();
+    while line:
+        line = parsetag.remove_nowiki_tag_from_line(line.strip());
+        if not line:
+            break
+        else:
+            level = parsetag.get_tag_level(line);
+            if level == 1:
+                if unit_class_units:
+                    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes, unit_class_units_attributes);
+                unit_class = parsetag.get_tag_name(line);
+                unit_class_attributes = parsetag.get_tag_attributes(line);
+                unit_class_units = [];
+                unit_class_units_attributes = []
+            else:
+                unit_class_unit = parsetag.get_tag_name(line);
+                unit_class_unit_attributes = parsetag.get_tag_attributes(line);
+                unit_class_units.append(unit_class_unit);
+                unit_class_units_attributes.append(unit_class_unit_attributes)
+        line = wiki_file.readline();
+    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes, unit_class_units_attributes);
+
+
+def add_unit_modifiers(wiki_file):
+    """Adds the unit modifiers to the HED element.
+
+    Parameters
+    ----------
+    wiki_file: file object.
+        A file object that points to the HED wiki file.
+
+    Returns
+    -------
+
+    """
+    unit_modifier_node = SubElement(hed_node, 'unitModifiers');
     line = wiki_file.readline();
     while line:
         line = parsetag.remove_nowiki_tag_from_line(line.strip());
@@ -115,18 +155,11 @@ def add_unit_classes(wiki_file):
         elif line.startswith(END_STRING):
             break
         else:
-            level = parsetag.get_tag_level(line);
-            if level == 1:
-                if unit_class_units:
-                    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes);
-                unit_class = parsetag.get_tag_name(line);
-                unit_class_attributes = parsetag.get_tag_attributes(line);
-                unit_class_units = [];
-            else:
-                unit_class_unit = parsetag.get_tag_name(line);
-                unit_class_units.append(unit_class_unit);
+            unit_modifier = parsetag.get_tag_name(line);
+            unit_modifier_attributes = parsetag.get_tag_attributes(line);
+            unit_modifier_description = parsetag.get_tag_description(line);
+            parsetag.add_unit_modifier_node(unit_modifier_node, unit_modifier, unit_modifier_attributes, unit_modifier_description);
         line = wiki_file.readline();
-    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes);
 
 
 def hed_wiki_2_xml_tree(wiki_file_path):
