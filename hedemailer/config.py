@@ -12,7 +12,7 @@ class Config(object):
     EMAIL_LIST = '/path/to/email/list';
     FROM = 'github-notifications@' + socket.getfqdn();
     HED_WIKI_PAGE = 'HED-schema.mediawiki'
-    HED_WIKI_URL = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/HED-schema.mediawiki'
+    HED_WIKI_URL = 'https://raw.githubusercontent.com/hed-standard/hed-specification/HED-restructure/HED-schema.mediawiki'
     TO = 'github-mailing-list@' + socket.getfqdn();
 
 
