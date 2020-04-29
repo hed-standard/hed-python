@@ -15,6 +15,7 @@ from defusedxml.lxml import parse
 class HedDictionary:
     DEFAULT_UNIT_ATTRIBUTE = 'default'
     DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
+    DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE = 'default'
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed'
     TAG_DICTIONARY_KEYS = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
                            'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
@@ -77,6 +78,7 @@ class HedDictionary:
         """
         return self.dictionaries
 
+    # make changes to add hasUnitClasses and hasUnitModifier here?
     def _populate_dictionaries(self):
         """Populates a dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit
            class attributes.
@@ -141,6 +143,11 @@ class HedDictionary:
 
         """
         unit_class_elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT)
+        ## NEW ##
+        if len(unit_class_elements) == 0:
+            self.has_unit_classes = False
+            return
+        self.has_unit_classes = True
         self._populate_unit_class_default_unit_dictionary(unit_class_elements)
         self._populate_unit_class_units_dictionary(unit_class_elements)
 
@@ -152,6 +159,11 @@ class HedDictionary:
 
         """
         unit_modifier_elements = self._get_elements_by_name(self.UNIT_MODIFIER_ELEMENT)
+        ## NEW ##
+        if len(unit_modifier_elements) == 0:
+            self.has_unit_modifiers = False
+            return
+        self.has_unit_modifiers = True
         for unit_modifier_key in self.UNIT_MODIFIER_DICTIONARY_KEYS:
             self.dictionaries[unit_modifier_key] = {}
         for unit_modifier_element in unit_modifier_elements:
@@ -179,6 +191,15 @@ class HedDictionary:
         for unit_class_element in unit_class_elements:
             element_name = self._get_element_tag_value(unit_class_element)
             element_units = self._get_elements_by_name('unit', unit_class_element)
+            ## NEW ##
+            if not element_units:
+                element_units = self._get_element_tag_value(unit_class_element, element_name)
+                units = element_units.split(',')
+                units_list = []
+                for unit in units:
+                    units_list.append(unit.lower())
+                self.dictionaries[element_units][element_name] = units_list
+                continue
             element_unit_names = list(map(lambda element: element.text, element_units))
             self.dictionaries[self.UNITS_ELEMENT][element_name] = element_unit_names
             for element_unit in element_units:
@@ -205,6 +226,13 @@ class HedDictionary:
             unit_class_element_name = self._get_element_tag_value(unit_class_element)
             self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = \
                 unit_class_element.attrib[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE]
+            ## NEW ##
+            default_unit = unit_class_element.get(self.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE)
+            if default_unit is None:
+                self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = \
+                        unit_class_element.attrib[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE]
+            else:
+                self.dictionaries[self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = default_unit
 
     def _populate_tag_to_attribute_dictionary(self, tag_list, tag_element_list, attribute_name):
         """Populates the dictionaries associated with default unit tags in the attribute dictionary.

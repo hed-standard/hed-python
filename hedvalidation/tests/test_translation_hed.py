@@ -42,47 +42,6 @@ class TestHed(unittest.TestCase):
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
 
-class TestHedTagGroups(TestHed):
-    def validator(self, test_strings, expected_results, expected_issues):
-        self.validator_base(test_strings, expected_results, expected_issues,
-                            lambda hed_string_delimiter: ''.join(
-                                [self.syntactic_tag_validator.run_tag_group_validators(*args) for args in
-                                 zip(hed_string_delimiter.get_tag_groups(),
-                                     hed_string_delimiter.get_tag_group_strings())]))
-
-    def test_no_more_than_two_tildes(self):
-        testStrings = {
-            'noTildeGroup': 'Event/Category/Sensory presentation,'
-                            '(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)',
-            'oneTildeGroup': 'Event/Category/Sensory presentation,'
-                             '(Item/Object/Vehicle/Car ~ Attribute/Object control/Perturb)',
-            'twoTildeGroup': 'Event/Category/Sensory presentation,'
-                             '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar,'
-                             ' Attribute/Visual/Color/Red)',
-            'invalidTildeGroup': 'Event/Category/Sensory presentation,'
-                                 '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car,'
-                                 ' Item/ID/RedCar, Attribute/Visual/Color/Red ~ Attribute/Object control/Perturb)',
-        }
-        expectedResults = {
-            'noTildeGroup': True,
-            'oneTildeGroup': True,
-            'twoTildeGroup': True,
-            'invalidTildeGroup': False
-        }
-        expectedIssues = {
-            'noTildeGroup': '',
-            'oneTildeGroup': '',
-            'twoTildeGroup': '',
-            'invalidTildeGroup': report_error_type('tilde',
-                                                   tag='(Participant/ID 1 ~ Participant/Effect/Visual '
-                                                       '~ Item/Object/Vehicle/Car,'
-                                                       ' Item/ID/RedCar,'
-                                                       ' Attribute/Visual/Color/Red '
-                                                       '~ Attribute/Object control/Perturb)')
-        }
-        self.validator(testStrings, expectedResults, expectedIssues)
-
-
 class FullHedString(TestHed):
     def validator(self, test_strings, expected_results, expected_issues):
         for test_key in test_strings:
@@ -536,3 +495,56 @@ class TopLevelTags(TestHed):
                                                                                tag_prefix='Event/Description'),
         }
         self.validator_semantic(testStrings, expectedResults, expectedIssues, True)
+
+
+class TestHedTagGroups(TestHed):
+    def validator(self, test_strings, expected_results, expected_issues):
+        self.validator_base(test_strings, expected_results, expected_issues,
+                            lambda hed_string_delimiter: ''.join(
+                                [self.syntactic_tag_validator.run_tag_group_validators(*args) for args in
+                                 zip(hed_string_delimiter.get_tag_groups(),
+                                     hed_string_delimiter.get_tag_group_strings())]))
+
+    def test_no_more_than_two_tildes(self):
+        testStrings = {
+            'noTildeGroup': 'Event/Category/Sensory presentation,'
+                            '(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)',
+            'oneTildeGroup': 'Event/Category/Sensory presentation,'
+                             '(Item/Object/Vehicle/Car ~ Attribute/Object control/Perturb)',
+            'twoTildeGroup': 'Event/Category/Sensory presentation,'
+                             '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar,'
+                             ' Attribute/Visual/Color/Red)',
+            'invalidTildeGroup': 'Event/Category/Sensory presentation,'
+                                 '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car,'
+                                 ' Item/ID/RedCar, Attribute/Visual/Color/Red ~ Attribute/Object control/Perturb)',
+        }
+        expectedResults = {
+            'noTildeGroup': True,
+            'oneTildeGroup': True,
+            'twoTildeGroup': True,
+            'invalidTildeGroup': False
+        }
+        expectedIssues = {
+            'noTildeGroup': '',
+            'oneTildeGroup': '',
+            'twoTildeGroup': '',
+            'invalidTildeGroup': report_error_type('tilde',
+                                                   tag='(Participant/ID 1 ~ Participant/Effect/Visual '
+                                                       '~ Item/Object/Vehicle/Car,'
+                                                       ' Item/ID/RedCar,'
+                                                       ' Attribute/Visual/Color/Red '
+                                                       '~ Attribute/Object control/Perturb)')
+        }
+        self.validator(testStrings, expectedResults, expectedIssues)
+
+
+class TestHedTags(TestHed):
+    def test_valid_comma_seperated_paths(self):
+        hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
+        result = True
+        issues = self.semantic_tag_validator.run_hed_string_validators(hed_string)
+        self.assertEqual(result, True)
+        self.assertCountEqual(issues, [])
+
+
+

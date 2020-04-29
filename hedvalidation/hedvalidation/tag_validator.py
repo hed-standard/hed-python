@@ -368,6 +368,8 @@ class TagValidator:
 
         """
         takes_value_tag = self.replace_tag_name_with_pound(formatted_tag)
+        if not self._hed_dictionary.has_unit_classes:
+            return False
         return self._hed_dictionary.tag_has_attribute(takes_value_tag,
                                                       TagValidator.UNIT_CLASS_ATTRIBUTE)
 
@@ -421,7 +423,7 @@ class TagValidator:
                 pass
             else:
                 validation_error = error_reporter.report_error_type('unitClass', tag=original_tag,
-                                                                    unit_class_units=','.join(tag_unit_class_units))
+                                                                    unit_class_units=','.join(sorted(tag_unit_class_units)))
                 self._increment_issue_count()
         return validation_error
 
@@ -437,11 +439,12 @@ class TagValidator:
             list of plural units
         """
         derivativeUnits = [unit]
-        if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit) is None:
+        if self._hed_dictionary.has_unit_modifiers and \
+                self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit) is None:
             derivativeUnits.append(pluralize.plural(unit))
         return derivativeUnits
 
-    def __strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
+    def _strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
         """
 
         Parameters
@@ -464,7 +467,7 @@ class TagValidator:
             found_unit = True
             stripped_value = str(unit_value)[0:-len(unit)].strip()
 
-        if found_unit:
+        if found_unit and self._hed_dictionary.has_unit_modifiers:
             modifierKey = ''
             if is_unit_symbol:
                 modifierKey = self.SI_UNIT_SYMBOL_MODIFIER_KEY
@@ -500,12 +503,13 @@ class TagValidator:
         for unit in tag_unit_class_units:
             derivative_units = self.get_valid_unit_plural(unit)
             for derivative_unit in derivative_units:
-                if self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
-                    found_unit, stripped_value = self.__strip_off_units_if_valid(original_tag_unit_value,
+                if self._hed_dictionary.has_unit_modifiers and \
+                        self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
+                    found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
                                                                                  derivative_unit,
                                                                                  True)
                 else:
-                    found_unit, stripped_value = self.__strip_off_units_if_valid(formatted_tag_unit_value,
+                    found_unit, stripped_value = self._strip_off_units_if_valid(formatted_tag_unit_value,
                                                                                  derivative_unit,
                                                                                  False)
                 if found_unit:
