@@ -29,25 +29,28 @@ class StringUtilityFunctions(TestHed):
         self.assertEqual(name2, 'Left')
         self.assertEqual(no_slash_name, 'Participant')
 
+    # not working
     def test_strip_off_units_from_value(self):
         dollars_string = '$25.99'
         volume_string = '100 m3'
         invalid_volume_string = '200 cm'
         currency_units = ['dollars', '$', 'points', 'fraction']
         volume_units = ['m3', 'cm3', 'mm3', 'km3']
-        stripped_dollars_string = self.syntactic_tag_validator.\
+        stripped_dollars_string = self.syntactic_tag_validator. \
             _strip_off_units_if_valid(dollars_string, currency_units, True)
-        stripped_volume_string = self.syntactic_tag_validator.\
+        stripped_volume_string = self.syntactic_tag_validator. \
             _strip_off_units_if_valid(volume_string, volume_units, True)
-        stripped_invalid_volume_string = self.syntactic_tag_validator.\
+        stripped_invalid_volume_string = self.syntactic_tag_validator. \
             _strip_off_units_if_valid(invalid_volume_string, volume_units, True)
         self.assertEqual(stripped_dollars_string, '25.99')
         self.assertEqual(stripped_volume_string, '100')
         self.assertEqual(invalid_volume_string, '200 cm')
 
+
 class TestSchemaUtilityFunctions(TestHed):
+    # not working
     def test_if_tag_exists(self):
-        valid_tag1 = 'attribute/direction/left'
+        valid_tag1 = 'attribute/temporal/direction/left'
         valid_tag2 = 'item/object/person'
         valid_tag3 = 'event/duration/#'
         invalid_tag1 = 'something'
@@ -62,6 +65,106 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertEqual(valid_tag1_results, True)
         self.assertEqual(valid_tag2_results, True)
         self.assertEqual(valid_tag3_results, True)
-        self.assertEqual(valid_tag1_results, False)
-        self.assertEqual(valid_tag3_results, False)
-        self.assertEqual(valid_tag3_results, False)
+        self.assertEqual(invalid_tag1_results, False)
+        self.assertEqual(invalid_tag2_results, False)
+        self.assertEqual(invalid_tag3_results, False)
+
+    # not working
+    def test_correctly_determine_tag_takes_value(self):
+        value_tag1 = 'attribute/direction/left/35 px'
+        value_tag2 = 'item/id/35'
+        value_tag3 = 'event/duration/#'
+        no_value_tag1 = 'something'
+        no_value_tag2 = 'attribute/color/black'
+        no_value_tag3 = 'participant/#'
+        value_tag1_result = self.semantic_tag_validator.tag_takes_value(value_tag1)
+        value_tag2_result = self.semantic_tag_validator.tag_takes_value(value_tag2)
+        value_tag3_result = self.semantic_tag_validator.tag_takes_value(value_tag3)
+        no_value_tag1_result = self.semantic_tag_validator.tag_takes_value(no_value_tag1)
+        no_value_tag2_result = self.semantic_tag_validator.tag_takes_value(no_value_tag2)
+        no_value_tag3_result = self.semantic_tag_validator.tag_takes_value(no_value_tag3)
+        self.assertEqual(value_tag1_result, True)
+        self.assertEqual(value_tag2_result, True)
+        self.assertEqual(value_tag3_result, True)
+        self.assertEqual(no_value_tag1_result, False)
+        self.assertEqual(no_value_tag2_result, False)
+        self.assertEqual(no_value_tag3_result, False)
+
+    def test_should_determine_default_unit(self):
+        unit_class_tag1 = 'attribute/blink/duration/35 ms'
+        unit_class_tag2 = 'participant/effect/cognitive/reward/11 dollars'
+        no_unit_class_tag = 'attribute/color/red/0.5'
+        no_value_tag = 'attribute/color/black'
+        unit_class_tag1_result = self.semantic_tag_validator.get_unit_class_default_unit(unit_class_tag1)
+        unit_class_tag2_result = self.semantic_tag_validator.get_unit_class_default_unit(unit_class_tag2)
+        no_unit_class_tag_result = self.semantic_tag_validator.get_unit_class_default_unit(no_unit_class_tag)
+        no_value_tag_result = self.semantic_tag_validator.get_unit_class_default_unit(no_value_tag)
+        self.assertEqual(unit_class_tag1_result, 's')
+        self.assertEqual(unit_class_tag2_result, '$')
+        self.assertEqual(no_unit_class_tag_result, '')
+        self.assertEqual(no_value_tag_result, '')
+
+        # does not work
+    def test_correctly_determine_tag_unit_classes(self):
+        unit_class_tag1 = 'attribute/direction/left/35 px'
+        unit_class_tag2 = 'participant/effect/cognitive/reward/$10.55'
+        unit_class_tag3 = 'event/duration/#'
+        no_unit_class_tag = 'attribute/color/red/0.5'
+        unit_class_tag1_result = self.semantic_tag_validator.get_tag_unit_classes(unit_class_tag1)
+        unit_class_tag2_result = self.semantic_tag_validator.get_tag_unit_classes(unit_class_tag2)
+        unit_class_tag3_result = self.semantic_tag_validator.get_tag_unit_classes(unit_class_tag3)
+        no_unit_class_tag_result = self.semantic_tag_validator.get_tag_unit_classes(no_unit_class_tag)
+        self.assertEqual(unit_class_tag1_result, ['angle', 'physicalLength', 'pixels'])
+        self.assertEqual(unit_class_tag2_result, ['currency'])
+        self.assertEqual(unit_class_tag3_result, ['time'])
+        self.assertEqual(no_unit_class_tag_result, [])
+
+        # does not work
+    def test_determine_tags_legal_units(self):
+        unit_class_tag1 = 'attribute/direction/left/35 px'
+        unit_class_tag2 = 'participant/effect/cognitive/reward/$10.55'
+        no_unit_class_tag = 'attribute/color/red/0.5'
+        unit_class_tag1_result = self.semantic_tag_validator.get_tag_unit_class_units(unit_class_tag1)
+        unit_class_tag2_result = self.semantic_tag_validator.get_tag_unit_class_units(unit_class_tag2)
+        no_unit_class_tag_result = self.semantic_tag_validator.get_tag_unit_class_units(no_unit_class_tag)
+        self.assertEqual(unit_class_tag1_result, [
+            'degrees',
+            'degree',
+            'radian',
+            'radians',
+            'm',
+            'cm',
+            'km',
+            'mm',
+            'feet',
+            'foot',
+            'meter',
+            'meters',
+            'mile',
+            'miles',
+            'pixels',
+            'px',
+            'pixel',
+        ])
+        self.assertEqual(unit_class_tag2_result, [
+            'dollars',
+            '$',
+            'points',
+            'fraction',
+        ])
+        self.assertEqual(no_unit_class_tag_result, [])
+
+        # does not work
+    def test_determine_allows_extensions(self):
+        extension_tag1 = 'item/object/vehicle/boat'
+        extension_tag2 = 'attribute/color/red/0.5'
+        no_extension_tag1 = 'event/duration/22 s'
+        no_extension_tag2 = 'participant/id/45'
+        extension_tag1_result = self.semantic_tag_validator.is_extension_allowed_tag(extension_tag1)
+        extension_tag2_result = self.semantic_tag_validator.is_extension_allowed_tag(extension_tag2)
+        no_extension_tag1_result = self.semantic_tag_validator.is_extension_allowed_tag(no_extension_tag1)
+        no_extension_tag2_result = self.semantic_tag_validator.is_extension_allowed_tag(no_extension_tag2)
+        self.assertEqual(extension_tag1_result, True)
+        self.assertEqual(extension_tag2_result, True)
+        self.assertEqual(no_extension_tag1_result, False)
+        self.assertEqual(no_extension_tag2_result, False)
