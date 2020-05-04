@@ -89,14 +89,14 @@ class Test(unittest.TestCase):
         cls.invalid_tag_with_bad_characters = 'event/description/this is a hed string [badbrackets]'
 
     def test_check_if_tag_is_valid(self):
-        validation_error = self.tag_validator.check_if_tag_is_valid(self.invalid_original_tag,
-                                                                    self.invalid_formatted_tag)
+        validation_error = self.tag_validator.tag_exist_in_schema(self.invalid_original_tag,
+                                                                  self.invalid_formatted_tag)
         self.assertIsInstance(validation_error, str)
         self.assertTrue(validation_error)
-        validation_error = self.tag_validator.check_if_tag_is_valid(self.valid_original_tag, self.valid_formatted_tag)
+        validation_error = self.tag_validator.tag_exist_in_schema(self.valid_original_tag, self.valid_formatted_tag)
         self.assertIsInstance(validation_error, str)
         self.assertFalse(validation_error)
-        validation_error = self.tag_validator.check_if_tag_is_valid(
+        validation_error = self.tag_validator.tag_exist_in_schema(
             self.invalid_original_tag, self.invalid_formatted_tag, previous_original_tag=self.valid_takes_value_tag,
             previous_formatted_tag=self.valid_takes_value_tag)
         self.assertIsInstance(validation_error, str)
@@ -126,6 +126,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_error, str)
         self.assertTrue(validation_error)
 
+    @unittest.skip("test_includes_all_required_tags() does a better job of testing this")
     def test_check_for_required_tags(self):
         validation_warning = self.tag_validator.check_for_required_tags(self.valid_formatted_required_tag_list)
         self.assertIsInstance(validation_warning, str)
@@ -306,6 +307,7 @@ class Test(unittest.TestCase):
         is_a_delimiter = TagValidator.character_is_delimiter(self.at_sign)
         self.assertFalse(is_a_delimiter)
 
+    @unittest.skip("better version of test located in test_translation.py")
     def test_tag_is_valid(self):
         tag_is_valid = self.tag_validator.tag_exists_in_schema(self.valid_formatted_tag_without_attribute)
         self.assertTrue(tag_is_valid)

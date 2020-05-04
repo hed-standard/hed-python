@@ -149,8 +149,8 @@ class TagValidator:
          """
         validation_issues = ''
         if self._run_semantic_validation:
-            validation_issues += self.check_if_tag_is_valid(original_tag, formatted_tag, previous_original_tag,
-                                                            previous_formatted_tag)
+            validation_issues += self.tag_exist_in_schema(original_tag, formatted_tag, previous_original_tag,
+                                                          previous_formatted_tag)
             validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag, formatted_tag)
             validation_issues += self.check_if_tag_requires_child(original_tag, formatted_tag)
             if self._check_for_warnings:
@@ -238,7 +238,7 @@ class TagValidator:
             validation_issues += self.check_for_required_tags(formatted_top_level_tags)
         return validation_issues
 
-    def check_if_tag_is_valid(self, original_tag, formatted_tag, previous_original_tag='', previous_formatted_tag=''):
+    def tag_exist_in_schema(self, original_tag, formatted_tag, previous_original_tag='', previous_formatted_tag=''):
         """Reports a validation error if the tag provided is not a valid tag or doesn't take a value.
 
         Parameters

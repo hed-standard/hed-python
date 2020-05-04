@@ -40,14 +40,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(tag_name, str)
         self.assertTrue(tag_name)
 
-    def test_get_parent_tag_name(self):
-        root_element = self.hed_dictionary.get_root_element()
-        nodes = root_element.xpath('.//node')
-        random_node = random.randint(2, len(nodes) - 1)
-        tag_element = nodes[random_node]
-        parent_tag_name = self.hed_dictionary._get_parent_tag_name(tag_element)
-        self.assertIsInstance(parent_tag_name, str)
-
     def test_get_tag_path_from_tag_element(self):
         root_element = self.hed_dictionary.get_root_element()
         tag_elements = root_element.xpath('.//node')
@@ -72,7 +64,7 @@ class Test(unittest.TestCase):
             self.assertIsInstance(tags, list)
 
     def test_string_list_2_lowercase_dictionary(self):
-        lowercase_dictionary = self.hed_dictionary._string_list_2_lowercase_dictionary(self.string_list)
+        lowercase_dictionary = self.hed_dictionary._string_list_to_lowercase_dictionary(self.string_list)
         self.assertIsInstance(lowercase_dictionary, dict)
         self.assertTrue(lowercase_dictionary)
 

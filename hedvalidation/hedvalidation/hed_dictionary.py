@@ -47,7 +47,6 @@ class HedDictionary:
         self.root_element = self._find_root_element(hed_xml_file_path)
         self._populate_dictionaries()
 
-
     def get_root_element(self):
         """Gets the root element of the HED XML file.
 
@@ -114,19 +113,18 @@ class HedDictionary:
             tags, tag_elements = self.get_tags_by_attribute(TAG_DICTIONARY_KEY)
             if HedDictionary.EXTENSION_ALLOWED_ATTRIBUTE == TAG_DICTIONARY_KEY:
                 child_tags = self._get_all_child_tags(tag_elements)
-                child_tags_dictionary = self._string_list_2_lowercase_dictionary(child_tags)
-                tag_dictionary = self._string_list_2_lowercase_dictionary(tags)
+                child_tags_dictionary = self._string_list_to_lowercase_dictionary(child_tags)
+                tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
                 tag_dictionary.update(child_tags_dictionary)
             elif HedDictionary.DEFAULT_UNIT_ATTRIBUTE == TAG_DICTIONARY_KEY or \
-                 HedDictionary.TAG_UNIT_CLASS_ATTRIBUTE == TAG_DICTIONARY_KEY:
+                    HedDictionary.TAG_UNIT_CLASS_ATTRIBUTE == TAG_DICTIONARY_KEY:
                 tag_dictionary = self._populate_tag_to_attribute_dictionary(tags, tag_elements, TAG_DICTIONARY_KEY)
             elif HedDictionary.TAGS_DICTIONARY_KEY == TAG_DICTIONARY_KEY:
                 tags = self.get_all_tags()[0]
-                tag_dictionary = self._string_list_2_lowercase_dictionary(tags)
+                tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
             else:
-                tag_dictionary = self._string_list_2_lowercase_dictionary(tags)
+                tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
             self.dictionaries[TAG_DICTIONARY_KEY] = tag_dictionary
-
 
     def _populate_unit_class_dictionaries(self):
         """Populates a dictionary of dictionaries associated with all of the unit classes, unit class units, and unit
@@ -230,7 +228,7 @@ class HedDictionary:
             default_unit = unit_class_element.get(self.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE)
             if default_unit is None:
                 self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = \
-                        unit_class_element.attrib[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE]
+                    unit_class_element.attrib[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE]
             else:
                 self.dictionaries[self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = default_unit
 
@@ -257,7 +255,7 @@ class HedDictionary:
             dictionary[tag.lower()] = tag_element_list[index].attrib[attribute_name]
         return dictionary
 
-    def _string_list_2_lowercase_dictionary(self, string_list):
+    def _string_list_to_lowercase_dictionary(self, string_list):
         """Converts a string list into a dictionary. The keys in the dictionary will be the lowercase values of the
            strings in the list.
 
@@ -395,7 +393,6 @@ class HedDictionary:
             tags.append(tag)
         return tags, tag_elements
 
-
     def get_all_tags(self, tag_element_name='node'):
         """Gets the tags that have a specific attribute.
 
@@ -504,7 +501,7 @@ class HedDictionary:
 
         """
         if self.dictionaries[tag_attribute].get(tag):
-                return True
+            return True
         return False
 
     @staticmethod
