@@ -1,4 +1,4 @@
-'''
+"""
 This module contains the HedInputReader class which is used to validate the tags in a HED string or a file. The file
 types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after creating a HedInputReader class call
 the get_validation_issues() function.
@@ -7,37 +7,37 @@ Created on Oct 2, 2017
 
 @author: Jeremy Cockfield
 
-'''
+"""
 
-import os;
-import re;
-import xlrd;
-from hedvalidation import error_reporter;
+import os
+import re
+import xlrd
+from hedvalidation import error_reporter
 from hedvalidation.hed_dictionary import HedDictionary
-from hedvalidation.hed_string_delimiter import HedStringDelimiter;
-from hedvalidation.tag_validator import TagValidator;
-from distutils.version import StrictVersion;
+from hedvalidation.hed_string_delimiter import HedStringDelimiter
+from hedvalidation.tag_validator import TagValidator
+from distutils.version import StrictVersion
 
 
 class HedInputReader:
-    TSV_EXTENSION = ['tsv', 'txt'];
-    EXCEL_EXTENSION = ['xls', 'xlsx'];
-    FILE_EXTENSION = ['tsv', 'txt', 'xls', 'xlsx'];
-    TEXT_EXTENSION = ['tsv', 'txt'];
-    STRING_INPUT = 'string';
-    FILE_INPUT = 'file';
-    TAB_DELIMITER = '\t';
-    COMMA_DELIMITER = ',';
-    HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../hed-specification/hedxml/');
-    DEFAULT_HED_XML_FILE = os.path.join(HED_DIRECTORY, 'HEDLatest.xml');
+    TSV_EXTENSION = ['tsv', 'txt']
+    EXCEL_EXTENSION = ['xls', 'xlsx']
+    FILE_EXTENSION = ['tsv', 'txt', 'xls', 'xlsx']
+    TEXT_EXTENSION = ['tsv', 'txt']
+    STRING_INPUT = 'string'
+    FILE_INPUT = 'file'
+    TAB_DELIMITER = '\t'
+    COMMA_DELIMITER = ','
+    HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/')
+    DEFAULT_HED_XML_FILE = os.path.join(HED_DIRECTORY, 'HEDLatest.xml')
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
-                                   'Label': 'Event/Label/', 'Long': 'Event/Long name/'};
-    HED_VERSION_EXPRESSION = r'HED(\d+.\d+.\d+)';
-    HED_XML_PREFIX = 'HED';
-    HED_XML_EXTENSION = '.xml';
+                                   'Label': 'Event/Label/', 'Long': 'Event/Long name/'}
+    HED_VERSION_EXPRESSION = r'HED(\d+.\d+.\d+)'
+    HED_XML_PREFIX = 'HED'
+    HED_XML_EXTENSION = '.xml'
 
     def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name='', hed_xml_file=''):
+                 required_tag_columns={}, worksheet_name='', hed_xml_file='', run_semantic_validation=True):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -67,14 +67,22 @@ class HedInputReader:
             A HedInputReader object.
 
         """
-        self._hed_input = hed_input;
-        self._required_tag_columns = HedInputReader.subtract_1_from_dictionary_keys(required_tag_columns);
-        self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns);
-        self._has_column_names = has_column_names;
-        self._worksheet_name = worksheet_name;
-        self._hed_dictionary = self._get_hed_dictionary(hed_xml_file);
-        self._tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=check_for_warnings);
-        self._validation_issues = self._validate_hed_input();
+        self._hed_input = hed_input
+        self._required_tag_columns = HedInputReader.subtract_1_from_dictionary_keys(required_tag_columns)
+        self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns)
+        self._has_column_names = has_column_names
+        self._worksheet_name = worksheet_name
+        if run_semantic_validation:
+            self._hed_dictionary = self._get_hed_dictionary(hed_xml_file)
+            self._tag_validator = TagValidator(hed_dictionary=self._hed_dictionary,
+                                               check_for_warnings=check_for_warnings,
+                                               run_semantic_validation=True)
+        else:
+            self._tag_validator = TagValidator(check_for_warnings=check_for_warnings,
+                                               run_semantic_validation=False)
+
+        self._validation_issues = self._validate_hed_input()
+        self._run_semantic_validation = run_semantic_validation
 
     def get_tag_validator(self):
         """Gets a TagValidator object.
@@ -88,7 +96,7 @@ class HedInputReader:
             A TagValidator object.
 
         """
-        return self._tag_validator;
+        return self._tag_validator
 
     def _get_hed_dictionary(self, hed_xml_file):
         """Gets a HEDDictionary object based on the hed xml file specified. If no HED file is specified then the latest
@@ -105,8 +113,8 @@ class HedInputReader:
 
         """
         if not hed_xml_file:
-            hed_xml_file = HedInputReader.get_latest_hed_version_path();
-        return HedDictionary(hed_xml_file);
+            hed_xml_file = HedInputReader.get_latest_hed_version_path()
+        return HedDictionary(hed_xml_file)
 
     def _convert_tag_columns_to_processing_format(self, tag_columns):
         """Converts the tag columns list to a list that allows it to be internally processed. 1 is subtracted from
@@ -122,10 +130,10 @@ class HedInputReader:
             A list containing the modified list of tag columns that's used for processing.
 
         """
-        tag_columns = HedInputReader.subtract_1_from_list_elements(tag_columns);
+        tag_columns = HedInputReader.subtract_1_from_list_elements(tag_columns)
         tag_columns = HedInputReader.add_required_tag_columns_to_tag_columns(tag_columns,
-                                                                             self._required_tag_columns);
-        return tag_columns;
+                                                                             self._required_tag_columns)
+        return tag_columns
 
     def _validate_hed_input(self):
         """Validates the HED tags in a string or a file.
@@ -136,13 +144,13 @@ class HedInputReader:
          -------
          string
              The issues that were found.
-
         """
+        validation_issues = ''
         if isinstance(self._hed_input, list):
-            validation_issues = self._validate_hed_strings(self._hed_input);
+            validation_issues = self._validate_hed_strings(self._hed_input)
         elif HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
-            validation_issues = self._validate_hed_tags_in_file();
-        return validation_issues;
+            validation_issues = self._validate_hed_tags_in_file()
+        return validation_issues
 
     def _validate_hed_tags_in_file(self):
         """Validates the HED tags in a file.
@@ -155,12 +163,12 @@ class HedInputReader:
              The issues that were found.
 
          """
-        file_extension = HedInputReader.get_file_extension(self._hed_input);
+        file_extension = HedInputReader.get_file_extension(self._hed_input)
         if HedInputReader.file_is_a_text_file(file_extension):
-            validation_issues = self._validate_hed_tags_in_text_file(HedInputReader.TAB_DELIMITER);
+            validation_issues = self._validate_hed_tags_in_text_file(HedInputReader.TAB_DELIMITER)
         else:
-            validation_issues = self._validate_hed_tags_in_excel_worksheet();
-        return validation_issues;
+            validation_issues = self._validate_hed_tags_in_excel_worksheet()
+        return validation_issues
 
     def get_validation_issues(self):
         """Gets the issues.
@@ -173,7 +181,7 @@ class HedInputReader:
              The issues that were found.
 
          """
-        return self._validation_issues;
+        return self._validation_issues
 
     def _validate_hed_tags_in_text_file(self, column_delimiter):
         """Validates the HED tags in a text file.
@@ -186,17 +194,17 @@ class HedInputReader:
              The issues that were found in the text file.
 
          """
-        validation_issues = '';
+        validation_issues = ''
         with open(self._hed_input, 'r', encoding='utf-8') as opened_text_file:
             for row_number, text_file_row in enumerate(opened_text_file):
                 if HedInputReader.row_contains_headers(self._has_column_names, row_number):
-                    continue;
+                    continue
                 row_hed_string, column_to_hed_tags_dictionary = self.get_hed_string_from_text_file_row(
-                    text_file_row, column_delimiter);
+                    text_file_row, column_delimiter)
                 validation_issues = self._append_validation_issues_if_found(validation_issues, row_number,
                                                                             row_hed_string,
-                                                                            column_to_hed_tags_dictionary);
-        return validation_issues;
+                                                                            column_to_hed_tags_dictionary)
+        return validation_issues
 
     def _validate_hed_tags_in_excel_worksheet(self):
         """Validates the HED tags in a excel worksheet.
@@ -209,17 +217,17 @@ class HedInputReader:
              The issues that were found in a excel worksheet.
 
          """
-        validation_issues = '';
-        opened_worksheet = HedInputReader.open_workbook_worksheet(self._hed_input, worksheet_name=self._worksheet_name);
-        number_of_rows = opened_worksheet.nrows;
+        validation_issues = ''
+        opened_worksheet = HedInputReader.open_workbook_worksheet(self._hed_input, worksheet_name=self._worksheet_name)
+        number_of_rows = opened_worksheet.nrows
         for row_number in range(number_of_rows):
-            worksheet_row = opened_worksheet.row(row_number);
+            worksheet_row = opened_worksheet.row(row_number)
             if HedInputReader.row_contains_headers(self._has_column_names, row_number):
-                continue;
-            row_hed_string, column_to_hed_tags_dictionary = self.get_hed_tags_from_worksheet_row(worksheet_row);
+                continue
+            row_hed_string, column_to_hed_tags_dictionary = self.get_hed_tags_from_worksheet_row(worksheet_row)
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
-                                                                        column_to_hed_tags_dictionary);
-        return validation_issues;
+                                                                        column_to_hed_tags_dictionary)
+        return validation_issues
 
     def _append_validation_issues_if_found(self, validation_issues, row_number, row_hed_string,
                                            column_to_hed_tags_dictionary):
@@ -242,10 +250,10 @@ class HedInputReader:
 
          """
         validation_issues = self._append_row_validation_issues_if_found(validation_issues, row_number,
-                                                                        row_hed_string);
+                                                                        row_hed_string)
         validation_issues = self._append_column_validation_issues_if_found(validation_issues, row_number,
-                                                                           column_to_hed_tags_dictionary);
-        return validation_issues;
+                                                                           column_to_hed_tags_dictionary)
+        return validation_issues
 
     def _append_row_validation_issues_if_found(self, validation_issues, row_number, row_hed_string):
         """Appends the issues associated with a particular row in a spreadsheet.
@@ -265,12 +273,12 @@ class HedInputReader:
 
          """
         if row_hed_string:
-            hed_string_delimiter = HedStringDelimiter(row_hed_string);
-            row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter);
-            row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
+            hed_string_delimiter = HedStringDelimiter(row_hed_string)
+            row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter)
+            row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
             if row_validation_issues:
-                validation_issues += HedInputReader.generate_row_issue_message(row_number) + row_validation_issues;
-        return validation_issues;
+                validation_issues += HedInputReader.generate_row_issue_message(row_number) + row_validation_issues
+        return validation_issues
 
     def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
         """Appends the issues associated with a particular row column in a spreadsheet.
@@ -291,12 +299,12 @@ class HedInputReader:
          """
         if column_to_hed_tags_dictionary:
             for column_number in column_to_hed_tags_dictionary.keys():
-                column_hed_string = column_to_hed_tags_dictionary[column_number];
-                column_validation_issues = self.validate_column_hed_string(column_hed_string);
+                column_hed_string = column_to_hed_tags_dictionary[column_number]
+                column_validation_issues = self.validate_column_hed_string(column_hed_string)
                 if column_validation_issues:
                     validation_issues += HedInputReader.generate_column_issue_message(row_number, column_number) + \
-                                         column_validation_issues;
-        return validation_issues;
+                                         column_validation_issues
+        return validation_issues
 
     def validate_column_hed_string(self, column_hed_string):
         """Appends the issues associated with a particular row in a spreadsheet.
@@ -311,13 +319,13 @@ class HedInputReader:
              The issues associated with a particular row column.
 
          """
-        validation_issues = '';
-        validation_issues += self._tag_validator.run_hed_string_validators(column_hed_string);
+        validation_issues = ''
+        validation_issues += self._tag_validator.run_hed_string_validators(column_hed_string)
         if not validation_issues:
-            hed_string_delimiter = HedStringDelimiter(column_hed_string);
-            validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
-            validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
-        return validation_issues;
+            hed_string_delimiter = HedStringDelimiter(column_hed_string)
+            validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter)
+            validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter)
+        return validation_issues
 
     def _validate_hed_strings(self, hed_strings):
         """Validates the tags in an array of HED strings
@@ -361,16 +369,16 @@ class HedInputReader:
              The issues associated with each level in the HED string.
 
          """
-        validation_issues = '';
-        tag_groups = hed_string_delimiter.get_tag_groups();
-        formatted_tag_groups = hed_string_delimiter.get_formatted_tag_groups();
-        original_and_formatted_tag_groups = zip(tag_groups, formatted_tag_groups);
+        validation_issues = ''
+        tag_groups = hed_string_delimiter.get_tag_groups()
+        formatted_tag_groups = hed_string_delimiter.get_formatted_tag_groups()
+        original_and_formatted_tag_groups = zip(tag_groups, formatted_tag_groups)
         for original_tag_group, formatted_tag_group in original_and_formatted_tag_groups:
-            validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group, formatted_tag_group);
-        top_level_tags = hed_string_delimiter.get_top_level_tags();
-        formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags();
-        validation_issues += self._tag_validator.run_tag_level_validators(top_level_tags, formatted_top_level_tags);
-        return validation_issues;
+            validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group, formatted_tag_group)
+        top_level_tags = hed_string_delimiter.get_top_level_tags()
+        formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags()
+        validation_issues += self._tag_validator.run_tag_level_validators(top_level_tags, formatted_top_level_tags)
+        return validation_issues
 
     def _validate_top_level_in_hed_string(self, hed_string_delimiter):
         """Validates the top-level tags in a HED string.
@@ -385,10 +393,10 @@ class HedInputReader:
              The issues associated with the top-level tags in the HED string.
 
          """
-        validation_issues = '';
-        formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags();
-        validation_issues += self._tag_validator.run_top_level_validators(formatted_top_level_tags);
-        return validation_issues;
+        validation_issues = ''
+        formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags()
+        validation_issues += self._tag_validator.run_top_level_validators(formatted_top_level_tags)
+        return validation_issues
 
     def _validate_groups_in_hed_string(self, hed_string_delimiter):
         """Validates the groups in a HED string.
@@ -403,13 +411,13 @@ class HedInputReader:
              The issues associated with the groups in the HED string.
 
          """
-        validation_issues = '';
-        tag_groups = hed_string_delimiter.get_tag_groups();
-        formatted_tag_groups = hed_string_delimiter.get_formatted_tag_groups();
-        original_and_formatted_tag_groups = zip(tag_groups, formatted_tag_groups);
-        for original_tag_group, formatted_tag_group in original_and_formatted_tag_groups:
-            validation_issues += self._tag_validator.run_tag_group_validators(original_tag_group);
-        return validation_issues;
+        validation_issues = ''
+        tag_groups = hed_string_delimiter.get_tag_groups()
+        tag_group_strings = hed_string_delimiter.get_tag_group_strings()
+        tag_groups_with_strings = zip(tag_groups, tag_group_strings)
+        for tag_group, tag_group_string in tag_groups_with_strings:
+            validation_issues += self._tag_validator.run_tag_group_validators(tag_group, tag_group_string)
+        return validation_issues
 
     def _validate_individual_tags_in_hed_string(self, hed_string_delimiter):
         """Validates the individual tags in a HED string.
@@ -424,18 +432,18 @@ class HedInputReader:
              The issues associated with the individual tags in the HED string.
 
          """
-        validation_issues = '';
-        tag_set = hed_string_delimiter.get_tags();
-        formatted_tag_set = hed_string_delimiter.get_formatted_tags();
-        original_and_formatted_tags = list(zip(tag_set, formatted_tag_set));
+        validation_issues = ''
+        tag_set = hed_string_delimiter.get_tags()
+        formatted_tag_set = hed_string_delimiter.get_formatted_tags()
+        original_and_formatted_tags = list(zip(tag_set, formatted_tag_set))
         for index, (original_tag, formatted_tag) in enumerate(original_and_formatted_tags):
             previous_original_tag, previous_formatted_tag = HedInputReader.get_previous_original_and_formatted_tag(
-                original_and_formatted_tags, index);
+                original_and_formatted_tags, index)
             validation_issues += \
                 self._tag_validator.run_individual_tag_validators(original_tag, formatted_tag,
                                                                   previous_original_tag=previous_original_tag,
-                                                                  previous_formatted_tag=previous_formatted_tag);
-        return validation_issues;
+                                                                  previous_formatted_tag=previous_formatted_tag)
+        return validation_issues
 
     @staticmethod
     def get_previous_original_and_formatted_tag(original_and_formatted_tags, loop_index):
@@ -453,12 +461,12 @@ class HedInputReader:
              A tuple containing the previous original and formatted tag.
 
          """
-        previous_original_tag = '';
-        previous_formatted_tag = '';
+        previous_original_tag = ''
+        previous_formatted_tag = ''
         if loop_index > 0:
-            previous_original_tag = original_and_formatted_tags[loop_index - 1][0];
-            previous_formatted_tag = original_and_formatted_tags[loop_index - 1][1];
-        return previous_original_tag, previous_formatted_tag;
+            previous_original_tag = original_and_formatted_tags[loop_index - 1][0]
+            previous_formatted_tag = original_and_formatted_tags[loop_index - 1][1]
+        return previous_original_tag, previous_formatted_tag
 
     @staticmethod
     def add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns):
@@ -476,7 +484,7 @@ class HedInputReader:
              A list containing the combined required tag columns and the tag columns.
 
          """
-        return tag_columns + list(set(required_tag_columns.keys()) - set(tag_columns));
+        return tag_columns + list(set(required_tag_columns.keys()) - set(tag_columns))
 
     @staticmethod
     def row_contains_headers(has_headers, row_number):
@@ -511,8 +519,8 @@ class HedInputReader:
 
          """
         if has_headers:
-            row_number += 1;
-        return error_reporter.report_error_type('row', error_row=row_number);
+            row_number += 1
+        return error_reporter.report_error_type('row', error_row=row_number)
 
     @staticmethod
     def generate_column_issue_message(row_number, column_number, has_headers=True):
@@ -531,9 +539,9 @@ class HedInputReader:
 
          """
         if has_headers:
-            row_number += 1;
-        column_number += 1;
-        return error_reporter.report_error_type('column', error_row=row_number, error_column=column_number);
+            row_number += 1
+        column_number += 1
+        return error_reporter.report_error_type('column', error_row=row_number, error_column=column_number)
 
     @staticmethod
     def file_is_a_text_file(file_extension):
@@ -549,7 +557,7 @@ class HedInputReader:
              True if the file is a text file. False, if otherwise.
 
          """
-        return file_extension in HedInputReader.TEXT_EXTENSION;
+        return file_extension in HedInputReader.TEXT_EXTENSION
 
     @staticmethod
     def hed_input_has_valid_file_extension(hed_input):
@@ -563,9 +571,9 @@ class HedInputReader:
             True if the hed input has a valid file extension. False, if otherwise.
 
         """
-        hed_input_has_extension = HedInputReader.file_path_has_extension(hed_input);
-        hed_input_file_extension = HedInputReader.get_file_extension(hed_input);
-        return hed_input_has_extension and hed_input_file_extension in HedInputReader.FILE_EXTENSION;
+        hed_input_has_extension = HedInputReader.file_path_has_extension(hed_input)
+        hed_input_file_extension = HedInputReader.get_file_extension(hed_input)
+        return hed_input_has_extension and hed_input_file_extension in HedInputReader.FILE_EXTENSION
 
     @staticmethod
     def open_workbook_worksheet(workbook_path, worksheet_name=''):
@@ -584,10 +592,10 @@ class HedInputReader:
             A Sheet object representing an Excel workbook worksheet.
 
         """
-        workbook = xlrd.open_workbook(workbook_path);
+        workbook = xlrd.open_workbook(workbook_path)
         if not worksheet_name:
-            return workbook.sheet_by_index(0);
-        return workbook.sheet_by_name(worksheet_name);
+            return workbook.sheet_by_index(0)
+        return workbook.sheet_by_name(worksheet_name)
 
     def get_hed_string_from_text_file_row(self, text_file_row, column_delimiter):
         """Reads in the current row of HED tags from the text file. The hed tag columns will be concatenated to form a
@@ -605,11 +613,11 @@ class HedInputReader:
             A HED string containing the concatenated HED tag columns.
 
         """
-        text_file_row = [x.strip() for x in text_file_row.split(column_delimiter)];
-        row_column_count = len(text_file_row);
+        text_file_row = [x.strip() for x in text_file_row.split(column_delimiter)]
+        row_column_count = len(text_file_row)
         self._tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
-                                                                                            self._tag_columns);
-        return self.get_row_hed_tags(text_file_row, is_worksheet=False);
+                                                                                            self._tag_columns)
+        return self.get_row_hed_tags(text_file_row, is_worksheet=False)
 
     def get_hed_tags_from_worksheet_row(self, worksheet_row):
         """Reads in the current row of HED tags from the Excel file. The hed tag columns will be concatenated to form a
@@ -626,10 +634,10 @@ class HedInputReader:
             associates columns with HED tags.
 
         """
-        row_column_count = len(worksheet_row);
+        row_column_count = len(worksheet_row)
         self._tag_columns = HedInputReader.remove_tag_columns_greater_than_row_column_count(row_column_count,
-                                                                                            self._tag_columns);
-        return self.get_row_hed_tags(worksheet_row);
+                                                                                            self._tag_columns)
+        return self.get_row_hed_tags(worksheet_row)
 
     def get_row_hed_tags(self, spreadsheet_row, is_worksheet=True):
         """Reads in the current row of HED tags from a spreadsheet file. The hed tag columns will be concatenated to
@@ -648,20 +656,20 @@ class HedInputReader:
             associates columns with HED tags.
 
         """
-        column_to_hed_tags_dictionary = {};
+        column_to_hed_tags_dictionary = {}
         for hed_tag_column in self._tag_columns:
             if is_worksheet:
-                column_hed_tags = spreadsheet_row[hed_tag_column].value;
+                column_hed_tags = spreadsheet_row[hed_tag_column].value
             else:
-                column_hed_tags = spreadsheet_row[hed_tag_column];
+                column_hed_tags = spreadsheet_row[hed_tag_column]
             if not column_hed_tags:
-                continue;
+                continue
             elif hed_tag_column in self._required_tag_columns:
                 column_hed_tags = self.prepend_prefix_to_required_tag_column_if_needed(
-                    column_hed_tags, self._required_tag_columns[hed_tag_column]);
-            column_to_hed_tags_dictionary[hed_tag_column] = column_hed_tags;
-        hed_string = ','.join(column_to_hed_tags_dictionary.values());
-        return hed_string, column_to_hed_tags_dictionary;
+                    column_hed_tags, self._required_tag_columns[hed_tag_column])
+            column_to_hed_tags_dictionary[hed_tag_column] = column_hed_tags
+        hed_string = ','.join(column_to_hed_tags_dictionary.values())
+        return hed_string, column_to_hed_tags_dictionary
 
     @staticmethod
     def remove_tag_columns_greater_than_row_column_count(row_column_count, hed_tag_columns):
@@ -679,7 +687,7 @@ class HedInputReader:
             A list that only contains the HED tag columns that are less than the row column count.
 
         """
-        return sorted(filter(lambda x: x < row_column_count, hed_tag_columns));
+        return sorted(filter(lambda x: x < row_column_count, hed_tag_columns))
 
     def prepend_prefix_to_required_tag_column_if_needed(self, required_tag_column_tags, required_tag_prefix_key):
         """Prepends the tag paths to the required tag column tags that need them.
@@ -699,16 +707,16 @@ class HedInputReader:
             needed.
 
         """
-        required_tag_prefix = HedInputReader.REQUIRED_TAG_COLUMN_TO_PATH[required_tag_prefix_key];
+        required_tag_prefix = HedInputReader.REQUIRED_TAG_COLUMN_TO_PATH[required_tag_prefix_key]
         if not self._tag_validator.tag_has_unique_prefix(required_tag_prefix):
-            required_tags_with_prefix = [];
-            required_tags = required_tag_column_tags.split(',');
-            required_tags = [x.strip() for x in required_tags];
+            required_tags_with_prefix = []
+            required_tags = required_tag_column_tags.split(',')
+            required_tags = [x.strip() for x in required_tags]
             for required_tag in required_tags:
                 if required_tag and not required_tag.lower().startswith(required_tag_prefix.lower()):
-                    required_tag = required_tag_prefix + required_tag;
-                required_tags_with_prefix.append(required_tag);
-            return ','.join(required_tags_with_prefix);
+                    required_tag = required_tag_prefix + required_tag
+                required_tags_with_prefix.append(required_tag)
+            return ','.join(required_tags_with_prefix)
 			
         if required_tag_prefix and not required_tag_column_tags.lower().startswith(required_tag_prefix.lower()):
             required_tag_column_tags = required_tag_prefix + required_tag_column_tags
@@ -729,7 +737,7 @@ class HedInputReader:
             A list of containing each element subtracted by 1.
 
         """
-        return [x - 1 for x in integer_list];
+        return [x - 1 for x in integer_list]
 
     @staticmethod
     def subtract_1_from_dictionary_keys(integer_key_dictionary):
@@ -745,7 +753,7 @@ class HedInputReader:
             A dictionary with the keys subtracted by 1.
 
         """
-        return {key - 1: value for key, value in integer_key_dictionary.items()};
+        return {key - 1: value for key, value in integer_key_dictionary.items()}
 
     @staticmethod
     def file_path_has_extension(file_path):
@@ -762,8 +770,8 @@ class HedInputReader:
 
         """
         if len(file_path.rsplit('.', 1)) > 1:
-            return True;
-        return False;
+            return True
+        return False
 
     @staticmethod
     def get_file_extension(file_path):
@@ -779,7 +787,7 @@ class HedInputReader:
             The extension of the file path.
 
         """
-        return file_path.rsplit('.', 1)[-1].lower();
+        return file_path.rsplit('.', 1)[-1].lower()
 
     @staticmethod
     def get_latest_hed_version_path():
@@ -794,10 +802,10 @@ class HedInputReader:
 
         """
 
-        hed_versions = HedInputReader.get_all_hed_versions();
-        latest_hed_version = HedInputReader.get_latest_semantic_version_in_list(hed_versions);
+        hed_versions = HedInputReader.get_all_hed_versions()
+        latest_hed_version = HedInputReader.get_latest_semantic_version_in_list(hed_versions)
         return os.path.join(HedInputReader.HED_DIRECTORY,
-                            HedInputReader.HED_XML_PREFIX + latest_hed_version + HedInputReader.HED_XML_EXTENSION);
+                            HedInputReader.HED_XML_PREFIX + latest_hed_version + HedInputReader.HED_XML_EXTENSION)
 
     @staticmethod
     def get_path_from_hed_version(hed_version):
@@ -814,7 +822,7 @@ class HedInputReader:
 
         """
         return os.path.join(HedInputReader.HED_DIRECTORY,
-                            HedInputReader.HED_XML_PREFIX + hed_version + HedInputReader.HED_XML_EXTENSION);
+                            HedInputReader.HED_XML_PREFIX + hed_version + HedInputReader.HED_XML_EXTENSION)
 
     @staticmethod
     def get_all_hed_versions():
@@ -829,14 +837,14 @@ class HedInputReader:
 
         """
 
-        hed_versions = [];
-        compiled_expression = re.compile(HedInputReader.HED_VERSION_EXPRESSION);
+        hed_versions = []
+        compiled_expression = re.compile(HedInputReader.HED_VERSION_EXPRESSION)
         for _, _, hed_files in os.walk(HedInputReader.HED_DIRECTORY):
             for hed_file in hed_files:
-                expression_match = compiled_expression.match(hed_file);
+                expression_match = compiled_expression.match(hed_file)
                 if expression_match is not None:
-                    hed_versions.append(expression_match.group(1));
-        return sorted(hed_versions, key=StrictVersion, reverse=True);
+                    hed_versions.append(expression_match.group(1))
+        return sorted(hed_versions, key=StrictVersion, reverse=True)
 
     @staticmethod
     def get_latest_semantic_version_in_list(semantic_version_list):
@@ -853,13 +861,13 @@ class HedInputReader:
 
         """
         if not semantic_version_list:
-            return '';
-        latest_semantic_version = semantic_version_list[0];
+            return ''
+        latest_semantic_version = semantic_version_list[0]
         if len(semantic_version_list) > 1:
             for semantic_version in semantic_version_list[1:]:
                 latest_semantic_version = HedInputReader.compare_semantic_versions(latest_semantic_version,
-                                                                                   semantic_version);
-        return latest_semantic_version;
+                                                                                   semantic_version)
+        return latest_semantic_version
 
     @staticmethod
     def compare_semantic_versions(first_semantic_version, second_semantic_version):
@@ -878,4 +886,4 @@ class HedInputReader:
 
         """
         return first_semantic_version if StrictVersion(first_semantic_version) > StrictVersion(
-            second_semantic_version) else second_semantic_version;
+            second_semantic_version) else second_semantic_version

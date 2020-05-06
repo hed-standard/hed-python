@@ -1,32 +1,38 @@
-'''
+"""
 This module is used to report errors found in the validation.
 
 Created on Oct 2, 2017
 
 @author: Jeremy Cockfield
 
-'''
+"""
 
 
-def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefix='', previous_tag='',
-                      unit_class_units='', opening_bracket_count=0, closing_bracket_count=0):
+def report_error_type(error_type, error_row=1, error_column=1, hed_string='', tag='', tag_prefix='', previous_tag='',
+                      character='', index=0, unit_class_units='', opening_bracket_count=0, closing_bracket_count=0):
     """Reports the abc error based on the type of error.
 
     Parameters
     ----------
-    error_type: string
+    error_type: str
         The type of abc error.
     error_row: int
         The row number that the error occurred on.
     error_column: int
         The column number that the error occurred on.
-    tag: string
+    hed_string: str
+        The full HED string in which the error occurred
+    tag: str
         The tag that generated the error. The original tag not the formatted one.
-    tag_prefix: string
+    tag_prefix: str
         The tag prefix that generated the error.
-    previous_tag: string
+    previous_tag: str
         The previous tag that potentially could have generated the error. This is passed in with the tag.
-    unit_class_units: string
+    index: int
+        The index in the string of where the error occurred.
+    character: str
+        The character in the string that generated the error.
+    unit_class_units: str
         The unit class units that are associated with the error.
     opening_bracket_count: int
         The number of opening brackets.
@@ -34,7 +40,7 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
         The number of closing brackets.
     Returns
     -------
-    string
+    str
         A error message related to a particular type of error.
 
     """
@@ -53,7 +59,9 @@ def report_error_type(error_type, error_row=1, error_column=1, tag='', tag_prefi
         'tilde': '\tERROR: Too many tildes - group \"%s\"\n' % tag,
         'unique': '\tERROR: Multiple unique tags with prefix - \"%s\"\n' % tag_prefix,
         'unitClass': '\tERROR: Invalid unit - \"%s\" valid units are "%s"\n' % (tag, unit_class_units),
-        'valid': '\tERROR: Invalid tag - \"%s\"\n' % tag
-
+        'valid': '\tERROR: Invalid tag - \"%s\"\n' % tag,
+        'extraDelimiter': '\tERROR: Extra delimiter \"%s\" at index %s of string \"%s\"'
+                          % (character, index, hed_string),
+        'invalidCharacter': '\tERROR: ',
     }
-    return error_types.get(error_type, None);
+    return error_types.get(error_type, None)

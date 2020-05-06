@@ -17,13 +17,17 @@ unit_class_attribute = 'unitClass';
 no_wiki_tag = '</?nowiki>'
 square_bracket_removal_expression = r'[\[\]]';
 tag_name_element = 'name';
-tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()]+\s*)+';
+tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()\^µ]+\s*)+';
 tag_description_element = 'description';
 tag_element = 'node';
 true_attribute = 'true';
 unit_class_element = 'unitClass';
 unit_class_name_element = 'name';
 unit_class_units_element = 'units';
+unit_class_unit_element = 'unit'
+unit_modifier_element = 'unitModifier';
+unit_modifier_name_element = 'name';
+unit_modifier_description_element = 'description';
 
 
 def remove_nowiki_tag_from_line(tag_line):
@@ -181,7 +185,7 @@ def add_tag_node(parent_node, tag_line):
     return tag_node;
 
 
-def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_attributes):
+def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_attributes, unit_class_unit_attributes):
     """Adds a unit class to its parent.
 
     Parameters
@@ -194,21 +198,55 @@ def add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_at
         A list of unit class units.
     unit_class_attributes: list
         A list of unit class attributes.
+    unit_class_unit_attributes: list
+        A list of attributes for a specific unit
 
     Returns
     -------
     Element
         The unit class element.
     """
-    delimiter = ',';
     unit_class_node = SubElement(parent_node, unit_class_element);
     name_node = SubElement(unit_class_node, unit_class_name_element);
     name_node.text = unit_class;
-    units_node = SubElement(unit_class_node, unit_class_units_element);
-    units_node.text = delimiter.join(unit_class_units);
+    units_node = SubElement(unit_class_node, unit_class_units_element)
+    for unit, attributes in zip(unit_class_units, unit_class_unit_attributes):
+        unit_node = SubElement(units_node, unit_class_unit_element)
+        add_tag_node_attributes(unit_node, attributes)
+        unit_node.text = unit
     if unit_class_attributes:
         add_tag_node_attributes(unit_class_node, unit_class_attributes);
     return unit_class_node;
+
+
+def add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes, unit_modifier_description):
+    """Adds a unit modifier to its parent.
+
+    Parameters
+    ----------
+    parent_node: Element
+        The parent of the unit modifier.
+    unit_modifier: Element
+        The unit modifier.
+    unit_modifier_attributes: list
+        A list of unit modifier attributes.
+    unit_modifier_description: string
+        The unit modifier description.
+
+    Returns
+    -------
+    Element
+        The unit modifier element.
+    """
+    unit_modifier_node = SubElement(parent_node, unit_modifier_element);
+    name_node = SubElement(unit_modifier_node, unit_modifier_name_element);
+    name_node.text = unit_modifier;
+    if unit_modifier_description:
+        description_node = SubElement(unit_modifier_node, unit_modifier_description_element);
+        description_node.text = unit_modifier_description;
+    if unit_modifier_attributes:
+        add_tag_node_attributes(unit_modifier_node, unit_modifier_attributes);
+    return unit_modifier_node;
 
 
 def add_tag_node_attributes(tag_node, tag_attributes):
