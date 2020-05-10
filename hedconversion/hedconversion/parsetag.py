@@ -17,6 +17,7 @@ unit_class_attribute = 'unitClass';
 no_wiki_tag = '</?nowiki>'
 square_bracket_removal_expression = r'[\[\]]';
 tag_name_element = 'name';
+invalid_characters_to_strip = ["&#8203;"]
 tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()\^µ]+\s*)+';
 tag_description_element = 'description';
 tag_element = 'node';
@@ -84,6 +85,8 @@ def get_tag_name(tag_line):
     if tag_line.find(extend_here_line) != -1:
         return '';
     name = re.compile(tag_name_regexp);
+    for invalid_chars in invalid_characters_to_strip:
+        tag_line = tag_line.replace(invalid_chars, "")
     match = name.search(tag_line);
     if match:
         return match.group().strip();
