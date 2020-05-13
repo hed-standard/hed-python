@@ -2,6 +2,7 @@ import unittest
 from hedvalidation.hed_string_delimiter import HedStringDelimiter
 
 
+# all of these need to be rewritten. wait on alexander to rewrite stringparser.spec.js (under tests)
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

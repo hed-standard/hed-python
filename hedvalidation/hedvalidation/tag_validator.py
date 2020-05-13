@@ -286,7 +286,7 @@ class TagValidator:
             True if the tag is a valid HED tag. False, if otherwise.
 
         """
-        return self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag)
+        return self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag) is not None
 
     def check_capitalization(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag isn't correctly capitalized.
