@@ -151,19 +151,27 @@ class TestSchemaUtilityFunctions(TestHed):
 
     def test_strip_off_units_from_value(self):
         dollars_string = '$25.99'
-        volume_string = '100 m3'
+        volume_string = '100 m^3'
+        prefixed_volume_string = '100 cm^3'
         invalid_volume_string = '200 cm'
+
         currency_units = ['dollars', '$', 'points', 'fraction']
-        volume_units = ['m3', 'cm3', 'mm3', 'km3']
+        volume_units = ['m^3']
+
         stripped_dollars_string = self.semantic_tag_validator. \
             validate_units(dollars_string, dollars_string, currency_units)
         stripped_volume_string = self.semantic_tag_validator. \
             validate_units(volume_string, volume_string, volume_units)
+        stripped_prefixed_volume_string = self.semantic_tag_validator. \
+            validate_units(prefixed_volume_string, prefixed_volume_string, volume_units)
         stripped_invalid_volume_string = self.semantic_tag_validator. \
             validate_units(invalid_volume_string, invalid_volume_string, volume_units)
+
         self.assertEqual(stripped_dollars_string, '25.99')
         self.assertEqual(stripped_volume_string, '100')
+        self.assertEqual(stripped_prefixed_volume_string, '100')
         self.assertEqual(stripped_invalid_volume_string, '200 cm')
+
 
     def test_determine_allows_extensions(self):
         test_strings = {'vehicle': 'item/object/vehicle/boat',
