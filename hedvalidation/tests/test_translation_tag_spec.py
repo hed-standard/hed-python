@@ -63,7 +63,6 @@ class TestSchemaUtilityFunctions(TestHed):
         self.validator(test_strings, expected_results,
                        lambda tag: self.semantic_tag_validator.tag_exists_in_schema(tag))
 
-    # not working
     def test_correctly_determine_tag_takes_value(self):
         test_string = {'direction': 'attribute/direction/left/35 px',
                        'event_id': 'event/id/35',

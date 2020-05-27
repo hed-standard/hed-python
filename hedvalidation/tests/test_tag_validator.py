@@ -315,9 +315,9 @@ class Test(unittest.TestCase):
         self.assertFalse(tag_is_valid)
 
     def test_is_hh_mm_time(self):
-        validation_error = TagValidator.is_hh_mm_time(self.valid_time_string)
+        validation_error = TagValidator.is_clock_face_time(self.valid_time_string)
         self.assertTrue(validation_error, str)
-        validation_error = TagValidator.is_hh_mm_time(self.invalid_time_string)
+        validation_error = TagValidator.is_clock_face_time(self.invalid_time_string)
         self.assertFalse(validation_error, str)
 
     def test_comma_is_missing_after_closing_bracket(self):
