@@ -125,7 +125,7 @@ class FullHedString(TestHed):
             'validNestedParentheses':
                 '/Action/Reach/To touch,'
                 '((/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Spatial/Location/Screen/Top/70 px,'
-                '/Attribute/Spatial/Location/Screen/Left/23 px),Attribute/Temporal/Duration/3 ms',
+                '/Attribute/Spatial/Location/Screen/Left/23 px),Event/Duration/3 ms',
         }
 
         expectedResults = {
@@ -246,7 +246,7 @@ class IndividualHedTags(TestHed):
 
     def test_exist_in_schema(self):
         testString = {
-            'takesValue': 'Attribute/Temporal/Duration/3 ms',
+            'takesValue': 'Event/Duration/3 ms',
             'full': 'Attribute/Spatial/Object side/Left',
             'extensionsAllowed': 'Item/Object/Person/Driver',
             'leafExtension': 'Event/Category/Initial context/Something',
@@ -299,7 +299,7 @@ class IndividualHedTags(TestHed):
 
     def test_child_required(self):
         testString = {
-            'hasChild': 'Event/Category/Sensory presentation',
+            'hasChild': 'Event/Category/Experimental stimulus',
             'missingChild': 'Event/Category'
         }
         expectedResults = {
@@ -315,8 +315,8 @@ class IndividualHedTags(TestHed):
 
     def test_required_units(self):
         testString = {
-            'hasRequiredUnit': 'Attribute/Temporal/Duration/3 ms',
-            'missingRequiredUnit': 'Attribute/Temporal/Duration/3',
+            'hasRequiredUnit': 'Event/Duration/3 ms',
+            'missingRequiredUnit': 'Event/Duration/3',
             'notRequiredNumber': 'Attribute/Color/Red/0.5',
             'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
             'timeValue': 'Item/2D shape/Clock face/8:30'

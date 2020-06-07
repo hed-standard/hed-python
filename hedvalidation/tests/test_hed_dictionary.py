@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
         nodes = root_element.xpath('.//node')
         random_node = random.randint(2, len(nodes) - 1)
         tag_element = nodes[random_node]
-        parent_tag_name = self.hed_dictionary.get_parent_tag_name(tag_element)
+        parent_tag_name = self.hed_dictionary._get_parent_tag_name(tag_element)
         self.assertIsInstance(parent_tag_name, str)
         self.assertTrue(parent_tag_name)
 
