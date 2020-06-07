@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(root_element, defusedxml.lxml.RestrictedElement)
 
     def test_get_parent_tag_name(self):
-        root_element = self.hed_dictionary.get_root_element(self.hed_xml)
+        root_element = self.hed_dictionary._find_root_element(self.hed_xml)
         nodes = root_element.xpath('.//node')
         random_node = random.randint(2, len(nodes) - 1)
         tag_element = nodes[random_node]
