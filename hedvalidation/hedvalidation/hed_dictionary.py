@@ -225,10 +225,10 @@ class HedDictionary:
             self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = \
                 unit_class_element.attrib[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE]
             ## NEW ##
-            default_unit = unit_class_element.get(self.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE)
+            default_unit = unit_class_element.get(self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE)
             if default_unit is None:
                 self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = \
-                    unit_class_element.attrib[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE]
+                    unit_class_element.attrib[HedDictionary.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE]
             else:
                 self.dictionaries[self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = default_unit
 
