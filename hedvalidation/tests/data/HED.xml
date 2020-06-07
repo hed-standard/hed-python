@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="7.1.0">
+<HED version="7.1.1">
    <node>
       <name>Event</name>
       <node position="1" predicateType="passThrough" requireChild="true" required="true">
@@ -374,9 +374,8 @@
          <node>
             <name>Clock face</name>
             <description>Used to study things like hemispheric neglect. The tag is related to the clock-drawing-test</description>
-            <node takesValue="true" unitClass="time">
+            <node takesValue="true" unitClass="clockTime">
                <name>#</name>
-               <description>Hour:min</description>
             </node>
          </node>
       </node>
@@ -772,7 +771,7 @@
       </node>
       <node>
          <name>Imagined</name>
-         <description>This is used to identity that the (sub)event only happened in participant's imagination, e.g.  imagined movements in motor imagery paradigms.</description>
+         <description>This is used to identity that the (sub)event only happened in the imagination of the participant, e.g.  imagined movements in motor imagery paradigms.</description>
       </node>
       <node requireChild="true">
          <name>State ID</name>
@@ -1612,7 +1611,7 @@
       </node>
       <node>
          <name>Probability</name>
-         <description>Use to specify the level of certainty about the occurrence of the event. Use either numerical values as the child node or 'low', 'high', etc.</description>
+         <description>Use to specify the level of certainty about the occurrence of the event. Use either numerical values as the child node or low, high, etc.</description>
       </node>
       <node requireChild="true">
          <name>Temporal uncertainty</name>
@@ -1817,7 +1816,7 @@
          </node>
          <node>
             <name>Drop</name>
-            <description>For example something  drops from subject’s hand</description>
+            <description>For example something  drops from the hand of the subject</description>
          </node>
       </node>
       <node>
@@ -2648,7 +2647,7 @@
                   <name>Stage</name>
                   <node takesValue="true">
                      <name>#</name>
-                     <description>a number between 1 to 4, or 'REM'</description>
+                     <description>a number between 1 to 4, or REM</description>
                   </node>
                </node>
             </node>
@@ -2909,7 +2908,7 @@
          <description>Default</description>
          <node>
             <name>Clinic</name>
-            <description>Recording in a clinical setting such as in a hospital or doctor’s office</description>
+            <description>Recording in a clinical setting such as in a hospital or medical office</description>
          </node>
          <node>
             <name>Dim Room</name>
@@ -3673,10 +3672,18 @@
          <units>
             <unit SIUnit="true">second</unit>
             <unit SIUnit="true" unitSymbol="true">s</unit>
-            <unit unitSymbol="true">hour:min</unit>
             <unit>day</unit>
             <unit>minute</unit>
             <unit>hour</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="hour:min">
+         <name>clockTime</name>
+         <units>
+            <unit unitSymbol="true">hour:min</unit>
+            <unit unitSymbol="true">h:m</unit>
+            <unit unitSymbol="true">hour:min:sec</unit>
+            <unit unitSymbol="true">h:m:s</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="Hz">
