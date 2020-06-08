@@ -545,7 +545,7 @@ class TagValidator:
         validation_warning = ''
         if self.is_unit_class_tag(formatted_tag):
             tag_unit_values = self.get_tag_name(formatted_tag)
-            if re.fullmatch(TagValidator.DIGIT_EXPRESSION, tag_unit_values):
+            if re.search(TagValidator.DIGIT_EXPRESSION, tag_unit_values):
                 default_unit = self.get_unit_class_default_unit(formatted_tag)
                 validation_warning = warning_reporter.report_warning_type('unitClass', tag=original_tag,
                                                                           default_unit=default_unit)
