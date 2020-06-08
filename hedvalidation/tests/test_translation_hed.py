@@ -56,14 +56,14 @@ class FullHedString(TestHed):
     def test_mismatched_parentheses(self):
         testStrings = {
             'extraOpening':
-                '/Action/Reach/To touch,((/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Spatial/Location/Screen/Top/70 px,/Attribute/Spatial/Location/Screen/Left/23 px',
+                '/Action/Reach/To touch,((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
+                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
             'extraClosing':
-                '/Action/Reach/To touch,(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),),'
-                '/Attribute/Spatial/Location/Screen/Top/70 px,/Attribute/Spatial/Location/Screen/Left/23 px',
+                '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),),'
+                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
             'valid':
-                '/Action/Reach/To touch,(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Spatial/Location/Screen/Top/70 px,/Attribute/Spatial/Location/Screen/Left/23 px'
+                '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
+                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px'
         }
         expectedResults = {
             'extraOpening': False,
@@ -84,48 +84,48 @@ class FullHedString(TestHed):
     def test_malformed_delimiters(self):
         testStrings = {
             'missingOpeningComma':
-                '/Action/Reach/To touch(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Spatial/Location/Screen/Top/70 px,/Attribute/Spatial/Location/Screen/Left/23 px',
+                '/Action/Reach/To touch(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
+                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
             'missingClosingComma':
                 '/Action/Reach/To touch,'
-                '(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm)/Attribute/Spatial/Location/Screen/Top/70 px,'
-                '/Attribute/Spatial/Location/Screen/Left/23 px',
+                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)/Attribute/Location/Screen/Top/70 px,'
+                '/Attribute/Location/Screen/Left/23 px',
             'extraOpeningComma':
                 ',/Action/Reach/To touch,'
-                '(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Spatial/Location/Screen/Top/70 px,/Attribute/Spatial/Location/Screen/Left/23 px',
+                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
+                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
             'extraClosingComma':
                 '/Action/Reach/To touch,'
-                '(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Spatial/Location/Screen/Top/70 px,'
-                '/Attribute/Spatial/Location/Screen/Left/23 px,',
+                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
+                '/Attribute/Location/Screen/Left/23 px,',
             'extraOpeningTilde':
                 '~/Action/Reach/To touch,'
-                '(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Spatial/Location/Screen/Top/70 px,/Attribute/Spatial/Location/Screen/Left/23 px',
+                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
+                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
             'extraClosingTilde':
                 '/Action/Reach/To touch,'
-                '(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Spatial/Location/Screen/Top/70 px,/Attribute/Spatial/Location/Screen/Left/23 px~',
+                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
+                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px~',
             'multipleExtraOpeningDelimiters':
                 ',~,/Action/Reach/To touch,'
-                '(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Spatial/Location/Screen/Top/70 px,'
-                '/Attribute/Spatial/Location/Screen/Left/23 px',
+                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
+                '/Attribute/Location/Screen/Left/23 px',
             'multipleExtraClosingDelimiters':
                 '/Action/Reach/To touch,'
-                '(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Spatial/Location/Screen/Top/70 px,/Attribute/Spatial/Location/Screen/Left/23 px,~~,',
+                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
+                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px,~~,',
             'multipleExtraMiddleDelimiters':
                 '/Action/Reach/To touch,'
-                ',(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Spatial/Location/Screen/Top/70 px,'
-                '~,/Attribute/Spatial/Location/Screen/Left/23 px',
+                ',(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
+                '~,/Attribute/Location/Screen/Left/23 px',
             'valid':
                 '/Action/Reach/To touch,'
-                '(/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Spatial/Location/Screen/Top/70 px,'
-                '/Attribute/Spatial/Location/Screen/Left/23 px',
+                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
+                '/Attribute/Location/Screen/Left/23 px',
             'validNestedParentheses':
                 '/Action/Reach/To touch,'
-                '((/Attribute/Spatial/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Spatial/Location/Screen/Top/70 px,'
-                '/Attribute/Spatial/Location/Screen/Left/23 px),Event/Duration/3 ms',
+                '((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
+                '/Attribute/Location/Screen/Left/23 px),Event/Duration/3 ms',
         }
 
         expectedResults = {
@@ -183,10 +183,10 @@ class FullHedString(TestHed):
             'multipleExtraMiddleDelimiters': report_error_type('extraDelimiter', character=',', index=23,
                                                                hed_string=testStrings[
                                                                    'multipleExtraMiddleDelimiters'])
-                                             + report_error_type('extraDelimiter', character='~', index=141,
+                                             + report_error_type('extraDelimiter', character='~', index=125,
                                                                  hed_string=testStrings[
                                                                      'multipleExtraMiddleDelimiters'])
-                                             + report_error_type('extraDelimiter', character=',', index=142,
+                                             + report_error_type('extraDelimiter', character=',', index=126,
                                                                  hed_string=testStrings[
                                                                      'multipleExtraMiddleDelimiters']),
             'valid': '',
@@ -197,13 +197,13 @@ class FullHedString(TestHed):
     def test_invalid_characters(self):
         testStrings = {
             'openingBrace':
-                '/Attribute/Spatial/Object side/Left,/Participant/Effect{/Body part/Arm',
+                '/Attribute/Object side/Left,/Participant/Effect{/Body part/Arm',
             'closingBrace':
-                '/Attribute/Spatial/Object side/Left,/Participant/Effect}/Body part/Arm',
+                '/Attribute/Object side/Left,/Participant/Effect}/Body part/Arm',
             'openingBracket':
-                '/Attribute/Spatial/Object side/Left,/Participant/Effect[/Body part/Arm',
+                '/Attribute/Object side/Left,/Participant/Effect[/Body part/Arm',
             'closingBracket':
-                '/Attribute/Spatial/Object side/Left,/Participant/Effect]/Body part/Arm'
+                '/Attribute/Object side/Left,/Participant/Effect]/Body part/Arm'
         }
         expectedResults = {
             'openingBrace': False,
@@ -247,7 +247,7 @@ class IndividualHedTags(TestHed):
     def test_exist_in_schema(self):
         testString = {
             'takesValue': 'Event/Duration/3 ms',
-            'full': 'Attribute/Spatial/Object side/Left',
+            'full': 'Attribute/Object side/Left',
             'extensionsAllowed': 'Item/Object/Person/Driver',
             'leafExtension': 'Event/Category/Initial context/Something',
             'nonExtensionsAllowed': 'Event/Nonsense',

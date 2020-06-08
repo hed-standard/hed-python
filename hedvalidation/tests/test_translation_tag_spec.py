@@ -36,7 +36,7 @@ class TestSchemaUtilityFunctions(TestHed):
     # not working
     @unittest.skip('See issue #25.')
     def test_if_tag_exists(self):
-        valid_tag1 = 'attribute/temporal/direction/left'
+        valid_tag1 = 'attribute/direction/left'
         valid_tag2 = 'item/object/person'
         valid_tag3 = 'event/duration/#'
         invalid_tag1 = 'something'
