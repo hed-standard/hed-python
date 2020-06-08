@@ -103,7 +103,6 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertCountEqual(unit_class_tag3_result, ['time'])
         self.assertEqual(no_unit_class_tag_result, [])
 
-        # does not work
     def test_determine_tags_legal_units(self):
         unit_class_tag1 = 'attribute/direction/left/35 px'
         unit_class_tag2 = 'participant/effect/cognitive/reward/$10.55'
@@ -150,7 +149,6 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertEqual(stripped_prefixed_volume_string, '100')
         self.assertEqual(invalid_volume_string, '200 cm')
 
-        # does not work
     def test_determine_allows_extensions(self):
         extension_tag1 = 'item/object/vehicle/boat'
         extension_tag2 = 'attribute/color/red/0.5'
