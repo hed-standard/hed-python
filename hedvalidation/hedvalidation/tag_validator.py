@@ -31,6 +31,8 @@ class TagValidator:
     TAG_DICTIONARY_KEY = 'tags'
     TILDE_ERROR_TYPE = 'tilde'
     TIME_UNIT_CLASS = 'time'
+    UNITS_ELEMENT = 'units'
+    CLOCK_TIME_UNIT_CLASS = 'clockTime'
     UNIQUE_ERROR_TYPE = 'unique'
     DUPLICATE_ERROR_TYPE = 'duplicate'
     VALID_ERROR_TYPE = 'valid'
@@ -286,7 +288,7 @@ class TagValidator:
             True if the tag is a valid HED tag. False, if otherwise.
 
         """
-        return self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag)
+        return self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag) is not None
 
     def check_capitalization(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag isn't correctly capitalized.
@@ -413,17 +415,25 @@ class TagValidator:
             formatted_tag_unit_value = self.get_tag_name(formatted_tag)
             original_tag_unit_value = self.get_tag_name(original_tag)
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag))
-            if (TagValidator.TIME_UNIT_CLASS in tag_unit_classes
-                    and TagValidator.is_hh_mm_time(formatted_tag_unit_value)):
-                pass
-            elif re.search(TagValidator.DIGIT_EXPRESSION,
+            if (TagValidator.CLOCK_TIME_UNIT_CLASS in
+                    self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
+                if (TagValidator.CLOCK_TIME_UNIT_CLASS in tag_unit_classes
+                        and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
+                    return validation_error
+            elif (TagValidator.TIME_UNIT_CLASS in
+                  self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
+                if (TagValidator.TIME_UNIT_CLASS in tag_unit_classes
+                        and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
+                    return validation_error
+            if re.search(TagValidator.DIGIT_EXPRESSION,
                            self.validate_units(original_tag_unit_value,
                                                formatted_tag_unit_value,
                                                tag_unit_class_units)):
                 pass
             else:
                 validation_error = error_reporter.report_error_type('unitClass', tag=original_tag,
-                                                                    unit_class_units=','.join(sorted(tag_unit_class_units)))
+                                                                    unit_class_units=','.join(
+                                                                        sorted(tag_unit_class_units)))
                 self._increment_issue_count()
         return validation_error
 
@@ -506,12 +516,12 @@ class TagValidator:
                 if self._hed_dictionary.has_unit_modifiers and \
                         self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
                     found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
-                                                                                 derivative_unit,
-                                                                                 True)
+                                                                                derivative_unit,
+                                                                                True)
                 else:
                     found_unit, stripped_value = self._strip_off_units_if_valid(formatted_tag_unit_value,
-                                                                                 derivative_unit,
-                                                                                 False)
+                                                                                derivative_unit,
+                                                                                False)
                 if found_unit:
                     return stripped_value
 
@@ -1048,7 +1058,7 @@ class TagValidator:
         return validation_error
 
     @staticmethod
-    def is_hh_mm_time(time_string):
+    def is_clock_face_time(time_string):
         """Checks to see if the specified string is valid HH:MM time string.
 
         Parameters
@@ -1062,9 +1072,12 @@ class TagValidator:
 
         """
         try:
-            time.strptime(time_string, '%H:%M')
+            time.strptime(time_string, '%H:%M:%S')
         except ValueError:
-            return False
+            try:
+                time.strptime(time_string, '%H:%M')
+            except ValueError:
+                return False
         return True
 
 
