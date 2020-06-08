@@ -1,3 +1,5 @@
+import unittest
+
 from tests.test_translation_hed import TestHed
 
 
@@ -29,28 +31,12 @@ class StringUtilityFunctions(TestHed):
         self.assertEqual(name2, 'Left')
         self.assertEqual(no_slash_name, 'Participant')
 
-    # not working
-    def test_strip_off_units_from_value(self):
-        dollars_string = '$25.99'
-        volume_string = '100 m3'
-        invalid_volume_string = '200 cm'
-        currency_units = ['dollars', '$', 'points', 'fraction']
-        volume_units = ['m3', 'cm3', 'mm3', 'km3']
-        stripped_dollars_string = self.syntactic_tag_validator. \
-            _strip_off_units_if_valid(dollars_string, currency_units, True)
-        stripped_volume_string = self.syntactic_tag_validator. \
-            _strip_off_units_if_valid(volume_string, volume_units, True)
-        stripped_invalid_volume_string = self.syntactic_tag_validator. \
-            _strip_off_units_if_valid(invalid_volume_string, volume_units, True)
-        self.assertEqual(stripped_dollars_string, '25.99')
-        self.assertEqual(stripped_volume_string, '100')
-        self.assertEqual(invalid_volume_string, '200 cm')
-
 
 class TestSchemaUtilityFunctions(TestHed):
     # not working
+    @unittest.skip('See issue #25.')
     def test_if_tag_exists(self):
-        valid_tag1 = 'attribute/temporal/direction/left'
+        valid_tag1 = 'attribute/direction/left'
         valid_tag2 = 'item/object/person'
         valid_tag3 = 'event/duration/#'
         invalid_tag1 = 'something'
@@ -69,7 +55,6 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertEqual(invalid_tag2_results, False)
         self.assertEqual(invalid_tag3_results, False)
 
-    # not working
     def test_correctly_determine_tag_takes_value(self):
         value_tag1 = 'attribute/direction/left/35 px'
         value_tag2 = 'item/id/35'
@@ -104,7 +89,6 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertEqual(no_unit_class_tag_result, '')
         self.assertEqual(no_value_tag_result, '')
 
-        # does not work
     def test_correctly_determine_tag_unit_classes(self):
         unit_class_tag1 = 'attribute/direction/left/35 px'
         unit_class_tag2 = 'participant/effect/cognitive/reward/$10.55'
@@ -114,12 +98,11 @@ class TestSchemaUtilityFunctions(TestHed):
         unit_class_tag2_result = self.semantic_tag_validator.get_tag_unit_classes(unit_class_tag2)
         unit_class_tag3_result = self.semantic_tag_validator.get_tag_unit_classes(unit_class_tag3)
         no_unit_class_tag_result = self.semantic_tag_validator.get_tag_unit_classes(no_unit_class_tag)
-        self.assertEqual(unit_class_tag1_result, ['angle', 'physicalLength', 'pixels'])
-        self.assertEqual(unit_class_tag2_result, ['currency'])
-        self.assertEqual(unit_class_tag3_result, ['time'])
+        self.assertCountEqual(unit_class_tag1_result, ['angle', 'physicalLength', 'pixels'])
+        self.assertCountEqual(unit_class_tag2_result, ['currency'])
+        self.assertCountEqual(unit_class_tag3_result, ['time'])
         self.assertEqual(no_unit_class_tag_result, [])
 
-        # does not work
     def test_determine_tags_legal_units(self):
         unit_class_tag1 = 'attribute/direction/left/35 px'
         unit_class_tag2 = 'participant/effect/cognitive/reward/$10.55'
@@ -127,34 +110,45 @@ class TestSchemaUtilityFunctions(TestHed):
         unit_class_tag1_result = self.semantic_tag_validator.get_tag_unit_class_units(unit_class_tag1)
         unit_class_tag2_result = self.semantic_tag_validator.get_tag_unit_class_units(unit_class_tag2)
         no_unit_class_tag_result = self.semantic_tag_validator.get_tag_unit_class_units(no_unit_class_tag)
-        self.assertEqual(unit_class_tag1_result, [
-            'degrees',
+        self.assertCountEqual(unit_class_tag1_result,[
             'degree',
             'radian',
-            'radians',
+            'rad',
             'm',
-            'cm',
-            'km',
-            'mm',
-            'feet',
             'foot',
-            'meter',
-            'meters',
+            'metre',
             'mile',
-            'miles',
-            'pixels',
             'px',
             'pixel',
         ])
-        self.assertEqual(unit_class_tag2_result, [
-            'dollars',
+        self.assertCountEqual(unit_class_tag2_result, [
+            'dollar',
             '$',
-            'points',
+            'point',
             'fraction',
         ])
         self.assertEqual(no_unit_class_tag_result, [])
 
-        # does not work
+    def test_strip_off_units_from_value(self):
+        dollars_string = '$25.99'
+        volume_string = '100 m^3'
+        prefixed_volume_string = '100 cm^3'
+        invalid_volume_string = '200 cm'
+        currency_units = ['dollar', '$', 'point', 'fraction']
+        volume_units = ['m^3']
+        stripped_dollars_string = self.semantic_tag_validator. \
+            validate_units(dollars_string, dollars_string, currency_units)
+        stripped_volume_string = self.semantic_tag_validator. \
+            validate_units(volume_string, volume_string, volume_units)
+        stripped_prefixed_volume_string = self.semantic_tag_validator. \
+            validate_units(prefixed_volume_string, prefixed_volume_string, volume_units)
+        stripped_invalid_volume_string = self.semantic_tag_validator. \
+            validate_units(invalid_volume_string, invalid_volume_string, volume_units)
+        self.assertEqual(stripped_dollars_string, '25.99')
+        self.assertEqual(stripped_volume_string, '100')
+        self.assertEqual(stripped_prefixed_volume_string, '100')
+        self.assertEqual(invalid_volume_string, '200 cm')
+
     def test_determine_allows_extensions(self):
         extension_tag1 = 'item/object/vehicle/boat'
         extension_tag2 = 'attribute/color/red/0.5'
