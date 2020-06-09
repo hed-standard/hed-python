@@ -36,31 +36,37 @@ class HedInputReader:
     HED_XML_PREFIX = 'HED'
     HED_XML_EXTENSION = '.xml'
 
-    def __init__(self, hed_input, tag_columns=[2], has_column_names=True, check_for_warnings=False,
-                 required_tag_columns={}, worksheet_name='', hed_xml_file='', run_semantic_validation=True):
+    def __init__(self, hed_input, is_file=True, check_for_warnings=False, run_semantic_validation=True, hed_xml_file='',
+                 tag_columns=[2], has_column_names=True, required_tag_columns={}, worksheet_name=''):
         """Constructor for the HedInputReader class.
 
         Parameters
         ----------
-        hed_input: string
-            A HED string or a spreadsheet file containing HED tags. If a string is passed in then no other arguments
-            need to be specified.
+        hed_input: str or list
+            A list of HED strings, a single HED string, or the name of a spreadsheet file containing HED tags.
+            If is_file is True and hed_input is a string, this tries to parse hed_input as a file name.
+            If is_file is False or hed_input is not a valid file name, this will validate hed_input as a HED string.
+        is_file: bool
+            True if hed_input represents a file name. False if it represents a HED string.
+        check_for_warnings: bool
+            True if the validator should check for warnings. False if the validator should only report errors.
+        run_semantic_validation: bool
+            True if the validator should check the HED data against a schema. False for syntax-only validation.
+        hed_xml_file: str
+            A path to a HED XML file.
         tag_columns: list
             A list of integers containing the columns that contain the HED tags. The default value is the 2nd column.
-        has_column_names: boolean
+        has_column_names: bool
             True if file has column names. The validation will skip over the first line of the file. False, if
             otherwise.
-        worksheet_name: string
-            The name of the Excel workbook worksheet that contains the HED tags.
-        required_tag_columns: dictionary
+        required_tag_columns: dict
             A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
             prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Description',
             4: 'Label', 5: 'Category'}; The third column contains tags that need Event/Description/ prepended to them,
             the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
-            that needs Event/Category/ prepended to them, the seventh column contains tags that needs
-            Attribute/ prepended to them.
-        hed_xml_file: string
-            A path to a HED XML file.
+            that needs Event/Category/ prepended to them.
+        worksheet_name: str
+            The name of the Excel workbook worksheet that contains the HED tags.
         Returns
         -------
         HedInputReader object
@@ -72,6 +78,7 @@ class HedInputReader:
         self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns)
         self._has_column_names = has_column_names
         self._worksheet_name = worksheet_name
+        self._is_file = is_file
         if run_semantic_validation:
             self._hed_dictionary = self._get_hed_dictionary(hed_xml_file)
             self._tag_validator = TagValidator(hed_dictionary=self._hed_dictionary,
@@ -148,8 +155,10 @@ class HedInputReader:
         validation_issues = ''
         if isinstance(self._hed_input, list):
             validation_issues = self._validate_hed_strings(self._hed_input)
-        elif HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
+        elif self._is_file and HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
             validation_issues = self._validate_hed_tags_in_file()
+        else:
+            validation_issues = self._validate_hed_strings([self._hed_input])
         return validation_issues
 
     def _validate_hed_tags_in_file(self):
