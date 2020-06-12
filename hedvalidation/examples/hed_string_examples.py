@@ -1,4 +1,4 @@
-from hedvalidation.hed_input_reader import HedInputReader
+from hedvalidator.hed_input_reader import HedInputReader
 
 if __name__ == '__main__':
     # Example 1: Valid HED string

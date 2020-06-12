@@ -1,5 +1,5 @@
 import unittest
-from hedvalidation.hed_string_delimiter import HedStringDelimiter
+from hedvalidator.hed_string_delimiter import HedStringDelimiter
 
 
 class Test(unittest.TestCase):

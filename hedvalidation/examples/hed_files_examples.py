@@ -1,6 +1,6 @@
 import os;
 
-from hedvalidation.hed_input_reader import HedInputReader
+from hedvalidator.hed_input_reader import HedInputReader
 
 if __name__ == '__main__':
     example_data_path = 'path/to/example/data';

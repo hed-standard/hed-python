@@ -1,12 +1,12 @@
 import unittest
 import os
 
-from hedvalidation.hed_string_delimiter import HedStringDelimiter
-from hedvalidation.hed_input_reader import HedInputReader
-from hedvalidation.error_reporter import report_error_type
-from hedvalidation.warning_reporter import report_warning_type
-from hedvalidation.tag_validator import TagValidator
-from hedvalidation.hed_dictionary import HedDictionary
+from hedvalidator.hed_string_delimiter import HedStringDelimiter
+from hedvalidator.hed_input_reader import HedInputReader
+from hedvalidator.error_reporter import report_error_type
+from hedvalidator.warning_reporter import report_warning_type
+from hedvalidator.tag_validator import TagValidator
+from hedvalidator.hed_dictionary import HedDictionary
 
 
 class TestHed(unittest.TestCase):

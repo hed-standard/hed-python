@@ -12,10 +12,10 @@ Created on Oct 2, 2017
 import os
 import re
 import xlrd
-from hedvalidation import error_reporter
-from hedvalidation.hed_dictionary import HedDictionary
-from hedvalidation.hed_string_delimiter import HedStringDelimiter
-from hedvalidation.tag_validator import TagValidator
+from hedvalidator import error_reporter
+from hedvalidator.hed_dictionary import HedDictionary
+from hedvalidator.hed_string_delimiter import HedStringDelimiter
+from hedvalidator.tag_validator import TagValidator
 from distutils.version import StrictVersion
 
 

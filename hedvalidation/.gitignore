@@ -83,6 +83,10 @@ coverage.xml
 .project
 .pydevproject
 
+# pycharm
+/venv/
+.idea
+
 # Rope
 .ropeproject
 
