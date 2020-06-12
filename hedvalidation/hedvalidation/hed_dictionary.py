@@ -189,14 +189,11 @@ class HedDictionary:
         for unit_class_element in unit_class_elements:
             element_name = self._get_element_tag_value(unit_class_element)
             element_units = self._get_elements_by_name('unit', unit_class_element)
-            ## NEW ##
             if not element_units:
-                element_units = self._get_element_tag_value(unit_class_element, element_name)
+                element_units = self._get_element_tag_value(unit_class_element, self.UNIT_CLASS_UNITS_ELEMENT)
                 units = element_units.split(',')
-                units_list = []
-                for unit in units:
-                    units_list.append(unit.lower())
-                self.dictionaries[element_units][element_name] = units_list
+                units_list = list(map(lambda unit: unit.lower(), units))
+                self.dictionaries[self.UNITS_ELEMENT][element_name] = units_list
                 continue
             element_unit_names = list(map(lambda element: element.text, element_units))
             self.dictionaries[self.UNITS_ELEMENT][element_name] = element_unit_names
