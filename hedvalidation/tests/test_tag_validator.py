@@ -38,9 +38,9 @@ class Test(unittest.TestCase):
         cls.valid_formatted_unit_class_tag = 'attribute/temporal rate/20 hz'
         cls.valid_formatted_unit_class_tag_with_default = 'attribute/blink/time shut/#'
         cls.invalid_formatted_unit_class_tag_list = ['attribute/temporal rate/20 sdfkjsdfkjdfskjs',
-                                                 'attribute/temporal rate/20.2e-1 sdfkjsdfkjdfskjs']
+                                                     'attribute/temporal rate/20.2e-1 sdfkjsdfkjdfskjs']
         cls.valid_formatted_unit_class_tag_no_units_list = ['attribute/temporal rate/20e2',
-                                                        'attribute/temporal rate/20.0']
+                                                            'attribute/temporal rate/20.0']
 
         cls.valid_takes_value_tag = 'event/label/This is a label'
         cls.valid_tag_group_string = 'This/Is/A/Tag ~ This/Is/Another/Tag ~ This/Is/A/Different/Tag'
@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
                                                          '(item/2D shape/sector, Attribute/Visual/Color/Red)'
         cls.valid_group_tag_with_parentheses = '(paradigm/reading - covert, paradigm/reading - overt)'
         cls.valid_formatted_tag_with_complex_parentheses = '((Item/ID/Description value,Item/ID/Local)~' \
-                                                            '(Item/ID/Local,Item/Group ID/Description value))'
+                                                           '(Item/ID/Local,Item/Group ID/Description value))'
 
         cls.last_non_empty_character_not_delimiter = ')'
         cls.last_non_empty_character_delimiter = ','
@@ -361,6 +361,7 @@ class Test(unittest.TestCase):
         validation_error = self.tag_validator.find_invalid_character_issues(self.invalid_tag_with_bad_characters)
         self.assertIsInstance(validation_error, str)
         self.assertTrue(validation_error)
+
 
 if __name__ == '__main__':
     unittest.main()
