@@ -115,5 +115,6 @@ class Test(unittest.TestCase):
         hed_version = HedDictionary.get_hed_xml_version(self.hed_xml)
         self.assertIsInstance(hed_version, str)
 
+
 if __name__ == '__main__':
     unittest.main()
