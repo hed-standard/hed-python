@@ -1,1 +1,1 @@
-ROUTE_BLUEPRINT = 'route_blueprint';
+ROUTE_BLUEPRINT = 'route_blueprint'

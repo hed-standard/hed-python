@@ -1,2 +1,2 @@
-BOOLEAN = 'boolean';
-STRING = 'string';
+BOOLEAN = 'boolean'
+STRING = 'string'
