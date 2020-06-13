@@ -10,8 +10,8 @@ Created on Oct 2, 2017
 import re
 import time
 import inflect
-from hedvalidation import error_reporter
-from hedvalidation import warning_reporter
+from hedvalidator import error_reporter
+from hedvalidator import warning_reporter
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -66,7 +66,10 @@ class TagValidator:
 
         """
         self._hed_dictionary = hed_dictionary
-        self._hed_dictionary_dictionaries = hed_dictionary.get_dictionaries()
+        if hed_dictionary:
+            self._hed_dictionary_dictionaries = hed_dictionary.get_dictionaries()
+        else:
+            self._hed_dictionaries = None
         self._check_for_warnings = check_for_warnings
         self._issue_count = 0
         self._error_count = 0

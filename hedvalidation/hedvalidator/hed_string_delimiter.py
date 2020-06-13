@@ -8,8 +8,8 @@ Created on Nov 15, 2017
 '''
 
 import copy
-from hedvalidation import error_reporter
-from hedvalidation import warning_reporter
+from hedvalidator import error_reporter
+from hedvalidator import warning_reporter
 
 
 class HedStringDelimiter:
