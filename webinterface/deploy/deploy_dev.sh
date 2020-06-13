@@ -19,13 +19,13 @@ CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
 DOCKER_FILE="${ROOT_DIR}/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
-WEBINTERFACE_CODE_DIR="hed-python/webinterface/webinterface"
-VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidation"
+WEBINTERFACE_CODE_DIR="hed-python/webinterface/web"
+VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidator"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
 GIT_HED_DIR="${PWD}/hed-specification"
 GIT_HED_WILDCARD="${GIT_HED_DIR}/hedxml/*"
-HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidation/hed"
+HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidator/hed"
 
 ##### Functions
 

@@ -4,7 +4,7 @@ import os
 import defusedxml
 from defusedxml.lxml import parse
 
-from hedvalidation.hed_dictionary import HedDictionary
+from hedvalidator.hed_dictionary import HedDictionary
 
 
 class Test(unittest.TestCase):
@@ -114,6 +114,7 @@ class Test(unittest.TestCase):
     def test_get_hed_xml_version(self):
         hed_version = HedDictionary.get_hed_xml_version(self.hed_xml)
         self.assertIsInstance(hed_version, str)
+
 
 if __name__ == '__main__':
     unittest.main()

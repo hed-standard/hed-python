@@ -110,7 +110,7 @@ class TestSchemaUtilityFunctions(TestHed):
         unit_class_tag1_result = self.semantic_tag_validator.get_tag_unit_class_units(unit_class_tag1)
         unit_class_tag2_result = self.semantic_tag_validator.get_tag_unit_class_units(unit_class_tag2)
         no_unit_class_tag_result = self.semantic_tag_validator.get_tag_unit_class_units(no_unit_class_tag)
-        self.assertCountEqual(unit_class_tag1_result,[
+        self.assertCountEqual(unit_class_tag1_result, [
             'degree',
             'radian',
             'rad',
@@ -142,8 +142,8 @@ class TestSchemaUtilityFunctions(TestHed):
             validate_units(volume_string, volume_string, volume_units)
         stripped_prefixed_volume_string = self.semantic_tag_validator. \
             validate_units(prefixed_volume_string, prefixed_volume_string, volume_units)
-        stripped_invalid_volume_string = self.semantic_tag_validator. \
-            validate_units(invalid_volume_string, invalid_volume_string, volume_units)
+        # stripped_invalid_volume_string = self.semantic_tag_validator. \
+        #    validate_units(invalid_volume_string, invalid_volume_string, volume_units)
         self.assertEqual(stripped_dollars_string, '25.99')
         self.assertEqual(stripped_volume_string, '100')
         self.assertEqual(stripped_prefixed_volume_string, '100')
@@ -162,3 +162,7 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertEqual(extension_tag2_result, True)
         self.assertEqual(no_extension_tag1_result, False)
         self.assertEqual(no_extension_tag2_result, False)
+
+
+if __name__ == '__main__':
+    unittest.main()

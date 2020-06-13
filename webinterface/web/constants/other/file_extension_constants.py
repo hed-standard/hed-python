@@ -1,0 +1,2 @@
+TEXT_EXTENSION = '.txt'
+VALIDATION_OUTPUT_FILE_PREFIX = 'validated_'
