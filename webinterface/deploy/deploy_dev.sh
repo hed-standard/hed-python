@@ -15,7 +15,7 @@ CONTAINER_PORT=80;
 
 DEPLOY_DIR="${PWD}"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
-CONFIG_FILE="${ROOT_DIR}/config.py"
+CONFIG_FILE="${ROOT_DIR}/hed-python/webinterface/deploy/config.py"
 WSGI_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/web.wsgi"
 DOCKER_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/hed-python/webinterface/deploy/Dockerfile"
@@ -30,18 +30,18 @@ HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidator/hed"
 ##### Functions
 
 clone_github_repo(){
-echo Cloning repo ...
+echo Cloning hed-python repo in directory + "${PWD}"
 git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
 }
 
 clone_hed_github_repo(){
-echo Cloning HED repo ...
+echo Cloning HED repo in directory + "${PWD}"
 git clone $GIT_HED_REPO_URL
 }
 
 create_web_directory()
 {
-echo Creating web directory...
+echo Creating web directory in directory + "${PWD}"
 echo Code deploy directory "$CODE_DEPLOY_DIR"
 mkdir "$CODE_DEPLOY_DIR"
 cp "$CONFIG_FILE" "$CODE_DEPLOY_DIR"
