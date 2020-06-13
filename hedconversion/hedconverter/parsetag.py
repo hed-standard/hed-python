@@ -146,7 +146,7 @@ def get_tag_level(tag_line):
 
     Returns
     -------
-    string
+    int
         Gets the tag level. The number of asterisks determine what level the tag is on.
     """
     level = re.compile(level_expression)
