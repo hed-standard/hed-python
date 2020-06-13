@@ -4,7 +4,7 @@
 
 ##### Constants
 
-ROOT_DIR="${PWD}"
+ROOT_DIR= "${PWD}"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
@@ -13,14 +13,14 @@ GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
 
-DEPLOY_DIR="${PWD}"
+DEPLOY_DIR="hed-python/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
-WSGI_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/web.wsgi"
-DOCKER_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/Dockerfile_dev"
-DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/hed-python/webinterface/deploy/Dockerfile"
-WEBINTERFACE_CODE_DIR="${DEPLOY_DIR}/hed-python/webinterface/web"
-VALIDATOR_CODE_DIR="${DEPLOY_DIR}/hed-python/hedvalidation/hedvalidator"
+WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
+DOCKER_FILE="${ROOT_DIR}/Dockerfile_dev"
+DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
+WEBINTERFACE_CODE_DIR="hed-python/webinterface/web"
+VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidator"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
 GIT_HED_DIR="${PWD}/hed-specification"
@@ -42,19 +42,18 @@ git clone $GIT_HED_REPO_URL
 create_web_directory()
 {
 echo Creating web directory...
-echo Code deploy directory "$CODE_DEPLOY_DIR"
-mkdir "$CODE_DEPLOY_DIR"
+mkdir $CODE_DEPLOY_DIR
 cp "$CONFIG_FILE" "$CODE_DEPLOY_DIR"
 cp "$WSGI_FILE" "$CODE_DEPLOY_DIR"
 cp "$DOCKER_FILE" "$DOCKER_FILE_DEPLOY"
-cp -r "$WEBINTERFACE_CODE_DIR" "$CODE_DEPLOY_DIR"
-cp -r "$VALIDATOR_CODE_DIR" "$CODE_DEPLOY_DIR"
+cp -r $WEBINTERFACE_CODE_DIR $CODE_DEPLOY_DIR
+cp -r $VALIDATOR_CODE_DIR $CODE_DEPLOY_DIR
 cp -r "${GIT_HED_WILDCARD}" "$HED_XML_DEPLOY_DIR"
 }
 switch_to_web_directory()
 {
 echo Switching to web directory...
-cd "$DEPLOY_DIR"
+cd $DEPLOY_DIR
 }
 build_new_container()
 {
@@ -77,9 +76,9 @@ docker run --restart=always --name $CONTAINER_NAME -d -p $HOST_PORT:$CONTAINER_P
 cleanup_directory()
 {
 echo Cleaning up directory...
-rm -rf "$GIT_DIR"
-rm -rf "$GIT_HED_DIR"
-cd "$ROOT_DIR"
+rm -rf $GIT_DIR
+rm -rf $GIT_HED_DIR
+cd $ROOT_DIR
 }
 
 error_exit()
@@ -89,10 +88,10 @@ error_exit()
 }
 
 ##### Main
-if [ -z "$1" ]; then
+if [ -z $1 ]; then
 echo No branch specified... Using master branch
 else
-echo Branch specified... Using "$1" branch
+echo Branch specified... Using $1 branch
 GIT_REPO_BRANCH=$1
 fi
 clone_github_repo || error_exit "Cannot clone repo $GIT_REPO_URL branch $GIT_REPO_BRANCH"
