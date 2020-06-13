@@ -41,8 +41,9 @@ git clone $GIT_HED_REPO_URL
 
 create_web_directory()
 {
-echo Creating web directory in directory + "${PWD}"
-echo Code deploy directory "$CODE_DEPLOY_DIR"
+echo Creating the web directory...
+echo Currently in "${PWD}"
+echo Making the code  deploy directory "$CODE_DEPLOY_DIR" ...
 mkdir "$CODE_DEPLOY_DIR"
 cp "$CONFIG_FILE" "$CODE_DEPLOY_DIR"
 cp "$WSGI_FILE" "$CODE_DEPLOY_DIR"
@@ -51,11 +52,13 @@ cp -r "$WEBINTERFACE_CODE_DIR" "$CODE_DEPLOY_DIR"
 cp -r "$VALIDATOR_CODE_DIR" "$CODE_DEPLOY_DIR"
 cp -r "${GIT_HED_WILDCARD}" "$HED_XML_DEPLOY_DIR"
 }
+
 switch_to_web_directory()
 {
-echo Switching to web directory...
+echo Switching to web directory "$DEPLOY_DIR" ...
 cd "$DEPLOY_DIR"
 }
+
 build_new_container()
 {
 echo Building new container...
@@ -102,4 +105,4 @@ switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-cleanup_directory
+# cleanup_directory
