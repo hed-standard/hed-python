@@ -2,6 +2,20 @@ import os
 
 from hedvalidator.hed_input_reader import HedInputReader
 
+#TODO: These examples need to be cleaned up
+def print_issues(title, issues):
+    if not issues:
+        output_string = title + ": []"
+    elif isinstance(issues, str):
+        output_string = title  + ":" + issues
+    else:
+        output_string = title + ":"
+        for el in issues:
+            output_string = output_string + "\n" + el
+
+    print(output_string)
+
+
 if __name__ == '__main__':
     example_data_path = '../tests/data'   # path to example data
     bcit_guard_duty_path = os.path.join(example_data_path, 'BCIT_GuardDuty_HED_tag_spec_v27.tsv')
