@@ -16,7 +16,7 @@ CONTAINER_PORT=80;
 DEPLOY_DIR="hed-python/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
-WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
+WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
 WEBINTERFACE_CODE_DIR="hed-python/webinterface/web"
 VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidator"
 
