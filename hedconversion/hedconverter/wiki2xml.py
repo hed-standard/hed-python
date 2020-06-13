@@ -6,9 +6,35 @@ Created on Feb 27, 2017
 @author: Jeremy Cockfield 
 """
 
-from hedemailer import utils, constants
+import urllib.request
 from hedconverter import parsewiki
 import tempfile
+
+HED_XML_TREE_KEY = 'hed_xml_tree'
+HED_XML_VERSION_KEY = 'version'
+HED_CHANGE_LOG_KEY = 'hed_change_log'
+HED_WIKI_PAGE_KEY = 'HED_WIKI_PAGE'
+HED_XML_LOCATION_KEY = 'hed_xml_file_location'
+HED_WIKI_LOCATION_KEY = 'hed_wiki_file_location'
+
+
+def url_to_file(resource_url, file_path):
+    """Write data from a URL resource into a file. Data is decoded as unicode.
+
+    Parameters
+    ----------
+    resource_url: string
+        The URL to the resource.
+    file_path: string
+        A file path
+
+    Returns
+    -------
+    """
+    url_request = urllib.request.urlopen(resource_url)
+    url_data = str(url_request.read(), 'utf-8')
+    with open(file_path, 'w', encoding='utf-8') as opened_file:
+        opened_file.write(url_data)
 
 
 def download_hed_wiki(wiki_file_path, hed_wiki_url):
@@ -27,7 +53,7 @@ def download_hed_wiki(wiki_file_path, hed_wiki_url):
     string
         The tag line with the nowiki tag remove.
     """
-    utils.url_to_file(hed_wiki_url, wiki_file_path)
+    url_to_file(hed_wiki_url, wiki_file_path)
     return wiki_file_path
 
 
@@ -68,9 +94,10 @@ def convert_hed_wiki_2_xml(hed_wiki_url, use_local_wiki_file=None):
 
     hed_xml_file_location, hed_xml_tree = create_hed_xml_file(hed_wiki_file_location)
     hed_change_log = parsewiki.get_hed_change_log(hed_wiki_file_location)
-    hed_info_dictionary = {constants.HED_XML_TREE_KEY: hed_xml_tree, constants.HED_CHANGE_LOG_KEY: hed_change_log,
-                           constants.HED_WIKI_LOCATION_KEY: hed_wiki_file_location,
-                           constants.HED_XML_LOCATION_KEY: hed_xml_file_location}
+    hed_info_dictionary = {HED_XML_TREE_KEY: hed_xml_tree,
+                           HED_CHANGE_LOG_KEY: hed_change_log,
+                           HED_WIKI_LOCATION_KEY: hed_wiki_file_location,
+                           HED_XML_LOCATION_KEY: hed_xml_file_location}
     return hed_info_dictionary
 
 

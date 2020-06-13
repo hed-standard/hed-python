@@ -1,10 +1,10 @@
-from flask import Flask;
+from flask import Flask
 from shutil import copyfile
 
 
 app = Flask(__name__)
 with app.app_context():
-    from hedconversion import wiki2xml
+    from hedconverter import wiki2xml
     from hedemailer import constants
     app.config.from_object('config.Config')
 
