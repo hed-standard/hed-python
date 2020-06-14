@@ -13,11 +13,11 @@ GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
 
-DEPLOY_DIR="${ROOT_DIR}"
-CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
-CONFIG_FILE="${ROOT_DIR}/hed-python/webinterface/deploy/config.py"
-WSGI_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/web.wsgi"
-DOCKER_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/Dockerfile_dev"
+DEPLOY_DIR="${ROOT_DIR}/hed-python/webinterface/deploy"
+CODE_DEPLOY_DIR="${ROOT_DIR}/hedtools"
+CONFIG_FILE="${DEPLOY_DIR}/config.py"
+WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
+DOCKER_FILE="${DEPLOY_DIR}/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/hed-python/webinterface/deploy/Dockerfile"
 WEBINTERFACE_CODE_DIR="${DEPLOY_DIR}/hed-python/webinterface/web"
 VALIDATOR_CODE_DIR="${DEPLOY_DIR}/hed-python/hedvalidation/hedvalidator"
@@ -58,7 +58,7 @@ cp "${DOCKER_FILE}" "${DOCKER_FILE_DEPLOY}"
 echo Copying "${WEBINTERFACE_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
 cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 
-echo Copying "${VALIDATOR_CODE_DIR}" to "{$CODE_DEPLOY_DIR}" ...
+echo Copying "${VALIDATOR_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
 cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 
 echo Copying " ${GIT_HED_WILDCARD}" to "${HED_XML_DEPLOY_DIR}" ...
@@ -68,7 +68,7 @@ cp -r ${GIT_HED_WILDCARD} "${HED_XML_DEPLOY_DIR}"
 switch_to_web_directory()
 {
 echo Switching to web directory "${DEPLOY_DIR}" ...
-cd "${DEPLOY_DIR}" || exit 1
+cd "${DEPLOY_DIR}"
 }
 
 build_new_container()
@@ -94,7 +94,7 @@ cleanup_directory()
 echo Cleaning up directory...
 rm -rf "$GIT_DIR"
 rm -rf "$GIT_HED_DIR"
-cd "$ROOT_DIR" || exit 1
+cd "$ROOT_DIR" || error_exit Failed to clean up
 }
 
 error_exit()
@@ -110,11 +110,11 @@ else
 echo Branch specified... Using "$1" branch
 GIT_REPO_BRANCH="$1"
 fi
-clone_github_repo || error_exit "Cannot clone repo $GIT_REPO_URL branch $GIT_REPO_BRANCH"
-clone_hed_github_repo || error_exit "Cannot clone repo $GIT_HED_REPO_URL"
+clone_github_repo || error_exit "Cannot clone repo ${GIT_REPO_URL branch $GIT_REPO_BRANCH"
+clone_hed_github_repo || error_exit "Cannot clone repo ${GIT_HED_REPO_URL}"
 create_web_directory
-# switch_to_web_directory
-# build_new_container
-# delete_old_container
-# run_new_container
-# cleanup_directory
+switch_to_web_directory
+build_new_container
+delete_old_container
+run_new_container
+cleanup_directory
