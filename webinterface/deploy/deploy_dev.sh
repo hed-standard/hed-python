@@ -68,7 +68,7 @@ cp -r ${GIT_HED_WILDCARD} "${HED_XML_DEPLOY_DIR}"
 switch_to_web_directory()
 {
 echo Switching to web directory "${DEPLOY_DIR}" ...
-cd "${DEPLOY_DIR}"
+cd "${DEPLOY_DIR}" || exit 1
 }
 
 build_new_container()
@@ -94,7 +94,7 @@ cleanup_directory()
 echo Cleaning up directory...
 rm -rf "$GIT_DIR"
 rm -rf "$GIT_HED_DIR"
-cd "$ROOT_DIR"
+cd "$ROOT_DIR" || exit 1
 }
 
 error_exit()
