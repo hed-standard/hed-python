@@ -14,7 +14,7 @@ HOST_PORT=33000;
 CONTAINER_PORT=80;
 
 DEPLOY_DIR="${ROOT_DIR}/hed-python/webinterface/deploy"
-CODE_DEPLOY_DIR="${ROOT_DIR}/hedtools"
+CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${DEPLOY_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
 DOCKER_FILE="${DEPLOY_DIR}/Dockerfile_dev"
@@ -117,4 +117,4 @@ switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-cleanup_directory
+#cleanup_directory
