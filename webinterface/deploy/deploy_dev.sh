@@ -80,22 +80,25 @@ docker build -t "${IMAGE_NAME}" .
 
 delete_old_container()
 {
-echo Deleting old container...
-docker rm -f $CONTAINER_NAME
+echo Deleting old container  "${CONTAINER_NAME}" ...
+docker rm -f "${CONTAINER_NAME}"
 }
 
 run_new_container()
 {
 echo Running new container...
-docker run --restart=always --name $CONTAINER_NAME -d -p $HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
+docker run --restart=always --name "${CONTAINER_NAME}" -d -p "${HOST_PORT}":"${CONTAINER_PORT}" "${IMAGE_NAME}"
 }
 
 cleanup_directory()
 {
-echo Cleaning up directory...
-rm -rf "$GIT_DIR"
-rm -rf "$GIT_HED_DIR"
-cd "$ROOT_DIR" || error_exit Failed to clean up
+echo Cleaning up directories...
+echo Deleting "${GIT_DIR}" ...
+rm -rf "${GIT_DIR}"
+
+echo Deleting "${GIT_HED_DIR}" ...
+rm -rf "${GIT_HED_DIR}"
+cd "${ROOT_DIR}" || error_exit Failed to clean up
 }
 
 error_exit()
@@ -118,4 +121,4 @@ switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-#cleanup_directory
+cleanup_directory
