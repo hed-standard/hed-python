@@ -7,13 +7,13 @@
 ROOT_DIR="${PWD}"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
-GIT_REPO_URL="https://github.com/hed-standard/hed-python"
+GIT_REPO_URL="https://github.com/VisLab/hed-python"
 GIT_DIR="${PWD}/hed-python"
 GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
 
-DEPLOY_DIR="${PWD}"
+DEPLOY_DIR="${ROOT_DIR}"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/hed-python/webinterface/deploy/config.py"
 WSGI_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/web.wsgi"
@@ -23,19 +23,19 @@ WEBINTERFACE_CODE_DIR="${DEPLOY_DIR}/hed-python/webinterface/web"
 VALIDATOR_CODE_DIR="${DEPLOY_DIR}/hed-python/hedvalidation/hedvalidator"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
-GIT_HED_DIR="${PWD}/hed-specification"
-GIT_HED_WILDCARD="${GIT_HED_DIR}/hedxml/*"
+GIT_HED_DIR="${ROOT_DIR}/hed-specification"
+GIT_HED_WILDCARD="$ROOT_DIR}/hed-specification/hedxml/*"
 HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidator/hed"
 
 ##### Functions
 
 clone_github_repo(){
-echo Cloning hed-python repo in directory + "${PWD}"
+echo Cloning hed-python repo in directory  "${ROOT_DIR}" ...
 git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
 }
 
 clone_hed_github_repo(){
-echo Cloning HED repo in directory + "${PWD}"
+echo Cloning HED repo in directory "${ROOT_DIR}" ...
 git clone $GIT_HED_REPO_URL
 }
 
@@ -96,13 +96,13 @@ if [ -z "$1" ]; then
 echo No branch specified... Using master branch
 else
 echo Branch specified... Using "$1" branch
-GIT_REPO_BRANCH=$1
+GIT_REPO_BRANCH="$1"
 fi
 clone_github_repo || error_exit "Cannot clone repo $GIT_REPO_URL branch $GIT_REPO_BRANCH"
 clone_hed_github_repo || error_exit "Cannot clone repo $GIT_HED_REPO_URL"
 create_web_directory
-switch_to_web_directory
-build_new_container
-delete_old_container
-run_new_container
+# switch_to_web_directory
+# build_new_container
+# delete_old_container
+# run_new_container
 # cleanup_directory

@@ -22,7 +22,7 @@ VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidator"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
 GIT_HED_DIR="${PWD}/hed-specification"
-GIT_HED_WILDCARD="${GIT_HED_DIR}/hedxml/*"
+GIT_HED_WILDCARD="${PWD}"/hed-specification/hedxml/*
 HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidation/hed"
 
 ##### Functions
