@@ -23,8 +23,8 @@ WEBINTERFACE_CODE_DIR="${DEPLOY_DIR}/hed-python/webinterface/web"
 VALIDATOR_CODE_DIR="${DEPLOY_DIR}/hed-python/hedvalidation/hedvalidator"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
-GIT_HED_DIR="${ROOT_DIR}/hed-specification"
-GIT_HED_WILDCARD="$ROOT_DIR}/hed-specification/hedxml/*"
+GIT_HED_DIR="${ROOT_DIR}/hed-specification/"
+GIT_HED_WILDCARD="${ROOT_DIR}/hed-specification/hedxml/"*
 HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidator/hed"
 
 ##### Functions
@@ -42,27 +42,39 @@ git clone $GIT_HED_REPO_URL
 create_web_directory()
 {
 echo Creating the web directory...
-echo Currently in "${PWD}"
+echo Currently in "${PWD}" ... root directory is "${ROOT_DIR}"
 echo Making the code  deploy directory "$CODE_DEPLOY_DIR" ...
 mkdir "$CODE_DEPLOY_DIR"
-cp "$CONFIG_FILE" "$CODE_DEPLOY_DIR"
-cp "$WSGI_FILE" "$CODE_DEPLOY_DIR"
-cp "$DOCKER_FILE" "$DOCKER_FILE_DEPLOY"
-cp -r "$WEBINTERFACE_CODE_DIR" "$CODE_DEPLOY_DIR"
-cp -r "$VALIDATOR_CODE_DIR" "$CODE_DEPLOY_DIR"
-cp -r "${GIT_HED_WILDCARD}" "$HED_XML_DEPLOY_DIR"
+
+echo Copying "${CONFIG_FILE}" to "${CODE_DEPLOY_DIR}" ...
+cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
+
+echo Copying "${WSGI_FILE}" to "${WSGI_FILE}" ...
+cp "${WSGI_FILE}" "${CODE_DEPLOY_DIR}"
+
+echo Copying "${DOCKER_FILE}" to "${DOCKER_FILE_DEPLOY}" ...
+cp "${DOCKER_FILE}" "${DOCKER_FILE_DEPLOY}"
+
+echo Copying "${WEBINTERFACE_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
+cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+
+echo Copying "${VALIDATOR_CODE_DIR}" to "{$CODE_DEPLOY_DIR}" ...
+cp -r "${VALIDATOR_CODE_DIR}" "{$CODE_DEPLOY_DIR}"
+
+echo Copying " ${GIT_HED_WILDCARD}" to "${HED_XML_DEPLOY_DIR}" ...
+cp -r ${GIT_HED_WILDCARD} "${HED_XML_DEPLOY_DIR}"
 }
 
 switch_to_web_directory()
 {
-echo Switching to web directory "$DEPLOY_DIR" ...
-cd "$DEPLOY_DIR"
+echo Switching to web directory "${DEPLOY_DIR}" ...
+cd "${DEPLOY_DIR}"
 }
 
 build_new_container()
 {
-echo Building new container...
-docker build -t $IMAGE_NAME .
+echo Building new container "${IMAGE_NAME}" ...
+docker build -t "${IMAGE_NAME}" .
 }
 
 delete_old_container()
