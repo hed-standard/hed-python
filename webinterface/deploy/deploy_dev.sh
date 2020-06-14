@@ -7,8 +7,9 @@
 ROOT_DIR="${PWD}"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
-GIT_REPO_URL="https://github.com/VisLab/hed-python"
-GIT_DIR="${PWD}/hed-python"
+# GIT_REPO_URL="https://github.com/VisLab/hed-python"
+GIT_REPO_URL="https://github.com/hed-standard/hed-python"
+GIT_DIR="${ROOT_DIR}/hed-python"
 GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
@@ -31,7 +32,7 @@ HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidator/hed"
 
 clone_github_repo(){
 echo Cloning hed-python repo in directory  "${ROOT_DIR}" ...
-git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
+git clone "${GIT_REPO_URL}" -b "${GIT_REPO_BRANCH}"
 }
 
 clone_hed_github_repo(){
@@ -49,7 +50,7 @@ mkdir "$CODE_DEPLOY_DIR"
 echo Copying "${CONFIG_FILE}" to "${CODE_DEPLOY_DIR}" ...
 cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
 
-echo Copying "${WSGI_FILE}" to "${WSGI_FILE}" ...
+echo Copying "${WSGI_FILE}" to "${CODE_DEPLOY_DIR}" ...
 cp "${WSGI_FILE}" "${CODE_DEPLOY_DIR}"
 
 echo Copying "${DOCKER_FILE}" to "${DOCKER_FILE_DEPLOY}" ...
