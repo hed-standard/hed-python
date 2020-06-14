@@ -110,7 +110,7 @@ else
 echo Branch specified... Using "$1" branch
 GIT_REPO_BRANCH="$1"
 fi
-clone_github_repo || error_exit "Cannot clone repo ${GIT_REPO_URL branch $GIT_REPO_BRANCH"
+clone_github_repo || error_exit "Cannot clone repo ${GIT_REPO_URL} branch ${GIT_REPO_BRANCH}"
 clone_hed_github_repo || error_exit "Cannot clone repo ${GIT_HED_REPO_URL}"
 create_web_directory
 switch_to_web_directory
