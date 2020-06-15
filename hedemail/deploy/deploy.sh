@@ -13,54 +13,55 @@ CONFIG_FILE="${SERVER_CONFIG_DIR}/config.py"
 WSGI_FILE="${SERVER_CONFIG_DIR}/hedemailer.wsgi"
 
 
-HEDEMAILER_CODE_DIR="$GIT_DIR/hedemailer"
-CONVERSION_CODE_DIR="$GIT_DIR/hedconversion/hedconversion"
+HEDEMAILER_CODE_DIR="$GIT_DIR/hedemail"
+CONVERSION_CODE_DIR="$GIT_DIR/hedconversion/hedconverter"
 ENV_DIR="${PWD}/hedemailer_env"
 
-SERVER_CODE_DIR="/var/www/gollum/hedemailer"
-SERVER_ENV_DIR="/var/www/gollum/env"
+SERVER_BASE_DIR="/var/www/gollum"
+SERVER_CODE_DIR="${SERVER_BASE_DIR}/hedemail"
+SERVER_ENV_DIR="${SERVER_BASE_DIR}/env"
 
 ##### Functions
 
 clone_github_repo(){
-echo Cloning repo ... 
+echo Cloning repo ...
 git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
 }
 
 create_virtual_env() {
 echo Creating virtual env...
-virtualenv -p python3 $ENV_DIR
-source $ENV_DIR/bin/activate
-pip3 install -r hed-python/hedemailer/deploy/requirements.txt
+virtualenv -p python3 ${ENV_DIR}
+source ${ENV_DIR}/bin/activate
+pip3 install -r ${HEDEMAILER_CODE_DIR}/deploy/requirements.txt
 }
 
 cleanup_old_server_data() {
 echo Cleaning up old server data...
-sudo rm -r $SERVER_CODE_DIR
-sudo rm -r $SERVER_ENV_DIR
+sudo rm -r ${SERVER_CODE_DIR}
+sudo rm -r ${SERVER_ENV_DIR}
 sudo rm -r /var/www/gollum/
 sudo mkdir /var/www/gollum
 }
 
 move_env_to_server_and_modify() {
 echo Moving to server...
-sudo cp -r $GIT_DIR/hedemailer/ $SERVER_CODE_DIR
-sudo cp -r $GIT_DIR/hedconversion/hedconversion/ $SERVER_CODE_DIR/hedconversion/
-sudo cp -r $ENV_DIR $SERVER_ENV_DIR
-sudo sed -i -e "s|VIRTUAL_ENV=\"$ENV_DIR\"|VIRTUAL_ENV=\"$SERVER_ENV_DIR\"|g" $SERVER_ENV_DIR/bin/activate
+sudo cp -r ${HEDEMAILER_CODE_DIR} ${SERVER_CODE_DIR}
+sudo cp -r ${CONVERSION_CODE_DIR} ${SERVER_CODE_DIR}/hedconverter/
+sudo cp -r ${ENV_DIR} ${SERVER_ENV_DIR}
+sudo sed -i -e "s|VIRTUAL_ENV=\"${ENV_DIR}\"|VIRTUAL_ENV=\"${SERVER_ENV_DIR}\"|g" ${SERVER_ENV_DIR}/bin/activate
 }
 
 move_config_to_server() {
 echo Moving config to server...
-sudo cp $CONFIG_FILE $SERVER_CODE_DIR/
-sudo cp $WSGI_FILE $SERVER_CODE_DIR/
+sudo cp ${CONFIG_FILE} ${SERVER_CODE_DIR}/
+sudo cp ${WSGI_FILE} ${SERVER_CODE_DIR}/
 }
 cleanup_directory()
 {
 echo Cleaning up directory...
-rm -rf $GIT_DIR
-rm -rf $ENV_DIR
-cd $ROOT_DIR
+rm -rf ${GIT_DIR}
+rm -rf ${ENV_DIR}
+cd ${ROOT_DIR}
 }
 
 restart_server() {
