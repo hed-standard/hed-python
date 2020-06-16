@@ -18,12 +18,12 @@ CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
 WEBINTERFACE_CODE_DIR="hed-python/webinterface/web"
-VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidator"
+VALIDATOR_CODE_DIR="hed-python/hedvalidation/hed"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
 GIT_HED_DIR="${PWD}/hed-specification"
 GIT_HED_WILDCARD="${PWD}/hed-specification/hedxml/."
-HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidator/hed"
+HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hed/validator/hed"
 
 ##### Functions
 

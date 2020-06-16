@@ -1,6 +1,6 @@
 import os
 
-from hedvalidator.hed_input_reader import HedInputReader
+from hed.validator.hed_input_reader import HedInputReader
 
 #TODO: These examples need to be cleaned up
 def print_issues(title, issues):

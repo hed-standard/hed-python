@@ -7,7 +7,7 @@ Created on Feb 27, 2017
 """
 
 import urllib.request
-from hedconverter import parsewiki
+from hed.converter import parsewiki
 import tempfile
 
 HED_XML_TREE_KEY = 'hed_xml_tree'

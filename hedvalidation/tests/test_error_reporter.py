@@ -1,6 +1,6 @@
 import unittest
 
-from hedvalidator import error_reporter
+from hed.validator import error_reporter
 
 
 class Test(unittest.TestCase):

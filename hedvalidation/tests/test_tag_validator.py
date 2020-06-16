@@ -1,8 +1,8 @@
 import random
 import os
 import unittest
-from hedvalidator.tag_validator import TagValidator
-from hedvalidator.hed_dictionary import HedDictionary
+from hed.validator.tag_validator import TagValidator
+from hed.validator.hed_dictionary import HedDictionary
 
 
 @unittest.skip("many tests fail to due no update to be compatible with new XML files")

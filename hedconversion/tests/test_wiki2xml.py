@@ -5,7 +5,7 @@ Created on Jul 25, 2017
 """
 
 import unittest
-from hedconverter.wiki2xml import *
+from hed.converter.wiki2xml import *
 
 
 class Test(unittest.TestCase):

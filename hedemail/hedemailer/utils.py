@@ -1,4 +1,4 @@
-from hedconverter import wiki2xml
+from hed.converter import wiki2xml
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from flask import current_app

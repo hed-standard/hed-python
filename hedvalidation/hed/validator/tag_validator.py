@@ -10,8 +10,8 @@ Created on Oct 2, 2017
 import re
 import time
 import inflect
-from hedvalidator import error_reporter
-from hedvalidator import warning_reporter
+from hed.validator import error_reporter
+from hed.validator import warning_reporter
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
