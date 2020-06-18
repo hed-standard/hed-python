@@ -4,8 +4,8 @@ from shutil import copyfile
 
 app = Flask(__name__)
 with app.app_context():
-    from hedconverter import wiki2xml
-    from hedemailer import constants
+    from hed.converter import wiki2xml
+    from hed.emailer import constants
     app.config.from_object('config.Config')
 
     hed_wiki_url = app.config[constants.CONFIG_HED_WIKI_URL_KEY]

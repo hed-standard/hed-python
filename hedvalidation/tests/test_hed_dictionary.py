@@ -4,7 +4,7 @@ import os
 import defusedxml
 from defusedxml.lxml import parse
 
-from hedvalidator.hed_dictionary import HedDictionary
+from hed.validator.hed_dictionary import HedDictionary
 
 
 class Test(unittest.TestCase):

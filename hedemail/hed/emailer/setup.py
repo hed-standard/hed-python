@@ -1,6 +1,6 @@
 import os
 from flask.app import Flask
-from hedemailer.app_factory import AppFactory
+from hed.emailer.app_factory import AppFactory
 
 CONFIG_ENVIRON_NAME = 'HEDEMAILER_CONFIG_CLASS'
 

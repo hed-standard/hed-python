@@ -1,14 +1,10 @@
 """
-This module contains functions for parsing a wiki HED schema. 
-
-Created on Feb 28, 2017
-
-@author: Jeremy Cockfield
+This module contains functions for parsing a wiki HED schema.
 """
 
 from xml.etree.ElementTree import Element, SubElement
 from xml.etree import ElementTree as et
-from hedconverter import parsetag
+from hed.converter import parsetag
 from xml.dom import minidom
 import os
 

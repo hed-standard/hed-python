@@ -1,10 +1,10 @@
-from hedconverter import wiki2xml
+from hed.converter import wiki2xml
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from flask import current_app
 import os
 import urllib.request
-from hedemailer import constants
+from hed.emailer import constants
 
 app_config = current_app.config
 

@@ -14,7 +14,7 @@ WSGI_FILE="${SERVER_CONFIG_DIR}/hedemailer.wsgi"
 
 
 HEDEMAILER_CODE_DIR="$GIT_DIR/hedemail"
-CONVERSION_CODE_DIR="$GIT_DIR/hedconversion/hedconverter"
+CONVERSION_CODE_DIR="$GIT_DIR/hedconversion/hed"
 ENV_DIR="${PWD}/hedemailer_env"
 
 SERVER_BASE_DIR="/var/www/gollum"
@@ -46,7 +46,7 @@ sudo mkdir /var/www/gollum
 move_env_to_server_and_modify() {
 echo Moving to server...
 sudo cp -r ${HEDEMAILER_CODE_DIR} ${SERVER_CODE_DIR}
-sudo cp -r ${CONVERSION_CODE_DIR} ${SERVER_CODE_DIR}/hedconverter/
+sudo cp -r ${CONVERSION_CODE_DIR} ${SERVER_CODE_DIR}/
 sudo cp -r ${ENV_DIR} ${SERVER_ENV_DIR}
 sudo sed -i -e "s|VIRTUAL_ENV=\"${ENV_DIR}\"|VIRTUAL_ENV=\"${SERVER_ENV_DIR}\"|g" ${SERVER_ENV_DIR}/bin/activate
 }

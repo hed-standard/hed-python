@@ -1,12 +1,10 @@
 '''
 This module contains the Hed_Dictionary class which encapsulates all HED tags, tag attributes, unit classes, and
-unit class attributes in a dictionary. The dictionary is a dictionary of dictionaries. The dictionary names are
+unit class attributes in a dictionary.
+
+The dictionary is a dictionary of dictionaries. The dictionary names are
 'default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended', 'required', 'requireChild',
 'tags', 'takesValue', 'unique', 'units', and 'unitClass'.
-Created on Sept 21, 2017
-
-@author: Jeremy Cockfield
-
 '''
 
 from defusedxml.lxml import parse

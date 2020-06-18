@@ -1,5 +1,5 @@
 from flask import Blueprint, current_app, request
-from hedemailer import hed_emailer, utils, constants
+from hed.emailer import hed_emailer, utils, constants
 
 app_config = current_app.config
 route_blueprint = Blueprint('route_blueprint', __name__)

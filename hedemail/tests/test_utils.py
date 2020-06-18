@@ -1,7 +1,7 @@
 import unittest
 import json
-from hedemailer.app_factory import AppFactory
-import hedemailer
+from hed.emailer.app_factory import AppFactory
+from hed import emailer
 
 
 class Test(unittest.TestCase):
@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
     def create_test_app(cls):
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hedemailer.routes import route_blueprint
+            from hed.emailer.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             cls.app = app.test_client()
 
@@ -33,17 +33,17 @@ class Test(unittest.TestCase):
 
     def test_wiki_page_is_hed_schema(self):
         github_payload_dictionary = {}
-        is_hed_schema = hedemailer.utils.push_page_is_hed_schema(github_payload_dictionary)
+        is_hed_schema = emailer.utils.push_page_is_hed_schema(github_payload_dictionary)
         self.assertFalse(is_hed_schema, 'Wiki page should not be HED schema')
         github_payload_dictionary = {}
-        is_hed_schema = hedemailer.utils.push_page_is_hed_schema(github_payload_dictionary)
+        is_hed_schema = emailer.utils.push_page_is_hed_schema(github_payload_dictionary)
         self.assertFalse(is_hed_schema, 'Wiki page should be HED schema')
 
     def test_delete_file_if_exist(self):
         self.create_file_in_data_dir(self.file_that_exist)
-        file_deleted = hedemailer.utils.delete_file_if_exist(self.file_that_exist)
+        file_deleted = emailer.utils.delete_file_if_exist(self.file_that_exist)
         self.assertTrue(file_deleted, 'File should have been deleted')
-        file_deleted = hedemailer.utils.delete_file_if_exist(self.file_that_does_not_exit)
+        file_deleted = emailer.utils.delete_file_if_exist(self.file_that_does_not_exit)
         self.assertFalse(file_deleted, 'File should not have been deleted. Does not exist')
 
 

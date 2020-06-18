@@ -1,15 +1,11 @@
 '''
 This module is used to split tags in a HED string .
 
-Created on Nov 15, 2017
-
-@author: Jeremy Cockfield
-
 '''
 
 import copy
-from hedvalidator import error_reporter
-from hedvalidator import warning_reporter
+from hed.validator import error_reporter
+from hed.validator import warning_reporter
 
 
 class HedStringDelimiter:

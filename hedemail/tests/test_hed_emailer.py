@@ -1,8 +1,8 @@
 import json
 import unittest
 
-from hedemailer import constants
-from hedemailer.app_factory import AppFactory
+from hed.emailer import constants
+from hed.emailer.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
     def create_test_app(cls):
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hedemailer.routes import route_blueprint
+            from hed.emailer.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             cls.app = app.test_client()
 
