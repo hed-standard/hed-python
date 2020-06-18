@@ -1,10 +1,6 @@
 '''
 This module is used to validate the HED tags as strings.
 
-Created on Oct 2, 2017
-
-@author: Jeremy Cockfield
-
 '''
 
 import re

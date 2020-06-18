@@ -1,8 +1,5 @@
 """
 This module contains the configurations for the gollum_email webhook application.
-Created on Mar 14, 2017
-
-@author: Jeremy Cockfield
 """
 
 import socket

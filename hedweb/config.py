@@ -1,8 +1,5 @@
 """
 This module contains the configurations for the HEDTools application.
-Created on Dec 21, 2017
-
-@author: Jeremy Cockfield
 """
 
 import os

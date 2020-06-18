@@ -1,9 +1,5 @@
 """
 This module is a webhook implementation that sends out an email whenever there is an update to the Wiki HED schema.
-
-Created on Mar 8, 2017
-
-@author: Jeremy Cockfield
 """
 
 import smtplib

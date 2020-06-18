@@ -3,10 +3,6 @@ This module contains the HedInputReader class which is used to validate the tags
 types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after creating a HedInputReader class call
 the get_validation_issues() function.
 
-Created on Oct 2, 2017
-
-@author: Jeremy Cockfield
-
 """
 
 import os

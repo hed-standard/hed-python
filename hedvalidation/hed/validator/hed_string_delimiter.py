@@ -1,10 +1,6 @@
 '''
 This module is used to split tags in a HED string .
 
-Created on Nov 15, 2017
-
-@author: Jeremy Cockfield
-
 '''
 
 import copy

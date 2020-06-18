@@ -1,10 +1,6 @@
 """
 This module is used to report errors found in the validation.
 
-Created on Oct 2, 2017
-
-@author: Jeremy Cockfield
-
 """
 
 

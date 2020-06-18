@@ -1,9 +1,5 @@
 """
-This module contains functions for parsing a wiki HED schema. 
-
-Created on Feb 28, 2017
-
-@author: Jeremy Cockfield
+This module contains functions for parsing a wiki HED schema.
 """
 
 from xml.etree.ElementTree import Element, SubElement

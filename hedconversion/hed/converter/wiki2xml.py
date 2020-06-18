@@ -1,9 +1,5 @@
 """
-This module contains functions that convert a wiki HED schema into a XML HED schema. 
-
-Created on Feb 27, 2017
-
-@author: Jeremy Cockfield 
+This module contains functions that convert a wiki HED schema into a XML HED schema.
 """
 
 import urllib.request
