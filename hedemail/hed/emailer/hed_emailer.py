@@ -10,7 +10,7 @@ import smtplib
 import json
 from email.mime.text import MIMEText
 from flask import current_app
-from hedemailer import utils, constants
+from hed.emailer import utils, constants
 
 app_config = current_app.config
 

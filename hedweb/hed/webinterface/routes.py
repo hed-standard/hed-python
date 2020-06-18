@@ -1,9 +1,9 @@
 from flask import render_template, Response, request, Blueprint, current_app
 import os
 import json
-from web import utils
-from web.constants.error import error_constants
-from web.constants.routing import page_constants, route_constants, blueprint_constants
+from hed.webinterface import utils
+from hed.webinterface.constants.error import error_constants
+from hed.webinterface.constants.routing import page_constants, route_constants, blueprint_constants
 import traceback
 
 app_config = current_app.config

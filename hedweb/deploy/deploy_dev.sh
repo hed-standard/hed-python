@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# deploy.sh - A script used to build and deploy a docker container for the HEDTools web validator
+# deploy.sh - A script used to build and deploy a docker container for the HEDTools webinterface validator
 
 ##### Constants
 
@@ -14,13 +14,13 @@ GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
 
-DEPLOY_DIR="${ROOT_DIR}/hed-python/webinterface/deploy"
+DEPLOY_DIR="${ROOT_DIR}/hed-python/hedweb/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
-WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
+WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
 DOCKER_FILE="${DEPLOY_DIR}/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
-WEBINTERFACE_CODE_DIR="${ROOT_DIR}/hed-python/webinterface/web"
+WEBINTERFACE_CODE_DIR="${ROOT_DIR}/hed-python/hedweb/hed"
 VALIDATOR_CODE_DIR="${ROOT_DIR}/hed-python/hedvalidation/hed"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"

@@ -13,11 +13,11 @@ GIT_REPO_BRANCH="master"
 HOST_PORT=33000
 CONTAINER_PORT=80
 
-DEPLOY_DIR="hed-python/webinterface/deploy"
+DEPLOY_DIR="hed-python/hedweb/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
-WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
-WEBINTERFACE_CODE_DIR="hed-python/webinterface/web"
+WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
+WEBINTERFACE_CODE_DIR="hed-python/hedweb/hed"
 VALIDATOR_CODE_DIR="hed-python/hedvalidation/hed"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"

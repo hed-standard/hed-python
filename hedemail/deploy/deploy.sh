@@ -13,7 +13,7 @@ CONFIG_FILE="${SERVER_CONFIG_DIR}/config.py"
 WSGI_FILE="${SERVER_CONFIG_DIR}/hedemailer.wsgi"
 
 
-HEDEMAILER_CODE_DIR="$GIT_DIR/hedemail"
+HEDEMAILER_CODE_DIR="$GIT_DIR/hedemail/hed/"
 CONVERSION_CODE_DIR="$GIT_DIR/hedconversion/hed/"
 ENV_DIR="${PWD}/hedemailer_env"
 

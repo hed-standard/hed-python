@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from flask import current_app
 import os
 import urllib.request
-from hedemailer import constants
+from hed.emailer import constants
 
 app_config = current_app.config
 
