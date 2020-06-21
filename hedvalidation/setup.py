@@ -5,10 +5,10 @@ with open("../hedvalidation/README.md", "r") as fh:
 
 setuptools.setup(
     name="hedvalidation",
-    version="0.0.3",
+    version="1.0.0",
     author="VisLab, Jeremy Cockfield, Alexander Jones, Owen Winterberg, Ian Callanan, Kay Robbins",
     author_email="Kay.Robbins@utsa.edu",
-    description="Python tools used to validate strings and spreadsheets containing tags against a HED schema.",
+    description="Python tools used to validate strings and spreadsheets containing tags against a HED (Hierarchical Event Descriptor) schema.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hed-standard/hed-python/hedvalidation/",

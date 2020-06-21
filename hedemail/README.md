@@ -1,8 +1,15 @@
-# hedemailer
+# hedemail
 
-hedemailer is a Python 3 package is a webhook implementation that sends out an email whenever there is an update to the Wiki HED schema. 
+hedemail package implements a webhook to send an email when there is an update to
+any of the .mediawiki files on a specified repository.
 
-For the HED schema please visit: <https://github.com/hed-standard/hed-specification> or
+### What is HED?
+HED (Hierarchical Event Descriptors) is a semi-structured vocabulary and
+framework for annotating events in a machine-friendly and uniform way. The HED
+framework is being developed and maintained by the
+[hed-standard organization](https://github.com/hed-standard).  
+
+For more information on HED visit: <https://github.com/hed-standard/hed-specification> or
 [hedtags.org](http://hedtags.org) for an html schema viewer.
 
 ### Dependencies
