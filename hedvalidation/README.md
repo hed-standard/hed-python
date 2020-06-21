@@ -1,26 +1,25 @@
-Python tools used to validate spreadsheet tags against a HED schema. 
+# hedvalidation
+Python project to implement validation of HED (Hierarchical Event Descriptors). 
 
+### What is HED?
+HED (Hierarchical Event Descriptors) is a semi-structured vocabulary and
+framework for annotating events in a machine-friendly and uniform way. The HED
+framework is being developed and maintained by the
+[hed-standard organization](https://github.com/hed-standard).  
 
-### Releases
-Version 1.0.0 ????
-* Initial release
+For more information on HED visit: <https://github.com/hed-standard/hed-specification> or
+[hedtags.org](http://hedtags.org) for an html schema viewer.
 
-Version 1.0.1 Released 4/30/19
-* Fix issue where the required tag prefix could end up duplicated.  eg: Event/Description/Event/Description
+### What does it do?
+The HED validator python module, hed.validator, contains code to validate HED tags presented
+in either string form or as spreadsheets.  See the examples directory for code examples of
+how to call the validator in either form.
 
-Version 1.0.2 Released 5/10/19
-* Fix issues with validating tags parenthesis in them. eg: (Paradigm/Rapid serial object transformation,Paradigm/Reading (Overt))
+### HED online validator
+Most people who just want to validate HED tags in their data will prefer to use the
+[HED online validator](http://visual.cs.utsa.edu/hed).
 
-Version 1.0.3 Released 5/10/19
-* Update error message for unmatched parenthesis
-* Add error message for invalid characters.  Invalid characters are currently "[]{}"
-
-Version 1.0.4 Released 5/12/19
-* Further grouping fix.  Don't fail when two groups end at the same time.  eg: ((Item/ID/Description value,Item/ID/Local)~(Item/ID/Local,Item/Group ID/Description value))
-
-Version 1.0.5 Released 5/16/19
-* Fix unit type checking to actually check for units
-* Also validate the number when given a unit tag(it was not validated before if a unit name was present)
-
-Version 1.0.6 Released 5/16/19
-* Update regular expression that validates unit numbers to check for scientific numbers, not just digits.
+### HED in MATLAB and with EEGLAB
+HED tagging is integrated into [EEGLAB](https://sccn.ucsd.edu/eeglab/index.php) as a plugin.
+HED tagging support using a graphical user interface with integrated validation is available at
+<https://github.com/hed-standard/hed-matlab>.
