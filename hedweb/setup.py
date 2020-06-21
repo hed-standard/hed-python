@@ -5,7 +5,7 @@ with open("../hedweb/README.md", "r") as fh:
 
 setuptools.setup(
     name="hedweb",
-    version="0.0.1",
+    version="1.0.0",
     author="VisLab, Jeremy Cockfield, Ian Callanan, Kay Robbins",
     author_email="Kay.Robbins@utsa.edu",
     description="Web interface for HED validation.",

@@ -5,10 +5,10 @@ with open("../hedemail/README.md", "r") as fh:
 
 setuptools.setup(
     name="hedemail",
-    version="0.0.1",
+    version="1.0.0",
     author="VisLab, Jeremy Cockfield, Ian Callanan, Kay Robbins",
     author_email="Kay.Robbins@utsa.edu",
-    description="Implementation of webhook to send email when wikimedia representation of the HED schema on GitHub changes.",
+    description="Webhook implementation for sending email when mediawiki representation of the HED schema on GitHub changes.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hed-standard/hed-python/hedemail/",

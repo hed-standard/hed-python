@@ -1,7 +1,7 @@
-'''
+"""
 This module is used to validate the HED tags as strings.
 
-'''
+"""
 
 import re
 import time
