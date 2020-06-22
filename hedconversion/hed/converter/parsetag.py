@@ -13,7 +13,7 @@ unit_class_attribute = 'unitClass'
 no_wiki_tag = '</?nowiki>'
 square_bracket_removal_expression = r'[\[\]]'
 tag_name_element = 'name'
-invalid_characters_to_strip = ["&#8203"]
+invalid_characters_to_strip = ["&#8203;"]
 tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()\^µ]+\s*)+'
 tag_description_element = 'description'
 tag_element = 'node'
