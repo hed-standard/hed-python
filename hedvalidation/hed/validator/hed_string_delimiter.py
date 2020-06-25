@@ -1,11 +1,10 @@
-'''
-This module is used to split tags in a HED string .
+"""
+This module is used to split tags in a HED string.
 
-'''
+"""
 
 import copy
 from hed.validator import error_reporter
-from hed.validator import warning_reporter
 
 
 class HedStringDelimiter:
@@ -13,8 +12,6 @@ class HedStringDelimiter:
     DOUBLE_QUOTE_CHARACTER = '"'
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
-    OPENING_ATTRIBUTE_GROUP_CHARACTER = '{'
-    CLOSING_ATTRIBUTE_GROUP_CHARACTER = '}'
     TILDE = '~'
 
     def __init__(self, hed_string):
@@ -26,12 +23,12 @@ class HedStringDelimiter:
             A HED string consisting of tags and tag groups.
         Returns
         -------
-        HedStringDelimiter object
+        HedStringDelimiter
             A HedStringDelimiter object.
 
         """
         self.hed_string = hed_string
-        self._split_hed_string_list = HedStringDelimiter.split_hed_string_into_list(hed_string)
+        self._split_hed_string_list = self.split_hed_string_into_list(hed_string)
         self.tags = []
         self.tag_groups = []
         self.tag_group_strings = []
@@ -43,7 +40,6 @@ class HedStringDelimiter:
         self.formatted_tags = HedStringDelimiter.format_hed_tags_in_list(self.tags)
         self.formatted_top_level_tags = HedStringDelimiter.format_hed_tags_in_list(self.top_level_tags)
         self.formatted_tag_groups = HedStringDelimiter.format_hed_tags_in_list(self.tag_groups)
-
 
     def get_split_hed_string_list(self):
         """Gets the split_hed_string_list field.
@@ -70,6 +66,19 @@ class HedStringDelimiter:
 
         """
         return self.hed_string
+
+    def get_issues(self):
+        """Gets the issues field.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        list
+            A list containing the validation issues encountered while parsing the HED string.
+
+        """
+        return self.tags
 
     def get_tags(self):
         """Gets the tags field.
@@ -162,41 +171,7 @@ class HedStringDelimiter:
         """
         return self.tag_group_strings
 
-    def hed_string_is_an_attribute_group(self, hed_string, full_hed_string):
-        issues = ''
-        trimmed_hed_string = hed_string.strip()
-        if self.OPENING_ATTRIBUTE_GROUP_CHARACTER in trimmed_hed_string:
-            if self.CLOSING_ATTRIBUTE_GROUP_CHARACTER not in trimmed_hed_string:
-                issues + error_reporter.report_error_type('invalidCharacter',
-                                                          character=self.OPENING_ATTRIBUTE_GROUP_CHARACTER,
-                                                          index=full_hed_string.index(
-                                                              self.OPENING_ATTRIBUTE_GROUP_CHARACTER),
-                                                          hed_string=full_hed_string)
-                return issues
-            elif trimmed_hed_string.index(self.OPENING_ATTRIBUTE_GROUP_CHARACTER) > trimmed_hed_string.index(
-                    self.CLOSING_ATTRIBUTE_GROUP_CHARACTER):
-                issues + error_reporter.report_error_type('invalidCharacter',
-                                                          character=self.OPENING_ATTRIBUTE_GROUP_CHARACTER,
-                                                          index=full_hed_string.index(
-                                                              self.OPENING_ATTRIBUTE_GROUP_CHARACTER),
-                                                          hed_string=full_hed_string)
-                issues + error_reporter.report_error_type('invalidCharacter',
-                                                          character=self.CLOSING_ATTRIBUTE_GROUP_CHARACTER,
-                                                          index=full_hed_string.index(
-                                                              self.CLOSING_ATTRIBUTE_GROUP_CHARACTER),
-                                                          hed_string=full_hed_string)
-                return issues
-            return issues
-        elif self.CLOSING_ATTRIBUTE_GROUP_CHARACTER in trimmed_hed_string:
-            issues + error_reporter.report_error_type('invalidCharacter',
-                                                      character=self.CLOSING_ATTRIBUTE_GROUP_CHARACTER,
-                                                      index=full_hed_string.index(
-                                                          self.CLOSING_ATTRIBUTE_GROUP_CHARACTER),
-                                                      hed_string=full_hed_string)
-            return issues
-        return issues
-
-    def _find_group_tags(self, tag_group_list):  # rewrite for parsing attribute groups change
+    def _find_group_tags(self, tag_group_list):
         """Finds the tags that are in groups and put them in a set. The groups themselves are also put into a list.
 
         Parameters
@@ -210,7 +185,7 @@ class HedStringDelimiter:
         for tag_or_group in tag_group_list:
             if HedStringDelimiter.hed_string_is_a_group(tag_or_group):
                 tag_group_string = HedStringDelimiter.remove_group_parentheses(tag_or_group)
-                nested_group_tag_list = HedStringDelimiter.split_hed_string_into_list(tag_group_string)
+                nested_group_tag_list = self.split_hed_string_into_list(tag_group_string)
                 self._find_group_tags(nested_group_tag_list)
                 self.tag_groups.append(nested_group_tag_list)
                 self.tag_group_strings.append(tag_or_group)
@@ -313,8 +288,7 @@ class HedStringDelimiter:
             formatted_hed_tags_set.add(formatted_hed_tag)
         return formatted_hed_tags_set
 
-    @staticmethod
-    def split_hed_string_into_list(hed_string):  # rewrite for parsing attribute groups change
+    def split_hed_string_into_list(self, hed_string):
         """Splits the tags and non-nested groups in a HED string based on a delimiter. The default delimiter is a comma.
 
         Parameters
@@ -327,26 +301,23 @@ class HedStringDelimiter:
             A list containing the individual tags and tag groups in the HED string. Nested tag groups are not split.
 
         """
-        invalid_characters = ['[', ']']
         split_hed_string = []
-        number_of_opening_groups = 0
-        number_of_closing_groups = 0
+        number_of_opening_parentheses = 0
+        number_of_closing_parentheses = 0
         current_tag = ''
-        for character in hed_string:
+        for index, character in enumerate(hed_string):
             if character == HedStringDelimiter.DOUBLE_QUOTE_CHARACTER:
                 pass
-            elif character == HedStringDelimiter.OPENING_GROUP_CHARACTER \
-                    or character == HedStringDelimiter.OPENING_ATTRIBUTE_GROUP_CHARACTER:
-                number_of_opening_groups += 1
-            elif character == HedStringDelimiter.CLOSING_GROUP_CHARACTER \
-                    or character == HedStringDelimiter.CLOSING_ATTRIBUTE_GROUP_CHARACTER:
-                number_of_closing_groups += 1
-            if number_of_opening_groups == number_of_closing_groups and character == HedStringDelimiter.TILDE:
+            elif character == HedStringDelimiter.OPENING_GROUP_CHARACTER:
+                number_of_opening_parentheses += 1
+            elif character == HedStringDelimiter.CLOSING_GROUP_CHARACTER:
+                number_of_closing_parentheses += 1
+            if number_of_opening_parentheses == number_of_closing_parentheses and character == HedStringDelimiter.TILDE:
                 if not HedStringDelimiter.string_is_space_or_empty(current_tag):
                     split_hed_string.append(current_tag.strip())
                 split_hed_string.append(HedStringDelimiter.TILDE)
                 current_tag = ''
-            elif number_of_opening_groups == number_of_closing_groups and character == \
+            elif number_of_opening_parentheses == number_of_closing_parentheses and character == \
                     HedStringDelimiter.DELIMITER:
                 if not HedStringDelimiter.string_is_space_or_empty(current_tag):
                     split_hed_string.append(current_tag.strip())
