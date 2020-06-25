@@ -1,6 +1,7 @@
 import unittest
-import hed.webinterface
+from hed import webinterface
 from hed.webinterface.app_factory import AppFactory
+from hed.webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants
 import os
 
 
@@ -23,9 +24,9 @@ class Test(unittest.TestCase):
         self.assertTrue(self.major_version_key in hed_info)
 
     def test_file_extension_is_valid(self):
-        file_name = 'abc.' + webinterface.utils.SPREADSHEET_FILE_EXTENSIONS[0]
+        file_name = 'abc.' + spreadsheet_constants.SPREADSHEET_FILE_EXTENSIONS[0]
         is_valid = webinterface.utils._file_extension_is_valid(file_name,
-                                                      webinterface.utils.SPREADSHEET_FILE_EXTENSIONS)
+                                                      spreadsheet_constants.SPREADSHEET_FILE_EXTENSIONS)
         self.assertTrue(is_valid)
 
     def test_generate_spreadsheet_validation_filename(self):
@@ -90,7 +91,7 @@ class Test(unittest.TestCase):
         self.assertEqual(tab_delimiter, delimiter)
 
     def test_get_spreadsheet_other_tag_column_indices(self):
-        column_names = ['a,', webinterface.utils.OTHER_TAG_COLUMN_NAMES[0]]
+        column_names = ['a,', spreadsheet_constants.OTHER_TAG_COLUMN_NAMES[0]]
         expected_indices = [2]
         indices = webinterface.utils._get_spreadsheet_other_tag_column_indices(column_names)
         self.assertTrue(indices)
@@ -98,9 +99,9 @@ class Test(unittest.TestCase):
         self.assertEqual(indices, expected_indices)
 
     def test_get_spreadsheet_specific_tag_column_indices(self):
-        column_names = ['a,', webinterface.utils.SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY[
-            webinterface.utils.SPECIFIC_TAG_COLUMN_NAMES[0]][0]]
-        print(column_names)
+        column_names = ['a,', spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY[
+            spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES[0]][0]]
+        #print(column_names)
         indices = webinterface.utils._get_spreadsheet_specific_tag_column_indices(column_names)
         self.assertTrue(indices)
         self.assertIsInstance(indices, dict)
