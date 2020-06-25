@@ -5,7 +5,8 @@ This module is used to report errors found in the validation.
 
 
 def report_error_type(error_type, error_row=1, error_column=1, hed_string='', tag='', tag_prefix='', previous_tag='',
-                      character='', index=0, unit_class_units='', opening_bracket_count=0, closing_bracket_count=0):
+                      character='', index=0, unit_class_units='', opening_parentheses_count=0,
+                      closing_parentheses_count=0):
     """Reports the abc error based on the type of error.
 
     Parameters
@@ -30,34 +31,38 @@ def report_error_type(error_type, error_row=1, error_column=1, hed_string='', ta
         The character in the string that generated the error.
     unit_class_units: str
         The unit class units that are associated with the error.
-    opening_bracket_count: int
-        The number of opening brackets.
-    closing_bracket_count: int
-        The number of closing brackets.
+    opening_parentheses_count: int
+        The number of opening parentheses.
+    closing_parentheses_count: int
+        The number of closing parentheses.
     Returns
     -------
-    str
-        A error message related to a particular type of error.
+    list of dict
+        A singleton list containing a dictionary with the error type and error message related to a particular type of
+        error.
 
     """
     error_types = {
-        'bracket': '\tERROR: Number of opening and closing parentheses are unequal. %s opening parentheses. %s '
-                   'closing parentheses\n' % (opening_bracket_count, closing_bracket_count),
-        'character': '\tERROR: Invalid character \"%s\"\n' % tag,
-        'comma': '\tERROR: Comma missing after - \"%s\"\n' % tag,
-        'commaValid': '\tERROR: Either \"%s\" contains a comma when it should not or \"%s\" is not a valid tag\n'
-                      % (previous_tag, tag),
-        'duplicate': '\tERROR: Duplicate tag - \"%s\"\n' % tag,
-        'isNumeric': '\tERROR: Invalid numeric tag - \"%s\"\n' % tag,
+        'parentheses': '\tERROR: Number of opening and closing parentheses are unequal. %s opening parentheses. %s '
+                       'closing parentheses\n' % (opening_parentheses_count, closing_parentheses_count),
+        'invalidCharacter': '\tERROR: Invalid character "%s" at index %s of string "%s"'
+                            % (character, index, hed_string),
+        'commaMissing': '\tERROR: Comma missing after - "%s"\n' % tag,
+        'extraCommaOrInvalid': '\tERROR: Either "%s" contains a comma when it should not or "%s" is not a valid '
+                               'tag\n ' % (previous_tag, tag),
+        'duplicateTag': '\tERROR: Duplicate tag - "%s"\n' % tag,
         'row': 'Issues in row %s:\n' % str(error_row),
         'column': 'Issues in row %s column %s:\n' % (str(error_row), str(error_column)),
-        'requireChild': '\tERROR: Descendant tag required - \"%s\"\n' % tag,
-        'tilde': '\tERROR: Too many tildes - group \"%s\"\n' % tag,
-        'unique': '\tERROR: Multiple unique tags with prefix - \"%s\"\n' % tag_prefix,
-        'unitClass': '\tERROR: Invalid unit - \"%s\" valid units are "%s"\n' % (tag, unit_class_units),
-        'valid': '\tERROR: Invalid tag - \"%s\"\n' % tag,
-        'extraDelimiter': '\tERROR: Extra delimiter \"%s\" at index %s of string \"%s\"'
+        'childRequired': '\tERROR: Descendant tag required - "%s"\n' % tag,
+        'tooManyTildes': '\tERROR: Too many tildes - group "%s"\n' % tag,
+        'multipleUniqueTags': '\tERROR: Multiple unique tags with prefix - "%s"\n' % tag_prefix,
+        'unitClassInvalidUnit': '\tERROR: Invalid unit - "%s" valid units are "%s"\n' % (tag, unit_class_units),
+        'invalidTag': '\tERROR: Invalid tag - "%s"\n' % tag,
+        'extraDelimiter': '\tERROR: Extra delimiter "%s" at index %s of string "%s"'
                           % (character, index, hed_string),
-        'invalidCharacter': '\tERROR: ',
     }
-    return error_types.get(error_type, None)
+    default_error_message = 'ERROR: Unknown error'
+    error_message = error_types.get(error_type, default_error_message)
+
+    error_object = {'code': error_type, 'message': error_message}
+    return [error_object]

@@ -51,14 +51,14 @@ class HedInputReader:
         hed_xml_file: str
             A path to a HED XML file.
         tag_columns: list
-            A list of integers containing the columns that contain the HED tags. The default value is the 2nd column.
+            A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
         has_column_names: bool
             True if file has column names. The validation will skip over the first line of the file. False, if
             otherwise.
         required_tag_columns: dict
             A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
             prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Description',
-            4: 'Label', 5: 'Category'}; The third column contains tags that need Event/Description/ prepended to them,
+            4: 'Label', 5: 'Category'} The third column contains tags that need Event/Description/ prepended to them,
             the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
             that needs Event/Category/ prepended to them.
         worksheet_name: str
@@ -107,7 +107,7 @@ class HedInputReader:
 
         Parameters
         ----------
-        hed_xml_file: string
+        hed_xml_file: str
             A path to a HED XML file.
         Returns
         -------
@@ -126,7 +126,7 @@ class HedInputReader:
         Parameters
         ----------
         tag_columns: list
-            A list of integers containing the columns that contain the HED tags.
+            A list of ints containing the columns that contain the HED tags.
         Returns
         -------
         list
@@ -145,10 +145,9 @@ class HedInputReader:
          ----------
          Returns
          -------
-         string
+         list
              The issues that were found.
         """
-        validation_issues = ''
         if isinstance(self._hed_input, list):
             validation_issues = self._validate_hed_strings(self._hed_input)
         elif self._is_file and HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
@@ -164,7 +163,7 @@ class HedInputReader:
          ----------
          Returns
          -------
-         string
+         list
              The issues that were found.
 
          """
@@ -182,7 +181,7 @@ class HedInputReader:
          ----------
          Returns
          -------
-         string
+         list
              The issues that were found.
 
          """
@@ -195,11 +194,11 @@ class HedInputReader:
          ----------
          Returns
          -------
-         string
+         list
              The issues that were found in the text file.
 
          """
-        validation_issues = ''
+        validation_issues = []
         with open(self._hed_input, 'r', encoding='utf-8') as opened_text_file:
             for row_number, text_file_row in enumerate(opened_text_file):
                 if HedInputReader.row_contains_headers(self._has_column_names, row_number):
@@ -218,11 +217,11 @@ class HedInputReader:
          ----------
          Returns
          -------
-         string
+         list
              The issues that were found in a excel worksheet.
 
          """
-        validation_issues = ''
+        validation_issues = []
         opened_worksheet = HedInputReader.open_workbook_worksheet(self._hed_input, worksheet_name=self._worksheet_name)
         number_of_rows = opened_worksheet.nrows
         for row_number in range(number_of_rows):
@@ -240,17 +239,17 @@ class HedInputReader:
 
          Parameters
          ----------
-        validation_issues: string
+        validation_issues: str
             A  string that contains all the issues found in the spreadsheet.
-        row_number: integer
+        row_number: int
             The row number that the issues are associated with.
-        row_hed_string: string
+        row_hed_string: str
             The HED string associated with a row.
-        column_to_hed_tags_dictionary
+        column_to_hed_tags_dictionary: dict
             A dictionary which associates columns with HED tags
          Returns
          -------
-         string
+         list
              The issues with the appended issues found in the particular row.
 
          """
@@ -265,15 +264,15 @@ class HedInputReader:
 
          Parameters
          ----------
-        validation_issues: string
+        validation_issues: str
             A  string that contains all the issues found in the spreadsheet.
-        row_number: integer
+        row_number: int
             The row number that the issues are associated with.
-        row_hed_string: string
+        row_hed_string: str
             The HED string associated with a row.
          Returns
          -------
-         string
+         list
              The issues with the appended issues found in the particular row.
 
          """
@@ -290,15 +289,15 @@ class HedInputReader:
 
          Parameters
          ----------
-        validation_issues: string
+        validation_issues: str
             A  string that contains all the issues found in the spreadsheet.
-        row_number: integer
+        row_number: int
             The row number that the issues are associated with.
-        column_to_hed_tags_dictionary
+        column_to_hed_tags_dictionary: dict
             A dictionary which associates columns with HED tags
          Returns
          -------
-         string
+         list
              The issues with the appended issues found in the particular row column.
 
          """
@@ -316,15 +315,15 @@ class HedInputReader:
 
          Parameters
          ----------
-        column_hed_string: string
+        column_hed_string: str
             The HED string associated with a row column.
          Returns
          -------
-         string
+         list
              The issues associated with a particular row column.
 
          """
-        validation_issues = ''
+        validation_issues = []
         validation_issues += self._tag_validator.run_hed_string_validators(column_hed_string)
         if not validation_issues:
             hed_string_delimiter = HedStringDelimiter(column_hed_string)
@@ -337,28 +336,27 @@ class HedInputReader:
 
          Parameters
          ----------
-         hed_string: string array
-            An array of HED string.
+         hed_strings: list of str
+            An array of HED strings.
          Returns
          -------
-         string
-             The issues associated with the HED strings
+         list
+             The issues associated with the HED strings.
 
          """
         eeg_issues = []
         for i in range(0, len(hed_strings)):
             hed_string = hed_strings[i]
-            validation_issues = self._tag_validator.run_hed_string_validators(hed_string);
+            validation_issues = self._tag_validator.run_hed_string_validators(hed_string)
             if not validation_issues:
-                hed_string_delimiter = HedStringDelimiter(hed_string);
-                validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter);
-                validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter);
-                validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter);
-                validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter);
-            if validation_issues:
-                validation_issues = "Issue in event " + str(i+1) + ":\n" + validation_issues
-                eeg_issues.append(validation_issues)
-        return eeg_issues;
+                hed_string_delimiter = HedStringDelimiter(hed_string)
+                validation_issues += hed_string_delimiter.get_issues()
+                validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter)
+                validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
+                validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter)
+                validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter)
+            eeg_issues.append(validation_issues)
+        return eeg_issues
 
     def _validate_tag_levels_in_hed_string(self, hed_string_delimiter):
         """Validates the tags at each level in a HED string. This pertains to the top-level, all groups, and nested
@@ -366,15 +364,15 @@ class HedInputReader:
 
          Parameters
          ----------
-         hed_string_delimiter: HedStringDelimiter object
+         hed_string_delimiter: HedStringDelimiter
             A HEDStringDelimiter object.
          Returns
          -------
-         string
+         list
              The issues associated with each level in the HED string.
 
          """
-        validation_issues = ''
+        validation_issues = []
         tag_groups = hed_string_delimiter.get_tag_groups()
         formatted_tag_groups = hed_string_delimiter.get_formatted_tag_groups()
         original_and_formatted_tag_groups = zip(tag_groups, formatted_tag_groups)
@@ -390,15 +388,15 @@ class HedInputReader:
 
          Parameters
          ----------
-         hed_string_delimiter: HedStringDelimiter object
+         hed_string_delimiter: HedStringDelimiter
             A HEDStringDelimiter object.
          Returns
          -------
-         string
+         list
              The issues associated with the top-level tags in the HED string.
 
          """
-        validation_issues = ''
+        validation_issues = []
         formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags()
         validation_issues += self._tag_validator.run_top_level_validators(formatted_top_level_tags)
         return validation_issues
@@ -408,15 +406,15 @@ class HedInputReader:
 
          Parameters
          ----------
-         hed_string_delimiter: HedStringDelimiter object
+         hed_string_delimiter: HedStringDelimiter
             A HEDStringDelimiter object.
          Returns
          -------
-         string
+         list
              The issues associated with the groups in the HED string.
 
          """
-        validation_issues = ''
+        validation_issues = []
         tag_groups = hed_string_delimiter.get_tag_groups()
         tag_group_strings = hed_string_delimiter.get_tag_group_strings()
         tag_groups_with_strings = zip(tag_groups, tag_group_strings)
@@ -429,15 +427,15 @@ class HedInputReader:
 
          Parameters
          ----------
-         hed_string_delimiter: HedStringDelimiter object
+         hed_string_delimiter: HedStringDelimiter
             A HEDStringDelimiter object.
          Returns
          -------
-         string
+         list
              The issues associated with the individual tags in the HED string.
 
          """
-        validation_issues = ''
+        validation_issues = []
         tag_set = hed_string_delimiter.get_tags()
         formatted_tag_set = hed_string_delimiter.get_formatted_tags()
         original_and_formatted_tags = list(zip(tag_set, formatted_tag_set))
@@ -481,7 +479,7 @@ class HedInputReader:
          ----------
         tag_columns: list
             A list containing the tag column indices.
-         required_tag_columns: dictionary
+         required_tag_columns: dict
             A dictionary containing the required tag columns.
          Returns
          -------
@@ -497,13 +495,13 @@ class HedInputReader:
 
          Parameters
          ----------
-        has_headers: boolean
+        has_headers: bool
             True if file has headers. False, if otherwise.
-         row_number: integer
+         row_number: int
             The row number of the spreadsheet.
          Returns
          -------
-         boolean
+         bool
              True if the row contains the headers. False, if otherwise.
 
          """
@@ -515,17 +513,17 @@ class HedInputReader:
 
          Parameters
          ----------
-         row_number: integer
+         row_number: int
             The row number that the issue is associated with.
          Returns
          -------
-         string
-             The row issue message.
+         list
+             A singleton list containing the row issue message.
 
          """
         if has_headers:
             row_number += 1
-        return error_reporter.report_error_type('row', error_row=row_number)
+        return [error_reporter.report_error_type('row', error_row=row_number)]
 
     @staticmethod
     def generate_column_issue_message(row_number, column_number, has_headers=True):
@@ -533,20 +531,20 @@ class HedInputReader:
 
          Parameters
          ----------
-         row_number: integer
+         row_number: int
             The row number that the issue is associated with.
-         column_number: integer
+         column_number: int
             The column number that the issue is associated with.
          Returns
          -------
-         string
-             The column issue message.
+         list
+             A singleton list containing the column issue message.
 
          """
         if has_headers:
             row_number += 1
         column_number += 1
-        return error_reporter.report_error_type('column', error_row=row_number, error_column=column_number)
+        return [error_reporter.report_error_type('column', error_row=row_number, error_column=column_number)]
 
     @staticmethod
     def file_is_a_text_file(file_extension):
@@ -554,11 +552,11 @@ class HedInputReader:
 
          Parameters
          ----------
-         file_extension: string
+         file_extension: str
             A file extension.
          Returns
          -------
-         boolean
+         bool
              True if the file is a text file. False, if otherwise.
 
          """
@@ -572,7 +570,7 @@ class HedInputReader:
         ----------
         Returns
         -------
-        boolean
+        bool
             True if the hed input has a valid file extension. False, if otherwise.
 
         """
@@ -586,9 +584,9 @@ class HedInputReader:
 
         Parameters
         ----------
-        workbook_path: string
+        workbook_path: str
             The path to an Excel workbook.
-        worksheet_name: string
+        worksheet_name: str
             The name of the workbook worksheet that will be opened. The default will be the first worksheet of the
             workbook.
         Returns
@@ -608,9 +606,9 @@ class HedInputReader:
 
         Parameters
         ----------
-        text_file_row: string
+        text_file_row: str
             The row in the text file that contains the HED tags.
-        column_delimiter: string
+        column_delimiter: str
             A delimiter used to split the columns.
         Returns
         -------
@@ -652,7 +650,7 @@ class HedInputReader:
         ----------
         spreadsheet_row: list
             A list containing the values in the spreadsheet rows.
-        is_worksheet: boolean
+        is_worksheet: bool
             True if the spreadsheet is an Excel worksheet. False if it is a text file.
         Returns
         -------
@@ -682,10 +680,10 @@ class HedInputReader:
 
         Parameters
         ----------
-        row_column_count: integer
+        row_column_count: int
             The number of columns in the row.
         hed_tag_columns: list
-            A list of integers containing the columns that contain the HED tags.
+            A list of ints containing the columns that contain the HED tags.
         Returns
         -------
         list
@@ -699,10 +697,10 @@ class HedInputReader:
 
         Parameters
         ----------
-        required_tag_column_tags: string
+        required_tag_column_tags: str
             A string containing HED tags associated with a required tag column that may need a tag prefix prepended to
             its tags.
-        required_tag_prefix_key: string
+        required_tag_prefix_key: str
             A string dictionary key that corresponds to the required tag prefix that may be prepended to the tags in a
             required tag column if needed.
         Returns
@@ -722,43 +720,43 @@ class HedInputReader:
                     required_tag = required_tag_prefix + required_tag
                 required_tags_with_prefix.append(required_tag)
             return ','.join(required_tags_with_prefix)
-			
+
         if required_tag_prefix and not required_tag_column_tags.lower().startswith(required_tag_prefix.lower()):
             required_tag_column_tags = required_tag_prefix + required_tag_column_tags
 
         return required_tag_column_tags
 
     @staticmethod
-    def subtract_1_from_list_elements(integer_list):
-        """Subtracts 1 from each integer in a list.
+    def subtract_1_from_list_elements(int_list):
+        """Subtracts 1 from each int in a list.
 
         Parameters
         ----------
-        integer_list: list
-            A list of integers.
+        int_list: list
+            A list of ints.
         Returns
         -------
         list
             A list of containing each element subtracted by 1.
 
         """
-        return [x - 1 for x in integer_list]
+        return [x - 1 for x in int_list]
 
     @staticmethod
-    def subtract_1_from_dictionary_keys(integer_key_dictionary):
+    def subtract_1_from_dictionary_keys(int_key_dictionary):
         """Subtracts 1 from each dictionary key.
 
         Parameters
         ----------
-        integer_key_dictionary: dictionary
-            A dictionary with integer keys.
+        int_key_dictionary: dict
+            A dictionary with int keys.
         Returns
         -------
         dictionary
             A dictionary with the keys subtracted by 1.
 
         """
-        return {key - 1: value for key, value in integer_key_dictionary.items()}
+        return {key - 1: value for key, value in int_key_dictionary.items()}
 
     @staticmethod
     def file_path_has_extension(file_path):
@@ -766,11 +764,11 @@ class HedInputReader:
 
         Parameters
         ----------
-        file_path: string
+        file_path: str
              A file path.
         Returns
         -------
-        boolean
+        bool
             Returns True if the file path has an extension. False, if otherwise.
 
         """
@@ -784,7 +782,7 @@ class HedInputReader:
 
         Parameters
         ----------
-        file_path: string
+        file_path: str
              A file path.
         Returns
         -------
@@ -818,7 +816,7 @@ class HedInputReader:
 
         Parameters
         ----------
-        hed_version: string
+        hed_version: str
              The HED version that is in the hed directory.
         Returns
         -------
@@ -880,9 +878,9 @@ class HedInputReader:
 
         Parameters
         ----------
-        first_semantic_version: string
+        first_semantic_version: str
              The first semantic version.
-        second_semantic_version: string
+        second_semantic_version: str
              The second semantic version.
         Returns
         -------
