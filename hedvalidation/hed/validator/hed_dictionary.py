@@ -1,11 +1,11 @@
-'''
+"""
 This module contains the Hed_Dictionary class which encapsulates all HED tags, tag attributes, unit classes, and
 unit class attributes in a dictionary.
 
 The dictionary is a dictionary of dictionaries. The dictionary names are
 'default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended', 'required', 'requireChild',
 'tags', 'takesValue', 'unique', 'units', and 'unitClass'.
-'''
+"""
 
 from defusedxml.lxml import parse
 
@@ -33,7 +33,7 @@ class HedDictionary:
 
         Parameters
         ----------
-        hed_xml_file_path: string
+        hed_xml_file_path: str
             The path to a HED XML file.
 
         Returns
@@ -68,24 +68,23 @@ class HedDictionary:
 
         Returns
         -------
-        dictionary
+        dict
             A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit
             class attributes
 
         """
         return self.dictionaries
 
-    # make changes to add hasUnitClasses and hasUnitModifier here?
     def _populate_dictionaries(self):
-        """Populates a dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit
-           class attributes.
+        """Populates a dictionary of dictionaries that contains all of the tags, tag attributes, unit class units,
+           and unit class attributes.
 
         Parameters
         ----------
 
         Returns
         -------
-        dictionary
+        dict
             A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit class
             attributes.
 
@@ -103,7 +102,7 @@ class HedDictionary:
 
         Returns
         -------
-        dictionary
+        dict
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
@@ -133,13 +132,12 @@ class HedDictionary:
 
         Returns
         -------
-        dictionary
+        dict
             A dictionary of dictionaries associated with all of the unit classes, unit class units, and unit class
             default units.
 
         """
         unit_class_elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT)
-        ## NEW ##
         if len(unit_class_elements) == 0:
             self.has_unit_classes = False
             return
@@ -155,7 +153,6 @@ class HedDictionary:
 
         """
         unit_modifier_elements = self._get_elements_by_name(self.UNIT_MODIFIER_ELEMENT)
-        ## NEW ##
         if len(unit_modifier_elements) == 0:
             self.has_unit_modifiers = False
             return
@@ -177,7 +174,7 @@ class HedDictionary:
 
         Returns
         -------
-        dictionary
+        dict
             A dictionary that contains all the unit class units.
 
         """
@@ -210,7 +207,7 @@ class HedDictionary:
 
         Returns
         -------
-        dictionary
+        dict
             A dictionary that contains all the unit class default units.
 
         """
@@ -233,12 +230,12 @@ class HedDictionary:
             A list containing tags that have a specific attribute.
         tag_element_list: list
             A list containing tag elements that have a specific attribute.
-        attribute_name: string
+        attribute_name: str
             The name of the attribute associated with the tags and tag elements.
 
         Returns
         -------
-        dictionary
+        dict
             The attribute dictionary that has been populated with dictionaries associated with tags.
 
         """
@@ -258,7 +255,7 @@ class HedDictionary:
 
         Returns
         -------
-        dictionary
+        dict
             A dictionary containing the strings in the list.
 
         """
@@ -272,7 +269,7 @@ class HedDictionary:
 
         Parameters
         ----------
-        hed_xml_file_path: string
+        hed_xml_file_path: str
             The path to a HED XML file.
 
         Returns
@@ -314,12 +311,12 @@ class HedDictionary:
         ----------
         element: Element
             A element in the HED XML file.
-        tag_name: string
+        tag_name: str
             The name of the XML element's tag. The default is 'name'.
 
         Returns
         -------
-        string
+        str
             The value of the element's tag. If the element doesn't have the tag then it will return an empty string.
 
         """
@@ -335,7 +332,7 @@ class HedDictionary:
 
         Returns
         -------
-        string
+        str
             The name of the tag element's parent. If there is no parent tag then an empty string is returned.
 
         """
@@ -355,7 +352,7 @@ class HedDictionary:
 
         Returns
         -------
-        string
+        str
             A tag path which is typically referred to as a tag. The tag and it's ancestor tags will be separated by /'s.
 
         """
@@ -369,7 +366,7 @@ class HedDictionary:
 
         Parameters
         ----------
-        attribute_name: string
+        attribute_name: str
             The name of the attribute associated with the tags.
 
         Returns
@@ -390,7 +387,7 @@ class HedDictionary:
 
         Parameters
         ----------
-        tag_element_name: string
+        tag_element_name: str
             The XML tag name of the tag elements. The default is 'node'.
 
         Returns
@@ -411,9 +408,9 @@ class HedDictionary:
 
         Parameters
         ----------
-        attribute_name: string
+        attribute_name: str
             The name of the attribute associated with the element.
-        element_name: string
+        element_name: str
             The name of the XML element tag name. The default is 'node'.
 
         Returns
@@ -429,9 +426,9 @@ class HedDictionary:
 
         Parameters
         ----------
-        element_name: string
+        element_name: str
             The name of the element. The default is 'node'.
-        parent_element: string
+        parent_element: RestrictedElement
             The parent element. The default is 'None'. If a parent element is specified then only the children of the
             parent will be returned with the given 'element_name'. If not specified the root element will be the parent.
 
@@ -454,9 +451,9 @@ class HedDictionary:
         ----------
         tag_elements: list of nodes
             The list to return all child tags from
-        element_name: string
+        element_name: str
             The name of the XML tag elements. The default is 'node'.
-        exclude_take_value_tags: boolean
+        exclude_take_value_tags: bool
             True if to exclude tags that take values. False, if otherwise. The default is True.
 
         Returns
@@ -482,13 +479,13 @@ class HedDictionary:
 
         Parameters
         ----------
-        tag: string
+        tag: str
             A tag.
-        tag_attribute: string
+        tag_attribute: str
             A tag attribute.
         Returns
         -------
-        boolean
+        bool
             True if the tag has the specified attribute. False, if otherwise.
 
         """
@@ -502,11 +499,11 @@ class HedDictionary:
 
         Parameters
         ----------
-        hed_xml_file_path: string
+        hed_xml_file_path: str
             The path to a HED XML file.
         Returns
         -------
-        string
+        str
             The version number of the HED XML file.
 
         """
