@@ -35,6 +35,7 @@ class TestHed(unittest.TestCase):
         for test_key in test_strings:
             hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
             test_issues = test_function(hed_string_delimiter)
+            print("Issues", test_issues)
             test_result = not test_issues
             expected_issue = expected_issues[test_key]
             expected_result = expected_results[test_key]
@@ -72,10 +73,10 @@ class FullHedString(TestHed):
         }
         expected_issues = {
             # I think this is right
-            'extraOpening': report_error_type('bracket', tag=test_strings['extraOpening'].strip(),
-                                              opening_bracket_count=2, closing_bracket_count=1),
-            'extraClosing': report_error_type('bracket', tag=test_strings['extraClosing'].strip(),
-                                              opening_bracket_count=1, closing_bracket_count=2),
+            'extraOpening': report_error_type('parentheses',
+                                              opening_parentheses_count=2, closing_parentheses_count=1),
+            'extraClosing': report_error_type('parentheses',
+                                              opening_parentheses_count=1, closing_parentheses_count=2),
             'valid': ''
         }
 
@@ -143,8 +144,8 @@ class FullHedString(TestHed):
         }
         expected_issues = {
             # NOT COMPLETE
-            'missingOpeningComma': report_error_type('valid', tag='/Action/Reach/To touch('),
-            'missingClosingComma': report_error_type('comma', tag='/Participant/Effect/Body part/Arm)/'),
+            'missingOpeningComma': report_error_type('invalidTag', tag='/Action/Reach/To touch('),
+            'missingClosingComma': report_error_type('commaMissing', tag='/Participant/Effect/Body part/Arm)/'),
             'extraOpeningComma': report_error_type('extraDelimiter', character=',', index=0,
                                                    hed_string=test_strings['extraOpeningComma']),
             'extraClosingComma': report_error_type('extraDelimiter', character=',',
@@ -212,11 +213,10 @@ class FullHedString(TestHed):
             'closingBracket': False
         }
         expected_issues = {
-            # NOT COMPLETE
-            'openingBrace': report_error_type('character', tag='{'),
-            'closingBrace': report_error_type('character', tag='}'),
-            'openingBracket': report_error_type('character', tag='['),
-            'closingBracket': report_error_type('character', tag=']')
+            'openingBrace': report_error_type('invalidCharacter', character='{', index=47, hed_string=test_strings['openingBrace']),
+            'closingBrace': report_error_type('invalidCharacter', character='}', index=47, hed_string=test_strings['closingBrace']),
+            'openingBracket': report_error_type('invalidCharacter', character='[', index=47, hed_string=test_strings['openingBracket']),
+            'closingBracket': report_error_type('invalidCharacter', character=']', index=47, hed_string=test_strings['closingBracket'])
         }
         self.validator(test_strings, expected_results, expected_issues)
 
@@ -224,15 +224,13 @@ class FullHedString(TestHed):
 class IndividualHedTags(TestHed):
     def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda hed_string_delimiter: ''.join(
-                [self.syntactic_warning_tag_validator.run_individual_tag_validators(*args) for args in
-                 zip(hed_string_delimiter.get_tags(),
-                     hed_string_delimiter.get_formatted_tags())]))
+            self.validator_base(test_strings, expected_results, expected_issues, lambda
+                hed_string_delimiter: self.syntactic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
+                hed_string_delimiter))
         else:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda hed_string_delimiter: ''.join(
-                [self.syntactic_tag_validator.run_individual_tag_validators(*args) for args in
-                 zip(hed_string_delimiter.get_tags(),
-                     hed_string_delimiter.get_formatted_tags())]))
+            self.validator_base(test_strings, expected_results, expected_issues, lambda
+                hed_string_delimiter: self.syntactic_hed_input_reader._validate_individual_tags_in_hed_string(
+                hed_string_delimiter))
 
     def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         if check_for_warnings is True:
@@ -245,7 +243,7 @@ class IndividualHedTags(TestHed):
                 hed_string_delimiter))
 
     def test_exist_in_schema(self):
-        test_string = {
+        test_strings = {
             'takesValue': 'Event/Duration/3 ms',
             'full': 'Attribute/Object side/Left',
             'extensionsAllowed': 'Item/Object/Person/Driver',
@@ -265,15 +263,15 @@ class IndividualHedTags(TestHed):
             'takesValue': '',
             'full': '',
             'extensionsAllowed': '',
-            'leafExtension': report_error_type('valid', tag=test_string['leafExtension']),
-            'nonExtensionsAllowed': report_error_type('valid', tag=test_string['nonExtensionsAllowed']),
-            'illegalComma': report_error_type('commaValid', previous_tag='Event/Label/This is a label',
+            'leafExtension': report_error_type('invalidTag', tag=test_strings['leafExtension']),
+            'nonExtensionsAllowed': report_error_type('invalidTag', tag=test_strings['nonExtensionsAllowed']),
+            'illegalComma': report_error_type('extraCommaOrInvalid', previous_tag='Event/Label/This is a label',
                                               tag='This/Is/A/Tag')
         }
-        self.validator_semantic(test_string, expected_results, expected_issues, False)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_proper_capitalization(self):
-        test_string = {
+        test_strings = {
             'proper': 'Event/Category/Sensory presentation',
             'camelCase': 'DoubleEvent/Something',
             'takesValue': 'Attribute/Temporal rate/20 Hz',
@@ -293,12 +291,12 @@ class IndividualHedTags(TestHed):
             'camelCase': '',
             'takesValue': '',
             'numeric': '',
-            'lowercase': report_warning_type('cap', tag=test_string['lowercase'])
+            'lowercase': report_warning_type('capitalization', tag=test_strings['lowercase'])
         }
-        self.validator_syntactic(test_string, expected_results, expected_issues, True)
+        self.validator_syntactic(test_strings, expected_results, expected_issues, True)
 
     def test_child_required(self):
-        test_string = {
+        test_strings = {
             'hasChild': 'Event/Category/Experimental stimulus',
             'missingChild': 'Event/Category'
         }
@@ -309,12 +307,12 @@ class IndividualHedTags(TestHed):
         expected_issues = {
             # NOT COMPLETE
             'hasChild': '',
-            'missingChild': report_error_type('requireChild', tag=test_string['missingChild'])
+            'missingChild': report_error_type('childRequired', tag=test_strings['missingChild'])
         }
-        self.validator_semantic(test_string, expected_results, expected_issues, True)
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
     def test_required_units(self):
-        test_string = {
+        test_strings = {
             'hasRequiredUnit': 'Event/Duration/3 ms',
             'missingRequiredUnit': 'Event/Duration/3',
             'notRequiredNumber': 'Attribute/Color/Red/0.5',
@@ -330,16 +328,16 @@ class IndividualHedTags(TestHed):
         }
         expected_issues = {
             'hasRequiredUnit': "",
-            'missingRequiredUnit': report_warning_type('unitClass', tag=test_string['missingRequiredUnit'],
+            'missingRequiredUnit': report_warning_type('unitClassDefaultUsed', tag=test_strings['missingRequiredUnit'],
                                                        default_unit='s'),
             'notRequiredNumber': "",
             'notRequiredScientific': "",
             'timeValue': ""
         }
-        self.validator_semantic(test_string, expected_results, expected_issues, True)
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
     def correct_units(self):
-        test_string = {
+        test_strings = {
             'correctUnit': 'Event/Duration/3 ms',
             'correctUnitScientific': 'Event/Duration/3.5e1 ms',
             'incorrectUnit': 'Event/Duration/3 cm',
@@ -379,13 +377,15 @@ class IndividualHedTags(TestHed):
             # NOT COMPLETE
             'correctUnit': '',
             'correctUnitScientific': '',
-            'incorrectUnit': report_error_type(test_string['incorrectUnit'], ",".join(list(legal_time_units).sort())),
+            'incorrectUnit': report_error_type('unitClassInvalidUnit', tag=test_strings['incorrectUnit'],
+                                               unit_class_units=",".join(list(legal_time_units).sort())),
             'notRequiredNumber': '',
             'notRequiredScientific': '',
             'properTime': '',
-            'invalidTime': report_error_type(test_string['invalidTime'], ",".join(list(legal_time_units).sort()))
+            'invalidTime': report_error_type('unitClassInvalidUnit', tag=test_strings['invalidTime'],
+                                             unit_class_units=",".join(list(legal_time_units).sort()))
         }
-        self.validate_semantic(test_string, expected_results, expected_issues, True)
+        self.validate_semantic(test_strings, expected_results, expected_issues, True)
 
 
 class HedTagLevels(TestHed):
@@ -431,8 +431,8 @@ class HedTagLevels(TestHed):
             'noDuplicate': True
         }
         expected_issues = {
-            'topLevelDuplicate': report_error_type('duplicate', tag='Event/Category/Sensory presentation'),
-            'groupDuplicate': report_error_type('duplicate', tag='Event/Category/Sensory presentation'),
+            'topLevelDuplicate': report_error_type('duplicateTag', tag='Event/Category/Sensory presentation'),
+            'groupDuplicate': report_error_type('duplicateTag', tag='Event/Category/Sensory presentation'),
             'legalDuplicate': '',
             'noDuplicate': ''
         }
@@ -452,7 +452,7 @@ class HedTagLevels(TestHed):
         }
         expected_issues = {
             'legal': '',
-            'multipleDesc': report_error_type('unique', tag_prefix='Event/Description')
+            'multipleDesc': report_error_type('multipleUniqueTags', tag_prefix='Event/Description')
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -488,11 +488,11 @@ class TopLevelTags(TestHed):
         }
         expected_issues = {
             'complete': "",
-            'missingLabel': report_warning_type('required', tag_prefix='Event/Label'),
-            'missingCategory': report_warning_type('required', tag_prefix='Event/Category'),
-            'missingDescription': report_warning_type('required', tag_prefix='Event/Description'),
-            'missingAllRequired': report_warning_type('required', tag_prefix='Event/Label') + report_warning_type(
-                'required', tag_prefix='Event/Category') + report_warning_type('required',
+            'missingLabel': report_warning_type('requiredPrefixMissing', tag_prefix='Event/Label'),
+            'missingCategory': report_warning_type('requiredPrefixMissing', tag_prefix='Event/Category'),
+            'missingDescription': report_warning_type('requiredPrefixMissing', tag_prefix='Event/Description'),
+            'missingAllRequired': report_warning_type('requiredPrefixMissing', tag_prefix='Event/Label') + report_warning_type(
+                'requiredPrefixMissing', tag_prefix='Event/Category') + report_warning_type('requiredPrefixMissing',
                                                                                tag_prefix='Event/Description'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
@@ -501,10 +501,10 @@ class TopLevelTags(TestHed):
 class TestHedTagGroups(TestHed):
     def validator(self, test_strings, expected_results, expected_issues):
         self.validator_base(test_strings, expected_results, expected_issues,
-                            lambda hed_string_delimiter: ''.join(
-                                [self.syntactic_tag_validator.run_tag_group_validators(*args) for args in
-                                 zip(hed_string_delimiter.get_tag_groups(),
-                                     hed_string_delimiter.get_tag_group_strings())]))
+                            lambda
+                                hed_string_delimiter:
+                            self.syntactic_hed_input_reader._validate_groups_in_hed_string(
+                                hed_string_delimiter))
 
     def test_no_more_than_two_tildes(self):
         testStrings = {
@@ -529,7 +529,7 @@ class TestHedTagGroups(TestHed):
             'noTildeGroup': '',
             'oneTildeGroup': '',
             'twoTildeGroup': '',
-            'invalidTildeGroup': report_error_type('tilde',
+            'invalidTildeGroup': report_error_type('tooManyTildes',
                                                    tag='(Participant/ID 1 ~ Participant/Effect/Visual '
                                                        '~ Item/Object/Vehicle/Car,'
                                                        ' Item/ID/RedCar,'
@@ -540,7 +540,7 @@ class TestHedTagGroups(TestHed):
 
 
 class TestHedTags(TestHed):
-    def test_valid_comma_seperated_paths(self):
+    def test_valid_comma_separated_paths(self):
         hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
         result = True
         issues = self.semantic_tag_validator.run_hed_string_validators(hed_string)
