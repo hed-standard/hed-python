@@ -523,7 +523,7 @@ class HedInputReader:
          """
         if has_headers:
             row_number += 1
-        return [error_reporter.report_error_type('row', error_row=row_number)]
+        return error_reporter.report_error_type('row', error_row=row_number)
 
     @staticmethod
     def generate_column_issue_message(row_number, column_number, has_headers=True):
@@ -544,7 +544,7 @@ class HedInputReader:
         if has_headers:
             row_number += 1
         column_number += 1
-        return [error_reporter.report_error_type('column', error_row=row_number, error_column=column_number)]
+        return error_reporter.report_error_type('column', error_row=row_number, error_column=column_number)
 
     @staticmethod
     def file_is_a_text_file(file_extension):
