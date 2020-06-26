@@ -3,9 +3,7 @@ This module contains functions for parsing a wiki HED schema.
 """
 
 from xml.etree.ElementTree import Element, SubElement
-from xml.etree import ElementTree as et
 from hed.converter import parsetag
-from xml.dom import minidom
 import os
 
 ATTRIBUTE_DEFINITION_STRING = '\'\'\'Attribute Definitions:'
@@ -19,43 +17,6 @@ UNIT_CLASS_STRING = '\'\'\'Unit classes'
 UNIT_MODIFIER_STRING = '\'\'\'Unit modifiers'
 END_STRING = '!# end hed'
 hed_node = Element('HED')
-
-
-def xml_element_2_str(elem):
-    """Converts an XML element to an XML string.
-
-    Parameters
-    ----------
-    elem: Element
-        An XML element.
-
-    Returns
-    -------
-    string
-        A XML string representing the XML element.
-
-    """
-    rough_string = et.tostring(elem, method='xml')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="   ")
-
-
-def remove_last_newline_from_string(tstr):
-    """Removes the last newline character from a string.
-
-    Parameters
-    ----------
-    tstr: string
-        A string.
-
-    Returns
-    -------
-    string
-        The string with last new line character removed.
-
-    """
-    return tstr[:tstr.rfind('\n')]
-
 
 def add_tags(wiki_file):
     """Adds the tags to the HED element.
