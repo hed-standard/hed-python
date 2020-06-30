@@ -20,7 +20,8 @@ if __name__ == '__main__':
                    'Event/Category/Participant response, ' \
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger)'
     hed_input_reader = HedInputReader(hed_string_1)
-    print_issues('Example 1 should have no issues', hed_input_reader.get_validation_issues())
+    x = hed_input_reader.get_validation_issues()
+    #print_issues('Example 1 should have no issues', hed_input_reader.get_validation_issues())
 
     # Example 2: Invalid HED string (junk in last tag)
     hed_string_2 = 'Event/Category/Participant response, ' \
@@ -28,11 +29,13 @@ if __name__ == '__main__':
                    'dskfjkf/dskjdfkj/sdkjdsfkjdf/sdlfdjdsjklj'
 
     hed_input_reader = HedInputReader(hed_string_2)
-    print_issues('Example 2 has junk in the last tag', hed_input_reader.get_validation_issues())
+    y = hed_input_reader.get_validation_issues()
+    #print_issues('Example 2 has junk in the last tag', hed_input_reader.get_validation_issues())
 
     # Example 3: However HED string of example 2 has valid syntax
     hed_input_reader = HedInputReader(hed_string_2, run_semantic_validation = False)
-    print_issues('Example 2 is syntactically correct', hed_input_reader.get_validation_issues())
+    z = hed_input_reader.get_validation_issues()
+    #print_issues('Example 2 is syntactically correct', hed_input_reader.get_validation_issues())
 
     # Example 4: Invalid HED string
     hed_string_4 = 'Event/Description/The start of increasing the size of sector, Event/Label/Sector start, ' \
@@ -40,4 +43,6 @@ if __name__ == '__main__':
     '(Item/2D shape/Ellipse/Circle, Attribute/Visual/Color / Red), Sensory presentation/Visual, ' \
     'Participant/Efffectt/Visual, Participant/Effect/Cognitive/Target'
     hed_input_reader = HedInputReader(hed_string_4)
-    print_issues('Example 4 has a missing comma so fails before Efffectt typo', hed_input_reader.get_validation_issues())
+    w = hed_input_reader.get_validation_issues()
+    print("We're done")
+    #print_issues('Example 4 has a missing comma so fails before Efffectt typo', hed_input_reader.get_validation_issues())
