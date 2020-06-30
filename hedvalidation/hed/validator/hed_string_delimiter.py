@@ -67,19 +67,6 @@ class HedStringDelimiter:
         """
         return self.hed_string
 
-    def get_issues(self):
-        """Gets the issues field.
-
-        Parameters
-        ----------
-        Returns
-        -------
-        list
-            A list containing the validation issues encountered while parsing the HED string.
-
-        """
-        return self.tags
-
     def get_tags(self):
         """Gets the tags field.
 
