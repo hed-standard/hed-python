@@ -153,7 +153,7 @@ class HedInputReader:
         elif self._is_file and HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
             validation_issues = self._validate_hed_tags_in_file()
         else:
-            validation_issues = self._validate_hed_strings([self._hed_input])
+            validation_issues = self._validate_hed_strings([self._hed_input])[0]
         return validation_issues
 
     def _validate_hed_tags_in_file(self):
@@ -350,7 +350,6 @@ class HedInputReader:
             validation_issues = self._tag_validator.run_hed_string_validators(hed_string)
             if not validation_issues:
                 hed_string_delimiter = HedStringDelimiter(hed_string)
-                validation_issues += hed_string_delimiter.get_issues()
                 validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter)
                 validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
                 validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter)
