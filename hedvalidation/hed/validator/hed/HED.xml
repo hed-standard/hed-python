@@ -1776,7 +1776,7 @@
          </node>
       </node>
    </node>
-   <node>
+   <node extensionAllowed="true">
       <name>Action</name>
       <description>May or may not be associated with a prior stimulus and can be extended</description>
       <node>

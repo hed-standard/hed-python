@@ -8,16 +8,19 @@ from hed.validator.hed_input_reader import HedInputReader
 if __name__ == '__main__':
     local_hed_file = '../tests/data/HED.xml'   # path HED v7.1.1 stored locally
 
-    # Example 1: Valid HED string for HED <= v7.1.1
+    # Example 1a: Valid HED string for HED <= v7.1.1
     hed_string_1 = 'Event/Label/ButtonPuskDeny, Event/Description/Button push to deny access to the ID holder,' \
                    'Event/Category/Participant response, ' \
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger)'
     hed_input_reader = HedInputReader(hed_string_1, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string('Example 1 should have no issues with HEDv7.1.1'))
 
-    # Example 1a: Try with the latest version of HED.xml
+    # Example 1b: Try with the latest version of HED.xml
     hed_input_reader = HedInputReader(hed_string_1)
     print(hed_input_reader.get_printable_issue_string('Example 1 issues with the latest HED version'))
+
+    hed_string_2 = "Event/Label/TakeSurvey, Event/Category/Experimental stimulus/Instruction, " \
+                   "Event/Description/Tell subject to start survey, (Participant, Action/Deny)"
 
     # Example 2: Invalid HED string (junk in last tag)
     hed_string_2 = 'Event/Category/Participant response, ' \
