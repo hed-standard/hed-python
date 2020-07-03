@@ -447,6 +447,31 @@ class HedInputReader:
                                                                   previous_formatted_tag=previous_formatted_tag)
         return validation_issues
 
+    def get_printable_issue_string(self, title=''):
+        """Return a string with identifying title and issues in string form one per line.
+
+          Parameters
+          ----------
+         title: str
+             String used as a title for the issues.
+
+          Returns
+          -------
+          str
+              A str containing printable version of the issues or '[]'.
+
+          """
+
+        if not self._validation_issues:
+            issue_string = "\t[]\n"
+        else:
+            issue_string = "\n"
+            for el in self._validation_issues:
+                issue_string = issue_string + "\t" + el["code"] + el["message"]
+        if title:
+            issue_string = title + ":" + issue_string
+        return issue_string
+
     @staticmethod
     def get_previous_original_and_formatted_tag(original_and_formatted_tags, loop_index):
         """Retrieves the previous original and formatted tag from a list of tuples.
@@ -514,6 +539,8 @@ class HedInputReader:
          ----------
          row_number: int
             The row number that the issue is associated with.
+         has_headers: bool
+            If true, adjusts the row number to account for one line header.
          Returns
          -------
          list
@@ -534,6 +561,9 @@ class HedInputReader:
             The row number that the issue is associated with.
          column_number: int
             The column number that the issue is associated with.
+         has_headers: bool
+            If true, adjusts row number to account for one line header.
+
          Returns
          -------
          list

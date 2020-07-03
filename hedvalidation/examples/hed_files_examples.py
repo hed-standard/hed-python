@@ -18,6 +18,7 @@ def print_issues(title, issues):
 
 if __name__ == '__main__':
     example_data_path = '../tests/data'   # path to example data
+    valid_tsv_file = os.path.join(example_data_path, 'ValidTwoColumnHED7_1_1.tsv')
     bcit_guard_duty_path = os.path.join(example_data_path, 'BCIT_GuardDuty_HED_tag_spec_v27.tsv')
     tx_14_path = os.path.join(example_data_path, 'TX14 HED Tags v9.87.csv')
     tx_16_path = os.path.join(example_data_path, 'TX16 HED Tags v5.9.xlsx')
@@ -29,9 +30,17 @@ if __name__ == '__main__':
     ncturwn_das_worksheet = 'DAS Events'
 
     # Example 1: Valid TSV file
+    print(valid_tsv_file)
+    hed_input_reader = HedInputReader(valid_tsv_file, tag_columns=[2])
+    issues = hed_input_reader.get_validation_issues()
+    print(hed_input_reader.get_printable_issue_string('Example 1 should have no issues'))
+    print('BCIT_GuardDuty_HED_tag_spec_v27.tsv abc issues:', len(issues))
+
+    print(valid_tsv_file)
     hed_input_reader = HedInputReader(bcit_guard_duty_path, tag_columns=[2])
     issues = hed_input_reader.get_validation_issues()
-    print('BCIT_GuardDuty_HED_tag_spec_v27.tsv abc issues:', len(issues))
+    print(hed_input_reader.get_printable_issue_string('Example 1 should have no issues'))
+    print('ABCIT_GuardDuty_HED_tag_spec_v27.tsv abc issues:', len(issues))
 
     # Example 2: Valid CSV file
     prefixed_needed_tag_columns = {3: 'Description', 4: 'Label', 5: 'Category'}
