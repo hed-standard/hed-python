@@ -1,0 +1,2 @@
+BOOLEAN = 'boolean'
+STRING = 'string'
