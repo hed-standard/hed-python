@@ -174,10 +174,6 @@ class Test(unittest.TestCase):
         takes_value_tag = self.tag_validator.tag_takes_value(self.valid_formatted_tag)
         self.assertFalse(takes_value_tag)
 
-    def test_is_numeric_tag(self):
-        numeric_tag = self.tag_validator.is_numeric_tag(self.valid_formatted_is_numeric_tag)
-        self.assertTrue(numeric_tag)
-
     def test_is_unit_class_tag(self):
         unit_class_tag = self.tag_validator.is_unit_class_tag(self.valid_formatted_unit_class_tag)
         self.assertTrue(unit_class_tag)
@@ -263,39 +259,39 @@ class Test(unittest.TestCase):
         self.assertTrue(validation_error)
         self.assertIsInstance(validation_error, str)
 
-    def test_count_tag_group_brackets(self):
-        validation_error = self.tag_validator.count_tag_group_brackets(self.valid_hed_string)
+    def test_count_tag_group_parentheses(self):
+        validation_error = self.tag_validator.count_tag_group_parentheses(self.valid_hed_string)
         self.assertFalse(validation_error)
         self.assertIsInstance(validation_error, str)
-        validation_error = self.tag_validator.count_tag_group_brackets(self.invalid_hed_string)
+        validation_error = self.tag_validator.count_tag_group_parentheses(self.invalid_hed_string)
         self.assertTrue(validation_error)
         self.assertIsInstance(validation_error, str)
 
-    def test_find_missing_commas_in_hed_string(self):
-        validation_error = self.tag_validator.find_comma_issues_in_hed_string(self.valid_hed_string)
+    def test_find_delimiter_issues_in_hed_string(self):
+        validation_error = self.tag_validator.find_delimiter_issues_in_hed_string(self.valid_hed_string)
         self.assertFalse(validation_error)
         self.assertIsInstance(validation_error, str)
-        validation_error = self.tag_validator.find_comma_issues_in_hed_string(self.missing_comma_hed_string)
+        validation_error = self.tag_validator.find_delimiter_issues_in_hed_string(self.missing_comma_hed_string)
         self.assertTrue(validation_error)
         self.assertIsInstance(validation_error, str)
         validation_error = \
-            self.tag_validator.find_comma_issues_in_hed_string(self.valid_formatted_tag_with_parentheses)
+            self.tag_validator.find_delimiter_issues_in_hed_string(self.valid_formatted_tag_with_parentheses)
         self.assertFalse(validation_error)
         self.assertIsInstance(validation_error, str)
         validation_error = \
-            self.tag_validator.find_comma_issues_in_hed_string(self.invalid_formatted_tag_with_parentheses)
+            self.tag_validator.find_delimiter_issues_in_hed_string(self.invalid_formatted_tag_with_parentheses)
         self.assertTrue(validation_error)
         self.assertIsInstance(validation_error, str)
         validation_error = \
-            self.tag_validator.find_comma_issues_in_hed_string(self.valid_formatted_tag_with_parentheses_group)
+            self.tag_validator.find_delimiter_issues_in_hed_string(self.valid_formatted_tag_with_parentheses_group)
         self.assertFalse(validation_error)
         self.assertIsInstance(validation_error, str)
         validation_error = \
-            self.tag_validator.find_comma_issues_in_hed_string(self.hed_string_ending_with_parentheses)
+            self.tag_validator.find_delimiter_issues_in_hed_string(self.hed_string_ending_with_parentheses)
         self.assertFalse(validation_error)
         self.assertIsInstance(validation_error, str)
         validation_error = \
-            self.tag_validator.find_comma_issues_in_hed_string(self.valid_formatted_tag_with_complex_parentheses)
+            self.tag_validator.find_delimiter_issues_in_hed_string(self.valid_formatted_tag_with_complex_parentheses)
         self.assertFalse(validation_error)
         self.assertIsInstance(validation_error, str)
 
@@ -314,35 +310,21 @@ class Test(unittest.TestCase):
         tag_is_valid = self.tag_validator.tag_exists_in_schema(self.invalid_formatted_tag)
         self.assertFalse(tag_is_valid)
 
-    def test_is_hh_mm_time(self):
-        validation_error = TagValidator.is_hh_mm_time(self.valid_time_string)
+    def test_is_clock_face_time(self):
+        validation_error = TagValidator.is_clock_face_time(self.valid_time_string)
         self.assertTrue(validation_error, str)
-        validation_error = TagValidator.is_hh_mm_time(self.invalid_time_string)
+        validation_error = TagValidator.is_clock_face_time(self.invalid_time_string)
         self.assertFalse(validation_error, str)
 
     def test_comma_is_missing_after_closing_bracket(self):
         comma_is_missing = \
-            self.tag_validator.comma_is_missing_after_closing_bracket(self.last_non_empty_character_not_delimiter,
+            self.tag_validator.comma_is_missing_after_closing_parentheses(self.last_non_empty_character_not_delimiter,
                                                                       self.current_character)
         self.assertTrue(comma_is_missing)
         comma_is_missing = \
-            self.tag_validator.comma_is_missing_after_closing_bracket(self.last_non_empty_character_delimiter,
+            self.tag_validator.comma_is_missing_after_closing_parentheses(self.last_non_empty_character_delimiter,
                                                                       self.current_character)
         self.assertFalse(comma_is_missing)
-
-    def test_comma_is_missing_before_opening_bracket(self):
-        comma_is_missing = \
-            self.tag_validator.comma_is_missing_before_opening_bracket(self.last_non_empty_character_not_delimiter,
-                                                                       self.current_opening_bracket_character)
-        self.assertTrue(comma_is_missing)
-        comma_is_missing = \
-            self.tag_validator.comma_is_missing_before_opening_bracket(self.last_non_empty_character_delimiter,
-                                                                       self.current_opening_bracket_character)
-        self.assertFalse(comma_is_missing)
-
-    def test_report_missing_comma_error(self):
-        missing_comma_error = TagValidator.report_missing_comma_error(self.invalid_original_tag)
-        self.assertTrue(missing_comma_error)
 
     def test_check_if_duplicate_tags_exist(self):
         validation_error = self.tag_validator.check_if_duplicate_tags_exist(self.valid_original_duplicate_tag_list,
