@@ -23,3 +23,11 @@ Most people who just want to validate HED tags in their data will prefer to use 
 HED tagging is integrated into [EEGLAB](https://sccn.ucsd.edu/eeglab/index.php) as a plugin.
 HED tagging support using a graphical user interface with integrated validation is available at
 <https://github.com/hed-standard/hed-matlab>.
+
+### HED validating in Python
+You can also incorporate HED validation into your own Python tools or validate HED strings or tagged
+files using Python: 
+
+> `examples/hed_string_examples.py` illsutrates how to call the HED validator on HED tag strings.  
+
+> `examples/hed_files_examples.py` illustrates how to call the HED validator on spreadsheets of tags.
