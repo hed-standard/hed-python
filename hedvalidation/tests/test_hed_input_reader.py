@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         cls.attribute_onset_tag = 'Attribute/Onset'
         cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
         cls.category_tags = 'Participant response, Stimulus'
-        cls.validation_issues = ''
+        cls.validation_issues = []
         cls.semantic_version_one = '1.2.3'
         cls.semantic_version_two = '1.2.4'
         cls.semantic_version_three = '1.2.5'
@@ -48,30 +48,30 @@ class Test(unittest.TestCase):
 
     def test__validate_hed_input(self):
         validation_issues = self.generic_hed_input_reader._validate_hed_input()
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
 
     def test__validate_individual_tags_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_invalid_tags)
         validation_issues = self.generic_hed_input_reader._validate_individual_tags_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test__validate_top_levels_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_no_required_tags)
         validation_issues = self.generic_hed_input_reader._validate_top_level_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test__validate_tag_levels_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_multiple_unique_tags)
         validation_issues = self.generic_hed_input_reader._validate_tag_levels_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test__validate_groups_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_too_many_tildes)
         validation_issues = self.generic_hed_input_reader._validate_groups_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test__append_validation_issues_if_found(self):
@@ -82,7 +82,7 @@ class Test(unittest.TestCase):
                                                                              row_number,
                                                                              self.hed_string_with_invalid_tags,
                                                                              self.column_to_hed_tags_dictionary)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test__append_row_validation_issues_if_found(self):
@@ -92,7 +92,7 @@ class Test(unittest.TestCase):
             self.generic_hed_input_reader._append_row_validation_issues_if_found(self.validation_issues,
                                                                                  row_number,
                                                                                  self.hed_string_with_invalid_tags)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test__append_column_validation_issues_if_found(self):
@@ -102,18 +102,18 @@ class Test(unittest.TestCase):
             self.generic_hed_input_reader._append_column_validation_issues_if_found(self.validation_issues,
                                                                                     row_number,
                                                                                     self.column_to_hed_tags_dictionary)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test_validate_column_hed_string(self):
         self.assertFalse(self.validation_issues)
         validation_issues = self.generic_hed_input_reader.validate_column_hed_string(self.hed_string_with_invalid_tags)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test_get_validation_issues(self):
         validation_issues = self.generic_hed_input_reader.get_validation_issues()
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
 
     def test_get_file_extension(self):
         file_extension = HedInputReader.get_file_extension(self.text_file_with_extension)
