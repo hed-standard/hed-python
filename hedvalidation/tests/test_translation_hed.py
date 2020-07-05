@@ -145,7 +145,7 @@ class FullHedString(TestHed):
         expected_issues = {
             # NOT COMPLETE
             'missingOpeningComma': report_error_type('invalidTag', tag='/Action/Reach/To touch('),
-            'missingClosingComma': report_error_type('commaMissing', tag='/Participant/Effect/Body part/Arm)/'),
+            'missingClosingComma': report_error_type('commaMissing', tag='/Participant/Effect/Body part/Arm)'),
             'extraOpeningComma': report_error_type('extraDelimiter', character=',', index=0,
                                                    hed_string=test_strings['extraOpeningComma']),
             'extraClosingComma': report_error_type('extraDelimiter', character=',',

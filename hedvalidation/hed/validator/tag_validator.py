@@ -41,8 +41,8 @@ class TagValidator:
     UNIT_SYMBOL_TYPE = 'unitSymbol'
     UNITS_ELEMENT = 'units'
     VALID_ERROR_TYPE = 'invalidTag'
-    OPENING_GROUP_parentheses = '('
-    CLOSING_GROUP_parentheses = ')'
+    OPENING_GROUP_CHARACTER = '('
+    CLOSING_GROUP_CHARACTER = ')'
     DOUBLE_QUOTE = '"'
     COMMA = ','
     TILDE = '~'
@@ -198,7 +198,7 @@ class TagValidator:
         validation_issues = []
         validation_issues += self.find_invalid_character_issues(hed_string)
         validation_issues += self.count_tag_group_parentheses(hed_string)
-        validation_issues += self.find_comma_issues_in_hed_string(hed_string)
+        validation_issues += self.find_delimiter_issues_in_hed_string(hed_string)
         return validation_issues
 
     def run_tag_level_validators(self, original_tag_list, formatted_tag_list):
@@ -829,7 +829,7 @@ class TagValidator:
             return tag[:end_index]
         return tag
 
-    def find_comma_issues_in_hed_string(self, hed_string):  # rewrite this to fix issue 3
+    def find_delimiter_issues_in_hed_string(self, hed_string):
         """Reports a validation error if there are missing commas or commas in tags that take values.
 
         Parameters
@@ -855,28 +855,28 @@ class TagValidator:
             if TagValidator.character_is_delimiter(current_character):
                 if current_tag.strip() == current_character:
                     issues += error_reporter.report_error_type('extraDelimiter',
-                                                                character=current_character,
-                                                                index=i,
-                                                                hed_string=hed_string)
+                                                               character=current_character,
+                                                               index=i,
+                                                               hed_string=hed_string)
                     current_tag = ''
                     continue
                 current_tag = ''
-            elif current_character == self.OPENING_GROUP_parentheses:
-                if current_tag.strip() == self.OPENING_GROUP_parentheses:
+            elif current_character == self.OPENING_GROUP_CHARACTER:
+                if current_tag.strip() == self.OPENING_GROUP_CHARACTER:
                     current_tag = ''
                 else:
                     issues += error_reporter.report_error_type('invalidTag', tag=current_tag)
             elif TagValidator.comma_is_missing_after_closing_parentheses(last_non_empty_valid_character,
-                                                                     current_character):
-                issues += error_reporter.report_error_type('commaMissing', tag=current_tag)
+                                                                         current_character):
+                issues += error_reporter.report_error_type('commaMissing', tag=current_tag[:-1])
                 break
             last_non_empty_valid_character = current_character
             last_non_empty_valid_index = i
         if TagValidator.character_is_delimiter(last_non_empty_valid_character):
             issues += error_reporter.report_error_type('extraDelimiter',
-                                                        character=last_non_empty_valid_character,
-                                                        index=last_non_empty_valid_index,
-                                                        hed_string=hed_string)
+                                                       character=last_non_empty_valid_character,
+                                                       index=last_non_empty_valid_index,
+                                                       hed_string=hed_string)
         return issues
 
     def skip_iterations(self, iterator, start, end):
@@ -923,43 +923,6 @@ class TagValidator:
                                                 hed_string=hed_string)
 
     @staticmethod
-    def report_missing_comma_error(error_tag):
-        """Reports a error that is related with a missing comma.
-
-        Parameters
-        ----------
-        error_tag: str
-            The tag that caused the error.
-        Returns
-        -------
-        string
-            The error message associated with a missing comma.
-
-        """
-        error_tag = error_tag[:-1].strip()
-        return error_reporter.report_error_type(TagValidator.COMMA_ERROR_TYPE, tag=error_tag)
-
-    @staticmethod
-    def comma_is_missing_before_opening_parentheses(last_non_empty_character, current_character):
-        """Checks to see if a comma is missing before a opening parentheses in a HED string. This is a helper function for
-           the find_missing_commas_in_hed_string function.
-
-        Parameters
-        ----------
-        last_non_empty_character: character
-            The last non-empty string in the HED string.
-        current_character: str
-            The current character in the HED string.
-        Returns
-        -------
-        bool
-            True if a comma is missing before a opening parentheses. False, if otherwise.
-
-        """
-        return last_non_empty_character and not TagValidator.character_is_delimiter(last_non_empty_character) and \
-               current_character == TagValidator.OPENING_GROUP_parentheses
-
-    @staticmethod
     def comma_is_missing_after_closing_parentheses(last_non_empty_character, current_character):
         """Checks to see if a comma is missing after a closing parentheses in a HED string. This is a helper function for
            the find_missing_commas_in_hed_string function.
@@ -976,9 +939,8 @@ class TagValidator:
             True if a comma is missing after a closing parentheses. False, if otherwise.
 
         """
-        return last_non_empty_character == TagValidator.CLOSING_GROUP_parentheses and not \
-            (TagValidator.character_is_delimiter(current_character)
-             or current_character == TagValidator.CLOSING_GROUP_parentheses)
+        return last_non_empty_character == TagValidator.CLOSING_GROUP_CHARACTER and not \
+            TagValidator.character_is_delimiter(current_character)
 
     @staticmethod
     def character_is_delimiter(character):
