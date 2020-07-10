@@ -5,7 +5,7 @@ This module is used to report errors found in the validation.
 
 
 def report_error_type(error_type, error_row=1, error_column=1, hed_string='', tag='', tag_prefix='', previous_tag='',
-                      character='', index=0, unit_class_units='', opening_parentheses_count=0,
+                      character='', index=0, unit_class_units='', file_name='', opening_parentheses_count=0,
                       closing_parentheses_count=0):
     """Reports the abc error based on the type of error.
 
@@ -31,6 +31,8 @@ def report_error_type(error_type, error_row=1, error_column=1, hed_string='', ta
         The character in the string that generated the error.
     unit_class_units: str
         The unit class units that are associated with the error.
+    file_name: str
+        The invalid file name that cause the error.
     opening_parentheses_count: int
         The number of opening parentheses.
     closing_parentheses_count: int
@@ -43,6 +45,9 @@ def report_error_type(error_type, error_row=1, error_column=1, hed_string='', ta
 
     """
     error_types = {
+        'row': 'Issues in row %s:\n' % str(error_row),
+        'column': 'Issues in row %s column %s:\n' % (str(error_row), str(error_column)),
+        'invalidFileName': '\tInvalid file name - "%s"\n' % file_name,
         'parentheses': '\tERROR: Number of opening and closing parentheses are unequal. %s opening parentheses. %s '
                        'closing parentheses\n' % (opening_parentheses_count, closing_parentheses_count),
         'invalidCharacter': '\tERROR: Invalid character "%s" at index %s of string "%s"'
@@ -51,8 +56,6 @@ def report_error_type(error_type, error_row=1, error_column=1, hed_string='', ta
         'extraCommaOrInvalid': '\tERROR: Either "%s" contains a comma when it should not or "%s" is not a valid '
                                'tag\n ' % (previous_tag, tag),
         'duplicateTag': '\tERROR: Duplicate tag - "%s"\n' % tag,
-        'row': 'Issues in row %s:\n' % str(error_row),
-        'column': 'Issues in row %s column %s:\n' % (str(error_row), str(error_column)),
         'childRequired': '\tERROR: Descendant tag required - "%s"\n' % tag,
         'tooManyTildes': '\tERROR: Too many tildes - group "%s"\n' % tag,
         'multipleUniqueTags': '\tERROR: Multiple unique tags with prefix - "%s"\n' % tag_prefix,
