@@ -150,8 +150,11 @@ class HedInputReader:
         """
         if isinstance(self._hed_input, list):
             validation_issues = self._validate_hed_strings(self._hed_input)
-        elif self._is_file and HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
-            validation_issues = self._validate_hed_tags_in_file()
+        elif self._is_file:
+            if HedInputReader.hed_input_has_valid_file_extension(self._hed_input):
+                validation_issues = self._validate_hed_tags_in_file()
+            else:
+                validation_issues = error_reporter.report_error_type('invalidFileName', file_name=self._hed_input)
         else:
             validation_issues = self._validate_hed_strings([self._hed_input])[0]
         return validation_issues
