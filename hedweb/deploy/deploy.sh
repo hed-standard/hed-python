@@ -20,21 +20,11 @@ WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
 WEBINTERFACE_CODE_DIR="hed-python/hedweb/hed"
 VALIDATOR_CODE_DIR="hed-python/hedvalidation/hed"
 
-GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
-GIT_HED_DIR="${PWD}/hed-specification"
-GIT_HED_WILDCARD="${PWD}/hed-specification/hedxml/."
-HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hed/validator/hed"
-
 ##### Functions
 
 clone_github_repo(){
 echo Cloning repo ...
 git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
-}
-
-clone_hed_github_repo(){
-echo Cloning HED repo ...
-git clone $GIT_HED_REPO_URL
 }
 
 create_web_directory()
@@ -45,7 +35,6 @@ cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
 cp ${WSGI_FILE} "${CODE_DEPLOY_DIR}"
 cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
-cp -r "${GIT_HED_WILDCARD}" "${HED_XML_DEPLOY_DIR}"
 }
 
 switch_to_web_directory()
@@ -93,7 +82,6 @@ echo Branch specified... Using "$1" branch
 GIT_REPO_BRANCH="$1"
 fi
 clone_github_repo || error_exit "Cannot clone repo $GIT_REPO_URL branch $GIT_REPO_BRANCH"
-clone_hed_github_repo || error_exit "Cannot clone repo $GIT_HED_REPO_URL"
 create_web_directory
 switch_to_web_directory
 build_new_container

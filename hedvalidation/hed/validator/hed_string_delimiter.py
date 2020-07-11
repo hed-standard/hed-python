@@ -275,7 +275,8 @@ class HedStringDelimiter:
             formatted_hed_tags_set.add(formatted_hed_tag)
         return formatted_hed_tags_set
 
-    def split_hed_string_into_list(self, hed_string):
+    @staticmethod
+    def split_hed_string_into_list(hed_string):
         """Splits the tags and non-nested groups in a HED string based on a delimiter. The default delimiter is a comma.
 
         Parameters

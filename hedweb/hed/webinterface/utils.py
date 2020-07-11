@@ -9,6 +9,7 @@ from flask import current_app
 from logging.handlers import RotatingFileHandler
 from logging import ERROR
 from hed.validator.hed_input_reader import HedInputReader
+from hed.validator import hed_cache
 from hed.validator.hed_dictionary import HedDictionary
 from hed.webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants
 from hed.webinterface.constants.error import error_constants
@@ -58,7 +59,8 @@ def find_major_hed_versions():
     """
     hed_info = {}
     try:
-        hed_info[js_form_constants.HED_MAJOR_VERSIONS] = HedInputReader.get_all_hed_versions()
+        hed_cache.cache_all_hed_xml_versions()
+        hed_info[js_form_constants.HED_MAJOR_VERSIONS] = hed_cache.get_all_hed_versions()
     except:
         hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
     return hed_info
@@ -505,7 +507,7 @@ def _get_hed_path_from_validation_form(form_request_object, hed_file_path):
     if _hed_version_in_form(form_request_object) and \
             (form_request_object.form[
                  html_form_constants.HED_VERSION] != spreadsheet_constants.OTHER_HED_VERSION_OPTION or not hed_file_path):
-        return HedInputReader.get_path_from_hed_version(form_request_object.form['hed-version'])
+        return hed_cache.get_path_from_hed_version(form_request_object.form['hed-version'])
     return hed_file_path
 
 

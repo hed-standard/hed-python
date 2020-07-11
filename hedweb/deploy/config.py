@@ -20,7 +20,7 @@ class Config(object):
     STATIC_URL_PATH_ATTRIBUTE_NAME = 'STATIC_URL_PATH'
     UPLOAD_FOLDER = os.path.join(tempfile.gettempdir(), 'hedtools_uploads')
     URL_PREFIX = None
-
+    HED_CACHE_FOLDER = '/var/cache/hed_cache'
 
 class DevelopmentConfig(Config):
     DEBUG = False

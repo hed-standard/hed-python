@@ -67,7 +67,7 @@ class TagValidator:
         if hed_dictionary:
             self._hed_dictionary_dictionaries = hed_dictionary.get_dictionaries()
         else:
-            self._hed_dictionaries = None
+            self._hed_dictionary_dictionaries = None
         self._check_for_warnings = check_for_warnings
         self._issue_count = 0
         self._error_count = 0
