@@ -8,11 +8,12 @@ the get_validation_issues() function.
 import os
 import re
 import xlrd
+
 from hed.validator import error_reporter
 from hed.validator.hed_dictionary import HedDictionary
 from hed.validator.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
-from distutils.version import StrictVersion
+from hed.validator import hed_cache
 
 
 class HedInputReader:
@@ -28,12 +29,11 @@ class HedInputReader:
     DEFAULT_HED_XML_FILE = os.path.join(HED_DIRECTORY, 'HEDLatest.xml')
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
                                    'Label': 'Event/Label/', 'Long': 'Event/Long name/'}
-    HED_VERSION_EXPRESSION = r'HED(\d+.\d+.\d+)'
-    HED_XML_PREFIX = 'HED'
-    HED_XML_EXTENSION = '.xml'
 
-    def __init__(self, hed_input, is_file=True, check_for_warnings=False, run_semantic_validation=True, hed_xml_file='',
-                 tag_columns=[2], has_column_names=True, required_tag_columns={}, worksheet_name=''):
+    def __init__(self, hed_input, is_file=True, check_for_warnings=False, run_semantic_validation=True,
+                 hed_xml_file='', xml_version_number=None,
+                 tag_columns=[2], has_column_names=True, required_tag_columns={},
+                 worksheet_name='', hed_dictionary=None):
         """Constructor for the HedInputReader class.
 
         Parameters
@@ -49,7 +49,10 @@ class HedInputReader:
         run_semantic_validation: bool
             True if the validator should check the HED data against a schema. False for syntax-only validation.
         hed_xml_file: str
-            A path to a HED XML file.
+            A path to a specific hed xml file, or a directory containing a hed xml file.
+        xml_version_number: str
+            HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
+                or does not point to a specific xml file.
         tag_columns: list
             A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
         has_column_names: bool
@@ -63,6 +66,8 @@ class HedInputReader:
             that needs Event/Category/ prepended to them.
         worksheet_name: str
             The name of the Excel workbook worksheet that contains the HED tags.
+        hed_dictionary: HedDictionary
+            Name of already prepared HedDictionary to use.  This overrides hed_xml_url_or_file
         Returns
         -------
         HedInputReader object
@@ -76,7 +81,11 @@ class HedInputReader:
         self._worksheet_name = worksheet_name
         self._is_file = is_file
         if run_semantic_validation:
-            self._hed_dictionary = self._get_hed_dictionary(hed_xml_file)
+            if hed_dictionary is None:
+                self._hed_dictionary = self._get_hed_dictionary(hed_xml_file,
+                                                                get_specific_version=xml_version_number)
+            else:
+                self._hed_dictionary = hed_dictionary
             self._tag_validator = TagValidator(hed_dictionary=self._hed_dictionary,
                                                check_for_warnings=check_for_warnings,
                                                run_semantic_validation=True)
@@ -101,23 +110,28 @@ class HedInputReader:
         """
         return self._tag_validator
 
-    def _get_hed_dictionary(self, hed_xml_file):
+    @staticmethod
+    def _get_hed_dictionary(hed_xml_file, get_specific_version=None):
         """Gets a HEDDictionary object based on the hed xml file specified. If no HED file is specified then the latest
            file will be retrieved.
 
         Parameters
         ----------
         hed_xml_file: str
-            A path to a HED XML file.
+            A path to a specific hed xml file, or a directory containing a hed xml file.
+        xml_version_number: str
+            HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
+                or does not point to a specific xml file.
         Returns
         -------
         HedDictionary object
             A HedDictionary object.
 
         """
-        if not hed_xml_file:
-            hed_xml_file = HedInputReader.get_latest_hed_version_path()
-        return HedDictionary(hed_xml_file)
+        final_hed_xml_file = hed_cache.get_local_file(hed_xml_file, get_specific_version)
+        hed_dictionary = HedDictionary(final_hed_xml_file)
+        return hed_dictionary
+
 
     def _convert_tag_columns_to_processing_format(self, tag_columns):
         """Converts the tag columns list to a list that allows it to be internally processed. 1 is subtracted from
