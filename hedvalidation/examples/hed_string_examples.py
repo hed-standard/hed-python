@@ -12,24 +12,24 @@ if __name__ == '__main__':
     hed_string_1 = 'Event/Label/ButtonPuskDeny, Event/Description/Button push to deny access to the ID holder,' \
                    'Event/Category/Participant response, ' \
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger)'
-    hed_input_reader = HedInputReader(hed_string_1, hed_xml_file=local_hed_file)
+    hed_input_reader = HedInputReader(hed_string_1, is_file=False, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 1a] hed_string_1 should have no issues with HEDv7.1.1'))
 
     # Example 1b: Try with the latest version of HED.xml
-    hed_input_reader = HedInputReader(hed_string_1)
+    hed_input_reader = HedInputReader(hed_string_1, is_file=False)
     print(hed_input_reader.get_printable_issue_string(
-        '[Example 1b] hed_string_1 probably has noissues with the latest HED version'))
+        '[Example 1b] hed_string_1 probably has no issues with the latest HED version'))
 
     # Example 2a: Invalid HED string (junk in last tag)
     hed_string_2 = 'Event/Category/Participant response,'  \
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger),' \
                    'dskfjkf/dskjdfkj/sdkjdsfkjdf/sdlfdjdsjklj'
-    hed_input_reader = HedInputReader(hed_string_2)
+    hed_input_reader = HedInputReader(hed_string_2, is_file=False)
     print(hed_input_reader.get_printable_issue_string('[Example 2a] hed_string_2 has junk in the last tag'))
 
     # Example 2b: However HED string of Example 2 has valid syntax so syntactic validation works
-    hed_input_reader = HedInputReader(hed_string_2, run_semantic_validation=False)
+    hed_input_reader = HedInputReader(hed_string_2, is_file=False, run_semantic_validation=False)
     print(hed_input_reader.get_printable_issue_string('[Example 2b] hed_string_2 is syntactically correct'))
 
     # Example 3a: Invalid HED string
@@ -38,7 +38,7 @@ if __name__ == '__main__':
                    '(Item/2D shape/Sector, Attribute/Visual/Color/Red) ' \
                    '(Item/2D shape/Ellipse/Circle, Attribute/Visual/Color / Red), Sensory presentation/Visual, ' \
                    'Participant/Efffectt/Visual, Participant/Effect/Cognitive/Target'
-    hed_input_reader = HedInputReader(hed_string_3)
+    hed_input_reader = HedInputReader(hed_string_3, is_file=False)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 3a] hed_string_3 has missing comma so fails before Efffectt typo'))
 
@@ -51,6 +51,6 @@ if __name__ == '__main__':
                    'Event/Category/Participant response, ' \
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger), ' \
                    '(Participant ~ Action/Deny/Access ~ Item/Object/Person/IDHolder)'
-    hed_input_reader = HedInputReader(hed_string_4, hed_xml_file=local_hed_file)
+    hed_input_reader = HedInputReader(hed_string_4, is_file=False, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 4a] the ~ notation in hed_string_4 works in v7.1.1'))
