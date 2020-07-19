@@ -10,9 +10,12 @@ from hed.validator.hed_dictionary import HedDictionary
 
 
 class TestHed(unittest.TestCase):
+
+    schema_file = 'data/HED.xml'
+
     @classmethod
     def setUpClass(cls):
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
         cls.hed_dictionary = HedDictionary(hed_xml)
         cls.syntactic_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=False,
                                                    run_semantic_validation=False)
@@ -35,7 +38,6 @@ class TestHed(unittest.TestCase):
         for test_key in test_strings:
             hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
             test_issues = test_function(hed_string_delimiter)
-            print("Issues", test_issues)
             test_result = not test_issues
             expected_issue = expected_issues[test_key]
             expected_result = expected_results[test_key]
@@ -557,6 +559,107 @@ class TestHedTags(TestHed):
         self.assertEqual(result, True)
         self.assertCountEqual(issues, [])
 
+
+class TestOldHed(TestHed):
+    schema_file = 'data/HED7.0.4.xml'
+
+
+class OldIndividualHedTags(TestOldHed):
+    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
+        if check_for_warnings is True:
+            self.validator_base(test_strings, expected_results, expected_issues, lambda
+                hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
+                hed_string_delimiter))
+        else:
+            self.validator_base(test_strings, expected_results, expected_issues, lambda
+                hed_string_delimiter: self.semantic_hed_input_reader._validate_individual_tags_in_hed_string(
+                hed_string_delimiter))
+
+    def test_required_units(self):
+        test_strings = {
+            'hasRequiredUnit': 'Event/Duration/3 ms',
+            'missingRequiredUnit': 'Event/Duration/3',
+            'notRequiredNumber': 'Attribute/Color/Red/0.5',
+            'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
+            'timeValue': 'Item/2D shape/Clock face/8:30'
+        }
+        expected_results = {
+            'hasRequiredUnit': True,
+            'missingRequiredUnit': False,
+            'notRequiredNumber': True,
+            'notRequiredScientific': True,
+            'timeValue': True
+        }
+        expected_issues = {
+            'hasRequiredUnit': "",
+            'missingRequiredUnit': report_warning_type('unitClassDefaultUsed', tag=test_strings['missingRequiredUnit'],
+                                                       default_unit='s'),
+            'notRequiredNumber': "",
+            'notRequiredScientific': "",
+            'timeValue': ""
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
+    def correct_units(self):
+        test_strings = {
+            'correctUnit': 'Event/Duration/3 ms',
+            'correctUnitWord': 'Event/Duration/3 milliseconds',
+            'correctUnitScientific': 'Event/Duration/3.5e1 ms',
+            'incorrectUnit': 'Event/Duration/3 cm',
+            'incorrectUnitWord': 'Event/Duration/3 nanoseconds',
+            'incorrectPrefix': 'Event/Duration/3 ns',
+            'notRequiredNumber': 'Attribute/Color/Red/0.5',
+            'notRequiredScientific': 'Attribute/Color/Red/5e-1',
+            'properTime': 'Item/2D shape/Clock face/8:30',
+            'invalidTime': 'Item/2D shape/Clock face/54:54'
+        }
+        expected_results = {
+            'correctUnit': True,
+            'correctUnitWord': True,
+            'correctUnitScientific': True,
+            'incorrectUnit': False,
+            'incorrectUnitWord': False,
+            'incorrectPrefix': False,
+            'notRequiredNumber': True,
+            'notRequiredScientific': True,
+            'properTime': True,
+            'invalidTime': False
+        }
+        legal_time_units = [
+            's',
+            'second',
+            'seconds',
+            'centiseconds',
+            'centisecond',
+            'cs',
+            'hour:min',
+            'day',
+            'days',
+            'ms',
+            'milliseconds',
+            'millisecond',
+            'minute',
+            'minutes',
+            'hour',
+            'hours',
+        ]
+        expected_issues = {
+            'correctUnit': [],
+            'correctUnitWord': [],
+            'correctUnitScientific': [],
+            'incorrectUnit': report_error_type('unitClassInvalidUnit', tag=test_strings['incorrectUnit'],
+                                               unit_class_units=",".join(sorted(legal_time_units))),
+            'incorrectUnitWord': report_error_type('unitClassInvalidUnit', tag=test_strings['incorrectUnitWord'],
+                                               unit_class_units=",".join(sorted(legal_time_units))),
+            'incorrectPrefix': report_error_type('unitClassInvalidUnit', tag=test_strings['incorrectPrefix'],
+                                               unit_class_units=",".join(sorted(legal_time_units))),
+            'notRequiredNumber': [],
+            'notRequiredScientific': [],
+            'properTime': [],
+            'invalidTime': report_error_type('unitClassInvalidUnit', tag=test_strings['invalidTime'],
+                                             unit_class_units=",".join(sorted(legal_time_units)))
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
 if __name__ == '__main__':
     unittest.main()
