@@ -76,79 +76,11 @@ def download_file_in_upload_directory(filename):
         The contents of a other in the upload directory to send to the client.
 
     """
-    download_response = utils.generate_download_file_response(filename)
+    display_name = request.args.get("display_name")
+    download_response = utils.generate_download_file_response(filename, display_name)
     if isinstance(download_response, str):
         utils.handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
     return download_response
-
-
-@route_blueprint.route(route_constants.HED_VERSION_ROUTE, methods=['POST'])
-def get_hed_version_in_file():
-    """Gets information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the spreadsheet columns.
-
-    """
-    hed_info = utils.find_hed_version_in_file(request)
-    if error_constants.ERROR_KEY in hed_info:
-        return utils.handle_http_error(error_constants.INTERNAL_SERVER_ERROR, hed_info[error_constants.ERROR_KEY])
-    return json.dumps(hed_info)
-
-
-@route_blueprint.route(route_constants.MAJOR_HED_VERSION_ROUTE, methods=['GET'])
-def get_major_hed_versions():
-    """Gets information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the spreadsheet columns.
-
-    """
-    hed_info = utils.find_major_hed_versions()
-    if error_constants.ERROR_KEY in hed_info:
-        return utils.handle_http_error(error_constants.INTERNAL_SERVER_ERROR, hed_info[error_constants.ERROR_KEY])
-    return json.dumps(hed_info)
-
-
-@route_blueprint.route(route_constants.WORKSHEET_COLUMN_INFO, methods=['POST'])
-def get_worksheets_info():
-    """Gets information related to the Excel worksheets.
-
-    This information contains the names of the worksheets in a workbook, the names of the columns in the first
-    worksheet, and column indices that contain HED tags in the first worksheet.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the Excel worksheets.
-
-    """
-    worksheets_info = {}
-    try:
-        worksheets_info = utils.find_worksheets_info(request)
-        if error_constants.ERROR_KEY in worksheets_info:
-            return utils.handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                           worksheets_info[error_constants.ERROR_KEY])
-    except:
-        worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
-    return json.dumps(worksheets_info)
 
 
 @route_blueprint.route(route_constants.HELP_ROUTE, strict_slashes=False, methods=['GET'])
@@ -183,28 +115,9 @@ def render_additional_examples_page():
     return render_template(page_constants.ADDITIONAL_EXAMPLES_PAGE)
 
 
-# @route_blueprint.route(route_constants.SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-# def get_validation_results():
-#     """Validate the spreadsheet in the form after submission and return an attachment other containing the output.
-#
-#     Parameters
-#     ----------
-#
-#     Returns
-#     -------
-#         string
-#         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
-#         500 error message is returned.
-#     """
-#     validation_status = utils.report_spreadsheet_validation_status(request)
-#     if error_constants.ERROR_KEY in validation_status:
-#         return utils.handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-#                                        validation_status[error_constants.ERROR_KEY])
-#     return json.dumps(validation_status)
-
 @route_blueprint.route(route_constants.SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_conversion_results():
-    """Validate the spreadsheet in the form after submission and return an attachment other containing the output.
+    """Convert the given HED specification and return an attachment with the result.
 
     Parameters
     ----------
@@ -212,20 +125,40 @@ def get_conversion_results():
     Returns
     -------
         string
-        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
+        A serialized JSON string containing information related file to convert. If the conversion fails then a
         500 error message is returned.
     """
-    validation_status = utils.run_conversion(request)
-    if error_constants.ERROR_KEY in validation_status:
+    conversion_status = utils.run_conversion(request)
+    if error_constants.ERROR_KEY in conversion_status:
         return utils.handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                       validation_status[error_constants.ERROR_KEY])
-    return json.dumps(validation_status)
+                                       conversion_status[error_constants.ERROR_KEY])
+    return json.dumps(conversion_status)
+
+
+@route_blueprint.route(route_constants.SUBMIT_TAG_ROUTE, strict_slashes=False, methods=['POST'])
+def get_duplciate_tag_results():
+    """Check the HED specification in the form after submission and return an attachment other containing the output.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        string
+        A serialized JSON string containing the hed specification to check. If the conversion fails then a
+        500 error message is returned.
+    """
+    conversion_status = utils.run_tag_compare(request)
+    if error_constants.ERROR_KEY in conversion_status:
+        return utils.handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
+                                       conversion_status[error_constants.ERROR_KEY])
+    return json.dumps(conversion_status)
 
 
 
-@route_blueprint.route(route_constants.VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
-def render_validation_form():
-    """Handles the site root and Validation tab functionality.
+@route_blueprint.route(route_constants.CONVERSION_ROUTE, strict_slashes=False, methods=['GET'])
+def render_conversion_form():
+    """Handles the site root and conversion tab functionality.
 
     Parameters
     ----------
@@ -233,9 +166,9 @@ def render_validation_form():
     Returns
     -------
     Rendered template
-        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
-        displayed. If the HTTP method is a POST then the validation form is submitted.
+        A rendered template for the conversion form. If the HTTP method is a GET then the conversion form will be
+        displayed. If the HTTP method is a POST then the conversion form is submitted.
 
     """
-    return render_template(page_constants.VALIDATION_PAGE)
+    return render_template(page_constants.CONVERSION_PAGE)
 

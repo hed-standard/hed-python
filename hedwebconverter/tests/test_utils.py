@@ -28,14 +28,6 @@ class Test(unittest.TestCase):
                                                       hedwebconverter.utils.SPREADSHEET_FILE_EXTENSIONS)
         self.assertTrue(is_valid)
 
-    def test_generate_spreadsheet_validation_filename(self):
-        spreadsheet_filename = 'abc.xls'
-        expected_spreadsheet_filename = 'validated_' + spreadsheet_filename.rsplit('.')[0] + '.txt'
-        validation_file_name = hedwebconverter.utils._generate_spreadsheet_validation_filename(spreadsheet_filename,
-                                                                                   worksheet_name='')
-        self.assertTrue(validation_file_name)
-        self.assertEqual(expected_spreadsheet_filename, validation_file_name)
-
     def test_get_file_extension(self):
         spreadsheet_filename = 'abc.xls'
         expected_extension = 'xls'

@@ -20,6 +20,10 @@
     width: 10rem;
 }
 
+.form-group button[id="submit"], .form-group button[id="submit_tag"]{
+    width: 15rem;
+}
+
 .textbox-group {
     display: block;
 }
@@ -54,5 +58,5 @@
 }
 
 .form-group input[type="url"] {
-    width: 25rem;
+    width: 40rem;
 }

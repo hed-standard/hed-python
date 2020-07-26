@@ -1,17 +1,17 @@
 import setuptools
 
-with open("../hedweb/README.md", "r") as fh:
+with open("../hedwebconverter/README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="hedweb",
+    name="hedwebconverter",
     version="1.0.0",
-    author="VisLab, Jeremy Cockfield, Ian Callanan, Kay Robbins",
+    author="VisLab, Ian Callanan, Jeremy Cockfield, Kay Robbins",
     author_email="Kay.Robbins@utsa.edu",
-    description="Web interface for HED validation.",
+    description="Web interface for HED conversion.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/hed-standard/hed-python/hedweb/",
+    url="https://github.com/hed-standard/hed-python/hedwebconverter/",
     packages=setuptools.find_namespace_packages(include=["hed.*"]),
     classifiers=[
         "Programming Language :: Python :: 3",
