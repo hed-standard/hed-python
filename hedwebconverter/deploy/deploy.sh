@@ -5,20 +5,20 @@
 ##### Constants
 
 ROOT_DIR=${PWD}
-IMAGE_NAME="hedtools-validation:latest"
-CONTAINER_NAME="hedtools-validation"
+IMAGE_NAME="hedtools-conversion:latest"
+CONTAINER_NAME="hedtools-conversion"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${PWD}/hed-python"
 GIT_REPO_BRANCH="master"
 HOST_PORT=33000
 CONTAINER_PORT=80
 
-DEPLOY_DIR="hed-python/hedweb/deploy"
+DEPLOY_DIR="hed-python/hedwebconverter/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/hedwebconverter.wsgi"
-WEBINTERFACE_CODE_DIR="hed-python/hedweb/hed"
-VALIDATOR_CODE_DIR="hed-python/hedvalidation/hed"
+WEBINTERFACE_CODE_DIR="hed-python/hedwebconverter/hed"
+CONVERSION_CODE_DIR="hed-python/hedconversion/hed"
 
 ##### Functions
 
@@ -39,7 +39,7 @@ mkdir "${CODE_DEPLOY_DIR}"
 cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
 cp ${WSGI_FILE} "${CODE_DEPLOY_DIR}"
 cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
-cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+cp -r "${CONVERSION_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 }
 
 switch_to_web_directory()

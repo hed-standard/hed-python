@@ -5,8 +5,8 @@
 ##### Constants
 
 ROOT_DIR="${PWD}"
-IMAGE_NAME="hedtools-validation:latest"
-CONTAINER_NAME="hedtools-validation"
+IMAGE_NAME="hedtools-conversion:latest"
+CONTAINER_NAME="hedtools-conversion"
 # GIT_REPO_URL="https://github.com/VisLab/hed-python"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${ROOT_DIR}/hed-python"
@@ -21,7 +21,7 @@ WSGI_FILE="${DEPLOY_DIR}/hedwebconverter.wsgi"
 DOCKER_FILE="${DEPLOY_DIR}/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
 WEBINTERFACE_CODE_DIR="${ROOT_DIR}/hed-python/hedwebconverter/hed"
-VALIDATOR_CODE_DIR="${ROOT_DIR}/hed-python/hedconversion/hed"
+CONVERSION_CODE_DIR="${ROOT_DIR}/hed-python/hedconversion/hed"
 
 ##### Functions
 
@@ -49,8 +49,8 @@ cp "${DOCKER_FILE}" "${DOCKER_FILE_DEPLOY}"
 echo Copying "${WEBINTERFACE_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
 cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 
-echo Copying "${VALIDATOR_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
-cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+echo Copying "${CONVERSION_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
+cp -r "${CONVERSION_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 }
 
 switch_to_web_directory()
