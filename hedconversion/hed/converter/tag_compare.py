@@ -1,6 +1,6 @@
 from defusedxml.lxml import parse
 from hed.converter import utils
-from hedconversion.hed.converter import constants
+from hed.converter import constants
 
 
 class TagCompare():
