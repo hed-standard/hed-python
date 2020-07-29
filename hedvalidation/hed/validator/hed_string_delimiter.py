@@ -295,7 +295,7 @@ class HedStringDelimiter:
         current_tag = ''
         for index, character in enumerate(hed_string):
             if character == HedStringDelimiter.DOUBLE_QUOTE_CHARACTER:
-                pass
+                continue
             elif character == HedStringDelimiter.OPENING_GROUP_CHARACTER:
                 number_of_opening_parentheses += 1
             elif character == HedStringDelimiter.CLOSING_GROUP_CHARACTER:
