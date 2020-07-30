@@ -15,7 +15,6 @@ $(document).ready(function () {
  */
 function prepareConversionForm() {
     resetForm();
-    flashMessageOnScreen($('#hed-xml-url').val(), 'success', 'submit-flash');
     $('#hed-xml-url').val(DEFAULT_XML_URL);
     update_form_gui();
 }
@@ -70,6 +69,7 @@ $('#hed-xml-filename').change(function () {
     updateHEDFileLabel(hedPath);
     var checkboxUpload = document.getElementById("option_upload");
     checkboxUpload.checked = true;
+    clearSubmitFlash()
     update_form_gui();
 });
 
@@ -78,14 +78,17 @@ $('#hed-xml-url').change(function () {
     var hedURL = hed.val();
     var checkboxUpload = document.getElementById("option_url");
     checkboxUpload.checked = true;
+    clearSubmitFlash()
     update_form_gui();
 });
 
 $('#option_url').change(function () {
+    clearSubmitFlash();
     update_form_gui();
 });
 
 $('#option_upload').change(function () {
+    clearSubmitFlash();
     update_form_gui();
 });
 
@@ -93,6 +96,7 @@ function onURLModified(event){
     var checkboxURL = document.getElementById("option_url");
     checkboxURL.checked = true;
 
+    clearSubmitFlash();
     update_form_gui();
 }
 
@@ -196,9 +200,8 @@ function flashSubmitMessage() {
     flashMessageOnScreen('Specification is being converted...', 'success', 'submit-flash')
 }
 
-function flashSubmitMessage2() {
-    resetFlashMessages(false);
-    flashMessageOnScreen('Specification is being checked...', 'success', 'submit_tag-flash')
+function clearSubmitFlash() {
+    flashMessageOnScreen('', 'success', 'submit-flash')
 }
 
 function getHedFilename() {
@@ -262,6 +265,17 @@ $('#submit_tag').click(function () {
     }
 });
 
+/**
+ * Trigger the "save as" dialog for a text blob to save as a file with display name.
+ */
+function triggerDownloadBlob(download_text_blob, display_name) {
+    const url = window.URL.createObjectURL(new Blob([download_text_blob]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', display_name);
+    document.body.appendChild(link);
+    link.click();
+}
 
 /**
  * Submit the form and return the conversion results as an attachment
@@ -277,15 +291,18 @@ function submitForm() {
             data: formData,
             contentType: false,
             processData: false,
-            dataType: 'json',
-            success: function (conversionStatus) {
-                downloadResultFile(conversionStatus['downloadFile'], download_display_name);
-                flashMessageOnScreen('File converted...preparing to download...', 'success', 'submit-flash');
+            dataType: "text",
+            success: function (downloaded_file) {
+                  flashMessageOnScreen('', 'success', 'submit-flash');
+                  triggerDownloadBlob(downloaded_file, download_display_name);
             },
-            error: function (jqXHR) {
-                console.log(jqXHR.responseJSON.message);
-                flashMessageOnScreen('XML could not be processed', 'error',
-                    'submit-flash');
+            error: function (error_msg) {
+                console.log(download_response.responseText);
+                if (download_response.responseText.length < 100) {
+                    flashMessageOnScreen(download_response.responseText, 'error','submit-flash');
+                } else {
+                    flashMessageOnScreen('XML could not be processed', 'error','submit-flash');
+                }
             }
         }
     )
@@ -296,63 +313,34 @@ function submitForm2() {
     var conversionForm = document.getElementById("conversion-form");
     var formData = new FormData(conversionForm);
     var download_display_name = convert_to_results_name(getHedFilename())
-    flashSubmitMessage2();
+    flashSubmitMessage();
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.get_duplciate_tag_results')}}",
             data: formData,
             contentType: false,
             processData: false,
-            dataType: 'json',
-            success: function (conversionStatus) {
-                if (conversionStatus['downloadFile']) {
-                    downloadResultFile(conversionStatus['downloadFile'], download_display_name);
-                    flashMessageOnScreen('Duplicate tags found.  Creating txt...', 'error', 'submit_tag-flash');
+            dataType: 'text',
+            success: function (downloaded_file) {
+                  if (downloaded_file) {
+                      flashMessageOnScreen('', 'success', 'submit-flash');
+                      triggerDownloadBlob(downloaded_file, download_display_name);
+                  } else {
+                      flashMessageOnScreen('No duplicate tags found.', 'success', 'submit-flash');
+                  }
+            },
+            error: function (download_response) {
+                console.log(download_response.responseText);
+                if (download_response.responseText.length < 100) {
+                    flashMessageOnScreen(download_response.responseText, 'error','submit-flash');
                 } else {
-                     flashMessageOnScreen('No duplicate tags found.', 'success', 'submit_tag-flash');
+                    flashMessageOnScreen('XML could not be processed', 'error','submit-flash');
                 }
-            },
-            error: function (jqXHR) {
-                console.log(jqXHR.responseJSON.message);
-                flashMessageOnScreen('XML could not be processed', 'error',
-                    'submit_tag-flash');
             }
         }
     )
     ;
 }
-
-/**
- * Downloads the output file.
- * @param {string} downloadFile - The name of the download file.
- * @param {string} display_name - the name of the file to show to the user.
- */
-function downloadResultFile(downloadFile, display_name) {
-    window.location = "{{url_for('route_blueprint.download_file_in_upload_directory', filename='')}}" + downloadFile + "?display_name=" + display_name;
-}
-
-/**
- * Deletes the uploaded file indicated.
- * @param {string} uploaded_filename - The name of the uploaded file.
- */
-function deleteUploadedFile(uploaded_filename) {
-    $.ajax({
-            type: 'GET',
-            url: "{{url_for('route_blueprint.delete_file_in_upload_directory', filename='')}}" + uploaded_filename,
-            data: {},
-            contentType: false,
-            processData: false,
-            dataType: 'json',
-            success: function () {
-            },
-            error: function (jqXHR) {
-                console.log(jqXHR.responseJSON.message);
-            }
-        }
-    )
-    ;
-}
-
 
 /**
  * Checks to see if a string is empty. Empty meaning null or a length of zero.
@@ -424,25 +412,10 @@ function urlFileBasename(url) {
     return (-1 !== index) ? pathname.substring(index + 1) : pathname;
 }
 
-/**
- * Hides the HED XML file upload.
- */
-function hideUrlHEDVersionFileUpload() {
-    $('#url-hed-version').hide();
-}
-
-/**
- * Hides the HED XML file upload.
- */
-function hideOtherHEDVersionFileUpload() {
-    $('#other-hed-version').hide();
-}
-
-
-/**
- * Checks to see if warnings are being generated through checkbox.
- * @returns {boolean} - True if warnings are generated. False if otherwise.
- */
-function generateWarningsIsChecked() {
-    return $('#generate-warnings').prop('checked') === true;
-}
+///**
+// * Checks to see if warnings are being generated through checkbox.
+// * @returns {boolean} - True if warnings are generated. False if otherwise.
+// */
+//function generateWarningsIsChecked() {
+//    return $('#generate-warnings').prop('checked') === true;
+//}

@@ -1,7 +1,6 @@
 import os
-import json
+
 import tempfile
-import xlrd
 import traceback
 import urllib
 from flask import jsonify, Response
@@ -9,11 +8,10 @@ from werkzeug.utils import secure_filename
 from flask import current_app
 from logging.handlers import RotatingFileHandler
 from logging import ERROR
-from shutil import move
-from hed.webconverter.constants.other import file_extension_constants, spreadsheet_constants, type_constants
+
+from hed.webconverter.constants.other import file_extension_constants
 from hed.webconverter.constants.error import error_constants
-from hed.webconverter.constants.form import python_form_constants, conversion_arg_constants, js_form_constants, \
-    html_form_constants
+from hed.webconverter.constants.form import conversion_arg_constants, js_form_constants
 
 from hed.converter import xml2wiki, wiki2xml, tag_compare
 from hed.converter import constants as converter_constants
@@ -34,7 +32,7 @@ def url_to_file(resource_url):
     string: The local temporary filename for downloaded file
     """
     url_request = urllib.request.urlopen(resource_url)
-    suffix = "." + _get_file_extension(resource_url)
+    suffix = _get_file_extension(resource_url)
     url_data = str(url_request.read(), 'utf-8')
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False, mode='w', encoding='utf-8') as opened_file:
         opened_file.write(url_data)
@@ -56,7 +54,7 @@ def _get_uploaded_file_paths_from_forms(form_request_object):
     """
     hed_file_path = ''
     if hed_present_in_form(form_request_object) and _file_has_valid_extension(
-            form_request_object.files[js_form_constants.HED_FILE], spreadsheet_constants.HED_FILE_EXTENSIONS):
+            form_request_object.files[js_form_constants.HED_FILE], file_extension_constants.HED_FILE_EXTENSIONS):
         hed_file_path = _save_hed_to_upload_folder_if_present(
             form_request_object.files[js_form_constants.HED_FILE])
     elif url_present_in_form(form_request_object):
@@ -64,11 +62,19 @@ def _get_uploaded_file_paths_from_forms(form_request_object):
     return hed_file_path
 
 
+def get_upload_folder_filename(filename):
+    return os.path.join(app_config[UPLOAD_DIRECTORY_KEY], filename)
+
+
 def _run_conversion(hed_file_path):
+    """Runs the appropriate xml<>mediawiki converter depending on input filetype.
+
+    returns: A dictionary with converter.constants filled in.
+    """
     input_extension = _get_file_extension(hed_file_path)
-    if input_extension == "xml":
+    if input_extension == file_extension_constants.HED_XML_EXTENSION:
         conversion_function = xml2wiki.convert_hed_xml_2_wiki
-    elif input_extension == "mediawiki":
+    elif input_extension == file_extension_constants.HED_WIKI_EXTENSION:
         conversion_function = wiki2xml.convert_hed_wiki_2_xml
     else:
         raise ValueError(f"Invalid extension type: {input_extension}")
@@ -77,23 +83,43 @@ def _run_conversion(hed_file_path):
 
 
 def run_conversion(form_request_object):
-    conversion_status = {}
+    """Run conversion(wiki2xml or xml2wiki from converter)
+
+    returns: Response or string.
+        Non empty string is an error
+        Response is a download success.
+    """
     hed_file_path = ''
     try:
         conversion_input_arguments = _generate_input_arguments_from_conversion_form(form_request_object)
         hed_file_path = conversion_input_arguments[conversion_arg_constants.HED_XML_PATH]
         result_dict = _run_conversion(hed_file_path)
-        conversion_status[js_form_constants.DOWNLOAD_FILE] = _move_results_file_to_upload_folder(
-            result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY])
+        filename = result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]
+        download_response = generate_download_file_response_and_delete(filename)
+        if isinstance(download_response, str):
+            return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+        return download_response
+    except urllib.error.URLError:
+        #conversion_status[error_constants.ERROR_KEY] = error_constants.INVALID_URL_ERROR
+        return error_constants.INVALID_URL_ERROR
+    except urllib.error.HTTPError:
+        #conversion_status[error_constants.ERROR_KEY] = error_constants.NO_URL_CONNECTION_ERROR
+        return error_constants.NO_URL_CONNECTION_ERROR
     except:
-        conversion_status[error_constants.ERROR_KEY] = traceback.format_exc()
+        #conversion_status[error_constants.ERROR_KEY] = traceback.format_exc()
+        return traceback.format_exc()
     finally:
         delete_file_if_it_exist(hed_file_path)
-    return conversion_status
 
 
 def run_tag_compare(form_request_object):
-    comparison_status = {}
+    """Run tag comparison(tag_compare from converter)
+
+    returns: Response or string.
+        Empty string is success, but nothing to download.
+        Non empty string is an error
+        Response is a download success.
+    """
     hed_file_path = ''
     try:
         conversion_input_arguments = _generate_input_arguments_from_conversion_form(form_request_object)
@@ -105,36 +131,40 @@ def run_tag_compare(form_request_object):
                 hed_file_path = new_file_path
         result_dict = tag_compare.check_for_duplicate_tags(hed_file_path)
         if result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]:
-            comparison_status[js_form_constants.DOWNLOAD_FILE] = _move_results_file_to_upload_folder(
-                result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY])
-    except:
-        comparison_status[error_constants.ERROR_KEY] = traceback.format_exc()
+            filename = result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]
+            download_response = generate_download_file_response_and_delete(filename)
+            if isinstance(download_response, str):
+                return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+            return download_response
+    except urllib.error.URLError:
+        return error_constants.INVALID_URL_ERROR
+    except urllib.error.HTTPError:
+        return error_constants.NO_URL_CONNECTION_ERROR
     finally:
         delete_file_if_it_exist(hed_file_path)
-    return comparison_status
+    return ""
 
 
-def generate_download_file_response(download_file_name, display_filename=None):
+def generate_download_file_response_and_delete(full_filename, display_filename=None):
     """Generates a download other response.
 
     Parameters
     ----------
-    download_file_name: string
+    full_filename: string
         The download other name.
     display_filename: string
         What the save as window should show for filename.  If none use download flie name.
 
     Returns
     -------
-    response object
-        A response object containing the download other.
+    response object or string.
+        A response object containing the download, or a string on error.
 
     """
     if display_filename is None:
-        display_filename = download_file_name
+        display_filename = full_filename
     try:
         def generate():
-            full_filename = os.path.join(app_config[UPLOAD_DIRECTORY_KEY], download_file_name)
             with open(full_filename, 'r', encoding='utf-8') as download_file:
                 for line in download_file:
                     yield line
@@ -146,7 +176,7 @@ def generate_download_file_response(download_file_name, display_filename=None):
         return traceback.format_exc()
 
 
-def handle_http_error(error_code, error_message):
+def handle_http_error(error_code, error_message, as_text=False):
     """Handles an http error.
 
     Parameters
@@ -155,7 +185,8 @@ def handle_http_error(error_code, error_message):
         The code associated with the error.
     error_message: string
         The message associated with the error.
-
+    as_text: Bool
+        If we should encode this as text or json.
     Returns
     -------
     boolean
@@ -163,6 +194,8 @@ def handle_http_error(error_code, error_message):
 
     """
     current_app.logger.error(error_message)
+    if as_text:
+        return error_message, error_code
     return jsonify(message=error_message), error_code
 
 
@@ -200,10 +233,7 @@ def _file_extension_is_valid(filename, accepted_file_extensions):
         True if the other has a valid other extension.
 
     """
-    return "." in filename and os.path.splitext(filename)[1] in accepted_file_extensions
-    #check_filename = filename.rsplit('.', 1)[1].lower()
-    #return '.' in filename and \
-    #       filename.rsplit('.', 1)[1].lower() in accepted_file_extensions
+    return os.path.splitext(filename)[1] in accepted_file_extensions
 
 
 def _save_hed_to_upload_folder_if_present(hed_file_object):
@@ -222,19 +252,9 @@ def _save_hed_to_upload_folder_if_present(hed_file_object):
     """
     hed_file_path = ''
     if hed_file_object.filename:
-        hed_file_extension = '.' + _get_file_extension(hed_file_object.filename)
+        hed_file_extension = _get_file_extension(hed_file_object.filename)
         hed_file_path = _save_file_to_upload_folder(hed_file_object, hed_file_extension)
     return hed_file_path
-
-
-def _move_results_file_to_upload_folder(result_filename):
-    """Moves the indicated file to the upload folder.
-
-    """
-    upload_folder_filename = _generate_output_conversion_filename(result_filename)
-    upload_folder_filename_with_path = os.path.join(current_app.config[UPLOAD_DIRECTORY_KEY], upload_folder_filename)
-    move(result_filename, upload_folder_filename_with_path)
-    return upload_folder_filename
 
 
 def _file_has_valid_extension(file_object, accepted_file_extensions):
@@ -283,7 +303,7 @@ def _get_file_extension(file_name_or_path):
        string
            The extension of the other.
        """
-    return secure_filename(file_name_or_path).rsplit('.')[-1]
+    return os.path.splitext(file_name_or_path)[1]
 
 
 def _generate_input_arguments_from_conversion_form(form_request_object):
@@ -403,11 +423,15 @@ def url_present_in_form(conversion_form_request_object):
         True if a HED XML other is present in a request object from the conversion form.
 
     """
-    return _check_if_option_in_form(conversion_form_request_object, "upload_options", "option_url") \
-            and js_form_constants.HED_URL in conversion_form_request_object.values
+    return _check_if_option_in_form(conversion_form_request_object, js_form_constants.OPTIONS_GROUP,
+                                    js_form_constants.OPTION_URL) \
+                                    and js_form_constants.HED_URL in conversion_form_request_object.values
 
 
 def _check_if_option_in_form(conversion_form_request_object, option_name, target_value):
+    """Checks if the given option has a specific value.
+       This is used for radio buttons.
+    """
     if "upload_options" in conversion_form_request_object.values:
         if conversion_form_request_object.values[option_name] == target_value:
             return True
@@ -429,8 +453,9 @@ def hed_present_in_form(conversion_form_request_object):
         True if a HED XML other is present in a request object from the conversion form.
 
     """
-    return _check_if_option_in_form(conversion_form_request_object, "upload_options", "option_upload") \
-                and js_form_constants.HED_FILE in conversion_form_request_object.files
+    return _check_if_option_in_form(conversion_form_request_object, js_form_constants.OPTIONS_GROUP,
+                                    js_form_constants.OPTION_UPLOAD) \
+                                    and js_form_constants.HED_FILE in conversion_form_request_object.files
 
 
 def save_hed_to_upload_folder(hed_file_object):
@@ -447,11 +472,8 @@ def save_hed_to_upload_folder(hed_file_object):
         The path to the HED XML other that was saved to the upload folder.
 
     """
-    hed_file_extension = '.' + _get_file_extension(hed_file_object.filename)
+    hed_file_extension = _get_file_extension(hed_file_object.filename)
     hed_file_path = _save_file_to_upload_folder(hed_file_object, hed_file_extension)
     return hed_file_path
 
-
-def _get_filename_from_url(url):
-    return url.rsplit('/')[-1]
 
