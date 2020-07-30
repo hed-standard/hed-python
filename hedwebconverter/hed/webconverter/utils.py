@@ -432,7 +432,7 @@ def _check_if_option_in_form(conversion_form_request_object, option_name, target
     """Checks if the given option has a specific value.
        This is used for radio buttons.
     """
-    if "upload_options" in conversion_form_request_object.values:
+    if option_name in conversion_form_request_object.values:
         if conversion_form_request_object.values[option_name] == target_value:
             return True
 
