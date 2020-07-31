@@ -76,7 +76,7 @@ def create_hed_schema_email(mime_email, main_body_text):
         main_body_text = add_hed_xml_attachment_text(main_body_text, hed_resource_dictionary)
         main_body = MIMEText(main_body_text)
         mime_email.attach(main_body)
-        hed_xml_attachment = create_hed_xml_attachment(hed_resource_dictionary[constants.HED_INPUT_LOCATION_KEY])
+        hed_xml_attachment = create_hed_xml_attachment(hed_resource_dictionary[constants.HED_OUTPUT_LOCATION_KEY])
         mime_email.attach(hed_xml_attachment)
     finally:
         clean_up_hed_resources(hed_resource_dictionary)
