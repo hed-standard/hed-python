@@ -1,0 +1,4 @@
+Code,Long Name,Description,Label,Category,Event Details,Attribute
+1110001,Vehicle | Moving | Forward | | | | Onset,Vehicle begins moving forward,StartVehicleMoveFwd,Environmental,"(Participant/Effect/Visual, Item/Object/Vehicle ~ Attribute/Direction/Forward)",Onset
+2110000,Scenario | Trip Line Crossed | Target Event,Vehicle crosses trip line for target event,TripLineCrossTarget,Environmental,(Item/Object/Vehicle ~ Action/Cross boundary),
+2120000,Scenario | Trip Line Crossed | Intervention Event,Vehicle crosses trip line for intervention event,TripLineCrossInterv,Environmental,(Item/Object/Vehicle ~ Action/Cross boundary),

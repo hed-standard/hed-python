@@ -10,3 +10,4 @@ WTForms==2.1
 xlrd==1.1.0
 defusedxml==0.5.0
 lxml==4.5.1
+portalocker==1.7.0

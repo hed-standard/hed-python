@@ -23,21 +23,11 @@ DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
 WEBINTERFACE_CODE_DIR="${ROOT_DIR}/hed-python/hedweb/hed"
 VALIDATOR_CODE_DIR="${ROOT_DIR}/hed-python/hedvalidation/hed"
 
-GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
-GIT_HED_DIR="${ROOT_DIR}/hed-specification/"
-GIT_HED_WILDCARD="${ROOT_DIR}/hed-specification/hedxml/."
-HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hed/validator/hed"
-
 ##### Functions
 
 clone_github_repo(){
 echo Cloning hed-python repo in directory  "${ROOT_DIR}" ...
 git clone "${GIT_REPO_URL}" -b "${GIT_REPO_BRANCH}"
-}
-
-clone_hed_github_repo(){
-echo Cloning HED repo in directory "${ROOT_DIR}" ...
-git clone $GIT_HED_REPO_URL
 }
 
 create_web_directory()
@@ -61,9 +51,6 @@ cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 
 echo Copying "${VALIDATOR_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
 cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
-
-echo Copying " ${GIT_HED_WILDCARD}" to "${HED_XML_DEPLOY_DIR}" ...
-cp -r ${GIT_HED_WILDCARD} "${HED_XML_DEPLOY_DIR}"
 }
 
 switch_to_web_directory()
@@ -112,7 +99,6 @@ echo Branch specified... Using "$1" branch
 GIT_REPO_BRANCH="$1"
 fi
 clone_github_repo || error_exit "Cannot clone repo ${GIT_REPO_URL} branch ${GIT_REPO_BRANCH}"
-clone_hed_github_repo || error_exit "Cannot clone repo ${GIT_HED_REPO_URL}"
 create_web_directory
 switch_to_web_directory
 build_new_container

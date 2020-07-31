@@ -9,12 +9,15 @@ class Test(unittest.TestCase):
         cls.group_hed_string = '(tag1, tag2)'
         cls.empty_hed_string = ''
         cls.newline_hed_string = '\n'
+        cls.space_hed_string = '  '
+        cls.space_tab_hed_string = ' \t '
         cls.removal_elements = ['(tag2,tag5,(tag1),tag6)', '(tag3,tag5,tag6)']
         cls.unformatted_tag = '/Event/label/This label ends with a slash/'
         cls.formatted_tag = 'event/label/this label ends with a slash'
 
     def test_split_hed_string_into_list(self):
-        split_hed_string = HedStringDelimiter.split_hed_string_into_list(self.mixed_hed_string)
+        hed_string_delimiter = HedStringDelimiter(self.mixed_hed_string)
+        split_hed_string = hed_string_delimiter.split_hed_string_into_list(self.mixed_hed_string)
         self.assertTrue(split_hed_string)
         self.assertIsInstance(split_hed_string, list)
 
@@ -140,6 +143,10 @@ class Test(unittest.TestCase):
         is_space_or_empty = HedStringDelimiter.string_is_space_or_empty(self.empty_hed_string)
         self.assertTrue(is_space_or_empty)
         is_space_or_empty = HedStringDelimiter.string_is_space_or_empty(self.newline_hed_string)
+        self.assertTrue(is_space_or_empty)
+        is_space_or_empty = HedStringDelimiter.string_is_space_or_empty(self.space_hed_string)
+        self.assertTrue(is_space_or_empty)
+        is_space_or_empty = HedStringDelimiter.string_is_space_or_empty(self.space_tab_hed_string)
         self.assertTrue(is_space_or_empty)
 
 

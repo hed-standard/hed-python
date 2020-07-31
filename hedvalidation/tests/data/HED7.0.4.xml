@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="7.1.1">
+<HED version="7.0.4">
    <node>
       <name>Event</name>
       <node position="1" predicateType="passThrough" requireChild="true" required="true">
@@ -374,8 +374,9 @@
          <node>
             <name>Clock face</name>
             <description>Used to study things like hemispheric neglect. The tag is related to the clock-drawing-test</description>
-            <node takesValue="true" unitClass="clockTime">
+            <node takesValue="true" unitClass="time">
                <name>#</name>
+               <description>Hour:min</description>
             </node>
          </node>
       </node>
@@ -515,7 +516,7 @@
          <description>The Self-Assessment Manikin</description>
       </node>
    </node>
-   <node extensionAllowed="true">
+   <node>
       <name>Sensory presentation</name>
       <description>Object manifestation</description>
       <node>
@@ -561,12 +562,6 @@
             </node>
             <node>
                <name>Instrumental</name>
-            </node>
-            <node>
-               <name>Tone</name>
-            </node>
-            <node>
-               <name>Genre</name>
             </node>
          </node>
          <node>
@@ -705,9 +700,6 @@
             <node>
                <name>Screen</name>
                <node>
-                  <name>Head-mounted display</name>
-               </node>
-               <node>
                   <name>View port</name>
                   <description>Two or more views on the same object --- for example one from top one from street view</description>
                   <node predicateType="passThrough">
@@ -771,7 +763,7 @@
       </node>
       <node>
          <name>Imagined</name>
-         <description>This is used to identity that the (sub)event only happened in the imagination of the participant, e.g.  imagined movements in motor imagery paradigms.</description>
+         <description>This is used to identity that the (sub)event only happened in participant's imagination, e.g.  imagined movements in motor imagery paradigms.</description>
       </node>
       <node requireChild="true">
          <name>State ID</name>
@@ -1611,7 +1603,7 @@
       </node>
       <node>
          <name>Probability</name>
-         <description>Use to specify the level of certainty about the occurrence of the event. Use either numerical values as the child node or low, high, etc.</description>
+         <description>Use to specify the level of certainty about the occurrence of the event. Use either numerical values as the child node or 'low', 'high', etc.</description>
       </node>
       <node requireChild="true">
          <name>Temporal uncertainty</name>
@@ -1816,7 +1808,7 @@
          </node>
          <node>
             <name>Drop</name>
-            <description>For example something  drops from the hand of the subject</description>
+            <description>For example something  drops from subject’s hand</description>
          </node>
       </node>
       <node>
@@ -2647,7 +2639,7 @@
                   <name>Stage</name>
                   <node takesValue="true">
                      <name>#</name>
-                     <description>a number between 1 to 4, or REM</description>
+                     <description>a number between 1 to 4, or 'REM'</description>
                   </node>
                </node>
             </node>
@@ -2908,7 +2900,7 @@
          <description>Default</description>
          <node>
             <name>Clinic</name>
-            <description>Recording in a clinical setting such as in a hospital or medical office</description>
+            <description>Recording in a clinical setting such as in a hospital or doctor’s office</description>
          </node>
          <node>
             <name>Dim Room</name>
@@ -3667,280 +3659,61 @@
       </node>
    </node>
    <unitClasses>
-      <unitClass defaultUnits="s">
-         <name>time</name>
-         <units>
-            <unit SIUnit="true">second</unit>
-            <unit SIUnit="true" unitSymbol="true">s</unit>
-            <unit>day</unit>
-            <unit>minute</unit>
-            <unit>hour</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="hour:min">
-         <name>clockTime</name>
-         <units>
-            <unit unitSymbol="true">hour:min</unit>
-            <unit unitSymbol="true">h:m</unit>
-            <unit unitSymbol="true">hour:min:sec</unit>
-            <unit unitSymbol="true">h:m:s</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="Hz">
-         <name>frequency</name>
-         <units>
-            <unit SIUnit="true">hertz</unit>
-            <unit SIUnit="true" unitSymbol="true">Hz</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="radian">
-         <name>angle</name>
-         <units>
-            <unit SIUnit="true">radian</unit>
-            <unit SIUnit="true" unitSymbol="true">rad</unit>
-            <unit>degree</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m">
-         <name>physicalLength</name>
-         <units>
-            <unit SIUnit="true">metre</unit>
-            <unit SIUnit="true" unitSymbol="true">m</unit>
-            <unit>foot</unit>
-            <unit>mile</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="px">
-         <name>pixels</name>
-         <units>
-            <unit>pixel</unit>
-            <unit unitSymbol="true">px</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m^2">
-         <name>area</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m^2</unit>
-            <unit unitSymbol="true">px^2</unit>
-            <unit>pixel^2</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m^3">
-         <name>volume</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m^3</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m-per-s">
-         <name>speed</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m-per-s</unit>
-            <unit unitSymbol="true">mph</unit>
-            <unit unitSymbol="true">kph</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m-per-s^2">
+      <unitClass default="cm-per-s2">
          <name>acceleration</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m-per-s^2</unit>
-         </units>
+         <units>m-per-s2,cm-per-s2</units>
       </unitClass>
-      <unitClass defaultUnits="m-per-s^3">
-         <name>jerk</name>
-         <units>
-            <unit unitSymbol="true">m-per-s^3</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="dB">
-         <name>intensity</name>
-         <units>
-            <unit unitSymbol="true">dB</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="cd">
-         <name>luminousIntensity</name>
-         <units>
-            <unit SIUnit="true">candela</unit>
-            <unit SIUnit="true" unitSymbol="true">cd</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="B">
-         <name>memorySize</name>
-         <units>
-            <unit SIUnit="true">byte</unit>
-            <unit SIUnit="true" unitSymbol="true">B</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="$">
+      <unitClass default="$">
          <name>currency</name>
-         <units>
-            <unit>dollar</unit>
-            <unit unitSymbol="true">$</unit>
-            <unit>point</unit>
-            <unit>fraction</unit>
-         </units>
+         <units>dollars,$,points,fraction</units>
+      </unitClass>
+      <unitClass default="radians">
+         <name>angle</name>
+         <units>degrees,degree,radian,radians</units>
+      </unitClass>
+      <unitClass default="Hz">
+         <name>frequency</name>
+         <units>Hz,mHz,Hertz,kHz</units>
+      </unitClass>
+      <unitClass default="dB">
+         <name>intensity</name>
+         <units>dB</units>
+      </unitClass>
+      <unitClass default="cm-per-s3">
+         <name>jerk</name>
+         <units>m-per-s3,cm-per-s3</units>
+      </unitClass>
+      <unitClass default="cd">
+         <name>luminousIntensity</name>
+         <units>candela,cd</units>
+      </unitClass>
+      <unitClass default="mb">
+         <name>memorySize</name>
+         <units>mb,kb,gb,tb</units>
+      </unitClass>
+      <unitClass default="cm">
+         <name>physicalLength</name>
+         <units>m,cm,km,mm,feet,foot,meter,meters,mile,miles</units>
+      </unitClass>
+      <unitClass default="px">
+         <name>pixels</name>
+         <units>pixels,px,pixel</units>
+      </unitClass>
+      <unitClass default="cm-per-s">
+         <name>speed</name>
+         <units>m-per-s,mph,kph,cm-per-s</units>
+      </unitClass>
+      <unitClass default="s">
+         <name>time</name>
+         <units>s,second,seconds,centiseconds,centisecond,cs,hour:min,day,days,ms,milliseconds,millisecond,minute,minutes,hour,hours</units>
+      </unitClass>
+      <unitClass default="cm2">
+         <name>area</name>
+         <units>m2,cm2,km2,pixels2,px2,pixel2,mm2</units>
+      </unitClass>
+      <unitClass default="cm3">
+         <name>volume</name>
+         <units>m3,cm3,mm3,km3</units>
       </unitClass>
    </unitClasses>
-   <unitModifiers>
-      <unitModifier SIUnitModifier="true">
-         <name>deca</name>
-         <description>SI unit multiple representing 10^1</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>da</name>
-         <description>SI unit multiple representing 10^1</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>hecto</name>
-         <description>SI unit multiple representing 10^2</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>h</name>
-         <description>SI unit multiple representing 10^2</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>kilo</name>
-         <description>SI unit multiple representing 10^3</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>k</name>
-         <description>SI unit multiple representing 10^3</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>mega</name>
-         <description>SI unit multiple representing 10^6</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>M</name>
-         <description>SI unit multiple representing 10^6</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>giga</name>
-         <description>SI unit multiple representing 10^9</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>G</name>
-         <description>SI unit multiple representing 10^9</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>tera</name>
-         <description>SI unit multiple representing 10^12</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>T</name>
-         <description>SI unit multiple representing 10^12</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>peta</name>
-         <description>SI unit multiple representing 10^15</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>P</name>
-         <description>SI unit multiple representing 10^15</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>exa</name>
-         <description>SI unit multiple representing 10^18</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>E</name>
-         <description>SI unit multiple representing 10^18</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>zetta</name>
-         <description>SI unit multiple representing 10^21</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>Z</name>
-         <description>SI unit multiple representing 10^21</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>yotta</name>
-         <description>SI unit multiple representing 10^24</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>Y</name>
-         <description>SI unit multiple representing 10^24</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>deci</name>
-         <description>SI unit submultiple representing 10^-1</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>d</name>
-         <description>SI unit submultiple representing 10^-1</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>centi</name>
-         <description>SI unit submultiple representing 10^-2</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>c</name>
-         <description>SI unit submultiple representing 10^-2</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>milli</name>
-         <description>SI unit submultiple representing 10^-3</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>m</name>
-         <description>SI unit submultiple representing 10^-3</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>micro</name>
-         <description>SI unit submultiple representing 10^-6</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>u</name>
-         <description>SI unit submultiple representing 10^-6</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>nano</name>
-         <description>SI unit submultiple representing 10^-9</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>n</name>
-         <description>SI unit submultiple representing 10^-9</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>pico</name>
-         <description>SI unit submultiple representing 10^-12</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>p</name>
-         <description>SI unit submultiple representing 10^-12</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>femto</name>
-         <description>SI unit submultiple representing 10^-15</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>f</name>
-         <description>SI unit submultiple representing 10^-15</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>atto</name>
-         <description>SI unit submultiple representing 10^-18</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>a</name>
-         <description>SI unit submultiple representing 10^-18</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>zepto</name>
-         <description>SI unit submultiple representing 10^-21</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>z</name>
-         <description>SI unit submultiple representing 10^-21</description>
-      </unitModifier>
-      <unitModifier SIUnitModifier="true">
-         <name>yocto</name>
-         <description>SI unit submultiple representing 10^-24</description>
-      </unitModifier>
-      <unitModifier SIUnitSymbolModifier="true">
-         <name>y</name>
-         <description>SI unit submultiple representing 10^-24</description>
-      </unitModifier>
-   </unitModifiers>
 </HED>

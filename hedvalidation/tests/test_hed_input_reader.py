@@ -28,12 +28,7 @@ class Test(unittest.TestCase):
         cls.attribute_onset_tag = 'Attribute/Onset'
         cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
         cls.category_tags = 'Participant response, Stimulus'
-        cls.validation_issues = ''
-        cls.semantic_version_one = '1.2.3'
-        cls.semantic_version_two = '1.2.4'
-        cls.semantic_version_three = '1.2.5'
-        cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5']
-        cls.hed_directory_version = '4.0.5'
+        cls.validation_issues = []
         cls.column_to_hed_tags_dictionary = {}
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
         cls.row_hed_tag_columns = [1, 2]
@@ -48,30 +43,30 @@ class Test(unittest.TestCase):
 
     def test__validate_hed_input(self):
         validation_issues = self.generic_hed_input_reader._validate_hed_input()
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
 
     def test__validate_individual_tags_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_invalid_tags)
         validation_issues = self.generic_hed_input_reader._validate_individual_tags_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test__validate_top_levels_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_no_required_tags)
         validation_issues = self.generic_hed_input_reader._validate_top_level_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test__validate_tag_levels_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_multiple_unique_tags)
         validation_issues = self.generic_hed_input_reader._validate_tag_levels_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test__validate_groups_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_too_many_tildes)
         validation_issues = self.generic_hed_input_reader._validate_groups_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test__append_validation_issues_if_found(self):
@@ -82,7 +77,7 @@ class Test(unittest.TestCase):
                                                                              row_number,
                                                                              self.hed_string_with_invalid_tags,
                                                                              self.column_to_hed_tags_dictionary)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test__append_row_validation_issues_if_found(self):
@@ -92,7 +87,7 @@ class Test(unittest.TestCase):
             self.generic_hed_input_reader._append_row_validation_issues_if_found(self.validation_issues,
                                                                                  row_number,
                                                                                  self.hed_string_with_invalid_tags)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test__append_column_validation_issues_if_found(self):
@@ -102,18 +97,18 @@ class Test(unittest.TestCase):
             self.generic_hed_input_reader._append_column_validation_issues_if_found(self.validation_issues,
                                                                                     row_number,
                                                                                     self.column_to_hed_tags_dictionary)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test_validate_column_hed_string(self):
         self.assertFalse(self.validation_issues)
         validation_issues = self.generic_hed_input_reader.validate_column_hed_string(self.hed_string_with_invalid_tags)
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test_get_validation_issues(self):
         validation_issues = self.generic_hed_input_reader.get_validation_issues()
-        self.assertIsInstance(validation_issues, str)
+        self.assertIsInstance(validation_issues, list)
 
     def test_get_file_extension(self):
         file_extension = HedInputReader.get_file_extension(self.text_file_with_extension)
@@ -154,28 +149,6 @@ class Test(unittest.TestCase):
             self.zero_based_row_column_count, self.zero_based_tag_columns)
         self.assertIsInstance(rows_less_than_row_column_count, list)
         self.assertEqual(rows_less_than_row_column_count, self.zero_based_tag_columns_less_than_row_column_count)
-
-    def test_get_latest_hed_version_path(self):
-        latest_hed_version_path = HedInputReader.get_latest_hed_version_path()
-        self.assertIsInstance(latest_hed_version_path, str)
-
-    def test_get_all_hed_versions(self):
-        hed_versions = HedInputReader.get_all_hed_versions()
-        self.assertIsInstance(hed_versions, list)
-
-    def test_get_latest_semantic_version_in_list(self):
-        latest_version = HedInputReader.get_latest_semantic_version_in_list(self.semantic_version_list)
-        self.assertIsInstance(latest_version, str)
-        self.assertEqual(latest_version, self.semantic_version_three)
-
-    def test_compare_semantic_versions(self):
-        latest_version = HedInputReader.compare_semantic_versions(self.semantic_version_one, self.semantic_version_two)
-        self.assertIsInstance(latest_version, str)
-        self.assertEqual(latest_version, self.semantic_version_two)
-
-    def test_get_path_from_hed_version(self):
-        hed_version_path = HedInputReader.get_path_from_hed_version(self.hed_directory_version)
-        self.assertIsInstance(hed_version_path, str)
 
     def test_get_row_hed_tags(self):
         hed_string, column_to_hed_tags_dictionary = self.generic_hed_input_reader.get_row_hed_tags(

@@ -67,19 +67,6 @@ class HedStringDelimiter:
         """
         return self.hed_string
 
-    def get_issues(self):
-        """Gets the issues field.
-
-        Parameters
-        ----------
-        Returns
-        -------
-        list
-            A list containing the validation issues encountered while parsing the HED string.
-
-        """
-        return self.tags
-
     def get_tags(self):
         """Gets the tags field.
 
@@ -288,7 +275,8 @@ class HedStringDelimiter:
             formatted_hed_tags_set.add(formatted_hed_tag)
         return formatted_hed_tags_set
 
-    def split_hed_string_into_list(self, hed_string):
+    @staticmethod
+    def split_hed_string_into_list(hed_string):
         """Splits the tags and non-nested groups in a HED string based on a delimiter. The default delimiter is a comma.
 
         Parameters
@@ -307,7 +295,7 @@ class HedStringDelimiter:
         current_tag = ''
         for index, character in enumerate(hed_string):
             if character == HedStringDelimiter.DOUBLE_QUOTE_CHARACTER:
-                pass
+                continue
             elif character == HedStringDelimiter.OPENING_GROUP_CHARACTER:
                 number_of_opening_parentheses += 1
             elif character == HedStringDelimiter.CLOSING_GROUP_CHARACTER:

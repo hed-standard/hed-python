@@ -23,5 +23,5 @@ For more information on HED visit: <https://github.com/hed-standard/hed-specific
 ![Email example](screenshots/hedemailer-email.png)
 
 ### Notes
-* The webhook has been implemented to ONLY accept JSON content type and Wiki page updates (gollum) events. 
+* The webhook has been implemented to ONLY accept JSON content type push events. 
 * Emails may potentially be blocked without a fully-qualified domain name.  
