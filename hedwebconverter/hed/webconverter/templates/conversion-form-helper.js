@@ -16,7 +16,6 @@ $(document).ready(function () {
 function prepareConversionForm() {
     resetForm();
     $('#hed-xml-url').val(DEFAULT_XML_URL);
-    update_form_gui();
 }
 
 function update_form_gui() {
@@ -31,6 +30,8 @@ function update_form_gui() {
      } else if (isMediawikiFilename) {
         $('#submit').html("Convert to XML");
         hasValidFilename = true;
+     } else {
+        $('#submit').html("Convert...");
      }
 
      var urlChecked = document.getElementById("option_url").checked;
@@ -54,8 +55,7 @@ function update_form_gui() {
         flashMessageOnScreen('No source file specified.', 'error', 'hed-flash');
      }
 
-     $('#submit').prop('disabled', !hasValidFilename);
-     $('#submit_tag').prop('disabled', !hasValidFilename);
+     flashMessageOnScreen('', 'success', 'submit-flash')
 }
 
 
@@ -69,7 +69,6 @@ $('#hed-xml-filename').change(function () {
     updateHEDFileLabel(hedPath);
     var checkboxUpload = document.getElementById("option_upload");
     checkboxUpload.checked = true;
-    clearSubmitFlash()
     update_form_gui();
 });
 
@@ -78,17 +77,14 @@ $('#hed-xml-url').change(function () {
     var hedURL = hed.val();
     var checkboxUpload = document.getElementById("option_url");
     checkboxUpload.checked = true;
-    clearSubmitFlash()
     update_form_gui();
 });
 
 $('#option_url').change(function () {
-    clearSubmitFlash();
     update_form_gui();
 });
 
 $('#option_upload').change(function () {
-    clearSubmitFlash();
     update_form_gui();
 });
 
@@ -218,7 +214,6 @@ function getHedFilename() {
             flashMessageOnScreen('HED file is not specified.', 'error', 'hed-flash');
             return '';
         }
-        //flashMessageOnScreen('', 'success', 'hed-flash');
         return hedFile[0].files[0].name;
     }
 
@@ -229,7 +224,6 @@ function getHedFilename() {
             flashMessageOnScreen('URL not specified.', 'error', 'hed-flash-url');
             return '';
         }
-        //flashMessageOnScreen('', 'success', 'hed-flash-url');
         return urlFileBasename(hedUrl);
     }
     return '';
@@ -253,6 +247,8 @@ function hedSpecifiedWhenOtherIsSelected() {
 $('#submit').click(function () {
     if (hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
+    } else {
+        flashMessageOnScreen('No valid source input file.  See above.', 'error', 'submit-flash')
     }
 });
 
@@ -261,7 +257,9 @@ $('#submit').click(function () {
  */
 $('#submit_tag').click(function () {
     if (hedSpecifiedWhenOtherIsSelected()) {
-        submitForm2();
+        submitForm_tag_compare();
+    } else {
+        flashMessageOnScreen('No valid source input file.  See above.', 'error', 'submit-flash')
     }
 });
 
@@ -296,7 +294,7 @@ function submitForm() {
                   flashMessageOnScreen('', 'success', 'submit-flash');
                   triggerDownloadBlob(downloaded_file, download_display_name);
             },
-            error: function (error_msg) {
+            error: function (download_response) {
                 console.log(download_response.responseText);
                 if (download_response.responseText.length < 100) {
                     flashMessageOnScreen(download_response.responseText, 'error','submit-flash');
@@ -309,7 +307,7 @@ function submitForm() {
     ;
 }
 
-function submitForm2() {
+function submitForm_tag_compare() {
     var conversionForm = document.getElementById("conversion-form");
     var formData = new FormData(conversionForm);
     var download_display_name = convert_to_results_name(getHedFilename())
@@ -377,10 +375,10 @@ function convert_to_output_name(original_filename) {
     var file_parts = split_ext(original_filename);
     var basename = file_parts[0]
     var extension = file_parts[1]
-    if (extension == "xml") {
-        new_extension = "mediawiki"
-    } else if (extension == "mediawiki") {
-        new_extension = "xml"
+    if (extension == HED_XML_EXTENSION) {
+        new_extension = HED_MEDIAWIKI_EXTENSION
+    } else if (extension == HED_MEDIAWIKI_EXTENSION) {
+        new_extension = HED_XML_EXTENSION
     }
 
     final_name = basename + "." + new_extension
@@ -412,10 +410,3 @@ function urlFileBasename(url) {
     return (-1 !== index) ? pathname.substring(index + 1) : pathname;
 }
 
-///**
-// * Checks to see if warnings are being generated through checkbox.
-// * @returns {boolean} - True if warnings are generated. False if otherwise.
-// */
-//function generateWarningsIsChecked() {
-//    return $('#generate-warnings').prop('checked') === true;
-//}

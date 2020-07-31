@@ -16,7 +16,6 @@ from hed.webconverter.constants.form import conversion_arg_constants, js_form_co
 from hed.converter import xml2wiki, wiki2xml, tag_compare
 from hed.converter import constants as converter_constants
 
-app_config = current_app.config
 UPLOAD_DIRECTORY_KEY = 'UPLOAD_FOLDER'
 
 def url_to_file(resource_url):
@@ -62,9 +61,6 @@ def _get_uploaded_file_paths_from_forms(form_request_object):
     return hed_file_path
 
 
-def get_upload_folder_filename(filename):
-    return os.path.join(app_config[UPLOAD_DIRECTORY_KEY], filename)
-
 
 def _run_conversion(hed_file_path):
     """Runs the appropriate xml<>mediawiki converter depending on input filetype.
@@ -80,6 +76,17 @@ def _run_conversion(hed_file_path):
         raise ValueError(f"Invalid extension type: {input_extension}")
 
     return conversion_function(None, hed_file_path)
+
+def _run_tag_compare(local_xml_path):
+    """Runs tag compare for the given XML file.
+
+    returns: A dictionary with converter.constants filled in.
+    """
+    input_extension = _get_file_extension(local_xml_path)
+    if input_extension != file_extension_constants.HED_XML_EXTENSION:
+        raise ValueError(f"Invalid extension type: {input_extension}")
+
+    return tag_compare.check_for_duplicate_tags(local_xml_path)
 
 
 def run_conversion(form_request_object):
@@ -100,13 +107,10 @@ def run_conversion(form_request_object):
             return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
         return download_response
     except urllib.error.URLError:
-        #conversion_status[error_constants.ERROR_KEY] = error_constants.INVALID_URL_ERROR
         return error_constants.INVALID_URL_ERROR
     except urllib.error.HTTPError:
-        #conversion_status[error_constants.ERROR_KEY] = error_constants.NO_URL_CONNECTION_ERROR
         return error_constants.NO_URL_CONNECTION_ERROR
     except:
-        #conversion_status[error_constants.ERROR_KEY] = traceback.format_exc()
         return traceback.format_exc()
     finally:
         delete_file_if_it_exist(hed_file_path)
@@ -129,7 +133,7 @@ def run_tag_compare(form_request_object):
             if new_file_path:
                 delete_file_if_it_exist(hed_file_path)
                 hed_file_path = new_file_path
-        result_dict = tag_compare.check_for_duplicate_tags(hed_file_path)
+        result_dict = _run_tag_compare(hed_file_path)
         if result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]:
             filename = result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]
             download_response = generate_download_file_response_and_delete(filename)
@@ -153,7 +157,7 @@ def generate_download_file_response_and_delete(full_filename, display_filename=N
     full_filename: string
         The download other name.
     display_filename: string
-        What the save as window should show for filename.  If none use download flie name.
+        What the save as window should show for filename.  If none use download file name.
 
     Returns
     -------
@@ -197,16 +201,6 @@ def handle_http_error(error_code, error_message, as_text=False):
     if as_text:
         return error_message, error_code
     return jsonify(message=error_message), error_code
-
-
-def setup_logging():
-    """Sets up the current_application logging. If the log directory does not exist then there will be no logging.
-
-    """
-    if not current_app.debug and os.path.exists(current_app.config['LOG_DIRECTORY']):
-        file_handler = RotatingFileHandler(current_app.config['LOG_FILE'], maxBytes=10 * 1024 * 1024, backupCount=5)
-        file_handler.setLevel(ERROR)
-        current_app.logger.addHandler(file_handler)
 
 
 def create_upload_directory(upload_directory):
@@ -274,20 +268,6 @@ def _file_has_valid_extension(file_object, accepted_file_extensions):
 
     """
     return file_object and _file_extension_is_valid(file_object.filename, accepted_file_extensions)
-
-def _generate_output_conversion_filename(filename):
-    """Gets basename and converts filename to secure for final output.
-
-    Parameters
-    ----------
-    filename: string
-        result filename from the server.(full path)
-    -------
-    Returns
-        A valid output filename, not including upload folder.
-    """
-    basename = os.path.basename(filename)
-    return secure_filename(basename)
 
 
 def _get_file_extension(file_name_or_path):
@@ -456,24 +436,5 @@ def hed_present_in_form(conversion_form_request_object):
     return _check_if_option_in_form(conversion_form_request_object, js_form_constants.OPTIONS_GROUP,
                                     js_form_constants.OPTION_UPLOAD) \
                                     and js_form_constants.HED_FILE in conversion_form_request_object.files
-
-
-def save_hed_to_upload_folder(hed_file_object):
-    """Save a hed specification object to upload folder.
-
-    Parameters
-    ----------
-    hed_file_object: File object
-        A other object that points to a HED XML other that was first saved in a temporary location.
-
-    Returns
-    -------
-    string
-        The path to the HED XML other that was saved to the upload folder.
-
-    """
-    hed_file_extension = _get_file_extension(hed_file_object.filename)
-    hed_file_path = _save_file_to_upload_folder(hed_file_object, hed_file_extension)
-    return hed_file_path
 
 

@@ -4,11 +4,6 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <h3>Source file: </h3>
 
-<!--        <div class="form-group">-->
-<!--            <label for="hed-version">Choose HED version:</label><br>-->
-<!--            <select name="hed-version" id="hed-version"></select><br>-->
-<!--        </div>-->
-
         <div class="form-group" id="url-hed-version">
             <input type="radio" name="upload_options" id="option_url" value="option_url">
             <label class="secondary-label" for="url-hed-version">Enter HED URL</label>
@@ -21,7 +16,7 @@
 
         <div class="form-group" id="other-hed-version">
             <input type="radio" name="upload_options" id="option_upload" value="option_upload">
-            <label class="secondary-label" for="hed-xml-filename">Upload HED file:</label>
+            <label class="secondary-label" for="hed-xml-filename">Upload HED File:</label>
             <label class="btn-group file-browse-group">
                 <button for="hed-xml-filename">Browse ...</button>
                 <label id="hed-filename"></label>
