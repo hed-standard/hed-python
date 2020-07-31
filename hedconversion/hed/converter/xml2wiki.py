@@ -196,13 +196,13 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):
     hed_xml_tree = hed_xml_tree.getroot()
     xml2wiki = HEDXml2Wiki()
     output_strings = xml2wiki.process_tree(hed_xml_tree)
-    local_mediawiki_file = utils.write_strings_to_file(output_strings)
+    local_mediawiki_file = utils.write_strings_to_file(output_strings, ".mediawiki")
     hed_version = utils.get_version_from_xml(hed_xml_tree)
     hed_info_dictionary = {constants.HED_XML_TREE_KEY: hed_xml_tree,
                            constants.HED_XML_VERSION_KEY: hed_version,
                            constants.HED_CHANGE_LOG_KEY: None,
                            constants.HED_WIKI_PAGE_KEY: None,
-                           constants.HED_WIKI_LOCATION_KEY: local_mediawiki_file,
-                           constants.HED_XML_LOCATION_KEY: local_xml_file}
+                           constants.HED_OUTPUT_LOCATION_KEY: local_mediawiki_file,
+                           constants.HED_INPUT_LOCATION_KEY: local_xml_file}
     return hed_info_dictionary
 

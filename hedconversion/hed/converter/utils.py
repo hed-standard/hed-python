@@ -26,8 +26,8 @@ def url_to_file(resource_url):
         opened_file.write(url_data)
         return opened_file.name
 
-def write_strings_to_file(output_strings):
-    with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as opened_file:
+def write_strings_to_file(output_strings, extension=None):
+    with tempfile.NamedTemporaryFile(suffix=extension, delete=False, mode='w', encoding='utf-8') as opened_file:
         for string in output_strings:
             opened_file.write(string)
             opened_file.write('\n')
@@ -54,7 +54,7 @@ def xml_element_2_str(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="   ")
 
-def write_xml_tree_2_xml_file(xml_tree):
+def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
     """Writes a XML element tree object into a XML file.
 
     Parameters
@@ -68,9 +68,28 @@ def write_xml_tree_2_xml_file(xml_tree):
     -------
 
     """
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as hed_xml_file:
+    with tempfile.NamedTemporaryFile(suffix=extension, mode='w', delete=False, encoding='utf-8') as hed_xml_file:
         xml_string = xml_element_2_str(xml_tree)
         hed_xml_file.write(xml_string)
+        return hed_xml_file.name
+
+def write_text_iter_to_file(iter, extension=".txt"):
+    """Writes a text file based on an iterator.
+
+    Parameters
+    ----------
+    iter: text iterator
+        Iterates over the lines you wish to write to a file.  Adds newlines.
+    extension: string
+        Desired file extension.
+
+    Returns
+    -------
+
+    """
+    with tempfile.NamedTemporaryFile(suffix=extension, mode='w', delete=False, encoding='utf-8') as hed_xml_file:
+        for line in iter:
+            hed_xml_file.write(f"{line}\n")
         return hed_xml_file.name
 
 def get_version_from_xml(hed_xml_tree):

@@ -30,8 +30,8 @@ def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None):
                            constants.HED_XML_VERSION_KEY: hed_version,
                            constants.HED_CHANGE_LOG_KEY: hed_change_log,
                            constants.HED_WIKI_PAGE_KEY: hed_wiki_url,
-                           constants.HED_WIKI_LOCATION_KEY: local_wiki_file,
-                           constants.HED_XML_LOCATION_KEY: hed_xml_file_location}
+                           constants.HED_INPUT_LOCATION_KEY: local_wiki_file,
+                           constants.HED_OUTPUT_LOCATION_KEY: hed_xml_file_location}
     return hed_info_dictionary
 
 
