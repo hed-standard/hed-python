@@ -14,7 +14,7 @@ WSGI_FILE="${SERVER_CONFIG_DIR}/hedemailer.wsgi"
 
 
 HEDEMAILER_CODE_DIR="$GIT_DIR/hedemail"
-CONVERSION_CODE_DIR="$GIT_DIR/hedconversion/hed"
+CONVERSION_CODE_DIR="$GIT_DIR/hedschema/hed"
 ENV_DIR="${PWD}/hedemailer_env"
 
 SERVER_BASE_DIR="/var/www/gollum"
