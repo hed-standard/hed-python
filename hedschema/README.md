@@ -1,6 +1,6 @@
-# hedconversion
+# hedschema
 
-hedconversion is a Python 3 package that converts representations of the HED specification to
+hedschema is a Python 3 package that converts representations of the HED specification to
 different representations. 
 
 ### What is HED?

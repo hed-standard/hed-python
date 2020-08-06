@@ -1,4 +1,4 @@
-# hedwebconverter
+# hedwebschema
 
 Dev branch of running hed conversion code from a web interface. 
 

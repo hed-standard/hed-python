@@ -13,12 +13,12 @@ GIT_REPO_BRANCH="master"
 HOST_PORT=33000
 CONTAINER_PORT=80
 
-DEPLOY_DIR="hed-python/hedwebconverter/deploy"
+DEPLOY_DIR="hed-python/hedwebschema/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
-WSGI_FILE="${DEPLOY_DIR}/hedwebconverter.wsgi"
-WEBINTERFACE_CODE_DIR="hed-python/hedwebconverter/hed"
-CONVERSION_CODE_DIR="hed-python/hedconversion/hed"
+WSGI_FILE="${DEPLOY_DIR}/hedwebschema.wsgi"
+WEBINTERFACE_CODE_DIR="hed-python/hedwebschema/hed"
+CONVERSION_CODE_DIR="hed-python/hedschema/hed"
 
 ##### Functions
 

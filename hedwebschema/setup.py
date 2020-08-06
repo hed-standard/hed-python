@@ -1,17 +1,17 @@
 import setuptools
 
-with open("../hedconversion/README.md", "r") as fh:
+with open("/README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="hedconversion",
+    name="hedwebschema",
     version="1.0.0",
-    author="VisLab, Jeremy Cockfield, Ian Callanan, Alexander Jones, Kay Robbins",
+    author="VisLab, Ian Callanan, Jeremy Cockfield, Kay Robbins",
     author_email="Kay.Robbins@utsa.edu",
-    description="Utilities for converting among different representations of the HED (Hierarchical Event Descriptor) specification.",
+    description="Web interface for HED conversion.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/hed-standard/hed-python/hedconversion/",
+    url="https://github.com/hed-standard/hed-python/hedwebschema/",
     packages=setuptools.find_namespace_packages(include=["hed.*"]),
     classifiers=[
         "Programming Language :: Python :: 3",
