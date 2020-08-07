@@ -1,6 +1,6 @@
 import unittest
 
-from tests.test_translation_hed import TestHed
+from tests.test_tag_validator import TestHed
 
 
 class StringUtilityFunctions(TestHed):

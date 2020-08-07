@@ -370,7 +370,7 @@ class IndividualHedTags(TestHed):
             'invalidTime': False
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
-        legal_clock_time_units = ['h:m', 'h:m:s', 'hour:min', 'hour:min:sec']
+        legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'correctUnit': [],
             'correctUnitScientific': [],
