@@ -1,120 +1,141 @@
-import random
 import unittest
 import os
-import defusedxml
-from defusedxml.lxml import parse
 
 from hed.validator.hed_dictionary import HedDictionary
 
 
-class Test(unittest.TestCase):
+class TestHedDictionary(unittest.TestCase):
+    schema_file = 'data/HED7.1.1.xml'
+
     @classmethod
     def setUpClass(cls):
-        cls.hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        cls.hed_dictionary = HedDictionary(cls.hed_xml)
-        cls.unit_class_tag = 'unitClass'
-        cls.tag_attributes = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType',
-                              'recommended', 'required', 'requireChild', 'takesValue', 'unique', 'unitClass']
-        cls.default_tag_attribute = 'default'
-        cls.string_list = ['This/Is/A/Tag', 'This/Is/Another/Tag']
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
+        cls.hed_dictionary = HedDictionary(hed_xml)
+        cls.hed_dictionary_dictionaries = cls.hed_dictionary.dictionaries
 
-    def test_find_root_element(self):
-        root_element = self.hed_dictionary._find_root_element(self.hed_xml)
-        self.assertIsInstance(root_element, defusedxml.lxml.RestrictedElement)
+    def test_attribute_keys(self):
+        tag_dictionary_keys = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
+                               'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
+        for key in tag_dictionary_keys:
+            self.assertIn(key, self.hed_dictionary_dictionaries, key + ' not found.')
+            self.assertIsInstance(self.hed_dictionary_dictionaries[key], dict, key + ' not a dictionary.')
 
-    def test_get_parent_tag_name(self):
-        root_element = self.hed_dictionary._find_root_element(self.hed_xml)
-        nodes = root_element.xpath('.//node')
-        random_node = random.randint(2, len(nodes) - 1)
-        tag_element = nodes[random_node]
-        parent_tag_name = self.hed_dictionary._get_parent_tag_name(tag_element)
-        self.assertIsInstance(parent_tag_name, str)
-        self.assertTrue(parent_tag_name)
+    def test_required_tags(self):
+        expected_tags = ['event/category', 'event/description', 'event/label']
+        actual_tags_dictionary = self.hed_dictionary_dictionaries['required']
+        self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
 
-    def test__get_tag_from_tag_element(self):
-        root_element = self.hed_dictionary.get_root_element()
-        nodes = root_element.xpath('.//node')
-        random_node = random.randint(2, len(nodes) - 1)
-        tag_element = nodes[random_node]
-        tag_name = self.hed_dictionary._get_tag_path_from_tag_element(tag_element)
-        self.assertIsInstance(tag_name, str)
-        self.assertTrue(tag_name)
+    def test_positioned_tags(self):
+        expected_tags = ['event/category', 'event/description', 'event/label', 'event/long name']
+        actual_tags_dictionary = self.hed_dictionary_dictionaries['position']
+        self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
 
-    def test_get_tag_path_from_tag_element(self):
-        root_element = self.hed_dictionary.get_root_element()
-        tag_elements = root_element.xpath('.//node')
-        random_node = random.randint(2, len(tag_elements) - 1)
-        tag_element = tag_elements[random_node]
-        tag = self.hed_dictionary._get_tag_path_from_tag_element(tag_element)
-        self.assertIsInstance(tag, str)
-        self.assertTrue(tag)
+    def test_unique_tags(self):
+        expected_tags = ['event/description', 'event/label', 'event/long name']
+        actual_tags_dictionary = self.hed_dictionary_dictionaries['unique']
+        self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
 
-    def test_get_all_ancestor_tag_names(self):
-        root_element = self.hed_dictionary.get_root_element()
-        nodes = root_element.xpath('.//node')
-        random_node = random.randint(2, len(nodes) - 1)
-        tag_element = nodes[random_node]
-        all_ancestor_tags = self.hed_dictionary._get_ancestor_tag_names(tag_element)
-        self.assertIsInstance(all_ancestor_tags, list)
-        self.assertTrue(all_ancestor_tags)
+    def test_default_unit_tags(self):
+        default_unit_tags = {
+            'attribute/blink/time shut/#': 's',
+            'attribute/blink/duration/#': 's',
+            'attribute/blink/pavr/#': 'centiseconds',
+            'attribute/blink/navr/#': 'centiseconds',
+        }
+        actual_tags_dictionary = self.hed_dictionary_dictionaries['default']
+        self.assertDictEqual(actual_tags_dictionary, default_unit_tags)
 
-    def test_get_tags_by_attribute(self):
-        for tag_attribute in self.tag_attributes:
-            tags, tag_elements = self.hed_dictionary.get_tags_by_attribute(tag_attribute)
-            self.assertIsInstance(tags, list)
+    def test_unit_classes(self):
+        default_units = {
+            'acceleration': 'm-per-s^2',
+            'currency': '$',
+            'angle': 'radian',
+            'frequency': 'Hz',
+            'intensity': 'dB',
+            'jerk': 'm-per-s^3',
+            'luminousIntensity': 'cd',
+            'memorySize': 'B',
+            'physicalLength': 'm',
+            'pixels': 'px',
+            'speed': 'm-per-s',
+            'time': 's',
+            'clockTime': 'hour:min',
+            'area': 'm^2',
+            'volume': 'm^3',
+        }
+        all_units = {
+            'acceleration': ['m-per-s^2'],
+            'currency': ['dollar', '$', 'point', 'fraction'],
+            'angle': ['radian', 'rad', 'degree'],
+            'frequency': ['hertz', 'Hz'],
+            'intensity': ['dB'],
+            'jerk': ['m-per-s^3'],
+            'luminousIntensity': ['candela', 'cd'],
+            'memorySize': ['byte', 'B'],
+            'physicalLength': ['metre', 'm', 'foot', 'mile'],
+            'pixels': ['pixel', 'px'],
+            'speed': ['m-per-s', 'mph', 'kph'],
+            'time': ['second', 's', 'day', 'minute', 'hour'],
+            'clockTime': ['hour:min', 'h:m', 'hour:min:sec', 'h:m:s'],
+            'area': ['m^2', 'px^2', 'pixel^2'],
+            'volume': ['m^3'],
+        }
+        actual_default_units_dictionary = self.hed_dictionary_dictionaries['defaultUnits']
+        actual_all_units_dictionary = self.hed_dictionary_dictionaries['units']
+        self.assertDictEqual(actual_default_units_dictionary, default_units)
+        self.assertDictEqual(actual_all_units_dictionary, all_units)
 
-    def test_string_list_2_lowercase_dictionary(self):
-        lowercase_dictionary = self.hed_dictionary._string_list_to_lowercase_dictionary(self.string_list)
-        self.assertIsInstance(lowercase_dictionary, dict)
-        self.assertTrue(lowercase_dictionary)
+    def test_large_dictionaries(self):
+        expected_tag_count = {
+            'isNumeric': 80,
+            'predicateType': 20,
+            'recommended': 0,
+            'requireChild': 64,
+            'tags': 1116,
+            'takesValue': 119,
+            'unitClass': 63,
+        }
+        for key, number in expected_tag_count.items():
+            self.assertEqual(len(self.hed_dictionary_dictionaries[key]), number, 'Mismatch on attribute ' + key)
 
-    def test_get_elements_by_attribute(self):
-        for tag_attribute in self.tag_attributes:
-            elements = self.hed_dictionary._get_elements_by_attribute(tag_attribute)
-            self.assertIsInstance(elements, list)
-
-    def test_get_elements_by_name(self):
-        unit_class_elements = self.hed_dictionary._get_elements_by_name(self.unit_class_tag)
-        self.assertIsInstance(unit_class_elements, list)
-
-    def test_get_all_tags(self):
-        tags, tag_elements = self.hed_dictionary.get_all_tags()
-        self.assertIsInstance(tags, list)
-        self.assertIsInstance(tag_elements, list)
-
-    def test_populate_dictionaries(self):
-        self.hed_dictionary._populate_dictionaries()
-        for hed_dictionary_key in self.hed_dictionary.dictionaries:
-            self.assertIsInstance(self.hed_dictionary.dictionaries[hed_dictionary_key], dict)
-
-    def test_get_all_child_tags(self):
-        child_tags = self.hed_dictionary._get_all_child_tags()
-        child_tags_with_take_value_tags = self.hed_dictionary._get_all_child_tags(exclude_take_value_tags=False)
-        self.assertIsInstance(child_tags, list)
-        self.assertIsInstance(child_tags_with_take_value_tags, list)
-        self.assertNotEqual(len(child_tags), len(child_tags_with_take_value_tags))
-
-    def test_tag_has_attribute(self):
-        dictionaries = self.hed_dictionary.get_dictionaries()
-        for tag_attribute in self.tag_attributes:
-            tag_attribute_keys = list(dictionaries[tag_attribute].keys())
-            if tag_attribute_keys:
-                tag = tag_attribute_keys[0]
-                tag_has_attribute = self.hed_dictionary.tag_has_attribute(tag, tag_attribute)
-                self.assertTrue(tag_has_attribute)
-
-    def test_get_dictionary(self):
-        dictionaries = self.hed_dictionary.get_dictionaries()
-        self.assertIsInstance(dictionaries, dict)
-
-    def test_get_root_element(self):
-        root_element = self.hed_dictionary.get_root_element()
-        self.assertIsInstance(root_element, defusedxml.lxml.RestrictedElement)
-
-    def test_get_hed_xml_version(self):
-        hed_version = HedDictionary.get_hed_xml_version(self.hed_xml)
-        self.assertIsInstance(hed_version, str)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_tag_attribute(self):
+        test_strings = {
+            'value':
+                'Attribute/Location/Reference frame/Relative to participant/Azimuth/#',
+            'extensionAllowed': 'Item/Object/Road sign',
+        }
+        expected_results = {
+            'value': {
+                'default': False,
+                'extensionAllowed': True,
+                'isNumeric': True,
+                'position': False,
+                'predicateType': False,
+                'recommended': False,
+                'required': False,
+                'requireChild': False,
+                'tags': True,
+                'takesValue': True,
+                'unique': False,
+                'unitClass': True,
+            },
+            'extension_allowed': {
+                'default': False,
+                'extensionAllowed': True,
+                'isNumeric': False,
+                'position': False,
+                'predicateType': False,
+                'recommended': False,
+                'required': False,
+                'requireChild': False,
+                'tags': True,
+                'takesValue': False,
+                'unique': False,
+                'unitClass': False,
+            },
+        }
+        for key, test_string in test_strings.items():
+            expected_dict = expected_results[key]
+            for attribute, expected_value in expected_dict.items():
+                self.assertEqual(self.hed_dictionary.tag_has_attribute(test_string, attribute), expected_value,
+                                 'Test string: %s. Attribute: %s.' % (test_string, attribute))
