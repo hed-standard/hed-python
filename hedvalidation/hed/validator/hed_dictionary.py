@@ -489,7 +489,7 @@ class HedDictionary:
             True if the tag has the specified attribute. False, if otherwise.
 
         """
-        if self.dictionaries[tag_attribute].get(tag):
+        if self.dictionaries[tag_attribute].get(tag.lower()):
             return True
         return False
 
