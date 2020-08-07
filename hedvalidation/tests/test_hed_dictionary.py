@@ -102,7 +102,7 @@ class TestHedDictionary(unittest.TestCase):
         test_strings = {
             'value':
                 'Attribute/Location/Reference frame/Relative to participant/Azimuth/#',
-            'extensionAllowed': 'Item/Object/Road sign',
+            'allowedExtension': 'Item/Object/Road sign',
         }
         expected_results = {
             'value': {
@@ -119,7 +119,7 @@ class TestHedDictionary(unittest.TestCase):
                 'unique': False,
                 'unitClass': True,
             },
-            'extension_allowed': {
+            'allowedExtension': {
                 'default': False,
                 'extensionAllowed': True,
                 'isNumeric': False,
