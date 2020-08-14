@@ -1022,7 +1022,7 @@ class TagValidator:
             A time string.
         Returns
         -------
-        string
+        bool
             True if the time string is valid. False, if otherwise.
 
         """
@@ -1045,7 +1045,7 @@ class TagValidator:
             A datetime string.
         Returns
         -------
-        string
+        bool
             True if the datetime string is valid. False, if otherwise.
 
         """
