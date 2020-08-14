@@ -3,6 +3,7 @@ This module is used to validate the HED tags as strings.
 
 """
 
+import datetime
 import re
 import time
 import inflect
@@ -19,6 +20,7 @@ class TagValidator:
     CLOCK_TIME_UNIT_CLASS = 'clockTime'
     COMMA_ERROR_TYPE = 'commaMissing'
     COMMA_VALID_ERROR_TYPE = 'extraCommaOrInvalid'
+    DATE_TIME_UNIT_CLASS = 'dateTime'
     DEFAULT_UNIT_ATTRIBUTE = 'default'
     DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
     DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$'
@@ -416,6 +418,11 @@ class TagValidator:
             formatted_tag_unit_value = self.get_tag_name(formatted_tag)
             original_tag_unit_value = self.get_tag_name(original_tag)
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag))
+            if (TagValidator.DATE_TIME_UNIT_CLASS in
+                    self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
+                if (TagValidator.DATE_TIME_UNIT_CLASS in tag_unit_classes
+                        and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
+                    return validation_issues
             if (TagValidator.CLOCK_TIME_UNIT_CLASS in
                     self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
                 if (TagValidator.CLOCK_TIME_UNIT_CLASS in tag_unit_classes
@@ -1007,7 +1014,7 @@ class TagValidator:
 
     @staticmethod
     def is_clock_face_time(time_string):
-        """Checks to see if the specified string is valid HH:MM time string.
+        """Checks to see if the specified string is a valid HH:MM time string.
 
         Parameters
         ----------
@@ -1026,6 +1033,26 @@ class TagValidator:
                 time.strptime(time_string, '%H:%M')
             except ValueError:
                 return False
+        return True
+
+    @staticmethod
+    def is_date_time(date_time_string):
+        """Checks to see if the specified string is a valid ISO 8601 datetime string.
+
+        Parameters
+        ----------
+        date_time_string: str
+            A datetime string.
+        Returns
+        -------
+        string
+            True if the datetime string is valid. False, if otherwise.
+
+        """
+        try:
+            datetime.datetime.fromisoformat(date_time_string)
+        except ValueError:
+            return False
         return True
 
 
