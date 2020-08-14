@@ -1,5 +1,6 @@
 import unittest
 
+from hed.validator.tag_validator import TagValidator
 from tests.test_tag_validator import TestHed
 
 
@@ -30,6 +31,52 @@ class StringUtilityFunctions(TestHed):
         self.assertEqual(name1, 'Something')
         self.assertEqual(name2, 'Left')
         self.assertEqual(no_slash_name, 'Participant')
+
+    def test_clock_face_times(self):
+        valid_test_strings = {
+            'validPM': '23:52',
+            'validMidnight': '00:55',
+            'validHour': '11:00',
+            'validSingleDigitHour': '08:30',
+            'validSeconds': '19:33:47',
+        }
+        invalid_test_strings = {
+            'invalidDate': '8/8/2019',
+            'invalidHour': '25:11',
+            'invalidSingleDigitHour': '8:30',
+            'invalidMinute': '12:65',
+            'invalidSecond': '15:45:82',
+            'invalidString': 'not a time',
+        }
+        for string in valid_test_strings.values():
+            result = TagValidator.is_clock_face_time(string)
+            self.assertEqual(result, True, string)
+        for string in invalid_test_strings.values():
+            result = TagValidator.is_clock_face_time(string)
+            self.assertEqual(result, False, string)
+
+    def test_date_times(self):
+        valid_test_strings = {
+            'validPM': '2000-01-01T23:52:00',
+            'validMidnight': '2000-01-01T00:55:00',
+            'validHour': '2000-01-01T11:00:00',
+            'validSingleDigitHour': '2000-01-01T08:30:00',
+            'validSeconds': '2000-01-01T19:33:47',
+        }
+        invalid_test_strings = {
+            'invalidDate': '8/8/2019',
+            'invalidHour': '2000-01-01T25:11',
+            'invalidSingleDigitHour': '2000-01-01T8:30',
+            'invalidMinute': '2000-01-01T12:65',
+            'invalidSecond': '2000-01-01T15:45:82',
+            'invalidString': 'not a time',
+        }
+        for string in valid_test_strings.values():
+            result = TagValidator.is_date_time(string)
+            self.assertEqual(result, True, string)
+        for string in invalid_test_strings.values():
+            result = TagValidator.is_date_time(string)
+            self.assertEqual(result, False, string)
 
 
 class TestSchemaUtilityFunctions(TestHed):
@@ -140,12 +187,12 @@ class TestSchemaUtilityFunctions(TestHed):
             validate_units(volume_string, volume_string, volume_units)
         stripped_prefixed_volume_string = self.semantic_tag_validator. \
             validate_units(prefixed_volume_string, prefixed_volume_string, volume_units)
-        # stripped_invalid_volume_string = self.semantic_tag_validator. \
-        #    validate_units(invalid_volume_string, invalid_volume_string, volume_units)
+        stripped_invalid_volume_string = self.semantic_tag_validator. \
+            validate_units(invalid_volume_string, invalid_volume_string, volume_units)
         self.assertEqual(stripped_dollars_string, '25.99')
         self.assertEqual(stripped_volume_string, '100')
         self.assertEqual(stripped_prefixed_volume_string, '100')
-        self.assertEqual(invalid_volume_string, '200 cm')
+        self.assertEqual(stripped_invalid_volume_string, '200 cm')
 
     def test_determine_allows_extensions(self):
         extension_tag1 = 'item/object/vehicle/boat'
