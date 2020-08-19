@@ -2,56 +2,29 @@ from defusedxml.lxml import parse
 from hed.converter import utils
 from hed.converter import constants
 
+
 class TagEntry:
     """This is a single entry in the tag dictionary.
 
-    If there are no duplicate tags in the schema, each tag also points to its parent and children.
-
+       Keeps track of the human formatted short/long form of each tag.
     """
-    def __init__(self, short_org_tag, long_org_tag, extension_allowed=False, parent=None):
+    def __init__(self, short_org_tag, long_org_tag):
         self.short_org_tag = short_org_tag
         self.long_org_tag = long_org_tag
-        self.takes_value = False
-        self.extension_allowed = extension_allowed
-
-        self.parent_tag = parent
-        self.children = []
-        if self.parent_tag:
-            self.parent_tag.add_child(self)
-
-    def add_child(self, child):
-        self.children.append(child)
-        child.parent_tag = self
-
-    def is_child_of(self, parent_entry):
-        if self.parent_tag != parent_entry:
-            return False
-        return True
-
-    def has_direct_child_with_takes_value(self):
-        for tag_entry in self.children:
-            if tag_entry.takes_value:
-                return True
-        return False
 
     def get_tag_string(self, remainder, return_long_version=False):
         tag_string = self.short_org_tag
         if return_long_version:
             tag_string = self.long_org_tag
-        if self.takes_value:
-            if remainder.rfind('/') != -1:
-                # raise ValueError(
-                #     f"Invalid syntax in takes value{tag_string}.  Did you mean to make an extension tag?")
-                return None
-            return f"{tag_string}/{remainder}"
-        elif self.extension_allowed and remainder is not None:
-            return f"{tag_string}/{remainder}"
-        elif remainder:
-            return None
+        if remainder:
+            return tag_string + remainder
         return tag_string
 
 
 class TagCompare:
+    """     Helper class for seeing if a schema has any duplicate tags, and also has functions to convert
+        hed strings and tags short<>long
+       """
     def __init__(self, hed_xml_file=None, hed_tree=None):
         self.parent_map = None
         self.tag_dict = {}
@@ -67,114 +40,151 @@ class TagCompare:
             self.process_tree(hed_tree)
 
     def process_tree(self, hed_tree):
+        """Primary setup function.  Takes an XML tree and sets up the mapping dict."""
         # Create a map so we can go from child to parent easily.
         self.parent_map = {c: p for p in hed_tree.iter() for c in p}
         self._reset_tag_compare()
 
-        mark_next_node_as_extension_allowed = False
-        current_tag_entry = None
         for elem in hed_tree.iter():
             if elem.tag == "unitModifiers" or elem.tag == "unitClasses":
                 break
 
-            if "extensionAllowed" in elem.attrib:
-                mark_next_node_as_extension_allowed = True
-
             if elem.tag == "name":
                 # handle special case where text is just "#"
                 if elem.text and "#" in elem.text:
-                    current_tag_entry.takes_value = True
+                    pass
                 else:
                     nodes_in_parent = self._count_parent_nodes(elem)
                     while len(self.tag_name_stack) >= nodes_in_parent and len(self.tag_name_stack) > 0:
                         self.tag_name_stack.pop()
                     self.tag_name_stack.append(elem.text)
-                    current_tag_entry = self._add_tag(elem.text, self.tag_name_stack, mark_next_node_as_extension_allowed)
-                    mark_next_node_as_extension_allowed = False
+                    self._add_tag(elem.text, self.tag_name_stack)
 
         self._finalize_processing()
 
-    def _finalize_processing(self):
-        if not self.has_duplicate_tags():
-            # Mark child tags as extension allowed as appropriate.
-            # This relies on python 3.7 ordered dict behavior.
-            for tag_name, tag_entry in self.tag_dict.items():
-                parent_tag_entry = tag_entry.parent_tag
-                if parent_tag_entry and (parent_tag_entry.extension_allowed and not parent_tag_entry.has_direct_child_with_takes_value()):
-                    tag_entry.extension_allowed = True
+    def convert_hed_string_to_short(self, hed_string):
+        """ Convert a hed string from any form to the shortest.
 
-            # Add the long versions of the tag to the dictionary too.
-            self.tag_dict.update(dict((self._get_clean_tag(v.long_org_tag), v) for k, v in self.tag_dict.items()))
+            This goes through the hed string, splits it into tags, then converts
+            each tag individually using convert_to_short_tag
 
-    def _reset_tag_compare(self):
-        self.tag_name_stack = []
-        self.tag_dict = {}
-        self.current_depth_check = ["node"]
-        self.no_duplicate_tags = True
-
-    def _get_clean_tag(self, tag):
-        return tag.lower()
-
-    def _add_tag(self, new_tag, tag_stack, extension_allowed=False):
-        clean_tag = self._get_clean_tag(new_tag)
-        full_tag = "/".join(tag_stack)
-        parent_tag_entry = None
-        # There is no clean tree to make if we have any duplicate tags, so just stop trying.
-        if not self.has_duplicate_tags() and len(tag_stack) > 1:
-            parent_tag = self._get_clean_tag(tag_stack[-2])
-            parent_tag_entry = self.tag_dict[parent_tag]
-
-        new_tag_entry = TagEntry(new_tag, full_tag, extension_allowed, parent_tag_entry)
-
-        if clean_tag not in self.tag_dict:
-            self.tag_dict[clean_tag] = new_tag_entry
-        else:
-            self.no_duplicate_tags = False
-            if not isinstance(self.tag_dict[clean_tag], list):
-                self.tag_dict[clean_tag] = [self.tag_dict[clean_tag]]
-            self.tag_dict[clean_tag].append(new_tag_entry)
-
-        return new_tag_entry
-
-    def _count_parent_nodes(self, node):
-        nodes_in_parent = 0
-        parent_elem = node
-        while parent_elem in self.parent_map:
-            if parent_elem.tag in self.current_depth_check:
-                nodes_in_parent += 1
-            parent_elem = self.parent_map[parent_elem]
-
-        return nodes_in_parent
-
-    def _get_root_tag_entry(self, hed_tag):
-        """This returns the tag entry for the first sub_tag in hed_tag.
-
-           It does not validate anything after the first / found.
-
-           Parameters:
-           hed_tag: A short or long formatted hed tag
-
-           Returns:
-            Tuple (tag_entry, remainder_of_tag)
-            Returns None, None if nothing passed or it is not a tag.
+         Parameters
+            ----------
+            hed_string: str
+                a hed string containing any number of tags
+            Returns
+            -------
+                str: The converted string
         """
-        if hed_tag is None:
-            return None, None
+        short_hed_string = self._convert_hed_string(hed_string, self.convert_to_short_tag)
+        return short_hed_string
 
-        remainder = hed_tag
-        index = hed_tag.find('/')
-        if index != -1:
-            split_tag, remainder = self._get_clean_tag(remainder[:index]), remainder[index + 1:]
-        else:
-            split_tag = self._get_clean_tag(remainder)
-            remainder = None
+    def convert_hed_string_to_long(self, hed_string):
+        """ Convert a hed string from any form to the longest.
 
-        if split_tag in self.tag_dict:
-            return self.tag_dict[split_tag], remainder
+            This goes through the hed string, splits it into tags, then converts
+            each tag individually using convert_to_long_tag
+
+         Parameters
+            ----------
+            hed_string: str
+                a hed string containing any number of tags
+            Returns
+            -------
+                str: The converted string
+        """
+        long_hed_string = self._convert_hed_string(hed_string, self.convert_to_long_tag)
+        return long_hed_string
+
+    def convert_to_long_tag(self, hed_tag):
+        """Convert a single tag from any form to the longest form
+
+            eg  Event/Sensory event -> Event/Sensory event
+                Sensory event -> Event/Sensory event
+         Parameters
+            ----------
+            hed_tag: str
+                a single hed tag
+            Returns
+            -------
+                str: The converted tag
+        """
+        tag_entry, remainder = self.get_tag_entry(hed_tag)
+        if tag_entry:
+            final_tag = tag_entry.get_tag_string(remainder, return_long_version=True)
+            return final_tag
+
+        return None
+
+    def convert_to_short_tag(self, hed_tag):
+        """Convert a single tag from any form to the shortest form
+
+            eg  Event/Sensory event -> Sensory event
+                Sensory event -> Sensory event
+         Parameters
+            ----------
+            hed_tag: str
+                a single hed tag
+            Returns
+            -------
+                str: The converted tag
+        """
+        tag_entry, remainder = self.get_tag_entry(hed_tag)
+        if tag_entry:
+            final_tag = tag_entry.get_tag_string(remainder)
+            return final_tag
+
+        return None
+
+    def get_tag_entry(self, hed_tag):
+        """This takes a hed tag(short or long form) and finds the lowest level valid tag_entry.
+            Note: NO validation is done for if tags take value or allow extensions, the following is just examples.
+
+            eg 'Event'                    - Returns (entry for 'Event', None)
+               'Event/Sensory event'      - Returns (entry for 'Sensory event', None)
+            Takes Value:
+               'Item/Sound/Environmental sound/Unique Value'
+                                          - Returns (entry for 'Environmental Sound', "Unique Value")
+            Extension Allowed:
+                'Experiment control/demo_extension'
+                                          - Returns (entry for 'Experiment Control', "demo_extension")
+                'Event/Experiment control/demo_extension/second_part'
+                                          - Returns (entry for 'Experiment Control', "demo_extension/second_part")
+
+            Returns
+            -------
+            tuple.  (tag_entry, remainder of tag).  If not found, (None, None)
+
+        """
+        if self.has_duplicate_tags():
+            raise ValueError("Cannot process tags when duplicate tags exist in schema.")
+
+        clean_tag = hed_tag.lower()
+        if clean_tag in self.tag_dict:
+            return self.tag_dict[clean_tag], None
+
+        found_index = clean_tag.rfind("/")
+        while found_index != -1:
+            check_tag = clean_tag[:found_index]
+            remainder = hed_tag[found_index:]
+            if check_tag in self.tag_dict:
+                return self.tag_dict[check_tag], remainder
+
+            found_index = clean_tag.rfind("/", 0, found_index)
 
         return None, None
 
+    def has_duplicate_tags(self):
+        """Converting functions don't make much sense to work if we have duplicate tags and are disabled"""
+        return not self.no_duplicate_tags
+
     def find_duplicate_tags(self):
+        """Finds all tags that are not unique.
+
+        Returns
+        -------
+            dict: (duplicate_tag_name : list of tag entries with this name)
+        """
         duplicate_dict = {}
         for tag_name in self.tag_dict:
             modified_name = f'{tag_name}'
@@ -196,67 +206,124 @@ class TagCompare:
                     yield f"{tag_entry.long_org_tag}"
 
     def print_tag_dict(self):
+        """Utility function that prints the human readable form of duplicate tags to console."""
         for line in self.dupe_tag_iter(True):
             print(line)
 
-    def get_tag_entry(self, tag):
-        """This takes a hed tag(short or long form) and finds the lowest level valid tag_entry
+    def _finalize_processing(self):
+        if not self.has_duplicate_tags():
+            # Also add every intermediate version of every tag.
+            # eg: Attribute/Sensory/Visual/Color should also add:
+            # Color, Visual/Color, Sensory/Visual/Color
+            new_entries = {}
+            for tag_entry in self.tag_dict.values():
+                clean_tag = tag_entry.long_org_tag.lower()
+                slash_delimiter = '/'
+                found_index = clean_tag.find(slash_delimiter)
+                while found_index != -1:
+                    new_clean_tag = clean_tag[found_index + 1:]
+                    new_entries[clean_tag] = tag_entry
+                    clean_tag = new_clean_tag
+                    found_index = clean_tag.find(slash_delimiter)
 
-            eg 'Event'                    - Returns (entry for 'Event', None)
-               'Event/Sensory event'      - Returns (entry for 'Sensory event', None)
-            Takes Value:
-               'Item/Sound/Environmental sound/Unique Value'      - Returns (entry for 'Environmental Sound', "Unique Value")
-            Extension Allowed:
-                'Experiment control/demo_extension'                   - Returns (entry for 'Experiment Control', "demo_extension")
-                'Event/Experiment control/demo_extension/second_part'  - Returns (entry for 'Experiment Control', "demo_extension/second_part")
+            self.tag_dict.update(new_entries)
 
-            Returns:
-            tuple.  (tag_entry, remainder of tag).  If not found, (None, None)
+    def _reset_tag_compare(self):
+        self.tag_name_stack = []
+        self.tag_dict = {}
+        self.current_depth_check = ["node"]
+        self.no_duplicate_tags = True
 
-        """
-        if self.has_duplicate_tags():
-            raise ValueError("Cannot process tags when duplicate tags exist in schema.")
+    def _add_tag(self, new_tag, tag_stack):
+        clean_tag = new_tag.lower()
+        full_tag = "/".join(tag_stack)
+        new_tag_entry = TagEntry(new_tag, full_tag)
+        if clean_tag not in self.tag_dict:
+            self.tag_dict[clean_tag] = new_tag_entry
+        else:
+            self.no_duplicate_tags = False
+            if not isinstance(self.tag_dict[clean_tag], list):
+                self.tag_dict[clean_tag] = [self.tag_dict[clean_tag]]
+            self.tag_dict[clean_tag].append(new_tag_entry)
 
-        current_tag_entry, remainder = self._get_root_tag_entry(tag)
-        while True:
-            possible_child_tag_entry, possible_remainder = self._get_root_tag_entry(remainder)
+        return new_tag_entry
 
-            if not possible_child_tag_entry:
-                break
+    def _count_parent_nodes(self, node):
+        nodes_in_parent = 0
+        parent_elem = node
+        while parent_elem in self.parent_map:
+            if parent_elem.tag in self.current_depth_check:
+                nodes_in_parent += 1
+            parent_elem = self.parent_map[parent_elem]
 
-            if possible_child_tag_entry:
-                if not possible_child_tag_entry.is_child_of(current_tag_entry):
-                    return None, None
+        return nodes_in_parent
 
-            current_tag_entry = possible_child_tag_entry
-            remainder = possible_remainder
+    @staticmethod
+    def _split_hed_string(hed_string):
+        """Takes a hed"""
+        tag_delimiters = ",()~"
+        inside_d = True
+        tag_strings = []
+        current_tag = ""
+        current_delimiter = ""
+        current_spacing = ""
+        for i, char in enumerate(hed_string):
+            if char.isspace():
+                current_spacing += char
+                continue
 
-        return current_tag_entry, remainder
+            if char in tag_delimiters:
+                if not inside_d:
+                    inside_d = True
+                    if current_tag:
+                        tag_strings.append((True, current_tag))
+                        current_tag = ""
+                current_delimiter += current_spacing + char
+                current_spacing = ""
+                continue
 
-    def short_to_long_tag(self, short_tag):
-        tag_entry, remainder = self.get_tag_entry(short_tag)
-        if tag_entry:
-            final_tag = tag_entry.get_tag_string(remainder, return_long_version=True)
-            return final_tag
+            if current_delimiter:
+                tag_strings.append((False, current_delimiter + current_spacing))
+                current_spacing = ""
+                current_delimiter = ""
 
-        return None
+            if current_spacing:
+                current_tag += current_spacing
+                current_spacing = ""
 
-    def long_to_short_tag(self, long_tag):
-        tag_entry, remainder = self.get_tag_entry(long_tag)
-        if tag_entry:
-            final_tag = tag_entry.get_tag_string(remainder)
-            return final_tag
+            current_tag += char
+            inside_d = False
 
-        return None
-        #raise ValueError(f"Invalid short tag {short_tag}")
+        if current_tag:
+            tag_strings.append((True, current_tag))
+        elif current_delimiter:
+            tag_strings.append((False, current_delimiter))
 
-    def has_duplicate_tags(self):
-        return not self.no_duplicate_tags
+        return tag_strings
+
+    def _convert_hed_string(self, hed_string, conversion_function=None):
+        if conversion_function is None:
+            conversion_function = self.convert_to_short_tag
+
+        hed_tags = self._split_hed_string(hed_string)
+        final_string = ""
+        for is_hed_tag, tag in hed_tags:
+            if is_hed_tag:
+                converted_tag = conversion_function(tag)
+                if converted_tag is None:
+                    converted_tag = tag
+                final_string += converted_tag
+            else:
+                final_string += tag
+
+        return final_string
 
 
 def check_for_duplicate_tags(local_xml_file):
     """Checks if a source XML file has duplicate tags.
 
+        If there are no duplicates, returns None.
+        If there are any duplicates, points to a file containing the formatted result.
     Parameters
     ----------
         local_xml_file: string
@@ -277,13 +344,3 @@ def check_for_duplicate_tags(local_xml_file):
                            constants.HED_INPUT_LOCATION_KEY: local_xml_file,
                            constants.HED_OUTPUT_LOCATION_KEY: dupe_tag_file}
     return hed_info_dictionary
-
-
-def convert_tag_to_long(short_tag, local_xml_file):
-    tag_compare = TagCompare(local_xml_file)
-    return tag_compare.short_to_long_tag(short_tag)
-
-
-def convert_tag_to_short(full_tag, local_xml_file):
-    tag_compare = TagCompare(local_xml_file)
-    return tag_compare.long_to_short_tag(full_tag)
