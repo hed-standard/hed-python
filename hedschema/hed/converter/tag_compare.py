@@ -8,6 +8,7 @@ class TagEntry:
 
        Keeps track of the human formatted short/long form of each tag.
     """
+
     def __init__(self, short_org_tag, long_org_tag):
         self.short_org_tag = short_org_tag
         self.long_org_tag = long_org_tag
@@ -25,6 +26,7 @@ class TagCompare:
     """     Helper class for seeing if a schema has any duplicate tags, and also has functions to convert
         hed strings and tags short<>long
        """
+
     def __init__(self, hed_xml_file=None, hed_tree=None):
         self.parent_map = None
         self.tag_dict = {}
@@ -66,7 +68,7 @@ class TagCompare:
         """ Convert a hed string from any form to the shortest.
 
             This goes through the hed string, splits it into tags, then converts
-            each tag individually using convert_to_short_tag
+            each tag individually
 
          Parameters
             ----------
@@ -76,14 +78,30 @@ class TagCompare:
             -------
                 str: The converted string
         """
-        short_hed_string = self._convert_hed_string(hed_string, self.convert_to_short_tag)
-        return short_hed_string
+        hed_tags = self._split_hed_string(hed_string)
+        final_string = ""
+        for is_hed_tag, (startpos, endpos) in hed_tags:
+            tag = hed_string[startpos:endpos]
+            if is_hed_tag:
+                tag_entry, remainder = self.get_tag_entry(tag)
+                # This is notably faster "inline" rather than calling a conversion function
+                converted_tag = None
+                if tag_entry:
+                    converted_tag = tag_entry.short_org_tag + remainder
+
+                if converted_tag is None:
+                    converted_tag = tag
+                final_string += converted_tag
+            else:
+                final_string += tag
+
+        return final_string
 
     def convert_hed_string_to_long(self, hed_string):
         """ Convert a hed string from any form to the longest.
 
             This goes through the hed string, splits it into tags, then converts
-            each tag individually using convert_to_long_tag
+            each tag individually
 
          Parameters
             ----------
@@ -93,8 +111,24 @@ class TagCompare:
             -------
                 str: The converted string
         """
-        long_hed_string = self._convert_hed_string(hed_string, self.convert_to_long_tag)
-        return long_hed_string
+        hed_tags = self._split_hed_string(hed_string)
+        final_string = ""
+        for is_hed_tag, (startpos, endpos) in hed_tags:
+            tag = hed_string[startpos:endpos]
+            if is_hed_tag:
+                tag_entry, remainder = self.get_tag_entry(tag)
+                # This is notably faster "inline" rather than calling a conversion function
+                converted_tag = None
+                if tag_entry:
+                    converted_tag = tag_entry.long_org_tag + remainder
+
+                if converted_tag is None:
+                    converted_tag = tag
+                final_string += converted_tag
+            else:
+                final_string += tag
+
+        return final_string
 
     def convert_to_long_tag(self, hed_tag):
         """Convert a single tag from any form to the longest form
@@ -140,8 +174,8 @@ class TagCompare:
         """This takes a hed tag(short or long form) and finds the lowest level valid tag_entry.
             Note: NO validation is done for if tags take value or allow extensions, the following is just examples.
 
-            eg 'Event'                    - Returns (entry for 'Event', None)
-               'Event/Sensory event'      - Returns (entry for 'Sensory event', None)
+            eg 'Event'                    - Returns (entry for 'Event', "")
+               'Event/Sensory event'      - Returns (entry for 'Sensory event', "")
             Takes Value:
                'Item/Sound/Environmental sound/Unique Value'
                                           - Returns (entry for 'Environmental Sound', "Unique Value")
@@ -156,12 +190,12 @@ class TagCompare:
             tuple.  (tag_entry, remainder of tag).  If not found, (None, None)
 
         """
-        if self.has_duplicate_tags():
+        if not self.no_duplicate_tags:
             raise ValueError("Cannot process tags when duplicate tags exist in schema.")
 
         clean_tag = hed_tag.lower()
         if clean_tag in self.tag_dict:
-            return self.tag_dict[clean_tag], None
+            return self.tag_dict[clean_tag], ""
 
         found_index = clean_tag.rfind("/")
         while found_index != -1:
@@ -260,63 +294,67 @@ class TagCompare:
 
     @staticmethod
     def _split_hed_string(hed_string):
-        """Takes a hed"""
+        """Takes a hed string and splits it into delimiters and tags
+
+            Note: This does not validate tags in any form.
+
+        Parameters
+        ----------
+            hed_string: string
+                the hed string to split
+        Returns
+        -------
+        list of tuples.
+            each tuple: (is_hed_tag, (start_pos, end_pos))
+            is_hed_tag: bool
+                This is a hed tag if true, delimiter if not
+            start_pos: int
+                index of start of string in hed_string
+            end_pos: int
+                index of end of string in hed_string
+        """
         tag_delimiters = ",()~"
+        current_spacing = 0
         inside_d = True
-        tag_strings = []
-        current_tag = ""
-        current_delimiter = ""
-        current_spacing = ""
+        result_positions = []
+        start_pos = None
+        last_end_pos = None
         for i, char in enumerate(hed_string):
-            if char.isspace():
-                current_spacing += char
+            if char == " ":
+                current_spacing += 1
                 continue
 
             if char in tag_delimiters:
                 if not inside_d:
                     inside_d = True
-                    if current_tag:
-                        tag_strings.append((True, current_tag))
-                        current_tag = ""
-                current_delimiter += current_spacing + char
-                current_spacing = ""
+                    if start_pos is not None:
+                        last_end_pos = i - current_spacing
+                        # view_string = hed_string[start_pos: last_end_pos]
+                        result_positions.append((True, (start_pos, last_end_pos)))
+                        current_spacing = 0
+                        start_pos = None
                 continue
 
-            if current_delimiter:
-                tag_strings.append((False, current_delimiter + current_spacing))
-                current_spacing = ""
-                current_delimiter = ""
+            # If we have a current delimiter, end it here.
+            if inside_d and last_end_pos is not None:
+                # view_string = hed_string[last_end_pos: i]
+                result_positions.append((False, (last_end_pos, i)))
+                last_end_pos = None
 
-            if current_spacing:
-                current_tag += current_spacing
-                current_spacing = ""
-
-            current_tag += char
+            current_spacing = 0
             inside_d = False
+            if start_pos is None:
+                start_pos = i
 
-        if current_tag:
-            tag_strings.append((True, current_tag))
-        elif current_delimiter:
-            tag_strings.append((False, current_delimiter))
+        if last_end_pos is not None and len(hed_string) != last_end_pos:
+            # view_string = hed_string[last_end_pos: len(hed_string)]
+            result_positions.append((False, (last_end_pos, len(hed_string))))
+        if start_pos is not None:
+            # view_string = hed_string[start_pos: len(hed_string)]
+            result_positions.append((True, (start_pos, len(hed_string) - current_spacing)))
 
-        return tag_strings
-
-    def _convert_hed_string(self, hed_string, conversion_function=None):
-        if conversion_function is None:
-            conversion_function = self.convert_to_short_tag
-
-        hed_tags = self._split_hed_string(hed_string)
-        final_string = ""
-        for is_hed_tag, tag in hed_tags:
-            if is_hed_tag:
-                converted_tag = conversion_function(tag)
-                if converted_tag is None:
-                    converted_tag = tag
-                final_string += converted_tag
-            else:
-                final_string += tag
-
-        return final_string
+        # debug_result_strings = [hed_string[startpos:endpos] for (is_hed_string, (startpos, endpos)) in result_positions]
+        return result_positions
 
 
 def check_for_duplicate_tags(local_xml_file):
