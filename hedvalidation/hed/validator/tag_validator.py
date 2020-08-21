@@ -1030,12 +1030,10 @@ class TagValidator:
 
         """
         try:
-            time.strptime(time_string, '%H:%M:%S')
+            time_obj = datetime.time.fromisoformat(time_string)
+            return not time_obj.tzinfo and not time_obj.microsecond
         except ValueError:
-            try:
-                time.strptime(time_string, '%H:%M')
-            except ValueError:
-                return False
+            return False
         return True
 
     @staticmethod
@@ -1053,7 +1051,8 @@ class TagValidator:
 
         """
         try:
-            datetime.datetime.fromisoformat(date_time_string)
+            date_time_obj = datetime.datetime.fromisoformat(date_time_string)
+            return not date_time_obj.tzinfo
         except ValueError:
             return False
         return True
