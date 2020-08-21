@@ -46,6 +46,10 @@ class StringUtilityFunctions(TestHed):
             'invalidSingleDigitHour': '8:30',
             'invalidMinute': '12:65',
             'invalidSecond': '15:45:82',
+            'invalidTimeZone': '16:25:51+00:00',
+            'invalidMilliseconds': '17:31:05.123',
+            'invalidMicroseconds': '09:21:16.123456',
+            'invalidDateTime': '2000-01-01T00:55:00',
             'invalidString': 'not a time',
         }
         for string in valid_test_strings.values():
@@ -62,6 +66,8 @@ class StringUtilityFunctions(TestHed):
             'validHour': '2000-01-01T11:00:00',
             'validSingleDigitHour': '2000-01-01T08:30:00',
             'validSeconds': '2000-01-01T19:33:47',
+            'validMilliseconds': '2000-01-01T17:31:05.123',
+            'validMicroseconds': '2000-01-01T09:21:16.123456',
         }
         invalid_test_strings = {
             'invalidDate': '8/8/2019',
@@ -69,6 +75,7 @@ class StringUtilityFunctions(TestHed):
             'invalidSingleDigitHour': '2000-01-01T8:30',
             'invalidMinute': '2000-01-01T12:65',
             'invalidSecond': '2000-01-01T15:45:82',
+            'invalidTimeZone': '2000-01-01T16:25:51+00:00',
             'invalidString': 'not a time',
         }
         for string in valid_test_strings.values():
