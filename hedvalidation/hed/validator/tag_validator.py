@@ -3,6 +3,7 @@ This module is used to validate the HED tags as strings.
 
 """
 
+import datetime
 import re
 import time
 import inflect
@@ -19,6 +20,7 @@ class TagValidator:
     CLOCK_TIME_UNIT_CLASS = 'clockTime'
     COMMA_ERROR_TYPE = 'commaMissing'
     COMMA_VALID_ERROR_TYPE = 'extraCommaOrInvalid'
+    DATE_TIME_UNIT_CLASS = 'dateTime'
     DEFAULT_UNIT_ATTRIBUTE = 'default'
     DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
     DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$'
@@ -207,9 +209,9 @@ class TagValidator:
 
          Parameters
          ----------
-         original_tag_list: list
+         original_tag_list: list of str
             A list containing the original tags.
-         formatted_tag_list: list
+         formatted_tag_list: list of str
             A list containing formatted tags.
          Returns
          -------
@@ -228,7 +230,7 @@ class TagValidator:
 
          Parameters
          ----------
-         formatted_top_level_tags: list
+         formatted_top_level_tags: list of str
             A list containing the top-level tags in a HED string.
          Returns
          -------
@@ -416,6 +418,11 @@ class TagValidator:
             formatted_tag_unit_value = self.get_tag_name(formatted_tag)
             original_tag_unit_value = self.get_tag_name(original_tag)
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag))
+            if (TagValidator.DATE_TIME_UNIT_CLASS in
+                    self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
+                if (TagValidator.DATE_TIME_UNIT_CLASS in tag_unit_classes
+                        and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
+                    return validation_issues
             if (TagValidator.CLOCK_TIME_UNIT_CLASS in
                     self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
                 if (TagValidator.CLOCK_TIME_UNIT_CLASS in tag_unit_classes
@@ -446,7 +453,7 @@ class TagValidator:
             unit to generate plural forms
         Returns
         -------
-        list
+        list of str
             list of plural units
         """
         derivative_units = [unit]
@@ -456,17 +463,20 @@ class TagValidator:
         return derivative_units
 
     def _strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
-        """
+        """Validates and strips units from a value.
 
         Parameters
         ----------
-        unit_value      -value of unit
-        unit            -what the unit is
-        is_unit_symbol  -unit symbol bool
-
+        unit_value: str
+            The value to validate.
+        unit: str
+            The unit to strip.
+        is_unit_symbol: bool
+            Whether the unit is a symbol.
         Returns
         -------
-        tuple of the found unit and the stripped value
+        tuple
+            The found unit and the stripped value.
         """
         found_unit = False
         stripped_value = ''
@@ -493,15 +503,15 @@ class TagValidator:
         return found_unit, stripped_value
 
     def validate_units(self, original_tag_unit_value, formatted_tag_unit_value, tag_unit_class_units):
-        """Checks to see if the specified string has a valid unit, and removes it if so
+        """Checks to see if the specified string has a valid unit, and removes it if so.
 
         Parameters
         ----------
-        original_tag_unit_value
+        original_tag_unit_value: str
             The unformatted value of the tag
-        formatted_tag_unit_value
+        formatted_tag_unit_value: str
             The formatted value of the tag
-        tag_unit_class_units
+        tag_unit_class_units: list of str
             A list of valid units for this tag
         Returns
         -------
@@ -562,7 +572,7 @@ class TagValidator:
             A tag which is a path.
         Returns
         -------
-        string
+        str
             The tag name.
 
         """
@@ -629,7 +639,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        string
+        str
             The default unit class unit associated with the specific tag. If the tag doesn't have a unit class then an
             empty string is returned.
 
@@ -654,7 +664,7 @@ class TagValidator:
 
         Parameters
         ----------
-        tag_group: list
+        tag_group: list of str
             A list containing the tags in a group.
         tag_group_string: str
             A string of the tag group.
@@ -697,7 +707,7 @@ class TagValidator:
 
         Parameters
         ----------
-        formatted_top_level_tags: list
+        formatted_top_level_tags: list of str
             A list containing the top-level tags.
         Returns
         -------
@@ -721,9 +731,9 @@ class TagValidator:
 
         Parameters
         ----------
-        original_tag_list: list
+        original_tag_list: list of str
             A list containing tags that are used to report the error.
-        formatted_tag_list: list
+        formatted_tag_list: list of str
             A list containing tags that are used to do the validation.
         Returns
         -------
@@ -766,9 +776,9 @@ class TagValidator:
 
         Parameters
         ----------
-        original_tag_list: list
+        original_tag_list: list of str
             A list containing tags that are used to report the error.
-        formatted_tag_list: list
+        formatted_tag_list: list of str
             A list containing tags that are used to do the validation.
         Returns
         -------
@@ -929,7 +939,7 @@ class TagValidator:
 
         Parameters
         ----------
-        last_non_empty_character: character
+        last_non_empty_character: str
             The last non-empty string in the HED string.
         current_character: str
             The current character in the HED string.
@@ -948,11 +958,11 @@ class TagValidator:
 
         Parameters
         ----------
-        character: character
+        character: str
             A string character.
         Returns
         -------
-        string
+        bool
             Returns true if the character is a delimiter. False, if otherwise. A delimiter is a comma or a tilde.
 
         """
@@ -1007,7 +1017,7 @@ class TagValidator:
 
     @staticmethod
     def is_clock_face_time(time_string):
-        """Checks to see if the specified string is valid HH:MM time string.
+        """Checks to see if the specified string is a valid HH:MM time string.
 
         Parameters
         ----------
@@ -1015,17 +1025,36 @@ class TagValidator:
             A time string.
         Returns
         -------
-        string
+        bool
             True if the time string is valid. False, if otherwise.
 
         """
         try:
-            time.strptime(time_string, '%H:%M:%S')
+            time_obj = datetime.time.fromisoformat(time_string)
+            return not time_obj.tzinfo and not time_obj.microsecond
         except ValueError:
-            try:
-                time.strptime(time_string, '%H:%M')
-            except ValueError:
-                return False
+            return False
+        return True
+
+    @staticmethod
+    def is_date_time(date_time_string):
+        """Checks to see if the specified string is a valid ISO 8601 datetime string.
+
+        Parameters
+        ----------
+        date_time_string: str
+            A datetime string.
+        Returns
+        -------
+        bool
+            True if the datetime string is valid. False, if otherwise.
+
+        """
+        try:
+            date_time_obj = datetime.datetime.fromisoformat(date_time_string)
+            return not date_time_obj.tzinfo
+        except ValueError:
+            return False
         return True
 
 
