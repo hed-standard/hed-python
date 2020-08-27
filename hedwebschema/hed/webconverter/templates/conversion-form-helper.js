@@ -31,7 +31,7 @@ function update_form_gui() {
         $('#submit').html("Convert to XML");
         hasValidFilename = true;
      } else {
-        $('#submit').html("Convert...");
+        $('#submit').html("Convert Format");
      }
 
      var urlChecked = document.getElementById("option_url").checked;
