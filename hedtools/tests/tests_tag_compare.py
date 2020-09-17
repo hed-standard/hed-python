@@ -1,7 +1,7 @@
 import unittest
 import os
-from hed.converter.tag_compare import TagCompare
-from hed.converter import error_reporter
+from hed.utilities.tag_compare import TagCompare
+from hed.schema import error_reporter
 
 class Test(unittest.TestCase):
     schema_file = 'data/reduced_no_dupe.xml'
@@ -415,12 +415,12 @@ class Test(unittest.TestCase):
         expected_results = {'noTildeGroup': 'Event/Sensory event,'
                                         '(Item/Sound/Siren,Event/Sensory event)',
                         'oneTildeGroup': 'Event/Sensory event,'
-                                         '(Item/Sound/Siren~Attribute/Environmental/Indoors)',
+                                         '(Item/Sound/Siren ~ Attribute/Environmental/Indoors)',
                         'twoTildeGroup': 'Event/Sensory event,'
-                                         '(Participant/Cognitive state/Awake~Participant/Trait/Age/15~Item/Sound/Siren,Item/Object/Manmade/Vehicle,'
+                                         '(Participant/Cognitive state/Awake ~ Participant/Trait/Age/15 ~ Item/Sound/Siren, Item/Object/Manmade/Vehicle, '
                                          'Attribute/Sensory/Visual/Color/RGB color/RGB Red/100)',
                         'singleTag': 'Event/Sensory event',
-                        'nestedTag': 'Event,Event/Sensory event,Event/Sensory event'
+                        'nestedTag': 'Event, Event/Sensory event, Event/Sensory event'
                         }
 
         test_strings = test_strings.values()
@@ -448,13 +448,13 @@ class Test(unittest.TestCase):
                             'noTildeGroup': 'Sensory event,'
                                             '(Siren,Sensory event)',
                             'oneTildeGroup': 'Sensory event,'
-                                             '(Siren~Indoors)',
+                                             '(Siren ~ Indoors)',
                             'twoTildeGroup': 'Sensory event,'
-                                             '(Awake~Age/15~Siren,Vehicle,'
+                                             '(Awake ~ Age/15 ~ Siren, Vehicle, '
                                              'RGB Red/100)',
                             'singleTag': 'Sensory event',
-                            'nestedTag': 'Event,Sensory event,Sensory event',
-                            'nestedTag2': 'Event,Sensory event,Sensory event'
+                            'nestedTag': 'Event, Sensory event, Sensory event',
+                            'nestedTag2': 'Event, Sensory event, Sensory event'
                             }
 
         test_strings = test_strings.values()
@@ -474,7 +474,7 @@ class Test(unittest.TestCase):
         expected_results = [
             'InvalidEvent',
             'InvalidEvent/InvalidExtension',
-            'InvalidEvent,InvalidEvent/InvalidExtension'
+            'InvalidEvent, InvalidEvent/InvalidExtension'
         ]
 
         errors_list = [
@@ -499,7 +499,7 @@ class Test(unittest.TestCase):
         expected_results = [
             'InvalidEvent',
             'InvalidEvent/InvalidExtension',
-            'InvalidEvent,InvalidEvent/InvalidExtension'
+            'InvalidEvent, InvalidEvent/InvalidExtension'
         ]
 
         errors_list = [
@@ -554,8 +554,8 @@ class Test(unittest.TestCase):
             'Environmental sound/Unique Value ',
         ]
         expected_results = [
-            'Item/Sound/Environmental sound/Unique Value',
-            'Item/Sound/Environmental sound/Unique Value'
+            ' Item/Sound/Environmental sound/Unique Value',
+            'Item/Sound/Environmental sound/Unique Value '
         ]
 
         errors_list = [
@@ -569,8 +569,8 @@ class Test(unittest.TestCase):
             'Item/Sound/Environmental sound/Unique Value '
         ]
         expected_results = [
-            'Environmental sound/Unique Value',
-            'Environmental sound/Unique Value',
+            ' Environmental sound/Unique Value',
+            'Environmental sound/Unique Value ',
         ]
         errors_list = [
 

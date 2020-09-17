@@ -1,8 +1,8 @@
 import re
 from defusedxml.lxml import parse
-from hed.converter import utils
-from hed.converter import constants
-from hed.converter import error_reporter
+from hed.schema import utils
+from hed.schema import constants
+from hed.schema import error_reporter
 
 class TagEntry:
     """This is a single entry in the tag dictionary.
@@ -92,8 +92,9 @@ class TagCompare:
                     errors.append(single_error)
                 final_string += short_tag_string
             else:
-                no_spaces_delimeter = tag.replace(" ", "")
-                final_string += no_spaces_delimeter
+                final_string += tag
+                # no_spaces_delimeter = tag.replace(" ", "")
+                # final_string += no_spaces_delimeter
 
         return final_string, errors
 
@@ -132,8 +133,9 @@ class TagCompare:
                     errors.append(single_error)
                 final_string += converted_tag
             else:
-                no_spaces_delimeter = tag.replace(" ", "")
-                final_string += no_spaces_delimeter
+                final_string += tag
+                # no_spaces_delimeter = tag.replace(" ", "")
+                # final_string += no_spaces_delimeter
 
         return final_string, errors
 

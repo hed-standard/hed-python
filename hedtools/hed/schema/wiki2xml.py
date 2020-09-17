@@ -2,9 +2,9 @@
 This module contains functions that convert a wiki HED schema into a XML HED schema.
 """
 
-from hed.converter import parsewiki
-from hed.converter import utils
-from hed.converter import constants
+from hed.schema import parsewiki
+from hed.schema import utils
+from hed.schema import constants
 
 def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None):
     """Converts the HED wiki into a XML file.

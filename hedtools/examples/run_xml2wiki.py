@@ -1,8 +1,8 @@
 # Simplified example code for running xml2_wiki
 
 from shutil import move
-from hed.converter import xml2wiki
-from hed.converter import constants
+from hed.schema import xml2wiki
+from hed.schema import constants
 
 if __name__ == '__main__':
     hed_xml_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml'
