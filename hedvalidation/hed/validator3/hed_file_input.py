@@ -10,13 +10,31 @@ class HedFileInput:
     FILE_INPUT = 'file'
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
-    HED_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed/')
-    DEFAULT_HED_XML_FILE = os.path.join(HED_DIRECTORY, 'HEDLatest.xml')
     REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
                                    'Label': 'Event/Label/', 'Long': 'Event/Long name/'}
 
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, required_tag_columns=None):
+        """Constructor for the HedFileInput class.
+
+         Parameters
+         ----------
+         filename: str
+             An xml/tsv file to open.
+         worksheet_name: str
+             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
+         tag_columns: list
+             A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
+         has_column_names: bool
+             True if file has column names. The validation will skip over the first line of the file. False, if
+             otherwise.
+         required_tag_columns: dict
+             A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
+             prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Description',
+             4: 'Label', 5: 'Category'} The third column contains tags that need Event/Description/ prepended to them,
+             the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
+             that needs Event/Category/ prepended to them.
+         """
         if tag_columns is None:
             tag_columns = [2]
         if required_tag_columns is None:
@@ -32,6 +50,11 @@ class HedFileInput:
             self._parse_hed_tags_function = self._parse_spreadsheet
         elif self.is_text_file():
             self._parse_hed_tags_function = self._parse_text
+
+    # Make filename read only.
+    @property
+    def filename(self):
+        return self._filename
 
     def __iter__(self):
         return self._parse_hed_tags_function()

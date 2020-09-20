@@ -13,21 +13,17 @@ from hed.validator3.tag_validator import TagValidator
 from hed.validator3 import hed_cache
 from hed.validator3.hed_file_input import HedFileInput
 
-class HedInputReader:
-    def __init__(self, hed_input, is_file=True, check_for_warnings=False, run_semantic_validation=True,
+class HedValidator:
+    def __init__(self, hed_input, check_for_warnings=False, run_semantic_validation=True,
                  hed_xml_file='', xml_version_number=None,
-                 tag_columns=[2], has_column_names=True, required_tag_columns={},
-                 worksheet_name='', hed_dictionary=None):
-        """Constructor for the HedInputReader class.
+                 hed_dictionary=None):
+        """Constructor for the HedValidator class.
 
         Parameters
         ----------
-        hed_input: str or list
-            A list of HED strings, a single HED string, or the name of a spreadsheet file containing HED tags.
-            If is_file is True and hed_input is a string, this tries to parse hed_input as a file name.
-            If is_file is False or hed_input is not a valid file name, this will validate hed_input as a HED string.
-        is_file: bool
-            True if hed_input represents a file name. False if it represents a HED string.
+        hed_input: str or list or HedFileInput object
+            A list of HED strings, a single HED string, or a HedFileInput object.
+            If it is a single string or a list, validate them as hed strings.
         check_for_warnings: bool
             True if the validator should check for warnings. False if the validator should only report errors.
         run_semantic_validation: bool
@@ -37,35 +33,17 @@ class HedInputReader:
         xml_version_number: str
             HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
                 or does not point to a specific xml file.
-        tag_columns: list
-            A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
-        has_column_names: bool
-            True if file has column names. The validation will skip over the first line of the file. False, if
-            otherwise.
-        required_tag_columns: dict
-            A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
-            prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Description',
-            4: 'Label', 5: 'Category'} The third column contains tags that need Event/Description/ prepended to them,
-            the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
-            that needs Event/Category/ prepended to them.
-        worksheet_name: str
-            The name of the Excel workbook worksheet that contains the HED tags.
         hed_dictionary: HedDictionary
             Name of already prepared HedDictionary to use.  This overrides hed_xml_url_or_file
         Returns
         -------
-        HedInputReader object
-            A HedInputReader object.
+        HedValidator object
+            A HedValidator object.
 
         """
-        if is_file:
-            self._hed_file_input = HedFileInput(hed_input, worksheet_name=worksheet_name, tag_columns=tag_columns,
-                                                has_column_names=has_column_names,
-                                                required_tag_columns=required_tag_columns)
-        else:
-            self._hed_file_input = None
+        if isinstance(hed_input, HedFileInput):
+            self._is_file = True
         self._hed_input = hed_input
-        self._is_file = is_file
         if run_semantic_validation:
             if hed_dictionary is None:
                 self._hed_dictionary = self._get_hed_dictionary(hed_xml_file,
@@ -131,10 +109,10 @@ class HedInputReader:
         if isinstance(self._hed_input, list):
             validation_issues = self._validate_hed_strings(self._hed_input)
         elif self._is_file:
-            if self._hed_file_input and self._hed_file_input.is_valid_extension():
+            if self._hed_input and self._hed_input.is_valid_extension():
                 validation_issues = self._validate_hed_tags_in_file()
             else:
-                validation_issues = error_reporter.report_error_type('invalidFileName', file_name=self._hed_input)
+                validation_issues = error_reporter.report_error_type('invalidFileName', file_name=self._hed_input.filename)
         else:
             validation_issues = self._validate_hed_strings([self._hed_input])[0]
         return validation_issues
@@ -142,7 +120,7 @@ class HedInputReader:
     def _validate_hed_tags_in_file(self):
         validation_issues = []
 
-        for row_number, row_hed_string, column_to_hed_tags_dictionary in self._hed_file_input:
+        for row_number, row_hed_string, column_to_hed_tags_dictionary in self._hed_input:
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
                                                                         column_to_hed_tags_dictionary)
 
@@ -209,7 +187,7 @@ class HedInputReader:
             row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter)
             row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
             if row_validation_issues:
-                validation_issues += HedInputReader.generate_row_issue_message(row_number) + row_validation_issues
+                validation_issues += HedValidator.generate_row_issue_message(row_number) + row_validation_issues
         return validation_issues
 
     def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
@@ -234,7 +212,7 @@ class HedInputReader:
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
                 column_validation_issues = self.validate_column_hed_string(column_hed_string)
                 if column_validation_issues:
-                    validation_issues += HedInputReader.generate_column_issue_message(row_number, column_number) + \
+                    validation_issues += HedValidator.generate_column_issue_message(row_number, column_number) + \
                                          column_validation_issues
         return validation_issues
 
@@ -367,7 +345,7 @@ class HedInputReader:
         formatted_tag_set = hed_string_delimiter.get_formatted_tags()
         original_and_formatted_tags = list(zip(tag_set, formatted_tag_set))
         for index, (original_tag, formatted_tag) in enumerate(original_and_formatted_tags):
-            previous_original_tag, previous_formatted_tag = HedInputReader.get_previous_original_and_formatted_tag(
+            previous_original_tag, previous_formatted_tag = HedValidator.get_previous_original_and_formatted_tag(
                 original_and_formatted_tags, index)
             validation_issues += \
                 self._tag_validator.run_individual_tag_validators(original_tag, formatted_tag,
