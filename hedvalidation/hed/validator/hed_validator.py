@@ -6,12 +6,12 @@ the get_validation_issues() function.
 """
 
 
-from hed.validator3 import error_reporter
-from hed.validator3.hed_dictionary import HedDictionary
-from hed.validator3.hed_string_delimiter import HedStringDelimiter
-from hed.validator3.tag_validator import TagValidator
-from hed.validator3 import hed_cache
-from hed.validator3.hed_file_input import HedFileInput
+from hed.validator import error_reporter
+from hed.validator.hed_dictionary import HedDictionary
+from hed.validator.hed_string_delimiter import HedStringDelimiter
+from hed.validator.tag_validator import TagValidator
+from hed.validator import hed_cache
+from hed.validator.hed_file_input import HedFileInput
 
 class HedValidator:
     def __init__(self, hed_input, check_for_warnings=False, run_semantic_validation=True,
@@ -41,8 +41,7 @@ class HedValidator:
             A HedValidator object.
 
         """
-        if isinstance(hed_input, HedFileInput):
-            self._is_file = True
+        self._is_file = isinstance(hed_input, HedFileInput)
         self._hed_input = hed_input
         if run_semantic_validation:
             if hed_dictionary is None:

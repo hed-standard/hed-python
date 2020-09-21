@@ -1,5 +1,0 @@
-Update to take hed file input OR a filename.
-Figure out what's going on with that todo section.
-
-
-Update other parts of code(websites) to ensure they still function.

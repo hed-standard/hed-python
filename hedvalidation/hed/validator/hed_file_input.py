@@ -96,7 +96,7 @@ class HedFileInput:
 
         """
         row_column_count = len(worksheet_row)
-        self._tag_columns = self.remove_tag_columns_greater_than_row_column_count(row_column_count, self._tag_columns)
+        self._tag_columns = self._remove_tag_columns_greater_than_row_column_count(row_column_count, self._tag_columns)
         return self.get_row_hed_tags(worksheet_row)
 
     def get_hed_string_from_text_file_row(self, text_file_row, column_delimiter):
@@ -117,8 +117,8 @@ class HedFileInput:
         """
         text_file_row = [x.strip() for x in text_file_row.split(column_delimiter)]
         row_column_count = len(text_file_row)
-        self._tag_columns = self.remove_tag_columns_greater_than_row_column_count(row_column_count,
-                                                                                            self._tag_columns)
+        self._tag_columns = self._remove_tag_columns_greater_than_row_column_count(row_column_count,
+                                                                                   self._tag_columns)
         return self.get_row_hed_tags(text_file_row, is_worksheet=False)
 
     def get_row_hed_tags(self, spreadsheet_row, is_worksheet=True):
@@ -147,7 +147,7 @@ class HedFileInput:
             if not column_hed_tags:
                 continue
             elif hed_tag_column in self._required_tag_columns:
-                column_hed_tags = self.prepend_prefix_to_required_tag_column_if_needed(
+                column_hed_tags = self._prepend_prefix_to_required_tag_column_if_needed(
                     column_hed_tags, self._required_tag_columns[hed_tag_column])
             column_to_hed_tags_dictionary[hed_tag_column] = column_hed_tags
         hed_string = ','.join(column_to_hed_tags_dictionary.values())
@@ -185,12 +185,12 @@ class HedFileInput:
             A list containing the modified list of tag columns that's used for processing.
 
         """
-        tag_columns = self.subtract_1_from_list_elements(tag_columns)
-        tag_columns = self.add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns)
+        tag_columns = self._subtract_1_from_list_elements(tag_columns)
+        tag_columns = self._add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns)
         return tag_columns
 
     @staticmethod
-    def add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns):
+    def _add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns):
         """Adds the required tag columns to the tag columns.
 
          Parameters
@@ -208,7 +208,7 @@ class HedFileInput:
         return tag_columns + list(set(required_tag_columns.keys()) - set(tag_columns))
 
     @staticmethod
-    def remove_tag_columns_greater_than_row_column_count(row_column_count, hed_tag_columns):
+    def _remove_tag_columns_greater_than_row_column_count(row_column_count, hed_tag_columns):
         """Removes the HED tag columns that are greater than the row column count.
 
         Parameters
@@ -225,7 +225,7 @@ class HedFileInput:
         """
         return sorted(filter(lambda x: x < row_column_count, hed_tag_columns))
 
-    def prepend_prefix_to_required_tag_column_if_needed(self, required_tag_column_tags, required_tag_prefix_key):
+    def _prepend_prefix_to_required_tag_column_if_needed(self, required_tag_column_tags, required_tag_prefix_key):
         """Prepends the tag paths to the required tag column tags that need them.
 
         Parameters
@@ -261,7 +261,7 @@ class HedFileInput:
         return required_tag_column_tags
 
     @staticmethod
-    def subtract_1_from_list_elements(int_list):
+    def _subtract_1_from_list_elements(int_list):
         """Subtracts 1 from each int in a list.
 
         Parameters
