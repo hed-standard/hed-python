@@ -12,8 +12,8 @@ class Test(unittest.TestCase):
         cls.zero_based_tag_columns = [0, 1, 2, 3, 4]
         cls.zero_based_row_column_count = 3
         cls.zero_based_tag_columns_less_than_row_column_count = [0, 1, 2]
-        cls.required_tag_columns = {3: 'Description', 4: 'Label', 5: 'Category'}
-        cls.category_key = 'Category'
+        cls.required_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
+        cls.category_key = 'Event/Category/'
         cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
         cls.category_tags = 'Participant response, Stimulus'
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']

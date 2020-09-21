@@ -10,8 +10,6 @@ class HedFileInput:
     FILE_INPUT = 'file'
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
-    REQUIRED_TAG_COLUMN_TO_PATH = {'Category': 'Event/Category/', 'Description': 'Event/Description/',
-                                   'Label': 'Event/Label/', 'Long': 'Event/Long name/'}
 
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, required_tag_columns=None):
@@ -30,8 +28,8 @@ class HedFileInput:
              otherwise.
          required_tag_columns: dict
              A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
-             prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Description',
-             4: 'Label', 5: 'Category'} The third column contains tags that need Event/Description/ prepended to them,
+             prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
+             4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
              the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
              that needs Event/Category/ prepended to them.
          """
@@ -225,7 +223,7 @@ class HedFileInput:
         """
         return sorted(filter(lambda x: x < row_column_count, hed_tag_columns))
 
-    def _prepend_prefix_to_required_tag_column_if_needed(self, required_tag_column_tags, required_tag_prefix_key):
+    def _prepend_prefix_to_required_tag_column_if_needed(self, required_tag_column_tags, required_tag_prefix):
         """Prepends the tag paths to the required tag column tags that need them.
 
         Parameters
@@ -233,9 +231,8 @@ class HedFileInput:
         required_tag_column_tags: str
             A string containing HED tags associated with a required tag column that may need a tag prefix prepended to
             its tags.
-        required_tag_prefix_key: str
-            A string dictionary key that corresponds to the required tag prefix that may be prepended to the tags in a
-            required tag column if needed.
+        required_tag_prefix: str
+            A string that will be added if missing to any given tag.
         Returns
         -------
         string
@@ -243,9 +240,6 @@ class HedFileInput:
             needed.
 
         """
-        required_tag_prefix = self.REQUIRED_TAG_COLUMN_TO_PATH[required_tag_prefix_key]
-        #todo: Figure out this mess of a function
-        #if not self._tag_validator.tag_has_unique_prefix(required_tag_prefix):
         required_tags_with_prefix = []
         required_tags = required_tag_column_tags.split(',')
         required_tags = [x.strip() for x in required_tags]
@@ -254,11 +248,6 @@ class HedFileInput:
                 required_tag = required_tag_prefix + required_tag
             required_tags_with_prefix.append(required_tag)
         return ','.join(required_tags_with_prefix)
-
-        if required_tag_prefix and not required_tag_column_tags.lower().startswith(required_tag_prefix.lower()):
-            required_tag_column_tags = required_tag_prefix + required_tag_column_tags
-
-        return required_tag_column_tags
 
     @staticmethod
     def _subtract_1_from_list_elements(int_list):
