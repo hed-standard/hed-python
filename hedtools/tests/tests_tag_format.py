@@ -1,6 +1,6 @@
 import unittest
 import os
-from hed.utilities.tag_compare import TagCompare
+from hed.utilities.tag_format import TagFormat
 from hed.schema import error_reporter
 
 class Test(unittest.TestCase):
@@ -9,7 +9,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.tag_compare = TagCompare(hed_xml)
+        cls.tag_compare = TagFormat(hed_xml)
         cls.tag_compare.print_tag_dict()
 
     def compare_base_new(self, test_function, input_strings, expected_results, errors_list=None):

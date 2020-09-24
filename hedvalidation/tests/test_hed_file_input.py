@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
         cls.zero_based_tag_columns = [0, 1, 2, 3, 4]
         cls.zero_based_row_column_count = 3
         cls.zero_based_tag_columns_less_than_row_column_count = [0, 1, 2]
-        cls.required_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
+        cls.column_prefix_dictionary = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
         cls.category_key = 'Event/Category/'
         cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
         cls.category_tags = 'Participant response, Stimulus'
@@ -21,12 +21,12 @@ class Test(unittest.TestCase):
     def test_all(self):
         hed_input = 'tests/data/ExcelMultipleSheets.xlsx'
         has_column_names = True
-        required_tag_columns = {2: 'Label', 3: 'Description'}
+        column_prefix_dictionary = {2: 'Label', 3: 'Description'}
         tag_columns = [4]
         worksheet_name = 'LKT Events'
 
         file_input = HedFileInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
-                                  tag_columns=tag_columns, required_tag_columns=required_tag_columns)
+                                  tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
 
         for row_number, row, dict in file_input:
             breakHere = 3
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
 
     def test__convert_tag_columns_to_processing_format(self):
         processing_tag_columns = self.generic_file_input._convert_tag_columns_to_processing_format(
-            self.one_based_tag_columns, required_tag_columns={})
+            self.one_based_tag_columns, column_prefix_dictionary={})
         self.assertIsInstance(processing_tag_columns, list)
         self.assertEqual(processing_tag_columns, self.zero_based_tag_columns_less_than_row_column_count)
 

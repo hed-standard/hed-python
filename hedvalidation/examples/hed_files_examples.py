@@ -44,7 +44,7 @@ if __name__ == '__main__':
     print(valid_tsv_file_separate_cols)
     prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
     input_file = HedFileInput(valid_tsv_file_separate_cols, tag_columns=[6],
-                                      required_tag_columns=prefixed_needed_tag_columns)
+                                      column_prefix_dictionary=prefixed_needed_tag_columns)
     hed_input_reader = HedValidator(input_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 1d] Valid TSV with required tags in separate columns'))
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     print(unsupported_csv_format)
     prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
     input_file = HedFileInput(unsupported_csv_format, tag_columns=[6],
-                                      required_tag_columns=prefixed_needed_tag_columns)
+                                      column_prefix_dictionary=prefixed_needed_tag_columns)
     hed_input_reader = HedValidator(input_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 2a] csv is unsupported format, but this call treats file name as HED string'))
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     print(unsupported_csv_format)
     prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
     input_file = HedFileInput(unsupported_csv_format, tag_columns=[6],
-                              required_tag_columns=prefixed_needed_tag_columns)
+                              column_prefix_dictionary=prefixed_needed_tag_columns)
     hed_input_reader = HedValidator(input_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 2b] csv is unsupported format, now have right error message'))
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
     # Example 3a: XLSX file with multiple sheets - first sheet has no issues with 7.1.1
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
-                              required_tag_columns=prefixed_needed_tag_columns,
+                              column_prefix_dictionary=prefixed_needed_tag_columns,
                               worksheet_name='LKT Events')
     hed_input_reader = HedValidator(input_file, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     # Example 3b: Valid XLSX file with multiple sheets - first sheet probably has no issues with default schema
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
-                              required_tag_columns=prefixed_needed_tag_columns,
+                              column_prefix_dictionary=prefixed_needed_tag_columns,
                               worksheet_name='LKT Events')
     hed_input_reader = HedValidator(input_file)
     print(hed_input_reader.get_printable_issue_string(
@@ -86,14 +86,14 @@ if __name__ == '__main__':
 
     # Example 3c: XLSX file with multiple sheets - assumes first sheet by default
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
-                              required_tag_columns=prefixed_needed_tag_columns)
+                              column_prefix_dictionary=prefixed_needed_tag_columns)
     hed_input_reader = HedValidator(input_file, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 3c] Multiple sheet xlsl has first sheet with no issues'))
 
     # Example 3d: XLSX file with multiple sheets - PVT sheet has several issues with 7.1.1
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
-                                      required_tag_columns=prefixed_needed_tag_columns,
+                                      column_prefix_dictionary=prefixed_needed_tag_columns,
                                       worksheet_name='PVT Events')
     hed_input_reader = HedValidator(input_file, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
     # Example 3f: Invalid XLSX sheet with 7.1.1 - also can't duplicate Label and Description in 7.1.1
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
-                                      required_tag_columns=prefixed_needed_tag_columns,
+                                      column_prefix_dictionary=prefixed_needed_tag_columns,
                                       worksheet_name='DAS Events')
     hed_input_reader = HedValidator(input_file, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(

@@ -1,5 +1,5 @@
 import os
-import openpyxl
+import xlrd
 
 class HedFileInput:
     """Handles parsing the actual on disk hed files to a more general format."""
@@ -12,7 +12,7 @@ class HedFileInput:
     COMMA_DELIMITER = ','
 
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
-                 has_column_names=True, required_tag_columns=None):
+                 has_column_names=True, column_prefix_dictionary=None):
         """Constructor for the HedFileInput class.
 
          Parameters
@@ -26,7 +26,7 @@ class HedFileInput:
          has_column_names: bool
              True if file has column names. The validation will skip over the first line of the file. False, if
              otherwise.
-         required_tag_columns: dict
+         column_prefix_dictionary: dict
              A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
              prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
              4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
@@ -35,11 +35,11 @@ class HedFileInput:
          """
         if tag_columns is None:
             tag_columns = [2]
-        if required_tag_columns is None:
-            required_tag_columns = {}
+        if column_prefix_dictionary is None:
+            column_prefix_dictionary = {}
 
-        self._required_tag_columns = self._subtract_1_from_dictionary_keys(required_tag_columns)
-        self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns, self._required_tag_columns)
+        self._column_prefix_dictionary = self._subtract_1_from_dictionary_keys(column_prefix_dictionary)
+        self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns, self._column_prefix_dictionary)
         self._filename = filename
         self._worksheet_name = worksheet_name
         self._has_column_names = has_column_names
@@ -60,8 +60,9 @@ class HedFileInput:
     def _parse_spreadsheet(self):
         worksheet = self._open_workbook_worksheet(self._filename, self._worksheet_name)
         if worksheet:
-            for row in worksheet.rows:
-                row_number = row[0].row - 1
+            number_of_rows = worksheet.nrows
+            for row_number in range(number_of_rows):
+                row = worksheet.row(row_number)
                 if self.row_contains_headers(self._has_column_names, row_number):
                     continue
                 row_hed_string, column_to_hed_tags_dictionary = self.get_hed_tags_from_worksheet_row(row)
@@ -144,9 +145,9 @@ class HedFileInput:
                 column_hed_tags = spreadsheet_row[hed_tag_column]
             if not column_hed_tags:
                 continue
-            elif hed_tag_column in self._required_tag_columns:
+            elif hed_tag_column in self._column_prefix_dictionary:
                 column_hed_tags = self._prepend_prefix_to_required_tag_column_if_needed(
-                    column_hed_tags, self._required_tag_columns[hed_tag_column])
+                    column_hed_tags, self._column_prefix_dictionary[hed_tag_column])
             column_to_hed_tags_dictionary[hed_tag_column] = column_hed_tags
         hed_string = ','.join(column_to_hed_tags_dictionary.values())
         return hed_string, column_to_hed_tags_dictionary
@@ -167,7 +168,7 @@ class HedFileInput:
         """
         return {key - 1: value for key, value in int_key_dictionary.items()}
 
-    def _convert_tag_columns_to_processing_format(self, tag_columns, required_tag_columns):
+    def _convert_tag_columns_to_processing_format(self, tag_columns, column_prefix_dictionary):
         """Converts the tag columns list to a list that allows it to be internally processed. 1 is subtracted from
            each tag column making it 0 based. Then the tag columns are combined with the prefix needed tag columns.
 
@@ -175,7 +176,7 @@ class HedFileInput:
         ----------
         tag_columns: list
             A list of ints containing the columns that contain the HED tags.
-        required_tag_columns: todo: add this
+        column_prefix_dictionary: todo: add this
             ????
         Returns
         -------
@@ -184,18 +185,18 @@ class HedFileInput:
 
         """
         tag_columns = self._subtract_1_from_list_elements(tag_columns)
-        tag_columns = self._add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns)
+        tag_columns = self._add_required_tag_columns_to_tag_columns(tag_columns, column_prefix_dictionary)
         return tag_columns
 
     @staticmethod
-    def _add_required_tag_columns_to_tag_columns(tag_columns, required_tag_columns):
+    def _add_required_tag_columns_to_tag_columns(tag_columns, column_prefix_dictionary):
         """Adds the required tag columns to the tag columns.
 
          Parameters
          ----------
         tag_columns: list
             A list containing the tag column indices.
-         required_tag_columns: dict
+         column_prefix_dictionary: dict
             A dictionary containing the required tag columns.
          Returns
          -------
@@ -203,7 +204,7 @@ class HedFileInput:
              A list containing the combined required tag columns and the tag columns.
 
          """
-        return tag_columns + list(set(required_tag_columns.keys()) - set(tag_columns))
+        return tag_columns + list(set(column_prefix_dictionary.keys()) - set(tag_columns))
 
     @staticmethod
     def _remove_tag_columns_greater_than_row_column_count(row_column_count, hed_tag_columns):
@@ -315,9 +316,8 @@ class HedFileInput:
 
         """
 
-        workbook_t = openpyxl.open(workbook_path)
+        workbook = xlrd.open_workbook(workbook_path)
         if not worksheet_name:
-            # Return first sheet
-            for worksheet in workbook_t:
-                return worksheet
-        return workbook_t[worksheet_name]
+            return workbook.sheet_by_index(0)
+        return workbook.sheet_by_name(worksheet_name)
+
