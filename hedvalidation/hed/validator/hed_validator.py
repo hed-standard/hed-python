@@ -1,6 +1,6 @@
 """
-This module contains the HedInputReader class which is used to validate the tags in a HED string or a file. The file
-types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after creating a HedInputReader class call
+This module contains the HedValidator class which is used to validate the tags in a HED string or a file. The file
+types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after creating a HedValidator class call
 the get_validation_issues() function.
 
 """

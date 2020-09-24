@@ -15,11 +15,12 @@ class TagEntry:
         self.long_org_tag = long_org_tag
         self.long_clean_tag = long_org_tag.lower()
 
-class TagCompare:
+class TagFormat:
     """     Helper class for seeing if a schema has any duplicate tags, and also has functions to convert
         hed strings and tags short<>long
        """
-    pattern = re.compile("[\s/]*/+[\s/]*")
+    # Regular expression for cleaning up repeated slashes and spaces around slashes.
+    pattern_doubleslash = re.compile("[\s/]*/+[\s/]*")
 
     def __init__(self, hed_xml_file=None, hed_tree=None):
         self.parent_map = None
@@ -357,7 +358,7 @@ class TagCompare:
                         'Event  //Extension' -> 'Event/Extension'
 
         """
-        simplified_string = TagCompare.pattern.sub('/', hed_string)
+        simplified_string = TagFormat.pattern.sub('/', hed_string)
         return simplified_string
 
     @staticmethod
@@ -441,7 +442,7 @@ def check_for_duplicate_tags(local_xml_file):
     dictionary
             Contains source file location, dest, etc
     """
-    tag_compare = TagCompare(local_xml_file)
+    tag_compare = TagFormat(local_xml_file)
     dupe_tag_file = None
     if tag_compare.has_duplicate_tags():
         dupe_tag_file = utils.write_text_iter_to_file(tag_compare.dupe_tag_iter(True))
