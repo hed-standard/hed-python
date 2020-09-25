@@ -5,8 +5,8 @@
 ##### Constants
 
 ROOT_DIR=${PWD}
-IMAGE_NAME="hedtools-validation:latest"
-CONTAINER_NAME="hedtools-validation"
+IMAGE_NAME="hedtools3-validation:latest"
+CONTAINER_NAME="hedtools3-validation"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${PWD}/hed-python"
 GIT_REPO_BRANCH="master"
@@ -14,7 +14,7 @@ HOST_PORT=33000
 CONTAINER_PORT=80
 
 DEPLOY_DIR="hed-python/hedweb/deploy"
-CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
+CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools3"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
 WEBINTERFACE_CODE_DIR="hed-python/hedweb/hed"

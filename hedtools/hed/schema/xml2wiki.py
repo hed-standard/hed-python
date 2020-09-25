@@ -1,7 +1,7 @@
 from enum import Enum
 from defusedxml.lxml import parse
-from hed.converter import utils
-from hed.converter import constants
+from hed.schema import utils
+from hed.schema import constants
 
 class MainParseMode(Enum):
     MainTags = 1

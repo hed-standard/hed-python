@@ -1,8 +1,8 @@
 # Simplified example code for running wiki2xml
 
 from shutil import move
-from hed.converter import wiki2xml
-from hed.converter import constants
+from hed.schema import wiki2xml
+from hed.schema import constants
 
 if __name__ == '__main__':
     local_hed_file = None

@@ -6,7 +6,7 @@ import urllib.request
 from xml.dom import minidom
 from xml.etree import ElementTree as et
 import tempfile
-from hed.converter import constants
+from hed.schema import constants
 
 def url_to_file(resource_url):
     """Write data from a URL resource into a file. Data is decoded as unicode.

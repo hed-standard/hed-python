@@ -8,9 +8,10 @@ from werkzeug.utils import secure_filename
 from flask import current_app
 from logging.handlers import RotatingFileHandler
 from logging import ERROR
-from hed.validator.hed_input_reader import HedInputReader
+from hed.validator.hed_validator import HedValidator
 from hed.validator import hed_cache
 from hed.validator.hed_dictionary import HedDictionary
+from hed.validator.hed_file_input import HedFileInput
 from hed.webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants
 from hed.webinterface.constants.error import error_constants
 from hed.webinterface.constants.form import python_form_constants, validation_arg_constants, js_form_constants, \
@@ -204,7 +205,7 @@ def report_eeg_events_validation_status(request):
         # parse hed_strings from json
         hed_strings = json.loads(form_data["hed_strings"])
         # hed_strings is a list of HED strings associated with events in EEG.event (order preserved)
-        hed_input_reader = HedInputReader(hed_strings, check_for_warnings=check_for_warnings, hed_xml_file=hed_xml_file)
+        hed_input_reader = HedValidator(hed_strings, check_for_warnings=check_for_warnings, hed_xml_file=hed_xml_file)
         # issues is a list of lists. Element list is empty if no error,
         # else is a list of dictionaries, each dictionary contains an error-message key-value pair
         issues = hed_input_reader.get_validation_issues()
@@ -478,7 +479,7 @@ def _generate_input_arguments_from_validation_form(form_request_object, spreadsh
         form_request_object, hed_file_path)
     validation_input_arguments[validation_arg_constants.TAG_COLUMNS] = \
         _convert_other_tag_columns_to_list(form_request_object.form[html_form_constants.TAG_COLUMNS])
-    validation_input_arguments[validation_arg_constants.REQUIRED_TAG_COLUMNS] = \
+    validation_input_arguments[validation_arg_constants.COLUMN_PREFIX_DICTIONARY] = \
         _get_specific_tag_columns_from_validation_form(form_request_object)
     validation_input_arguments[validation_arg_constants.WORKSHEET_NAME] = _get_optional_validation_form_field(
         form_request_object, html_form_constants.WORKSHEET_NAME, type_constants.STRING)
@@ -559,15 +560,22 @@ def _get_specific_tag_columns_from_validation_form(form_request_object):
         A dictionary containing the required tag columns. The keys will be the column numbers and the values will be
         the name of the column.
     """
-    required_tag_columns = {}
+    column_prefix_dictionary = {}
     for tag_column_name in spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES:
         form_tag_column_name = tag_column_name.lower() + html_form_constants.COLUMN_POSTFIX
         if form_tag_column_name in form_request_object.form:
             tag_column_name_index = form_request_object.form[form_tag_column_name].strip()
             if tag_column_name_index:
                 tag_column_name_index = int(tag_column_name_index)
-                required_tag_columns[tag_column_name_index] = tag_column_name
-    return required_tag_columns
+
+                #todo: Remove these giant kludges at some point
+                if tag_column_name == "Long":
+                    tag_column_name = "Long Name"
+                tag_column_name = "Event/" + tag_column_name + "/"
+                # End giant kludges
+
+                column_prefix_dictionary[tag_column_name_index] = tag_column_name
+    return column_prefix_dictionary
 
 
 def _get_optional_validation_form_field(validation_form_request_object, form_field_name, ftype=''):
@@ -691,16 +699,18 @@ def validate_spreadsheet(validation_arguments):
 
     Returns
     -------
-    HedInputReader object
-        A HedInputReader object containing the validation results.
+    HedValidator object
+        A HedValidator object containing the validation results.
     """
-    return HedInputReader(validation_arguments[validation_arg_constants.SPREADSHEET_PATH],
-                          tag_columns=validation_arguments[validation_arg_constants.TAG_COLUMNS],
-                          has_column_names=validation_arguments[validation_arg_constants.HAS_COLUMN_NAMES],
-                          required_tag_columns=validation_arguments[validation_arg_constants.REQUIRED_TAG_COLUMNS],
-                          worksheet_name=validation_arguments[validation_arg_constants.WORKSHEET_NAME],
-                          check_for_warnings=validation_arguments[validation_arg_constants.CHECK_FOR_WARNINGS],
-                          hed_xml_file=validation_arguments[validation_arg_constants.HED_XML_PATH])
+    file_input_object = HedFileInput(validation_arguments[validation_arg_constants.SPREADSHEET_PATH],
+                                     worksheet_name=validation_arguments[validation_arg_constants.WORKSHEET_NAME],
+                                     tag_columns=validation_arguments[validation_arg_constants.TAG_COLUMNS],
+                                     has_column_names=validation_arguments[validation_arg_constants.HAS_COLUMN_NAMES],
+                                     column_prefix_dictionary=validation_arguments[validation_arg_constants.COLUMN_PREFIX_DICTIONARY]
+                                     )
+    return HedValidator(file_input_object,
+                        check_for_warnings=validation_arguments[validation_arg_constants.CHECK_FOR_WARNINGS],
+                        hed_xml_file=validation_arguments[validation_arg_constants.HED_XML_PATH])
 
 
 def spreadsheet_present_in_form(validation_form_request_object):
