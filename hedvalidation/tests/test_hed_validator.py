@@ -2,13 +2,13 @@ import random
 import unittest
 
 from hed.validator.hed_string_delimiter import HedStringDelimiter
-from hed.validator.hed_input_reader import HedInputReader
+from hed.validator.hed_validator import HedValidator
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.generic_hed_input_reader = HedInputReader('Attribute/Temporal/Onset')
+        cls.generic_hed_input_reader = HedValidator('Attribute/Temporal/Onset')
         cls.text_file_with_extension = 'file_with_extension.txt'
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
         cls.float_value = 1.1
@@ -34,12 +34,6 @@ class Test(unittest.TestCase):
         cls.row_hed_tag_columns = [1, 2]
         cls.original_and_formatted_tag = [('Event/Label/Test', 'event/label/test'),
                                           ('Event/Description/Test', 'event/description/test')]
-
-    def test__convert_tag_columns_to_processing_format(self):
-        processing_tag_columns = self.generic_hed_input_reader._convert_tag_columns_to_processing_format(
-            self.one_based_tag_columns)
-        self.assertIsInstance(processing_tag_columns, list)
-        self.assertEqual(processing_tag_columns, self.zero_based_tag_columns_less_than_row_column_count)
 
     def test__validate_hed_input(self):
         validation_issues = self.generic_hed_input_reader._validate_hed_input()
@@ -110,57 +104,10 @@ class Test(unittest.TestCase):
         validation_issues = self.generic_hed_input_reader.get_validation_issues()
         self.assertIsInstance(validation_issues, list)
 
-    def test_get_file_extension(self):
-        file_extension = HedInputReader.get_file_extension(self.text_file_with_extension)
-        self.assertIsInstance(file_extension, str)
-        self.assertTrue(file_extension)
-
-    def test_file_path_has_extension(self):
-        file_extension = HedInputReader.file_path_has_extension(self.text_file_with_extension)
-        self.assertIsInstance(file_extension, bool)
-        self.assertTrue(file_extension)
-
-    def test_subtract_1_from_dictionary_keys(self):
-        one_subtracted_key_dictionary = HedInputReader.subtract_1_from_dictionary_keys(self.integer_key_dictionary)
-        self.assertIsInstance(one_subtracted_key_dictionary, dict)
-        self.assertTrue(one_subtracted_key_dictionary)
-        original_dictionary_key_sum = sum(self.integer_key_dictionary.keys())
-        new_dictionary_key_sum = sum(one_subtracted_key_dictionary.keys())
-        original_dictionary_key_length = len(self.integer_key_dictionary.keys())
-        self.assertEqual(original_dictionary_key_sum - new_dictionary_key_sum, original_dictionary_key_length)
-
-    def test_subtract_1_from_list_elements(self):
-        one_subtracted_list = HedInputReader.subtract_1_from_list_elements(self.one_based_tag_columns)
-        self.assertIsInstance(one_subtracted_list, list)
-        self.assertTrue(one_subtracted_list)
-        original_list_sum = sum(self.one_based_tag_columns)
-        new_list_sum = sum(one_subtracted_list)
-        original_list_length = len(self.one_based_tag_columns)
-        self.assertEqual(original_list_sum - new_list_sum, original_list_length)
-
-    def test_prepend_prefix_to_required_tag_column_if_needed(self):
-        prepended_hed_string = self.generic_hed_input_reader.prepend_prefix_to_required_tag_column_if_needed(
-            self.category_tags, self.category_key)
-        self.assertIsInstance(prepended_hed_string, str)
-        self.assertEqual(prepended_hed_string, self.category_partipant_and_stimulus_tags)
-
-    def test_remove_tag_columns_greater_than_row_column_count(self):
-        rows_less_than_row_column_count = HedInputReader.remove_tag_columns_greater_than_row_column_count(
-            self.zero_based_row_column_count, self.zero_based_tag_columns)
-        self.assertIsInstance(rows_less_than_row_column_count, list)
-        self.assertEqual(rows_less_than_row_column_count, self.zero_based_tag_columns_less_than_row_column_count)
-
-    def test_get_row_hed_tags(self):
-        hed_string, column_to_hed_tags_dictionary = self.generic_hed_input_reader.get_row_hed_tags(
-            self.row_with_hed_tags, is_worksheet=False)
-        self.assertIsInstance(hed_string, str)
-        self.assertTrue(hed_string)
-        self.assertIsInstance(column_to_hed_tags_dictionary, dict)
-        self.assertTrue(column_to_hed_tags_dictionary)
 
     def test_get_previous_original_and_formatted_tag(self):
         loop_index = 1
-        previous_original_tag, previous_formatted_tag = HedInputReader.get_previous_original_and_formatted_tag(
+        previous_original_tag, previous_formatted_tag = HedValidator.get_previous_original_and_formatted_tag(
             self.original_and_formatted_tag, loop_index)
         self.assertEqual(previous_original_tag, self.original_and_formatted_tag[0][0])
         self.assertEqual(previous_formatted_tag, self.original_and_formatted_tag[0][1])

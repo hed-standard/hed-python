@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed.validator.hed_string_delimiter import HedStringDelimiter
-from hed.validator.hed_input_reader import HedInputReader
+from hed.validator.hed_validator import HedValidator
 from hed.validator.error_reporter import report_error_type
 from hed.validator.warning_reporter import report_warning_type
 from hed.validator.tag_validator import TagValidator
@@ -10,7 +10,6 @@ from hed.validator.hed_dictionary import HedDictionary
 
 
 class TestHed(unittest.TestCase):
-
     schema_file = 'data/HED.xml'
 
     @classmethod
@@ -25,13 +24,13 @@ class TestHed(unittest.TestCase):
                                                   run_semantic_validation=True)
         cls.semantic_warning_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=True,
                                                           run_semantic_validation=True)
-        cls.syntactic_hed_input_reader = HedInputReader("Event/Category")
+        cls.syntactic_hed_input_reader = HedValidator("Event/Category")
         cls.syntactic_hed_input_reader._tag_validator = cls.syntactic_tag_validator
-        cls.syntactic_warning_hed_input_reader = HedInputReader("Event/Category")
+        cls.syntactic_warning_hed_input_reader = HedValidator("Event/Category")
         cls.syntactic_warning_hed_input_reader._tag_validator = cls.syntactic_warning_tag_validator
-        cls.semantic_hed_input_reader = HedInputReader("Event/Category")
+        cls.semantic_hed_input_reader = HedValidator("Event/Category")
         cls.semantic_hed_input_reader._tag_validator = cls.semantic_tag_validator
-        cls.semantic_warning_hed_input_reader = HedInputReader("Event/Category")
+        cls.semantic_warning_hed_input_reader = HedValidator("Event/Category")
         cls.semantic_warning_hed_input_reader._tag_validator = cls.semantic_warning_tag_validator
 
     def validator_base(self, test_strings, expected_results, expected_issues, test_function):
