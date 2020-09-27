@@ -6,7 +6,7 @@ Examples of HED validation of a tag string
 from hed.validator.hed_validator import HedValidator
 
 if __name__ == '__main__':
-    local_hed_file = '../tests/data/HED.xml'   # path HED v7.1.1 stored locally
+    local_hed_file = 'tests/data/HED.xml'   # path HED v7.1.1 stored locally
 
     # Example 1a: Valid HED string for HED <= v7.1.1
     hed_string_1 = 'Event/Label/ButtonPuskDeny, Event/Description/Button push to deny access to the ID holder,' \
