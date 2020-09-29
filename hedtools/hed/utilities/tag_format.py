@@ -2,7 +2,7 @@ import re
 from defusedxml.lxml import parse
 from hed.schema import utils
 from hed.schema import constants
-from hed.schema import error_reporter
+from hed.utilities import error_reporter
 
 class TagEntry:
     """This is a single entry in the tag dictionary.
