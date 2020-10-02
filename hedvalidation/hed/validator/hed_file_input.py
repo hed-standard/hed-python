@@ -93,7 +93,31 @@ class HedFileInput:
             row_hed_string, column_to_hed_tags_dictionary = self.get_hed_string_from_text_file_row(text_file_row)
             yield row_number, row_hed_string, column_to_hed_tags_dictionary
 
-    def set_cell(self, row_number, column_number, new_text):
+    def set_cell(self, row_number, column_number, new_text, include_column_prefix_if_exist=False):
+        """
+
+        Parameters
+        ----------
+        row_number : int
+            The row number of the spreadsheet to set
+        column_number : int
+            The column number of the spreadsheet to set
+        new_text : str
+            Text to enter in the given cell
+        include_column_prefix_if_exist : bool
+            If true and the column matches one from _column_prefix_dictionary, remove the prefix
+
+        Returns
+        -------
+
+        """
+        if not include_column_prefix_if_exist \
+                and self._column_prefix_dictionary \
+                and column_number in self._column_prefix_dictionary:
+            prefix_to_remove = self._column_prefix_dictionary[column_number]
+            if new_text.startswith(prefix_to_remove):
+                new_text = new_text[len(prefix_to_remove):]
+
         if self._workbook:
             # Cells are 1 based rather than 0 based, so add 1
             self._worksheet.cell(row_number + 1, column_number + 1).value = new_text

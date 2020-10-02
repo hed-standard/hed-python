@@ -7,19 +7,41 @@ import os
 
 from hed.validator.hed_validator import HedValidator
 from hed.validator.hed_file_input import HedFileInput
+from hed.utilities.tag_format import TagFormat
+
+local_hed_file = 'tests/data/reduced_no_dupe.xml'  # path HED v7.1.1 stored locally
 
 def resave_file(input_file):
-    #tag_formatter = tag_format.TagFormat("reduced_no_dupe.xml")
     for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
         for column_number in column_to_hed_tags_dictionary:
-            # short_string, _ = tag_formatter.convert_hed_string_to_short(
-            #     column_to_hed_tags_dictionary[column_number])
-
             old_text = column_to_hed_tags_dictionary[column_number]
-            new_text = f"NEW{old_text}NEW"
-            input_file.set_cell(row_number, column_number, f"{row_number}, {column_number}: {new_text}")
+            new_text = old_text
+            input_file.set_cell(row_number, column_number, new_text)
 
     input_file.save(f"{input_file.filename}_test_output")
+
+
+def long_to_short_file(input_file):
+    tag_formatter = TagFormat(local_hed_file)
+    for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
+        for column_number in column_to_hed_tags_dictionary:
+            old_text = column_to_hed_tags_dictionary[column_number]
+            new_text, _ = tag_formatter.convert_hed_string_to_short(old_text)
+            input_file.set_cell(row_number, column_number, new_text,
+                                include_column_prefix_if_exist=False)
+
+    input_file.save(f"{input_file.filename}_test_long_to_short")
+
+def short_to_long_file(input_file):
+    tag_formatter = TagFormat(local_hed_file)
+    for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
+        for column_number in column_to_hed_tags_dictionary:
+            old_text = column_to_hed_tags_dictionary[column_number]
+            new_text, _ = tag_formatter.convert_hed_string_to_long(old_text)
+            input_file.set_cell(row_number, column_number, new_text,
+                                include_column_prefix_if_exist=False)
+
+    input_file.save(f"{input_file.filename}_test_short_to_long")
 
 if __name__ == '__main__':
     # Set up the file names for the tests
@@ -30,6 +52,7 @@ if __name__ == '__main__':
     valid_tsv_file_separate_cols = os.path.join(example_data_path, 'ValidSeparateColumnTSV.txt')
     unsupported_csv_format = os.path.join(example_data_path, 'UnsupportedFormatCSV.csv')
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
+    hed3_tags_single_sheet = os.path.join(example_data_path, 'hed3_tags_single_sheet.xlsx')
 
     # Example 1a: Valid TSV file with default version of HED
     print(valid_tsv_file)
@@ -58,14 +81,14 @@ if __name__ == '__main__':
     # prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
     # input_file = HedFileInput(unsupported_csv_format, tag_columns=[6],
     #                                   column_prefix_dictionary=prefixed_needed_tag_columns)
-    # resave_file(input_file)
+    # short_to_long_file(input_file)
     #
     # # Example 2b: CSV files are not supported (Use excel to convert) - explicit file specification
     # print(unsupported_csv_format)
     # prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
     # input_file = HedFileInput(unsupported_csv_format, tag_columns=[6],
     #                           column_prefix_dictionary=prefixed_needed_tag_columns)
-    # resave_file(input_file)
+    # short_to_long_file(input_file)
 
     prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
     # Example 3a: XLSX file with multiple sheets - first sheet has no issues with 7.1.1
@@ -100,3 +123,15 @@ if __name__ == '__main__':
                                       column_prefix_dictionary=prefixed_needed_tag_columns,
                                       worksheet_name='DAS Events')
     resave_file(input_file)
+
+    prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
+    # Example 3a: XLSX file with multiple sheets - first sheet has no issues with 7.1.1
+    input_file = HedFileInput(hed3_tags_single_sheet, tag_columns=[4],
+                              column_prefix_dictionary=prefixed_needed_tag_columns,
+                              worksheet_name='LKT Events')
+    long_to_short_file(input_file)
+
+    input_file = HedFileInput(hed3_tags_single_sheet, tag_columns=[4],
+                              column_prefix_dictionary=prefixed_needed_tag_columns,
+                              worksheet_name='LKT Events')
+    short_to_long_file(input_file)
