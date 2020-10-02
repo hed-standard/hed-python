@@ -358,7 +358,7 @@ class TagFormat:
                         'Event  //Extension' -> 'Event/Extension'
 
         """
-        simplified_string = TagFormat.pattern.sub('/', hed_string)
+        simplified_string = TagFormat.pattern_doubleslash.sub('/', hed_string)
         return simplified_string
 
     @staticmethod
