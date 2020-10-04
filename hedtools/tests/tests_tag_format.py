@@ -1,7 +1,8 @@
 import unittest
 import os
 from hed.utilities.tag_format import TagFormat
-from hed.schema import error_reporter
+from hed.utilities import error_reporter
+from hed.utilities import format_util
 
 class Test(unittest.TestCase):
     schema_file = 'data/reduced_no_dupe.xml'
@@ -32,7 +33,7 @@ class Test(unittest.TestCase):
 
     def compare_split_results(self, input_strings, expected_results):
         for input_tag, result in zip(input_strings, expected_results):
-            actual_results = self.tag_compare._split_hed_string(input_tag)
+            actual_results = format_util.split_hed_string(input_tag)
             decoded_results = [input_tag[start:end] for (is_tag, (start, end)) in actual_results]
             self.assertEqual(result, decoded_results)
 

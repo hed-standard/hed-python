@@ -1,0 +1,1434 @@
+Event | Event
+
+Event/Category |  Event [The Category is unnecessary]
+
+Event/Category/Initial context | (Event/Experiment-structure, (Attribute/Organizational/Definition, Attribute/Informational/Label/XXX, YYY), (Attribute/Informational/Label/XXX, Attribute/Spatiotemporal/Temporal/Onset)) [XXX is name of initial context and YYY is tag string defining initial context. These tags should appear in an event at the beginning of the experiment. The Definition XXX only occurs once in the dataset.]
+
+Event/Category/Participant response | (Event/Agent-action, Attribute/Task-related, (Item/Object/Natural/Human, Attribute/Role/Experimental-subject))
+
+Event/Category/Technical error| Event/Experiment-control/Mishap
+
+Event/Category/Technical error/# | (Event/Experiment-control/Mishap, Attribute/Informational/Description/#)
+
+Event/Category/Participant failure | (Event/Agent-action, Attribute/Informational/Description/#, Attribute/Task-related, (Item/Object/Natural/Human, Attribute/Role/Experimental-subject))
+
+Event/Category/Participant failure/# | (Event/Agent-action, Attribute/Informational/Description/#, Attribute/Task-related, (Item/Object/Natural/Human, Attribute/Role/Experimental-subject))
+
+Event/Category/Environmental/# | (Event, (Attribute/Organizational/Definition, Attribute/Informational/Label/XXX, Attribute/Environmental, YYY), (Attribute/Informational/Label/XXX, Attribute/Spatiotemporal/Temporal/Onset)) [XXX is name of the change and YYY is the tag string defining the change. If this definition overrides previous context, there must be an Offset event for previous context. If this event was mis-tagged to mean a single event such as an airplane flying overhead, it should have been tagged in HED-2 as incidental.]
+
+Event/Category/Experimental stimulus | (Event/Sensory-event, Attribute/Experimental/Task-related)
+
+Event/Category/Experimental stimulus/Instruction | (Event/Experiment-control/Instruction, Attribute/Experimental/Task-related, Attribute/Informational/Description/XXX) [XXX should describe the instruction. Should also include an appropriate Attribute/Sensory/]
+
+Event/Category/Experimental procedure | (Event/Experiment-control/Procedure, Attribute/Informational/Description/XXX) [XXX is a description of the procedure.]
+
+Event/Category/Experimental procedure/# | (Event/Experiment-control/Procedure, Attribute/InformationalDescription/#)
+
+Event/Category/Incidental | (Event/Sensory-event, Attribute/Environmental, Attribute/Informational/Description/XXX)  [XXX is a description of the incidental event.]
+
+Event/Category/Incidental/# | (Event/Sensory-event, Attribute/Environmental, Attribute/Informational/Description/#)
+
+Event/Category/Miscellaneous | (Event,  Attribute/Informational/Description/XXX) [Try to put the event into one of the existing subcategories and modify with appropriate attributes. XXX is a description.]
+
+Event/Category/Miscellaneous/# | (Event,  Attribute/Description/#) [Try to put event into one of the existing subcategories and modify with appropriate attributes]
+
+Event/Category/Experiment control | Event/Experiment-control
+
+Event/Category/Experiment control/Sequence | (Event/Experiment-structure, Attribute/Organizational/Sequence, Attribute/Informational/Label/XXX, YYY) [XXX is a sequence label and YYY are additional tags describing the sequence.]
+
+Event/Category/Experiment control/Sequence/Permutation ID/# | (Event/Experiment-structure, (Attribute/Informational/ID/#, Attribute/Informational/Label/XXX))  [XXX must have been defined as a Sequence or a Permutation.]
+
+Event/Category/Experiment control/Sequence/Experiment | Event/Experiment-structure, (Attribute/Organizational/Definition, Attribute/Organizational/Sequence, Attribute/Task-related, Attribute/Informational/Label/XXX, YYY) [XXX is a label and YYY are additional tags describing the sequence.The Definition XXX only occurs once in the dataset.]
+
+Event/Category/Experiment control/Sequence/Block | Event/Experiment-structure, (Attribute/Organizational/Definition, Attribute/Organizational/Block, Attribute/Task-related, Attribute/Informational/Label/XXX, YYY), (Attribute/Informational/Label/XXX, Attribute/Spatiotemporal/Temporal/Onset) [XXX is the name of block-type and YYY is the tag string defining block. The Definition XXX only occurs once in the dataset.]
+
+Event/Category/Experiment control/Sequence/Block/# | (Event/Experiment-structure, ((Attribute/Informational/Label/XXX, Attribute/Spatiotemporal/Temporal/Onset), Attribute/Informational/ID/#)) [# is an ID of the block of type XXX. The Definition XXX of the block must be defined.]
+
+Event/Category/Experiment control/Sequence/Trial | Event/Experiment-structure, (Attribute/Organizational/Definition, Attribute/Organizational/Trial, Attribute/Task-related, Attribute/Informational/Label/XXX, YYY), (Attribute/Informational/Label/XXX, Attribute/Spatiotemporal/Temporal/Onset) [XXX is the name of trial-type and YYY is the tag string defining the trial. The Definition only occurs once in the dataset.]
+
+Event/Category/Experiment control/Task | (Event/Experiment-structure, (Attribute/Organizational/Definition, Attribute/Organizational/Task, Attribute/Task-related, Attribute/Informational/Label/XXX, YYY)), (Attribute/Informational/Label/XXX, Attribute/Spatiotemporal/Temporal/Onset) [XXX is the name of block and YYY is the tag string defining the task. The Definition XXX only occurs once in the dataset.]
+
+Event/Category/Experiment control/Activity | (Event/Experiment-control, Attribute/Experimental/Task-related) [Consider specifying the Agent in this activity. Agent is often the control program for the experiment.]
+
+Event/Category/Experiment control/Activity/Participant action | (Event/Agent-action, Attribute/Task-related) [Should also indicate whether agent is human and what role is]
+
+Event/Category/Experiment control/Synchronization | Event/Experiment-control/Timesync
+
+Event/Category/Experiment control/Synchronization/Display refresh | (Event/Experiment-control/Timesync, Item/Object/Device/IO-Device/Output-device/Display)
+
+Event/Category/Experiment control/Synchronization/Trigger | Event/Experiment-control/Timesync [Add tags describing what is triggered if necessary.]
+
+Event/Category/Experiment control/Synchronization/Tag | (Event/Experiment-control/Timesync, Informational/Label/XXX) [XXX is a label value. Should consider a Definition if repeated.]
+
+Event/Category/Experiment control/Status | (Event/Experiment-control, Attribute/Informational, Attribute/Informational/Description/XXX) [XXX is description of the status]
+
+Event/Category/Experiment control/Status/Waiting for input | (Event/Experiment-control/Pause, Attribute/Informational/Description/XXXItem/Object/Man-made/Device/IO-device/Input-device)
+
+Event/Category/Experiment control/Status/Loading | (Event/Experiment-control, Attribute/Informational, Item/Object/Man-made/Device/IO-device/Input-device)
+
+Event/Category/Experiment control/Status/Error | Event/Experiment-control/Mishap
+
+Event/Category/Experiment control/Setup | (Event/Experiment-control, Attribute/Informational)
+
+Event/Category/Experiment control/Setup/Parameters | (Event/Experiment-control, Attribute/Informational/Parameter/XXX) [XXX is the value of the parameter]
+
+Event/Category/Experiment control/Setup/Parameters/# | (Event/Experiment-control, Attribute/Informational/Parameter/#)
+
+Event/ID | Attribute/Informational/ID
+
+Event/ID/# | Attribute/Informational/ID/#
+
+Event/Group ID | (Attribute/Organizational/Collection, Attribute/Informational/ID/XXX) [XXX is the group ID within a collection. The Collection should probably be defined elsewhere.]
+
+Event/Group ID/# | (Attribute/Organizational/Collection, Attribute/Informational/ID/#) The Collection should probably be defined elsewhere.]
+
+Event/Duration/# | Attribute/Spatiotemporal/Temporal/Duration/#
+
+Event/Description/# | Attribute/Informational/Description/#
+
+Event/Label/# | Attribute/Informational/Label/#
+
+Event/Long name/# | [Add the long name information to a description, use as short name or eliminate]
+
+---------------------------------------------------------------------------------------------------------------------
+Item | Item
+
+Item/ID/# | Attribute/Informational/ID/# [Suggest group with tags for an object and possibly a definition]
+
+Item/ID/Local/# | Attribute/Informational/ID/# [This is meant for items within a single event. It should be remapped to global objects or parentheses used.]
+
+Item/Group ID | Attribute/Informational/ID [Suggest group with tags for an object and possibly a definition and collection definition.]
+
+Item/Object | Item/Object
+
+Item/Object/Vehicle | Item/Object/Man-made/Vehicle
+
+Item/Object/Bicycle | Item/Object/Man-made/Vehicle/Bicycle
+
+Item/Object/Car | Item/Object/Man-made/Vehicle/Car
+
+Item/Object/Truck | Item/Object/Man-made/Vehicle/Truck
+
+Item/Object/Cart | Item/Object/Man-made/Vehicle/Cart
+
+Item/Object/Boat | Item/Object/Man-made/Vehicle/Boat
+
+Item/Object/Tractor | Item/Object/Man-made/Vehicle/Tractor
+
+Item/Object/Train | Item/Object/Man-made/Vehicle/Train
+
+Item/Object/Aircraft | Item/Object/Man-made/Vehicle/Aircraft
+
+Item/Object/Aircraft/Airplane | Item/Object/Man-made/Vehicle/Aircraft  [Too specific, extend if needed]
+
+Item/Object/Aircraft/Helicopter | Item/Object/Man-made/Vehicle/Aircraft[Too specific, extend if needed]
+
+Item/Object/Person | Item/Object/Natural/Human
+
+Item/Object/Person/Pedestrian | (Item/Object/Natural/Human, Action/Move/Move-leg-foot/Walk)
+
+Item/Object/Person/Cyclist | (Item/Object/Natural/Human, Action/Move/Move-leg-foot/Pedal)
+
+Item/Object/Person/Mother-child  | ((Attribute/Role/Parent/Mother, Attribute/Relational/Connective-relation/Related-to) Attribute/Role/Child)
+
+Item/Object/Person/Experimenter | (Item/Object/Natural/Human, Attribute/Role/Experimenter)
+
+Item/Object/Animal | Item/Object/Natural/Animal
+
+Item/Object/Plant | Item/Object/Natural/Plant
+
+Item/Object/Plant/Flower | Item/Object/Natural/Plant [Extend with Flower if necessary]
+
+Item/Object/Plant/Tree | Item/Object/Natural/Plant/Tree [Extend with Tree if necessary]
+
+Item/Object/Plant/Tree/Branch | Item/Object/Natural/Plant [Extend with Tree/Tree-branch if necessary]
+
+Item/Object/Plant/Tree/Root | Item/Object/Natural/Plant [Extend with Tree/Tree-root if necessary]
+
+Item/Object/Building | Item/Object/Man-made/Building
+
+Item/Object/Food | Item/Object/Food
+
+Item/Object/Water | Item/Object/Drink [Extend with Water if necessary]
+
+Item/Object/Clothing | Item/Object/Man-made/Clothing
+
+Item/Object/Clothing/Personal | Item/Object/Man-made/Clothing [use the Belongs-to attribute if necessary]
+
+Item/Object/Road sign | Item/Object/Man-made/Navigational-object/Sign [Extend to particular sign as needed]
+
+Item/Object/Barrel | Item/Object/Man-made/Navigational-object [Extend to Construction-barrel if  needed]
+
+Item/Object/Cone | Item/Object/Man-made/Navigational-object [Extend to Road-cone if  needed]
+
+Item/Object/Speedometer | Item/Object/Man-made/Navigational-object [Extend to Speedometer if needed]
+
+Item/Object/Construction zone | Item/Object/Man-made/Navigational-object [Extend to Construction-zone  needed]
+
+Item/Object/3D shape | Item/Object/Geometric/3D-shape
+
+Item/Object/Sphere | Item/Object/Geometric/3D-shape/Ellipsoid/Sphere
+
+Item/Object/Box | Item/Object/Geometric/3D-shape/Box
+
+Item/Object/Box/Cube | Item/Object/Geometric/3D-shape/Box/Cube
+
+Item/2D shape | Item/Object/Geometric/2D-shape
+
+Item/2D shape/Ellipse | Item/Object/Geometric/2D-shape/Ellipse
+
+Item/2D shape/Ellipse/Circle | Item/Object/Geometric/2D-shape/Ellipse/Circle
+
+Item/2D shape/Rectangle | Item/Object/Geometric/2D-shape/Rectangle
+
+Item/2D shape/Rectangle/Square | Item/Object/Geometric/2D-shape/Rectangle/Square
+
+Item/2D shape/Star | Item/Object/Geometric/2D-shape/Star
+
+Item/2D shape/Triangle | Item/Object/Geometric/2D-shape/Triangle
+
+Item/2D shape/Gabor patch |  Item/Object/Geometric/Pattern [Extend to Gabor-patch if necessary]
+
+Item/2D shape/Cross | Item/Object/Geometric/2D-shape/Cross
+
+Item/2D shape/Single point | Item/Object/Geometric/2D-shape/Single-point
+
+Item/2D shape/Clock face  | Item/Object/Device/Measurement-device/Clock/Clock-face
+
+Item/Pattern |  Item/Object/Geometric/Pattern
+
+Item/Pattern/Checkerboard | Item/Object/Geometric/Pattern [Extend with Checkerboard if necessary]
+
+Item/Pattern/Abstract | (Item/Object/Geometric/Pattern, Attribute/Descriptive/Abstract)
+
+Item/Pattern/Fractal | (Item/Object/Geometric/Pattern, Attribute/Descriptive/Fractal)
+
+Item/Pattern/LED | Item/Object/Geometric/Pattern/Led-pattern
+
+Item/Pattern/Dots | Item/Object/Geometric/Pattern/Dots
+
+Item/Pattern/Dots/Random dot | (Item/Object/Geometric/Pattern/Dots, Attribute/Descriptive/Random)
+
+Item/Pattern/Complex | (Item/Object/Geometric/Pattern, Attribute/Descriptive/Complex)
+
+Item/Face | Item/Object/Natural/Human/Head/Face
+
+Item/Face/Whole face with hair |  (Item/Object/Natural/Human/Head/Face, Item/Object/Natural/Human/Head/Hair)
+
+Item/Face/Whole face without hair |  Item/Object/Natural/Human/Head/Face
+
+Item/Face/Cut-out |  (Item/Object/Natural/Human/Head/Face, Item/Object/Man-made/Artwork/Visualization/Cutout)
+
+Item/Face/Parts only | (Item/Object/Natural/Human/Head/Face, Attribute/Relational/Connective-relation/Part-of)
+
+Item/Face/Parts only/Nose | Item/Object/Natural/Human/Head/Face/Nose
+
+Item/Face/Parts only/Lips | Item/Object/Natural/Human/Head/Face/Lips
+
+Item/Face/Parts only/Chin | Item/Object/Natural/Human/Head/Face/Chin
+
+Item/Face/Parts only/Eyes | Item/Object/Natural/Human/Head/Face/Eye
+
+Item/Face/Parts only/Eyes/Left only | Item/Object/Natural/Human/Head/Face/Eye, Attribute/Left(?)
+Item/Face/Parts only/Eyes/Right only |Item/Object/Natural/Human/Head/Face/Eye, Attribute/Right(?)
+
+Item/Symbolic | (Item/Object, Attribute/Descriptive/Symbolic)
+
+Item/Symbolic/Braille character | (Item/Object/Man-made/Artwork/Visualization/Braille, Attribute/Descriptive/Symbolic)
+
+Item/Symbolic/Sign | (Item/Object/Man-made/Navigational-object/Sign, Attribute/Descriptive/Symbolic)
+
+Item/Symbolic/Sign/Traffic | (Attribute/Descriptive/Symbolic, Item/Object/Man-made/Navigational-object/Sign) [Extend with Traffic if needed]
+
+Item/Symbolic/Sign/Traffic/Speed limit | (Attribute/Descriptive/Symbolic, Item/Object/Man-made/Navigational-object/Sign [Extend with Traffic/Speed-limit if needed]
+
+Item/Symbolic/Character | Item/Language/Character
+
+Item/Symbolic/Character/Digit | (Item/Language/Character, Attribute/Descriptive/Numerical)
+
+Item/Symbolic/Character/Pseudo-character | Item/Language/Character [Extend with Pseudo-character if needed or alternatively use Attribute/Task-related/Not-meaningful
+
+Item/Symbolic/Character/Letter | Item/Language/Character, Attribute/Descriptive/Symbolic
+
+Item/Symbolic/Composite | (Item/Object, Attribute/Descriptive/Symbolic, Attribute/Descriptive/Composite)
+
+Item/Natural scene | Item/Object/Natural/Terrain
+
+Item/Natural scene/Aerial | (Item/Object/Natural/Terrain, Item/Object/Man-made/Visualization/Aerial-view)
+
+Item/Natural scene/Aerial/Satellite | (Item/Object/Natural/Terrain, Item/Object/Man-made/Visualization/Satellite-view)
+
+Item/Drawing | Item/Object/Man-made/Visualization/Drawing
+
+Item/Drawing/Line drawing | Item/Object/Man-made/Visualization/Drawing [Extend with Line-drawing  if needed]
+
+Item/Film clip | Item/Object/Man-made/Visualization/Movie
+
+Item/Film clip/Commercial TV | Item/Object/Man-made/Visualization/Movie
+
+Item/Film clip/Animation | Item/Object/Man-made/Visualization/Animation
+
+Item/IAPS | (Item/ObjectMan-made/Visualization/Image, Attribute/Informational/Label/IAPS, Attribute/ID/XXX) [where XXX is the International Affective Picture ID]
+
+Item/IADS | (Item/ObjectMan-made/Visualization/Sound-clip, Attribute/Informational/Label/IADS, Attribute/ID/XXX) [where XXX is the International Affective Digital Sound ID]
+
+Item/SAM | (Item/ObjectMan-made/Visualization/Image/Cartoon, Attribute/Informational/Label/SAM, Attribute/ID/XXX) [where XXX is the Self-Assessment Manikin ID]
+
+---------------------------------------------------------------------------------------------------------
+
+Sensory presentation | Attribute/Sensory
+
+Sensory presentation/Auditory | Attribute/Sensory/Auditory
+
+Sensory presentation/Auditory/Nameable | (Item/Sound, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Cash register | (Item/Sound/Named-object-sound/Ka-ching, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Ding | (Item/Sound/Named-object-sound/Ding, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Buzz | (Item/Sound/Named-object-sound/Buzz, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Fire alarm | (Item/Sound/Named-object-sound/Alarm, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Click | (Item/Sound/Named-object-sound/Click, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Click/ABR | (Item/Sound/Named-object-sound/Click, Attribute/Sensory/Auditory) [ABR is too jargony and not a sound-- don’t tag]
+
+Sensory presentation/Auditory/Tone | (Item/Sound/Musical-sound/Tone, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Siren | (Item/Sound/Named-object-sound/Siren, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Music | (Item/Sound/Musical-sound, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Music/Chord sequence | (Item/Sound/Musical-sound, Attribute/Organizational/Sequence, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Music/Vocal | (Item/Sound/Music, Item/Sound/Musical-sound/Vocalized-sound, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Music/Instrumental | (Item/Sound/Musical-sound/Instrumental-sound, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Music/Tone | (Item/Sound/Musical-sound/Tone, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Music/Genre | (Item/Sound/Musical-sound, Attribute/Sensory/Auditory) [Sensory auditory might be omitted as this likely indicates a type of music and should have an attribute. It is too specific belongs in music library]
+
+Sensory presentation/Auditory/Noise | (Item/Sound/Environmental-sound/Noise, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/White | (Item/Sound/Environmental-sound/Noise/White-noise, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Colored | (Item/Sound/Environmental-sound/Noise/Colored-noise, Attribute/Sensory/Auditory)
+
+Sensory presentation/Auditory/Human voice | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Natural/Human, Action/Communicate/Communicate-vocally) [Might use Item/Sound/Musical-sound/Vocalized-sound, particularly if there is no agent or communication explicitly present.]
+
+Sensory presentation/Auditory/Animal voice | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Natural/Animal, Action/Communicate/Communicate-vocally) [Might use Item/Sound/Named-animal-sound, particularly if no agent animal present and the animal is making a recognizable sound.]
+
+Sensory presentation/Auditory/Animal voice/Bird | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Natural/Animal)) [Bird is specific, but you can add as an extension tag. If there is an explicit named animal sound you can use that, particularly if no agent animal present and the animal is making a recognizable sound.]
+
+Sensory presentation/Auditory/Animal voice/Dog | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Natural/Animal) [Dog is specific, but you can add as an extension tag. If there is an explicit named animal sound you can use that, particularly if no agent animal present and the animal is making a recognizable sound.]
+
+Sensory presentation/Auditory/Animal voice/Insect | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Natural/Animal) [Insect is too specific, but you can add as an extension tag. If there is an explicit named animal sound you can use that, particularly if no agent animal present and the animal is making a recognizable sound.]
+
+Sensory presentation/Auditory/Animal voice/Squirrel | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Natural/Animal/Squirrel) [Squirrel is too specific, but you can add as an extension tag. If there is an explicit named animal sound you can use that, particularly if no agent animal present and the animal is making a recognizable sound.]
+
+Sensory presentation/Auditory/Real world | (Item/Sound, Attribute/Sensory/Auditory, Attribute/Environmental/Real-world)
+
+Sensory presentation/Auditory/Real world/Pedestrian | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Move/Move-leg-foot))
+
+Sensory presentation/Auditory/Real world/Footsteps | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Move/Move-leg-foot/Step))
+
+Sensory presentation/Auditory/Real world/Footsteps/Walking | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Move/Move-leg-foot/Walk))
+
+Sensory presentation/Auditory/Real world/Footsteps/Running | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Move/Move-leg-foot/Run))
+
+Sensory presentation/Auditory/Real world/Noisemaker | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Machine/Noisemaker)
+
+Sensory presentation/Auditory/Real world/Construction noise | ((Item/Sound/Environmental-sound, Attribute/Sensory/Auditory), (Attribute/Environmental/Real-world, Item/Object/Man-made/Device/Machine)) [May need to extend Environmental-sound if important.]
+
+Sensory presentation/Auditory/Real world/Machine | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Device/Machine)
+
+Sensory presentation/Auditory/Real world/Vehicle | ((Item/Sound, Attribute/Sensory/Auditory
+), Item/Object/Man-made/Vehicle)
+
+Sensory presentation/Auditory/Real world/Vehicle/Horn | ((Item/Sound/Named-object-sound/Horn, Attribute/Sensory/Auditory) Item/Object/Man-made/Vehicle)
+
+Sensory presentation/Auditory/Real world/Vehicle/Aircraft | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Vehicle/Aircraft)
+
+Sensory presentation/Auditory/Real world/Vehicle/Aircraft/Airplane | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Vehicle/Aircraft), [Extend with Airplane if necessary.]
+
+Sensory presentation/Auditory/Real world/Vehicle/Aircraft/Helicopter | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Vehicle/Aircraft) [Extend with Helicopter if necessary]
+
+Sensory presentation/Auditory/Real world/Vehicle/Train | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Vehicle/Train)
+
+Sensory presentation/Auditory/Real world/Vehicle/Cart | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Vehicle/Cart)
+
+Sensory presentation/Auditory/Real world/Vehicle/Car alarm | ((Item/Sound/Named-object-sound/Alarm, Attribute/Sensory/Auditory),
+Item/Object/Man-made/Vehicle/Car)
+
+Sensory presentation/Auditory/Real world/Vehicle/Car | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Vehicle/Car)
+
+Sensory presentation/Auditory/Real world/Vehicle/Bicycle | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Vehicle/Bicycle)
+
+Sensory presentation/Auditory/Nonverbal vocal | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Communicate/Communicate-vocally)) [Can also use Item/Sound/Musical-sound/Vocalized-sound if no agent involved]
+
+Sensory presentation/Auditory/Nonverbal vocal/Emotional | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, (Action/Communicate/Communicate-vocally, Attribute/Agent-related/Emotional)))
+
+Sensory presentation/Auditory/Nonverbal vocal/Emotional/Crying | ((Item/Sound,  Attribute/Sensory/Auditory), (Item/Object/Natural/Human, (Action/Communicate/Communicate-vocally/Cry, Attribute/Agent-related/Emotional)))
+
+Sensory presentation/Auditory/Nonverbal vocal/Emotional/Sighing | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Natural/Human, (Action/Communicate/Communicate-vocally/Sigh, Attribute/Agent-related/Emotional)))
+
+Sensory presentation/Auditory/Nonverbal vocal/Gulp | (Item/Sound, Item/Object/Natural/Human, Action/Communicate/Communicate-vocally/Gulp), Attribute/Sensory/Auditory
+
+Sensory presentation/Auditory/Nonverbal vocal/Gurgle | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Move/Move-head/Move-mouth/Gurgle))
+
+Sensory presentation/Auditory/Nonverbal vocal/Sneeze  | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Move/Move-head/Move-mouth/Sneeze))
+
+Sensory presentation/Auditory/Nonverbal vocal/Cough | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Move/Move-head/Move-mouth/Cough))
+
+Sensory presentation/Auditory/Nonverbal vocal/Yawn | ((Item/Sound, Attribute/Sensory/Auditory), (Item/Object/Natural/Human, Action/Move/Move-head/Move-mouth/Yawn))
+
+Sensory presentation/Auditory/Nonvocal | (Item/Sound, Attribute/Sensory/Auditory) [Use additional tags to describe specific sound]
+
+Sensory presentation/Auditory/Nonvocal/Engine | ((Item/Sound, Attribute/Sensory/Auditory), Item/Object/Man-made/Device/Engine)
+
+Sensory presentation/Olfactory | Attribute/Sensory/Olfactory
+
+Sensory presentation/Taste | Attribute/Sensory/Gustatory
+
+Sensory presentation/Tactile | Attribute/Sensory/Tactile
+
+Sensory presentation/Visual | Attribute/Sensory/Visual
+
+Sensory presentation/Visual/Rendering type | (Item/Object/Man-made/Device/IO-device/Output-device/Display, Attribute/Sensory/Visual)
+
+Sensory presentation/Visual/Rendering type/Screen | (Item/Object/Man-made/Device/IO-device/Output-device/Display/Screen, Attribute/Sensory/Visual)
+
+Sensory presentation/Visual/Rendering type/Screen/Head-mounted display | (Item/Object/Man-made/Device/IO-device/Output-device/Display/Screen, Attribute/Sensory/Visual)
+
+**** View port   too technical
+***** ID    unnecessary, use a general ID tag
+**** 2D    Item/Object/Man-made/Device/Display/2D view
+**** 3D  Item/Object/Man-made/Device/Display/3D view
+
+Sensory presentation/Visual/Rendering type/Screen/Movie |  ((Item/Object/Man-made/Visualization/Movie, Attribute/Sensory/Visual), Item/Object/Man-made/Device/IO-device/Output-device/Display/Screen)
+
+Sensory presentation/Visual/Rendering type/Screen/Movie/Video-tape |
+((Item/Object/Man-made/Visualization/Movie, Attribute/Sensory/Visual), Item/Object/Man-made/Device/IO-device/Output-device/Display/Tape-recording)
+
+Sensory presentation/Visual/Rendering type/Screen/Movie/Motion-capture | ((Item/Object/Man-made/Visualization/Movie, Attribute/Sensory/Visual), Item/Object/Man-made/Device/IO-device/Output-device/Recording-device/Motion-capture)
+
+Sensory presentation/Visual/Rendering type/Screen/Movie/Motion-capture/Point light | ((Item/Object/Man-made/Visualization/Point-light-visualization, Attribute/Sensory/Visual), Item/Object/Man-made/Device/IO-device/Output-device/Recording-device/Motion-capture)
+
+Sensory presentation/Visual/Rendering type/Screen/Movie/Motion-capture/Stick figure | ((Item/Object/Man-made/Visualization/Stick-figure-visualization, Attribute/Sensory/Visual), Item/Object/Man-made/Device/IO-device/Output-device/Recording-device/Motion-capture)
+
+Sensory presentation/Visual/Rendering type/Screen/Movie/Motion-capture/Outline  | ((Item/Object/Man-made/Visualization/Outline-visualization, Attribute/Sensory/Visual), Item/Object/Man-made/Device/IO-device/Output-device/Recording-device/Motion-capture)
+
+Sensory presentation/Visual/Rendering type/Screen/Movie/Flickering | ((Item/Object/Man-made/Visualization/Movie, Attribute/Sensory/Visual, Attribute/Relational/Spatiotemporal-relation/Flickering), Item/Object/Man-made/Device/IO-device/Output-device/Display/Screen)
+
+Sensory presentation/Visual/Rendering type/Screen/Movie/Steady state  ((Item/Object/Man-made/Visualization/Movie, Attribute/Sensory/Visual, Attribute/Relational/Spatiotemporal-relation/Constant), Item/Object/Man-made/Device/IO-device/Output-device/Display/Screen)
+
+Sensory presentation/Visual/Rendering type/Real-world  | (Attribute/Sensory/Visual, Attribute/Environmental/Real-world)
+
+Sensory presentation/Visual/Rendering type/LED  too specific
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+Attribute | Attribute
+
+Attribute/Onset | (Attribute/Informational/Label/XXX, Attribute/Spatiotemporal/Temporal/Onset)  [XXX is a defined label.]
+
+Attribute/Offset | (Attribute/Informational/Label/XXX, Attribute/Spatiotemporal/Temporal/Offset)  [XXX is a defined label.]
+
+Attribute/Imagined | Attribute/Task-related/Imagined
+
+Attribute/State ID/# | Attribute/Informational/ID/# [Grouped with additional attributes to identify the state]
+
+Attribute/Repetition/# | Attribute/Quantitative/Repetition/#
+
+Attribute/Temporal rate/# | Attribute/Spatiotemporal/Rate/#
+
+Attribute/Condition/#  | (Attribute/Organizational/Definition, Attribute/Organizational/Condition, Attribute/Informational/Label/XXX, YYY) [XXX is the label of the defined condition. YYY tags the condition.]
+
+Attribute/Action judgment | Attribute/Task-related/Action-judgment
+
+Attribute/Action judgment/Correct | (Attribute/Task-related/Action-judgment, Attribute/Categorical/Correct)
+
+Attribute/Action judgment/Incorrect | (Attribute/Task-related/Action-judgment, Attribute/Categorical/Incorrect)
+
+Attribute/Action judgment/Indeterminate | (Attribute/Task-related/Action-judgment, Attribute/Task-related/Indeterminate)
+
+Attribute/Action judgment/Time out | (Attribute/Task-related/Action-judgment, Attribute/Spatiotemporal/Temporal/Time-out)
+
+
+Attribute/Action judgment/Time out/Missed | (Attribute/Task-related/Action-judgment, Attribute/Task-related/Missed)
+
+Attribute/Action judgment/Inappropriate | (Attribute/Task-related/Action-judgment, Attribute/Task-related/Inappropriate)
+
+Attribute/Response start delay/# | Attribute/Spatiotemporal/Temporal/Response-start-delay/#
+
+Attribute/Response end delay | Attribute/Spatiotemporal/Temporal/Response-end-delay/#
+
+Attribute/Social | Attribute/Agent-related/Social
+
+Attribute/Peak | [Peak velocity or  acceleration or jerk]
+Attribute/Object side | [Could be the left,  right, or both sides of a person or a vehicle]
+Attribute/Object side/Reference object ID | Use Attribute/Informational/ID with additional attributes and label
+Attribute/Object side/Right |
+Attribute/Object side/Left |
+Attribute/Object side/Front |
+Attribute/Object side/Back |
+Attribute/Object side/Top |
+Attribute/Object side/Bottom |
+Attribute/Object side/Starboard | too specific put in transportation library
+Attribute/Object side/Port | too specific put in transportation library
+Attribute/Object side/Passenger side | [Side of a car]    too specific put in transportation library
+Attribute/Object side/Driver side | [Side of a car]    too specific put in transportation library
+Attribute/Object side/Bow | [Front of a ship]     too specific put in transportation library
+Attribute/Object side/Stern | [Back of the ship]    too specific put in transportation library
+
+Attribute/Direction | Attribute/Spatiotemporal/Spatial/Direction
+
+Attribute/Direction/Top | [Combine Attribute/Direction/Top and Attribute/Direction/Left to mean the upper left]
+Attribute/Direction/Bottom |
+Attribute/Direction/Left |
+Attribute/Direction/Right |
+Attribute/Direction/Angle | [Clockwise angle in degrees from vertical]
+Attribute/Direction/North |
+Attribute/Direction/South |
+Attribute/Direction/East |
+Attribute/Direction/West |
+Attribute/Direction/Forward | [Like a car moving forward]
+Attribute/Direction/Backward | [Like a car moving backward]
+
+Attribute/Location | Attribute/Spatiotemporal/Spatial/Location
+
+Attribute/Location/Screen | specify Item/Object/Man-made/Display/Screen with Location attributes
+Attribute/Location/Screen/Center |
+Attribute/Location/Screen/Top |
+Attribute/Location/Screen/Bottom |
+Attribute/Location/Screen/Left |
+Attribute/Location/Screen/Right |
+Attribute/Location/Screen/Angle |
+Attribute/Location/Screen/Center displacement |
+Attribute/Location/Screen/Center displacement/Horizontal |
+Attribute/Location/Screen/Center displacement/Vertical |
+
+Attribute/Location/Lane | too specific put in transportation library
+Attribute/Location/Lane/Rightmost | too specific put in transportation library
+Attribute/Location/Lane/Leftmost | too specific put in transportation library
+Attribute/Location/Lane/Right of expected | too specific put in transportation library
+Attribute/Location/Lane/Left of expected | too specific put in transportation library
+Attribute/Location/Lane/Cruising | too specific put in transportation library
+Attribute/Location/Lane/Passing | too specific put in transportation library
+Attribute/Location/Lane/Oncoming | too specific put in transportation library
+
+Attribute/Location/Real-world coordinates |
+Attribute/Location/Real-world coordinates/Room |
+Attribute/Location/Real-world coordinates/Room/xyz | [have Attribute/Location/Real-world coordinates/Room/xyz/[10 50 30]]
+
+Attribute/Location/Reference frame |
+Attribute/Location/Reference frame |Specified absolute reference
+Attribute/Location/Reference frame/Relative to participant |
+Attribute/Location/Reference frame/Relative to participant/Participant ID |use ID with modifiers
+Attribute/Location/Reference frame/Relative to participant/Left |
+Attribute/Location/Reference frame/Relative to participant/Front |
+Attribute/Location/Reference frame/Relative to participant/Right |
+Attribute/Location/Reference frame/Relative to participant/Back |
+Attribute/Location/Reference frame/Relative to participant/Distance |
+Attribute/Location/Reference frame/Relative to participant/Distance/Near |
+Attribute/Location/Reference frame/Relative to participant/Distance/Moderate |
+Attribute/Location/Reference frame/Relative to participant/Distance/Far |
+Attribute/Location/Reference frame/Relative to participant/Azimuth |
+Attribute/Location/Reference frame/Relative to participant/Elevation |
+Attribute/Object orientation
+Attribute/Object orientation/Rotated
+Attribute/Object orientation/Degrees
+
+Attribute/Size | Attribute/Spatiotemporal/Spatial/Size
+
+Attribute/Size/Length | Attribute/Spatiotemporal/Spatial/Size/Length
+
+Attribute/Size/Width | Attribute/Spatiotemporal/Spatial/Size/Width
+
+Attribute/Size/Height | Attribute/Spatiotemporal/Spatial/Size/Height
+
+Attribute/Size/Area | Attribute/Spatiotemporal/Spatial/Size/Area
+
+Attribute/Size/Volume | Attribute/Spatiotemporal/Spatial/Size/Volume
+
+Attribute/SizeAngle
+
+Attribute/Item-count/#  | Attribute/Quantitative/Item-count/#
+
+Attribute/Item-count/<=# | (Attribute/Relational/Less-than-or-equal to, Attribute/Quantitative/Item-count/#)
+
+Attribute/Item-count/ >=# | (Attribute/Relational/Greater-than-or-or-equal to,  Attribute/Quantitative/Item-count/#)
+
+Attribute/Auditory | Attribute/Sensory/Auditory
+
+Attribute/Auditory/Frequency/# | Attribute/Sensory/Auditory/Frequency/#
+
+Attribute/Auditory/Loudness/# | Attribute/Sensory/Auditory/Loudness/#
+
+Attribute/Auditory/Ramp up | Attribute/Sensory/Auditory/Ramp-up
+
+Attribute/Auditory/Ramp down | Attribute/Sensory/Auditory/Ramp-down
+
+Attribute/Blink | (Event/Data-feature, Action/Move/Move-head/Move-eyes/Blink)
+
+Attribute/Blink/Time shut/# | ((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_TimeShut)
+
+Attribute/Blink/Duration/# | ((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_Duration)
+
+Attribute/Blink/PAVR | ((Event/Data-feature, Attribute/Quantitative/Ratio/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_PAVR)
+
+Attribute/Blink/NAVR | ((Event/Data-feature, Attribute/Quantitative/Ratio/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_NAVR)
+
+Attribute/Visual | Attribute/Sensory/Visual
+
+Attribute/Visual/Bistable |
+Attribute/Visual/Background |
+Attribute/Visual/Foreground |
+Attribute/Visual/Up-down separated | [Stimuli presented both at the top and the bottom of fovea]
+Attribute/Visual/Bilateral | [For bilateral visual field stimulus presentations]
+Attribute/Visual/Motion |
+Attribute/Visual/Motion/Down |
+Attribute/Visual/Motion/Up |
+Attribute/Visual/Motion/Horizontal |
+Attribute/Visual/Motion/Horizontal/Right |
+Attribute/Visual/Motion/Horizontal/Left |
+Attribute/Visual/Motion/Oblique |
+Attribute/Visual/Motion/Oblique/Clock face |
+Attribute/Visual/Fixation point |
+
+Attribute/Visual/Luminance | Attribute/Sensory/Visual/Luminance
+
+Attribute/Visual/Color | Attribute/Sensory/Visual/Color
+
+Attribute/Visual/Color/Dark | Attribute/Sensory/Color/Color-shade/Dark-shade
+
+Attribute/Visual/Color/Light | Attribute/Sensory/Color/Color-shade/Light-shade
+
+Attribute/Visual/Color/Aqua | Attribute/Sensory/Color/CSS-color/Cyan-color/Aqua
+
+Attribute/Visual/Color/Black | Attribute/Sensory/Color/CSS-color/Gray-color/Black
+
+Attribute/Visual/Color/Fuchsia | Attribute/Sensory/Color/CSS-color/Purple-color/Fuchsia
+
+Attribute/Visual/Color/Gray | Attribute/Sensory/Color/CSS-color/Gray-color/Gray
+
+Attribute/Visual/Color/Lime | Attribute/Sensory/Color/CSS-color/Green-color/Lime
+
+Attribute/Visual/Color/Maroon | Attribute/Sensory/Color/CSS-color/Brown-color/Maroon
+
+Attribute/Visual/Color/Navy | Attribute/Sensory/Color/CSS-color/Blue-color/Navy
+
+Attribute/Visual/Color/Olive | Attribute/Sensory/Color/CSS-color/Brown-color/Olive
+
+Attribute/Visual/Color/Purple | Attribute/Sensory/Color/CSS-color/Purple-color/Purple
+
+Attribute/Visual/Color/Silver | Attribute/Sensory/Color/CSS-color/Gray-color/Silver
+
+Attribute/Visual/Color/Teal | Attribute/Sensory/Color/CSS-color/Green-color/Teal
+
+Attribute/Visual/Color/White | Attribute/Sensory/Color/CSS-color/White-color/White
+
+Attribute/Visual/Color/Yellow | Attribute/Sensory/Color/CSS-color/Yellow-color/Yellow
+
+Attribute/Visual/Color/Red | Attribute/Sensory/Color/CSS-color/Red-color/Red
+
+Attribute/Visual/Color/Blue | Attribute/Sensory/Color/CSS color/Blue-color/Blue
+
+Attribute/Visual/Color/Green | Attribute/Sensory/Color/CSS-color/Green-color/Green
+
+Attribute/Visual/Color/Hue | Attribute/Sensory/Color/HSV-color/Hue
+
+Attribute/Visual/Color/Saturation | Attribute/Sensory/Color/HSV-color/Saturation
+
+Attribute/Visual/Color/Value | Attribute/Sensory/Color/HSV-color/HSV-value
+
+Attribute/Visual/Color/Achromatic | Attribute/Sensory/Color/Grayscale
+
+* Nonlinguistic [Conveys meaning without using words such as the iconic pictures of a man]
+* Semantic [Like in priming or in congruence]
+
+Attribute/Language | Item/Language
+
+Attribute/Language/Unit  | Item/Language
+
+Attribute/Language/Unit/Phoneme | Item/Language/Phoneme
+
+Attribute/Language/Unit/Syllable | Item/Language/Syllable
+
+Attribute/Language/Unit/Word | Item/Language/Word
+
+Attribute/Language/Unit/Word/Noun | Item/Language/Word [Extend if necessary]
+
+Attribute/Language/Unit/Word/Noun/Proper | Item/Language/Word [Extend if necessary]
+
+Attribute/Language/Unit/Word/Noun/Common | Item/Language/Word  [Extend if necessary]
+
+Attribute/Language/Unit/Word/Verb | Item/Language/Word  [Extend if necessary]
+
+Attribute/Language/Unit/Word/Adjective | Item/Language/Word  [Extend if necessary]
+
+Attribute/Language/Unit/Word/Pseudoword | Item/Language/Nonword
+
+Attribute/Language/Unit/Sentence | Item/Language/Sentence
+
+Attribute/Language/Unit/Sentence/Full | Item/Language/Sentence
+
+Attribute/Language/Unit/Sentence/Partial | (Item/Language/Sentence, Attribute/Relational/Connective relation/Part of)
+
+Attribute/Language/Unit/Paragraph | Item/Language/Textblock
+
+Attribute/Language/Unit/Story | too specific -- belongs in a linguistic library
+Attribute/Language/Family | unnecessary
+Attribute/Language/Family/Asian | too specific, belongs in a linguistic library
+Attribute/Language/Family/Asian/Chinese | too specific, belongs in a linguistic library
+Attribute/Language/Family/Asian/Japanese | too specific, belongs in a linguistic library
+Attribute/Language/Family/Latin | too specific, belongs in a linguistic library
+Attribute/Language/Family/Latin/English | too specific, belongs in a linguistic library
+Attribute/Language/Family/Latin/German | too specific, belongs in a linguistic library
+Attribute/Language/Family/Latin/French | too specific, belongs in a linguistic library
+
+* Induced | [Such as inducing emotions or keeping someone awake or in a coma]
+
+Attribute/Emotional | Attribute/Agent-related/Emotional-state [Should also indicate the role and type of agent]
+
+Attribute/Emotional/Arousal | Attribute/Agent-related/Emotional-state/Aroused [Should also indicate the role and type of agent]
+
+Attribute/Emotional/Positive valence | (Attribute/Agent-related/Emotional-state, Attribute/Categorical/Positive) [Should also indicate the role and type of agent]
+
+Attribute/Emotional/Negative valence | (Attribute/Agent-related/Emotional-state, Attribute/Categorical/Negative) [Should also indicate the role and type of agent]
+
+
+Attribute/Priming | Attribute/Task-related/Priming
+
+Attribute/Priming/Motoric | use Priming with Action
+Attribute/Priming/Emotional | use Priming with Emotional
+Attribute/Priming/Perceptual | use Priming with Sensory
+
+Attribute/Subliminal | Attribute/Categorical/Subliminal
+
+Attribute/Subliminal/Unmasked | (Attribute/Categorical/Subliminal, Attribute/Task-related/Unmasked)
+
+Attribute/Subliminal/Masked | (Attribute/Categorical/Subliminal, Attribute/Task-related/Masked, Attribute/Relational/Temporal-relation/Before)
+
+Attribute/Subliminal/Masked/Forward |  (Attribute/Categorical/Subliminal, Attribute/Task-related/Masked, Attribute/Relational/Temporal-relation/After)
+
+Attribute/Subliminal/Masked/Backward | (Attribute/Categorical/Subliminal, Attribute/Task-related/Masked)
+
+
+Attribute/Supraliminal | Attribute/Categorical/Supraliminal
+
+Attribute/Liminal | Attribute/Categorical/Liminal
+
+Attribute/Probability | Attribute/Quantitative/Probability
+
+Attribute/Temporal uncertainty | Attribute/Quantitative/Uncertainty
+Attribute/Temporal uncertainty/Standard deviation | [implies that the distribution of temporal uncertainty is Gaussian ]
+
+Attribute/Presentation | (Attribute/Sensory, Attribute/Task-related)
+
+Attribute/Presentation/Fraction | Attribute/Quantitative/Fraction
+
+Attribute/Presentation/Cued | Attribute/Task-related/Cued
+
+Attribute/Presentation/Background | Attribute/Task-related/Background
+
+Attribute/Intended-effect | Attribute/Task-related/Intended-effect
+Attribute/Instruction | Event/Experiment-control/Instruction
+Attribute/Participant indication | [This tag used to specify the type of cognitive effect the participant has]
+Attribute/Path |  too specific
+Attribute/Path/Velocity | Attribute/Spatiotemporal/Velocity
+Attribute/Path/Acceleration | Attribute/Spatiotemporal/Acceleration
+Attribute/Path/Jerk | Attribute/Spatiotemporal/Jerk rate
+Attribute/Path/Constrained | We might need this--- not in the context of path, but more generally
+
+Attribute/File | (Item/Object/Man-made/Device/IO device/Recording device/File recording, Attribute/Informational/Metadata, Attribute/Informational)
+
+Attribute/File/Name | (Item/Object/Man-made/Device/IO device/Recording device/File recording, Attribute/Informational/Metadata, Attribute/Informational)
+
+Attribute/File/Size |  (Item/Object/Man-made/Device/IO device/Recording device/File recording, Attribute/Informational/Metadata, Attribute/Informational)
+
+
+Attribute/Object control | [Specifies control such as for a vehicle] We only have actions for people issue
+Attribute/Object control/Perturb |
+Attribute/Object control/Collide |
+Attribute/Object control/Near miss | too specific put in transportation library
+Attribute/Object control/Correct position | too specific put in transportation library
+Attribute/Object control/Halt | too specific put in transportation library
+Attribute/Object control/Brake | too specific put in transportation library
+Attribute/Object control/Shift lane | too specific put in transportation library
+Attribute/Object control/Cross | too specific put in transportation library
+Attribute/Object control/Pass | by too specific put in transportation library
+Attribute/Object control/Accelerate | tag with Acceleration     Attribute/Categorical/Increasing
+Attribute/Object control/Decelerate |  tag with Acceleration     Attribute/Categorical/Decreasing
+
+Attribute/Association | Attribute/Role/Association
+
+Attribute/Association/Another person | Attribute/RoleAssociation/Associated-with-others
+
+Attribute/Association/Same person | Attribute/RoleAssociation/Associated-with-self
+
+Attribute/Extraneous | Attribute/Task-related/Extraneous
+
+Attribute/Role | Attribute/Role
+
+Attribute/Role/Leader | Attribute/Role/Leader
+
+Attribute/Role/Follower | Attribute/Role/Follower
+
+---------------------------------------------------------------------------------------------------------------------
+
+Action   Action
+
+Action/Involuntary | (Action, Attribute/Descriptive/Involuntary)
+
+Action/Involuntary/Hiccup | Action/Move/Move-head/Move-mouth/Hiccup
+
+Action/Involuntary/Cough | Action/Move/Move-head/Move-mouth/Cough
+
+Action/Involuntary/Sneeze | Action/Move/Move-head/Move-mouth/Sneeze
+
+Action/Involuntary/Stumble | Action/Move/Move-full-body/Stumble
+
+Action/Involuntary/Fall | Action/Move/Move-full-body/Fall-down
+
+Action/Involuntary/Tether Jerk | Action/Move/Move-full-body/Jerk
+
+Action/Involuntary/Clear Throat | Action/Move/Move-head/Move-mouth/Clear-throat
+
+Action/Involuntary/Yawn | Action/Move/Move-head/Move-mouth/Hiccup
+
+Action/Involuntary/Sniffle | Action/Move/Move-head/Move-mouth/Sniffle
+
+Action/Involuntary/Burp | Action/Move/Move-head/Move-mouth/Burp
+
+Action/Involuntary/Drop | Action/Move/Move-arm-hand/Drop
+
+Action/Make fist | Action/Move/Move-arm-hand/Make-fist
+
+Action/Make fist/Open and close | (Action/Move/Move-arm-hand/Make-fist, Attribute/Relational/Spatiotemporal-relation/Repetitive)
+
+Action/Curl toes | Action/Move/Move-leg-foot/Curl-toes
+
+Action/Curl toes/Open and close | (Action/Move/Move-leg-foot/Curl-toes, Attribute/Relational/Spatiotemporal-relation/Repetitive)
+
+Action/Button press | (Action/Move/Move arm-hand/Press, Item/Object/Man-made/Device/IO-device/Input-device/Button)
+
+Action/Button press/Touch screen | (Action/Move/Move-arm-hand/Press,  Item/Object/Man-made/Device/IO-device/Input-device/Touch-screen)
+
+Action/Button press/Keyboard | (Action/Move/Move-arm-hand/Press,  Item/Object/Man-made/Device/IO-device/Input-device/Keyboard)
+
+Action/Button press/Mouse |  (Action/Move/Move-arm-hand/Press,  Item/Object/Man-made/Device/IO-device/Input-device/Mouse)
+
+Action/Button press/Joystick |  (Action/Move/Move-arm-hand/Press,  Item/Object/Man-made/Device/IO-device/Input-device/Joystick)
+
+Action/Button hold | (Action/Move/Move-arm-hand/Hold-down,  Item/Object/Man-made/Device/IO-device/Input-device/Button)
+
+Action/Button release | (Action/Move/Move-arm-hand/Release,  Item/Object/Man-made/Device/IO-device/Input-device/Button)
+
+
+Action/Cross boundary |
+Action/Cross boundary/Arrive |
+Action/Cross boundary/Depart |
+
+Action/Speech | Action/Communicate/Communicate-verbally/Speak
+
+Action/Hum | Action/Communicate/Communicate-musically/Hum
+
+Action/Eye saccade | Action/Move/Move-head/Move-eyes/Saccade
+
+Action/Eye fixation | Action/Move/Move-head/Move-eyes/Fixate
+
+Action/Eye blink | Action/Move/Move-head/Move-eyes/Blink
+
+Action/Eye blink/Left base/# | ((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_LeftBase)
+
+Action/Eye blink/Left zero/# | ((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_LeftZero)
+
+Action/Eye blink/Left half height/# | ((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_LeftHalfHeight)
+
+Action/Eye blink/Max | ((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_BlinkMax)
+
+Action/Eye blink/Right half height |((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_RightHalfHeight)
+
+
+Action/Eye blink/Right zero | ((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_RightZero)
+
+Action/Eye blink/Right base | ((Event/Data-feature, Attribute/Spatiotemporal/Temporal/Temporal-value/#), Action/Move/Move-head/Move-eyes/Blink, Attribute/Label/Blinker_RightBase)
+
+
+Action/Eye close | Action/Move/Move-head/Move-eyes/Close-eyes
+
+Action/Eye close/Keep | Action/Move/Move-head/Move-eyes/Close-eyes [Define either with duration or using a definition with Onset and Offset]
+
+Action/Eye open | Action/Move/Move-head/Move-eyes/Open eyes
+
+Action/Eye open/Keep | Action/Move/Move-head/Move-eyes/Open-eyes  [Define either with duration or using a definition with Onset and Offset]
+
+Action/Eye open/Keep/With blinking | Action/Move/Move-head/Move-eyes/Open-eyes, (Action/Move/Move-head/Move-eyes/Blink [Define either with duration or using a definition with Onset and Offset]
+
+Action/Eye open/Keep/Without blinking | (Action/Move/Move-head/Move-eyes/Open-eyes, Action/Move/Move-head/Move-eyes/Inhibit-blinks)
+
+Action/Turn | Action/Move/Move-full-body/Turn
+
+Action/Point | Action/Move/Move-arm-hand/Point
+
+Action/Push | Action/Move/Move-arm-hand/Push
+
+Action/Grab | Action/Move/Move-arm-hand/Grab
+
+Action/Tap | Action/Move/Move-arm-hand/Tap
+
+Action/Lift | Action/Move/Move-arm-hand/Lift
+
+Action/Reach | Action/Move/Move-arm-hand/Reach
+
+Action/Reach/To Grab | Action/Move/Move-arm-hand/Grab
+
+Action/Reach/To Touch | Action/Move/Move-arm-hand/Touch
+
+Action/Course correction | (Action, Attribute/Spatiotemporal/Direction-change)
+
+Action/Interact | (Action, Attribute/Relational/Connective-relation/Interact-with)
+
+Action/Interact/With human |  (Action, (Attribute/Relational/Connective-relation/Interact-with, Item/Object/Natural/Human))
+
+Action/Take survey |
+
+Action/Stretch | Action/Move/Move-full-body/Stretch
+
+Action/Bend | Action/Move/Move-full-body/Bend
+
+Action/Deep breath | (Action/Move/Breathe, Attribute/Categorical/Deep)
+
+Action/Laugh | Action/Communicate/Communicate-verbally/Laugh
+
+Action/Sigh | Action/Communicate/Communicate-verbally/Sigh
+
+Action/Groan | Action/Communicate/Communicate-verbally/Groan
+
+Action/Scratch | Action/Move/Move-arm-hand/Scratch
+
+Action/Switch attention | Action/Think/Switch-attention
+
+Action/Switch attention/Intramodal | (Action/Think/Switch-attention, (Attribute/Sensory/XXX, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/XXX))) [XXX is the sensory modality]
+
+Action/Switch attention/Intramodal/Visual | (Action/Think/Switch-attention, (Attribute/Sensory/Visual, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/Visual)))
+
+Action/Switch attention/Intramodal/Auditory | (Action/Think/Switch-attention, (Attribute/Sensory/Auditory, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/Auditory)))
+
+Action/Switch attention/Intramodal/Taste | (Action/Think/Switch-attention, (Attribute/Sensory/Gustatory, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/Gustatory)))
+
+Action/Switch attention/Intramodal/Smell | (Action/Think/Switch-attention, (Attribute/Sensory/Olfactory, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/Olfactory)))
+
+Action/Switch attention/Intermodal | (Action/Think/Switch-attention, (Attribute/Sensory/YYY, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/XXX)))
+[YYY is the source modality and XXX is the destination modality]
+
+Action/Switch attention/Intermodal/From modality/# | (Action/Think/Switch-attention, (Attribute/Sensory/#, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/XXX))) [XXX is the destination modality]
+
+Action/Switch attention/Intermodal/From modality/Visual | (Action/Think/Switch-attention, (Attribute/Sensory/Visual, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/XXX))) [XXX is the destination modality]
+
+Action/Switch attention/Intermodal/From modality/Auditory | (Action/Think/Switch-attention, (Attribute/Sensory/Auditory, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/XXX))) [XXX is the destination modality]
+
+Action/Switch attention/Intermodal/From modality/Tactile | (Action/Think/Switch-attention, (Attribute/Sensory/Haptic, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/XXX))) [XXX is the destination modality]
+
+Action/Switch attention/Intermodal/From modality/Taste | (Action/Think/Switch-attention, (Attribute/Sensory/Gustatory, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/XXX))) [XXX is the destination modality]
+
+Action/Switch attention/Intermodal/From modality/Smell | (Action/Think/Switch-attention, (Attribute/Sensory/Olfactory (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/XXX))) [XXX is the destination modality]
+
+Action/Switch attention/Intermodal/To modality/# | (Action/Think/Switch-attention, (Attribute/Sensory/YYY, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/#))) [YYY is the source modality]
+
+Action/Switch attention/Intermodal/To modality/Visual | (Action/Think/Switch-attention, (Attribute/Sensory/YYY, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/Visual))) [YYY is the source modality]
+
+Action/Switch attention/Intermodal/To modality/Auditory | (Action/Think/Switch-attention, (Attribute/Sensory/YYY, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/Auditory))) [YYY is the source modality]
+
+Action/Switch attention/Intermodal/To modality/Tactile | (Action/Think/Switch-attention, (Attribute/Sensory/YYY, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/Haptic))) [YYY is the source modality]
+
+Action/Switch attention/Intermodal/To modality/Taste | (Action/Think/Switch-attention, (Attribute/Sensory/YYY, (Attribute/Relational/Connective-relation/From-to, Attribute/Sensory/Gustatory))) [YYY is the source modality]
+
+Action/Switch attention/Intermodal/To modality/Smell | (Action/Think/Switch-attention, (Attribute/Sensory/YYY, (Attribute/Relational/Connective relation/From-to, Attribute/Sensory/Olfactory))) [YYY is the source modality]
+
+Action/Walk | Action/Move/Move-leg-foot/Walk
+
+Action/Walk/Stride | Action/Move/Move-leg-foot/Step
+
+Action/Walk/Faster | (Action/Move/Move-leg-foot/Walk, Attribute/Relational/Spatiotemporal-relation/Increasing)
+
+Action/Walk/Slower | (Action/Move/Move-leg-foot/Walk, Attribute/Relational/Spatiotemporal-relation/Decreasing)
+
+Action/Control vehicle | (Action/Operate, Item/Object/Man-made/Vehicle)
+
+Action/Control vehicle/Drive | too specific use in driving library
+Action/Control vehicle/Drive/Correct | too specific use in driving library
+Action/Control vehicle/Drive/Near miss   too specific use in driving library
+Action/Control vehicle/Drive/Collide   too specific use in driving library
+Action/Control vehicle/Stop  too specific use in driving library
+Action/Control vehicle/Pilot  too specific use in driving library
+Action/Teleoperate   too specific use in driving library but there is an issue with actions
+
+Action/Allow | Action/Think/Allow
+
+Action/Deny | Action/Think/Deny
+
+Action/Step around | (Action/Move/Move-leg-foot/Step, (Attribute/Relational/Positional-relation/Around, XXX)) [XXX is the thing being stepped around)
+
+Action/Step over |  (Action/Move/Move-leg-foot/Step, (Attribute/Relational/Positional-relation/Over, XXX)) [XXX is the thing being stepped over)
+
+Action/Step on | (Action/Move/Move-leg-foot/Step, (Attribute/Relational/Positional-relation/On top of, XXX)) [XXX is the thing being stepped on top of)
+
+Action/Swallow | Action/Move/Move-head/Move-mouth/Swallow
+
+Action/Flex | Action/Move/Move-full-body/Flex
+
+Action/Evade | Action/Think/Evade
+
+Action/Shrug | Action/Communicate/Gesture/Shrug
+
+Action/Dance | Action/Move/Move-full-body/Dance
+
+Action/Open mouth | Action/Move/Move-head/Move-mouth,  Attribute/Relational/Spatiotemporal/Opening
+
+Action/Whistle | Action/Communicate/Communicate-musically/Whistle
+
+Action/Read | Action/Think/Read
+
+Action/Attend | Action/Think/Attend
+
+Action/Recall | Action/Think/Recall
+
+Action/Generate | Action/Think/Generate
+
+Action/Repeat | Action/Think/Repeat
+
+Action/Hold-breath | Action/Move/Breathe/Hold-breath
+
+Action/Breathe | Action/Move/Breathe
+
+Action/Rest | Action/Rest
+
+Action/Count | Action/Think/Count
+
+Action/Move | Action/Move
+
+Action/Move/Upper torso | Action/Move/Move-arms-hands
+
+Action/Move/Lower torso | Action/Move/Move-legs-feet
+
+Action/Move/Whole body | Action/Move/Move-full-body
+
+Action/Speak | Action/Communicate/Communicate-vocally/Speak
+
+Action/Sing | Action/Communicate/Communicate-musically/Sing
+
+Action/Detect | Action/Think/Detect
+
+Action/Name | Action/Think/Name
+
+Action/Smile | Action/Move/Move-head/Move mouth/Smile
+
+Action/Discriminate | Action/Think/Discriminate
+
+Action/Track | Action/ThinkTrack
+
+Action/Encode | Action/Think/Encode
+
+Action/Eye-blink inhibit | Action/Move/Move-head/Move-eyes/Inhibit-blinks
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+Participant  | (Item/Object/Natural/Human, Attribute/Role/Experimental-subject)
+
+Participant/ID | ((Item/Object/Natural/Human, Attribute/Role/Experimental-subject), Attribute/Informational/ID/XXX) [XXX is the participant ID]
+
+Participant/Effect | Attribute/Task-related/Intended-effect)
+
+Participant/Effect/Cognitive/Meaningful | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Meaningful)
+
+Participant/Effect/Cognitive/Not meaningful | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Not-meaningful)
+
+Participant/Effect/Cognitive/Newly learned meaning | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Newly-learned)
+
+ Participant/Effect/Cognitive/Reward | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Rewarding)
+
+Participant/Effect/Cognitive/Reward/Low | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Rewarding, Attribute/Categorical/Low))
+
+Participant/Effect/Cognitive/Reward/Medium | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Rewarding, Attribute/Categorical/Medium))
+
+Participant/Effect/Cognitive/Reward/High | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Rewarding, Attribute/Categorical/High))
+
+Participant/Effect/Cognitive/Penalty | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Penalizing)
+
+Participant/Effect/Cognitive/Penalty/Low | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Penalizing, Attribute/Categorical/Low))
+
+Participant/Effect/Cognitive/Penalty/Medium | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Penalizing, Attribute/Categorical/Medium))
+
+Participant/Effect/Cognitive/Penalty/High | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Penalizing, Attribute/Categorical/High))
+
+Participant/Effect/Cognitive/Error | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Erroneous)
+
+Participant/Effect/Cognitive/Error/Self originated | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Erroneous, Attribute/Role/Association/Associated-with-self))
+
+Participant/Effect/Cognitive/Error/Other originated | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Erroneous, Attribute/Role/Association/Associated-with-other-agents))
+
+Participant/Effect/Cognitive/Error/Other/Human | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Erroneous, Attribute/Role/Association/Associated-with-others))
+
+Participant/Effect/Cognitive/Error/Other/Non-human | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Erroneous, Attribute/Role/Association/Associated-with-non-agents))
+
+Participant/Effect/Cognitive/Error/Expected | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Erroneous, AttributeTask-related/Expected))
+
+Participant/Effect/Cognitive/Error/Unexpected | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Erroneous, AttributeTask-related/Unexpected))
+
+Participant/Effect/Cognitive/Error/Planned | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Erroneous, AttributeTask-related/Planned))
+
+Participant/Effect/Cognitive/Threat  | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Threatening))
+
+Participant/Effect/Cognitive/Threat/To self | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Threatening, Attribute/Role/Association/Associated-with-self))
+
+Participant/Effect/Cognitive/Threat/To others | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Threatening, Attribute/Role/Association/Associated-with-others))
+
+Participant/Effect/Cognitive/Threat/To others/Close | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Threatening, (Attribute/Relational/Positional-relation/Close-to, Attribute/Role/Association/Associated-with-others))
+
+Participant/Effect/Cognitive/Warning | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Warning)
+
+Participant/Effect/Cognitive/Oddball | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Oddball)
+
+Participant/Effect/Cognitive/Oddball | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Oddball)
+
+Participant/Effect/Cognitive/Oddball/One stimulus | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Oddball, Attribute/Quantitative/Item-count/1))
+
+Participant/Effect/Cognitive/Oddball/Two stimuli | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Oddball, Attribute/Quantitative/Item-count/2))
+
+Participant/Effect/Cognitive/Oddball/Three stimuli | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Oddball, Attribute/Quantitative/Item-count/3))
+
+Participant/Effect/Cognitive/Oddball/Silent counting | ((Action/Think/Count, Attribute/Sensory/Auditory/Silent), (Attribute/Task-related/Intended-effect, Attribute/Task-related/Oddball))
+
+Participant/Effect/Cognitive/Oddball/Button pressing for target |
+((Action/Move/Move arm-hand/Press, Item/Object/Man-made/Device/IO-device/Input-device/Button),
+(Attribute/Task-related/Intended-effect, Attribute/Task-related/Target))
+
+Participant/Effect/Cognitive/Oddball/Button pressing for all | ((Action/Move/Move-arm-hand/Press, Item/Object/Man-made/Device/IO-device/Input-device/Button),
+(Attribute/Task-related/Intended-effect, Attribute/Task-related/Oddball))
+
+Participant/Effect/Cognitive/Target | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Target)
+
+Participant/Effect/Cognitive/Non-target |  ((Item/Object/Natural/Human, Attribute/Role/Experimental-subject), (Attribute/Task-related/Intended-effect, Attribute/Task-related/Non-target))
+
+Participant/Effect/Cognitive/Novel | ((Item/Object/Natural/Human, Attribute/Role/Experimental-subject), (Attribute/Task-related/Intended-effect, Attribute/Task-related/Novel))
+
+Participant/Effect/Cognitive/Expected | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Expected)
+
+Participant/Effect/Cognitive/Expected/Standard | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Expected))
+
+Participant/Effect/Cognitive/Expected/Distractor | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Expected, Attribute/Task-related/Distractor))
+
+Participant/Effect/Cognitive/Valid | (Attribute/Task-related/Intended-effect, Attribute/Categorical/Valid)
+
+Participant/Effect/Cognitive/Invalid | (Attribute/Task-related/Intended-effect, Attribute/Categorical/Invalid)
+
+Participant/Effect/Cognitive/Congruence/Congruent | (Attribute/Task-related, Attribute/Categorical/Congruent)
+
+Participant/Effect/Cognitive/Congruence/Incongruent | (Attribute/Task-related, Attribute/Categorical/Incongruent)
+
+Participant/Effect/Cognitive/Congruence/Temporal synchrony/Synchronous | (Attribute/Task-related, Attribute/Spatiotemporal/Temporal/Synchronous)
+
+Participant/Effect/Cognitive/Congruence/Temporal synchrony/Asynchronous |  (Attribute/Task-related, Attribute/Spatiotemporal/Temporal/Asynchronous)
+
+Participant/Effect/Cognitive/Feedback |(Attribute/Task-related/Intended-effect, Attribute/Task-related/Feedback)
+
+Participant/Effect/Cognitive/Feedback/Correct | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Categorical/Correct))
+
+Participant/Effect/Cognitive/Feedback/Incorrect |(Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Categorical/Incorrect))
+
+Participant/Effect/Cognitive/Feedback/Non-informative | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Task-related/Non-informative))
+
+Participant/Effect/Cognitive/Feedback/Expected | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Task-related/Expected))
+
+Participant/Effect/Cognitive/Feedback/Unexpected | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Task-related/Unexpected))
+
+Participant/Effect/Cognitive/Feedback/On accuracy | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback)
+
+Participant/Effect/Cognitive/Feedback/On reaction time | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Spatiotemporal/Response-start-delay))
+
+Participant/Effect/Cognitive/Feedback/To self |  (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Role/Association/Associated-with-self))
+
+Participant/Effect/Cognitive/Feedback/To other | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Role/Association/Associated-with-other-agents))
+
+Participant/Effect/Cognitive/Feedback/Deterministic | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Relational/Spatiotemporal-relation/Deterministic))
+
+Participant/Effect/Cognitive/Feedback/Stochastic | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Relational/Spatiotemporal-relation/Stochastic))
+
+Participant/Effect/Cognitive/Feedback/False feedback | (Attribute/Task-related/Intended-effect, (Attribute/Task-related/Feedback, Attribute/Categorical/False))
+
+Participant/Effect/Cognitive/Feedback/False feedback/Negative | (Attribute/Task-related/Intended-effect, ((Attribute/Task-related/Feedback, Attribute/Categorical/False), Attribute/Categorical/Negative)))
+
+Participant/Effect/Cognitive/Feedback/False feedback/Positive | (Attribute/Task-related/Intended-effect, ((Attribute/Task-related/Feedback, Attribute/Categorical/False), Attribute/Categorical/Positive)))
+
+Participant/Effect/Cognitive/Cue | (Attribute/Task-related/Intended-effect, Attribute/Task-related/Cue)
+
+Participant/Effect/Cognitive/Cue/Constant delay | [The cue is for an event that will happen after a constant delay.]
+Participant/Effect/Cognitive/Cue/Variable delay | [The cue is for an event that will happen after a variable delay.]
+
+Participant/Effect/Visual | Attribute/Sensory/Visual
+
+Participant/Effect/Visual/Foveal |
+Participant/Effect/Visual/Peripheral |
+Participant/Effect/Visual/Perturbation | [Sudden movement or perturbation of the virtual environment]
+
+Participant/Effect/Auditory | Attribute/Sensory/Auditory
+
+Participant/Effect/Auditory/Stereo |
+Participant/Effect/Auditory/Mono |
+Participant/Effect/Auditory/Mono/Left |
+Participant/Effect/Auditory/Mono/Right |
+Participant/Effect/TMS |
+Participant/Effect/TMS/With | SPGS [SPGS stands for spatial position guiding system]
+Participant/Effect/TMS/Without | SPGS [SPGS stands for spatial position guiding system]
+
+Participant/Effect/Tactile | Attribute/Sensory/Tactile
+
+Participant/Effect/Tactile/Vibration |
+Participant/Effect/Tactile/Acupuncture |
+Participant/Effect/Tactile/Eye puff |
+Participant/Effect/Tactile/Swab | [Mouth swab]
+
+Participant/Effect/Vestibular | Attribute/Sensory/Vestibular
+
+Participant/Effect/Vestibular/Shaking | [being shaken or jerked around]
+Participant/Effect/Pain |
+Participant/Effect/Pain/Heat |
+Participant/Effect/Pain/Cold |
+Participant/Effect/Pain/Pressure |
+Participant/Effect/Pain/Electric shock |
+Participant/Effect/Pain/Laser-evoked |
+
+Participant/Effect/Taste | Attribute/Sensory/Gustatory
+
+Participant/Effect/Smell | Attribute/Sensory/Olfactory
+
+Participant/Effect/Body part |  Item/Object/Natural/Human/Body
+
+Participant/Effect/Body part/Whole Body | Item/Object/Natural/Human/Body
+
+Participant/Effect/Body part/Eye | Item/Object/Natural/Human/Head/Face/Eye
+
+Participant/Effect/Body part/Arm | Item/Object/Natural/Human/Body/Arm
+
+Participant/Effect/Body part/Arm/Hand | Item/Object/Natural/Human/Body/Arm/Hand
+
+Participant/Effect/Body part/Arm/Hand/Finger | Item/Object/Natural/Human/Body/Arm/Hand/Finger
+
+Participant/Effect/Body part/Arm/Hand/Finger/Index | Item/Object/Natural/Human/Body/Arm/Hand/Finger/Index-finger
+
+Participant/Effect/Body part/Arm/Hand/Finger/Thumb | Item/Object/Natural/Human/Body/Arm/Hand/Finger/Thumb
+
+Participant/Effect/Body part/Arm/Hand/Finger/Ring | Item/Object/Natural/Human/Body/Arm/Hand/Finger/Ring-finger
+
+Participant/Effect/Body part/Arm/Hand/Finger/Middle | Item/Object/Natural/Human/Body/Arm/Hand/Finger/Middle-finger
+
+Participant/Effect/Body part/Arm/Hand/Finger/Little | Item/Object/Natural/Human/Body/Arm/Hand/Finger/Little-finger
+
+Participant/Effect/Body part/Leg | Item/Object/Natural/Human/Body/Leg
+
+Participant/Effect/Body part/Feet | Item/Object/Natural/Human/Body/Leg/Foot
+
+Participant/Effect/Body part/Feet/Toes | Item/Object/Natural/Human/Body/Leg/Foot/Toe
+
+Participant/Effect/Body part/Head | Item/Object/Natural/Human/Head
+
+Participant/Effect/Body part/Head/Face | Item/Object/Natural/Human/Head/Face
+
+Participant/Effect/Body part/Head/Face/Eyebrow | Item/Object/Natural/Human/Head/Face/Eyebrow
+
+Participant/Effect/Body part/Head/Face/Lip | Item/Object/Natural/Human/Head/Face/Lip
+
+Participant/Effect/Body part/Head/Face/Forehead | Item/Object/Natural/Human/Head/Face/Forehead
+
+Participant/Effect/Body part/Head/Face/Mouth | Item/Object/Natural/Human/Head/Face/Mouth
+
+Participant/Effect/Body part/Head/Face/Nose | Item/Object/Natural/Human/Head/Face/Nose
+
+Participant/Effect/Body part/Head/Face/Chin | Item/Object/Natural/Human/Head/Face/Chin
+
+Participant/Effect/Body part/Head/Face/Cheek | Item/Object/Natural/Human/Head/Face/Cheek
+
+Participant/Effect/Body part/Torso | Item/Object/Natural/Human/Body/Torso
+
+Participant/State | Attribute/Agent-related/Cognitive-state
+
+Participant/State/Level of consciousness | Attribute/Agent-related/Cognitive-state
+
+Participant/State/Level of consciousness/Awake | Attribute/Agent-related/Cognitive-state/Awake
+
+Participant/State/Level of consciousness/Drowsy | Attribute/Agent-related/Cognitive-state/Drowsy
+
+Participant/State/Level of consciousness/Sleep | Attribute/Agent-related/Cognitive-state/Asleep
+
+Participant/State/Level of consciousness/Sleep/Stage | Attribute/Agent-related/Cognitive-state/Asleep
+
+Participant/State/Level of consciousness/Drunk | Attribute/Agent-related/Cognitive-state/Intoxicated
+
+Participant/State/Level of consciousness/Anesthesia | Attribute/Agent-related/Cognitive-state/Anesthesized
+
+Participant/State/Level of consciousness/Locked-in | Attribute/Agent-related/Cognitive-state/Locked-in
+
+Participant/State/Level of consciousness/Coma | Attribute/Agent-related/Cognitive-state/Comatose
+
+Participant/State/Level of consciousness/Vegetative | Attribute/Agent-related/Cognitive-state/Vegatative
+
+Participant/State/Level of consciousness/Brain-dead | Attribute/Agent-related/Cognitive-state/Brain-dead
+
+Participant/State/Emotion | Attribute/Agent-related/Emotional-state
+
+Participant/State/Emotion/Awe | Attribute/Agent-related/Emotional-state/Awed
+
+Participant/State/Emotion/Frustration | Attribute/Agent-related/Emotional-state/Frustrated
+
+Participant/State/Emotion/Joy |Attribute/Agent-related/Emotional-state/Joyful
+
+Participant/State/Emotion/Anger | Attribute/Agent-related/Emotional-state/Angry
+
+Participant/State/Emotion/Happiness | Attribute/Agent-related/Emotional-state/Happy
+
+Participant/State/Emotion/Sadness | Attribute/Agent-related/Emotional-state/Sad
+
+Participant/State/Emotion/Love | Attribute/Agent-related/Emotional-state/Loving
+
+Participant/State/Emotion/Fear | Attribute/Agent-related/Emotional-state/Fearful
+
+Participant/State/Emotion/Compassion | Attribute/Agent-related/Emotional-state/Compassionate
+
+Participant/State/Emotion/Jealousy | Attribute/Agent-related/Emotional-state/Jealous
+
+Participant/State//Emotion/Contentment | Attribute/Agent-related/Emotional-state/Content
+
+Participant/State/Emotion/Grief | Attribute/Agent-related/Emotional-state/Grieving
+
+Participant/State/Emotion/Relief | Attribute/Agent-related/Emotional-state/Relieved
+
+Participant/State/Emotion/Excitement | Attribute/Agent-related/Emotional-state/Excited
+
+Participant/State/Emotion/Disgust | Attribute/Agent-related/Emotional-state/Disgusted
+
+Participant/State/Neutral | [None of the above]
+Participant/State/Sense of community | [Primed to have an emotion such as patriotism]
+Participant/State/Sense of social justice | too specific
+Participant/State/Sense of social justice/Distributive | too specific
+Participant/State/Sense of social justice/Poverty | too specific
+Participant/State/Sense of social justice/Inequality | too specific
+Participant/State/Sense of social justice/Procedural | too specific
+Participant/State/Sense of social justice/Interpersonal | too specific
+Participant/State/Sense of social justice/Informational  too specific
+Participant/State/Stress level | Need way to specify these states
+Participant/State/Task load | too specific
+Participant/State/Under time pressure | too specific
+Participant/State/Under time pressure/Response window | too specific
+Participant/State/Under time pressure/Competitive | too specific
+Participant/State/Social interaction | too specific
+Participant/State/Social/Pseudo | too specific
+Participant/State/Passive | too specific
+
+Participant/State/Resting | Attribute/Agent-related/Cognitive-state/Resting
+
+Participant/State/Attention | Attribute/Agent-related/Cognitive-state/Attentive
+
+Participant/State/Attention/Top-down | [Instructed to pay attention to something explicitly]
+Participant/State/Attention/Bottom-up | [something captures your attention, like a big bang or your name]
+Participant/State/Attention/Bottom-up/Orienting | [The lower state of the bottom-up  or the pre-bottom up state]
+
+Participant/State/Attention/Covert | [Implicit]
+Participant/State/Attention/Overt | [Explicit]
+Participant/State/Attention/Selective | [If you have two circles but asked to pay attention to only one of them]
+Participant/State/Attention/Selective/Divided | [Attending to more than one object or location]
+Participant/State/Attention/Focused | [Paying a lot of attention]
+Participant/State/Attention/Sustained | [Paying attention for a continuous time]
+
+Participant/State/Attention/Auditory | (Attribute/Agent-related/Cognitive-state/Attentive, Attribute/Sensory/Auditory)
+
+Participant/State/Attention/Visual | (Attribute/Agent-related/Cognitive-state/Attentive, Attribute/Sensory/Visual)
+
+Participant/State/Attention/Tactile | (Attribute/Agent-related/Cognitive-state/Attentive, Attribute/Sensory/Tactile)
+
+Participant/State/Attention/Taste | (Attribute/Agent-related/Cognitive-state/Attentive, Attribute/Sensory/Gustatory)
+
+Participant/State/Attention/Smell | (Attribute/Agent-related/Cognitive-state/Attentive, Attribute/Sensory/Olfactory)
+
+Participant/State/Attention/To a location | [Spatial -- use the location attribute to specify to where the attention is directed]
+
+Participant/State/Attention/Arousal | Attribute/Agent-related/Emotional-state/Aroused
+
+Participant/State/Attention/Alerting | Attribute/Agent-related/Cognitive-state/Alert
+
+Participant/State/Attention/Drowsy | Attribute/Agent-related/Cognitive-state/Drowsy
+
+Participant/State/Attention/Excited |  Attribute/Agent-related/Emotional-state/Excited
+
+Participant/State/Attention/Neutral | Attribute/Agent-related/Emotional-state/Emotionally-neutral
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+Experiment context | (Attribute/Informational/Definition,  ((Attribute/Organizational/Context, Attribute/Label/XXX), YYY)) [XXX is the name of an experimental context and YYY is tag string defining the experimental context.]
+
+Experiment context/With chin rest | Attribute/Agent-related/Postural-state/Supported-by-chin-rest [Should be part of a context definition]
+
+Experiment context/Sitting | Attribute/Agent-related/Postural-state/Sitting) [Should be part of a context definition]
+
+Experiment context/Standing | Attribute/Agent-related/Postural-state/Standing[Should be part of a context definition]
+
+Experiment context/Prone | Attribute/Agent-related/Postural-state/Prone [Should be part of a context definition]
+
+Experiment context/Running | (Attribute/Agent-related, Action/Move/Move-leg-foot/Run) [Should be part of a context definition]
+
+Experiment context/Running/Treadmill | (Attribute/Agent-related, (Action/Move/Move-leg-foot/Run, Attribute/Agent-related/Postural-state/On-treadmill)) [Should be part of a context definition]
+
+Experiment context/Walking | (Attribute/Agent-related, Action/Move/Move-leg-foot/Walk) [Should be part of a context definition]
+
+Experiment context/Walking/Treadmill | (Attribute/Agent-related, (Action/Move/Move-leg-foot/Walk, Attribute/Agent-related/Postural-state/On-treadmill )) [Should be part of a context definition]
+
+Experiment context/Indoors | Attribute/Environmental/Indoors [Should be part of a context definition]
+
+Experiment context/Indoors/Clinic |  Attribute/Environmental/Indoors [Extend with Clinic if necessary. Should be part of a context definition]
+
+Experiment context/Outdoors | Attribute/Environmental/Outdoors [Should be part of a context definition]
+
+Experiment context/Outdoors/Terrain | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain)
+
+Experiment context/Outdoors/Terrain/Grass | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain)  [Extend Terrain with Grass if necessary]
+
+
+Experiment context/Outdoors/Uneven | (Attribute/Environmental/Outdoors, Attribute/Environmental/Outdoors/Terrain)  [Extend Terrain if necessary]
+
+Experiment context/Outdoors/Boardwalk | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain)
+
+Experiment context/Outdoors/Dirt | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain) [Extend Terrain with Dirt if necessary]
+
+Experiment context/Outdoors/Leaves | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain) [Extend Terrain with Leaves if necessary]
+
+Experiment context/Outdoors/Mud | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain) [Extend Terrain with Mud if necessary]
+
+Experiment context/Outdoors/Woodchip | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain) [Extend Terrain with Woodchip if necessary]
+
+Experiment context/Outdoors/Rocky | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain) [Extend Terrain with Rocky if necessary]
+
+Experiment context/Outdoors/Gravel | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain) [Extend Terrain with Gravel if necessary]
+
+Experiment context/Outdoors/Downhill | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain) [Extend Terrain with Downhill if necessary]
+
+Experiment context/Outdoors/Uphill | (Attribute/Environmental/Outdoors, Item/Object/Natural/Terrain) [Extend Terrain with Uphill if necessary]
+
+Experiment context/Motion platform | Attribute/Environmental/Motion-platform
+
+Experiment context/Fixed screen | Item/Object/Device/IO-Device/Output-device/Display/Screen
+
+Experiment context/Fixed screen/Distance |  Use Screen with Attribute/Spatiotemporal/Spatial/Distance |
+
+Experiment context/Fixed screen/Width resolution |  Use Screen with Width or Resolution
+
+Experiment context/Fixed screen/Height resolution |  Use Screen with Height or Resolution
+
+Experiment context/Real world | Attribute/Environmental/Real-world
+
+Experiment context/Virtual world | Attribute/Environmental/Virtual-world
