@@ -76,24 +76,63 @@ def create_out_tag(org_tag, new_tag, remainder):
 
     """
     if not new_tag:
-        return f"{org_tag} [Missing]"
-
-    if remainder:
+        new_tag = f"{org_tag} [Missing]"
+    elif remainder:
         if "XXX" in new_tag:
-            return f"{new_tag} - Original tag is {{{org_tag}}}"
-        if "#" in new_tag:
-            # Remove leading slash from remainder
-            remainder = remainder[1:]
-            new_tag = new_tag.replace("#", remainder)
-            return new_tag
-        return new_tag + remainder
-    else:
-        return new_tag
+            # Handle "special case" where XXX tag ends with a ].  This should be all instances involving XXX.
+            if new_tag.endswith(']'):
+                found_starting_bracket = new_tag.rfind('[')
+                if found_starting_bracket != -1:
+                    new_tag = f"{new_tag[:-1]}" \
+                              f"- Original tag is {{{org_tag}}}" \
+                              f"]"
+            else:
+                # This is mostly a fallback in case we don't have proper bracketing.
+                new_tag = f"{new_tag} [" \
+                             f"- Original tag is {{{org_tag}}}" \
+                             f"]"
+        else:
+            if "#" in new_tag:
+                # Remove leading slash from remainder
+                remainder = remainder[1:]
+                new_tag = new_tag.replace("#", remainder)
+            else:
+                new_tag = new_tag + remainder
 
+    # Replace brackets with the comment notation.
+    tag_bracket_start = '[--- '
+    tag_bracket_end = ' ---]'
+    if new_tag.endswith(']'):
+        found_starting_bracket = new_tag.rfind('[')
+        if found_starting_bracket != -1:
+            before_bracket = new_tag[:found_starting_bracket]
+            after_bracket = new_tag[found_starting_bracket + 1:-1]
+            new_tag = f"{before_bracket}" \
+                         f"{tag_bracket_start}" \
+                         f"{after_bracket}" \
+                         f"{tag_bracket_end}"
+    return new_tag
 
-def upgrade_file_to_hed3(input_file, mapping_dict):
+def upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None):
+    """
+
+    Parameters
+    ----------
+    input_file : A HedFileInput object
+    mapping_dict : a dictionary of hed2->hed3 upgrades.  Created by read_in_hed3_upgrade_file above
+    tag_columns_to_upgrade : list of column numbers
+        If passed in and non empty, ONLY upgrade these column numbers.  You can also filter out
+        which columns you want to upgrade via the HedFileInput object.
+
+    Returns
+    -------
+
+    """
     for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
         for column_number in column_to_hed_tags_dictionary:
+            if tag_columns_to_upgrade and column_number not in tag_columns_to_upgrade:
+                continue
+
             old_text = column_to_hed_tags_dictionary[column_number]
             old_cleaned_text = remove_slashes_and_spaces(old_text)
             hed_tags = split_hed_string(old_cleaned_text)
@@ -118,8 +157,9 @@ if __name__ == '__main__':
     example_data_path = 'tests/data'   # path to example data
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
 
-    prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
+    # Comment in prefixed_needed_tag_columns if you want to update those columns as well.
+    #prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
-                              column_prefix_dictionary=prefixed_needed_tag_columns,
+                              #column_prefix_dictionary=prefixed_needed_tag_columns,
                               worksheet_name='DAS Events')
-    upgrade_file_to_hed3(input_file, mapping_dict)
+    upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None)
