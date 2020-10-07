@@ -1,9 +1,45 @@
 import os
+import re
 from hed.validator.hed_file_input import HedFileInput
 from hed.utilities.format_util import split_hed_string, remove_slashes_and_spaces
+from hed.utilities.map_schema import MapSchema
+
+def validate_single_tag(map_schema, tag):
+    # Split off the variable suffix
+    if tag.endswith("/XXX"):
+        tag = tag[:-len("/XXX")]
+    elif tag.endswith("/#"):
+        tag = tag[:-len("/#")]
+    elif tag.endswith("/YYY"):
+        tag = tag[:-len("/YYY")]
+
+    # Sometimes these are entirely on their own.  eg: (hed/tag/string/XXX, YYY)
+    if tag == "YYY" or tag == "XXX":
+        return True
+
+    if tag not in map_schema.tag_dict:
+        return False
+    return True
 
 
-def read_in_hed3_upgrade_file(upgrade_filename):
+pattern_split_comment = re.compile("(.*?)(\[.*?\])")
+def split_off_comment(hed_string_with_comment):
+    """Splits off the comment in the [] at the end of a string in an upgrade file.
+          If no comment is present, returns (original string, "")
+    """
+    match = pattern_split_comment.match(hed_string_with_comment)
+    if not match:
+        return hed_string_with_comment, ""
+
+    return match.group(1), match.group(2)
+
+
+def read_in_hed3_upgrade_file(upgrade_filename, left_hed_schema=None, right_hed_schema=None):
+    left_map = right_map = None
+    if left_hed_schema:
+        left_map = MapSchema(left_hed_schema, use_full_name_as_key=True)
+    if right_hed_schema:
+        right_map = MapSchema(right_hed_schema, use_full_name_as_key=True)
     mapping_dict = {}
     with open(upgrade_filename, 'r', encoding='utf-8') as f:
         for line in f:
@@ -11,20 +47,39 @@ def read_in_hed3_upgrade_file(upgrade_filename):
                 while line.endswith('\n'):
                     line = line[:-1]
                 split_segments = line.split('|')
-                if len(split_segments) == 1:
-                    print(f"No split operator '|' found in line: {line}")
+                if len(split_segments) <= 1:
+                    print(f"Warning: No split operator '|' found in line: {line}")
                     continue
                 if len(split_segments) > 2:
-                    print(f"Too many split operators '|' found in line: {line}")
+                    print(f"Warning: Too many split operators '|' found in line: {line}")
                     continue
-                key, value = split_segments
-                if len(value.strip()) < 3:
-                    print(f"No hed3 version of tag found in line: {line}")
+                left_tag, right_string = split_segments
+                if len(right_string.strip()) < 3:
+                    print(f"Warning: No hed3 version of tag found in line: {line}")
                     continue
-                clean_key = key.lower()
-                clean_key = clean_key.strip()
-                value = value.strip()
-                mapping_dict[clean_key] = value
+
+                # Check for comment if needed
+                left_tag = left_tag.lower()
+                left_tag = left_tag.strip()
+                right_string = right_string.strip()
+                right_lower = right_string.lower()
+                right_string_no_comment, comment = split_off_comment(right_lower)
+                if ("XXX" in right_string_no_comment or "YYY" in right_string_no_comment) and not comment:
+                    print(f"Warning: XXX or YYY found in a line with no comment: {line}")
+
+                # Validate tags if we have a schema
+                if left_map is not None:
+                    if not validate_single_tag(left_map, left_tag):
+                        print(f"Warning: Left tag not found in Schema.  {left_tag}")
+                if right_map:
+                    hed_tags = split_hed_string(right_string_no_comment)
+                    for is_hed_tag, (startpos, endpos) in hed_tags:
+                        if is_hed_tag:
+                            hed_tag = right_string_no_comment[startpos:endpos]
+                            if not validate_single_tag(right_map, hed_tag):
+                                print(f"Warning: Right tag not found in Schema.  {hed_tag}  Full line: {right_string}")
+
+                mapping_dict[left_tag] = right_string
 
     return mapping_dict
 
@@ -43,10 +98,8 @@ def find_tag(hed_tag, mapping_dict):
 
     found_slash_index = tag_lower.rfind('/')
 
-    print(hed_tag)
     while found_slash_index != -1:
         temp_tag = tag_lower[:found_slash_index]
-        print(temp_tag)
         pound_sign_tag = f"{temp_tag}/#"
         # first see if the variant with /# on the end exists.  If so, use that tag.
         if pound_sign_tag in mapping_dict:
@@ -75,33 +128,47 @@ def create_out_tag(org_tag, new_tag, remainder):
     -------
 
     """
+    original_tag_is_string = ". Original string is "
     if not new_tag:
         new_tag = f"{org_tag} [Missing]"
     elif remainder:
-        if "XXX" in new_tag:
-            # Handle "special case" where XXX tag ends with a ].  This should be all instances involving XXX.
+        # It's mostly an error if YYY appears without XXX, so we don't really need to check for it.
+        if "XXX" in new_tag or "YYY" in new_tag:
+            # Handle default case where XXX tag ends with a ].  This should be all instances involving XXX.
+            # Fix this duplicate code
             if new_tag.endswith(']'):
                 found_starting_bracket = new_tag.rfind('[')
                 if found_starting_bracket != -1:
                     new_tag = f"{new_tag[:-1]}" \
-                              f"- Original tag is {{{org_tag}}}" \
+                              f"{original_tag_is_string}{{{org_tag}}}" \
                               f"]"
             else:
                 # This is mostly a fallback in case we don't have proper bracketing.
                 new_tag = f"{new_tag} [" \
-                             f"- Original tag is {{{org_tag}}}" \
+                             f"{original_tag_is_string}{{{org_tag}}}" \
                              f"]"
         else:
+            # Direct mapping 1-1 to a # tag.
             if "#" in new_tag:
                 # Remove leading slash from remainder
                 remainder = remainder[1:]
                 new_tag = new_tag.replace("#", remainder)
             else:
-                new_tag = new_tag + remainder
+                # Handle "normal" extension
+                # Fix this duplicate code
+                if new_tag.endswith(']'):
+                    found_starting_bracket = new_tag.rfind('[')
+                    if found_starting_bracket != -1:
+                        new_tag = f"{new_tag[:-1]}" \
+                                  f"{original_tag_is_string}{{{org_tag}}}" \
+                                  f"]"
+                else:
+                    new_tag = new_tag + remainder
 
     # Replace brackets with the comment notation.
     tag_bracket_start = '[--- '
     tag_bracket_end = ' ---]'
+    # Fix this duplicate code
     if new_tag.endswith(']'):
         found_starting_bracket = new_tag.rfind('[')
         if found_starting_bracket != -1:
@@ -152,8 +219,10 @@ def upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None):
 
 
 if __name__ == '__main__':
-    mapping_dict = read_in_hed3_upgrade_file("tests/data/hed2_hed3_conversion.txt")
-
+    hed2_xml_file = "tests/data/HED7.1.1.xml"
+    hed3_xml_file = "tests/data/reduced_hed3.xml"
+    mapping_dict = read_in_hed3_upgrade_file("tests/data/hed2_hed3_conversion.txt",
+                                             left_hed_schema=hed2_xml_file, right_hed_schema=hed3_xml_file)
     example_data_path = 'tests/data'   # path to example data
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
 
@@ -163,3 +232,5 @@ if __name__ == '__main__':
                               #column_prefix_dictionary=prefixed_needed_tag_columns,
                               worksheet_name='DAS Events')
     upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None)
+
+

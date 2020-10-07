@@ -3,56 +3,15 @@ from hed.schema import utils
 from hed.schema import constants
 from hed.utilities import error_reporter
 from hed.utilities import format_util
+from hed.utilities.map_schema import MapSchema
 
-class TagEntry:
-    """This is a single entry in the tag dictionary.
-
-       Keeps track of the human formatted short/long form of each tag.
-    """
-
-    def __init__(self, short_org_tag, long_org_tag):
-        self.short_org_tag = short_org_tag
-        self.long_org_tag = long_org_tag
-        self.long_clean_tag = long_org_tag.lower()
 
 class TagFormat:
     """     Helper class for seeing if a schema has any duplicate tags, and also has functions to convert
         hed strings and tags short<>long
        """
     def __init__(self, hed_xml_file=None, hed_tree=None):
-        self.parent_map = None
-        self.tag_dict = {}
-        self.current_depth_check = []
-        self.tag_name_stack = []
-        self.no_duplicate_tags = True
-
-        if hed_tree is not None:
-            self.process_tree(hed_tree)
-        elif hed_xml_file:
-            hed_tree = parse(hed_xml_file)
-            hed_tree = hed_tree.getroot()
-            self.process_tree(hed_tree)
-
-    def process_tree(self, hed_tree):
-        """Primary setup function.  Takes an XML tree and sets up the mapping dict."""
-        # Create a map so we can go from child to parent easily.
-        self.parent_map = {c: p for p in hed_tree.iter() for c in p}
-        self._reset_tag_compare()
-
-        for elem in hed_tree.iter():
-            if elem.tag == "unitModifiers" or elem.tag == "unitClasses":
-                break
-
-            if elem.tag == "name":
-                # handle special case where text is just "#"
-                if elem.text and "#" in elem.text:
-                    pass
-                else:
-                    nodes_in_parent = self._count_parent_nodes(elem)
-                    while len(self.tag_name_stack) >= nodes_in_parent and len(self.tag_name_stack) > 0:
-                        self.tag_name_stack.pop()
-                    self.tag_name_stack.append(elem.text)
-                    self._add_tag(elem.text, self.tag_name_stack)
+        self.map_schema = MapSchema(hed_xml_file, hed_tree)
 
     def convert_hed_string_to_short(self, hed_string):
         """ Convert a hed string from any form to the shortest.
@@ -68,7 +27,7 @@ class TagFormat:
             -------
                 str: The converted string
         """
-        if not self.no_duplicate_tags:
+        if not self.map_schema.no_duplicate_tags:
             error = error_reporter.report_error_type(error_reporter.INVALID_SCHEMA, hed_string, 0, len(hed_string))
             return hed_string, [error]
 
@@ -110,7 +69,7 @@ class TagFormat:
             -------
                 str: The converted string
         """
-        if not self.no_duplicate_tags:
+        if not self.map_schema.no_duplicate_tags:
             error = error_reporter.report_error_type(error_reporter.INVALID_SCHEMA, hed_string, 0, len(hed_string))
             return hed_string, [error]
 
@@ -182,7 +141,7 @@ class TagFormat:
 
             # If we already found an unknown tag, it's implicitly an extension.  No known tags can follow it.
             if not found_unknown_extension:
-                if tag not in self.tag_dict:
+                if tag not in self.map_schema.tag_dict:
                     found_unknown_extension = True
                     if not found_tag_entry:
                         error = error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND, hed_tag,
@@ -190,7 +149,7 @@ class TagFormat:
                         return hed_tag, error
                     continue
 
-                tag_entry = self.tag_dict[tag]
+                tag_entry = self.map_schema.tag_dict[tag]
                 tag_string = tag_entry.long_clean_tag
                 main_hed_portion = clean_tag[:index_end]
 
@@ -204,10 +163,10 @@ class TagFormat:
                 found_tag_entry = tag_entry
             else:
                 # These means we found a known tag in the remainder/extension section, which is an error
-                if tag in self.tag_dict:
+                if tag in self.map_schema.tag_dict:
                     error = error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE, hed_tag,
                                                              index_start, index_end,
-                                                             self.tag_dict[tag].long_org_tag)
+                                                             self.map_schema.tag_dict[tag].long_org_tag)
                     return hed_tag, error
 
         remainder = hed_tag[found_index_end:]
@@ -251,8 +210,8 @@ class TagFormat:
         # Iterate over tags right to left keeping track of current character index
         for tag in reversed(split_tag):
             # As soon as we find a non extension tag, mark down the index and bail.
-            if tag in self.tag_dict:
-                found_tag_entry = self.tag_dict[tag]
+            if tag in self.map_schema.tag_dict:
+                found_tag_entry = self.map_schema.tag_dict[tag]
                 last_found_index = index
                 index -= len(tag)
                 break
@@ -279,95 +238,3 @@ class TagFormat:
         short_tag_string = found_tag_entry.short_org_tag + remainder
         return short_tag_string, None
 
-    def has_duplicate_tags(self):
-        """Converting functions don't make much sense to work if we have duplicate tags and are disabled"""
-        return not self.no_duplicate_tags
-
-    def find_duplicate_tags(self):
-        """Finds all tags that are not unique.
-
-        Returns
-        -------
-            dict: (duplicate_tag_name : list of tag entries with this name)
-        """
-        duplicate_dict = {}
-        for tag_name in self.tag_dict:
-            modified_name = f'{tag_name}'
-            if isinstance(self.tag_dict[tag_name], list):
-                duplicate_dict[modified_name] = self.tag_dict[tag_name]
-
-        return duplicate_dict
-
-    def dupe_tag_iter(self, return_detailed_info=False):
-        """Returns an iterator that goes over each line of the duplicate tags dict, including descriptive ones."""
-        duplicate_dict = self.find_duplicate_tags()
-        for tag_name in duplicate_dict:
-            if return_detailed_info:
-                yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions"
-            for tag_entry in duplicate_dict[tag_name]:
-                if return_detailed_info:
-                    yield f"\t{tag_entry.short_org_tag}: {tag_entry.long_org_tag}"
-                else:
-                    yield f"{tag_entry.long_org_tag}"
-
-    def print_tag_dict(self):
-        """Utility function that prints the human readable form of duplicate tags to console."""
-        for line in self.dupe_tag_iter(True):
-            print(line)
-
-    def _reset_tag_compare(self):
-        self.tag_name_stack = []
-        self.tag_dict = {}
-        self.current_depth_check = ["node"]
-        self.no_duplicate_tags = True
-
-    def _add_tag(self, new_tag, tag_stack):
-        clean_tag = new_tag.lower()
-        full_tag = "/".join(tag_stack)
-        new_tag_entry = TagEntry(new_tag, full_tag)
-        if clean_tag not in self.tag_dict:
-            self.tag_dict[clean_tag] = new_tag_entry
-        else:
-            self.no_duplicate_tags = False
-            if not isinstance(self.tag_dict[clean_tag], list):
-                self.tag_dict[clean_tag] = [self.tag_dict[clean_tag]]
-            self.tag_dict[clean_tag].append(new_tag_entry)
-
-        return new_tag_entry
-
-    def _count_parent_nodes(self, node):
-        nodes_in_parent = 0
-        parent_elem = node
-        while parent_elem in self.parent_map:
-            if parent_elem.tag in self.current_depth_check:
-                nodes_in_parent += 1
-            parent_elem = self.parent_map[parent_elem]
-
-        return nodes_in_parent
-
-
-def check_for_duplicate_tags(local_xml_file):
-    """Checks if a source XML file has duplicate tags.
-
-        If there are no duplicates, returns None.
-        If there are any duplicates, points to a file containing the formatted result.
-    Parameters
-    ----------
-        local_xml_file: string
-    Returns
-    -------
-    dictionary
-            Contains source file location, dest, etc
-    """
-    tag_compare = TagFormat(local_xml_file)
-    dupe_tag_file = None
-    if tag_compare.has_duplicate_tags():
-        dupe_tag_file = utils.write_text_iter_to_file(tag_compare.dupe_tag_iter(True))
-    tag_compare.print_tag_dict()
-    hed_info_dictionary = {constants.HED_XML_TREE_KEY: None,
-                           constants.HED_XML_VERSION_KEY: None,
-                           constants.HED_CHANGE_LOG_KEY: None,
-                           constants.HED_WIKI_PAGE_KEY: None,
-                           constants.HED_INPUT_LOCATION_KEY: local_xml_file,
-                           constants.HED_OUTPUT_LOCATION_KEY: dupe_tag_file}
-    return hed_info_dictionary
