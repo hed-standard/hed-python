@@ -21,7 +21,7 @@ def validate_single_tag(map_schema, tag):
         return False
     return True
 
-
+# This assumes there are no square brackets anywhere else in the string except as a comment.
 pattern_split_comment = re.compile("(.*?)(\[.*?\])")
 def split_off_comment(hed_string_with_comment):
     """Splits off the comment in the [] at the end of a string in an upgrade file.
@@ -71,7 +71,7 @@ def read_in_hed3_upgrade_file(upgrade_filename, left_hed_schema=None, right_hed_
                 if left_map is not None:
                     if not validate_single_tag(left_map, left_tag):
                         print(f"Warning: Left tag not found in Schema.  {left_tag}")
-                if right_map:
+                if right_map is not None:
                     hed_tags = split_hed_string(right_string_no_comment)
                     for is_hed_tag, (startpos, endpos) in hed_tags:
                         if is_hed_tag:

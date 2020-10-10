@@ -8,6 +8,10 @@ from xml.etree import ElementTree as et
 import tempfile
 from hed.schema import constants
 
+class SchemaError(Exception):
+    def __init__(self, message):
+        self.message = f"SchemaError: {message}"
+
 def url_to_file(resource_url):
     """Write data from a URL resource into a file. Data is decoded as unicode.
 

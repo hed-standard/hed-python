@@ -79,6 +79,7 @@ class HedTagLists(HedStrings):
                 '/Item/Object/Vehicle/Car~~/Attribute/Object control/Perturb',
             'doubleComma':
                 '/Item/Object/Vehicle/Car,,/Attribute/Object control/Perturb',
+            # !FIXME! Are square brackets invalid characters, and if so, how should we detect them?
             'doubleInvalidCharacter':
                 '/Item/Object/Vehicle/Car[]/Attribute/Object control/Perturb',
             'trailingBlank':

@@ -13,8 +13,10 @@ from hed.webconverter.constants.other import file_extension_constants
 from hed.webconverter.constants.error import error_constants
 from hed.webconverter.constants.form import conversion_arg_constants, js_form_constants
 
-from hed.converter import xml2wiki, wiki2xml, tag_compare
-from hed.converter import constants as converter_constants
+from hed.schema import xml2wiki, wiki2xml
+from hed.schema.utils import SchemaError
+from hed.utilities import map_schema
+from hed.schema import constants as converter_constants
 
 UPLOAD_DIRECTORY_KEY = 'UPLOAD_FOLDER'
 
@@ -86,7 +88,7 @@ def _run_tag_compare(local_xml_path):
     if input_extension != file_extension_constants.HED_XML_EXTENSION:
         raise ValueError(f"Invalid extension type: {input_extension}")
 
-    return tag_compare.check_for_duplicate_tags(local_xml_path)
+    return map_schema.check_for_duplicate_tags(local_xml_path)
 
 
 def run_conversion(form_request_object):
@@ -110,6 +112,8 @@ def run_conversion(form_request_object):
         return error_constants.INVALID_URL_ERROR
     except urllib.error.HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
+    except SchemaError as e:
+        return e.message
     except:
         return traceback.format_exc()
     finally:
@@ -117,7 +121,7 @@ def run_conversion(form_request_object):
 
 
 def run_tag_compare(form_request_object):
-    """Run tag comparison(tag_compare from converter)
+    """Run tag comparison(map_schema from converter)
 
     returns: Response or string.
         Empty string is success, but nothing to download.
@@ -144,6 +148,8 @@ def run_tag_compare(form_request_object):
         return error_constants.INVALID_URL_ERROR
     except urllib.error.HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
+    except SchemaError as e:
+        return e.message
     finally:
         delete_file_if_it_exist(hed_file_path)
     return ""

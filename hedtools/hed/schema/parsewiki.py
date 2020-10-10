@@ -135,7 +135,7 @@ def hed_wiki_2_xml_tree(wiki_file_path):
     """
     hed_node.clear()
     if os.path.exists(wiki_file_path):
-        with open(wiki_file_path, 'r', encoding='utf-8') as wiki_file:
+        with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
             line = wiki_file.readline()
             while line:
                 line = line.strip()
@@ -199,7 +199,7 @@ def get_hed_change_log(wiki_file_path):
     """
     change_log = []
     if os.path.exists(wiki_file_path):
-        with open(wiki_file_path, 'r', encoding='utf-8') as wiki_file:
+        with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
             line = wiki_file.readline()
             while line:
                 line = line.strip()
