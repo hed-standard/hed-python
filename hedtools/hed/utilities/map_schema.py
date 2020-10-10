@@ -1,8 +1,7 @@
 from defusedxml.lxml import parse
+import lxml
 from hed.schema import utils
 from hed.schema import constants
-from hed.utilities import error_reporter
-from hed.utilities import format_util
 
 class TagEntry:
     """This is a single entry in the tag dictionary.
@@ -29,7 +28,10 @@ class MapSchema:
         if hed_tree is not None:
             self.process_tree(hed_tree)
         elif hed_xml_file:
-            hed_tree = parse(hed_xml_file)
+            try:
+                hed_tree = parse(hed_xml_file)
+            except lxml.etree.XMLSyntaxError as e:
+                raise utils.SchemaError(e.msg)
             hed_tree = hed_tree.getroot()
             self.process_tree(hed_tree)
 

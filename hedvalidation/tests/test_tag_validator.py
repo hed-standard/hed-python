@@ -313,6 +313,7 @@ class IndividualHedTags(TestHed):
             'notRequiredNoNumber': 'Attribute/Color/Red',
             'notRequiredNumber': 'Attribute/Color/Red/0.5',
             'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
+            # !FIXME! time.fromisoformat does not recognize H:MM formats, only HH:MM
             'timeValue': 'Item/2D shape/Clock face/8:30'
         }
         expected_results = {
@@ -334,7 +335,7 @@ class IndividualHedTags(TestHed):
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
-    def correct_units(self):
+    def test_correct_units(self):
         test_strings = {
             'correctUnit': 'Event/Duration/3 ms',
             'correctUnitScientific': 'Event/Duration/3.5e1 ms',
@@ -599,7 +600,7 @@ class OldIndividualHedTags(TestOldHed):
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
-    def correct_units(self):
+    def test_correct_units(self):
         test_strings = {
             'correctUnit': 'Event/Duration/3 ms',
             'correctUnitWord': 'Event/Duration/3 milliseconds',

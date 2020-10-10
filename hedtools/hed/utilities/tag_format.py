@@ -1,14 +1,10 @@
-from defusedxml.lxml import parse
-from hed.schema import utils
-from hed.schema import constants
 from hed.utilities import error_reporter
 from hed.utilities import format_util
 from hed.utilities.map_schema import MapSchema
 
 
 class TagFormat:
-    """     Helper class for seeing if a schema has any duplicate tags, and also has functions to convert
-        hed strings and tags short<>long
+    """     Class to convert hed3 tags between short and long form.
        """
     def __init__(self, hed_xml_file=None, hed_tree=None):
         self.map_schema = MapSchema(hed_xml_file, hed_tree)
