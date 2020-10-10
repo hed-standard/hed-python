@@ -10,7 +10,7 @@ CONTAINER_NAME="hedtools-conversion"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${PWD}/hed-python"
 GIT_REPO_BRANCH="master"
-HOST_PORT=33000
+HOST_PORT=33001
 CONTAINER_PORT=80
 
 DEPLOY_DIR="hed-python/hedwebschema/deploy"
@@ -18,7 +18,7 @@ CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/hedwebschema.wsgi"
 WEBINTERFACE_CODE_DIR="hed-python/hedwebschema/hed"
-CONVERSION_CODE_DIR="hed-python/hedschema/hed"
+CONVERSION_CODE_DIR="hed-python/hedtools/hed"
 
 ##### Functions
 
