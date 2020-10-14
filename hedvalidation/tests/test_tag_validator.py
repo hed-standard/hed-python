@@ -313,8 +313,8 @@ class IndividualHedTags(TestHed):
             'notRequiredNoNumber': 'Attribute/Color/Red',
             'notRequiredNumber': 'Attribute/Color/Red/0.5',
             'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
-            # !FIXME! time.fromisoformat does not recognize H:MM formats, only HH:MM
-            'timeValue': 'Item/2D shape/Clock face/8:30'
+            'timeValue': 'Item/2D shape/Clock face/08:30',
+            'invalidTimeValue': 'Item/2D shape/Clock face/8:30'
         }
         expected_results = {
             'hasRequiredUnit': True,
@@ -322,8 +322,10 @@ class IndividualHedTags(TestHed):
             'notRequiredNoNumber': True,
             'notRequiredNumber': True,
             'notRequiredScientific': True,
-            'timeValue': True
+            'timeValue': True,
+            'invalidTimeValue': False
         }
+        legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
             'missingRequiredUnit': report_warning_type('unitClassDefaultUsed', tag=test_strings['missingRequiredUnit'],
@@ -331,7 +333,9 @@ class IndividualHedTags(TestHed):
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
             'notRequiredScientific': [],
-            'timeValue': []
+            'timeValue': [],
+            'invalidTimeValue':report_error_type('unitClassInvalidUnit', tag=test_strings['invalidTimeValue'],
+                                               unit_class_units=",".join(sorted(legal_clock_time_units))),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -349,13 +353,12 @@ class IndividualHedTags(TestHed):
             'incorrectSymbolCapitalizedUnitModifier': 'Attribute/Temporal rate/3 KHz',
             'notRequiredNumber': 'Attribute/Color/Red/0.5',
             'notRequiredScientific': 'Attribute/Color/Red/5e-1',
-            'properTime': 'Item/2D shape/Clock face/8:30',
+            'properTime': 'Item/2D shape/Clock face/08:30',
             'invalidTime': 'Item/2D shape/Clock face/54:54'
         }
         expected_results = {
             'correctUnit': True,
             'correctUnitScientific': True,
-            'correctSingularUnit': True,
             'correctPluralUnit': True,
             'correctNoPluralUnit': True,
             'correctNonSymbolCapitalizedUnit': True,
@@ -371,10 +374,11 @@ class IndividualHedTags(TestHed):
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
+        legal_freq_units = ['Hz','hertz']
+
         expected_issues = {
             'correctUnit': [],
             'correctUnitScientific': [],
-            'correctSingularUnit': [],
             'correctPluralUnit': [],
             'correctNoPluralUnit': [],
             'correctNonSymbolCapitalizedUnit': [],
@@ -382,14 +386,14 @@ class IndividualHedTags(TestHed):
             'incorrectUnit': report_error_type('unitClassInvalidUnit', tag=test_strings['incorrectUnit'],
                                                unit_class_units=",".join(sorted(legal_time_units))),
             'incorrectPluralUnit': report_error_type('unitClassInvalidUnit', tag=test_strings['incorrectPluralUnit'],
-                                                     unit_class_units=",".join(sorted(legal_time_units))),
+                                                     unit_class_units=",".join(sorted(legal_freq_units))),
             'incorrectSymbolCapitalizedUnit': report_error_type('unitClassInvalidUnit',
                                                                 tag=test_strings['incorrectSymbolCapitalizedUnit'],
-                                                                unit_class_units=",".join(sorted(legal_time_units))),
+                                                                unit_class_units=",".join(sorted(legal_freq_units))),
             'incorrectSymbolCapitalizedUnitModifier': report_error_type('unitClassInvalidUnit', tag=test_strings[
                 'incorrectSymbolCapitalizedUnitModifier'],
                                                                         unit_class_units=",".join(
-                                                                            sorted(legal_time_units))),
+                                                                            sorted(legal_freq_units))),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
             'properTime': [],
@@ -581,7 +585,7 @@ class OldIndividualHedTags(TestOldHed):
             'missingRequiredUnit': 'Event/Duration/3',
             'notRequiredNumber': 'Attribute/Color/Red/0.5',
             'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
-            'timeValue': 'Item/2D shape/Clock face/8:30'
+            'timeValue': 'Item/2D shape/Clock face/08:30'
         }
         expected_results = {
             'hasRequiredUnit': True,
@@ -610,7 +614,7 @@ class OldIndividualHedTags(TestOldHed):
             'incorrectPrefix': 'Event/Duration/3 ns',
             'notRequiredNumber': 'Attribute/Color/Red/0.5',
             'notRequiredScientific': 'Attribute/Color/Red/5e-1',
-            'properTime': 'Item/2D shape/Clock face/8:30',
+            'properTime': 'Item/2D shape/Clock face/08:30',
             'invalidTime': 'Item/2D shape/Clock face/54:54'
         }
         expected_results = {
