@@ -1,6 +1,6 @@
 import unittest
 
-from hed.validator.tag_validator import TagValidator
+from hed.validator.util.tag_validator import TagValidator
 from tests.test_tag_validator import TestHed
 
 

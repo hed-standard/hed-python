@@ -6,7 +6,8 @@ import urllib.request
 from xml.dom import minidom
 from xml.etree import ElementTree as et
 import tempfile
-from hed.schema import constants
+from hed.schema.util import constants
+
 
 class SchemaError(Exception):
     def __init__(self, message):

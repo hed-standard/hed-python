@@ -4,7 +4,6 @@ This module is used to split tags in a HED string.
 """
 
 import copy
-from hed.validator import error_reporter
 
 
 class HedStringDelimiter:

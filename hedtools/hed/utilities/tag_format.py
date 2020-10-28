@@ -1,6 +1,5 @@
-from hed.utilities import error_reporter
-from hed.utilities import format_util
-from hed.utilities.map_schema import MapSchema
+from hed.utilities.util import error_reporter, format_util
+from hed.utilities.util.map_schema import MapSchema
 
 
 class TagFormat:

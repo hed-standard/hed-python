@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from hed.validator.hed_dictionary import HedDictionary
+from hed.validator.util.hed_dictionary import HedDictionary
 
 
 class TestHedDictionary(unittest.TestCase):

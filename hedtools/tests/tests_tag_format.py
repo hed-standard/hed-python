@@ -1,8 +1,8 @@
 import unittest
 import os
 from hed.utilities.tag_format import TagFormat
-from hed.utilities import error_reporter
-from hed.utilities import format_util
+from hed.utilities.util import error_reporter, format_util
+
 
 class Test(unittest.TestCase):
     schema_file = 'data/reduced_no_dupe.xml'
@@ -197,7 +197,7 @@ class Test(unittest.TestCase):
                                              61, 66, 'Event'),
             error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE,
                                              'Item/Object/Geometric/Item/Object/Geometric',
-                                              34, 43, 'Item/Object/Geometric'),
+                                             34, 43, 'Item/Object/Geometric'),
         ]
         self.compare_base_new(self.tag_compare._convert_to_short_tag, test_strings, expected_results, errors_list)
 

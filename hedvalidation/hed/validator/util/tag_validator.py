@@ -5,10 +5,8 @@ This module is used to validate the HED tags as strings.
 
 import datetime
 import re
-import time
 import inflect
-from hed.validator import error_reporter
-from hed.validator import warning_reporter
+from hed.validator.util import error_reporter, warning_reporter
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -270,8 +268,8 @@ class TagValidator:
 
         if not is_extension_tag and self.tag_takes_value(previous_formatted_tag):
             validation_issues += error_reporter.report_error_type(TagValidator.COMMA_VALID_ERROR_TYPE,
-                                                                   tag=original_tag,
-                                                                   previous_tag=previous_original_tag)
+                                                                  tag=original_tag,
+                                                                  previous_tag=previous_original_tag)
             self._increment_issue_count()
         elif not is_extension_tag:
             validation_issues += error_reporter.report_error_type(TagValidator.VALID_ERROR_TYPE, tag=original_tag)
@@ -440,7 +438,7 @@ class TagValidator:
                 pass
             else:
                 validation_issues += error_reporter.report_error_type('unitClassInvalidUnit', tag=original_tag,
-                                                                       unit_class_units=','.join(
+                                                                      unit_class_units=','.join(
                                                                            sorted(tag_unit_class_units)))
                 self._increment_issue_count()
         return validation_issues
@@ -559,7 +557,7 @@ class TagValidator:
             if re.search(TagValidator.DIGIT_EXPRESSION, tag_unit_values):
                 default_unit = self.get_unit_class_default_unit(formatted_tag)
                 validation_issues += warning_reporter.report_warning_type('unitClassDefaultUsed', tag=original_tag,
-                                                                           default_unit=default_unit)
+                                                                          default_unit=default_unit)
                 self._increment_issue_count(is_error=False)
         return validation_issues
 
@@ -698,7 +696,7 @@ class TagValidator:
         validation_issues = []
         if self._hed_dictionary_dictionaries[TagValidator.REQUIRE_CHILD_TYPE].get(formatted_tag):
             validation_issues += error_reporter.report_error_type(TagValidator.REQUIRE_CHILD_ERROR_TYPE,
-                                                                   tag=original_tag)
+                                                                  tag=original_tag)
             self._increment_issue_count()
         return validation_issues
 
@@ -722,7 +720,7 @@ class TagValidator:
                 self._hed_dictionary_dictionaries[TagValidator.REQUIRED_PREFIX_TYPE][required_tag_prefix]
             if sum([x.startswith(required_tag_prefix) for x in formatted_top_level_tags]) < 1:
                 validation_issues += warning_reporter.report_warning_type(TagValidator.REQUIRED_ERROR_TYPE,
-                                                                           tag_prefix=capitalized_required_tag_prefix)
+                                                                          tag_prefix=capitalized_required_tag_prefix)
                 self._increment_issue_count(is_error=False)
         return validation_issues
 
@@ -799,7 +797,7 @@ class TagValidator:
                     duplicate_indices.add(tag_index)
                     duplicate_indices.add(duplicate_index)
                     validation_issues += error_reporter.report_error_type(TagValidator.DUPLICATE_ERROR_TYPE,
-                                                                           tag=original_tag_list[tag_index])
+                                                                          tag=original_tag_list[tag_index])
                     self._increment_issue_count()
         return validation_issues
 
@@ -1010,8 +1008,8 @@ class TagValidator:
         number_of_closing_parentheses = hed_string.count(')')
         if number_of_opening_parentheses != number_of_closing_parentheses:
             validation_issues += error_reporter.report_error_type(TagValidator.PARENTHESES_ERROR_TYPE,
-                                                                   opening_parentheses_count=number_of_opening_parentheses,
-                                                                   closing_parentheses_count=number_of_closing_parentheses)
+                                                                  opening_parentheses_count=number_of_opening_parentheses,
+                                                                  closing_parentheses_count=number_of_closing_parentheses)
             self._increment_issue_count()
         return validation_issues
 

@@ -1,8 +1,8 @@
 import os
 import re
 from hed.validator.hed_file_input import HedFileInput
-from hed.utilities.format_util import split_hed_string, remove_slashes_and_spaces
-from hed.utilities.map_schema import MapSchema
+from hed.utilities.util.format_util import split_hed_string, remove_slashes_and_spaces
+from hed.utilities.util.map_schema import MapSchema
 
 def validate_single_tag(map_schema, tag):
     # Split off the variable suffix
@@ -34,28 +34,34 @@ def split_off_comment(hed_string_with_comment):
     return match.group(1), match.group(2)
 
 
-def read_in_hed3_upgrade_file(upgrade_filename, left_hed_schema=None, right_hed_schema=None):
+def read_version_map(version_map_filename, left_hed_schema=None, right_hed_schema=None,
+                     return_errors=False):
     left_map = right_map = None
     if left_hed_schema:
         left_map = MapSchema(left_hed_schema, use_full_name_as_key=True)
     if right_hed_schema:
         right_map = MapSchema(right_hed_schema, use_full_name_as_key=True)
     mapping_dict = {}
-    with open(upgrade_filename, 'r', encoding='utf-8') as f:
-        for line in f:
+    error_list = []
+
+    def add_error(new_error_text, line_number):
+        error_list.append(f"Line {line_number:04d}: {new_error_text}")
+
+    with open(version_map_filename, 'r', encoding='utf-8') as f:
+        for i, line in enumerate(f):
             if len(line) > 5:
                 while line.endswith('\n'):
                     line = line[:-1]
                 split_segments = line.split('|')
                 if len(split_segments) <= 1:
-                    print(f"Warning: No split operator '|' found in line: {line}")
+                    add_error(f"Warning: No split operator '|' found in line: {line}", i)
                     continue
                 if len(split_segments) > 2:
-                    print(f"Warning: Too many split operators '|' found in line: {line}")
+                    add_error(f"Warning: Too many split operators '|' found in line: {line}", i)
                     continue
                 left_tag, right_string = split_segments
                 if len(right_string.strip()) < 3:
-                    print(f"Warning: No hed3 version of tag found in line: {line}")
+                    add_error(f"Warning: No right tag version of tag found in line: {line}", i)
                     continue
 
                 # Check for comment if needed
@@ -65,23 +71,28 @@ def read_in_hed3_upgrade_file(upgrade_filename, left_hed_schema=None, right_hed_
                 right_lower = right_string.lower()
                 right_string_no_comment, comment = split_off_comment(right_lower)
                 if ("XXX" in right_string_no_comment or "YYY" in right_string_no_comment) and not comment:
-                    print(f"Warning: XXX or YYY found in a line with no comment: {line}")
+                    add_error(f"Warning: XXX or YYY found in a line with no comment: {line}", i)
 
                 # Validate tags if we have a schema
                 if left_map is not None:
                     if not validate_single_tag(left_map, left_tag):
-                        print(f"Warning: Left tag not found in Schema.  {left_tag}")
+                        add_error(f"Warning: Left tag not found in Schema.  {left_tag}", i)
                 if right_map is not None:
                     hed_tags = split_hed_string(right_string_no_comment)
                     for is_hed_tag, (startpos, endpos) in hed_tags:
                         if is_hed_tag:
                             hed_tag = right_string_no_comment[startpos:endpos]
                             if not validate_single_tag(right_map, hed_tag):
-                                print(f"Warning: Right tag not found in Schema.  {hed_tag}  Full line: {right_string}")
+                                add_error(f"Warning: Right tag not found in Schema.  {hed_tag}  Full line: {right_string}", i)
 
-                mapping_dict[left_tag] = right_string
+                mapping_dict[left_tag] = right_string_no_comment, comment
 
-    return mapping_dict
+    if return_errors:
+        return mapping_dict, error_list
+    else:
+        for error in error_list:
+            print(error)
+        return mapping_dict
 
 
 def find_tag(hed_tag, mapping_dict):
@@ -180,13 +191,15 @@ def create_out_tag(org_tag, new_tag, remainder):
                          f"{tag_bracket_end}"
     return new_tag
 
-def upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None):
+
+def upgrade_file_hed_version(input_file, mapping_filename_or_dict, tag_columns_to_upgrade=None):
     """
 
     Parameters
     ----------
     input_file : A HedFileInput object
-    mapping_dict : a dictionary of hed2->hed3 upgrades.  Created by read_in_hed3_upgrade_file above
+    mapping_filename_or_dict : a dictionary of hed2->hed3 upgrades.  Created by read_version_map above
+        It can also be a string pointing to a file that read_version_map can parse.
     tag_columns_to_upgrade : list of column numbers
         If passed in and non empty, ONLY upgrade these column numbers.  You can also filter out
         which columns you want to upgrade via the HedFileInput object.
@@ -195,6 +208,10 @@ def upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None):
     -------
 
     """
+    mapping_dict = mapping_filename_or_dict
+    if isinstance(mapping_filename_or_dict, str):
+        mapping_dict = read_version_map(mapping_filename_or_dict)
+
     for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
         for column_number in column_to_hed_tags_dictionary:
             if tag_columns_to_upgrade and column_number not in tag_columns_to_upgrade:
@@ -207,7 +224,9 @@ def upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None):
             for is_hed_tag, (startpos, endpos) in hed_tags:
                 tag = old_cleaned_text[startpos:endpos]
                 if is_hed_tag:
-                    new_tag, remainder = find_tag(tag, mapping_dict)
+                    (new_tag, comment), remainder = find_tag(tag, mapping_dict)
+                    if comment:
+                        new_tag = new_tag + comment
                     new_tag = create_out_tag(tag, new_tag, remainder)
                     new_text += new_tag
                 else:
@@ -221,8 +240,9 @@ def upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None):
 if __name__ == '__main__':
     hed2_xml_file = "tests/data/HED7.1.1.xml"
     hed3_xml_file = "tests/data/reduced_hed3.xml"
-    mapping_dict = read_in_hed3_upgrade_file("tests/data/hed2_hed3_conversion.txt",
-                                             left_hed_schema=hed2_xml_file, right_hed_schema=hed3_xml_file)
+    mapping_dict, errors = read_version_map("tests/data/hed2_hed3_conversion.txt",
+                                    left_hed_schema=hed2_xml_file, right_hed_schema=hed3_xml_file,
+                                    return_errors=True)
     example_data_path = 'tests/data'   # path to example data
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
 
@@ -231,6 +251,7 @@ if __name__ == '__main__':
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
                               #column_prefix_dictionary=prefixed_needed_tag_columns,
                               worksheet_name='DAS Events')
-    upgrade_file_to_hed3(input_file, mapping_dict, tag_columns_to_upgrade=None)
+
+    upgrade_file_hed_version(input_file, mapping_dict, tag_columns_to_upgrade=None)
 
 

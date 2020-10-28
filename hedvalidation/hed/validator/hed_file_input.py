@@ -1,5 +1,4 @@
 import os
-import xlrd
 import openpyxl
 
 class HedFileInput:

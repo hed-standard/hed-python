@@ -2,7 +2,7 @@
 
 from shutil import move
 from hed.schema import wiki2xml
-from hed.schema import constants
+from hed.schema.util import constants
 
 if __name__ == '__main__':
     local_hed_file = None

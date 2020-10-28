@@ -1,7 +1,7 @@
 from defusedxml.lxml import parse
 import lxml
-from hed.schema import utils
-from hed.schema import constants
+from hed.schema.util import utils, constants
+
 
 class TagEntry:
     """This is a single entry in the tag dictionary.
@@ -13,6 +13,7 @@ class TagEntry:
         self.short_org_tag = short_org_tag
         self.long_org_tag = long_org_tag
         self.long_clean_tag = long_org_tag.lower()
+
 
 class MapSchema:
     """     Helper class for seeing if a schema has any duplicate tags/validate basic existence

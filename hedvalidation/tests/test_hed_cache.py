@@ -1,8 +1,8 @@
-import random
 import unittest
 import os
 
-from hed.validator import hed_cache
+from hed.validator.util import hed_cache
+
 
 class Test(unittest.TestCase):
     @classmethod

@@ -2,7 +2,7 @@
 
 from shutil import move
 from hed.schema import xml2wiki
-from hed.schema import constants
+from hed.schema.util import constants
 
 if __name__ == '__main__':
     hed_xml_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml'

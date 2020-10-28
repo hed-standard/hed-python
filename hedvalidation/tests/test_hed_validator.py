@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from hed.validator.hed_string_delimiter import HedStringDelimiter
+from hed.validator.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.hed_validator import HedValidator
 
 

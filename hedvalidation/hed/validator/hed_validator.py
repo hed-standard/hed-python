@@ -5,12 +5,10 @@ the get_validation_issues() function.
 
 """
 
-
-from hed.validator import error_reporter
-from hed.validator.hed_dictionary import HedDictionary
-from hed.validator.hed_string_delimiter import HedStringDelimiter
-from hed.validator.tag_validator import TagValidator
-from hed.validator import hed_cache
+from hed.validator.util import error_reporter, hed_cache
+from hed.validator.util.hed_dictionary import HedDictionary
+from hed.validator.util.hed_string_delimiter import HedStringDelimiter
+from hed.validator.util.tag_validator import TagValidator
 from hed.validator.hed_file_input import HedFileInput
 
 class HedValidator:

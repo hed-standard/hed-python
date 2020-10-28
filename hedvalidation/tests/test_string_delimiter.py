@@ -1,4 +1,4 @@
-from hed.validator.hed_string_delimiter import HedStringDelimiter
+from hed.validator.util.hed_string_delimiter import HedStringDelimiter
 from tests.test_tag_validator import TestHed
 
 
