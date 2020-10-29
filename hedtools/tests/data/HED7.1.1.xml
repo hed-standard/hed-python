@@ -1776,7 +1776,7 @@
          </node>
       </node>
    </node>
-   <node>
+   <node extensionAllowed="true">
       <name>Action</name>
       <description>May or may not be associated with a prior stimulus and can be extended</description>
       <node>
@@ -2227,7 +2227,7 @@
             <description>Numeric value of an ID</description>
          </node>
       </node>
-      <node>
+      <node extensionAllowed="true">
          <name>Effect</name>
          <description>How the stimulus effects the participants</description>
          <node>
@@ -2631,7 +2631,7 @@
             </node>
          </node>
       </node>
-      <node requireChild="true">
+      <node extensionAllowed="true" requireChild="true">
          <name>State</name>
          <node requireChild="true">
             <name>Level of consciousness</name>
@@ -3677,13 +3677,17 @@
             <unit>hour</unit>
          </units>
       </unitClass>
+      <unitClass defaultUnits="YYYY-MM-DDThh:mm:ss">
+         <name>dateTime</name>
+         <units>
+            <unit>YYYY-MM-DDThh:mm:ss</unit>
+         </units>
+      </unitClass>
       <unitClass defaultUnits="hour:min">
          <name>clockTime</name>
          <units>
-            <unit unitSymbol="true">hour:min</unit>
-            <unit unitSymbol="true">h:m</unit>
-            <unit unitSymbol="true">hour:min:sec</unit>
-            <unit unitSymbol="true">h:m:s</unit>
+            <unit>hour:min</unit>
+            <unit>hour:min:sec</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="Hz">

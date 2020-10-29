@@ -1,7 +1,8 @@
 import unittest
 import os
-from hed.utilities.tag_format import TagFormat
-from hed.utilities.util import error_reporter, format_util
+from hed.tools.tag_format import TagFormat
+from hed.tools import error_reporter
+from hed.util import hed_string_util
 
 
 class Test(unittest.TestCase):
@@ -33,7 +34,7 @@ class Test(unittest.TestCase):
 
     def compare_split_results(self, input_strings, expected_results):
         for input_tag, result in zip(input_strings, expected_results):
-            actual_results = format_util.split_hed_string(input_tag)
+            actual_results = hed_string_util.split_hed_string(input_tag)
             decoded_results = [input_tag[start:end] for (is_tag, (start, end)) in actual_results]
             self.assertEqual(result, decoded_results)
 
@@ -480,13 +481,13 @@ class Test(unittest.TestCase):
 
         errors_list = [
             [error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND,
-                                             'InvalidEvent', 0, 12),],
+                                             'InvalidEvent', 0, 12), ],
             [error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND,
                                               'InvalidEvent/InvalidExtension', 0, 12), ],
 
             [error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND,
                                              'InvalidEvent', 0, 12),
-            error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND,
+             error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND,
                                               'InvalidEvent/InvalidExtension', 0, 12), ]
         ]
         self.compare_base_new(self.tag_compare.convert_hed_string_to_short, test_strings, expected_results, errors_list)

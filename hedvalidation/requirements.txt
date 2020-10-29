@@ -1,6 +1,0 @@
-defusedxml==0.5.0
-inflect==4.1.0
-lxml==4.5.1
-xlrd==1.1.0
-portalocker==1.7.0
-
