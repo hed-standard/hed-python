@@ -1,4 +1,5 @@
-from hed.schematools import utils, constants
+from hed.util.file_util import write_text_iter_to_file
+from hed.schematools import constants
 from hed.util.schema_node_map import SchemaNodeMap
 
 
@@ -18,7 +19,7 @@ def check_for_duplicate_tags(local_xml_file):
     map_schema = SchemaNodeMap(local_xml_file)
     dupe_tag_file = None
     if map_schema.has_duplicate_tags():
-        dupe_tag_file = utils.write_text_iter_to_file(map_schema.dupe_tag_iter(True))
+        dupe_tag_file = write_text_iter_to_file(map_schema.dupe_tag_iter(True))
     map_schema.print_tag_dict()
     hed_info_dictionary = {constants.HED_XML_TREE_KEY: None,
                            constants.HED_XML_VERSION_KEY: None,

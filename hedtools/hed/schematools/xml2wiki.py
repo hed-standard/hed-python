@@ -1,13 +1,16 @@
 from enum import Enum
 from defusedxml.lxml import parse
 import lxml
-from hed.schematools import utils, constants
+
+from hed.schematools import constants
 from hed.util.errors import SchemaError
+from hed.util import file_util
 
 class MainParseMode(Enum):
     MainTags = 1
     UnitClassTags = 2
     UnitModifierTags = 3
+
 
 class HEDXml2Wiki():
     def __init__(self):
@@ -191,7 +194,7 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):
         Contains xml, wiki, and version info.
     """
     if local_xml_file is None:
-        local_xml_file = utils.url_to_file(hed_xml_url)
+        local_xml_file = file_util.url_to_file(hed_xml_url)
 
     try:
         hed_xml_tree = parse(local_xml_file)
@@ -200,8 +203,8 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):
     hed_xml_tree = hed_xml_tree.getroot()
     xml2wiki = HEDXml2Wiki()
     output_strings = xml2wiki.process_tree(hed_xml_tree)
-    local_mediawiki_file = utils.write_strings_to_file(output_strings, ".mediawiki")
-    hed_version = utils.get_version_from_xml(hed_xml_tree)
+    local_mediawiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
+    hed_version = file_util.get_version_from_xml(hed_xml_tree)
     hed_info_dictionary = {constants.HED_XML_TREE_KEY: hed_xml_tree,
                            constants.HED_XML_VERSION_KEY: hed_version,
                            constants.HED_CHANGE_LOG_KEY: None,

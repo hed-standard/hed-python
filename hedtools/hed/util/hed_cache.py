@@ -1,6 +1,6 @@
 import os
 import urllib.request
-import tempfile
+
 import json
 from hashlib import sha1
 from shutil import copyfile
@@ -9,6 +9,7 @@ import re
 from distutils.version import StrictVersion
 import portalocker
 import time
+from hed.util.file_util import url_to_file
 
 HED_VERSION_EXPRESSION = r'HED(\d+.\d+.\d+)'
 HED_XML_PREFIX = 'HED'
@@ -17,6 +18,7 @@ DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed
 HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../validator/hed_cache/')
 TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300
+
 
 def set_cache_directory(new_cache_dir):
     """Set default global hed cache directory
@@ -116,7 +118,7 @@ def cache_specific_url(hed_xml_url, get_specific_version=None, cache_folder=None
     cache_filename = os.path.join(cache_folder, filename)
 
     os.makedirs(cache_folder, exist_ok=True)
-    temp_hed_xml_file = _url_to_file(hed_xml_url)
+    temp_hed_xml_file = url_to_file(hed_xml_url)
     if temp_hed_xml_file:
         cache_filename = _safe_copy_tmp_to_folder(temp_hed_xml_file, cache_filename)
         return cache_filename
@@ -240,26 +242,6 @@ def _check_if_url(hed_xml_or_url):
         return True
     return False
 
-
-def _url_to_file(resource_url):
-    """Write data from a URL resource into a file. Data is decoded as unicode.
-
-    Parameters
-    ----------
-    resource_url: string
-        The URL to the resource.
-
-    Returns
-    -------
-    string: The local temporary filename for downloaded file.  You are responsible for deleting this.
-    """
-    url_request = urllib.request.urlopen(resource_url)
-    url_data = str(url_request.read(), 'utf-8')
-    with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as opened_file:
-        opened_file.write(url_data)
-        return opened_file.name
-
-
 def _create_xml_filename(hed_xml_version, hed_directory=None):
     hed_xml_filename = HED_XML_PREFIX + hed_xml_version + HED_XML_EXTENSION
     if hed_directory:
@@ -345,7 +327,7 @@ def _cache_hed_version(version, version_info, cache_folder):
         return possible_cache_filename
 
     os.makedirs(cache_folder, exist_ok=True)
-    temp_hed_xml_file = _url_to_file(download_url)
+    temp_hed_xml_file = url_to_file(download_url)
     if temp_hed_xml_file:
         cache_filename = _safe_copy_tmp_to_folder(temp_hed_xml_file, possible_cache_filename)
         return cache_filename

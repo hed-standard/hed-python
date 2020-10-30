@@ -1,8 +1,8 @@
 """
 This module contains functions that convert a wiki HED schema into a XML HED schema.
 """
-
-from hed.schematools import parsewiki, utils, constants
+from hed.util import file_util
+from hed.schematools import parsewiki, constants
 
 
 def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None):
@@ -20,11 +20,11 @@ def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None):
         Contains xml, wiki, and version info.
     """
     if local_wiki_file is None:
-        local_wiki_file = utils.url_to_file(hed_wiki_url)
+        local_wiki_file = file_util.url_to_file(hed_wiki_url)
 
     hed_xml_file_location, hed_xml_tree = _create_hed_xml_file(local_wiki_file)
     hed_change_log = parsewiki.get_hed_change_log(local_wiki_file)
-    hed_version = utils.get_version_from_xml(hed_xml_tree)
+    hed_version = file_util.get_version_from_xml(hed_xml_tree)
     hed_info_dictionary = {constants.HED_XML_TREE_KEY: hed_xml_tree,
                            constants.HED_XML_VERSION_KEY: hed_version,
                            constants.HED_CHANGE_LOG_KEY: hed_change_log,
@@ -48,5 +48,5 @@ def _create_hed_xml_file(hed_wiki_file_path):
         A tuple containing the path to the HED XML file and a HED XML tree.
     """
     hed_xml_tree = parsewiki.hed_wiki_2_xml_tree(hed_wiki_file_path)
-    hed_xml_file_location = utils.write_xml_tree_2_xml_file(hed_xml_tree)
+    hed_xml_file_location = file_util.write_xml_tree_2_xml_file(hed_xml_tree)
     return hed_xml_file_location, hed_xml_tree
