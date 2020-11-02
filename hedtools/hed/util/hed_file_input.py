@@ -1,6 +1,7 @@
 import os
 import openpyxl
 
+
 class HedFileInput:
     """Handles parsing the actual on disk hed files to a more general format."""
     TEXT_EXTENSION = ['.tsv', '.txt']
@@ -123,7 +124,6 @@ class HedFileInput:
         elif self._text_file:
             text_file_row = self._text_file[row_number]
             text_file_row[column_number] = new_text
-
 
     def get_hed_tags_from_worksheet_row(self, worksheet_row):
         """Reads in the current row of HED tags from the Excel file. The hed tag columns will be concatenated to form a

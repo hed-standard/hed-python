@@ -233,4 +233,3 @@ class TagFormat:
         remainder = hed_tag[last_found_index:]
         short_tag_string = found_tag_entry.short_org_tag + remainder
         return short_tag_string, None
-

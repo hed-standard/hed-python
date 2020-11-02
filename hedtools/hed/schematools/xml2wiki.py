@@ -6,6 +6,7 @@ from hed.schematools import constants
 from hed.util.errors import SchemaError
 from hed.util import file_util
 
+
 class MainParseMode(Enum):
     MainTags = 1
     UnitClassTags = 2
@@ -89,7 +90,7 @@ class HEDXml2Wiki():
                     self.flush_current_tag()
             elif parse_mode == MainParseMode.UnitClassTags:
                 nodes_in_parent = self.count_parent_nodes(elem,
-                                                     tags_to_check=["unitClasses", "units"])
+                                                          tags_to_check=["unitClasses", "units"])
                 if elem.tag == "unit" or elem.tag == "unitClass":
                     self.flush_current_tag()
 
@@ -126,7 +127,6 @@ class HEDXml2Wiki():
 
             self.add_elem_desc(elem)
             self.add_elem_attributes(elem)
-
 
         self.flush_current_tag()
         self.current_tag_string = "!# end hed"
@@ -212,4 +212,3 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):
                            constants.HED_OUTPUT_LOCATION_KEY: local_mediawiki_file,
                            constants.HED_INPUT_LOCATION_KEY: local_xml_file}
     return hed_info_dictionary
-

@@ -1,5 +1,6 @@
 import re
 
+
 def split_hed_string(hed_string):
     """Takes a hed string and splits it into delimiters and tags
 
@@ -66,8 +67,10 @@ def split_hed_string(hed_string):
     # debug_result_strings = [hed_string[startpos:endpos] for (is_hed_string, (startpos, endpos)) in result_positions]
     return result_positions
 
+
 # Regular expression for cleaning up repeated slashes and spaces around slashes.
-pattern_doubleslash = re.compile("[\s/]*/+[\s/]*")
+pattern_doubleslash = re.compile(r"[\s/]*/+[\s/]*")
+
 
 def remove_slashes_and_spaces(hed_string):
     """This handles removing extra slashes, and spaces around slashes.

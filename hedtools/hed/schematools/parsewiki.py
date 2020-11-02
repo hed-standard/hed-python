@@ -18,6 +18,7 @@ UNIT_MODIFIER_STRING = '\'\'\'Unit modifiers'
 END_STRING = '!# end hed'
 hed_node = Element('HED')
 
+
 def add_tags(wiki_file):
     """Adds the tags to the HED element.
 

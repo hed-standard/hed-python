@@ -12,6 +12,7 @@ from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import HedFileInput
 
+
 class HedValidator:
     def __init__(self, hed_input, check_for_warnings=False, run_semantic_validation=True,
                  hed_xml_file='', xml_version_number=None,

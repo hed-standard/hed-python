@@ -4,6 +4,7 @@ from hed.util.hed_file_input import HedFileInput
 from hed.util.hed_string_util import split_hed_string, remove_slashes_and_spaces
 from hed.util.schema_node_map import SchemaNodeMap
 
+
 def validate_single_tag(map_schema, tag):
     # Split off the variable suffix
     if tag.endswith("/XXX"):
@@ -21,8 +22,11 @@ def validate_single_tag(map_schema, tag):
         return False
     return True
 
+
 # This assumes there are no square brackets anywhere else in the string except as a comment.
-pattern_split_comment = re.compile("(.*?)(\[.*?\])")
+pattern_split_comment = re.compile(r"(.*?)(\[.*?\])")
+
+
 def split_off_comment(hed_string_with_comment):
     """Splits off the comment in the [] at the end of a string in an upgrade file.
           If no comment is present, returns (original string, "")
@@ -156,8 +160,8 @@ def create_out_tag(org_tag, new_tag, remainder):
             else:
                 # This is mostly a fallback in case we don't have proper bracketing.
                 new_tag = f"{new_tag} [" \
-                             f"{original_tag_is_string}{{{org_tag}}}" \
-                             f"]"
+                          f"{original_tag_is_string}{{{org_tag}}}" \
+                          f"]"
         else:
             # Direct mapping 1-1 to a # tag.
             if "#" in new_tag:
@@ -186,9 +190,9 @@ def create_out_tag(org_tag, new_tag, remainder):
             before_bracket = new_tag[:found_starting_bracket]
             after_bracket = new_tag[found_starting_bracket + 1:-1]
             new_tag = f"{before_bracket}" \
-                         f"{tag_bracket_start}" \
-                         f"{after_bracket}" \
-                         f"{tag_bracket_end}"
+                      f"{tag_bracket_start}" \
+                      f"{after_bracket}" \
+                      f"{tag_bracket_end}"
     return new_tag
 
 
@@ -241,8 +245,8 @@ if __name__ == '__main__':
     hed2_xml_file = "tests/data/HED7.1.1.xml"
     hed3_xml_file = "tests/data/reduced_hed3.xml"
     mapping_dict, errors = read_version_map("tests/data/hed2_hed3_conversion.txt",
-                                    left_hed_schema=hed2_xml_file, right_hed_schema=hed3_xml_file,
-                                    return_errors=True)
+                                            left_hed_schema=hed2_xml_file, right_hed_schema=hed3_xml_file,
+                                            return_errors=True)
     example_data_path = 'tests/data'   # path to example data
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
 
@@ -253,5 +257,3 @@ if __name__ == '__main__':
                               worksheet_name='DAS Events')
 
     upgrade_file_hed_version(input_file, mapping_dict, tag_columns_to_upgrade=None)
-
-

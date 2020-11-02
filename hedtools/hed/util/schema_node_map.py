@@ -1,6 +1,9 @@
 from defusedxml.lxml import parse
 import lxml
 
+from hed.util.errors import SchemaError
+
+
 class TagEntry:
     """This is a single entry in the tag dictionary.
 
@@ -123,4 +126,3 @@ class SchemaNodeMap:
             parent_elem = self.parent_map[parent_elem]
 
         return nodes_in_parent
-

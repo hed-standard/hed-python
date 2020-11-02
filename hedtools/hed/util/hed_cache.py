@@ -206,7 +206,7 @@ def cache_all_hed_xml_versions(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL, cache
 
             _write_last_cached_time(current_timestamp, cache_folder)
     except portalocker.exceptions.LockException:
-        print(f"Cache currently being written to.  Skipping.")
+        print("Cache currently being written to.  Skipping.")
 
 
 def _read_last_cached_time(cache_folder):
@@ -225,7 +225,7 @@ def _write_last_cached_time(new_time, cache_folder):
     try:
         with open(timestamp_filename, "w") as f:
             f.write(str(new_time))
-    except:
+    except Exception:
         raise ValueError("Error writing timestamp to hed cache")
 
 
@@ -241,6 +241,7 @@ def _check_if_url(hed_xml_or_url):
     if hed_xml_or_url.startswith("http://") or hed_xml_or_url.startswith("https://"):
         return True
     return False
+
 
 def _create_xml_filename(hed_xml_version, hed_directory=None):
     hed_xml_filename = HED_XML_PREFIX + hed_xml_version + HED_XML_EXTENSION
@@ -310,7 +311,7 @@ def _safe_copy_tmp_to_folder(temp_hed_xml_file, dest_filename):
     os.remove(temp_hed_xml_file)
     try:
         os.replace(temp_filename_in_cache, dest_filename)
-    except:
+    except Exception:
         os.remove(temp_filename_in_cache)
         return None
 
@@ -354,7 +355,7 @@ def _get_latest_semantic_version_in_list(semantic_version_list):
     if len(semantic_version_list) > 1:
         for semantic_version in semantic_version_list[1:]:
             latest_semantic_version = _compare_semantic_versions(latest_semantic_version,
-                                                                               semantic_version)
+                                                                 semantic_version)
     return latest_semantic_version
 
 
@@ -375,4 +376,3 @@ def _compare_semantic_versions(first_semantic_version, second_semantic_version):
     """
     return first_semantic_version if StrictVersion(first_semantic_version) > StrictVersion(
         second_semantic_version) else second_semantic_version
-

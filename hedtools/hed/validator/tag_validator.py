@@ -432,14 +432,14 @@ class TagValidator:
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
             if re.search(TagValidator.DIGIT_EXPRESSION,
-                           self.validate_units(original_tag_unit_value,
-                                               formatted_tag_unit_value,
-                                               tag_unit_class_units)):
+                         self.validate_units(original_tag_unit_value,
+                                             formatted_tag_unit_value,
+                                             tag_unit_class_units)):
                 pass
             else:
                 validation_issues += error_reporter.report_error_type('unitClassInvalidUnit', tag=original_tag,
                                                                       unit_class_units=','.join(
-                                                                           sorted(tag_unit_class_units)))
+                                                                          sorted(tag_unit_class_units)))
                 self._increment_issue_count()
         return validation_issues
 
@@ -624,7 +624,7 @@ class TagValidator:
             for unit_class in unit_classes:
                 try:
                     units += (self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class])
-                except:
+                except Exception:
                     continue
         return units
 

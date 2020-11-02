@@ -7,6 +7,7 @@ NO_VALID_TAG_FOUND = "invalidTag"
 INVALID_SCHEMA = 'invalidSchema'
 EMPTY_TAG_FOUND = 'emptyTag'
 
+
 def report_error_type(error_type, hed_string, error_index=0, error_index_end=0, expected_parent_tag=None):
     """Reports the abc error based on the type of error.
 
@@ -25,7 +26,7 @@ def report_error_type(error_type, hed_string, error_index=0, error_index_end=0, 
 
     error_types = {
         INVALID_PARENT_NODE: f"ERROR: '{problem_tag}' appears as '{expected_parent_tag}' and cannot be used "
-                                        f"as an extension.  {error_index}, {error_index_end}",
+                             f"as an extension.  {error_index}, {error_index_end}",
         NO_VALID_TAG_FOUND : f"ERROR: '{problem_tag}' is not a valid base hed tag.  {error_index}, {error_index_end} ",
         EMPTY_TAG_FOUND    : f"ERROR: 'Empty tag cannot be converted.",
         INVALID_SCHEMA     : f"ERROR: 'Source hed schema is invalid as it contains duplicate tags.  "
