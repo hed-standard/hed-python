@@ -8,7 +8,7 @@ import os
 from hed.util.hed_file_input import HedFileInput
 from hed.tools.tag_format import TagFormat
 
-local_hed_file = 'data/reduced_no_dupe.xml'  # path HED v7.1.1 stored locally
+local_hed_file_no_dupe = 'data/reduced_no_dupe.xml'
 
 def resave_file(input_file):
     for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
@@ -21,26 +21,14 @@ def resave_file(input_file):
 
 
 def long_to_short_file(input_file):
-    tag_formatter = TagFormat(local_hed_file)
-    for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
-        for column_number in column_to_hed_tags_dictionary:
-            old_text = column_to_hed_tags_dictionary[column_number]
-            new_text, _ = tag_formatter.convert_hed_string_to_short(old_text)
-            input_file.set_cell(row_number, column_number, new_text,
-                                include_column_prefix_if_exist=False)
-
-    input_file.save(f"{input_file.filename}_test_long_to_short")
+    tag_formatter = TagFormat(local_hed_file_no_dupe)
+    converted_file, errors = tag_formatter.convert_file_to_short_tags(input_file)
+    converted_file.save(f"{converted_file.filename}_test_long_to_short")
 
 def short_to_long_file(input_file):
-    tag_formatter = TagFormat(local_hed_file)
-    for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
-        for column_number in column_to_hed_tags_dictionary:
-            old_text = column_to_hed_tags_dictionary[column_number]
-            new_text, _ = tag_formatter.convert_hed_string_to_long(old_text)
-            input_file.set_cell(row_number, column_number, new_text,
-                                include_column_prefix_if_exist=False)
-
-    input_file.save(f"{input_file.filename}_test_short_to_long")
+    tag_formatter = TagFormat(local_hed_file_no_dupe)
+    converted_file, errors = tag_formatter.convert_file_to_long_tags(input_file)
+    converted_file.save(f"{converted_file.filename}_test_short_to_long")
 
 if __name__ == '__main__':
     # Set up the file names for the tests
