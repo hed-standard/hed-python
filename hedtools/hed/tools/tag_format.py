@@ -233,3 +233,55 @@ class TagFormat:
         remainder = hed_tag[last_found_index:]
         short_tag_string = found_tag_entry.short_org_tag + remainder
         return short_tag_string, None
+
+    def _convert_file(self, input_file, conversion_function):
+        """  Runs a passed in conversion function over a given HedFileInput object
+        Parameters
+        ----------
+        input_file : HedFileInput object
+        conversion_function : function that takes a string and returns a string and errors.
+        Returns
+        -------
+        (modified input file, error_list)
+            Modified input file is NOT a copy.
+            error_list is a list of dicts of errors.
+        """
+        error_list = []
+        for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
+            for column_number in column_to_hed_tags_dictionary:
+                old_text = column_to_hed_tags_dictionary[column_number]
+                new_text, errors = conversion_function(old_text)
+                input_file.set_cell(row_number, column_number, new_text,
+                                    include_column_prefix_if_exist=False)
+
+                for error in errors:
+                    error_reporter.add_row_and_column(error, row_number, column_number)
+                    error_list.append(error)
+
+        return input_file, error_list
+
+    def convert_file_to_short_tags(self, input_file):
+        """Takes an input file and iterates over each cell with tags and converts to short.
+        Parameters
+        ----------
+        input_file : a HedFileInput object
+        Returns
+        -------
+        (modified input file, error_list)
+            Modified input file is NOT a copy.
+            error_list is a list of dicts of errors.
+        """
+        return self._convert_file(input_file, self.convert_hed_string_to_short)
+
+    def convert_file_to_long_tags(self, input_file):
+        """Takes an input file and iterates over each cell with tags and converts to long.
+        Parameters
+        ----------
+        input_file : a HedFileInput object
+        Returns
+        -------
+        (modified input file, error_list)
+            Modified input file is NOT a copy.
+            error_list is a list of dicts of errors.
+        """
+        return self._convert_file(input_file, self.convert_hed_string_to_long)
