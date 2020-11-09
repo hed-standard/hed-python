@@ -11,17 +11,17 @@ CONTAINER_NAME="hedtools3-validation"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${ROOT_DIR}/hed-python"
 GIT_REPO_BRANCH="master"
-HOST_PORT=33000;
+HOST_PORT=33002;
 CONTAINER_PORT=80;
 
-DEPLOY_DIR="${ROOT_DIR}/hed-python/hedweb/deploy"
+DEPLOY_DIR="${ROOT_DIR}/hed-python/hedweb/deploy_hed3"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools3"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
 DOCKER_FILE="${DEPLOY_DIR}/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
-WEBINTERFACE_CODE_DIR="${ROOT_DIR}/hed-python/hedweb/hed"
-VALIDATOR_CODE_DIR="${ROOT_DIR}/hed-python/hedvalidation/hed"
+WEBINTERFACE_CODE_DIR="hed-python/hedweb/hed"
+VALIDATOR_CODE_DIR="hed-python/hedtools/hed"
 
 ##### Functions
 

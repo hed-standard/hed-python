@@ -10,7 +10,7 @@ CONTAINER_NAME="hedtools3-validation"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${PWD}/hed-python"
 GIT_REPO_BRANCH="master"
-HOST_PORT=33000
+HOST_PORT=33002
 CONTAINER_PORT=80
 
 DEPLOY_DIR="hed-python/hedweb/deploy_hed3"
