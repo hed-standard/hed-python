@@ -30,7 +30,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
-	URL_PREFIX = '/hedschema';
+    URL_PREFIX = '/hedschema';
     STATIC_URL_PATH = '/hedschema/static';
 
 
