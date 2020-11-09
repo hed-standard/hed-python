@@ -30,6 +30,8 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
+	URL_PREFIX = 'hed'
+	STATIC_URL_PATH = '/hed/static'
 
 
 class TestConfig(Config):

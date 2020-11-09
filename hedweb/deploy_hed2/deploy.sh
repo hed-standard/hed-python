@@ -9,11 +9,11 @@ IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${PWD}/hed-python"
-GIT_REPO_BRANCH="master"
+GIT_REPO_BRANCH="hed2_archive"
 HOST_PORT=33000
 CONTAINER_PORT=80
 
-DEPLOY_DIR="hed-python/hedweb/deploy"
+DEPLOY_DIR="hed-python/hedweb/deploy_hed2"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
