@@ -13,7 +13,7 @@ GIT_REPO_BRANCH="hed2_archive"
 HOST_PORT=33000
 CONTAINER_PORT=80
 
-DEPLOY_DIR="hed-python/hedweb/deploy"
+DEPLOY_DIR="hed-python/hedweb/deploy_hed2"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"

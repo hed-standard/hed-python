@@ -14,7 +14,7 @@ GIT_REPO_BRANCH="master"
 HOST_PORT=33001;
 CONTAINER_PORT=80;
 
-DEPLOY_DIR="${ROOT_DIR}/hed-python/hedwebschema/deploy"
+DEPLOY_DIR="${ROOT_DIR}/hed-python/hedwebschema/deploy_schema"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/hedwebschema.wsgi"
