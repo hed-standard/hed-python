@@ -1,6 +1,6 @@
 import os
+import pandas
 import openpyxl
-
 
 class HedFileInput:
     """Handles parsing the actual on disk hed files to a more general format."""
@@ -44,29 +44,26 @@ class HedFileInput:
         self._filename = filename
         self._worksheet_name = worksheet_name
         self._has_column_names = has_column_names
-        self._parse_hed_tags_function = None
-        self._text_file = None
-        self._workbook = None
-        self._worksheet = None
         if self.is_spreadsheet_file():
-            self._parse_hed_tags_function = self._parse_spreadsheet
-            self._workbook = self._open_workbook(self._filename)
-            self._worksheet = self.get_worksheet(self._worksheet_name)
+            if self._worksheet_name is None:
+                self._worksheet_name = 0
+            self._dataframe = pandas.read_excel(filename, sheet_name=self._worksheet_name)
         elif self.is_text_file():
-            self._parse_hed_tags_function = self._parse_text
-            self._text_file = self._open_text_file(self._filename)
+            self._dataframe = pandas.read_csv(filename, '\t')
 
     def save(self, filename):
-        if self._workbook:
+        if self.is_spreadsheet_file():
+            # !BFK! - To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
+            old_workbook = openpyxl.load_workbook(self._filename)
+            old_worksheet = self.get_worksheet(old_workbook, worksheet_name=self._worksheet_name)
+            for row_number, text_file_row in self._dataframe.iterrows():
+                for column_number, column_text in enumerate(text_file_row):
+                    old_worksheet.cell(row_number + 1, column_number + 1).value = self._dataframe.iloc[row_number, column_number]
             final_filename = filename + ".xlsx"
-            self._workbook.save(final_filename)
-        elif self._text_file:
+            old_workbook.save(final_filename)
+        elif self.is_text_file():
             final_filename = filename + ".tsv"
-            with open(final_filename, 'w') as f:
-                for text_file_row in self._text_file:
-                    row_to_write = self.TAB_DELIMITER.join(text_file_row)
-                    f.write(row_to_write)
-                    f.write('\n')
+            self._dataframe.to_csv(final_filename, '\t', index=False)
 
     # Make filename read only.
     @property
@@ -74,23 +71,18 @@ class HedFileInput:
         return self._filename
 
     def __iter__(self):
-        return self._parse_hed_tags_function()
+        return self.parse_dataframe()
 
-    def _parse_spreadsheet(self):
-        if self._worksheet is None:
-            return
-        if self._worksheet:
-            for row_number, row in enumerate(self._worksheet.rows):
-                if self.row_contains_headers(self._has_column_names, row_number):
-                    continue
-                row_hed_string, column_to_hed_tags_dictionary = self.get_hed_tags_from_worksheet_row(row)
-                yield row_number, row_hed_string, column_to_hed_tags_dictionary
-
-    def _parse_text(self):
-        for row_number, text_file_row in enumerate(self._text_file):
-            if self.row_contains_headers(self._has_column_names, row_number):
+    def parse_dataframe(self):
+        for row_number, text_file_row in self._dataframe.iterrows():
+            row_column_count = len(text_file_row)
+            self._tag_columns = self._remove_tag_columns_greater_than_row_column_count(row_column_count,
+                                                                                       self._tag_columns)
+            # Skip any blank lines.
+            if any(text_file_row.isnull()):
                 continue
-            row_hed_string, column_to_hed_tags_dictionary = self.get_hed_string_from_text_file_row(text_file_row)
+
+            row_hed_string, column_to_hed_tags_dictionary = self.get_row_hed_tags_from_array_like(text_file_row)
             yield row_number, row_hed_string, column_to_hed_tags_dictionary
 
     def set_cell(self, row_number, column_number, new_text, include_column_prefix_if_exist=False):
@@ -118,80 +110,22 @@ class HedFileInput:
             if new_text.startswith(prefix_to_remove):
                 new_text = new_text[len(prefix_to_remove):]
 
-        if self._workbook:
-            # Cells are 1 based rather than 0 based, so add 1
-            self._worksheet.cell(row_number + 1, column_number + 1).value = new_text
-        elif self._text_file:
-            text_file_row = self._text_file[row_number]
-            text_file_row[column_number] = new_text
+        if self._dataframe is None:
+            raise ValueError("No data frame loaded")
 
-    def get_hed_tags_from_worksheet_row(self, worksheet_row):
-        """Reads in the current row of HED tags from the Excel file. The hed tag columns will be concatenated to form a
-           HED string.
+        self._dataframe.iloc[row_number, column_number] = new_text
 
-        Parameters
-        ----------
-        worksheet_row: list
-            A list containing the values in the worksheet rows.
-        Returns
-        -------
-        string
-            A tuple containing a HED string containing the concatenated HED tag columns and a dictionary which
-            associates columns with HED tags.
 
-        """
-        row_column_count = len(worksheet_row)
-        self._tag_columns = self._remove_tag_columns_greater_than_row_column_count(row_column_count, self._tag_columns)
-        return self.get_row_hed_tags(worksheet_row)
-
-    def get_hed_string_from_text_file_row(self, text_file_row):
-        """Reads in the current row of HED tags from the text file. The hed tag columns will be concatenated to form a
-           HED string.
-
-        Parameters
-        ----------
-        text_file_row: str
-            A list containing strings for the row.
-        Returns
-        -------
-        string
-            A HED string containing the concatenated HED tag columns.
-
-        """
-        row_column_count = len(text_file_row)
-        self._tag_columns = self._remove_tag_columns_greater_than_row_column_count(row_column_count,
-                                                                                   self._tag_columns)
-        return self.get_row_hed_tags(text_file_row, is_worksheet=False)
-
-    def get_row_hed_tags(self, spreadsheet_row, is_worksheet=True):
-        """Reads in the current row of HED tags from a spreadsheet file. The hed tag columns will be concatenated to
-           form a HED string.
-
-        Parameters
-        ----------
-        spreadsheet_row: list
-            A list containing the values in the spreadsheet rows.
-        is_worksheet: bool
-            True if the spreadsheet is an Excel worksheet. False if it is a text file.
-        Returns
-        -------
-        string
-            A tuple containing a HED string containing the concatenated HED tag columns and a dictionary which
-            associates columns with HED tags.
-
-        """
+    def get_row_hed_tags_from_array_like(self, spreadsheet_row):
         column_to_hed_tags_dictionary = {}
         for hed_tag_column in self._tag_columns:
-            if is_worksheet:
-                column_hed_tags = spreadsheet_row[hed_tag_column].value
-            else:
-                column_hed_tags = spreadsheet_row[hed_tag_column]
+            column_hed_tags = spreadsheet_row[hed_tag_column]
             if not column_hed_tags:
                 continue
             elif hed_tag_column in self._column_prefix_dictionary:
                 column_hed_tags = self._prepend_prefix_to_required_tag_column_if_needed(
                     column_hed_tags, self._column_prefix_dictionary[hed_tag_column])
-            column_to_hed_tags_dictionary[hed_tag_column] = column_hed_tags
+            column_to_hed_tags_dictionary[hed_tag_column] = str(column_hed_tags)
         hed_string = ','.join(column_to_hed_tags_dictionary.values())
         return hed_string, column_to_hed_tags_dictionary
 
@@ -342,22 +276,8 @@ class HedFileInput:
     def is_valid_extension(self):
         return self._is_extension_type(self._filename, HedFileInput.FILE_EXTENSION)
 
-    def get_worksheet(self, worksheet_name=None):
+    @staticmethod
+    def get_worksheet(workbook, worksheet_name=None):
         if not worksheet_name:
-            return self._workbook.worksheets[0]
-        return self._workbook.get_sheet_by_name(worksheet_name)
-
-    @staticmethod
-    def _open_workbook(workbook_path):
-        return openpyxl.load_workbook(workbook_path)
-
-    @staticmethod
-    def _open_text_file(textfile_path):
-        column_delimiter = HedFileInput.TAB_DELIMITER
-        text_file = []
-        with open(textfile_path, 'r', encoding='utf-8') as opened_text_file:
-            for text_file_row in opened_text_file:
-                text_file_row = [x.strip() for x in text_file_row.split(column_delimiter)]
-                text_file.append(text_file_row)
-
-        return text_file
+            return workbook.worksheets[0]
+        return workbook.get_sheet_by_name(worksheet_name)
