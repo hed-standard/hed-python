@@ -40,9 +40,9 @@ class TagFormat:
         for is_hed_tag, (startpos, endpos) in hed_tags:
             tag = hed_string[startpos:endpos]
             if is_hed_tag:
-                short_tag_string, single_error = self._convert_to_short_tag(tag)
+                short_tag_string, single_error = self._convert_to_short_tag(tag, startpos)
                 if single_error:
-                    errors.append(single_error)
+                    errors.extend(single_error)
                 final_string += short_tag_string
             else:
                 final_string += tag
@@ -81,9 +81,9 @@ class TagFormat:
         for is_hed_tag, (startpos, endpos) in hed_tags:
             tag = hed_string[startpos:endpos]
             if is_hed_tag:
-                converted_tag, single_error = self._convert_to_long_tag(tag)
+                converted_tag, single_error = self._convert_to_long_tag(tag, startpos)
                 if single_error:
-                    errors.append(single_error)
+                    errors.extend(single_error)
                 final_string += converted_tag
             else:
                 final_string += tag
@@ -92,7 +92,7 @@ class TagFormat:
 
         return final_string, errors
 
-    def _convert_to_long_tag(self, hed_tag):
+    def _convert_to_long_tag(self, hed_tag, offset):
         """This takes a hed tag(short or long form) and converts it to the long form
             Works left to right.(mostly relevant for errors)
             Note: This only does minimal validation
@@ -141,8 +141,8 @@ class TagFormat:
                     found_unknown_extension = True
                     if not found_tag_entry:
                         error = error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND, hed_tag,
-                                                                 index_start, index_end)
-                        return hed_tag, error
+                                                                 index_start + offset, index_end + offset)
+                        return hed_tag, [error]
                     continue
 
                 tag_entry = self.map_schema.tag_dict[tag]
@@ -152,25 +152,25 @@ class TagFormat:
                 # Verify the tag has the correct path above it.
                 if not tag_string.endswith(main_hed_portion):
                     error = error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE, hed_tag,
-                                                             index_start, index_end,
+                                                             index_start + offset, index_end + offset,
                                                              tag_entry.long_org_tag)
-                    return hed_tag, error
+                    return hed_tag, [error]
                 found_index_end = index_end
                 found_tag_entry = tag_entry
             else:
                 # These means we found a known tag in the remainder/extension section, which is an error
                 if tag in self.map_schema.tag_dict:
                     error = error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE, hed_tag,
-                                                             index_start, index_end,
+                                                             index_start + offset, index_end + offset,
                                                              self.map_schema.tag_dict[tag].long_org_tag)
-                    return hed_tag, error
+                    return hed_tag, [error]
 
         remainder = hed_tag[found_index_end:]
 
         long_tag_string = found_tag_entry.long_org_tag + remainder
-        return long_tag_string, None
+        return long_tag_string, []
 
-    def _convert_to_short_tag(self, hed_tag):
+    def _convert_to_short_tag(self, hed_tag, offset):
         """This takes a hed tag(short or long form) and converts it to the long form
             Works right to left.(mostly relevant for errors)
             Note: This only does minimal validation
@@ -219,20 +219,21 @@ class TagFormat:
                 index -= 1
 
         if found_tag_entry is None:
-            error = error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND, hed_tag, index, last_found_index)
-            return hed_tag, error
+            error = error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND, hed_tag,
+                                                     index + offset, last_found_index + offset)
+            return hed_tag, [error]
 
         # Verify the tag has the correct path above it.
         main_hed_portion = clean_tag[:last_found_index]
         tag_string = found_tag_entry.long_clean_tag
         if not tag_string.endswith(main_hed_portion):
-            error = error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE, hed_tag, index, last_found_index,
-                                                     found_tag_entry.long_org_tag)
-            return hed_tag, error
+            error = error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE, hed_tag, index + offset,
+                                                     last_found_index + offset, found_tag_entry.long_org_tag)
+            return hed_tag, [error]
 
         remainder = hed_tag[last_found_index:]
         short_tag_string = found_tag_entry.short_org_tag + remainder
-        return short_tag_string, None
+        return short_tag_string, []
 
     def _convert_file(self, input_file, conversion_function):
         """  Runs a passed in conversion function over a given HedFileInput object
