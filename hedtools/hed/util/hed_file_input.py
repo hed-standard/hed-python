@@ -1,6 +1,7 @@
 import os
 import pandas
 import openpyxl
+from hed.util.hed_event_mapper import EventMapper
 
 class HedFileInput:
     """Handles parsing the actual on disk hed files to a more general format."""
@@ -39,8 +40,8 @@ class HedFileInput:
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        self._column_prefix_dictionary = self._subtract_1_from_dictionary_keys(column_prefix_dictionary)
-        self._tag_columns = self._convert_tag_columns_to_processing_format(tag_columns, self._column_prefix_dictionary)
+        self.mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+
         self._filename = filename
         self._worksheet_name = worksheet_name
         self._has_column_names = has_column_names
@@ -75,9 +76,6 @@ class HedFileInput:
 
     def parse_dataframe(self):
         for row_number, text_file_row in self._dataframe.iterrows():
-            row_column_count = len(text_file_row)
-            self._tag_columns = self._remove_tag_columns_greater_than_row_column_count(row_column_count,
-                                                                                       self._tag_columns)
             # Skip any blank lines.
             if any(text_file_row.isnull()):
                 continue
@@ -103,164 +101,31 @@ class HedFileInput:
         -------
 
         """
-        if not include_column_prefix_if_exist \
-                and self._column_prefix_dictionary \
-                and column_number in self._column_prefix_dictionary:
-            prefix_to_remove = self._column_prefix_dictionary[column_number]
-            if new_text.startswith(prefix_to_remove):
-                new_text = new_text[len(prefix_to_remove):]
+        if not include_column_prefix_if_exist:
+            new_text = self.mapper.remove_prefix_if_needed(column_number, new_text)
 
         if self._dataframe is None:
             raise ValueError("No data frame loaded")
 
         self._dataframe.iloc[row_number, column_number] = new_text
 
-
     def get_row_hed_tags_from_array_like(self, spreadsheet_row):
-        column_to_hed_tags_dictionary = {}
-        for hed_tag_column in self._tag_columns:
-            column_hed_tags = spreadsheet_row[hed_tag_column]
-            if not column_hed_tags:
-                continue
-            elif hed_tag_column in self._column_prefix_dictionary:
-                column_hed_tags = self._prepend_prefix_to_required_tag_column_if_needed(
-                    column_hed_tags, self._column_prefix_dictionary[hed_tag_column])
-            column_to_hed_tags_dictionary[hed_tag_column] = str(column_hed_tags)
-        hed_string = ','.join(column_to_hed_tags_dictionary.values())
-        return hed_string, column_to_hed_tags_dictionary
-
-    @staticmethod
-    def _subtract_1_from_dictionary_keys(int_key_dictionary):
-        """Subtracts 1 from each dictionary key.
+        """Reads in the current row of HED tags from the Excel file. The hed tag columns will be concatenated to form a
+           HED string.
 
         Parameters
         ----------
-        int_key_dictionary: dict
-            A dictionary with int keys.
-        Returns
-        -------
-        dictionary
-            A dictionary with the keys subtracted by 1.
-
-        """
-        return {key - 1: value for key, value in int_key_dictionary.items()}
-
-    def _convert_tag_columns_to_processing_format(self, tag_columns, column_prefix_dictionary):
-        """Converts the tag columns list to a list that allows it to be internally processed. 1 is subtracted from
-           each tag column making it 0 based. Then the tag columns are combined with the prefix needed tag columns.
-
-        Parameters
-        ----------
-        tag_columns: list
-            A list of ints containing the columns that contain the HED tags.
-        column_prefix_dictionary:
-            A dict where keys are column numbers, and values are the prefix to append to tags
-                in that column if not present
-        Returns
-        -------
-        list
-            A list containing the modified list of tag columns that's used for processing.
-
-        """
-        tag_columns = self._subtract_1_from_list_elements(tag_columns)
-        tag_columns = self._add_required_tag_columns_to_tag_columns(tag_columns, column_prefix_dictionary)
-        return tag_columns
-
-    @staticmethod
-    def _add_required_tag_columns_to_tag_columns(tag_columns, column_prefix_dictionary):
-        """Adds the required tag columns to the tag columns.
-
-         Parameters
-         ----------
-        tag_columns: list
-            A list containing the tag column indices.
-         column_prefix_dictionary: dict
-            A dictionary containing the required tag columns.
-         Returns
-         -------
-         list
-             A list containing the combined required tag columns and the tag columns.
-
-         """
-        return tag_columns + list(set(column_prefix_dictionary.keys()) - set(tag_columns))
-
-    @staticmethod
-    def _remove_tag_columns_greater_than_row_column_count(row_column_count, hed_tag_columns):
-        """Removes the HED tag columns that are greater than the row column count.
-
-        Parameters
-        ----------
-        row_column_count: int
-            The number of columns in the row.
-        hed_tag_columns: list
-            A list of ints containing the columns that contain the HED tags.
-        Returns
-        -------
-        list
-            A list that only contains the HED tag columns that are less than the row column count.
-
-        """
-        return sorted(filter(lambda x: x < row_column_count, hed_tag_columns))
-
-    def _prepend_prefix_to_required_tag_column_if_needed(self, required_tag_column_tags, required_tag_prefix):
-        """Prepends the tag paths to the required tag column tags that need them.
-
-        Parameters
-        ----------
-        required_tag_column_tags: str
-            A string containing HED tags associated with a required tag column that may need a tag prefix prepended to
-            its tags.
-        required_tag_prefix: str
-            A string that will be added if missing to any given tag.
+        spreadsheet_row: list
+            A list containing the values in the worksheet rows.
         Returns
         -------
         string
-            A comma separated string that contains the required HED tags with the tag prefix prepended to them if
-            needed.
+            A tuple containing a HED string containing the concatenated HED tag columns and a dictionary which
+            associates columns with HED tags.
 
         """
-        required_tags_with_prefix = []
-        required_tags = required_tag_column_tags.split(',')
-        required_tags = [x.strip() for x in required_tags]
-        for required_tag in required_tags:
-            if required_tag and not required_tag.lower().startswith(required_tag_prefix.lower()):
-                required_tag = required_tag_prefix + required_tag
-            required_tags_with_prefix.append(required_tag)
-        return ','.join(required_tags_with_prefix)
-
-    @staticmethod
-    def _subtract_1_from_list_elements(int_list):
-        """Subtracts 1 from each int in a list.
-
-        Parameters
-        ----------
-        int_list: list
-            A list of ints.
-        Returns
-        -------
-        list
-            A list of containing each element subtracted by 1.
-
-        """
-        return [x - 1 for x in int_list]
-
-    @staticmethod
-    def row_contains_headers(has_headers, row_number):
-        """Checks to see if the row contains headers.
-
-         Parameters
-         ----------
-        has_headers: bool
-            True if file has headers. False, if otherwise.
-         row_number: int
-            The row number of the spreadsheet.
-         Returns
-         -------
-         bool
-             True if the row contains the headers. False, if otherwise.
-
-         """
-        return has_headers and row_number == 0
+        expanded_row = self.mapper.expand_row_tags(spreadsheet_row)
+        return expanded_row["HED"], expanded_row["column_to_hed_tags"]
 
     @staticmethod
     def _is_extension_type(filename, allowed_exts):
