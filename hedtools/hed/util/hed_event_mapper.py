@@ -32,20 +32,33 @@ class ColumnSettings:
 class EventMapper:
     """Handles mapping columns of hed tags from a file to a usable format."""
     def __init__(self, event_filename=None, tag_columns=None, column_prefix_dictionary=None):
+        """
+        Todo: expand this
+        Parameters
+        ----------
+        event_filename : A json filename to gather named columns from
+        tag_columns: list
+             A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
+         column_prefix_dictionary: dict
+             A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
+             prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
+             4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
+             the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
+             that needs Event/Category/ prepended to them.
+        """
         self.minimum_required_keys = ("HED", )
         # This points to event_type entries based on column names or indexes
         self.event_types = {}
-        self._column_prefix_dictionary = {}
-
         # Maps column number to event_entry.  This is what's actually used by most code.
         self._final_column_map = {}
-        if event_filename:
-            self.add_json_file_events(event_filename)
 
         self._column_map = None
         self._tag_columns = []
-        self.set_tag_columns(tag_columns, False)
         self._column_prefix_dictionary = {}
+        if event_filename:
+            self.add_json_file_events(event_filename)
+
+        self.set_tag_columns(tag_columns, False)
         self.set_column_prefix_dict(column_prefix_dictionary, False)
 
         # finalize the column map based on initial settings.
@@ -68,9 +81,9 @@ class EventMapper:
         with open(event_filename, "r") as fp:
             loaded_events = json.load(fp)
             for event, event_dict in loaded_events.items():
-                self.add_single_event_type(event, event_dict)
+                self._add_single_event_type(event, event_dict)
 
-    def detect_event_type(self, dict_for_entry):
+    def _detect_event_type(self, dict_for_entry):
         if not dict_for_entry or not set(self.minimum_required_keys).issubset(dict_for_entry.keys()):
             return None
 
@@ -83,34 +96,29 @@ class EventMapper:
 
         return ColumnType.Value
 
-    def _add_tag_columns(self, tag_columns):
-        tag_columns = self._subtract_1_from_list_elements(tag_columns)
-        for column_number in tag_columns:
-            self.add_single_event_type(column_number, None, ColumnType.HEDTags)
-
     def add_value_column(self, name, hed):
         new_entry = {
             "HED": hed
         }
-        self.add_single_event_type(name, new_entry)
+        self._add_single_event_type(name, new_entry)
 
     def add_attribute_column(self, column_name):
-        self.add_single_event_type(column_name, None, ColumnType.Attribute)
+        self._add_single_event_type(column_name, None, ColumnType.Attribute)
 
     def add_hedtag_column(self, column_name):
-        self.add_single_event_type(column_name, None, ColumnType.HEDTags)
+        self._add_single_event_type(column_name, None, ColumnType.HEDTags)
 
     def add_ignore_column(self, column_name):
-        self.add_single_event_type(column_name, None, ColumnType.Ignore)
+        self._add_single_event_type(column_name, None, ColumnType.Ignore)
 
-    def add_single_event_type(self, column_name, dict_for_entry, event_type=None):
+    def _add_single_event_type(self, column_name, dict_for_entry, event_type=None):
         event_entry = self._create_event_entry(dict_for_entry, column_name, event_type)
         self.event_types[column_name] = event_entry
         return True
 
     def _create_event_entry(self, dict_for_entry=None, column_name=None, event_type=None):
         if event_type is None:
-            event_type = self.detect_event_type(dict_for_entry)
+            event_type = self._detect_event_type(dict_for_entry)
 
         if dict_for_entry is None:
             dict_for_entry = {}
@@ -129,6 +137,17 @@ class EventMapper:
         """
         self._column_map = new_column_map
         self._finalize_mapping()
+
+    def _set_column_prefix(self, column_number, new_required_prefix):
+        if column_number not in self._final_column_map:
+            event_entry = self._create_event_entry()
+            self._final_column_map[column_number] = event_entry
+        else:
+            event_entry = self._final_column_map[column_number]
+
+        event_entry.column_prefix = new_required_prefix
+        if event_entry.type is None or event_entry.type == ColumnType.Ignore:
+            event_entry.type = ColumnType.HEDTags
 
     def _finalize_mapping(self):
         self._final_column_map = {}
@@ -156,21 +175,10 @@ class EventMapper:
         for column_number, prefix in self._column_prefix_dictionary.items():
             self._set_column_prefix(column_number, prefix)
 
-    def _set_column_prefix(self, column_number, new_required_prefix):
-        if column_number not in self._final_column_map:
-            event_entry = self._create_event_entry()
-            self._final_column_map[column_number] = event_entry
-        else:
-            event_entry = self._final_column_map[column_number]
-
-        event_entry.column_prefix = new_required_prefix
-        if event_entry.type is None or event_entry.type == ColumnType.Ignore:
-            event_entry.type = ColumnType.HEDTags
-
     def expand_column(self, column_number, input_text):
         # Default 1-1 mapping if we don't have specific behavior.
-        if column_number not in self._final_column_map:
-            return None, False
+        if not self._final_column_map:
+            return input_text, False
 
         column_entry = self._final_column_map[column_number]
         event_type = column_entry.type
@@ -191,7 +199,7 @@ class EventMapper:
         elif event_type == ColumnType.Attribute:
             return input_text, column_entry.name
 
-        return "BUG NO ENTRY FOUND"
+        return "BUG NO ENTRY FOUND", False
 
     def expand_row_tags(self, row_text):
         result_dict = {}

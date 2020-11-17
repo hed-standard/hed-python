@@ -1,11 +1,13 @@
 from hed.util.hed_event_mapper import EventMapper
 from hed.util.base_file_input import BaseFileInput
 
-class HedFileInput(BaseFileInput):
+class EventFileInput(BaseFileInput):
     """Handles parsing the actual on disk hed files to a more general format."""
+
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
-                 has_column_names=True, column_prefix_dictionary=None):
-        """Constructor for the HedFileInput class.
+                 has_column_names=True, column_prefix_dictionary=None,
+                 json_event_files=None, attribute_columns=None):
+        """Constructor for the EventFileInput class.
 
          Parameters
          ----------
@@ -30,5 +32,31 @@ class HedFileInput(BaseFileInput):
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        self.mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+        if isinstance(json_event_files, str):
+            json_event_files = [json_event_files]
+        if isinstance(attribute_columns, str):
+            attribute_columns = [attribute_columns]
+
+        new_mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+        for json_filename in json_event_files:
+            new_mapper.add_json_file_events(json_filename)
+        for attribute_name in attribute_columns:
+            new_mapper.add_attribute_column(attribute_name)
+
+        self.mapper = new_mapper
         super().__init__(filename, worksheet_name, has_column_names, self.mapper)
+
+        # Finalize mapping information
+        if self._dataframe is not None and self._has_column_names:
+            columns = self._dataframe.columns
+            self.mapper.set_column_map(columns)
+
+
+if __name__ == '__main__':
+    #prefixed_needed_tag_columns = {6: 'Event/Description/'}
+    event_file = EventFileInput("examples/data/basic_events_test.xlsx",
+                                #column_prefix_dictionary=prefixed_needed_tag_columns,
+                                json_event_files="examples/data/both_types_events.json", attribute_columns=["onset"])
+
+    for stuff in event_file:
+        print(stuff)
