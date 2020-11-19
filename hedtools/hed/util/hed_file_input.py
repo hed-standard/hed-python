@@ -2,7 +2,7 @@ from hed.util.hed_event_mapper import EventMapper
 from hed.util.base_file_input import BaseFileInput
 
 class HedFileInput(BaseFileInput):
-    """Handles parsing the actual on disk hed files to a more general format."""
+    """A class to parse basic hed style spreadsheets into a more general format."""
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None):
         """Constructor for the HedFileInput class.
@@ -30,5 +30,5 @@ class HedFileInput(BaseFileInput):
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        self.mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
-        super().__init__(filename, worksheet_name, has_column_names, self.mapper)
+        new_mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+        super().__init__(filename, worksheet_name, has_column_names, new_mapper)

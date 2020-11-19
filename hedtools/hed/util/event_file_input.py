@@ -2,7 +2,7 @@ from hed.util.hed_event_mapper import EventMapper
 from hed.util.base_file_input import BaseFileInput
 
 class EventFileInput(BaseFileInput):
-    """Handles parsing the actual on disk hed files to a more general format."""
+    """A class to parse bids style spreadsheets into a more general format."""
 
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
@@ -26,36 +26,33 @@ class EventFileInput(BaseFileInput):
              4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
              the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
              that needs Event/Category/ prepended to them.
+         json_event_files : str or [str]
+             A list of json filenames to pull events from
+         attribute_columns: str/int or [str/int]
+             A list of column names or numbers to treat as attributes.
          """
         if tag_columns is None:
             tag_columns = [2]
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        if isinstance(json_event_files, str):
-            json_event_files = [json_event_files]
-        if isinstance(attribute_columns, str):
-            attribute_columns = [attribute_columns]
-
         new_mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
-        for json_filename in json_event_files:
-            new_mapper.add_json_file_events(json_filename)
-        for attribute_name in attribute_columns:
-            new_mapper.add_attribute_column(attribute_name)
+        new_mapper.add_json_file_events(json_event_files)
+        new_mapper.add_attribute_columns(attribute_columns)
 
-        self.mapper = new_mapper
-        super().__init__(filename, worksheet_name, has_column_names, self.mapper)
+        super().__init__(filename, worksheet_name, has_column_names, new_mapper)
 
         # Finalize mapping information
         if self._dataframe is not None and self._has_column_names:
             columns = self._dataframe.columns
-            self.mapper.set_column_map(columns)
+            self._mapper.set_column_map(columns)
+        else:
+            raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
+                             "This is probably not intended.")
 
 
 if __name__ == '__main__':
-    #prefixed_needed_tag_columns = {6: 'Event/Description/'}
     event_file = EventFileInput("examples/data/basic_events_test.xlsx",
-                                #column_prefix_dictionary=prefixed_needed_tag_columns,
                                 json_event_files="examples/data/both_types_events.json", attribute_columns=["onset"])
 
     for stuff in event_file:

@@ -25,30 +25,41 @@ class BaseFileInput:
          has_column_names: bool
              True if file has column names. The validation will skip over the first line of the file. False, if
              otherwise.
+         mapper: EventMapper object
+             Pass in a built event mapper(see HedFileInput or EventFileInput for examples), or None to just
+             retrieve all columns as hed tags.
          """
         if mapper is None:
-            self.mapper = EventMapper()
-
+            mapper = EventMapper()
+        self._mapper = mapper
         self._filename = filename
         self._worksheet_name = worksheet_name
         self._has_column_names = has_column_names
+        pandas_header = 0
+        if not self._has_column_names:
+            pandas_header = None
+
         if self.is_spreadsheet_file():
             if self._worksheet_name is None:
                 self._worksheet_name = 0
-            self._dataframe = pandas.read_excel(filename, sheet_name=self._worksheet_name)
+            self._dataframe = pandas.read_excel(filename, sheet_name=self._worksheet_name, header=pandas_header)
         elif self.is_text_file():
-            self._dataframe = pandas.read_csv(filename, '\t')
+            self._dataframe = pandas.read_csv(filename, '\t', header=pandas_header)
 
-    def save(self, filename):
+    def save(self, filename, include_formatting=False):
         if self.is_spreadsheet_file():
-            # !BFK! - To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
-            old_workbook = openpyxl.load_workbook(self._filename)
-            old_worksheet = self.get_worksheet(old_workbook, worksheet_name=self._worksheet_name)
-            for row_number, text_file_row in self._dataframe.iterrows():
-                for column_number, column_text in enumerate(text_file_row):
-                    old_worksheet.cell(row_number + 1, column_number + 1).value = self._dataframe.iloc[row_number, column_number]
             final_filename = filename + ".xlsx"
-            old_workbook.save(final_filename)
+            if include_formatting:
+                # To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
+                # this is not ideal
+                old_workbook = openpyxl.load_workbook(self._filename)
+                old_worksheet = self.get_worksheet(old_workbook, worksheet_name=self._worksheet_name)
+                for row_number, text_file_row in self._dataframe.iterrows():
+                    for column_number, column_text in enumerate(text_file_row):
+                        old_worksheet.cell(row_number + 1, column_number + 1).value = self._dataframe.iloc[row_number, column_number]
+                old_workbook.save(final_filename)
+            else:
+                self._dataframe.to_excel(final_filename)
         elif self.is_text_file():
             final_filename = filename + ".tsv"
             self._dataframe.to_csv(final_filename, '\t', index=False)
@@ -67,7 +78,7 @@ class BaseFileInput:
 
     def parse_dataframe(self, mapper=None):
         if mapper is None:
-            mapper = self.mapper
+            mapper = self._mapper
 
         for row_number, text_file_row in self._dataframe.iterrows():
             # Skip any blank lines.
@@ -90,14 +101,14 @@ class BaseFileInput:
         new_text : str
             Text to enter in the given cell
         include_column_prefix_if_exist : bool
-            If true and the column matches one from _column_prefix_dictionary, remove the prefix
+            If true and the column matches one from mapper _column_prefix_dictionary, remove the prefix
 
         Returns
         -------
 
         """
         if not include_column_prefix_if_exist:
-            new_text = self.mapper.remove_prefix_if_needed(column_number, new_text)
+            new_text = self._mapper.remove_prefix_if_needed(column_number, new_text)
 
         if self._dataframe is None:
             raise ValueError("No data frame loaded")
@@ -148,8 +159,7 @@ class BaseFileInput:
 
 
 if __name__ == '__main__':
-    prefixed_needed_tag_columns = {6: 'Event/Description/'}
-    event_file = BaseFileInput("examples/data/basic_events_test.xlsx", column_prefix_dictionary=prefixed_needed_tag_columns)
+    event_file = BaseFileInput("examples/data/basic_events_test.xlsx")
 
     for stuff in event_file:
         print(stuff)
