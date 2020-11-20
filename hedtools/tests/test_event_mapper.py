@@ -69,9 +69,9 @@ class Test(unittest.TestCase):
         mapper.add_hedtag_columns(self.add_column_name)
         self.assertTrue(len(mapper.event_types) >= 1)
 
-    def test_add_ignore_column(self):
+    def test_add_ignore_columns(self):
         mapper = EventMapper()
-        mapper.add_ignore_column(self.add_column_name)
+        mapper.add_ignore_columns(self.add_column_name)
         self.assertTrue(len(mapper.event_types) >= 1)
 
     def test__add_single_event_type(self):

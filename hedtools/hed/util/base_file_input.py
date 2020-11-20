@@ -59,10 +59,10 @@ class BaseFileInput:
                         old_worksheet.cell(row_number + 1, column_number + 1).value = self._dataframe.iloc[row_number, column_number]
                 old_workbook.save(final_filename)
             else:
-                self._dataframe.to_excel(final_filename)
+                self._dataframe.to_excel(final_filename, header=self._has_column_names)
         elif self.is_text_file():
             final_filename = filename + ".tsv"
-            self._dataframe.to_csv(final_filename, '\t', index=False)
+            self._dataframe.to_csv(final_filename, '\t', index=False, header=self._has_column_names)
 
     # Make filename read only.
     @property
