@@ -1,7 +1,8 @@
-FROM python:3.6.5-alpine3.7
+FROM python:3.7-alpine
 COPY ./requirements.txt /root/
 WORKDIR /root
 RUN apk add --no-cache gcc \
+build-base \
 linux-headers \
 musl-dev \
 openrc \
