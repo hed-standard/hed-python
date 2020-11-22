@@ -401,7 +401,7 @@ class HedValidator:
         return previous_original_tag, previous_formatted_tag
 
     @staticmethod
-    def generate_row_issue_message(row_number, has_headers=True):
+    def generate_row_issue_message(row_number):
         """Generates a row issue message that is associated with a particular row in a spreadsheet.
 
          Parameters
@@ -416,12 +416,10 @@ class HedValidator:
              A singleton list containing the row issue message.
 
          """
-        if has_headers:
-            row_number += 1
         return error_reporter.report_error_type('row', error_row=row_number)
 
     @staticmethod
-    def generate_column_issue_message(row_number, column_number, has_headers=True):
+    def generate_column_issue_message(row_number, column_number):
         """Generates a column issue message that is associated with a particular column in a spreadsheet.
 
          Parameters
@@ -430,8 +428,6 @@ class HedValidator:
             The row number that the issue is associated with.
          column_number: int
             The column number that the issue is associated with.
-         has_headers: bool
-            If true, adjusts row number to account for one line header.
 
          Returns
          -------
@@ -439,7 +435,4 @@ class HedValidator:
              A singleton list containing the column issue message.
 
          """
-        if has_headers:
-            row_number += 1
-        column_number += 1
         return error_reporter.report_error_type('column', error_row=row_number, error_column=column_number)
