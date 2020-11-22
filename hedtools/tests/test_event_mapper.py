@@ -32,8 +32,6 @@ class Test(unittest.TestCase):
         cls.complex_hed_tag_required_prefix = "TestRequiredPrefix/ThisIsAHedTag, (TestRequiredPrefix/NewTag, TestRequiredPrefix/NewTag3)"
         cls.complex_hed_tag_no_prefix = "ThisIsAHedTag, (NewTag, NewTag3)"
 
-
-
     def test_set_column_prefix_dict(self):
         mapper = EventMapper()
         mapper.set_column_prefix_dict(self.column_prefix_dictionary, True)
@@ -109,7 +107,7 @@ class Test(unittest.TestCase):
         mapper = EventMapper()
         mapper.add_json_file_events(self.basic_events_json)
         mapper.set_column_map(self.basic_column_map)
-        expanded_column = mapper.expand_column(2, "go")
+        expanded_column = mapper._expand_column(2, "go")
         self.assertTrue(isinstance(expanded_column[0], str))
 
     def test_expand_row_tags(self):
@@ -124,7 +122,7 @@ class Test(unittest.TestCase):
 
     def test_remove_prefix_if_needed(self):
         mapper = EventMapper()
-        mapper._set_column_prefix(self.add_column_number, self.required_prefix)
+        mapper.set_column_prefix_dict({self.add_column_number: self.required_prefix})
         no_prefix_string = mapper.remove_prefix_if_needed(self.add_column_number, self.complex_hed_tag_required_prefix)
         self.assertEqual(no_prefix_string, self.complex_hed_tag_no_prefix)
 

@@ -49,7 +49,10 @@ class ColumnSettings:
 
 
 class EventMapper:
-    """Handles mapping columns of hed tags from a file to a usable format."""
+    """Handles mapping columns of hed tags from a file to a usable format.
+
+        Private Functions and variables column and row indexing starts at 0.
+        Public functions and variables indexing starts at 1(or 2 if has column names)"""
     def __init__(self, event_filenames=None, tag_columns=None, column_prefix_dictionary=None):
         """Constructor for EventMapper
 
@@ -150,16 +153,26 @@ class EventMapper:
         Parameters
         ----------
         new_column_map : list or dict
-            If list, should be each column name with numbers assumed to start at 0.
-            If dict, should be column_number : column name
+            If list, should be each column name with column numbers assumed to start at 1.
+            If dict, should be column_number : column name.  Column number should start at 1.
         """
-        self._column_map = new_column_map
+        column_map = {}
+        if isinstance(new_column_map, dict):
+            column_map = self._subtract_1_from_dictionary_keys(new_column_map)
+        # List like
+        else:
+            column_map = {column_number: column_name for column_number, column_name in enumerate(new_column_map)}
+        self._column_map = column_map
         self._finalize_mapping()
 
-    def expand_column(self, column_number, input_text):
+    def _expand_column(self, column_number, input_text):
         # Default 1-1 mapping if we don't have specific behavior.
-        if column_number not in self._final_column_map:
+        if not self._final_column_map:
             return input_text, False
+
+        # If no entry, ignore this column.
+        if column_number not in self._final_column_map:
+            return None, False
 
         column_entry = self._final_column_map[column_number]
         event_type = column_entry.type
@@ -186,13 +199,13 @@ class EventMapper:
         result_dict = {}
         column_to_hed_tags_dictionary = {}
         for column_number, cell_text in enumerate(row_text):
-            translated_column, attribute_name = self.expand_column(column_number, str(cell_text))
+            translated_column, attribute_name = self._expand_column(column_number, str(cell_text))
             if translated_column is None:
                 continue
             if attribute_name:
                 result_dict[attribute_name] = translated_column
                 continue
-            column_to_hed_tags_dictionary[column_number] = translated_column
+            column_to_hed_tags_dictionary[column_number + 1] = translated_column
 
         result_dict["column_to_hed_tags"] = column_to_hed_tags_dictionary
         final_hed_string = ','.join(column_to_hed_tags_dictionary.values())
@@ -204,6 +217,7 @@ class EventMapper:
         """This is the inverse of _prepend_prefix_to_required_tag_column_if_needed
 
         Used when saving back out to a file so we don't always save the added prefix"""
+        column_number -= 1
         if column_number not in self._final_column_map:
             return new_text
 
@@ -272,24 +286,17 @@ class EventMapper:
     def _finalize_mapping(self):
         self._final_column_map = {}
         if self._column_map is not None:
-            if isinstance(self._column_map, dict):
-                for column_number, column_name in self._column_map.items():
-                    if column_name in self.event_types:
-                        event_entry = self.event_types[column_name]
-                        event_entry.name = column_name
-                        self._final_column_map[column_number] = event_entry
-            # List like
-            else:
-                for column_number, column_name in enumerate(self._column_map):
-                    if column_name in self.event_types:
-                        event_entry = self.event_types[column_name]
-                        event_entry.name = column_name
-                        self._final_column_map[column_number] = event_entry
+            for column_number, column_name in self._column_map.items():
+                if column_name in self.event_types:
+                    event_entry = self.event_types[column_name]
+                    event_entry.name = column_name
+                    self._final_column_map[column_number] = event_entry
 
         # Add any numbered event columns
         for column_name, event_entry in self.event_types.items():
             if isinstance(column_name, int):
-                column_number = column_name
+                # Convert to internal numbering format
+                column_number = column_name - 1
                 self._final_column_map[column_number] = event_entry
 
         # Add column numbers.

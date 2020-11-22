@@ -54,9 +54,15 @@ class BaseFileInput:
                 # this is not ideal
                 old_workbook = openpyxl.load_workbook(self._filename)
                 old_worksheet = self.get_worksheet(old_workbook, worksheet_name=self._worksheet_name)
+                # excel spreadsheets are 1 based, then add another 1 for column names if present
+                adj_row_for_col_names = 1
+                if self._has_column_names:
+                    adj_row_for_col_names += 1
+                adj_for_one_based_cols = 1
                 for row_number, text_file_row in self._dataframe.iterrows():
                     for column_number, column_text in enumerate(text_file_row):
-                        old_worksheet.cell(row_number + 1, column_number + 1).value = self._dataframe.iloc[row_number, column_number]
+                        old_worksheet.cell(row_number + adj_row_for_col_names, column_number + adj_for_one_based_cols).value = \
+                            self._dataframe.iloc[row_number, column_number]
                 old_workbook.save(final_filename)
             else:
                 self._dataframe.to_excel(final_filename, header=self._has_column_names)
@@ -80,14 +86,17 @@ class BaseFileInput:
         if mapper is None:
             mapper = self._mapper
 
+        start_at_one = 1
+        if self._has_column_names:
+            start_at_one += 1
         for row_number, text_file_row in self._dataframe.iterrows():
             # Skip any blank lines.
-            if any(text_file_row.isnull()):
+            if all(text_file_row.isnull()):
                 continue
 
             row_dict = self._get_dict_from_row_hed_tags(text_file_row, mapper)
             row_hed_string, column_to_hed_tags_dictionary = self._get_row_hed_tags_from_dict(row_dict)
-            yield row_number, row_hed_string, column_to_hed_tags_dictionary
+            yield row_number + start_at_one, row_hed_string, column_to_hed_tags_dictionary
 
     def set_cell(self, row_number, column_number, new_text, include_column_prefix_if_exist=False):
         """
@@ -113,7 +122,10 @@ class BaseFileInput:
         if self._dataframe is None:
             raise ValueError("No data frame loaded")
 
-        self._dataframe.iloc[row_number, column_number] = new_text
+        adj_row_number = 1
+        if self._has_column_names:
+            adj_row_number += 1
+        self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = new_text
 
     def _get_dict_from_row_hed_tags(self, spreadsheet_row, mapper):
         row_dict = mapper.expand_row_tags(spreadsheet_row)
