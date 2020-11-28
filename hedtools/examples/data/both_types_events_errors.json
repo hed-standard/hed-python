@@ -1,0 +1,30 @@
+{
+   "trial_type": {
+       "LongName": "Event category",
+       "Description": "Indicator of type of action that is expected",
+       "Levels": {
+          "go": "A red square is displayed to indicate starting",
+          "stop": "A blue square is displayed to indicate stopping"
+       },
+       "HED": {
+          "go": "Event/Category/Experimental stimulus, Event/Label/RedSquare,Event/Description/A red square is displayed to indicate starting,Sensory presentation/Visual, Item/Object/2D Shape/Square,Attribute/Visual/Color/Red, Attribute/Visual/Rendering type/Screen,Attribute/Location/Screen/Center",
+          "stop": "Event/Category/Experimental stimulus, Event/Label/BlueSquare,Event/Description/A blue square is displayed to indicate stopping,Sensory presentation/Visual, Item/Object/2D Shape/Square,Attribute/Visual/Color/Blue, Attribute/Visual/Rendering type/Screen,Attribute/Location/Screen/Center"
+       }
+   },
+   "response_time": {
+       "LongName": "Response time after stimulus",
+       "Description": "Time from stimulus presentation until subject presses button",
+       "Units": "ms",
+       "HED": "Attribute/Response start delay/# ms, Action/Button press"
+   },
+   "stim_file": {
+       "LongName": "Stimulus file name",
+       "Description": "Relative path of the stimulus image file",
+       "HED": {"THING":  "Attribute/File/#" }
+   },
+  "debug_col": {
+       "LongName": "Stimulus file name",
+       "Description": "Relative path of the stimulus image file",
+       "HED": "Attribute/Response start delay/1 seconds, Action/Button press"
+   }
+}

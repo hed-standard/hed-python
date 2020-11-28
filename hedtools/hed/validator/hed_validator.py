@@ -4,9 +4,9 @@ types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after cr
 the get_validation_issues() function.
 
 """
-
+from hed.util.error_types import ValidationErrors
 from hed.util import hed_cache
-from hed.validator import error_reporter
+from hed.util import error_reporter
 from hed.util.hed_dictionary import HedDictionary
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
@@ -34,7 +34,7 @@ class HedValidator:
             HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
                 or does not point to a specific xml file.
         hed_dictionary: HedDictionary
-            Name of already prepared HedDictionary to use.  This overrides hed_xml_url_or_file
+            Name of already prepared HedDictionary to use.  This overrides hed_xml_file and xml_version_number.
         Returns
         -------
         HedValidator object
@@ -111,7 +111,7 @@ class HedValidator:
             if self._hed_input and self._hed_input.is_valid_extension():
                 validation_issues = self._validate_hed_tags_in_file()
             else:
-                validation_issues = error_reporter.report_error_type('invalidFileName', file_name=self._hed_input.filename)
+                validation_issues = error_reporter.format_val_error(ValidationErrors.INVALID_FILENAME, file_name=self._hed_input.filename)
         else:
             validation_issues = self._validate_hed_strings([self._hed_input])[0]
         return validation_issues
@@ -416,7 +416,7 @@ class HedValidator:
              A singleton list containing the row issue message.
 
          """
-        return error_reporter.report_error_type('row', error_row=row_number)
+        return error_reporter.format_val_error(ValidationErrors.ROW, error_row=row_number)
 
     @staticmethod
     def generate_column_issue_message(row_number, column_number):
@@ -435,4 +435,4 @@ class HedValidator:
              A singleton list containing the column issue message.
 
          """
-        return error_reporter.report_error_type('column', error_row=row_number, error_column=column_number)
+        return error_reporter.format_val_error(ValidationErrors.COLUMN, error_row=row_number, error_column=column_number)

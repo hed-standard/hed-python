@@ -6,7 +6,8 @@ class EventFileInput(BaseFileInput):
 
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
-                 json_event_files=None, attribute_columns=None):
+                 json_event_files=None, attribute_columns=None,
+                 hed_dictionary=None):
         """Constructor for the EventFileInput class.
 
          Parameters
@@ -36,9 +37,13 @@ class EventFileInput(BaseFileInput):
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        new_mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+        new_mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
+                                 hed_dictionary=hed_dictionary)
         new_mapper.add_json_file_events(json_event_files)
         new_mapper.add_attribute_columns(attribute_columns)
+        for entry in new_mapper._key_validation_issues:
+            for issue in new_mapper._key_validation_issues[entry]:
+                print(issue["message"])
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper)
 
@@ -52,8 +57,12 @@ class EventFileInput(BaseFileInput):
 
 
 if __name__ == '__main__':
+    from hed.util.hed_dictionary import HedDictionary
+    local_hed_xml = "examples/data/HED7.1.1.xml"
+    hed_dictionary = HedDictionary(local_hed_xml)
     event_file = EventFileInput("examples/data/basic_events_test.xlsx",
-                                json_event_files="examples/data/both_types_events.json", attribute_columns=["onset"])
+                                json_event_files="examples/data/both_types_events.json", attribute_columns=["onset"],
+                                hed_dictionary=hed_dictionary)
 
     for stuff in event_file:
         print(stuff)

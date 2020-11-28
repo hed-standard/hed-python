@@ -68,6 +68,12 @@ def split_hed_string(hed_string):
     return result_positions
 
 
+def split_hed_string_return_strings(hed_string):
+    """An easier to use variant of split_hed_string if you don't need positions or delimiters."""
+    result_positions = split_hed_string(hed_string)
+    return [hed_string[startpos:endpos] for (is_hed_tag, (startpos, endpos)) in result_positions if is_hed_tag]
+
+
 # Regular expression for cleaning up repeated slashes and spaces around slashes.
 pattern_doubleslash = re.compile(r"[\s/]*/+[\s/]*")
 

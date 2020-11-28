@@ -1,7 +1,10 @@
 from enum import Enum
 import json
-from hed.util.hed_string_util import split_hed_string
 
+from hed.util.error_types import SidecarErrors
+from hed.util.hed_string_util import split_hed_string, split_hed_string_return_strings
+from hed.validator.tag_validator import TagValidator
+from hed.util.error_reporter import format_sidecar_error
 
 class ColumnType(Enum):
     """The overall type of a column in event mapper, eg treat it as HED tags.
@@ -53,7 +56,8 @@ class EventMapper:
 
         Private Functions and variables column and row indexing starts at 0.
         Public functions and variables indexing starts at 1(or 2 if has column names)"""
-    def __init__(self, event_filenames=None, tag_columns=None, column_prefix_dictionary=None):
+    def __init__(self, event_filenames=None, tag_columns=None, column_prefix_dictionary=None,
+                 hed_dictionary=None):
         """Constructor for EventMapper
 
         Parameters
@@ -68,9 +72,11 @@ class EventMapper:
              4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
              the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
              that needs Event/Category/ prepended to them.
+        hed_dictionary: HedDictionary object
+            Used to create a TagValidator, which is then used to validate the entries in value and category entries.
         """
         self.minimum_required_keys = ("HED", )
-        # This points to event_type entries based on column names or indexes
+        # This points to event_type entries based on column names or indexes if columns have no name.
         self.event_types = {}
         # Maps column number to event_entry.  This is what's actually used by most code.
         self._final_column_map = {}
@@ -78,6 +84,10 @@ class EventMapper:
         self._column_map = None
         self._tag_columns = []
         self._column_prefix_dictionary = {}
+
+        self._hed_dictionary = hed_dictionary
+        # Each will contain a list of util.error_reporter error style dicts.
+        self._key_validation_issues = {}
 
         if event_filenames:
             self.add_json_file_events(event_filenames)
@@ -127,16 +137,29 @@ class EventMapper:
         if isinstance(event_filenames, str):
             event_filenames = [event_filenames]
         for event_filename in event_filenames:
-            with open(event_filename, "r") as fp:
-                loaded_events = json.load(fp)
-                for event, event_dict in loaded_events.items():
-                    self._add_single_event_type(event, event_dict)
+            try:
+                with open(event_filename, "r") as fp:
+                    loaded_events = json.load(fp)
+                    for event, event_dict in loaded_events.items():
+                        self._add_single_event_type(event, event_dict, source_filename=event_filename)
+            except FileNotFoundError:
+                self._key_validation_issues[event_filename] = format_sidecar_error(SidecarErrors.INVALID_FILENAME,
+                                                                                   filename=event_filename)
+            except json.decoder.JSONDecodeError:
+                self._key_validation_issues[event_filename] = format_sidecar_error(SidecarErrors.CANNOT_PARSE_JSON,
+                                                                                   filename=event_filename)
 
     def add_value_column(self, name, hed):
         new_entry = {
             "HED": hed
         }
-        self._add_single_event_type(name, new_entry)
+        self._add_single_event_type(name, new_entry, ColumnType.Value)
+
+    def add_categorical_column(self, name, hed_category_dict):
+        new_entry = {
+            "HED": hed_category_dict
+        }
+        self._add_single_event_type(name, new_entry, ColumnType.Categorical)
 
     def add_attribute_columns(self, column_names):
         self._add_multiple_events(column_names, ColumnType.Attribute)
@@ -242,10 +265,72 @@ class EventMapper:
         for column_name in column_names:
             self._add_single_event_type(column_name, None, event_type)
 
-    def _add_single_event_type(self, column_name, dict_for_entry, event_type=None):
+    def _add_single_event_type(self, column_name, dict_for_entry, event_type=None, source_filename=""):
         event_entry = self._create_event_entry(dict_for_entry, column_name, event_type)
+        event_validation_issues = self._validate_event_entry(event_entry)
+        if event_validation_issues and source_filename:
+            event_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_FILE_NAME, filename=source_filename) \
+                                      + event_validation_issues
+        self._key_validation_issues[column_name] = event_validation_issues
         self.event_types[column_name] = event_entry
         return True
+
+    def _validate_event_entry(self, event_entry):
+        col_validation_issues = []
+        dict_for_entry = event_entry._hed_dict
+        # Hed string validation can only be done with a _hed_dictionary
+        if self._hed_dictionary and dict_for_entry:
+            tag_validator = TagValidator(self._hed_dictionary, check_for_warnings=True, run_semantic_validation=True,
+                                         allow_numbers_to_be_pound_sign=True)
+            hed_strings = dict_for_entry["HED"]
+            if isinstance(hed_strings, dict):
+                hed_strings = [hed_strings[key] for key in hed_strings]
+            else:
+                hed_strings = [hed_strings]
+
+            for hed_string in hed_strings:
+                col_validation_issues += tag_validator.run_hed_string_validators(hed_string)
+                for hed_tag in split_hed_string_return_strings(hed_string):
+                    hed_tag_lower = hed_tag.lower()
+                    tag_issues = tag_validator.run_individual_tag_validators(hed_tag, hed_tag_lower)
+                    if tag_issues:
+                        col_validation_issues += tag_issues
+
+        if event_entry.type is None:
+            col_validation_issues += format_sidecar_error(SidecarErrors.UNKNOWN_EVENT_TYPE,
+                                                          event_name=event_entry.name)
+        elif event_entry.type == ColumnType.Value:
+            if not event_entry.hed_strings:
+                col_validation_issues += format_sidecar_error(SidecarErrors.BLANK_HED_STRING)
+            elif not isinstance(event_entry.hed_strings, str):
+                col_validation_issues += format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
+                                                              given_type=type(event_entry.hed_strings),
+                                                              expected_type="str")
+            elif event_entry.hed_strings.count("#") != 1:
+                col_validation_issues += format_sidecar_error(SidecarErrors.INVALID_NUMBER_POUND_SIGNS,
+                                                              pound_sign_count=event_entry.hed_strings.count("#"))
+
+        elif event_entry.type == ColumnType.Categorical:
+            if not event_entry.hed_strings:
+                col_validation_issues += format_sidecar_error(SidecarErrors.BLANK_HED_STRING)
+            elif not isinstance(event_entry.hed_strings, dict):
+                col_validation_issues += format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
+                                                              given_type=type(event_entry.hed_strings),
+                                                              expected_type="dict")
+            else:
+                if len(event_entry.hed_strings) < 2:
+                    # Make this a warning
+                    col_validation_issues += format_sidecar_error(SidecarErrors.TOO_FEW_CATEGORIES,
+                                                                  category_count=len(event_entry.hed_strings))
+
+                for key, value in event_entry.hed_strings.items():
+                    if value.count("#") != 0:
+                        col_validation_issues += format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,
+                                                                      pound_sign_count=value.count("#"))
+        if col_validation_issues:
+            col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_EVENT_NAME, event_name=event_entry.name) + \
+                                    col_validation_issues
+        return col_validation_issues
 
     def _create_event_entry(self, dict_for_entry=None, column_name=None, event_type=None):
         if event_type is None:

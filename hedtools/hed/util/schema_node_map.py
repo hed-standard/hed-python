@@ -1,7 +1,7 @@
 from defusedxml.lxml import parse
 import lxml
 
-from hed.util.errors import SchemaError
+from hed.util.exceptions import SchemaError
 
 
 class TagEntry:
@@ -9,7 +9,6 @@ class TagEntry:
 
        Keeps track of the human formatted short/long form of each tag.
     """
-
     def __init__(self, short_org_tag, long_org_tag):
         self.short_org_tag = short_org_tag
         self.long_org_tag = long_org_tag
