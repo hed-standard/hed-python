@@ -1,5 +1,6 @@
-from hed.util.hed_event_mapper import EventMapper
+from hed.util.column_mapper import ColumnMapper
 from hed.util.base_file_input import BaseFileInput
+from hed.util.column_def_group import ColumnDefinitionGroup
 
 class EventFileInput(BaseFileInput):
     """A class to parse bids style spreadsheets into a more general format."""
@@ -37,13 +38,24 @@ class EventFileInput(BaseFileInput):
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        new_mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
-                                 hed_dictionary=hed_dictionary)
-        new_mapper.add_json_file_events(json_event_files)
-        new_mapper.add_attribute_columns(attribute_columns)
-        for entry in new_mapper._key_validation_issues:
-            for issue in new_mapper._key_validation_issues[entry]:
-                print(issue["message"])
+        column_defs = []
+        if not isinstance(json_event_files, list):
+            json_event_files = [json_event_files]
+        for json_file in json_event_files:
+            if isinstance(json_file, str):
+                json_file = ColumnDefinitionGroup(json_file)
+            column_defs.append(json_file)
+
+        custom_columns = ColumnDefinitionGroup()
+        custom_columns.add_attribute_columns(attribute_columns)
+        column_defs.append(custom_columns)
+        new_mapper = ColumnMapper(json_event_files=column_defs, tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
+                                  hed_dictionary=hed_dictionary)
+        for column in column_defs:
+            errors = column.validate_entries(hed_dictionary)
+            for error in errors.values():
+                for sub_error in error:
+                    print(sub_error["message"])
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper)
 
@@ -60,8 +72,8 @@ if __name__ == '__main__':
     from hed.util.hed_dictionary import HedDictionary
     local_hed_xml = "examples/data/HED7.1.1.xml"
     hed_dictionary = HedDictionary(local_hed_xml)
-    event_file = EventFileInput("examples/data/basic_events_test.xlsx",
-                                json_event_files="examples/data/both_types_events.json", attribute_columns=["onset"],
+    event_file = EventFileInput("examples/data/basic_events_test_na.tsv",
+                                json_event_files="examples/data/both_types_events_errors.json", attribute_columns=["onset"],
                                 hed_dictionary=hed_dictionary)
 
     for stuff in event_file:
