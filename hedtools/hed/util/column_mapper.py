@@ -1,4 +1,4 @@
-from hed.util.column_settings import ColumnDefinition, ColumnType
+from hed.util.column_definition import ColumnDefinition, ColumnType
 from hed.util.column_def_group import ColumnDefinitionGroup
 import copy
 
@@ -7,27 +7,30 @@ class ColumnMapper:
 
         Private Functions and variables column and row indexing starts at 0.
         Public functions and variables indexing starts at 1(or 2 if has column names)"""
-    def __init__(self, json_event_files=None, tag_columns=None, column_prefix_dictionary=None,
-                 hed_dictionary=None):
+    def __init__(self, json_def_files=None, tag_columns=None, column_prefix_dictionary=None,
+                 hed_dictionary=None, attribute_columns=None):
         """Constructor for ColumnMapper
 
         Parameters
         ----------
-        json_event_files : ColumnDefinitionGroup or string or list
-
+        json_def_files : ColumnDefinitionGroup or string or list
+            A list of ColumnDefinitionGroups or filenames to gather ColumnDefinitions from.
         tag_columns: list
-             A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
+             A list of ints containing the columns that contain the HED tags.  If the column is otherwise unspecified,
+             it will convert this column type to HEDTags
         column_prefix_dictionary: dict
              A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
              prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
              4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
              the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
              that needs Event/Category/ prepended to them.
-        hed_dictionary: HedDictionary object
+        hed_dictionary: HedDictionary
             Used to create a TagValidator, which is then used to validate the entries in value and category entries.
+        attribute_columns: str or int or [str] or [int]
+             A list of column names or numbers to treat as attributes.
         """
-        # This points to column_type entries based on column names or indexes if columns have no name.
-        self.event_types = {}
+        # This points to column_type entries based on column names or indexes if columns have no column_name.
+        self.column_defs = {}
         # Maps column number to column_entry.  This is what's actually used by most code.
         self._final_column_map = {}
 
@@ -38,8 +41,9 @@ class ColumnMapper:
         self._na_patterns = ["n/a", "nan"]
         self._hed_dictionary = hed_dictionary
 
-        if json_event_files:
-            self.add_json_file_events(json_event_files)
+        if json_def_files:
+            self.add_json_file_defs(json_def_files)
+        self.add_columns(attribute_columns)
 
         self.set_tag_columns(tag_columns, False)
         self.set_column_prefix_dict(column_prefix_dictionary, False)
@@ -47,14 +51,11 @@ class ColumnMapper:
         # finalize the column map based on initial settings.
         self._finalize_mapping()
 
-    def add_json_file_events(self, json_file_input_list):
-        if not isinstance(json_file_input_list, list):
-            json_file_input_list = [json_file_input_list]
-        for json_file in json_file_input_list:
-            if isinstance(json_file, str):
-                json_file = ColumnDefinitionGroup(json_file)
-            for column_settings in json_file:
-                self._add_column_settings(column_settings)
+    def add_json_file_defs(self, json_file_input_list):
+        column_groups = ColumnDefinitionGroup.load_multiple_json_files(json_file_input_list)
+        for column_group in column_groups:
+            for column_def in column_group:
+                self._add_column_def(column_def)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
         """Adds the given columns as hed tag columns with the required prefix if it does not already exist.
@@ -92,7 +93,7 @@ class ColumnMapper:
             self._finalize_mapping()
 
     def set_column_map(self, new_column_map=None):
-        """Pass in the column number to name mapping to finalize
+        """Pass in the column number to column_name mapping to finalize
 
         Parameters
         ----------
@@ -107,6 +108,12 @@ class ColumnMapper:
             column_map = {column_number: column_name for column_number, column_name in enumerate(new_column_map)}
         self._column_map = column_map
         self._finalize_mapping()
+
+    def add_columns(self, column_names_or_numbers, column_type=ColumnType.Attribute):
+        if column_names_or_numbers:
+            for column_name in column_names_or_numbers:
+                new_def = ColumnDefinition(column_type, column_name)
+                self._add_column_def(new_def)
 
     def _expand_column(self, column_number, input_text):
         # Default 1-1 mapping if we don't have specific behavior.
@@ -156,34 +163,34 @@ class ColumnMapper:
         final_text = entry.remove_prefix(new_text)
         return final_text
 
-    def _add_column_settings(self, new_column_entry):
-        column_name = new_column_entry.name
-        self.event_types[column_name] = copy.deepcopy(new_column_entry)
+    def _add_column_def(self, new_column_entry):
+        column_name = new_column_entry.column_name
+        self.column_defs[column_name] = copy.deepcopy(new_column_entry)
 
     def _set_column_prefix(self, column_number, new_required_prefix):
         if isinstance(column_number, str):
-            raise TypeError("Must pass in a column number not name to _set_column_prefix")
+            raise TypeError("Must pass in a column number not column_name to _set_column_prefix")
         if column_number not in self._final_column_map:
-            column_entry = ColumnDefinition._create_event_entry()
+            column_entry = ColumnDefinition()
             self._final_column_map[column_number] = column_entry
         else:
             column_entry = self._final_column_map[column_number]
 
         column_entry.column_prefix = new_required_prefix
-        if column_entry.type is None or column_entry.type == ColumnType.Ignore:
-            column_entry.type = ColumnType.HEDTags
+        if column_entry.column_type is None or column_entry.column_type == ColumnType.Ignore:
+            column_entry.column_type = ColumnType.HEDTags
 
     def _finalize_mapping(self):
         self._final_column_map = {}
         if self._column_map is not None:
             for column_number, column_name in self._column_map.items():
-                if column_name in self.event_types:
-                    column_entry = self.event_types[column_name]
-                    column_entry.name = column_name
+                if column_name in self.column_defs:
+                    column_entry = self.column_defs[column_name]
+                    column_entry.column_name = column_name
                     self._final_column_map[column_number] = column_entry
 
-        # Add any numbered event columns
-        for column_name, column_entry in self.event_types.items():
+        # Add any numbered columns
+        for column_name, column_entry in self.column_defs.items():
             if isinstance(column_name, int):
                 # Convert to internal numbering format
                 column_number = column_name - 1
@@ -192,8 +199,7 @@ class ColumnMapper:
         # Add column numbers.
         for column_number in self._tag_columns:
             if column_number not in self._final_column_map:
-                self._final_column_map[column_number] = ColumnDefinition._create_event_entry(None, column_number,
-                                                                                             ColumnType.HEDTags)
+                self._final_column_map[column_number] = ColumnDefinition(ColumnType.HEDTags, column_number)
 
         # Add prefixes
         for column_number, prefix in self._column_prefix_dictionary.items():

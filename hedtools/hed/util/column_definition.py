@@ -5,7 +5,7 @@ from hed.util.error_reporter import format_sidecar_error
 from hed.validator.tag_validator import TagValidator
 
 class ColumnType(Enum):
-    """The overall type of a column in column mapper, eg treat it as HED tags.
+    """The overall column_type of a column in column mapper, eg treat it as HED tags.
 
     Mostly internal."""
     Unknown = None
@@ -32,41 +32,81 @@ class ColumnDefinition:
         column_type : ColumnType
             How to treat this column when reading data
         name : str or int
-            The name or column number of this column.  If name is a string, you'll need to use a column map
+            The column_name or column number of this column.  If name is a string, you'll need to use a column map
             to set the number later.
         hed_dict : dict
-            The loaded data (usually from json) for the given Event.
-            At a minimum, this needs "HED" in the dict for several event_types
+            The loaded data (usually from json) for the given def
+            At a minimum, this needs "HED" in the dict for several ColumnType
         column_prefix : str
             If present, prepend the given prefix to all hed tags in the columns.  Only works on ColumnType HedTags
         """
-        self.type = column_type
-        self.name = name
+        if column_type is None or column_type == ColumnType.Unknown:
+            column_type = ColumnDefinition._detect_column_def_type(hed_dict)
+
+        if hed_dict is None:
+            hed_dict = {}
+
+        self.column_type = column_type
+        self.column_name = name
         self.column_prefix = column_prefix
         self._hed_dict = hed_dict
 
-    @property
-    def hed_strings(self):
-        """Simple helper to retrieve the commonly used HED property of the dict"""
-        return self._hed_dict.get("HED", None)
+    def hed_string_iter(self, include_position=False):
+        if not isinstance(self._hed_dict, dict):
+            return
+        hed_strings = self._hed_dict.get("HED", [])
+        if self.column_type == ColumnType.Categorical:
+            for key, value in hed_strings.items():
+                if include_position:
+                    yield value, key
+                else:
+                    yield value
+        elif self.column_type == ColumnType.Value:
+            if include_position:
+                yield hed_strings, None
+            else:
+                yield hed_strings
 
-    @hed_strings.setter
-    def hed_strings(self, new_hed_string):
-        self._hed_dict["HED"] = new_hed_string
+    def set_hed_string(self, new_hed_string, position=None):
+        """Position is the value returned from hed_string_iter.  Generally the category key."""
+        if self.column_type == ColumnType.Categorical:
+            if position is None:
+                raise TypeError("Error: Trying to set a category HED string with no category")
+            if position not in self._hed_dict["HED"]:
+                raise TypeError("Error: Not allowed to add new categories to a column")
+            self._hed_dict["HED"][position] = new_hed_string
+        elif self.column_type == ColumnType.Value:
+            if position is not None:
+                raise TypeError("Error: Trying to set a value HED string with a category")
+            self._hed_dict["HED"] = new_hed_string
+        else:
+            raise TypeError("Error: Trying to set a HED string on a column_type that doesn't support it.")
+
+    def get_category_hed_string(self, category):
+        if self.column_type != ColumnType.Categorical:
+            return None
+
+        return self._hed_dict["HED"].get(category, None)
+
+    def get_value_hed_string(self):
+        if self.column_type != ColumnType.Value:
+            return None
+
+        return self._hed_dict["HED"]
 
     def expand(self, input_text):
-        column_type = self.type
+        column_type = self.column_type
 
         if column_type == ColumnType.Categorical:
-            hed_string_entries = self.hed_strings
-            if input_text in hed_string_entries:
-                return hed_string_entries[input_text], False
+            final_text = self.get_category_hed_string(input_text)
+            if final_text:
+                return final_text, False
             else:
                 # Issue warning here.
                 # Need to talk to kay about how we want to handle this warning.
                 pass
         elif column_type == ColumnType.Value:
-            prelim_text = self.hed_strings
+            prelim_text = self.get_value_hed_string()
             final_text = prelim_text.replace("#", input_text)
             return final_text, False
         elif column_type == ColumnType.HEDTags:
@@ -75,7 +115,7 @@ class ColumnDefinition:
         elif column_type == ColumnType.Ignore:
             return None, False
         elif column_type == ColumnType.Attribute:
-            return input_text, self.name
+            return input_text, self.column_name
 
         return "BUG NO ENTRY FOUND", False
 
@@ -125,10 +165,13 @@ class ColumnDefinition:
         return final_string
 
     @staticmethod
-    def _detect_event_type(dict_for_entry):
+    def _detect_column_def_type(dict_for_entry):
+        if not dict_for_entry or not isinstance(dict_for_entry, dict):
+            return ColumnType.Attribute
+
         minimum_required_keys = ("HED", )
-        if not dict_for_entry or not set(minimum_required_keys).issubset(dict_for_entry.keys()):
-            return None
+        if not set(minimum_required_keys).issubset(dict_for_entry.keys()):
+            return ColumnType.Attribute
 
         hed_entry = dict_for_entry["HED"]
         if isinstance(hed_entry, dict):
@@ -139,31 +182,13 @@ class ColumnDefinition:
 
         return ColumnType.Value
 
-    @staticmethod
-    def _create_event_entry(dict_for_entry=None, column_name=None, column_type=None):
-        if column_type is None or column_type == ColumnType.Unknown:
-            column_type = ColumnDefinition._detect_event_type(dict_for_entry)
-
-        if dict_for_entry is None:
-            dict_for_entry = {}
-
-        new_entry = ColumnDefinition(column_type, column_name, dict_for_entry, "")
-        return new_entry
-
-    def _validate_event_entry(self, hed_dictionary=None):
+    def _validate_column_entry(self, hed_dictionary=None):
         col_validation_issues = []
-        dict_for_entry = self._hed_dict
         # Hed string validation can only be done with a hed_dictionary
-        if hed_dictionary and dict_for_entry:
+        if hed_dictionary and self.hed_string_iter():
             tag_validator = TagValidator(hed_dictionary, check_for_warnings=True, run_semantic_validation=True,
                                          allow_numbers_to_be_pound_sign=True)
-            hed_strings = dict_for_entry["HED"]
-            if isinstance(hed_strings, dict):
-                hed_strings = [hed_strings[key] for key in hed_strings]
-            else:
-                hed_strings = [hed_strings]
-
-            for hed_string in hed_strings:
+            for hed_string in self.hed_string_iter():
                 col_validation_issues += tag_validator.run_hed_string_validators(hed_string)
                 for hed_tag in split_hed_string_return_strings(hed_string):
                     hed_tag_lower = hed_tag.lower()
@@ -171,38 +196,40 @@ class ColumnDefinition:
                     if tag_issues:
                         col_validation_issues += tag_issues
 
-        if self.type is None:
-            col_validation_issues += format_sidecar_error(SidecarErrors.UNKNOWN_EVENT_TYPE,
-                                                          event_name=self.name)
-        elif self.type == ColumnType.Value:
-            if not self.hed_strings:
+        if self.column_type is None:
+            col_validation_issues += format_sidecar_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
+                                                          column_name=self.column_name)
+        elif self.column_type == ColumnType.Value:
+            raw_hed_dict = self._hed_dict["HED"]
+            if not raw_hed_dict:
                 col_validation_issues += format_sidecar_error(SidecarErrors.BLANK_HED_STRING)
-            elif not isinstance(self.hed_strings, str):
+            elif not isinstance(raw_hed_dict, str):
                 col_validation_issues += format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                              given_type=type(self.hed_strings),
+                                                              given_type=type(raw_hed_dict),
                                                               expected_type="str")
-            elif self.hed_strings.count("#") != 1:
+            elif raw_hed_dict.count("#") != 1:
                 col_validation_issues += format_sidecar_error(SidecarErrors.INVALID_NUMBER_POUND_SIGNS,
-                                                              pound_sign_count=self.hed_strings.count("#"))
+                                                              pound_sign_count=raw_hed_dict.count("#"))
 
-        elif self.type == ColumnType.Categorical:
-            if not self.hed_strings:
+        elif self.column_type == ColumnType.Categorical:
+            raw_hed_dict = self._hed_dict["HED"]
+            if not raw_hed_dict:
                 col_validation_issues += format_sidecar_error(SidecarErrors.BLANK_HED_STRING)
-            elif not isinstance(self.hed_strings, dict):
+            elif not isinstance(raw_hed_dict, dict):
                 col_validation_issues += format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                              given_type=type(self.hed_strings),
+                                                              given_type=type(raw_hed_dict),
                                                               expected_type="dict")
             else:
-                if len(self.hed_strings) < 2:
+                if len(raw_hed_dict) < 2:
                     # Make this a warning
                     col_validation_issues += format_sidecar_error(SidecarErrors.TOO_FEW_CATEGORIES,
-                                                                  category_count=len(self.hed_strings))
+                                                                  category_count=len(raw_hed_dict))
 
-                for key, value in self.hed_strings.items():
+                for key, value in raw_hed_dict.items():
                     if value.count("#") != 0:
                         col_validation_issues += format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,
                                                                       pound_sign_count=value.count("#"))
         if col_validation_issues:
-            col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_EVENT_NAME, event_name=self.name) + \
+            col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_COLUMN_NAME, column_name=self.column_name) + \
                                     col_validation_issues
         return col_validation_issues

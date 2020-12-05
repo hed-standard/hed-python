@@ -7,7 +7,7 @@ class EventFileInput(BaseFileInput):
 
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
-                 json_event_files=None, attribute_columns=None,
+                 json_def_files=None, attribute_columns=None,
                  hed_dictionary=None):
         """Constructor for the EventFileInput class.
 
@@ -28,42 +28,27 @@ class EventFileInput(BaseFileInput):
              4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
              the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
              that needs Event/Category/ prepended to them.
-         json_event_files : str or [str]
+         json_def_files : str or [str] or ColumnDefinitionGroup or [ColumnDefinitionGroup]
              A list of json filenames to pull events from
-         attribute_columns: str/int or [str/int]
+         attribute_columns: str or int or [str] or [int]
              A list of column names or numbers to treat as attributes.
+             Default: ["duration", "onset"]
          """
         if tag_columns is None:
-            tag_columns = [2]
+            tag_columns = []
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
+        if attribute_columns is None:
+            attribute_columns = ["duration", "onset"]
 
-        column_defs = []
-        if not isinstance(json_event_files, list):
-            json_event_files = [json_event_files]
-        for json_file in json_event_files:
-            if isinstance(json_file, str):
-                json_file = ColumnDefinitionGroup(json_file)
-            column_defs.append(json_file)
+        column_group_defs = ColumnDefinitionGroup.load_multiple_json_files(json_def_files)
 
-        custom_columns = ColumnDefinitionGroup()
-        custom_columns.add_attribute_columns(attribute_columns)
-        column_defs.append(custom_columns)
-        new_mapper = ColumnMapper(json_event_files=column_defs, tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
-                                  hed_dictionary=hed_dictionary)
-        for column in column_defs:
-            errors = column.validate_entries(hed_dictionary)
-            for error in errors.values():
-                for sub_error in error:
-                    print(sub_error["message"])
+        new_mapper = ColumnMapper(json_def_files=column_group_defs, tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
+                                  hed_dictionary=hed_dictionary, attribute_columns=attribute_columns)
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper)
 
-        # Finalize mapping information
-        if self._dataframe is not None and self._has_column_names:
-            columns = self._dataframe.columns
-            self._mapper.set_column_map(columns)
-        else:
+        if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
                              "This is probably not intended.")
 
@@ -72,8 +57,8 @@ if __name__ == '__main__':
     from hed.util.hed_dictionary import HedDictionary
     local_hed_xml = "examples/data/HED7.1.1.xml"
     hed_dictionary = HedDictionary(local_hed_xml)
-    event_file = EventFileInput("examples/data/basic_events_test_na.tsv",
-                                json_event_files="examples/data/both_types_events_errors.json", attribute_columns=["onset"],
+    event_file = EventFileInput("examples/data/basic_events_test.tsv",
+                                json_def_files="examples/data/both_types_events_errors.json", attribute_columns=["onset"],
                                 hed_dictionary=hed_dictionary)
 
     for stuff in event_file:

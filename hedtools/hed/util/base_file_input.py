@@ -46,6 +46,11 @@ class BaseFileInput:
         elif self.is_text_file():
             self._dataframe = pandas.read_csv(filename, '\t', header=pandas_header)
 
+        # Finalize mapping information if we have columns
+        if self._dataframe is not None and self._has_column_names:
+            columns = self._dataframe.columns
+            self._mapper.set_column_map(columns)
+
     def save(self, filename, include_formatting=False):
         if self.is_spreadsheet_file():
             final_filename = filename + ".xlsx"

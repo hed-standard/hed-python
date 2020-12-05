@@ -75,21 +75,21 @@ def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag
     return [error_object]
 
 
-def format_sidecar_error(error_type, filename="", event_name="", given_type="", expected_type="", pound_sign_count=0,
+def format_sidecar_error(error_type, filename="", column_name="", given_type="", expected_type="", pound_sign_count=0,
                          category_count=0):
     ERROR_PREFIX = "\tERROR: "
     error_types = {
-        SidecarErrors.SIDECAR_FILE_NAME: f"Errors in file {filename}",
-        SidecarErrors.SIDECAR_EVENT_NAME: f"Errors in event '{event_name}':",
-        SidecarErrors.INVALID_FILENAME: f"Invalid json filename {filename}",
-        SidecarErrors.CANNOT_PARSE_JSON: f"Invalid formatted json file {filename}",
+        SidecarErrors.SIDECAR_FILE_NAME: f"Errors in file '{filename}'",
+        SidecarErrors.SIDECAR_COLUMN_NAME: f"Errors in column '{column_name}':",
+        SidecarErrors.INVALID_FILENAME: f"ERROR: File does not exist or cannot be opened. '{filename}'",
+        SidecarErrors.CANNOT_PARSE_JSON: f"ERROR: Json file cannot be parsed. '{filename}'",
         SidecarErrors.BLANK_HED_STRING: f"{ERROR_PREFIX}No HED string found for Value or Category column.",
-        SidecarErrors.WRONG_HED_DATA_TYPE: f"{ERROR_PREFIX}Invalid HED string datatype sidecar.  Should be {expected_type}, but got {given_type}",
-        SidecarErrors.INVALID_NUMBER_POUND_SIGNS: f"{ERROR_PREFIX}There should be exactly one # character in a sidecar string.  Found {pound_sign_count}",
-        SidecarErrors.TOO_MANY_POUND_SIGNS: f"{ERROR_PREFIX}There should be no # characters in a category sidecar string.  Found {pound_sign_count}",
-        SidecarErrors.TOO_FEW_CATEGORIES: f"{ERROR_PREFIX}A category column should have at least two keys.  Found {category_count}",
-        SidecarErrors.UNKNOWN_EVENT_TYPE: f"{ERROR_PREFIX}Could not automatically identify event '{event_name}' type from file.  "
-                                          f"Most likely the event in question needs a # sign to replace a number somewhere."
+        SidecarErrors.WRONG_HED_DATA_TYPE: f"{ERROR_PREFIX}Invalid HED string datatype sidecar. Should be '{expected_type}', but got '{given_type}'",
+        SidecarErrors.INVALID_NUMBER_POUND_SIGNS: f"{ERROR_PREFIX}There should be exactly one # character in a sidecar string. Found {pound_sign_count}",
+        SidecarErrors.TOO_MANY_POUND_SIGNS: f"{ERROR_PREFIX}There should be no # characters in a category sidecar string. Found {pound_sign_count}",
+        SidecarErrors.TOO_FEW_CATEGORIES: f"{ERROR_PREFIX}A category column should have at least two keys. Found {category_count}",
+        SidecarErrors.UNKNOWN_COLUMN_TYPE: f"{ERROR_PREFIX}Could not automatically identify column '{column_name}' type from file. "
+                                          f"Most likely the column definition in question needs a # sign to replace a number somewhere."
     }
 
     default_error_message = f'\tERROR: Unknown error {error_type}'

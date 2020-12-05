@@ -26,7 +26,7 @@ class ValidationWarnings:
 class SidecarErrors:
     # These are for json sidecar validation errors(sidecars can also produce most normal errors)
     SIDECAR_FILE_NAME = 'sidecarFilename'
-    SIDECAR_EVENT_NAME = 'sidecarEventName'
+    SIDECAR_COLUMN_NAME = 'sidecarColumnName'
     INVALID_FILENAME = 'sidecarInvalidFilename'
     CANNOT_PARSE_JSON = 'cannotParseJson'
     BLANK_HED_STRING = 'blankValueString'
@@ -34,7 +34,7 @@ class SidecarErrors:
     INVALID_NUMBER_POUND_SIGNS = 'invalidNumberPoundSigns'
     TOO_MANY_POUND_SIGNS = 'tooManyPoundSigns'
     TOO_FEW_CATEGORIES = 'tooFewCategories'
-    UNKNOWN_EVENT_TYPE = 'sidecarUnknownEvent'
+    UNKNOWN_COLUMN_TYPE = 'sidecarUnknownColumn'
 
 
 class SchemaErrors:
