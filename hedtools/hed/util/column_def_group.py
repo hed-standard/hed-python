@@ -1,10 +1,10 @@
 import json
-from hed.util.column_definition import ColumnDefinition
+from hed.util.column_definition import ColumnDef
 from hed.util.error_types import SidecarErrors
 from hed.util.error_reporter import format_sidecar_error
 
-class ColumnDefinitionGroup:
-    """This stores column definitions, generally loaded from a single file."""
+class ColumnDefGroup:
+    """This stores column definitions, generally loaded from a single json file."""
     def __init__(self, json_filename=None):
         self._json_filename = json_filename
         self._column_settings = {}
@@ -46,7 +46,7 @@ class ColumnDefinitionGroup:
         loaded_files = []
         for json_file in json_file_input_list:
             if isinstance(json_file, str):
-                json_file = ColumnDefinitionGroup(json_file)
+                json_file = ColumnDefGroup(json_file)
             loaded_files.append(json_file)
 
         return loaded_files
@@ -75,14 +75,14 @@ class ColumnDefinitionGroup:
     #     new_entry = {
     #         "HED": hed
     #     }
-    #     new_entry = ColumnDefinition(new_entry, column_name, ColumnType.Value)
+    #     new_entry = ColumnDef(new_entry, column_name, ColumnType.Value)
     #     self._column_settings[column_name] = column_entry
     #
     # def add_categorical_column(self, column_name, hed_category_dict):
     #     new_entry = {
     #         "HED": hed_category_dict
     #     }
-    #     new_entry = ColumnDefinition(new_entry, column_name, ColumnType.Categorical)
+    #     new_entry = ColumnDef(new_entry, column_name, ColumnType.Categorical)
     #     self._column_settings[column_name] = column_entry
     #
     # def add_attribute_columns(self, column_names):
@@ -101,7 +101,7 @@ class ColumnDefinitionGroup:
             self._add_single_col_type(column_name, None, column_type)
 
     def _add_single_col_type(self, column_name, dict_for_entry, column_type=None):
-        column_entry = ColumnDefinition(column_type, column_name, dict_for_entry)
+        column_entry = ColumnDef(column_type, column_name, dict_for_entry)
         self._column_settings[column_name] = column_entry
 
     def get_validation_issues(self):
@@ -123,30 +123,3 @@ class ColumnDefinitionGroup:
             self._validation_issues = key_validation_issues
         return self._validation_issues
 
-
-if __name__ == '__main__':
-    from hed.util.hed_dictionary import HedDictionary
-
-    local_hed_xml = "examples/data/HED7.1.1.xml"
-    hed_dictionary = HedDictionary(local_hed_xml)
-    json_filename = "examples/data/both_types_events_errors.json"
-    json_file = ColumnDefinitionGroup(json_filename)
-    for column_def in json_file:
-        for hed_string, position in column_def.hed_string_iter(include_position=True):
-            new_hed_string = hed_string + "extra"
-            column_def.set_hed_string(new_hed_string, position)
-            print(hed_string)
-
-    errors = json_file.validate_entries(hed_dictionary)
-    for error in errors.values():
-        for sub_error in error:
-            print(sub_error["message"])
-
-    # Alt syntax
-    for hed_string, position in json_file.hed_string_iter(include_position=True):
-        new_hed_string = hed_string + "extra2"
-        json_file.set_hed_string(new_hed_string, position)
-        print(hed_string)
-
-    for hed_string in json_file.hed_string_iter():
-        print(hed_string)
