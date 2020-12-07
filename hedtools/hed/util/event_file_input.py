@@ -1,6 +1,6 @@
 from hed.util.column_mapper import ColumnMapper
 from hed.util.base_file_input import BaseFileInput
-from hed.util.column_def_group import ColumnDefinitionGroup
+from hed.util.column_def_group import ColumnDefGroup
 
 class EventFileInput(BaseFileInput):
     """A class to parse bids style spreadsheets into a more general format."""
@@ -28,7 +28,7 @@ class EventFileInput(BaseFileInput):
              4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
              the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
              that needs Event/Category/ prepended to them.
-         json_def_files : str or [str] or ColumnDefinitionGroup or [ColumnDefinitionGroup]
+         json_def_files : str or [str] or ColumnDefGroup or [ColumnDefGroup]
              A list of json filenames to pull events from
          attribute_columns: str or int or [str] or [int]
              A list of column names or numbers to treat as attributes.
@@ -41,7 +41,7 @@ class EventFileInput(BaseFileInput):
         if attribute_columns is None:
             attribute_columns = ["duration", "onset"]
 
-        column_group_defs = ColumnDefinitionGroup.load_multiple_json_files(json_def_files)
+        column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
 
         new_mapper = ColumnMapper(json_def_files=column_group_defs, tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   hed_dictionary=hed_dictionary, attribute_columns=attribute_columns)
@@ -53,13 +53,3 @@ class EventFileInput(BaseFileInput):
                              "This is probably not intended.")
 
 
-if __name__ == '__main__':
-    from hed.util.hed_dictionary import HedDictionary
-    local_hed_xml = "examples/data/HED7.1.1.xml"
-    hed_dictionary = HedDictionary(local_hed_xml)
-    event_file = EventFileInput("examples/data/basic_events_test.tsv",
-                                json_def_files="examples/data/both_types_events_errors.json", attribute_columns=["onset"],
-                                hed_dictionary=hed_dictionary)
-
-    for stuff in event_file:
-        print(stuff)

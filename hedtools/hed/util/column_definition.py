@@ -21,11 +21,11 @@ class ColumnType(Enum):
     Attribute = "attribute"
 
 
-class ColumnDefinition:
+class ColumnDef:
+    """A single column in either the ColumnMapper or ColumnDefGroup"""
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None):
         """
         A single column entry in the column mapper.  Each column you want to retrieve data from will have one.
-            Mostly internal
 
         Parameters
         ----------
@@ -41,7 +41,7 @@ class ColumnDefinition:
             If present, prepend the given prefix to all hed tags in the columns.  Only works on ColumnType HedTags
         """
         if column_type is None or column_type == ColumnType.Unknown:
-            column_type = ColumnDefinition._detect_column_def_type(hed_dict)
+            column_type = ColumnDef._detect_column_def_type(hed_dict)
 
         if hed_dict is None:
             hed_dict = {}
@@ -54,14 +54,14 @@ class ColumnDefinition:
     def hed_string_iter(self, include_position=False):
         if not isinstance(self._hed_dict, dict):
             return
-        hed_strings = self._hed_dict.get("HED", [])
-        if self.column_type == ColumnType.Categorical:
+        hed_strings = self._hed_dict.get("HED", None)
+        if isinstance(hed_strings, dict):
             for key, value in hed_strings.items():
                 if include_position:
                     yield value, key
                 else:
                     yield value
-        elif self.column_type == ColumnType.Value:
+        elif isinstance(hed_strings, str):
             if include_position:
                 yield hed_strings, None
             else:
@@ -69,13 +69,14 @@ class ColumnDefinition:
 
     def set_hed_string(self, new_hed_string, position=None):
         """Position is the value returned from hed_string_iter.  Generally the category key."""
-        if self.column_type == ColumnType.Categorical:
+        hed_strings = self._hed_dict.get("HED", None)
+        if isinstance(hed_strings, dict):
             if position is None:
                 raise TypeError("Error: Trying to set a category HED string with no category")
             if position not in self._hed_dict["HED"]:
                 raise TypeError("Error: Not allowed to add new categories to a column")
             self._hed_dict["HED"][position] = new_hed_string
-        elif self.column_type == ColumnType.Value:
+        elif isinstance(hed_strings, str):
             if position is not None:
                 raise TypeError("Error: Trying to set a value HED string with a category")
             self._hed_dict["HED"] = new_hed_string

@@ -1,5 +1,5 @@
-from hed.util.column_definition import ColumnDefinition, ColumnType
-from hed.util.column_def_group import ColumnDefinitionGroup
+from hed.util.column_definition import ColumnDef, ColumnType
+from hed.util.column_def_group import ColumnDefGroup
 import copy
 
 class ColumnMapper:
@@ -13,7 +13,7 @@ class ColumnMapper:
 
         Parameters
         ----------
-        json_def_files : ColumnDefinitionGroup or string or list
+        json_def_files : ColumnDefGroup or string or list
             A list of ColumnDefinitionGroups or filenames to gather ColumnDefinitions from.
         tag_columns: list
              A list of ints containing the columns that contain the HED tags.  If the column is otherwise unspecified,
@@ -52,7 +52,7 @@ class ColumnMapper:
         self._finalize_mapping()
 
     def add_json_file_defs(self, json_file_input_list):
-        column_groups = ColumnDefinitionGroup.load_multiple_json_files(json_file_input_list)
+        column_groups = ColumnDefGroup.load_multiple_json_files(json_file_input_list)
         for column_group in column_groups:
             for column_def in column_group:
                 self._add_column_def(column_def)
@@ -110,9 +110,11 @@ class ColumnMapper:
         self._finalize_mapping()
 
     def add_columns(self, column_names_or_numbers, column_type=ColumnType.Attribute):
+        if not isinstance(column_names_or_numbers, list):
+            column_names_or_numbers = [column_names_or_numbers]
         if column_names_or_numbers:
             for column_name in column_names_or_numbers:
-                new_def = ColumnDefinition(column_type, column_name)
+                new_def = ColumnDef(column_type, column_name)
                 self._add_column_def(new_def)
 
     def _expand_column(self, column_number, input_text):
@@ -160,7 +162,7 @@ class ColumnMapper:
         if not entry.column_prefix:
             return new_text
 
-        final_text = entry.remove_prefix(new_text)
+        final_text = entry.remove_prefix_if_needed(new_text)
         return final_text
 
     def _add_column_def(self, new_column_entry):
@@ -171,7 +173,7 @@ class ColumnMapper:
         if isinstance(column_number, str):
             raise TypeError("Must pass in a column number not column_name to _set_column_prefix")
         if column_number not in self._final_column_map:
-            column_entry = ColumnDefinition()
+            column_entry = ColumnDef()
             self._final_column_map[column_number] = column_entry
         else:
             column_entry = self._final_column_map[column_number]
@@ -199,7 +201,7 @@ class ColumnMapper:
         # Add column numbers.
         for column_number in self._tag_columns:
             if column_number not in self._final_column_map:
-                self._final_column_map[column_number] = ColumnDefinition(ColumnType.HEDTags, column_number)
+                self._final_column_map[column_number] = ColumnDef(ColumnType.HEDTags, column_number)
 
         # Add prefixes
         for column_number, prefix in self._column_prefix_dictionary.items():
