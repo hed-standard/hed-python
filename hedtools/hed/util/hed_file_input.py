@@ -1,4 +1,4 @@
-from hed.util.hed_event_mapper import EventMapper
+from hed.util.column_mapper import ColumnMapper
 from hed.util.base_file_input import BaseFileInput
 
 class HedFileInput(BaseFileInput):
@@ -30,5 +30,5 @@ class HedFileInput(BaseFileInput):
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        new_mapper = EventMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+        new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
         super().__init__(filename, worksheet_name, has_column_names, new_mapper)

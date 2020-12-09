@@ -1,7 +1,7 @@
 import os
 import openpyxl
 import pandas
-from hed.util.hed_event_mapper import EventMapper
+from hed.util.column_mapper import ColumnMapper
 
 class BaseFileInput:
     """Handles parsing the actual on disk hed files to a more general format."""
@@ -25,12 +25,12 @@ class BaseFileInput:
          has_column_names: bool
              True if file has column names. The validation will skip over the first line of the file. False, if
              otherwise.
-         mapper: EventMapper object
-             Pass in a built event mapper(see HedFileInput or EventFileInput for examples), or None to just
+         mapper: ColumnMapper object
+             Pass in a built column mapper(see HedFileInput or EventFileInput for examples), or None to just
              retrieve all columns as hed tags.
          """
         if mapper is None:
-            mapper = EventMapper()
+            mapper = ColumnMapper()
         self._mapper = mapper
         self._filename = filename
         self._worksheet_name = worksheet_name
@@ -45,6 +45,11 @@ class BaseFileInput:
             self._dataframe = pandas.read_excel(filename, sheet_name=self._worksheet_name, header=pandas_header)
         elif self.is_text_file():
             self._dataframe = pandas.read_csv(filename, '\t', header=pandas_header)
+
+        # Finalize mapping information if we have columns
+        if self._dataframe is not None and self._has_column_names:
+            columns = self._dataframe.columns
+            self._mapper.set_column_map(columns)
 
     def save(self, filename, include_formatting=False):
         if self.is_spreadsheet_file():
@@ -79,7 +84,7 @@ class BaseFileInput:
         return self.parse_dataframe()
 
     def iter_raw(self):
-        default_mapper = EventMapper()
+        default_mapper = ColumnMapper()
         return self.parse_dataframe(default_mapper)
 
     def parse_dataframe(self, mapper=None):

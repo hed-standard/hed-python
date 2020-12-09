@@ -1,4 +1,5 @@
-from hed.tools import error_reporter
+from hed.util import error_reporter
+from hed.util.error_types import SchemaErrors
 from hed.util import hed_string_util
 from hed.util.schema_node_map import SchemaNodeMap
 
@@ -6,6 +7,7 @@ from hed.util.schema_node_map import SchemaNodeMap
 class TagFormat:
     """     Class to convert hed3 tags between short and long form.
        """
+
     def __init__(self, hed_xml_file=None, hed_tree=None):
         self.map_schema = SchemaNodeMap(hed_xml_file, hed_tree)
 
@@ -24,14 +26,14 @@ class TagFormat:
                 str: The converted string
         """
         if not self.map_schema.no_duplicate_tags:
-            error = error_reporter.report_error_type(error_reporter.INVALID_SCHEMA, hed_string, 0, len(hed_string))
+            error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string, 0, len(hed_string))
             return hed_string, [error]
 
         hed_string = hed_string_util.remove_slashes_and_spaces(hed_string)
 
         errors = []
         if hed_string == "":
-            errors.append(error_reporter.report_error_type(error_reporter.EMPTY_TAG_FOUND, ""))
+            errors.append(error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, ""))
             return hed_string, errors
 
         hed_tags = hed_string_util.split_hed_string(hed_string)
@@ -66,14 +68,14 @@ class TagFormat:
                 str: The converted string
         """
         if not self.map_schema.no_duplicate_tags:
-            error = error_reporter.report_error_type(error_reporter.INVALID_SCHEMA, hed_string, 0, len(hed_string))
+            error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string, 0, len(hed_string))
             return hed_string, [error]
 
         hed_string = hed_string_util.remove_slashes_and_spaces(hed_string)
 
         errors = []
         if hed_string == "":
-            errors.append(error_reporter.report_error_type(error_reporter.EMPTY_TAG_FOUND, ""))
+            errors.append(error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, ""))
             return hed_string, errors
 
         hed_tags = hed_string_util.split_hed_string(hed_string)
@@ -140,8 +142,8 @@ class TagFormat:
                 if tag not in self.map_schema.tag_dict:
                     found_unknown_extension = True
                     if not found_tag_entry:
-                        error = error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND, hed_tag,
-                                                                 index_start + offset, index_end + offset)
+                        error = error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
+                                                                   index_start + offset, index_end + offset)
                         return hed_tag, [error]
                     continue
 
@@ -151,18 +153,18 @@ class TagFormat:
 
                 # Verify the tag has the correct path above it.
                 if not tag_string.endswith(main_hed_portion):
-                    error = error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE, hed_tag,
-                                                             index_start + offset, index_end + offset,
-                                                             tag_entry.long_org_tag)
+                    error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
+                                                               index_start + offset, index_end + offset,
+                                                               tag_entry.long_org_tag)
                     return hed_tag, [error]
                 found_index_end = index_end
                 found_tag_entry = tag_entry
             else:
                 # These means we found a known tag in the remainder/extension section, which is an error
                 if tag in self.map_schema.tag_dict:
-                    error = error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE, hed_tag,
-                                                             index_start + offset, index_end + offset,
-                                                             self.map_schema.tag_dict[tag].long_org_tag)
+                    error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
+                                                               index_start + offset, index_end + offset,
+                                                               self.map_schema.tag_dict[tag].long_org_tag)
                     return hed_tag, [error]
 
         remainder = hed_tag[found_index_end:]
@@ -219,16 +221,16 @@ class TagFormat:
                 index -= 1
 
         if found_tag_entry is None:
-            error = error_reporter.report_error_type(error_reporter.NO_VALID_TAG_FOUND, hed_tag,
-                                                     index + offset, last_found_index + offset)
+            error = error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
+                                                       index + offset, last_found_index + offset)
             return hed_tag, [error]
 
         # Verify the tag has the correct path above it.
         main_hed_portion = clean_tag[:last_found_index]
         tag_string = found_tag_entry.long_clean_tag
         if not tag_string.endswith(main_hed_portion):
-            error = error_reporter.report_error_type(error_reporter.INVALID_PARENT_NODE, hed_tag, index + offset,
-                                                     last_found_index + offset, found_tag_entry.long_org_tag)
+            error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag, index + offset,
+                                                       last_found_index + offset, found_tag_entry.long_org_tag)
             return hed_tag, [error]
 
         remainder = hed_tag[last_found_index:]

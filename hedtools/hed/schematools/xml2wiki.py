@@ -3,7 +3,7 @@ from defusedxml.lxml import parse
 import lxml
 
 from hed.schematools import constants
-from hed.util.errors import SchemaError
+from hed.util.exceptions import SchemaError
 from hed.util import file_util
 
 
