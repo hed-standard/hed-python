@@ -26,14 +26,14 @@ class TagFormat:
                 str: The converted string
         """
         if not self.map_schema.no_duplicate_tags:
-            error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string, 0, len(hed_string))
-            return hed_string, [error]
+            error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_tag=hed_string)
+            return hed_string, error
 
         hed_string = hed_string_util.remove_slashes_and_spaces(hed_string)
 
         errors = []
         if hed_string == "":
-            errors.append(error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, ""))
+            errors += error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, "")
             return hed_string, errors
 
         hed_tags = hed_string_util.split_hed_string(hed_string)
@@ -42,9 +42,10 @@ class TagFormat:
         for is_hed_tag, (startpos, endpos) in hed_tags:
             tag = hed_string[startpos:endpos]
             if is_hed_tag:
-                short_tag_string, single_error = self._convert_to_short_tag(tag, startpos)
+                short_tag_string, single_error = self._convert_to_short_tag(tag)
                 if single_error:
-                    errors.extend(single_error)
+                    for error in single_error:
+                        errors += error_reporter.reformat_schema_error(error, hed_string, startpos)
                 final_string += short_tag_string
             else:
                 final_string += tag
@@ -68,14 +69,14 @@ class TagFormat:
                 str: The converted string
         """
         if not self.map_schema.no_duplicate_tags:
-            error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string, 0, len(hed_string))
-            return hed_string, [error]
+            error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string)
+            return hed_string, error
 
         hed_string = hed_string_util.remove_slashes_and_spaces(hed_string)
 
         errors = []
         if hed_string == "":
-            errors.append(error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, ""))
+            errors += error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, "")
             return hed_string, errors
 
         hed_tags = hed_string_util.split_hed_string(hed_string)
@@ -83,9 +84,10 @@ class TagFormat:
         for is_hed_tag, (startpos, endpos) in hed_tags:
             tag = hed_string[startpos:endpos]
             if is_hed_tag:
-                converted_tag, single_error = self._convert_to_long_tag(tag, startpos)
+                converted_tag, single_error = self._convert_to_long_tag(tag)
                 if single_error:
-                    errors.extend(single_error)
+                    for error in single_error:
+                        errors += error_reporter.reformat_schema_error(error, hed_string, startpos)
                 final_string += converted_tag
             else:
                 final_string += tag
@@ -94,7 +96,7 @@ class TagFormat:
 
         return final_string, errors
 
-    def _convert_to_long_tag(self, hed_tag, offset):
+    def _convert_to_long_tag(self, hed_tag):
         """This takes a hed tag(short or long form) and converts it to the long form
             Works left to right.(mostly relevant for errors)
             Note: This only does minimal validation
@@ -143,8 +145,8 @@ class TagFormat:
                     found_unknown_extension = True
                     if not found_tag_entry:
                         error = error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
-                                                                   index_start + offset, index_end + offset)
-                        return hed_tag, [error]
+                                                                   index_start, index_end)
+                        return hed_tag, error
                     continue
 
                 tag_entry = self.map_schema.tag_dict[tag]
@@ -154,25 +156,25 @@ class TagFormat:
                 # Verify the tag has the correct path above it.
                 if not tag_string.endswith(main_hed_portion):
                     error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
-                                                               index_start + offset, index_end + offset,
+                                                               index_start, index_end,
                                                                tag_entry.long_org_tag)
-                    return hed_tag, [error]
+                    return hed_tag, error
                 found_index_end = index_end
                 found_tag_entry = tag_entry
             else:
                 # These means we found a known tag in the remainder/extension section, which is an error
                 if tag in self.map_schema.tag_dict:
                     error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
-                                                               index_start + offset, index_end + offset,
+                                                               index_start, index_end,
                                                                self.map_schema.tag_dict[tag].long_org_tag)
-                    return hed_tag, [error]
+                    return hed_tag, error
 
         remainder = hed_tag[found_index_end:]
 
         long_tag_string = found_tag_entry.long_org_tag + remainder
         return long_tag_string, []
 
-    def _convert_to_short_tag(self, hed_tag, offset):
+    def _convert_to_short_tag(self, hed_tag):
         """This takes a hed tag(short or long form) and converts it to the long form
             Works right to left.(mostly relevant for errors)
             Note: This only does minimal validation
@@ -222,16 +224,16 @@ class TagFormat:
 
         if found_tag_entry is None:
             error = error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
-                                                       index + offset, last_found_index + offset)
-            return hed_tag, [error]
+                                                       index, last_found_index)
+            return hed_tag, error
 
         # Verify the tag has the correct path above it.
         main_hed_portion = clean_tag[:last_found_index]
         tag_string = found_tag_entry.long_clean_tag
         if not tag_string.endswith(main_hed_portion):
-            error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag, index + offset,
-                                                       last_found_index + offset, found_tag_entry.long_org_tag)
-            return hed_tag, [error]
+            error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag, index,
+                                                       last_found_index, found_tag_entry.long_org_tag)
+            return hed_tag, error
 
         remainder = hed_tag[last_found_index:]
         short_tag_string = found_tag_entry.short_org_tag + remainder
