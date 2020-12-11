@@ -135,7 +135,18 @@ def format_val_warning(warning_type, tag='', default_unit='', tag_prefix=''):
 SCHEMA_ERROR_PREFIX = "ERROR: "
 
 
-def format_schema_error(error_type, hed_string, error_index=0, error_index_end=0, expected_parent_tag=None):
+def reformat_schema_error(error, source_string, offset):
+    """Updates a schema error from hed_tag indexing to hed_string indexing."""
+    error_type = error["code"]
+    error_index = error["start_index"]
+    error_index_end = error["end_index"]
+    expected_parent_tag = error["expected_parent_tag"]
+
+    reformatted_error = format_schema_error(error_type, source_string, error_index + offset, error_index_end + offset, expected_parent_tag)
+    return reformatted_error
+
+
+def format_schema_error(error_type, hed_tag, error_index=0, error_index_end=None, expected_parent_tag=None):
     """Reports the abc error based on the type of error.
 
     Parameters
@@ -149,7 +160,10 @@ def format_schema_error(error_type, hed_string, error_index=0, error_index_end=0
         error.
 
     """
-    problem_tag = hed_string[error_index:error_index_end]
+    if error_index_end is None:
+        error_index_end = len(hed_tag)
+
+    problem_tag = hed_tag[error_index: error_index_end]
 
     error_types = {
         SchemaErrors.INVALID_PARENT_NODE: f"{SCHEMA_ERROR_PREFIX}'{problem_tag}' appears as '{expected_parent_tag}' and cannot be used "
@@ -162,7 +176,12 @@ def format_schema_error(error_type, hed_string, error_index=0, error_index_end=0
     default_error_message = f'{SCHEMA_ERROR_PREFIX}Internal Error'
     error_message = error_types.get(error_type, default_error_message)
 
-    error_object = {'code': error_type, 'message': error_message, 'source_string': hed_string}
+    error_object = {'code': error_type,
+                    'message': error_message,
+                    'source_tag': hed_tag,
+                    'start_index': error_index,
+                    'end_index': error_index_end,
+                    'expected_parent_tag': expected_parent_tag}
 
     # Debug printing
     # print(f"{hed_string}")
