@@ -19,7 +19,7 @@ class TestTagFormat(unittest.TestCase):
 class TestConvertTag(TestTagFormat):
     def validator_base(self, test_function, test_strings, expected_results, expected_errors):
         for test_key in test_strings:
-            test_result, test_errors = test_function(test_strings[test_key], 0)
+            test_result, test_errors = test_function(test_strings[test_key])
             expected_error = expected_errors[test_key]
             expected_result = expected_results[test_key]
             self.assertEqual(test_result, expected_result, test_strings[test_key])
@@ -93,10 +93,10 @@ class TestConvertToLongTag(TestConvertTag):
             'trailingSpace': 'Item/Sound/Environmental-sound/Unique Value ',
         }
         expected_errors = {
-            'leadingSpace': [
+            'leadingSpace':
                 error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, test_strings['leadingSpace'],
-                                                            0, 20),
-            ],
+                                                            0, 20)
+            ,
             'trailingSpace': [],
         }
         self.validator(test_strings, expected_results, expected_errors)
@@ -135,21 +135,21 @@ class TestConvertToLongTag(TestConvertTag):
             'partialDuplicate': 'Geometric/Item/Object/Geometric',
         }
         expected_errors = {
-            'validThenInvalid': [
+            'validThenInvalid':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, test_strings['validThenInvalid'],
-                                                            55, 60, 'Event')],
-            'singleLevel': [
+                                                            55, 60, 'Event'),
+            'singleLevel':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, test_strings['singleLevel'],
-                                                            19, 28, 'Item/Object/Geometric')],
-            'singleLevelAlreadyLong': [
+                                                            19, 28, 'Item/Object/Geometric'),
+            'singleLevelAlreadyLong':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
                                                             test_strings['singleLevelAlreadyLong'],
-                                                            25, 34, 'Item/Object/Geometric')],
-            'twoLevels': [
+                                                            25, 34, 'Item/Object/Geometric'),
+            'twoLevels':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, test_strings['twoLevels'],
-                                                            19, 28, 'Item/Object/Geometric')],
-            'partialDuplicate': [error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                             test_strings['partialDuplicate'], 10, 14, 'Item')],
+                                                            19, 28, 'Item/Object/Geometric'),
+            'partialDuplicate': error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
+                                                                             test_strings['partialDuplicate'], 10, 14, 'Item'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -165,13 +165,13 @@ class TestConvertToLongTag(TestConvertTag):
             'validChild': 'InvalidEvent/Event',
         }
         expected_errors = {
-            'single': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   test_strings['single'], 0, 12)],
-            'invalidChild': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                         test_strings['invalidChild'], 0, 12)],
+            'single': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                   test_strings['single'], 0, 12),
+            'invalidChild': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                         test_strings['invalidChild'], 0, 12),
 
-            'validChild': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                       test_strings['validChild'], 0, 12)],
+            'validChild': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                       test_strings['validChild'], 0, 12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -299,20 +299,20 @@ class TestConvertToShortTag(TestConvertTag):
             'mixed': 'Item/Sound/Event/Sensory-event/Environmental-sound',
         }
         expected_errors = {
-            'singleLevel': [
+            'singleLevel':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                            test_strings['singleLevel'], 31, 36, 'Event'),
-            ],
-            'multiLevel': [
+                                                            test_strings['singleLevel'], 31, 36, 'Event')
+            ,
+            'multiLevel':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
                                                             test_strings['multiLevel'], 37, 50,
-                                                 'Event/Sensory-event'),
-            ],
-            'mixed': [
+                                                 'Event/Sensory-event')
+            ,
+            'mixed':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
                                                             test_strings['mixed'], 31, 50,
-                                                 'Item/Sound/Environmental-sound'),
-            ],
+                                                 'Item/Sound/Environmental-sound')
+            ,
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -326,10 +326,10 @@ class TestConvertToShortTag(TestConvertTag):
             'trailingSpace': 'Environmental-sound/Unique Value ',
         }
         expected_errors = {
-            'leadingSpace': [
+            'leadingSpace':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, test_strings['leadingSpace'],
-                                                            12, 31, 'Item/Sound/Environmental-sound'),
-            ],
+                                                            12, 31, 'Item/Sound/Environmental-sound')
+            ,
             'trailingSpace': [],
         }
         self.validator(test_strings, expected_results, expected_errors)
@@ -368,19 +368,19 @@ class TestConvertToShortTag(TestConvertTag):
             'duplicate': 'Item/Object/Geometric/Item/Object/Geometric',
         }
         expected_errors = {
-            'validThenInvalid': [error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                             test_strings['validThenInvalid'], 61, 66, 'Event')],
-            'singleLevel': [error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
+            'validThenInvalid': error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
+                                                                             test_strings['validThenInvalid'], 61, 66, 'Event'),
+            'singleLevel': error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
                                                                         test_strings['singleLevel'], 25, 34,
-                                                             'Item/Object/Geometric')],
-            'singleLevelAlreadyShort': [
+                                                             'Item/Object/Geometric'),
+            'singleLevelAlreadyShort':
                 error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
                                                             test_strings['singleLevelAlreadyShort'],
-                                                            19, 28, 'Item/Object/Geometric')],
-            'twoLevels': [error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                      test_strings['twoLevels'], 35, 40, 'Event')],
-            'duplicate': [error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                      test_strings['duplicate'], 34, 43, 'Item/Object/Geometric')],
+                                                            19, 28, 'Item/Object/Geometric'),
+            'twoLevels': error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
+                                                                      test_strings['twoLevels'], 35, 40, 'Event'),
+            'duplicate': error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
+                                                                      test_strings['duplicate'], 34, 43, 'Item/Object/Geometric')
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -400,29 +400,29 @@ class TestConvertToShortTag(TestConvertTag):
             'invalidWithExtension': 'InvalidEvent/InvalidExtension',
         }
         expected_errors = {
-            'invalidParentWithExistingGrandchild': [error_reporter.format_schema_error(
+            'invalidParentWithExistingGrandchild': error_reporter.format_schema_error(
                 SchemaErrors.INVALID_PARENT_NODE,
                 test_strings[
                                                                                          'invalidParentWithExistingGrandchild'],
                 32, 41,
-                                                                                     'Item/Object/Geometric')],
-            'invalidChildWithExistingGrandchild': [error_reporter.format_schema_error(
+                                                                                     'Item/Object/Geometric'),
+            'invalidChildWithExistingGrandchild': error_reporter.format_schema_error(
                 SchemaErrors.INVALID_PARENT_NODE,
                 test_strings[
                                                                                         'invalidChildWithExistingGrandchild'],
                 19, 28,
-                                                                                    'Item/Object/Geometric')],
-            'invalidParentWithExistingChild': [error_reporter.format_schema_error(
+                                                                                    'Item/Object/Geometric'),
+            'invalidParentWithExistingChild': error_reporter.format_schema_error(
                 SchemaErrors.INVALID_PARENT_NODE,
                 test_strings[
                                                                                     'invalidParentWithExistingChild'],
                 13, 22,
-                                                                                'Item/Object/Geometric')],
-            'invalidSingle': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                          test_strings['invalidSingle'], 0, 12)],
-            'invalidWithExtension': [
+                                                                                'Item/Object/Geometric'),
+            'invalidSingle': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                          test_strings['invalidSingle'], 0, 12),
+            'invalidWithExtension':
                 error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                            test_strings['invalidWithExtension'], 0, 12)],
+                                                            test_strings['invalidWithExtension'], 0, 12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -504,7 +504,7 @@ class TestConvertHedStringToShort(TestConvertString):
             'emptyString': '',
         }
         expected_errors = {
-            'emptyString': [error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, '')]
+            'emptyString': error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, '')
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -565,18 +565,18 @@ class TestConvertHedStringToShort(TestConvertString):
             'doubleWithValid': double + ', Car/Minivan',
         }
         expected_errors = {
-            'single': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   single, 0, 12)],
-            'double': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   double, 0, 12)],
-            'both': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                 single, 0, 12),
-                     error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                 double, 14, 26)],
-            'singleWithTwoValid': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                               single, 11, 23)],
-            'doubleWithValid': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                            double, 0, 12)],
+            'single': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                   test_strings['single'], 0, 12),
+            'double': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                   test_strings['double'], 0, 12),
+            'both': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                 test_strings['both'], 0, 12)
+                     + error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                 test_strings['both'], 14, 26),
+            'singleWithTwoValid': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                               test_strings['singleWithTwoValid'], 11, 23),
+            'doubleWithValid': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                            test_strings['doubleWithValid'], 0, 12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -713,7 +713,7 @@ class TestConvertHedStringToLong(TestConvertString):
             'emptyString': '',
         }
         expected_errors = {
-            'emptyString': [error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, '')]
+            'emptyString': error_reporter.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, '')
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -774,18 +774,18 @@ class TestConvertHedStringToLong(TestConvertString):
             'doubleWithValid': double + ', Item/Object/Man-made/Vehicle/Car/Minivan',
         }
         expected_errors = {
-            'single': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   single, 0, 12)],
-            'double': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   double, 0, 12)],
-            'both': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                 single, 0, 12),
-                     error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                 double, 14, 26)],
-            'singleWithTwoValid': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                               single, 11, 23)],
-            'doubleWithValid': [error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                            double, 0, 12)],
+            'single': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                   test_strings['single'], 0, 12),
+            'double': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                   test_strings['double'], 0, 12),
+            'both': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                 test_strings['both'], 0, 12)
+                     + error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                 test_strings['both'], 14, 26),
+            'singleWithTwoValid': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                               test_strings['singleWithTwoValid'], 11, 23),
+            'doubleWithValid': error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
+                                                                            test_strings['doubleWithValid'], 0, 12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
