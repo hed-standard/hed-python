@@ -39,6 +39,7 @@ class BaseFileInput:
         if not self._has_column_names:
             pandas_header = None
 
+        self._dataframe = None
         if self.is_spreadsheet_file():
             if self._worksheet_name is None:
                 self._worksheet_name = 0
