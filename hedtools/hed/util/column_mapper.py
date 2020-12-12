@@ -173,7 +173,7 @@ class ColumnMapper:
         if isinstance(column_number, str):
             raise TypeError("Must pass in a column number not column_name to _set_column_prefix")
         if column_number not in self._final_column_map:
-            column_entry = ColumnDef()
+            column_entry = ColumnDef(ColumnType.HEDTags)
             self._final_column_map[column_number] = column_entry
         else:
             column_entry = self._final_column_map[column_number]
