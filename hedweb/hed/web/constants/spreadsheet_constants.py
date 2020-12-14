@@ -1,5 +1,3 @@
-
-HED_FILE_EXTENSIONS = ['.xml']
 OTHER_TAG_COLUMN_NAMES = ['Event Details', 'Multiple Tags', 'HED tag', 'HED tags', 'Tag', 'Tags']
 SPECIFIC_TAG_COLUMN_NAMES = ['Category', 'Description', 'Label', 'Long']
 SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY = {'Category': ['Categories', 'Category', 'Event Categories', 'Event Category'],

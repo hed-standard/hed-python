@@ -22,6 +22,7 @@ class Config(object):
     URL_PREFIX = None
     HED_CACHE_FOLDER = '/var/cache/hed_cache3'
 
+
 class DevelopmentConfig(Config):
     DEBUG = False
     TESTING = False
@@ -32,6 +33,7 @@ class ProductionConfig(Config):
     TESTING = False
     URL_PREFIX = '/hed3'
     STATIC_URL_PATH = '/hed3/static'
+
 
 class TestConfig(Config):
     DEBUG = False
