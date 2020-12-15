@@ -1,5 +1,0 @@
-ADDITIONAL_EXAMPLES_PAGE = 'additional-examples.html'
-HELP_PAGE = 'help.html'
-HOME_PAGE = 'home.html'
-CONVERSION_PAGE = 'conversion.html'
-COMMON_ERRORS = 'commonerrors.html'
