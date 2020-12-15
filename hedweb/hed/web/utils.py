@@ -17,6 +17,15 @@ from hed.web.web_utils import save_hed_to_upload_folder_if_present, file_has_val
 app_config = current_app.config
 
 
+def check_if_option_in_form(form_request_object, option_name, target_value):
+    """Checks if the given option has a specific value.
+       This is used for radio buttons.
+    """
+    if option_name in form_request_object.values and form_request_object.values[option_name] == target_value:
+        return True
+    return False
+
+
 def convert_other_tag_columns_to_list(other_tag_columns):
     """Gets the other tag columns from the validation form.
 
@@ -282,12 +291,12 @@ def get_hed_path_from_form(form_request_object, hed_file_path):
     return hed_file_path
 
 
-def get_optional_validation_form_field(validation_form_request_object, form_field_name, ftype=''):
+def get_optional_form_field(form_request_object, form_field_name, ftype=''):
     """Gets the specified optional form field if present.
 
     Parameters
     ----------
-    validation_form_request_object: Request object
+    form_request_object: Request object
         A Request object containing user data from the validation form.
     form_field_name: string
         The name of the optional form field.
@@ -301,11 +310,11 @@ def get_optional_validation_form_field(validation_form_request_object, form_fiel
     form_field_value = ''
     if ftype == common_constants.BOOLEAN:
         form_field_value = False
-        if form_field_name in validation_form_request_object.form:
+        if form_field_name in form_request_object.form:
             form_field_value = True
     elif ftype == common_constants.STRING:
-        if form_field_name in validation_form_request_object.form:
-            form_field_value = validation_form_request_object.form[form_field_name]
+        if form_field_name in form_request_object.form:
+            form_field_value = form_request_object.form[form_field_name]
     return form_field_value
 
 
@@ -432,31 +441,7 @@ def get_text_file_column_names(text_file_path, column_delimiter):
 
 
 def get_uploaded_file_paths_from_forms(form_request_object):
-    """Gets the other paths of the uploaded files in the form.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    tuple
-        A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
-    """
-    spreadsheet_file_path = ''
-    hed_file_path = ''
-    if spreadsheet_present_in_form(form_request_object) and file_has_valid_extension(
-            form_request_object.files[common_constants.SPREADSHEET_FILE],
-            file_constants.SPREADSHEET_FILE_EXTENSIONS):
-        spreadsheet_file_path = save_spreadsheet_to_upload_folder(
-            form_request_object.files[common_constants.SPREADSHEET_FILE])
-    if hed_present_in_form(form_request_object) and file_has_valid_extension(
-            form_request_object.files[common_constants.HED_SCHEMA_FILE], file_constants.HED_XML_EXTENSIONS):
-        hed_file_path = save_hed_to_upload_folder_if_present(
-            form_request_object.files[common_constants.HED_SCHEMA_FILE])
-    return spreadsheet_file_path, hed_file_path
-
+    return ''
 
 def get_worksheet_column_names(workbook_file_path, worksheet_name):
     """Get the worksheet columns in a Excel workbook.

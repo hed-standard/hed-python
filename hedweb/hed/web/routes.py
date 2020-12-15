@@ -3,6 +3,7 @@ import os
 import json
 from hed.web import utils
 from hed.web import validation
+from hed.web import schema
 from hed.web.constants import error_constants
 from hed.web.constants import page_constants, route_constants, blueprint_constants
 from hed.web.web_utils import handle_http_error
@@ -54,6 +55,33 @@ def download_file_in_upload_directory(filename):
     return download_response
 
 
+@route_blueprint.route(route_constants.SCHEMA_DUPLICATE_TAG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_duplicate_tag_results():
+    """Check the HED specification in the form after submission and return an attachment other containing the output.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        string
+        A serialized JSON string containing the hed specification to check. If the conversion fails then a
+        500 error message is returned.
+    """
+    comparison_response = schema.run_schema_duplicate_tag_detection(request)
+    # Success
+    if isinstance(comparison_response, Response):
+        return comparison_response
+    if isinstance(comparison_response, str):
+        if comparison_response:
+            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, comparison_response, as_text=True)
+        else:
+            return ""
+
+    return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
+                             "Invalid duplicate tag check. This should not happen.", as_text=True)
+
+
 @route_blueprint.route(route_constants.EEG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_eeg_events_validation_results():
     """Validate the hed strings associated with EEG events after submission from HEDTools EEGLAB plugin and
@@ -68,11 +96,10 @@ def get_eeg_events_validation_results():
         A serialized JSON string containing information related to the EEG events' hed-strings.
         If the validation fails then a 500 error message is returned.
     """
-    validation_status = utils.report_eeg_events_validation_status(request)
+    validation_status = validation.report_eeg_events_validation_status(request)
 
     if error_constants.ERROR_KEY in validation_status:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                 validation_status[error_constants.ERROR_KEY])
+        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_status[error_constants.ERROR_KEY])
     return json.dumps(validation_status)
 
 
@@ -116,6 +143,31 @@ def get_major_hed_versions():
     if error_constants.ERROR_KEY in hed_info:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, hed_info[error_constants.ERROR_KEY])
     return json.dumps(hed_info)
+
+
+@route_blueprint.route(route_constants.SCHEMA_CONVERSION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_schema_conversion_results():
+    """Convert the given HED specification and return an attachment with the result.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        string
+        A serialized JSON string containing information related file to convert. If the conversion fails then a
+        500 error message is returned.
+    """
+    conversion_response = schema.run_schema_conversion(request)
+    # Success
+    if isinstance(conversion_response, Response):
+        return conversion_response
+    if isinstance(conversion_response, str):
+        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, conversion_response, as_text=True)
+
+    return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
+                             "Invalid response type in get_duplicate_tag_results.  This should not happen.",
+                             as_text=True)
 
 
 @route_blueprint.route(route_constants.SPREADSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
@@ -266,6 +318,23 @@ def render_help_page():
 
     """
     return render_template(page_constants.HED_TOOLS_HELP_PAGE)
+
+
+@route_blueprint.route(route_constants.SCHEMA_ROUTE, strict_slashes=False, methods=['GET'])
+def render_schema_form():
+    """Handles the site root and conversion tab functionality.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the conversion form. If the HTTP method is a GET then the conversion form will be
+        displayed. If the HTTP method is a POST then the conversion form is submitted.
+
+    """
+    return render_template(page_constants.SCHEMA_PAGE)
 
 
 @route_blueprint.route(route_constants.VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])

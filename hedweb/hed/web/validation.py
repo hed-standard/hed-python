@@ -41,11 +41,11 @@ def generate_input_arguments_from_validation_form(form_request_object, spreadshe
     validation_input_arguments[common_constants.COLUMN_PREFIX_DICTIONARY] = \
         utils.get_specific_tag_columns_from_form(form_request_object)
     validation_input_arguments[common_constants.WORKSHEET_NAME] = \
-        utils.get_optional_validation_form_field(form_request_object, common_constants.WORKSHEET_NAME,
-                                                 common_constants.STRING)
-    validation_input_arguments[common_constants.HAS_COLUMN_NAMES] = utils.get_optional_validation_form_field(
+        utils.get_optional_form_field(form_request_object, common_constants.WORKSHEET_NAME,
+                                      common_constants.STRING)
+    validation_input_arguments[common_constants.HAS_COLUMN_NAMES] = utils.get_optional_form_field(
         form_request_object, common_constants.HAS_COLUMN_NAMES, common_constants.BOOLEAN)
-    validation_input_arguments[common_constants.CHECK_FOR_WARNINGS] = utils.get_optional_validation_form_field(
+    validation_input_arguments[common_constants.CHECK_FOR_WARNINGS] = utils.get_optional_form_field(
         form_request_object, common_constants.CHECK_FOR_WARNINGS, common_constants.BOOLEAN)
     return validation_input_arguments
 
@@ -70,6 +70,33 @@ def generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_nam
                secure_filename(worksheet_name) + file_constants.TEXT_EXTENSION
     return common_constants.VALIDATION_OUTPUT_FILE_PREFIX + secure_filename(spreadsheet_filename).rsplit('.')[
         0] + file_constants.TEXT_EXTENSION
+
+
+def get_uploaded_file_paths_from_forms(form_request_object):
+    """Gets the other paths of the uploaded files in the form.
+
+    Parameters
+    ----------
+    form_request_object: Request object
+        A Request object containing user data from the validation form.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
+    """
+    spreadsheet_file_path = ''
+    hed_file_path = ''
+    if utils.spreadsheet_present_in_form(form_request_object) and utils.file_has_valid_extension(
+            form_request_object.files[common_constants.SPREADSHEET_FILE],
+            file_constants.SPREADSHEET_FILE_EXTENSIONS):
+        spreadsheet_file_path = utils.save_spreadsheet_to_upload_folder(
+            form_request_object.files[common_constants.SPREADSHEET_FILE])
+    if utils.hed_present_in_form(form_request_object) and utils.file_has_valid_extension(
+            form_request_object.files[common_constants.HED_SCHEMA_FILE], [file_constants.SCHEMA_XML_EXTENSION]):
+        hed_file_path = utils.save_hed_to_upload_folder_if_present(
+            form_request_object.files[common_constants.HED_SCHEMA_FILE])
+    return spreadsheet_file_path, hed_file_path
 
 
 def report_eeg_events_validation_status(request):
@@ -136,7 +163,7 @@ def report_spreadsheet_validation_status(form_request_object):
     spreadsheet_file_path = ''
     hed_file_path = ''
     try:
-        spreadsheet_file_path, hed_file_path = utils.get_uploaded_file_paths_from_forms(form_request_object)
+        spreadsheet_file_path, hed_file_path = get_uploaded_file_paths_from_forms(form_request_object)
         original_spreadsheet_filename = utils.get_original_spreadsheet_filename(form_request_object)
         validation_input_arguments = generate_input_arguments_from_validation_form(
             form_request_object, spreadsheet_file_path, hed_file_path)

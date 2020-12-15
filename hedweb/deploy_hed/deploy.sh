@@ -5,20 +5,20 @@
 ##### Constants
 
 ROOT_DIR=${PWD}
-IMAGE_NAME="hedtools-validation:latest"
-CONTAINER_NAME="hedtools-validation"
+IMAGE_NAME="hedtools:latest"
+CONTAINER_NAME="hedtools"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${PWD}/hed-python"
-GIT_REPO_BRANCH="hed2_archive"
+GIT_REPO_BRANCH="master"
 HOST_PORT=33000
 CONTAINER_PORT=80
 
-DEPLOY_DIR="hed-python/hedweb/deploy_hed2"
+DEPLOY_DIR="hed-python/hedweb/deploy_hed"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
-WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
-WEBINTERFACE_CODE_DIR="hed-python/hedweb/hed"
-VALIDATOR_CODE_DIR="hed-python/hedvalidation/hed"
+WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
+WEB_CODE_DIR="hed-python/hedweb/hed"
+VALIDATOR_CODE_DIR="hed-python/hedtools/hed"
 
 ##### Functions
 
@@ -33,7 +33,7 @@ echo Creating web directory...
 mkdir "${CODE_DEPLOY_DIR}"
 cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
 cp ${WSGI_FILE} "${CODE_DEPLOY_DIR}"
-cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+cp -r "${WEB_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 }
 

@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% from "schema-form-helper.html" import create_schema_form %}
+{% block content %}
+    <h2>Process HED Schema</h2>
+    {{ create_schema_form() }}
+{% endblock %}

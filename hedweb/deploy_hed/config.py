@@ -22,6 +22,7 @@ class Config(object):
     URL_PREFIX = None
     HED_CACHE_FOLDER = '/var/cache/hed_cache'
 
+
 class DevelopmentConfig(Config):
     DEBUG = False
     TESTING = False

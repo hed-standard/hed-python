@@ -1,7 +1,8 @@
-FROM python:3.6.5-alpine3.7
+FROM python:3.7-alpine
 COPY ./requirements.txt /root/
 WORKDIR /root
 RUN apk add --no-cache gcc \
+build-base \
 linux-headers \
 musl-dev \
 openrc \
@@ -19,4 +20,4 @@ chown -R apache:apache /var/log/hedtools && \
 mkdir -p /var/cache/hed_cache && \
 chown -R apache:apache /var/cache/hed_cache
 ENTRYPOINT /usr/sbin/httpd -D FOREGROUND -f /etc/apache2/httpd.conf
-ENV HEDTOOLS_CONFIG_CLASS=config.DevelopmentConfig
+ENV HEDTOOLS_CONFIG_CLASS=config.ProductionConfig

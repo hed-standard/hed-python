@@ -5,22 +5,22 @@
 ##### Constants
 
 ROOT_DIR="${PWD}"
-IMAGE_NAME="hedtools3-validation:latest"
-CONTAINER_NAME="hedtools3-validation"
+IMAGE_NAME="hedtools:latest"
+CONTAINER_NAME="hedtools"
 # GIT_REPO_URL="https://github.com/VisLab/hed-python"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${ROOT_DIR}/hed-python"
 GIT_REPO_BRANCH="master"
-HOST_PORT=33002;
+HOST_PORT=33000;
 CONTAINER_PORT=80;
 
-DEPLOY_DIR="${ROOT_DIR}/hed-python/hedweb/deploy_hed3"
-CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools3"
+DEPLOY_DIR="${ROOT_DIR}/hed-python/hedweb/deploy_hed"
+CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
-WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
+WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
 DOCKER_FILE="${DEPLOY_DIR}/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
-WEBINTERFACE_CODE_DIR="hed-python/hedweb/hed"
+WEB_CODE_DIR="hed-python/hedweb/hed"
 VALIDATOR_CODE_DIR="hed-python/hedtools/hed"
 
 ##### Functions
@@ -46,8 +46,8 @@ cp "${WSGI_FILE}" "${CODE_DEPLOY_DIR}"
 echo Copying "${DOCKER_FILE}" to "${DOCKER_FILE_DEPLOY}" ...
 cp "${DOCKER_FILE}" "${DOCKER_FILE_DEPLOY}"
 
-echo Copying "${WEBINTERFACE_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
-cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+echo Copying "${WEB_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
+cp -r "${WEB_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 
 echo Copying "${VALIDATOR_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
 cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
