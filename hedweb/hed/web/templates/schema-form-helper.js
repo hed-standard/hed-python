@@ -123,7 +123,7 @@ function getSchemaFilename() {
         return schemaFile[0].files[0].name;
     }
 
-    let schemaUrl = $('#hed-schema-url').val();
+    let schemaUrl = $('#schema-url').val();
     let schemaUrlIsEmpty = schemaUrl === "";
     if (checkRadioVal == "schema-url-option") {
         if (schemaUrlIsEmpty) {
