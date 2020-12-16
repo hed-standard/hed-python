@@ -80,7 +80,7 @@ if __name__ == '__main__':
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
                               column_prefix_dictionary=prefixed_needed_tag_columns,
                               worksheet_name='LKT Events')
-    hed_input_reader = HedValidator(input_file)
+    hed_input_reader = HedValidator(input_file, check_for_warnings=True)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 3b] LKT Events sheet probably has with no issues with the default schema'))
 
