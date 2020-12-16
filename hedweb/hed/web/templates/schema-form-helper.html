@@ -1,0 +1,41 @@
+{% macro create_schema_form() %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/schema-form-helper.css') }}">
+    <form id="schema-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <h3>Source file (.xml/.mediawiki): </h3>
+        <div class="form-group" id="schema-url-group">
+            <input class="radio-btn" type="radio" name="schema-upload-options" id="schema-url-option" value="schema-url-option">
+            <label class="secondary-label" for="schema-url-version">Enter HED schema URL:</label>
+            <label class="btn-group url-browse-group">
+                <label id="schema-url-display-name"></label>
+                <input type="url" name="schema-url" id="schema-url">
+            </label>
+            <p class="flash" id="schema-url-flash"></p>
+        </div>
+
+        <div class="form-group" id="schema-file-group">
+            <input class="radio-btn" type="radio" name="schema-upload-options" id="schema-file-option" value="schema-file-option">
+            <label class="secondary-label" for="schema-file">Upload HED schema file:</label>
+            <label class="btn-group file-browse-group">
+                <button for="schema-file">Browse ...</button>
+                <label id="schema-file-display-name"></label>
+                <input type="file" name="schema-file" id="schema-file"/>
+            </label>
+            <p class="flash" id="schema-file-flash"></p>
+        </div>
+
+        <h3>Actions (pick one): </h3>
+        <div class="form-group">
+            <button id="schema-conversion-submit" type="button">Convert schema format</button>
+        </div>
+
+        <div class="form-group">
+            <button id="schema-duplicate-tag-submit" type="button">Check for duplicate tags</button>
+            <p class="flash" id="schema-submit-flash"></p>
+        </div>
+
+    </form>
+    <script>
+        {%  include 'schema-form-helper.js' %}
+    </script>
+{% endmacro %}

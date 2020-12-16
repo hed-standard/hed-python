@@ -1,0 +1,82 @@
+{% macro create_validation_form() %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/validation-form-helper.css') }}">
+    <form id="validation-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <div class="form-group">
+            <label for="spreadsheet-file">Select spreadsheet (Excel and tab-separated):</label><br>
+            <label class="btn-group file-browse-group spreadsheet-btn-group">
+                <button for="spreadsheet-file">Browse ...</button>
+                <label id="spreadsheet-display-name"></label>
+                <input type="file" name="spreadsheet-file" id="spreadsheet-file"/>
+            </label>
+            <p class="flash" id="spreadsheet-flash"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="worksheet-name">Choose a worksheet (for workbooks):</label><br>
+            <select name="worksheet-name" id="worksheet-name"></select>
+            <p class="flash" id="worksheet-flash"></p>
+        </div>
+
+        <div class="form-group" id="column-names">
+            <label class="secondary-label" for="columns-names-table">Spreadsheet columns</label>
+            <table id="columns-names-table"></table>
+        </div>
+
+        <div class="form-group">
+            <label>Columns corresponding to specific tags (if available):</label><br>
+            <div class="textbox-group">
+                <label for="category-column">Category</label>
+                <input type="text" name="category-column" id="category-column">
+                <label for="description-column">Description</label>
+                <input type="text" name="description-column" id="description-column">
+                <label for="label-column">Label</label>
+                <input type="text" name="label-column" id="label-column">
+                <label for="long-column">Long name</label>
+                <input type="text" name="long-column" id="long-column">
+            </div>
+            <label class="secondary-label" for="tag-columns">Other columns containing tags
+                (comma-separated):</label><br>
+            <input class="textbox-group" type="text" name="tag-columns" id="tag-columns">
+            <p class="flash" id="tag-columns-flash"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="hed-version">Choose HED version:</label><br>
+            <select name="hed-version" id="hed-version"></select><br>
+        </div>
+
+        <div class="form-group" id="other-hed-version">
+            <label class="secondary-label" for="hed">Upload HED version:</label>
+            <label class="btn-group file-browse-group">
+                <button for="hed-xml-file">Browse ...</button>
+                <label id="hed-display-name"></label>
+                <input type="file" name="hed-xml-file" id="hed-xml-file"/>
+            </label>
+            <p class="flash" id="hed-flash"></p>
+        </div>
+
+        <div class="form-group">
+            <label>Specify additional options:</label><br>
+            <div class="checkbox-group">
+                <div class="inline-field">
+                    <input type="checkbox" name="has-column-names" id="has-column-names">
+                    <label for="has-column-names">Spreadsheet has column names</label>
+                </div>
+                <div class="inline-field">
+                    <input type="checkbox" name="check-for-warnings" id="check-for-warnings">
+                    <label for="check-for-warnings">Include warnings in output file</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button id="validation-submit" type="button">Validate</button>
+            <p class="flash" id="validation-submit-flash"></p>
+        </div>
+    </form>
+    <script>
+        {%  include 'validation-form-helper.js' %}
+    </script>
+{% endmacro %}

@@ -1,5 +1,5 @@
 """
-This module contains the configurations for the HEDTools application.
+This module contains the default configurations for hedwebmap
 """
 
 import os
@@ -7,22 +7,20 @@ import tempfile
 
 
 class Config(object):
-    BASE_DIRECTORY = 'E:/PythonWebMap'
-    LOG_DIRECTORY = os.path.join(BASE_DIRECTORY, 'log')
+    LOG_DIRECTORY = '/var/log/hedtools3'
     LOG_FILE = os.path.join(LOG_DIRECTORY, 'error.log')
-    KEY_FILE = os.path.join(LOG_DIRECTORY, 'tmp.txt')
-    if not os.path.exists(KEY_FILE):
-        f = open(KEY_FILE, 'w+')
+    if not os.path.exists('/var/log/hedtools3/tmp.txt'):
+        f = open('/var/log/hedtools3/tmp.txt', 'w+')
         f.write(str(os.urandom(24)))
         f.close()
-    f = open(KEY_FILE, 'r')
+    f = open('/var/log/hedtools3/tmp.txt', 'r')
     SECRET_KEY = f.read()  # os.getenv('SECRET_KEY') # os.urandom(24)
     f.close()
     STATIC_URL_PATH = None
     STATIC_URL_PATH_ATTRIBUTE_NAME = 'STATIC_URL_PATH'
     UPLOAD_FOLDER = os.path.join(tempfile.gettempdir(), 'hedtools3_uploads')
     URL_PREFIX = None
-    HED_CACHE_FOLDER = os.path.join(BASE_DIRECTORY, 'HED_CACHE')
+    HED_CACHE_FOLDER = None
 
 
 class DevelopmentConfig(Config):

@@ -1,8 +1,9 @@
 import unittest
 import os
-from hed.webinterface.app_factory import AppFactory
 import shutil
-from hed.webinterface import web_utils
+from hed.web import web_utils
+from hed.web.app_factory import AppFactory
+
 
 class Test(unittest.TestCase):
     @classmethod
@@ -10,8 +11,8 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hed.webinterface import utils
-            from hed.webinterface.routes import route_blueprint
+
+            from hed.web.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             web_utils.create_upload_directory(cls.upload_directory)
             app.config['UPLOAD_FOLDER'] = cls.upload_directory

@@ -1,0 +1,7 @@
+ADDITIONAL_EXAMPLES_PAGE = 'additional-examples.html'
+COMMON_ERRORS_PAGE = 'common-errors.html'
+EEG_VALIDATION_PAGE = 'eeg-validation.html'
+HED_TOOLS_HELP_PAGE = 'hed-tools-help.html'
+HED_TOOLS_HOME_PAGE = 'hed-tools-home.html'
+SCHEMA_PAGE = 'schema.html'
+VALIDATION_PAGE = 'validation.html'
