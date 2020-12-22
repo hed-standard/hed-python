@@ -8,7 +8,7 @@ class ColumnMapper:
         Private Functions and variables column and row indexing starts at 0.
         Public functions and variables indexing starts at 1(or 2 if has column names)"""
     def __init__(self, json_def_files=None, tag_columns=None, column_prefix_dictionary=None,
-                 hed_dictionary=None, attribute_columns=None):
+                 hed_dictionary=None, attribute_columns=None, definition_mapper=None):
         """Constructor for ColumnMapper
 
         Parameters
@@ -28,6 +28,9 @@ class ColumnMapper:
             Used to create a TagValidator, which is then used to validate the entries in value and category entries.
         attribute_columns: str or int or [str] or [int]
              A list of column names or numbers to treat as attributes.
+        definition_mapper: DefinitionMapper
+            The mapper to use to remove definitions and replace dlabels from the given input
+
         """
         # This points to column_type entries based on column names or indexes if columns have no column_name.
         self.column_defs = {}
@@ -37,6 +40,7 @@ class ColumnMapper:
         self._column_map = None
         self._tag_columns = []
         self._column_prefix_dictionary = {}
+        self._def_mapper = definition_mapper
 
         self._na_patterns = ["n/a", "nan"]
         self._hed_dictionary = hed_dictionary
@@ -56,6 +60,10 @@ class ColumnMapper:
         for column_group in column_groups:
             for column_def in column_group:
                 self._add_column_def(column_def)
+
+    def update_definition_mapper_with_file(self, hed_file_input):
+        if self._def_mapper is not None:
+            self._def_mapper.add_definitions(hed_file_input)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
         """Adds the given columns as hed tag columns with the required prefix if it does not already exist.
@@ -142,6 +150,8 @@ class ColumnMapper:
             if attribute_name:
                 result_dict[attribute_name] = translated_column
                 continue
+            if self._def_mapper:
+                translated_column = self._def_mapper.replace_and_remove_tags(translated_column)
             column_to_hed_tags_dictionary[column_number + 1] = translated_column
 
         result_dict["column_to_hed_tags"] = column_to_hed_tags_dictionary

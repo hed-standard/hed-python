@@ -1,6 +1,7 @@
 from hed.util.column_mapper import ColumnMapper
 from hed.util.base_file_input import BaseFileInput
 from hed.util.column_def_group import ColumnDefGroup
+from hed.util.def_mapper import DefinitionMapper
 
 class EventFileInput(BaseFileInput):
     """A class to parse bids style spreadsheets into a more general format."""
@@ -33,6 +34,8 @@ class EventFileInput(BaseFileInput):
          attribute_columns: str or int or [str] or [int]
              A list of column names or numbers to treat as attributes.
              Default: ["duration", "onset"]
+         hed_dictionary: HedDictionary
+            Used by column mapper to do (optional) hed string validation, and also to gather definition tags correctly.
          """
         if tag_columns is None:
             tag_columns = []
@@ -43,8 +46,11 @@ class EventFileInput(BaseFileInput):
 
         column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
 
-        new_mapper = ColumnMapper(json_def_files=column_group_defs, tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
-                                  hed_dictionary=hed_dictionary, attribute_columns=attribute_columns)
+        def_mapper = DefinitionMapper(column_group_defs, hed_dictionary=hed_dictionary)
+        new_mapper = ColumnMapper(json_def_files=column_group_defs, tag_columns=tag_columns,
+                                  column_prefix_dictionary=column_prefix_dictionary,
+                                  hed_dictionary=hed_dictionary, attribute_columns=attribute_columns,
+                                  definition_mapper=def_mapper)
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper)
 
