@@ -76,11 +76,12 @@ def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag
 
 
 def format_sidecar_error(error_type, filename="", column_name="", given_type="", expected_type="", pound_sign_count=0,
-                         category_count=0):
+                         category_count=0, hed_string="", position=None):
     ERROR_PREFIX = "\tERROR: "
     error_types = {
         SidecarErrors.SIDECAR_FILE_NAME: f"Errors in file '{filename}'",
         SidecarErrors.SIDECAR_COLUMN_NAME: f"Errors in column '{column_name}':",
+        SidecarErrors.SIDECAR_HED_STRING: f"Errors in hed string at position {position}: {hed_string}",
         SidecarErrors.INVALID_FILENAME: f"ERROR: File does not exist or cannot be opened. '{filename}'",
         SidecarErrors.CANNOT_PARSE_JSON: f"ERROR: Json file cannot be parsed. '{filename}'",
         SidecarErrors.BLANK_HED_STRING: f"{ERROR_PREFIX}No HED string found for Value or Category column.",
