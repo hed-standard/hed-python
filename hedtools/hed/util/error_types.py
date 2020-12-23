@@ -27,6 +27,7 @@ class SidecarErrors:
     # These are for json sidecar validation errors(sidecars can also produce most normal errors)
     SIDECAR_FILE_NAME = 'sidecarFilename'
     SIDECAR_COLUMN_NAME = 'sidecarColumnName'
+    SIDECAR_HED_STRING = 'sidecarHedString'
     INVALID_FILENAME = 'sidecarInvalidFilename'
     CANNOT_PARSE_JSON = 'cannotParseJson'
     BLANK_HED_STRING = 'blankValueString'
