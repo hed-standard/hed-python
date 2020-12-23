@@ -16,10 +16,11 @@ class HedDictionary:
     DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE = 'default'
     EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed'
     TAG_DICTIONARY_KEYS = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
-                           'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
+                           'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass', 'shortTags']
     UNIT_CLASS_DICTIONARY_KEYS = ['SIUnit', 'unitSymbol']
     UNIT_MODIFIER_DICTIONARY_KEYS = ['SIUnitModifier', 'SIUnitSymbolModifier']
     TAGS_DICTIONARY_KEY = 'tags'
+    SHORT_TAGS_DICTIONARY_KEY = 'shortTags'
     TAG_UNIT_CLASS_ATTRIBUTE = 'unitClass'
     UNIT_CLASS_ELEMENT = 'unitClass'
     UNIT_CLASS_UNIT_ELEMENT = 'unit'
@@ -93,6 +94,40 @@ class HedDictionary:
         self._populate_tag_dictionaries()
         self._populate_unit_class_dictionaries()
         self._populate_unit_modifier_dictionaries()
+        self._populate_short_tag_dict()
+
+    def tag_exists(self, short_tag_to_check):
+        """Returns if the given short tag exists in the schema
+
+        Parameters
+        ----------
+        short_tag_to_check : str
+
+        Returns
+        -------
+            bool
+        """
+        return short_tag_to_check.lower() in self.dictionaries[self.SHORT_TAGS_DICTIONARY_KEY]
+
+    def get_all_forms_of_tag(self, short_tag_to_check):
+        """Given a short tag, return all the longer versions of it.
+
+            eg: "definition" will return
+                    ["definition", "informational/definition", "attribute/informational/definition"]
+        """
+        try:
+            long_form_of_tag = self.dictionaries[self.SHORT_TAGS_DICTIONARY_KEY][short_tag_to_check.lower()]
+        except KeyError:
+            return []
+
+        split_tags = long_form_of_tag.lower().split("/")
+        final_tag = ""
+        all_forms = []
+        for tag in reversed(split_tags):
+            final_tag = tag + "/" + final_tag
+            all_forms.append(final_tag)
+
+        return all_forms
 
     def _populate_tag_dictionaries(self):
         """Populates a dictionary of dictionaries associated with tags and their attributes.
@@ -163,6 +198,19 @@ class HedDictionary:
             unit_modifier_name = self._get_element_tag_value(unit_modifier_element)
             for unit_modifier_key in self.UNIT_MODIFIER_DICTIONARY_KEYS:
                 self.dictionaries[unit_modifier_key][unit_modifier_name] = unit_modifier_element.get(unit_modifier_key)
+
+    def _populate_short_tag_dict(self):
+        """Create a mapping from the short version of a tag to the long version.
+
+           """
+        base_tag_dict = self.dictionaries[self.TAGS_DICTIONARY_KEY]
+        new_short_tag_dict = {}
+        for tag, unformatted_tag in base_tag_dict.items():
+            split_tags = tag.split("/")
+            short_tag = split_tags[-1]
+            new_short_tag_dict[short_tag] = unformatted_tag
+
+        self.dictionaries[self.SHORT_TAGS_DICTIONARY_KEY] = new_short_tag_dict
 
     def _populate_unit_class_units_dictionary(self, unit_class_elements):
         """Populates a dictionary that contains unit class units.

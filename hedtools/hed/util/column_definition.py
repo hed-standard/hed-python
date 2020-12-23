@@ -189,13 +189,18 @@ class ColumnDef:
         if hed_dictionary and self.hed_string_iter():
             tag_validator = TagValidator(hed_dictionary, check_for_warnings=True, run_semantic_validation=True,
                                          allow_numbers_to_be_pound_sign=True)
-            for hed_string in self.hed_string_iter():
-                col_validation_issues += tag_validator.run_hed_string_validators(hed_string)
+            for hed_string, position in self.hed_string_iter(include_position=True):
+                new_col_validation_issues = tag_validator.run_hed_string_validators(hed_string)
                 for hed_tag in split_hed_string_return_strings(hed_string):
                     hed_tag_lower = hed_tag.lower()
                     tag_issues = tag_validator.run_individual_tag_validators(hed_tag, hed_tag_lower)
                     if tag_issues:
-                        col_validation_issues += tag_issues
+                        new_col_validation_issues += tag_issues
+                if new_col_validation_issues:
+                    new_col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_HED_STRING,
+                                                                     hed_string=hed_string,
+                                                                     position=position) + new_col_validation_issues
+                    col_validation_issues += new_col_validation_issues
 
         if self.column_type is None:
             col_validation_issues += format_sidecar_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
