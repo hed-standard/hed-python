@@ -2,7 +2,7 @@ import os
 import openpyxl
 import pandas
 from hed.util.column_mapper import ColumnMapper
-
+import copy
 class BaseFileInput:
     """Handles parsing the actual on disk hed files to a more general format."""
     TEXT_EXTENSION = ['.tsv', '.txt']
@@ -52,8 +52,35 @@ class BaseFileInput:
             columns = self._dataframe.columns
             self._mapper.set_column_map(columns)
 
-    def save(self, filename, include_formatting=False):
-        if self.is_spreadsheet_file():
+        # Now that the file is fully initialized, gather the definitions from it.
+        mapper.update_definition_mapper_with_file(self)
+
+    def save(self, filename, include_formatting=False, output_processed_file=False):
+        """
+
+        Parameters
+        ----------
+        filename :
+        include_formatting : bool
+            If it's a spreadsheet, this will attempt to reopen the file and preserve formatting lost from panads.
+        output_processed_file : bool
+            Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
+        Returns
+        -------
+
+        """
+        # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
+        if output_processed_file:
+            output_file = copy.deepcopy(self)
+            for row_number, row_hed_string, column_to_hed_tags_dictionary in self:
+                for column_number in column_to_hed_tags_dictionary:
+                    old_text = column_to_hed_tags_dictionary[column_number]
+                    new_text = old_text
+                    output_file.set_cell(row_number, column_number, new_text)
+        else:
+            output_file = self
+
+        if output_file.is_spreadsheet_file():
             final_filename = filename + ".xlsx"
             if include_formatting:
                 # To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
@@ -65,16 +92,16 @@ class BaseFileInput:
                 if self._has_column_names:
                     adj_row_for_col_names += 1
                 adj_for_one_based_cols = 1
-                for row_number, text_file_row in self._dataframe.iterrows():
+                for row_number, text_file_row in output_file._dataframe.iterrows():
                     for column_number, column_text in enumerate(text_file_row):
                         old_worksheet.cell(row_number + adj_row_for_col_names, column_number + adj_for_one_based_cols).value = \
-                            self._dataframe.iloc[row_number, column_number]
+                            output_file._dataframe.iloc[row_number, column_number]
                 old_workbook.save(final_filename)
             else:
-                self._dataframe.to_excel(final_filename, header=self._has_column_names)
+                output_file._dataframe.to_excel(final_filename, header=self._has_column_names)
         elif self.is_text_file():
             final_filename = filename + ".tsv"
-            self._dataframe.to_csv(final_filename, '\t', index=False, header=self._has_column_names)
+            output_file._dataframe.to_csv(final_filename, '\t', index=False, header=output_file._has_column_names)
 
     # Make filename read only.
     @property
@@ -85,6 +112,10 @@ class BaseFileInput:
         return self.parse_dataframe()
 
     def iter_raw(self):
+        """Returns an iterator that goes over every column in the file without modification.
+
+           This is primarily for altering or re-saving the original file.
+        """
         default_mapper = ColumnMapper()
         return self.parse_dataframe(default_mapper)
 
