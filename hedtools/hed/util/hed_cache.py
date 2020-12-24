@@ -12,6 +12,7 @@ import time
 from hed.util.file_util import url_to_file
 
 HED_VERSION_EXPRESSION = r'HED(\d+.\d+.\d+)'
+# HED_VERSION_EXPRESSION = r'^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
 HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
 DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
