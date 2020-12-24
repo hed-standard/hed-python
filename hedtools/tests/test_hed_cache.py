@@ -1,6 +1,6 @@
 import unittest
 import os
-
+import itertools
 from hed.util import hed_cache
 
 
@@ -71,6 +71,22 @@ class Test(unittest.TestCase):
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
+
+    def test_sort_version_list(self):
+        valid_versions = ["8.1.0", "8.0.0", "8.0.0-alpha.1", "7.1.1", "1.0.0"]
+        for shuffled_versions in itertools.permutations(valid_versions):
+            sorted_versions = hed_cache._sort_version_list(shuffled_versions)
+            self.assertEqual(valid_versions, sorted_versions)
+
+    def test_find_hed_expression(self):
+        valid_versions = ["8.1.0", "8.0.0", "8.0.0-alpha.1", "7.1.1", "1.0.0"]
+        invalid_versions = ["01.1.1", "0", "0.0.0.0.1.1"]
+        for version in valid_versions:
+            final_version = f"HED{version}.xml"
+            self.assertTrue(hed_cache.version_pattern.match(final_version))
+        for version in invalid_versions:
+            final_version = f"HED{version}.xml"
+            self.assertFalse(hed_cache.version_pattern.match(final_version))
 
 if __name__ == '__main__':
     unittest.main()
