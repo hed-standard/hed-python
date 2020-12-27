@@ -10,23 +10,51 @@ The dictionary is a dictionary of dictionaries. The dictionary names are
 from defusedxml.lxml import parse
 
 
+# These need to match the attributes/element name/etc used to load from the xml
+class HedKey:
+    Default='default'
+    ExtensionAllowed='extensionAllowed'
+    IsNumeric='isNumeric'
+    Position='position'
+    PredicateType='predicateType'
+    Recommended='recommended'
+    RequiredPrefix='required'
+    RequireChild='requireChild'
+    AllTags='tags'
+    TakesValue='takesValue'
+    Unique='unique'
+    UnitClass='unitClass'
+
+    # Default Units for Type
+    DefaultUnits='defaultUnits'
+    Units='units'
+
+    SIUnit='SIUnit'
+    UnitSymbol='unitSymbol'
+
+    SIUnitModifier='SIUnitModifier'
+    SIUnitSymbolModifier='SIUnitSymbolModifier'
+
+    # If this is a valid HED3 spec, this allow mapping from short to long.
+    ShortTags='shortTags'
+
+
 class HedDictionary:
-    DEFAULT_UNIT_ATTRIBUTE = 'default'
-    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
-    DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE = 'default'
-    EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed'
-    TAG_DICTIONARY_KEYS = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
-                           'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass', 'shortTags']
-    UNIT_CLASS_DICTIONARY_KEYS = ['SIUnit', 'unitSymbol']
-    UNIT_MODIFIER_DICTIONARY_KEYS = ['SIUnitModifier', 'SIUnitSymbolModifier']
-    TAGS_DICTIONARY_KEY = 'tags'
-    SHORT_TAGS_DICTIONARY_KEY = 'shortTags'
-    TAG_UNIT_CLASS_ATTRIBUTE = 'unitClass'
-    UNIT_CLASS_ELEMENT = 'unitClass'
+    TAG_DICTIONARY_KEYS = [HedKey.Default, HedKey.ExtensionAllowed, HedKey.IsNumeric, HedKey.Position,
+                           HedKey.PredicateType, HedKey.Recommended, HedKey.RequiredPrefix, HedKey.RequireChild,
+                           HedKey.AllTags, HedKey.TakesValue, HedKey.Unique, HedKey.UnitClass]
+    UNIT_CLASS_DICTIONARY_KEYS = [HedKey.SIUnit, HedKey.UnitSymbol]
+    UNIT_MODIFIER_DICTIONARY_KEYS = [HedKey.SIUnitModifier, HedKey.SIUnitSymbolModifier]
+
+    # These should mostly match the HedKey values above.
+    # These are repeated here for clarification primarily
+    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = HedKey.DefaultUnits
+    DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE = HedKey.Default
+    UNIT_CLASS_ELEMENT = HedKey.UnitClass
     UNIT_CLASS_UNIT_ELEMENT = 'unit'
-    UNIT_CLASS_UNITS_ELEMENT = 'units'
+    UNIT_CLASS_UNITS_ELEMENT = HedKey.Units
     UNIT_MODIFIER_ELEMENT = 'unitModifier'
-    UNITS_ELEMENT = 'units'
+
     VERSION_ATTRIBUTE = 'version'
 
     def __init__(self, hed_xml_file_path):
@@ -43,6 +71,7 @@ class HedDictionary:
             A Hed_Dictionary object.
 
         """
+        self.no_duplicate_tags = True
         self.root_element = self._find_root_element(hed_xml_file_path)
         self._populate_dictionaries()
 
@@ -95,19 +124,14 @@ class HedDictionary:
         self._populate_unit_class_dictionaries()
         self._populate_unit_modifier_dictionaries()
         self._populate_short_tag_dict()
+        self._add_hed3_compatible_tags()
 
-    def tag_exists(self, short_tag_to_check):
-        """Returns if the given short tag exists in the schema
-
-        Parameters
-        ----------
-        short_tag_to_check : str
-
-        Returns
-        -------
-            bool
-        """
-        return short_tag_to_check.lower() in self.dictionaries[self.SHORT_TAGS_DICTIONARY_KEY]
+    @property
+    def short_tag_mapping(self):
+        """This returns the short->long tag dictionary if we have a hed3 compatible schema."""
+        if self.no_duplicate_tags:
+            return self.dictionaries[HedKey.ShortTags]
+        return None
 
     def get_all_forms_of_tag(self, short_tag_to_check):
         """Given a short tag, return all the longer versions of it.
@@ -116,11 +140,11 @@ class HedDictionary:
                     ["definition", "informational/definition", "attribute/informational/definition"]
         """
         try:
-            long_form_of_tag = self.dictionaries[self.SHORT_TAGS_DICTIONARY_KEY][short_tag_to_check.lower()]
+            tag_entry = self.short_tag_mapping[short_tag_to_check.lower()]
         except KeyError:
             return []
 
-        split_tags = long_form_of_tag.lower().split("/")
+        split_tags = tag_entry.lower().split("/")
         final_tag = ""
         all_forms = []
         for tag in reversed(split_tags):
@@ -141,22 +165,22 @@ class HedDictionary:
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
-        for TAG_DICTIONARY_KEY in HedDictionary.TAG_DICTIONARY_KEYS:
-            tags, tag_elements = self.get_tags_by_attribute(TAG_DICTIONARY_KEY)
-            if HedDictionary.EXTENSION_ALLOWED_ATTRIBUTE == TAG_DICTIONARY_KEY:
+        for dict_key in HedDictionary.TAG_DICTIONARY_KEYS:
+            tags, tag_elements = self.get_tags_by_attribute(dict_key)
+            if HedKey.ExtensionAllowed == dict_key:
                 child_tags = self._get_all_child_tags(tag_elements)
                 child_tags_dictionary = self._string_list_to_lowercase_dictionary(child_tags)
                 tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
                 tag_dictionary.update(child_tags_dictionary)
-            elif HedDictionary.DEFAULT_UNIT_ATTRIBUTE == TAG_DICTIONARY_KEY or \
-                    HedDictionary.TAG_UNIT_CLASS_ATTRIBUTE == TAG_DICTIONARY_KEY:
-                tag_dictionary = self._populate_tag_to_attribute_dictionary(tags, tag_elements, TAG_DICTIONARY_KEY)
-            elif HedDictionary.TAGS_DICTIONARY_KEY == TAG_DICTIONARY_KEY:
+            elif HedKey.Default == dict_key or \
+                    HedKey.UnitClass == dict_key:
+                tag_dictionary = self._populate_tag_to_attribute_dictionary(tags, tag_elements, dict_key)
+            elif HedKey.AllTags == dict_key:
                 tags = self.get_all_tags()[0]
                 tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
             else:
                 tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
-            self.dictionaries[TAG_DICTIONARY_KEY] = tag_dictionary
+            self.dictionaries[dict_key] = tag_dictionary
 
     def _populate_unit_class_dictionaries(self):
         """Populates a dictionary of dictionaries associated with all of the unit classes, unit class units, and unit
@@ -199,18 +223,71 @@ class HedDictionary:
             for unit_modifier_key in self.UNIT_MODIFIER_DICTIONARY_KEYS:
                 self.dictionaries[unit_modifier_key][unit_modifier_name] = unit_modifier_element.get(unit_modifier_key)
 
+    def find_duplicate_tags(self):
+        """Finds all tags that are not unique.
+
+        Returns
+        -------
+            dict: (duplicate_tag_name : list of tag entries with this name)
+        """
+        duplicate_dict = {}
+        short_tag_dict = self.dictionaries[HedKey.ShortTags]
+        for tag_name in short_tag_dict:
+            modified_name = f'{tag_name}'
+            if isinstance(short_tag_dict[tag_name], list):
+                duplicate_dict[modified_name] = short_tag_dict[tag_name]
+
+        return duplicate_dict
+
+    def dupe_tag_iter(self, return_detailed_info=False):
+        """Returns an iterator that goes over each line of the duplicate tags dict, including descriptive ones."""
+        duplicate_dict = self.find_duplicate_tags()
+        for tag_name in duplicate_dict:
+            if return_detailed_info:
+                yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions"
+            for tag_entry in duplicate_dict[tag_name]:
+                # if return_detailed_info:
+                #     yield f"\t{tag_entry.short_org_tag}: {tag_entry.long_org_tag}"
+                # else:
+                yield f"{tag_entry}"
+
     def _populate_short_tag_dict(self):
         """Create a mapping from the short version of a tag to the long version.
 
            """
-        base_tag_dict = self.dictionaries[self.TAGS_DICTIONARY_KEY]
+        self.no_duplicate_tags = True
+        base_tag_dict = self.dictionaries[HedKey.AllTags]
         new_short_tag_dict = {}
         for tag, unformatted_tag in base_tag_dict.items():
-            split_tags = tag.split("/")
+            split_tags = unformatted_tag.split("/")
             short_tag = split_tags[-1]
-            new_short_tag_dict[short_tag] = unformatted_tag
+            if short_tag == "#":
+                continue
+            short_clean_tag = short_tag.lower()
+            new_tag_entry = unformatted_tag
+            if short_clean_tag not in new_short_tag_dict:
+                new_short_tag_dict[short_clean_tag] = new_tag_entry
+            else:
+                self.no_duplicate_tags = False
+                if not isinstance(new_short_tag_dict[short_clean_tag], list):
+                    new_short_tag_dict[short_clean_tag] = [new_short_tag_dict[short_clean_tag]]
+                new_short_tag_dict[short_clean_tag].append(new_tag_entry)
+        self.dictionaries[HedKey.ShortTags] = new_short_tag_dict
 
-        self.dictionaries[self.SHORT_TAGS_DICTIONARY_KEY] = new_short_tag_dict
+    def _add_hed3_compatible_tags(self):
+        """Adds the short and intermediate tags to the appropriate dictionaries if this is hed3 compatible."""
+        if self.no_duplicate_tags:
+            for dict_key in self.TAG_DICTIONARY_KEYS:
+                tag_dictionary = self.dictionaries[dict_key]
+                new_entries = {}
+                for tag, value in tag_dictionary.items():
+                    split_tags = tag.split("/")
+                    final_tag = ""
+                    for tag in reversed(split_tags):
+                        final_tag = tag + "/" + final_tag
+                        # Remove extra trailing slash.
+                        new_entries[final_tag[:-1]] = value
+                tag_dictionary.update(new_entries)
 
     def _populate_unit_class_units_dictionary(self, unit_class_elements):
         """Populates a dictionary that contains unit class units.
@@ -226,20 +303,20 @@ class HedDictionary:
             A dictionary that contains all the unit class units.
 
         """
-        self.dictionaries[self.UNITS_ELEMENT] = {}
+        self.dictionaries[HedKey.Units] = {}
         for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
             self.dictionaries[unit_class_key] = {}
         for unit_class_element in unit_class_elements:
             element_name = self._get_element_tag_value(unit_class_element)
-            element_units = self._get_elements_by_name('unit', unit_class_element)
+            element_units = self._get_elements_by_name(self.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
             if not element_units:
                 element_units = self._get_element_tag_value(unit_class_element, self.UNIT_CLASS_UNITS_ELEMENT)
                 units = element_units.split(',')
                 units_list = list(map(lambda unit: unit.lower(), units))
-                self.dictionaries[self.UNITS_ELEMENT][element_name] = units_list
+                self.dictionaries[HedKey.Units][element_name] = units_list
                 continue
             element_unit_names = list(map(lambda element: element.text, element_units))
-            self.dictionaries[self.UNITS_ELEMENT][element_name] = element_unit_names
+            self.dictionaries[HedKey.Units][element_name] = element_unit_names
             for element_unit in element_units:
                 unit_name = element_unit.text
                 for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
@@ -259,15 +336,15 @@ class HedDictionary:
             A dictionary that contains all the unit class default units.
 
         """
-        self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE] = {}
+        self.dictionaries[HedKey.DefaultUnits] = {}
         for unit_class_element in unit_class_elements:
             unit_class_element_name = self._get_element_tag_value(unit_class_element)
             default_unit = unit_class_element.get(self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE)
             if default_unit is None:
-                self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = \
+                self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = \
                     unit_class_element.attrib[HedDictionary.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE]
             else:
-                self.dictionaries[self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = default_unit
+                self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = default_unit
 
     def _populate_tag_to_attribute_dictionary(self, tag_list, tag_element_list, attribute_name):
         """Populates the dictionaries associated with default unit tags in the attribute dictionary.

@@ -126,6 +126,14 @@ class FullHedString(TestHed):
                 '/Action/Reach/To touch,'
                 '((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
                 '/Attribute/Location/Screen/Left/23 px),Event/Duration/3 ms',
+            'validNestedParentheses2':
+                '/Action/Reach/To touch,'
+                '(((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
+                '/Attribute/Location/Screen/Left/23 px)),Event/Duration/3 ms',
+            'validNestedParentheses3':
+                'Thing, (Thing, (Thing))',
+            'validNestedParentheses4': 'Thing, ((Thing, (Thing)), Thing)',
+            'invalidNestedParentheses': 'Thing, ((Thing, (Thing)) Thing)'
         }
 
         expected_results = {
@@ -139,7 +147,11 @@ class FullHedString(TestHed):
             'multipleExtraClosingDelimiters': False,
             'multipleExtraMiddleDelimiters': False,
             'valid': True,
-            'validNestedParentheses': True
+            'validNestedParentheses': True,
+            'validNestedParentheses2': True,
+            'validNestedParentheses3': True,
+            'validNestedParentheses4': True,
+            'invalidNestedParentheses': False,
         }
         expected_issues = {
             'missingOpeningComma': format_val_error('invalidTag', tag='/Action/Reach/To touch('),
@@ -183,7 +195,11 @@ class FullHedString(TestHed):
                                                                 hed_string=test_strings[
                                                                      'multipleExtraMiddleDelimiters']),
             'valid': [],
-            'validNestedParentheses': []
+            'validNestedParentheses': [],
+            'validNestedParentheses2': [],
+            'validNestedParentheses3': [],
+            'validNestedParentheses4': [],
+            'invalidNestedParentheses': format_val_error('commaMissing', tag="Thing)) ")
         }
         self.validator(test_strings, expected_results, expected_issues)
 
