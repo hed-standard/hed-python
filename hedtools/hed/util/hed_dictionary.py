@@ -285,6 +285,9 @@ class HedDictionary:
                     final_tag = ""
                     for tag in reversed(split_tags):
                         final_tag = tag + "/" + final_tag
+                        # We need to include the #, but make sure we don't create a tag with just # alone.
+                        if tag == "#":
+                            continue
                         # Remove extra trailing slash.
                         new_entries[final_tag[:-1]] = value
                 tag_dictionary.update(new_entries)
