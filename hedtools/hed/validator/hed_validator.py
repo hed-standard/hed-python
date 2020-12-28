@@ -372,7 +372,7 @@ class HedValidator:
         else:
             issue_string = "\n"
             for el in self._validation_issues:
-                issue_string = issue_string + "\t" + el["code"] + el["message"]
+                issue_string = issue_string + "\t" + el["code"] + el["message"] + "\n"
         if title:
             issue_string = title + ":" + issue_string
         return issue_string
