@@ -1,15 +1,16 @@
 from hed.util import error_reporter
 from hed.util.error_types import SchemaErrors
 from hed.util import hed_string_util
-from hed.util.schema_node_map import SchemaNodeMap
-
+from hed.util.hed_dictionary import HedDictionary
 
 class TagFormat:
     """     Class to convert hed3 tags between short and long form.
        """
 
-    def __init__(self, hed_xml_file=None, hed_tree=None):
-        self.map_schema = SchemaNodeMap(hed_xml_file, hed_tree)
+    def __init__(self, hed_xml_file=None, hed_dictionary=None):
+        if hed_dictionary is None:
+            hed_dictionary = HedDictionary(hed_xml_file)
+        self._short_tag_mapping = hed_dictionary.short_tag_mapping
 
     def convert_hed_string_to_short(self, hed_string):
         """ Convert a hed string from any form to the shortest.
@@ -25,7 +26,7 @@ class TagFormat:
             -------
                 str: The converted string
         """
-        if not self.map_schema.no_duplicate_tags:
+        if not self._short_tag_mapping:
             error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_tag=hed_string)
             return hed_string, error
 
@@ -68,7 +69,7 @@ class TagFormat:
             -------
                 str: The converted string
         """
-        if not self.map_schema.no_duplicate_tags:
+        if not self._short_tag_mapping:
             error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string)
             return hed_string, error
 
@@ -129,7 +130,7 @@ class TagFormat:
         index_end = 0
         found_unknown_extension = False
         found_index_end = 0
-        found_tag_entry = None
+        found_long_org_tag = None
         # Iterate over tags left to right keeping track of current index
         for tag in split_tags:
             tag_len = len(tag)
@@ -141,37 +142,37 @@ class TagFormat:
 
             # If we already found an unknown tag, it's implicitly an extension.  No known tags can follow it.
             if not found_unknown_extension:
-                if tag not in self.map_schema.tag_dict:
+                if tag not in self._short_tag_mapping:
                     found_unknown_extension = True
-                    if not found_tag_entry:
+                    if not found_long_org_tag:
                         error = error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
                                                                    index_start, index_end)
                         return hed_tag, error
                     continue
 
-                tag_entry = self.map_schema.tag_dict[tag]
-                tag_string = tag_entry.long_clean_tag
+                long_org_tag = self._short_tag_mapping[tag]
+                tag_string = long_org_tag.lower()
                 main_hed_portion = clean_tag[:index_end]
 
                 # Verify the tag has the correct path above it.
                 if not tag_string.endswith(main_hed_portion):
                     error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
                                                                index_start, index_end,
-                                                               tag_entry.long_org_tag)
+                                                               long_org_tag)
                     return hed_tag, error
                 found_index_end = index_end
-                found_tag_entry = tag_entry
+                found_long_org_tag = long_org_tag
             else:
                 # These means we found a known tag in the remainder/extension section, which is an error
-                if tag in self.map_schema.tag_dict:
+                if tag in self._short_tag_mapping:
                     error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
                                                                index_start, index_end,
-                                                               self.map_schema.tag_dict[tag].long_org_tag)
+                                                               self._short_tag_mapping[tag])
                     return hed_tag, error
 
         remainder = hed_tag[found_index_end:]
 
-        long_tag_string = found_tag_entry.long_org_tag + remainder
+        long_tag_string = found_long_org_tag + remainder
         return long_tag_string, []
 
     def _convert_to_short_tag(self, hed_tag):
@@ -204,14 +205,16 @@ class TagFormat:
         clean_tag = hed_tag.lower()
         split_tag = clean_tag.split("/")
 
-        found_tag_entry = None
+        found_long_org_tag = None
         index = len(hed_tag)
         last_found_index = index
+        found_short_tag = None
         # Iterate over tags right to left keeping track of current character index
         for tag in reversed(split_tag):
             # As soon as we find a non extension tag, mark down the index and bail.
-            if tag in self.map_schema.tag_dict:
-                found_tag_entry = self.map_schema.tag_dict[tag]
+            if tag in self._short_tag_mapping:
+                found_long_org_tag = self._short_tag_mapping[tag]
+                found_short_tag = tag
                 last_found_index = index
                 index -= len(tag)
                 break
@@ -222,21 +225,22 @@ class TagFormat:
             if index != 0:
                 index -= 1
 
-        if found_tag_entry is None:
+        if found_long_org_tag is None:
             error = error_reporter.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
                                                        index, last_found_index)
             return hed_tag, error
 
         # Verify the tag has the correct path above it.
         main_hed_portion = clean_tag[:last_found_index]
-        tag_string = found_tag_entry.long_clean_tag
+        tag_string = found_long_org_tag.lower()
         if not tag_string.endswith(main_hed_portion):
             error = error_reporter.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag, index,
-                                                       last_found_index, found_tag_entry.long_org_tag)
+                                                       last_found_index, found_long_org_tag)
             return hed_tag, error
 
         remainder = hed_tag[last_found_index:]
-        short_tag_string = found_tag_entry.short_org_tag + remainder
+        short_tag = found_long_org_tag[-len(found_short_tag):]
+        short_tag_string = short_tag + remainder
         return short_tag_string, []
 
     def _convert_file(self, input_file, conversion_function):

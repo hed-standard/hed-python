@@ -16,7 +16,7 @@ class DefinitionMapper:
 
     def __init__(self, hed_inputs=None, hed_dictionary=None):
         self._defs = {}
-        self._hed_dictionary = hed_dictionary
+        self._short_tag_mapping = hed_dictionary.short_tag_mapping
 
         if hed_dictionary:
             self._def_tag_versions = hed_dictionary.get_all_forms_of_tag(self.DEF_KEY)
@@ -179,7 +179,7 @@ class DefinitionMapper:
                 print(f"Too many org tags found in definition for {def_tag}.  Also found: {org_tags}")
                 continue
             if len(group_tags) > 1:
-                print(f"Too many org tags found in definition for {def_tag}.  Also found: {group_tags}")
+                print(f"Too many group tags found in definition for {def_tag}.  Also found: {group_tags}")
                 continue
 
             org_tag = org_tags[0] if org_tags else None
@@ -187,7 +187,7 @@ class DefinitionMapper:
 
             if def_tag in self._defs:
                 print(f"Duplicate definition found for '{def_tag}'.")
-            if self._hed_dictionary and self._hed_dictionary.tag_exists(def_tag):
+            if self._short_tag_mapping and def_tag.lower() in self._short_tag_mapping:
                 print(f"Tag '{def_tag}' already in base schema.")
 
             self._defs[def_tag.lower()] = f"({self.ELABEL_ORG_KEY}/{def_tag}, {org_tag}, {group_tag})"

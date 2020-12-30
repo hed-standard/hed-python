@@ -2,23 +2,23 @@ import os
 import re
 from hed.util.hed_file_input import HedFileInput
 from hed.util.hed_string_util import split_hed_string, remove_slashes_and_spaces
-from hed.util.schema_node_map import SchemaNodeMap
+from hed.util.hed_dictionary import HedDictionary, HedKey
 
 
-def validate_single_tag(map_schema, tag):
+def validate_single_tag(hed_dict, tag):
     # Split off the variable suffix
-    if tag.endswith("/XXX"):
-        tag = tag[:-len("/XXX")]
+    if tag.endswith("/xxx"):
+        tag = tag[:-len("/xxx")]
     elif tag.endswith("/#"):
         tag = tag[:-len("/#")]
-    elif tag.endswith("/YYY"):
-        tag = tag[:-len("/YYY")]
+    elif tag.endswith("/yyy"):
+        tag = tag[:-len("/yyy")]
 
     # Sometimes these are entirely on their own.  eg: (hed/tag/string/XXX, YYY)
     if tag == "YYY" or tag == "XXX":
         return True
 
-    if tag not in map_schema.tag_dict:
+    if tag not in hed_dict.dictionaries[HedKey.AllTags]:
         return False
     return True
 
@@ -40,11 +40,11 @@ def split_off_comment(hed_string_with_comment):
 
 def read_version_map(version_map_filename, left_hed_schema=None, right_hed_schema=None,
                      return_errors=False):
-    left_map = right_map = None
+    left_dict = right_dict = None
     if left_hed_schema:
-        left_map = SchemaNodeMap(left_hed_schema, use_full_name_as_key=True)
+        left_dict = HedDictionary(left_hed_schema)
     if right_hed_schema:
-        right_map = SchemaNodeMap(right_hed_schema, use_full_name_as_key=True)
+        right_dict = HedDictionary(right_hed_schema)
     mapping_dict = {}
     error_list = []
 
@@ -78,15 +78,15 @@ def read_version_map(version_map_filename, left_hed_schema=None, right_hed_schem
                     add_error(f"Warning: XXX or YYY found in a line with no comment: {line}", i)
 
                 # Validate tags if we have a schema
-                if left_map is not None:
-                    if not validate_single_tag(left_map, left_tag):
+                if left_dict is not None:
+                    if not validate_single_tag(left_dict, left_tag):
                         add_error(f"Warning: Left tag not found in Schema.  {left_tag}", i)
-                if right_map is not None:
+                if right_dict is not None:
                     hed_tags = split_hed_string(right_string_no_comment)
                     for is_hed_tag, (startpos, endpos) in hed_tags:
                         if is_hed_tag:
                             hed_tag = right_string_no_comment[startpos:endpos]
-                            if not validate_single_tag(right_map, hed_tag):
+                            if not validate_single_tag(right_dict, hed_tag):
                                 add_error(f"Warning: Right tag not found in Schema.  {hed_tag}  Full line: {right_string}", i)
 
                 mapping_dict[left_tag] = right_string_no_comment, comment
@@ -243,7 +243,7 @@ def upgrade_file_hed_version(input_file, mapping_filename_or_dict, tag_columns_t
 
 if __name__ == '__main__':
     hed2_xml_file = "tests/data/HED7.1.1.xml"
-    hed3_xml_file = "tests/data/reduced_hed3.xml"
+    hed3_xml_file = "tests/data/HED8.0.0-alpha.1.xml"
     mapping_dict, errors = read_version_map("tests/data/hed2_hed3_conversion.txt",
                                             left_hed_schema=hed2_xml_file, right_hed_schema=hed3_xml_file,
                                             return_errors=True)
