@@ -3,15 +3,14 @@ This module contains functions for parsing a wiki HED schema.
 """
 
 from xml.etree.ElementTree import Element, SubElement
-from hed.schematools import parsetag
+from hed.schematools import parsetag, constants
 import os
 
 ATTRIBUTE_DEFINITION_STRING = '\'\'\'Attribute Definitions:'
 CHANGE_LOG_STRING = 'Changelog'
 SYNTAX_STRING = '\'\'\'Syntax'
 ROOT_TAG = '\'\'\''
-HED_NODE_NAME = 'HED'
-HED_VERSION_STRING = 'HED version:'
+HED_NODE_STRING = "HED"
 START_STRING = '!# start hed'
 UNIT_CLASS_STRING = '\'\'\'Unit classes'
 UNIT_MODIFIER_STRING = '\'\'\'Unit modifiers'
@@ -142,9 +141,10 @@ def hed_wiki_2_xml_tree(wiki_file_path):
                 line = line.strip()
                 if not line:
                     pass
-                if line.startswith(HED_VERSION_STRING):
-                    version_number = get_wiki_version(line)
-                    hed_node.set('version', version_number)
+                if line.startswith(HED_NODE_STRING):
+                    hed_attributes = get_hed_attributes(line[len(HED_NODE_STRING):])
+                    for attrib_name, attrib_value in hed_attributes.items():
+                        hed_node.set(attrib_name, attrib_value)
                 elif line.startswith(START_STRING):
                     add_tags(wiki_file)
                     break
@@ -215,18 +215,29 @@ def get_hed_change_log(wiki_file_path):
     return change_log
 
 
-def get_wiki_version(version_line):
-    """Gets the HED version from the wiki file.
+def get_hed_attributes(version_line):
+    """Extracts all valid attributes like version from the HED line in .mediawiki format.
 
     Parameters
     ----------
     version_line: string
-        The line in the wiki file that contains the version.
+        The line in the wiki file that contains the version or other attributes.
 
     Returns
     -------
-    string
-        The HED version from the wiki file.
+    dict: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}
     """
-    split = version_line.split(':')
-    return split[1].strip()
+    final_attributes = {}
+    attribute_pairs = version_line.split(',')
+    for pair in attribute_pairs:
+        if ':' not in pair:
+            continue
+        key, value = pair.split(':')
+        key = key.strip()
+        value = value.strip()
+        if key not in constants.HED_VALID_ATTRIBUTES:
+            continue
+
+        final_attributes[key] = value
+
+    return final_attributes
