@@ -60,7 +60,8 @@ class HEDXml2Wiki():
         parse_mode = MainParseMode.MainTags
         for elem in hed_tree.iter():
             if elem.tag == "HED":
-                self.current_tag_string = f"HED version: {elem.attrib['version']}"
+                hed_attrib_string = self.get_attribs_from_root_hed_node(elem)
+                self.current_tag_string = f"HED {hed_attrib_string}"
                 self.flush_current_tag()
                 self.add_blank_line()
                 self.current_tag_string = "!# start hed"
@@ -177,6 +178,14 @@ class HEDXml2Wiki():
                     else:
                         self.current_tag_extra += f"{attrib_name}={attrib_val}"
             self.current_tag_extra += "}"
+
+    @staticmethod
+    def get_attribs_from_root_hed_node(elem):
+        attrib_values = [f"{attr}:{elem.attrib[attr]}" for attr in constants.HED_VALID_ATTRIBUTES if
+                           attr in elem.attrib]
+        final_attrib_string = ", ".join(attrib_values)
+        return final_attrib_string
+
 
 
 def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):
