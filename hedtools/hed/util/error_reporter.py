@@ -48,23 +48,23 @@ def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag
     """
 
     error_types = {
-        ValidationErrors.ROW: 'Issues in row %s:\n' % str(error_row),
-        ValidationErrors.COLUMN: 'Issues in row %s column %s:\n' % (str(error_row), str(error_column)),
-        ValidationErrors.INVALID_FILENAME: '\tInvalid file name - "%s"\n' % file_name,
+        ValidationErrors.ROW: 'Issues in row %s:' % str(error_row),
+        ValidationErrors.COLUMN: 'Issues in row %s column %s:' % (str(error_row), str(error_column)),
+        ValidationErrors.INVALID_FILENAME: '\tInvalid file name - "%s"' % file_name,
         ValidationErrors.PARENTHESES: '\tERROR: Number of opening and closing parentheses are unequal. %s opening parentheses. %s '
-                                      'closing parentheses\n' % (opening_parentheses_count, closing_parentheses_count),
+                                      'closing parentheses' % (opening_parentheses_count, closing_parentheses_count),
         ValidationErrors.INVALID_CHARACTER: '\tERROR: Invalid character "%s" at index %s of string "%s"'
                                             % (character, index, hed_string),
-        ValidationErrors.COMMA_MISSING: '\tERROR: Comma missing after - "%s"\n' % tag,
+        ValidationErrors.COMMA_MISSING: '\tERROR: Comma missing after - "%s"' % tag,
         ValidationErrors.INVALID_COMMA: '\tERROR: Either "%s" contains a comma when it should not or "%s" is not a valid '
-                                        'tag\n ' % (previous_tag, tag),
-        ValidationErrors.DUPLICATE: '\tERROR: Duplicate tag - "%s"\n' % tag,
-        ValidationErrors.REQUIRE_CHILD: '\tERROR: Descendant tag required - "%s"\n' % tag,
-        ValidationErrors.EXTRA_TILDE: '\tERROR: Too many tildes - group "%s"\n' % tag,
-        ValidationErrors.MULTIPLE_UNIQUE: '\tERROR: Multiple unique tags with prefix - "%s"\n' % tag_prefix,
-        ValidationErrors.UNIT_CLASS_INVALID_UNIT: '\tERROR: Invalid unit - "%s" valid units are "%s"\n' % (
+                                        'tag ' % (previous_tag, tag),
+        ValidationErrors.DUPLICATE: '\tERROR: Duplicate tag - "%s"' % tag,
+        ValidationErrors.REQUIRE_CHILD: '\tERROR: Descendant tag required - "%s"' % tag,
+        ValidationErrors.EXTRA_TILDE: '\tERROR: Too many tildes - group "%s"' % tag,
+        ValidationErrors.MULTIPLE_UNIQUE: '\tERROR: Multiple unique tags with prefix - "%s"' % tag_prefix,
+        ValidationErrors.UNIT_CLASS_INVALID_UNIT: '\tERROR: Invalid unit - "%s" valid units are "%s"' % (
         tag, unit_class_units),
-        ValidationErrors.INVALID_TAG: '\tERROR: Invalid tag - "%s"\n' % tag,
+        ValidationErrors.INVALID_TAG: '\tERROR: Invalid tag - "%s"' % tag,
         ValidationErrors.EXTRA_DELIMITER: '\tERROR: Extra delimiter "%s" at index %s of string "%s"'
                                           % (character, index, hed_string),
     }
@@ -121,9 +121,9 @@ def format_val_warning(warning_type, tag='', default_unit='', tag_prefix=''):
 
     """
     warning_types = {
-        ValidationWarnings.CAPITALIZATION: '\tWARNING: First word not capitalized or camel case - "%s"\n' % tag,
-        ValidationWarnings.REQUIRED_PREFIX_MISSING: '\tWARNING: Tag with prefix "%s" is required\n' % tag_prefix,
-        ValidationWarnings.UNIT_CLASS_DEFAULT_USED: '\tWARNING: No unit specified. Using "%s" as the default - "%s"\n' % (
+        ValidationWarnings.CAPITALIZATION: '\tWARNING: First word not capitalized or camel case - "%s"' % tag,
+        ValidationWarnings.REQUIRED_PREFIX_MISSING: '\tWARNING: Tag with prefix "%s" is required' % tag_prefix,
+        ValidationWarnings.UNIT_CLASS_DEFAULT_USED: '\tWARNING: No unit specified. Using "%s" as the default - "%s"' % (
         default_unit, tag)
     }
     default_warning_message = 'WARNING: Unknown warning'

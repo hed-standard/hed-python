@@ -210,7 +210,7 @@ def save_validation_issues_to_file_in_upload_folder(spreadsheet_filename, valida
     validation_issues_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], validation_issues_filename)
     with open(validation_issues_file_path, 'w', encoding='utf-8') as validation_issues_file:
         for val_issue in validation_issues:
-            validation_issues_file.write(val_issue['message'])
+            validation_issues_file.write(val_issue['message'] + "\n")
     return validation_issues_filename
 
 

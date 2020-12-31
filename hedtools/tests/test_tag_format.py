@@ -13,7 +13,6 @@ class TestTagFormat(unittest.TestCase):
     def setUpClass(cls):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
         cls.tag_compare = TagFormat(hed_xml)
-        cls.tag_compare.map_schema.print_tag_dict()
 
 
 class TestConvertTag(TestTagFormat):
