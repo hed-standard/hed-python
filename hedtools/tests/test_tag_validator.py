@@ -606,7 +606,6 @@ class TestHed3(unittest.TestCase):
         for test_key in test_strings:
             hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
             test_issues = test_function(hed_string_delimiter)
-            print(test_issues)
             test_result = not test_issues
             expected_issue = expected_issues[test_key]
             expected_result = expected_results[test_key]

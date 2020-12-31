@@ -3,8 +3,7 @@ from urllib.error import URLError, HTTPError
 from flask import current_app
 
 from hed.schematools import xml2wiki, wiki2xml, constants as converter_constants
-#from hed.tools.duplicate_tags import check_for_duplicate_tags
-from hed.web.duplicate_tag_temp import check_for_duplicate_tags
+from hed.tools.duplicate_tags import check_for_duplicate_tags
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension
 from hed.util.exceptions import SchemaError
 
