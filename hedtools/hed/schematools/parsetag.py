@@ -106,7 +106,10 @@ def get_tag_attributes(tag_line):
     attributes = re.compile(attributes_expression)
     match = attributes.search(tag_line)
     if match:
-        return [x.strip() for x in re.sub('[{}]', '', match.group()).split(',')]
+        attributes_split = [x.strip() for x in re.sub('[{}]', '', match.group()).split(',')]
+        # Filter out attributes with spaces.
+        final_attributes = [a for a in attributes_split if " " not in a]
+        return final_attributes
     else:
         return ''
 
