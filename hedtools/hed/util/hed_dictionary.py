@@ -105,6 +105,10 @@ class HedDictionary:
         """
         return self.dictionaries
 
+    def has_duplicate_tags(self):
+        """Converting functions don't make much sense to work if we have duplicate tags and are disabled"""
+        return not self.no_duplicate_tags
+
     def _populate_dictionaries(self):
         """Populates a dictionary of dictionaries that contains all of the tags, tag attributes, unit class units,
            and unit class attributes.
