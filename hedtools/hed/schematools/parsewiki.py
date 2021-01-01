@@ -230,7 +230,7 @@ def get_hed_attributes(version_line):
     final_attributes = {}
     attribute_pairs = version_line.split(',')
     for pair in attribute_pairs:
-        if ':' not in pair:
+        if pair.count(':') != 1:
             continue
         key, value = pair.split(':')
         key = key.strip()
