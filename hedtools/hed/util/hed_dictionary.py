@@ -7,7 +7,7 @@ The dictionary is a dictionary of dictionaries. The dictionary names are
 'tags', 'takesValue', 'unique', 'units', and 'unitClass'.
 """
 
-from defusedxml.lxml import parse
+from defusedxml.ElementTree import parse
 
 
 # These need to match the attributes/element name/etc used to load from the xml
@@ -429,11 +429,11 @@ class HedDictionary:
         """
         ancestor_tags = []
         parent_tag_name = self._get_parent_tag_name(tag_element)
-        parent_element = tag_element.getparent()
+        parent_element = tag_element.find('..')
         while parent_tag_name:
             ancestor_tags.append(parent_tag_name)
             parent_tag_name = self._get_parent_tag_name(parent_element)
-            parent_element = parent_element.getparent()
+            parent_element = parent_element.find('..')
         return ancestor_tags
 
     def _get_element_tag_value(self, element, tag_name='name'):
@@ -468,7 +468,7 @@ class HedDictionary:
             The name of the tag element's parent. If there is no parent tag then an empty string is returned.
 
         """
-        parent_tag_element = tag_element.getparent()
+        parent_tag_element = tag_element.find('..')
         if parent_tag_element is not None:
             return parent_tag_element.findtext('name')
         else:
@@ -508,7 +508,7 @@ class HedDictionary:
 
         """
         tags = []
-        tag_elements = self.root_element.xpath('.//node[@%s]' % attribute_name)
+        tag_elements = self.root_element.findall('.//node[@%s]' % attribute_name)
         for attribute_tag_element in tag_elements:
             tag = self._get_tag_path_from_tag_element(attribute_tag_element)
             tags.append(tag)
@@ -529,29 +529,30 @@ class HedDictionary:
 
         """
         tags = []
-        tag_elements = self.root_element.xpath('.//%s' % tag_element_name)
+        tag_elements = self.root_element.findall('.//%s' % tag_element_name)
         for tag_element in tag_elements:
             tag = self._get_tag_path_from_tag_element(tag_element)
             tags.append(tag)
         return tags, tag_elements
 
-    def _get_elements_by_attribute(self, attribute_name, element_name='node'):
-        """Gets the elements that have a specific attribute.
-
-        Parameters
-        ----------
-        attribute_name: str
-            The name of the attribute associated with the element.
-        element_name: str
-            The name of the XML element tag name. The default is 'node'.
-
-        Returns
-        -------
-        list
-            A list containing elements that have a specified attribute.
-
-        """
-        return self.root_element.xpath('.//%s[@%s]' % (element_name, attribute_name))
+    # def _get_elements_by_attribute(self, attribute_name, element_name='node'):
+    #     """Gets the elements that have a specific attribute.
+    #
+    #     Parameters
+    #     ----------
+    #     attribute_name: str
+    #         The name of the attribute associated with the element.
+    #     element_name: str
+    #         The name of the XML element tag name. The default is 'node'.
+    #
+    #     Returns
+    #     -------
+    #     list
+    #         A list containing elements that have a specified attribute.
+    #
+    #     """
+    #     tag_elements = self.root_element.xpath('.//%s[@%s]' % (element_name, attribute_name))
+    #     return tag_elements
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """Gets the elements that have a specific element name.
@@ -571,9 +572,9 @@ class HedDictionary:
 
         """
         if parent_element is None:
-            elements = self.root_element.xpath('.//%s' % element_name)
+            elements = self.root_element.findall('.//%s' % element_name)
         else:
-            elements = parent_element.xpath('.//%s' % element_name)
+            elements = parent_element.findall('.//%s' % element_name)
         return elements
 
     def _get_all_child_tags(self, tag_elements=None, element_name='node', exclude_take_value_tags=True):
