@@ -1,6 +1,6 @@
 from enum import Enum
-from defusedxml.lxml import parse
-import lxml
+from defusedxml.ElementTree import parse
+import xml
 
 from hed.schematools import constants
 from hed.util.exceptions import SchemaError
@@ -207,8 +207,8 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):
 
     try:
         hed_xml_tree = parse(local_xml_file)
-    except lxml.etree.XMLSyntaxError as e:
-        raise SchemaError(e.msg)
+    except xml.etree.ElementTree.ParseError as e:
+         raise SchemaError(e.msg)
     hed_xml_tree = hed_xml_tree.getroot()
     xml2wiki = HEDXml2Wiki()
     output_strings = xml2wiki.process_tree(hed_xml_tree)
