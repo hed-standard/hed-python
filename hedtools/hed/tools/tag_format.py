@@ -24,7 +24,7 @@ class TagFormat:
                 a hed string containing any number of tags
             Returns
             -------
-                str: The converted string
+                tuple: (The converted string, a list of errors)
         """
         if not self._short_tag_mapping:
             error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_tag=hed_string)
@@ -67,7 +67,7 @@ class TagFormat:
                 a hed string containing any number of tags
             Returns
             -------
-                str: The converted string
+                tuple: (The converted string, a list of errors)
         """
         if not self._short_tag_mapping:
             error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string)

@@ -10,7 +10,7 @@ from hed.util import error_reporter
 from hed.util.hed_dictionary import HedDictionary
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
-from hed.util.hed_file_input import HedFileInput
+from hed.util.hed_file_input import BaseFileInput
 
 
 class HedValidator:
@@ -41,7 +41,7 @@ class HedValidator:
             A HedValidator object.
 
         """
-        self._is_file = isinstance(hed_input, HedFileInput)
+        self._is_file = isinstance(hed_input, BaseFileInput)
         self._hed_input = hed_input
         if run_semantic_validation:
             if hed_dictionary is None:
@@ -91,6 +91,9 @@ class HedValidator:
             A HedDictionary object.
 
         """
+        # If we're not asking for a specific file, for ease of use cache the ones from github.
+        if hed_xml_file is None and get_specific_version is None:
+            hed_cache.cache_all_hed_xml_versions()
         final_hed_xml_file = hed_cache.get_local_file(hed_xml_file, get_specific_version)
         hed_dictionary = HedDictionary(final_hed_xml_file)
         return hed_dictionary
