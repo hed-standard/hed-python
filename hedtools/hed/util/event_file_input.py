@@ -44,10 +44,10 @@ class EventFileInput(BaseFileInput):
         if attribute_columns is None:
             attribute_columns = ["duration", "onset"]
 
-        column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
+        self.column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
 
-        def_mapper = DefinitionMapper(column_group_defs, hed_dictionary=hed_dictionary)
-        new_mapper = ColumnMapper(json_def_files=column_group_defs, tag_columns=tag_columns,
+        def_mapper = DefinitionMapper(self.column_group_defs, hed_dictionary=hed_dictionary)
+        new_mapper = ColumnMapper(json_def_files=self.column_group_defs, tag_columns=tag_columns,
                                   column_prefix_dictionary=column_prefix_dictionary,
                                   hed_dictionary=hed_dictionary, attribute_columns=attribute_columns,
                                   definition_mapper=def_mapper)
@@ -58,4 +58,11 @@ class EventFileInput(BaseFileInput):
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
                              "This is probably not intended.")
 
+    def validate_file_sidecars(self, hed_dictionary=None):
+        validation_issues = []
+        for column_def_group in self.column_group_defs:
+            new_issue_dict = column_def_group.validate_entries(hed_dictionary=hed_dictionary)
+            for name, issues in new_issue_dict.items():
+                validation_issues += issues
 
+        return validation_issues

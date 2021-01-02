@@ -73,6 +73,8 @@ class HedDictionary:
         """
         self.no_duplicate_tags = True
         self.root_element = self._find_root_element(hed_xml_file_path)
+        # Used to find parent elements of XML nodes for file parsing
+        self._parent_map = {c: p for p in self.root_element.iter() for c in p}
         self._populate_dictionaries()
 
     def get_root_element(self):
@@ -429,11 +431,12 @@ class HedDictionary:
         """
         ancestor_tags = []
         parent_tag_name = self._get_parent_tag_name(tag_element)
-        parent_element = tag_element.find('..')
+        parent_element = self._parent_map[tag_element]
         while parent_tag_name:
             ancestor_tags.append(parent_tag_name)
             parent_tag_name = self._get_parent_tag_name(parent_element)
-            parent_element = parent_element.find('..')
+            if parent_tag_name:
+                parent_element = self._parent_map[parent_element]
         return ancestor_tags
 
     def _get_element_tag_value(self, element, tag_name='name'):
@@ -468,7 +471,7 @@ class HedDictionary:
             The name of the tag element's parent. If there is no parent tag then an empty string is returned.
 
         """
-        parent_tag_element = tag_element.find('..')
+        parent_tag_element = self._parent_map[tag_element]
         if parent_tag_element is not None:
             return parent_tag_element.findtext('name')
         else:
