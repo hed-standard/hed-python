@@ -3,8 +3,9 @@ from urllib.error import URLError, HTTPError
 from flask import current_app
 
 from hed.schematools import xml2wiki, wiki2xml, constants as converter_constants
-from hed.tools.duplicate_tags import check_for_duplicate_tags
-from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension
+#from hed.tools.duplicate_tags import check_for_duplicate_tags
+from hed.util.hed_dictionary import HedDictionary
+from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension, write_text_iter_to_file
 from hed.util.exceptions import SchemaError
 
 from hed.web.web_utils import check_if_option_in_form, file_extension_is_valid, handle_http_error, \
@@ -124,10 +125,12 @@ def run_schema_duplicate_tag_detection(form_request_object):
 
         if not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
             raise ValueError(f"Invalid extension on file: {hed_file_path}")
-        result_dict = check_for_duplicate_tags(hed_file_path)
-        if result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]:
-            filename = result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]
-            download_response = generate_download_file_response_and_delete(filename)
+        hed_dict = HedDictionary(hed_file_path)
+        if hed_dict.has_duplicate_tags():
+            dup_tag_file = write_text_iter_to_file(hed_dict.dupe_tag_iter(True))
+        # if result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]:
+            #filename = result_dict[converter_constants.HED_OUTPUT_LOCATION_KEY]
+            download_response = generate_download_file_response_and_delete(dup_tag_file)
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
