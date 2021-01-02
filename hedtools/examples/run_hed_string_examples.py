@@ -19,13 +19,13 @@ if __name__ == '__main__':
     # Example 1b: Try with the latest version of HED.xml
     hed_input_reader = HedValidator(hed_string_1)
     print(hed_input_reader.get_printable_issue_string(
-        '[Example 1b] hed_string_1 probably has no issues with the latest HED version'))
+        '[Example 1b] hed_string_1 has issues with the latest HED version'))
 
     # Example 2a: Invalid HED string (junk in last tag)
     hed_string_2 = 'Event/Category/Participant response,'  \
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger),' \
                    'dskfjkf/dskjdfkj/sdkjdsfkjdf/sdlfdjdsjklj'
-    hed_input_reader = HedValidator(hed_string_2)
+    hed_input_reader = HedValidator(hed_string_2, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string('[Example 2a] hed_string_2 has junk in the last tag'))
 
     # Example 2b: However HED string of Example 2 has valid syntax so syntactic validation works

@@ -1,5 +1,4 @@
-# Simplified example code for running xml2_wiki
-
+"""Example for how to convert from xml format to mediawiki format"""
 from shutil import move
 from hed.schematools import xml2wiki, constants
 
