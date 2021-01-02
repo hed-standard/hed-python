@@ -99,7 +99,11 @@ class DefinitionMapper:
             replace_with = ""
             if full_label_tag:
                 to_remove = full_label_tag
-                replace_with = self._defs[label_tag.lower()]
+                label_tag_lower = label_tag.lower()
+                # Just leave definitions in place if they aren't found.
+                if label_tag_lower not in self._defs:
+                    continue
+                replace_with = self._defs[label_tag_lower]
             else:
                 extents = self._find_tag_group_extent(final_string, tag_index, remove_comma=True)
                 to_remove = hed_string[extents[0]:extents[1]]

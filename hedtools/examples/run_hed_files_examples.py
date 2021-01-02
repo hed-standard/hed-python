@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # Example 1a: Valid TSV file with default version of HED
     print(valid_tsv_file)
     input_file = HedFileInput(valid_tsv_file, tag_columns=[2])
-    hed_input_reader = HedValidator(input_file)
+    hed_input_reader = HedValidator(input_file, xml_version_number='7.1.1')
     issues = hed_input_reader.get_validation_issues()
     print(hed_input_reader.get_printable_issue_string(
         '[Example 1a] ValidTwoColumnHED7_1_1 is probably okay with default version of HED'))
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
     input_file = HedFileInput(valid_tsv_file_separate_cols, tag_columns=[6],
                                       column_prefix_dictionary=prefixed_needed_tag_columns)
-    hed_input_reader = HedValidator(input_file)
+    hed_input_reader = HedValidator(input_file, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 1d] Valid TSV with required tags in separate columns'))
 
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
     input_file = HedFileInput(unsupported_csv_format, tag_columns=[6],
                                       column_prefix_dictionary=prefixed_needed_tag_columns)
-    hed_input_reader = HedValidator(input_file)
+    hed_input_reader = HedValidator(input_file, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 2a] csv is unsupported format, but this call treats file name as HED string'))
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
     input_file = HedFileInput(unsupported_csv_format, tag_columns=[6],
                               column_prefix_dictionary=prefixed_needed_tag_columns)
-    hed_input_reader = HedValidator(input_file)
+    hed_input_reader = HedValidator(input_file, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 2b] csv is unsupported format, now have right error message'))
 
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
                               column_prefix_dictionary=prefixed_needed_tag_columns,
                               worksheet_name='LKT Events')
-    hed_input_reader = HedValidator(input_file, check_for_warnings=True)
+    hed_input_reader = HedValidator(input_file, check_for_warnings=True, hed_xml_file=local_hed_file)
     print(hed_input_reader.get_printable_issue_string(
         '[Example 3b] LKT Events sheet probably has with no issues with the default schema'))
 
