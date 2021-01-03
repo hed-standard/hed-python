@@ -5,6 +5,5 @@ from hed.schematools import xml2wiki, constants
 if __name__ == '__main__':
     hed_xml_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml'
     local_xml_file = None
-    result_dict = xml2wiki.convert_hed_xml_2_wiki(hed_xml_url, local_xml_file)
-    xml_location = result_dict[constants.HED_OUTPUT_LOCATION_KEY]
+    xml_location, errors = xml2wiki.convert_hed_xml_2_wiki(hed_xml_url, local_xml_file)
     move(xml_location, "output.mediawiki")
