@@ -55,33 +55,43 @@ class BaseFileInput:
         # Now that the file is fully initialized, gather the definitions from it.
         mapper.update_definition_mapper_with_file(self)
 
-    def save(self, filename, include_formatting=False, output_processed_file=False):
+    def save(self, filename=None, include_formatting=False, output_processed_file=False,
+             add_suffix=None):
         """
 
         Parameters
         ----------
-        filename :
+        filename : str or None
+            if filename is empty, use the original filename that the file was opened from.
         include_formatting : bool
             If it's a spreadsheet, this will attempt to reopen the file and preserve formatting lost from panads.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
+        add_suffix: str
+            if present, adds a suffix to the passed in filename(before extension)
         Returns
         -------
 
         """
+        if not filename:
+            filename = self._filename
+        base_filename, extension = os.path.splitext(filename)
+        final_filename = base_filename
+        if add_suffix:
+            final_filename += add_suffix
+        final_filename += extension
+
         # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
         if output_processed_file:
             output_file = copy.deepcopy(self)
             for row_number, row_hed_string, column_to_hed_tags_dictionary in self:
                 for column_number in column_to_hed_tags_dictionary:
-                    old_text = column_to_hed_tags_dictionary[column_number]
-                    new_text = old_text
+                    new_text = column_to_hed_tags_dictionary[column_number]
                     output_file.set_cell(row_number, column_number, new_text)
         else:
             output_file = self
 
         if output_file.is_spreadsheet_file():
-            final_filename = filename + ".xlsx"
             if include_formatting:
                 # To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
                 # this is not ideal
@@ -100,7 +110,6 @@ class BaseFileInput:
             else:
                 output_file._dataframe.to_excel(final_filename, header=self._has_column_names)
         elif self.is_text_file():
-            final_filename = filename + ".tsv"
             output_file._dataframe.to_csv(final_filename, '\t', index=False, header=output_file._has_column_names)
 
     # Make filename read only.

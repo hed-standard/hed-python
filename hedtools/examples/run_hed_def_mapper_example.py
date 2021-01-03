@@ -27,7 +27,7 @@ if __name__ == '__main__':
     print(validator.get_printable_issue_string(
         "Normal hed string errors:"))
 
-    input_file.save(f"{input_file.filename}_test_output", include_formatting=True, output_processed_file=False)
-    input_file.save(f"{input_file.filename}_proc_test_output", include_formatting=True, output_processed_file=True)
+    input_file.save(include_formatting=True, add_suffix="_test_output", output_processed_file=False)
+    input_file.save(include_formatting=True, add_suffix="_proc_test_output", output_processed_file=True)
 
 

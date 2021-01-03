@@ -12,14 +12,13 @@ local_hed_file_no_dupe = 'data/HED8.0.0-alpha.1.xml'
 def long_to_short_file(input_file):
     tag_formatter = TagFormat(local_hed_file_no_dupe)
     converted_file, errors = tag_formatter.convert_file_to_short_tags(input_file)
-    converted_file.save(f"{converted_file.filename}_test_long_to_short", include_formatting=True)
+    converted_file.save(include_formatting=True, add_suffix="_test_long_to_short")
 
 
 def short_to_long_file(input_file):
     tag_formatter = TagFormat(local_hed_file_no_dupe)
     converted_file, errors = tag_formatter.convert_file_to_long_tags(input_file)
-    converted_file.save(f"{converted_file.filename}_test_short_to_long", include_formatting=True)
-
+    converted_file.save(include_formatting=True, add_suffix="_test_short_to_long")
 
 if __name__ == '__main__':
     example_data_path = 'data'
