@@ -36,13 +36,13 @@ def delete_file_in_upload_directory(filename):
 
 
 @route_blueprint.route(route_constants.DOWNLOAD_FILE_ROUTE, strict_slashes=False, methods=['GET'])
-def download_file_in_upload_directory(filename):
-    """Downloads the specified other from the upload other.
+def download_file_in_upload_directory(filename, header=None):
+    """Downloads the specified file from the download folder.
 
     Parameters
     ----------
     filename: string
-        The name of the other to download from the upload other.
+        The name of the file to download from the upload other.
 
     Returns
     -------
@@ -50,8 +50,8 @@ def download_file_in_upload_directory(filename):
         The contents of a other in the upload directory to send to the client.
 
     """
-    download_response = generate_download_file_response(filename)
-    if isinstance(download_response, str):
+    download_response = generate_download_file_response(filename, header)
+    if not download_response or isinstance(download_response, str):
         handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
     return download_response
 

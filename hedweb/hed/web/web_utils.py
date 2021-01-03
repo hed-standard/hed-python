@@ -1,4 +1,5 @@
 import os
+import pathlib
 import tempfile
 import traceback
 
@@ -9,7 +10,7 @@ from logging import ERROR
 from hed.util import hed_cache
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.util.hed_dictionary import HedDictionary
-from hed.web.constants import common_constants, error_constants, file_constants
+from hed.web.constants import common_constants, error_constants
 
 app_config = current_app.config
 
@@ -78,6 +79,7 @@ def convert_number_str_to_list(number_str):
         return list(map(int, number_str.split(',')))
     return []
 
+
 def create_upload_directory(upload_directory):
     """Creates the upload directory.
 
@@ -90,7 +92,7 @@ def create_upload_directory(upload_directory):
     return folder_needed_to_be_created
 
 
-def file_extension_is_valid(filename, accepted_file_extensions = None):
+def file_extension_is_valid(filename, accepted_file_extensions=None):
     """Checks the other extension against a list of accepted ones.
 
     Parameters
@@ -131,6 +133,7 @@ def find_all_str_indices_in_list(list_of_strs, str_value):
     """
     return [index + 1 for index, value in enumerate(list_of_strs) if
             value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
+
 
 def find_hed_version_in_uploaded_file(form_request_object, key_name=common_constants.HED_XML_FILE):
     """Finds the version number in an HED XML other.
@@ -179,66 +182,48 @@ def find_major_hed_versions():
     return hed_info
 
 
-def generate_download_file_response(download_file_name):
+def generate_download_file_response(download_file, display_name=None, header=None):
     """Generates a download other response.
 
     Parameters
     ----------
-    download_file_name: string
-        The download other name.
+    download_file: str
+        Local path of the file to be downloaded into the response.
+    display_name: str
+        Name to be assigned to the file in the response
+    header: str
+        Optional header -- usually given for error message downloads
 
     Returns
     -------
     response object
-        A response object containing the download other.
+        A response object containing the downloaded file.
 
     """
+    if not display_name:
+        display_name = download_file
     try:
-        def generate():
-            full_filename = os.path.join(app_config['UPLOAD_FOLDER'], download_file_name)
-            # upload_folder = current_app.config
-            # full_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], download_file_name)
-            with open(full_filename, 'r', encoding='utf-8') as download_file:
-                yield download_file_name + ".....\n"
-                for line in download_file:
-                    yield line
-            delete_file_if_it_exist(full_filename)
+        #full_filename = os.path.join(app_config.get('UPLOAD_FOLDER'), download_file_name)
+        if not download_file:
+            return f"No download file given"
 
+        print(download_file)
+        if not pathlib.Path(download_file).is_file():
+            print("help", download_file)
+            return f"File {download_file} not found"
+
+        def generate():
+            with open(download_file, 'r', encoding='utf-8') as download:
+                if header:
+                    yield header
+                for line in download:
+                    yield line
+            delete_file_if_it_exist(download_file)
         return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': "attachment filename=%s" % download_file_name})
+                        headers={'Content-Disposition': f"attachment filename={display_name}"})
     except:
         return traceback.format_exc()
 
-
-def generate_download_file_response_and_delete(full_filename, display_filename=None):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    full_filename: string
-        The download other name.
-    display_filename: string
-        What the save as window should show for filename.  If none use download file name.
-
-    Returns
-    -------
-    response object or string.
-        A response object containing the download, or a string on error.
-
-    """
-    if display_filename is None:
-        display_filename = full_filename
-    try:
-        def generate():
-            with open(full_filename, 'r', encoding='utf-8') as download_file:
-                for line in download_file:
-                    yield line
-            delete_file_if_it_exist(full_filename)
-
-        return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': f"attachment; filename={display_filename}"})
-    except:
-        return traceback.format_exc()
 
 # def get_file_from_form(form_request_object, file_key):
 #     """Checks to see if a spreadsheet other is present in a request object from validation form.

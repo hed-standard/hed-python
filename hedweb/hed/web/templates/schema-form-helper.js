@@ -120,6 +120,7 @@ function getSchemaFilename() {
                 'schema-file-flash');
             return '';
         }
+
         return schemaFile[0].files[0].name;
     }
 
