@@ -1,6 +1,5 @@
-import os
 import re
-from hed.util.hed_file_input import HedFileInput
+import copy
 from hed.util.hed_string_util import split_hed_string, remove_slashes_and_spaces
 from hed.util.hed_dictionary import HedDictionary, HedKey
 
@@ -127,7 +126,7 @@ def find_tag(hed_tag, mapping_dict):
         found_slash_index = tag_lower.rfind('/', 0, found_slash_index - 1)
 
     # not in dict at all
-    return None, None
+    return (None, None), None
 
 
 def create_out_tag(org_tag, new_tag, remainder):
@@ -184,6 +183,7 @@ def create_out_tag(org_tag, new_tag, remainder):
     tag_bracket_start = '[--- '
     tag_bracket_end = ' ---]'
     # Fix this duplicate code
+    # this could be simplified with simple replace calls if we aren't worried about extra brackets
     if new_tag.endswith(']'):
         found_starting_bracket = new_tag.rfind('[')
         if found_starting_bracket != -1:
@@ -196,7 +196,8 @@ def create_out_tag(org_tag, new_tag, remainder):
     return new_tag
 
 
-def upgrade_file_hed_version(input_file, mapping_filename_or_dict, tag_columns_to_upgrade=None):
+def upgrade_file_hed_version(input_file, mapping_filename_or_dict, tag_columns_to_upgrade=None,
+                             return_copy=False):
     """
 
     Parameters
@@ -207,11 +208,15 @@ def upgrade_file_hed_version(input_file, mapping_filename_or_dict, tag_columns_t
     tag_columns_to_upgrade : list of column numbers
         If passed in and non empty, ONLY upgrade these column numbers.  You can also filter out
         which columns you want to upgrade via the HedFileInput object.
-
+    return_copy: bool
+        If false, make a deep copy of input_File and return that.
     Returns
     -------
 
     """
+    output_file = input_file
+    if return_copy:
+        output_file = copy.deepcopy(input_file)
     mapping_dict = mapping_filename_or_dict
     if isinstance(mapping_filename_or_dict, str):
         mapping_dict = read_version_map(mapping_filename_or_dict)
@@ -235,25 +240,8 @@ def upgrade_file_hed_version(input_file, mapping_filename_or_dict, tag_columns_t
                     new_text += new_tag
                 else:
                     new_text += tag
-            input_file.set_cell(row_number, column_number, new_text,
+            output_file.set_cell(row_number, column_number, new_text,
                                 include_column_prefix_if_exist=False)
 
-    input_file.save(f"{input_file.filename}_test_hed3_upgrade")
+    return output_file
 
-
-if __name__ == '__main__':
-    hed2_xml_file = "tests/data/HED7.1.1.xml"
-    hed3_xml_file = "tests/data/HED8.0.0-alpha.1.xml"
-    mapping_dict, errors = read_version_map("tests/data/hed2_hed3_conversion.txt",
-                                            left_hed_schema=hed2_xml_file, right_hed_schema=hed3_xml_file,
-                                            return_errors=True)
-    example_data_path = 'tests/data'   # path to example data
-    multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
-
-    # Comment in prefixed_needed_tag_columns if you want to update those columns as well.
-    #prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
-    input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
-                              #column_prefix_dictionary=prefixed_needed_tag_columns,
-                              worksheet_name='DAS Events')
-
-    upgrade_file_hed_version(input_file, mapping_dict, tag_columns_to_upgrade=None)
