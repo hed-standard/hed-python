@@ -22,16 +22,11 @@ def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None):
     if local_wiki_file is None:
         local_wiki_file = file_util.url_to_file(hed_wiki_url)
 
-    hed_xml_file_location, hed_xml_tree = _create_hed_xml_file(local_wiki_file)
-    hed_change_log = parsewiki.get_hed_change_log(local_wiki_file)
-    hed_version = file_util.get_version_from_xml(hed_xml_tree)
-    hed_info_dictionary = {constants.HED_XML_TREE_KEY: hed_xml_tree,
-                           constants.HED_XML_VERSION_KEY: hed_version,
-                           constants.HED_CHANGE_LOG_KEY: hed_change_log,
-                           constants.HED_WIKI_PAGE_KEY: hed_wiki_url,
-                           constants.HED_INPUT_LOCATION_KEY: local_wiki_file,
-                           constants.HED_OUTPUT_LOCATION_KEY: hed_xml_file_location}
-    return hed_info_dictionary
+    hed_xml_file_location = _create_hed_xml_file(local_wiki_file)
+
+    # Placeholder
+    errors = []
+    return hed_xml_file_location, errors
 
 
 def _create_hed_xml_file(hed_wiki_file_path):
@@ -49,4 +44,4 @@ def _create_hed_xml_file(hed_wiki_file_path):
     """
     hed_xml_tree = parsewiki.hed_wiki_2_xml_tree(hed_wiki_file_path)
     hed_xml_file_location = file_util.write_xml_tree_2_xml_file(hed_xml_tree)
-    return hed_xml_file_location, hed_xml_tree
+    return hed_xml_file_location
