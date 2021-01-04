@@ -250,12 +250,9 @@ class HedDictionary:
         duplicate_dict = self.find_duplicate_tags()
         for tag_name in duplicate_dict:
             if return_detailed_info:
-                yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions"
+                yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions:"
             for tag_entry in duplicate_dict[tag_name]:
-                # if return_detailed_info:
-                #     yield f"\t{tag_entry.short_org_tag}: {tag_entry.long_org_tag}"
-                # else:
-                yield f"{tag_entry}"
+                yield f"\t{tag_entry}"
 
     def _populate_short_tag_dict(self):
         """Create a mapping from the short version of a tag to the long version.
