@@ -11,7 +11,7 @@ from hed.util.hed_dictionary import HedDictionary
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
-
+from hed.util.exceptions import SchemaFileError
 
 class HedValidator:
     def __init__(self, hed_input, check_for_warnings=False, run_semantic_validation=True,
@@ -43,20 +43,28 @@ class HedValidator:
         """
         self._is_file = isinstance(hed_input, BaseFileInput)
         self._hed_input = hed_input
+        self._validation_issues = []
+        self._tag_validator = None
         if run_semantic_validation:
-            if hed_dictionary is None:
-                self._hed_dictionary = self._get_hed_dictionary(hed_xml_file,
-                                                                get_specific_version=xml_version_number)
-            else:
-                self._hed_dictionary = hed_dictionary
-            self._tag_validator = TagValidator(hed_dictionary=self._hed_dictionary,
-                                               check_for_warnings=check_for_warnings,
-                                               run_semantic_validation=True)
-        else:
+            try:
+                if hed_dictionary is None:
+                    self._hed_dictionary = self._get_hed_dictionary(hed_xml_file,
+                                                                    get_specific_version=xml_version_number)
+                else:
+                    self._hed_dictionary = hed_dictionary
+                self._tag_validator = TagValidator(hed_dictionary=self._hed_dictionary,
+                                                   check_for_warnings=check_for_warnings,
+                                                   run_semantic_validation=True)
+            except SchemaFileError as e:
+                self._hed_dictionary = None
+                self._validation_issues += e.format_error_message()
+
+        # Fall back to syntax validation if we don't have a tag validator at this point
+        if self._tag_validator is None:
             self._tag_validator = TagValidator(check_for_warnings=check_for_warnings,
                                                run_semantic_validation=False)
 
-        self._validation_issues = self._validate_hed_input()
+        self._validation_issues += self._validate_hed_input()
         self._run_semantic_validation = run_semantic_validation
 
     def get_tag_validator(self):

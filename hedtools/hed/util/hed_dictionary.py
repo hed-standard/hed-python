@@ -8,7 +8,9 @@ The dictionary is a dictionary of dictionaries. The dictionary names are
 """
 
 from defusedxml.ElementTree import parse
-
+import xml
+from hed.util.exceptions import SchemaFileError
+from hed.util.error_types import SchemaErrors
 
 # These need to match the attributes/element name/etc used to load from the xml
 class HedKey:
@@ -72,7 +74,7 @@ class HedDictionary:
 
         """
         self.no_duplicate_tags = True
-        self.root_element = self._find_root_element(hed_xml_file_path)
+        self.root_element = self.parse_hed_xml_file(hed_xml_file_path)
         # Used to find parent elements of XML nodes for file parsing
         self._parent_map = {c: p for p in self.root_element.iter() for c in p}
         self._populate_dictionaries()
@@ -395,7 +397,8 @@ class HedDictionary:
             lowercase_dictionary[string_element.lower()] = string_element
         return lowercase_dictionary
 
-    def _find_root_element(self, hed_xml_file_path):
+    @staticmethod
+    def parse_hed_xml_file(hed_xml_file_path):
         """Parses a XML file and returns the root element.
 
         Parameters
@@ -409,8 +412,13 @@ class HedDictionary:
             The root element of the HED XML file.
 
         """
-        tree = parse(hed_xml_file_path)
-        return tree.getroot()
+        try:
+            hed_xml_tree = parse(hed_xml_file_path)
+        except xml.etree.ElementTree.ParseError as e:
+            raise SchemaFileError(SchemaErrors.CANNOT_PARSE_XML, e.msg, hed_xml_file_path)
+        except FileNotFoundError as e:
+            raise SchemaFileError(SchemaErrors.FILE_NOT_FOUND, e.strerror, hed_xml_file_path)
+        return hed_xml_tree.getroot()
 
     def _get_ancestor_tag_names(self, tag_element):
         """Gets all the ancestor tag names of a tag element.
@@ -640,6 +648,5 @@ class HedDictionary:
             The version number of the HED XML file.
 
         """
-        tree = parse(hed_xml_file_path)
-        root_node = tree.getroot()
+        root_node = HedDictionary.parse_hed_xml_file(hed_xml_file_path)
         return root_node.attrib[HedDictionary.VERSION_ATTRIBUTE]
