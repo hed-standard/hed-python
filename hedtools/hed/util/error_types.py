@@ -44,3 +44,5 @@ class SchemaErrors:
     NO_VALID_TAG_FOUND = "invalidTag"
     INVALID_SCHEMA = 'invalidSchema'
     EMPTY_TAG_FOUND = 'emptyTag'
+    FILE_NOT_FOUND = 'fileNotFound'
+    CANNOT_PARSE_XML = 'cannotParseXML'

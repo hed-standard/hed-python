@@ -340,6 +340,8 @@ class TagValidator:
             True if the tag has the 'takesValue' attribute. False, if otherwise.
 
         """
+        if not self._hed_dictionary:
+            return False
         takes_value_tag = self.replace_tag_name_with_pound(formatted_tag)
         return self._hed_dictionary.tag_has_attribute(takes_value_tag,
                                                       HedKey.TakesValue)

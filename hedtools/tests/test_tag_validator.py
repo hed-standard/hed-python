@@ -15,9 +15,9 @@ class TestHed(unittest.TestCase):
     def setUpClass(cls):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
         cls.hed_dictionary = HedDictionary(hed_xml)
-        cls.syntactic_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=False,
+        cls.syntactic_tag_validator = TagValidator(check_for_warnings=False,
                                                    run_semantic_validation=False)
-        cls.syntactic_warning_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=True,
+        cls.syntactic_warning_tag_validator = TagValidator(check_for_warnings=True,
                                                            run_semantic_validation=False)
         cls.semantic_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=False,
                                                   run_semantic_validation=True)
