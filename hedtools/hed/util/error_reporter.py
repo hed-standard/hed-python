@@ -170,8 +170,8 @@ def format_schema_error(error_type, hed_tag, error_index=0, error_index_end=None
         SchemaErrors.INVALID_PARENT_NODE: f"{SCHEMA_ERROR_PREFIX}'{problem_tag}' appears as '{expected_parent_tag}' and cannot be used "
                                           f"as an extension.  {error_index}, {error_index_end}",
         SchemaErrors.NO_VALID_TAG_FOUND: f"{SCHEMA_ERROR_PREFIX}'{problem_tag}' is not a valid base hed tag.  {error_index}, {error_index_end} ",
-        SchemaErrors.EMPTY_TAG_FOUND: f"{SCHEMA_ERROR_PREFIX}'Empty tag cannot be converted.",
-        SchemaErrors.INVALID_SCHEMA: f"{SCHEMA_ERROR_PREFIX}'Source hed schema is invalid as it contains duplicate tags.  "
+        SchemaErrors.EMPTY_TAG_FOUND: f"{SCHEMA_ERROR_PREFIX}Empty tag cannot be converted.",
+        SchemaErrors.INVALID_SCHEMA: f"{SCHEMA_ERROR_PREFIX}Source hed schema is invalid as it contains duplicate tags.  "
                                      f"Please fix if you wish to be abe to convert tags. {error_index}, {error_index_end}"
     }
     default_error_message = f'{SCHEMA_ERROR_PREFIX}Internal Error'

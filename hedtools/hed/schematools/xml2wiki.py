@@ -1,11 +1,8 @@
 from enum import Enum
-from defusedxml.ElementTree import parse
-import xml
 
 from hed.schematools import constants
-from hed.util.exceptions import SchemaError
 from hed.util import file_util
-
+from hed.util.hed_dictionary import HedDictionary
 
 class MainParseMode(Enum):
     MainTags = 1
@@ -205,11 +202,7 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):
     if local_xml_file is None:
         local_xml_file = file_util.url_to_file(hed_xml_url)
 
-    try:
-        hed_xml_tree = parse(local_xml_file)
-    except xml.etree.ElementTree.ParseError as e:
-         raise SchemaError(e.msg)
-    hed_xml_tree = hed_xml_tree.getroot()
+    hed_xml_tree = HedDictionary.parse_hed_xml_file(local_xml_file)
     xml2wiki = HEDXml2Wiki()
     output_strings = xml2wiki.process_tree(hed_xml_tree)
     local_mediawiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
