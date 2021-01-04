@@ -41,8 +41,10 @@ def download_file_in_upload_directory(filename, header=None):
 
     Parameters
     ----------
-    filename: string
+    filename: str
         The name of the file to download from the upload other.
+    header: str
+        Header string to be inserted in text files --- particularly files reporting errors or status
 
     Returns
     -------
@@ -52,7 +54,7 @@ def download_file_in_upload_directory(filename, header=None):
     """
     download_response = generate_download_file_response(filename, header)
     if not download_response or isinstance(download_response, str):
-        handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+        handle_http_error(error_constants.NOT_FOUND_ERROR, download_response, as_text=True)
     return download_response
 
 

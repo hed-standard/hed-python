@@ -4,7 +4,7 @@ from urllib.error import URLError, HTTPError
 from urllib.parse import urlparse
 from flask import current_app, Response
 
-from hed.schematools import xml2wiki, wiki2xml, constants as converter_constants
+from hed.schematools import xml2wiki, wiki2xml
 from hed.util.hed_dictionary import HedDictionary
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension, write_text_iter_to_file
 from hed.util.exceptions import SchemaError
@@ -49,6 +49,8 @@ def form_has_hed_url(form_request_object, valid_extensions):
     ----------
     form_request_object: Request object
         A Request object containing user data from the schema form.
+    valid_extensions: list of str
+        List of valid extensions
 
     Returns
     -------
@@ -57,7 +59,7 @@ def form_has_hed_url(form_request_object, valid_extensions):
 
     """
     if not check_if_option_in_form(form_request_object, common_constants.SCHEMA_UPLOAD_OPTIONS,
-                                          common_constants.SCHEMA_URL_OPTION) or \
+                                   common_constants.SCHEMA_URL_OPTION) or \
             common_constants.SCHEMA_URL not in form_request_object.values:
         return False
     parsed_url = urlparse(form_request_object.values.get(common_constants.SCHEMA_URL))
@@ -83,9 +85,9 @@ def generate_input_from_schema_form(form_request_object):
         schema_file = form_request_object.files[common_constants.SCHEMA_FILE]
         arguments[common_constants.SCHEMA_PATH] = save_file_to_upload_folder(schema_file)
         arguments[common_constants.SCHEMA_DISPLAY_NAME] = schema_file.filename
-    elif form_has_hed_url(form_request_object):
+    elif form_has_hed_url(form_request_object, file_constants.SCHEMA_EXTENSIONS):
         schema_url = form_request_object.values[common_constants.SCHEMA_URL]
-        arguments[common_constants.SCHEMA_PATH]= url_to_file(schema_url)
+        arguments[common_constants.SCHEMA_PATH] = url_to_file(schema_url)
         url_parsed = urlparse(schema_url)
         arguments[common_constants.SCHEMA_DISPLAY_NAME] = basename(url_parsed.path)
     return arguments
@@ -108,11 +110,9 @@ def get_schema_conversion(schema_local_path):
             conversion_function = wiki2xml.convert_hed_wiki_2_xml
         else:
             raise ValueError(f"Invalid extension type: {input_extension}")
-        results = conversion_function(None, schema_local_path)
-        converted_schema_path = results.get(converter_constants.HED_OUTPUT_LOCATION_KEY)
-        errors = ''
-    except ValueError as v:
-        errors = v.message
+        converted_schema_path, errors = conversion_function(None, schema_local_path)
+    except ValueError as error:
+        errors = format(error)
         converted_schema_path = ''
 
     return converted_schema_path, errors
@@ -155,8 +155,6 @@ def run_schema_conversion(form_request_object):
         arguments = generate_input_from_schema_form(form_request_object)
         hed_file_path = arguments.get(common_constants.SCHEMA_PATH)
         schema_file, errors = get_schema_conversion(hed_file_path)
-        print(schema_file)
-        print(hed_file_path)
         if errors:
             download_response = errors
         else:
@@ -200,39 +198,18 @@ def run_schema_duplicate_tag_detection(form_request_object):
         if not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
             raise ValueError(f"Invalid extension on file: {hed_file_path}")
         hed_dict = HedDictionary(hed_file_path)
-        x = hed_dict.has_duplicate_tags()
         if hed_dict.has_duplicate_tags():
             dup_tag_file = write_text_iter_to_file(hed_dict.dupe_tag_iter(True))
-            #download_response = generate_download_file_response_and_delete(dup_tag_file)
             download_response = generate_download_file_response(dup_tag_file, f"Duplicate tags for: {hed_file_path}")
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
-    except URLError:
-        return error_constants.INVALID_URL_ERROR
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
+    except URLError:
+        return error_constants.INVALID_URL_ERROR
     except SchemaError as e:
         return e.message
     finally:
         delete_file_if_it_exist(hed_file_path)
     return ""
-
-
-def form_has_hed_url(form_request_object):
-    """Checks to see if a HED XML URL is present in a request object from conversion form.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the conversion form.
-
-    Returns
-    -------
-    boolean
-        True if a HED XML other is present in a request object from the conversion form.
-
-    """
-    url_checked = check_if_option_in_form(form_request_object, common_constants.SCHEMA_UPLOAD_OPTIONS,
-                                          common_constants.SCHEMA_URL_OPTION)
-    return url_checked and common_constants.SCHEMA_URL in form_request_object.values

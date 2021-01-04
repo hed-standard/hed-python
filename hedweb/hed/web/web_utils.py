@@ -207,9 +207,7 @@ def generate_download_file_response(download_file, display_name=None, header=Non
         if not download_file:
             return f"No download file given"
 
-        print(download_file)
         if not pathlib.Path(download_file).is_file():
-            print("help", download_file)
             return f"File {download_file} not found"
 
         def generate():

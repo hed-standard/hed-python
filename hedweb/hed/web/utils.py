@@ -119,7 +119,7 @@ def get_excel_worksheet_names(workbook_file_path):
     return worksheet_names
 
 
-def get_optional_form_field(form_request_object, form_field_name, ftype=''):
+def get_optional_form_field(form_request_object, form_field_name, type=''):
     """Gets the specified optional form field if present.
 
     Parameters
@@ -128,6 +128,8 @@ def get_optional_form_field(form_request_object, form_field_name, ftype=''):
         A Request object containing user data from the validation form.
     form_field_name: string
         The name of the optional form field.
+    type: str
+        Name of expected type: 'boolean' or 'string'
 
     Returns
     -------
@@ -136,11 +138,11 @@ def get_optional_form_field(form_request_object, form_field_name, ftype=''):
 
     """
     form_field_value = ''
-    if ftype == common_constants.BOOLEAN:
+    if type == common_constants.BOOLEAN:
         form_field_value = False
         if form_field_name in form_request_object.form:
             form_field_value = True
-    elif ftype == common_constants.STRING:
+    elif type == common_constants.STRING:
         if form_field_name in form_request_object.form:
             form_field_value = form_request_object.form[form_field_name]
     return form_field_value

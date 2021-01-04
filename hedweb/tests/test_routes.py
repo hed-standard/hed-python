@@ -29,7 +29,6 @@ class Test(unittest.TestCase):
     def test_delete_file_in_upload_directory(self):
         response = self.app.test.get('/delete/file_that_does_not_exist')
         self.assertEqual(response.status_code, 404, "Non-existent file should cause a non-found error")
-        upload_dir = self.app.config['UPLOAD_FOLDER']
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
         dummy_file = os.path.join(self.app.config['UPLOAD_FOLDER'], 'HED.xml')
         dummy_path = pathlib.Path(dummy_file)
@@ -53,7 +52,7 @@ class Test(unittest.TestCase):
         response = self.app.test.get('/download-file/HED.xml')
         print(response.status_code)
         self.assertEqual(response.status_code, 204, "Dummy file should be deleted")
-    #
+
     # def test_get_duplicate_tag_results(self):
     #     response = self.app.get('/schema-duplicate-tag-results')
     #     self.assertEqual(response.status_code, 404)
