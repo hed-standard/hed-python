@@ -188,15 +188,15 @@ def run_schema_duplicate_tag_detection(form_request_object):
     hed_file_path = ''
     try:
         conversion_input_arguments = generate_input_from_schema_form(form_request_object)
-        hed_file_path = conversion_input_arguments.get(common_constants.SCHEMA_PATH)
-        if hed_file_path.endswith(".mediawiki"):
+        hed_file_path = conversion_input_arguments.get(common_constants.SCHEMA_PATH, '')
+        if hed_file_path and hed_file_path.endswith(".mediawiki"):
             new_file_path, errors = get_schema_conversion(hed_file_path)
             if new_file_path:
                 delete_file_if_it_exist(hed_file_path)
                 hed_file_path = new_file_path
 
-        if not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
-            raise ValueError(f"Invalid extension on file: {hed_file_path}")
+        if not hed_file_path or not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
+            return f"Invalid file name {hed_file_path}"
         hed_dict = HedDictionary(hed_file_path)
         if hed_dict.has_duplicate_tags():
             dup_tag_file = write_text_iter_to_file(hed_dict.dupe_tag_iter(True))
@@ -210,6 +210,8 @@ def run_schema_duplicate_tag_detection(form_request_object):
         return error_constants.INVALID_URL_ERROR
     except SchemaError as e:
         return e.message
+    except Exception as e:
+        return "Unexpected processing error: " + str(e)
     finally:
         delete_file_if_it_exist(hed_file_path)
     return ""

@@ -13,5 +13,7 @@ if __name__ == '__main__':
     # move(output_location, "duplicate_tags_in_HEDXML.txt")
     hed_file_path = ''
     delete_file_if_it_exist(hed_file_path)
+    hed_file_path = None
+    delete_file_if_it_exist(hed_file_path)
     url = urlparse('')
     print(url)
