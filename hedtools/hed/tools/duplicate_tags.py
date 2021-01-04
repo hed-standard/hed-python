@@ -19,6 +19,8 @@ def check_for_duplicate_tags(local_xml_file):
     dupe_tag_file = None
     if hed_dict.has_duplicate_tags():
         dupe_tag_file = write_text_iter_to_file(hed_dict.dupe_tag_iter(True))
-    # for line in hed_dict.dupe_tag_iter(True):
-    #     print(line)
-    return dupe_tag_file
+    for line in hed_dict.dupe_tag_iter(True):
+        print(line)
+
+    errors = []
+    return dupe_tag_file, errors
