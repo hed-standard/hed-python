@@ -101,7 +101,7 @@ def file_extension_is_valid(filename, accepted_file_extensions=None):
         The name of the other.
 
     accepted_file_extensions: list
-        A list containing all of the accepted other extensions or an empty list of all are acceted
+        A list containing all of the accepted other extensions or an empty list of all are accepted
 
     Returns
     -------
@@ -115,12 +115,12 @@ def file_extension_is_valid(filename, accepted_file_extensions=None):
         return False
 
 
-def find_all_str_indices_in_list(list_of_strs, str_value):
+def find_all_str_indices_in_list(list_of_str, str_value):
     """Find the indices of a string value in a list.
 
     Parameters
     ----------
-    list_of_strs: list
+    list_of_str: list
         A list containing strings.
     str_value: string
         A string value.
@@ -131,7 +131,7 @@ def find_all_str_indices_in_list(list_of_strs, str_value):
         A list containing all of the indices where a string value occurs in a string list.
 
     """
-    return [index + 1 for index, value in enumerate(list_of_strs) if
+    return [index + 1 for index, value in enumerate(list_of_str) if
             value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
 
 
@@ -203,7 +203,7 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     if not display_name:
         display_name = download_file
     try:
-        #full_filename = os.path.join(app_config.get('UPLOAD_FOLDER'), download_file_name)
+        # full_filename = os.path.join(app_config.get('UPLOAD_FOLDER'), download_file_name)
         if not download_file:
             return f"No download file given"
 
@@ -242,7 +242,35 @@ def generate_download_file_response(download_file, display_name=None, header=Non
 #     return form_request_object.files.get(file_key, None)
 
 
-def get_original_filename(form_request_object, file_key, valid_extensions = None):
+def get_hed_path_from_pull_down_form(form_request_object):
+    """Gets the hed path from a section of form that uses a pull-down box and hed_cache
+    Parameters
+    ----------
+    form_request_object: Request object
+        A Request object containing user data from a form.
+
+    Returns
+    -------
+    tuple: str, str
+        The HED XML local path and the HED display file name
+    """
+    if common_constants.HED_VERSION not in form_request_object.form:
+        hed_file_path = ''
+        hed_display_name = ''
+    elif form_request_object.form[common_constants.HED_VERSION] != common_constants.HED_OTHER_VERSION_OPTION:
+        hed_file_path = hed_cache.get_path_from_hed_version(form_request_object.form[common_constants.HED_VERSION])
+        hed_display_name = os.path.basename(hed_file_path)
+    elif form_request_object.form[common_constants.HED_VERSION] == common_constants.HED_OTHER_VERSION_OPTION and \
+            common_constants.HED_XML_FILE in form_request_object.files:
+        hed_file_path = save_file_to_upload_folder(form_request_object.files[common_constants.HED_XML_FILE])
+        hed_display_name = form_request_object.files[common_constants.HED_XML_FILE].filename
+    else:
+        hed_file_path = ''
+        hed_display_name = ''
+    return hed_file_path, hed_display_name
+
+
+def get_original_filename(form_request_object, file_key, valid_extensions=None):
     """Gets the original name of the file if it has a valid extension.
 
     Parameters
@@ -265,25 +293,30 @@ def get_original_filename(form_request_object, file_key, valid_extensions = None
     return ''
 
 
-def get_hed_path_from_form(form_request_object, hed_file_path):
-    """Gets the hed path from a section of form that uses a pull-down box and hed_cache
+def get_uploaded_file_path_from_form(form_request_object, file_key, valid_extensions=None):
+    """Gets the other paths of the uploaded files in the form.
+
     Parameters
     ----------
     form_request_object: Request object
         A Request object containing user data from a form.
-    hed_file_path: string
-        The path to the HED XML other.
+    file_key: str
+        key name in the files dictionary of the Request object
+    valid_extensions: list of str
+        List of valid extensions
 
     Returns
     -------
-    string
-        The HED XML other path.
+    tuple
+        A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
     """
-    if common_constants.HED_VERSION in form_request_object.form and \
-        (form_request_object.form[common_constants.HED_VERSION] != common_constants.HED_OTHER_VERSION_OPTION
-         or not hed_file_path):
-        return hed_cache.get_path_from_hed_version(form_request_object.form[common_constants.HED_VERSION])
-    return hed_file_path
+    uploaded_file_name = ''
+    original_file_name = ''
+    if file_key in form_request_object.files and \
+            file_extension_is_valid(form_request_object.files[file_key].filename, valid_extensions):
+        uploaded_file_name = save_file_to_upload_folder(form_request_object.files.get(file_key, ''))
+        original_file_name = form_request_object.files[file_key].filename
+    return uploaded_file_name, original_file_name
 
 
 def handle_http_error(error_code, error_message, as_text=False):
@@ -309,7 +342,7 @@ def handle_http_error(error_code, error_message, as_text=False):
     return jsonify(message=error_message), error_code
 
 
-def save_file_to_upload_folder(file_object):
+def save_file_to_upload_folder(file_object, delete_on_close=False):
     """Save a other to the upload folder.
 
     Parameters
@@ -327,7 +360,7 @@ def save_file_to_upload_folder(file_object):
     try:
         if file_object.filename:
             file_extension = get_file_extension(file_object.filename)
-            temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_extension, delete=False,
+            temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_extension, delete=delete_on_close,
                                                                 dir=current_app.config['UPLOAD_FOLDER'])
             for line in file_object:
                 temporary_upload_file.write(line)
@@ -345,5 +378,3 @@ def setup_logging():
         file_handler = RotatingFileHandler(current_app.config['LOG_FILE'], maxBytes=10 * 1024 * 1024, backupCount=5)
         file_handler.setLevel(ERROR)
         current_app.logger.addHandler(file_handler)
-
-

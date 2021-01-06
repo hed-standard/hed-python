@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
     #         self.app = app.test_client()
 
     def test_generate_input_arguments_from_validation_form(self):
-        self.assertTrue(1, "Testing generate_input_arguments_from_validation_form")
+        self.assertTrue(1, "Testing generate_arguments_from_validation_form")
 
     def test_generate_spreadsheet_validation_filename(self):
         self.assertTrue(1, "Testing generate_spreadsheet_validation_filename")
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing report_spreadsheet_validation_status")
 
     def test_save_validation_issues_to_file_in_upload_folder(self):
-        self.assertTrue(1, "Testing save_validation_issues_to_file_in_upload_folder")
+        self.assertTrue(1, "Testing save_issues_to_upload_folder")
 
     def test_validate_spreadsheet(self):
         self.assertTrue(1, "Testing validate_spreadsheet")

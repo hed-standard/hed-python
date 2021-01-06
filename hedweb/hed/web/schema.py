@@ -7,7 +7,7 @@ from flask import current_app, Response
 from hed.schematools import xml2wiki, wiki2xml
 from hed.util.hed_dictionary import HedDictionary
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension, write_text_iter_to_file
-from hed.util.exceptions import SchemaError
+from hed.util.exceptions import SchemaFileError
 
 from hed.web.web_utils import check_if_option_in_form, file_extension_is_valid, handle_http_error, \
     save_file_to_upload_folder, generate_download_file_response
@@ -165,7 +165,7 @@ def run_schema_conversion(form_request_object):
             return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
         else:
             raise Exception("Unable to download schema file for unknown reasons")
-    except SchemaError as e:
+    except SchemaFileError as e:
         return e.message
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
@@ -208,7 +208,7 @@ def run_schema_duplicate_tag_detection(form_request_object):
         return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:
         return error_constants.INVALID_URL_ERROR
-    except SchemaError as e:
+    except SchemaFileError as e:
         return e.message
     except Exception as e:
         return "Unexpected processing error: " + str(e)

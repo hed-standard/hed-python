@@ -76,7 +76,8 @@
             <p class="flash" id="validation-submit-flash"></p>
         </div>
     </form>
-    <script>
+    <script type="module">
+        {%  include 'form-helpers.js' %}
         {%  include 'validation-form-helper.js' %}
     </script>
 {% endmacro %}

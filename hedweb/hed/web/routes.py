@@ -206,11 +206,15 @@ def get_validation_results():
         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
         500 error message is returned.
     """
-    validation_status = validation.report_spreadsheet_validation_status(request)
-    if error_constants.ERROR_KEY in validation_status:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                 validation_status[error_constants.ERROR_KEY])
-    return json.dumps(validation_status)
+    validation_response = validation.report_spreadsheet_validation_status(request)
+    # Success
+    if isinstance(validation_response, Response):
+        return validation_response
+    if isinstance(validation_response, str):
+        if validation_response:
+            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
+        else:
+            return ""
 
 
 @route_blueprint.route(route_constants.WORKSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
