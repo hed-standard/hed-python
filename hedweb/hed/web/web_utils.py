@@ -38,30 +38,6 @@ def check_if_option_in_form(form_request_object, option_name, target_value):
     return False
 
 
-# def copy_file_line_by_line(file_object_1, file_object_2):
-#     """Copy the contents of one other to the other other.
-#
-#     Parameters
-#     ----------
-#     file_object_1: File object
-#         A other object that points to a other that will be copied.
-#     file_object_2: File object
-#         A other object that points to a other that will copy the other other.
-#
-#     Returns
-#     -------
-#     boolean
-#        True if the other was copied successfully, False if it wasn't.
-#
-#     """
-#     try:
-#         for line in file_object_1:
-#             file_object_2.write(line)
-#         return True
-#     except:
-#         return False
-
-
 def convert_number_str_to_list(number_str):
     """Converts a string of integers to a list of integers, which is useful for web forms.
 
@@ -78,18 +54,6 @@ def convert_number_str_to_list(number_str):
     if number_str:
         return list(map(int, number_str.split(',')))
     return []
-
-
-def create_upload_directory(upload_directory):
-    """Creates the upload directory.
-
-    """
-
-    folder_needed_to_be_created = False
-    if not os.path.exists(upload_directory):
-        os.makedirs(upload_directory)
-        folder_needed_to_be_created = True
-    return folder_needed_to_be_created
 
 
 def file_extension_is_valid(filename, accepted_file_extensions=None):
@@ -161,27 +125,6 @@ def find_hed_version_in_uploaded_file(form_request_object, key_name=common_const
     return hed_info
 
 
-def find_major_hed_versions():
-    """Finds the major HED versions that are kept on the server.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information about the major HED versions.
-
-    """
-    hed_info = {}
-    try:
-        hed_cache.cache_all_hed_xml_versions()
-        hed_info[common_constants.HED_MAJOR_VERSIONS] = hed_cache.get_all_hed_versions()
-    except:
-        hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
-    return hed_info
-
-
 def generate_download_file_response(download_file, display_name=None, header=None):
     """Generates a download other response.
 
@@ -223,25 +166,6 @@ def generate_download_file_response(download_file, display_name=None, header=Non
         return traceback.format_exc()
 
 
-# def get_file_from_form(form_request_object, file_key):
-#     """Checks to see if a spreadsheet other is present in a request object from validation form.
-#
-#     Parameters
-#     ----------
-#     form_request_object: Request object
-#         A Request object containing user data from a form.
-#     file_key: str
-#         String with the key in the form_request_object.files dictionary
-#
-#     Returns
-#     -------
-#     file_object or None
-#         Returns None if there isn't one.
-#
-#     """
-#     return form_request_object.files.get(file_key, None)
-
-
 def get_hed_path_from_pull_down_form(form_request_object):
     """Gets the hed path from a section of form that uses a pull-down box and hed_cache
     Parameters
@@ -268,29 +192,6 @@ def get_hed_path_from_pull_down_form(form_request_object):
         hed_file_path = ''
         hed_display_name = ''
     return hed_file_path, hed_display_name
-
-
-def get_original_filename(form_request_object, file_key, valid_extensions=None):
-    """Gets the original name of the file if it has a valid extension.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from a posted form.
-    file_key: str
-        Key string in the files dictionary of the form_request_object
-    valid_extensions: list of str
-        List containing the valid extensions
-
-    Returns
-    -------
-    string
-        The name of the uploaded file.
-    """
-    if file_key in form_request_object.files and \
-            file_extension_is_valid(form_request_object.files[file_key].filename, valid_extensions):
-        return form_request_object.files[file_key].filename
-    return ''
 
 
 def get_uploaded_file_path_from_form(form_request_object, file_key, valid_extensions=None):
@@ -368,13 +269,3 @@ def save_file_to_upload_folder(file_object, delete_on_close=False):
     except:
         file_path = ''
     return file_path
-
-
-def setup_logging():
-    """Sets up the current_application logging. If the log directory does not exist then there will be no logging.
-
-    """
-    if not current_app.debug and os.path.exists(current_app.config['LOG_DIRECTORY']):
-        file_handler = RotatingFileHandler(current_app.config['LOG_FILE'], maxBytes=10 * 1024 * 1024, backupCount=5)
-        file_handler.setLevel(ERROR)
-        current_app.logger.addHandler(file_handler)

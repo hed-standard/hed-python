@@ -23,26 +23,8 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-
-
-
-
     def test_find_spreadsheet_columns_info(self):
         self.assertTrue(1, "Testing find_spreadsheet_columns_info")
-
-    def test_find_str_index_in_list(self):
-        self.assertTrue(1, "Testing find_str_index_in_list")
-        # def test_find_str_index_in_list(self):
-        #     list_1 = ['a', 'a', 'c', 'd']
-        #     search_str = 'a'
-        #     expected_indices = 1
-        #     indices = utils.find_str_index_in_list(list_1, search_str)
-        #     self.assertTrue(indices)
-        #     self.assertIsInstance(indices, int)
-        #     self.assertEqual(expected_indices, indices)
-
-    def test_find_worksheets_info(self):
-        self.assertTrue(1, "Testing find_worksheets_info")
 
     def test_get_column_delimiter_based_on_file_extension(self):
         self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
@@ -103,21 +85,6 @@ class Test(unittest.TestCase):
 
     def test_get_worksheet_column_names(self):
         self.assertTrue(1, "Testing get_worksheet_column_names")
-
-    def test_initialize_spreadsheet_columns_info_dictionary(self):
-        self.assertTrue(1, "Testing initialize_spreadsheet_columns_info_dictionary")
-        # def test_initialize_spreadsheet_columns_info_dictionary(self):
-        #     worksheets_info_dictionary = utils._initialize_spreadsheet_columns_info_dictionary()
-        #     self.assertTrue(worksheets_info_dictionary)
-        #     self.assertIsInstance(worksheets_info_dictionary, dict)
-        #
-
-    def test_initialize_worksheets_info_dictionary(self):
-        self.assertTrue(1, "Testing initialize_worksheets_info_dictionary")
-        # def test_initialize_worksheets_info_dictionary(self):
-        #     worksheets_info_dictionary = initialize_worksheets_info_dictionary()
-        #     self.assertTrue(worksheets_info_dictionary)
-        #     self.assertIsInstance(worksheets_info_dictionary, dict)
 
     def test_populate_spreadsheet_columns_info_dictionary(self):
         self.assertTrue(1, "Testing populate_spreadsheet_columns_info_dictionary")

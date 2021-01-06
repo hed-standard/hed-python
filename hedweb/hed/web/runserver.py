@@ -30,11 +30,10 @@ def configure_app():
 
 app = configure_app()
 with app.app_context():
-    from hed.web import web_utils
     from hed.web.routes import route_blueprint
 
     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX'])
-    web_utils.create_upload_directory(app.config['UPLOAD_FOLDER'])
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     hed_cache.set_cache_directory(app.config['HED_CACHE_FOLDER'])
     setup_logging()
 

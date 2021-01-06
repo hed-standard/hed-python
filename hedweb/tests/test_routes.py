@@ -68,6 +68,11 @@ class Test(unittest.TestCase):
     # def test_get_major_hed_versions(self):
     #     response = self.app.post('/get-hed-major-versions')
     #     self.assertEqual(response.status_code, 405)
+    # import hed.web.constants.common_constants as constants
+    # from hed.web.web_utils import find_major_hed_versions
+    # hed_info = find_major_hed_versions()
+    # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key hed-major-versions")
+    # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
     #
     # def test_get_major_hed_versions(self):
     #     response = self.app.post('/get-hed-major-versions')

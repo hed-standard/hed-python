@@ -1,7 +1,6 @@
 import os
 import shutil
 import unittest
-from flask import Flask, current_app
 from unittest import mock
 from hed.web.app_factory import AppFactory
 
@@ -12,28 +11,17 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-
             from hed.web.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
             app.config['UPLOAD_FOLDER'] = cls.upload_directory
-            cls.app = app.test_client()
-
-    # def setUp(self):
-    #     self.app_context = app.app_context()
-    #     self.app_context.push()
+            cls.app = app
+            cls.app.test = app.test_client()
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
-
-    # def create_test_app(self):
-    #     app = AppFactory.create_app('config.TestConfig')
-    #     with app.app_context():
-    #         from hed.webinterface.routes import route_blueprint
-    #         app.register_blueprint(route_blueprint)
-    #         self.app = app.test_client()
 
     def test_check_if_option_in_form(self):
         self.assertTrue(1, "Testing check_if_option_in_form")
@@ -67,9 +55,6 @@ class Test(unittest.TestCase):
         expected_other_columns = ['A', 'B', 'C']
         with self.assertRaises(ValueError):
             other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
-
-    def test_create_upload_directory(self):
-        self.assertTrue(1, "Testing create_upload_directory")
 
     def test_file_extension_is_valid(self):
         from hed.web import web_utils
@@ -108,11 +93,17 @@ class Test(unittest.TestCase):
         self.assertIsInstance(indices, list)
         self.assertEqual(expected_indices, indices)
 
+    def test_find_hed_version_in_uploaded_file(self):
+        self.assertTrue(1, "Testing find_hed_version_in_uploaded_file")
+
+    def test_generate_download_file_response(self):
+        self.assertTrue(1, "Testing generate_download_file_response")
+
     def test_generate_download_file_response_and_delete(self):
         self.assertTrue(1, "Testing generate_download_file_response_and_delete")
 
-    def test_get_original_filename(self):
-        self.assertTrue(1, "Testing get_original_filename")
+    def test_get_hed_path_from_pull_down_form(self):
+        self.assertTrue(1, "Testing get_hed_path_from_pull_down_form")
         # from hed.web import web_utils
         # local_config = web_utils.app_config
         # request_form = Mock()
@@ -123,29 +114,14 @@ class Test(unittest.TestCase):
         # the_file = web_utils. get_original_filename(request_form, 'hed_file')
         # self.assertEqual(the_file, 'hedX', "hedX should be in the dictionary")
 
-    def test_find_hed_version_in_uploaded_file(self):
-        self.assertTrue(1, "Testing find_hed_version_in_uploaded_file")
-
-    def test_find_major_hed_versions(self):
-        import hed.web.constants.common_constants as constants
-        from hed.web.web_utils import find_major_hed_versions
-        hed_info = find_major_hed_versions()
-        self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key hed-major-versions")
-        self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
-
-    def test_generate_download_file_response(self):
-        self.assertTrue(1, "Testing generate_download_file_response")
-
-    def test_get_hed_path_from_form(self):
-        self.assertTrue(1, "Testing get_hed_path_from_form")
+    def test_get_uploaded_file_path_from_form(self):
+        self.assertTrue(1, "Testingget_uploaded_file_path_from_form")
 
     def test_handle_http_error(self):
         self.assertTrue(1, "Testing handle_http_error")
 
     def test_save_file_to_upload_folder(self):
         from hed.web.web_utils import save_file_to_upload_folder, app_config
-        local_config = Test.app.application.config
-        app_config = local_config
         temp_name = save_file_to_upload_folder('')
         self.assertEqual(temp_name, '', "A file with empty name cnnot be copied copied")
         some_file = '3k32j23kj1.txt'
@@ -160,9 +136,6 @@ class Test(unittest.TestCase):
         #     temp_name = save_file_to_upload_folder(mock_file)
         # self.assertNotEqual(mock_file, '', "It should create an actual file in the upload directory")
         # self.assertTrue(os.path.isfile(temp_name), "File should exist after it is uploaded")
-
-    def test_setup_logging(self):
-        self.assertTrue(1, "Testing setup_logging")
 
 
 if __name__ == '__main__':

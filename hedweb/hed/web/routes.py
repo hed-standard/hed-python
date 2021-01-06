@@ -1,16 +1,18 @@
 from flask import render_template, Response, request, Blueprint, current_app
 import os
 import json
-from hed.web import utils
-from hed.web import validation
-from hed.web import schema
-from hed.web.constants import error_constants
-from hed.web.constants import page_constants, route_constants, blueprint_constants
-from hed.web.web_utils import find_hed_version_in_uploaded_file, find_major_hed_versions, \
-    generate_download_file_response, handle_http_error
 import traceback
 
 import hed.util.file_util
+from hed.util import hed_cache
+
+from hed.web import utils
+from hed.web import validation
+from hed.web import schema
+from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
+from hed.web.web_utils import delete_file_if_it_exist, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
+    generate_download_file_response, handle_http_error
+
 
 app_config = current_app.config
 route_blueprint = Blueprint(blueprint_constants.ROUTE_BLUEPRINT, __name__)
@@ -140,9 +142,12 @@ def get_major_hed_versions():
         A serialized JSON string containing information related to the spreadsheet columns.
 
     """
-    hed_info = find_major_hed_versions()
-    if error_constants.ERROR_KEY in hed_info:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, hed_info[error_constants.ERROR_KEY])
+    hed_info = {}
+    try:
+        hed_cache.cache_all_hed_xml_versions()
+        hed_info[common_constants.HED_MAJOR_VERSIONS] = hed_cache.get_all_hed_versions()
+    except:
+        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, traceback.format_exc())
     return json.dumps(hed_info)
 
 
@@ -233,14 +238,18 @@ def get_worksheets_info():
         A serialized JSON string containing information related to the Excel worksheets.
 
     """
-    worksheets_info = {}
+    worksheets_info = {common_constants.WORKSHEET_NAMES: [], common_constants.COLUMN_NAMES: [],
+                       common_constants.TAG_COLUMN_INDICES: []}
     try:
-        worksheets_info = utils.find_worksheets_info(request)
-        if error_constants.ERROR_KEY in worksheets_info:
-            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                     worksheets_info[error_constants.ERROR_KEY])
+        if common_constants.SPREADSHEET_FILE in request.files:
+            workbook_file = request.files[common_constants.SPREADSHEET_FILE]
+            workbook_file_path = save_file_to_upload_folder(workbook_file)
+            if workbook_file_path:
+                worksheets_info = utils.populate_worksheets_info_dictionary(worksheets_info, workbook_file_path)
     except:
         worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
+    finally:
+        delete_file_if_it_exist(workbook_file_path)
     return json.dumps(worksheets_info)
 
 

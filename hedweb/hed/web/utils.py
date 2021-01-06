@@ -27,7 +27,7 @@ def find_spreadsheet_columns_info(form_request_object):
     spreadsheet_file_path = ''
     spreadsheet_columns_info = []
     try:
-        spreadsheet_columns_info = initialize_spreadsheet_columns_info_dictionary()
+        spreadsheet_columns_info = {common_constants.COLUMN_NAMES: [], common_constants.TAG_COLUMN_INDICES: []}
         if common_constants.SPREADSHEET_FILE in form_request_object.files:
             spreadsheet_file = form_request_object.files[common_constants.SPREADSHEET_FILE]
             spreadsheet_file_path = save_file_to_upload_folder(spreadsheet_file)
@@ -44,39 +44,6 @@ def find_spreadsheet_columns_info(form_request_object):
     finally:
         delete_file_if_it_exist(spreadsheet_file_path)
     return spreadsheet_columns_info
-
-
-def find_worksheets_info(form_request_object):
-    """Finds the info related to the Excel worksheets.
-
-    This information contains the names of the worksheets in a workbook, the names of the columns in the first
-    worksheet, and column indices that contain HED tags in the first worksheet.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the Excel worksheets.
-
-    """
-    workbook_file_path = ''
-    worksheets_info = {}
-    try:
-        worksheets_info = initialize_worksheets_info_dictionary()
-        if common_constants.SPREADSHEET_FILE in form_request_object.files:
-            workbook_file = form_request_object.files[common_constants.SPREADSHEET_FILE]
-            workbook_file_path = save_file_to_upload_folder(workbook_file)
-            if workbook_file_path:
-                worksheets_info = populate_worksheets_info_dictionary(worksheets_info, workbook_file_path)
-    except:
-        worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
-    finally:
-        delete_file_if_it_exist(workbook_file_path)
-    return worksheets_info
 
 
 def get_column_delimiter_based_on_file_extension(file_name_or_path):
@@ -270,44 +237,6 @@ def get_worksheet_column_names(workbook_file_path, worksheet_name):
     opened_worksheet = opened_workbook_file.sheet_by_name(worksheet_name)
     worksheet_column_names = [opened_worksheet.cell(0, col_index).value for col_index in range(opened_worksheet.ncols)]
     return worksheet_column_names
-
-
-def initialize_spreadsheet_columns_info_dictionary():
-    """Initializes a dictionary that will hold information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    dictionary
-        A dictionary that will hold information related to the spreadsheet columns.
-
-    """
-    worksheet_columns_info = {common_constants.COLUMN_NAMES: [], common_constants.TAG_COLUMN_INDICES: []}
-    return worksheet_columns_info
-
-
-def initialize_worksheets_info_dictionary():
-    """Initializes a dictionary that will hold information related to the Excel worksheets.
-
-    This information contains the names of the worksheets in a workbook, the names of the columns in the first
-    worksheet, and column indices that contain HED tags in the first worksheet.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    dictionary
-        A dictionary that will hold information related to the Excel worksheets.
-
-    """
-    worksheets_info = {common_constants.WORKSHEET_NAMES: [], common_constants.COLUMN_NAMES: [],
-                       common_constants.TAG_COLUMN_INDICES: []}
-    return worksheets_info
 
 
 def populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info, spreadsheet_file_path,
