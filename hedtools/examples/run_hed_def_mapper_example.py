@@ -25,9 +25,7 @@ if __name__ == '__main__':
             print(f"{issue['code']}: {issue['message']}")
     validator = HedValidator(input_file, hed_dictionary=hed_dict)
     print(validator.get_printable_issue_string(
-        "Normal hed string errors:"))
+        "Normal hed string errors"))
 
     input_file.save(include_formatting=True, add_suffix="_test_output", output_processed_file=False)
     input_file.save(include_formatting=True, add_suffix="_proc_test_output", output_processed_file=True)
-
-

@@ -81,6 +81,7 @@ class Test(unittest.TestCase):
             result_string = input_string[min_i:max_i]
             self.assertEqual(result_string, expected_string_no_comma)
 
+
 if __name__ == '__main__':
     unittest.main()
 
@@ -88,7 +89,3 @@ if __name__ == '__main__':
 
 
 
-def test_set_column_prefix_dict(self):
-    mapper = ColumnMapper()
-    mapper.set_column_prefix_dict(self.column_prefix_dictionary, True)
-    self.assertTrue(len(mapper._final_column_map) == 3)

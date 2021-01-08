@@ -3,28 +3,43 @@ from hed.util.error_types import SchemaErrors
 from hed.util import hed_string_util
 from hed.util.hed_dictionary import HedDictionary
 
+
 class TagFormat:
-    """     Class to convert hed3 tags between short and long form.
-       """
+    """
+    Class to convert hed3 tags between short and long form.
+    """
 
     def __init__(self, hed_xml_file=None, hed_dictionary=None):
+        """
+
+        Parameters
+        ----------
+        hed_xml_file : str
+            hed xml schema filepath to create HedDictionary from
+        hed_dictionary : HedDictionary, default None
+             Used in place of hed_xml_file
+        """
         if hed_dictionary is None:
             hed_dictionary = HedDictionary(hed_xml_file)
         self._short_tag_mapping = hed_dictionary.short_tag_mapping
 
     def convert_hed_string_to_short(self, hed_string):
-        """ Convert a hed string from any form to the shortest.
+        """
+        Convert a hed3 string from any form to the shortest.
 
-            This goes through the hed string, splits it into tags, then converts
-            each tag individually
+        This goes through the hed string, splits it into tags, then converts
+        each tag individually
 
-         Parameters
-            ----------
-            hed_string: str
-                a hed string containing any number of tags
-            Returns
-            -------
-                tuple: (The converted string, a list of errors)
+        Parameters
+        ----------
+        hed_string: str
+            a hed string containing any number of tags
+        Returns
+        -------
+            converted_string: str
+                The converted string
+            errors: list
+                a list of validation errors while converting
         """
         if not self._short_tag_mapping:
             error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_tag=hed_string)
@@ -50,24 +65,28 @@ class TagFormat:
                 final_string += short_tag_string
             else:
                 final_string += tag
-                # no_spaces_delimeter = tag.replace(" ", "")
-                # final_string += no_spaces_delimeter
+                # no_spaces_delimiter = tag.replace(" ", "")
+                # final_string += no_spaces_delimiter
 
         return final_string, errors
 
     def convert_hed_string_to_long(self, hed_string):
-        """ Convert a hed string from any form to the longest.
+        """
+        Convert a hed3 string from any form to the longest.
 
-            This goes through the hed string, splits it into tags, then converts
-            each tag individually
+        This goes through the hed string, splits it into tags, then converts
+        each tag individually
 
-         Parameters
-            ----------
-            hed_string: str
-                a hed string containing any number of tags
-            Returns
-            -------
-                tuple: (The converted string, a list of errors)
+        Parameters
+        ----------
+        hed_string: str
+            a hed string containing any number of tags
+        Returns
+        -------
+        converted_string: str
+            The converted string
+        errors: list
+            a list of validation errors while converting
         """
         if not self._short_tag_mapping:
             error = error_reporter.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string)
@@ -92,31 +111,39 @@ class TagFormat:
                 final_string += converted_tag
             else:
                 final_string += tag
-                # no_spaces_delimeter = tag.replace(" ", "")
-                # final_string += no_spaces_delimeter
+                # no_spaces_delimiter = tag.replace(" ", "")
+                # final_string += no_spaces_delimiter
 
         return final_string, errors
 
     def _convert_to_long_tag(self, hed_tag):
-        """This takes a hed tag(short or long form) and converts it to the long form
-            Works left to right.(mostly relevant for errors)
-            Note: This only does minimal validation
+        """
+        This takes a hed tag(short or long form) and converts it to the long form
+        Works left to right.(mostly relevant for errors)
+        Note: This only does minimal validation
 
-            eg 'Event'                    - Returns ('Event', None)
-               'Sensory event'            - Returns ('Event/Sensory event', None)
-            Takes Value:
-               'Environmental sound/Unique Value'
-                                          - Returns ('Item/Sound/Environmental Sound/Unique Value', None)
-            Extension Allowed:
-                'Experiment control/demo_extension'
-                                          - Returns ('Event/Experiment Control/demo_extension/', None)
-                'Experiment control/demo_extension/second_part'
-                                          - Returns ('Event/Experiment Control/demo_extension/second_part', None)
+        eg 'Event'                    - Returns ('Event', None)
+           'Sensory event'            - Returns ('Event/Sensory event', None)
+        Takes Value:
+           'Environmental sound/Unique Value'
+                                      - Returns ('Item/Sound/Environmental Sound/Unique Value', None)
+        Extension Allowed:
+            'Experiment control/demo_extension'
+                                      - Returns ('Event/Experiment Control/demo_extension/', None)
+            'Experiment control/demo_extension/second_part'
+                                      - Returns ('Event/Experiment Control/demo_extension/second_part', None)
 
-            Returns
-            -------
-            tuple.  (long_tag, error).  If not found, (original_tag, error)
 
+        Parameters
+        ----------
+        hed_tag: str
+            A single hed tag(long or short)
+        Returns
+        -------
+        converted_tag: str
+            The converted tag
+        errors: list
+            a list of errors while converting
         """
         # Remove leading and trailing slashes
         if hed_tag.startswith('/'):
@@ -176,25 +203,33 @@ class TagFormat:
         return long_tag_string, []
 
     def _convert_to_short_tag(self, hed_tag):
-        """This takes a hed tag(short or long form) and converts it to the long form
-            Works right to left.(mostly relevant for errors)
-            Note: This only does minimal validation
+        """
+        This takes a hed tag(short or long form) and converts it to the short form
+        Works left to right.(mostly relevant for errors)
+        Note: This only does minimal validation
 
-            eg 'Event'                    - Returns ('Event', None)
-               'Event/Sensory event'      - Returns (Sensory event', None)
-            Takes Value:
-               'Item/Sound/Environmental sound/Unique Value'
-                                          - Returns ('Environmental Sound/Unique Value', None)
-            Extension Allowed:
-                'Event/Experiment control/demo_extension'
-                                          - Returns ('Experiment Control/demo_extension/', None)
-                'Event/Experiment control/demo_extension/second_part'
-                                          - Returns ('Experiment Control/demo_extension/second_part', None)
+        eg 'Event'                    - Returns ('Event', [])
+           'Event/Sensory event'      - Returns ('Sensory event', [])
+        Takes Value:
+           'Item/Sound/Environmental sound/Unique Value'
+                                      - Returns ('Environmental Sound/Unique Value', [])
+        Extension Allowed:
+            'Event/Experiment control/demo_extension'
+                                      - Returns ('Experiment Control/demo_extension/', [])
+            'Event/Experiment control/demo_extension/second_part'
+                                      - Returns ('Experiment Control/demo_extension/second_part', [])
 
-            Returns
-            -------
-            tuple.  (short_tag, None or error).  If not found, (original_tag, error)
 
+        Parameters
+        ----------
+        hed_tag: str
+            A single hed tag(long or short)
+        Returns
+        -------
+        converted_tag: str
+            The converted tag
+        errors: list
+            a list of errors while converting
         """
         # Remove leading and trailing slashes
         if hed_tag.startswith('/'):
@@ -243,17 +278,21 @@ class TagFormat:
         short_tag_string = short_tag + remainder
         return short_tag_string, []
 
-    def _convert_file(self, input_file, conversion_function):
+    @staticmethod
+    def _convert_file(input_file, conversion_function):
         """  Runs a passed in conversion function over a given HedFileInput object
         Parameters
         ----------
-        input_file : HedFileInput object
-        conversion_function : function that takes a string and returns a string and errors.
+        input_file : HedFileInput
+            The file to convert hed strings in
+        conversion_function : (str) -> (str, [])
+            Conversion function for any given hed string.
         Returns
         -------
-        (modified input file, error_list)
-            Modified input file is NOT a copy.
-            error_list is a list of dicts of errors.
+        input_file: HedFileInput
+            The same passed in object converted in place
+        error_list: []
+            list of dicts of errors while converting
         """
         error_list = []
         for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
@@ -270,15 +309,19 @@ class TagFormat:
         return input_file, error_list
 
     def convert_file_to_short_tags(self, input_file):
-        """Takes an input file and iterates over each cell with tags and converts to short.
+        """
+        Takes an input file and iterates over each cell with tags and converts to short.
+
         Parameters
         ----------
-        input_file : a HedFileInput object
+        input_file : a HedFileInput
+            The file to convert hed strings in
         Returns
         -------
-        (modified input file, error_list)
-            Modified input file is NOT a copy.
-            error_list is a list of dicts of errors.
+        input_file: HedFileInput
+            The same passed in object converted in place
+        error_list: []
+            list of dicts of errors while converting
         """
         return self._convert_file(input_file, self.convert_hed_string_to_short)
 
@@ -286,11 +329,13 @@ class TagFormat:
         """Takes an input file and iterates over each cell with tags and converts to long.
         Parameters
         ----------
-        input_file : a HedFileInput object
+        input_file : a HedFileInput
+            The file to convert hed strings in
         Returns
         -------
-        (modified input file, error_list)
-            Modified input file is NOT a copy.
-            error_list is a list of dicts of errors.
+        input_file: HedFileInput
+            The same passed in object converted in place
+        error_list: []
+            list of dicts of errors while converting
         """
         return self._convert_file(input_file, self.convert_hed_string_to_long)

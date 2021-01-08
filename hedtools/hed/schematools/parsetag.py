@@ -265,16 +265,16 @@ def add_tag_node_attributes(tag_node, tag_attributes):
     -------
 
     """
-    unitClasses = []
+    unit_classes = []
     delimiter = ','
     for attribute in tag_attributes:
         if attribute.startswith(unit_class_attribute):
             split_attribute = attribute.split('=')
-            unitClasses.append(split_attribute[1])
+            unit_classes.append(split_attribute[1])
         elif attribute.find('=') > -1:
             split_attribute = attribute.split('=')
             tag_node.set(split_attribute[0], split_attribute[1])
         else:
             tag_node.set(attribute, true_attribute)
-    if unitClasses:
-        tag_node.set(unit_class_attribute, delimiter.join(unitClasses))
+    if unit_classes:
+        tag_node.set(unit_class_attribute, delimiter.join(unit_classes))

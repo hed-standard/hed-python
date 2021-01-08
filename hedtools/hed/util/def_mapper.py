@@ -3,6 +3,7 @@ from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.util.base_file_input import BaseFileInput
 from hed.util.column_def_group import ColumnDefGroup
 
+
 class DefinitionMapper:
     """Class responsible for gathering/removing definitions from hed strings,
         and also replacing labels in hed strings with the gathered definitions."""
@@ -15,6 +16,16 @@ class DefinitionMapper:
     ORG_KEY = "organizational"
 
     def __init__(self, hed_inputs=None, hed_dictionary=None):
+        """
+
+        Parameters
+        ----------
+        hed_inputs : [] or str or BaseFileInput or ColumnDefGroup
+            List input doesn't need to all be the same type.
+        hed_dictionary : HedDictionary, optional
+            Used to determine where definition tags are in the schema.  This is technically optional, but
+            only short form definition tags will work if this is absent.
+        """
         self._defs = {}
         self._short_tag_mapping = hed_dictionary.short_tag_mapping
 
@@ -33,11 +44,12 @@ class DefinitionMapper:
             self.add_definitions(hed_inputs)
 
     def add_definitions(self, hed_inputs):
-        """ Adds all definitions found in hed strings in the given input
+        """
+        Adds all definitions found in hed strings in the given input
 
         Parameters
         ----------
-        hed_inputs : list or str or BaseFileInput or ColumnDefGroup
+        hed_inputs : [] or str or BaseFileInput or ColumnDefGroup
             List input doesn't need to all be the same type.
         """
         if not isinstance(hed_inputs, list):
@@ -64,9 +76,9 @@ class DefinitionMapper:
             The hed string to modify.
         Returns
         -------
-            str: the string with replacements
+        modified_hed_string: str
+            hed_string with all definitions removed and definition tags replaced with the actual definition
         """
-        """"""
         # First see if the word definition or dLabel is found at all.  Just move on if not.
         hed_string_lower = hed_string.lower()
         if self.DLABEL_KEY not in hed_string_lower and \
@@ -93,7 +105,7 @@ class DefinitionMapper:
                     continue
 
         final_string = hed_string
-        #print(f"Original String: {final_string}")
+        # print(f"Original String: {final_string}")
         # Do this in reverse order so we don't need to update string indexes
         for tag_index, label_tag, full_label_tag in reversed(indexes_to_change):
             replace_with = ""
@@ -107,14 +119,14 @@ class DefinitionMapper:
             else:
                 extents = self._find_tag_group_extent(final_string, tag_index, remove_comma=True)
                 to_remove = hed_string[extents[0]:extents[1]]
-                #print(f"To remove: '{to_remove}'")
+                # print(f"To remove: '{to_remove}'")
             final_string = final_string.replace(to_remove, replace_with)
-        #print(final_string)
+        # print(final_string)
         return final_string
 
     @staticmethod
     def _check_tag_starts_with(hed_tag, possible_starts_with_list):
-        """ Check if a given tag starts with a given string
+        """ Check if a given tag starts with a given string, and returns the tag with the prefix removed if it does.
 
         Parameters
         ----------
@@ -122,6 +134,8 @@ class DefinitionMapper:
             A single input tag
         possible_starts_with_list : list
             A list of strings to check as the prefix.
+            Generally this will be all short/intermediate/long forms of a specific tag
+            eg. ['definitional', 'informational/definitional', 'attribute/informational/definitional']
         Returns
         -------
             str: the tag without the removed prefix, or None
@@ -134,15 +148,13 @@ class DefinitionMapper:
         return None
 
     def _check_for_definitions(self, hed_string):
-        """Check a given hed string to see if there is a definition in it.
+        """
+        Check a given hed string to see if there is a definition in it, and add it to the definition dict if it does.
 
         Parameters
         ----------
-        hed_string :
-
-        Returns
-        -------
-
+        hed_string : str
+            A single hed string to gather definitions from
         """
         if self.DEF_KEY not in hed_string.lower():
             return False
@@ -198,7 +210,8 @@ class DefinitionMapper:
 
     @staticmethod
     def _find_tag_group_extent(hed_string, starting_tag_index, remove_comma=True):
-        """Returns the starting/ending index into the string of the given tag group.
+        """
+        Returns the starting/ending index into the string of the tag group at starting_tag_index in hed_string
 
         eg (tag1, tag2, (tag3, tag4)) will return (0, 13) if 0 <= starting_tag_index < 13 and
                 will return (13, 24) if 13 <= starting_tag_index < 24
@@ -207,15 +220,18 @@ class DefinitionMapper:
         Parameters
         ----------
         hed_string : str
+            The hed string to gather the tag extents from
         starting_tag_index : int
-            index into the string to gather extents from
+            Index into the string to gather tag extents from
         remove_comma : bool
             If True, extents will include the now extraneous comma (between tag2 and tag3
                 above if removing tag3 in above example)
-
         Returns
         -------
-
+        start_index: int
+            The first index of the full tag group
+        end_index: int
+            The last index of the full tag group
         """
         paren_counter = 0
         start_index_a = 0
@@ -243,7 +259,7 @@ class DefinitionMapper:
 
         if remove_comma:
             found_comma = False
-            #First check if a comma is before the string.
+            # First check if a comma is before the string.
             if start_index > 0:
                 for i in range(start_index - 1, -1, -1):
                     if hed_string[i] == ',':
@@ -256,46 +272,9 @@ class DefinitionMapper:
             if not found_comma and end_index < end_index_a:
                 for i in range(end_index, end_index_a):
                     if hed_string[i] == ',':
-                        found_comma = True
+                        continue
                     elif hed_string[i] != ' ':
                         break
                     end_index = i + 1
 
         return start_index, end_index
-
-
-if __name__ == '__main__':
-    import os
-    from hed.util.hed_file_input import HedFileInput
-    from hed.util.hed_dictionary import HedDictionary
-
-    local_xml_file = "examples/data/HED8.0.0-alpha.1.xml"
-    hed_dictionary = HedDictionary(local_xml_file)
-    def_string = "(Attribute/Informational/Definition/XXX, Attribute/Organizational/YYY, (Tag1, Tag2))," \
-                 "(Attribute/Informational/Definition/XXX, Attribute/Organizational/YYY, (Tag1, Tag2))"
-    mapper = DefinitionMapper(def_string, hed_dictionary=hed_dictionary)
-    def_removed = mapper.replace_and_remove_tags(def_string)
-
-    def_string = "(Attribute/Informational/Definition/XXX, ()), (Attribute/Informational/Definition/XXX2, ())"
-    DefinitionMapper(def_string, hed_dictionary=hed_dictionary)
-
-    def_string_3level = "(Tag1, tag2, (tag3, tag4), (Attribute/Informational/Definition/XXX, Attribute/Organizational/YYY, (Tag5, Tag6)))"
-    mapper = DefinitionMapper(def_string_3level, hed_dictionary=hed_dictionary)
-    def_removed = mapper.replace_and_remove_tags(def_string_3level)
-    print(f"after Def Removed: {def_removed}")
-
-    def_string_3level = "(Tag1, tag2, (Label-def/XXX, tag4), (Attribute/Informational/Definition/XXX, Attribute/Organizational/YYY, (Tag5, Tag6)))"
-    mapper = DefinitionMapper(def_string_3level, hed_dictionary=hed_dictionary)
-    def_removed = mapper.replace_and_remove_tags(def_string_3level)
-    print(f"after Def Removed: {def_removed}")
-
-    example_data_path = 'examples/data'  # path to example data
-    multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
-
-    prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
-    # Example 3a: XLSX file with multiple sheets - first sheet has no issues with 7.1.1
-    input_file = HedFileInput(multiple_sheet_xlsx_file, tag_columns=[4],
-                              column_prefix_dictionary=prefixed_needed_tag_columns,
-                              worksheet_name='LKT Events')
-
-    DefinitionMapper(input_file, hed_dictionary=hed_dictionary)
