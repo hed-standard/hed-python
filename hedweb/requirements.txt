@@ -14,14 +14,8 @@ pandas==1.1.4
 numpy==1.19.3
 xlrd==1.2.0
 defusedxml==0.6.0
-<<<<<<< HEAD
-=======
-lxml==4.6.2
->>>>>>> be3ad77361d00131abc8287cac8a446011b67295
 portalocker==2.0.0
 python-dateutil==2.8.1
 pytz==2020.4
 semantic_version==2.8.5
 six==1.15.0
-
-
