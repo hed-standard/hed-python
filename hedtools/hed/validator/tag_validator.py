@@ -133,7 +133,7 @@ class TagValidator:
             The previous format tag.
          Returns
          -------
-         list
+         []
              The validation issues associated with the top-level in the HED string.
 
          """
@@ -154,13 +154,13 @@ class TagValidator:
 
          Parameters
          ----------
-         tag_group: list
+         tag_group: []
             A list containing the tags in a group.
          tag_group_string: str
             A string of the tag group.
          Returns
          -------
-         list
+         []
              The validation issues associated with the groups in a HED string.
 
          """
@@ -178,7 +178,7 @@ class TagValidator:
             A HED string.
          Returns
          -------
-         list
+         []
              The validation issues associated with a HED string.
 
          """
@@ -194,13 +194,13 @@ class TagValidator:
 
          Parameters
          ----------
-         original_tag_list: list of str
+         original_tag_list: [str]
             A list containing the original tags.
-         formatted_tag_list: list of str
+         formatted_tag_list: [str]
             A list containing formatted tags.
          Returns
          -------
-         list
+         []
              The validation issues associated with each level in a HED string.
 
          """
@@ -215,11 +215,11 @@ class TagValidator:
 
          Parameters
          ----------
-         formatted_top_level_tags: list of str
+         formatted_top_level_tags: [str]
             A list containing the top-level tags in a HED string.
          Returns
          -------
-         list
+         []
              The validation issues associated with the top-level in a HED string.
 
          """
@@ -243,7 +243,7 @@ class TagValidator:
             The previous tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -289,7 +289,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -300,7 +300,8 @@ class TagValidator:
         for tag_name in tag_names:
             correct_tag_name = tag_name.capitalize()
             if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
-                validation_issues += error_reporter.format_val_warning(ValidationWarnings.CAPITALIZATION, tag=original_tag)
+                validation_issues += error_reporter.format_val_warning(ValidationWarnings.CAPITALIZATION,
+                                                                       tag=original_tag)
                 self._increment_issue_count(is_error=False)
                 break
         return validation_issues
@@ -395,7 +396,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -426,9 +427,10 @@ class TagValidator:
                                              tag_unit_class_units)):
                 pass
             else:
-                validation_issues += error_reporter.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, tag=original_tag,
+                validation_issues += error_reporter.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                     tag=original_tag,
                                                                      unit_class_units=','.join(
-                                                                          sorted(tag_unit_class_units)))
+                                                                         sorted(tag_unit_class_units)))
                 self._increment_issue_count()
         return validation_issues
 
@@ -440,7 +442,7 @@ class TagValidator:
             unit to generate plural forms
         Returns
         -------
-        list of str
+        [str]
             list of plural units
         """
         derivative_units = [unit]
@@ -476,13 +478,12 @@ class TagValidator:
             stripped_value = str(unit_value)[0:-len(unit)].strip()
 
         if found_unit and self._hed_dictionary.has_unit_modifiers:
-            modifierKey = ''
             if is_unit_symbol:
-                modifierKey = HedKey.SIUnitSymbolModifier
+                modifier_key = HedKey.SIUnitSymbolModifier
             else:
-                modifierKey = HedKey.SIUnitModifier
+                modifier_key = HedKey.SIUnitModifier
 
-            for unit_modifier in self._hed_dictionary_dictionaries[modifierKey]:
+            for unit_modifier in self._hed_dictionary_dictionaries[modifier_key]:
                 if stripped_value.startswith(unit_modifier):
                     stripped_value = stripped_value[len(unit_modifier):].strip()
                 elif stripped_value.endswith(unit_modifier):
@@ -498,7 +499,7 @@ class TagValidator:
             The unformatted value of the tag
         formatted_tag_unit_value: str
             The formatted value of the tag
-        tag_unit_class_units: list of str
+        tag_unit_class_units: [str]
             A list of valid units for this tag
         Returns
         -------
@@ -545,8 +546,9 @@ class TagValidator:
             tag_unit_values = self.get_tag_name(formatted_tag)
             if re.search(self._digit_expression, tag_unit_values):
                 default_unit = self.get_unit_class_default_unit(formatted_tag)
-                validation_issues += error_reporter.format_val_warning(ValidationWarnings.UNIT_CLASS_DEFAULT_USED, tag=original_tag,
-                                                                                     default_unit=default_unit)
+                validation_issues += error_reporter.format_val_warning(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
+                                                                       tag=original_tag,
+                                                                       default_unit=default_unit)
                 self._increment_issue_count(is_error=False)
         return validation_issues
 
@@ -578,7 +580,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A list containing the unit classes associated with a particular tag. A empty list will be returned if
             the tag doesn't have unit classes associated with it.
 
@@ -599,7 +601,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A list containing the unit class units associated with a particular tag. A empty list will be returned if
             the tag doesn't have unit class units associated with it.
 
@@ -651,13 +653,13 @@ class TagValidator:
 
         Parameters
         ----------
-        tag_group: list of str
+        tag_group: [str]
             A list containing the tags in a group.
         tag_group_string: str
             A string of the tag group.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -678,7 +680,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -694,11 +696,11 @@ class TagValidator:
 
         Parameters
         ----------
-        formatted_top_level_tags: list of str
+        formatted_top_level_tags: [str]
             A list containing the top-level tags.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -719,13 +721,13 @@ class TagValidator:
 
         Parameters
         ----------
-        original_tag_list: list of str
+        original_tag_list: [str]
             A list containing tags that are used to report the error.
-        formatted_tag_list: list of str
+        formatted_tag_list: [str]
             A list containing tags that are used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -764,13 +766,13 @@ class TagValidator:
 
         Parameters
         ----------
-        original_tag_list: list of str
+        original_tag_list: [str]
             A list containing tags that are used to report the error.
-        formatted_tag_list: list of str
+        formatted_tag_list: [str]
             A list containing tags that are used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -802,7 +804,7 @@ class TagValidator:
             The slash character. By default it is a forward slash.
         Returns
         -------
-        list
+        []
             A list containing the indices of the tag slashes.
 
         """
@@ -836,7 +838,7 @@ class TagValidator:
             A hed string.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -913,7 +915,7 @@ class TagValidator:
             The HED string that caused the error.
         Returns
         -------
-        list of dict
+        [{}]
             A singleton list with a dictionary representing the error.
 
         """
@@ -922,8 +924,10 @@ class TagValidator:
 
     @staticmethod
     def comma_is_missing_after_closing_parentheses(last_non_empty_character, current_character):
-        """Checks to see if a comma is missing after a closing parentheses in a HED string. This is a helper function for
-           the find_missing_commas_in_hed_string function.
+        """
+        Checks to see if a comma is missing after a closing parentheses in a HED string.
+
+        This is a helper function for the find_missing_commas_in_hed_string function.
 
         Parameters
         ----------
@@ -938,8 +942,8 @@ class TagValidator:
 
         """
         return last_non_empty_character == TagValidator.CLOSING_GROUP_CHARACTER and \
-                not (TagValidator.character_is_delimiter(current_character) or
-                     current_character == TagValidator.CLOSING_GROUP_CHARACTER)
+            not (TagValidator.character_is_delimiter(current_character) or
+                 current_character == TagValidator.CLOSING_GROUP_CHARACTER)
 
     @staticmethod
     def character_is_delimiter(character):
@@ -967,7 +971,7 @@ class TagValidator:
         Returns
         -------
         list
-            A validation issues list. If no issues are found then an empty list is returned.
+            A validation issues []. If no issues are found then an empty list is returned.
 
         """
         validation_issues = []
@@ -988,7 +992,7 @@ class TagValidator:
             A hed string.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -996,9 +1000,10 @@ class TagValidator:
         number_of_opening_parentheses = hed_string.count('(')
         number_of_closing_parentheses = hed_string.count(')')
         if number_of_opening_parentheses != number_of_closing_parentheses:
-            validation_issues += error_reporter.format_val_error(ValidationErrors.PARENTHESES,
-                                                                 opening_parentheses_count=number_of_opening_parentheses,
-                                                                 closing_parentheses_count=number_of_closing_parentheses)
+            validation_issues += error_reporter.format_val_error(
+                ValidationErrors.PARENTHESES,
+                opening_parentheses_count=number_of_opening_parentheses,
+                closing_parentheses_count=number_of_closing_parentheses)
             self._increment_issue_count()
         return validation_issues
 
@@ -1041,10 +1046,3 @@ class TagValidator:
             return not date_time_obj.tzinfo
         except ValueError:
             return False
-
-
-if __name__ == '__main__':
-    song = ['always', 'look', 'on', 'the', 'bright', 'side', 'of', 'life']
-    song_iter = iter(song)
-    for sing in song_iter:
-        print(sing)

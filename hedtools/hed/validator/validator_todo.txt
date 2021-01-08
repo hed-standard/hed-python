@@ -1,4 +1,0 @@
-Create openpyxl version again for hedFileInput
-Create some method of callbacks where you can write out a txt or tsv file.
-
-Remove giant kludge: search todo to find it

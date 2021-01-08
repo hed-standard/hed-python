@@ -12,6 +12,7 @@ import xml
 from hed.util.exceptions import SchemaFileError
 from hed.util.error_types import SchemaErrors
 
+
 # These need to match the attributes/element name/etc used to load from the xml
 class HedKey:
     Default='default'
@@ -102,7 +103,7 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit
             class attributes
 
@@ -110,7 +111,14 @@ class HedDictionary:
         return self.dictionaries
 
     def has_duplicate_tags(self):
-        """Converting functions don't make much sense to work if we have duplicate tags and are disabled"""
+        """
+        Returns True if this is a valid hed3 schema with no duplicate short tags.
+
+        Returns
+        -------
+        bool
+            Returns True if this is a valid hed3 schema with no duplicate short tags.
+        """
         return not self.no_duplicate_tags
 
     def _populate_dictionaries(self):
@@ -122,7 +130,7 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit class
             attributes.
 
@@ -136,16 +144,35 @@ class HedDictionary:
 
     @property
     def short_tag_mapping(self):
-        """This returns the short->long tag dictionary if we have a hed3 compatible schema."""
+        """
+        This returns the short->long tag dictionary if we have a hed3 compatible schema.
+
+        Returns
+        -------
+        short_tag_dict: {}
+            Returns the short tag mapping dictionary, or None if this is not a hed3 compatible schema.
+        """
         if self.no_duplicate_tags:
             return self.dictionaries[HedKey.ShortTags]
         return None
 
     def get_all_forms_of_tag(self, short_tag_to_check):
-        """Given a short tag, return all the longer versions of it.
+        """
+        Given a short tag, return all the longer versions of it.
 
-            eg: "definition" will return
-                    ["definition", "informational/definition", "attribute/informational/definition"]
+        eg: "definition" will return
+                ["definition", "informational/definition", "attribute/informational/definition"]
+
+        Parameters
+        ----------
+        short_tag_to_check : str
+            The short version of a hed tag we are interested in.
+
+        Returns
+        -------
+        tag_versions: [str]
+            A list of all short, intermediate, and long versions of the passed in short tag.
+            Returns empty list if no versions found.
         """
         try:
             tag_entry = self.short_tag_mapping[short_tag_to_check.lower()]
@@ -169,7 +196,7 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
@@ -236,7 +263,9 @@ class HedDictionary:
 
         Returns
         -------
-            dict: (duplicate_tag_name : list of tag entries with this name)
+        duplicate_tag_dict: {str: [str]}
+            A dictionary of all duplicate short tags as keys, with the values being a list of
+            long tags sharing that short tag
         """
         duplicate_dict = {}
         short_tag_dict = self.dictionaries[HedKey.ShortTags]
@@ -248,7 +277,19 @@ class HedDictionary:
         return duplicate_dict
 
     def dupe_tag_iter(self, return_detailed_info=False):
-        """Returns an iterator that goes over each line of the duplicate tags dict, including descriptive ones."""
+        """
+        An iterator that goes over each line of the duplicate tags dict, including descriptive ones.
+
+        Parameters
+        ----------
+        return_detailed_info : bool
+            If true, also returns header lines listing the number of duplicate tags for each short tag.
+
+        Yields
+        -------
+        text_line: str
+            A list of long tags that have duplicates, with optional descriptive short tag lines.
+        """
         duplicate_dict = self.find_duplicate_tags()
         for tag_name in duplicate_dict:
             if return_detailed_info:
@@ -280,7 +321,12 @@ class HedDictionary:
         self.dictionaries[HedKey.ShortTags] = new_short_tag_dict
 
     def _add_hed3_compatible_tags(self):
-        """Adds the short and intermediate tags to the appropriate dictionaries if this is hed3 compatible."""
+        """
+        Updates the normal tag dictionaries with all the intermediate forms if this is a hed3 compatible schema."
+
+        Returns
+        -------
+        """
         if self.no_duplicate_tags:
             for dict_key in self.TAG_DICTIONARY_KEYS:
                 tag_dictionary = self.dictionaries[dict_key]
@@ -575,7 +621,7 @@ class HedDictionary:
 
         Returns
         -------
-        list
+        []
             A list containing elements that have a specific element name.
 
         """

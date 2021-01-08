@@ -47,7 +47,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list containing the individual tags and tag groups in the HED string. Nested tag groups are not split.
 
         """
@@ -73,7 +73,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list containing the individual tags in the HED string.
 
         """
@@ -86,7 +86,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list containing all of the groups with formatted tags.
 
         """
@@ -99,7 +99,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list containing the individual formatted tags in the HED string.
 
         """
@@ -112,7 +112,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list containing the top-level tags in a HED string.
 
         """
@@ -125,7 +125,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list containing the top-level formatted tags in a HED string.
 
         """
@@ -138,7 +138,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list of a lists containing all of the tag groups in a HED string. Each list is a tag group.
 
         """
@@ -151,7 +151,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list of strings containing all of the tag groups in a HED string. Each string is a tag group.
 
         """
@@ -185,7 +185,7 @@ class HedStringDelimiter:
         ----------
         Returns
         -------
-        list
+        []
             A list containing the top-level tags.
 
         """
@@ -199,8 +199,9 @@ class HedStringDelimiter:
 
     @staticmethod
     def format_hed_tag(hed_tag, only_remove_new_line=False):
-        """Format a single HED tag. Slashes and double quotes in the beginning and end are removed and the tag is
-           converted to lowercase.
+        """
+        Format a single HED tag. Slashes and double quotes in the beginning and end are removed and the tag is
+        converted to lowercase.
 
         Parameters
         ----------
@@ -234,11 +235,14 @@ class HedStringDelimiter:
 
         Parameters
         ----------
-        hed_tags_list: list
+        hed_tags_list: []
             A list containing HED tags. Groups are lists inside of the list.
+        only_remove_new_line: bool
+            If True, this will only clean up hed tags by removing new lines.
+            If False, it will also clean up a slash or quote at the start or end of the string
         Returns
         -------
-        list
+        []
             A list with the HED tags formatted.
 
         """
@@ -284,7 +288,7 @@ class HedStringDelimiter:
             A hed string consisting of tags and tag groups.
         Returns
         -------
-        list
+        []
             A list containing the individual tags and tag groups in the HED string. Nested tag groups are not split.
 
         """
@@ -343,7 +347,7 @@ class HedStringDelimiter:
             A HED string consisting of tags and tag groups.
         Returns
         -------
-        boolean
+        bool
             True if the HED string is a group. False, if not a group.
 
         """
@@ -355,4 +359,16 @@ class HedStringDelimiter:
 
     @staticmethod
     def remove_group_parentheses(tag_group):
+        """
+        Removes the first and last character of the given string(assumed to be parentheses)
+
+        Parameters
+        ----------
+        tag_group : str
+            a string with a group of tags, starting and ending with parentheses
+        Returns
+        -------
+        str
+            The string with the parentheses removed.
+        """
         return tag_group[1:-1]

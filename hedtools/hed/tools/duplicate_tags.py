@@ -3,17 +3,22 @@ from hed.util.hed_dictionary import HedDictionary
 
 
 def check_for_duplicate_tags(local_xml_file):
-    """Checks if a source XML file has duplicate tags.
+    """
+    Checks if a source XML file has duplicate tags.
 
-        If there are no duplicates, returns None.
-        If there are any duplicates, points to a file containing the formatted result.
+    If there are no duplicates, returns None.
+    If there are any duplicates, points to a file containing the formatted result.
+
     Parameters
     ----------
-        local_xml_file: string
+    local_xml_file: string
+        path to local XML file to validate
     Returns
     -------
-    dictionary
-            Contains source file location, dest, etc
+    output_filename: str or None
+        location of text file containing list of duplicates
+    errors: list
+        list of errors in checking for duplicates    
     """
     hed_dict = HedDictionary(local_xml_file)
     dupe_tag_file = None
