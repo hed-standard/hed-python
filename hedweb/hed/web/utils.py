@@ -61,7 +61,7 @@ def get_column_delimiter_based_on_file_extension(file_name_or_path):
 
     """
     column_delimiter = ''
-    file_extension = get_file_extension(file_name_or_path)
+    file_extension = get_file_extension(file_name_or_path).lower()
     if file_extension in spreadsheet_constants.SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY:
         column_delimiter = spreadsheet_constants.SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY.get(file_extension)
     return column_delimiter
@@ -239,8 +239,7 @@ def get_worksheet_column_names(workbook_file_path, worksheet_name):
     return worksheet_column_names
 
 
-def populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info, spreadsheet_file_path,
-                                                 worksheet_name=''):
+def populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info, spreadsheet_file_path, worksheet_name=''):
     """Populate dictionary with information related to the spreadsheet columns.
 
     This information contains the names of the spreadsheet columns and column indices that contain HED tags.
@@ -261,14 +260,12 @@ def populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info, sprea
 
     """
     if worksheet_name:
-        spreadsheet_columns_info[common_constants.COLUMN_NAMES] = get_worksheet_column_names(
-            spreadsheet_file_path,
-            worksheet_name)
+        spreadsheet_columns_info[common_constants.COLUMN_NAMES] = \
+            get_worksheet_column_names(spreadsheet_file_path, worksheet_name)
     else:
         column_delimiter = get_column_delimiter_based_on_file_extension(spreadsheet_file_path)
-        spreadsheet_columns_info[common_constants.COLUMN_NAMES] = get_text_file_column_names(
-            spreadsheet_file_path,
-            column_delimiter)
+        spreadsheet_columns_info[common_constants.COLUMN_NAMES] = \
+            get_text_file_column_names(spreadsheet_file_path, column_delimiter)
     spreadsheet_columns_info[common_constants.TAG_COLUMN_INDICES] = \
         get_spreadsheet_other_tag_column_indices(spreadsheet_columns_info[common_constants.COLUMN_NAMES])
     spreadsheet_columns_info[common_constants.REQUIRED_TAG_COLUMN_INDICES] = \

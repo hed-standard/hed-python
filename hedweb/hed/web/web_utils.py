@@ -146,7 +146,6 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     if not display_name:
         display_name = download_file
     try:
-        # full_filename = os.path.join(app_config.get('UPLOAD_FOLDER'), download_file_name)
         if not download_file:
             return f"No download file given"
 
@@ -166,7 +165,7 @@ def generate_download_file_response(download_file, display_name=None, header=Non
         return traceback.format_exc()
 
 
-def get_hed_path_from_pull_down_form(form_request_object):
+def get_hed_path_from_pull_down(form_request_object):
     """Gets the hed path from a section of form that uses a pull-down box and hed_cache
     Parameters
     ----------

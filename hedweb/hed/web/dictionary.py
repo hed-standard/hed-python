@@ -29,7 +29,7 @@ def generate_arguments_from_validation_form(form_request_object):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, hed_display_name = web_utils.get_hed_path_from_pull_down_form(form_request_object)
+    hed_file_path, hed_display_name = web_utils.get_hed_path_from_pull_down(form_request_object)
     uploaded_file_name, original_file_name = \
         web_utils.get_uploaded_file_path_from_form(form_request_object, common_constants.SPREADSHEET_FILE,
                                                    file_constants.SPREADSHEET_FILE_EXTENSIONS)

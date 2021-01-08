@@ -26,15 +26,17 @@ class Test(unittest.TestCase):
     def test_find_spreadsheet_columns_info(self):
         self.assertTrue(1, "Testing find_spreadsheet_columns_info")
 
-    def test_get_column_delimiter_based_on_file_extension(self):
-        self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
-        # def test_get_column_delimiter_based_on_file_extension(self):
-        #     delimiter = utils.get_column_delimiter_based_on_file_extension(self.tsv_file1)
-        #     tab_delimiter = '\t'
-        #     self.assertTrue(delimiter)
-        #     self.assertIsInstance(delimiter, str)
-        #     self.assertEqual(tab_delimiter, delimiter)
-        #
+    # def test_get_column_delimiter_based_on_file_extension(self):
+    #     self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
+    #     from hed.web.utils import get_column_delimiter_based_on_file_extension
+    #     delimiter = get_column_delimiter_based_on_file_extension('test.tsv')
+    #     self.assertEqual('\t', delimiter, ".tsv files should have a tab delimiter")
+    #     delimiter = get_column_delimiter_based_on_file_extension('test.TSV')
+    #     self.assertEqual('\t', delimiter, ".TSV files should have a tab delimiter")
+    #     delimiter = get_column_delimiter_based_on_file_extension('test')
+    #     self.assertEqual('', delimiter, "Files with no extension should have an empty delimiter")
+    #     delimiter = get_column_delimiter_based_on_file_extension('test.xlsx')
+    #     self.assertEqual('', delimiter, "Excel files should have an empty delimiter")
 
     def test_get_excel_worksheet_names(self):
         from hed.web.utils import get_excel_worksheet_names

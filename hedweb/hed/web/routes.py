@@ -7,7 +7,7 @@ import hed.util.file_util
 from hed.util import hed_cache
 
 from hed.web import utils
-from hed.web import validation
+from hed.web import spreadsheet
 from hed.web import schema
 from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exist, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
@@ -60,6 +60,29 @@ def download_file_in_upload_directory(filename, header=None):
     return download_response
 
 
+@route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_dictionary_validation_results():
+    """Validate the JSON dictionary in the form after submission and return an attachment other containing the output.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        string
+        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
+        500 error message is returned.
+    """
+    validation_response = spreadsheet.report_spreadsheet_validation_status(request)
+    # Success
+    if isinstance(validation_response, Response):
+        return validation_response
+    if isinstance(validation_response, str):
+        if validation_response:
+            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
+        else:
+            return ""
+
 @route_blueprint.route(route_constants.SCHEMA_DUPLICATE_TAG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_duplicate_tag_results():
     """Check the HED specification in the form after submission and return an attachment other containing the output.
@@ -101,7 +124,7 @@ def get_eeg_events_validation_results():
         A serialized JSON string containing information related to the EEG events' hed-strings.
         If the validation fails then a 500 error message is returned.
     """
-    validation_status = validation.report_eeg_events_validation_status(request)
+    validation_status = spreadsheet.report_eeg_events_validation_status(request)
 
     if error_constants.ERROR_KEY in validation_status:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_status[error_constants.ERROR_KEY])
@@ -198,8 +221,8 @@ def get_spreadsheet_columns_info():
     return json.dumps(spreadsheet_columns_info)
 
 
-@route_blueprint.route(route_constants.VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_validation_results():
+@route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_spreadsheet_validation_results():
     """Validate the spreadsheet in the form after submission and return an attachment other containing the output.
 
     Parameters
@@ -211,7 +234,7 @@ def get_validation_results():
         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
         500 error message is returned.
     """
-    validation_response = validation.report_spreadsheet_validation_status(request)
+    validation_response = spreadsheet.report_spreadsheet_validation_status(request)
     # Success
     if isinstance(validation_response, Response):
         return validation_response
@@ -285,6 +308,24 @@ def render_common_error_page():
     return render_template(page_constants.COMMON_ERRORS_PAGE)
 
 
+@route_blueprint.route(route_constants.DICTIONARY_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
+def render_dictionary_validation_form():
+    """Handles the site root and Validation tab functionality.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
+        displayed. If the HTTP method is a POST then the validation form is submitted.
+
+    """
+    return render_template(page_constants.SPREADSHEET_VALIDATION_PAGE)
+    # return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
+
+
 @route_blueprint.route(route_constants.EEG_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
 def render_eeg_validation_form():
     """Handles the site root and EEG Validation tab functionality.
@@ -351,8 +392,8 @@ def render_schema_form():
     return render_template(page_constants.SCHEMA_PAGE)
 
 
-@route_blueprint.route(route_constants.VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
-def render_validation_form():
+@route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
+def render_spreadsheet_validation_form():
     """Handles the site root and Validation tab functionality.
 
     Parameters
@@ -365,4 +406,4 @@ def render_validation_form():
         displayed. If the HTTP method is a POST then the validation form is submitted.
 
     """
-    return render_template(page_constants.VALIDATION_PAGE)
+    return render_template(page_constants.SPREADSHEET_VALIDATION_PAGE)
