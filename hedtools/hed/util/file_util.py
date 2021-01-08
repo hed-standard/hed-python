@@ -4,7 +4,7 @@ import tempfile
 import os
 import urllib.request
 from xml.dom import minidom
-from xml.etree import ElementTree as et
+from xml.etree import ElementTree
 
 NO_VERSION_INFO_STRING = "No version info found"
 
@@ -67,7 +67,7 @@ def _xml_element_2_str(elem):
         A XML string representing the XML element.
 
     """
-    rough_string = et.tostring(elem, method='xml')
+    rough_string = ElementTree.tostring(elem, method='xml')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="   ")
 
@@ -79,8 +79,8 @@ def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
     ----------
     xml_tree: Element
         A element representing an XML file.
-    xml_file_path: string
-        The path to an XML file.
+    extension: string
+        The file extension to use for temporary file.
 
     Returns
     -------
@@ -92,12 +92,12 @@ def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
         return hed_xml_file.name
 
 
-def write_text_iter_to_file(iter, extension=".txt"):
+def write_text_iter_to_file(text_iter, extension=".txt"):
     """Writes a text file based on an iterator.
 
     Parameters
     ----------
-    iter: text iterator
+    text_iter: text iterator
         Iterates over the lines you wish to write to a file.  Adds newlines.
     extension: string
         Desired file extension.
@@ -107,7 +107,7 @@ def write_text_iter_to_file(iter, extension=".txt"):
 
     """
     with tempfile.NamedTemporaryFile(suffix=extension, mode='w', delete=False, encoding='utf-8') as hed_xml_file:
-        for line in iter:
+        for line in text_iter:
             hed_xml_file.write(f"{line}\n")
         return hed_xml_file.name
 

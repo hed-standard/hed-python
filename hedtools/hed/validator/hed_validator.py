@@ -13,6 +13,7 @@ from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
 from hed.util.exceptions import SchemaFileError
 
+
 class HedValidator:
     def __init__(self, hed_input, check_for_warnings=False, run_semantic_validation=True,
                  hed_xml_file='', xml_version_number=None,
@@ -83,19 +84,20 @@ class HedValidator:
 
     @staticmethod
     def _get_hed_dictionary(hed_xml_file, get_specific_version=None):
-        """Gets a HEDDictionary object based on the hed xml file specified. If no HED file is specified then the latest
+        """
+        Gets a HEDDictionary object based on the hed xml file specified. If no HED file is specified then the latest
            file will be retrieved.
 
         Parameters
         ----------
         hed_xml_file: str
             A path to a specific hed xml file, or a directory containing a hed xml file.
-        xml_version_number: str
+        get_specific_version: str
             HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
                 or does not point to a specific xml file.
         Returns
         -------
-        HedDictionary object
+        HedDictionary
             A HedDictionary object.
 
         """
@@ -122,7 +124,8 @@ class HedValidator:
             if self._hed_input and self._hed_input.is_valid_extension():
                 validation_issues = self._validate_hed_tags_in_file()
             else:
-                validation_issues = error_reporter.format_val_error(ValidationErrors.INVALID_FILENAME, file_name=self._hed_input.filename)
+                validation_issues = error_reporter.format_val_error(ValidationErrors.INVALID_FILENAME,
+                                                                    file_name=self._hed_input.filename)
         else:
             validation_issues = self._validate_hed_strings([self._hed_input])[0]
         return validation_issues
@@ -188,7 +191,7 @@ class HedValidator:
             The HED string associated with a row.
          Returns
          -------
-         list
+         []
              The issues with the appended issues found in the particular row.
 
          """
@@ -213,7 +216,7 @@ class HedValidator:
             A dictionary which associates columns with HED tags
          Returns
          -------
-         list
+         []
              The issues with the appended issues found in the particular row column.
 
          """
@@ -235,7 +238,7 @@ class HedValidator:
             The HED string associated with a row column.
          Returns
          -------
-         list
+         issues: list
              The issues associated with a particular row column.
 
          """
@@ -252,11 +255,11 @@ class HedValidator:
 
          Parameters
          ----------
-         hed_strings: list of str
+         hed_strings: [str]
             An array of HED strings.
          Returns
          -------
-         list
+         []
              The issues associated with the HED strings.
 
          """
@@ -392,18 +395,18 @@ class HedValidator:
     def get_previous_original_and_formatted_tag(original_and_formatted_tags, loop_index):
         """Retrieves the previous original and formatted tag from a list of tuples.
 
-         Parameters
-         ----------
-        original_and_formatted_tags: list
+        Parameters
+        ----------
+        original_and_formatted_tags: []
             A list of tuples containing the original and formatted tags.
         loop_index: int
             The current index in the loop.
-         Returns
-         -------
-         tuple
+        Returns
+        -------
+        tuple
              A tuple containing the previous original and formatted tag.
 
-         """
+        """
         previous_original_tag = ''
         previous_formatted_tag = ''
         if loop_index > 0:
@@ -419,11 +422,9 @@ class HedValidator:
          ----------
          row_number: int
             The row number that the issue is associated with.
-         has_headers: bool
-            If true, adjusts the row number to account for one line header.
          Returns
          -------
-         list
+         issue_list: []
              A singleton list containing the row issue message.
 
          """
@@ -442,8 +443,9 @@ class HedValidator:
 
          Returns
          -------
-         list
+         []
              A singleton list containing the column issue message.
 
          """
-        return error_reporter.format_val_error(ValidationErrors.COLUMN, error_row=row_number, error_column=column_number)
+        return error_reporter.format_val_error(ValidationErrors.COLUMN,
+                                               error_row=row_number, error_column=column_number)

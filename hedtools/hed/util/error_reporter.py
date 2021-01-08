@@ -5,6 +5,7 @@ This module is used to report errors found in the validation.
 
 from hed.util.error_types import ValidationErrors, ValidationWarnings, SchemaErrors, SidecarErrors
 
+# Todo: Update doc strings in this file
 
 def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag='', tag_prefix='', previous_tag='',
                      character='', index=0, unit_class_units='', file_name='', opening_parentheses_count=0,
@@ -41,9 +42,9 @@ def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag
         The number of closing parentheses.
     Returns
     -------
-    list of dict
-        A singleton list containing a dictionary with the error type and error message related to a particular type of
-        error.
+    issue_list: [{}]
+        A list containing a single dictionary with the warning type and warning message related to a particular type
+        of warning.
 
     """
 
@@ -62,8 +63,7 @@ def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag
         ValidationErrors.REQUIRE_CHILD: '\tERROR: Descendant tag required - "%s"' % tag,
         ValidationErrors.EXTRA_TILDE: '\tERROR: Too many tildes - group "%s"' % tag,
         ValidationErrors.MULTIPLE_UNIQUE: '\tERROR: Multiple unique tags with prefix - "%s"' % tag_prefix,
-        ValidationErrors.UNIT_CLASS_INVALID_UNIT: '\tERROR: Invalid unit - "%s" valid units are "%s"' % (
-        tag, unit_class_units),
+        ValidationErrors.UNIT_CLASS_INVALID_UNIT: '\tERROR: Invalid unit - "%s" valid units are "%s"' % (tag, unit_class_units),
         ValidationErrors.INVALID_TAG: '\tERROR: Invalid tag - "%s"' % tag,
         ValidationErrors.EXTRA_DELIMITER: '\tERROR: Extra delimiter "%s" at index %s of string "%s"'
                                           % (character, index, hed_string),
@@ -115,8 +115,8 @@ def format_val_warning(warning_type, tag='', default_unit='', tag_prefix=''):
         The tag prefix that generated the warning.
     Returns
     -------
-    list of dict
-        A singleton list containing a dictionary with the warning type and warning message related to a particular type
+    issue_list: [{}]
+        A list containing a single dictionary with the warning type and warning message related to a particular type
         of warning.
 
     """
@@ -156,9 +156,9 @@ def format_schema_error(error_type, hed_tag, error_index=0, error_index_end=None
         The type of abc error.
     Returns
     -------
-    list of dict
-        A singleton list containing a dictionary with the error type and error message related to a particular type of
-        error.
+    issue_list: [{}]
+        A list containing a single dictionary with the warning type and warning message related to a particular type
+        of warning.
 
     """
     if error_index_end is None:

@@ -12,33 +12,34 @@ import xml
 from hed.util.exceptions import SchemaFileError
 from hed.util.error_types import SchemaErrors
 
+
 # These need to match the attributes/element name/etc used to load from the xml
 class HedKey:
-    Default='default'
-    ExtensionAllowed='extensionAllowed'
-    IsNumeric='isNumeric'
-    Position='position'
-    PredicateType='predicateType'
-    Recommended='recommended'
-    RequiredPrefix='required'
-    RequireChild='requireChild'
-    AllTags='tags'
-    TakesValue='takesValue'
-    Unique='unique'
-    UnitClass='unitClass'
+    Default = 'default'
+    ExtensionAllowed = 'extensionAllowed'
+    IsNumeric = 'isNumeric'
+    Position = 'position'
+    PredicateType = 'predicateType'
+    Recommended = 'recommended'
+    RequiredPrefix = 'required'
+    RequireChild = 'requireChild'
+    AllTags = 'tags'
+    TakesValue = 'takesValue'
+    Unique = 'unique'
+    UnitClass = 'unitClass'
 
     # Default Units for Type
-    DefaultUnits='defaultUnits'
-    Units='units'
+    DefaultUnits = 'defaultUnits'
+    Units = 'units'
 
-    SIUnit='SIUnit'
-    UnitSymbol='unitSymbol'
+    SIUnit = 'SIUnit'
+    UnitSymbol = 'unitSymbol'
 
-    SIUnitModifier='SIUnitModifier'
-    SIUnitSymbolModifier='SIUnitSymbolModifier'
+    SIUnitModifier = 'SIUnitModifier'
+    SIUnitSymbolModifier = 'SIUnitSymbolModifier'
 
     # If this is a valid HED3 spec, this allow mapping from short to long.
-    ShortTags='shortTags'
+    ShortTags = 'shortTags'
 
 
 class HedDictionary:
@@ -102,7 +103,7 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit
             class attributes
 
@@ -110,7 +111,14 @@ class HedDictionary:
         return self.dictionaries
 
     def has_duplicate_tags(self):
-        """Converting functions don't make much sense to work if we have duplicate tags and are disabled"""
+        """
+        Returns True if this is a valid hed3 schema with no duplicate short tags.
+
+        Returns
+        -------
+        bool
+            Returns True if this is a valid hed3 schema with no duplicate short tags.
+        """
         return not self.no_duplicate_tags
 
     def _populate_dictionaries(self):
@@ -122,7 +130,7 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit class
             attributes.
 
@@ -136,16 +144,35 @@ class HedDictionary:
 
     @property
     def short_tag_mapping(self):
-        """This returns the short->long tag dictionary if we have a hed3 compatible schema."""
+        """
+        This returns the short->long tag dictionary if we have a hed3 compatible schema.
+
+        Returns
+        -------
+        short_tag_dict: {}
+            Returns the short tag mapping dictionary, or None if this is not a hed3 compatible schema.
+        """
         if self.no_duplicate_tags:
             return self.dictionaries[HedKey.ShortTags]
         return None
 
     def get_all_forms_of_tag(self, short_tag_to_check):
-        """Given a short tag, return all the longer versions of it.
+        """
+        Given a short tag, return all the longer versions of it.
 
-            eg: "definition" will return
-                    ["definition", "informational/definition", "attribute/informational/definition"]
+        eg: "definition" will return
+                ["definition", "informational/definition", "attribute/informational/definition"]
+
+        Parameters
+        ----------
+        short_tag_to_check : str
+            The short version of a hed tag we are interested in.
+
+        Returns
+        -------
+        tag_versions: [str]
+            A list of all short, intermediate, and long versions of the passed in short tag.
+            Returns empty list if no versions found.
         """
         try:
             tag_entry = self.short_tag_mapping[short_tag_to_check.lower()]
@@ -169,7 +196,7 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
@@ -214,6 +241,7 @@ class HedDictionary:
 
     def _populate_unit_modifier_dictionaries(self):
         """
+        Gathers all unit modifier definitions from the schema.
 
         Returns
         -------
@@ -236,7 +264,9 @@ class HedDictionary:
 
         Returns
         -------
-            dict: (duplicate_tag_name : list of tag entries with this name)
+        duplicate_tag_dict: {str: [str]}
+            A dictionary of all duplicate short tags as keys, with the values being a list of
+            long tags sharing that short tag
         """
         duplicate_dict = {}
         short_tag_dict = self.dictionaries[HedKey.ShortTags]
@@ -248,7 +278,19 @@ class HedDictionary:
         return duplicate_dict
 
     def dupe_tag_iter(self, return_detailed_info=False):
-        """Returns an iterator that goes over each line of the duplicate tags dict, including descriptive ones."""
+        """
+        An iterator that goes over each line of the duplicate tags dict, including descriptive ones.
+
+        Parameters
+        ----------
+        return_detailed_info : bool
+            If true, also returns header lines listing the number of duplicate tags for each short tag.
+
+        Yields
+        -------
+        text_line: str
+            A list of long tags that have duplicates, with optional descriptive short tag lines.
+        """
         duplicate_dict = self.find_duplicate_tags()
         for tag_name in duplicate_dict:
             if return_detailed_info:
@@ -257,9 +299,13 @@ class HedDictionary:
                 yield f"\t{tag_entry}"
 
     def _populate_short_tag_dict(self):
-        """Create a mapping from the short version of a tag to the long version.
+        """
+        Create a mapping from the short version of a tag to the long version and
+        determines if this is a hed3 compatible schema.
 
-           """
+        Returns
+        -------
+        """
         self.no_duplicate_tags = True
         base_tag_dict = self.dictionaries[HedKey.AllTags]
         new_short_tag_dict = {}
@@ -280,13 +326,18 @@ class HedDictionary:
         self.dictionaries[HedKey.ShortTags] = new_short_tag_dict
 
     def _add_hed3_compatible_tags(self):
-        """Adds the short and intermediate tags to the appropriate dictionaries if this is hed3 compatible."""
+        """
+        Updates the normal tag dictionaries with all the intermediate forms if this is a hed3 compatible schema."
+
+        Returns
+        -------
+        """
         if self.no_duplicate_tags:
             for dict_key in self.TAG_DICTIONARY_KEYS:
                 tag_dictionary = self.dictionaries[dict_key]
                 new_entries = {}
-                for tag, value in tag_dictionary.items():
-                    split_tags = tag.split("/")
+                for full_tag, value in tag_dictionary.items():
+                    split_tags = full_tag.split("/")
                     final_tag = ""
                     for tag in reversed(split_tags):
                         final_tag = tag + "/" + final_tag
@@ -359,16 +410,16 @@ class HedDictionary:
 
         Parameters
         ----------
-        tag_list: list
+        tag_list: []
             A list containing tags that have a specific attribute.
-        tag_element_list: list
+        tag_element_list: []
             A list containing tag elements that have a specific attribute.
         attribute_name: str
             The name of the attribute associated with the tags and tag elements.
 
         Returns
         -------
-        dict
+        {}
             The attribute dictionary that has been populated with dictionaries associated with tags.
 
         """
@@ -430,7 +481,7 @@ class HedDictionary:
 
         Returns
         -------
-        list
+        []
             A list containing all of the ancestor tag names of a given tag.
 
         """
@@ -575,7 +626,7 @@ class HedDictionary:
 
         Returns
         -------
-        list
+        []
             A list containing elements that have a specific element name.
 
         """

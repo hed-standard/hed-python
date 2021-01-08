@@ -4,13 +4,14 @@ from hed.schematools import constants
 from hed.util import file_util
 from hed.util.hed_dictionary import HedDictionary
 
+
 class MainParseMode(Enum):
     MainTags = 1
     UnitClassTags = 2
     UnitModifierTags = 3
 
 
-class HEDXml2Wiki():
+class HEDXml2Wiki:
     def __init__(self):
         self.parent_map = None
         self.current_tag_string = ""
@@ -43,7 +44,6 @@ class HEDXml2Wiki():
             self.current_tag_extra = ""
 
     def add_blank_line(self):
-        #print("")
         self.output.append("")
 
     def process_tree(self, hed_tree):
@@ -179,10 +179,9 @@ class HEDXml2Wiki():
     @staticmethod
     def get_attribs_from_root_hed_node(elem):
         attrib_values = [f"{attr}:{elem.attrib[attr]}" for attr in constants.HED_VALID_ATTRIBUTES if
-                           attr in elem.attrib]
+                         attr in elem.attrib]
         final_attrib_string = ", ".join(attrib_values)
         return final_attrib_string
-
 
 
 def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):

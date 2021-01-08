@@ -3,6 +3,7 @@ import copy
 from hed.util.hed_string_util import split_hed_string, remove_slashes_and_spaces
 from hed.util.hed_dictionary import HedDictionary, HedKey
 
+# Todo: Review this file once we have more stable test cases for it.
 
 def validate_single_tag(hed_dict, tag):
     # Split off the variable suffix
@@ -86,7 +87,8 @@ def read_version_map(version_map_filename, left_hed_schema=None, right_hed_schem
                         if is_hed_tag:
                             hed_tag = right_string_no_comment[startpos:endpos]
                             if not validate_single_tag(right_dict, hed_tag):
-                                add_error(f"Warning: Right tag not found in Schema.  {hed_tag}  Full line: {right_string}", i)
+                                add_error(f"Warning: Right tag not found in Schema.  "
+                                          f"{hed_tag}  Full line: {right_string}", i)
 
                 mapping_dict[left_tag] = right_string_no_comment, comment
 
@@ -131,12 +133,15 @@ def find_tag(hed_tag, mapping_dict):
 
 def create_out_tag(org_tag, new_tag, remainder):
     """
-
+        Combines a given tag into the final converted format.
     Parameters
     ----------
-    tag : Full original tag
-    new_tag : Full new tag
-    remainder : Remainder of old tag.  This is used as the output of # if present.
+    org_tag : str
+    Full original tag
+    new_tag : str
+        Full new tag
+    remainder : str
+        Remainder of old tag.  This is used as the output of # if present.
 
     Returns
     -------
@@ -241,7 +246,6 @@ def upgrade_file_hed_version(input_file, mapping_filename_or_dict, tag_columns_t
                 else:
                     new_text += tag
             output_file.set_cell(row_number, column_number, new_text,
-                                include_column_prefix_if_exist=False)
+                                 include_column_prefix_if_exist=False)
 
     return output_file
-

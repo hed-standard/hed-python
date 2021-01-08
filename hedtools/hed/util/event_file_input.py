@@ -3,6 +3,7 @@ from hed.util.base_file_input import BaseFileInput
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.def_mapper import DefinitionMapper
 
+
 class EventFileInput(BaseFileInput):
     """A class to parse bids style spreadsheets into a more general format."""
 
@@ -12,31 +13,31 @@ class EventFileInput(BaseFileInput):
                  hed_dictionary=None):
         """Constructor for the EventFileInput class.
 
-         Parameters
-         ----------
-         filename: str
-             An xml/tsv file to open.
-         worksheet_name: str
-             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
-         tag_columns: list
-             A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
-         has_column_names: bool
-             True if file has column names. The validation will skip over the first line of the file. False, if
-             otherwise.
-         column_prefix_dictionary: dict
-             A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
-             prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
-             4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/ prepended to them,
-             the fourth column contains tags that need Event/Label/ prepended to them, and the fifth column contains tags
-             that needs Event/Category/ prepended to them.
-         json_def_files : str or [str] or ColumnDefGroup or [ColumnDefGroup]
-             A list of json filenames to pull events from
-         attribute_columns: str or int or [str] or [int]
-             A list of column names or numbers to treat as attributes.
-             Default: ["duration", "onset"]
-         hed_dictionary: HedDictionary
-            Used by column mapper to do (optional) hed string validation, and also to gather definition tags correctly.
-         """
+        Parameters
+        ----------
+        filename: str
+            An xml/tsv file to open.
+        worksheet_name: str
+            The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
+        tag_columns: []
+            A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
+        has_column_names: bool
+            True if file has column names. The validation will skip over the first line of the file. False, if
+            otherwise.
+        column_prefix_dictionary: {}
+            A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
+            prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
+            4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/
+            prepended to them, the fourth column contains tags that need Event/Label/ prepended to them,
+            and the fifth column contains tags that needs Event/Category/ prepended to them.
+        json_def_files : str or [str] or ColumnDefGroup or [ColumnDefGroup]
+            A list of json filenames to pull events from
+        attribute_columns: str or int or [str] or [int]
+            A list of column names or numbers to treat as attributes.
+            Default: ["duration", "onset"]
+        hed_dictionary: HedDictionary
+           Used by column mapper to do (optional) hed string validation, and also to gather definition tags correctly.
+        """
         if tag_columns is None:
             tag_columns = []
         if column_prefix_dictionary is None:
@@ -59,6 +60,18 @@ class EventFileInput(BaseFileInput):
                              "This is probably not intended.")
 
     def validate_file_sidecars(self, hed_dictionary=None):
+        """
+        Validates all column definitions and column definition hed strings.
+
+        Parameters
+        ----------
+        hed_dictionary : HedDictionary, optional
+            Also semantically validates hed strings if present.
+        Returns
+        -------
+        validation_issues : [{}]
+            A list of syntax and semantic issues found in the definitions.
+        """
         validation_issues = []
         for column_def_group in self.column_group_defs:
             new_issue_dict = column_def_group.validate_entries(hed_dictionary=hed_dictionary)

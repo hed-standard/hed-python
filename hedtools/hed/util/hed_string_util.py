@@ -2,9 +2,10 @@ import re
 
 
 def split_hed_string(hed_string):
-    """Takes a hed string and splits it into delimiters and tags
+    """
+    Takes a hed string and splits it into delimiters and tags
 
-        Note: This does not validate tags in any form.
+    Note: This does not validate tags or delimiters in any form.
 
     Parameters
     ----------
@@ -12,7 +13,7 @@ def split_hed_string(hed_string):
             the hed string to split
     Returns
     -------
-    list of tuples.
+    [tuple]
         each tuple: (is_hed_tag, (start_pos, end_pos))
         is_hed_tag: bool
             This is a (possible) hed tag if true, delimiter if not
@@ -69,7 +70,19 @@ def split_hed_string(hed_string):
 
 
 def split_hed_string_return_strings(hed_string):
-    """An easier to use variant of split_hed_string if you don't need positions or delimiters."""
+    """
+    An easier to use variant of split_hed_string if you don't need positions or delimiters.
+
+    Parameters
+    ----------
+    hed_string : str
+        A hed string to split into tags
+
+    Returns
+    -------
+    hed_tags: [str]
+        The string split apart into hed tags with all delimiters removed
+    """
     result_positions = split_hed_string(hed_string)
     return [hed_string[startpos:endpos] for (is_hed_tag, (startpos, endpos)) in result_positions if is_hed_tag]
 
@@ -79,13 +92,22 @@ pattern_doubleslash = re.compile(r"[\s/]*/+[\s/]*")
 
 
 def remove_slashes_and_spaces(hed_string):
-    """This handles removing extra slashes, and spaces around slashes.
+    """
+    Removes duplicate slashes and extra spaces around tags from hed strings.
 
-        Takes and returns a (hed) string.
-        Examples:   '//' -> '/'
-                    'Event//Extension' -> 'Event/Extension'
-                    'Event  //Extension' -> 'Event/Extension'
+    Examples:   '//' -> '/'
+                'Event//Extension' -> 'Event/Extension'
+                'Event  //Extension' -> 'Event/Extension'
 
+    Parameters
+    ----------
+    hed_string : str
+        A hed string that potentially has extra slashes or spaces.
+
+    Returns
+    -------
+    cleaned_string: str
+        The hed_string with redundant slashes and spaces removed.
     """
     simplified_string = pattern_doubleslash.sub('/', hed_string)
     # Temp - Remove newlines as well

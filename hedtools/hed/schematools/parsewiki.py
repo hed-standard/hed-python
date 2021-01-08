@@ -78,7 +78,8 @@ def add_unit_classes(wiki_file):
             level = parsetag.get_tag_level(line)
             if level == 1:
                 if unit_class_units:
-                    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes, unit_class_units_attributes)
+                    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units,
+                                                 unit_class_attributes, unit_class_units_attributes)
                 unit_class = parsetag.get_tag_name(line)
                 unit_class_attributes = parsetag.get_tag_attributes(line)
                 unit_class_units = []
@@ -89,7 +90,8 @@ def add_unit_classes(wiki_file):
                 unit_class_units.append(unit_class_unit)
                 unit_class_units_attributes.append(unit_class_unit_attributes)
         line = wiki_file.readline()
-    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units, unit_class_attributes, unit_class_units_attributes)
+    parsetag.add_unit_class_node(unit_class_node, unit_class, unit_class_units,
+                                 unit_class_attributes, unit_class_units_attributes)
 
 
 def add_unit_modifiers(wiki_file):
@@ -116,7 +118,8 @@ def add_unit_modifiers(wiki_file):
             unit_modifier = parsetag.get_tag_name(line)
             unit_modifier_attributes = parsetag.get_tag_attributes(line)
             unit_modifier_description = parsetag.get_tag_description(line)
-            parsetag.add_unit_modifier_node(unit_modifier_node, unit_modifier, unit_modifier_attributes, unit_modifier_description)
+            parsetag.add_unit_modifier_node(unit_modifier_node, unit_modifier,
+                                            unit_modifier_attributes, unit_modifier_description)
         line = wiki_file.readline()
 
 
