@@ -15,31 +15,31 @@ from hed.util.error_types import SchemaErrors
 
 # These need to match the attributes/element name/etc used to load from the xml
 class HedKey:
-    Default='default'
-    ExtensionAllowed='extensionAllowed'
-    IsNumeric='isNumeric'
-    Position='position'
-    PredicateType='predicateType'
-    Recommended='recommended'
-    RequiredPrefix='required'
-    RequireChild='requireChild'
-    AllTags='tags'
-    TakesValue='takesValue'
-    Unique='unique'
-    UnitClass='unitClass'
+    Default = 'default'
+    ExtensionAllowed = 'extensionAllowed'
+    IsNumeric = 'isNumeric'
+    Position = 'position'
+    PredicateType = 'predicateType'
+    Recommended = 'recommended'
+    RequiredPrefix = 'required'
+    RequireChild = 'requireChild'
+    AllTags = 'tags'
+    TakesValue = 'takesValue'
+    Unique = 'unique'
+    UnitClass = 'unitClass'
 
     # Default Units for Type
-    DefaultUnits='defaultUnits'
-    Units='units'
+    DefaultUnits = 'defaultUnits'
+    Units = 'units'
 
-    SIUnit='SIUnit'
-    UnitSymbol='unitSymbol'
+    SIUnit = 'SIUnit'
+    UnitSymbol = 'unitSymbol'
 
-    SIUnitModifier='SIUnitModifier'
-    SIUnitSymbolModifier='SIUnitSymbolModifier'
+    SIUnitModifier = 'SIUnitModifier'
+    SIUnitSymbolModifier = 'SIUnitSymbolModifier'
 
     # If this is a valid HED3 spec, this allow mapping from short to long.
-    ShortTags='shortTags'
+    ShortTags = 'shortTags'
 
 
 class HedDictionary:
@@ -241,6 +241,7 @@ class HedDictionary:
 
     def _populate_unit_modifier_dictionaries(self):
         """
+        Gathers all unit modifier definitions from the schema.
 
         Returns
         -------
@@ -298,9 +299,13 @@ class HedDictionary:
                 yield f"\t{tag_entry}"
 
     def _populate_short_tag_dict(self):
-        """Create a mapping from the short version of a tag to the long version.
+        """
+        Create a mapping from the short version of a tag to the long version and
+        determines if this is a hed3 compatible schema.
 
-           """
+        Returns
+        -------
+        """
         self.no_duplicate_tags = True
         base_tag_dict = self.dictionaries[HedKey.AllTags]
         new_short_tag_dict = {}
@@ -331,8 +336,8 @@ class HedDictionary:
             for dict_key in self.TAG_DICTIONARY_KEYS:
                 tag_dictionary = self.dictionaries[dict_key]
                 new_entries = {}
-                for tag, value in tag_dictionary.items():
-                    split_tags = tag.split("/")
+                for full_tag, value in tag_dictionary.items():
+                    split_tags = full_tag.split("/")
                     final_tag = ""
                     for tag in reversed(split_tags):
                         final_tag = tag + "/" + final_tag
@@ -405,16 +410,16 @@ class HedDictionary:
 
         Parameters
         ----------
-        tag_list: list
+        tag_list: []
             A list containing tags that have a specific attribute.
-        tag_element_list: list
+        tag_element_list: []
             A list containing tag elements that have a specific attribute.
         attribute_name: str
             The name of the attribute associated with the tags and tag elements.
 
         Returns
         -------
-        dict
+        {}
             The attribute dictionary that has been populated with dictionaries associated with tags.
 
         """
@@ -476,7 +481,7 @@ class HedDictionary:
 
         Returns
         -------
-        list
+        []
             A list containing all of the ancestor tag names of a given tag.
 
         """
