@@ -25,12 +25,11 @@
     <h1 class="project-name">Hierarchical Event Descriptor (HED) online tools</h1>
     <h2 class="project-tagline">Online tools for HED schema, HED tags, and event files</h2>
     <a href="{{ url_for('route_blueprint.render_home_page') }}" class="btn">HED tools online</a>
-    <a href="{{ url_for('route_blueprint.render_validation_form') }}" class="btn">Validate HED</a>
-    <a href="{{ url_for('route_blueprint.render_schema_form') }}" class="btn">Convert schema</a>
-    <a href="{{ url_for('route_blueprint.render_help_page') }}" class="btn">HED validator help</a>
-    <a href="http://www.hedtags.org/hed-docs" class="btn">HED documentation</a>
-    <a href="http://www.hedtags.org/" class="btn">HED Homepage</a>
-    <a href="http://visual.cs.utsa.edu/contact-info" class="btn">Contact us</a>
+    <a href="{{ url_for('route_blueprint.render_spreadsheet_validation_form') }}" class="btn">Validate spreadsheet</a>
+    <a href="{{ url_for('route_blueprint.render_dictionary_validation_form') }}" class="btn">Validate dictionary</a>
+    <a href="{{ url_for('route_blueprint.render_schema_form') }}" class="btn">Process schema</a>
+    <a href="{{ url_for('route_blueprint.render_help_page') }}" class="btn">HED tools help</a>
+    <a href="https://github.com/hed-standard" class="btn">HED standard</a>
 </section>
 <section class="main-content">
     {% block content %}
@@ -41,7 +40,6 @@
         <p class="site-footer-owner"><a href="https://github.com/hed-standard/hed-specification/">
             Hierarchical Event Descriptor (HED) Tags and related tools</a> are maintained by
             <a href="https://github.com/hed-standard/">HED-Standard.</a></p>
-        <p class="site-footer-owner"><a href="https://www.utsa.edu/policies">Required Links</a></p>
     {% endblock %}
 </footer>
 <!-- Latest compiled and minified JavaScript -->

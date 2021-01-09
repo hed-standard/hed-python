@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% from "dictionary-form-helper.html" import create_dictionary_validation_form %}
+{% block content %}
+    <h2>Validate JSON dictionary containing HED tags (in progress)</h2>
+    {{ create_dictionary_validation_form() }}
+{% endblock %}

@@ -1,6 +1,6 @@
-{% macro create_validation_form() %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/validation-form-helper.css') }}">
-    <form id="validation-form" method="POST" enctype="multipart/form-data">
+{% macro create_spreadsheet_validation_form() %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form-helper.css') }}">
+    <form id="spreadsheet-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         <div class="form-group">
@@ -72,11 +72,12 @@
         </div>
 
         <div class="form-group">
-            <button id="validation-submit" type="button">Validate</button>
-            <p class="flash" id="validation-submit-flash"></p>
+            <button id="spreadsheet-validation-submit" type="button">Validate</button>
+            <p class="flash" id="spreadsheet-validation-submit-flash"></p>
         </div>
     </form>
-    <script>
-        {%  include 'validation-form-helper.js' %}
+    <script type="module">
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/spreadsheet-form-helper.js' %}
     </script>
 {% endmacro %}

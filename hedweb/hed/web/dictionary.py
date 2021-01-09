@@ -1,6 +1,7 @@
 import json
 import os
 import traceback
+from urllib.error import URLError, HTTPError
 from flask import current_app
 from werkzeug.utils import secure_filename
 
@@ -8,7 +9,6 @@ from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 
-import hed.web.web_utils
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web import web_utils
 from hed.web import utils
@@ -16,29 +16,30 @@ from hed.web import utils
 app_config = current_app.config
 
 
-def generate_input_arguments_from_validation_form(form_request_object, spreadsheet_file_path, hed_file_path):
+def generate_arguments_from_validation_form(form_request_object):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters
     ----------
     form_request_object: Request object
         A Request object containing user data from the validation form.
-    spreadsheet_file_path: str
-        The path to the workbook other.
-    hed_file_path: str
-        Full local path of the hed schema xml file
 
     Returns
     -------
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    validation_input_arguments = {}
-    validation_input_arguments[common_constants.SPREADSHEET_PATH] = spreadsheet_file_path
-    validation_input_arguments[common_constants.HED_XML_FILE] = \
-        web_utils.get_hed_path_from_form(form_request_object, hed_file_path)
+    hed_file_path, hed_display_name = web_utils.get_hed_path_from_pull_down(form_request_object)
+    uploaded_file_name, original_file_name = \
+        web_utils.get_uploaded_file_path_from_form(form_request_object, common_constants.SPREADSHEET_FILE,
+                                                   file_constants.SPREADSHEET_FILE_EXTENSIONS)
+
+    validation_input_arguments = {common_constants.HED_XML_FILE: hed_file_path,
+                                  common_constants.HED_DISPLAY_NAME: hed_display_name,
+                                  common_constants.SPREADSHEET_PATH: uploaded_file_name,
+                                  common_constants.SPREADSHEET_FILE: original_file_name}
     validation_input_arguments[common_constants.TAG_COLUMNS] = \
-        hed.web.web_utils.convert_number_str_to_list(form_request_object.form[common_constants.TAG_COLUMNS])
+        web_utils.convert_number_str_to_list(form_request_object.form[common_constants.TAG_COLUMNS])
     validation_input_arguments[common_constants.COLUMN_PREFIX_DICTIONARY] = \
         utils.get_specific_tag_columns_from_form(form_request_object)
     validation_input_arguments[common_constants.WORKSHEET_NAME] = \
@@ -73,31 +74,33 @@ def generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_nam
         0] + file_constants.TEXT_EXTENSION
 
 
-def get_uploaded_file_paths_from_forms(form_request_object):
-    """Gets the other paths of the uploaded files in the form.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    tuple
-        A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
-    """
-    spreadsheet_file_path = ''
-    hed_file_path = ''
-    if common_constants.SPREADSHEET_FILE in form_request_object.files and \
-        web_utils.file_extension_is_valid(form_request_object.files[common_constants.SPREADSHEET_FILE].filename,
-                                           file_constants.SPREADSHEET_FILE_EXTENSIONS):
-        spreadsheet_file_path = utils.save_file_to_upload_folder(
-            form_request_object.files[common_constants.SPREADSHEET_FILE])
-    if common_constants.HED_XML_FILE in form_request_object.files and \
-            web_utils.file_extension_is_valid(form_request_object.files[common_constants.HED_XML_FILE].filename,
-                                               [file_constants.SCHEMA_XML_EXTENSION]):
-        hed_file_path = web_utils.save_file_to_upload_folder(form_request_object.files[common_constants.HED_XML_FILE])
-    return spreadsheet_file_path, hed_file_path
+# def get_uploaded_file_paths_from_forms(form_request_object):
+#     """Gets the other paths of the uploaded files in the form.
+#
+#     Parameters
+#     ----------
+#     form_request_object: Request object
+#         A Request object containing user data from the validation form.
+#
+#     Returns
+#     -------
+#     tuple
+#         A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
+#     """
+#     spreadsheet_file_path = ''
+#     hed_file_path = ''
+#     if common_constants.SPREADSHEET_FILE in form_request_object.files and \
+#         web_utils.file_extension_is_valid(form_request_object.files[common_constants.SPREADSHEET_FILE].filename,
+#                                           file_constants.SPREADSHEET_FILE_EXTENSIONS):
+#         spreadsheet_file_path = web_utils.save_file_to_upload_folder(
+#             form_request_object.files[common_constants.SPREADSHEET_FILE])
+#     if common_constants.HED_XML_FILE in form_request_object.files and \
+#             web_utils.file_extension_is_valid(form_request_object.files[common_constants.HED_XML_FILE].filename,
+#                                              [file_constants.SCHEMA_XML_EXTENSION]):
+#         hed_file_path = web_utils.save_file_to_upload_folder(form_request_object.files[common_constants.HED_XML_FILE])
+#         hed_file_path = web_utils.get_hed_path_from_form(form_request_object, hed_file_path)
+#     elif
+#     return spreadsheet_file_path, hed_file_path
 
 
 def report_eeg_events_validation_status(request):
@@ -160,35 +163,32 @@ def report_spreadsheet_validation_status(form_request_object):
         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
         500 error message is returned.
     """
-    validation_status = {}
-    spreadsheet_file_path = ''
-    hed_file_path = ''
+    input_arguments = []
     try:
-        spreadsheet_file_path, hed_file_path = get_uploaded_file_paths_from_forms(form_request_object)
-        original_spreadsheet_filename = \
-            hed.web.web_utils.get_original_filename(form_request_object, common_constants.SPREADSHEET_FILE,
-                                                    file_constants.SPREADSHEET_FILE_EXTENSIONS)
-        validation_input_arguments = generate_input_arguments_from_validation_form(
-            form_request_object, spreadsheet_file_path, hed_file_path)
-        hed_validator = validate_spreadsheet(validation_input_arguments)
-        tag_validator = hed_validator.get_tag_validator()
-        # validation_issues = tag_validator.get_printable_issue_string()
+        input_arguments = generate_arguments_from_validation_form(form_request_object)
+        hed_validator = validate_spreadsheet(input_arguments)
         validation_issues = hed_validator.get_validation_issues()
-        validation_status[common_constants.DOWNLOAD_FILE] = save_validation_issues_to_file_in_upload_folder(
-            original_spreadsheet_filename, validation_issues,
-            validation_input_arguments[common_constants.WORKSHEET_NAME])
-        validation_status[common_constants.ISSUE_COUNT] = tag_validator.get_issue_count()
-        validation_status[common_constants.ERROR_COUNT] = tag_validator.get_error_count()
-        validation_status[common_constants.WARNING_COUNT] = tag_validator.get_warning_count()
-    except:
-        validation_status[error_constants.ERROR_KEY] = traceback.format_exc()
+        if validation_issues:
+            issue_file = save_issues_to_upload_folder(input_arguments[common_constants.SPREADSHEET_FILE],
+                                                      validation_issues,
+                                                      input_arguments[common_constants.WORKSHEET_NAME])
+            download_response = web_utils.generate_download_file_response(issue_file)
+            if isinstance(download_response, str):
+                return web_utils.handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+            return download_response
+    except HTTPError:
+            return error_constants.NO_URL_CONNECTION_ERROR
+    except URLError:
+        return error_constants.INVALID_URL_ERROR
+    except Exception as e:
+        return "Unexpected processing error: " + str(e)
     finally:
-        delete_file_if_it_exist(spreadsheet_file_path)
-        delete_file_if_it_exist(hed_file_path)
-    return validation_status
+        delete_file_if_it_exist(input_arguments[common_constants.SPREADSHEET_PATH])
+        # delete_file_if_it_exist(input_arguments[common_constants.HED_XML_FILE])
+    return ""
 
 
-def save_validation_issues_to_file_in_upload_folder(spreadsheet_filename, validation_issues, worksheet_name=''):
+def save_issues_to_upload_folder(spreadsheet_filename, validation_issues, worksheet_name=''):
     """Saves the validation issues found to a other in the upload folder.
 
     Parameters
@@ -211,7 +211,7 @@ def save_validation_issues_to_file_in_upload_folder(spreadsheet_filename, valida
     with open(validation_issues_file_path, 'w', encoding='utf-8') as validation_issues_file:
         for val_issue in validation_issues:
             validation_issues_file.write(val_issue['message'] + "\n")
-    return validation_issues_filename
+    return validation_issues_file_path
 
 
 def validate_spreadsheet(validation_arguments):

@@ -27,7 +27,7 @@ def find_spreadsheet_columns_info(form_request_object):
     spreadsheet_file_path = ''
     spreadsheet_columns_info = []
     try:
-        spreadsheet_columns_info = initialize_spreadsheet_columns_info_dictionary()
+        spreadsheet_columns_info = {common_constants.COLUMN_NAMES: [], common_constants.TAG_COLUMN_INDICES: []}
         if common_constants.SPREADSHEET_FILE in form_request_object.files:
             spreadsheet_file = form_request_object.files[common_constants.SPREADSHEET_FILE]
             spreadsheet_file_path = save_file_to_upload_folder(spreadsheet_file)
@@ -46,39 +46,6 @@ def find_spreadsheet_columns_info(form_request_object):
     return spreadsheet_columns_info
 
 
-def find_worksheets_info(form_request_object):
-    """Finds the info related to the Excel worksheets.
-
-    This information contains the names of the worksheets in a workbook, the names of the columns in the first
-    worksheet, and column indices that contain HED tags in the first worksheet.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the Excel worksheets.
-
-    """
-    workbook_file_path = ''
-    worksheets_info = {}
-    try:
-        worksheets_info = initialize_worksheets_info_dictionary()
-        if common_constants.SPREADSHEET_FILE in form_request_object.files:
-            workbook_file = form_request_object.files[common_constants.SPREADSHEET_FILE]
-            workbook_file_path = save_file_to_upload_folder(workbook_file)
-            if workbook_file_path:
-                worksheets_info = populate_worksheets_info_dictionary(worksheets_info, workbook_file_path)
-    except:
-        worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
-    finally:
-        delete_file_if_it_exist(workbook_file_path)
-    return worksheets_info
-
-
 def get_column_delimiter_based_on_file_extension(file_name_or_path):
     """Gets the spreadsheet column delimiter based on the other extension.
 
@@ -94,7 +61,7 @@ def get_column_delimiter_based_on_file_extension(file_name_or_path):
 
     """
     column_delimiter = ''
-    file_extension = get_file_extension(file_name_or_path)
+    file_extension = get_file_extension(file_name_or_path).lower()
     if file_extension in spreadsheet_constants.SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY:
         column_delimiter = spreadsheet_constants.SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY.get(file_extension)
     return column_delimiter
@@ -119,7 +86,7 @@ def get_excel_worksheet_names(workbook_file_path):
     return worksheet_names
 
 
-def get_optional_form_field(form_request_object, form_field_name, ftype=''):
+def get_optional_form_field(form_request_object, form_field_name, type=''):
     """Gets the specified optional form field if present.
 
     Parameters
@@ -128,6 +95,8 @@ def get_optional_form_field(form_request_object, form_field_name, ftype=''):
         A Request object containing user data from the validation form.
     form_field_name: string
         The name of the optional form field.
+    type: str
+        Name of expected type: 'boolean' or 'string'
 
     Returns
     -------
@@ -136,11 +105,11 @@ def get_optional_form_field(form_request_object, form_field_name, ftype=''):
 
     """
     form_field_value = ''
-    if ftype == common_constants.BOOLEAN:
+    if type == common_constants.BOOLEAN:
         form_field_value = False
         if form_field_name in form_request_object.form:
             form_field_value = True
-    elif ftype == common_constants.STRING:
+    elif type == common_constants.STRING:
         if form_field_name in form_request_object.form:
             form_field_value = form_request_object.form[form_field_name]
     return form_field_value
@@ -270,46 +239,7 @@ def get_worksheet_column_names(workbook_file_path, worksheet_name):
     return worksheet_column_names
 
 
-def initialize_spreadsheet_columns_info_dictionary():
-    """Initializes a dictionary that will hold information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    dictionary
-        A dictionary that will hold information related to the spreadsheet columns.
-
-    """
-    worksheet_columns_info = {common_constants.COLUMN_NAMES: [], common_constants.TAG_COLUMN_INDICES: []}
-    return worksheet_columns_info
-
-
-def initialize_worksheets_info_dictionary():
-    """Initializes a dictionary that will hold information related to the Excel worksheets.
-
-    This information contains the names of the worksheets in a workbook, the names of the columns in the first
-    worksheet, and column indices that contain HED tags in the first worksheet.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    dictionary
-        A dictionary that will hold information related to the Excel worksheets.
-
-    """
-    worksheets_info = {common_constants.WORKSHEET_NAMES: [], common_constants.COLUMN_NAMES: [],
-                       common_constants.TAG_COLUMN_INDICES: []}
-    return worksheets_info
-
-
-def populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info, spreadsheet_file_path,
-                                                 worksheet_name=''):
+def populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info, spreadsheet_file_path, worksheet_name=''):
     """Populate dictionary with information related to the spreadsheet columns.
 
     This information contains the names of the spreadsheet columns and column indices that contain HED tags.
@@ -330,14 +260,12 @@ def populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info, sprea
 
     """
     if worksheet_name:
-        spreadsheet_columns_info[common_constants.COLUMN_NAMES] = get_worksheet_column_names(
-            spreadsheet_file_path,
-            worksheet_name)
+        spreadsheet_columns_info[common_constants.COLUMN_NAMES] = \
+            get_worksheet_column_names(spreadsheet_file_path, worksheet_name)
     else:
         column_delimiter = get_column_delimiter_based_on_file_extension(spreadsheet_file_path)
-        spreadsheet_columns_info[common_constants.COLUMN_NAMES] = get_text_file_column_names(
-            spreadsheet_file_path,
-            column_delimiter)
+        spreadsheet_columns_info[common_constants.COLUMN_NAMES] = \
+            get_text_file_column_names(spreadsheet_file_path, column_delimiter)
     spreadsheet_columns_info[common_constants.TAG_COLUMN_INDICES] = \
         get_spreadsheet_other_tag_column_indices(spreadsheet_columns_info[common_constants.COLUMN_NAMES])
     spreadsheet_columns_info[common_constants.REQUIRED_TAG_COLUMN_INDICES] = \

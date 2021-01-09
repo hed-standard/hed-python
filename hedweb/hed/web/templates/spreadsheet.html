@@ -1,0 +1,7 @@
+{% extends "layout.html" %}
+{% from "spreadsheet-form-helper.html" import create_spreadsheet_validation_form %}
+{% block content %}
+    <h2>Validate spreadsheet containing HED tags</h2>
+    {{ create_spreadsheet_validation_form() }}
+
+{% endblock %}

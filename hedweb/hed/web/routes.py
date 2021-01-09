@@ -1,16 +1,18 @@
 from flask import render_template, Response, request, Blueprint, current_app
 import os
 import json
-from hed.web import utils
-from hed.web import validation
-from hed.web import schema
-from hed.web.constants import error_constants
-from hed.web.constants import page_constants, route_constants, blueprint_constants
-from hed.web.web_utils import find_hed_version_in_uploaded_file, find_major_hed_versions, \
-    generate_download_file_response, handle_http_error
 import traceback
 
 import hed.util.file_util
+from hed.util import hed_cache
+
+from hed.web import utils
+from hed.web import spreadsheet
+from hed.web import schema
+from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
+from hed.web.web_utils import delete_file_if_it_exist, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
+    generate_download_file_response, handle_http_error
+
 
 app_config = current_app.config
 route_blueprint = Blueprint(blueprint_constants.ROUTE_BLUEPRINT, __name__)
@@ -36,13 +38,15 @@ def delete_file_in_upload_directory(filename):
 
 
 @route_blueprint.route(route_constants.DOWNLOAD_FILE_ROUTE, strict_slashes=False, methods=['GET'])
-def download_file_in_upload_directory(filename):
-    """Downloads the specified other from the upload other.
+def download_file_in_upload_directory(filename, header=None):
+    """Downloads the specified file from the download folder.
 
     Parameters
     ----------
-    filename: string
-        The name of the other to download from the upload other.
+    filename: str
+        The name of the file to download from the upload other.
+    header: str
+        Header string to be inserted in text files --- particularly files reporting errors or status
 
     Returns
     -------
@@ -50,10 +54,36 @@ def download_file_in_upload_directory(filename):
         The contents of a other in the upload directory to send to the client.
 
     """
-    download_response = generate_download_file_response(filename)
-    if isinstance(download_response, str):
-        handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+    download_response = generate_download_file_response(filename, header)
+    if not download_response or isinstance(download_response, str):
+        handle_http_error(error_constants.NOT_FOUND_ERROR, download_response, as_text=True)
     return download_response
+
+
+@route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_dictionary_validation_results():
+    """Validate the JSON dictionary in the form after submission and return an attachment other containing the output.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        string
+        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
+        500 error message is returned.
+    """
+
+    return "Dictionary validation is not yet implemented"
+    # validation_response = spreadsheet.report_spreadsheet_validation_status(request)
+    # # Success
+    # if isinstance(validation_response, Response):
+    #     return validation_response
+    # if isinstance(validation_response, str):
+    #     if validation_response:
+    #         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
+    #     else:
+    #         return ""
 
 
 @route_blueprint.route(route_constants.SCHEMA_DUPLICATE_TAG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -97,7 +127,7 @@ def get_eeg_events_validation_results():
         A serialized JSON string containing information related to the EEG events' hed-strings.
         If the validation fails then a 500 error message is returned.
     """
-    validation_status = validation.report_eeg_events_validation_status(request)
+    validation_status = spreadsheet.report_eeg_events_validation_status(request)
 
     if error_constants.ERROR_KEY in validation_status:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_status[error_constants.ERROR_KEY])
@@ -138,9 +168,12 @@ def get_major_hed_versions():
         A serialized JSON string containing information related to the spreadsheet columns.
 
     """
-    hed_info = find_major_hed_versions()
-    if error_constants.ERROR_KEY in hed_info:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, hed_info[error_constants.ERROR_KEY])
+    hed_info = {}
+    try:
+        hed_cache.cache_all_hed_xml_versions()
+        hed_info[common_constants.HED_MAJOR_VERSIONS] = hed_cache.get_all_hed_versions()
+    except:
+        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, traceback.format_exc())
     return json.dumps(hed_info)
 
 
@@ -191,8 +224,8 @@ def get_spreadsheet_columns_info():
     return json.dumps(spreadsheet_columns_info)
 
 
-@route_blueprint.route(route_constants.VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_validation_results():
+@route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_spreadsheet_validation_results():
     """Validate the spreadsheet in the form after submission and return an attachment other containing the output.
 
     Parameters
@@ -204,11 +237,15 @@ def get_validation_results():
         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
         500 error message is returned.
     """
-    validation_status = validation.report_spreadsheet_validation_status(request)
-    if error_constants.ERROR_KEY in validation_status:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                 validation_status[error_constants.ERROR_KEY])
-    return json.dumps(validation_status)
+    validation_response = spreadsheet.report_spreadsheet_validation_status(request)
+    # Success
+    if isinstance(validation_response, Response):
+        return validation_response
+    if isinstance(validation_response, str):
+        if validation_response:
+            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
+        else:
+            return ""
 
 
 @route_blueprint.route(route_constants.WORKSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
@@ -227,14 +264,19 @@ def get_worksheets_info():
         A serialized JSON string containing information related to the Excel worksheets.
 
     """
-    worksheets_info = {}
+    worksheets_info = {common_constants.WORKSHEET_NAMES: [], common_constants.COLUMN_NAMES: [],
+                       common_constants.TAG_COLUMN_INDICES: []}
+    workbook_file_path = ''
     try:
-        worksheets_info = utils.find_worksheets_info(request)
-        if error_constants.ERROR_KEY in worksheets_info:
-            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                     worksheets_info[error_constants.ERROR_KEY])
+        if common_constants.SPREADSHEET_FILE in request.files:
+            workbook_file = request.files[common_constants.SPREADSHEET_FILE]
+            workbook_file_path = save_file_to_upload_folder(workbook_file)
+            if workbook_file_path:
+                worksheets_info = utils.populate_worksheets_info_dictionary(worksheets_info, workbook_file_path)
     except:
         worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
+    finally:
+        delete_file_if_it_exist(workbook_file_path)
     return json.dumps(worksheets_info)
 
 
@@ -268,6 +310,24 @@ def render_common_error_page():
 
     """
     return render_template(page_constants.COMMON_ERRORS_PAGE)
+
+
+@route_blueprint.route(route_constants.DICTIONARY_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
+def render_dictionary_validation_form():
+    """Handles the site root and Validation tab functionality.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
+        displayed. If the HTTP method is a POST then the validation form is submitted.
+
+    """
+    return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
+    # return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
 
 
 @route_blueprint.route(route_constants.EEG_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
@@ -336,8 +396,8 @@ def render_schema_form():
     return render_template(page_constants.SCHEMA_PAGE)
 
 
-@route_blueprint.route(route_constants.VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
-def render_validation_form():
+@route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
+def render_spreadsheet_validation_form():
     """Handles the site root and Validation tab functionality.
 
     Parameters
@@ -350,4 +410,4 @@ def render_validation_form():
         displayed. If the HTTP method is a POST then the validation form is submitted.
 
     """
-    return render_template(page_constants.VALIDATION_PAGE)
+    return render_template(page_constants.SPREADSHEET_VALIDATION_PAGE)

@@ -1,0 +1,50 @@
+{% macro create_dictionary_validation_form() %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form-helper.css') }}">
+    <form id="dictionary-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <div class="form-group">
+            <label for="dictionary-file">Select JSON-formatted dictionaries:</label><br>
+            <label class="btn-group file-browse-group dictionary-btn-group">
+                <button for="dictionary-file">Browse ...</button>
+                <label id="dictionary-display-name"></label>
+                <input type="file" name="dictionary-file" id="dictionary-file"/>
+            </label>
+            <p class="flash" id="dictionary-flash"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="hed-version">Choose HED version:</label><br>
+            <select name="hed-version" id="hed-version"></select><br>
+        </div>
+
+        <div class="form-group" id="hed-other-version">
+            <label class="secondary-label" for="hed-xml-file">Upload HED version:</label>
+            <label class="btn-group file-browse-group">
+                <button for="hed-xml-file">Browse ...</button>
+                <label id="hed-display-name"></label>
+                <input type="file" name="hed-xml-file" id="hed-xml-file"/>
+            </label>
+            <p class="flash" id="hed-flash"></p>
+        </div>
+
+        <div class="form-group">
+            <label>Specify additional options:</label><br>
+            <div class="checkbox-group">
+                <div class="inline-field">
+                    <input type="checkbox" name="check-for-warnings" id="check-for-warnings">
+                    <label for="check-for-warnings">Include warnings in output file</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button id="dictionary-validation-submit" type="button">Validate</button>
+            <p class="flash" id="dictionary-validation-submit-flash"></p>
+        </div>
+    </form>
+    <script type="module">
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/dictionary-form-helper.js' %}
+    </script>
+{% endmacro %}

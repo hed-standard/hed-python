@@ -33,10 +33,10 @@ class Test(unittest.TestCase):
 
 
     def test_generate_input_arguments_from_schema_form(self):
-        self.assertTrue(1, "Testing generate_input_arguments_from_schema_form")
+        self.assertTrue(1, "Testing generate_input_from_schema_form")
 
     def test_get_schema_conversion_function(self):
-        self.assertTrue(1, "Testing get_schema_conversion_function")
+        self.assertTrue(1, "Testing get_schema_conversion")
 
     def test_get_uploaded_file_paths_from_schema_form(self):
         self.assertTrue(1, "Testing get_uploaded_file_paths_from_schema_form")
@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing run_schema_duplicate_tag_detection")
 
     def test_url_present_in_form(self):
-        self.assertTrue(1, "Testing url_present_in_form")
+        self.assertTrue(1, "Testing form_has_hed_url")
 
 
 if __name__ == '__main__':
