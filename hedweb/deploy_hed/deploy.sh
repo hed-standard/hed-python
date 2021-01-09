@@ -40,8 +40,9 @@ cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 switch_to_web_directory()
 {
 echo Switching to web directory...
-cd "${DEPLOY_DIR}"
+cd "${DEPLOY_DIR}" || error_exit "Cannot access $DEPLOY_DIR"
 }
+
 build_new_container()
 {
 echo Building new container...
@@ -64,8 +65,7 @@ cleanup_directory()
 {
 echo Cleaning up directory...
 rm -rf "${GIT_DIR}"
-rm -rf "${GIT_HED_DIR}"
-cd "${ROOT_DIR}"
+cd "${ROOT_DIR}" || return
 }
 
 error_exit()
@@ -88,4 +88,3 @@ build_new_container
 delete_old_container
 run_new_container
 cleanup_directory
-

@@ -4,42 +4,13 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         <div class="form-group">
-            <label for="spreadsheet-file">Select spreadsheet (Excel and tab-separated):</label><br>
-            <label class="btn-group file-browse-group spreadsheet-btn-group">
-                <button for="spreadsheet-file">Browse ...</button>
-                <label id="spreadsheet-display-name"></label>
-                <input type="file" name="spreadsheet-file" id="spreadsheet-file"/>
+            <label for="dictionary-file">Select JSON-formatted dictionaries:</label><br>
+            <label class="btn-group file-browse-group dictionary-btn-group">
+                <button for="dictionary-file">Browse ...</button>
+                <label id="dictionary-display-name"></label>
+                <input type="file" name="dictionary-file" id="dictionary-file"/>
             </label>
-            <p class="flash" id="spreadsheet-flash"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="worksheet-name">Choose a worksheet (for workbooks):</label><br>
-            <select name="worksheet-name" id="worksheet-name"></select>
-            <p class="flash" id="worksheet-flash"></p>
-        </div>
-
-        <div class="form-group" id="column-names">
-            <label class="secondary-label" for="columns-names-table">Spreadsheet columns</label>
-            <table id="columns-names-table"></table>
-        </div>
-
-        <div class="form-group">
-            <label>Columns corresponding to specific tags (if available):</label><br>
-            <div class="textbox-group">
-                <label for="category-column">Category</label>
-                <input type="text" name="category-column" id="category-column">
-                <label for="description-column">Description</label>
-                <input type="text" name="description-column" id="description-column">
-                <label for="label-column">Label</label>
-                <input type="text" name="label-column" id="label-column">
-                <label for="long-column">Long name</label>
-                <input type="text" name="long-column" id="long-column">
-            </div>
-            <label class="secondary-label" for="tag-columns">Other columns containing tags
-                (comma-separated):</label><br>
-            <input class="textbox-group" type="text" name="tag-columns" id="tag-columns">
-            <p class="flash" id="tag-columns-flash"></p>
+            <p class="flash" id="dictionary-flash"></p>
         </div>
 
         <div class="form-group">
@@ -61,10 +32,6 @@
             <label>Specify additional options:</label><br>
             <div class="checkbox-group">
                 <div class="inline-field">
-                    <input type="checkbox" name="has-column-names" id="has-column-names">
-                    <label for="has-column-names">Spreadsheet has column names</label>
-                </div>
-                <div class="inline-field">
                     <input type="checkbox" name="check-for-warnings" id="check-for-warnings">
                     <label for="check-for-warnings">Include warnings in output file</label>
                 </div>
@@ -77,7 +44,7 @@
         </div>
     </form>
     <script type="module">
-        {%  include '../static/js/form-helpers.js' %}
-        {%  include '../static/js/dictionary-form-helper.js' %}
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/dictionary-form-helper.js' %}
     </script>
 {% endmacro %}

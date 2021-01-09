@@ -73,15 +73,18 @@ def get_dictionary_validation_results():
         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
         500 error message is returned.
     """
-    validation_response = spreadsheet.report_spreadsheet_validation_status(request)
-    # Success
-    if isinstance(validation_response, Response):
-        return validation_response
-    if isinstance(validation_response, str):
-        if validation_response:
-            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
-        else:
-            return ""
+
+    return "Dictionary validation is not yet implemented"
+    # validation_response = spreadsheet.report_spreadsheet_validation_status(request)
+    # # Success
+    # if isinstance(validation_response, Response):
+    #     return validation_response
+    # if isinstance(validation_response, str):
+    #     if validation_response:
+    #         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
+    #     else:
+    #         return ""
+
 
 @route_blueprint.route(route_constants.SCHEMA_DUPLICATE_TAG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_duplicate_tag_results():
@@ -263,6 +266,7 @@ def get_worksheets_info():
     """
     worksheets_info = {common_constants.WORKSHEET_NAMES: [], common_constants.COLUMN_NAMES: [],
                        common_constants.TAG_COLUMN_INDICES: []}
+    workbook_file_path = ''
     try:
         if common_constants.SPREADSHEET_FILE in request.files:
             workbook_file = request.files[common_constants.SPREADSHEET_FILE]
@@ -322,7 +326,7 @@ def render_dictionary_validation_form():
         displayed. If the HTTP method is a POST then the validation form is submitted.
 
     """
-    return render_template(page_constants.SPREADSHEET_VALIDATION_PAGE)
+    return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
     # return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
 
 
