@@ -15,7 +15,7 @@ pip3 install -r requirements.txt
 COPY ./httpd.conf /etc/apache2/httpd.conf
 COPY ./hedtools /var/www/hedtools/
 RUN mkdir -p /var/www/hedtools/hed/web
-COPY ./hedweb/hed/web /var/www/hedtools/hed/web
+COPY ./hedweb/hed/web /var/www/hedtools/hed/web/
 RUN mkdir -p /run/apache2 && \
 mkdir -p /var/log/hedtools && \
 chown -R apache:apache /var/log/hedtools && \
