@@ -1,4 +1,5 @@
 click==7.1.2
+defusedxml==0.6.0
 Flask==1.1.2
 Flask-WTF==0.14.3
 inflect==5.0.2
@@ -20,3 +21,13 @@ pytz==2020.4
 semantic_version==2.8.5
 six==1.15.0
 mod_wsgi==4.7.1
+
+
+
+
+
+
+
+
+
+
