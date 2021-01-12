@@ -9,7 +9,7 @@ from logging import ERROR
 from hed.util import hed_cache
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.util.hed_dictionary import HedDictionary
-from hed.web.constants import common_constants, error_constants, file_constants
+from constants import common_constants, error_constants, file_constants
 
 app_config = current_app.config
 

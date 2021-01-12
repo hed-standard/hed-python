@@ -8,10 +8,9 @@ from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 
-import hed.web.web_utils
-from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web import web_utils
-from hed.web import utils
+import web_utils
+from constants import common_constants, error_constants, file_constants
+import utils
 
 app_config = current_app.config
 

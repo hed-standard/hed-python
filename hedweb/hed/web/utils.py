@@ -5,8 +5,8 @@ from flask import current_app
 
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 
-from hed.web.constants import common_constants, error_constants, spreadsheet_constants
-from hed.web.web_utils import save_file_to_upload_folder, find_all_str_indices_in_list
+from constants import common_constants, error_constants, spreadsheet_constants
+from web_utils import save_file_to_upload_folder, find_all_str_indices_in_list
 
 app_config = current_app.config
 

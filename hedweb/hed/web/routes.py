@@ -1,12 +1,12 @@
 from flask import render_template, Response, request, Blueprint, current_app
 import os
 import json
-from hed.web import utils
-from hed.web import validation
-from hed.web import schema
-from hed.web.constants import error_constants
-from hed.web.constants import page_constants, route_constants, blueprint_constants
-from hed.web.web_utils import find_hed_version_in_uploaded_file, find_major_hed_versions, \
+import utils
+import validation
+import schema
+from constants import error_constants
+from constants import page_constants, route_constants, blueprint_constants
+from web_utils import find_hed_version_in_uploaded_file, find_major_hed_versions, \
     generate_download_file_response, handle_http_error
 import traceback
 
