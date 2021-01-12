@@ -6,11 +6,11 @@ import traceback
 import hed.util.file_util
 from hed.util import hed_cache
 
-from hed.web import utils
-from hed.web import spreadsheet
-from hed.web import schema
-from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
-from hed.web.web_utils import delete_file_if_it_exist, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
+import utils
+import spreadsheet
+import schema
+from constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
+from web_utils import delete_file_if_it_exist, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error
 
 

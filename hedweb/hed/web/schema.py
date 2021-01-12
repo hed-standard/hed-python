@@ -9,10 +9,10 @@ from hed.util.hed_dictionary import HedDictionary
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension, write_text_iter_to_file
 from hed.util.exceptions import SchemaFileError
 
-from hed.web.web_utils import check_if_option_in_form, file_extension_is_valid, handle_http_error, \
+from web_utils import check_if_option_in_form, file_extension_is_valid, handle_http_error, \
     save_file_to_upload_folder, generate_download_file_response
 
-from hed.web.constants import common_constants, error_constants, file_constants
+from constants import common_constants, error_constants, file_constants
 
 app_config = current_app.config
 
