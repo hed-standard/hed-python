@@ -7,8 +7,8 @@ from hed.util import hed_cache
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hed_cache_test/')
-        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../schema_cache_test/')
+        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
         cls.default_xml_base_filename = "HED7.1.1.xml"
         cls.default_hed_xml = os.path.join(cls.hed_base_dir, cls.default_xml_base_filename)
         cls.hed_test_version = '7.1.1'
@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(hed_version_path, str)
 
     def test_set_cache_directory(self):
-        hed_cache_dir = "TEST_HED_CACHE"
+        hed_cache_dir = "TEST_SCHEMA_CACHE"
         saved_cache_dir = hed_cache.HED_CACHE_DIRECTORY
         hed_cache.set_cache_directory(hed_cache_dir)
         self.assertTrue(hed_cache.HED_CACHE_DIRECTORY == hed_cache_dir)

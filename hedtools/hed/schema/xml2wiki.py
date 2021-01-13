@@ -1,6 +1,6 @@
 from enum import Enum
 
-from hed.schematools import constants
+from hed.schema import constants
 from hed.util import file_util
 from hed.util.hed_dictionary import HedDictionary
 
