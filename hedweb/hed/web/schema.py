@@ -4,7 +4,7 @@ from urllib.error import URLError, HTTPError
 from urllib.parse import urlparse
 from flask import current_app, Response
 
-from hed.schematools import xml2wiki, wiki2xml
+from hed.schema import xml2wiki, wiki2xml
 from hed.util.hed_dictionary import HedDictionary
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension, write_text_iter_to_file
 from hed.util.exceptions import SchemaFileError

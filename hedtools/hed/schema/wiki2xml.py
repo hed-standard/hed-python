@@ -2,7 +2,7 @@
 This module contains functions that convert a wiki HED schema into a XML HED schema.
 """
 from hed.util import file_util
-from hed.schematools import parsewiki
+from hed.schema import parsewiki
 
 
 def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None):

@@ -1,6 +1,6 @@
 """Example for how to convert from mediawiki format to xml format"""
 from shutil import move
-from hed.schematools import wiki2xml, constants
+from hed.schema import wiki2xml, constants
 
 if __name__ == '__main__':
     local_hed_file = None
