@@ -1,5 +1,5 @@
 from hed.util.hed_string_delimiter import HedStringDelimiter
-from tests.test_tag_validator import TestHed
+from tests.validator.test_tag_validator import TestHed
 
 
 class HedStrings(TestHed):
