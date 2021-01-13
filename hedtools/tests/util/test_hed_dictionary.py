@@ -5,7 +5,7 @@ from hed.util.hed_dictionary import HedDictionary
 
 
 class TestHedDictionary(unittest.TestCase):
-    schema_file = 'data/HED7.1.1.xml'
+    schema_file = '../data/HED7.1.1.xml'
 
     @classmethod
     def setUpClass(cls):

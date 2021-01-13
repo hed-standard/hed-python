@@ -8,7 +8,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.default_test_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                  "data/ExcelMultipleSheets.xlsx")
+                                                  "../data/ExcelMultipleSheets.xlsx")
         cls.generic_file_input = HedFileInput(cls.default_test_file_name)
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
         cls.one_based_tag_columns = [1, 2, 3]

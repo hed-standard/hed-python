@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         cls.category_tags = 'Participant response, Stimulus'
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
 
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/')
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         cls.basic_events_json = os.path.join(cls.base_data_dir, "both_types_events.json")
         cls.basic_event_name = "trial_type"
         cls.basic_event_type = ColumnType.Categorical

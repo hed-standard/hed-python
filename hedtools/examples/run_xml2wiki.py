@@ -1,6 +1,6 @@
 """Example for how to convert from xml format to mediawiki format"""
 from shutil import move
-from hed.schematools import xml2wiki, constants
+from hed.schema import xml2wiki, constants
 
 if __name__ == '__main__':
     hed_xml_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml'
