@@ -1,5 +1,5 @@
 """
-This module contains the default configurations for hedwebmap
+This module contains the default configurations for hedweb
 
 If you want to locally run debug code, create a copy of this file called
 config.py and set the BASE_DIRECTORY at the top of it to be valid.
