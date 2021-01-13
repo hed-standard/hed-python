@@ -10,7 +10,7 @@ import tempfile
 
 
 class Config(object):
-    # Folder the program stores hed cache, log, etc.
+    # Folder the program stores hed cache, log, etc.  Make sure the program has access to this directory.
     BASE_DIRECTORY = '/path/to/base/folder'
     LOG_DIRECTORY = os.path.join(BASE_DIRECTORY, 'log')
     os.makedirs(LOG_DIRECTORY, exist_ok=True)
@@ -27,7 +27,7 @@ class Config(object):
     STATIC_URL_PATH_ATTRIBUTE_NAME = 'STATIC_URL_PATH'
     UPLOAD_FOLDER = os.path.join(tempfile.gettempdir(), 'hedtools_uploads')
     URL_PREFIX = None
-    HED_CACHE_FOLDER = os.path.join(BASE_DIRECTORY, 'HED_CACHE')
+    HED_CACHE_FOLDER = os.path.join(BASE_DIRECTORY, 'schema_cache')
 
 
 class DevelopmentConfig(Config):

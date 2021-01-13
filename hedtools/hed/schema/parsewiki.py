@@ -3,7 +3,7 @@ This module contains functions for parsing a wiki HED schema.
 """
 
 from xml.etree.ElementTree import Element, SubElement
-from hed.schematools import parsetag, constants
+from hed.schema import parsetag, constants
 import os
 
 ATTRIBUTE_DEFINITION_STRING = '\'\'\'Attribute Definitions:'

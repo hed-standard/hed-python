@@ -7,7 +7,7 @@ from hed.util import error_reporter
 
 
 class TestTagFormat(unittest.TestCase):
-    schema_file = 'data/reduced_no_dupe.xml'
+    schema_file = '../data/reduced_no_dupe.xml'
 
     @classmethod
     def setUpClass(cls):

@@ -9,7 +9,7 @@ from hed.util.hed_dictionary import HedDictionary
 
 
 class TestHed(unittest.TestCase):
-    schema_file = 'data/HED7.1.1.xml'
+    schema_file = '../data/HED7.1.1.xml'
 
     @classmethod
     def setUpClass(cls):
@@ -579,7 +579,7 @@ class TestHedTags(TestHed):
         self.assertCountEqual(issues, [])
 
 class TestHed3(unittest.TestCase):
-    schema_file = 'data/HED8.0.0-alpha.1.xml'
+    schema_file = '../data/HED8.0.0-alpha.1.xml'
 
     @classmethod
     def setUpClass(cls):
@@ -800,7 +800,7 @@ class IndividualHedTagsShort(TestHed3):
 
 
 class TestOldHed(TestHed):
-    schema_file = 'data/HED7.0.4.xml'
+    schema_file = '../data/HED7.0.4.xml'
 
 
 class OldIndividualHedTags(TestOldHed):

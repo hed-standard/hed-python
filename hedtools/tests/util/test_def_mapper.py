@@ -7,7 +7,7 @@ from hed.util.hed_dictionary import HedDictionary
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/')
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         hed_xml_file = os.path.join(cls.base_data_dir, "HED8.0.0-alpha.1.xml")
         cls.hed_dictionary = HedDictionary(hed_xml_file)
         cls.base_def_mapper = DefinitionMapper(hed_dictionary=cls.hed_dictionary)
