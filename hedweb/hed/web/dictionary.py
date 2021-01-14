@@ -7,7 +7,8 @@ from werkzeug.utils import secure_filename
 
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.validator.hed_validator import HedValidator
-from hed.util.hed_file_input import HedFileInput
+from hed.util.column_def_group import ColumnDefGroup
+from hed.util.hed_dictionary import HedDictionary
 
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web import web_utils
@@ -31,76 +32,34 @@ def generate_arguments_from_validation_form(form_request_object):
     """
     hed_file_path, hed_display_name = web_utils.get_hed_path_from_pull_down(form_request_object)
     uploaded_file_name, original_file_name = \
-        web_utils.get_uploaded_file_path_from_form(form_request_object, common_constants.SPREADSHEET_FILE,
-                                                   file_constants.SPREADSHEET_FILE_EXTENSIONS)
+        web_utils.get_uploaded_file_path_from_form(form_request_object, common_constants.DICTIONARY_FILE,
+                                                   file_constants.DICTIONARY_FILE_EXTENSIONS)
 
-    validation_input_arguments = {common_constants.HED_XML_FILE: hed_file_path,
-                                  common_constants.HED_DISPLAY_NAME: hed_display_name,
-                                  common_constants.SPREADSHEET_PATH: uploaded_file_name,
-                                  common_constants.SPREADSHEET_FILE: original_file_name}
-    validation_input_arguments[common_constants.TAG_COLUMNS] = \
-        web_utils.convert_number_str_to_list(form_request_object.form[common_constants.TAG_COLUMNS])
-    validation_input_arguments[common_constants.COLUMN_PREFIX_DICTIONARY] = \
-        utils.get_specific_tag_columns_from_form(form_request_object)
-    validation_input_arguments[common_constants.WORKSHEET_NAME] = \
-        utils.get_optional_form_field(form_request_object, common_constants.WORKSHEET_NAME,
-                                      common_constants.STRING)
-    validation_input_arguments[common_constants.HAS_COLUMN_NAMES] = utils.get_optional_form_field(
-        form_request_object, common_constants.HAS_COLUMN_NAMES, common_constants.BOOLEAN)
-    validation_input_arguments[common_constants.CHECK_FOR_WARNINGS] = utils.get_optional_form_field(
+    input_arguments = {common_constants.HED_XML_FILE: hed_file_path,
+                       common_constants.HED_DISPLAY_NAME: hed_display_name,
+                       common_constants.DICTIONARY_PATH: uploaded_file_name,
+                       common_constants.DICTIONARY_FILE: original_file_name}
+    input_arguments[common_constants.CHECK_FOR_WARNINGS] = utils.get_optional_form_field(
         form_request_object, common_constants.CHECK_FOR_WARNINGS, common_constants.BOOLEAN)
-    return validation_input_arguments
+    return input_arguments
 
 
-def generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_name=''):
-    """Generates a filename for the attachment that will contain the spreadsheet validation issues.
+def generate_dictionary_validation_filename(dictionary_filename):
+    """Generates a filename for the attachment that will contain the dictionary validation issues.
 
     Parameters
     ----------
-    spreadsheet_filename: string
-        The name of the spreadsheet other.
-    worksheet_name: string
-        The name of the spreadsheet worksheet.
+    dictionary_filename: string
+        The name of the dictionary file.
+
     Returns
     -------
     string
         The name of the attachment other containing the validation issues.
     """
-    if worksheet_name:
-        return common_constants.VALIDATION_OUTPUT_FILE_PREFIX + \
-               secure_filename(spreadsheet_filename).rsplit('.')[0] + '_' + \
-               secure_filename(worksheet_name) + file_constants.TEXT_EXTENSION
-    return common_constants.VALIDATION_OUTPUT_FILE_PREFIX + secure_filename(spreadsheet_filename).rsplit('.')[
+
+    return common_constants.VALIDATION_OUTPUT_FILE_PREFIX + secure_filename(dictionary_filename).rsplit('.')[
         0] + file_constants.TEXT_EXTENSION
-
-
-# def get_uploaded_file_paths_from_forms(form_request_object):
-#     """Gets the other paths of the uploaded files in the form.
-#
-#     Parameters
-#     ----------
-#     form_request_object: Request object
-#         A Request object containing user data from the validation form.
-#
-#     Returns
-#     -------
-#     tuple
-#         A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
-#     """
-#     spreadsheet_file_path = ''
-#     hed_file_path = ''
-#     if common_constants.SPREADSHEET_FILE in form_request_object.files and \
-#         web_utils.file_extension_is_valid(form_request_object.files[common_constants.SPREADSHEET_FILE].filename,
-#                                           file_constants.SPREADSHEET_FILE_EXTENSIONS):
-#         spreadsheet_file_path = web_utils.save_file_to_upload_folder(
-#             form_request_object.files[common_constants.SPREADSHEET_FILE])
-#     if common_constants.HED_XML_FILE in form_request_object.files and \
-#             web_utils.file_extension_is_valid(form_request_object.files[common_constants.HED_XML_FILE].filename,
-#                                              [file_constants.SCHEMA_XML_EXTENSION]):
-#         hed_file_path = web_utils.save_file_to_upload_folder(form_request_object.files[common_constants.HED_XML_FILE])
-#         hed_file_path = web_utils.get_hed_path_from_form(form_request_object, hed_file_path)
-#     elif
-#     return spreadsheet_file_path, hed_file_path
 
 
 def report_eeg_events_validation_status(request):
@@ -149,7 +108,7 @@ def report_eeg_events_validation_status(request):
     return validation_status
 
 
-def report_spreadsheet_validation_status(form_request_object):
+def report_dictionary_validation_status(form_request_object):
     """Reports the spreadsheet validation status.
 
     Parameters
@@ -166,56 +125,56 @@ def report_spreadsheet_validation_status(form_request_object):
     input_arguments = []
     try:
         input_arguments = generate_arguments_from_validation_form(form_request_object)
-        hed_validator = validate_spreadsheet(input_arguments)
-        validation_issues = hed_validator.get_validation_issues()
+        def_group = validate_dictionary(input_arguments)
+        validation_issues = def_group.get_validation_issues()
         if validation_issues:
-            issue_file = save_issues_to_upload_folder(input_arguments[common_constants.SPREADSHEET_FILE],
-                                                      validation_issues,
-                                                      input_arguments[common_constants.WORKSHEET_NAME])
+            issue_file = save_issues_to_upload_folder(input_arguments[common_constants.DICTIONARY_FILE],
+                                                      validation_issues)
             download_response = web_utils.generate_download_file_response(issue_file)
             if isinstance(download_response, str):
                 return web_utils.handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
     except HTTPError:
-            return error_constants.NO_URL_CONNECTION_ERROR
+        return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:
         return error_constants.INVALID_URL_ERROR
     except Exception as e:
         return "Unexpected processing error: " + str(e)
     finally:
-        delete_file_if_it_exist(input_arguments[common_constants.SPREADSHEET_PATH])
+        delete_file_if_it_exist(input_arguments[common_constants.DICTIONARY_PATH])
         # delete_file_if_it_exist(input_arguments[common_constants.HED_XML_FILE])
     return ""
 
 
-def save_issues_to_upload_folder(spreadsheet_filename, validation_issues, worksheet_name=''):
+def save_issues_to_upload_folder(dictionary_filename, validation_issues, file_mode='w'):
     """Saves the validation issues found to a other in the upload folder.
 
     Parameters
     ----------
-    spreadsheet_filename: string
-        The name to the spreadsheet.
-    worksheet_name: string
-        The name of the spreadsheet worksheet.
-    validation_issues: string
+    dictionary_filename: str
+        The name to the dictionary.
+    validation_issues: str
         A string containing the validation issues.
-
+    file_mode: str
+        Either 'w' to create a new file and write or 'a' to create a new file if necessary and append to end.
     Returns
     -------
     string
         The name of the validation output other.
 
     """
-    validation_issues_filename = generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_name)
+    validation_issues_filename = generate_dictionary_validation_filename(dictionary_filename)
     validation_issues_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], validation_issues_filename)
-    with open(validation_issues_file_path, 'w', encoding='utf-8') as validation_issues_file:
+    with open(validation_issues_file_path, file_mode, encoding='utf-8') as validation_issues_file:
         for val_issue in validation_issues:
-            validation_issues_file.write(val_issue['message'] + "\n")
+            for issue in val_issue:
+                validation_issues_file.write(issue['message'] + "\n")
+    validation_issues_file.close()
     return validation_issues_file_path
 
 
-def validate_spreadsheet(validation_arguments):
-    """Validates the spreadsheet.
+def validate_dictionary(validation_arguments):
+    """Validates the dictionary.
 
     Parameters
     ----------
@@ -224,17 +183,11 @@ def validate_spreadsheet(validation_arguments):
 
     Returns
     -------
-    HedValidator object
-        A HedValidator object containing the validation results.
+    ColumnDefGroup
+        Contains a representation of the JSON dictionary and validation issues.
     """
 
-    file_input_object = HedFileInput(validation_arguments[common_constants.SPREADSHEET_PATH],
-                                     worksheet_name=validation_arguments[common_constants.WORKSHEET_NAME],
-                                     tag_columns=validation_arguments[common_constants.TAG_COLUMNS],
-                                     has_column_names=validation_arguments[common_constants.HAS_COLUMN_NAMES],
-                                     column_prefix_dictionary=validation_arguments[
-                                         common_constants.COLUMN_PREFIX_DICTIONARY])
-
-    return HedValidator(file_input_object,
-                        check_for_warnings=validation_arguments[common_constants.CHECK_FOR_WARNINGS],
-                        hed_xml_file=validation_arguments[common_constants.HED_XML_FILE])
+    json_dictionary = ColumnDefGroup(validation_arguments[common_constants.DICTIONARY_PATH])
+    hed_dictionary = HedDictionary(validation_arguments[common_constants.HED_XML_FILE])
+    json_dictionary.validate_entries(hed_dictionary)
+    return json_dictionary

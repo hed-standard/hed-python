@@ -74,35 +74,6 @@ def generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_nam
         0] + file_constants.TEXT_EXTENSION
 
 
-# def get_uploaded_file_paths_from_forms(form_request_object):
-#     """Gets the other paths of the uploaded files in the form.
-#
-#     Parameters
-#     ----------
-#     form_request_object: Request object
-#         A Request object containing user data from the validation form.
-#
-#     Returns
-#     -------
-#     tuple
-#         A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
-#     """
-#     spreadsheet_file_path = ''
-#     hed_file_path = ''
-#     if common_constants.SPREADSHEET_FILE in form_request_object.files and \
-#         web_utils.file_extension_is_valid(form_request_object.files[common_constants.SPREADSHEET_FILE].filename,
-#                                           file_constants.SPREADSHEET_FILE_EXTENSIONS):
-#         spreadsheet_file_path = web_utils.save_file_to_upload_folder(
-#             form_request_object.files[common_constants.SPREADSHEET_FILE])
-#     if common_constants.HED_XML_FILE in form_request_object.files and \
-#             web_utils.file_extension_is_valid(form_request_object.files[common_constants.HED_XML_FILE].filename,
-#                                              [file_constants.SCHEMA_XML_EXTENSION]):
-#         hed_file_path = web_utils.save_file_to_upload_folder(form_request_object.files[common_constants.HED_XML_FILE])
-#         hed_file_path = web_utils.get_hed_path_from_form(form_request_object, hed_file_path)
-#     elif
-#     return spreadsheet_file_path, hed_file_path
-
-
 def report_eeg_events_validation_status(request):
     """Reports validation status of hed strings associated with EEG events
        received from EEGLAB plugin HEDTools
@@ -177,7 +148,7 @@ def report_spreadsheet_validation_status(form_request_object):
                 return web_utils.handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
     except HTTPError:
-            return error_constants.NO_URL_CONNECTION_ERROR
+        return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:
         return error_constants.INVALID_URL_ERROR
     except Exception as e:
@@ -211,6 +182,7 @@ def save_issues_to_upload_folder(spreadsheet_filename, validation_issues, worksh
     with open(validation_issues_file_path, 'w', encoding='utf-8') as validation_issues_file:
         for val_issue in validation_issues:
             validation_issues_file.write(val_issue['message'] + "\n")
+    validation_issues_file.close()
     return validation_issues_file_path
 
 

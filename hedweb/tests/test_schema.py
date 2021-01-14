@@ -1,7 +1,7 @@
 import unittest
 # from flask import current_app, jsonify, Response
 # from hed.web.utils import app_config
-# from hed.web.validation import generate_spreadsheet_validation_filename
+# from hed.web.validation import generate_dictionary_validation_filename
 # from hed.web.app_factory import AppFactory
 # from hed.web.constants import file_constants, spreadsheet_constants
 import os

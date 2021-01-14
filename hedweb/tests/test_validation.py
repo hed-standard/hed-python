@@ -1,7 +1,7 @@
 import unittest
 # from flask import current_app, jsonify, Response
 # from hed.web.utils import app_config
-# from hed.web.validation import generate_spreadsheet_validation_filename
+# from hed.web.validation import generate_dictionary_validation_filename
 # from hed.web.app_factory import AppFactory
 # from hed.web.constants import file_constants, spreadsheet_constants
 import os
@@ -35,10 +35,10 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing generate_arguments_from_validation_form")
 
     def test_generate_spreadsheet_validation_filename(self):
-        self.assertTrue(1, "Testing generate_spreadsheet_validation_filename")
-        # spreadsheet_filename = 'abc.xls'
-        # expected_spreadsheet_filename = 'validated_' + spreadsheet_filename.rsplit('.')[0] + '.txt'
-        # validation_file_name = generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_name='')
+        self.assertTrue(1, "Testing generate_dictionary_validation_filename")
+        # dictionary_filename = 'abc.xls'
+        # expected_spreadsheet_filename = 'validated_' + dictionary_filename.rsplit('.')[0] + '.txt'
+        # validation_file_name = generate_dictionary_validation_filename(dictionary_filename, worksheet_name='')
         # self.assertTrue(validation_file_name)
         # self.assertEqual(expected_spreadsheet_filename, validation_file_name)
 
@@ -49,13 +49,13 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing report_eeg_events_validation_status")
 
     def test_report_spreadsheet_validation_status(self):
-        self.assertTrue(1, "Testing report_spreadsheet_validation_status")
+        self.assertTrue(1, "Testing report_dictionary_validation_status")
 
     def test_save_validation_issues_to_file_in_upload_folder(self):
         self.assertTrue(1, "Testing save_issues_to_upload_folder")
 
     def test_validate_spreadsheet(self):
-        self.assertTrue(1, "Testing validate_spreadsheet")
+        self.assertTrue(1, "Testing validate_dictionary")
 
 
 if __name__ == '__main__':

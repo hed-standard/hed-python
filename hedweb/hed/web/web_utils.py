@@ -4,8 +4,6 @@ import tempfile
 import traceback
 
 from flask import current_app, jsonify, Response
-from logging.handlers import RotatingFileHandler
-from logging import ERROR
 
 from hed.util import hed_cache
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
@@ -214,7 +212,7 @@ def get_uploaded_file_path_from_form(form_request_object, file_key, valid_extens
     original_file_name = ''
     if file_key in form_request_object.files and \
             file_extension_is_valid(form_request_object.files[file_key].filename, valid_extensions):
-        uploaded_file_name = save_file_to_upload_folder(form_request_object.files.get(file_key, ''))
+        uploaded_file_name = save_file_to_upload_folder(form_request_object.files[file_key])
         original_file_name = form_request_object.files[file_key].filename
     return uploaded_file_name, original_file_name
 
@@ -249,6 +247,8 @@ def save_file_to_upload_folder(file_object, delete_on_close=False):
     ----------
     file_object: File object
         A other object that points to a other that was first saved in a temporary location.
+    delete_on_close: bool
+        If true will delete after closing
 
     Returns
     -------
