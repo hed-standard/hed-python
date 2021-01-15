@@ -6,18 +6,29 @@ from hashlib import sha1
 from shutil import copyfile
 from collections import OrderedDict
 import re
-from distutils.version import StrictVersion
+from semantic_version import Version
 import portalocker
 import time
 from hed.util.file_util import url_to_file
 
-HED_VERSION_EXPRESSION = r'HED(\d+.\d+.\d+)'
+# Todo: Update doc strings in this file
+
+# From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+HED_VERSION_P1 = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"
+HED_VERSION_P2 = r"(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)" \
+                 r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
+HED_VERSION_P3 = r"(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
+# Actual local hed filename re.
+HED_VERSION_FINAL = '^[hH][eE][dD](' + HED_VERSION_P1 + HED_VERSION_P2 + HED_VERSION_P3 + ')\.[xX][mM][lL]$'
+
 HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
 DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
-HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../validator/hed_cache/')
+HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../validator/schema_cache/')
 TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300
+
+version_pattern = re.compile(HED_VERSION_FINAL)
 
 
 def set_cache_directory(new_cache_dir):
@@ -51,13 +62,12 @@ def get_all_hed_versions(local_hed_directory=None):
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
     hed_versions = []
-    compiled_expression = re.compile(HED_VERSION_EXPRESSION)
     for _, _, hed_files in os.walk(local_hed_directory):
         for hed_file in hed_files:
-            expression_match = compiled_expression.match(hed_file)
+            expression_match = version_pattern.match(hed_file)
             if expression_match is not None:
                 hed_versions.append(expression_match.group(1))
-    return sorted(hed_versions, key=StrictVersion, reverse=True)
+    return _sort_version_list(hed_versions)
 
 
 def get_local_file(hed_xml_file, get_specific_version=None):
@@ -99,7 +109,7 @@ def cache_specific_url(hed_xml_url, get_specific_version=None, cache_folder=None
         hed cache folder: Defaults to HED_CACHE_DIRECTORY
     Returns
     -------
-    string
+    str
         Path to local hed XML file to use.
     """
     if not cache_folder:
@@ -109,7 +119,9 @@ def cache_specific_url(hed_xml_url, get_specific_version=None, cache_folder=None
         return None
 
     if _check_if_api_url(hed_xml_url):
-        return _download_latest_hed_xml_version_from_url(hed_xml_url, get_specific_version=get_specific_version, cache_folder=cache_folder)
+        return _download_latest_hed_xml_version_from_url(hed_xml_url,
+                                                         get_specific_version=get_specific_version,
+                                                         cache_folder=cache_folder)
 
     if not _check_if_specific_xml(hed_xml_url):
         return None
@@ -137,7 +149,7 @@ def get_latest_hed_version_path(local_hed_directory=None, get_specific_version=N
         If not None, return this version or None.
     Returns
     -------
-    string
+    str
         The path to the latest HED version the hed directory.
     """
     if not local_hed_directory:
@@ -178,8 +190,9 @@ def cache_all_hed_xml_versions(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL, cache
 
     Parameters
     ----------
-    hed_xml_url: str
+    hed_base_url: str
         Path to a directory on github API.
+        eg: https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml
     cache_folder:
         hed cache folder: Defaults to HED_CACHE_DIRECTORY
     Returns
@@ -210,6 +223,19 @@ def cache_all_hed_xml_versions(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL, cache
 
 
 def _read_last_cached_time(cache_folder):
+    """
+    Checks the given cache folder to see when it was last updated.
+
+    Parameters
+    ----------
+    cache_folder : str
+        The folder we're caching hed schema in.
+
+    Returns
+    -------
+    time_stamp: float
+        The time we last updated the cache.  Zero if no update found.
+    """
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
 
     try:
@@ -221,6 +247,16 @@ def _read_last_cached_time(cache_folder):
 
 
 def _write_last_cached_time(new_time, cache_folder):
+    """
+    Sets the given time as when we last updated cache_folder.
+
+    Parameters
+    ----------
+    new_time : float
+        The time this was updated
+    cache_folder : str
+        The folder we're caching hed schema in.
+    """
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
     try:
         with open(timestamp_filename, "w") as f:
@@ -250,19 +286,22 @@ def _create_xml_filename(hed_xml_version, hed_directory=None):
     return hed_xml_filename
 
 
+def _sort_version_list(hed_versions):
+    return sorted(hed_versions, key=Version, reverse=True)
+
+
 def _get_hed_xml_versions_from_url(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL):
     url_request = urllib.request.urlopen(hed_base_url)
     url_data = str(url_request.read(), 'utf-8')
     loaded_json = json.loads(url_data)
 
-    compiled_expression = re.compile(HED_VERSION_EXPRESSION)
     hed_versions = {}
     for file_entry in loaded_json:
-        expression_match = compiled_expression.match(file_entry["name"])
+        expression_match = version_pattern.match(file_entry["name"])
         if expression_match is not None:
             hed_versions[expression_match.group(1)] = file_entry["sha"], file_entry["download_url"]
 
-    ordered_versions1 = sorted(hed_versions, key=StrictVersion, reverse=True)
+    ordered_versions1 = _sort_version_list(hed_versions)
     ordered_versions2 = [(version, hed_versions[version]) for version in ordered_versions1]
     ordered_versions = OrderedDict(ordered_versions2)
 
@@ -301,8 +340,21 @@ def _calculate_sha1(filename):
         return None
 
 
-# Attempt to make this multithread safe.
 def _safe_copy_tmp_to_folder(temp_hed_xml_file, dest_filename):
+    """
+    Copies the schema file to destination folder, and renames it.
+
+    Parameters
+    ----------
+    temp_hed_xml_file : str
+        An XML file, generally from a temp folder.  Will be deleted on a successful copy.
+    dest_filename : str
+        A destination folder and filename
+    Returns
+    -------
+    dest_filename: str
+        Returns the new filename on success, returns None on failure.
+    """
     _, temp_xml_file = os.path.split(temp_hed_xml_file)
     dest_folder, _ = os.path.split(dest_filename)
 
@@ -341,11 +393,11 @@ def _get_latest_semantic_version_in_list(semantic_version_list):
 
     Parameters
     ----------
-    semantic_version_list: list
+    semantic_version_list: [str]
          A list containing semantic versions.
     Returns
     -------
-    string
+    str
         The latest semantic version in the list.
 
     """
@@ -374,5 +426,6 @@ def _compare_semantic_versions(first_semantic_version, second_semantic_version):
         The later semantic version.
 
     """
-    return first_semantic_version if StrictVersion(first_semantic_version) > StrictVersion(
-        second_semantic_version) else second_semantic_version
+    if Version(first_semantic_version) > Version(second_semantic_version):
+        return first_semantic_version
+    return second_semantic_version

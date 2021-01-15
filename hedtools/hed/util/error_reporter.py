@@ -5,6 +5,7 @@ This module is used to report errors found in the validation.
 
 from hed.util.error_types import ValidationErrors, ValidationWarnings, SchemaErrors, SidecarErrors
 
+# Todo: Update doc strings in this file
 
 def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag='', tag_prefix='', previous_tag='',
                      character='', index=0, unit_class_units='', file_name='', opening_parentheses_count=0,
@@ -41,30 +42,29 @@ def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag
         The number of closing parentheses.
     Returns
     -------
-    list of dict
-        A singleton list containing a dictionary with the error type and error message related to a particular type of
-        error.
+    issue_list: [{}]
+        A list containing a single dictionary with the warning type and warning message related to a particular type
+        of warning.
 
     """
 
     error_types = {
-        ValidationErrors.ROW: 'Issues in row %s:\n' % str(error_row),
-        ValidationErrors.COLUMN: 'Issues in row %s column %s:\n' % (str(error_row), str(error_column)),
-        ValidationErrors.INVALID_FILENAME: '\tInvalid file name - "%s"\n' % file_name,
+        ValidationErrors.ROW: 'Issues in row %s:' % str(error_row),
+        ValidationErrors.COLUMN: 'Issues in row %s column %s:' % (str(error_row), str(error_column)),
+        ValidationErrors.INVALID_FILENAME: '\tInvalid file name - "%s"' % file_name,
         ValidationErrors.PARENTHESES: '\tERROR: Number of opening and closing parentheses are unequal. %s opening parentheses. %s '
-                                      'closing parentheses\n' % (opening_parentheses_count, closing_parentheses_count),
+                                      'closing parentheses' % (opening_parentheses_count, closing_parentheses_count),
         ValidationErrors.INVALID_CHARACTER: '\tERROR: Invalid character "%s" at index %s of string "%s"'
                                             % (character, index, hed_string),
-        ValidationErrors.COMMA_MISSING: '\tERROR: Comma missing after - "%s"\n' % tag,
+        ValidationErrors.COMMA_MISSING: '\tERROR: Comma missing after - "%s"' % tag,
         ValidationErrors.INVALID_COMMA: '\tERROR: Either "%s" contains a comma when it should not or "%s" is not a valid '
-                                        'tag\n ' % (previous_tag, tag),
-        ValidationErrors.DUPLICATE: '\tERROR: Duplicate tag - "%s"\n' % tag,
-        ValidationErrors.REQUIRE_CHILD: '\tERROR: Descendant tag required - "%s"\n' % tag,
-        ValidationErrors.EXTRA_TILDE: '\tERROR: Too many tildes - group "%s"\n' % tag,
-        ValidationErrors.MULTIPLE_UNIQUE: '\tERROR: Multiple unique tags with prefix - "%s"\n' % tag_prefix,
-        ValidationErrors.UNIT_CLASS_INVALID_UNIT: '\tERROR: Invalid unit - "%s" valid units are "%s"\n' % (
-        tag, unit_class_units),
-        ValidationErrors.INVALID_TAG: '\tERROR: Invalid tag - "%s"\n' % tag,
+                                        'tag ' % (previous_tag, tag),
+        ValidationErrors.DUPLICATE: '\tERROR: Duplicate tag - "%s"' % tag,
+        ValidationErrors.REQUIRE_CHILD: '\tERROR: Descendant tag required - "%s"' % tag,
+        ValidationErrors.EXTRA_TILDE: '\tERROR: Too many tildes - group "%s"' % tag,
+        ValidationErrors.MULTIPLE_UNIQUE: '\tERROR: Multiple unique tags with prefix - "%s"' % tag_prefix,
+        ValidationErrors.UNIT_CLASS_INVALID_UNIT: '\tERROR: Invalid unit - "%s" valid units are "%s"' % (tag, unit_class_units),
+        ValidationErrors.INVALID_TAG: '\tERROR: Invalid tag - "%s"' % tag,
         ValidationErrors.EXTRA_DELIMITER: '\tERROR: Extra delimiter "%s" at index %s of string "%s"'
                                           % (character, index, hed_string),
     }
@@ -76,11 +76,12 @@ def format_val_error(error_type, error_row=1, error_column=1, hed_string='', tag
 
 
 def format_sidecar_error(error_type, filename="", column_name="", given_type="", expected_type="", pound_sign_count=0,
-                         category_count=0):
+                         category_count=0, hed_string="", position=None):
     ERROR_PREFIX = "\tERROR: "
     error_types = {
         SidecarErrors.SIDECAR_FILE_NAME: f"Errors in file '{filename}'",
         SidecarErrors.SIDECAR_COLUMN_NAME: f"Errors in column '{column_name}':",
+        SidecarErrors.SIDECAR_HED_STRING: f"Errors in hed string at position {position}: {hed_string}",
         SidecarErrors.INVALID_FILENAME: f"ERROR: File does not exist or cannot be opened. '{filename}'",
         SidecarErrors.CANNOT_PARSE_JSON: f"ERROR: Json file cannot be parsed. '{filename}'",
         SidecarErrors.BLANK_HED_STRING: f"{ERROR_PREFIX}No HED string found for Value or Category column.",
@@ -114,15 +115,15 @@ def format_val_warning(warning_type, tag='', default_unit='', tag_prefix=''):
         The tag prefix that generated the warning.
     Returns
     -------
-    list of dict
-        A singleton list containing a dictionary with the warning type and warning message related to a particular type
+    issue_list: [{}]
+        A list containing a single dictionary with the warning type and warning message related to a particular type
         of warning.
 
     """
     warning_types = {
-        ValidationWarnings.CAPITALIZATION: '\tWARNING: First word not capitalized or camel case - "%s"\n' % tag,
-        ValidationWarnings.REQUIRED_PREFIX_MISSING: '\tWARNING: Tag with prefix "%s" is required\n' % tag_prefix,
-        ValidationWarnings.UNIT_CLASS_DEFAULT_USED: '\tWARNING: No unit specified. Using "%s" as the default - "%s"\n' % (
+        ValidationWarnings.CAPITALIZATION: '\tWARNING: First word not capitalized or camel case - "%s"' % tag,
+        ValidationWarnings.REQUIRED_PREFIX_MISSING: '\tWARNING: Tag with prefix "%s" is required' % tag_prefix,
+        ValidationWarnings.UNIT_CLASS_DEFAULT_USED: '\tWARNING: No unit specified. Using "%s" as the default - "%s"' % (
         default_unit, tag)
     }
     default_warning_message = 'WARNING: Unknown warning'
@@ -155,9 +156,9 @@ def format_schema_error(error_type, hed_tag, error_index=0, error_index_end=None
         The type of abc error.
     Returns
     -------
-    list of dict
-        A singleton list containing a dictionary with the error type and error message related to a particular type of
-        error.
+    issue_list: [{}]
+        A list containing a single dictionary with the warning type and warning message related to a particular type
+        of warning.
 
     """
     if error_index_end is None:
@@ -169,8 +170,8 @@ def format_schema_error(error_type, hed_tag, error_index=0, error_index_end=None
         SchemaErrors.INVALID_PARENT_NODE: f"{SCHEMA_ERROR_PREFIX}'{problem_tag}' appears as '{expected_parent_tag}' and cannot be used "
                                           f"as an extension.  {error_index}, {error_index_end}",
         SchemaErrors.NO_VALID_TAG_FOUND: f"{SCHEMA_ERROR_PREFIX}'{problem_tag}' is not a valid base hed tag.  {error_index}, {error_index_end} ",
-        SchemaErrors.EMPTY_TAG_FOUND: f"{SCHEMA_ERROR_PREFIX}'Empty tag cannot be converted.",
-        SchemaErrors.INVALID_SCHEMA: f"{SCHEMA_ERROR_PREFIX}'Source hed schema is invalid as it contains duplicate tags.  "
+        SchemaErrors.EMPTY_TAG_FOUND: f"{SCHEMA_ERROR_PREFIX}Empty tag cannot be converted.",
+        SchemaErrors.INVALID_SCHEMA: f"{SCHEMA_ERROR_PREFIX}Source hed schema is invalid as it contains duplicate tags.  "
                                      f"Please fix if you wish to be abe to convert tags. {error_index}, {error_index_end}"
     }
     default_error_message = f'{SCHEMA_ERROR_PREFIX}Internal Error'

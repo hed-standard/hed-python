@@ -9,6 +9,7 @@ import inflect
 
 from hed.util.error_types import ValidationErrors, ValidationWarnings
 from hed.util import error_reporter
+from hed.util.hed_dictionary import HedDictionary, HedKey
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -16,31 +17,17 @@ pluralize.defnoun("hertz", "hertz")
 
 class TagValidator:
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+'
-    CLOCK_TIME_UNIT_CLASS = 'clockTime'
-    DATE_TIME_UNIT_CLASS = 'dateTime'
-    DEFAULT_UNIT_ATTRIBUTE = 'default'
-    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
     DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$'
     DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
-    EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed'
     INVALID_CHARS = '[]{}'
-    REQUIRE_CHILD_TYPE = 'requireChild'
-    REQUIRED_PREFIX_TYPE = 'required'
-    TAG_DICTIONARY_KEY = 'tags'
-    TAKES_VALUE_ATTRIBUTE = 'takesValue'
-    TIME_UNIT_CLASS = 'time'
-    UNIQUE_TAG_TYPE = 'unique'
-    UNIT_CLASS_ATTRIBUTE = 'unitClass'
-    UNIT_CLASS_UNITS_ELEMENT = 'units'
-    UNIT_SYMBOL_TYPE = 'unitSymbol'
-    UNITS_ELEMENT = 'units'
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
     DOUBLE_QUOTE = '"'
     COMMA = ','
     TILDE = '~'
-    SI_UNIT_MODIFIER_KEY = 'SIUnitModifier'
-    SI_UNIT_SYMBOL_MODIFIER_KEY = 'SIUnitSymbolModifier'
+    CLOCK_TIME_UNIT_CLASS = 'clockTime'
+    DATE_TIME_UNIT_CLASS = 'dateTime'
+    TIME_UNIT_CLASS = 'time'
 
     def __init__(self, hed_dictionary=None, check_for_warnings=False, run_semantic_validation=True,
                  allow_numbers_to_be_pound_sign=False):
@@ -146,7 +133,7 @@ class TagValidator:
             The previous format tag.
          Returns
          -------
-         list
+         []
              The validation issues associated with the top-level in the HED string.
 
          """
@@ -167,13 +154,13 @@ class TagValidator:
 
          Parameters
          ----------
-         tag_group: list
+         tag_group: []
             A list containing the tags in a group.
          tag_group_string: str
             A string of the tag group.
          Returns
          -------
-         list
+         []
              The validation issues associated with the groups in a HED string.
 
          """
@@ -191,7 +178,7 @@ class TagValidator:
             A HED string.
          Returns
          -------
-         list
+         []
              The validation issues associated with a HED string.
 
          """
@@ -207,13 +194,13 @@ class TagValidator:
 
          Parameters
          ----------
-         original_tag_list: list of str
+         original_tag_list: [str]
             A list containing the original tags.
-         formatted_tag_list: list of str
+         formatted_tag_list: [str]
             A list containing formatted tags.
          Returns
          -------
-         list
+         []
              The validation issues associated with each level in a HED string.
 
          """
@@ -228,11 +215,11 @@ class TagValidator:
 
          Parameters
          ----------
-         formatted_top_level_tags: list of str
+         formatted_top_level_tags: [str]
             A list containing the top-level tags in a HED string.
          Returns
          -------
-         list
+         []
              The validation issues associated with the top-level in a HED string.
 
          """
@@ -256,13 +243,13 @@ class TagValidator:
             The previous tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
         validation_issues = []
         is_extension_tag = self.is_extension_allowed_tag(formatted_tag)
-        if self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag) or \
+        if self._hed_dictionary_dictionaries[HedKey.AllTags].get(formatted_tag) or \
                 self.tag_takes_value(formatted_tag) or formatted_tag == TagValidator.TILDE:
             return validation_issues
 
@@ -289,7 +276,7 @@ class TagValidator:
             True if the tag is a valid HED tag. False, if otherwise.
 
         """
-        return self._hed_dictionary_dictionaries[TagValidator.TAG_DICTIONARY_KEY].get(formatted_tag) is not None
+        return self._hed_dictionary_dictionaries[HedKey.AllTags].get(formatted_tag) is not None
 
     def check_capitalization(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag isn't correctly capitalized.
@@ -302,7 +289,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -313,7 +300,8 @@ class TagValidator:
         for tag_name in tag_names:
             correct_tag_name = tag_name.capitalize()
             if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
-                validation_issues += error_reporter.format_val_warning(ValidationWarnings.CAPITALIZATION, tag=original_tag)
+                validation_issues += error_reporter.format_val_warning(ValidationWarnings.CAPITALIZATION,
+                                                                       tag=original_tag)
                 self._increment_issue_count(is_error=False)
                 break
         return validation_issues
@@ -336,7 +324,7 @@ class TagValidator:
         for tag_slash_index in tag_slash_indices:
             tag_substring = self.get_tag_substring_by_end_index(formatted_tag, tag_slash_index)
             if self._hed_dictionary.tag_has_attribute(tag_substring,
-                                                      TagValidator.EXTENSION_ALLOWED_ATTRIBUTE):
+                                                      HedKey.ExtensionAllowed):
                 return True
         return False
 
@@ -353,9 +341,11 @@ class TagValidator:
             True if the tag has the 'takesValue' attribute. False, if otherwise.
 
         """
+        if not self._hed_dictionary:
+            return False
         takes_value_tag = self.replace_tag_name_with_pound(formatted_tag)
         return self._hed_dictionary.tag_has_attribute(takes_value_tag,
-                                                      TagValidator.TAKES_VALUE_ATTRIBUTE)
+                                                      HedKey.TakesValue)
 
     def is_unit_class_tag(self, formatted_tag):
         """Checks to see if the tag has the 'unitClass' attribute.
@@ -374,7 +364,7 @@ class TagValidator:
         if not self._hed_dictionary.has_unit_classes:
             return False
         return self._hed_dictionary.tag_has_attribute(takes_value_tag,
-                                                      TagValidator.UNIT_CLASS_ATTRIBUTE)
+                                                      HedKey.UnitClass)
 
     def replace_tag_name_with_pound(self, formatted_tag):
         """Replaces the tag name with the pound sign.
@@ -406,7 +396,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -417,17 +407,17 @@ class TagValidator:
             original_tag_unit_value = self.get_tag_name(original_tag)
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag))
             if (TagValidator.DATE_TIME_UNIT_CLASS in
-                    self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
+                    self._hed_dictionary_dictionaries[HedKey.Units]):
                 if (TagValidator.DATE_TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
             if (TagValidator.CLOCK_TIME_UNIT_CLASS in
-                    self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
+                    self._hed_dictionary_dictionaries[HedKey.Units]):
                 if (TagValidator.CLOCK_TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
             elif (TagValidator.TIME_UNIT_CLASS in
-                  self._hed_dictionary_dictionaries[self.UNITS_ELEMENT]):
+                  self._hed_dictionary_dictionaries[HedKey.Units]):
                 if (TagValidator.TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
@@ -437,9 +427,10 @@ class TagValidator:
                                              tag_unit_class_units)):
                 pass
             else:
-                validation_issues += error_reporter.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, tag=original_tag,
+                validation_issues += error_reporter.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                     tag=original_tag,
                                                                      unit_class_units=','.join(
-                                                                          sorted(tag_unit_class_units)))
+                                                                         sorted(tag_unit_class_units)))
                 self._increment_issue_count()
         return validation_issues
 
@@ -451,12 +442,12 @@ class TagValidator:
             unit to generate plural forms
         Returns
         -------
-        list of str
+        [str]
             list of plural units
         """
         derivative_units = [unit]
         if self._hed_dictionary.has_unit_modifiers and \
-                self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit) is None:
+                self._hed_dictionary_dictionaries[HedKey.UnitSymbol].get(unit) is None:
             derivative_units.append(pluralize.plural(unit))
         return derivative_units
 
@@ -487,13 +478,12 @@ class TagValidator:
             stripped_value = str(unit_value)[0:-len(unit)].strip()
 
         if found_unit and self._hed_dictionary.has_unit_modifiers:
-            modifierKey = ''
             if is_unit_symbol:
-                modifierKey = self.SI_UNIT_SYMBOL_MODIFIER_KEY
+                modifier_key = HedKey.SIUnitSymbolModifier
             else:
-                modifierKey = self.SI_UNIT_MODIFIER_KEY
+                modifier_key = HedKey.SIUnitModifier
 
-            for unit_modifier in self._hed_dictionary_dictionaries[modifierKey]:
+            for unit_modifier in self._hed_dictionary_dictionaries[modifier_key]:
                 if stripped_value.startswith(unit_modifier):
                     stripped_value = stripped_value[len(unit_modifier):].strip()
                 elif stripped_value.endswith(unit_modifier):
@@ -509,7 +499,7 @@ class TagValidator:
             The unformatted value of the tag
         formatted_tag_unit_value: str
             The formatted value of the tag
-        tag_unit_class_units: list of str
+        tag_unit_class_units: [str]
             A list of valid units for this tag
         Returns
         -------
@@ -523,7 +513,7 @@ class TagValidator:
             derivative_units = self.get_valid_unit_plural(unit)
             for derivative_unit in derivative_units:
                 if self._hed_dictionary.has_unit_modifiers and \
-                        self._hed_dictionary_dictionaries[self.UNIT_SYMBOL_TYPE].get(unit):
+                        self._hed_dictionary_dictionaries[HedKey.UnitSymbol].get(unit):
                     found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
                                                                                 derivative_unit,
                                                                                 True)
@@ -556,8 +546,9 @@ class TagValidator:
             tag_unit_values = self.get_tag_name(formatted_tag)
             if re.search(self._digit_expression, tag_unit_values):
                 default_unit = self.get_unit_class_default_unit(formatted_tag)
-                validation_issues += error_reporter.format_val_warning(ValidationWarnings.UNIT_CLASS_DEFAULT_USED, tag=original_tag,
-                                                                                     default_unit=default_unit)
+                validation_issues += error_reporter.format_val_warning(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
+                                                                       tag=original_tag,
+                                                                       default_unit=default_unit)
                 self._increment_issue_count(is_error=False)
         return validation_issues
 
@@ -589,7 +580,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A list containing the unit classes associated with a particular tag. A empty list will be returned if
             the tag doesn't have unit classes associated with it.
 
@@ -597,7 +588,7 @@ class TagValidator:
         unit_classes = []
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
         if self.is_unit_class_tag(formatted_tag):
-            unit_classes = self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag]
+            unit_classes = self._hed_dictionary_dictionaries[HedKey.UnitClass][unit_class_tag]
             unit_classes = unit_classes.split(',')
         return unit_classes
 
@@ -610,7 +601,7 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A list containing the unit class units associated with a particular tag. A empty list will be returned if
             the tag doesn't have unit class units associated with it.
 
@@ -618,12 +609,12 @@ class TagValidator:
         units = []
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
         if self.is_unit_class_tag(formatted_tag):
-            unit_classes = self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag]
+            unit_classes = self._hed_dictionary_dictionaries[HedKey.UnitClass][unit_class_tag]
             unit_classes = unit_classes.split(',')
 
             for unit_class in unit_classes:
                 try:
-                    units += (self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_UNITS_ELEMENT][unit_class])
+                    units += (self._hed_dictionary_dictionaries[HedKey.Units][unit_class])
                 except Exception:
                     continue
         return units
@@ -646,14 +637,14 @@ class TagValidator:
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
         if self.is_unit_class_tag(formatted_tag):
             has_default_attribute = self._hed_dictionary.tag_has_attribute(unit_class_tag,
-                                                                           TagValidator.DEFAULT_UNIT_ATTRIBUTE)
+                                                                           HedKey.Default)
             if has_default_attribute:
-                default_unit = self._hed_dictionary_dictionaries[TagValidator.DEFAULT_UNIT_ATTRIBUTE][unit_class_tag]
-            elif unit_class_tag in self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE]:
+                default_unit = self._hed_dictionary_dictionaries[HedKey.Default][unit_class_tag]
+            elif unit_class_tag in self._hed_dictionary_dictionaries[HedKey.UnitClass]:
                 unit_classes = \
-                    self._hed_dictionary_dictionaries[TagValidator.UNIT_CLASS_ATTRIBUTE][unit_class_tag].split(',')
+                    self._hed_dictionary_dictionaries[HedKey.UnitClass][unit_class_tag].split(',')
                 first_unit_class = unit_classes[0]
-                default_unit = self._hed_dictionary_dictionaries[TagValidator.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][
+                default_unit = self._hed_dictionary_dictionaries[HedKey.DefaultUnits][
                     first_unit_class]
         return default_unit
 
@@ -662,13 +653,13 @@ class TagValidator:
 
         Parameters
         ----------
-        tag_group: list of str
+        tag_group: [str]
             A list containing the tags in a group.
         tag_group_string: str
             A string of the tag group.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -689,12 +680,12 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
         validation_issues = []
-        if self._hed_dictionary_dictionaries[TagValidator.REQUIRE_CHILD_TYPE].get(formatted_tag):
+        if self._hed_dictionary_dictionaries[HedKey.RequireChild].get(formatted_tag):
             validation_issues += error_reporter.format_val_error(ValidationErrors.REQUIRE_CHILD,
                                                                  tag=original_tag)
             self._increment_issue_count()
@@ -705,19 +696,19 @@ class TagValidator:
 
         Parameters
         ----------
-        formatted_top_level_tags: list of str
+        formatted_top_level_tags: [str]
             A list containing the top-level tags.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
         validation_issues = []
-        required_tag_prefixes = self._hed_dictionary_dictionaries[TagValidator.REQUIRED_PREFIX_TYPE]
+        required_tag_prefixes = self._hed_dictionary_dictionaries[HedKey.RequiredPrefix]
         for required_tag_prefix in required_tag_prefixes:
             capitalized_required_tag_prefix = \
-                self._hed_dictionary_dictionaries[TagValidator.REQUIRED_PREFIX_TYPE][required_tag_prefix]
+                self._hed_dictionary_dictionaries[HedKey.RequiredPrefix][required_tag_prefix]
             if sum([x.startswith(required_tag_prefix) for x in formatted_top_level_tags]) < 1:
                 validation_issues += error_reporter.format_val_warning(
                     ValidationWarnings.REQUIRED_PREFIX_MISSING,
@@ -730,24 +721,24 @@ class TagValidator:
 
         Parameters
         ----------
-        original_tag_list: list of str
+        original_tag_list: [str]
             A list containing tags that are used to report the error.
-        formatted_tag_list: list of str
+        formatted_tag_list: [str]
             A list containing tags that are used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
         validation_issues = []
-        unique_tag_prefixes = self._hed_dictionary_dictionaries[TagValidator.UNIQUE_TAG_TYPE]
+        unique_tag_prefixes = self._hed_dictionary_dictionaries[HedKey.Unique]
         for unique_tag_prefix in unique_tag_prefixes:
             unique_tag_prefix_bool_mask = [x.startswith(unique_tag_prefix) for x in formatted_tag_list]
             if sum(unique_tag_prefix_bool_mask) > 1:
                 validation_issues += error_reporter.format_val_error(
                     ValidationErrors.MULTIPLE_UNIQUE,
-                    tag_prefix=self._hed_dictionary_dictionaries[TagValidator.UNIQUE_TAG_TYPE][unique_tag_prefix])
+                    tag_prefix=self._hed_dictionary_dictionaries[HedKey.Unique][unique_tag_prefix])
                 self._increment_issue_count()
         return validation_issues
 
@@ -764,7 +755,7 @@ class TagValidator:
             True if the tag starts with a unique prefix. False if otherwise.
 
         """
-        unique_tag_prefixes = self._hed_dictionary_dictionaries[TagValidator.UNIQUE_TAG_TYPE]
+        unique_tag_prefixes = self._hed_dictionary_dictionaries[HedKey.Unique]
         for unique_tag_prefix in unique_tag_prefixes:
             if tag.lower().startswith(unique_tag_prefix):
                 return True
@@ -775,13 +766,13 @@ class TagValidator:
 
         Parameters
         ----------
-        original_tag_list: list of str
+        original_tag_list: [str]
             A list containing tags that are used to report the error.
-        formatted_tag_list: list of str
+        formatted_tag_list: [str]
             A list containing tags that are used to do the validation.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -813,7 +804,7 @@ class TagValidator:
             The slash character. By default it is a forward slash.
         Returns
         -------
-        list
+        []
             A list containing the indices of the tag slashes.
 
         """
@@ -847,7 +838,7 @@ class TagValidator:
             A hed string.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -924,7 +915,7 @@ class TagValidator:
             The HED string that caused the error.
         Returns
         -------
-        list of dict
+        [{}]
             A singleton list with a dictionary representing the error.
 
         """
@@ -933,8 +924,10 @@ class TagValidator:
 
     @staticmethod
     def comma_is_missing_after_closing_parentheses(last_non_empty_character, current_character):
-        """Checks to see if a comma is missing after a closing parentheses in a HED string. This is a helper function for
-           the find_missing_commas_in_hed_string function.
+        """
+        Checks to see if a comma is missing after a closing parentheses in a HED string.
+
+        This is a helper function for the find_missing_commas_in_hed_string function.
 
         Parameters
         ----------
@@ -948,8 +941,9 @@ class TagValidator:
             True if a comma is missing after a closing parentheses. False, if otherwise.
 
         """
-        return last_non_empty_character == TagValidator.CLOSING_GROUP_CHARACTER and not \
-            TagValidator.character_is_delimiter(current_character)
+        return last_non_empty_character == TagValidator.CLOSING_GROUP_CHARACTER and \
+            not (TagValidator.character_is_delimiter(current_character) or
+                 current_character == TagValidator.CLOSING_GROUP_CHARACTER)
 
     @staticmethod
     def character_is_delimiter(character):
@@ -965,9 +959,7 @@ class TagValidator:
             Returns true if the character is a delimiter. False, if otherwise. A delimiter is a comma or a tilde.
 
         """
-        if character == TagValidator.COMMA or character == TagValidator.TILDE:
-            return True
-        return False
+        return character == TagValidator.COMMA or character == TagValidator.TILDE
 
     def find_invalid_character_issues(self, hed_string):
         """Reports an error if it finds any invalid characters as defined by TagValidator.INVALID_CHARS
@@ -979,7 +971,7 @@ class TagValidator:
         Returns
         -------
         list
-            A validation issues list. If no issues are found then an empty list is returned.
+            A validation issues []. If no issues are found then an empty list is returned.
 
         """
         validation_issues = []
@@ -1000,7 +992,7 @@ class TagValidator:
             A hed string.
         Returns
         -------
-        list
+        []
             A validation issues list. If no issues are found then an empty list is returned.
 
         """
@@ -1008,9 +1000,10 @@ class TagValidator:
         number_of_opening_parentheses = hed_string.count('(')
         number_of_closing_parentheses = hed_string.count(')')
         if number_of_opening_parentheses != number_of_closing_parentheses:
-            validation_issues += error_reporter.format_val_error(ValidationErrors.PARENTHESES,
-                                                                 opening_parentheses_count=number_of_opening_parentheses,
-                                                                 closing_parentheses_count=number_of_closing_parentheses)
+            validation_issues += error_reporter.format_val_error(
+                ValidationErrors.PARENTHESES,
+                opening_parentheses_count=number_of_opening_parentheses,
+                closing_parentheses_count=number_of_closing_parentheses)
             self._increment_issue_count()
         return validation_issues
 
@@ -1033,7 +1026,6 @@ class TagValidator:
             return not time_obj.tzinfo and not time_obj.microsecond
         except ValueError:
             return False
-        return True
 
     @staticmethod
     def is_date_time(date_time_string):
@@ -1054,11 +1046,3 @@ class TagValidator:
             return not date_time_obj.tzinfo
         except ValueError:
             return False
-        return True
-
-
-if __name__ == '__main__':
-    song = ['always', 'look', 'on', 'the', 'bright', 'side', 'of', 'life']
-    song_iter = iter(song)
-    for sing in song_iter:
-        print(sing)

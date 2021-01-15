@@ -20,11 +20,10 @@
    "stim_file": {
        "LongName": "Stimulus file name",
        "Description": "Relative path of the stimulus image file",
-       "HED": {"THING":  "Attribute/File/#" }
+       "HED": "Attribute/File/#, (Attribute/Informational/Definition/ExampleDef, Attribute/Organizational/ExampleOrganization, (Item/ExampleDefTag1, Item/ExampleDefTag2))"
    },
-  "debug_col": {
-       "LongName": "Stimulus file name",
-       "Description": "Relative path of the stimulus image file",
-       "HED": "Attribute/Response start delay/1 seconds, Action/Button press"
-   }
+    "filename": "ThisIsAnAttribute",
+  "attribute_example": {
+        "NotHED": "attribute_example2"
+  }
 }

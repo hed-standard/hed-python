@@ -7,25 +7,57 @@ The dictionary is a dictionary of dictionaries. The dictionary names are
 'tags', 'takesValue', 'unique', 'units', and 'unitClass'.
 """
 
-from defusedxml.lxml import parse
+from defusedxml.ElementTree import parse
+import xml
+from hed.util.exceptions import SchemaFileError
+from hed.util.error_types import SchemaErrors
+
+
+# These need to match the attributes/element name/etc used to load from the xml
+class HedKey:
+    Default = 'default'
+    ExtensionAllowed = 'extensionAllowed'
+    IsNumeric = 'isNumeric'
+    Position = 'position'
+    PredicateType = 'predicateType'
+    Recommended = 'recommended'
+    RequiredPrefix = 'required'
+    RequireChild = 'requireChild'
+    AllTags = 'tags'
+    TakesValue = 'takesValue'
+    Unique = 'unique'
+    UnitClass = 'unitClass'
+
+    # Default Units for Type
+    DefaultUnits = 'defaultUnits'
+    Units = 'units'
+
+    SIUnit = 'SIUnit'
+    UnitSymbol = 'unitSymbol'
+
+    SIUnitModifier = 'SIUnitModifier'
+    SIUnitSymbolModifier = 'SIUnitSymbolModifier'
+
+    # If this is a valid HED3 spec, this allow mapping from short to long.
+    ShortTags = 'shortTags'
 
 
 class HedDictionary:
-    DEFAULT_UNIT_ATTRIBUTE = 'default'
-    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = 'defaultUnits'
-    DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE = 'default'
-    EXTENSION_ALLOWED_ATTRIBUTE = 'extensionAllowed'
-    TAG_DICTIONARY_KEYS = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
-                           'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
-    UNIT_CLASS_DICTIONARY_KEYS = ['SIUnit', 'unitSymbol']
-    UNIT_MODIFIER_DICTIONARY_KEYS = ['SIUnitModifier', 'SIUnitSymbolModifier']
-    TAGS_DICTIONARY_KEY = 'tags'
-    TAG_UNIT_CLASS_ATTRIBUTE = 'unitClass'
-    UNIT_CLASS_ELEMENT = 'unitClass'
+    TAG_DICTIONARY_KEYS = [HedKey.Default, HedKey.ExtensionAllowed, HedKey.IsNumeric, HedKey.Position,
+                           HedKey.PredicateType, HedKey.Recommended, HedKey.RequiredPrefix, HedKey.RequireChild,
+                           HedKey.AllTags, HedKey.TakesValue, HedKey.Unique, HedKey.UnitClass]
+    UNIT_CLASS_DICTIONARY_KEYS = [HedKey.SIUnit, HedKey.UnitSymbol]
+    UNIT_MODIFIER_DICTIONARY_KEYS = [HedKey.SIUnitModifier, HedKey.SIUnitSymbolModifier]
+
+    # These should mostly match the HedKey values above.
+    # These are repeated here for clarification primarily
+    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = HedKey.DefaultUnits
+    DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE = HedKey.Default
+    UNIT_CLASS_ELEMENT = HedKey.UnitClass
     UNIT_CLASS_UNIT_ELEMENT = 'unit'
-    UNIT_CLASS_UNITS_ELEMENT = 'units'
+    UNIT_CLASS_UNITS_ELEMENT = HedKey.Units
     UNIT_MODIFIER_ELEMENT = 'unitModifier'
-    UNITS_ELEMENT = 'units'
+
     VERSION_ATTRIBUTE = 'version'
 
     def __init__(self, hed_xml_file_path):
@@ -42,7 +74,10 @@ class HedDictionary:
             A Hed_Dictionary object.
 
         """
-        self.root_element = self._find_root_element(hed_xml_file_path)
+        self.no_duplicate_tags = True
+        self.root_element = self.parse_hed_xml_file(hed_xml_file_path)
+        # Used to find parent elements of XML nodes for file parsing
+        self._parent_map = {c: p for p in self.root_element.iter() for c in p}
         self._populate_dictionaries()
 
     def get_root_element(self):
@@ -68,12 +103,23 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit
             class attributes
 
         """
         return self.dictionaries
+
+    def has_duplicate_tags(self):
+        """
+        Returns True if this is a valid hed3 schema with no duplicate short tags.
+
+        Returns
+        -------
+        bool
+            Returns True if this is a valid hed3 schema with no duplicate short tags.
+        """
+        return not self.no_duplicate_tags
 
     def _populate_dictionaries(self):
         """Populates a dictionary of dictionaries that contains all of the tags, tag attributes, unit class units,
@@ -84,7 +130,7 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit class
             attributes.
 
@@ -93,6 +139,54 @@ class HedDictionary:
         self._populate_tag_dictionaries()
         self._populate_unit_class_dictionaries()
         self._populate_unit_modifier_dictionaries()
+        self._populate_short_tag_dict()
+        self._add_hed3_compatible_tags()
+
+    @property
+    def short_tag_mapping(self):
+        """
+        This returns the short->long tag dictionary if we have a hed3 compatible schema.
+
+        Returns
+        -------
+        short_tag_dict: {}
+            Returns the short tag mapping dictionary, or None if this is not a hed3 compatible schema.
+        """
+        if self.no_duplicate_tags:
+            return self.dictionaries[HedKey.ShortTags]
+        return None
+
+    def get_all_forms_of_tag(self, short_tag_to_check):
+        """
+        Given a short tag, return all the longer versions of it.
+
+        eg: "definition" will return
+                ["definition", "informational/definition", "attribute/informational/definition"]
+
+        Parameters
+        ----------
+        short_tag_to_check : str
+            The short version of a hed tag we are interested in.
+
+        Returns
+        -------
+        tag_versions: [str]
+            A list of all short, intermediate, and long versions of the passed in short tag.
+            Returns empty list if no versions found.
+        """
+        try:
+            tag_entry = self.short_tag_mapping[short_tag_to_check.lower()]
+        except KeyError:
+            return []
+
+        split_tags = tag_entry.lower().split("/")
+        final_tag = ""
+        all_forms = []
+        for tag in reversed(split_tags):
+            final_tag = tag + "/" + final_tag
+            all_forms.append(final_tag)
+
+        return all_forms
 
     def _populate_tag_dictionaries(self):
         """Populates a dictionary of dictionaries associated with tags and their attributes.
@@ -102,26 +196,26 @@ class HedDictionary:
 
         Returns
         -------
-        dict
+        {}
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
-        for TAG_DICTIONARY_KEY in HedDictionary.TAG_DICTIONARY_KEYS:
-            tags, tag_elements = self.get_tags_by_attribute(TAG_DICTIONARY_KEY)
-            if HedDictionary.EXTENSION_ALLOWED_ATTRIBUTE == TAG_DICTIONARY_KEY:
+        for dict_key in HedDictionary.TAG_DICTIONARY_KEYS:
+            tags, tag_elements = self.get_tags_by_attribute(dict_key)
+            if HedKey.ExtensionAllowed == dict_key:
                 child_tags = self._get_all_child_tags(tag_elements)
                 child_tags_dictionary = self._string_list_to_lowercase_dictionary(child_tags)
                 tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
                 tag_dictionary.update(child_tags_dictionary)
-            elif HedDictionary.DEFAULT_UNIT_ATTRIBUTE == TAG_DICTIONARY_KEY or \
-                    HedDictionary.TAG_UNIT_CLASS_ATTRIBUTE == TAG_DICTIONARY_KEY:
-                tag_dictionary = self._populate_tag_to_attribute_dictionary(tags, tag_elements, TAG_DICTIONARY_KEY)
-            elif HedDictionary.TAGS_DICTIONARY_KEY == TAG_DICTIONARY_KEY:
+            elif HedKey.Default == dict_key or \
+                    HedKey.UnitClass == dict_key:
+                tag_dictionary = self._populate_tag_to_attribute_dictionary(tags, tag_elements, dict_key)
+            elif HedKey.AllTags == dict_key:
                 tags = self.get_all_tags()[0]
                 tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
             else:
                 tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
-            self.dictionaries[TAG_DICTIONARY_KEY] = tag_dictionary
+            self.dictionaries[dict_key] = tag_dictionary
 
     def _populate_unit_class_dictionaries(self):
         """Populates a dictionary of dictionaries associated with all of the unit classes, unit class units, and unit
@@ -147,6 +241,7 @@ class HedDictionary:
 
     def _populate_unit_modifier_dictionaries(self):
         """
+        Gathers all unit modifier definitions from the schema.
 
         Returns
         -------
@@ -164,6 +259,95 @@ class HedDictionary:
             for unit_modifier_key in self.UNIT_MODIFIER_DICTIONARY_KEYS:
                 self.dictionaries[unit_modifier_key][unit_modifier_name] = unit_modifier_element.get(unit_modifier_key)
 
+    def find_duplicate_tags(self):
+        """Finds all tags that are not unique.
+
+        Returns
+        -------
+        duplicate_tag_dict: {str: [str]}
+            A dictionary of all duplicate short tags as keys, with the values being a list of
+            long tags sharing that short tag
+        """
+        duplicate_dict = {}
+        short_tag_dict = self.dictionaries[HedKey.ShortTags]
+        for tag_name in short_tag_dict:
+            modified_name = f'{tag_name}'
+            if isinstance(short_tag_dict[tag_name], list):
+                duplicate_dict[modified_name] = short_tag_dict[tag_name]
+
+        return duplicate_dict
+
+    def dupe_tag_iter(self, return_detailed_info=False):
+        """
+        An iterator that goes over each line of the duplicate tags dict, including descriptive ones.
+
+        Parameters
+        ----------
+        return_detailed_info : bool
+            If true, also returns header lines listing the number of duplicate tags for each short tag.
+
+        Yields
+        -------
+        text_line: str
+            A list of long tags that have duplicates, with optional descriptive short tag lines.
+        """
+        duplicate_dict = self.find_duplicate_tags()
+        for tag_name in duplicate_dict:
+            if return_detailed_info:
+                yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions:"
+            for tag_entry in duplicate_dict[tag_name]:
+                yield f"\t{tag_entry}"
+
+    def _populate_short_tag_dict(self):
+        """
+        Create a mapping from the short version of a tag to the long version and
+        determines if this is a hed3 compatible schema.
+
+        Returns
+        -------
+        """
+        self.no_duplicate_tags = True
+        base_tag_dict = self.dictionaries[HedKey.AllTags]
+        new_short_tag_dict = {}
+        for tag, unformatted_tag in base_tag_dict.items():
+            split_tags = unformatted_tag.split("/")
+            short_tag = split_tags[-1]
+            if short_tag == "#":
+                continue
+            short_clean_tag = short_tag.lower()
+            new_tag_entry = unformatted_tag
+            if short_clean_tag not in new_short_tag_dict:
+                new_short_tag_dict[short_clean_tag] = new_tag_entry
+            else:
+                self.no_duplicate_tags = False
+                if not isinstance(new_short_tag_dict[short_clean_tag], list):
+                    new_short_tag_dict[short_clean_tag] = [new_short_tag_dict[short_clean_tag]]
+                new_short_tag_dict[short_clean_tag].append(new_tag_entry)
+        self.dictionaries[HedKey.ShortTags] = new_short_tag_dict
+
+    def _add_hed3_compatible_tags(self):
+        """
+        Updates the normal tag dictionaries with all the intermediate forms if this is a hed3 compatible schema."
+
+        Returns
+        -------
+        """
+        if self.no_duplicate_tags:
+            for dict_key in self.TAG_DICTIONARY_KEYS:
+                tag_dictionary = self.dictionaries[dict_key]
+                new_entries = {}
+                for full_tag, value in tag_dictionary.items():
+                    split_tags = full_tag.split("/")
+                    final_tag = ""
+                    for tag in reversed(split_tags):
+                        final_tag = tag + "/" + final_tag
+                        # We need to include the #, but make sure we don't create a tag with just # alone.
+                        if tag == "#":
+                            continue
+                        # Remove extra trailing slash.
+                        new_entries[final_tag[:-1]] = value
+                tag_dictionary.update(new_entries)
+
     def _populate_unit_class_units_dictionary(self, unit_class_elements):
         """Populates a dictionary that contains unit class units.
 
@@ -178,20 +362,20 @@ class HedDictionary:
             A dictionary that contains all the unit class units.
 
         """
-        self.dictionaries[self.UNITS_ELEMENT] = {}
+        self.dictionaries[HedKey.Units] = {}
         for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
             self.dictionaries[unit_class_key] = {}
         for unit_class_element in unit_class_elements:
             element_name = self._get_element_tag_value(unit_class_element)
-            element_units = self._get_elements_by_name('unit', unit_class_element)
+            element_units = self._get_elements_by_name(self.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
             if not element_units:
                 element_units = self._get_element_tag_value(unit_class_element, self.UNIT_CLASS_UNITS_ELEMENT)
                 units = element_units.split(',')
                 units_list = list(map(lambda unit: unit.lower(), units))
-                self.dictionaries[self.UNITS_ELEMENT][element_name] = units_list
+                self.dictionaries[HedKey.Units][element_name] = units_list
                 continue
             element_unit_names = list(map(lambda element: element.text, element_units))
-            self.dictionaries[self.UNITS_ELEMENT][element_name] = element_unit_names
+            self.dictionaries[HedKey.Units][element_name] = element_unit_names
             for element_unit in element_units:
                 unit_name = element_unit.text
                 for unit_class_key in self.UNIT_CLASS_DICTIONARY_KEYS:
@@ -211,31 +395,31 @@ class HedDictionary:
             A dictionary that contains all the unit class default units.
 
         """
-        self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE] = {}
+        self.dictionaries[HedKey.DefaultUnits] = {}
         for unit_class_element in unit_class_elements:
             unit_class_element_name = self._get_element_tag_value(unit_class_element)
             default_unit = unit_class_element.get(self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE)
             if default_unit is None:
-                self.dictionaries[HedDictionary.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = \
+                self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = \
                     unit_class_element.attrib[HedDictionary.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE]
             else:
-                self.dictionaries[self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE][unit_class_element_name] = default_unit
+                self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = default_unit
 
     def _populate_tag_to_attribute_dictionary(self, tag_list, tag_element_list, attribute_name):
         """Populates the dictionaries associated with default unit tags in the attribute dictionary.
 
         Parameters
         ----------
-        tag_list: list
+        tag_list: []
             A list containing tags that have a specific attribute.
-        tag_element_list: list
+        tag_element_list: []
             A list containing tag elements that have a specific attribute.
         attribute_name: str
             The name of the attribute associated with the tags and tag elements.
 
         Returns
         -------
-        dict
+        {}
             The attribute dictionary that has been populated with dictionaries associated with tags.
 
         """
@@ -264,7 +448,8 @@ class HedDictionary:
             lowercase_dictionary[string_element.lower()] = string_element
         return lowercase_dictionary
 
-    def _find_root_element(self, hed_xml_file_path):
+    @staticmethod
+    def parse_hed_xml_file(hed_xml_file_path):
         """Parses a XML file and returns the root element.
 
         Parameters
@@ -278,8 +463,13 @@ class HedDictionary:
             The root element of the HED XML file.
 
         """
-        tree = parse(hed_xml_file_path)
-        return tree.getroot()
+        try:
+            hed_xml_tree = parse(hed_xml_file_path)
+        except xml.etree.ElementTree.ParseError as e:
+            raise SchemaFileError(SchemaErrors.CANNOT_PARSE_XML, e.msg, hed_xml_file_path)
+        except FileNotFoundError as e:
+            raise SchemaFileError(SchemaErrors.FILE_NOT_FOUND, e.strerror, hed_xml_file_path)
+        return hed_xml_tree.getroot()
 
     def _get_ancestor_tag_names(self, tag_element):
         """Gets all the ancestor tag names of a tag element.
@@ -291,17 +481,18 @@ class HedDictionary:
 
         Returns
         -------
-        list
+        []
             A list containing all of the ancestor tag names of a given tag.
 
         """
         ancestor_tags = []
         parent_tag_name = self._get_parent_tag_name(tag_element)
-        parent_element = tag_element.getparent()
+        parent_element = self._parent_map[tag_element]
         while parent_tag_name:
             ancestor_tags.append(parent_tag_name)
             parent_tag_name = self._get_parent_tag_name(parent_element)
-            parent_element = parent_element.getparent()
+            if parent_tag_name:
+                parent_element = self._parent_map[parent_element]
         return ancestor_tags
 
     def _get_element_tag_value(self, element, tag_name='name'):
@@ -336,7 +527,7 @@ class HedDictionary:
             The name of the tag element's parent. If there is no parent tag then an empty string is returned.
 
         """
-        parent_tag_element = tag_element.getparent()
+        parent_tag_element = self._parent_map[tag_element]
         if parent_tag_element is not None:
             return parent_tag_element.findtext('name')
         else:
@@ -376,7 +567,7 @@ class HedDictionary:
 
         """
         tags = []
-        tag_elements = self.root_element.xpath('.//node[@%s]' % attribute_name)
+        tag_elements = self.root_element.findall('.//node[@%s]' % attribute_name)
         for attribute_tag_element in tag_elements:
             tag = self._get_tag_path_from_tag_element(attribute_tag_element)
             tags.append(tag)
@@ -397,29 +588,30 @@ class HedDictionary:
 
         """
         tags = []
-        tag_elements = self.root_element.xpath('.//%s' % tag_element_name)
+        tag_elements = self.root_element.findall('.//%s' % tag_element_name)
         for tag_element in tag_elements:
             tag = self._get_tag_path_from_tag_element(tag_element)
             tags.append(tag)
         return tags, tag_elements
 
-    def _get_elements_by_attribute(self, attribute_name, element_name='node'):
-        """Gets the elements that have a specific attribute.
-
-        Parameters
-        ----------
-        attribute_name: str
-            The name of the attribute associated with the element.
-        element_name: str
-            The name of the XML element tag name. The default is 'node'.
-
-        Returns
-        -------
-        list
-            A list containing elements that have a specified attribute.
-
-        """
-        return self.root_element.xpath('.//%s[@%s]' % (element_name, attribute_name))
+    # def _get_elements_by_attribute(self, attribute_name, element_name='node'):
+    #     """Gets the elements that have a specific attribute.
+    #
+    #     Parameters
+    #     ----------
+    #     attribute_name: str
+    #         The name of the attribute associated with the element.
+    #     element_name: str
+    #         The name of the XML element tag name. The default is 'node'.
+    #
+    #     Returns
+    #     -------
+    #     list
+    #         A list containing elements that have a specified attribute.
+    #
+    #     """
+    #     tag_elements = self.root_element.xpath('.//%s[@%s]' % (element_name, attribute_name))
+    #     return tag_elements
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """Gets the elements that have a specific element name.
@@ -434,14 +626,14 @@ class HedDictionary:
 
         Returns
         -------
-        list
+        []
             A list containing elements that have a specific element name.
 
         """
         if parent_element is None:
-            elements = self.root_element.xpath('.//%s' % element_name)
+            elements = self.root_element.findall('.//%s' % element_name)
         else:
-            elements = parent_element.xpath('.//%s' % element_name)
+            elements = parent_element.findall('.//%s' % element_name)
         return elements
 
     def _get_all_child_tags(self, tag_elements=None, element_name='node', exclude_take_value_tags=True):
@@ -507,6 +699,5 @@ class HedDictionary:
             The version number of the HED XML file.
 
         """
-        tree = parse(hed_xml_file_path)
-        root_node = tree.getroot()
+        root_node = HedDictionary.parse_hed_xml_file(hed_xml_file_path)
         return root_node.attrib[HedDictionary.VERSION_ATTRIBUTE]

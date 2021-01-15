@@ -5,7 +5,18 @@ from hed.tools.tag_format import TagFormat
 
 
 def map_json_file(json_filename, out_filename, mapping_function):
-    """Mapping function takes a string and returns a tuple (modified string, errors)"""
+    """
+        Run the specified mapping_function on all hed strings in a specified json sidecar
+
+    Parameters
+    ----------
+    json_filename : str
+        Path to input json file
+    out_filename : str
+        Path to save output file
+    mapping_function : (str) -> (str, [])
+        The function to map an input string to an output string.
+    """
     json_file = ColumnDefGroup(json_filename)
     all_errors = {}
     for column_def in json_file:
@@ -23,23 +34,15 @@ def map_json_file(json_filename, out_filename, mapping_function):
             print(error["message"])
 
 
-def convert_json_HED_to_short(json_filename, hed_xml_file):
+def convert_json_hed_to_short(json_filename, hed_xml_file):
     formatter = TagFormat(hed_xml_file)
     mapping_function = formatter.convert_hed_string_to_short
     out_filename = os.path.splitext(json_filename)[0] + "_short.json"
     map_json_file(json_filename, out_filename, mapping_function)
 
 
-def convert_json_HED_to_long(json_filename, hed_xml_file):
+def convert_json_hed_to_long(json_filename, hed_xml_file):
     formatter = TagFormat(hed_xml_file)
     mapping_function = formatter.convert_hed_string_to_long
     out_filename = os.path.splitext(json_filename)[0] + "_long.json"
     map_json_file(json_filename, out_filename, mapping_function)
-
-
-if __name__ == '__main__':
-    local_xml_file = "examples/data/HED8.0.0-alpha.1.xml"
-    json_filename = "examples/data/both_types_events.json"
-
-    convert_json_HED_to_short(json_filename, local_xml_file)
-    convert_json_HED_to_long(json_filename, local_xml_file)

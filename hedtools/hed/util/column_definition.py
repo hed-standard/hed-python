@@ -4,10 +4,11 @@ from hed.util.error_types import SidecarErrors
 from hed.util.error_reporter import format_sidecar_error
 from hed.validator.tag_validator import TagValidator
 
+
 class ColumnType(Enum):
     """The overall column_type of a column in column mapper, eg treat it as HED tags.
 
-    Mostly internal."""
+    Mostly internal to column mapper related code"""
     Unknown = None
     # Do not return this column at all
     Ignore = "ignore"
@@ -51,7 +52,34 @@ class ColumnDef:
         self.column_prefix = column_prefix
         self._hed_dict = hed_dict
 
+    @property
+    def hed_dict(self):
+        """
+            The loaded dict for any given entry.
+
+        Returns
+        -------
+        dict_for_entry: dict
+            A dict which generally contains a "HED" entry and optional others like description.
+        """
+        return self._hed_dict
+
     def hed_string_iter(self, include_position=False):
+        """
+        Return iterator to loop over all hed strings in this column definition
+
+        Parameters
+        ----------
+        include_position : bool
+            If true, this returns a tuple including a position element you can pass back in to set_hed_string
+
+        Yields
+        -------
+        hed_string : str
+            hed_string at a given column and key position
+        position: str, optional
+            Indicates where hed_string was loaded from so it can be later set by the user
+        """
         if not isinstance(self._hed_dict, dict):
             return
         hed_strings = self._hed_dict.get("HED", None)
@@ -68,7 +96,16 @@ class ColumnDef:
                 yield hed_strings
 
     def set_hed_string(self, new_hed_string, position=None):
-        """Position is the value returned from hed_string_iter.  Generally the category key."""
+        """
+            Set a hed string in a provided category key/etc
+
+        Parameters
+        ----------
+        new_hed_string : str
+            The new hed_string to replace the value at position.
+        position : str, optional
+            This should only be a value returned from hed_string_iter
+        """
         hed_strings = self._hed_dict.get("HED", None)
         if isinstance(hed_strings, dict):
             if position is None:
@@ -84,18 +121,54 @@ class ColumnDef:
             raise TypeError("Error: Trying to set a HED string on a column_type that doesn't support it.")
 
     def get_category_hed_string(self, category):
+        """Fetches the hed string from a given category key.
+
+        Parameters
+        ----------
+        category : str
+            The category key to retrieve the string from
+
+        Returns
+        -------
+        hed_string: str
+            The hed string for a given category entry in a category column
+        """
         if self.column_type != ColumnType.Categorical:
             return None
 
         return self._hed_dict["HED"].get(category, None)
 
     def get_value_hed_string(self):
+        """Fetches the hed_string from a given value column
+
+        Returns
+        -------
+        hed_string: str
+            The hed string for a given value column
+        """
         if self.column_type != ColumnType.Value:
             return None
 
         return self._hed_dict["HED"]
 
     def expand(self, input_text):
+        """
+            Expands the input_text based on the rules for this column.
+            Eg adding prefix, inserting a column hed_string from key, etc.
+
+        Parameters
+        ----------
+        input_text : str
+            Text to expand(generally from a single cell in a spreadsheet)
+
+        Returns
+        -------
+        hed_string: str
+            The expanded column as a hed_string
+        attribute_name: str
+            If not None, contains the name of this column as an attribute.
+
+        """
         column_type = self.column_type
 
         if column_type == ColumnType.Categorical:
@@ -103,8 +176,7 @@ class ColumnDef:
             if final_text:
                 return final_text, False
             else:
-                # Issue warning here.
-                # Need to talk to kay about how we want to handle this warning.
+                # todo: Issue a warning here that the category key is missing.
                 pass
         elif column_type == ColumnType.Value:
             prelim_text = self.get_value_hed_string()
@@ -151,6 +223,19 @@ class ColumnDef:
         return final_string
 
     def remove_prefix_if_needed(self, original_text):
+        """
+        Remove prefix from all tags in given hed string if this column has a required prefix
+
+        Parameters
+        ----------
+        original_text : str
+            Input text, generally from a single cell of a spreadsheet
+
+        Returns
+        -------
+        prefix_removed_text: str
+            original_text with required prefixes removed from all hed tags
+        """
         prefix_to_remove = self.column_prefix
         if not prefix_to_remove:
             return original_text
@@ -167,6 +252,19 @@ class ColumnDef:
 
     @staticmethod
     def _detect_column_def_type(dict_for_entry):
+        """
+        Determines the ColumnType of a given json entry.
+
+        Parameters
+        ----------
+        dict_for_entry : dict
+            The loaded json entry a specific column.  Generally has a "HED" entry among other optional ones.
+
+        Returns
+        -------
+        column_type: ColumnType
+            The determined type of a given column.  Returns None if unknown.
+        """
         if not dict_for_entry or not isinstance(dict_for_entry, dict):
             return ColumnType.Attribute
 
@@ -183,19 +281,36 @@ class ColumnDef:
 
         return ColumnType.Value
 
-    def _validate_column_entry(self, hed_dictionary=None):
+    def validate_column_entry(self, hed_dictionary=None):
+        """
+        Finds all validation issues in this column.
+
+        Parameters
+        ----------
+        hed_dictionary : HedDictionary, optional
+            The dictionary to use to validate hed_strings.  If absent, will only validate column syntax.
+
+        Returns
+        -------
+        column_issues: [{}]
+        """
         col_validation_issues = []
         # Hed string validation can only be done with a hed_dictionary
         if hed_dictionary and self.hed_string_iter():
             tag_validator = TagValidator(hed_dictionary, check_for_warnings=True, run_semantic_validation=True,
                                          allow_numbers_to_be_pound_sign=True)
-            for hed_string in self.hed_string_iter():
-                col_validation_issues += tag_validator.run_hed_string_validators(hed_string)
+            for hed_string, position in self.hed_string_iter(include_position=True):
+                new_col_validation_issues = tag_validator.run_hed_string_validators(hed_string)
                 for hed_tag in split_hed_string_return_strings(hed_string):
                     hed_tag_lower = hed_tag.lower()
                     tag_issues = tag_validator.run_individual_tag_validators(hed_tag, hed_tag_lower)
                     if tag_issues:
-                        col_validation_issues += tag_issues
+                        new_col_validation_issues += tag_issues
+                if new_col_validation_issues:
+                    new_col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_HED_STRING,
+                                                                     hed_string=hed_string,
+                                                                     position=position) + new_col_validation_issues
+                    col_validation_issues += new_col_validation_issues
 
         if self.column_type is None:
             col_validation_issues += format_sidecar_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
@@ -231,6 +346,7 @@ class ColumnDef:
                         col_validation_issues += format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,
                                                                       pound_sign_count=value.count("#"))
         if col_validation_issues:
-            col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_COLUMN_NAME, column_name=self.column_name) + \
-                                    col_validation_issues
+            col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_COLUMN_NAME,
+                                                         column_name=self.column_name) \
+                                    + col_validation_issues
         return col_validation_issues
