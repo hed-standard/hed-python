@@ -153,7 +153,7 @@ def save_issues_to_upload_folder(dictionary_filename, validation_issues, file_mo
     ----------
     dictionary_filename: str
         The name to the dictionary.
-    validation_issues: str
+    validation_issues: dictionary
         A string containing the validation issues.
     file_mode: str
         Either 'w' to create a new file and write or 'a' to create a new file if necessary and append to end.
@@ -166,7 +166,7 @@ def save_issues_to_upload_folder(dictionary_filename, validation_issues, file_mo
     validation_issues_filename = generate_dictionary_validation_filename(dictionary_filename)
     validation_issues_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], validation_issues_filename)
     with open(validation_issues_file_path, file_mode, encoding='utf-8') as validation_issues_file:
-        for val_issue in validation_issues:
+        for val_issue in validation_issues.values():
             for issue in val_issue:
                 validation_issues_file.write(issue['message'] + "\n")
     validation_issues_file.close()
