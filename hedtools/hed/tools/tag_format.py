@@ -1,7 +1,7 @@
 from hed.util import error_reporter
 from hed.util.error_types import SchemaErrors, ErrorContext
 from hed.util import hed_string_util
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 
 
 class TagFormat:
@@ -9,19 +9,19 @@ class TagFormat:
     Class to convert hed3 tags between short and long form.
     """
 
-    def __init__(self, hed_xml_file=None, hed_dictionary=None):
+    def __init__(self, hed_xml_file=None, hed_schema=None):
         """
 
         Parameters
         ----------
         hed_xml_file : str
-            hed xml schema filepath to create HedDictionary from
-        hed_dictionary : HedDictionary, default None
+            hed xml schema filepath to create HedSchema from
+        hed_schema : HedSchema, default None
              Used in place of hed_xml_file
         """
-        if hed_dictionary is None:
-            hed_dictionary = HedDictionary(hed_xml_file)
-        self._short_tag_mapping = hed_dictionary.short_tag_mapping
+        if hed_schema is None:
+            hed_schema = HedSchema(hed_xml_file)
+        self._short_tag_mapping = hed_schema.short_tag_mapping
 
     def convert_hed_string_to_short(self, hed_string):
         """

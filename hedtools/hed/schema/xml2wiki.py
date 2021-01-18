@@ -2,7 +2,7 @@ from enum import Enum
 
 from hed.schema import constants
 from hed.util import file_util
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 from hed.util.exceptions import SchemaFileError
 from hed.schema.schema_validator import validate_schema
 
@@ -207,7 +207,7 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=Tr
         local_xml_file = file_util.url_to_file(hed_xml_url)
 
     try:
-        hed_xml_tree = HedDictionary.parse_hed_xml_file(local_xml_file)
+        hed_xml_tree = HedSchema.parse_hed_xml_file(local_xml_file)
     except SchemaFileError as e:
         return None, e.format_error_message()
 

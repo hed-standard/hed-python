@@ -281,13 +281,13 @@ class ColumnDef:
 
         return ColumnType.Value
 
-    def validate_column_entry(self, hed_dictionary=None):
+    def validate_column_entry(self, hed_schema=None):
         """
         Finds all validation issues in this column.
 
         Parameters
         ----------
-        hed_dictionary : HedDictionary, optional
+        hed_schema : HedSchema, optional
             The dictionary to use to validate hed_strings.  If absent, will only validate column syntax.
 
         Returns
@@ -295,9 +295,9 @@ class ColumnDef:
         column_issues: [{}]
         """
         col_validation_issues = []
-        # Hed string validation can only be done with a hed_dictionary
-        if hed_dictionary and self.hed_string_iter():
-            tag_validator = TagValidator(hed_dictionary, check_for_warnings=True, run_semantic_validation=True,
+        # Hed string validation can only be done with a hed_schema
+        if hed_schema and self.hed_string_iter():
+            tag_validator = TagValidator(hed_schema, check_for_warnings=True, run_semantic_validation=True,
                                          allow_numbers_to_be_pound_sign=True)
             for hed_string, position in self.hed_string_iter(include_position=True):
                 push_error_context(ErrorContext.SIDECAR_CUE_NAME, position)
@@ -347,7 +347,7 @@ class ColumnDef:
                                                                   category_count=len(raw_hed_dict))
 
                 # Handle this error here instead of above if we don't have a dictionary for hed_string validation
-                if hed_dictionary is None:
+                if hed_schema is None:
                     for key, value in raw_hed_dict.items():
                         if value.count("#") != 0:
                             col_validation_issues += format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,

@@ -1,5 +1,5 @@
 """
-This module contains the Hed_Dictionary class which encapsulates all HED tags, tag attributes, unit classes, and
+This module contains the HedSchema class which encapsulates all HED tags, tag attributes, unit classes, and
 unit class attributes in a dictionary.
 
 The dictionary is a dictionary of dictionaries. The dictionary names are
@@ -42,7 +42,7 @@ class HedKey:
     ShortTags = 'shortTags'
 
 
-class HedDictionary:
+class HedSchema:
     TAG_DICTIONARY_KEYS = [HedKey.Default, HedKey.ExtensionAllowed, HedKey.IsNumeric, HedKey.Position,
                            HedKey.PredicateType, HedKey.Recommended, HedKey.RequiredPrefix, HedKey.RequireChild,
                            HedKey.AllTags, HedKey.TakesValue, HedKey.Unique, HedKey.UnitClass]
@@ -61,7 +61,7 @@ class HedDictionary:
     VERSION_ATTRIBUTE = 'version'
 
     def __init__(self, hed_xml_file_path):
-        """Constructor for the Hed_Dictionary class.
+        """Constructor for the HedSchema class.
 
         Parameters
         ----------
@@ -70,8 +70,8 @@ class HedDictionary:
 
         Returns
         -------
-        HedDictionary
-            A Hed_Dictionary object.
+        HedSchema
+            A HedSchema object.
 
         """
         self.no_duplicate_tags = True
@@ -200,7 +200,7 @@ class HedDictionary:
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
-        for dict_key in HedDictionary.TAG_DICTIONARY_KEYS:
+        for dict_key in HedSchema.TAG_DICTIONARY_KEYS:
             tags, tag_elements = self.get_tags_by_attribute(dict_key)
             if HedKey.ExtensionAllowed == dict_key:
                 child_tags = self._get_all_child_tags(tag_elements)
@@ -404,7 +404,7 @@ class HedDictionary:
             default_unit = unit_class_element.get(self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE)
             if default_unit is None:
                 self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = \
-                    unit_class_element.attrib[HedDictionary.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE]
+                    unit_class_element.attrib[HedSchema.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE]
             else:
                 self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = default_unit
 
@@ -735,5 +735,5 @@ class HedDictionary:
             The version number of the HED XML file.
 
         """
-        root_node = HedDictionary.parse_hed_xml_file(hed_xml_file_path)
-        return root_node.attrib[HedDictionary.VERSION_ATTRIBUTE]
+        root_node = HedSchema.parse_hed_xml_file(hed_xml_file_path)
+        return root_node.attrib[HedSchema.VERSION_ATTRIBUTE]

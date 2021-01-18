@@ -2,27 +2,27 @@ import unittest
 import os
 
 from hed.util.def_mapper import DefinitionMapper
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         hed_xml_file = os.path.join(cls.base_data_dir, "HED8.0.0-alpha.1.xml")
-        cls.hed_dictionary = HedDictionary(hed_xml_file)
-        cls.base_def_mapper = DefinitionMapper(hed_dictionary=cls.hed_dictionary)
+        cls.hed_schema = HedSchema(hed_xml_file)
+        cls.base_def_mapper = DefinitionMapper(hed_schema=cls.hed_schema)
         cls.basic_def_string = "(Definition/TestDef, Organizational/TestOrg, (Item/TestDef1, Item/TestDef2))"
         cls.basic_hed_string = "Item/BasicTestTag1, Item/BasicTestTag2"
 
     def test_add_definitions(self):
-        def_mapper = DefinitionMapper(hed_dictionary=self.hed_dictionary)
+        def_mapper = DefinitionMapper(hed_schema=self.hed_schema)
         original_def_count = len(def_mapper._defs)
         def_mapper.add_definitions(self.basic_def_string)
         new_def_count = len(def_mapper._defs)
         self.assertGreater(new_def_count, original_def_count)
 
     def test_replace_and_remove_tags(self):
-        def_mapper = DefinitionMapper(hed_dictionary=self.hed_dictionary)
+        def_mapper = DefinitionMapper(hed_schema=self.hed_schema)
         def_mapper.add_definitions(self.basic_def_string)
 
         result_string = def_mapper.replace_and_remove_tags(self.basic_def_string)
@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
             self.assertTrue(result)
 
     def test__check_for_definitions(self):
-        def_mapper = DefinitionMapper(hed_dictionary=self.hed_dictionary)
+        def_mapper = DefinitionMapper(hed_schema=self.hed_schema)
         original_def_count = len(def_mapper._defs)
         def_mapper._check_for_definitions(self.basic_def_string)
         new_def_count = len(def_mapper._defs)

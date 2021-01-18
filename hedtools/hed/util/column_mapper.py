@@ -9,7 +9,7 @@ class ColumnMapper:
         Private Functions and variables column and row indexing starts at 0.
         Public functions and variables indexing starts at 1(or 2 if has column names)"""
     def __init__(self, json_def_files=None, tag_columns=None, column_prefix_dictionary=None,
-                 hed_dictionary=None, attribute_columns=None, definition_mapper=None):
+                 hed_schema=None, attribute_columns=None, definition_mapper=None):
         """Constructor for ColumnMapper
 
         Parameters
@@ -25,7 +25,7 @@ class ColumnMapper:
             4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/
             prepended to them, the fourth column contains tags that need Event/Label/ prepended to them,
             and the fifth column contains tags that needs Event/Category/ prepended to them.
-        hed_dictionary: HedDictionary
+        hed_schema: HedSchema
             Used to create a TagValidator, which is then used to validate the entries in value and category entries.
         attribute_columns: str or int or [str] or [int]
              A list of column names or numbers to treat as attributes.
@@ -44,7 +44,7 @@ class ColumnMapper:
         self._def_mapper = definition_mapper
 
         self._na_patterns = ["n/a", "nan"]
-        self._hed_dictionary = hed_dictionary
+        self._hed_schema = hed_schema
 
         if json_def_files:
             self.add_json_file_defs(json_def_files)
