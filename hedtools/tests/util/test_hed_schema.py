@@ -1,38 +1,38 @@
 import unittest
 import os
 
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 
 
-class TestHedDictionary(unittest.TestCase):
+class TestHedSchema(unittest.TestCase):
     schema_file = '../data/HED7.1.1.xml'
 
     @classmethod
     def setUpClass(cls):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_dictionary = HedDictionary(hed_xml)
-        cls.hed_dictionary_dictionaries = cls.hed_dictionary.dictionaries
+        cls.hed_schema = HedSchema(hed_xml)
+        cls.hed_schema_dictionaries = cls.hed_schema.dictionaries
 
     def test_attribute_keys(self):
         tag_dictionary_keys = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
                                'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
         for key in tag_dictionary_keys:
-            self.assertIn(key, self.hed_dictionary_dictionaries, key + ' not found.')
-            self.assertIsInstance(self.hed_dictionary_dictionaries[key], dict, key + ' not a dictionary.')
+            self.assertIn(key, self.hed_schema_dictionaries, key + ' not found.')
+            self.assertIsInstance(self.hed_schema_dictionaries[key], dict, key + ' not a dictionary.')
 
     def test_required_tags(self):
         expected_tags = ['event/category', 'event/description', 'event/label']
-        actual_tags_dictionary = self.hed_dictionary_dictionaries['required']
+        actual_tags_dictionary = self.hed_schema_dictionaries['required']
         self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
 
     def test_positioned_tags(self):
         expected_tags = ['event/category', 'event/description', 'event/label', 'event/long name']
-        actual_tags_dictionary = self.hed_dictionary_dictionaries['position']
+        actual_tags_dictionary = self.hed_schema_dictionaries['position']
         self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
 
     def test_unique_tags(self):
         expected_tags = ['event/description', 'event/label', 'event/long name']
-        actual_tags_dictionary = self.hed_dictionary_dictionaries['unique']
+        actual_tags_dictionary = self.hed_schema_dictionaries['unique']
         self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
 
     def test_default_unit_tags(self):
@@ -42,7 +42,7 @@ class TestHedDictionary(unittest.TestCase):
             'attribute/blink/pavr/#': 'centiseconds',
             'attribute/blink/navr/#': 'centiseconds',
         }
-        actual_tags_dictionary = self.hed_dictionary_dictionaries['default']
+        actual_tags_dictionary = self.hed_schema_dictionaries['default']
         self.assertDictEqual(actual_tags_dictionary, default_unit_tags)
 
     def test_unit_classes(self):
@@ -82,8 +82,8 @@ class TestHedDictionary(unittest.TestCase):
             'area': ['m^2', 'px^2', 'pixel^2'],
             'volume': ['m^3'],
         }
-        actual_default_units_dictionary = self.hed_dictionary_dictionaries['defaultUnits']
-        actual_all_units_dictionary = self.hed_dictionary_dictionaries['units']
+        actual_default_units_dictionary = self.hed_schema_dictionaries['defaultUnits']
+        actual_all_units_dictionary = self.hed_schema_dictionaries['units']
         self.assertDictEqual(actual_default_units_dictionary, default_units)
         self.assertDictEqual(actual_all_units_dictionary, all_units)
 
@@ -98,7 +98,7 @@ class TestHedDictionary(unittest.TestCase):
             'unitClass': 63,
         }
         for key, number in expected_tag_count.items():
-            self.assertEqual(len(self.hed_dictionary_dictionaries[key]), number, 'Mismatch on attribute ' + key)
+            self.assertEqual(len(self.hed_schema_dictionaries[key]), number, 'Mismatch on attribute ' + key)
 
     def test_tag_attribute(self):
         test_strings = {
@@ -155,5 +155,15 @@ class TestHedDictionary(unittest.TestCase):
         for key, test_string in test_strings.items():
             expected_dict = expected_results[key]
             for attribute, expected_value in expected_dict.items():
-                self.assertEqual(self.hed_dictionary.tag_has_attribute(test_string, attribute), expected_value,
+                self.assertEqual(self.hed_schema.tag_has_attribute(test_string, attribute), expected_value,
                                  'Test string: %s. Attribute: %s.' % (test_string, attribute))
+
+    def test_get_all_descriptions(self):
+        descriptions = self.hed_schema.get_all_descriptions()
+        self.assertTrue(isinstance(descriptions, dict))
+        self.assertTrue(len(descriptions) > 0)
+
+    def test_get_all_terms(self):
+        terms = self.hed_schema.get_all_terms()
+        self.assertTrue(isinstance(terms, list))
+        self.assertTrue(len(terms) > 0)

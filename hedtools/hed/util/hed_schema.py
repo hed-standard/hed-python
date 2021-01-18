@@ -1,5 +1,5 @@
 """
-This module contains the Hed_Dictionary class which encapsulates all HED tags, tag attributes, unit classes, and
+This module contains the HedSchema class which encapsulates all HED tags, tag attributes, unit classes, and
 unit class attributes in a dictionary.
 
 The dictionary is a dictionary of dictionaries. The dictionary names are
@@ -42,7 +42,7 @@ class HedKey:
     ShortTags = 'shortTags'
 
 
-class HedDictionary:
+class HedSchema:
     TAG_DICTIONARY_KEYS = [HedKey.Default, HedKey.ExtensionAllowed, HedKey.IsNumeric, HedKey.Position,
                            HedKey.PredicateType, HedKey.Recommended, HedKey.RequiredPrefix, HedKey.RequireChild,
                            HedKey.AllTags, HedKey.TakesValue, HedKey.Unique, HedKey.UnitClass]
@@ -61,7 +61,7 @@ class HedDictionary:
     VERSION_ATTRIBUTE = 'version'
 
     def __init__(self, hed_xml_file_path):
-        """Constructor for the Hed_Dictionary class.
+        """Constructor for the HedSchema class.
 
         Parameters
         ----------
@@ -70,8 +70,8 @@ class HedDictionary:
 
         Returns
         -------
-        HedDictionary
-            A Hed_Dictionary object.
+        HedSchema
+            A HedSchema object.
 
         """
         self.no_duplicate_tags = True
@@ -200,7 +200,7 @@ class HedDictionary:
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
-        for dict_key in HedDictionary.TAG_DICTIONARY_KEYS:
+        for dict_key in HedSchema.TAG_DICTIONARY_KEYS:
             tags, tag_elements = self.get_tags_by_attribute(dict_key)
             if HedKey.ExtensionAllowed == dict_key:
                 child_tags = self._get_all_child_tags(tag_elements)
@@ -292,11 +292,14 @@ class HedDictionary:
             A list of long tags that have duplicates, with optional descriptive short tag lines.
         """
         duplicate_dict = self.find_duplicate_tags()
+        prefix_string = ""
+        if return_detailed_info:
+            prefix_string = "\t"
         for tag_name in duplicate_dict:
             if return_detailed_info:
                 yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions:"
             for tag_entry in duplicate_dict[tag_name]:
-                yield f"\t{tag_entry}"
+                yield f"{prefix_string}{tag_entry}"
 
     def _populate_short_tag_dict(self):
         """
@@ -401,7 +404,7 @@ class HedDictionary:
             default_unit = unit_class_element.get(self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE)
             if default_unit is None:
                 self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = \
-                    unit_class_element.attrib[HedDictionary.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE]
+                    unit_class_element.attrib[HedSchema.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE]
             else:
                 self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = default_unit
 
@@ -613,6 +616,39 @@ class HedDictionary:
     #     tag_elements = self.root_element.xpath('.//%s[@%s]' % (element_name, attribute_name))
     #     return tag_elements
 
+    def get_all_descriptions(self):
+        """
+        Gather all description nodes from the xml file and pair them with their tag name.
+
+        Returns
+        -------
+        {str: str}:
+            tag name : description
+        """
+        elements = self._get_elements_by_name("description")
+        parents = [self._get_parent_tag_name(element) for element in elements]
+        final_dict = {parent: element.text for parent, element in zip(parents, elements)}
+        return final_dict
+
+    def get_all_terms(self):
+        """
+        Gets a single copy of all hed terms from the schema, for hed2 or hed3 compatible.
+
+        Returns
+        -------
+        term_list: [str]
+            A list of all terms(short tags) from the schema.
+        """
+        final_list = []
+        if not self.has_duplicate_tags():
+            for lower_tag, org_tag in self.short_tag_mapping.items():
+                final_list.append(org_tag.split('/')[-1])
+        # Fallback for hed2 style schema validation
+        else:
+            for lower_tag, org_tag in self.dictionaries[HedKey.AllTags].items():
+                final_list.append(org_tag.split('/')[-1])
+        return final_list
+
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """Gets the elements that have a specific element name.
 
@@ -699,5 +735,5 @@ class HedDictionary:
             The version number of the HED XML file.
 
         """
-        root_node = HedDictionary.parse_hed_xml_file(hed_xml_file_path)
-        return root_node.attrib[HedDictionary.VERSION_ATTRIBUTE]
+        root_node = HedSchema.parse_hed_xml_file(hed_xml_file_path)
+        return root_node.attrib[HedSchema.VERSION_ATTRIBUTE]

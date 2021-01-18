@@ -7,7 +7,7 @@
           "stop": "A blue square is displayed to indicate stopping"
        },
        "HED": {
-          "go": "Experimental-stimulus, Label/RedSquare,Description/A red square is displayed to indicate starting,Visual, Item/Object/2D Shape/Square,Attribute/Visual/Color/Red, Attribute/Visual/Rendering type/Screen,Attribute/Location/Screen/Center",
+          "go": "Experimental-stimulu, Label/RedSquare,Description/A red square is displayed to indicate starting,Visual, Item/Object/2D Shape/Square,Attribute/Visual/Color/Red, Attribute/Visual/Rendering type/Screen,Attribute/Location/Screen/Center",
           "stop": "Experimental-stimulus, Label/BlueSquare,Description/A blue square is displayed to indicate stopping,Visual, Item/Object/2D Shape/Square,Attribute/Visual/Color/Blue, Attribute/Visual/Rendering type/Screen,Attribute/Location/Screen/Center"
        }
    },
@@ -20,11 +20,17 @@
    "stim_file": {
        "LongName": "Stimulus file name",
        "Description": "Relative path of the stimulus image file",
-       "HED": {"THING":  "Attribute/File/#" }
+       "HED": {"THING":  "Attribute/File/#, Experimental-stimulu" }
    },
   "debug_col": {
        "LongName": "Stimulus file name",
        "Description": "Relative path of the stimulus image file",
-       "HED": "Attribute/Response start delay/1 seconds, Action/Button press"
+       "HED": "Attribute/Response start delay/1 seconds, Experimental-stimulu"
+   },
+     "stim_file2": {
+       "LongName": "Stimulus file name",
+       "Description": "Relative path of the stimulus image file",
+       "HED": {"THING":  "Attribute/File/1 seconds, Experimental-stimulu",
+               "THING2":  "Attribute/File/1 second, Experimental-stimulu"}
    }
 }
