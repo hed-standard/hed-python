@@ -5,7 +5,7 @@ from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.hed_validator import HedValidator
 from hed.util.error_reporter import format_val_error, format_val_warning
 from hed.validator.tag_validator import TagValidator
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 
 
 class TestHed(unittest.TestCase):
@@ -14,14 +14,14 @@ class TestHed(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_dictionary = HedDictionary(hed_xml)
+        cls.hed_schema = HedSchema(hed_xml)
         cls.syntactic_tag_validator = TagValidator(check_for_warnings=False,
                                                    run_semantic_validation=False)
         cls.syntactic_warning_tag_validator = TagValidator(check_for_warnings=True,
                                                            run_semantic_validation=False)
-        cls.semantic_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=False,
+        cls.semantic_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=False,
                                                   run_semantic_validation=True)
-        cls.semantic_warning_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=True,
+        cls.semantic_warning_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=True,
                                                           run_semantic_validation=True)
         cls.syntactic_hed_input_reader = HedValidator("Event/Category")
         cls.syntactic_hed_input_reader._tag_validator = cls.syntactic_tag_validator
@@ -584,14 +584,14 @@ class TestHed3(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_dictionary = HedDictionary(hed_xml)
-        cls.syntactic_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=False,
+        cls.hed_schema = HedSchema(hed_xml)
+        cls.syntactic_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=False,
                                                    run_semantic_validation=False)
-        cls.syntactic_warning_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=True,
+        cls.syntactic_warning_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=True,
                                                            run_semantic_validation=False)
-        cls.semantic_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=False,
+        cls.semantic_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=False,
                                                   run_semantic_validation=True)
-        cls.semantic_warning_tag_validator = TagValidator(cls.hed_dictionary, check_for_warnings=True,
+        cls.semantic_warning_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=True,
                                                           run_semantic_validation=True)
         cls.syntactic_hed_input_reader = HedValidator("Event/Category")
         cls.syntactic_hed_input_reader._tag_validator = cls.syntactic_tag_validator

@@ -9,7 +9,7 @@ import inflect
 
 from hed.util.error_types import ValidationErrors, ValidationWarnings
 from hed.util import error_reporter
-from hed.util.hed_dictionary import HedDictionary, HedKey
+from hed.util.hed_schema import HedSchema, HedKey
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -29,14 +29,14 @@ class TagValidator:
     DATE_TIME_UNIT_CLASS = 'dateTime'
     TIME_UNIT_CLASS = 'time'
 
-    def __init__(self, hed_dictionary=None, check_for_warnings=False, run_semantic_validation=True,
+    def __init__(self, hed_schema=None, check_for_warnings=False, run_semantic_validation=True,
                  allow_numbers_to_be_pound_sign=False):
         """Constructor for the Tag_Validator class.
 
         Parameters
         ----------
-        hed_dictionary: HedDictionary
-            A Hed_Dictionary object.
+        hed_schema: HedSchema
+            A HedSchema object.
         allow_numbers_to_be_pound_sign: bool
             If true, considers # equal to a number for validation purposes.  This is so it can validate templates.
         Returns
@@ -45,11 +45,11 @@ class TagValidator:
             A Tag_Validator object.
 
         """
-        self._hed_dictionary = hed_dictionary
-        if hed_dictionary:
-            self._hed_dictionary_dictionaries = hed_dictionary.get_dictionaries()
+        self._hed_schema = hed_schema
+        if hed_schema:
+            self._hed_schema_dictionaries = hed_schema.get_dictionaries()
         else:
-            self._hed_dictionary_dictionaries = None
+            self._hed_schema_dictionaries = None
         self._check_for_warnings = check_for_warnings
         self._issue_count = 0
         self._error_count = 0
@@ -249,7 +249,7 @@ class TagValidator:
         """
         validation_issues = []
         is_extension_tag = self.is_extension_allowed_tag(formatted_tag)
-        if self._hed_dictionary_dictionaries[HedKey.AllTags].get(formatted_tag) or \
+        if self._hed_schema_dictionaries[HedKey.AllTags].get(formatted_tag) or \
                 self.tag_takes_value(formatted_tag) or formatted_tag == TagValidator.TILDE:
             return validation_issues
 
@@ -276,7 +276,7 @@ class TagValidator:
             True if the tag is a valid HED tag. False, if otherwise.
 
         """
-        return self._hed_dictionary_dictionaries[HedKey.AllTags].get(formatted_tag) is not None
+        return self._hed_schema_dictionaries[HedKey.AllTags].get(formatted_tag) is not None
 
     def check_capitalization(self, original_tag, formatted_tag):
         """Reports a validation warning if the tag isn't correctly capitalized.
@@ -323,8 +323,8 @@ class TagValidator:
         tag_slash_indices = self.get_tag_slash_indices(formatted_tag)
         for tag_slash_index in tag_slash_indices:
             tag_substring = self.get_tag_substring_by_end_index(formatted_tag, tag_slash_index)
-            if self._hed_dictionary.tag_has_attribute(tag_substring,
-                                                      HedKey.ExtensionAllowed):
+            if self._hed_schema.tag_has_attribute(tag_substring,
+                                                  HedKey.ExtensionAllowed):
                 return True
         return False
 
@@ -341,11 +341,11 @@ class TagValidator:
             True if the tag has the 'takesValue' attribute. False, if otherwise.
 
         """
-        if not self._hed_dictionary:
+        if not self._hed_schema:
             return False
         takes_value_tag = self.replace_tag_name_with_pound(formatted_tag)
-        return self._hed_dictionary.tag_has_attribute(takes_value_tag,
-                                                      HedKey.TakesValue)
+        return self._hed_schema.tag_has_attribute(takes_value_tag,
+                                                  HedKey.TakesValue)
 
     def is_unit_class_tag(self, formatted_tag):
         """Checks to see if the tag has the 'unitClass' attribute.
@@ -361,10 +361,10 @@ class TagValidator:
 
         """
         takes_value_tag = self.replace_tag_name_with_pound(formatted_tag)
-        if not self._hed_dictionary.has_unit_classes:
+        if not self._hed_schema.has_unit_classes:
             return False
-        return self._hed_dictionary.tag_has_attribute(takes_value_tag,
-                                                      HedKey.UnitClass)
+        return self._hed_schema.tag_has_attribute(takes_value_tag,
+                                                  HedKey.UnitClass)
 
     def replace_tag_name_with_pound(self, formatted_tag):
         """Replaces the tag name with the pound sign.
@@ -407,17 +407,17 @@ class TagValidator:
             original_tag_unit_value = self.get_tag_name(original_tag)
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag))
             if (TagValidator.DATE_TIME_UNIT_CLASS in
-                    self._hed_dictionary_dictionaries[HedKey.Units]):
+                    self._hed_schema_dictionaries[HedKey.Units]):
                 if (TagValidator.DATE_TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
             if (TagValidator.CLOCK_TIME_UNIT_CLASS in
-                    self._hed_dictionary_dictionaries[HedKey.Units]):
+                    self._hed_schema_dictionaries[HedKey.Units]):
                 if (TagValidator.CLOCK_TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
             elif (TagValidator.TIME_UNIT_CLASS in
-                  self._hed_dictionary_dictionaries[HedKey.Units]):
+                  self._hed_schema_dictionaries[HedKey.Units]):
                 if (TagValidator.TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
@@ -446,8 +446,8 @@ class TagValidator:
             list of plural units
         """
         derivative_units = [unit]
-        if self._hed_dictionary.has_unit_modifiers and \
-                self._hed_dictionary_dictionaries[HedKey.UnitSymbol].get(unit) is None:
+        if self._hed_schema.has_unit_modifiers and \
+                self._hed_schema_dictionaries[HedKey.UnitSymbol].get(unit) is None:
             derivative_units.append(pluralize.plural(unit))
         return derivative_units
 
@@ -477,13 +477,13 @@ class TagValidator:
             found_unit = True
             stripped_value = str(unit_value)[0:-len(unit)].strip()
 
-        if found_unit and self._hed_dictionary.has_unit_modifiers:
+        if found_unit and self._hed_schema.has_unit_modifiers:
             if is_unit_symbol:
                 modifier_key = HedKey.SIUnitSymbolModifier
             else:
                 modifier_key = HedKey.SIUnitModifier
 
-            for unit_modifier in self._hed_dictionary_dictionaries[modifier_key]:
+            for unit_modifier in self._hed_schema_dictionaries[modifier_key]:
                 if stripped_value.startswith(unit_modifier):
                     stripped_value = stripped_value[len(unit_modifier):].strip()
                 elif stripped_value.endswith(unit_modifier):
@@ -512,8 +512,8 @@ class TagValidator:
         for unit in tag_unit_class_units:
             derivative_units = self.get_valid_unit_plural(unit)
             for derivative_unit in derivative_units:
-                if self._hed_dictionary.has_unit_modifiers and \
-                        self._hed_dictionary_dictionaries[HedKey.UnitSymbol].get(unit):
+                if self._hed_schema.has_unit_modifiers and \
+                        self._hed_schema_dictionaries[HedKey.UnitSymbol].get(unit):
                     found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
                                                                                 derivative_unit,
                                                                                 True)
@@ -588,7 +588,7 @@ class TagValidator:
         unit_classes = []
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
         if self.is_unit_class_tag(formatted_tag):
-            unit_classes = self._hed_dictionary_dictionaries[HedKey.UnitClass][unit_class_tag]
+            unit_classes = self._hed_schema_dictionaries[HedKey.UnitClass][unit_class_tag]
             unit_classes = unit_classes.split(',')
         return unit_classes
 
@@ -609,12 +609,12 @@ class TagValidator:
         units = []
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
         if self.is_unit_class_tag(formatted_tag):
-            unit_classes = self._hed_dictionary_dictionaries[HedKey.UnitClass][unit_class_tag]
+            unit_classes = self._hed_schema_dictionaries[HedKey.UnitClass][unit_class_tag]
             unit_classes = unit_classes.split(',')
 
             for unit_class in unit_classes:
                 try:
-                    units += (self._hed_dictionary_dictionaries[HedKey.Units][unit_class])
+                    units += (self._hed_schema_dictionaries[HedKey.Units][unit_class])
                 except Exception:
                     continue
         return units
@@ -636,15 +636,15 @@ class TagValidator:
         default_unit = ''
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
         if self.is_unit_class_tag(formatted_tag):
-            has_default_attribute = self._hed_dictionary.tag_has_attribute(unit_class_tag,
-                                                                           HedKey.Default)
+            has_default_attribute = self._hed_schema.tag_has_attribute(unit_class_tag,
+                                                                       HedKey.Default)
             if has_default_attribute:
-                default_unit = self._hed_dictionary_dictionaries[HedKey.Default][unit_class_tag]
-            elif unit_class_tag in self._hed_dictionary_dictionaries[HedKey.UnitClass]:
+                default_unit = self._hed_schema_dictionaries[HedKey.Default][unit_class_tag]
+            elif unit_class_tag in self._hed_schema_dictionaries[HedKey.UnitClass]:
                 unit_classes = \
-                    self._hed_dictionary_dictionaries[HedKey.UnitClass][unit_class_tag].split(',')
+                    self._hed_schema_dictionaries[HedKey.UnitClass][unit_class_tag].split(',')
                 first_unit_class = unit_classes[0]
-                default_unit = self._hed_dictionary_dictionaries[HedKey.DefaultUnits][
+                default_unit = self._hed_schema_dictionaries[HedKey.DefaultUnits][
                     first_unit_class]
         return default_unit
 
@@ -685,7 +685,7 @@ class TagValidator:
 
         """
         validation_issues = []
-        if self._hed_dictionary_dictionaries[HedKey.RequireChild].get(formatted_tag):
+        if self._hed_schema_dictionaries[HedKey.RequireChild].get(formatted_tag):
             validation_issues += error_reporter.format_val_error(ValidationErrors.REQUIRE_CHILD,
                                                                  tag=original_tag)
             self._increment_issue_count()
@@ -705,10 +705,10 @@ class TagValidator:
 
         """
         validation_issues = []
-        required_tag_prefixes = self._hed_dictionary_dictionaries[HedKey.RequiredPrefix]
+        required_tag_prefixes = self._hed_schema_dictionaries[HedKey.RequiredPrefix]
         for required_tag_prefix in required_tag_prefixes:
             capitalized_required_tag_prefix = \
-                self._hed_dictionary_dictionaries[HedKey.RequiredPrefix][required_tag_prefix]
+                self._hed_schema_dictionaries[HedKey.RequiredPrefix][required_tag_prefix]
             if sum([x.startswith(required_tag_prefix) for x in formatted_top_level_tags]) < 1:
                 validation_issues += error_reporter.format_val_warning(
                     ValidationWarnings.REQUIRED_PREFIX_MISSING,
@@ -732,13 +732,13 @@ class TagValidator:
 
         """
         validation_issues = []
-        unique_tag_prefixes = self._hed_dictionary_dictionaries[HedKey.Unique]
+        unique_tag_prefixes = self._hed_schema_dictionaries[HedKey.Unique]
         for unique_tag_prefix in unique_tag_prefixes:
             unique_tag_prefix_bool_mask = [x.startswith(unique_tag_prefix) for x in formatted_tag_list]
             if sum(unique_tag_prefix_bool_mask) > 1:
                 validation_issues += error_reporter.format_val_error(
                     ValidationErrors.MULTIPLE_UNIQUE,
-                    tag_prefix=self._hed_dictionary_dictionaries[HedKey.Unique][unique_tag_prefix])
+                    tag_prefix=self._hed_schema_dictionaries[HedKey.Unique][unique_tag_prefix])
                 self._increment_issue_count()
         return validation_issues
 
@@ -755,7 +755,7 @@ class TagValidator:
             True if the tag starts with a unique prefix. False if otherwise.
 
         """
-        unique_tag_prefixes = self._hed_dictionary_dictionaries[HedKey.Unique]
+        unique_tag_prefixes = self._hed_schema_dictionaries[HedKey.Unique]
         for unique_tag_prefix in unique_tag_prefixes:
             if tag.lower().startswith(unique_tag_prefix):
                 return True

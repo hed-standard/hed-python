@@ -2,16 +2,16 @@
         opening a json file and converting each HED tag from short to long."""
 
 from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 from hed.tools.tag_format import TagFormat
 
 local_hed_xml = "data/HED8.0.0-alpha.1.xml"
-hed_dictionary = HedDictionary(local_hed_xml)
+hed_schema = HedSchema(local_hed_xml)
 json_filename = "data/both_types_events_errors.json"
 
 json_file = ColumnDefGroup(json_filename)
 # Print all the errors from the json file
-errors = json_file.validate_entries(hed_dictionary)
+errors = json_file.validate_entries(hed_schema)
 for error in errors.values():
     for sub_error in error:
         print(sub_error["message"])

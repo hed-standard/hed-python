@@ -15,24 +15,24 @@ class DefinitionMapper:
     DEF_KEY = "definition"
     ORG_KEY = "organizational"
 
-    def __init__(self, hed_inputs=None, hed_dictionary=None):
+    def __init__(self, hed_inputs=None, hed_schema=None):
         """
 
         Parameters
         ----------
         hed_inputs : [] or str or BaseFileInput or ColumnDefGroup
             List input doesn't need to all be the same type.
-        hed_dictionary : HedDictionary, optional
+        hed_schema : HedSchema, optional
             Used to determine where definition tags are in the schema.  This is technically optional, but
             only short form definition tags will work if this is absent.
         """
         self._defs = {}
-        self._short_tag_mapping = hed_dictionary.short_tag_mapping
+        self._short_tag_mapping = hed_schema.short_tag_mapping
 
-        if hed_dictionary:
-            self._def_tag_versions = hed_dictionary.get_all_forms_of_tag(self.DEF_KEY)
-            self._org_tag_versions = hed_dictionary.get_all_forms_of_tag(self.ORG_KEY)
-            self._label_tag_versions = hed_dictionary.get_all_forms_of_tag(self.DLABEL_KEY)
+        if hed_schema:
+            self._def_tag_versions = hed_schema.get_all_forms_of_tag(self.DEF_KEY)
+            self._org_tag_versions = hed_schema.get_all_forms_of_tag(self.ORG_KEY)
+            self._label_tag_versions = hed_schema.get_all_forms_of_tag(self.DLABEL_KEY)
             if not self._label_tag_versions:
                 self._label_tag_versions = [self.DLABEL_KEY + "/"]
         else:
