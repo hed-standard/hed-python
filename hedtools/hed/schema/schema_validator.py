@@ -1,4 +1,4 @@
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 from hed.util.error_reporter import format_schema_error, format_schema_warning, push_error_context, pop_error_context
 from hed.util.error_types import SchemaErrors, SchemaWarnings, ErrorContext
 from hed.util.exceptions import SchemaFileError
@@ -21,7 +21,7 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True):
     """
     issues_list = []
     try:
-        hed_dict = HedDictionary(hed_xml_file)
+        hed_dict = HedSchema(hed_xml_file)
     except SchemaFileError as e:
         return e.format_error_message()
 

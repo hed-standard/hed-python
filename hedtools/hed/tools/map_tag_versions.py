@@ -1,7 +1,7 @@
 import re
 import copy
 from hed.util.hed_string_util import split_hed_string, remove_slashes_and_spaces
-from hed.util.hed_dictionary import HedDictionary, HedKey
+from hed.util.hed_schema import HedSchema, HedKey
 
 # Todo: Review this file once we have more stable test cases for it.
 
@@ -42,9 +42,9 @@ def read_version_map(version_map_filename, left_hed_schema=None, right_hed_schem
                      return_errors=False):
     left_dict = right_dict = None
     if left_hed_schema:
-        left_dict = HedDictionary(left_hed_schema)
+        left_dict = HedSchema(left_hed_schema)
     if right_hed_schema:
-        right_dict = HedDictionary(right_hed_schema)
+        right_dict = HedSchema(right_hed_schema)
     mapping_dict = {}
     error_list = []
 

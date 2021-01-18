@@ -182,12 +182,12 @@ class ColumnDefGroup:
         """
         return self._validation_issues
 
-    def validate_entries(self, hed_dictionary=None, display_filename=None):
-        """Validate the column entries, and also hed strings in the column entries if a hed_dictionary is passed.
+    def validate_entries(self, hed_schema=None, display_filename=None):
+        """Validate the column entries, and also hed strings in the column entries if a hed_schema is passed.
 
         Parameters
         ----------
-        hed_dictionary : HedDictionary, optional
+        hed_schema : HedSchema, optional
             The dictionary to use to validate individual hed strings.
         display_filename: str
             If present, it will display errors as coming from this filename instead of the actual source.
@@ -206,7 +206,7 @@ class ColumnDefGroup:
             push_error_context(ErrorContext.FILE_NAME, display_filename, False)
             for column_entry in self:
                 push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
-                col_validation_issues = column_entry.validate_column_entry(hed_dictionary)
+                col_validation_issues = column_entry.validate_column_entry(hed_schema)
                 if col_validation_issues:
                     key_validation_issues[column_entry.column_name] = col_validation_issues
 

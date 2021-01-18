@@ -8,7 +8,7 @@ from hed.util.error_types import ValidationErrors, ErrorContext
 from hed.util import hed_cache
 from hed.util import error_reporter
 from hed.util.error_reporter import push_error_context, pop_error_context
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
@@ -18,7 +18,7 @@ from hed.util.exceptions import SchemaFileError
 class HedValidator:
     def __init__(self, hed_input, check_for_warnings=False, run_semantic_validation=True,
                  hed_xml_file='', xml_version_number=None,
-                 hed_dictionary=None):
+                 hed_schema=None):
         """Constructor for the HedValidator class.
 
         Parameters
@@ -35,8 +35,8 @@ class HedValidator:
         xml_version_number: str
             HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
                 or does not point to a specific xml file.
-        hed_dictionary: HedDictionary
-            Name of already prepared HedDictionary to use.  This overrides hed_xml_file and xml_version_number.
+        hed_schema: HedSchema
+            Name of already prepared HedSchema to use.  This overrides hed_xml_file and xml_version_number.
         Returns
         -------
         HedValidator object
@@ -49,16 +49,16 @@ class HedValidator:
         self._tag_validator = None
         if run_semantic_validation:
             try:
-                if hed_dictionary is None:
-                    self._hed_dictionary = self._get_hed_dictionary(hed_xml_file,
-                                                                    get_specific_version=xml_version_number)
+                if hed_schema is None:
+                    self._hed_schema = self._get_hed_schema(hed_xml_file,
+                                                            get_specific_version=xml_version_number)
                 else:
-                    self._hed_dictionary = hed_dictionary
-                self._tag_validator = TagValidator(hed_dictionary=self._hed_dictionary,
+                    self._hed_schema = hed_schema
+                self._tag_validator = TagValidator(hed_schema=self._hed_schema,
                                                    check_for_warnings=check_for_warnings,
                                                    run_semantic_validation=True)
             except SchemaFileError as e:
-                self._hed_dictionary = None
+                self._hed_schema = None
                 self._validation_issues += e.format_error_message()
 
         # Fall back to syntax validation if we don't have a tag validator at this point
@@ -84,9 +84,9 @@ class HedValidator:
         return self._tag_validator
 
     @staticmethod
-    def _get_hed_dictionary(hed_xml_file, get_specific_version=None):
+    def _get_hed_schema(hed_xml_file, get_specific_version=None):
         """
-        Gets a HEDDictionary object based on the hed xml file specified. If no HED file is specified then the latest
+        Gets a HedSchema object based on the hed xml file specified. If no HED file is specified then the latest
            file will be retrieved.
 
         Parameters
@@ -98,16 +98,16 @@ class HedValidator:
                 or does not point to a specific xml file.
         Returns
         -------
-        HedDictionary
-            A HedDictionary object.
+        HedSchema
+            A HedSchema object.
 
         """
         # If we're not asking for a specific file, for ease of use cache the ones from github.
         if hed_xml_file is None and get_specific_version is None:
             hed_cache.cache_all_hed_xml_versions()
         final_hed_xml_file = hed_cache.get_local_file(hed_xml_file, get_specific_version)
-        hed_dictionary = HedDictionary(final_hed_xml_file)
-        return hed_dictionary
+        hed_schema = HedSchema(final_hed_xml_file)
+        return hed_schema
 
     def _validate_hed_input(self):
         """Validates the HED tags in a string or a file.
