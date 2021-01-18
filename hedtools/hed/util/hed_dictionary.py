@@ -292,11 +292,14 @@ class HedDictionary:
             A list of long tags that have duplicates, with optional descriptive short tag lines.
         """
         duplicate_dict = self.find_duplicate_tags()
+        prefix_string = ""
+        if return_detailed_info:
+            prefix_string = "\t"
         for tag_name in duplicate_dict:
             if return_detailed_info:
                 yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions:"
             for tag_entry in duplicate_dict[tag_name]:
-                yield f"\t{tag_entry}"
+                yield f"{prefix_string}{tag_entry}"
 
     def _populate_short_tag_dict(self):
         """
@@ -612,6 +615,39 @@ class HedDictionary:
     #     """
     #     tag_elements = self.root_element.xpath('.//%s[@%s]' % (element_name, attribute_name))
     #     return tag_elements
+
+    def get_all_descriptions(self):
+        """
+        Gather all description nodes from the xml file and pair them with their tag name.
+
+        Returns
+        -------
+        {str: str}:
+            tag name : description
+        """
+        elements = self._get_elements_by_name("description")
+        parents = [self._get_parent_tag_name(element) for element in elements]
+        final_dict = {parent: element.text for parent, element in zip(parents, elements)}
+        return final_dict
+
+    def get_all_terms(self):
+        """
+        Gets a single copy of all hed terms from the schema, for hed2 or hed3 compatible.
+
+        Returns
+        -------
+        term_list: [str]
+            A list of all terms(short tags) from the schema.
+        """
+        final_list = []
+        if not self.has_duplicate_tags():
+            for lower_tag, org_tag in self.short_tag_mapping.items():
+                final_list.append(org_tag.split('/')[-1])
+        # Fallback for hed2 style schema validation
+        else:
+            for lower_tag, org_tag in self.dictionaries[HedKey.AllTags].items():
+                final_list.append(org_tag.split('/')[-1])
+        return final_list
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """Gets the elements that have a specific element name.

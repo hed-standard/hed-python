@@ -4,9 +4,10 @@ types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after cr
 the get_validation_issues() function.
 
 """
-from hed.util.error_types import ValidationErrors
+from hed.util.error_types import ValidationErrors, ErrorContext
 from hed.util import hed_cache
 from hed.util import error_reporter
+from hed.util.error_reporter import push_error_context, pop_error_context
 from hed.util.hed_dictionary import HedDictionary
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
@@ -196,11 +197,12 @@ class HedValidator:
 
          """
         if row_hed_string:
+            push_error_context(ErrorContext.ROW, row_number)
             hed_string_delimiter = HedStringDelimiter(row_hed_string)
             row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter)
             row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
-            if row_validation_issues:
-                validation_issues += HedValidator.generate_row_issue_message(row_number) + row_validation_issues
+            validation_issues += row_validation_issues
+            pop_error_context()
         return validation_issues
 
     def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
@@ -222,11 +224,10 @@ class HedValidator:
          """
         if column_to_hed_tags_dictionary:
             for column_number in column_to_hed_tags_dictionary.keys():
+                push_error_context(ErrorContext.COLUMN, row_number, column_context=column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
-                column_validation_issues = self.validate_column_hed_string(column_hed_string)
-                if column_validation_issues:
-                    validation_issues += HedValidator.generate_column_issue_message(row_number, column_number) + \
-                                         column_validation_issues
+                validation_issues += self.validate_column_hed_string(column_hed_string)
+                pop_error_context()
         return validation_issues
 
     def validate_column_hed_string(self, column_hed_string):
@@ -413,39 +414,3 @@ class HedValidator:
             previous_original_tag = original_and_formatted_tags[loop_index - 1][0]
             previous_formatted_tag = original_and_formatted_tags[loop_index - 1][1]
         return previous_original_tag, previous_formatted_tag
-
-    @staticmethod
-    def generate_row_issue_message(row_number):
-        """Generates a row issue message that is associated with a particular row in a spreadsheet.
-
-         Parameters
-         ----------
-         row_number: int
-            The row number that the issue is associated with.
-         Returns
-         -------
-         issue_list: []
-             A singleton list containing the row issue message.
-
-         """
-        return error_reporter.format_val_error(ValidationErrors.ROW, error_row=row_number)
-
-    @staticmethod
-    def generate_column_issue_message(row_number, column_number):
-        """Generates a column issue message that is associated with a particular column in a spreadsheet.
-
-         Parameters
-         ----------
-         row_number: int
-            The row number that the issue is associated with.
-         column_number: int
-            The column number that the issue is associated with.
-
-         Returns
-         -------
-         []
-             A singleton list containing the column issue message.
-
-         """
-        return error_reporter.format_val_error(ValidationErrors.COLUMN,
-                                               error_row=row_number, error_column=column_number)

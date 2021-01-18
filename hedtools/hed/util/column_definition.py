@@ -1,7 +1,7 @@
 from enum import Enum
 from hed.util.hed_string_util import split_hed_string, split_hed_string_return_strings
-from hed.util.error_types import SidecarErrors
-from hed.util.error_reporter import format_sidecar_error
+from hed.util.error_types import SidecarErrors, ErrorContext
+from hed.util.error_reporter import format_sidecar_error, push_error_context, pop_error_context
 from hed.validator.tag_validator import TagValidator
 
 
@@ -300,6 +300,8 @@ class ColumnDef:
             tag_validator = TagValidator(hed_dictionary, check_for_warnings=True, run_semantic_validation=True,
                                          allow_numbers_to_be_pound_sign=True)
             for hed_string, position in self.hed_string_iter(include_position=True):
+                push_error_context(ErrorContext.SIDECAR_CUE_NAME, position)
+                push_error_context(ErrorContext.SIDECAR_HED_STRING, hed_string, False)
                 new_col_validation_issues = tag_validator.run_hed_string_validators(hed_string)
                 for hed_tag in split_hed_string_return_strings(hed_string):
                     hed_tag_lower = hed_tag.lower()
@@ -307,10 +309,13 @@ class ColumnDef:
                     if tag_issues:
                         new_col_validation_issues += tag_issues
                 if new_col_validation_issues:
-                    new_col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_HED_STRING,
-                                                                     hed_string=hed_string,
-                                                                     position=position) + new_col_validation_issues
                     col_validation_issues += new_col_validation_issues
+                if self.column_type == ColumnType.Categorical:
+                    if hed_string.count("#") != 0:
+                        col_validation_issues += format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,
+                                                                      pound_sign_count=hed_string.count("#"))
+                pop_error_context(False)
+                pop_error_context()
 
         if self.column_type is None:
             col_validation_issues += format_sidecar_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
@@ -341,12 +346,12 @@ class ColumnDef:
                     col_validation_issues += format_sidecar_error(SidecarErrors.TOO_FEW_CATEGORIES,
                                                                   category_count=len(raw_hed_dict))
 
-                for key, value in raw_hed_dict.items():
-                    if value.count("#") != 0:
-                        col_validation_issues += format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,
-                                                                      pound_sign_count=value.count("#"))
-        if col_validation_issues:
-            col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_COLUMN_NAME,
-                                                         column_name=self.column_name) \
-                                    + col_validation_issues
+                # Handle this error here instead of above if we don't have a dictionary for hed_string validation
+                if hed_dictionary is None:
+                    for key, value in raw_hed_dict.items():
+                        if value.count("#") != 0:
+                            col_validation_issues += format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,
+                                                                          pound_sign_count=value.count("#"))
+
+
         return col_validation_issues

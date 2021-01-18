@@ -157,3 +157,13 @@ class TestHedDictionary(unittest.TestCase):
             for attribute, expected_value in expected_dict.items():
                 self.assertEqual(self.hed_dictionary.tag_has_attribute(test_string, attribute), expected_value,
                                  'Test string: %s. Attribute: %s.' % (test_string, attribute))
+
+    def test_get_all_descriptions(self):
+        descriptions = self.hed_dictionary.get_all_descriptions()
+        self.assertTrue(isinstance(descriptions, dict))
+        self.assertTrue(len(descriptions) > 0)
+
+    def test_get_all_terms(self):
+        terms = self.hed_dictionary.get_all_terms()
+        self.assertTrue(isinstance(terms, list))
+        self.assertTrue(len(terms) > 0)

@@ -1,7 +1,7 @@
 import json
 from hed.util.column_definition import ColumnDef
-from hed.util.error_types import SidecarErrors
-from hed.util.error_reporter import format_sidecar_error
+from hed.util.error_types import SidecarErrors, ErrorContext
+from hed.util.error_reporter import format_sidecar_error, push_error_context, pop_error_context
 
 
 class ColumnDefGroup:
@@ -51,7 +51,6 @@ class ColumnDefGroup:
                 loaded_defs = json.load(fp)
                 for col_def, col_dict in loaded_defs.items():
                     self._add_single_col_type(col_def, col_dict)
-            self.save_as_json(json_filename + "test_json_out.json")
 
         except FileNotFoundError:
             self._validation_issues[json_filename] = format_sidecar_error(SidecarErrors.INVALID_FILENAME,
@@ -183,13 +182,16 @@ class ColumnDefGroup:
         """
         return self._validation_issues
 
-    def validate_entries(self, hed_dictionary=None):
+    def validate_entries(self, hed_dictionary=None, display_filename=None):
         """Validate the column entries, and also hed strings in the column entries if a hed_dictionary is passed.
 
         Parameters
         ----------
         hed_dictionary : HedDictionary, optional
             The dictionary to use to validate individual hed strings.
+        display_filename: str
+            If present, it will display errors as coming from this filename instead of the actual source.
+            Useful for temporary files and similar.
         Returns
         -------
         validation_issues: [{}]
@@ -199,14 +201,16 @@ class ColumnDefGroup:
         # If we already have an issue we either already validated, or have a file io error
         if not self._validation_issues:
             key_validation_issues = {}
+            if not display_filename:
+                display_filename = self._json_filename
+            push_error_context(ErrorContext.FILE_NAME, display_filename, False)
             for column_entry in self:
+                push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
                 col_validation_issues = column_entry.validate_column_entry(hed_dictionary)
                 if col_validation_issues:
-                    if self._json_filename:
-                        col_validation_issues = format_sidecar_error(SidecarErrors.SIDECAR_FILE_NAME,
-                                                                     filename=self._json_filename) \
-                                                + col_validation_issues
                     key_validation_issues[column_entry.column_name] = col_validation_issues
 
+                pop_error_context()
             self._validation_issues = key_validation_issues
+            pop_error_context(False)
         return self._validation_issues

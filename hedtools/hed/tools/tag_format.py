@@ -1,5 +1,5 @@
 from hed.util import error_reporter
-from hed.util.error_types import SchemaErrors
+from hed.util.error_types import SchemaErrors, ErrorContext
 from hed.util import hed_string_util
 from hed.util.hed_dictionary import HedDictionary
 
@@ -297,14 +297,13 @@ class TagFormat:
         error_list = []
         for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
             for column_number in column_to_hed_tags_dictionary:
+                error_reporter.push_error_context(ErrorContext.COLUMN, row_number, column_context=column_number)
                 old_text = column_to_hed_tags_dictionary[column_number]
                 new_text, errors = conversion_function(old_text)
                 input_file.set_cell(row_number, column_number, new_text,
                                     include_column_prefix_if_exist=False)
 
-                for error in errors:
-                    error_reporter.add_row_and_column(error, row_number, column_number)
-                    error_list.append(error)
+                error_reporter.pop_error_context()
 
         return input_file, error_list
 

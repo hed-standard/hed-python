@@ -3,7 +3,8 @@ from enum import Enum
 from hed.schema import constants
 from hed.util import file_util
 from hed.util.hed_dictionary import HedDictionary
-
+from hed.util.exceptions import SchemaFileError
+from hed.schema.schema_validator import validate_schema
 
 class MainParseMode(Enum):
     MainTags = 1
@@ -184,27 +185,39 @@ class HEDXml2Wiki:
         return final_attrib_string
 
 
-def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None):
+def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=True):
     """Converts the local HED xml file into a wikimedia file
 
     Parameters
     ----------
-        hed_xml_url: string
-            url pointing to the .xml file to use
-        local_xml_file: string
-            filepath to local xml hed schema(overrides hed_xml_url)
+    hed_xml_url: str or None
+        url pointing to the .xml file to use
+    local_xml_file: str or None
+        filepath to local xml hed schema(overrides hed_xml_url)
+    check_for_issues : bool
+        After conversion checks for warnings like capitalization or invalid characters.
     Returns
     -------
-    dictionary
-        Contains xml, wiki, and version info.
+    mediawiki_filename: str
+        Location of output mediawiki file, None on complete failure
+    issues_list: [{}]
+        returns a list of error/warning dictionaries
     """
     if local_xml_file is None:
         local_xml_file = file_util.url_to_file(hed_xml_url)
 
-    hed_xml_tree = HedDictionary.parse_hed_xml_file(local_xml_file)
+    try:
+        hed_xml_tree = HedDictionary.parse_hed_xml_file(local_xml_file)
+    except SchemaFileError as e:
+        return None, e.format_error_message()
+
     xml2wiki = HEDXml2Wiki()
     output_strings = xml2wiki.process_tree(hed_xml_tree)
     local_mediawiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
 
-    errors = []
-    return local_mediawiki_file, errors
+    issue_list = []
+    if check_for_issues:
+        warnings = validate_schema(local_xml_file)
+        issue_list += warnings
+
+    return local_mediawiki_file, issue_list
