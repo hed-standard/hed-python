@@ -50,23 +50,20 @@ class Test(unittest.TestCase):
         test_descs = [
             "This is a tag description with no invalid characters.",
             "This is (also) a tag description with no invalid characters.  -_:;./()+ ^",
-            "This description has invalid characters, as commas are not allowed",
-            "This description has multiple invalid characters, a comma and others @$%*"
+            "This description has no invalid characters, as commas are allowed",
+            "This description has multiple invalid characters at the end @$%*"
         ]
         expected_issues = [
             [],
             [],
-            format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[2], error_index=39,
-                                  problem_char=","),
-            format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=48,
-                                  problem_char=",")
-            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=69,
+            [],
+            format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=60,
                                   problem_char="@")
-            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=70,
+            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=61,
                                   problem_char="$")
-            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=71,
+            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=62,
                                   problem_char="%")
-            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=72,
+            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=63,
                                   problem_char="*")
             ,
         ]
