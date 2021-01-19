@@ -3,6 +3,9 @@ from hed.util.error_reporter import format_schema_error, format_schema_warning, 
 from hed.util.error_types import SchemaErrors, SchemaWarnings, ErrorContext
 from hed.util.exceptions import SchemaFileError
 
+ALLOWED_TAG_CHARS = "-"
+ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
+
 
 def validate_schema(hed_xml_file, also_check_for_warnings=True):
     """
@@ -61,13 +64,12 @@ def validate_schema_term(hed_term):
     if hed_term == "#":
         return issues_list
 
-    valid_characters = "-"
     for i, char in enumerate(hed_term):
         if i == 0 and not (char.isdigit() or char.isupper()):
             issues_list += format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, hed_term,
                                                  error_index=i, problem_char=char)
             continue
-        if char in valid_characters:
+        if char in ALLOWED_TAG_CHARS:
             continue
         if char.isalnum():
             continue
@@ -95,11 +97,10 @@ def validate_schema_description(tag_name, hed_description):
     # Blank description is fine
     if not hed_description:
         return issues_list
-    valid_characters = "-_:;./()+ ^"
     for i, char in enumerate(hed_description):
         if char.isalnum():
             continue
-        if char in valid_characters:
+        if char in ALLOWED_DESC_CHARS:
             continue
         issues_list += format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, tag_name, hed_description, i, char)
     return issues_list
