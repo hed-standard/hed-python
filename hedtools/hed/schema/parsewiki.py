@@ -4,6 +4,9 @@ This module contains functions for parsing a wiki HED schema.
 
 from xml.etree.ElementTree import Element, SubElement
 from hed.schema import parsetag, constants
+from hed.util.exceptions import SchemaFileError
+from hed.util.error_types import SchemaErrors
+
 import os
 
 ATTRIBUTE_DEFINITION_STRING = '\'\'\'Attribute Definitions:'
@@ -128,7 +131,7 @@ def hed_wiki_2_xml_tree(wiki_file_path):
 
     Parameters
     ----------
-    wiki_file_path: string
+    wiki_file_path: str
         The location of the HED wiki file.
 
     Returns
@@ -137,7 +140,7 @@ def hed_wiki_2_xml_tree(wiki_file_path):
         A XML element containing the entire HED.
     """
     hed_node.clear()
-    if os.path.exists(wiki_file_path):
+    try:
         with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
             line = wiki_file.readline()
             while line:
@@ -152,6 +155,8 @@ def hed_wiki_2_xml_tree(wiki_file_path):
                     add_tags(wiki_file)
                     break
                 line = wiki_file.readline()
+    except FileNotFoundError as e:
+        raise SchemaFileError(SchemaErrors.FILE_NOT_FOUND, e.strerror, wiki_file_path)
     return hed_node
 
 

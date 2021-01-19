@@ -10,7 +10,7 @@ class EventFileInput(BaseFileInput):
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
-                 hed_dictionary=None):
+                 hed_schema=None):
         """Constructor for the EventFileInput class.
 
         Parameters
@@ -35,7 +35,7 @@ class EventFileInput(BaseFileInput):
         attribute_columns: str or int or [str] or [int]
             A list of column names or numbers to treat as attributes.
             Default: ["duration", "onset"]
-        hed_dictionary: HedDictionary
+        hed_schema: HedSchema
            Used by column mapper to do (optional) hed string validation, and also to gather definition tags correctly.
         """
         if tag_columns is None:
@@ -47,10 +47,10 @@ class EventFileInput(BaseFileInput):
 
         self.column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
 
-        def_mapper = DefinitionMapper(self.column_group_defs, hed_dictionary=hed_dictionary)
+        def_mapper = DefinitionMapper(self.column_group_defs, hed_schema=hed_schema)
         new_mapper = ColumnMapper(json_def_files=self.column_group_defs, tag_columns=tag_columns,
                                   column_prefix_dictionary=column_prefix_dictionary,
-                                  hed_dictionary=hed_dictionary, attribute_columns=attribute_columns,
+                                  hed_schema=hed_schema, attribute_columns=attribute_columns,
                                   definition_mapper=def_mapper)
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper)
@@ -59,13 +59,13 @@ class EventFileInput(BaseFileInput):
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
                              "This is probably not intended.")
 
-    def validate_file_sidecars(self, hed_dictionary=None):
+    def validate_file_sidecars(self, hed_schema=None):
         """
         Validates all column definitions and column definition hed strings.
 
         Parameters
         ----------
-        hed_dictionary : HedDictionary, optional
+        hed_schema : HedSchema, optional
             Also semantically validates hed strings if present.
         Returns
         -------
@@ -74,7 +74,7 @@ class EventFileInput(BaseFileInput):
         """
         validation_issues = []
         for column_def_group in self.column_group_defs:
-            new_issue_dict = column_def_group.validate_entries(hed_dictionary=hed_dictionary)
+            new_issue_dict = column_def_group.validate_entries(hed_schema=hed_schema)
             for name, issues in new_issue_dict.items():
                 validation_issues += issues
 
