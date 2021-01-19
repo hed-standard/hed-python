@@ -251,6 +251,33 @@ def add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes,
     return unit_modifier_node
 
 
+def reformat_attributes(tag_attributes):
+    """
+    Take tag attributes from a list to an organized dict
+
+    Parameters
+    ----------
+    tag_attributes : [str]
+        A list of key-(optional)value pairs split with commas
+    Returns
+    -------
+    tag_attributes_dict : {str:str}
+        A reorganized version of the input which splits values from keys and combines multiple values with the same key.
+    """
+    tag_attributes_dict = {}
+    for attribute in tag_attributes:
+        if attribute.find('=') > -1:
+            key, value = attribute.split("=")
+            if key in tag_attributes_dict:
+                tag_attributes_dict[key] += f",{value}"
+            else:
+                tag_attributes_dict[key] = value
+        else:
+            tag_attributes_dict[attribute] = true_attribute
+
+    return tag_attributes_dict
+
+
 def add_tag_node_attributes(tag_node, tag_attributes):
     """Adds the attributes to a tag.
 
@@ -267,14 +294,11 @@ def add_tag_node_attributes(tag_node, tag_attributes):
     """
     unit_classes = []
     delimiter = ','
-    for attribute in tag_attributes:
+    tag_attributes_dict = reformat_attributes(tag_attributes)
+    for attribute, value in tag_attributes_dict.items():
         if attribute.startswith(unit_class_attribute):
-            split_attribute = attribute.split('=')
-            unit_classes.append(split_attribute[1])
-        elif attribute.find('=') > -1:
-            split_attribute = attribute.split('=')
-            tag_node.set(split_attribute[0], split_attribute[1])
+            unit_classes.append(value)
         else:
-            tag_node.set(attribute, true_attribute)
+            tag_node.set(attribute, value)
     if unit_classes:
         tag_node.set(unit_class_attribute, delimiter.join(unit_classes))

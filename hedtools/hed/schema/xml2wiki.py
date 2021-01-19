@@ -144,7 +144,6 @@ class HEDXml2Wiki:
         """Add all attributes from the passed in elem to current tag"""
         if len(elem.attrib) > 0:
             self.current_tag_extra += "{"
-            is_first = True
             sorted_keys = []
             # This is purely optional, but makes comparing easier when it's identical
             expected_key_order = ["takesValue", "isNumeric", "requireChild", "required", "unique",
@@ -156,25 +155,23 @@ class HEDXml2Wiki:
                 if attrib_name not in sorted_keys:
                     sorted_keys.append(attrib_name)
 
+            final_attribute_list = []
             for attrib_name in sorted_keys:
                 attrib_val = elem.attrib[attrib_name]
                 if attrib_name == "unitClass":
                     unit_classes = attrib_val.split(",")
                     for unit_class in unit_classes:
-                        if not is_first:
-                            self.current_tag_extra += ", "
-                        is_first = False
-                        self.current_tag_extra += f"{attrib_name}={unit_class}"
+                        final_attribute_list.append(f"{attrib_name}={unit_class}")
                 else:
-                    if not is_first:
-                        self.current_tag_extra += ", "
-                    is_first = False
                     if attrib_val == "true":
-                        self.current_tag_extra += attrib_name
-                    elif attrib_val.isdigit():
-                        self.current_tag_extra += f"{attrib_name}={attrib_val}"
+                        final_attribute_list.append(f"{attrib_name}")
                     else:
-                        self.current_tag_extra += f"{attrib_name}={attrib_val}"
+                        # Split apart attributes with multiple values
+                        attrib_vals = attrib_val.split(",")
+                        for single_attrib_val in attrib_vals:
+                            final_attribute_list.append(f"{attrib_name}={single_attrib_val}")
+
+            self.current_tag_extra += ", ".join(final_attribute_list)
             self.current_tag_extra += "}"
 
     @staticmethod
