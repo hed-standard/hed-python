@@ -72,10 +72,8 @@ class EventFileInput(BaseFileInput):
         validation_issues : [{}]
             A list of syntax and semantic issues found in the definitions.
         """
-        validation_issues = []
+        all_validation_issues = []
         for column_def_group in self.column_group_defs:
-            new_issue_dict = column_def_group.validate_entries(hed_schema=hed_schema)
-            for name, issues in new_issue_dict.items():
-                validation_issues += issues
+            all_validation_issues += column_def_group.validate_entries(hed_schema=hed_schema)
 
-        return validation_issues
+        return all_validation_issues
