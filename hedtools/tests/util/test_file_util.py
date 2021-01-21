@@ -11,12 +11,23 @@ class Test(unittest.TestCase):
     def test_url_to_file(self):
         downloaded_file = file_util.url_to_file(self.default_test_url)
         self.assertTrue(downloaded_file)
-        file_util.delete_file_if_it_exist(downloaded_file)
+        file_util.delete_file_if_it_exists(downloaded_file)
 
     def test_delete_file_if_it_exist(self):
         some_file = '3k32j23kj.txt'
-        deleted = file_util.delete_file_if_it_exist(some_file)
+        deleted = file_util.delete_file_if_it_exists(some_file)
         self.assertFalse(deleted)
+
+        deleted = file_util.delete_file_if_it_exists(None)
+        self.assertFalse(deleted)
+
+        deleted = file_util.delete_file_if_it_exists("")
+        self.assertFalse(deleted)
+
+        some_file = "folder_that_does_not_exist/3k32j23kj.txt"
+        deleted = file_util.delete_file_if_it_exists(some_file)
+        self.assertFalse(deleted)
+
 
     def test_get_file_extension(self):
         expected_extension = '.xml'

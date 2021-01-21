@@ -9,7 +9,7 @@ from xml.etree import ElementTree
 NO_VERSION_INFO_STRING = "No version info found"
 
 
-def delete_file_if_it_exist(file_path):
+def delete_file_if_it_exists(file_path):
     """Deletes a other if it exist.
 
     Parameters
@@ -22,6 +22,9 @@ def delete_file_if_it_exist(file_path):
     bool
         True if the file exists and was deleted.
     """
+    if file_path is None:
+        return False
+
     if os.path.isfile(file_path):
         os.remove(file_path)
         return True
