@@ -200,17 +200,14 @@ class ColumnDefGroup:
         """
         # If we already have an issue we either already validated, or have a file io error
         if not self._validation_issues:
-            key_validation_issues = {}
+            all_validation_issues = []
             if not display_filename:
                 display_filename = self._json_filename
             push_error_context(ErrorContext.FILE_NAME, display_filename, False)
             for column_entry in self:
                 push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
-                col_validation_issues = column_entry.validate_column_entry(hed_schema)
-                if col_validation_issues:
-                    key_validation_issues[column_entry.column_name] = col_validation_issues
-
+                all_validation_issues += column_entry.validate_column_entry(hed_schema)
                 pop_error_context()
-            self._validation_issues = key_validation_issues
+            self._validation_issues = all_validation_issues
             pop_error_context(False)
         return self._validation_issues
