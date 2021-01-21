@@ -12,9 +12,8 @@ json_filename = "data/both_types_events_errors.json"
 json_file = ColumnDefGroup(json_filename)
 # Print all the errors from the json file
 errors = json_file.validate_entries(hed_schema)
-for error in errors.values():
-    for sub_error in error:
-        print(sub_error["message"])
+for error in errors:
+    print(error["message"])
 
 # Open the json file, convert all tags to long, and save it out
 long_tag_formatter = TagFormat(local_hed_xml)
