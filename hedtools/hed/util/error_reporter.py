@@ -214,8 +214,6 @@ def format_sidecar_error(error_type, filename="", column_name="", given_type="",
     default_tabbing = "\t" * current_tab_depth
     error_prefix = default_tabbing + "ERROR: "
     error_types = {
-        SidecarErrors.INVALID_FILENAME: f"{error_prefix}File does not exist or cannot be opened. '{filename}'",
-        SidecarErrors.CANNOT_PARSE_JSON: f"{error_prefix}Json file cannot be parsed. '{filename}'",
         SidecarErrors.BLANK_HED_STRING: f"{error_prefix}No HED string found for Value or Category column.",
         SidecarErrors.WRONG_HED_DATA_TYPE: f"{error_prefix}Invalid HED string datatype sidecar. Should be '{expected_type}', but got '{given_type}'",
         SidecarErrors.INVALID_NUMBER_POUND_SIGNS: f"{error_prefix}There should be exactly one # character in a sidecar string. Found {pound_sign_count}",
