@@ -125,23 +125,18 @@ def add_unit_modifiers(wiki_file):
         line = wiki_file.readline()
 
 
-def hed_wiki_2_xml_tree(wiki_file_path, display_filename=None):
+def hed_wiki_2_xml_tree(wiki_file_path):
     """Converts a HED wiki file into a XML tree.
 
     Parameters
     ----------
     wiki_file_path: str
         The location of the HED wiki file.
-    display_filename: str
-        If present, it will display errors as coming from this filename instead of the actual source.
-        Useful for temporary files and similar.
     Returns
     -------
     Element
         A XML element containing the entire HED.
     """
-    if not display_filename:
-        display_filename = wiki_file_path
     hed_node.clear()
     try:
         with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
@@ -159,7 +154,7 @@ def hed_wiki_2_xml_tree(wiki_file_path, display_filename=None):
                     break
                 line = wiki_file.readline()
     except FileNotFoundError as e:
-        raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, display_filename)
+        raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, wiki_file_path)
     return hed_node
 
 

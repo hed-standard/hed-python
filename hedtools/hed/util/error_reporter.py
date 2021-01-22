@@ -38,7 +38,7 @@ def push_error_context(context_type, context, increment_depth_after=True, column
     default_tabbing = "\t" * current_tab_depth
 
     error_types = {
-        ErrorContext.FILE_NAME: f"Errors in file '{context}'",
+        ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
         ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
         ErrorContext.SIDECAR_CUE_NAME: f"Cue: {context}",
         ErrorContext.SIDECAR_HED_STRING: f"hed_string: {context}",

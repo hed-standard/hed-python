@@ -27,9 +27,9 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename
     """
     issues_list = []
     try:
-        hed_dict = HedSchema(hed_xml_file, display_filename=display_filename)
+        hed_dict = HedSchema(hed_xml_file)
     except HedFileError as e:
-        return e.format_error_message()
+        return e.format_error_message(display_filename=display_filename)
 
     if not display_filename:
         display_filename = hed_xml_file

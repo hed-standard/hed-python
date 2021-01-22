@@ -211,9 +211,9 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=Tr
         local_xml_file = file_util.url_to_file(hed_xml_url)
 
     try:
-        hed_xml_tree = HedSchema.parse_hed_xml_file(local_xml_file, display_filename)
+        hed_xml_tree = HedSchema.parse_hed_xml_file(local_xml_file)
     except HedFileError as e:
-        return None, e.format_error_message()
+        return None, e.format_error_message(display_filename=display_filename)
 
     xml2wiki = HEDXml2Wiki()
     output_strings = xml2wiki.process_tree(hed_xml_tree)

@@ -7,24 +7,17 @@ from hed.util.exceptions import HedFileError, HedExceptions
 
 class ColumnDefGroup:
     """This stores column definitions for parsing hed spreadsheets, generally loaded from a single json file."""
-    def __init__(self, json_filename, display_filename=None):
+    def __init__(self, json_filename):
         """
 
         Parameters
         ----------
         json_filename: str
             The actual filename to be loaded
-        display_filename: str
-            If present, it will display errors as coming from this filename instead of the actual source.
-            Useful for temporary files and similar.
         """
         self._json_filename = json_filename
-        self._display_filename = display_filename
-        if not display_filename:
-            self._display_filename = json_filename
         self._column_settings = {}
-        self._validation_issues = {}
-        self.add_json_file_defs(json_filename, self._display_filename)
+        self.add_json_file_defs(json_filename)
 
     def __iter__(self):
         """
@@ -49,7 +42,7 @@ class ColumnDefGroup:
         with open(save_filename, "w") as fp:
             json.dump(output_dict, fp, indent=4)
 
-    def add_json_file_defs(self, json_filename, display_filename=None):
+    def add_json_file_defs(self, json_filename):
         """
             Loads column definitions from a given json file
             Will add errors related to opening or parsing the file to validation issues.
@@ -58,23 +51,18 @@ class ColumnDefGroup:
         ----------
         json_filename : str
             path to file to load
-        display_filename: str
-            If present, it will display errors as coming from this filename instead of the actual source.
-            Useful for temporary files and similar.
         """
-        if not display_filename:
-            display_filename = json_filename
         try:
             with open(json_filename, "r") as fp:
                 loaded_defs = json.load(fp)
                 for col_def, col_dict in loaded_defs.items():
                     self._add_single_col_type(col_def, col_dict)
         except json.decoder.JSONDecodeError as e:
-            raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), display_filename)
+            raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), json_filename)
         except FileNotFoundError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, display_filename)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, json_filename)
         except TypeError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), display_filename)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), json_filename)
 
     @staticmethod
     def load_multiple_json_files(json_file_input_list):
@@ -189,39 +177,29 @@ class ColumnDefGroup:
         column_entry = ColumnDef(column_type, column_name, dict_for_entry)
         self._column_settings[column_name] = column_entry
 
-    def get_validation_issues(self):
-        """Simple getter for previously validated issues from the files.
-
-        Use self.validate_entries to initially validate them.
-
-        Returns
-        -------
-        validation_issues: [{}]
-            The list of validation issues found
-        """
-        return self._validation_issues
-
-    def validate_entries(self, hed_schema=None):
+    def validate_entries(self, hed_schema=None, display_filename=None):
         """Validate the column entries, and also hed strings in the column entries if a hed_schema is passed.
 
         Parameters
         ----------
         hed_schema : HedSchema, optional
             The dictionary to use to validate individual hed strings.
+        display_filename: str
+            If present, it will display errors as coming from this filename instead of the actual source.
+            Useful for temporary files and similar.
         Returns
         -------
         validation_issues: [{}]
             The list of validation issues found
 
         """
-        # If we already have an issue we either already validated, or have a file io error
-        if not self._validation_issues:
-            all_validation_issues = []
-            push_error_context(ErrorContext.FILE_NAME, self._display_filename, False)
-            for column_entry in self:
-                push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
-                all_validation_issues += column_entry.validate_column_entry(hed_schema)
-                pop_error_context()
-            self._validation_issues = all_validation_issues
-            pop_error_context(False)
-        return self._validation_issues
+        if not display_filename:
+            display_filename = self._json_filename
+        all_validation_issues = []
+        push_error_context(ErrorContext.FILE_NAME, display_filename, False)
+        for column_entry in self:
+            push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
+            all_validation_issues += column_entry.validate_column_entry(hed_schema)
+            pop_error_context()
+        pop_error_context(False)
+        return all_validation_issues
