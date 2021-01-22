@@ -1,13 +1,13 @@
 from hed.util.hed_schema import HedSchema
 from hed.util.error_reporter import format_schema_error, format_schema_warning, push_error_context, pop_error_context
 from hed.util.error_types import SchemaErrors, SchemaWarnings, ErrorContext
-from hed.util.exceptions import SchemaFileError
+from hed.util.exceptions import HedFileError
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
-def validate_schema(hed_xml_file, also_check_for_warnings=True):
+def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename=None):
     """
         Does validation of schema and returns a list of errors and warnings.
 
@@ -17,6 +17,9 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True):
         filepath to a HED XML file to validate
     also_check_for_warnings : bool, default True
         If True, also checks for formatting issues like invalid characters, capitalization, etc.
+    display_filename: str
+        If present, it will display errors as coming from this filename instead of the actual source.
+        Useful for temporary files and similar.
     Returns
     -------
     issue_list : [{}]
@@ -24,11 +27,14 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True):
     """
     issues_list = []
     try:
-        hed_dict = HedSchema(hed_xml_file)
-    except SchemaFileError as e:
+        hed_dict = HedSchema(hed_xml_file, display_filename=display_filename)
+    except HedFileError as e:
         return e.format_error_message()
 
-    push_error_context(ErrorContext.FILE_NAME, hed_xml_file)
+    if not display_filename:
+        display_filename = hed_xml_file
+
+    push_error_context(ErrorContext.FILE_NAME, display_filename)
     if hed_dict.has_duplicate_tags():
         duplicate_dict = hed_dict.find_duplicate_tags()
         for tag_name, long_org_tags in duplicate_dict.items():

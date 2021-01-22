@@ -9,8 +9,7 @@ The dictionary is a dictionary of dictionaries. The dictionary names are
 
 from defusedxml.ElementTree import parse
 import xml
-from hed.util.exceptions import SchemaFileError
-from hed.util.error_types import SchemaErrors
+from hed.util.exceptions import HedFileError, HedExceptions
 
 
 # These need to match the attributes/element name/etc used to load from the xml
@@ -60,14 +59,16 @@ class HedSchema:
 
     VERSION_ATTRIBUTE = 'version'
 
-    def __init__(self, hed_xml_file_path):
+    def __init__(self, hed_xml_file_path, display_filename=None):
         """Constructor for the HedSchema class.
 
         Parameters
         ----------
         hed_xml_file_path: str
             The path to a HED XML file.
-
+        display_filename: str
+            If present, it will display errors as coming from this filename instead of the actual source.
+            Useful for temporary files and similar.
         Returns
         -------
         HedSchema
@@ -75,7 +76,7 @@ class HedSchema:
 
         """
         self.no_duplicate_tags = True
-        self.root_element = self.parse_hed_xml_file(hed_xml_file_path)
+        self.root_element = self.parse_hed_xml_file(hed_xml_file_path, display_filename)
         # Used to find parent elements of XML nodes for file parsing
         self._parent_map = {c: p for p in self.root_element.iter() for c in p}
         self._populate_dictionaries()
@@ -452,13 +453,16 @@ class HedSchema:
         return lowercase_dictionary
 
     @staticmethod
-    def parse_hed_xml_file(hed_xml_file_path):
+    def parse_hed_xml_file(hed_xml_file_path, display_filename=None):
         """Parses a XML file and returns the root element.
 
         Parameters
         ----------
         hed_xml_file_path: str
             The path to a HED XML file.
+        display_filename: str
+            If present, it will display errors as coming from this filename instead of the actual source.
+            Useful for temporary files and similar.
 
         Returns
         -------
@@ -466,12 +470,16 @@ class HedSchema:
             The root element of the HED XML file.
 
         """
+        if not display_filename:
+            display_filename = hed_xml_file_path
         try:
             hed_xml_tree = parse(hed_xml_file_path)
         except xml.etree.ElementTree.ParseError as e:
-            raise SchemaFileError(SchemaErrors.CANNOT_PARSE_XML, e.msg, hed_xml_file_path)
+            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, display_filename)
         except FileNotFoundError as e:
-            raise SchemaFileError(SchemaErrors.FILE_NOT_FOUND, e.strerror, hed_xml_file_path)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, display_filename)
+        except TypeError as e:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), display_filename)
         return hed_xml_tree.getroot()
 
     def _get_ancestor_tag_names(self, tag_element):
