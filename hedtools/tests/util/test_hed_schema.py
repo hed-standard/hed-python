@@ -2,6 +2,7 @@ import unittest
 import os
 
 from hed.util.hed_schema import HedSchema
+from hed.util.exceptions import HedFileError
 
 
 class TestHedSchema(unittest.TestCase):
@@ -12,6 +13,41 @@ class TestHedSchema(unittest.TestCase):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
         cls.hed_schema = HedSchema(hed_xml)
         cls.hed_schema_dictionaries = cls.hed_schema.dictionaries
+
+    def test_invalid_schema(self):
+        # Handle missing or invalid files.
+        invalid_xml_file = "invalidxmlfile.xml"
+        hed_schema = None
+        try:
+            hed_schema = HedSchema(invalid_xml_file)
+        except HedFileError as e:
+            pass
+
+        self.assertFalse(hed_schema)
+
+        hed_schema = None
+        try:
+            hed_schema = HedSchema(None)
+        except HedFileError as e:
+            pass
+        self.assertFalse(hed_schema)
+
+        hed_schema = None
+        try:
+            hed_schema = HedSchema("")
+        except HedFileError as e:
+            pass
+        self.assertFalse(hed_schema)
+
+    def test_display_filename(self):
+        invalid_xml_file = "invalidxmlfile.xml"
+        display_filename = "PrettyDisplayName.xml"
+        try:
+            hed_schema = HedSchema(invalid_xml_file, display_filename=display_filename)
+            # We should have an error before we reach here.
+            self.assertTrue(False)
+        except HedFileError as e:
+            self.assertTrue(display_filename in e.format_error_message(return_string_only=True))
 
     def test_attribute_keys(self):
         tag_dictionary_keys = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',

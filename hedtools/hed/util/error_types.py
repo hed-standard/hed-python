@@ -33,8 +33,6 @@ class ValidationWarnings:
 
 class SidecarErrors:
     # These are for json sidecar validation errors(sidecars can also produce most normal validation errors)
-    INVALID_FILENAME = 'sidecarInvalidFilename'
-    CANNOT_PARSE_JSON = 'cannotParseJson'
     BLANK_HED_STRING = 'blankValueString'
     WRONG_HED_DATA_TYPE = 'wrongHedDataType'
     INVALID_NUMBER_POUND_SIGNS = 'invalidNumberPoundSigns'
@@ -49,8 +47,6 @@ class SchemaErrors:
     NO_VALID_TAG_FOUND = "invalidTag"
     INVALID_SCHEMA = 'invalidSchema'
     EMPTY_TAG_FOUND = 'emptyTag'
-    FILE_NOT_FOUND = 'fileNotFound'
-    CANNOT_PARSE_XML = 'cannotParseXML'
     DUPLICATE_TERMS = 'duplicateTerms'
 
 

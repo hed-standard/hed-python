@@ -12,7 +12,7 @@ from hed.util.hed_schema import HedSchema
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
-from hed.util.exceptions import SchemaFileError
+from hed.util.exceptions import HedFileError
 
 
 class HedValidator:
@@ -57,7 +57,7 @@ class HedValidator:
                 self._tag_validator = TagValidator(hed_schema=self._hed_schema,
                                                    check_for_warnings=check_for_warnings,
                                                    run_semantic_validation=True)
-            except SchemaFileError as e:
+            except HedFileError as e:
                 self._hed_schema = None
                 self._validation_issues += e.format_error_message()
 
