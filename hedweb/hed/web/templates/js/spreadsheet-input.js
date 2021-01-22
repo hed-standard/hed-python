@@ -15,7 +15,7 @@ $('#spreadsheet-file').on('change', function () {
     let spreadsheet = $('#spreadsheet-file');
     let spreadsheetPath = spreadsheet.val();
     let spreadsheetFile = spreadsheet[0].files[0];
-    resetFlashMessages();
+    resetFormFlashMessages();
     if (cancelWasPressedInChromeFileUpload(spreadsheetPath)) {
         resetForm();
     }
@@ -42,7 +42,7 @@ $('#spreadsheet-file').on('change', function () {
 $('#worksheet-name').on('change', function () {
     let spreadsheetFile = $('#spreadsheet-file')[0].files[0];
     let worksheetName = $('#worksheet-name option:selected').text();
-    resetFlashMessages();
+    resetFormFlashMessages();
     getColumnsInfo(spreadsheetFile, worksheetName);
 });
 

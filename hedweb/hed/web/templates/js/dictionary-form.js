@@ -1,6 +1,6 @@
 
 $(function () {
-    prepareDictionaryValidationForm();
+    prepareForm();
 });
 
 /**
@@ -16,8 +16,8 @@ $('#dictionary-validation-submit').on('click', function () {
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
-function prepareDictionaryValidationForm() {
-    resetDictionaryForm();
+function prepareForm() {
+    resetForm();
     getHEDVersions()
     hideOtherHEDVersionFileUpload();
 }
@@ -25,7 +25,7 @@ function prepareDictionaryValidationForm() {
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-function resetFlashMessages() {
+function resetFormFlashMessages() {
     clearJsonFlashMessage();
     clearHEDFlashMessage();
     flashMessageOnScreen('', 'success', 'dictionary-validation-submit-flash');
@@ -34,7 +34,7 @@ function resetFlashMessages() {
 /**
  * Resets the fields in the form.
  */
-function resetDictionaryForm() {
+function resetForm() {
     $('#dictionary-form')[0].reset();
     clearJsonFileLabel();
     hideOtherHEDVersionFileUpload()
@@ -50,7 +50,7 @@ function submitForm() {
 
     let dictionaryFile = getJsonFileLabel();
     let display_name = convertToResultsName(dictionaryFile, 'issues')
-    resetFlashMessages();
+    resetFormFlashMessages();
     flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary-validation-submit-flash')
     $.ajax({
             type: 'POST',
@@ -77,14 +77,4 @@ function submitForm() {
             }
         }
     )
-}
-
-
-/**
- * Updates the dictionary file label.
- * @param {String} dictionaryPath - The path to the dictionary.
- */
-function updateDictionaryFileLabel(dictionaryPath) {
-    let dictionaryFilename = dictionaryPath.split('\\').pop();
-    $('#dictionary-display-name').text(dictionaryFilename);
 }

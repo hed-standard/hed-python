@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from flask import current_app, Response
 
 from hed.schema import xml2wiki, wiki2xml, schema_validator
-from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension, write_errors_to_file
+from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_extension, write_errors_to_file
 from hed.util.exceptions import SchemaFileError
 
 from hed.web.web_utils import file_extension_is_valid, form_has_file, form_has_option, form_has_url, \
@@ -87,7 +87,7 @@ def run_schema_compliance_check(form_request_object):
         if hed_file_path and hed_file_path.endswith(".mediawiki"):
             new_file_path, errors = get_schema_conversion(hed_file_path)
             if new_file_path:
-                delete_file_if_it_exist(hed_file_path)
+                delete_file_if_it_exists(hed_file_path)
                 hed_file_path = new_file_path
 
         if not hed_file_path or not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
@@ -110,7 +110,7 @@ def run_schema_compliance_check(form_request_object):
     except Exception as e:
         return "Unexpected processing error: " + str(e)
     finally:
-        delete_file_if_it_exist(hed_file_path)
+        delete_file_if_it_exists(hed_file_path)
     return ""
 
 
@@ -145,4 +145,4 @@ def run_schema_conversion(form_request_object):
     except:
         return traceback.format_exc()
     finally:
-        delete_file_if_it_exist(hed_file_path)
+        delete_file_if_it_exists(hed_file_path)

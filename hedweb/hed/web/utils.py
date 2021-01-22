@@ -3,7 +3,7 @@ import traceback
 
 from flask import current_app
 
-from hed.util.file_util import get_file_extension, delete_file_if_it_exist
+from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 
 from hed.web.constants import common_constants, error_constants, spreadsheet_constants
 from hed.web.web_utils import save_file_to_upload_folder, find_all_str_indices_in_list
@@ -42,7 +42,7 @@ def find_spreadsheet_columns_info(form_request_object):
     except:
         spreadsheet_columns_info[error_constants.ERROR_KEY] = traceback.format_exc()
     finally:
-        delete_file_if_it_exist(spreadsheet_file_path)
+        delete_file_if_it_exists(spreadsheet_file_path)
     return spreadsheet_columns_info
 
 

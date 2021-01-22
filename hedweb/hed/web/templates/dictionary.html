@@ -8,8 +8,9 @@
     <form id="dictionary-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_json_input() }}
+         <div class="form-group">
 
+        {{ create_json_input() }}
         {{ create_hed_pulldown() }}
 
         <div class="form-group">

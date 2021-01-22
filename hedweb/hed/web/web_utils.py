@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from flask import current_app, jsonify, Response
 
 from hed.util import hed_cache
-from hed.util.file_util import get_file_extension, delete_file_if_it_exist
+from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 from hed.util.hed_schema import HedSchema
 from hed.web.constants import common_constants, error_constants, file_constants
 
@@ -204,33 +204,35 @@ def generate_download_file_response(download_file, display_name=None, header=Non
                     yield header
                 for line in download:
                     yield line
-            delete_file_if_it_exist(download_file)
+            delete_file_if_it_exists(download_file)
         return Response(generate(), mimetype='text/plain charset=utf-8',
                         headers={'Content-Disposition': f"attachment filename={display_name}"})
     except:
         return traceback.format_exc()
 
 
-def generate_issues_filename(prefix, basename, suffix=''):
+def generate_issues_filename(basename, prefix, suffix=''):
     """Generates a filename for the attachment of the form prefix_basename_suffix.txt.
 
     Parameters
     ----------
-    prefix: str
-        The prefix to be preappended to the front of the basename
-    basename: str
+   basename: str
         The name of the base, usually the name of the file that the issues were generated from
+    prefix: str
+        The prefix preappended to the front of the basename
     suffix: str
-        The name of the appended to the end of the basename
+        The suffix appended to the end of the basename
     Returns
     -------
     string
         The name of the attachment other containing the issues.
     """
+    filename = secure_filename(prefix)
+    if basename:
+        filename = filename + '_' + secure_filename(basename).rsplit('.')[0]
     if suffix:
-        return prefix + secure_filename(basename).rsplit('.')[0] + '_' + \
-               secure_filename(suffix) + file_constants.TEXT_EXTENSION
-    return prefix + secure_filename(basename).rsplit('.')[0] + file_constants.TEXT_EXTENSION
+        return filename + '_' + secure_filename(suffix) + file_constants.TEXT_EXTENSION
+    return filename + file_constants.TEXT_EXTENSION
 
 
 def get_hed_path_from_pull_down(form_request_object):

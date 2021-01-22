@@ -5,7 +5,7 @@ const JSON_FILE_EXTENSIONS = ['json'];
  */
 $('#json-file').on('change',function () {
     let jsonPath = $('#json-file').val();
-    resetFlashMessages();
+    resetFormFlashMessages();
     if (cancelWasPressedInChromeFileUpload(jsonPath)) {
         resetForm();
     }

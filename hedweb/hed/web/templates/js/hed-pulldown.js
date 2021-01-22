@@ -75,7 +75,7 @@ function getVersionFromHEDFile(hedXMLFile) {
         processData: false,
         dataType: 'json',
         success: function (hedInfo) {
-            resetFlashMessages();
+            resetFormFlashMessages();
             flashMessageOnScreen('Using HED version ' + hedInfo['hed-version'],
                 'success', 'hed-flash');
         },

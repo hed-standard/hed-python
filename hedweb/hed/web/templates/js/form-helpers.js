@@ -4,7 +4,7 @@
  * @param {String} filePath - A path to a file.
  * @returns {boolean} - True if the user selects cancel in chrome's file upload browser.
  */
-export function cancelWasPressedInChromeFileUpload(filePath) {
+function cancelWasPressedInChromeFileUpload(filePath) {
     return isEmptyStr(filePath) && (window.chrome)
 }
 
@@ -13,7 +13,7 @@ export function cancelWasPressedInChromeFileUpload(filePath) {
  * @param {Array} names - An array containing a list of names.
  * @returns {boolean} - True if any of the names in the array are all empty.
  */
-export function columnNamesAreEmpty(names) {
+function columnNamesAreEmpty(names) {
     let numberOfNames = names.length;
     for (let i = 0; i < numberOfNames; i++) {
         if (!isEmptyStr(names[i].trim())) {
@@ -29,7 +29,7 @@ export function columnNamesAreEmpty(names) {
  * @param {String} prefix - Prefix to be appended to the file name of original file
  * @returns {String} - File name of the
  */
-export function convertToResultsName(filename, prefix) {
+function convertToResultsName(filename, prefix) {
     let parts = getFilenameAndExtension(filename);
     return prefix + "_" + parts[0] + ".txt"
 }
@@ -40,7 +40,7 @@ export function convertToResultsName(filename, prefix) {
  * @param {Array} acceptedFileExtensions - An array of accepted file extensions.
  * @returns {boolean} - True if the file has an accepted file extension.
  */
-export function fileHasValidExtension(filePath, acceptedFileExtensions) {
+function fileHasValidExtension(filePath, acceptedFileExtensions) {
     let fileExtension = filePath.split('.').pop();
     if ($.inArray(fileExtension.toLowerCase(), acceptedFileExtensions) != -1) {
         return true;
@@ -54,7 +54,7 @@ export function fileHasValidExtension(filePath, acceptedFileExtensions) {
  * @param {String} str - A string.
  * @returns {boolean} - True if the string is null or its length is 0.
  */
-export function isEmptyStr(str) {
+function isEmptyStr(str) {
     if (str === null || str.length === 0) {
         return true;
     }
@@ -68,14 +68,14 @@ export function isEmptyStr(str) {
  * @param {String} category - The category of the message. The categories are 'error', 'success', and 'other'.
  * @param {String} flashMessageElementId - ID of the flash element
  */
-export function flashMessageOnScreen(message, category, flashMessageElementId) {
+function flashMessageOnScreen(message, category, flashMessageElementId) {
     let flashMessage = document.getElementById(flashMessageElementId);
     flashMessage.innerHTML = message;
     setFlashMessageCategory(flashMessage, category);
 }
 
 
-export function getFilenameAndExtension(pathname){
+function getFilenameAndExtension(pathname){
 
   let clean = pathname.toString().replace(/^.*[\\\/]/, '');
   if (!clean) {
@@ -93,7 +93,7 @@ export function getFilenameAndExtension(pathname){
  * @param {Object} flashMessage - The li element containing the flash message.
  * @param {String} category - The category of the message. The categories are 'error', 'success', and 'other'.
  */
-export function setFlashMessageCategory(flashMessage, category) {
+function setFlashMessageCategory(flashMessage, category) {
     if ("error" === category) {
         flashMessage.style.backgroundColor = 'lightcoral';
     } else if ("success" === category) {
@@ -108,7 +108,7 @@ export function setFlashMessageCategory(flashMessage, category) {
 /**
  * Trigger the "save as" dialog for a text blob to save as a file with display name.
  */
-export function triggerDownloadBlob(download_text_blob, display_name) {
+function triggerDownloadBlob(download_text_blob, display_name) {
     const url = window.URL.createObjectURL(new Blob([download_text_blob]));
     const link = document.createElement('a');
     link.href = url;
@@ -122,7 +122,7 @@ export function triggerDownloadBlob(download_text_blob, display_name) {
  * @param {String} filePath - The path to the dictionary.
  * @param {String} displayName - The ID of the label field to set
  */
-export function updateFileLabel(filePath, displayName) {
+function updateFileLabel(filePath, displayName) {
     let filename = filePath.split('\\').pop();
     $(displayName).text(filename);
 }

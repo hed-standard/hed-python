@@ -1,6 +1,6 @@
 
 $(function () {
-    prepareSpreadsheetForm();
+    prepareForm();
 });
 
 /**
@@ -126,7 +126,7 @@ function populateTagColumnsTextbox(tagColumnIndices) {
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
-function prepareSpreadsheetForm() {
+function prepareForm() {
     resetForm();
     getHEDVersions()
     hideColumnNames();
@@ -136,7 +136,7 @@ function prepareSpreadsheetForm() {
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-function resetFlashMessages() {
+function resetFormFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
     flashMessageOnScreen('', 'success', 'worksheet-flash');
     resetTagColumnMessages();
@@ -245,7 +245,7 @@ function submitForm() {
     }
     let spreadsheetFile = $('#spreadsheet-file')[0].files[0].name;
     let display_name = convertToResultsName(spreadsheetFile, prefix)
-    resetFlashMessages();
+    resetFormFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
         'spreadsheet-validation-submit-flash')
     $.ajax({

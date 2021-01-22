@@ -3,12 +3,11 @@ import os
 import json
 import traceback
 
-import hed.util.file_util
 from hed.util import hed_cache
 
 from hed.web import events, spreadsheet, schema, utils
 from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
-from hed.web.web_utils import delete_file_if_it_exist, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
+from hed.web.web_utils import delete_file_if_it_exists, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error
 from hed.web.dictionary import report_dictionary_validation_status
 
@@ -29,7 +28,7 @@ def delete_file_in_upload_directory(filename):
     -------
 
     """
-    if hed.util.file_util.delete_file_if_it_exist(os.path.join(app_config['UPLOAD_FOLDER'], filename)):
+    if delete_file_if_it_exists(os.path.join(app_config['UPLOAD_FOLDER'], filename)):
         return Response(status=error_constants.NO_CONTENT_SUCCESS)
     else:
         return handle_http_error(error_constants.NOT_FOUND_ERROR, error_constants.FILE_DOES_NOT_EXIST)
@@ -299,7 +298,7 @@ def get_worksheets_info():
     except:
         worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
     finally:
-        delete_file_if_it_exist(workbook_file_path)
+        delete_file_if_it_exists(workbook_file_path)
     return json.dumps(worksheets_info)
 
 

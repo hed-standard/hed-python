@@ -1,6 +1,6 @@
 
 $(function () {
-    prepareEventsForm();
+    prepareForm();
 });
 
 /**
@@ -76,7 +76,7 @@ function getWorksheetsInfo(workbookFile) {
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
-function prepareEventsForm() {
+function prepareForm() {
     resetForm();
     getHEDVersions()
     hideColumnNames();
@@ -86,7 +86,7 @@ function prepareEventsForm() {
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-function resetFlashMessages() {
+function resetFormFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
     flashMessageOnScreen('', 'success', 'worksheet-flash');
     flashMessageOnScreen('', 'success', 'hed-flash');
@@ -136,8 +136,8 @@ function setComponentsRelatedToColumns(columnsInfo) {
 }
 
 /**
- * Sets the spreadsheet has column names checkbox to false.
- * @param {boolean} Box is checked if true and unchecked if false
+ * Checks or unchecks the spreadsheet column names checkbox to false.
+ * @param {boolean} value  sets the checkbox to checked if true
  */
 function setHasColumnNamesCheckbox(value) {
     $('#has-column-names').prop('checked', value);
@@ -158,7 +158,7 @@ function submitForm() {
     }
     let spreadsheetFile = $('#spreadsheet-file')[0].files[0].name;
     let display_name = convertToResultsName(spreadsheetFile, prefix)
-    resetFlashMessages();
+    resetFormFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
         'events-validation-submit-flash')
     $.ajax({

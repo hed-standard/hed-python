@@ -4,7 +4,7 @@ from urllib.error import URLError, HTTPError
 from flask import current_app
 from werkzeug.utils import secure_filename
 
-from hed.util.file_util import get_file_extension, delete_file_if_it_exist
+from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 
@@ -92,7 +92,7 @@ def report_eeg_events_validation_status(request):
     except:
         validation_status[error_constants.ERROR_KEY] = traceback.format_exc()
     finally:
-        delete_file_if_it_exist(hed_xml_file)
+        delete_file_if_it_exists(hed_xml_file)
 
     return validation_status
 
@@ -132,8 +132,7 @@ def report_spreadsheet_validation_status(form_request_object):
     except Exception as e:
         return "Unexpected processing error: " + str(e)
     finally:
-        delete_file_if_it_exist(input_arguments[common_constants.SPREADSHEET_PATH])
-        # delete_file_if_it_exist(input_arguments[common_constants.HED_XML_FILE])
+        delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
     return ""
 
 
