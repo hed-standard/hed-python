@@ -33,9 +33,9 @@ def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None, check_for_issues=
         local_wiki_file = file_util.url_to_file(hed_wiki_url)
 
     try:
-        hed_xml_file_location = _create_hed_xml_file(local_wiki_file, display_filename)
+        hed_xml_file_location = _create_hed_xml_file(local_wiki_file)
     except HedFileError as e:
-        return None, e.format_error_message()
+        return None, e.format_error_message(display_filename=display_filename)
 
     issue_list = []
     if check_for_issues:
@@ -45,22 +45,19 @@ def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None, check_for_issues=
     return hed_xml_file_location, issue_list
 
 
-def _create_hed_xml_file(hed_wiki_file_path, display_filename):
+def _create_hed_xml_file(hed_wiki_file_path):
     """Creates a HED XML file from a HED wiki.
 
     Parameters
     ----------
     hed_wiki_file_path: string
         The path to the local HED wiki file.
-    display_filename: str
-        If present, it will display errors as coming from this filename instead of the actual source.
-        Useful for temporary files and similar.
 
     Returns
     -------
     filename: str
         Path to hed XML file
     """
-    hed_xml_tree = parsewiki.hed_wiki_2_xml_tree(hed_wiki_file_path, display_filename)
+    hed_xml_tree = parsewiki.hed_wiki_2_xml_tree(hed_wiki_file_path)
     hed_xml_file_location = file_util.write_xml_tree_2_xml_file(hed_xml_tree)
     return hed_xml_file_location

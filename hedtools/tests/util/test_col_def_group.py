@@ -42,10 +42,11 @@ class Test(unittest.TestCase):
         invalid_json = "invalidxmlfile.json"
         display_filename = "PrettyDisplayName.json"
         try:
-            json_dict = ColumnDefGroup(invalid_json, display_filename=display_filename)
+            json_dict = ColumnDefGroup(invalid_json)
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(display_filename in e.format_error_message(return_string_only=True))
+            self.assertTrue(display_filename in e.format_error_message(return_string_only=True,
+                                                                       display_filename=display_filename))
 
     def test__iter__(self):
         columns_target = 3
