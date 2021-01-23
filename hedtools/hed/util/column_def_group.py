@@ -1,7 +1,7 @@
 import json
 from hed.util.column_definition import ColumnDef
 from hed.util.error_types import ErrorContext
-from hed.util.error_reporter import push_error_context, pop_error_context
+from hed.util import error_reporter
 from hed.util.exceptions import HedFileError, HedExceptions
 
 
@@ -177,7 +177,7 @@ class ColumnDefGroup:
         column_entry = ColumnDef(column_type, column_name, dict_for_entry)
         self._column_settings[column_name] = column_entry
 
-    def validate_entries(self, hed_schema=None, display_filename=None):
+    def validate_entries(self, hed_schema=None, display_filename=None, error_handler=None):
         """Validate the column entries, and also hed strings in the column entries if a hed_schema is passed.
 
         Parameters
@@ -187,19 +187,23 @@ class ColumnDefGroup:
         display_filename: str
             If present, it will display errors as coming from this filename instead of the actual source.
             Useful for temporary files and similar.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
         Returns
         -------
         validation_issues: [{}]
             The list of validation issues found
 
         """
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
         if not display_filename:
             display_filename = self._json_filename
         all_validation_issues = []
-        push_error_context(ErrorContext.FILE_NAME, display_filename, False)
+        error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename, False)
         for column_entry in self:
-            push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
-            all_validation_issues += column_entry.validate_column_entry(hed_schema)
-            pop_error_context()
-        pop_error_context(False)
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
+            all_validation_issues += column_entry.validate_column_entry(hed_schema, error_handler=error_handler)
+            error_handler.pop_error_context()
+        error_handler.pop_error_context(False)
         return all_validation_issues
