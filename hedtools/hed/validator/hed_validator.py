@@ -7,7 +7,6 @@ the get_validation_issues() function.
 from hed.util.error_types import ValidationErrors, ErrorContext
 from hed.util import hed_cache
 from hed.util import error_reporter
-from hed.util.error_reporter import push_error_context, pop_error_context
 from hed.util.hed_schema import HedSchema
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
@@ -18,7 +17,7 @@ from hed.util.exceptions import HedFileError
 class HedValidator:
     def __init__(self, hed_input, check_for_warnings=False, run_semantic_validation=True,
                  hed_xml_file='', xml_version_number=None,
-                 hed_schema=None):
+                 hed_schema=None, error_handler=None):
         """Constructor for the HedValidator class.
 
         Parameters
@@ -37,6 +36,8 @@ class HedValidator:
                 or does not point to a specific xml file.
         hed_schema: HedSchema
             Name of already prepared HedSchema to use.  This overrides hed_xml_file and xml_version_number.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
         Returns
         -------
         HedValidator object
@@ -47,6 +48,9 @@ class HedValidator:
         self._hed_input = hed_input
         self._validation_issues = []
         self._tag_validator = None
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+        self._error_handler = error_handler
         if run_semantic_validation:
             try:
                 if hed_schema is None:
@@ -56,7 +60,8 @@ class HedValidator:
                     self._hed_schema = hed_schema
                 self._tag_validator = TagValidator(hed_schema=self._hed_schema,
                                                    check_for_warnings=check_for_warnings,
-                                                   run_semantic_validation=True)
+                                                   run_semantic_validation=True,
+                                                   error_handler=self._error_handler)
             except HedFileError as e:
                 self._hed_schema = None
                 self._validation_issues += e.format_error_message()
@@ -64,7 +69,8 @@ class HedValidator:
         # Fall back to syntax validation if we don't have a tag validator at this point
         if self._tag_validator is None:
             self._tag_validator = TagValidator(check_for_warnings=check_for_warnings,
-                                               run_semantic_validation=False)
+                                               run_semantic_validation=False,
+                                               error_handler=self._error_handler)
 
         self._validation_issues += self._validate_hed_input()
         self._run_semantic_validation = run_semantic_validation
@@ -125,8 +131,8 @@ class HedValidator:
             if self._hed_input and self._hed_input.is_valid_extension():
                 validation_issues = self._validate_hed_tags_in_file()
             else:
-                validation_issues = error_reporter.format_val_error(ValidationErrors.INVALID_FILENAME,
-                                                                    file_name=self._hed_input.filename)
+                validation_issues = self._error_handler.format_val_error(ValidationErrors.INVALID_FILENAME,
+                                                                         file_name=self._hed_input.filename)
         else:
             validation_issues = self._validate_hed_strings([self._hed_input])[0]
         return validation_issues
@@ -197,12 +203,12 @@ class HedValidator:
 
          """
         if row_hed_string:
-            push_error_context(ErrorContext.ROW, row_number)
+            self._error_handler.push_error_context(ErrorContext.ROW, row_number)
             hed_string_delimiter = HedStringDelimiter(row_hed_string)
             row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter)
             row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
             validation_issues += row_validation_issues
-            pop_error_context()
+            self._error_handler.pop_error_context()
         return validation_issues
 
     def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
@@ -224,10 +230,10 @@ class HedValidator:
          """
         if column_to_hed_tags_dictionary:
             for column_number in column_to_hed_tags_dictionary.keys():
-                push_error_context(ErrorContext.COLUMN, row_number, column_context=column_number)
+                self._error_handler.push_error_context(ErrorContext.COLUMN, row_number, column_context=column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
                 validation_issues += self.validate_column_hed_string(column_hed_string)
-                pop_error_context()
+                self._error_handler.pop_error_context()
         return validation_issues
 
     def validate_column_hed_string(self, column_hed_string):

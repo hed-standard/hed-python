@@ -1,5 +1,5 @@
 from hed.util.hed_schema import HedSchema
-from hed.util.error_reporter import format_schema_error, format_schema_warning, push_error_context, pop_error_context
+from hed.util import error_reporter
 from hed.util.error_types import SchemaErrors, SchemaWarnings, ErrorContext
 from hed.util.exceptions import HedFileError
 
@@ -7,7 +7,8 @@ ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
-def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename=None):
+def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename=None,
+                    error_handler=None):
     """
         Does validation of schema and returns a list of errors and warnings.
 
@@ -20,11 +21,15 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename
     display_filename: str
         If present, it will display errors as coming from this filename instead of the actual source.
         Useful for temporary files and similar.
+    error_handler : ErrorHandler or None
+        Used to report errors.  Uses a default one if none passed in.
     Returns
     -------
     issue_list : [{}]
         A list of all warnings and errors found in the file.
     """
+    if error_handler is None:
+        error_handler = error_reporter.ErrorHandler()
     issues_list = []
     try:
         hed_dict = HedSchema(hed_xml_file)
@@ -34,26 +39,27 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename
     if not display_filename:
         display_filename = hed_xml_file
 
-    push_error_context(ErrorContext.FILE_NAME, display_filename)
+    error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
     if hed_dict.has_duplicate_tags():
         duplicate_dict = hed_dict.find_duplicate_tags()
         for tag_name, long_org_tags in duplicate_dict.items():
-            issues_list += format_schema_error(SchemaErrors.DUPLICATE_TERMS, tag_name, duplicate_tag_list=long_org_tags)
+            issues_list += error_handler.format_schema_error(SchemaErrors.DUPLICATE_TERMS, tag_name,
+                                                             duplicate_tag_list=long_org_tags)
 
     if also_check_for_warnings:
         hed_terms = hed_dict.get_all_terms()
         for hed_term in hed_terms:
-            issues_list += validate_schema_term(hed_term)
+            issues_list += validate_schema_term(hed_term, error_handler=error_handler)
 
         tag_descs = hed_dict.get_all_descriptions()
         for tag_name, desc in tag_descs.items():
-            issues_list += validate_schema_description(tag_name, desc)
+            issues_list += validate_schema_description(tag_name, desc, error_handler=error_handler)
 
-    pop_error_context()
+    error_handler.pop_error_context()
     return issues_list
 
 
-def validate_schema_term(hed_term):
+def validate_schema_term(hed_term, error_handler):
     """
     Takes a single term(ie short tag) and checks capitalization and illegal characters.
 
@@ -61,6 +67,8 @@ def validate_schema_term(hed_term):
     ----------
     hed_term : str
         A single hed term
+    error_handler : ErrorHandler
+        Used to report errors
     Returns
     -------
     issue_list: [{}]
@@ -72,19 +80,19 @@ def validate_schema_term(hed_term):
 
     for i, char in enumerate(hed_term):
         if i == 0 and not (char.isdigit() or char.isupper()):
-            issues_list += format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, hed_term,
-                                                 error_index=i, problem_char=char)
+            issues_list += error_handler.format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, hed_term,
+                                                               error_index=i, problem_char=char)
             continue
         if char in ALLOWED_TAG_CHARS:
             continue
         if char.isalnum():
             continue
-        issues_list += format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, hed_term,
-                                             error_index=i, problem_char=char)
+        issues_list += error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, hed_term,
+                                                           error_index=i, problem_char=char)
     return issues_list
 
 
-def validate_schema_description(tag_name, hed_description):
+def validate_schema_description(tag_name, hed_description, error_handler):
     """
     Takes a single term description and returns a list of warnings and errors in it.
 
@@ -94,6 +102,8 @@ def validate_schema_description(tag_name, hed_description):
         A single hed tag - not validated here, just used for error messages
     hed_description: str
         The description string to validate
+    error_handler : ErrorHandler
+        Used to report errors
     Returns
     -------
     issue_list: [{}]
@@ -108,5 +118,6 @@ def validate_schema_description(tag_name, hed_description):
             continue
         if char in ALLOWED_DESC_CHARS:
             continue
-        issues_list += format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, tag_name, hed_description, i, char)
+        issues_list += error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, tag_name,
+                                                           hed_description, i, char)
     return issues_list
