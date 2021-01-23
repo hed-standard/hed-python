@@ -2,6 +2,7 @@ from hed.util.column_mapper import ColumnMapper
 from hed.util.base_file_input import BaseFileInput
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.def_mapper import DefinitionMapper
+from hed.util import error_reporter
 
 
 class EventFileInput(BaseFileInput):
@@ -59,7 +60,7 @@ class EventFileInput(BaseFileInput):
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
                              "This is probably not intended.")
 
-    def validate_file_sidecars(self, hed_schema=None):
+    def validate_file_sidecars(self, hed_schema=None, error_handler=None):
         """
         Validates all column definitions and column definition hed strings.
 
@@ -67,13 +68,18 @@ class EventFileInput(BaseFileInput):
         ----------
         hed_schema : HedSchema, optional
             Also semantically validates hed strings if present.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
         Returns
         -------
         validation_issues : [{}]
             A list of syntax and semantic issues found in the definitions.
         """
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
         all_validation_issues = []
         for column_def_group in self.column_group_defs:
-            all_validation_issues += column_def_group.validate_entries(hed_schema=hed_schema)
+            all_validation_issues += column_def_group.validate_entries(hed_schema=hed_schema,
+                                                                       error_handler=error_handler)
 
         return all_validation_issues

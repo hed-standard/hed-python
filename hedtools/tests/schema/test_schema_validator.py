@@ -1,7 +1,7 @@
 import unittest
 import os
 from hed.schema import schema_validator
-from hed.util.error_reporter import format_schema_warning
+from hed.util import error_reporter
 from hed.util.error_types import SchemaWarnings
 
 class Test(unittest.TestCase):
@@ -10,16 +10,17 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.error_handler = error_reporter.ErrorHandler()
         cls.schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
 
     def validate_term_base(self, input_text, expected_issues):
         for text, issues in zip(input_text, expected_issues):
-            test_issues = schema_validator.validate_schema_term(text)
+            test_issues = schema_validator.validate_schema_term(text, self.error_handler)
             self.assertCountEqual(issues, test_issues)
 
     def validate_desc_base(self, input_descriptions, expected_issues):
         for description, issues in zip(input_descriptions, expected_issues):
-            test_issues = schema_validator.validate_schema_description("dummy", description)
+            test_issues = schema_validator.validate_schema_description("dummy", description, self.error_handler)
             self.assertCountEqual(issues, test_issues)
 
     def test_validate_schema(self):
@@ -36,12 +37,12 @@ class Test(unittest.TestCase):
             "@invalidcharatstart",
         ]
         expected_issues = [
-            format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, test_terms[0], error_index=0, problem_char="i"),
+            self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, test_terms[0], error_index=0, problem_char="i"),
             [],
             [],
-            format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, test_terms[3], error_index=11,
+            self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, test_terms[3], error_index=11,
                                   problem_char="#"),
-            format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, test_terms[4], error_index=0,
+            self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, test_terms[4], error_index=0,
                                   problem_char="@"),
         ]
         self.validate_term_base(test_terms, expected_issues)
@@ -57,13 +58,13 @@ class Test(unittest.TestCase):
             [],
             [],
             [],
-            format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=60,
+            self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=60,
                                   problem_char="@")
-            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=61,
+            + self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=61,
                                   problem_char="$")
-            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=62,
+            + self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=62,
                                   problem_char="%")
-            + format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=63,
+            + self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=63,
                                   problem_char="*")
             ,
         ]
