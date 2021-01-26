@@ -44,7 +44,8 @@ class ErrorHandler:
             ErrorContext.SIDECAR_CUE_NAME: f"Cue: {context}",
             ErrorContext.SIDECAR_HED_STRING: f"hed_string: {context}",
             ErrorContext.ROW: f'Issues in row {context}:',
-            ErrorContext.COLUMN: f'Issues in row {context} column {column_context}:'
+            ErrorContext.COLUMN: f'Issues in row {context} column {column_context}:',
+            ErrorContext.CUSTOM: context
         }
 
         default_context = 'ERROR: Unknown error context'
