@@ -56,71 +56,12 @@ class TagValidator:
         else:
             self._hed_schema_dictionaries = None
         self._check_for_warnings = check_for_warnings
-        self._issue_count = 0
-        self._error_count = 0
-        self._warning_count = 0
         self._run_semantic_validation = run_semantic_validation
 
         if allow_numbers_to_be_pound_sign:
             self._digit_expression = self.DIGIT_OR_POUND_EXPRESSION
         else:
             self._digit_expression = self.DIGIT_EXPRESSION
-
-    def _increment_issue_count(self, is_error=True):
-        """Increments the validation issue count
-
-         Parameters
-         ----------
-         is_error: bool
-            True if the issue is an error, False if it is not.
-         Returns
-         -------
-
-         """
-        self._issue_count += 1
-        if is_error:
-            self._error_count += 1
-        else:
-            self._warning_count += 1
-
-    def get_issue_count(self):
-        """Gets the issue count
-
-         Parameters
-         ----------
-
-         Returns
-         -------
-         int
-            The issue count
-         """
-        return self._issue_count
-
-    def get_warning_count(self):
-        """Gets the warning count
-
-         Parameters
-         ----------
-
-         Returns
-         -------
-         int
-            The warning count
-         """
-        return self._warning_count
-
-    def get_error_count(self):
-        """Gets the error count
-
-         Parameters
-         ----------
-
-         Returns
-         -------
-         int
-            The error count
-         """
-        return self._error_count
 
     def run_individual_tag_validators(self, original_tag, formatted_tag, previous_original_tag='',
                                       previous_formatted_tag=''):
@@ -262,10 +203,8 @@ class TagValidator:
             validation_issues += self._error_handler.format_val_error(ValidationErrors.INVALID_COMMA,
                                                                       tag=original_tag,
                                                                       previous_tag=previous_original_tag)
-            self._increment_issue_count()
         elif not is_extension_tag:
             validation_issues += self._error_handler.format_val_error(ValidationErrors.INVALID_TAG, tag=original_tag)
-            self._increment_issue_count()
         return validation_issues
 
     def tag_exists_in_schema(self, formatted_tag):
@@ -307,7 +246,6 @@ class TagValidator:
             if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
                 validation_issues += self._error_handler.format_val_warning(ValidationWarnings.CAPITALIZATION,
                                                                             tag=original_tag)
-                self._increment_issue_count(is_error=False)
                 break
         return validation_issues
 
@@ -436,7 +374,6 @@ class TagValidator:
                                                                           tag=original_tag,
                                                                           unit_class_units=','.join(
                                                                               sorted(tag_unit_class_units)))
-                self._increment_issue_count()
         return validation_issues
 
     def get_valid_unit_plural(self, unit):
@@ -554,7 +491,6 @@ class TagValidator:
                 validation_issues += self._error_handler.format_val_warning(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
                                                                             tag=original_tag,
                                                                             default_unit=default_unit)
-                self._increment_issue_count(is_error=False)
         return validation_issues
 
     def get_tag_name(self, tag):
@@ -672,7 +608,6 @@ class TagValidator:
         if tag_group.count('~') > 2:
             validation_issues += self._error_handler.format_val_error(ValidationErrors.EXTRA_TILDE,
                                                                       tag=tag_group_string)
-            self._increment_issue_count()
         return validation_issues
 
     def check_if_tag_requires_child(self, original_tag, formatted_tag):
@@ -694,7 +629,6 @@ class TagValidator:
         if self._hed_schema_dictionaries[HedKey.RequireChild].get(formatted_tag):
             validation_issues += self._error_handler.format_val_error(ValidationErrors.REQUIRE_CHILD,
                                                                       tag=original_tag)
-            self._increment_issue_count()
         return validation_issues
 
     def check_for_required_tags(self, formatted_top_level_tags):
@@ -719,7 +653,6 @@ class TagValidator:
                 validation_issues += self._error_handler.format_val_warning(
                     ValidationWarnings.REQUIRED_PREFIX_MISSING,
                     tag_prefix=capitalized_required_tag_prefix)
-                self._increment_issue_count(is_error=False)
         return validation_issues
 
     def check_if_multiple_unique_tags_exist(self, original_tag_list, formatted_tag_list):
@@ -745,7 +678,6 @@ class TagValidator:
                 validation_issues += self._error_handler.format_val_error(
                     ValidationErrors.MULTIPLE_UNIQUE,
                     tag_prefix=self._hed_schema_dictionaries[HedKey.Unique][unique_tag_prefix])
-                self._increment_issue_count()
         return validation_issues
 
     def tag_has_unique_prefix(self, tag):
@@ -796,7 +728,6 @@ class TagValidator:
                     duplicate_indices.add(duplicate_index)
                     validation_issues += self._error_handler.format_val_error(ValidationErrors.DUPLICATE,
                                                                               tag=original_tag_list[tag_index])
-                    self._increment_issue_count()
         return validation_issues
 
     def get_tag_slash_indices(self, tag, slash='/'):
@@ -984,7 +915,6 @@ class TagValidator:
         for index, character in enumerate(hed_string):
             if character in TagValidator.INVALID_CHARS:
                 validation_issues += self.report_invalid_character_error(character, index, hed_string)
-                self._increment_issue_count()
 
         return validation_issues
 
@@ -1010,7 +940,6 @@ class TagValidator:
                 ValidationErrors.PARENTHESES,
                 opening_parentheses_count=number_of_opening_parentheses,
                 closing_parentheses_count=number_of_closing_parentheses)
-            self._increment_issue_count()
         return validation_issues
 
     @staticmethod

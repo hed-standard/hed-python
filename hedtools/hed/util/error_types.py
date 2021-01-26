@@ -7,6 +7,8 @@ class ErrorContext:
     SIDECAR_HED_STRING = 'sidecarHedString'
     ROW = 'row'
     COLUMN = 'column'
+    # Use this one to display any passed in message
+    CUSTOM = 'custom'
 
 
 class ValidationErrors:

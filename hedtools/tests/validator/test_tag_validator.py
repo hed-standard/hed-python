@@ -24,13 +24,13 @@ class TestHed(unittest.TestCase):
                                                   run_semantic_validation=True)
         cls.semantic_warning_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=True,
                                                           run_semantic_validation=True)
-        cls.syntactic_hed_input_reader = HedValidator("Event/Category")
+        cls.syntactic_hed_input_reader = HedValidator()
         cls.syntactic_hed_input_reader._tag_validator = cls.syntactic_tag_validator
-        cls.syntactic_warning_hed_input_reader = HedValidator("Event/Category")
+        cls.syntactic_warning_hed_input_reader = HedValidator()
         cls.syntactic_warning_hed_input_reader._tag_validator = cls.syntactic_warning_tag_validator
-        cls.semantic_hed_input_reader = HedValidator("Event/Category")
+        cls.semantic_hed_input_reader = HedValidator()
         cls.semantic_hed_input_reader._tag_validator = cls.semantic_tag_validator
-        cls.semantic_warning_hed_input_reader = HedValidator("Event/Category")
+        cls.semantic_warning_hed_input_reader = HedValidator()
         cls.semantic_warning_hed_input_reader._tag_validator = cls.semantic_warning_tag_validator
 
     def validator_base(self, test_strings, expected_results, expected_issues, test_function):
@@ -595,13 +595,13 @@ class TestHed3(unittest.TestCase):
                                                   run_semantic_validation=True)
         cls.semantic_warning_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=True,
                                                           run_semantic_validation=True)
-        cls.syntactic_hed_input_reader = HedValidator("Event/Category")
+        cls.syntactic_hed_input_reader = HedValidator()
         cls.syntactic_hed_input_reader._tag_validator = cls.syntactic_tag_validator
-        cls.syntactic_warning_hed_input_reader = HedValidator("Event/Category")
+        cls.syntactic_warning_hed_input_reader = HedValidator()
         cls.syntactic_warning_hed_input_reader._tag_validator = cls.syntactic_warning_tag_validator
-        cls.semantic_hed_input_reader = HedValidator("Event/Category")
+        cls.semantic_hed_input_reader = HedValidator()
         cls.semantic_hed_input_reader._tag_validator = cls.semantic_tag_validator
-        cls.semantic_warning_hed_input_reader = HedValidator("Event/Category")
+        cls.semantic_warning_hed_input_reader = HedValidator()
         cls.semantic_warning_hed_input_reader._tag_validator = cls.semantic_warning_tag_validator
 
     def validator_base(self, test_strings, expected_results, expected_issues, test_function):
