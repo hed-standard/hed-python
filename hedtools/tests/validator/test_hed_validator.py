@@ -1,14 +1,16 @@
 import random
 import unittest
+import os
 
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.hed_validator import HedValidator
-
+from hed.util.hed_file_input import HedFileInput
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.generic_hed_input_reader = HedValidator('Attribute/Temporal/Onset', xml_version_number='7.1.1')
+        cls.base_hed_input = 'Attribute/Temporal/Onset'
+        cls.generic_hed_input_reader = HedValidator(xml_version_number='7.1.1')
         cls.text_file_with_extension = 'file_with_extension.txt'
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
         cls.float_value = 1.1
@@ -34,10 +36,19 @@ class Test(unittest.TestCase):
         cls.row_hed_tag_columns = [1, 2]
         cls.original_and_formatted_tag = [('Event/Label/Test', 'event/label/test'),
                                           ('Event/Description/Test', 'event/description/test')]
+        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
+        cls.hed_filepath_with_errors = os.path.join(cls.hed_base_dir, "ExcelMultipleSheets.xlsx")
+        cls.hed_file_with_errors = HedFileInput(cls.hed_filepath_with_errors)
 
-    def test__validate_hed_input(self):
-        validation_issues = self.generic_hed_input_reader._validate_hed_input()
+    def test__validate_input(self):
+        validation_issues = self.generic_hed_input_reader.validate_input(self.base_hed_input)
         self.assertIsInstance(validation_issues, list)
+
+        display_filename = "DummyDisplayFilename.txt"
+        validation_issues = self.generic_hed_input_reader.validate_input(self.hed_file_with_errors,
+                                                                         display_filename=display_filename)
+        self.assertIsInstance(validation_issues, list)
+        self.assertTrue(display_filename in validation_issues[0]['message'])
 
     def test__validate_individual_tags_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_invalid_tags)
@@ -99,11 +110,6 @@ class Test(unittest.TestCase):
         validation_issues = self.generic_hed_input_reader.validate_column_hed_string(self.hed_string_with_invalid_tags)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
-
-    def test_get_validation_issues(self):
-        validation_issues = self.generic_hed_input_reader.get_validation_issues()
-        self.assertIsInstance(validation_issues, list)
-
 
     def test_get_previous_original_and_formatted_tag(self):
         loop_index = 1
