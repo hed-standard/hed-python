@@ -1,7 +1,6 @@
 from hed.util.hed_schema import HedSchema
 from hed.util import error_reporter
 from hed.util.error_types import SchemaErrors, SchemaWarnings, ErrorContext
-from hed.util.exceptions import HedFileError
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
@@ -19,8 +18,8 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename
     also_check_for_warnings : bool, default True
         If True, also checks for formatting issues like invalid characters, capitalization, etc.
     display_filename: str
-        If present, it will display errors as coming from this filename instead of the actual source.
-        Useful for temporary files and similar.
+        If present, will use this as the filename for context, rather than using the actual filename
+        Useful for temp filenames.
     error_handler : ErrorHandler or None
         Used to report errors.  Uses a default one if none passed in.
     Returns
@@ -31,15 +30,12 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename
     if error_handler is None:
         error_handler = error_reporter.ErrorHandler()
     issues_list = []
-    try:
-        hed_dict = HedSchema(hed_xml_file)
-    except HedFileError as e:
-        return e.format_error_message(display_filename=display_filename)
+    hed_dict = HedSchema(hed_xml_file)
 
     if not display_filename:
         display_filename = hed_xml_file
-
     error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
+
     if hed_dict.has_duplicate_tags():
         duplicate_dict = hed_dict.find_duplicate_tags()
         for tag_name, long_org_tags in duplicate_dict.items():
@@ -121,3 +117,21 @@ def validate_schema_description(tag_name, hed_description, error_handler):
         issues_list += error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, tag_name,
                                                            hed_description, i, char)
     return issues_list
+
+def get_printable_issue_string(validation_issues, title=None):
+    """Return a string with issues list flatted into single string, one per line
+
+    Parameters
+    ----------
+    validation_issues: []
+        Issues to print
+    title: str
+        Optional title that will always show up first if present(even if there are no validation issues)
+
+    Returns
+    -------
+    str
+        A str containing printable version of the issues or '[]'.
+
+    """
+    return error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title)

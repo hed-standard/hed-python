@@ -185,8 +185,8 @@ class ColumnDefGroup:
         hed_schema : HedSchema, optional
             The dictionary to use to validate individual hed strings.
         display_filename: str
-            If present, it will display errors as coming from this filename instead of the actual source.
-            Useful for temporary files and similar.
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         Returns
@@ -199,11 +199,32 @@ class ColumnDefGroup:
             error_handler = error_reporter.ErrorHandler()
         if not display_filename:
             display_filename = self._json_filename
-        all_validation_issues = []
         error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename, False)
+
+        all_validation_issues = []
         for column_entry in self:
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
             all_validation_issues += column_entry.validate_column_entry(hed_schema, error_handler=error_handler)
             error_handler.pop_error_context()
-        error_handler.pop_error_context(False)
+
+        error_handler.pop_error_context()
         return all_validation_issues
+
+    @staticmethod
+    def get_printable_issue_string(validation_issues, title=None):
+        """Return a string with issues list flatted into single string, one per line
+
+        Parameters
+        ----------
+        validation_issues: []
+            Issues to print
+        title: str
+            Optional title that will always show up first if present(even if there are no validation issues)
+
+        Returns
+        -------
+        str
+            A str containing printable version of the issues or '[]'.
+
+        """
+        return error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title)
