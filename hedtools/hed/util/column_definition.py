@@ -303,7 +303,7 @@ class ColumnDef:
             tag_validator = TagValidator(hed_schema, check_for_warnings=True, run_semantic_validation=True,
                                          allow_numbers_to_be_pound_sign=True, error_handler=error_handler)
             for hed_string, position in self.hed_string_iter(include_position=True):
-                error_handler.push_error_context(ErrorContext.SIDECAR_CUE_NAME, position)
+                error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
                 error_handler.push_error_context(ErrorContext.SIDECAR_HED_STRING, hed_string, False)
                 new_col_validation_issues = tag_validator.run_hed_string_validators(hed_string)
                 for hed_tag in split_hed_string_return_strings(hed_string):
@@ -318,7 +318,7 @@ class ColumnDef:
                         col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,
                                                                                     pound_sign_count=hed_string.count(
                                                                                         "#"))
-                error_handler.pop_error_context(False)
+                error_handler.pop_error_context()
                 error_handler.pop_error_context()
 
         if self.column_type is None:

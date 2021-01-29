@@ -20,9 +20,8 @@ if __name__ == '__main__':
 
     validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
     if validation_issues:
-        print("There should be no errors with the sidecar.  This will likely cause other errors.")
-        for issue in validation_issues:
-            print(f"{issue['code']}: {issue['message']}")
+        print("There should be no errors with the sidecar.  This will likely cause other errors if there are.")
+        print(HedValidator.get_printable_issue_string(validation_issues))
     validator = HedValidator(hed_schema=hed_schema)
     validation_issues = validator.validate_input(input_file)
     print(validator.get_printable_issue_string(validation_issues,

@@ -300,14 +300,16 @@ class TagFormat:
         """
         error_list = []
         for row_number, row_hed_string, column_to_hed_tags_dictionary in input_file:
+            self._error_handler.push_error_context(ErrorContext.ROW, row_number)
             for column_number in column_to_hed_tags_dictionary:
-                self._error_handler.push_error_context(ErrorContext.COLUMN, row_number, column_context=column_number)
+                self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 old_text = column_to_hed_tags_dictionary[column_number]
                 new_text, errors = conversion_function(old_text)
                 input_file.set_cell(row_number, column_number, new_text,
                                     include_column_prefix_if_exist=False)
 
                 self._error_handler.pop_error_context()
+            self._error_handler.pop_error_context()
 
         return input_file, error_list
 

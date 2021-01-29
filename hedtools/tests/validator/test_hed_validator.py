@@ -5,6 +5,8 @@ import os
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
+from hed.util.error_types import ErrorContext
+
 
 class Test(unittest.TestCase):
     @classmethod
@@ -48,7 +50,7 @@ class Test(unittest.TestCase):
         validation_issues = self.generic_hed_input_reader.validate_input(self.hed_file_with_errors,
                                                                          display_filename=display_filename)
         self.assertIsInstance(validation_issues, list)
-        self.assertTrue(display_filename in validation_issues[0]['message'])
+        self.assertTrue(display_filename in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_individual_tags_in_hed_string(self):
         hed_string_delimiter = HedStringDelimiter(self.hed_string_with_invalid_tags)

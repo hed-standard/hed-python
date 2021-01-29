@@ -5,84 +5,47 @@ You can scope the formatted errors with calls to push_error_context and pop_erro
 """
 
 from hed.util.error_types import ValidationErrors, ValidationWarnings, SchemaErrors, \
-    SidecarErrors, SchemaWarnings, ErrorContext
+    SidecarErrors, SchemaWarnings, ErrorContext, ErrorSeverity
 
 
 class ErrorHandler:
     def __init__(self):
-        # Number of tabs to insert at the start of each line.  Incremented when you push a new error_context.
-        self.current_tab_depth = 0
-        # A list of strings containing the current error context scope such as row or column number.
-        # Starts from index 0 being the largest(eg file usually) scope.
-        self.error_context_stack = []
-        # A copy of the last error_context_stack used to actually format an error.
-        # This is used to allow us to only display the context once, regardless of how many errors there are.
-        self.last_used_error_context = []
+        # The current (ordered) dictionary of contexts.
+        self.error_context = []
 
-    def push_error_context(self, context_type, context, increment_depth_after=True, column_context=None):
+    def push_error_context(self, context_type, context, increment_depth_after=True):
         """
         Pushes a new error context to the end of the stack to narrow down error scope.
 
         Parameters
         ----------
-        context_type : str
+        context_type : ErrorContext
             This should be a value from ErrorContext representing the type of scope.
         context : str or int
             The main value for the context_type.  eg for ErrorContext.FILE_NAME this would be the actual filename.
         increment_depth_after : bool
             If True, this adds an extra tab to any subsequent errors in the scope.
-        column_context : str or int
-            This is only used by ErrorContext.COLUMN, where context is the row and column_context is the column number.
         Returns
         -------
         """
-        default_tabbing = "\t" * self.current_tab_depth
+        self.error_context.append((context_type, context, increment_depth_after))
 
-        error_types = {
-            ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
-            ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
-            ErrorContext.SIDECAR_CUE_NAME: f"Cue: {context}",
-            ErrorContext.SIDECAR_HED_STRING: f"hed_string: {context}",
-            ErrorContext.ROW: f'Issues in row {context}:',
-            ErrorContext.COLUMN: f'Issues in row {context} column {column_context}:',
-            ErrorContext.CUSTOM: context
-        }
-
-        default_context = 'ERROR: Unknown error context'
-        context_message = error_types.get(context_type, default_context)
-
-        self.error_context_stack.append(f"{default_tabbing}{context_message}")
-        if increment_depth_after:
-            self.current_tab_depth += 1
-
-
-    def pop_error_context(self, decrement_depth_after=True):
+    def pop_error_context(self):
         """
         Removes the last scope from the error context.
 
-        Parameters
-        ----------
-        decrement_depth_after : bool
-            This should always match the value passed to push_error_context.
-
         Returns
         -------
         """
-        if decrement_depth_after:
-            self.current_tab_depth -= 1
-        self.error_context_stack.pop()
-
+        self.error_context.pop(-1)
 
     def reset_error_context(self):
         """Reset all error context information to defaults
 
         This function should not be needed with proper usage."""
-        self.current_tab_depth = 0
-        self.error_context_stack = []
-        self.last_used_error_context = []
+        self.error_context = []
 
-
-    def _add_context_to_errors(self, error_object):
+    def _add_context_to_errors(self, error_object=None):
         """
         Takes an error object and adds relevant context around it, such as row number, or column name.
 
@@ -96,25 +59,10 @@ class ErrorHandler:
         error_object_list: [{}]
             The passed in error with any needed context strings added to the start.
         """
-        # The context has not changed, no need to add new context text
-        if self.last_used_error_context == self.error_context_stack:
-            return [error_object]
+        for (context_type, context, increment_count) in self.error_context:
+            error_object[context_type] = (context, increment_count)
 
-        error_context = []
-        for i, context in enumerate(self.error_context_stack):
-            if len(self.last_used_error_context) > i:
-                last_drawn = self.last_used_error_context[i]
-                # Was drawn, and hasn't changed.
-                if last_drawn == context:
-                    continue
-
-            context_object = {'code': 'context', 'message': context}
-            error_context.append(context_object)
-
-        self.last_used_error_context = self.error_context_stack.copy()
-
-        return error_context + [error_object]
-
+        return [error_object]
 
     def format_val_error(self, error_type, hed_string='', tag='', tag_prefix='', previous_tag='',
                          character='', index=0, unit_class_units='', file_name='', opening_parentheses_count=0,
@@ -152,10 +100,8 @@ class ErrorHandler:
             of warning.
 
         """
-        default_tabbing = "\t" * self.current_tab_depth
-        error_prefix = default_tabbing + "ERROR: "
+        error_prefix = "ERROR: "
         error_types = {
-            ValidationErrors.INVALID_FILENAME: f'Invalid file name - "{file_name}"',
             ValidationErrors.PARENTHESES: f'{error_prefix}Number of opening and closing parentheses are unequal. '
                                           f'{opening_parentheses_count} opening parentheses. {closing_parentheses_count} '
                                           'closing parentheses',
@@ -174,12 +120,11 @@ class ErrorHandler:
         default_error_message = 'ERROR: Unknown error'
         error_message = error_types.get(error_type, default_error_message)
 
-        error_object = {'code': error_type, 'message': error_message}
+        error_object = {'code': error_type, 'message': error_message, 'severity': ErrorSeverity.ERROR}
         error_object_list = self._add_context_to_errors(error_object)
         return error_object_list
 
-
-    def format_sidecar_error(self, error_type, filename="", column_name="", given_type="", expected_type="", pound_sign_count=0,
+    def format_sidecar_error(self, error_type, column_name="", given_type="", expected_type="", pound_sign_count=0,
                              category_count=0):
         """
         Formats a json sidecar error to human readable
@@ -188,8 +133,6 @@ class ErrorHandler:
         ----------
         error_type : str
             This should be a value from SidecarErrors
-        filename : str
-            The filename this error is from
         column_name : str
             The column name this error is from
         given_type : str
@@ -207,8 +150,7 @@ class ErrorHandler:
             A list containing a single dictionary with the warning type and warning message related to a particular type
             of warning.
         """
-        default_tabbing = "\t" * self.current_tab_depth
-        error_prefix = default_tabbing + "ERROR: "
+        error_prefix = "ERROR: "
         error_types = {
             SidecarErrors.BLANK_HED_STRING: f"{error_prefix}No HED string found for Value or Category column.",
             SidecarErrors.WRONG_HED_DATA_TYPE: f"{error_prefix}Invalid HED string datatype sidecar. Should be '{expected_type}', but got '{given_type}'",
@@ -222,11 +164,10 @@ class ErrorHandler:
         default_error_message = f'{error_prefix}Unknown error {error_type}'
         error_message = error_types.get(error_type, default_error_message)
 
-        error_object = {'code': error_type, 'message': error_message}
+        error_object = {'code': error_type, 'message': error_message, 'severity': ErrorSeverity.ERROR}
 
         error_object_list = self._add_context_to_errors(error_object)
         return error_object_list
-
 
     def format_val_warning(self, warning_type, tag='', default_unit='', tag_prefix=''):
         """Reports the abc warning based on the type of warning.
@@ -248,8 +189,7 @@ class ErrorHandler:
             of warning.
 
         """
-        default_tabbing = "\t" * self.current_tab_depth
-        warning_prefix = default_tabbing + "WARNING: "
+        warning_prefix = "WARNING: "
 
         warning_types = {
             ValidationWarnings.CAPITALIZATION: f'{warning_prefix}First word not capitalized or camel case - "{tag}"',
@@ -259,10 +199,9 @@ class ErrorHandler:
         default_warning_message = 'WARNING: Unknown warning'
         warning_message = warning_types.get(warning_type, default_warning_message)
 
-        warning_object = {'code': warning_type, 'message': warning_message}
+        warning_object = {'code': warning_type, 'message': warning_message, 'severity': ErrorSeverity.WARNING}
         warning_object_list = self._add_context_to_errors(warning_object)
         return warning_object_list
-
 
     def reformat_schema_error(self, error, hed_string, offset):
         """
@@ -292,7 +231,6 @@ class ErrorHandler:
 
         reformatted_error = self.format_schema_error(error_type, hed_string, error_index + offset, error_index_end + offset, expected_parent_tag)
         return reformatted_error
-
 
     def format_schema_error(self, error_type, hed_tag, error_index=0, error_index_end=None, expected_parent_tag=None,
                             duplicate_tag_list=()):
@@ -324,10 +262,9 @@ class ErrorHandler:
 
         problem_tag = hed_tag[error_index: error_index_end]
 
-        default_tabbing = "\t" * self.current_tab_depth
-        error_prefix = f"{default_tabbing}ERROR: "
+        error_prefix = f"ERROR: "
 
-        tag_join_delimiter = f"\n\t{default_tabbing}"
+        tag_join_delimiter = f"\n\t"
         error_types = {
             SchemaErrors.INVALID_PARENT_NODE: f"{error_prefix}'{problem_tag}' appears as '{expected_parent_tag}' and cannot be used "
                                               f"as an extension.  {error_index}, {error_index_end}",
@@ -346,11 +283,11 @@ class ErrorHandler:
                         'source_tag': hed_tag,
                         'start_index': error_index,
                         'end_index': error_index_end,
-                        'expected_parent_tag': expected_parent_tag}
+                        'expected_parent_tag': expected_parent_tag,
+                        'severity': ErrorSeverity.ERROR}
 
         error_object_list = self._add_context_to_errors(error_object)
         return error_object_list
-
 
     def format_schema_warning(self, error_type, hed_tag, hed_desc=None, error_index=0, problem_char=None):
         """Reports the abc warning based on the type of error.
@@ -376,8 +313,7 @@ class ErrorHandler:
         """
         problem_tag = hed_tag
 
-        default_tabbing = "\t" * self.current_tab_depth
-        warning_prefix = f"{default_tabbing}WARNING: "
+        warning_prefix = f"WARNING: "
         error_types = {
             SchemaWarnings.INVALID_CHARACTERS_IN_DESC: f"{warning_prefix}Invalid character '{problem_char}' in desc "
                                                        f"for '{problem_tag}' at position {error_index}.  '{hed_desc}",
@@ -392,9 +328,158 @@ class ErrorHandler:
 
         error_object = {'code': error_type,
                         'message': warning_message,
-                        'source_tag': hed_tag}
+                        'source_tag': hed_tag,
+                        'severity': ErrorSeverity.WARNING}
 
         error_object_list = self._add_context_to_errors(error_object)
         return error_object_list
 
-default_handler = ErrorHandler()
+    @staticmethod
+    def _get_context_from_issue(val_issue):
+        """
+        Extract all the context values from the given issue
+        Parameters
+        ----------
+        val_issue : {}
+            A dictionary a representing a single error
+        Returns
+        -------
+        context_list: []
+            A list of tuples containing the context_type and context for the given issue
+        """
+        single_issue_context = []
+        for key in val_issue:
+            if key in ErrorContext:
+                single_issue_context.append((key.value, *val_issue[key]))
+
+        return single_issue_context
+
+    @staticmethod
+    def _format_single_context_string(context_type, context, tab_count=0):
+        """
+        Takes a single context tuple and returns the human readable form.
+
+        Parameters
+        ----------
+        context_type : str
+            The context type of this entry
+        context : str
+            The value of this context
+        tab_count : int
+            Number of tabs to prefix each line with.
+
+        Returns
+        -------
+        context_string: str
+            A string containing the context, including tabs.
+        """
+        tab_string = tab_count * '\t'
+        error_types = {
+            ErrorContext.FILE_NAME.value: f"\nErrors in file '{context}'",
+            ErrorContext.SIDECAR_COLUMN_NAME.value: f"Column '{context}':",
+            ErrorContext.SIDECAR_KEY_NAME.value: f"Key: {context}",
+            ErrorContext.SIDECAR_HED_STRING.value: f"hed_string: {context}",
+            ErrorContext.ROW.value: f'Issues in row {context}:',
+            ErrorContext.COLUMN.value: f'Issues in column {context}:',
+            ErrorContext.CUSTOM_TITLE.value: context
+        }
+        context_portion = error_types[context_type]
+        context_string = f"{tab_string}{context_portion}\n"
+        return context_string
+
+    @staticmethod
+    def _get_context_string(single_issue_context, last_used_context):
+        """
+        Converts a single context list into the final human readable output form.
+
+        Parameters
+        ----------
+        single_issue_context : [()]
+            A list of tuples containing the context(context_type, context, increment_tab)
+        last_used_context : [()]
+            A list of tuples containing the last drawn context, so it can only add the parts that have changed.
+            This is always the same format as single_issue_context.
+
+        Returns
+        -------
+        context_string: str
+            The full string of context(potentially multiline) to add before the error
+        tab_string: str
+            The prefix to add to any message line with this context.
+        """
+        context_string = ""
+        tab_count = 0
+        for i, context_tuple in enumerate(single_issue_context):
+            (context_type, context, increment_tab) = context_tuple
+            if len(last_used_context) > i:
+                last_drawn = last_used_context[i]
+                # Was drawn, and hasn't changed.
+                if last_drawn == context_tuple:
+                    if increment_tab:
+                        tab_count += 1
+                    continue
+
+            context_string += ErrorHandler._format_single_context_string(context_type, context, tab_count)
+            if increment_tab:
+                tab_count += 1
+
+        tab_string = '\t' * tab_count
+        return context_string, tab_string
+
+    @staticmethod
+    def get_printable_issue_string(validation_issues, title=None):
+        """Return a string with issues list flatted into single string, one per line
+
+        Parameters
+        ----------
+        validation_issues: []
+            Issues to print
+        title: str
+            Optional title that will always show up first if present(even if there are no validation issues)
+
+        Returns
+        -------
+        str
+            A str containing printable version of the issues or '[]'.
+
+        """
+        last_used_error_context = []
+
+        issue_string = ""
+        for single_issue in validation_issues:
+            single_issue_context = ErrorHandler._get_context_from_issue(single_issue)
+            context_string, tab_string = ErrorHandler._get_context_string(single_issue_context, last_used_error_context)
+
+            issue_string += context_string
+            single_issue_message = tab_string + single_issue['message']
+            if "\n" in single_issue_message:
+                single_issue_message = single_issue_message.replace("\n", "\n" + tab_string)
+            issue_string += f"{single_issue_message}\n"
+            last_used_error_context = single_issue_context.copy()
+
+        if not issue_string:
+            issue_string = "[]"
+        issue_string += "\n"
+        if title:
+            issue_string = title + '\n' + issue_string
+        return issue_string
+
+    @staticmethod
+    def filter_issues_by_severity(issues_list, severity):
+        """
+        Gathers all issues matching a given severity
+            
+        Parameters
+        ----------
+        issues_list : [{}]
+            The full issue list
+        severity : ErrorSeverity
+            The level of issue you're interested in
+
+        Returns
+        -------
+        filtered_issues_list: [{}]
+            The list with all other severities removed.
+        """
+        return [issue for issue in issues_list if issue['severity'] == severity]
+
