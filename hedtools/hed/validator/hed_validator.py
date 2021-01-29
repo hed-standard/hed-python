@@ -4,13 +4,14 @@ types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after cr
 the get_validation_issues() function.
 
 """
-from hed.util.error_types import ValidationErrors, ErrorContext
+from hed.util.error_types import ErrorContext
 from hed.util import hed_cache
 from hed.util import error_reporter
 from hed.util.hed_schema import HedSchema
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
+from hed.util.exceptions import HedFileError, HedExceptions
 
 
 class HedValidator:
@@ -74,25 +75,27 @@ class HedValidator:
         hed_input: str or list or HedFileInput object
             A list of HED strings, a single HED string, or a HedFileInput object.
             If it is a single string or a list, validate them as hed strings.
-        display_filename : str or None
-            If hed_input is a filename, it will be validated as if it had this filename instead.
-            Useful for temp files.
+        display_filename: str
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
         Returns
         -------
         validation_issues : [{}]
         """
         is_file = isinstance(hed_input, BaseFileInput)
-
+        if not display_filename and is_file:
+            display_filename = hed_input.filename
         if isinstance(hed_input, list):
             validation_issues = self._validate_hed_strings(hed_input)
         elif is_file:
-            if hed_input and hed_input.is_valid_extension():
-                validation_issues = self._validate_hed_tags_in_file(hed_input, display_filename)
-            else:
-                validation_issues = self._error_handler.format_val_error(ValidationErrors.INVALID_FILENAME,
-                                                                         file_name=hed_input.filename)
+            self._error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
+            validation_issues = self._validate_hed_tags_in_file(hed_input)
         else:
             validation_issues = self._validate_hed_strings([hed_input])[0]
+
+        if is_file:
+            # If we have a custom title and found no issues, we need to still print the title.
+            self._error_handler.pop_error_context()
         return validation_issues
 
     def get_tag_validator(self):
@@ -135,30 +138,21 @@ class HedValidator:
         hed_schema = HedSchema(final_hed_xml_file)
         return hed_schema
 
-    def _validate_hed_tags_in_file(self, hed_input, display_filename=None):
+    def _validate_hed_tags_in_file(self, hed_input):
         """
 
         Parameters
         ----------
         hed_input: HedFileInput object
             A file to validate.  This function does no type checking on this.
-        display_filename : str or None
-            If hed_input is a filename, it will be validated as if it had this filename instead.
-            Useful for temp files where the real filename is unhelpful.
         Returns
         -------
         validation_issues : [{}]
         """
         validation_issues = []
-        if not display_filename:
-            display_filename = hed_input.filename
-
-        self._error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
         for row_number, row_hed_string, column_to_hed_tags_dictionary in hed_input:
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
                                                                         column_to_hed_tags_dictionary)
-        self._error_handler.pop_error_context()
-
         return validation_issues
 
     def _append_validation_issues_if_found(self, validation_issues, row_number, row_hed_string,
@@ -231,11 +225,13 @@ class HedValidator:
 
          """
         if column_to_hed_tags_dictionary:
+            self._error_handler.push_error_context(ErrorContext.ROW, row_number)
             for column_number in column_to_hed_tags_dictionary.keys():
-                self._error_handler.push_error_context(ErrorContext.COLUMN, row_number, column_context=column_number)
+                self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
                 validation_issues += self.validate_column_hed_string(column_hed_string)
                 self._error_handler.pop_error_context()
+            self._error_handler.pop_error_context()
         return validation_issues
 
     def validate_column_hed_string(self, column_hed_string):
@@ -376,31 +372,22 @@ class HedValidator:
         return validation_issues
 
     @staticmethod
-    def get_printable_issue_string(validation_issues, title=''):
-        """Return a string with identifying title and issues in string form one per line.
+    def get_printable_issue_string(validation_issues, title=None):
+        """Return a string with issues list flatted into single string, one per line
 
         Parameters
         ----------
         validation_issues: []
             Issues to print
         title: str
-            string used as a title for the issues.
-
+            If present, add this to the start of the returned string.
         Returns
         -------
         str
             A str containing printable version of the issues or '[]'.
 
-          """
-        if not validation_issues:
-            issue_string = "\t[]\n"
-        else:
-            issue_string = "\n"
-            for el in validation_issues:
-                issue_string = issue_string + el["message"] + "\n"
-        if title:
-            issue_string = title + ":" + issue_string
-        return issue_string
+        """
+        return error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title)
 
     @staticmethod
     def get_previous_original_and_formatted_tag(original_and_formatted_tags, loop_index):

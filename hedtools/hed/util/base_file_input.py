@@ -2,6 +2,7 @@ import os
 import openpyxl
 import pandas
 from hed.util.column_mapper import ColumnMapper
+from hed.util.exceptions import HedFileError, HedExceptions
 import copy
 
 
@@ -49,6 +50,8 @@ class BaseFileInput:
             self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header)
         elif self.is_text_file():
             self._dataframe = pandas.read_csv(filename, '\t', header=pandas_header)
+        else:
+            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
 
         # Finalize mapping information if we have columns
         if self._dataframe is not None and self._has_column_names:
