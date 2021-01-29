@@ -3,6 +3,7 @@ class HedExceptions:
     FILE_NOT_FOUND = 'fileNotFound'
     CANNOT_PARSE_XML = 'cannotParseXML'
     CANNOT_PARSE_JSON = 'cannotParseJson'
+    INVALID_EXTENSION = 'invalidExtension'
 
 
 class HedFileError(Exception):
@@ -39,8 +40,9 @@ class HedFileError(Exception):
             filename = display_filename
         error_types = {
             HedExceptions.FILE_NOT_FOUND: f"{error_prefix}{message}.  '{filename}'",
+            HedExceptions.INVALID_EXTENSION: f"{error_prefix}Invalid extension.  '{filename}'",
             HedExceptions.CANNOT_PARSE_XML: f"{error_prefix}Cannot parse schema XML file: "
-                                           f"{message}.  '{filename}'",
+                                            f"{message}.  '{filename}'",
             HedExceptions.CANNOT_PARSE_JSON: f"{error_prefix}Cannot parse json file: {message}. '{filename}'",
         }
         default_error_message = f'{error_prefix}Internal Error'
