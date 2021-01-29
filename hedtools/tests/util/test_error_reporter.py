@@ -1,7 +1,8 @@
 import unittest
 from hed.util import error_reporter
 from hed.util import error_types
-from hed.util.error_types import ErrorContext
+from hed.util.error_types import ErrorContext, ErrorSeverity
+
 
 class Test(unittest.TestCase):
     @classmethod
@@ -64,3 +65,11 @@ class Test(unittest.TestCase):
         error_list = self.error_handler.format_schema_error(error_types.SchemaErrors.EMPTY_TAG_FOUND, "")
         self.assertTrue(len(error_list) == 1)
         self.error_handler.reset_error_context()
+
+    def test_filter_issues_by_severity(self):
+        error_list = self.error_handler.format_schema_error(error_types.SchemaErrors.EMPTY_TAG_FOUND, "")
+        error_list += self.error_handler.format_schema_warning(error_types.SchemaWarnings.INVALID_CAPITALIZATION,
+                                                               "invalid_caps")
+        self.assertTrue(len(error_list) == 2)
+        filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list, severity=ErrorSeverity.ERROR)
+        self.assertTrue(len(filtered_list) == 1)

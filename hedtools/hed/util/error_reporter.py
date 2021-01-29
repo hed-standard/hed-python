@@ -65,7 +65,7 @@ class ErrorHandler:
         return [error_object]
 
     def format_val_error(self, error_type, hed_string='', tag='', tag_prefix='', previous_tag='',
-                         character='', index=0, unit_class_units='', file_name='', opening_parentheses_count=0,
+                         character='', index=0, unit_class_units='', opening_parentheses_count=0,
                          closing_parentheses_count=0):
         """Reports the abc error based on the type of error.
 
@@ -87,8 +87,6 @@ class ErrorHandler:
             The character in the string that generated the error.
         unit_class_units: str
             The unit class units that are associated with the error.
-        file_name: str
-            The invalid file name that cause the error.
         opening_parentheses_count: int
             The number of opening parentheses.
         closing_parentheses_count: int
@@ -335,13 +333,15 @@ class ErrorHandler:
         return error_object_list
 
     @staticmethod
-    def _get_context_from_issue(val_issue):
+    def _get_context_from_issue(val_issue, skip_filename=True):
         """
         Extract all the context values from the given issue
         Parameters
         ----------
         val_issue : {}
             A dictionary a representing a single error
+        skip_filename: bool
+            If true, don't gather the filename context.
         Returns
         -------
         context_list: []
@@ -349,6 +349,8 @@ class ErrorHandler:
         """
         single_issue_context = []
         for key in val_issue:
+            if skip_filename and key == ErrorContext.FILE_NAME:
+                continue
             if key in ErrorContext:
                 single_issue_context.append((key.value, *val_issue[key]))
 
@@ -409,9 +411,10 @@ class ErrorHandler:
         """
         context_string = ""
         tab_count = 0
+        found_difference = False
         for i, context_tuple in enumerate(single_issue_context):
             (context_type, context, increment_tab) = context_tuple
-            if len(last_used_context) > i:
+            if len(last_used_context) > i and not found_difference:
                 last_drawn = last_used_context[i]
                 # Was drawn, and hasn't changed.
                 if last_drawn == context_tuple:
@@ -420,6 +423,7 @@ class ErrorHandler:
                     continue
 
             context_string += ErrorHandler._format_single_context_string(context_type, context, tab_count)
+            found_difference = True
             if increment_tab:
                 tab_count += 1
 
@@ -427,7 +431,7 @@ class ErrorHandler:
         return context_string, tab_string
 
     @staticmethod
-    def get_printable_issue_string(validation_issues, title=None):
+    def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
         """Return a string with issues list flatted into single string, one per line
 
         Parameters
@@ -436,7 +440,10 @@ class ErrorHandler:
             Issues to print
         title: str
             Optional title that will always show up first if present(even if there are no validation issues)
-
+        severity: int
+            Return only warnings >= severity
+        skip_filename: bool
+            If true, don't add the filename context to the printable string.
         Returns
         -------
         str
@@ -445,9 +452,12 @@ class ErrorHandler:
         """
         last_used_error_context = []
 
+        if severity is not None:
+            validation_issues = ErrorHandler.filter_issues_by_severity(validation_issues, severity)
+
         issue_string = ""
         for single_issue in validation_issues:
-            single_issue_context = ErrorHandler._get_context_from_issue(single_issue)
+            single_issue_context = ErrorHandler._get_context_from_issue(single_issue, skip_filename)
             context_string, tab_string = ErrorHandler._get_context_string(single_issue_context, last_used_error_context)
 
             issue_string += context_string
@@ -473,7 +483,7 @@ class ErrorHandler:
         ----------
         issues_list : [{}]
             The full issue list
-        severity : ErrorSeverity
+        severity : int
             The level of issue you're interested in
 
         Returns
@@ -481,5 +491,4 @@ class ErrorHandler:
         filtered_issues_list: [{}]
             The list with all other severities removed.
         """
-        return [issue for issue in issues_list if issue['severity'] == severity]
-
+        return [issue for issue in issues_list if issue['severity'] >= severity]
