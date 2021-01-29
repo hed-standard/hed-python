@@ -211,7 +211,7 @@ class ColumnDefGroup:
         return all_validation_issues
 
     @staticmethod
-    def get_printable_issue_string(validation_issues, title=None):
+    def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
         """Return a string with issues list flatted into single string, one per line
 
         Parameters
@@ -220,11 +220,14 @@ class ColumnDefGroup:
             Issues to print
         title: str
             Optional title that will always show up first if present(even if there are no validation issues)
-
+        severity: int
+            Return only warnings >= severity
+        skip_filename: bool
+            If true, don't add the filename context to the printable string.
         Returns
         -------
         str
             A str containing printable version of the issues or '[]'.
 
         """
-        return error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title)
+        return error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title, severity, skip_filename)
