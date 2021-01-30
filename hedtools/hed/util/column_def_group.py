@@ -3,6 +3,7 @@ from hed.util.column_definition import ColumnDef
 from hed.util.error_types import ErrorContext
 from hed.util import error_reporter
 from hed.util.exceptions import HedFileError, HedExceptions
+from hed.util.def_dict import DefDict
 
 
 class ColumnDefGroup:
@@ -27,6 +28,16 @@ class ColumnDefGroup:
         column_defs: iterator
         """
         return iter(self._column_settings.values())
+
+    def extract_defs(self, hed_schema, error_handler=None):
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+        new_def_dict = DefDict(hed_schema=hed_schema)
+        validation_issues = []
+        for hed_string in self.hed_string_iter():
+            validation_issues += new_def_dict.check_for_definitions(hed_string, error_handler=error_handler)
+
+        return new_def_dict, validation_issues
 
     def save_as_json(self, save_filename):
         """
@@ -90,6 +101,10 @@ class ColumnDefGroup:
                 json_file = ColumnDefGroup(json_file)
             loaded_files.append(json_file)
         return loaded_files
+
+    @staticmethod
+    def extract_defs_from_list(column_group_defs, hed_schema):
+        return [column_group_def.extract_defs(hed_schema, check_for_issues=False) for column_group_def in column_group_defs]
 
     def hed_string_iter(self, include_position=False):
         """
