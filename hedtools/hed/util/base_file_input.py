@@ -1,9 +1,11 @@
 import os
 import openpyxl
 import pandas
+import copy
+
+from hed.util.def_dict import DefDict
 from hed.util.column_mapper import ColumnMapper
 from hed.util.exceptions import HedFileError, HedExceptions
-import copy
 
 
 class BaseFileInput:
@@ -16,7 +18,8 @@ class BaseFileInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename, worksheet_name=None, has_column_names=True, mapper=None):
+    def __init__(self, filename, worksheet_name=None, has_column_names=True, mapper=None,
+                 hed_schema=None):
         """Constructor for the BaseFileInput class.
 
          Parameters
@@ -31,6 +34,8 @@ class BaseFileInput:
          mapper: ColumnMapper object
              Pass in a built column mapper(see HedFileInput or EventFileInput for examples), or None to just
              retrieve all columns as hed tags.
+         hed_schema: HedSchema object
+             Used to create definitions.
          """
         if mapper is None:
             mapper = ColumnMapper()
@@ -59,7 +64,31 @@ class BaseFileInput:
             self._mapper.set_column_map(columns)
 
         # Now that the file is fully initialized, gather the definitions from it.
-        mapper.update_definition_mapper_with_file(self)
+        self.file_def_dict, self.file_def_dict_issues = self.extract_definitions(hed_schema)
+        # finally add the new file dict to the mapper.
+        mapper.update_definition_mapper_with_file(self.file_def_dict)
+
+    def extract_definitions(self, hed_schema):
+        """
+        Gathers and validates all definitions found in this spreadsheet
+
+        Parameters
+        ----------
+        hed_schema : HedSchema
+            Used to know where definition tags are located in the schema
+
+        Returns
+        -------
+        def_dict: DefDict
+            Contains all the definitions located in the file
+        validation_issues: [{}]
+            A list of all issues found with the definitions.
+        """
+        new_def_dict = DefDict(hed_schema=hed_schema)
+        validation_issues = []
+        for row_number, row_hed_string, column_to_hed_tags_dictionary in self.iter_raw():
+            validation_issues += new_def_dict.check_for_definitions(row_hed_string)
+        return new_def_dict, validation_issues
 
     def save(self, filename=None, include_formatting=False, output_processed_file=False,
              add_suffix=None):
@@ -263,3 +292,4 @@ class BaseFileInput:
         if not worksheet_name:
             return workbook.worksheets[0]
         return workbook.get_sheet_by_name(worksheet_name)
+

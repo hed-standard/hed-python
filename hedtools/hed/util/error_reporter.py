@@ -5,7 +5,7 @@ You can scope the formatted errors with calls to push_error_context and pop_erro
 """
 
 from hed.util.error_types import ValidationErrors, ValidationWarnings, SchemaErrors, \
-    SidecarErrors, SchemaWarnings, ErrorContext, ErrorSeverity
+    SidecarErrors, SchemaWarnings, ErrorContext, ErrorSeverity, DefinitionErrors
 
 
 class ErrorHandler:
@@ -328,6 +328,30 @@ class ErrorHandler:
                         'message': warning_message,
                         'source_tag': hed_tag,
                         'severity': ErrorSeverity.WARNING}
+
+        error_object_list = self._add_context_to_errors(error_object)
+        return error_object_list
+
+    def format_definition_error(self, error_type, def_name, tag_list=None):
+        error_prefix = f"ERROR: "
+        error_types = {
+            DefinitionErrors.WRONG_NUMBER_DEF_TAGS:
+                f"{error_prefix}Too many def tags found in definition for {def_name}.  Expected 1, also found: {tag_list}",
+            DefinitionErrors.WRONG_NUMBER_ORG_TAGS:
+                f"{error_prefix}Too many org tags found in definition for {def_name}.  Expected 0 or 1, found: {tag_list}",
+            DefinitionErrors.WRONG_NUMBER_GROUP_TAGS:
+                f"{error_prefix}Too many group tags found in definition for {def_name}.  Expected 1, found: {tag_list}",
+            DefinitionErrors.DUPLICATE_DEFINITION:
+                f"{error_prefix}Duplicate definition found for '{def_name}'.",
+            DefinitionErrors.TAG_IN_SCHEMA:
+                f"{error_prefix}Term '{def_name}' already used as term in schema and cannot be re-used as a definition."
+        }
+        default_error_message = f'{error_prefix}Internal Error'
+        error_message = error_types.get(error_type, default_error_message)
+
+        error_object = {'code': error_type,
+                        'message': error_message,
+                        'severity': ErrorSeverity.ERROR}
 
         error_object_list = self._add_context_to_errors(error_object)
         return error_object_list
