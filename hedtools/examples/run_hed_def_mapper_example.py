@@ -17,6 +17,9 @@ if __name__ == '__main__':
     json_file = "data/both_types_events_def_example.json"
     column_group = ColumnDefGroup(json_file)
     def_dict, def_issues = column_group.extract_defs(hed_schema)
+    if def_issues:
+        print(HedValidator.get_printable_issue_string(def_issues,
+                                                      title="There should be no errors in the definitions from the sidecars:"))
     input_file = EventFileInput(hed3_tags_single_sheet, json_def_files=column_group,
                                 tag_columns=[4], column_prefix_dictionary=prefixed_needed_tag_columns,
                                 worksheet_name='LKT Events',
