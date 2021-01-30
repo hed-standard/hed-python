@@ -9,7 +9,7 @@ class ColumnMapper:
         Private Functions and variables column and row indexing starts at 0.
         Public functions and variables indexing starts at 1(or 2 if has column names)"""
     def __init__(self, json_def_files=None, tag_columns=None, column_prefix_dictionary=None,
-                 hed_schema=None, attribute_columns=None, definition_mapper=None):
+                 attribute_columns=None, definition_mapper=None):
         """Constructor for ColumnMapper
 
         Parameters
@@ -25,13 +25,10 @@ class ColumnMapper:
             4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/
             prepended to them, the fourth column contains tags that need Event/Label/ prepended to them,
             and the fifth column contains tags that needs Event/Category/ prepended to them.
-        hed_schema: HedSchema
-            Used to create a TagValidator, which is then used to validate the entries in value and category entries.
         attribute_columns: str or int or [str] or [int]
              A list of column names or numbers to treat as attributes.
         definition_mapper: DefinitionMapper
             The mapper to use to remove definitions and replace dlabels from the given input
-
         """
         # This points to column_type entries based on column names or indexes if columns have no column_name.
         self.column_defs = {}
@@ -44,7 +41,6 @@ class ColumnMapper:
         self._def_mapper = definition_mapper
 
         self._na_patterns = ["n/a", "nan"]
-        self._hed_schema = hed_schema
 
         if json_def_files:
             self.add_json_file_defs(json_def_files)
@@ -70,17 +66,17 @@ class ColumnMapper:
             for column_def in column_group:
                 self._add_column_def(column_def)
 
-    def update_definition_mapper_with_file(self, hed_file_input):
+    def update_definition_mapper_with_file(self, def_dict):
         """
         Adds label definitions gathered from the given list of inputs if this has a definition mapper.
 
         Parameters
         ----------
-        hed_file_input : BaseFileInput
-            The file to gather definitions from.  Generally, this is the same spreadsheet you're opening.
+        def_dict : DefDict
+            The gathered definitions to add to the mapper.
         """
         if self._def_mapper is not None:
-            self._def_mapper.add_definitions(hed_file_input)
+            self._def_mapper.add_definitions(def_dict)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
         """Adds the given columns as hed tag columns with the required prefix if it does not already exist.

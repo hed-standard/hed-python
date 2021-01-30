@@ -62,3 +62,11 @@ class SchemaWarnings:
     INVALID_CHARACTERS_IN_DESC = "invalidCharDesc"
     INVALID_CHARACTERS_IN_TAG = "invalidCharTag"
     INVALID_CAPITALIZATION = 'invalidCaps'
+
+
+class DefinitionErrors:
+    WRONG_NUMBER_DEF_TAGS = 'wrongNumberDefTags'
+    WRONG_NUMBER_ORG_TAGS = 'wrongNumberOrgTags'
+    WRONG_NUMBER_GROUP_TAGS = 'wrongNumberGroupTags'
+    DUPLICATE_DEFINITION = 'duplicateDefinition'
+    TAG_IN_SCHEMA = 'defAlreadyInSchema'
