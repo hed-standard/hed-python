@@ -491,9 +491,8 @@ class ErrorHandler:
             issue_string += f"{single_issue_message}\n"
             last_used_error_context = single_issue_context.copy()
 
-        if not issue_string:
-            issue_string = "[]"
-        issue_string += "\n"
+        if issue_string:
+            issue_string += "\n"
         if title:
             issue_string = title + '\n' + issue_string
         return issue_string
