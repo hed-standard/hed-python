@@ -1,6 +1,15 @@
-"""Examples of how to validate errors in a json sidecar file independently, and also an example of
-        opening a json file and converting each HED tag from short to long."""
+"""
+Example 1: creating a ColumnDefGroup from a json sidecar file and validating it
 
+Example 2: how to open a json sidecar, modify it, then save it back out.
+
+Example 3: Iterate over hed strings in a json sidecar.
+
+Classes Demonstrated:
+HedSchema - Opens a hed xml schema.  Used by other tools to check tag attributes in the schema.
+TagFormat - Used to convert between short and long tags
+ColumnDefGroup - Contains the data from a single json sidecar, can be validated using a HedSchema.
+"""
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.hed_schema import HedSchema
 from hed.tools.tag_format import TagFormat
@@ -9,11 +18,13 @@ local_hed_xml = "data/HED8.0.0-alpha.1.xml"
 hed_schema = HedSchema(local_hed_xml)
 json_filename = "data/both_types_events_errors.json"
 
+# Example 1
 json_file = ColumnDefGroup(json_filename)
 # Print all the errors from the json file
 errors = json_file.validate_entries(hed_schema)
 print(json_file.get_printable_issue_string(errors))
 
+# Example 2
 # Open the json file, convert all tags to long, and save it out
 long_tag_formatter = TagFormat(local_hed_xml)
 for column_def in json_file:
@@ -25,6 +36,7 @@ for column_def in json_file:
 # Save off a copy of the input json, modified.
 json_file.save_as_json(json_filename + "-long.json")
 
+# Example 3
 # Alternate shorter syntax for accessing HED strings in a json file.
 for hed_string, position in json_file.hed_string_iter(include_position=True):
     print(hed_string)

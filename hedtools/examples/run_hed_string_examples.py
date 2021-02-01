@@ -1,5 +1,8 @@
 """
-Examples of HED validation of a tag string
+Examples of creating a HedValidator and validating various Hed Strings with it.
+
+Classes Demonstrated:
+HedValidator - Validates a given input string or file
 """
 
 from hed.validator.hed_validator import HedValidator
