@@ -1,5 +1,14 @@
 """
-Example of outputting a spreadsheet after processing is done(replacing definitions etc)
+Examples of creating an EventFileInput to open a spreadsheet, process it, then save it back out.
+
+Classes Demonstrated:
+HedSchema - Opens a hed xml schema.  Used by other tools to check tag attributes in the schema.
+HedValidator - Validates a given input string or file
+EventFileInput - Used to open/modify/save a bids style spreadsheet, with json sidecars and definitions.
+HedFileError - Exception thrown when a file cannot be opened.(parsing error, file not found error, etc)
+ColumnDefGroup - Contains the data from a single json sidecar, can be validated using a HedSchema.
+DefDict - Created from a ColumnDefGroup.  Contains all label definitions to be expanded, can be validated using
+          a HedSchema.
 """
 import os
 from hed.util.event_file_input import EventFileInput
