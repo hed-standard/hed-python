@@ -1,5 +1,10 @@
 """
-Examples of opening a HED dataset spreadsheet and resaving the entire thing with tags converted to short or long.
+Examples of opening a HED dataset spreadsheet, processing it, then saving it back out as a spreadsheet.
+This example is specifically converting tags between short and long form.
+
+Classes Demonstrated:
+HedFileInput - Used to open/modify/save a spreadsheet
+TagFormat - Used to convert between short and long tags
 """
 import os
 

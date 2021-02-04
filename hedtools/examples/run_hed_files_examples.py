@@ -1,5 +1,11 @@
 """
-Examples of calling the HED validator with files of tags
+Examples of creating a HedValidator and validating various spreadsheets using it.
+Also contains examples of catching HedFileErrors for invalid input.
+
+Classes Demonstrated:
+HedFileInput - Used to open/modify/save a spreadsheet
+HedValidator - Validates a given input string or file
+HedFileError - Exception thrown when a file cannot be opened.(parsing error, file not found error, etc)
 """
 
 import os
