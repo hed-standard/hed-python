@@ -1,5 +1,9 @@
-# Example of validating a given schema XML file.
+"""
+Example of how to validate a given hed schema file.
 
+Functions Demonstrated:
+schema_validator.validate_schema - Takes a schema XML filename as input and returns all validation issues found within.
+"""
 from hed.schema import schema_validator
 
 if __name__ == '__main__':
