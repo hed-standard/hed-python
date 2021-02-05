@@ -184,7 +184,7 @@ function submitSchemaConversionForm() {
 function submitSchemaComplianceCheckForm() {
     let schemaForm = document.getElementById("schema-form");
     let formData = new FormData(schemaForm);
-    let download_display_name = convertToResultsName(getSchemaFilename(), 'HED3G_format_issues')
+    let display_name = convertToResultsName(getSchemaFilename(), 'HED3G_format_issues')
     resetFlashMessages(false);
     flashMessageOnScreen('Checking schema for HED-3G compliance...', 'success',
         'schema-submit-flash')
@@ -195,10 +195,11 @@ function submitSchemaComplianceCheckForm() {
             contentType: false,
             processData: false,
             dataType: 'text',
-            success: function (downloaded_file) {
-                  if (downloaded_file) {
+            success: function (downloaded_file, status, xhr) {
+                if (downloaded_file) {
+                      let filename = getFilenameFromResponseHeader(xhr, display_name)
+                      triggerDownloadBlob(downloaded_file, filename);
                       flashMessageOnScreen('', 'success', 'schema-submit-flash');
-                      triggerDownloadBlob(downloaded_file, download_display_name);
                   } else {
                       flashMessageOnScreen('No HED-3G compliance issues found.', 'success',
                           'schema-submit-flash');
@@ -216,7 +217,6 @@ function submitSchemaComplianceCheckForm() {
             }
         }
     )
-    ;
 }
 
 function updateFormGui() {

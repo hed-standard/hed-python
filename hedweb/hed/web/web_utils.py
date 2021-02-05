@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 from flask import current_app, jsonify, Response
 
 from hed.util import hed_cache
+from hed.util.error_reporter import ErrorHandler
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 from hed.util.hed_schema import HedSchema
 from hed.web.constants import common_constants, error_constants, file_constants
@@ -231,11 +232,14 @@ def generate_filename(basename, prefix=None, suffix=None, extension=None):
     filename = ''
     pieces = []
     if prefix:
-        pieces.append(secure_filename(prefix))
+        pieces = pieces + [secure_filename(prefix)]
     if basename:
-        pieces.append(secure_filename(basename).rsplit('.')[0])
+        temp = secure_filename(basename).rsplit('.')
+        temp = temp + temp
+        pieces.append(os.path.splitext(secure_filename(basename))[0])
+        # pieces = pieces + secure_filename(basename).rsplit('.')
     if suffix:
-        pieces.append(secure_filename(suffix))
+        pieces = pieces + [secure_filename(suffix)]
 
     if not pieces:
         return ''
@@ -275,8 +279,30 @@ def get_hed_path_from_pull_down(form_request_object):
     return hed_file_path, hed_display_name
 
 
-def get_printable_issue_string(issues, title=title, )
-    error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title, severity, skip_filename)
+def get_printable_issue_string(issues, display_name=None, title_string=''):
+    """Returns a string suitable for text blob download
+
+     Parameters
+     ----------
+     issues: list
+         List of the issues to be printed.
+     title_string: str
+         key name in the files dictionary of the Request object
+     display_name: list of str
+         List of valid extensions
+
+     Returns
+     -------
+     tuple
+         A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
+     """
+    if not issues:
+        return ''
+    if display_name:
+        title = title_string + display_name + '\n'
+    else:
+        title = None
+    return ErrorHandler.get_printable_issue_string(issues, title, None, True)
 
 
 def get_uploaded_file_path_from_form(form_request_object, file_key, valid_extensions=None):

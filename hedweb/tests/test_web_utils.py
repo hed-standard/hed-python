@@ -138,6 +138,8 @@ class Test(unittest.TestCase):
                                      suffix='blech', extension='.txt')
         self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
                          "Returns correct string when basename with hyphens")
+        filename = generate_filename('HED7.1.2.xml', suffix='blech', extension='.txt')
+        self.assertEqual('HED7.1.2_blech.txt', filename, "Returns correct string when basename has periods")
 
     def test_get_hed_path_from_pull_down(self):
         from hed.web.constants import common_constants

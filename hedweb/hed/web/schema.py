@@ -9,7 +9,8 @@ from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_e
 from hed.util.exceptions import HedFileError
 
 from hed.web.web_utils import file_extension_is_valid, form_has_file, form_has_option, form_has_url, \
-    handle_http_error, save_file_to_upload_folder, generate_download_file_response, generate_filename
+    generate_download_file_response, generate_filename, get_printable_issue_string, \
+    handle_http_error, save_file_to_upload_folder, save_text_to_upload_folder
 
 from hed.web.constants import common_constants, error_constants, file_constants
 
@@ -92,15 +93,14 @@ def run_schema_compliance_check(form_request_object):
 
         if not hed_file_path or not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
             return f"Invalid file name {hed_file_path}"
-        display_name = input_arguments(common_constants.SCHEMA_DISPLAY_NAME)
+
         issues = schema_validator.validate_schema(hed_file_path)
-        issue_str = schema_validator.get_printable_issue_string(issues)
-        if issue_str:
-            header = f'HED schema errors for {hed_file_path}\n'
-            file_name = generate_filename(hed_file_path, 'schema_errors_')
-            temp_file = write_strings_to_file([issue_str], extension='txt')
-            download_response = \
-                generate_download_file_response(temp_file, display_name=file_name, header=header)
+        if issues:
+            display_name = input_arguments.get(common_constants.SCHEMA_DISPLAY_NAME)
+            issue_str = get_printable_issue_string(issues, display_name, 'Schema validation errors for ')
+            file_name = generate_filename(display_name, suffix='schema_errors', extension='.txt')
+            issue_file = save_text_to_upload_folder(issue_str, file_name)
+            download_response = generate_download_file_response(issue_file, display_name=file_name)
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response

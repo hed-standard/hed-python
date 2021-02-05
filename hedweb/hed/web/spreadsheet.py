@@ -8,9 +8,9 @@ from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 
 from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web.web_utils import convert_number_str_to_list, generate_filename, generate_download_file_response, \
-    get_hed_path_from_pull_down, get_uploaded_file_path_from_form, handle_http_error,\
-    save_file_to_upload_folder, save_text_to_upload_folder
+from hed.web.web_utils import convert_number_str_to_list, generate_filename, get_printable_issue_string, \
+    generate_download_file_response, get_hed_path_from_pull_down, get_uploaded_file_path_from_form, \
+    handle_http_error, save_file_to_upload_folder, save_text_to_upload_folder
 from hed.web import utils
 
 app_config = current_app.config
@@ -115,12 +115,13 @@ def report_spreadsheet_validation_status(form_request_object):
     input_arguments = []
     try:
         input_arguments = generate_arguments_from_validation_form(form_request_object)
-        display_name = input_arguments.get(common_constants.SPREADSHEET_FILE, None)
-        issue_str = validate_spreadsheet(input_arguments, hed_validator=None, display_name=display_name)
-        if issue_str:
-            issues_filename = generate_filename(display_name, suffix='validation_errors', extension='.txt')
-            issue_file = save_text_to_upload_folder(issue_str, issues_filename)
-            download_response = generate_download_file_response(issue_file, display_name=issues_filename)
+        issues = validate_spreadsheet(input_arguments)
+        if issues:
+            display_name = input_arguments.get(common_constants.SPREADSHEET_FILE, None)
+            issue_str = get_printable_issue_string(issues, display_name, 'HED validation errors for ')
+            file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
+            issue_file = save_text_to_upload_folder(issue_str, file_name)
+            download_response = generate_download_file_response(issue_file, display_name=file_name)
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
@@ -135,14 +136,15 @@ def report_spreadsheet_validation_status(form_request_object):
     return ""
 
 
-def validate_spreadsheet(input_arguments, hed_validator=None, display_name=None):
+def validate_spreadsheet(input_arguments, hed_validator=None):
     """Validates the spreadsheet.
 
     Parameters
     ----------
     input_arguments: dictionary
         A dictionary containing the arguments for the validation function.
-
+    hed_validator: HedValidator
+        Validator passed if previously created in another phase
     Returns
     -------
     HedValidator object
@@ -159,11 +161,4 @@ def validate_spreadsheet(input_arguments, hed_validator=None, display_name=None)
         hed_validator = HedValidator(hed_xml_file=input_arguments.get(common_constants.HED_XML_FILE, ''),
                                      check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
 
-    issues = hed_validator.validate_input(file_input)
-    if not issues:
-        return ''
-    if display_name:
-        title = f'HED validation errors for {display_name}\n'
-    else:
-        title = None
-    return hed_validator.get_printable_issue_string(issues, title=title)
+    return hed_validator.validate_input(file_input)
