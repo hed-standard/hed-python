@@ -41,9 +41,9 @@ class HedFileError(Exception):
         error_types = {
             HedExceptions.FILE_NOT_FOUND: f"{error_prefix}{message}.  '{filename}'",
             HedExceptions.INVALID_EXTENSION: f"{error_prefix}Invalid extension.  '{filename}'",
-            HedExceptions.CANNOT_PARSE_XML: f"{error_prefix}Cannot parse schema XML file: "
+            HedExceptions.CANNOT_PARSE_XML: f"{error_prefix}Cannot parse schema XML: "
                                             f"{message}.  '{filename}'",
-            HedExceptions.CANNOT_PARSE_JSON: f"{error_prefix}Cannot parse json file: {message}. '{filename}'",
+            HedExceptions.CANNOT_PARSE_JSON: f"{error_prefix}Cannot parse json: {message}. '{filename}'",
         }
         default_error_message = f'{error_prefix}Internal Error'
         error_message = error_types.get(error_type, default_error_message)

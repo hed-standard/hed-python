@@ -8,17 +8,22 @@ from hed.util.def_dict import DefDict
 
 class ColumnDefGroup:
     """This stores column definitions for parsing hed spreadsheets, generally loaded from a single json file."""
-    def __init__(self, json_filename):
+    def __init__(self, json_filename=None, json_string=None):
         """
 
         Parameters
         ----------
-        json_filename: str
-            The actual filename to be loaded
+        json_filename: str or None, optional
+            The actual filename to be loaded.
+        json_string: str or None, optional
+            Alternate to passing a filename, you can pass in a json string to be parsed
         """
-        self._json_filename = json_filename
+        self._json_filename = None
         self._column_settings = {}
-        self.add_json_file_defs(json_filename)
+        if json_string:
+            self.add_json_string(json_string)
+        if json_filename:
+            self.add_json_file_defs(json_filename)
 
     def __iter__(self):
         """
@@ -30,6 +35,23 @@ class ColumnDefGroup:
         return iter(self._column_settings.values())
 
     def extract_defs(self, hed_schema, error_handler=None):
+        """
+            Finds all definitions in the hed strings of this column def group.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema
+            Schema to use for checking if definition names are already used, and to locate definition tags.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        Returns
+        -------
+        def_dicts: DefDict
+            A DefDict containing all the definitions found
+        validation_issues: [{}]
+            A list of all errors and warnings found while extracting definitions.
+
+        """
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
         new_def_dict = DefDict(hed_schema=hed_schema)
@@ -53,10 +75,26 @@ class ColumnDefGroup:
         with open(save_filename, "w") as fp:
             json.dump(output_dict, fp, indent=4)
 
+    def add_json_string(self, json_string):
+        """
+            Loads column definitions from a given json string
+
+        Parameters
+        ----------
+        json_string : str
+            path to file to load
+        """
+        try:
+            loaded_defs = json.loads(json_string)
+            for col_def, col_dict in loaded_defs.items():
+                self._add_single_col_type(col_def, col_dict)
+        except json.decoder.JSONDecodeError as e:
+            raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), json_string[:100])
+
     def add_json_file_defs(self, json_filename):
         """
-            Loads column definitions from a given json file
-            Will add errors related to opening or parsing the file to validation issues.
+            Loads column definitions from a given json file.
+            You can load multiple files into one ColumnDefGroup, but it is discouraged.
 
         Parameters
         ----------
@@ -66,6 +104,7 @@ class ColumnDefGroup:
         try:
             with open(json_filename, "r") as fp:
                 loaded_defs = json.load(fp)
+                self._json_filename = json_filename
                 for col_def, col_dict in loaded_defs.items():
                     self._add_single_col_type(col_def, col_dict)
         except json.decoder.JSONDecodeError as e:
@@ -104,6 +143,19 @@ class ColumnDefGroup:
 
     @staticmethod
     def extract_defs_from_list(column_group_defs, hed_schema):
+        """
+            Take a list of column def groups, and return a list of def dicts extracted from them.
+            This is primarily for quick development tests.  It is not suggested you use this.
+
+        Parameters
+        ----------
+        column_group_defs : [ColumnDefGroup]
+        hed_schema : HedSchema
+        Returns
+        -------
+        def_dicts: [DefDict]
+
+        """
         return [column_group_def.extract_defs(hed_schema, check_for_issues=False) for column_group_def in column_group_defs]
 
     def hed_string_iter(self, include_position=False):
@@ -214,7 +266,8 @@ class ColumnDefGroup:
             error_handler = error_reporter.ErrorHandler()
         if not display_filename:
             display_filename = self._json_filename
-        error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename, False)
+        if display_filename:
+            error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename, False)
 
         all_validation_issues = []
         for column_entry in self:
@@ -222,7 +275,8 @@ class ColumnDefGroup:
             all_validation_issues += column_entry.validate_column_entry(hed_schema, error_handler=error_handler)
             error_handler.pop_error_context()
 
-        error_handler.pop_error_context()
+        if display_filename:
+            error_handler.pop_error_context()
         return all_validation_issues
 
     @staticmethod
