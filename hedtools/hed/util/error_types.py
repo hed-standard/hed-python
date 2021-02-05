@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class ErrorSeverity:
-    WARNING = 1
-    ERROR = 2
+    ERROR = 1
+    WARNING = 2
 
 
 class ErrorContext(Enum):
