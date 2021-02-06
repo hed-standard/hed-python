@@ -160,6 +160,7 @@ function submitSchemaConversionForm() {
             success: function (downloaded_file, status, xhr) {
                 if (downloaded_file) {
                       let filename = getFilenameFromResponseHeader(xhr, display_name)
+
                       triggerDownloadBlob(downloaded_file, filename);
                       flashMessageOnScreen('', 'success', 'schema-submit-flash');
                 } else {

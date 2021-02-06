@@ -1,4 +1,4 @@
-from os.path import basename
+from os.path import basename, splitext
 import traceback
 from urllib.error import URLError, HTTPError
 from urllib.parse import urlparse
@@ -125,14 +125,21 @@ def run_schema_conversion(form_request_object):
         Response is a download success.
     """
     hed_file_path = ''
+    download_response = ''
     try:
-        arguments = generate_input_from_schema_form(form_request_object)
-        hed_file_path = arguments.get(common_constants.SCHEMA_PATH)
-        schema_file, errors = get_schema_conversion(hed_file_path)
-        if errors:
-            download_response = errors
+        input_arguments = generate_input_from_schema_form(form_request_object)
+        hed_file_path = input_arguments.get(common_constants.SCHEMA_PATH)
+        display_name = input_arguments.get(common_constants.SCHEMA_DISPLAY_NAME)
+        schema_file, issues = get_schema_conversion(hed_file_path)
+        if issues:
+            issue_str = get_printable_issue_string(issues, display_name, 'Schema conversion errors for ')
+            file_name = generate_filename(display_name, suffix='conversion_errors', extension='.txt')
+            issue_file = save_text_to_upload_folder(issue_str, file_name)
+            download_response = generate_download_file_response(issue_file, display_name=file_name)
         else:
-            download_response = generate_download_file_response(schema_file)
+            schema_name, schema_ext = splitext(schema_file)
+            file_name = generate_filename(display_name,  extension=schema_ext)
+            download_response = generate_download_file_response(schema_file, display_name=file_name)
         if isinstance(download_response, Response):
             return download_response
         elif isinstance(download_response, str):
