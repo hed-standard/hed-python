@@ -500,7 +500,7 @@ class ErrorHandler:
     @staticmethod
     def filter_issues_by_severity(issues_list, severity):
         """
-        Gathers all issues matching a given severity
+        Gathers all issues matching or below a given severity.
             
         Parameters
         ----------
@@ -514,4 +514,4 @@ class ErrorHandler:
         filtered_issues_list: [{}]
             The list with all other severities removed.
         """
-        return [issue for issue in issues_list if issue['severity'] >= severity]
+        return [issue for issue in issues_list if issue['severity'] <= severity]

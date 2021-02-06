@@ -77,6 +77,8 @@ class EventFileInput(BaseFileInput):
         """
         Validates all column definitions and column definition hed strings.
 
+        This is not an encouraged way to do this.  You should instead validate the sidecars BEFORE creating
+        an EventFileInput
         Parameters
         ----------
         hed_schema : HedSchema, optional
