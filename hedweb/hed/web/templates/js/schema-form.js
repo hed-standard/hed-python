@@ -26,7 +26,7 @@ $('#schema-url').on('change', function () {
 /**
  * Submits the form for conversion if we have a valid file.
  */
-$('#schema-conversion-submit').click(function () {
+$('#schema-conversion-submit').on('click', function () {
     if (getSchemaFilename() === "") {
         flashMessageOnScreen('No valid source input file.  See above.', 'error',
             'schema-submit-flash')
@@ -64,9 +64,9 @@ function convertToOutputName(original_filename) {
     let basename = file_parts[0]
     let extension = file_parts[1]
     let new_extension = 'bad'
-    if (extension == SCHEMA_XML_EXTENSION) {
+    if (extension === SCHEMA_XML_EXTENSION) {
         new_extension = SCHEMA_MEDIAWIKI_EXTENSION
-    } else if (extension == SCHEMA_MEDIAWIKI_EXTENSION) {
+    } else if (extension === SCHEMA_MEDIAWIKI_EXTENSION) {
         new_extension = SCHEMA_XML_EXTENSION
     }
 
@@ -83,7 +83,7 @@ function getSchemaFilename() {
     let checkRadioVal = checkRadio.id
     let schemaFile = $('#schema-file');
     let schemaFileIsEmpty = schemaFile[0].files.length === 0;
-    if (checkRadioVal == "schema-file-option") {
+    if (checkRadioVal === "schema-file-option") {
         if (schemaFileIsEmpty) {
             flashMessageOnScreen('Schema file not specified.', 'error',
                 'schema-file-flash');
@@ -95,7 +95,7 @@ function getSchemaFilename() {
 
     let schemaUrl = $('#schema-url').val();
     let schemaUrlIsEmpty = schemaUrl === "";
-    if (checkRadioVal == "schema-url-option") {
+    if (checkRadioVal === "schema-url-option") {
         if (schemaUrlIsEmpty) {
             flashMessageOnScreen('URL not specified.', 'error', 'schema-url-flash');
             return '';
@@ -157,25 +157,11 @@ function submitSchemaConversionForm() {
             contentType: false,
             processData: false,
             dataType: "text",
-            success: function (downloaded_file, status, xhr) {
-                if (downloaded_file) {
-                      let filename = getFilenameFromResponseHeader(xhr, display_name)
-
-                      triggerDownloadBlob(downloaded_file, filename);
-                      flashMessageOnScreen('', 'success', 'schema-submit-flash');
-                } else {
-                      flashMessageOnScreen('Unable to download converted file.', 'error',
-                          'spreadsheet-validation-submit-flash');
-                }
+            success: function (download, status, xhr) {
+                getResponseSuccess(download, xhr, display_name, 'schema-submit-flash')
             },
-            error: function (download_response) {
-                console.log(download_response.responseText);
-                if (download_response.responseText.length < 100) {
-                    flashMessageOnScreen(download_response.responseText, 'error','schema-submit-flash');
-                } else {
-                    flashMessageOnScreen('Schema could not be converted---check file validity', 'error',
-                        'schema-submit-flash');
-                }
+            error: function (download, status, xhr) {
+                getResponseFailure(download, xhr, display_name, 'schema-submit-flash')
             }
         }
     )
@@ -196,25 +182,11 @@ function submitSchemaComplianceCheckForm() {
             contentType: false,
             processData: false,
             dataType: 'text',
-            success: function (downloaded_file, status, xhr) {
-                if (downloaded_file) {
-                      let filename = getFilenameFromResponseHeader(xhr, display_name)
-                      triggerDownloadBlob(downloaded_file, filename);
-                      flashMessageOnScreen('', 'success', 'schema-submit-flash');
-                  } else {
-                      flashMessageOnScreen('No HED-3G compliance issues found.', 'success',
-                          'schema-submit-flash');
-                  }
+            success: function (download, status, xhr) {
+                getResponseSuccess(download, xhr, display_name, 'schema-submit-flash')
             },
-            error: function (download_response) {
-                console.log(download_response.responseText);
-                if (download_response.responseText.length < 100) {
-                    flashMessageOnScreen(download_response.responseText, 'error',
-                        'schema-submit-flash');
-                } else {
-                    flashMessageOnScreen('Schema could not be processed',
-                        'error','schema-submit-flash');
-                }
+            error: function (download, status, xhr) {
+                getResponseFailure(download, xhr, display_name, 'schema-submit-flash')
             }
         }
     )
@@ -260,24 +232,6 @@ function updateFormGui() {
      }
 
      flashMessageOnScreen('', 'success', 'schema-submit-flash')
-}
-
-/**
- * Updates the HED file label.
- * @param {String} hedPath - The path to the HED XML file.
- */
-function updateSchemaFileLabel(hedPath) {
-    let hedFilename = hedPath.split('\\').pop();
-    $('#schema-file-display-name').text(hedFilename);
-}
-
-/**
- * Updates the HED file label.
- * @param {String} hedPath - The path to the HED XML file.
- */
-function updateSchemaUrlLabel(hedPath) {
-    let hedFilename = hedPath.split('\\').pop();
-    $('#schema-url-display-name').text(hedFilename);
 }
 
 

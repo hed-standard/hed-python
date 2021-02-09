@@ -168,13 +168,12 @@ function submitForm() {
             contentType: false,
             processData: false,
             dataType: 'text',
-            success: function (downloaded_file) {
+            success: function (downloaded_file, status, xhr) {
                   if (downloaded_file) {
+                      let filename = getFilenameFromResponseHeader(xhr, display_name)
+
+                      triggerDownloadBlob(downloaded_file, filename);
                       flashMessageOnScreen('', 'success',
-                          'events-validation-submit-flash');
-                      triggerDownloadBlob(downloaded_file, display_name);
-                  } else {
-                      flashMessageOnScreen('No validation errors found.', 'success',
                           'events-validation-submit-flash');
                   }
             },

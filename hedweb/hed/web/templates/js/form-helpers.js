@@ -34,27 +34,7 @@ function convertToResultsName(filename, prefix) {
     return prefix + "_" + parts[0] + ".txt"
 }
 
-/**
- * Gets the file download name from a Response header
- * @param {Object} xhr - Dictionary containing Response header information
- * @param {String} default_name - The default name to use
- * @returns {String} - Name of the save file
- */
-function getFilenameFromResponseHeader(xhr, default_name) {
-    let disposition = xhr.getResponseHeader('Content-Disposition')
-    let filename = "";
-    if (disposition && disposition.indexOf('attachment') !== -1) {
-        let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-        let matches = filenameRegex.exec(disposition);
-        if (matches != null && matches[1]) {
-            filename = matches[1].replace(/['"]/g, '');
-        }
-    }
-    if (!filename) {
-        filename = default_name;
-    }
-    return filename
-}
+
 /**
  * Compares the file extension of the file at the specified path to an Array of accepted file extensions.
  * @param {String} filePath - A path to a file.
@@ -69,18 +49,6 @@ function fileHasValidExtension(filePath, acceptedFileExtensions) {
     return false;
 }
 
-
-/**
- * Checks to see if a string is empty. Empty meaning null or a length of zero.
- * @param {String} str - A string.
- * @returns {boolean} - True if the string is null or its length is 0.
- */
-function isEmptyStr(str) {
-    if (str === null || str.length === 0) {
-        return true;
-    }
-    return false;
-}
 
 
 /**
@@ -110,6 +78,82 @@ function getFilenameAndExtension(pathname){
 
 
 /**
+ * Gets the file download name from a Response header
+ * @param {Object} xhr - Dictionary containing Response header information
+ * @param {String} default_name - The default name to use
+ * @returns {String} - Name of the save file
+ */
+function getFilenameFromResponseHeader(xhr, default_name) {
+    let disposition = xhr.getResponseHeader('Content-Disposition')
+
+    let filename = "";
+    if (disposition && disposition.indexOf('attachment') !== -1) {
+        let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        let matches = filenameRegex.exec(disposition);
+        if (matches != null && matches[1]) {
+            filename = matches[1].replace(/['"]/g, '');
+        }
+    }
+    if (!filename) {
+        filename = default_name;
+    }
+    return filename
+}
+
+/**
+ * Gets standard failure response for download
+ * @param {String} download - Downloaded string response blob
+ * @param {Object} xhr - Dictionary containing Response header information
+ * @param {String} display_name - Name used for the downloaded blob file
+ * @param {String} flash_location - ID of the flash location element for displaying response Message
+ */
+function getResponseFailure(download, xhr, display_name, flash_location) {
+    console.log(download.responseText);
+    if (download.responseText.length < 100) {
+        flashMessageOnScreen(download_response.responseText, 'error', flash_location);
+    } else {
+        flashMessageOnScreen('Not processed', 'error', flash_location);
+    }
+}
+
+/**
+ * Gets standard response with download
+ * @param {String} download - Downloaded string response blob
+ * @param {Object} xhr - Dictionary containing Response header information
+ * @param {String} display_name - Name used for the downloaded blob file
+ * @param {String} flash_location - ID of the flash location element for displaying response Message
+ */
+function getResponseSuccess(download, xhr, display_name, flash_location) {
+    if (download) {
+        let filename = getFilenameFromResponseHeader(xhr, display_name)
+        triggerDownloadBlob(download, filename);
+        let info = xhr.getResponseHeader('Message')
+        let category =  xhr.getResponseHeader('Category')
+        if (info) {
+            flashMessageOnScreen(info, category, flash_location);
+        } else {
+            flashMessageOnScreen('', 'success', flash_location);
+        }
+    } else {
+        flashMessageOnScreen('No errors found.', 'success', flash_location);
+    }
+}
+
+
+/**
+ * Checks to see if a string is empty. Empty meaning null or a length of zero.
+ * @param {String} str - A string.
+ * @returns {boolean} - True if the string is null or its length is 0.
+ */
+function isEmptyStr(str) {
+    if (str === null || str.length === 0) {
+        return true;
+    }
+    return false;
+}
+
+
+/**
  * Flash a message on the screen.
  * @param {Object} flashMessage - The li element containing the flash message.
  * @param {String} category - The category of the message. The categories are 'error', 'success', and 'other'.
@@ -120,7 +164,7 @@ function setFlashMessageCategory(flashMessage, category) {
     } else if ("success" === category) {
         flashMessage.style.backgroundColor = 'palegreen';
     } else if ("warning" === category) {
-        flashMessage.style.backgroundColor = 'darkorange';
+        flashMessage.style.backgroundColor = 'orange';
     } else {
         flashMessage.style.backgroundColor = '#f0f0f5';
     }

@@ -12,8 +12,8 @@ from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.dictionary import validate_dictionary
 from hed.web.spreadsheet import validate_spreadsheet
 from hed.web.web_utils import generate_filename, generate_download_file_response, \
-    get_hed_path_from_pull_down, get_uploaded_file_path_from_form, handle_http_error, \
-    save_text_to_upload_folder
+    get_hed_path_from_pull_down, get_printable_issue_string, \
+    get_uploaded_file_path_from_form, handle_http_error, save_text_to_upload_folder
 from hed.web.utils import get_optional_form_field
 
 app_config = current_app.config
@@ -74,34 +74,29 @@ def report_events_validation_status(form_request_object):
     try:
         input_arguments = generate_arguments_from_events_form(form_request_object)
         hed_schema = HedSchema(input_arguments.get(common_constants.HED_XML_FILE, ''))
-        hed_validator = HedValidator(hed_schema=hed_schema,
-                                     check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
-        json_display_name = input_arguments.get(common_constants.JSON_FILE, '')
-        issue_str = validate_dictionary(input_arguments, hed_schema=hed_schema, display_name=json_display_name)
-        display_name = input_arguments.get(common_constants.SPREADSHEET_DISPLAY_NAME, None)
-        issue_str = issue_str + validate_spreadsheet(input_arguments, hed_validator=hed_validator,
-                                                     display_name=display_name)
-        if issue_str:
-            final_name = json_display_name
-            issues_filename = generate_filename(final_name, suffix='validation_errors', extension='.txt')
-            issue_file = save_text_to_upload_folder(issue_str, issues_filename)
-            download_response = generate_download_file_response(issue_file)
+        issues = validate_dictionary(input_arguments, hed_schema=hed_schema)
+        if issues:
+            display_name = input_arguments.get(common_constants.JSON_FILE, '')
+            issue_str = get_printable_issue_string(issues, display_name, 'HED validation errors for ')
+            file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
+            issue_file = save_text_to_upload_folder(issue_str, file_name)
+            download_response = generate_download_file_response(issue_file, display_name=file_name)
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
-        # input_arguments = generate_arguments_from_events_form(form_request_object)
-        # validation_issues = validate_events(input_arguments)
-        # if validation_issues:
-        #     issues_filename = \
-        #         generate_filename(input_arguments.get(common_constants.SPREADSHEET_FILE, ''),
-        #                           common_constants.VALIDATION_OUTPUT_FILE_PREFIX,
-        #                           input_arguments.get(common_constants.WORKSHEET_NAME, ''))
-        #
-        #     issue_file = save_issues_to_upload_folder(validation_issues, issues_filename)
-        #     download_response = generate_download_file_response(issue_file)
-        #     if isinstance(download_response, str):
-        #         return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
-        #     return download_response
+
+        hed_validator = HedValidator(hed_schema=hed_schema,
+                                     check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
+        issues = validate_spreadsheet(input_arguments, hed_validator)
+        if issues:
+            display_name = input_arguments.get(common_constants.SPREADSHEET_FILE, None)
+            issue_str = get_printable_issue_string(issues, display_name, 'HED validation errors for ')
+            file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
+            issue_file = save_text_to_upload_folder(issue_str, file_name)
+            download_response = generate_download_file_response(issue_file, display_name=file_name)
+            if isinstance(download_response, str):
+                return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+            return download_response
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:

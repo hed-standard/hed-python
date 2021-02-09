@@ -97,10 +97,11 @@ def run_schema_compliance_check(form_request_object):
         issues = schema_validator.validate_schema(hed_file_path)
         if issues:
             display_name = input_arguments.get(common_constants.SCHEMA_DISPLAY_NAME)
-            issue_str = get_printable_issue_string(issues, display_name, 'Schema validation errors for ')
+            issue_str = get_printable_issue_string(issues, display_name, 'Schema HED 3G compliance errors for ')
             file_name = generate_filename(display_name, suffix='schema_errors', extension='.txt')
             issue_file = save_text_to_upload_folder(issue_str, file_name)
-            download_response = generate_download_file_response(issue_file, display_name=file_name)
+            download_response = generate_download_file_response(issue_file, display_name=file_name, category='warning',
+                                                                msg='Schema is not HED 3G compliant')
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
@@ -125,7 +126,6 @@ def run_schema_conversion(form_request_object):
         Response is a download success.
     """
     hed_file_path = ''
-    download_response = ''
     try:
         input_arguments = generate_input_from_schema_form(form_request_object)
         hed_file_path = input_arguments.get(common_constants.SCHEMA_PATH)
@@ -135,11 +135,14 @@ def run_schema_conversion(form_request_object):
             issue_str = get_printable_issue_string(issues, display_name, 'Schema conversion errors for ')
             file_name = generate_filename(display_name, suffix='conversion_errors', extension='.txt')
             issue_file = save_text_to_upload_folder(issue_str, file_name)
-            download_response = generate_download_file_response(issue_file, display_name=file_name)
+            download_response = \
+                generate_download_file_response(issue_file, display_name=file_name, category='warning',
+                                                msg='Schema had validation errors and could not be converted')
         else:
             schema_name, schema_ext = splitext(schema_file)
             file_name = generate_filename(display_name,  extension=schema_ext)
-            download_response = generate_download_file_response(schema_file, display_name=file_name)
+            download_response = generate_download_file_response(schema_file, display_name=file_name, category='success',
+                                                                msg='Schema was successfully converted')
         if isinstance(download_response, Response):
             return download_response
         elif isinstance(download_response, str):

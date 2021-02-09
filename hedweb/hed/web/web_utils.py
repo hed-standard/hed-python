@@ -172,7 +172,7 @@ def form_has_url(form_request_object, url_field, valid_extensions):
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
 
-def generate_download_file_response(download_file, display_name=None, header=None):
+def generate_download_file_response(download_file, display_name=None, header=None, category='success', msg=''):
     """Generates a download other response.
 
     Parameters
@@ -182,7 +182,11 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     display_name: str
         Name to be assigned to the file in the response
     header: str
-        Optional header -- usually given for error message downloads
+        Optional header -- header for download file blob
+    category: str
+        Category of the message to be displayed ('Success', 'Error', 'Warning')
+    msg: str
+        Optional message to be displayed in the submit-flash-field
 
     Returns
     -------
@@ -208,7 +212,8 @@ def generate_download_file_response(download_file, display_name=None, header=Non
                     yield line
             delete_file_if_it_exists(download_file)
         return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': f"attachment filename={display_name}"})
+                        headers={'Content-Disposition': f"attachment filename={display_name}",
+                                 'Category': category, 'Message': msg})
     except:
         return traceback.format_exc()
 

@@ -59,21 +59,11 @@ function submitForm() {
             contentType: false,
             processData: false,
             dataType: 'text',
-            success: function (downloaded_file) {
-                  if (downloaded_file) {
-                      flashMessageOnScreen('', 'success', 'dictionary-validation-submit-flash');
-                      triggerDownloadBlob(downloaded_file, display_name);
-                  } else {
-                      flashMessageOnScreen('No errors found.', 'success', 'dictionary-validation-submit-flash');
-                  }
+            success: function (download, status, xhr) {
+                getResponseSuccess(download, xhr, display_name, 'dictionary-validation-submit-flash')
             },
-            error: function (download_response) {
-                console.log(download_response.responseText);
-                if (download_response.responseText.length < 100) {
-                    flashMessageOnScreen(download_response.responseText, 'error', 'dictionary-validation-submit-flash');
-                } else {
-                    flashMessageOnScreen('Dictionary not processed', 'error','dictionary-validation-submit-flash');
-                }
+            error: function (download, status, xhr) {
+                getResponseFailure(download, xhr, display_name, 'dictionary-validation-submit-flash')
             }
         }
     )
