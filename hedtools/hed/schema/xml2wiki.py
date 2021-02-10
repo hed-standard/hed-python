@@ -3,8 +3,8 @@ from enum import Enum
 from hed.schema import constants
 from hed.util import file_util
 from hed.util.hed_schema import HedSchema
-from hed.util.exceptions import SchemaFileError
 from hed.schema.schema_validator import validate_schema
+
 
 class MainParseMode(Enum):
     MainTags = 1
@@ -185,7 +185,8 @@ class HEDXml2Wiki:
         return final_attrib_string
 
 
-def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=True):
+def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=True,
+                           display_filename=None):
     """Converts the local HED xml file into a wikimedia file
 
     Parameters
@@ -196,6 +197,9 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=Tr
         filepath to local xml hed schema(overrides hed_xml_url)
     check_for_issues : bool
         After conversion checks for warnings like capitalization or invalid characters.
+    display_filename: str
+        If present, will use this as the filename for context, rather than using the actual filename
+        Useful for temp filenames.
     Returns
     -------
     mediawiki_filename: str
@@ -206,10 +210,7 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=Tr
     if local_xml_file is None:
         local_xml_file = file_util.url_to_file(hed_xml_url)
 
-    try:
-        hed_xml_tree = HedSchema.parse_hed_xml_file(local_xml_file)
-    except SchemaFileError as e:
-        return None, e.format_error_message()
+    hed_xml_tree = HedSchema.parse_hed_xml_file(local_xml_file)
 
     xml2wiki = HEDXml2Wiki()
     output_strings = xml2wiki.process_tree(hed_xml_tree)
@@ -217,7 +218,7 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=Tr
 
     issue_list = []
     if check_for_issues:
-        warnings = validate_schema(local_xml_file)
+        warnings = validate_schema(local_xml_file, display_filename=display_filename)
         issue_list += warnings
 
     return local_mediawiki_file, issue_list

@@ -4,10 +4,10 @@ This module contains functions that convert a wiki HED schema into a XML HED sch
 from hed.util import file_util
 from hed.schema import parsewiki
 from hed.schema.schema_validator import validate_schema
-from hed.util.exceptions import SchemaFileError
 
 
-def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None, check_for_issues=True):
+def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None, check_for_issues=True,
+                           display_filename=None):
     """Converts the HED wiki into a XML file.
 
     Parameters
@@ -18,6 +18,9 @@ def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None, check_for_issues=
         local wiki file to use(overrides hed_wiki_url)
     check_for_issues : bool
         After conversion checks for warnings like capitalization or invalid characters.
+    display_filename: str
+        If present, will use this as the filename for context, rather than using the actual filename
+        Useful for temp filenames.
     Returns
     -------
     xml_filename: str
@@ -28,14 +31,11 @@ def convert_hed_wiki_2_xml(hed_wiki_url, local_wiki_file=None, check_for_issues=
     if local_wiki_file is None:
         local_wiki_file = file_util.url_to_file(hed_wiki_url)
 
-    try:
-        hed_xml_file_location = _create_hed_xml_file(local_wiki_file)
-    except SchemaFileError as e:
-        return None, e.format_error_message()
+    hed_xml_file_location = _create_hed_xml_file(local_wiki_file)
 
     issue_list = []
     if check_for_issues:
-        warnings = validate_schema(hed_xml_file_location)
+        warnings = validate_schema(hed_xml_file_location, display_filename=display_filename)
         issue_list += warnings
 
     return hed_xml_file_location, issue_list

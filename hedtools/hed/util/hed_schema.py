@@ -9,8 +9,7 @@ The dictionary is a dictionary of dictionaries. The dictionary names are
 
 from defusedxml.ElementTree import parse
 import xml
-from hed.util.exceptions import SchemaFileError
-from hed.util.error_types import SchemaErrors
+from hed.util.exceptions import HedFileError, HedExceptions
 
 
 # These need to match the attributes/element name/etc used to load from the xml
@@ -67,7 +66,6 @@ class HedSchema:
         ----------
         hed_xml_file_path: str
             The path to a HED XML file.
-
         Returns
         -------
         HedSchema
@@ -469,9 +467,11 @@ class HedSchema:
         try:
             hed_xml_tree = parse(hed_xml_file_path)
         except xml.etree.ElementTree.ParseError as e:
-            raise SchemaFileError(SchemaErrors.CANNOT_PARSE_XML, e.msg, hed_xml_file_path)
+            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, hed_xml_file_path)
         except FileNotFoundError as e:
-            raise SchemaFileError(SchemaErrors.FILE_NOT_FOUND, e.strerror, hed_xml_file_path)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, hed_xml_file_path)
+        except TypeError as e:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), hed_xml_file_path)
         return hed_xml_tree.getroot()
 
     def _get_ancestor_tag_names(self, tag_element):

@@ -1,15 +1,27 @@
 import json
 from hed.util.column_definition import ColumnDef
-from hed.util.error_types import SidecarErrors, ErrorContext
-from hed.util.error_reporter import format_sidecar_error, push_error_context, pop_error_context
+from hed.util.error_types import ErrorContext
+from hed.util import error_reporter
+from hed.util.exceptions import HedFileError, HedExceptions
+from hed.util.def_dict import DefDict
 
 
 class ColumnDefGroup:
     """This stores column definitions for parsing hed spreadsheets, generally loaded from a single json file."""
-    def __init__(self, json_filename=None):
-        self._json_filename = json_filename
+    def __init__(self, json_filename=None, json_string=None):
+        """
+
+        Parameters
+        ----------
+        json_filename: str or None, optional
+            The actual filename to be loaded.
+        json_string: str or None, optional
+            Alternate to passing a filename, you can pass in a json string to be parsed
+        """
+        self._json_filename = None
         self._column_settings = {}
-        self._validation_issues = {}
+        if json_string:
+            self.add_json_string(json_string)
         if json_filename:
             self.add_json_file_defs(json_filename)
 
@@ -21,6 +33,33 @@ class ColumnDefGroup:
         column_defs: iterator
         """
         return iter(self._column_settings.values())
+
+    def extract_defs(self, hed_schema, error_handler=None):
+        """
+            Finds all definitions in the hed strings of this column def group.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema
+            Schema to use for checking if definition names are already used, and to locate definition tags.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        Returns
+        -------
+        def_dicts: DefDict
+            A DefDict containing all the definitions found
+        validation_issues: [{}]
+            A list of all errors and warnings found while extracting definitions.
+
+        """
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+        new_def_dict = DefDict(hed_schema=hed_schema)
+        validation_issues = []
+        for hed_string in self.hed_string_iter():
+            validation_issues += new_def_dict.check_for_definitions(hed_string, error_handler=error_handler)
+
+        return new_def_dict, validation_issues
 
     def save_as_json(self, save_filename):
         """
@@ -36,10 +75,26 @@ class ColumnDefGroup:
         with open(save_filename, "w") as fp:
             json.dump(output_dict, fp, indent=4)
 
+    def add_json_string(self, json_string):
+        """
+            Loads column definitions from a given json string
+
+        Parameters
+        ----------
+        json_string : str
+            path to file to load
+        """
+        try:
+            loaded_defs = json.loads(json_string)
+            for col_def, col_dict in loaded_defs.items():
+                self._add_single_col_type(col_def, col_dict)
+        except json.decoder.JSONDecodeError as e:
+            raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), json_string[:100])
+
     def add_json_file_defs(self, json_filename):
         """
-            Loads column definitions from a given json file
-            Will add errors related to opening or parsing the file to validation issues.
+            Loads column definitions from a given json file.
+            You can load multiple files into one ColumnDefGroup, but it is discouraged.
 
         Parameters
         ----------
@@ -49,21 +104,23 @@ class ColumnDefGroup:
         try:
             with open(json_filename, "r") as fp:
                 loaded_defs = json.load(fp)
+                self._json_filename = json_filename
                 for col_def, col_dict in loaded_defs.items():
                     self._add_single_col_type(col_def, col_dict)
-
-        except FileNotFoundError:
-            self._validation_issues[json_filename] = format_sidecar_error(SidecarErrors.INVALID_FILENAME,
-                                                                          filename=json_filename)
-        except json.decoder.JSONDecodeError:
-            self._validation_issues[json_filename] = format_sidecar_error(SidecarErrors.CANNOT_PARSE_JSON,
-                                                                          filename=json_filename)
+        except json.decoder.JSONDecodeError as e:
+            raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), json_filename)
+        except FileNotFoundError as e:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, json_filename)
+        except TypeError as e:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), json_filename)
 
     @staticmethod
     def load_multiple_json_files(json_file_input_list):
         """
             Utility function for easily loading multiple json files at once
             This takes a list of filenames or ColumnDefinitionGroups and returns a list of ColumnDefinitionGroups.
+
+            Note: it will completely fail and raise a HedFileError if any of the files are not found.
 
         Parameters
         ----------
@@ -83,6 +140,23 @@ class ColumnDefGroup:
                 json_file = ColumnDefGroup(json_file)
             loaded_files.append(json_file)
         return loaded_files
+
+    @staticmethod
+    def extract_defs_from_list(column_group_defs, hed_schema):
+        """
+            Take a list of column def groups, and return a list of def dicts extracted from them.
+            This is primarily for quick development tests.  It is not suggested you use this.
+
+        Parameters
+        ----------
+        column_group_defs : [ColumnDefGroup]
+        hed_schema : HedSchema
+        Returns
+        -------
+        def_dicts: [DefDict]
+
+        """
+        return [column_group_def.extract_defs(hed_schema, check_for_issues=False) for column_group_def in column_group_defs]
 
     def hed_string_iter(self, include_position=False):
         """
@@ -170,19 +244,7 @@ class ColumnDefGroup:
         column_entry = ColumnDef(column_type, column_name, dict_for_entry)
         self._column_settings[column_name] = column_entry
 
-    def get_validation_issues(self):
-        """Simple getter for previously validated issues from the files.
-
-        Use self.validate_entries to initially validate them.
-
-        Returns
-        -------
-        validation_issues: [{}]
-            The list of validation issues found
-        """
-        return self._validation_issues
-
-    def validate_entries(self, hed_schema=None, display_filename=None):
+    def validate_entries(self, hed_schema=None, display_filename=None, error_handler=None):
         """Validate the column entries, and also hed strings in the column entries if a hed_schema is passed.
 
         Parameters
@@ -190,27 +252,51 @@ class ColumnDefGroup:
         hed_schema : HedSchema, optional
             The dictionary to use to validate individual hed strings.
         display_filename: str
-            If present, it will display errors as coming from this filename instead of the actual source.
-            Useful for temporary files and similar.
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
         Returns
         -------
         validation_issues: [{}]
             The list of validation issues found
 
         """
-        # If we already have an issue we either already validated, or have a file io error
-        if not self._validation_issues:
-            key_validation_issues = {}
-            if not display_filename:
-                display_filename = self._json_filename
-            push_error_context(ErrorContext.FILE_NAME, display_filename, False)
-            for column_entry in self:
-                push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
-                col_validation_issues = column_entry.validate_column_entry(hed_schema)
-                if col_validation_issues:
-                    key_validation_issues[column_entry.column_name] = col_validation_issues
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+        if not display_filename:
+            display_filename = self._json_filename
+        if display_filename:
+            error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename, False)
 
-                pop_error_context()
-            self._validation_issues = key_validation_issues
-            pop_error_context(False)
-        return self._validation_issues
+        all_validation_issues = []
+        for column_entry in self:
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_entry.column_name)
+            all_validation_issues += column_entry.validate_column_entry(hed_schema, error_handler=error_handler)
+            error_handler.pop_error_context()
+
+        if display_filename:
+            error_handler.pop_error_context()
+        return all_validation_issues
+
+    @staticmethod
+    def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
+        """Return a string with issues list flatted into single string, one per line
+
+        Parameters
+        ----------
+        validation_issues: []
+            Issues to print
+        title: str
+            Optional title that will always show up first if present(even if there are no validation issues)
+        severity: int
+            Return only warnings >= severity
+        skip_filename: bool
+            If true, don't add the filename context to the printable string.
+        Returns
+        -------
+        str
+            A str containing printable version of the issues or '[]'.
+
+        """
+        return error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title, severity, skip_filename)
