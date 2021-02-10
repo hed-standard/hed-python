@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
     #         self.app = app.test_client()
 
     def test_generate_input_arguments_from_validation_form(self):
-        self.assertTrue(1, "Testing generate_arguments_from_validation_form")
+        self.assertTrue(1, "Testing generate_arguments_from_dictionary_form")
 
     def test_generate_spreadsheet_validation_filename(self):
         self.assertTrue(1, "Testing generate_dictionary_validation_filename")

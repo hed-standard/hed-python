@@ -3,6 +3,7 @@ import os
 
 from hed.util.def_mapper import DefinitionMapper
 from hed.util.hed_schema import HedSchema
+from hed.util.def_dict import DefDict
 
 class Test(unittest.TestCase):
     @classmethod
@@ -10,20 +11,18 @@ class Test(unittest.TestCase):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         hed_xml_file = os.path.join(cls.base_data_dir, "HED8.0.0-alpha.1.xml")
         cls.hed_schema = HedSchema(hed_xml_file)
-        cls.base_def_mapper = DefinitionMapper(hed_schema=cls.hed_schema)
-        cls.basic_def_string = "(Definition/TestDef, Organizational/TestOrg, (Item/TestDef1, Item/TestDef2))"
+        cls.base_dict = DefDict(hed_schema=cls.hed_schema)
+        cls.def_contents_string = "(Item/TestDef1, Item/TestDef2)"
+        cls.basic_def_string = f"(Definition/TestDef, Organizational/TestOrg, {cls.def_contents_string})"
+        cls.label_def_string = f"Label-def/TestDef"
+        cls.expanded_def_string = f"(Label-exp/TestDef, Organizational/TestOrg, {cls.def_contents_string})"
         cls.basic_hed_string = "Item/BasicTestTag1, Item/BasicTestTag2"
-
-    def test_add_definitions(self):
-        def_mapper = DefinitionMapper(hed_schema=self.hed_schema)
-        original_def_count = len(def_mapper._defs)
-        def_mapper.add_definitions(self.basic_def_string)
-        new_def_count = len(def_mapper._defs)
-        self.assertGreater(new_def_count, original_def_count)
+        cls.basic_hed_string_with_def = f"Item/BasicTestTag1, Item/BasicTestTag2, {cls.label_def_string}"
 
     def test_replace_and_remove_tags(self):
-        def_mapper = DefinitionMapper(hed_schema=self.hed_schema)
-        def_mapper.add_definitions(self.basic_def_string)
+        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict.check_for_definitions(self.basic_def_string)
+        def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
 
         result_string = def_mapper.replace_and_remove_tags(self.basic_def_string)
         self.assertEqual(result_string, "")
@@ -34,6 +33,9 @@ class Test(unittest.TestCase):
         result_string = def_mapper.replace_and_remove_tags(self.basic_def_string + ", " + self.basic_hed_string)
         self.assertEqual(result_string, self.basic_hed_string)
 
+        result_string = def_mapper.replace_and_remove_tags(self.basic_hed_string_with_def)
+        self.assertEqual(result_string, self.basic_hed_string + ", " + self.expanded_def_string)
+
     def test__check_tag_starts_with(self):
         possible_tag_list = ["definition", "informational/definition", "attribute/informational/definition"]
 
@@ -43,13 +45,6 @@ class Test(unittest.TestCase):
         for tag in test_tags:
             result = DefinitionMapper._check_tag_starts_with(tag, possible_tag_list)
             self.assertTrue(result)
-
-    def test__check_for_definitions(self):
-        def_mapper = DefinitionMapper(hed_schema=self.hed_schema)
-        original_def_count = len(def_mapper._defs)
-        def_mapper._check_for_definitions(self.basic_def_string)
-        new_def_count = len(def_mapper._defs)
-        self.assertGreater(new_def_count, original_def_count)
 
     def test__find_tag_group_extent(self):
         input_strings = [

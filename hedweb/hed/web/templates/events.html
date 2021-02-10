@@ -1,50 +1,15 @@
 {% extends "layout.html" %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "json-input.html" import create_json_input %}
+{% from "spreadsheet-input.html" import spreadsheet_input %}
 {% block content %}
     <h2>Validate spreadsheet containing HED tags</h2>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form.css') }}">
-    <form id="spreadsheet-form" method="POST" enctype="multipart/form-data">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <form id="events-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        <div class="form-group">
-            <label for="spreadsheet-file">Select spreadsheet (Excel or tab-separated):</label><br>
-            <label class="btn-group file-browse-group spreadsheet-btn-group">
-                <button for="spreadsheet-file">Browse ...</button>
-                <label id="spreadsheet-display-name"></label>
-                <input type="file" name="spreadsheet-file" id="spreadsheet-file"/>
-            </label>
-            <p class="flash" id="spreadsheet-flash"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="worksheet-name">Choose a worksheet (for workbooks):</label><br>
-            <select name="worksheet-name" id="worksheet-name"></select>
-            <p class="flash" id="worksheet-flash"></p>
-        </div>
-
-        <div class="form-group" id="column-names">
-            <label class="secondary-label" for="columns-names-table">Worksheet columns</label>
-            <table id="columns-names-table"></table>
-        </div>
-
-        <div class="form-group">
-            <label>Special non-prefixed tag columns (if available):</label><br>
-            <div class="textbox-group">
-                <label for="category-column">Category</label>
-                <input type="text" name="category-column" id="category-column">
-                <label for="description-column">Description</label>
-                <input type="text" name="description-column" id="description-column">
-                <label for="label-column">Label</label>
-                <input type="text" name="label-column" id="label-column">
-                <label for="long-column">Long name</label>
-                <input type="text" name="long-column" id="long-column">
-            </div>
-            <label class="secondary-label" for="tag-columns">Columns containing HED strings
-                (comma-separated):</label><br>
-            <input class="textbox-group" type="text" name="tag-columns" id="tag-columns">
-            <p class="flash" id="tag-columns-flash"></p>
-        </div>
-
+        {{ spreadsheet_input() }}
+        {{ create_json_input() }}
         {{ create_hed_pulldown() }}
 
         <div class="form-group">
@@ -62,14 +27,18 @@
         </div>
 
         <div class="form-group">
-            <button id="spreadsheet-validation-submit" type="button">Validate</button>
-            <p class="flash" id="spreadsheet-validation-submit-flash"></p>
+            <button id="events-validation-submit" type="button">Validate</button>
+            <p class="flash" id="events-validation-submit-flash"></p>
         </div>
     </form>
     <script type="module">
+
         {%  include 'js/form-helpers.js' %}
         {%  include 'js/hed-pulldown.js' %}
-        {%  include 'js/spreadsheet-form.js' %}
+        {%  include 'js/json-input.js' %}
+        {%  include 'js/spreadsheet-input.js' %}
+        {%  include 'js/events-form.js' %}
+
     </script>
 
 {% endblock %}

@@ -1,7 +1,5 @@
 from hed.util.hed_string_util import split_hed_string
-from hed.util.hed_string_delimiter import HedStringDelimiter
-from hed.util.base_file_input import BaseFileInput
-from hed.util.column_def_group import ColumnDefGroup
+from hed.util.def_dict import DefDict
 
 
 class DefinitionMapper:
@@ -15,57 +13,67 @@ class DefinitionMapper:
     DEF_KEY = "definition"
     ORG_KEY = "organizational"
 
-    def __init__(self, hed_inputs=None, hed_schema=None):
+    def __init__(self, def_dicts=None, hed_schema=None):
         """
+        Class to handle mapping definitions from hed strings to fill them in with their vlaues.
 
         Parameters
         ----------
-        hed_inputs : [] or str or BaseFileInput or ColumnDefGroup
-            List input doesn't need to all be the same type.
+        def_dicts: [DefDict]
+            DefDict's containing all the definitions this mapper should initialize with.  More can be added later.
         hed_schema : HedSchema, optional
             Used to determine where definition tags are in the schema.  This is technically optional, but
             only short form definition tags will work if this is absent.
         """
-        self._defs = {}
-        self._short_tag_mapping = hed_schema.short_tag_mapping
+        self._gathered_defs = {}
 
         if hed_schema:
             self._def_tag_versions = hed_schema.get_all_forms_of_tag(self.DEF_KEY)
-            self._org_tag_versions = hed_schema.get_all_forms_of_tag(self.ORG_KEY)
             self._label_tag_versions = hed_schema.get_all_forms_of_tag(self.DLABEL_KEY)
             if not self._label_tag_versions:
                 self._label_tag_versions = [self.DLABEL_KEY + "/"]
         else:
             self._def_tag_versions = [self.DEF_KEY + "/"]
-            self._org_tag_versions = [self.ORG_KEY + "/"]
             self._label_tag_versions = [self.DLABEL_KEY + "/"]
 
-        if hed_inputs:
-            self.add_definitions(hed_inputs)
+        if def_dicts:
+            self.add_definitions(def_dicts)
 
-    def add_definitions(self, hed_inputs):
+    def add_definitions(self, def_dicts):
         """
         Adds all definitions found in hed strings in the given input
 
         Parameters
         ----------
-        hed_inputs : [] or str or BaseFileInput or ColumnDefGroup
-            List input doesn't need to all be the same type.
+        def_dicts : [] or DefDict
+
         """
-        if not isinstance(hed_inputs, list):
-            hed_inputs = [hed_inputs]
-        for hed_input in hed_inputs:
-            if isinstance(hed_input, str):
-                self._check_for_definitions(hed_input)
-            elif isinstance(hed_input, BaseFileInput):
-                for row_number, row_hed_string, column_to_hed_tags_dictionary in hed_input.iter_raw():
-                    self._check_for_definitions(row_hed_string)
-            elif isinstance(hed_input, ColumnDefGroup):
-                for hed_string in hed_input.hed_string_iter():
-                    self._check_for_definitions(hed_string)
+        if not isinstance(def_dicts, list):
+            def_dicts = [def_dicts]
+        for def_dict in def_dicts:
+            if isinstance(def_dict, DefDict):
+                self._add_definitions_from_group(def_dict)
             else:
-                print(f"Invalid input type '{type(hed_input)} passed to DefinitionMapper.  Skipping.")
-                # add error here
+                print(f"Invalid input type '{type(def_dict)} passed to DefinitionMapper.  Skipping.")
+
+    def _add_definitions_from_group(self, def_dict):
+        """
+            Gather definitions from a single def group and add it to the mapper
+
+        Parameters
+        ----------
+        def_dict : DefDict
+
+        Returns
+        -------
+        """
+        for def_tag, def_value in def_dict:
+            if def_tag in self._gathered_defs:
+                # This is a warning.  Errors from a duplicate definition in a single source will be reported
+                # by DefDict
+                print(f"WARNING: Duplicate definition found for '{def_tag}'.")
+                continue
+            self._gathered_defs[def_tag] = def_value
 
     def replace_and_remove_tags(self, hed_string):
         """Takes a given string and returns the hed string with all definitions removed, and all labels replaced
@@ -113,9 +121,9 @@ class DefinitionMapper:
                 to_remove = full_label_tag
                 label_tag_lower = label_tag.lower()
                 # Just leave definitions in place if they aren't found.
-                if label_tag_lower not in self._defs:
+                if label_tag_lower not in self._gathered_defs:
                     continue
-                replace_with = self._defs[label_tag_lower]
+                replace_with = self._gathered_defs[label_tag_lower]
             else:
                 extents = self._find_tag_group_extent(final_string, tag_index, remove_comma=True)
                 to_remove = hed_string[extents[0]:extents[1]]
@@ -146,67 +154,6 @@ class DefinitionMapper:
                 found_tag = hed_tag[len(start_with_version):]
                 return found_tag
         return None
-
-    def _check_for_definitions(self, hed_string):
-        """
-        Check a given hed string to see if there is a definition in it, and add it to the definition dict if it does.
-
-        Parameters
-        ----------
-        hed_string : str
-            A single hed string to gather definitions from
-        """
-        if self.DEF_KEY not in hed_string.lower():
-            return False
-
-        def_tag_versions = self._def_tag_versions
-        org_tag_versions = self._org_tag_versions
-
-        # This could eventually be replaced with another method as we only care about portions of the tags
-        string_split = HedStringDelimiter(hed_string)
-        for tag_group in string_split.tag_groups:
-            org_tags = []
-            def_tags = []
-            group_tags = []
-            for tag in tag_group:
-                new_def_tag = DefinitionMapper._check_tag_starts_with(tag, def_tag_versions)
-                if new_def_tag:
-                    def_tags.append(new_def_tag)
-                    continue
-
-                new_org_tag = DefinitionMapper._check_tag_starts_with(tag, org_tag_versions)
-                if new_org_tag:
-                    org_tags.append(tag)
-                    continue
-
-                group_tags.append(tag)
-
-            # Now validate to see if we have a definition.  We want 1 definition, and the other parts are optional.
-            if not def_tags:
-                # If we don't have at least one valid definition tag, just move on.  This is probably a tag with
-                # the word definition somewhere else in the text.
-                continue
-
-            if len(def_tags) > 1:
-                print(f"Too many def tags found in definition for {def_tags[0]}.  Also found: {def_tags[1:]}")
-                continue
-            def_tag = def_tags[0]
-            if len(org_tags) > 1:
-                print(f"Too many org tags found in definition for {def_tag}.  Also found: {org_tags}")
-                continue
-            if len(group_tags) > 1:
-                print(f"Too many group tags found in definition for {def_tag}.  Also found: {group_tags}")
-                continue
-
-            org_tag = org_tags[0] if org_tags else None
-            group_tag = group_tags[0] if group_tags else None
-
-            if def_tag in self._defs:
-                print(f"Duplicate definition found for '{def_tag}'.")
-            if self._short_tag_mapping and def_tag.lower() in self._short_tag_mapping:
-                print(f"Tag '{def_tag}' already in base schema.")
-
-            self._defs[def_tag.lower()] = f"({self.ELABEL_ORG_KEY}/{def_tag}, {org_tag}, {group_tag})"
 
     @staticmethod
     def _find_tag_group_extent(hed_string, starting_tag_index, remove_comma=True):

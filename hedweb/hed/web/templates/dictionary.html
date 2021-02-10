@@ -4,9 +4,11 @@
 
 {% block content %}
     <h2>Validate JSON dictionary containing HED tags</h2>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dictionary-form.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="dictionary-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+         <div class="form-group">
 
         {{ create_json_input() }}
         {{ create_hed_pulldown() }}
@@ -28,8 +30,8 @@
     </form>
     <script type="module">
         {%  include 'js/form-helpers.js' %}
-        {%  include 'js/hed-pulldown.js' %}
         {%  include 'js/json-input.js' %}
+        {%  include 'js/hed-pulldown.js' %}
         {%  include 'js/dictionary-form.js' %}
     </script>
 {% endblock %}

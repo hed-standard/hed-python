@@ -2,6 +2,7 @@ from hed.util.column_mapper import ColumnMapper
 from hed.util.base_file_input import BaseFileInput
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.def_mapper import DefinitionMapper
+from hed.util import error_reporter
 
 
 class EventFileInput(BaseFileInput):
@@ -10,7 +11,7 @@ class EventFileInput(BaseFileInput):
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
-                 hed_schema=None):
+                 hed_schema=None, def_dicts=None):
         """Constructor for the EventFileInput class.
 
         Parameters
@@ -37,6 +38,10 @@ class EventFileInput(BaseFileInput):
             Default: ["duration", "onset"]
         hed_schema: HedSchema
            Used by column mapper to do (optional) hed string validation, and also to gather definition tags correctly.
+        def_dicts: [DefDict]
+            DefDict's containing all the definitions this file should use - other than the ones coming from the file
+            itself.
+            If this is NOT passed, the class will instead gather definitions from any passed in ColumnDefGroups
         """
         if tag_columns is None:
             tag_columns = []
@@ -45,12 +50,21 @@ class EventFileInput(BaseFileInput):
         if attribute_columns is None:
             attribute_columns = ["duration", "onset"]
 
+        # This stuff is mostly here to make this easier to use for development
+        # you should generally create the DefDict and ColumnDefGroup before reaching this point.
         self.column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
+        if def_dicts is None:
+            self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs, hed_schema)
+        else:
+            if not isinstance(def_dicts, list):
+                self.def_dicts = [def_dicts]
+            else:
+                self.def_dicts = def_dicts
 
-        def_mapper = DefinitionMapper(self.column_group_defs, hed_schema=hed_schema)
+        def_mapper = DefinitionMapper(self.def_dicts, hed_schema=hed_schema)
         new_mapper = ColumnMapper(json_def_files=self.column_group_defs, tag_columns=tag_columns,
                                   column_prefix_dictionary=column_prefix_dictionary,
-                                  hed_schema=hed_schema, attribute_columns=attribute_columns,
+                                  attribute_columns=attribute_columns,
                                   definition_mapper=def_mapper)
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper)
@@ -59,23 +73,28 @@ class EventFileInput(BaseFileInput):
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
                              "This is probably not intended.")
 
-    def validate_file_sidecars(self, hed_schema=None):
+    def validate_file_sidecars(self, hed_schema=None, error_handler=None):
         """
         Validates all column definitions and column definition hed strings.
 
+        This is not an encouraged way to do this.  You should instead validate the sidecars BEFORE creating
+        an EventFileInput
         Parameters
         ----------
         hed_schema : HedSchema, optional
             Also semantically validates hed strings if present.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
         Returns
         -------
         validation_issues : [{}]
             A list of syntax and semantic issues found in the definitions.
         """
-        validation_issues = []
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+        all_validation_issues = []
         for column_def_group in self.column_group_defs:
-            new_issue_dict = column_def_group.validate_entries(hed_schema=hed_schema)
-            for name, issues in new_issue_dict.items():
-                validation_issues += issues
+            all_validation_issues += column_def_group.validate_entries(hed_schema=hed_schema,
+                                                                       error_handler=error_handler)
 
-        return validation_issues
+        return all_validation_issues

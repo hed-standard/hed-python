@@ -1,9 +1,7 @@
-const DICTIONARY_FILE_EXTENSIONS = ['json'];
 
 $(function () {
-    prepareDictionaryValidationForm();
+    prepareForm();
 });
-
 
 /**
  * Submits the form if the tag columns textbox is valid.
@@ -14,13 +12,12 @@ $('#dictionary-validation-submit').on('click', function () {
     }
 });
 
-
 /**
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
-function prepareDictionaryValidationForm() {
-    resetDictionaryForm();
+function prepareForm() {
+    resetForm();
     getHEDVersions()
     hideOtherHEDVersionFileUpload();
 }
@@ -28,7 +25,7 @@ function prepareDictionaryValidationForm() {
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-function resetFlashMessages() {
+function resetFormFlashMessages() {
     clearJsonFlashMessage();
     clearHEDFlashMessage();
     flashMessageOnScreen('', 'success', 'dictionary-validation-submit-flash');
@@ -37,7 +34,7 @@ function resetFlashMessages() {
 /**
  * Resets the fields in the form.
  */
-function resetDictionaryForm() {
+function resetForm() {
     $('#dictionary-form')[0].reset();
     clearJsonFileLabel();
     hideOtherHEDVersionFileUpload()
@@ -52,10 +49,9 @@ function submitForm() {
     let formData = new FormData(dictionaryForm);
 
     let dictionaryFile = getJsonFileLabel();
-    let display_name = convertToResultsName(dictionaryFile, 'validation_issues')
-    resetFlashMessages();
-    flashMessageOnScreen('Dictionary is being validated ...', 'success',
-        'dictionary-validation-submit-flash')
+    let display_name = convertToResultsName(dictionaryFile, 'issues')
+    resetFormFlashMessages();
+    flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary-validation-submit-flash')
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.get_dictionary_validation_results')}}",
@@ -63,36 +59,12 @@ function submitForm() {
             contentType: false,
             processData: false,
             dataType: 'text',
-            success: function (downloaded_file) {
-                  if (downloaded_file) {
-                      flashMessageOnScreen('', 'success',
-                          'dictionary-validation-submit-flash');
-                      triggerDownloadBlob(downloaded_file, display_name);
-                  } else {
-                      flashMessageOnScreen('No validation errors found.', 'success',
-                          'dictionary-validation-submit-flash');
-                  }
+            success: function (download, status, xhr) {
+                getResponseSuccess(download, xhr, display_name, 'dictionary-validation-submit-flash')
             },
-            error: function (download_response) {
-                console.log(download_response.responseText);
-                if (download_response.responseText.length < 100) {
-                    flashMessageOnScreen(download_response.responseText, 'error',
-                        'dictionary-validation-submit-flash');
-                } else {
-                    flashMessageOnScreen('Dictionary could not be processed',
-                        'error','dictionary-validation-submit-flash');
-                }
+            error: function (download, status, xhr) {
+                getResponseFailure(download, xhr, display_name, 'dictionary-validation-submit-flash')
             }
         }
     )
-}
-
-
-/**
- * Updates the dictionary file label.
- * @param {String} dictionaryPath - The path to the dictionary.
- */
-function updateDictionaryFileLabel(dictionaryPath) {
-    let dictionaryFilename = dictionaryPath.split('\\').pop();
-    $('#dictionary-display-name').text(dictionaryFilename);
 }

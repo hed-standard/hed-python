@@ -10,6 +10,6 @@ if __name__ == '__main__':
     json_file = ColumnDefGroup(json_filename)
     # Print all the errors from the json file
     errors = json_file.validate_entries(hed_dictionary)
-    for error in errors.values():
-        for sub_error in error:
-            print(sub_error["message"])
+    for error in errors:
+        x = error
+        print(error["message"])

@@ -1,10 +1,10 @@
 {% macro create_json_input() %}
         <div class="form-group">
             <label for="json-file">Select JSON-formatted dictionary or side-car:</label><br>
-            <label class="btn-group file-browse-group json-btn-group">
+            <label class="btn-group file-browse-group">
                 <button for="json-file">Browse ...</button>
                 <label id="json-display-name"></label>
-                <input type="file" name="json-file" id="json-file" multiple/>
+                <input type="file" name="json-file" id="json-file"/>
             </label>
             <p class="flash" id="json-flash"></p>
         </div>

@@ -69,13 +69,13 @@ function getVersionFromHEDFile(hedXMLFile) {
     formData.append('hed-xml-file', hedXMLFile);
     $.ajax({
         type: 'POST',
-        url: "{{ url_for('route_blueprint.get_hed_version_in_file')}}",
+        url: "{{ url_for('route_blueprint.get_hed_version')}}",
         data: formData,
         contentType: false,
         processData: false,
         dataType: 'json',
         success: function (hedInfo) {
-            resetFlashMessages();
+            resetFormFlashMessages();
             flashMessageOnScreen('Using HED version ' + hedInfo['hed-version'],
                 'success', 'hed-flash');
         },

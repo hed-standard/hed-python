@@ -12,6 +12,9 @@ JSON_FILE = 'json-file'
 JSON_PATH = 'json-path'
 ERROR_COUNT = 'error-count'
 
+EVENTS_VALIDATION_SUBMIT = 'events-validation-submit'
+EVENTS_SUBMIT_FLASH = 'events-validation-submit-flash'
+
 HED_DISPLAY_NAME = 'hed-display-name'
 HED_MAJOR_VERSIONS = 'hed-major-versions'
 HED_OTHER_VERSION = 'hed-other-version'
@@ -51,6 +54,9 @@ SCHEMA_URL_DISPLAY_NAME = 'schema-url-display-name'
 SCHEMA_URL_FLASH = 'schema-url-flash'
 SCHEMA_URL_DISPLAY_NAME = 'schema-url-display-name'
 SCHEMA_URL_OPTION = 'schema-url-option'
+
+SERVICE_SUBMIT = 'service-submit'
+
 # Type constants
 BOOLEAN = 'boolean'
 STRING = 'string'
@@ -58,7 +64,7 @@ STRING = 'string'
 
 # Validation-specific constants
 VALIDATION_FORM = 'validation-form'
-VALIDATION_OUTPUT_FILE_PREFIX = 'validated_'
+VALIDATION_OUTPUT_FILE_PREFIX = 'validation_errors'
 VALIDATION_SUBMIT = 'validation-submit'
 VALIDATION_SUBMIT_FLASH = 'validation-submit-flash'
-EEG_SUBMIT = 'eeg-submit'
+

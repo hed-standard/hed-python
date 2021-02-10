@@ -3,10 +3,12 @@ import pathlib
 import tempfile
 import traceback
 from urllib.parse import urlparse
+from werkzeug.utils import secure_filename
 from flask import current_app, jsonify, Response
 
 from hed.util import hed_cache
-from hed.util.file_util import get_file_extension, delete_file_if_it_exist
+from hed.util.error_reporter import ErrorHandler
+from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 from hed.util.hed_schema import HedSchema
 from hed.web.constants import common_constants, error_constants
 
@@ -74,15 +76,15 @@ def find_all_str_indices_in_list(list_of_str, str_value):
             value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
 
 
-def find_hed_version_in_uploaded_file(form_request_object, key_name=common_constants.HED_XML_FILE):
+def find_hed_version_in_uploaded_file(request, key_name=common_constants.HED_XML_FILE):
     """Finds the version number in an HED XML other.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data
     key_name: str
-        Name of the key for the HED XML file in the form_request_object
+        Name of the key for the HED XML file in the request
 
     Returns
     -------
@@ -92,20 +94,20 @@ def find_hed_version_in_uploaded_file(form_request_object, key_name=common_const
     """
     hed_info = {}
     try:
-        if key_name in form_request_object.files:
-            hed_file_path = save_file_to_upload_folder(form_request_object.files[key_name])
+        if key_name in request.files:
+            hed_file_path = save_file_to_upload_folder(request.files[key_name])
             hed_info[common_constants.HED_VERSION] = HedSchema.get_hed_xml_version(hed_file_path)
     except:
         hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
     return hed_info
 
 
-def form_has_file(form_request_object, file_field, valid_extensions):
+def form_has_file(request, file_field, valid_extensions):
     """Checks to see if a file name with valid extension is present in the request object.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from the schema form.
     file_field: str
         Name of the form field containing the file name
@@ -118,19 +120,18 @@ def form_has_file(form_request_object, file_field, valid_extensions):
         True if a file is present in a request object.
 
     """
-    if file_field in form_request_object.files and \
-            file_extension_is_valid(form_request_object.files[file_field].filename, valid_extensions):
+    if file_field in request.files and file_extension_is_valid(request.files[file_field].filename, valid_extensions):
         return True
     else:
         return False
 
 
-def form_has_option(form_request_object, option_name, target_value):
+def form_has_option(request, option_name, target_value):
     """Checks if the given option has a specific value. This is used for radio buttons.
 
     Parameters
     ----------
-    form_request_object: Request
+    request: Request
         A Request object produced by the post of a form
     option_name: str
         String containing the name of the radio button group in the web form
@@ -143,17 +144,17 @@ def form_has_option(form_request_object, option_name, target_value):
         True if the target radio button has been set and false otherwise
     """
 
-    if option_name in form_request_object.values and form_request_object.values[option_name] == target_value:
+    if option_name in request.values and request.values[option_name] == target_value:
         return True
     return False
 
 
-def form_has_url(form_request_object, url_field, valid_extensions):
+def form_has_url(request, url_field, valid_extensions):
     """Checks to see if the url_field has a value with a valid extension.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from a form.
     url_field: str
         The name of the value field in the form containing the URL to be parsed.
@@ -166,11 +167,11 @@ def form_has_url(form_request_object, url_field, valid_extensions):
         True if a URL is present in request object.
 
     """
-    parsed_url = urlparse(form_request_object.form.get(url_field))
+    parsed_url = urlparse(request.form.get(url_field))
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
 
-def generate_download_file_response(download_file, display_name=None, header=None):
+def generate_download_file_response(download_file, display_name=None, header=None, category='success', msg=''):
     """Generates a download other response.
 
     Parameters
@@ -180,7 +181,11 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     display_name: str
         Name to be assigned to the file in the response
     header: str
-        Optional header -- usually given for error message downloads
+        Optional header -- header for download file blob
+    category: str
+        Category of the message to be displayed ('Success', 'Error', 'Warning')
+    msg: str
+        Optional message to be displayed in the submit-flash-field
 
     Returns
     -------
@@ -190,6 +195,7 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     """
     if not display_name:
         display_name = download_file
+    print("In generate:", display_name)
     try:
         if not download_file:
             return f"No download file given"
@@ -203,18 +209,54 @@ def generate_download_file_response(download_file, display_name=None, header=Non
                     yield header
                 for line in download:
                     yield line
-            delete_file_if_it_exist(download_file)
+            delete_file_if_it_exists(download_file)
         return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': f"attachment filename={display_name}"})
+                        headers={'Content-Disposition': f"attachment filename={display_name}",
+                                 'Category': category, 'Message': msg})
     except:
         return traceback.format_exc()
 
 
-def get_hed_path_from_pull_down(form_request_object):
+def generate_filename(basename, prefix=None, suffix=None, extension=None):
+    """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
+
+    Parameters
+    ----------
+   basename: str
+        The name of the base, usually the name of the file that the issues were generated from
+    prefix: str
+        The prefix prepended to the front of the basename
+    suffix: str
+        The suffix appended to the end of the basename
+    Returns
+    -------
+    string
+        The name of the attachment other containing the issues.
+    """
+
+    pieces = []
+    if prefix:
+        pieces = pieces + [secure_filename(prefix)]
+    if basename:
+        pieces.append(os.path.splitext(secure_filename(basename))[0])
+    if suffix:
+        pieces = pieces + [secure_filename(suffix)]
+
+    if not pieces:
+        return ''
+    filename = pieces[0]
+    for name in pieces[1:]:
+        filename = filename + '_' + name
+    if extension:
+        filename = filename + '.' + secure_filename(extension)
+    return filename
+
+
+def get_hed_path_from_pull_down(request):
     """Gets the hed path from a section of form that uses a pull-down box and hed_cache
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from a form.
 
     Returns
@@ -222,28 +264,87 @@ def get_hed_path_from_pull_down(form_request_object):
     tuple: str, str
         The HED XML local path and the HED display file name
     """
-    if common_constants.HED_VERSION not in form_request_object.form:
+    if common_constants.HED_VERSION not in request.form:
         hed_file_path = ''
         hed_display_name = ''
-    elif form_request_object.form[common_constants.HED_VERSION] != common_constants.HED_OTHER_VERSION_OPTION:
-        hed_file_path = hed_cache.get_path_from_hed_version(form_request_object.form[common_constants.HED_VERSION])
+    elif request.form[common_constants.HED_VERSION] != common_constants.HED_OTHER_VERSION_OPTION:
+        hed_file_path = hed_cache.get_path_from_hed_version(request.form[common_constants.HED_VERSION])
         hed_display_name = os.path.basename(hed_file_path)
-    elif form_request_object.form[common_constants.HED_VERSION] == common_constants.HED_OTHER_VERSION_OPTION and \
-            common_constants.HED_XML_FILE in form_request_object.files:
-        hed_file_path = save_file_to_upload_folder(form_request_object.files[common_constants.HED_XML_FILE])
-        hed_display_name = form_request_object.files[common_constants.HED_XML_FILE].filename
+    elif request.form[common_constants.HED_VERSION] == common_constants.HED_OTHER_VERSION_OPTION and \
+            common_constants.HED_XML_FILE in request.files:
+        hed_file_path = save_file_to_upload_folder(request.files[common_constants.HED_XML_FILE])
+        hed_display_name = request.files[common_constants.HED_XML_FILE].filename
     else:
         hed_file_path = ''
         hed_display_name = ''
     return hed_file_path, hed_display_name
 
 
-def get_uploaded_file_path_from_form(form_request_object, file_key, valid_extensions=None):
+def get_printable_issue_string(issues, display_name=None, title_string=''):
+    """Returns a string suitable for text blob download
+
+     Parameters
+     ----------
+     issues: list
+         List of the issues to be printed.
+     title_string: str
+         key name in the files dictionary of the Request object
+     display_name: list of str
+         List of valid extensions
+
+     Returns
+     -------
+     tuple
+         A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
+     """
+    if not issues:
+        return ''
+    if title_string:
+        title = title_string
+    else:
+        title = ''
+    if display_name:
+        title = display_name + ' ' + title_string + '\n'
+    if not title:
+        title = None
+    return ErrorHandler.get_printable_issue_string(issues, title, skip_filename=True)
+
+
+def get_optional_form_field(request, form_field_name, type=''):
+    """Gets the specified optional form field if present.
+
+    Parameters
+    ----------
+    request: Request object
+        A Request object containing user data from the validation form.
+    form_field_name: string
+        The name of the optional form field.
+    type: str
+        Name of expected type: 'boolean' or 'string'
+
+    Returns
+    -------
+    boolean or string
+        A boolean or string value based on the form field type.
+
+    """
+    form_field_value = ''
+    if type == common_constants.BOOLEAN:
+        form_field_value = False
+        if form_field_name in request.form:
+            form_field_value = True
+    elif type == common_constants.STRING:
+        if form_field_name in request.form:
+            form_field_value = request.form[form_field_name]
+    return form_field_value
+
+
+def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
     """Gets the other paths of the uploaded files in the form.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from a form.
     file_key: str
         key name in the files dictionary of the Request object
@@ -257,9 +358,9 @@ def get_uploaded_file_path_from_form(form_request_object, file_key, valid_extens
     """
     uploaded_file_name = ''
     original_file_name = ''
-    if form_has_file(form_request_object, file_key, valid_extensions):
-        uploaded_file_name = save_file_to_upload_folder(form_request_object.files[file_key])
-        original_file_name = form_request_object.files[file_key].filename
+    if form_has_file(request, file_key, valid_extensions):
+        uploaded_file_name = save_file_to_upload_folder(request.files[file_key])
+        original_file_name = request.files[file_key].filename
     return uploaded_file_name, original_file_name
 
 
@@ -313,4 +414,53 @@ def save_file_to_upload_folder(file_object, delete_on_close=False):
             file_path = temporary_upload_file.name
     except:
         file_path = ''
+    return file_path
+
+
+def save_issues_to_upload_folder(issues, filename):
+    """Saves the issues found the upload folder as filename.
+
+    Parameters
+    ----------
+    issues: string
+        A string containing the validation issues.
+    filename: str
+        File name of the issue folder
+
+    Returns
+    -------
+    string
+        The name of the validation output other.
+
+    """
+
+    issues_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    with open(issues_file_path, 'w', encoding='utf-8') as issues_file:
+        for val_issue in issues:
+            issues_file.write(val_issue['message'] + "\n")
+    issues_file.close()
+    return issues_file_path
+
+
+def save_text_to_upload_folder(text, filename):
+    """Saves a string in the upload folder as filename.
+
+    Parameters
+    ----------
+    text: string
+        A printable string.
+    filename: str
+        File name of the issue folder
+
+    Returns
+    -------
+    string
+        The name of the validation output other.
+
+    """
+
+    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    with open(file_path, 'w', encoding='utf-8') as text_file:
+        text_file.write(text)
+    text_file.close()
     return file_path

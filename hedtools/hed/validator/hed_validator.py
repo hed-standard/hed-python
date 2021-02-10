@@ -4,70 +4,99 @@ types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after cr
 the get_validation_issues() function.
 
 """
-from hed.util.error_types import ValidationErrors, ErrorContext
+from hed.util.error_types import ErrorContext
 from hed.util import hed_cache
 from hed.util import error_reporter
-from hed.util.error_reporter import push_error_context, pop_error_context
 from hed.util.hed_schema import HedSchema
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
-from hed.util.exceptions import SchemaFileError
+from hed.util.exceptions import HedFileError, HedExceptions
 
 
 class HedValidator:
-    def __init__(self, hed_input, check_for_warnings=False, run_semantic_validation=True,
+    def __init__(self, check_for_warnings=False, run_semantic_validation=True,
                  hed_xml_file='', xml_version_number=None,
-                 hed_schema=None):
+                 hed_schema=None, error_handler=None):
         """Constructor for the HedValidator class.
 
         Parameters
         ----------
-        hed_input: str or list or HedFileInput object
-            A list of HED strings, a single HED string, or a HedFileInput object.
-            If it is a single string or a list, validate them as hed strings.
         check_for_warnings: bool
             True if the validator should check for warnings. False if the validator should only report errors.
         run_semantic_validation: bool
             True if the validator should check the HED data against a schema. False for syntax-only validation.
         hed_xml_file: str
             A path to a specific hed xml file, or a directory containing a hed xml file.
+            Note: An invalid schema here will throw a HedFileError exception.  Use hed_schema to pass an already
+            created schema.
         xml_version_number: str
             HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
                 or does not point to a specific xml file.
         hed_schema: HedSchema
             Name of already prepared HedSchema to use.  This overrides hed_xml_file and xml_version_number.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
         Returns
         -------
         HedValidator object
             A HedValidator object.
 
         """
-        self._is_file = isinstance(hed_input, BaseFileInput)
-        self._hed_input = hed_input
-        self._validation_issues = []
         self._tag_validator = None
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+        self._error_handler = error_handler
         if run_semantic_validation:
-            try:
-                if hed_schema is None:
-                    self._hed_schema = self._get_hed_schema(hed_xml_file,
-                                                            get_specific_version=xml_version_number)
-                else:
-                    self._hed_schema = hed_schema
-                self._tag_validator = TagValidator(hed_schema=self._hed_schema,
-                                                   check_for_warnings=check_for_warnings,
-                                                   run_semantic_validation=True)
-            except SchemaFileError as e:
-                self._hed_schema = None
-                self._validation_issues += e.format_error_message()
+            if hed_schema is None:
+                self._hed_schema = self._get_hed_schema(hed_xml_file,
+                                                        get_specific_version=xml_version_number)
+            else:
+                self._hed_schema = hed_schema
+            self._tag_validator = TagValidator(hed_schema=self._hed_schema,
+                                               check_for_warnings=check_for_warnings,
+                                               run_semantic_validation=True,
+                                               error_handler=self._error_handler)
 
         # Fall back to syntax validation if we don't have a tag validator at this point
         if self._tag_validator is None:
             self._tag_validator = TagValidator(check_for_warnings=check_for_warnings,
-                                               run_semantic_validation=False)
+                                               run_semantic_validation=False,
+                                               error_handler=self._error_handler)
 
-        self._validation_issues += self._validate_hed_input()
         self._run_semantic_validation = run_semantic_validation
+
+    def validate_input(self, hed_input, display_filename=None):
+        """
+            Validates any given hed_input string, file, or list and returns a list of issues.
+
+        Parameters
+        ----------
+        hed_input: str or list or HedFileInput object
+            A list of HED strings, a single HED string, or a HedFileInput object.
+            If it is a single string or a list, validate them as hed strings.
+        display_filename: str
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
+        Returns
+        -------
+        validation_issues : [{}]
+        """
+        is_file = isinstance(hed_input, BaseFileInput)
+        if not display_filename and is_file:
+            display_filename = hed_input.filename
+        if isinstance(hed_input, list):
+            validation_issues = self._validate_hed_strings(hed_input)
+        elif is_file:
+            self._error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
+            validation_issues = self._validate_hed_tags_in_file(hed_input)
+        else:
+            validation_issues = self._validate_hed_strings([hed_input])[0]
+
+        if is_file:
+            # If we have a custom title and found no issues, we need to still print the title.
+            self._error_handler.pop_error_context()
+        return validation_issues
 
     def get_tag_validator(self):
         """Gets a TagValidator object.
@@ -109,49 +138,22 @@ class HedValidator:
         hed_schema = HedSchema(final_hed_xml_file)
         return hed_schema
 
-    def _validate_hed_input(self):
-        """Validates the HED tags in a string or a file.
-
-         Parameters
-         ----------
-         Returns
-         -------
-         list
-             The issues that were found.
+    def _validate_hed_tags_in_file(self, hed_input):
         """
-        if isinstance(self._hed_input, list):
-            validation_issues = self._validate_hed_strings(self._hed_input)
-        elif self._is_file:
-            if self._hed_input and self._hed_input.is_valid_extension():
-                validation_issues = self._validate_hed_tags_in_file()
-            else:
-                validation_issues = error_reporter.format_val_error(ValidationErrors.INVALID_FILENAME,
-                                                                    file_name=self._hed_input.filename)
-        else:
-            validation_issues = self._validate_hed_strings([self._hed_input])[0]
-        return validation_issues
 
-    def _validate_hed_tags_in_file(self):
+        Parameters
+        ----------
+        hed_input: HedFileInput object
+            A file to validate.  This function does no type checking on this.
+        Returns
+        -------
+        validation_issues : [{}]
+        """
         validation_issues = []
-
-        for row_number, row_hed_string, column_to_hed_tags_dictionary in self._hed_input:
+        for row_number, row_hed_string, column_to_hed_tags_dictionary in hed_input:
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
                                                                         column_to_hed_tags_dictionary)
-
         return validation_issues
-
-    def get_validation_issues(self):
-        """Gets the issues.
-
-         Parameters
-         ----------
-         Returns
-         -------
-         list
-             The issues that were found.
-
-         """
-        return self._validation_issues
 
     def _append_validation_issues_if_found(self, validation_issues, row_number, row_hed_string,
                                            column_to_hed_tags_dictionary):
@@ -197,12 +199,12 @@ class HedValidator:
 
          """
         if row_hed_string:
-            push_error_context(ErrorContext.ROW, row_number)
+            self._error_handler.push_error_context(ErrorContext.ROW, row_number)
             hed_string_delimiter = HedStringDelimiter(row_hed_string)
             row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter)
             row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
             validation_issues += row_validation_issues
-            pop_error_context()
+            self._error_handler.pop_error_context()
         return validation_issues
 
     def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
@@ -223,11 +225,13 @@ class HedValidator:
 
          """
         if column_to_hed_tags_dictionary:
+            self._error_handler.push_error_context(ErrorContext.ROW, row_number)
             for column_number in column_to_hed_tags_dictionary.keys():
-                push_error_context(ErrorContext.COLUMN, row_number, column_context=column_number)
+                self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
                 validation_issues += self.validate_column_hed_string(column_hed_string)
-                pop_error_context()
+                self._error_handler.pop_error_context()
+            self._error_handler.pop_error_context()
         return validation_issues
 
     def validate_column_hed_string(self, column_hed_string):
@@ -367,30 +371,27 @@ class HedValidator:
                                                                   previous_formatted_tag=previous_formatted_tag)
         return validation_issues
 
-    def get_printable_issue_string(self, title=''):
-        """Return a string with identifying title and issues in string form one per line.
+    @staticmethod
+    def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
+        """Return a string with issues list flatted into single string, one per line
 
-          Parameters
-          ----------
-         title: str
-             String used as a title for the issues.
+        Parameters
+        ----------
+        validation_issues: []
+            Issues to print
+        title: str
+            Optional title that will always show up first if present(even if there are no validation issues)
+        severity: int
+            Return only warnings >= severity
+        skip_filename: bool
+            If true, don't add the filename context to the printable string.
+        Returns
+        -------
+        str
+            A str containing printable version of the issues or '[]'.
 
-          Returns
-          -------
-          str
-              A str containing printable version of the issues or '[]'.
-
-          """
-
-        if not self._validation_issues:
-            issue_string = "\t[]\n"
-        else:
-            issue_string = "\n"
-            for el in self._validation_issues:
-                issue_string = issue_string + "\t" + el["code"] + el["message"] + "\n"
-        if title:
-            issue_string = title + ":" + issue_string
-        return issue_string
+        """
+        return error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title, severity, skip_filename)
 
     @staticmethod
     def get_previous_original_and_formatted_tag(original_and_formatted_tags, loop_index):

@@ -1,28 +1,27 @@
 import json
-import os
 import traceback
 from urllib.error import URLError, HTTPError
 from flask import current_app
-from werkzeug.utils import secure_filename
 
-from hed.util.file_util import get_file_extension, delete_file_if_it_exist
+from hed.util.file_util import get_file_extension, delete_file_if_it_exists, write_strings_to_file
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.hed_schema import HedSchema
 
 from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web import web_utils
-from hed.web import utils
+from hed.web.web_utils import generate_filename, generate_download_file_response, \
+    handle_http_error, get_hed_path_from_pull_down, get_printable_issue_string, \
+    get_uploaded_file_path_from_form, save_file_to_upload_folder, save_text_to_upload_folder, get_optional_form_field
 
 app_config = current_app.config
 
 
-def generate_arguments_from_validation_form(form_request_object):
+def generate_arguments_from_dictionary_form(request):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from the validation form.
 
     Returns
@@ -30,36 +29,20 @@ def generate_arguments_from_validation_form(form_request_object):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, hed_display_name = web_utils.get_hed_path_from_pull_down(form_request_object)
-    uploaded_file_name, original_file_name = \
-        web_utils.get_uploaded_file_path_from_form(form_request_object, common_constants.JSON_FILE,
-                                                   file_constants.DICTIONARY_FILE_EXTENSIONS)
+    hed_file_path, hed_display_name = get_hed_path_from_pull_down(request)
+    uploaded_file_name, original_file_name = get_uploaded_file_path_from_form(request, common_constants.JSON_FILE,
+                                                                              file_constants.DICTIONARY_FILE_EXTENSIONS)
 
     input_arguments = {common_constants.HED_XML_FILE: hed_file_path,
                        common_constants.HED_DISPLAY_NAME: hed_display_name,
                        common_constants.JSON_PATH: uploaded_file_name,
-                       common_constants.JSON_FILE: original_file_name}
-    input_arguments[common_constants.CHECK_FOR_WARNINGS] = utils.get_optional_form_field(
-        form_request_object, common_constants.CHECK_FOR_WARNINGS, common_constants.BOOLEAN)
+                       common_constants.JSON_FILE: original_file_name,
+                       common_constants.CHECK_FOR_WARNINGS: get_optional_form_field(request,
+                                                                                    common_constants.CHECK_FOR_WARNINGS,
+                                                                                    common_constants.BOOLEAN)
+                       }
+
     return input_arguments
-
-
-def generate_dictionary_validation_filename(dictionary_filename):
-    """Generates a filename for the attachment that will contain the dictionary validation issues.
-
-    Parameters
-    ----------
-    dictionary_filename: string
-        The name of the dictionary file.
-
-    Returns
-    -------
-    string
-        The name of the attachment other containing the validation issues.
-    """
-
-    return common_constants.VALIDATION_OUTPUT_FILE_PREFIX + secure_filename(dictionary_filename).rsplit('.')[
-        0] + file_constants.TEXT_EXTENSION
 
 
 def report_eeg_events_validation_status(request):
@@ -85,7 +68,7 @@ def report_eeg_events_validation_status(request):
     check_for_warnings = form_data["check_for_warnings"] == '1' if "check_for_warnings" in form_data else False
     # if hed_xml_file was submitted, it's accessed by request.files, otherwise empty
     if "hed-xml-file" in request.files and get_file_extension(request.files["hed-xml-file"].filename) == "xml":
-        hed_xml_file = web_utils.save_file_to_upload_folder(request.files["hed-xml-file"])
+        hed_xml_file = save_file_to_upload_folder(request.files["hed-xml-file"])
     else:
         hed_xml_file = ''
 
@@ -103,17 +86,17 @@ def report_eeg_events_validation_status(request):
     except:
         validation_status[error_constants.ERROR_KEY] = traceback.format_exc()
     finally:
-        delete_file_if_it_exist(hed_xml_file)
+        delete_file_if_it_exists(hed_xml_file)
 
     return validation_status
 
 
-def report_dictionary_validation_status(form_request_object):
+def report_dictionary_validation_status(request):
     """Reports the spreadsheet validation status.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from the validation form.
 
     Returns
@@ -124,16 +107,8 @@ def report_dictionary_validation_status(form_request_object):
     """
     input_arguments = []
     try:
-        input_arguments = generate_arguments_from_validation_form(form_request_object)
-        def_group = validate_dictionary(input_arguments)
-        validation_issues = def_group.get_validation_issues()
-        if validation_issues:
-            issue_file = save_issues_to_upload_folder(input_arguments[common_constants.JSON_FILE],
-                                                      validation_issues)
-            download_response = web_utils.generate_download_file_response(issue_file)
-            if isinstance(download_response, str):
-                return web_utils.handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
-            return download_response
+        input_arguments = generate_arguments_from_dictionary_form(request)
+        return validate_dictionary(input_arguments, hed_schema=None)
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:
@@ -141,53 +116,42 @@ def report_dictionary_validation_status(form_request_object):
     except Exception as e:
         return "Unexpected processing error: " + str(e)
     finally:
-        delete_file_if_it_exist(input_arguments[common_constants.JSON_PATH])
-        # delete_file_if_it_exist(input_arguments[common_constants.HED_XML_FILE])
+        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
     return ""
 
 
-def save_issues_to_upload_folder(dictionary_filename, validation_issues, file_mode='w'):
-    """Saves the validation issues found to a other in the upload folder.
+def validate_dictionary(input_arguments, hed_schema=None, return_response=True):
+    """Validates the dictionary and returns a
 
     Parameters
     ----------
-    dictionary_filename: str
-        The name to the dictionary.
-    validation_issues: dictionary
-        A string containing the validation issues.
-    file_mode: str
-        Either 'w' to create a new file and write or 'a' to create a new file if necessary and append to end.
-    Returns
-    -------
-    string
-        The name of the validation output other.
-
-    """
-    validation_issues_filename = generate_dictionary_validation_filename(dictionary_filename)
-    validation_issues_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], validation_issues_filename)
-    with open(validation_issues_file_path, file_mode, encoding='utf-8') as validation_issues_file:
-        for val_issue in validation_issues.values():
-            for issue in val_issue:
-                validation_issues_file.write(issue['message'] + "\n")
-    validation_issues_file.close()
-    return validation_issues_file_path
-
-
-def validate_dictionary(validation_arguments):
-    """Validates the dictionary.
-
-    Parameters
-    ----------
-    validation_arguments: dictionary
-        A dictionary containing the arguments for the validation function.
+    input_arguments: dict
+        Dictionary containing standard input form arguments
+    hed_schema: str or HedSchema
+        Version number or path or HedSchema object to be used
+    return_response: bool
+        If true, return a Response. If false return a printable issue string
 
     Returns
     -------
-    ColumnDefGroup
-        Contains a representation of the JSON dictionary and validation issues.
+    Response or str
+        Either a Response or a printable issue string
     """
 
-    json_dictionary = ColumnDefGroup(validation_arguments[common_constants.JSON_PATH])
-    hed_schema = HedSchema(validation_arguments[common_constants.HED_XML_FILE])
-    json_dictionary.validate_entries(hed_schema)
-    return json_dictionary
+    json_dictionary = ColumnDefGroup(input_arguments.get(common_constants.JSON_PATH, ''))
+    if not hed_schema:
+        hed_schema = HedSchema(input_arguments.get(common_constants.HED_XML_FILE, ''))
+    issues = json_dictionary.validate_entries(hed_schema)
+    if issues:
+        display_name = input_arguments.get(common_constants.JSON_FILE, '')
+        issue_str = get_printable_issue_string(issues, display_name, 'HED validation errors')
+        if not return_response:
+            return issue_str
+        file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
+        issue_file = save_text_to_upload_folder(issue_str, file_name)
+        download_response = generate_download_file_response(issue_file, display_name=file_name, category='warning',
+                                                            msg='JSON dictionary had validation errors')
+        if isinstance(download_response, str):
+            return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+        return download_response
+    return ""
