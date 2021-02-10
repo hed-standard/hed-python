@@ -1,17 +1,20 @@
 import unittest
 import os
 
-from hed.util.hed_schema import HedSchema
+from hed.util.hed_schema import HedSchema, HedKey
 from hed.util.exceptions import HedFileError
 
 
 class TestHedSchema(unittest.TestCase):
     schema_file = '../data/HED7.1.1.xml'
+    schema_file_3g = '../data/HED8.0.0-alpha.1.xml'
 
     @classmethod
     def setUpClass(cls):
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_schema = HedSchema(hed_xml)
+        cls.hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
+        cls.hed_schema = HedSchema(cls.hed_xml)
+        cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g)
+        cls.hed_schema_3g = HedSchema(cls.hed_xml_3g)
         cls.hed_schema_dictionaries = cls.hed_schema.dictionaries
 
     def test_invalid_schema(self):
@@ -149,6 +152,7 @@ class TestHedSchema(unittest.TestCase):
             'value': {
                 'default': False,
                 'extensionAllowed': False,
+                'extensionAllowedPropagated': False,
                 'isNumeric': True,
                 'position': False,
                 'predicateType': False,
@@ -162,7 +166,8 @@ class TestHedSchema(unittest.TestCase):
             },
             'valueParent': {
                 'default': False,
-                'extensionAllowed': True,
+                'extensionAllowed': False,
+                'extensionAllowedPropagated': True,
                 'isNumeric': False,
                 'position': False,
                 'predicateType': False,
@@ -176,7 +181,8 @@ class TestHedSchema(unittest.TestCase):
             },
             'allowedExtension': {
                 'default': False,
-                'extensionAllowed': True,
+                'extensionAllowed': False,
+                'extensionAllowedPropagated': True,
                 'isNumeric': False,
                 'position': False,
                 'predicateType': False,
@@ -195,12 +201,84 @@ class TestHedSchema(unittest.TestCase):
                 self.assertEqual(self.hed_schema.tag_has_attribute(test_string, attribute), expected_value,
                                  'Test string: %s. Attribute: %s.' % (test_string, attribute))
 
-    def test_get_all_descriptions(self):
-        descriptions = self.hed_schema.get_all_descriptions()
-        self.assertTrue(isinstance(descriptions, dict))
-        self.assertTrue(len(descriptions) > 0)
-
-    def test_get_all_terms(self):
-        terms = self.hed_schema.get_all_terms()
+    def test_get_all_tags(self):
+        terms = self.hed_schema.get_all_tags(True)
         self.assertTrue(isinstance(terms, list))
         self.assertTrue(len(terms) > 0)
+
+    def test_find_duplicate_tags(self):
+        dupe_tags = self.hed_schema.find_duplicate_tags()
+        self.assertEqual(len(dupe_tags), 81)
+
+        dupe_tags = self.hed_schema_3g.find_duplicate_tags()
+        self.assertEqual(len(dupe_tags), 0)
+
+    def test_get_desc_dict(self):
+        desc_dict = self.hed_schema.get_desc_dict()
+        self.assertEqual(len(desc_dict), 358)
+
+        desc_dict = self.hed_schema_3g.get_desc_dict()
+        self.assertEqual(len(desc_dict), 193)
+
+    def test_get_tag_description(self):
+        # Test known tag
+        desc = self.hed_schema.get_tag_description("Event/Category")
+        self.assertEqual(desc, "This is meant to designate the reason this event was recorded")
+        # Test known unit modifier
+        desc = self.hed_schema.get_tag_description("deca", HedKey.SIUnitModifier)
+        self.assertEqual(desc, "SI unit multiple representing 10^1")
+
+        # test unknown tag.
+        desc = self.hed_schema.get_tag_description("This/Is/Not/A/Real/Tag")
+        self.assertEqual(desc, None)
+
+    def test_get_all_tag_attributes(self):
+        tag_props = self.hed_schema.get_all_tag_attributes("Event/Category")
+        expected_props = {
+            "position": "1",
+            "predicateType" : "passThrough",
+            "requireChild": "true",
+            "required" : "true"
+        }
+        self.assertCountEqual(tag_props, expected_props)
+
+        tag_props = self.hed_schema.get_all_tag_attributes("This/Is/Not/A/Tag")
+        expected_props = {
+        }
+        self.assertCountEqual(tag_props, expected_props)
+
+        tag_props = self.hed_schema_3g.get_all_tag_attributes("Agent-trait")
+        expected_props = {
+            HedKey.ExtensionAllowed: "true",
+            HedKey.RequireChild: "true"
+        }
+        self.assertCountEqual(tag_props, expected_props)
+        # also test long form.
+        tag_props = self.hed_schema_3g.get_all_tag_attributes("Agent-property/Agent-trait")
+        self.assertCountEqual(tag_props, expected_props)
+
+    def test_get_all_forms_of_tag(self):
+        tag_forms = self.hed_schema.get_all_forms_of_tag("Category")
+        expected_forms = []
+        self.assertCountEqual(tag_forms, expected_forms)
+
+        tag_forms = self.hed_schema_3g.get_all_forms_of_tag("Definition")
+        expected_forms = ["definition/", "informational/definition/", "attribute/informational/definition/"]
+        self.assertCountEqual(tag_forms, expected_forms)
+
+        tag_forms = self.hed_schema_3g.get_all_forms_of_tag("This/Is/Not/A/Tag")
+        expected_forms = []
+        self.assertCountEqual(tag_forms, expected_forms)
+
+    def test_get_hed_xml_version(self):
+        self.assertEqual(HedSchema.get_hed_xml_version(self.hed_xml), "7.1.1")
+        self.assertEqual(HedSchema.get_hed_xml_version(self.hed_xml_3g), "8.0.0-alpha.1")
+
+    def test_has_duplicate_tags(self):
+        self.assertTrue(self.hed_schema.has_duplicate_tags())
+        self.assertFalse(self.hed_schema_3g.has_duplicate_tags())
+
+    def test_short_tag_mapping(self):
+        self.assertFalse(self.hed_schema.short_tag_mapping)
+        self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 986)
+

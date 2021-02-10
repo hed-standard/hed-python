@@ -52,7 +52,7 @@ class TagValidator:
         self._error_handler = error_handler
         self._hed_schema = hed_schema
         if hed_schema:
-            self._hed_schema_dictionaries = hed_schema.get_dictionaries()
+            self._hed_schema_dictionaries = hed_schema.dictionaries
         else:
             self._hed_schema_dictionaries = None
         self._check_for_warnings = check_for_warnings
@@ -259,15 +259,14 @@ class TagValidator:
             The tag that is used to do the validation.
         Returns
         -------
-        bool
+        tag_takes_extension: bool
             True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
-
         """
         tag_slash_indices = self.get_tag_slash_indices(formatted_tag)
         for tag_slash_index in tag_slash_indices:
             tag_substring = self.get_tag_substring_by_end_index(formatted_tag, tag_slash_index)
             if self._hed_schema.tag_has_attribute(tag_substring,
-                                                  HedKey.ExtensionAllowed):
+                                                  HedKey.ExtensionAllowedPropagated):
                 return True
         return False
 

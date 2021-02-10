@@ -1,186 +1,178 @@
-from enum import Enum
-
-from hed.schema import constants
 from hed.util import file_util
-from hed.util.hed_schema import HedSchema
+from hed.util.hed_schema import HedSchema, HedKey
 from hed.schema.schema_validator import validate_schema
-
-
-class MainParseMode(Enum):
-    MainTags = 1
-    UnitClassTags = 2
-    UnitModifierTags = 3
 
 
 class HEDXml2Wiki:
     def __init__(self):
-        self.parent_map = None
         self.current_tag_string = ""
         self.current_tag_extra = ""
-        self.parse_mode = MainParseMode.MainTags
         self.output = []
 
-    def count_parent_nodes(self, node, tags_to_check=None):
-        """Count what depth this node should be considered, counting only tags in tags_to_check"""
-        if tags_to_check is None:
-            tags_to_check = ["node"]
-        nodes_in_parent = 0
-        parent_elem = node
-        while parent_elem in self.parent_map:
-            if parent_elem.tag in tags_to_check:
-                nodes_in_parent += 1
-            parent_elem = self.parent_map[parent_elem]
+    def process_schema(self, hed_schema):
+        """
+        Takes a HedSchema object and returns a list of strings representing it's .mediawiki version.
 
-        return nodes_in_parent
+        Parameters
+        ----------
+        hed_schema : HedSchema
 
-    def flush_current_tag(self):
+        Returns
+        -------
+        mediawiki_strings: [str]
+            A list of strings representing the .mediawiki version of this schema.
+        """
+        self.output = []
+
+        self._output_header(hed_schema)
+        self._output_tags(hed_schema)
+        self._output_units(hed_schema)
+        self._output_unit_modifiers(hed_schema)
+
+        self.current_tag_string = "!# end hed"
+        self._flush_current_tag()
+
+        return self.output
+
+    def _output_header(self, hed_schema):
+        hed_attrib_string = self._get_attribs_string_from_schema(hed_schema)
+        self.current_tag_string = f"HED {hed_attrib_string}"
+        self._flush_current_tag()
+        self._add_blank_line()
+        self.current_tag_string = "!# start hed"
+        self._flush_current_tag()
+
+    def _output_tags(self, hed_schema):
+        all_tags = hed_schema.get_all_tags()
+
+        for tag in all_tags:
+            if "/" not in tag:
+                self._add_blank_line()
+                self.current_tag_string += f"'''{tag}'''"
+            else:
+                count = tag.count("/")
+                short_tag = tag.split("/")[-1]
+                # takes value tags should appear after the nowiki tag.
+                if short_tag.endswith("#"):
+                    self.current_tag_string += f"{'*' * count}"
+                    self.current_tag_extra += short_tag + " "
+                else:
+                    self.current_tag_string += f"{'*' * count} {short_tag}"
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, tag)
+            self._flush_current_tag()
+
+        self._add_blank_line()
+        self._add_blank_line()
+
+    def _output_units(self, hed_schema):
+        self.current_tag_string += "'''Unit classes'''"
+        self._flush_current_tag()
+        for unit_name, unit_types in hed_schema.dictionaries[HedKey.Units].items():
+            self.current_tag_string += f"* {unit_name}"
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.Units,
+                                                                         [HedKey.DefaultUnits])
+            self._flush_current_tag()
+
+            for unit_type in unit_types:
+                self.current_tag_string += f"** {unit_type}"
+                self.current_tag_extra += self._format_props_and_desc(
+                    hed_schema, unit_type, HedKey.Units, [HedKey.DefaultUnits, HedKey.SIUnit, HedKey.UnitSymbol])
+                self._flush_current_tag()
+
+        self._add_blank_line()
+
+    def _output_unit_modifiers(self, hed_schema):
+        self.current_tag_string += "'''Unit modifiers'''"
+        self._flush_current_tag()
+        for modifier_name in hed_schema.dictionaries[HedKey.SIUnitModifier]:
+            self.current_tag_string += f"* {modifier_name}"
+            self.current_tag_extra += self._format_props_and_desc(
+                hed_schema, modifier_name, HedKey.SIUnitModifier, [HedKey.SIUnitModifier, HedKey.SIUnitSymbolModifier])
+            self._flush_current_tag()
+
+    def _flush_current_tag(self):
         if self.current_tag_string or self.current_tag_extra:
             if self.current_tag_extra:
                 new_tag = f"{self.current_tag_string} <nowiki>{self.current_tag_extra}</nowiki>"
             else:
                 new_tag = self.current_tag_string
-            # print(new_tag)
             self.output.append(new_tag)
             self.current_tag_string = ""
             self.current_tag_extra = ""
 
-    def add_blank_line(self):
+    def _add_blank_line(self):
         self.output.append("")
 
-    def process_tree(self, hed_tree):
-        # Create a map so we can go from child to parent easily.
-        self.parent_map = {c: p for p in hed_tree.iter() for c in p}
-        self.current_tag_string = ""
-        self.current_tag_extra = ""
-        self.parse_mode = MainParseMode.MainTags
-        self.output = []
+    # Should this be a function?
+    def _format_props_and_desc(self, hed_schema, tag_name, tag_class=HedKey.AllTags, keys=None):
+        prop_string = ""
+        tag_props = hed_schema.get_all_tag_attributes(tag_name, keys)
+        if tag_props:
+            prop_string += self._format_tag_props(tag_props)
+        desc = hed_schema.get_tag_description(tag_name, tag_class)
+        if desc:
+            if tag_props:
+                prop_string += " "
+            prop_string += f"[{desc}]"
 
-        parse_mode = MainParseMode.MainTags
-        for elem in hed_tree.iter():
-            if elem.tag == "HED":
-                hed_attrib_string = self.get_attribs_from_root_hed_node(elem)
-                self.current_tag_string = f"HED {hed_attrib_string}"
-                self.flush_current_tag()
-                self.add_blank_line()
-                self.current_tag_string = "!# start hed"
-                self.flush_current_tag()
-                continue
-            elif elem.tag == "unitClasses":
-                self.flush_current_tag()
-                parse_mode = MainParseMode.UnitClassTags
-
-                section_text_name = "Unit classes"
-                self.current_tag_string += "\n"
-                self.current_tag_string += f"'''{section_text_name}'''"
-                self.add_blank_line()
-            elif elem.tag == "unitModifiers":
-                self.flush_current_tag()
-                parse_mode = MainParseMode.UnitModifierTags
-
-                section_text_name = "Unit modifiers"
-                self.current_tag_string += "\n"
-                self.current_tag_string += f"'''{section_text_name}'''"
-                # self.add_blank_line()
-
-            nodes_in_parent = None
-            if parse_mode == MainParseMode.MainTags:
-                nodes_in_parent = self.count_parent_nodes(elem) - 1
-                if elem.tag == "node":
-                    self.flush_current_tag()
-            elif parse_mode == MainParseMode.UnitClassTags:
-                nodes_in_parent = self.count_parent_nodes(elem,
-                                                          tags_to_check=["unitClasses", "units"])
-                if elem.tag == "unit" or elem.tag == "unitClass":
-                    self.flush_current_tag()
-
-                # Handle old style units where they don't have separate tags.
-                if elem.tag == "units" and not elem.text.isspace():
-                    self.flush_current_tag()
-                    unit_list = elem.text.split(',')
-                    for unit in unit_list:
-                        prefix = "*" * nodes_in_parent
-                        self.current_tag_string += f"{prefix} {unit}"
-                        self.flush_current_tag()
-
-            elif parse_mode == MainParseMode.UnitModifierTags:
-                nodes_in_parent = self.count_parent_nodes(elem, tags_to_check=["unitModifiers"])
-                if elem.tag == "unitModifier":
-                    self.flush_current_tag()
-
-            # stuff that applies to all modes
-            if elem.tag == "name" or elem.tag == "unit":
-                # handle special case where text is just "#"
-                if elem.text and "#" in elem.text:
-                    prefix = "*" * nodes_in_parent
-                    self.current_tag_string += f"{prefix}"
-                    self.current_tag_extra = f"{elem.text} {self.current_tag_extra}"
-                else:
-                    if nodes_in_parent == 0:
-                        self.current_tag_string += f"'''{elem.text}'''"
-                        self.add_blank_line()
-                    elif nodes_in_parent > 0:
-                        prefix = "*" * nodes_in_parent
-                        self.current_tag_string += f"{prefix} {elem.text}"
-                    elif nodes_in_parent == -1:
-                        self.current_tag_string += elem.tag
-
-            self.add_elem_desc(elem)
-            self.add_elem_attributes(elem)
-
-        self.flush_current_tag()
-        self.current_tag_string = "!# end hed"
-        self.flush_current_tag()
-
-        return self.output
-
-    def add_elem_desc(self, elem):
-        """Add description from passed in elem to current tag"""
-        if elem.tag == "description":
-            if self.current_tag_extra:
-                self.current_tag_extra += " "
-            self.current_tag_extra += f"[{elem.text}]"
-
-    def add_elem_attributes(self, elem):
-        """Add all attributes from the passed in elem to current tag"""
-        if len(elem.attrib) > 0:
-            self.current_tag_extra += "{"
-            is_first = True
-            sorted_keys = []
-            # This is purely optional, but makes comparing easier when it's identical
-            expected_key_order = ["takesValue", "isNumeric", "requireChild", "required", "unique",
-                                  "predicateType", "position", "unitClass", "default"]
-            for expected_key in expected_key_order:
-                if expected_key in elem.attrib:
-                    sorted_keys.append(expected_key)
-            for attrib_name in elem.attrib:
-                if attrib_name not in sorted_keys:
-                    sorted_keys.append(attrib_name)
-
-            for attrib_name in sorted_keys:
-                attrib_val = elem.attrib[attrib_name]
-                if attrib_name == "unitClass":
-                    unit_classes = attrib_val.split(",")
-                    for unit_class in unit_classes:
-                        if not is_first:
-                            self.current_tag_extra += ", "
-                        is_first = False
-                        self.current_tag_extra += f"{attrib_name}={unit_class}"
-                else:
-                    if not is_first:
-                        self.current_tag_extra += ", "
-                    is_first = False
-                    if attrib_val == "true":
-                        self.current_tag_extra += attrib_name
-                    elif attrib_val.isdigit():
-                        self.current_tag_extra += f"{attrib_name}={attrib_val}"
-                    else:
-                        self.current_tag_extra += f"{attrib_name}={attrib_val}"
-            self.current_tag_extra += "}"
+        return prop_string
 
     @staticmethod
-    def get_attribs_from_root_hed_node(elem):
-        attrib_values = [f"{attr}:{elem.attrib[attr]}" for attr in constants.HED_VALID_ATTRIBUTES if
-                         attr in elem.attrib]
+    def _format_tag_props(tag_props):
+        """
+            Takes a dictionary of tag attributes and returns a string with the .mediawiki representation
+
+        Parameters
+        ----------
+        tag_props : {str:str}
+            {attribute_name : attribute_value}
+        Returns
+        -------
+        str:
+            The formatted string that should be output to the file.
+        """
+        prop_string = ""
+        final_props = []
+        for prop, value in tag_props.items():
+            if value is None:
+                continue
+            if value is True or value == "true":
+                final_props.append(prop)
+            else:
+                if "," in value:
+                    split_values = value.split(",")
+                    for split_value in split_values:
+                        final_props.append(f"{prop}={split_value}")
+                else:
+                    final_props.append(f"{prop}={value}")
+
+        if final_props:
+            prop_string += "{"
+            final_prop_string = ", ".join(final_props)
+            prop_string += final_prop_string
+            prop_string += "}"
+
+        return prop_string
+
+    @staticmethod
+    def _get_attribs_string_from_schema(hed_schema):
+        """
+        Gets the schema attributes and converts it to a string.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema
+            The schema to get attributes from
+
+        Returns
+        -------
+        str:
+            A string of the attributes that can be written to a .mediawiki formatted file
+        """
+        # Hardcode version to always be the first thing in attributes
+        attrib_values = [f"version:{hed_schema.schema_attributes['version']}"]
+        attrib_values.extend([f"{attr}:{value}" for attr, value in
+                              hed_schema.schema_attributes.items() if attr != "version"])
         final_attrib_string = ", ".join(attrib_values)
         return final_attrib_string
 
@@ -210,10 +202,9 @@ def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=Tr
     if local_xml_file is None:
         local_xml_file = file_util.url_to_file(hed_xml_url)
 
-    hed_xml_tree = HedSchema.parse_hed_xml_file(local_xml_file)
-
+    hed_schema = HedSchema(local_xml_file)
     xml2wiki = HEDXml2Wiki()
-    output_strings = xml2wiki.process_tree(hed_xml_tree)
+    output_strings = xml2wiki.process_schema(hed_schema)
     local_mediawiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
 
     issue_list = []
