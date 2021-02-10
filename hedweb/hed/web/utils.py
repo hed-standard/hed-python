@@ -11,12 +11,12 @@ from hed.web.web_utils import save_file_to_upload_folder, find_all_str_indices_i
 app_config = current_app.config
 
 
-def find_spreadsheet_columns_info(form_request_object):
+def find_spreadsheet_columns_info(request):
     """Finds the info associated with the spreadsheet columns.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from the validation form.
 
     Returns
@@ -28,11 +28,11 @@ def find_spreadsheet_columns_info(form_request_object):
     spreadsheet_columns_info = []
     try:
         spreadsheet_columns_info = {common_constants.COLUMN_NAMES: [], common_constants.TAG_COLUMN_INDICES: []}
-        if common_constants.SPREADSHEET_FILE in form_request_object.files:
-            spreadsheet_file = form_request_object.files[common_constants.SPREADSHEET_FILE]
+        if common_constants.SPREADSHEET_FILE in request.files:
+            spreadsheet_file = request.files[common_constants.SPREADSHEET_FILE]
             spreadsheet_file_path = save_file_to_upload_folder(spreadsheet_file)
-            if spreadsheet_file_path and worksheet_name_present_in_form(form_request_object):
-                worksheet_name = form_request_object.form[common_constants.WORKSHEET_NAME]
+            if spreadsheet_file_path and worksheet_name_present_in_form(request):
+                worksheet_name = request.form[common_constants.WORKSHEET_NAME]
                 spreadsheet_columns_info = populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info,
                                                                                         spreadsheet_file_path,
                                                                                         worksheet_name)
@@ -86,12 +86,12 @@ def get_excel_worksheet_names(workbook_file_path):
     return worksheet_names
 
 
-def get_optional_form_field(form_request_object, form_field_name, type=''):
+def get_optional_form_field(request, form_field_name, type=''):
     """Gets the specified optional form field if present.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from the validation form.
     form_field_name: string
         The name of the optional form field.
@@ -107,20 +107,20 @@ def get_optional_form_field(form_request_object, form_field_name, type=''):
     form_field_value = ''
     if type == common_constants.BOOLEAN:
         form_field_value = False
-        if form_field_name in form_request_object.form:
+        if form_field_name in request.form:
             form_field_value = True
     elif type == common_constants.STRING:
-        if form_field_name in form_request_object.form:
-            form_field_value = form_request_object.form[form_field_name]
+        if form_field_name in request.form:
+            form_field_value = request.form[form_field_name]
     return form_field_value
 
 
-def get_specific_tag_columns_from_form(form_request_object):
+def get_specific_tag_columns_from_form(request):
     """Gets the specific tag columns from the validation form.
 
     Parameters
     ----------
-    form_request_object: Request object
+    request: Request object
         A Request object containing user data from the validation form.
 
     Returns
@@ -132,8 +132,8 @@ def get_specific_tag_columns_from_form(form_request_object):
     column_prefix_dictionary = {}
     for tag_column_name in spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES:
         form_tag_column_name = tag_column_name.lower() + common_constants.COLUMN_POSTFIX
-        if form_tag_column_name in form_request_object.form:
-            tag_column_name_index = form_request_object.form[form_tag_column_name].strip()
+        if form_tag_column_name in request.form:
+            tag_column_name_index = request.form[form_tag_column_name].strip()
             if tag_column_name_index:
                 tag_column_name_index = int(tag_column_name_index)
 
@@ -302,18 +302,18 @@ def populate_worksheets_info_dictionary(worksheets_info, spreadsheet_file_path):
     return worksheets_info
 
 
-def worksheet_name_present_in_form(validation_form_request_object):
-    """Checks to see if a worksheet name is present in a request object from the validation form.
+def worksheet_name_present_in_form(request):
+    """Checks to see if a worksheet name is present in a request object from form.
 
     Parameters
     ----------
-    validation_form_request_object: Request object
-        A Request object containing user data from the validation form.
+    request: Request object
+        A Request object containing user data from a form.
 
     Returns
     -------
     boolean
-        True if a worksheet name is present in a request object from the validation form.
+        True if a worksheet name is present in a request object from the form.
 
     """
-    return common_constants.WORKSHEET_NAME in validation_form_request_object.form
+    return common_constants.WORKSHEET_NAME in request.form

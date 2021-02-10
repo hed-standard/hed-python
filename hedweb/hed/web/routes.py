@@ -5,7 +5,7 @@ import traceback
 
 from hed.util import hed_cache
 
-from hed.web import events, spreadsheet, schema, utils
+from hed.web import events, spreadsheet, schema, service, utils
 from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error
@@ -134,8 +134,8 @@ def get_schema_compliance_check_results():
                              "Invalid duplicate tag check. This should not happen.", as_text=True)
 
 
-@route_blueprint.route(route_constants.EEG_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_eeg_events_validation_results():
+@route_blueprint.route(route_constants.SERVICE_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_service_results():
     """Validate the hed strings associated with EEG events after submission from HEDTools EEGLAB plugin and
     return json string containing the output.
 
@@ -148,11 +148,11 @@ def get_eeg_events_validation_results():
         A serialized JSON string containing information related to the EEG events' hed-strings.
         If the validation fails then a 500 error message is returned.
     """
-    validation_status = spreadsheet.report_eeg_events_validation_status(request)
+    status = service.report_service_status(request)
 
-    if error_constants.ERROR_KEY in validation_status:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_status[error_constants.ERROR_KEY])
-    return json.dumps(validation_status)
+    if error_constants.ERROR_KEY in status:
+        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, status[error_constants.ERROR_KEY])
+    return json.dumps(status)
 
 
 @route_blueprint.route(route_constants.HED_VERSION_ROUTE, methods=['POST'])
@@ -351,8 +351,8 @@ def render_dictionary_validation_form():
     # return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
 
 
-@route_blueprint.route(route_constants.EEG_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
-def render_eeg_validation_form():
+@route_blueprint.route(route_constants.SERVICE_ROUTE, strict_slashes=False, methods=['GET'])
+def render_service_form():
     """Handles the site root and EEG Validation tab functionality.
 
     Parameters
@@ -365,8 +365,7 @@ def render_eeg_validation_form():
         displayed. If the HTTP method is a POST then the validation form is submitted.
 
     """
-    return render_template(page_constants.EEG_VALIDATION_PAGE)
-
+    return render_template(page_constants.SERVICE_PAGE)
 
 
 @route_blueprint.route(route_constants.EVENTS_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])

@@ -54,6 +54,9 @@ SCHEMA_URL_DISPLAY_NAME = 'schema-url-display-name'
 SCHEMA_URL_FLASH = 'schema-url-flash'
 SCHEMA_URL_DISPLAY_NAME = 'schema-url-display-name'
 SCHEMA_URL_OPTION = 'schema-url-option'
+
+SERVICE_SUBMIT = 'service-submit'
+
 # Type constants
 BOOLEAN = 'boolean'
 STRING = 'string'
@@ -64,4 +67,4 @@ VALIDATION_FORM = 'validation-form'
 VALIDATION_OUTPUT_FILE_PREFIX = 'validation_errors'
 VALIDATION_SUBMIT = 'validation-submit'
 VALIDATION_SUBMIT_FLASH = 'validation-submit-flash'
-EEG_SUBMIT = 'eeg-submit'
+
