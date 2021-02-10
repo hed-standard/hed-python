@@ -53,46 +53,50 @@ class Test(unittest.TestCase):
         print(response.status_code)
         # self.assertEqual(response.status_code, 204, "Dummy file should be deleted")
 
-    # def test_get_duplicate_tag_results(self):
-    #     response = self.app.get('/schema-duplicate-tag-results')
-    #     self.assertEqual(response.status_code, 404)
-    #
-    # def test_get_eeg_events_validation_results(self):
-    #     response = self.app.get('/eeg-validation-submit')
-    #     self.assertEqual(response.status_code, 404)
-    #
-    # def test_get_hed_version_in_file(self):
-    #     response = self.app.post('/get-hed-version')
-    #     self.assertEqual(response.status_code, 400)
-    #
-    # def test_get_major_hed_versions(self):
-    #     response = self.app.post('/get-hed-major-versions')
-    #     self.assertEqual(response.status_code, 405)
-    # import hed.web.constants.common_constants as constants
-    # from hed.web.web_utils import find_major_hed_versions
-    # hed_info = find_major_hed_versions()
-    # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key hed-major-versions")
-    # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
-    #
-    # def test_get_major_hed_versions(self):
-    #     response = self.app.post('/get-hed-major-versions')
-    #     self.assertEqual(response.status_code, 405)
-    #
-    # def test_get_schema_conversion_results(self):
-    #     response = self.app.post('/schema-conversion-submit')
-    #     self.assertEqual(response.status_code, 400)
-    #
-    # def test_get_spreadsheet_columns_info(self):
-    #     response = self.app.post('/get-spreadsheet-columns-info')
-    #     self.assertEqual(response.status_code, 400)
-    #
-    # def test_get_validation_results(self):
-    #     response = self.app.post('/validation-submit')
-    #     self.assertEqual(response.status_code, 400)
-    #
-    # def test_get_worksheets_info(self):
-    #     response = self.app.post('/get-worksheets-info')
-    #     self.assertEqual(response.status_code, 400)
+    def test_get_dictionary_validation_results(self):
+        response = self.app.get('/dictionary-validation-submit')
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_events_validation_results(self):
+        response = self.app.get('/events-validation-submit')
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_hed_services_results(self):
+        response = self.app.get('/hed-services-submit')
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_hed_version(self):
+        response = self.app.post('/get-hed-version')
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_major_hed_versions(self):
+        response = self.app.post('/get-hed-major-versions')
+        self.assertEqual(response.status_code, 405)
+        # import hed.web.constants.common_constants as constants
+        # from hed.web.web_utils import find_major_hed_versions
+        # hed_info = find_major_hed_versions()
+        # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key hed-major-versions")
+        # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
+
+    def test_get_schema_compliance_check_results(self):
+        response = self.app.post('/schema-compliance-check-submit')
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_schema_conversion_results(self):
+        response = self.app.post('/schema-conversion-submit')
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_spreadsheet_columns_info(self):
+        response = self.app.post('/get-spreadsheet-columns-info')
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_spreadsheet_validation_results(self):
+        response = self.app.post('/spreadsheet-validation-submit')
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_worksheets_info(self):
+        response = self.app.post('/get-worksheets-info')
+        self.assertEqual(response.status_code, 400)
 
     def test_render_additional_examples_page(self):
         response = self.app.test.get('/additional-examples')
@@ -102,25 +106,33 @@ class Test(unittest.TestCase):
         response = self.app.test.get('/common-errors')
         self.assertEqual(response.status_code, 200, "The common-errors content page exists")
 
-    # def test_render_eeg_validation_form(self):
-    #     response = self.app.get('/eeg-validation')
-    #     self.assertEqual(response.status_code, 200)
-    #
-    # def test_render_home_page(self):
-    #     response = self.app.get('/')
-    #     self.assertEqual(response.status_code, 200)
-    #
-    # def test_render_help_page(self):
-    #     response = self.app.get('/hed-tools-help')
-    #     self.assertEqual(response.status_code, 200)
-    #
-    # def test_render_schema_form(self):
-    #     response = self.app.get('/schema')
-    #     self.assertEqual(response.status_code, 200)
-    #
-    # def test_render_validation_form(self):
-    #     response = self.app.get('/validation')
-    #     self.assertEqual(response.status_code, 200)
+    def test_render_dictionary_form(self):
+        response = self.app.get('/dictionary')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_events_form(self):
+        response = self.app.get('/events')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_hed_services_form(self):
+        response = self.app.get('/hed-services')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_help_page(self):
+        response = self.app.get('/hed-tools-help')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_home_page(self):
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_schema_form(self):
+        response = self.app.get('/schema')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_spreadsheet_form(self):
+        response = self.app.get('/spreadsheet')
+        self.assertEqual(response.status_code, 200)
 
 
 if __name__ == '__main__':

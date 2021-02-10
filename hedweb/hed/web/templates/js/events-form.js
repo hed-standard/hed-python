@@ -168,27 +168,12 @@ function submitForm() {
             contentType: false,
             processData: false,
             dataType: 'text',
-            success: function (downloaded_file) {
-                  if (downloaded_file) {
-                      flashMessageOnScreen('', 'success',
-                          'events-validation-submit-flash');
-                      triggerDownloadBlob(downloaded_file, display_name);
-                  } else {
-                      flashMessageOnScreen('No validation errors found.', 'success',
-                          'events-validation-submit-flash');
-                  }
+            success: function (download, status, xhr) {
+                getResponseSuccess(download, xhr, display_name, 'events-validation-submit-flash')
             },
-            error: function (download_response) {
-                console.log(download_response.responseText);
-                if (download_response.responseText.length < 100) {
-                    flashMessageOnScreen(download_response.responseText, 'error',
-                        'events-validation-submit-flash');
-                } else {
-                    flashMessageOnScreen('Event annotations could not be processed',
-                        'error','events-validation-submit-flash');
-                }
+            error: function (download, status, xhr) {
+                getResponseFailure(download, xhr, display_name, 'events-validation-submit-flash')
             }
         }
     )
-    ;
 }

@@ -98,9 +98,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(indices, list)
         self.assertEqual(expected_indices, indices)
 
-    def test_find_hed_version_in_uploaded_file(self):
-        self.assertTrue(1, "Testing find_hed_version_in_uploaded_file")
-
     def test_generate_download_file_response(self):
         from hed.web.web_utils import generate_download_file_response
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
@@ -122,6 +119,28 @@ class Test(unittest.TestCase):
             os.remove(temp_file)
         self.assertFalse(os.path.isfile(temp_file), "Dummy has been deleted")
 
+    def test_generate_filename(self):
+        from hed.web.web_utils import generate_filename
+        filename = generate_filename(None, prefix=None, suffix=None, extension=None)
+        self.assertEqual('', filename, "Returns empty when all arguments are none")
+        filename = generate_filename(None, prefix=None, suffix=None, extension='.txt')
+        self.assertEqual('', filename, "Returns empty when basename, prefix, and suffix are None, but extension is not")
+        filename = generate_filename('c:/temp.json', prefix=None, suffix=None, extension='.txt')
+        self.assertEqual('c_temp.txt', filename,
+                         "Returns stripped basename + extension when prefix, and suffix are None")
+        filename = generate_filename('temp.json', prefix='prefix', suffix='suffix', extension='.txt')
+        self.assertEqual('prefix_temp_suffix.txt', filename,
+                         "Returns stripped basename + extension when prefix, and suffix are None")
+        filename = generate_filename(None, prefix='prefix', suffix='suffix', extension='.txt')
+        self.assertEqual('prefix_suffix.txt', filename,
+                         "Returns correct string when no basename")
+        filename = generate_filename('event-strategy-v3_task-matchingpennies_events.json',
+                                     suffix='blech', extension='.txt')
+        self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
+                         "Returns correct string when basename with hyphens")
+        filename = generate_filename('HED7.1.2.xml', suffix='blech', extension='.txt')
+        self.assertEqual('HED7.1.2_blech.txt', filename, "Returns correct string when basename has periods")
+
     def test_get_hed_path_from_pull_down(self):
         from hed.web.constants import common_constants
         from hed.web.web_utils import get_hed_path_from_pull_down
@@ -135,6 +154,8 @@ class Test(unittest.TestCase):
         # self.assertTrue(hed_file_path,
         #                 'When hed-version is in form get_hed_path_from_pull_down returns a hed_file_path')
 
+    def test_get_optional_form_field(self):
+        self.assertTrue(1, "Testing get_optional_form_field")
 
     def test_get_uploaded_file_path_from_form(self):
         self.assertTrue(1, "Testingget_uploaded_file_path_from_form")
@@ -144,6 +165,9 @@ class Test(unittest.TestCase):
         error_message = "Test"
 
         self.assertTrue(1, "Testing handle_http_error")
+
+    def test_find_hed_version_in_uploaded_file(self):
+            self.assertTrue(1, "Testing find_hed_version_in_uploaded_file")
 
     def test_save_file_to_upload_folder(self):
         from hed.web.web_utils import save_file_to_upload_folder, app_config

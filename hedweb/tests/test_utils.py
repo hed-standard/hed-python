@@ -26,8 +26,8 @@ class Test(unittest.TestCase):
     def test_find_spreadsheet_columns_info(self):
         self.assertTrue(1, "Testing find_spreadsheet_columns_info")
 
-    # def test_get_column_delimiter_based_on_file_extension(self):
-    #     self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
+    def test_get_column_delimiter_based_on_file_extension(self):
+        self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
     #     from hed.web.utils import get_column_delimiter_based_on_file_extension
     #     delimiter = get_column_delimiter_based_on_file_extension('test.tsv')
     #     self.assertEqual('\t', delimiter, ".tsv files should have a tab delimiter")
@@ -45,9 +45,6 @@ class Test(unittest.TestCase):
         self.assertEqual(len(worksheet_names), 3, "This excel file has three worksheets")
         self.assertIn('PVT Events', worksheet_names, "PVT Events is one of the worksheet names")
         self.assertNotIn('Temp', worksheet_names, "Temp is not one of the worksheet names")
-
-    def test_get_optional_form_field(self):
-        self.assertTrue(1, "Testing get_optional_form_field")
 
     def test_get_original_spreadsheet_filename(self):
         self.assertTrue(1, "Testing get_original_filename")
@@ -76,6 +73,12 @@ class Test(unittest.TestCase):
         #     self.assertTrue(indices)
         #     self.assertIsInstance(indices, dict)
         #
+
+    def test_get_spreadsheet_other_tag_column_indices(self):
+        self.assertTrue(1, "Testing get_spreadsheet_other_tag_column_indices")
+
+    def test_get_spreadsheet_specific_tag_column_indices(self):
+        self.assertTrue(1, "Testing get_spreadsheet_specific_tag_column_indices")
 
     def test_get_text_file_column_names(self):
         self.assertTrue(1, "Testing get_text_file_column_names")
