@@ -154,6 +154,8 @@ class Test(unittest.TestCase):
         # self.assertTrue(hed_file_path,
         #                 'When hed-version is in form get_hed_path_from_pull_down returns a hed_file_path')
 
+    def test_get_optional_form_field(self):
+        self.assertTrue(1, "Testing get_optional_form_field")
 
     def test_get_uploaded_file_path_from_form(self):
         self.assertTrue(1, "Testingget_uploaded_file_path_from_form")

@@ -310,6 +310,35 @@ def get_printable_issue_string(issues, display_name=None, title_string=''):
     return ErrorHandler.get_printable_issue_string(issues, title, skip_filename=True)
 
 
+def get_optional_form_field(request, form_field_name, type=''):
+    """Gets the specified optional form field if present.
+
+    Parameters
+    ----------
+    request: Request object
+        A Request object containing user data from the validation form.
+    form_field_name: string
+        The name of the optional form field.
+    type: str
+        Name of expected type: 'boolean' or 'string'
+
+    Returns
+    -------
+    boolean or string
+        A boolean or string value based on the form field type.
+
+    """
+    form_field_value = ''
+    if type == common_constants.BOOLEAN:
+        form_field_value = False
+        if form_field_name in request.form:
+            form_field_value = True
+    elif type == common_constants.STRING:
+        if form_field_name in request.form:
+            form_field_value = request.form[form_field_name]
+    return form_field_value
+
+
 def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
     """Gets the other paths of the uploaded files in the form.
 

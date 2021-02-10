@@ -5,6 +5,7 @@ from hed.util.file_util import delete_file_if_it_exists
 from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 
+import hed.web.web_utils
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.web_utils import convert_number_str_to_list, generate_filename, get_printable_issue_string, \
     generate_download_file_response, get_hed_path_from_pull_down, get_uploaded_file_path_from_form, \
@@ -14,7 +15,7 @@ from hed.web import utils
 app_config = current_app.config
 
 
-def generate_arguments_from_validation_form(request):
+def generate_input_from_validation_form(request):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters
@@ -39,12 +40,12 @@ def generate_arguments_from_validation_form(request):
         common_constants.SPREADSHEET_FILE: original_file_name,
         common_constants.TAG_COLUMNS: convert_number_str_to_list(request.form[common_constants.TAG_COLUMNS]),
         common_constants.COLUMN_PREFIX_DICTIONARY: utils.get_specific_tag_columns_from_form(request),
-        common_constants.WORKSHEET_NAME: utils.get_optional_form_field(request, common_constants.WORKSHEET_NAME,
-                                                                       common_constants.STRING),
+        common_constants.WORKSHEET_NAME: hed.web.web_utils.get_optional_form_field(request, common_constants.WORKSHEET_NAME,
+                                                                                   common_constants.STRING),
         common_constants.HAS_COLUMN_NAMES:
-            utils.get_optional_form_field(request, common_constants.HAS_COLUMN_NAMES, common_constants.BOOLEAN),
+            hed.web.web_utils.get_optional_form_field(request, common_constants.HAS_COLUMN_NAMES, common_constants.BOOLEAN),
         common_constants.CHECK_FOR_WARNINGS:
-            utils.get_optional_form_field(request, common_constants.CHECK_FOR_WARNINGS, common_constants.BOOLEAN)
+            hed.web.web_utils.get_optional_form_field(request, common_constants.CHECK_FOR_WARNINGS, common_constants.BOOLEAN)
     }
     return validation_input_arguments
 
@@ -65,7 +66,7 @@ def report_spreadsheet_validation_status(request):
     """
     input_arguments = []
     try:
-        input_arguments = generate_arguments_from_validation_form(request)
+        input_arguments = generate_input_from_validation_form(request)
         return validate_spreadsheet(input_arguments)
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR

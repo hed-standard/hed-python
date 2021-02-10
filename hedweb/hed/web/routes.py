@@ -5,7 +5,7 @@ import traceback
 
 from hed.util import hed_cache
 
-from hed.web import events, spreadsheet, schema, service, utils
+from hed.web import events, spreadsheet, schema, services, utils
 from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error
@@ -107,35 +107,8 @@ def get_events_validation_results():
             return ""
 
 
-@route_blueprint.route(route_constants.SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_schema_compliance_check_results():
-    """Check the HED specification in the form after submission and return an attachment other containing the output.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-        string
-        A serialized JSON string containing the hed specification to check. If the conversion fails then a
-        500 error message is returned.
-    """
-    comparison_response = schema.run_schema_compliance_check(request)
-    # Success
-    if isinstance(comparison_response, Response):
-        return comparison_response
-    if isinstance(comparison_response, str):
-        if comparison_response:
-            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, comparison_response, as_text=True)
-        else:
-            return ""
-
-    return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                             "Invalid duplicate tag check. This should not happen.", as_text=True)
-
-
-@route_blueprint.route(route_constants.SERVICE_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_service_results():
+@route_blueprint.route(route_constants.HED_SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_hed_services_results():
     """Validate the hed strings associated with EEG events after submission from HEDTools EEGLAB plugin and
     return json string containing the output.
 
@@ -148,7 +121,7 @@ def get_service_results():
         A serialized JSON string containing information related to the EEG events' hed-strings.
         If the validation fails then a 500 error message is returned.
     """
-    status = service.report_service_status(request)
+    status = services.report_services_status(request)
 
     if error_constants.ERROR_KEY in status:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, status[error_constants.ERROR_KEY])
@@ -156,7 +129,7 @@ def get_service_results():
 
 
 @route_blueprint.route(route_constants.HED_VERSION_ROUTE, methods=['POST'])
-def get_hed_version_in_file():
+def get_hed_version():
     """Finds the information about the HED version of a file and returns as JSON.
 
     Parameters
@@ -196,6 +169,33 @@ def get_major_hed_versions():
     except:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, traceback.format_exc())
     return json.dumps(hed_info)
+
+
+@route_blueprint.route(route_constants.SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_schema_compliance_check_results():
+    """Check the HED specification in the form after submission and return an attachment other containing the output.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        string
+        A serialized JSON string containing the hed specification to check. If the conversion fails then a
+        500 error message is returned.
+    """
+    comparison_response = schema.run_schema_compliance_check(request)
+    # Success
+    if isinstance(comparison_response, Response):
+        return comparison_response
+    if isinstance(comparison_response, str):
+        if comparison_response:
+            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, comparison_response, as_text=True)
+        else:
+            return ""
+
+    return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
+                             "Invalid duplicate tag check. This should not happen.", as_text=True)
 
 
 @route_blueprint.route(route_constants.SCHEMA_CONVERSION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -333,8 +333,8 @@ def render_common_error_page():
     return render_template(page_constants.COMMON_ERRORS_PAGE)
 
 
-@route_blueprint.route(route_constants.DICTIONARY_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
-def render_dictionary_validation_form():
+@route_blueprint.route(route_constants.DICTIONARY_ROUTE, strict_slashes=False, methods=['GET'])
+def render_dictionary_form():
     """Handles the site root and Validation tab functionality.
 
     Parameters
@@ -351,25 +351,8 @@ def render_dictionary_validation_form():
     # return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
 
 
-@route_blueprint.route(route_constants.SERVICE_ROUTE, strict_slashes=False, methods=['GET'])
-def render_service_form():
-    """Handles the site root and EEG Validation tab functionality.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
-        displayed. If the HTTP method is a POST then the validation form is submitted.
-
-    """
-    return render_template(page_constants.SERVICE_PAGE)
-
-
-@route_blueprint.route(route_constants.EVENTS_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
-def render_events_validation_form():
+@route_blueprint.route(route_constants.EVENTS_ROUTE, strict_slashes=False, methods=['GET'])
+def render_events_form():
     """Handles the site root and Validation tab functionality.
 
     Parameters
@@ -382,12 +365,12 @@ def render_events_validation_form():
         displayed. If the HTTP method is a POST then the validation form is submitted.
 
     """
-    return render_template(page_constants.EVENTS_VALIDATION_PAGE)
+    return render_template(page_constants.EVENTS_PAGE)
 
 
-@route_blueprint.route(route_constants.HED_TOOLS_HOME_ROUTE, strict_slashes=False, methods=['GET'])
-def render_home_page():
-    """Handles the home page.
+@route_blueprint.route(route_constants.HED_SERVICES_ROUTE, strict_slashes=False, methods=['GET'])
+def render_hed_services_form():
+    """Handles the site root and EEG Validation tab functionality.
 
     Parameters
     ----------
@@ -395,10 +378,11 @@ def render_home_page():
     Returns
     -------
     Rendered template
-        A rendered template for the home page.
+        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
+        displayed. If the HTTP method is a POST then the validation form is submitted.
 
     """
-    return render_template(page_constants.HED_TOOLS_HOME_PAGE)
+    return render_template(page_constants.HED_SERVICES_PAGE)
 
 
 @route_blueprint.route(route_constants.HED_TOOLS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
@@ -415,6 +399,22 @@ def render_help_page():
 
     """
     return render_template(page_constants.HED_TOOLS_HELP_PAGE)
+
+
+@route_blueprint.route(route_constants.HED_TOOLS_HOME_ROUTE, strict_slashes=False, methods=['GET'])
+def render_home_page():
+    """Handles the home page.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the home page.
+
+    """
+    return render_template(page_constants.HED_TOOLS_HOME_PAGE)
 
 
 @route_blueprint.route(route_constants.SCHEMA_ROUTE, strict_slashes=False, methods=['GET'])
@@ -434,8 +434,8 @@ def render_schema_form():
     return render_template(page_constants.SCHEMA_PAGE)
 
 
-@route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_ROUTE, strict_slashes=False, methods=['GET'])
-def render_spreadsheet_validation_form():
+@route_blueprint.route(route_constants.SPREADSHEET_ROUTE, strict_slashes=False, methods=['GET'])
+def render_spreadsheet_form():
     """Handles the site root and Validation tab functionality.
 
     Parameters
@@ -448,4 +448,4 @@ def render_spreadsheet_validation_form():
         displayed. If the HTTP method is a POST then the validation form is submitted.
 
     """
-    return render_template(page_constants.SPREADSHEET_VALIDATION_PAGE)
+    return render_template(page_constants.SPREADSHEET_PAGE)

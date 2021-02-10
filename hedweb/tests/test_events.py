@@ -4,6 +4,7 @@ import unittest
 # from hed.web.validation import generate_dictionary_validation_filename
 # from hed.web.app_factory import AppFactory
 # from hed.web.constants import file_constants, spreadsheet_constants
+import os
 
 # app = AppFactory.create_app('config.TestConfig')
 # with app.app_context():
@@ -30,17 +31,11 @@ class Test(unittest.TestCase):
     #         app.register_blueprint(route_blueprint)
     #         self.app = app.test_client()
 
-    def test_generate_input_from_schema_form(self):
-        self.assertTrue(1, "Testing generate_input_from_schema_form")
+    def test_generate_input_from_events_form(self):
+        self.assertTrue(1, "Testing generate_input_from_events_form")
 
-    def test_get_schema_conversion(self):
-        self.assertTrue(1, "Testing get_schema_conversion")
-
-    def test_run_schema_compliance_check(self):
-        self.assertTrue(1, "Testing run_schema_compliance_check")
-
-    def test_run_schema_conversion(self):
-        self.assertTrue(1, "Testing run_schema_conversion")
+    def test_report_events_validation_status(self):
+        self.assertTrue(1, "report_events_validation_status")
 
 
 if __name__ == '__main__':

@@ -46,7 +46,7 @@ def generate_arguments_from_form(request):
     return input_arguments
 
 
-def report_service_status(request):
+def report_services_status(request):
     """
     Reports validation status of hed strings associated with EEG events received from EEGLAB plugin HEDTools
 

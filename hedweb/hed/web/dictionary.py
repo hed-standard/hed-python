@@ -11,8 +11,7 @@ from hed.util.hed_schema import HedSchema
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.web_utils import generate_filename, generate_download_file_response, \
     handle_http_error, get_hed_path_from_pull_down, get_printable_issue_string, \
-    get_uploaded_file_path_from_form, save_file_to_upload_folder, save_text_to_upload_folder
-from hed.web.utils import get_optional_form_field
+    get_uploaded_file_path_from_form, save_file_to_upload_folder, save_text_to_upload_folder, get_optional_form_field
 
 app_config = current_app.config
 

@@ -9,13 +9,12 @@ from hed.util.hed_schema import HedSchema
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.dictionary import validate_dictionary
 from hed.web.spreadsheet import validate_spreadsheet
-from hed.web.web_utils import get_hed_path_from_pull_down, get_uploaded_file_path_from_form
-from hed.web.utils import get_optional_form_field
+from hed.web.web_utils import get_hed_path_from_pull_down, get_uploaded_file_path_from_form, get_optional_form_field
 
 app_config = current_app.config
 
 
-def generate_arguments_from_events_form(request):
+def generate_input_from_events_form(request):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters
@@ -72,7 +71,7 @@ def report_events_validation_status(request):
     """
     input_arguments = []
     try:
-        input_arguments = generate_arguments_from_events_form(request)
+        input_arguments = generate_input_from_events_form(request)
         hed_schema = HedSchema(input_arguments.get(common_constants.HED_XML_FILE, ''))
         download_response = validate_dictionary(input_arguments, hed_schema=hed_schema)
         if download_response:
