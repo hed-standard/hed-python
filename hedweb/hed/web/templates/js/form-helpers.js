@@ -110,7 +110,7 @@ function getFilenameFromResponseHeader(xhr, default_name) {
 function getResponseFailure(download, xhr, display_name, flash_location) {
     console.log(download.responseText);
     if (download.responseText.length < 100) {
-        flashMessageOnScreen(download_response.responseText, 'error', flash_location);
+        flashMessageOnScreen(download.responseText, 'error', flash_location);
     } else {
         flashMessageOnScreen('Not processed', 'error', flash_location);
     }
