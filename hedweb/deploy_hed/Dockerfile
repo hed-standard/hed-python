@@ -1,9 +1,7 @@
-FROM python:3.7-alpine
+FROM python:3.9-slim-buster
 COPY ./requirements.txt /root/
 WORKDIR /root
-RUN apk add --no-cache gcc \
-build-base \
-linux-headers \
+RUN apt-get update && apt-get install -y gcc \
 musl-dev \
 openrc \
 libxslt-dev \
@@ -11,15 +9,15 @@ libxml2-dev \
 apache2 \
 apache2-dev && \
 pip3 install --upgrade pip && \
-pip3 install -r requirements.txt
-COPY ./httpd.conf /etc/apache2/httpd.conf
-COPY ./hedtools /var/www/hedtools/
-RUN mkdir -p /var/www/hedtools/hed/web
-COPY ./hedtools/hed/web /var/www/hedtools/hed/web/
-RUN mkdir -p /run/apache2 && \
+pip3 install --no-cache-dir -r requirements.txt && \
+mkdir -p /var/www/localhost/htdocs && \
+cp /etc/mime.types /var/www/mime.types && \
 mkdir -p /var/log/hedtools && \
-chown -R apache:apache /var/log/hedtools && \
+chown -R www-data:www-data /var/log/hedtools && \
 mkdir -p /var/cache/schema_cache && \
-chown -R apache:apache /var/cache/schema_cache
-ENTRYPOINT /usr/sbin/httpd -D FOREGROUND -f /etc/apache2/httpd.conf
+chown -R www-data:www-data /var/cache/schema_cache
+COPY ./httpd.conf /etc/apache2/apache2.conf
+COPY ./hedtools /var/www/hedtools/
+COPY ./hedtools/hed/web /var/www/hedtools/hed/web/
+ENTRYPOINT /usr/sbin/apache2 -D FOREGROUND -f /etc/apache2/apache2.conf
 ENV HEDTOOLS_CONFIG_CLASS=config.ProductionConfig
