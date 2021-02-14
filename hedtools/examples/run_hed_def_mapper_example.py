@@ -12,7 +12,7 @@ DefDict - Created from a ColumnDefGroup.  Contains all label definitions to be e
 """
 import os
 from hed.util.event_file_input import EventFileInput
-from hed.util.hed_schema import HedSchema
+from hed import schema
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     example_data_path = 'data'  # path to example data
     hed3_tags_single_sheet = os.path.join(example_data_path, 'hed_tag_def_example.xlsx')
 
-    hed_schema = HedSchema(local_hed_file)
+    hed_schema = schema.load_schema(local_hed_file)
     prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
     json_file = "data/both_types_events_def_example.json"
     column_group = ColumnDefGroup(json_file)

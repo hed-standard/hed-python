@@ -9,7 +9,7 @@ import inflect
 
 from hed.util.error_types import ValidationErrors, ValidationWarnings
 from hed.util import error_reporter
-from hed.util.hed_schema import HedSchema, HedKey
+from hed.schema import HedKey
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")

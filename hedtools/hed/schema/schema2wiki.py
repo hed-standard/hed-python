@@ -1,9 +1,10 @@
-from hed.util import file_util
-from hed.util.hed_schema import HedSchema, HedKey
-from hed.schema.schema_validator import validate_schema
+"""Allows output of HedSchema objects as .mediawiki format"""
+
+from hed.schema.hed_schema_constants import HedKey
+from hed.schema import hed_schema_constants as constants
 
 
-class HEDXml2Wiki:
+class HedSchema2Wiki:
     def __init__(self):
         self.current_tag_string = ""
         self.current_tag_extra = ""
@@ -70,13 +71,13 @@ class HEDXml2Wiki:
         for unit_name, unit_types in hed_schema.dictionaries[HedKey.Units].items():
             self.current_tag_string += f"* {unit_name}"
             self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.Units,
-                                                                         [HedKey.DefaultUnits])
+                                                                  keys=constants.UNIT_CLASS_ATTRIBUTES)
             self._flush_current_tag()
 
             for unit_type in unit_types:
                 self.current_tag_string += f"** {unit_type}"
                 self.current_tag_extra += self._format_props_and_desc(
-                    hed_schema, unit_type, HedKey.Units, [HedKey.DefaultUnits, HedKey.SIUnit, HedKey.UnitSymbol])
+                    hed_schema, unit_type, HedKey.Units, keys=constants.UNIT_CLASS_ATTRIBUTES)
                 self._flush_current_tag()
 
         self._add_blank_line()
@@ -87,7 +88,7 @@ class HEDXml2Wiki:
         for modifier_name in hed_schema.dictionaries[HedKey.SIUnitModifier]:
             self.current_tag_string += f"* {modifier_name}"
             self.current_tag_extra += self._format_props_and_desc(
-                hed_schema, modifier_name, HedKey.SIUnitModifier, [HedKey.SIUnitModifier, HedKey.SIUnitSymbolModifier])
+                hed_schema, modifier_name, HedKey.SIUnitModifier, keys=constants.UNIT_MODIFIER_ATTRIBUTES)
             self._flush_current_tag()
 
     def _flush_current_tag(self):
@@ -134,7 +135,7 @@ class HEDXml2Wiki:
         prop_string = ""
         final_props = []
         for prop, value in tag_props.items():
-            if value is None:
+            if value is None or value is False:
                 continue
             if value is True or value == "true":
                 final_props.append(prop)
@@ -175,41 +176,3 @@ class HEDXml2Wiki:
                               hed_schema.schema_attributes.items() if attr != "version"])
         final_attrib_string = ", ".join(attrib_values)
         return final_attrib_string
-
-
-def convert_hed_xml_2_wiki(hed_xml_url, local_xml_file=None, check_for_issues=True,
-                           display_filename=None):
-    """Converts the local HED xml file into a wikimedia file
-
-    Parameters
-    ----------
-    hed_xml_url: str or None
-        url pointing to the .xml file to use
-    local_xml_file: str or None
-        filepath to local xml hed schema(overrides hed_xml_url)
-    check_for_issues : bool
-        After conversion checks for warnings like capitalization or invalid characters.
-    display_filename: str
-        If present, will use this as the filename for context, rather than using the actual filename
-        Useful for temp filenames.
-    Returns
-    -------
-    mediawiki_filename: str
-        Location of output mediawiki file, None on complete failure
-    issues_list: [{}]
-        returns a list of error/warning dictionaries
-    """
-    if local_xml_file is None:
-        local_xml_file = file_util.url_to_file(hed_xml_url)
-
-    hed_schema = HedSchema(local_xml_file)
-    xml2wiki = HEDXml2Wiki()
-    output_strings = xml2wiki.process_schema(hed_schema)
-    local_mediawiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
-
-    issue_list = []
-    if check_for_issues:
-        warnings = validate_schema(local_xml_file, display_filename=display_filename)
-        issue_list += warnings
-
-    return local_mediawiki_file, issue_list
