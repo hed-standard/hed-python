@@ -1,7 +1,7 @@
 from hed.util import error_reporter
 from hed.util.error_types import SchemaErrors, ErrorContext
 from hed.util import hed_string_util
-from hed.util.hed_schema import HedSchema
+from hed import schema
 
 
 class TagFormat:
@@ -9,20 +9,20 @@ class TagFormat:
     Class to convert hed3 tags between short and long form.
     """
 
-    def __init__(self, hed_xml_file=None, hed_schema=None, error_handler=None):
+    def __init__(self, hed_file=None, hed_schema=None, error_handler=None):
         """
 
         Parameters
         ----------
-        hed_xml_file : str
-            hed xml schema filepath to create HedSchema from
+        hed_file : str
+            hed xml/mediawiki schema filepath to create HedSchema from
         hed_schema : HedSchema, default None
              Used in place of hed_xml_file
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         """
         if hed_schema is None:
-            hed_schema = HedSchema(hed_xml_file)
+            hed_schema = schema.load_schema(hed_file)
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
         self._error_handler = error_handler

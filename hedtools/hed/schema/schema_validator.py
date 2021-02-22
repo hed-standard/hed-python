@@ -1,4 +1,4 @@
-from hed.util.hed_schema import HedSchema
+from hed import schema
 from hed.util import error_reporter
 from hed.util.error_types import SchemaErrors, SchemaWarnings, ErrorContext
 
@@ -6,15 +6,15 @@ ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
-def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename=None,
+def validate_schema(schema_filename, also_check_for_warnings=True, display_filename=None,
                     error_handler=None):
     """
         Does validation of schema and returns a list of errors and warnings.
 
     Parameters
     ----------
-    hed_xml_file : str
-        filepath to a HED XML file to validate
+    schema_filename : str
+        filepath to a HED XML/wikimedia file to validate
     also_check_for_warnings : bool, default True
         If True, also checks for formatting issues like invalid characters, capitalization, etc.
     display_filename: str
@@ -30,25 +30,24 @@ def validate_schema(hed_xml_file, also_check_for_warnings=True, display_filename
     if error_handler is None:
         error_handler = error_reporter.ErrorHandler()
     issues_list = []
-    hed_dict = HedSchema(hed_xml_file)
+    hed_schema = schema.load_schema(schema_filename)
 
     if not display_filename:
-        display_filename = hed_xml_file
+        display_filename = schema_filename
     error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
 
-    if hed_dict.has_duplicate_tags():
-        duplicate_dict = hed_dict.find_duplicate_tags()
+    if hed_schema.has_duplicate_tags():
+        duplicate_dict = hed_schema.find_duplicate_tags()
         for tag_name, long_org_tags in duplicate_dict.items():
             issues_list += error_handler.format_schema_error(SchemaErrors.DUPLICATE_TERMS, tag_name,
                                                              duplicate_tag_list=long_org_tags)
 
     if also_check_for_warnings:
-        hed_terms = hed_dict.get_all_terms()
+        hed_terms = hed_schema.get_all_tags(True)
         for hed_term in hed_terms:
             issues_list += validate_schema_term(hed_term, error_handler=error_handler)
 
-        tag_descs = hed_dict.get_all_descriptions()
-        for tag_name, desc in tag_descs.items():
+        for tag_name, desc in hed_schema.get_desc_dict().items():
             issues_list += validate_schema_description(tag_name, desc, error_handler=error_handler)
 
     error_handler.pop_error_context()

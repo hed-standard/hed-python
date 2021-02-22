@@ -7,11 +7,10 @@ the get_validation_issues() function.
 from hed.util.error_types import ErrorContext
 from hed.util import hed_cache
 from hed.util import error_reporter
-from hed.util.hed_schema import HedSchema
+from hed import schema
 from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
-from hed.util.exceptions import HedFileError, HedExceptions
 
 
 class HedValidator:
@@ -135,7 +134,7 @@ class HedValidator:
         if hed_xml_file is None and get_specific_version is None:
             hed_cache.cache_all_hed_xml_versions()
         final_hed_xml_file = hed_cache.get_local_file(hed_xml_file, get_specific_version)
-        hed_schema = HedSchema(final_hed_xml_file)
+        hed_schema = schema.load_schema(final_hed_xml_file)
         return hed_schema
 
     def _validate_hed_tags_in_file(self, hed_input):
