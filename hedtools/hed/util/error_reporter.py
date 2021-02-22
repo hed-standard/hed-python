@@ -375,8 +375,8 @@ class ErrorHandler:
         for key in val_issue:
             if skip_filename and key == ErrorContext.FILE_NAME:
                 continue
-            if key in ErrorContext:
-                single_issue_context.append((key.value, *val_issue[key]))
+            if key.startswith("ec_"):
+                single_issue_context.append((key, *val_issue[key]))
 
         return single_issue_context
 
@@ -401,13 +401,13 @@ class ErrorHandler:
         """
         tab_string = tab_count * '\t'
         error_types = {
-            ErrorContext.FILE_NAME.value: f"\nErrors in file '{context}'",
-            ErrorContext.SIDECAR_COLUMN_NAME.value: f"Column '{context}':",
-            ErrorContext.SIDECAR_KEY_NAME.value: f"Key: {context}",
-            ErrorContext.SIDECAR_HED_STRING.value: f"hed_string: {context}",
-            ErrorContext.ROW.value: f'Issues in row {context}:',
-            ErrorContext.COLUMN.value: f'Issues in column {context}:',
-            ErrorContext.CUSTOM_TITLE.value: context
+            ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
+            ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
+            ErrorContext.SIDECAR_KEY_NAME: f"Key: {context}",
+            ErrorContext.SIDECAR_HED_STRING: f"hed_string: {context}",
+            ErrorContext.ROW: f'Issues in row {context}:',
+            ErrorContext.COLUMN: f'Issues in column {context}:',
+            ErrorContext.CUSTOM_TITLE: context
         }
         context_portion = error_types[context_type]
         context_string = f"{tab_string}{context_portion}\n"
