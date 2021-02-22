@@ -4,14 +4,14 @@ import os
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.column_definition import ColumnDef
 from hed.util.exceptions import HedFileError
-from hed.util.hed_schema import HedSchema
+from hed import schema
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         hed_xml_file = os.path.join(cls.base_data_dir, "HED8.0.0-alpha.1.xml")
-        cls.hed_schema = HedSchema(hed_xml_file)
+        cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.json_filename = os.path.join(cls.base_data_dir, "both_types_events.json")
         cls.default_sidecar = ColumnDefGroup(cls.json_filename)
 
