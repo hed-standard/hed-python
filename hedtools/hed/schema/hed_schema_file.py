@@ -4,7 +4,6 @@ from hed.util.exceptions import HedFileError, HedExceptions
 from hed.schema.hed_schema import HedSchema
 from hed.schema import hed_schema_constants
 from hed.util import file_util
-from hed.schema import schema_validator
 
 
 def load_schema(hed_file_path):
@@ -20,6 +19,7 @@ def load_schema(hed_file_path):
 
     hed_schema = HedSchema()
 
+    hed_schema.filename = hed_file_path
     hed_schema.set_dictionaries(parser.dictionaries)
     hed_schema.set_attributes(parser.schema_attributes)
 
@@ -46,7 +46,8 @@ def get_hed_xml_version(hed_xml_file_path):
 
 def convert_schema_to_format(hed_url=None, local_hed_file=None, check_for_issues=True,
                              display_filename=None, save_as_mediawiki=False):
-    """Converts the local HED xml file into a wikimedia file
+    """
+    Loads a local schema file or from a URL, then outputs a temporary file with the requested format.
 
     Parameters
     ----------
@@ -75,7 +76,7 @@ def convert_schema_to_format(hed_url=None, local_hed_file=None, check_for_issues
 
     issue_list = []
     if check_for_issues:
-        warnings = schema_validator.validate_schema(local_hed_file, display_filename=display_filename)
+        warnings = hed_schema.check_compliance(display_filename=display_filename)
         issue_list += warnings
 
     if save_as_mediawiki:
