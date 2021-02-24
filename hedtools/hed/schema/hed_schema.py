@@ -9,6 +9,7 @@ from hed.schema import hed_schema_constants as constants
 from hed.util import file_util
 from hed.schema.schema2xml import HedSchema2XML
 from hed.schema.schema2wiki import HedSchema2Wiki
+from hed.schema import schema_compliance
 
 
 class HedSchema:
@@ -24,7 +25,10 @@ class HedSchema:
         """
         self.no_duplicate_tags = True
         self.schema_attributes = {}
+        self._filename = None
         self.dictionaries = self.create_empty_dictionaries()
+        self.prologue = ""
+        self.epilogue = ""
 
     def set_attributes(self, schema_attributes):
         self.schema_attributes = schema_attributes
@@ -34,6 +38,15 @@ class HedSchema:
         self._propagate_extension_allowed()
         self._populate_short_tag_dict()
         self._add_hed3_compatible_tags()
+
+    @property
+    def filename(self):
+        return self._filename
+
+    @filename.setter
+    def filename(self, value):
+        if self._filename is None:
+            self._filename = value
 
     def save_as_xml(self):
         schema2xml = HedSchema2XML()
@@ -50,13 +63,14 @@ class HedSchema:
     def __eq__(self, other):
         if self.schema_attributes != other.schema_attributes:
             return False
-
         if self.schema_attributes != other.schema_attributes:
             return False
-
         if self.no_duplicate_tags != other.no_duplicate_tags:
             return False
-
+        if self.prologue != other.prologue:
+            return False
+        if self.epilogue != other.epilogue:
+            return False
         return True
 
     @staticmethod
@@ -69,6 +83,27 @@ class HedSchema:
             dictionaries[tag] = {}
         dictionaries[HedKey.Descriptions] = {}
         return dictionaries
+
+    def check_compliance(self, also_check_for_warnings=True, display_filename=None,
+                         error_handler=None):
+        """
+            Checks for hed3 compliance of this schema.
+
+        Parameters
+        ----------
+        also_check_for_warnings : bool, default True
+            If True, also checks for formatting issues like invalid characters, capitalization, etc.
+        display_filename: str
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        Returns
+        -------
+        issue_list : [{}]
+            A list of all warnings and errors found in the file.
+        """
+        return schema_compliance.check_compliance(self, also_check_for_warnings, display_filename, error_handler)
 
     def dupe_tag_iter(self, return_detailed_info=False):
         """

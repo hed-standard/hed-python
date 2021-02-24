@@ -19,6 +19,8 @@ class HedSchemaXMLParser:
     UNIT_CLASS_UNIT_ELEMENT = 'unit'
     UNIT_CLASS_UNITS_ELEMENT = HedKey.Units
     UNIT_MODIFIER_ELEMENT = 'unitModifier'
+    PROLOGUE_ELEMENT = "prologue"
+    EPILOGUE_ELEMENT = "epilogue"
 
     def __init__(self, hed_xml_file_path):
         self._root_element = self._parse_hed_xml_file(hed_xml_file_path)
@@ -28,6 +30,8 @@ class HedSchemaXMLParser:
         # Required properties
         self.schema_attributes = self._get_schema_attributes()
         self.dictionaries = HedSchema.create_empty_dictionaries()
+        self.prologue = self._get_prologue()
+        self.epilogue = self._get_epilogue()
         self._populate_dictionaries()
 
     @staticmethod
@@ -347,6 +351,18 @@ class HedSchemaXMLParser:
 
         """
         return self._root_element.attrib
+
+    def _get_prologue(self):
+        prologue_elements = self._get_elements_by_name(self.PROLOGUE_ELEMENT)
+        if len(prologue_elements) == 1:
+            return prologue_elements[0].text
+        return ""
+
+    def _get_epilogue(self):
+        epilogue_elements = self._get_elements_by_name(self.EPILOGUE_ELEMENT)
+        if len(epilogue_elements) == 1:
+            return epilogue_elements[0].text
+        return ""
 
     def _get_tags_by_attribute(self, attribute_name):
         """Gets the tag that have a specific attribute.
