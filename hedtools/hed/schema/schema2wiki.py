@@ -3,6 +3,10 @@
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema import hed_schema_constants as constants
 
+START_HED_STRING = "!# start schema"
+END_SCHEMA_STRING = "!# end schema"
+END_HED_STRING = "!# end hed"
+
 
 class HedSchema2Wiki:
     def __init__(self):
@@ -27,11 +31,11 @@ class HedSchema2Wiki:
 
         self._output_header(hed_schema)
         self._output_tags(hed_schema)
+        self.current_tag_string = END_SCHEMA_STRING
+        self._flush_current_tag()
         self._output_units(hed_schema)
         self._output_unit_modifiers(hed_schema)
-
-        self.current_tag_string = "!# end hed"
-        self._flush_current_tag()
+        self._output_footer(hed_schema)
 
         return self.output
 
@@ -40,7 +44,18 @@ class HedSchema2Wiki:
         self.current_tag_string = f"HED {hed_attrib_string}"
         self._flush_current_tag()
         self._add_blank_line()
-        self.current_tag_string = "!# start hed"
+        self.current_tag_string += hed_schema.prologue
+        self._flush_current_tag()
+        self._add_blank_line()
+        self.current_tag_string = START_HED_STRING
+        self._flush_current_tag()
+
+    def _output_footer(self, hed_schema):
+        self._add_blank_line()
+        self.current_tag_string = END_HED_STRING
+        self._flush_current_tag()
+        self._add_blank_line()
+        self.current_tag_string += hed_schema.epilogue
         self._flush_current_tag()
 
     def _output_tags(self, hed_schema):

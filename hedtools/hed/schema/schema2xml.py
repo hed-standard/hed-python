@@ -16,6 +16,8 @@ unit_class_unit_element = 'unit'
 unit_modifier_element = 'unitModifier'
 unit_modifier_name_element = 'name'
 unit_modifier_description_element = 'description'
+PROLOGUE_ELEMENT = "prologue"
+EPILOGUE_ELEMENT = "epilogue"
 
 
 class HedSchema2XML:
@@ -50,6 +52,9 @@ class HedSchema2XML:
     def _output_header(self, hed_schema):
         for attrib_name, attrib_value in hed_schema.schema_attributes.items():
             self.hed_node.set(attrib_name, attrib_value)
+        if hed_schema.prologue:
+            prologue_node = SubElement(self.hed_node, PROLOGUE_ELEMENT)
+            prologue_node.text = hed_schema.prologue
 
     def _output_tags(self, hed_schema):
         all_tags = hed_schema.get_all_tags()
@@ -95,7 +100,9 @@ class HedSchema2XML:
                                          unit_modifier_attributes, unit_modifier_description)
 
     def _output_footer(self, hed_schema):
-        pass
+        if hed_schema.epilogue:
+            prologue_node = SubElement(self.hed_node, EPILOGUE_ELEMENT)
+            prologue_node.text = hed_schema.epilogue
 
     # =========================================
     # Output helper functions to create nodes
