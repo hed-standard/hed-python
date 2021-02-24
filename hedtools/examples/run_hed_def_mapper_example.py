@@ -11,6 +11,7 @@ DefDict - Created from a ColumnDefGroup.  Contains all label definitions to be e
           a HedSchema.
 """
 import os
+import hed
 from hed.util.event_file_input import EventFileInput
 from hed import schema
 from hed.validator.hed_validator import HedValidator
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     column_group = ColumnDefGroup(json_file)
     def_dict, def_issues = column_group.extract_defs(hed_schema)
     if def_issues:
-        print(HedValidator.get_printable_issue_string(def_issues,
+        print(hed.get_printable_issue_string(def_issues,
                                                       title="There should be no errors in the definitions from the sidecars:"))
     input_file = EventFileInput(hed3_tags_single_sheet, json_def_files=column_group,
                                 tag_columns=[4], column_prefix_dictionary=prefixed_needed_tag_columns,
@@ -37,11 +38,11 @@ if __name__ == '__main__':
 
     validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
     if validation_issues:
-        print(HedValidator.get_printable_issue_string(validation_issues,
+        print(hed.get_printable_issue_string(validation_issues,
                                                       title="There should be no errors with the sidecar.  This will likely cause other errors if there are."))
     validator = HedValidator(hed_schema=hed_schema)
     validation_issues = validator.validate_input(input_file)
-    print(validator.get_printable_issue_string(validation_issues,
+    print(hed.get_printable_issue_string(validation_issues,
                                                "Normal hed string errors"))
 
     input_file.save(include_formatting=True, add_suffix="_test_output", output_processed_file=False)

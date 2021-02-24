@@ -1,4 +1,3 @@
-from hed import schema
 from hed.util import error_reporter
 from hed.util.error_types import SchemaErrors, SchemaWarnings, ErrorContext
 
@@ -6,15 +5,15 @@ ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
-def validate_schema(schema_filename, also_check_for_warnings=True, display_filename=None,
-                    error_handler=None):
+def check_compliance(hed_schema, also_check_for_warnings=True, display_filename=None,
+                     error_handler=None):
     """
-        Does validation of schema and returns a list of errors and warnings.
+        Checks for hed3 compliance of a schema object.
 
     Parameters
     ----------
-    schema_filename : str
-        filepath to a HED XML/wikimedia file to validate
+    hed_schema : HedSchema
+        HedSchema object to check for hed3 compliance
     also_check_for_warnings : bool, default True
         If True, also checks for formatting issues like invalid characters, capitalization, etc.
     display_filename: str
@@ -30,10 +29,9 @@ def validate_schema(schema_filename, also_check_for_warnings=True, display_filen
     if error_handler is None:
         error_handler = error_reporter.ErrorHandler()
     issues_list = []
-    hed_schema = schema.load_schema(schema_filename)
 
     if not display_filename:
-        display_filename = schema_filename
+        display_filename = hed_schema.filename
     error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
 
     if hed_schema.has_duplicate_tags():
@@ -117,24 +115,3 @@ def validate_schema_description(tag_name, hed_description, error_handler):
                                                            hed_description, i, char)
     return issues_list
 
-
-def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
-    """Return a string with issues list flatted into single string, one per line
-
-    Parameters
-    ----------
-    validation_issues: []
-        Issues to print
-    title: str
-        Optional title that will always show up first if present(even if there are no validation issues)
-    severity: int
-        Return only warnings >= severity
-    skip_filename: bool
-        If true, don't add the filename context to the printable string.
-    Returns
-    -------
-    str
-        A str containing printable version of the issues or '[]'.
-
-    """
-    return error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title, severity, skip_filename)
