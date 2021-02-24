@@ -12,7 +12,8 @@ CHANGE_LOG_STRING = 'Changelog'
 SYNTAX_STRING = '\'\'\'Syntax'
 ROOT_TAG = '\'\'\''
 HED_NODE_STRING = "HED"
-START_STRING = '!# start hed'
+START_STRING = '!# start schema'
+END_SCHEMA_STRING = "!# end schema"
 UNIT_CLASS_STRING = '\'\'\'Unit classes'
 UNIT_MODIFIER_STRING = '\'\'\'Unit modifiers'
 END_STRING = '!# end hed'
@@ -33,6 +34,8 @@ class HedSchemaWikiParser:
         # Required properties
         self.schema_attributes = {}
         self.dictionaries = HedSchema.create_empty_dictionaries()
+        self.prologue = ""
+        self.epilogue = ""
 
         try:
             with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
@@ -42,16 +45,29 @@ class HedSchemaWikiParser:
 
     def _populate_dictionaries(self, wiki_file):
         line = wiki_file.readline()
+        in_prologue = True
         while line:
-            line = line.strip()
-            if not line:
+            line_stripped = line.strip()
+            if not line_stripped:
                 pass
-            if line.startswith(HED_NODE_STRING):
+            elif line.startswith(HED_NODE_STRING):
                 hed_attributes = self._get_schema_attributes(line[len(HED_NODE_STRING):])
                 self.schema_attributes = hed_attributes
             elif line.startswith(START_STRING):
+                in_prologue = False
                 self._add_tags(wiki_file)
-                break
+            else:
+                # This is messy.  We don't want to strip formatting except newlines at the end for prologue/epilogue.
+                if line.endswith("\n"):
+                    line = line[:-1]
+                if in_prologue:
+                    if self.prologue:
+                        self.prologue += "\n"
+                    self.prologue += line
+                else:
+                    if self.epilogue:
+                        self.epilogue += "\n"
+                    self.epilogue += line
             line = wiki_file.readline()
 
     @staticmethod
@@ -121,7 +137,7 @@ class HedSchemaWikiParser:
         return tag_line
 
     def _add_tags(self, wiki_file):
-        """Adds the tags to the HED element.
+        """Adds the main schema section, then calls another function to add the units etc.
 
         Parameters
         ----------
@@ -138,11 +154,9 @@ class HedSchemaWikiParser:
             line = self._remove_nowiki_tag_from_line(line.strip())
             if not line:
                 pass
-            elif line.startswith(UNIT_MODIFIER_STRING):
-                self.add_unit_modifiers(wiki_file)
+            elif line.startswith(END_SCHEMA_STRING):
+                self._add_units_and_attributes(wiki_file)
                 break
-            elif line.startswith(UNIT_CLASS_STRING):
-                self.add_unit_classes(wiki_file)
             elif line.startswith(ROOT_TAG):
                 parent_tags = []
                 new_tag = self._add_tag_line(parent_tags, line)
@@ -153,6 +167,31 @@ class HedSchemaWikiParser:
                     parent_tags = parent_tags[:level]
                 new_tag = self._add_tag_line(parent_tags, line)
                 parent_tags.append(new_tag)
+            line = wiki_file.readline()
+
+    def _add_units_and_attributes(self, wiki_file):
+        """Add the units/attributes/etc sections from the wiki file.
+
+        Parameters
+        ----------
+        wiki_file: file object.
+            A file object that points to the HED wiki file.
+
+        Returns
+        -------
+
+        """
+        line = wiki_file.readline()
+        while line:
+            line = self._remove_nowiki_tag_from_line(line.strip())
+            if not line:
+                pass
+            elif line.startswith(END_STRING):
+                break
+            elif line.startswith(UNIT_MODIFIER_STRING):
+                self.add_unit_modifiers(wiki_file)
+            elif line.startswith(UNIT_CLASS_STRING):
+                self.add_unit_classes(wiki_file)
             line = wiki_file.readline()
 
     @staticmethod

@@ -27,6 +27,8 @@ class HedSchema:
         self.schema_attributes = {}
         self._filename = None
         self.dictionaries = self.create_empty_dictionaries()
+        self.prologue = ""
+        self.epilogue = ""
 
     def set_attributes(self, schema_attributes):
         self.schema_attributes = schema_attributes
@@ -61,13 +63,14 @@ class HedSchema:
     def __eq__(self, other):
         if self.schema_attributes != other.schema_attributes:
             return False
-
         if self.schema_attributes != other.schema_attributes:
             return False
-
         if self.no_duplicate_tags != other.no_duplicate_tags:
             return False
-
+        if self.prologue != other.prologue:
+            return False
+        if self.epilogue != other.epilogue:
+            return False
         return True
 
     @staticmethod

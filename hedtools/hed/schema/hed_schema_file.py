@@ -20,6 +20,8 @@ def load_schema(hed_file_path):
     hed_schema = HedSchema()
 
     hed_schema.filename = hed_file_path
+    hed_schema.prologue = parser.prologue
+    hed_schema.epilogue = parser.epilogue
     hed_schema.set_dictionaries(parser.dictionaries)
     hed_schema.set_attributes(parser.schema_attributes)
 
