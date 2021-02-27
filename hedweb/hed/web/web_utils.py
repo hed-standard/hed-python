@@ -7,7 +7,6 @@ from werkzeug.utils import secure_filename
 from flask import current_app, jsonify, Response
 
 from hed.util import hed_cache
-from hed.util import error_reporter
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 from hed.web.constants import common_constants
 

@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
         self.assertEqual(expected_indices, indices)
 
     def test_form_has_file(self):
-        print('has_file')
+        self.assertTrue(1, "Testing form_has_file")
 
     def test_form_has_option(self):
         self.assertTrue(1, "Testing form_has_option")
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
                          "False if invalid option name")
 
     def test_form_has_url(self):
-        print('has_file')
+        self.assertTrue(1, "Testing form_has_url")
 
     def test_generate_download_file_response(self):
         from hed.web.web_utils import generate_download_file_response
@@ -191,6 +191,7 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing handle_http_error")
 
     def test_save_file_to_upload_folder(self):
+        self.assertTrue(1, "Testing save_file_to_upload_folder")
         from hed.web.web_utils import save_file_to_upload_folder
         from werkzeug.datastructures import FileStorage
         filename = 'HED.xml'
@@ -202,7 +203,7 @@ class Test(unittest.TestCase):
         #     with self.app.app_context():
         #         the_path = save_file_to_upload_folder(upload_file)
         #         self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
-        print("help")
+
         # temp_name = save_file_to_upload_folder('')
         # self.assertEqual(temp_name, '', "A file with empty name cnnot be copied copied")
         # some_file = '3k32j23kj1.txt'

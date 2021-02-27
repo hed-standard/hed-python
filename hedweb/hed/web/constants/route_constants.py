@@ -1,3 +1,5 @@
+ROUTE_BLUEPRINT = 'route_blueprint'
+
 ADDITIONAL_EXAMPLES_ROUTE = '/additional-examples'
 COMMON_ERRORS_ROUTE = '/common-errors'
 DELETE_FILE_ROUTE = '/delete/<filename>'

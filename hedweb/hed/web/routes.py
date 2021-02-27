@@ -6,13 +6,13 @@ import traceback
 from hed.util import hed_cache
 from hed.schema import hed_schema_file
 from hed.web import events, spreadsheet, schema, services, spreadsheet_utils
-from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
+from hed.web.constants import common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error
 from hed.web.dictionary import report_dictionary_validation_status
 
 app_config = current_app.config
-route_blueprint = Blueprint(blueprint_constants.ROUTE_BLUEPRINT, __name__)
+route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
 
 @route_blueprint.route(route_constants.DELETE_FILE_ROUTE, strict_slashes=False, methods=['GET'])
