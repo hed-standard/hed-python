@@ -28,18 +28,6 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_check_if_option_in_form(self):
-        self.assertTrue(1, "Testing form_has_option")
-        from hed.web.web_utils import form_has_option
-        mock_form = mock.Mock()
-        mock_dict = {'upload': 'me', 'download:': 'them'}
-        mock_form.values = mock_dict
-        self.assertTrue(form_has_option(mock_form, 'upload', 'me'),
-                        "True if option_name has target_value")
-        self.assertFalse(form_has_option(mock_form, 'upload', 'them'),
-                         "False if option_name is not target_value")
-        self.assertFalse(form_has_option(mock_form, 'temp', 'them'),
-                         "False if invalid option name")
 
     def test_convert_number_str_to_list(self):
         from hed.web.web_utils import convert_number_str_to_list
@@ -97,6 +85,25 @@ class Test(unittest.TestCase):
         self.assertFalse(indices)
         self.assertIsInstance(indices, list)
         self.assertEqual(expected_indices, indices)
+
+    def test_form_has_file(self):
+        self.assertTrue(1, "Testing form_has_file")
+
+    def test_form_has_option(self):
+        self.assertTrue(1, "Testing form_has_option")
+        from hed.web.web_utils import form_has_option
+        mock_form = mock.Mock()
+        mock_dict = {'upload': 'me', 'download:': 'them'}
+        mock_form.values = mock_dict
+        self.assertTrue(form_has_option(mock_form, 'upload', 'me'),
+                        "True if option_name has target_value")
+        self.assertFalse(form_has_option(mock_form, 'upload', 'them'),
+                         "False if option_name is not target_value")
+        self.assertFalse(form_has_option(mock_form, 'temp', 'them'),
+                         "False if invalid option name")
+
+    def test_form_has_url(self):
+        self.assertTrue(1, "Testing form_has_url")
 
     def test_generate_download_file_response(self):
         from hed.web.web_utils import generate_download_file_response
@@ -158,7 +165,24 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing get_optional_form_field")
 
     def test_get_uploaded_file_path_from_form(self):
-        self.assertTrue(1, "Testingget_uploaded_file_path_from_form")
+        from hed.web.web_utils import get_uploaded_file_path_from_form
+        # with self.app.test as client:
+        #     # send data as POST form to endpoint
+        #     sent = {'return_url': 'my_test_url'}
+        #     result = client.post(
+        #         '/',
+        #         data=sent
+        #     )
+        # mock_form = mock.Mock()
+        # mock_dict = {'upload': 'me', 'download:': 'them'}
+        #     mock_form.values = mock_dict
+        # text = 'save me now'
+        # filename = 'test_save.txt'
+        # actual_path = os.path.join(self.upload_directory, filename)
+        # self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
+        # with self.app.app_context():
+        #     the_path = save_text_to_upload_folder(text, filename)
+        #     self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 
     def test_handle_http_error(self):
         error_code = "CODE"
@@ -166,25 +190,50 @@ class Test(unittest.TestCase):
 
         self.assertTrue(1, "Testing handle_http_error")
 
-    def test_find_hed_version_in_uploaded_file(self):
-            self.assertTrue(1, "Testing find_hed_version_in_uploaded_file")
-
     def test_save_file_to_upload_folder(self):
-        from hed.web.web_utils import save_file_to_upload_folder, app_config
-        temp_name = save_file_to_upload_folder('')
-        self.assertEqual(temp_name, '', "A file with empty name cnnot be copied copied")
-        some_file = '3k32j23kj1.txt'
-        temp_name = save_file_to_upload_folder(some_file)
-        self.assertEqual(temp_name, '', "A file that does not exist cannot be copied")
+        self.assertTrue(1, "Testing save_file_to_upload_folder")
+        from hed.web.web_utils import save_file_to_upload_folder
+        from werkzeug.datastructures import FileStorage
+        filename = 'HED.xml'
+        actual_path = os.path.join(self.upload_directory, filename)
+        self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        self.assertTrue(os.path.exists(hed_file), "The HED.xml file should exist in the data directory")
-        mock_file = mock.Mock()
-        mock_file.filename = hed_file
+        # with open(hed_file) as f:
+        #     upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
+        #     with self.app.app_context():
+        #         the_path = save_file_to_upload_folder(upload_file)
+        #         self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
+
+        # temp_name = save_file_to_upload_folder('')
+        # self.assertEqual(temp_name, '', "A file with empty name cnnot be copied copied")
+        # some_file = '3k32j23kj1.txt'
+        # temp_name = save_file_to_upload_folder(some_file)
+        # self.assertEqual(temp_name, '', "A file that does not exist cannot be copied")
+        # hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
+        #
+        # self.assertTrue(os.path.exists(hed_file), "The HED.xml file should exist in the data directory")
+        # actual_path = os.path.join(self.upload_directory, filename)
+        # self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
+        # with self.app.app_context():
+        #     the_path = save_text_to_upload_folder(text, filename)
+        #     self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
+        # mock_file = mock.Mock()
+        # mock_file.filename = hed_file
         # TODO: Context not working this is not tested
         # with Test.app_context():
         #     temp_name = save_file_to_upload_folder(mock_file)
         # self.assertNotEqual(mock_file, '', "It should create an actual file in the upload directory")
         # self.assertTrue(os.path.isfile(temp_name), "File should exist after it is uploaded")
+
+    def test_text_to_upload_folder(self):
+        from hed.web.web_utils import save_text_to_upload_folder
+        text = 'save me now'
+        filename = 'test_save.txt'
+        actual_path = os.path.join(self.upload_directory, filename)
+        self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
+        with self.app.app_context():
+            the_path = save_text_to_upload_folder(text, filename)
+            self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 
 
 if __name__ == '__main__':

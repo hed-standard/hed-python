@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing generate_input_from_schema_form")
 
     def test_get_schema_conversion(self):
-        self.assertTrue(1, "Testing get_schema_conversion")
+        self.assertTrue(1, "Testing convert_schema")
 
     def test_run_schema_compliance_check(self):
         self.assertTrue(1, "Testing run_schema_compliance_check")

@@ -1,10 +1,7 @@
 import xlrd
 import traceback
-
 from flask import current_app
-
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
-
 from hed.web.constants import common_constants, error_constants, spreadsheet_constants
 from hed.web.web_utils import save_file_to_upload_folder, find_all_str_indices_in_list
 
@@ -31,7 +28,7 @@ def find_spreadsheet_columns_info(request):
         if common_constants.SPREADSHEET_FILE in request.files:
             spreadsheet_file = request.files[common_constants.SPREADSHEET_FILE]
             spreadsheet_file_path = save_file_to_upload_folder(spreadsheet_file)
-            if spreadsheet_file_path and worksheet_name_present_in_form(request):
+            if spreadsheet_file_path and common_constants.WORKSHEET_NAME in request.form:
                 worksheet_name = request.form[common_constants.WORKSHEET_NAME]
                 spreadsheet_columns_info = populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info,
                                                                                         spreadsheet_file_path,
@@ -271,20 +268,3 @@ def populate_worksheets_info_dictionary(worksheets_info, spreadsheet_file_path):
     worksheets_info[common_constants.REQUIRED_TAG_COLUMN_INDICES] = \
         get_spreadsheet_specific_tag_column_indices(worksheets_info[common_constants.COLUMN_NAMES])
     return worksheets_info
-
-
-def worksheet_name_present_in_form(request):
-    """Checks to see if a worksheet name is present in a request object from form.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from a form.
-
-    Returns
-    -------
-    boolean
-        True if a worksheet name is present in a request object from the form.
-
-    """
-    return common_constants.WORKSHEET_NAME in request.form

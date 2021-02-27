@@ -1,0 +1,21 @@
+{
+    "onset": {
+        "Description": "Onset of the go signal which is the disappearance of the cue bar",
+        "Units": "s"
+    },
+    "duration": {
+        "Description": "Duration of the event",
+        "Units": "s"
+    },
+	"event-type": {
+      "Description": "Subject presses both buttons causing cue bar to start count-down display",
+      "Levels": {
+        "cue": "Subject presses both buttons causing cue bar to start count-down display",
+        "go": "Bar disappears cueing the subject to make a choice about which hand to raise"
+      },
+      "HED": {
+        "cue": "Description/Subject presses both buttons causing cue bar to start count-down display, (Sensory-event, Visual, Cue, ((Rectangle, (Position, (Center-of, Screen)), (Size, Decreasing)))), (Agent-action, Experiment-participant, (Press, Hold-down, (Left-side, Button)), (Press, Hold-down, (Right-side, Button)))",
+        "go": "Description/Onset of the go signal which is the disappearance of the cue bar, Sensory-event, Visual, Experimental-stimulus, Instructional, Signal-go"
+      }
+    }
+}

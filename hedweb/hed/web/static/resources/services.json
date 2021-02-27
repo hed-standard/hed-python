@@ -1,0 +1,46 @@
+{
+  "get_services": {
+    "Name": "get_services",
+    "Description": "Return a list of hed services commands with descriptions",
+    "Parameters" : [],
+    "Returns" : [
+      {"Name": "supported_services",
+       "Description": "A list of available services with description, parameters and return values."}]
+  },
+  "validate_strings": {
+     "Name": "validate_strings",
+     "Description": "Validate a list of HED strings and return errors",
+     "Parameters": [
+         {"Name": "hed_version",
+          "Description": "Version of HED to be used to validate",
+          "Default": "Latest"},
+         {"Name": "hed_strings",
+          "Description": "List of hed strings to be validated",
+          "Default": []}
+       ],
+     "Returns": [
+         {"Name": "hed_version",
+          "Description": "Version of HED used to validate"},
+         {"Name": "validation_errors",
+          "Description": "List of validation error dictionaries"}
+     ]
+  },
+    "validate_json": {
+     "Name": "validate_json",
+     "Description": "Validate a JSON string in form of BIDS sidecar and return errors",
+     "Parameters": [
+         {"Name": "hed_version",
+          "Description": "Version of HED to be used to validate",
+          "Default": "Latest"},
+         {"Name": "json_dictionary",
+          "Description": "JSON sidecar as a string",
+          "Default": []}
+       ],
+     "Returns": [
+         {"Name": "hed_version",
+          "Description": "Version of HED used to validate"},
+         {"Name": "validation_errors",
+          "Description": "List of validation error dictionaries"}
+     ]
+  }
+}

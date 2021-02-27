@@ -2,17 +2,17 @@
 <HED version="8.0.0-alpha.1">
    <node>
       <name>Event</name>
-      <node>
+      <node suggestedTag="Task-property/Task-role">
          <name>Sensory-event</name>
-         <description>Something perceivable by the participant. An event meant to be an experimental stimulus should also be tagged with Attribute/Contextual/Task-related. Other events may be tagged with Attribute/Contextual/Non task-related.</description>
+         <description>Something perceivable by the participant. An event meant to be an experimental stimulus should also be tagged with Task-property/Task-role/Experiment-stimulus.</description>
       </node>
       <node>
          <name>Agent-action</name>
-         <description>Any action engaged in by an agent. An event which is a participant response to an experimental stimulus should also be tagged with Attribute/Task-related and Attribute/Role/Experimental subject.</description>
+         <description>Any action engaged in by an agent. An event that is a participant response to an experiment stimulus should also be tagged with Agent-property/Agent-task-role/Participant-response.</description>
       </node>
       <node>
          <name>Data-feature</name>
-         <description>An event derived from the data itself, possibly inserted in a post-hoc fashion, for example an interictal spike or alpha burst.</description>
+         <description>An event derived from the data itself or possibly inserted in a post-hoc fashion. Examples are markers for interictal spikes or alpha bursts.</description>
       </node>
       <node extensionAllowed="true">
          <name>Experiment-control</name>
@@ -20,17 +20,19 @@
       </node>
       <node>
          <name>Experiment-procedure</name>
-         <description>An event indicating an experimental procedure as in doing a saliva swab on the person during the experiment or administering a survey.</description>
+         <description>An event indicating an experimental procedure as in doing a saliva swab on a participant during the experiment or administering a survey.</description>
       </node>
       <node extensionAllowed="true">
          <name>Experiment-structure</name>
          <description>An event specifying the structure of the experiment.</description>
       </node>
    </node>
-   <node extensionAllowed="true">
+   <node>
       <name>Agent</name>
+      <description>Something in the experiment that takes an active role or produces an effect. The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be soething that simulates something else.</description>
       <node>
          <name>Animal-agent</name>
+         <description>An animal that is present.</description>
       </node>
       <node>
          <name>Avatar-agent</name>
@@ -58,11 +60,11 @@
             <name>Breathe</name>
             <node>
                <name>Inhale</name>
-               <description>A deliberate inbreath, e.g. in response to a task instruction. If incidental, group it with Attribute/Cognitive modifier/Incidental. E.g. (Action/Move/Breathe/Inhale, Attribute/Cognitive modifier/Incidental).</description>
+               <description>A deliberate in-breath in response to a task instruction or as part of a task. Group with Attribute/Cognitive modifier/Incidental if the inhalation is incidental to the task (Action/Move/Breathe/Inhale, Attribute/Cognitive modifier/Incidental).</description>
             </node>
             <node>
                <name>Exhale</name>
-               <description>A deliberate outbreath, e.g. in response to a task instruction. If incidental, group it with Attribute/Cognitive modifier/Incidental. E.g. (Action/Move/Breathe/Exhale, Attribute/Cognitive modifier/Incidental).</description>
+               <description>A deliberate out-breath in response to a task instruction or as part of a task. Group with Attribute/Cognitive modifier/Incidental: (Action/Move/Breathe/Exhale, Attribute/Cognitive modifier/Incidental).</description>
             </node>
             <node>
                <name>Hold-breath</name>
@@ -333,7 +335,7 @@
             </node>
             <node>
                <name>Vocalize</name>
-               <description>Make a sustained vowel sound such as, Ahhh</description>
+               <description>Make a sustained vowel sound such as Ahhh.</description>
             </node>
             <node>
                <name>Whistle</name>
@@ -344,36 +346,36 @@
          <name>Perform</name>
          <description>Carry out or accomplish an action or task or function.</description>
          <node>
-            <name>Appear</name>
-         </node>
-         <node>
-            <name>Change</name>
-         </node>
-         <node>
             <name>Collide</name>
          </node>
          <node>
-            <name>Disappear</name>
-         </node>
-         <node>
-            <name>Fill-out-survey</name>
-         </node>
-         <node>
             <name>Halt</name>
+            <description>Stop action.</description>
+         </node>
+         <node>
+            <name>Modify</name>
+            <description>Deliberately make a change in something.</description>
          </node>
          <node>
             <name>Operate</name>
             <description>Control something else.</description>
+         </node>
+         <node>
+            <name>Perceive</name>
             <node>
-               <name>Drive</name>
-               <description>Control something that moves.</description>
+               <name>Feel</name>
             </node>
             <node>
-               <name>Brake</name>
-               <description>Apply brakes to stop something.</description>
+               <name>Listen</name>
             </node>
             <node>
-               <name>Steer</name>
+               <name>Look</name>
+            </node>
+            <node>
+               <name>Smell</name>
+            </node>
+            <node>
+               <name>Taste</name>
             </node>
          </node>
          <node>
@@ -381,7 +383,13 @@
             <description>As a musical instrument or a game.</description>
          </node>
          <node>
+            <name>Read</name>
+         </node>
+         <node>
             <name>Rest</name>
+         </node>
+         <node>
+            <name>Write</name>
          </node>
       </node>
       <node>
@@ -425,7 +433,7 @@
             <name>Predict</name>
          </node>
          <node>
-            <name>Read</name>
+            <name>Respond</name>
          </node>
          <node>
             <name>Recall</name>
@@ -443,6 +451,46 @@
    </node>
    <node extensionAllowed="true">
       <name>Item</name>
+      <node>
+         <name>Language</name>
+         <description>An  system of communication that is receivable in a sensory presentation.</description>
+         <node>
+            <name>Character</name>
+            <description>A mark, sign or symbol used as part of language.</description>
+         </node>
+         <node>
+            <name>Glyph</name>
+            <description>A symbol or pictograph.</description>
+         </node>
+         <node>
+            <name>Nonword</name>
+            <description>A group of letters or speech sounds that looks or sounds like a word but that is not accepted as such by native speakers.</description>
+         </node>
+         <node>
+            <name>Phoneme</name>
+            <description>A sound or a group of different sounds perceived to have the same function by speakers of the language.</description>
+         </node>
+         <node>
+            <name>Phrase</name>
+            <description>A small group of words standing together as a conceptual unit.</description>
+         </node>
+         <node>
+            <name>Sentence</name>
+            <description>A set of words that is complete in itself.</description>
+         </node>
+         <node>
+            <name>Syllable</name>
+            <description>A unit of pronunciation having one vowel sound.</description>
+         </node>
+         <node>
+            <name>Textblock</name>
+            <description>A block of text.</description>
+         </node>
+         <node>
+            <name>Word</name>
+            <description>A single distinct meaningful element of a language.</description>
+         </node>
+      </node>
       <node extensionAllowed="true">
          <name>Object</name>
          <description>Physical object perceptible via Visual, Auditory, Olfactory, and/or Tactile modalities.</description>
@@ -613,17 +661,17 @@
                      </node>
                      <node>
                         <name>Keyboard</name>
-                        <node takesValue="true">
+                        <node>
                            <name>Key</name>
-                           <node>
+                           <node takesValue="true">
                               <name>#</name>
                               <description>Value of key.</description>
                            </node>
                         </node>
                      </node>
-                     <node takesValue="true">
+                     <node>
                         <name>Keypad</name>
-                        <node>
+                        <node takesValue="true">
                            <name>#</name>
                            <description>Value of keypad key.</description>
                         </node>
@@ -789,23 +837,14 @@
          </node>
          <node>
             <name>Natural-object</name>
-            <node>
-               <name>Organism</name>
-               <node>
-                  <name>Animal</name>
-               </node>
-               <node>
-                  <name>Human</name>
-               </node>
-               <node>
-                  <name>Plant</name>
-               </node>
-            </node>
+            <description>An object occuring naturally in contrast to a man-made object.</description>
             <node>
                <name>Mineral</name>
+               <description>An inorganic substance</description>
             </node>
             <node>
                <name>Natural-feature</name>
+               <description>Some terrain occuring in the outdoors.</description>
                <node>
                   <name>Field</name>
                </node>
@@ -825,50 +864,140 @@
          </node>
          <node>
             <name>Food</name>
+            <description>Something that is usually solid and can be consumed by an organism.</description>
          </node>
          <node>
             <name>Drink</name>
+            <description>Something that is liquid and can be consumed by an organism.</description>
          </node>
       </node>
       <node>
-         <name>Language</name>
-         <description>Perceivable in a visual or auditory (spoken) sensory presentation</description>
+         <name>Organism</name>
+         <description>Something living or part of something living.</description>
          <node>
-            <name>Character</name>
+            <name>Animal</name>
+            <description>Any multicellular or eukaryotic organism.</description>
+            <node>
+               <name>Human</name>
+            </node>
          </node>
          <node>
-            <name>Glyph</name>
+            <name>Plant</name>
          </node>
          <node>
-            <name>Nonword</name>
-         </node>
-         <node>
-            <name>Phoneme</name>
-         </node>
-         <node>
-            <name>Phrase</name>
-         </node>
-         <node>
-            <name>Sentence</name>
-         </node>
-         <node>
-            <name>Syllable</name>
-         </node>
-         <node>
-            <name>Textblock</name>
-         </node>
-         <node>
-            <name>Word</name>
+            <name>Body-part</name>
+            <node>
+               <name>Head</name>
+               <node>
+                  <name>Hair</name>
+               </node>
+               <node>
+                  <name>Ear</name>
+               </node>
+               <node>
+                  <name>Face</name>
+                  <node>
+                     <name>Cheek</name>
+                  </node>
+                  <node>
+                     <name>Chin</name>
+                  </node>
+                  <node>
+                     <name>Eye</name>
+                  </node>
+                  <node>
+                     <name>Eyebrow</name>
+                  </node>
+                  <node>
+                     <name>Forehead</name>
+                  </node>
+                  <node>
+                     <name>Lip</name>
+                  </node>
+                  <node>
+                     <name>Nose</name>
+                  </node>
+                  <node>
+                     <name>Mouth</name>
+                  </node>
+                  <node>
+                     <name>Teeth</name>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Arm</name>
+               <node>
+                  <name>Elbow</name>
+               </node>
+               <node>
+                  <name>Hand</name>
+                  <node>
+                     <name>Finger</name>
+                     <node>
+                        <name>Index-finger</name>
+                     </node>
+                     <node>
+                        <name>Little-finger</name>
+                     </node>
+                     <node>
+                        <name>Middle-finger</name>
+                     </node>
+                     <node>
+                        <name>Ring-finger</name>
+                     </node>
+                     <node>
+                        <name>Thumb</name>
+                     </node>
+                  </node>
+               </node>
+               <node>
+                  <name>Wrist</name>
+               </node>
+            </node>
+            <node>
+               <name>Leg</name>
+               <node>
+                  <name>Ankle</name>
+               </node>
+               <node>
+                  <name>Foot</name>
+                  <node>
+                     <name>Toe</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Knee</name>
+               </node>
+            </node>
+            <node>
+               <name>Torso</name>
+               <node>
+                  <name>Upper-torso</name>
+                  <node>
+                     <name>Chest</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Lower-torso</name>
+                  <node>
+                     <name>Hips</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Waist</name>
+               </node>
+            </node>
          </node>
       </node>
       <node>
          <name>Sound</name>
-         <description>Item/Sound can be used in a tag group to describe, for example, sound created by an action Item/Sound, Action/Move/Move leg-foot/Walk, Agent/Human or an object or Item/Sound, Item/Object/Man-made/Vehicle/Car</description>
+         <description>Item/Sound can be used in a tag group to describe a sound created by an action Item/Sound, Action/Move/Move leg-foot/Walk, Agent/Human or an object or Item/Sound, Item/Object/Man-made/Vehicle/Car</description>
          <node>
             <name>Environmental-sound</name>
             <description>A background sound from the surrounding environment.</description>
             <node>
-               <name>Crowd sound</name>
+               <name>Crowd-sound</name>
                <description>Multiple speech streams at once</description>
             </node>
             <node>
@@ -1056,8 +1185,9 @@
             <name>Sad</name>
          </node>
       </node>
-      <node requireChild="true">
+      <node>
          <name>Postural-state</name>
+         <description>Indicates the position of an agent. Usually this position or posture is static for some length of time rather than being part of a motion.</description>
          <node>
             <name>Crouching</name>
          </node>
@@ -1080,7 +1210,7 @@
             <name>Supported-by-chin-rest</name>
          </node>
       </node>
-      <node extensionAllowed="true" requireChild="true">
+      <node extensionAllowed="true">
          <name>Agent-trait</name>
          <node>
             <name>Age</name>
@@ -1101,7 +1231,7 @@
             </node>
          </node>
       </node>
-      <node requireChild="true">
+      <node>
          <name>Social-role</name>
          <description>The role of the agent not particular to the task.</description>
          <node>
@@ -1120,14 +1250,14 @@
             <name>Sister</name>
          </node>
       </node>
-      <node requireChild="true">
-         <name>Task-role</name>
+      <node>
+         <name>Agent-task-role</name>
          <description>The role of the agent in the task.</description>
          <node>
             <name>Experiment-controller</name>
          </node>
          <node>
-            <name>Experiment-subject</name>
+            <name>Experiment-participant</name>
          </node>
          <node>
             <name>Experimenter</name>
@@ -1151,7 +1281,7 @@
             <name>Teacher</name>
          </node>
       </node>
-      <node requireChild="true">
+      <node>
          <name>Association</name>
          <node>
             <name>Associated-with-non-agent</name>
@@ -1168,13 +1298,345 @@
    </node>
    <node>
       <name>Data-property</name>
-      <node requireChild="true">
-         <name>Data-property-value</name>
+      <node extensionAllowed="true">
+         <name>Computed-property</name>
+         <description>Feature computed by tool. Should be grouped with a label of the form Toolname_propertyName</description>
+         <node>
+            <name>Computed-prediction</name>
+         </node>
+      </node>
+      <node>
+         <name>Data-value</name>
          <node takesValue="true">
             <name>#</name>
          </node>
       </node>
+      <node extensionAllowed="true">
+         <name>Observational-property</name>
+         <description>Manually identified data feature. Should be grouped with a label of the form AgentID_featureName</description>
+         <node extensionAllowed="true">
+            <name>Expert-annotation</name>
+         </node>
+         <node extensionAllowed="true">
+            <name>Instrument-measurement</name>
+         </node>
+      </node>
       <node>
+         <name>Physical-property</name>
+         <node>
+            <name>Electrical-property</name>
+         </node>
+         <node>
+            <name>Magnetic-property</name>
+         </node>
+         <node>
+            <name>Mechanical-property</name>
+         </node>
+         <node>
+            <name>Organic-property</name>
+         </node>
+         <node>
+            <name>Thermodynamic-property</name>
+            <node>
+               <name>Energy</name>
+            </node>
+            <node>
+               <name>Pressure</name>
+            </node>
+            <node>
+               <name>Temperature</name>
+               <node isNumeric="true" takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Quantitative</name>
+         <node>
+            <name>Angle</name>
+            <description>Angle assumed clockwise from vertical unless grouped with axis.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Fraction</name>
+            <description>Fraction of items of a particular type.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Interval</name>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Item-count</name>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Percentage</name>
+            <description>Percentage of items of a particular type.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Ratio</name>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Repetition</name>
+            <description>When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Spatiotemporal</name>
+         <node>
+            <name>Rate-of-change</name>
+            <node>
+               <name>Acceleration</name>
+               <node isNumeric="true" takesValue="true" unitClass="acceleration">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Jerk-rate</name>
+               <description>Rate at which the acceleration of an object changes with respect to time.</description>
+               <node isNumeric="true" takesValue="true" unitClass="jerk">
+                  <name>#</name>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Sampling-rate</name>
+               <description>Number of measurements per unit time.</description>
+               <node takesValue="true" unitClass="frequency">
+                  <name>#</name>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Refresh-rate</name>
+               <description>Number of times per second a device displays an image. Also known as the frame rate.</description>
+               <node isNumeric="true" takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Temporal-rate</name>
+               <description>Number of occurrences in a unit of time.</description>
+               <node isNumeric="true" takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Velocity</name>
+               <node isNumeric="true" takesValue="true" unitClass="speed">
+                  <name>#</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Resolution</name>
+            <node>
+               <name>IO-resolution</name>
+               <node>
+                  <name>Screen-resolution</name>
+                  <description>Number of pixels in each dimension for a digital display device.</description>
+                  <node takesValue="true">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Printer-resolution</name>
+                  <description>Number of dots-per-inch for a printer.</description>
+                  <node takesValue="true">
+                     <name>#</name>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Spatial-resolution</name>
+               <description>Linear spacing of a spatial measurement.</description>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Spectral-resolution</name>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Temporal-resolution</name>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Spatial</name>
+            <node>
+               <name>Direction</name>
+               <node isNumeric="true" takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Distance</name>
+               <description>Distance from a specified position in a specified Direction or grouped with an item from which the distance is measured.</description>
+               <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Orientation</name>
+               <node isNumeric="true" takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Position</name>
+               <description>Coordinates with respect a specified frame of reference or the default Screen-frame if no frame is given.</description>
+               <node>
+                  <name>X-position</name>
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Y-position</name>
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Z-position</name>
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                     <name>#</name>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Reference-frame</name>
+               <description>A frame of reference used to express spatial attributes.</description>
+               <node>
+                  <name>Custom-frame</name>
+                  <description>A custom frame of reference which should be defined in terms of one of the default frames of reference or by a library.</description>
+               </node>
+               <node>
+                  <name>Room-frame</name>
+               </node>
+               <node>
+                  <name>Screen-frame</name>
+                  <description>HED default frame of reference with origin at center of screen used to display experimental stimuli. Looking out of the screen has +X is horizontal to the right. +Y is up and +Z is out of the front of the screen.</description>
+               </node>
+               <node>
+                  <name>Screen-facing-frame</name>
+                  <description>HED default frame of reference with origin at the subject Nasion. +X is horizontal to the subject right. +Y is to the subject front and +Z is vertical upward.</description>
+               </node>
+               <node>
+                  <name>World-frame</name>
+               </node>
+            </node>
+            <node>
+               <name>Size</name>
+               <node>
+                  <name>Area</name>
+                  <node isNumeric="true" takesValue="true" unitClass="area">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Length</name>
+                  <description>A measurement of the size along the longest dimension.</description>
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Width</name>
+                  <description>A measurement along the shortest of two or three dimensions.</description>
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Height</name>
+                  <description>A measurement in a direction perpendicular to Length and Width in 3D. In 2D, it is perpendicular to both the Length and Height.</description>
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                     <name>#</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Volume</name>
+                  <node isNumeric="true" takesValue="true" unitClass="volume">
+                     <name>#</name>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Surface-properties</name>
+               <node>
+                  <name>Rough</name>
+               </node>
+               <node>
+                  <name>Smooth</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Temporal</name>
+            <node>
+               <name>Delay</name>
+               <description>An indicator that the associated tag group represents something temporally offset from the current event. The delay value can be positive or negative and should always appear in a tag group indicating what is delayed.</description>
+               <node isNumeric="true" takesValue="true" unitClass="time">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Duration</name>
+               <description>Time extent of something.</description>
+               <node isNumeric="true" takesValue="true" unitClass="time">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Onset</name>
+            </node>
+            <node>
+               <name>Offset</name>
+            </node>
+            <node>
+               <name>Pause</name>
+               <description>Indicating something stopped such as a break or waiting for input.</description>
+            </node>
+            <node>
+               <name>Temporal-value</name>
+               <node isNumeric="true" takesValue="true" unitClass="time">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>Time-out</name>
+            </node>
+            <node>
+               <name>Time-sync</name>
+               <description>Indicates a marker inserted into the recorded data to allow post hoc synchronization of concurrently recorded data streams.</description>
+            </node>
+         </node>
+      </node>
+      <node extensionAllowed="true">
          <name>Statistical-property</name>
          <node>
             <name>Accuracy</name>
@@ -1207,23 +1669,6 @@
          <node>
             <name>Uncertainty</name>
             <description>Use to specify the level of error.</description>
-         </node>
-      </node>
-      <node>
-         <name>Observational-property</name>
-         <description>Manually identified data feature. Should be grouped with a label of the form AgentID_featureName</description>
-         <node>
-            <name>Expert-annotation</name>
-         </node>
-         <node>
-            <name>Instrument-measurement</name>
-         </node>
-      </node>
-      <node>
-         <name>Computed-property</name>
-         <description>Feature computed by tool. Should be grouped with a label of the form Toolname_propertyName</description>
-         <node>
-            <name>Computed-prediction</name>
          </node>
       </node>
    </node>
@@ -1278,12 +1723,15 @@
          </node>
       </node>
       <node>
-         <name>Task-event-type</name>
+         <name>Task-role</name>
+         <description>The purpose with respect to the task.</description>
          <node>
             <name>Activity</name>
+            <description>Something that is part of the overall task or is necessary to the overall experiment but is not directly part of a stimulus-response cycle. Examples would be taking a survey or provided providing a silva sample.</description>
          </node>
          <node>
-            <name>Background-task</name>
+            <name>Background-subtask</name>
+            <description>A part of the task which should be performed in the background.</description>
          </node>
          <node>
             <name>Experimental-stimulus</name>
@@ -1293,13 +1741,12 @@
             <name>Failure</name>
          </node>
          <node>
-            <name>Feedback</name>
-         </node>
-         <node>
             <name>Incidental</name>
+            <description>Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.</description>
          </node>
          <node>
             <name>Instructional</name>
+            <description>Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.</description>
          </node>
          <node>
             <name>Mishap</name>
@@ -1307,22 +1754,24 @@
          </node>
          <node>
             <name>Participant-response</name>
-            <description>Something related to a participant's actions in performing the task.</description>
+            <description>Something related to a participant actions in performing the task.</description>
          </node>
          <node>
-            <name>Primary-task</name>
+            <name>Primary-subtask</name>
+            <description>A part of the task which should be the primary focus of the participant.</description>
          </node>
          <node>
             <name>Warning</name>
-            <description>As in a warning message that you are getting too close to the shoulder in a driving task</description>
+            <description>Something that should warn the participant that the parameters of the task have been or are about to be exceeded such as a warning message about getting too close to the shoulder of the road in a driving task.</description>
          </node>
       </node>
       <node>
          <name>Task-response-type</name>
-         <node>
+         <description>How the participant response should be interpreted in terms of the task specification.</description>
+         <node relatedTag="Inappropriate">
             <name>Appropriate</name>
          </node>
-         <node>
+         <node relatedTag="Successful">
             <name>Correction</name>
          </node>
          <node>
@@ -1330,26 +1779,27 @@
          </node>
          <node>
             <name>Imagined</name>
-            <description>This is used to identity that the (sub)event only happened in the imagination of the participant, e.g.  imagined movements in motor imagery paradigms.</description>
+            <description>This is used to identity something that only happened in the imagination of the participant as in imagined movements in motor imagery paradigms.</description>
          </node>
-         <node>
+         <node relatedTag="Appropriate">
             <name>Inappropriate</name>
          </node>
-         <node>
+         <node relatedTag="Near-miss">
             <name>Indeterminate</name>
          </node>
-         <node>
+         <node relatedTag="Near-miss">
             <name>Missed</name>
          </node>
-         <node>
+         <node relatedTag="Miss">
             <name>Near-miss</name>
          </node>
-         <node>
+         <node relatedTag="Correction">
             <name>Successful</name>
          </node>
       </node>
       <node>
          <name>Task-stimulus-type</name>
+         <description>The stimulus purpose in the task.</description>
          <node>
             <name>Cue</name>
          </node>
@@ -1358,10 +1808,13 @@
          </node>
          <node>
             <name>Expected</name>
-            <description>Of low information value, for example frequent Non-targets in an RSVP paradigm</description>
+            <description>Of low information value as in frequent non-targets in an RSVP paradigm.</description>
          </node>
          <node>
             <name>Extraneous</name>
+         </node>
+         <node>
+            <name>Feedback</name>
          </node>
          <node>
             <name>Meaningful</name>
@@ -1391,13 +1844,13 @@
             <name>Planned</name>
          </node>
          <node>
-            <name>Penalizing</name>
+            <name>Penalty</name>
          </node>
          <node>
             <name>Priming</name>
          </node>
          <node>
-            <name>Rewarding</name>
+            <name>Reward</name>
          </node>
          <node>
             <name>Signal-go</name>
@@ -1410,7 +1863,7 @@
             <description>Something the subject is looking for</description>
          </node>
          <node>
-            <name>Threatening</name>
+            <name>Threat</name>
          </node>
          <node>
             <name>Timed</name>
@@ -1422,27 +1875,34 @@
    </node>
    <node extensionAllowed="true">
       <name>Attribute</name>
-      <description>Vocabulary tree for properties.</description>
+      <description>Subtree tree for general properties.</description>
       <node>
          <name>Informational</name>
          <description>Informational properties.</description>
          <node requireChild="true">
-            <name>Label</name>
-            <description>A string of 20 or fewer characters identifying something. Labels usually refer to general classes of things while IDs refer to specific instances.</description>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Label-def</name>
+            <name>Def</name>
             <description>A label that specifically corresponds to a Definition name and indicates that this label represents tags in an unexpanded definition.</description>
             <node takesValue="true">
                <name>#</name>
             </node>
          </node>
          <node requireChild="true">
-            <name>Label-exp</name>
-            <description>A label that specifically corresponds to a Definition name and indicates that this label is in a group containing an expanded definition.</description>
+            <name>Defexp</name>
+            <description>A label that specifically corresponds to a Definition name and indicates that this label is in a group containing an expanded definition and should not be expanded again.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Definition</name>
+            <description>A tag used within a tag group also containing a Label tag to indicate that the Label represents that group of tags.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Description</name>
+            <description>Human-readable text description of the event.</description>
             <node takesValue="true">
                <name>#</name>
             </node>
@@ -1455,15 +1915,8 @@
             </node>
          </node>
          <node requireChild="true">
-            <name>Description</name>
-            <description>Human-readable text description of the event.</description>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>Definition</name>
-            <description>A tag used within a tag group also containing a Label tag to indicate that the Label represents that group of tags.</description>
+            <name>Label</name>
+            <description>A string of 20 or fewer characters identifying something. Labels usually refer to general classes of things while IDs refer to specific instances.</description>
             <node takesValue="true">
                <name>#</name>
             </node>
@@ -1471,32 +1924,46 @@
          <node>
             <name>Metadata</name>
             <description>A tag used within a tag group indicate to designate information about the data such as file size or author.</description>
-            <node requireChild="true">
+            <node>
+               <name>CogAtlas</name>
+               <description>A tag used within a tag group indicate a relationship to the CognitiveAtlas terminology.</description>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
+               <name>CogPo</name>
+               <description>A tag used within a tag group indicate a relationship to the CogPO terminology.</description>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
                <name>Creation-date</name>
                <node takesValue="true" unitClass="datetime">
                   <name>#</name>
                </node>
             </node>
-            <node requireChild="true">
+            <node>
                <name>Library-name</name>
                <node takesValue="true">
                   <name>#</name>
                </node>
             </node>
-            <node requireChild="true">
+            <node>
                <name>Subject</name>
                <node takesValue="true">
                   <name>#</name>
                </node>
             </node>
-            <node requireChild="true">
+            <node>
                <name>Version</name>
                <node takesValue="true">
                   <name>#</name>
                </node>
             </node>
          </node>
-         <node requireChild="true">
+         <node>
             <name>Parameter</name>
             <description>As a Name:Value</description>
             <node takesValue="true">
@@ -1507,59 +1974,48 @@
       <node>
          <name>Organizational</name>
          <node>
-            <name>Block</name>
-            <description>An event used to indicate a particular organizational part in the experimental design or plan. Usually the Block tag is used with scoping tags as well as tags describing what the block represents to assist with downstream analysis.</description>
-         </node>
-         <node>
             <name>Collection</name>
             <description>A tag designating a grouping of items such as in a set or list.</description>
          </node>
          <node>
-            <name>Context</name>
+            <name>Event-context</name>
             <description>A tag indicating the overall environment and setup of the experiment or a portion of the experiment. This event is often inserted into a recording at the beginning of an experimental record to describe information such as whether the experiment is conducted indoors or outdoors or whether the experiment is conducted in the real-world or in a controlled laboratory setting. Tags specifying subject metadata might also be included.</description>
-         </node>
-         <node>
-            <name>Condition-variable</name>
-            <description>An aspect of the experiment or task that is to be varied during the experiment. Condition-variables are sometimes called independent variables.</description>
-         </node>
-         <node>
-            <name>Control-variable</name>
-            <description>An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.</description>
-         </node>
-         <node>
-            <name>Data-acquisition</name>
-            <description>An activity related to data acquisition.</description>
          </node>
          <node>
             <name>Event-stream</name>
             <description>An ordered list of events</description>
          </node>
          <node>
-            <name>Namespace</name>
-            <description>Tag used to indicate a namespace type of definition.</description>
-         </node>
-         <node>
             <name>Permutation</name>
             <description>A tag used within a tag group also containing a Label tag to indicate that the Label represents events that are permutations of each other.</description>
          </node>
          <node>
-            <name>Response-variable</name>
-            <description>An aspect of the experiment or task that is measured as control-variables are varied during the experiment. Response-variables are sometimes called dependent variables.</description>
-         </node>
-         <node>
-            <name>Sequence</name>
-            <description>A tag used within a tag group also containing a Label tag to indicate that the Label represents events related in a sequential order.</description>
-         </node>
-         <node>
-            <name>Session</name>
+            <name>Recording</name>
+            <description>Indicates an uninterrupted block of time during which data was acquired using a fixed scanning protocol or sensor positioning. Recording tags are usually have temporal scope which is the entire recording.</description>
          </node>
          <node>
             <name>Task</name>
-            <description>A tag used to indicate a linkage to the task.</description>
+            <description>A tag used to indicate a linkage the structured activities performed as part of the experiment.</description>
          </node>
          <node>
-            <name>Trial</name>
+            <name>Task-condition</name>
+            <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.</description>
+         </node>
+         <node>
+            <name>Task-control</name>
+            <description>An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.</description>
+         </node>
+         <node>
+            <name>Task-response</name>
+            <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Task-responses are sometimes called dependent variables.</description>
+         </node>
+         <node>
+            <name>Task-trial</name>
             <description>A tag used to indicate a particular organizational part in the experimental design often containing a stimulus-response pair.</description>
+         </node>
+         <node>
+            <name>Time-block</name>
+            <description>A tag used to indicate a contiguous time block in the experiment during which something is fixed or noted.</description>
          </node>
       </node>
       <node extensionAllowed="true">
@@ -1838,7 +2294,7 @@
                </node>
                <node>
                   <name>Flickering</name>
-                  <description>Irregular changes in time</description>
+                  <description>Irregular changes in time.</description>
                </node>
                <node>
                   <name>Fractal</name>
@@ -1874,55 +2330,6 @@
          </node>
       </node>
       <node extensionAllowed="true">
-         <name>Quantitative</name>
-         <node requireChild="true">
-            <name>Angle</name>
-            <description>Angle assumed clockwise from vertical unless grouped with axis.</description>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Fraction</name>
-            <description>Fraction of items of a particular type.</description>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-         <node>
-            <name>Interval</name>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Item-count</name>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Percentage</name>
-            <description>Percentage of items of a particular type.</description>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Ratio</name>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-         <node requireChild="true">
-            <name>Repetition</name>
-            <description>When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others</description>
-            <node takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-      </node>
-      <node extensionAllowed="true">
          <name>Categorical</name>
          <node relatedTag="Normal">
             <name>Abnormal</name>
@@ -1951,8 +2358,13 @@
          <node relatedTag="True">
             <name>False</name>
          </node>
-         <node relatedTag="Unfamiliar">
+         <node relatedTag="Famous">
             <name>Familiar</name>
+            <description>Something known or encountered before.</description>
+         </node>
+         <node relatedTag="Unfamiliar">
+            <name>Famous</name>
+            <description>Something known by many people but necessarily because of direct contact.</description>
          </node>
          <node relatedTag="Medium">
             <name>High</name>
@@ -2018,8 +2430,9 @@
          <node relatedTag="Constrained">
             <name>Unconstrained</name>
          </node>
-         <node relatedTag="Familiar">
+         <node relatedTag="Famous">
             <name>Unfamiliar</name>
+            <description>Something not known or encountered before.</description>
          </node>
          <node>
             <name>Unmasked</name>
@@ -2039,9 +2452,6 @@
             <name>Abstract</name>
          </node>
          <node>
-            <name>Biological</name>
-         </node>
-         <node>
             <name>Clinical</name>
          </node>
          <node>
@@ -2049,15 +2459,6 @@
          </node>
          <node>
             <name>Composite</name>
-         </node>
-         <node>
-            <name>Electrical</name>
-         </node>
-         <node>
-            <name>Mechanical</name>
-         </node>
-         <node>
-            <name>Magnetic</name>
          </node>
          <node>
             <name>Numerical</name>
@@ -2073,13 +2474,13 @@
             <node>
                <name>Audible</name>
             </node>
-            <node requireChild="true">
+            <node>
                <name>Frequency</name>
                <node isNumeric="true" takesValue="true" unitClass="frequency">
                   <name>#</name>
                </node>
             </node>
-            <node requireChild="true">
+            <node>
                <name>Loudness</name>
                <node isNumeric="true" takesValue="true">
                   <name>#</name>
@@ -2160,10 +2561,10 @@
          </node>
          <node>
             <name>Visual</name>
-            <node requireChild="true">
+            <node>
                <name>Luminance</name>
             </node>
-            <node requireChild="true">
+            <node>
                <name>Color</name>
                <node>
                   <name>Color-shade</name>
@@ -2736,257 +3137,6 @@
          </node>
       </node>
       <node extensionAllowed="true">
-         <name>Spatiotemporal</name>
-         <node>
-            <name>Rate-of-change</name>
-            <node>
-               <name>Acceleration</name>
-               <node isNumeric="true" takesValue="true" unitClass="acceleration">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Jerk-rate</name>
-               <description>Rate at which an object's acceleration changes with respect to time.</description>
-               <node isNumeric="true" takesValue="true" unitClass="jerk">
-                  <name>#</name>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Sampling-rate</name>
-               <description>Number of measurements per unit time.</description>
-               <node takesValue="true" unitClass="frequency">
-                  <name>#</name>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Refresh-rate</name>
-               <description>Number of times per second a device displays an image. Also known as the frame rate.</description>
-               <node isNumeric="true" takesValue="true">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Temporal-rate</name>
-               <description>Number of occurrences in a unit of time.</description>
-               <node isNumeric="true" takesValue="true">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Velocity</name>
-               <node isNumeric="true" takesValue="true" unitClass="speed">
-                  <name>#</name>
-               </node>
-            </node>
-         </node>
-         <node>
-            <name>Resolution</name>
-            <node requireChild="true">
-               <name>IO-resolution</name>
-               <node requireChild="true">
-                  <name>Screen-resolution</name>
-                  <description>Number of pixels in each dimension for a digital display device.</description>
-                  <node takesValue="true">
-                     <name>#</name>
-                  </node>
-               </node>
-               <node requireChild="true">
-                  <name>Printer-resolution</name>
-                  <description>Number of dots-per-inch for a printer.</description>
-                  <node takesValue="true">
-                     <name>#</name>
-                  </node>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Spatial-resolution</name>
-               <description>Linear spacing of a spatial measurement.</description>
-               <node takesValue="true">
-                  <name>#</name>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Spectral-resolution</name>
-               <node takesValue="true">
-                  <name>#</name>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Temporal-resolution</name>
-               <node takesValue="true">
-                  <name>#</name>
-               </node>
-            </node>
-         </node>
-         <node>
-            <name>Spatial</name>
-            <node>
-               <name>Direction</name>
-               <node isNumeric="true" takesValue="true">
-                  <name>#</name>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Distance</name>
-               <description>Distance from a specified position in a specified Direction or grouped with an item from which the distance is measured.</description>
-               <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Orientation</name>
-               <node isNumeric="true" takesValue="true">
-                  <name>#</name>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Position</name>
-               <description>Coordinates with respect a specified frame of reference or the default Screen-frame if no frame is given.</description>
-               <node requireChild="true">
-                  <name>X-position</name>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-                     <name>#</name>
-                  </node>
-               </node>
-               <node requireChild="true">
-                  <name>Y-position</name>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-                     <name>#</name>
-                  </node>
-               </node>
-               <node requireChild="true">
-                  <name>Z-position</name>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-                     <name>#</name>
-                  </node>
-               </node>
-            </node>
-            <node>
-               <name>Reference-frame</name>
-               <description>A frame of reference used to express spatial attributes.</description>
-               <node>
-                  <name>Custom-frame</name>
-                  <description>A custom frame of reference which should be defined in terms of one of the default frames of reference or by a library.</description>
-               </node>
-               <node>
-                  <name>Room-frame</name>
-               </node>
-               <node>
-                  <name>Screen-frame</name>
-                  <description>HED default frame of reference with origin at center of screen used to display experimental stimuli. Looking out of the screen has +X is horizontal to the right. +Y is up and +Z is out of the front of the screen.</description>
-               </node>
-               <node>
-                  <name>Screen-facing-frame</name>
-                  <description>HED default frame of reference with origin at the subject Nasion. +X is horizontal to the subject right. +Y is to the subject front and +Z is vertical upward.</description>
-               </node>
-               <node>
-                  <name>World-frame</name>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Size</name>
-               <node requireChild="true">
-                  <name>Area</name>
-                  <node isNumeric="true" takesValue="true" unitClass="area">
-                     <name>#</name>
-                  </node>
-               </node>
-               <node requireChild="true">
-                  <name>Length</name>
-                  <description>A measurement of the size along the longest dimension.</description>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-                     <name>#</name>
-                  </node>
-               </node>
-               <node>
-                  <name>Width</name>
-                  <description>A measurement along the shortest of two or three dimensions.</description>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-                     <name>#</name>
-                  </node>
-               </node>
-               <node>
-                  <name>Height</name>
-                  <description>A measurement in a direction perpendicular to Length and Width in 3D. In 2D, it is perpendicular to both the Length and Height.</description>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
-                     <name>#</name>
-                  </node>
-               </node>
-               <node requireChild="true">
-                  <name>Volume</name>
-                  <node isNumeric="true" takesValue="true" unitClass="volume">
-                     <name>#</name>
-                  </node>
-               </node>
-            </node>
-            <node>
-               <name>Surface-properties</name>
-               <node>
-                  <name>Rough</name>
-               </node>
-               <node>
-                  <name>Smooth</name>
-               </node>
-            </node>
-         </node>
-         <node>
-            <name>Temporal</name>
-            <node requireChild="true">
-               <name>Delay</name>
-               <description>An indicator that the associated tag group represents something temporally offset from the current event. The delay value can be positive or negative and should always appear in a tag group indicating what is delayed.</description>
-               <node isNumeric="true" takesValue="true" unitClass="time">
-                  <name>#</name>
-               </node>
-            </node>
-            <node requireChild="true">
-               <name>Duration</name>
-               <description>An offset that is implicit after duration time passed from the onset.</description>
-               <node isNumeric="true" takesValue="true" unitClass="time">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Onset</name>
-            </node>
-            <node>
-               <name>Offset</name>
-            </node>
-            <node>
-               <name>Pause</name>
-               <description>Indicating something stopped such as a break or waiting for input.</description>
-            </node>
-            <node requireChild="true">
-               <name>Temporal-value</name>
-               <node isNumeric="true" takesValue="true" unitClass="time">
-                  <name>#</name>
-               </node>
-            </node>
-            <node>
-               <name>Time-out</name>
-            </node>
-            <node>
-               <name>Time-sync</name>
-               <description>Indicates a marker inserted into the recorded data to allow post hoc synchronization of concurrently recorded data streams.</description>
-            </node>
-         </node>
-      </node>
-      <node>
-         <name>Thermodynamic</name>
-         <node>
-            <name>Energy</name>
-         </node>
-         <node>
-            <name>Pressure</name>
-         </node>
-         <node>
-            <name>Temperature</name>
-            <node isNumeric="true" takesValue="true">
-               <name>#</name>
-            </node>
-         </node>
-      </node>
-      <node extensionAllowed="true">
          <name>Environmental</name>
          <node>
             <name>Indoors</name>
@@ -3051,111 +3201,6 @@
       </node>
       <node>
          <name>Anatomical</name>
-         <node>
-            <name>Body-part</name>
-            <node>
-               <name>Head</name>
-               <node>
-                  <name>Hair</name>
-               </node>
-               <node>
-                  <name>Ear</name>
-               </node>
-               <node>
-                  <name>Face</name>
-                  <node>
-                     <name>Cheek</name>
-                  </node>
-                  <node>
-                     <name>Chin</name>
-                  </node>
-                  <node>
-                     <name>Eye</name>
-                  </node>
-                  <node>
-                     <name>Eyebrow</name>
-                  </node>
-                  <node>
-                     <name>Forehead</name>
-                  </node>
-                  <node>
-                     <name>Lip</name>
-                  </node>
-                  <node>
-                     <name>Nose</name>
-                  </node>
-                  <node>
-                     <name>Mouth</name>
-                  </node>
-                  <node>
-                     <name>Teeth</name>
-                  </node>
-               </node>
-            </node>
-            <node>
-               <name>Arm</name>
-               <node>
-                  <name>Elbow</name>
-               </node>
-               <node>
-                  <name>Hand</name>
-                  <node>
-                     <name>Finger</name>
-                     <node>
-                        <name>Index-finger</name>
-                     </node>
-                     <node>
-                        <name>Little-finger</name>
-                     </node>
-                     <node>
-                        <name>Middle-finger</name>
-                     </node>
-                     <node>
-                        <name>Ring-finger</name>
-                     </node>
-                     <node>
-                        <name>Thumb</name>
-                     </node>
-                  </node>
-               </node>
-               <node>
-                  <name>Wrist</name>
-               </node>
-            </node>
-            <node>
-               <name>Leg</name>
-               <node>
-                  <name>Ankle</name>
-               </node>
-               <node>
-                  <name>Foot</name>
-                  <node>
-                     <name>Toe</name>
-                  </node>
-               </node>
-               <node>
-                  <name>Knee</name>
-               </node>
-            </node>
-            <node>
-               <name>Torso</name>
-               <node>
-                  <name>Upper-torso</name>
-                  <node>
-                     <name>Chest</name>
-                  </node>
-               </node>
-               <node>
-                  <name>Lower-torso</name>
-                  <node>
-                     <name>Hips</name>
-                  </node>
-               </node>
-               <node>
-                  <name>Waist</name>
-               </node>
-            </node>
-         </node>
       </node>
    </node>
    <unitClasses>

@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
     #     self.assertEqual('', delimiter, "Excel files should have an empty delimiter")
 
     def test_get_excel_worksheet_names(self):
-        from hed.web.utils import get_excel_worksheet_names
+        from hed.web.spreadsheet_utils import get_excel_worksheet_names
         self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         worksheet_names = get_excel_worksheet_names(self.excel_file)
         self.assertEqual(len(worksheet_names), 3, "This excel file has three worksheets")
@@ -74,12 +74,6 @@ class Test(unittest.TestCase):
         #     self.assertIsInstance(indices, dict)
         #
 
-    def test_get_spreadsheet_other_tag_column_indices(self):
-        self.assertTrue(1, "Testing get_spreadsheet_other_tag_column_indices")
-
-    def test_get_spreadsheet_specific_tag_column_indices(self):
-        self.assertTrue(1, "Testing get_spreadsheet_specific_tag_column_indices")
-
     def test_get_text_file_column_names(self):
         self.assertTrue(1, "Testing get_text_file_column_names")
         # def test_get_text_file_column_names(self):
@@ -95,10 +89,8 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing populate_spreadsheet_columns_info_dictionary")
 
     def test_populate_worksheets_info_dictionary(self):
+        info = {}
         self.assertTrue(1, "Testing populate_worksheets_info_dictionary")
-
-    def test_worksheet_name_present_in_form(self):
-        self.assertTrue(1, "Testing worksheet_name_present_in_form")
 
 
 if __name__ == '__main__':

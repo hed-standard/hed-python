@@ -7,10 +7,8 @@ from werkzeug.utils import secure_filename
 from flask import current_app, jsonify, Response
 
 from hed.util import hed_cache
-from hed.util.error_reporter import ErrorHandler
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
-from hed.util.hed_schema import HedSchema
-from hed.web.constants import common_constants, error_constants
+from hed.web.constants import common_constants
 
 app_config = current_app.config
 
@@ -74,32 +72,6 @@ def find_all_str_indices_in_list(list_of_str, str_value):
     """
     return [index + 1 for index, value in enumerate(list_of_str) if
             value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
-
-
-def find_hed_version_in_uploaded_file(request, key_name=common_constants.HED_XML_FILE):
-    """Finds the version number in an HED XML other.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data
-    key_name: str
-        Name of the key for the HED XML file in the request
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing the version number information.
-
-    """
-    hed_info = {}
-    try:
-        if key_name in request.files:
-            hed_file_path = save_file_to_upload_folder(request.files[key_name])
-            hed_info[common_constants.HED_VERSION] = HedSchema.get_hed_xml_version(hed_file_path)
-    except:
-        hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
-    return hed_info
 
 
 def form_has_file(request, file_field, valid_extensions):
@@ -195,7 +167,6 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     """
     if not display_name:
         display_name = download_file
-    print("In generate:", display_name)
     try:
         if not download_file:
             return f"No download file given"
@@ -278,36 +249,6 @@ def get_hed_path_from_pull_down(request):
         hed_file_path = ''
         hed_display_name = ''
     return hed_file_path, hed_display_name
-
-
-def get_printable_issue_string(issues, display_name=None, title_string=''):
-    """Returns a string suitable for text blob download
-
-     Parameters
-     ----------
-     issues: list
-         List of the issues to be printed.
-     title_string: str
-         key name in the files dictionary of the Request object
-     display_name: list of str
-         List of valid extensions
-
-     Returns
-     -------
-     tuple
-         A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
-     """
-    if not issues:
-        return ''
-    if title_string:
-        title = title_string
-    else:
-        title = ''
-    if display_name:
-        title = display_name + ' ' + title_string + '\n'
-    if not title:
-        title = None
-    return ErrorHandler.get_printable_issue_string(issues, title, skip_filename=True)
 
 
 def get_optional_form_field(request, form_field_name, type=''):
@@ -415,31 +356,6 @@ def save_file_to_upload_folder(file_object, delete_on_close=False):
     except:
         file_path = ''
     return file_path
-
-
-def save_issues_to_upload_folder(issues, filename):
-    """Saves the issues found the upload folder as filename.
-
-    Parameters
-    ----------
-    issues: string
-        A string containing the validation issues.
-    filename: str
-        File name of the issue folder
-
-    Returns
-    -------
-    string
-        The name of the validation output other.
-
-    """
-
-    issues_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    with open(issues_file_path, 'w', encoding='utf-8') as issues_file:
-        for val_issue in issues:
-            issues_file.write(val_issue['message'] + "\n")
-    issues_file.close()
-    return issues_file_path
 
 
 def save_text_to_upload_folder(text, filename):

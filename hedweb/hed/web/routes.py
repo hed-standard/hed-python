@@ -4,15 +4,15 @@ import json
 import traceback
 
 from hed.util import hed_cache
-
-from hed.web import events, spreadsheet, schema, services, utils
-from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
-from hed.web.web_utils import delete_file_if_it_exists, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
+from hed.schema import hed_schema_file
+from hed.web import events, spreadsheet, schema, services, spreadsheet_utils
+from hed.web.constants import common_constants, error_constants, page_constants, route_constants
+from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error
 from hed.web.dictionary import report_dictionary_validation_status
 
 app_config = current_app.config
-route_blueprint = Blueprint(blueprint_constants.ROUTE_BLUEPRINT, __name__)
+route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
 
 @route_blueprint.route(route_constants.DELETE_FILE_ROUTE, strict_slashes=False, methods=['GET'])
@@ -59,28 +59,18 @@ def download_file_in_upload_directory(filename, header=None):
 
 @route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_dictionary_validation_results():
-    """Validate the JSON dictionary in the form after submission and return an attachment other containing the output.
+    """Validate the JSON dictionary in the form after submission and return an attachment containing the output.
 
     Parameters
     ----------
 
     Returns
     -------
-        string
-        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
-        500 error message is returned.
+        download file
+        A text file with the validation errors.
     """
     validation_response = report_dictionary_validation_status(request)
     return validation_response
-    # validation_response = dictionary.report_dictionary_validation_status(request)
-    # # Success
-    # if isinstance(validation_response, Response):
-    #     return validation_response
-    # if isinstance(validation_response, str):
-    #     if validation_response:
-    #         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
-    #     else:
-    #         return ""
 
 
 @route_blueprint.route(route_constants.EVENTS_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -141,9 +131,13 @@ def get_hed_version():
         A serialized JSON string containing information related to the spreadsheet columns.
 
     """
-    hed_info = find_hed_version_in_uploaded_file(request)
-    if error_constants.ERROR_KEY in hed_info:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, hed_info[error_constants.ERROR_KEY])
+    hed_info = {}
+    try:
+        if common_constants.HED_XML_FILE in request.files:
+            hed_file_path = save_file_to_upload_folder(request.files[common_constants.HED_XML_FILE])
+            hed_info[common_constants.HED_VERSION] = hed_schema_file.get_hed_xml_version(hed_file_path)
+    except:
+        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, traceback.format_exc())
     return json.dumps(hed_info)
 
 
@@ -238,7 +232,7 @@ def get_spreadsheet_columns_info():
         A serialized JSON string containing information related to the spreadsheet columns.
 
     """
-    spreadsheet_columns_info = utils.find_spreadsheet_columns_info(request)
+    spreadsheet_columns_info = spreadsheet_utils.find_spreadsheet_columns_info(request)
     if error_constants.ERROR_KEY in spreadsheet_columns_info:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
                                  spreadsheet_columns_info[error_constants.ERROR_KEY])
@@ -293,7 +287,7 @@ def get_worksheets_info():
             workbook_file = request.files[common_constants.SPREADSHEET_FILE]
             workbook_file_path = save_file_to_upload_folder(workbook_file)
             if workbook_file_path:
-                worksheets_info = utils.populate_worksheets_info_dictionary(worksheets_info, workbook_file_path)
+                worksheets_info = spreadsheet_utils.populate_worksheets_info_dictionary(worksheets_info, workbook_file_path)
     except:
         worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
     finally:
