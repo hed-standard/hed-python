@@ -1,8 +1,10 @@
 import unittest
 import os
-from hed.schema import schema_validator
+from hed.schema import schema_compliance
+from hed import schema
 from hed.util import error_reporter
 from hed.util.error_types import SchemaWarnings
+
 
 class Test(unittest.TestCase):
     # A known schema with many issues.
@@ -15,16 +17,17 @@ class Test(unittest.TestCase):
 
     def validate_term_base(self, input_text, expected_issues):
         for text, issues in zip(input_text, expected_issues):
-            test_issues = schema_validator.validate_schema_term(text, self.error_handler)
+            test_issues = schema_compliance.validate_schema_term(text, self.error_handler)
             self.assertCountEqual(issues, test_issues)
 
     def validate_desc_base(self, input_descriptions, expected_issues):
         for description, issues in zip(input_descriptions, expected_issues):
-            test_issues = schema_validator.validate_schema_description("dummy", description, self.error_handler)
+            test_issues = schema_compliance.validate_schema_description("dummy", description, self.error_handler)
             self.assertCountEqual(issues, test_issues)
 
     def test_validate_schema(self):
-        issues = schema_validator.validate_schema(self.schema_path)
+        hed_schema = schema.load_schema(self.schema_path)
+        issues = hed_schema.check_compliance()
         self.assertTrue(isinstance(issues, list))
         self.assertTrue(len(issues) > 1)
 

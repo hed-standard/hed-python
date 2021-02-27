@@ -5,7 +5,7 @@ from hed.util.hed_string_delimiter import HedStringDelimiter
 from hed.validator.hed_validator import HedValidator
 from hed.util import error_reporter
 from hed.validator.tag_validator import TagValidator
-from hed.util.hed_schema import HedSchema
+from hed import schema
 
 
 class TestHed(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestHed(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_schema = HedSchema(hed_xml)
+        cls.hed_schema = schema.load_schema(hed_xml)
         cls.error_handler = error_reporter.ErrorHandler()
         cls.syntactic_tag_validator = TagValidator(check_for_warnings=False,
                                                    run_semantic_validation=False)
@@ -586,7 +586,7 @@ class TestHed3(unittest.TestCase):
     def setUpClass(cls):
         cls.error_handler = error_reporter.ErrorHandler()
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_schema = HedSchema(hed_xml)
+        cls.hed_schema = schema.load_schema(hed_xml)
         cls.syntactic_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=False,
                                                    run_semantic_validation=False)
         cls.syntactic_warning_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=True,

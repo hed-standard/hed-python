@@ -10,19 +10,20 @@ HedSchema - Opens a hed xml schema.  Used by other tools to check tag attributes
 TagFormat - Used to convert between short and long tags
 ColumnDefGroup - Contains the data from a single json sidecar, can be validated using a HedSchema.
 """
+import hed
 from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_schema import HedSchema
+from hed import schema
 from hed.tools.tag_format import TagFormat
 
 local_hed_xml = "data/HED8.0.0-alpha.1.xml"
-hed_schema = HedSchema(local_hed_xml)
+hed_schema = schema.load_schema(local_hed_xml)
 json_filename = "data/both_types_events_errors.json"
 
 # Example 1
 json_file = ColumnDefGroup(json_filename)
 # Print all the errors from the json file
 errors = json_file.validate_entries(hed_schema)
-print(json_file.get_printable_issue_string(errors))
+print(hed.get_printable_issue_string(errors))
 
 # Example 2
 # Open the json file, convert all tags to long, and save it out

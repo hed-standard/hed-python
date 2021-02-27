@@ -357,147 +357,6 @@ class ErrorHandler:
         return error_object_list
 
     @staticmethod
-    def _get_context_from_issue(val_issue, skip_filename=True):
-        """
-        Extract all the context values from the given issue
-        Parameters
-        ----------
-        val_issue : {}
-            A dictionary a representing a single error
-        skip_filename: bool
-            If true, don't gather the filename context.
-        Returns
-        -------
-        context_list: []
-            A list of tuples containing the context_type and context for the given issue
-        """
-        single_issue_context = []
-        for key in val_issue:
-            if skip_filename and key == ErrorContext.FILE_NAME:
-                continue
-            if key in ErrorContext:
-                single_issue_context.append((key.value, *val_issue[key]))
-
-        return single_issue_context
-
-    @staticmethod
-    def _format_single_context_string(context_type, context, tab_count=0):
-        """
-        Takes a single context tuple and returns the human readable form.
-
-        Parameters
-        ----------
-        context_type : str
-            The context type of this entry
-        context : str
-            The value of this context
-        tab_count : int
-            Number of tabs to prefix each line with.
-
-        Returns
-        -------
-        context_string: str
-            A string containing the context, including tabs.
-        """
-        tab_string = tab_count * '\t'
-        error_types = {
-            ErrorContext.FILE_NAME.value: f"\nErrors in file '{context}'",
-            ErrorContext.SIDECAR_COLUMN_NAME.value: f"Column '{context}':",
-            ErrorContext.SIDECAR_KEY_NAME.value: f"Key: {context}",
-            ErrorContext.SIDECAR_HED_STRING.value: f"hed_string: {context}",
-            ErrorContext.ROW.value: f'Issues in row {context}:',
-            ErrorContext.COLUMN.value: f'Issues in column {context}:',
-            ErrorContext.CUSTOM_TITLE.value: context
-        }
-        context_portion = error_types[context_type]
-        context_string = f"{tab_string}{context_portion}\n"
-        return context_string
-
-    @staticmethod
-    def _get_context_string(single_issue_context, last_used_context):
-        """
-        Converts a single context list into the final human readable output form.
-
-        Parameters
-        ----------
-        single_issue_context : [()]
-            A list of tuples containing the context(context_type, context, increment_tab)
-        last_used_context : [()]
-            A list of tuples containing the last drawn context, so it can only add the parts that have changed.
-            This is always the same format as single_issue_context.
-
-        Returns
-        -------
-        context_string: str
-            The full string of context(potentially multiline) to add before the error
-        tab_string: str
-            The prefix to add to any message line with this context.
-        """
-        context_string = ""
-        tab_count = 0
-        found_difference = False
-        for i, context_tuple in enumerate(single_issue_context):
-            (context_type, context, increment_tab) = context_tuple
-            if len(last_used_context) > i and not found_difference:
-                last_drawn = last_used_context[i]
-                # Was drawn, and hasn't changed.
-                if last_drawn == context_tuple:
-                    if increment_tab:
-                        tab_count += 1
-                    continue
-
-            context_string += ErrorHandler._format_single_context_string(context_type, context, tab_count)
-            found_difference = True
-            if increment_tab:
-                tab_count += 1
-
-        tab_string = '\t' * tab_count
-        return context_string, tab_string
-
-    @staticmethod
-    def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
-        """Return a string with issues list flatted into single string, one per line
-
-        Parameters
-        ----------
-        validation_issues: []
-            Issues to print
-        title: str
-            Optional title that will always show up first if present(even if there are no validation issues)
-        severity: int
-            Return only warnings >= severity
-        skip_filename: bool
-            If true, don't add the filename context to the printable string.
-        Returns
-        -------
-        str
-            A str containing printable version of the issues or '[]'.
-
-        """
-        last_used_error_context = []
-
-        if severity is not None:
-            validation_issues = ErrorHandler.filter_issues_by_severity(validation_issues, severity)
-
-        issue_string = ""
-        for single_issue in validation_issues:
-            single_issue_context = ErrorHandler._get_context_from_issue(single_issue, skip_filename)
-            context_string, tab_string = ErrorHandler._get_context_string(single_issue_context, last_used_error_context)
-
-            issue_string += context_string
-            single_issue_message = tab_string + single_issue['message']
-            if "\n" in single_issue_message:
-                single_issue_message = single_issue_message.replace("\n", "\n" + tab_string)
-            issue_string += f"{single_issue_message}\n"
-            last_used_error_context = single_issue_context.copy()
-
-        if issue_string:
-            issue_string += "\n"
-        if title:
-            issue_string = title + '\n' + issue_string
-        return issue_string
-
-    @staticmethod
     def filter_issues_by_severity(issues_list, severity):
         """
         Gathers all issues matching or below a given severity.
@@ -515,3 +374,144 @@ class ErrorHandler:
             The list with all other severities removed.
         """
         return [issue for issue in issues_list if issue['severity'] <= severity]
+
+
+def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
+    """Return a string with issues list flatted into single string, one per line
+
+    Parameters
+    ----------
+    validation_issues: []
+        Issues to print
+    title: str
+        Optional title that will always show up first if present(even if there are no validation issues)
+    severity: int
+        Return only warnings >= severity
+    skip_filename: bool
+        If true, don't add the filename context to the printable string.
+    Returns
+    -------
+    str
+        A str containing printable version of the issues or '[]'.
+
+    """
+    last_used_error_context = []
+
+    if severity is not None:
+        validation_issues = ErrorHandler.filter_issues_by_severity(validation_issues, severity)
+
+    issue_string = ""
+    for single_issue in validation_issues:
+        single_issue_context = _get_context_from_issue(single_issue, skip_filename)
+        context_string, tab_string = _get_context_string(single_issue_context, last_used_error_context)
+
+        issue_string += context_string
+        single_issue_message = tab_string + single_issue['message']
+        if "\n" in single_issue_message:
+            single_issue_message = single_issue_message.replace("\n", "\n" + tab_string)
+        issue_string += f"{single_issue_message}\n"
+        last_used_error_context = single_issue_context.copy()
+
+    if issue_string:
+        issue_string += "\n"
+    if title:
+        issue_string = title + '\n' + issue_string
+    return issue_string
+
+
+def _get_context_from_issue(val_issue, skip_filename=True):
+    """
+    Extract all the context values from the given issue
+    Parameters
+    ----------
+    val_issue : {}
+        A dictionary a representing a single error
+    skip_filename: bool
+        If true, don't gather the filename context.
+    Returns
+    -------
+    context_list: []
+        A list of tuples containing the context_type and context for the given issue
+    """
+    single_issue_context = []
+    for key in val_issue:
+        if skip_filename and key == ErrorContext.FILE_NAME:
+            continue
+        if key.startswith("ec_"):
+            single_issue_context.append((key, *val_issue[key]))
+
+    return single_issue_context
+
+
+def _format_single_context_string(context_type, context, tab_count=0):
+    """
+    Takes a single context tuple and returns the human readable form.
+
+    Parameters
+    ----------
+    context_type : str
+        The context type of this entry
+    context : str
+        The value of this context
+    tab_count : int
+        Number of tabs to prefix each line with.
+
+    Returns
+    -------
+    context_string: str
+        A string containing the context, including tabs.
+    """
+    tab_string = tab_count * '\t'
+    error_types = {
+        ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
+        ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
+        ErrorContext.SIDECAR_KEY_NAME: f"Key: {context}",
+        ErrorContext.SIDECAR_HED_STRING: f"hed_string: {context}",
+        ErrorContext.ROW: f'Issues in row {context}:',
+        ErrorContext.COLUMN: f'Issues in column {context}:',
+        ErrorContext.CUSTOM_TITLE: context
+    }
+    context_portion = error_types[context_type]
+    context_string = f"{tab_string}{context_portion}\n"
+    return context_string
+
+
+def _get_context_string(single_issue_context, last_used_context):
+    """
+    Converts a single context list into the final human readable output form.
+
+    Parameters
+    ----------
+    single_issue_context : [()]
+        A list of tuples containing the context(context_type, context, increment_tab)
+    last_used_context : [()]
+        A list of tuples containing the last drawn context, so it can only add the parts that have changed.
+        This is always the same format as single_issue_context.
+
+    Returns
+    -------
+    context_string: str
+        The full string of context(potentially multiline) to add before the error
+    tab_string: str
+        The prefix to add to any message line with this context.
+    """
+    context_string = ""
+    tab_count = 0
+    found_difference = False
+    for i, context_tuple in enumerate(single_issue_context):
+        (context_type, context, increment_tab) = context_tuple
+        if len(last_used_context) > i and not found_difference:
+            last_drawn = last_used_context[i]
+            # Was drawn, and hasn't changed.
+            if last_drawn == context_tuple:
+                if increment_tab:
+                    tab_count += 1
+                continue
+
+        context_string += _format_single_context_string(context_type, context, tab_count)
+        found_difference = True
+        if increment_tab:
+            tab_count += 1
+
+    tab_string = '\t' * tab_count
+    return context_string, tab_string

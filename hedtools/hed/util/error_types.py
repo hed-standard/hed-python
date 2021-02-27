@@ -1,21 +1,19 @@
-from enum import Enum
-
 
 class ErrorSeverity:
     ERROR = 1
     WARNING = 2
 
 
-class ErrorContext(Enum):
+class ErrorContext:
     """Indicates the context this error took place in, each error potentially having multiple contexts"""
-    CUSTOM_TITLE = 'title'
-    FILE_NAME = 'filename'
-    SIDECAR_COLUMN_NAME = 'sidecarColumnName'
-    SIDECAR_KEY_NAME = 'sidecarKeyName'
-    SIDECAR_HED_STRING = 'sidecarHedString'
-    ROW = 'row'
-    COLUMN = 'column'
     # Use this one to display any passed in message without modification
+    CUSTOM_TITLE = 'ec_title'
+    FILE_NAME = 'ec_filename'
+    SIDECAR_COLUMN_NAME = 'ec_sidecarColumnName'
+    SIDECAR_KEY_NAME = 'ec_sidecarKeyName'
+    SIDECAR_HED_STRING = 'ec_sidecarHedString'
+    ROW = 'ec_row'
+    COLUMN = 'ec_column'
 
 
 class ValidationErrors:

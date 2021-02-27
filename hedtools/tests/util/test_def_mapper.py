@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed.util.def_mapper import DefinitionMapper
-from hed.util.hed_schema import HedSchema
+from hed import schema
 from hed.util.def_dict import DefDict
 
 class Test(unittest.TestCase):
@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         hed_xml_file = os.path.join(cls.base_data_dir, "HED8.0.0-alpha.1.xml")
-        cls.hed_schema = HedSchema(hed_xml_file)
+        cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.base_dict = DefDict(hed_schema=cls.hed_schema)
         cls.def_contents_string = "(Item/TestDef1, Item/TestDef2)"
         cls.basic_def_string = f"(Definition/TestDef, Organizational/TestOrg, {cls.def_contents_string})"

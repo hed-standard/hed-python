@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <HED version="8.0.0-alpha.1">
    <node>
+      <prologue>This is a prologue.
+      This is a second line of a prologue.</prologue>
       <name>Event</name>
       <node>
          <name>Sensory-event</name>
@@ -3392,4 +3394,6 @@
          <description>SI unit submultiple representing 10^-24</description>
       </unitModifier>
    </unitModifiers>
+   <epilogue>This is an epilogue.
+      This is a second line of an epilogue.</epilogue>
 </HED>
