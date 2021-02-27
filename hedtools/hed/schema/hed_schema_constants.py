@@ -52,4 +52,4 @@ UNIT_CLASS_ATTRIBUTES = [HedKey.DefaultUnits, HedKey.SIUnit, HedKey.UnitSymbol]
 UNIT_MODIFIER_ATTRIBUTES = [HedKey.SIUnitModifier, HedKey.SIUnitSymbolModifier]
 
 VERSION_ATTRIBUTE = 'version'
-HED_VALID_ATTRIBUTES = ['library', 'version']
+

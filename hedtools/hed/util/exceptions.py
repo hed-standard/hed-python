@@ -5,6 +5,16 @@ class HedExceptions:
     CANNOT_PARSE_JSON = 'cannotParseJson'
     INVALID_EXTENSION = 'invalidExtension'
 
+    # These are actual schema issues, not that the file cannot be found or parsed
+    SCHEMA_HEADER_MISSING = 'schemaHeaderMissing',
+    SCHEMA_HEADER_INVALID = 'schemaHeaderInvalid',
+    BAD_HED_LIBRARY_NAME = 'badHedLibraryName',
+    BAD_HED_SEMANTIC_VERSION = 'BadHedSemanticVersion',
+    SCHEMA_START_MISSING = 'schemaStartMissing',
+    SCHEMA_END_INVALID = 'schemaEndMissing',
+    HED_END_INVALID = 'hedEndMissing'
+    INVALID_SECTION_SEPARATOR = 'invalidSectionSeparator'
+
 
 class HedFileError(Exception):
     """Exception raised when a file cannot be parsed due to being malformed, file IO, etc."""
@@ -44,9 +54,18 @@ class HedFileError(Exception):
             HedExceptions.CANNOT_PARSE_XML: f"{error_prefix}Cannot parse schema XML: "
                                             f"{message}.  '{filename}'",
             HedExceptions.CANNOT_PARSE_JSON: f"{error_prefix}Cannot parse json: {message}. '{filename}'",
+            HedExceptions.SCHEMA_HEADER_MISSING: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.SCHEMA_HEADER_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.BAD_HED_LIBRARY_NAME: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.BAD_HED_SEMANTIC_VERSION: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.SCHEMA_START_MISSING: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.SCHEMA_END_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.HED_END_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.INVALID_SECTION_SEPARATOR: f"{error_prefix}{self.message}.  '{filename}'",
         }
         default_error_message = f'{error_prefix}Internal Error'
         error_message = error_types.get(error_type, default_error_message)
+        print(error_message)
 
         error_object = {'code': error_type,
                         'message': error_message}
