@@ -35,6 +35,20 @@ class HedSchemaXMLParser:
         self._populate_dictionaries()
 
     @staticmethod
+    def load_xml(xml_file_path):
+        parser = HedSchemaXMLParser(xml_file_path)
+
+        hed_schema = HedSchema()
+
+        hed_schema.filename = xml_file_path
+        hed_schema.prologue = parser.prologue
+        hed_schema.epilogue = parser.epilogue
+        hed_schema.set_dictionaries(parser.dictionaries)
+        hed_schema.set_attributes(parser.schema_attributes)
+
+        return hed_schema
+
+    @staticmethod
     def _parse_hed_xml_file(hed_xml_file_path):
         """Parses a XML file and returns the root element.
 

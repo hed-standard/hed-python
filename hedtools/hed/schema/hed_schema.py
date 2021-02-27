@@ -30,6 +30,8 @@ class HedSchema:
         self.prologue = ""
         self.epilogue = ""
 
+        self.issues = []
+
     def set_attributes(self, schema_attributes):
         self.schema_attributes = schema_attributes
 

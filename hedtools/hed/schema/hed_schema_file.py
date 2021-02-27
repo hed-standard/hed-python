@@ -1,7 +1,6 @@
 from hed.schema.xml2schema import HedSchemaXMLParser
 from hed.schema.wiki2schema import HedSchemaWikiParser
 from hed.util.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema import HedSchema
 from hed.schema import hed_schema_constants
 from hed.util import file_util
 
@@ -11,21 +10,13 @@ def load_schema(hed_file_path):
         raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file", filename=hed_file_path)
 
     if hed_file_path.lower().endswith(".xml"):
-        parser = HedSchemaXMLParser(hed_file_path)
+        hed_schema = HedSchemaXMLParser.load_xml(hed_file_path)
+        return hed_schema
     elif hed_file_path.lower().endswith(".mediawiki"):
-        parser = HedSchemaWikiParser(hed_file_path)
+        hed_schema = HedSchemaWikiParser.load_wiki(hed_file_path)
+        return hed_schema
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_file_path)
-
-    hed_schema = HedSchema()
-
-    hed_schema.filename = hed_file_path
-    hed_schema.prologue = parser.prologue
-    hed_schema.epilogue = parser.epilogue
-    hed_schema.set_dictionaries(parser.dictionaries)
-    hed_schema.set_attributes(parser.schema_attributes)
-
-    return hed_schema
 
 
 # todo: this could be updated to also support .mediawiki format.
