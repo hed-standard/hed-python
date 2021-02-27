@@ -6,16 +6,15 @@ from hed.schema import hed_schema_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from hed.util.exceptions import HedFileError, HedExceptions
 from hed.schema import HedSchema
+from hed.schema import schema_validation_util
 
-ATTRIBUTE_DEFINITION_STRING = '\'\'\'Attribute Definitions:'
-CHANGE_LOG_STRING = 'Changelog'
-SYNTAX_STRING = '\'\'\'Syntax'
 ROOT_TAG = '\'\'\''
-HED_NODE_STRING = "HED"
+HEADER_LINE_STRING = "HED"
 START_STRING = '!# start schema'
 END_SCHEMA_STRING = "!# end schema"
 UNIT_CLASS_STRING = '\'\'\'Unit classes'
 UNIT_MODIFIER_STRING = '\'\'\'Unit modifiers'
+ATTRIBUTE_DEFINITION_STRING = '\'\'\'Attribute Definitions:'
 END_STRING = '!# end hed'
 
 
@@ -29,49 +28,332 @@ no_wiki_tag = '</?nowiki>'
 square_bracket_removal_expression = r'[\[\]]'
 
 
+# these must always be in order under the current spec.
+class HedSection:
+    HeaderLine = 2
+    Prologue = 3
+    Schema = 4
+    EndSchema = 5
+    UnitsClasses = 6
+    UnitModifiers = 7
+    Attributes = 8
+    EndHed = 9
+
+
+SectionStarts = {
+    HedSection.Schema: START_STRING,
+    HedSection.EndSchema: END_SCHEMA_STRING,
+    HedSection.UnitsClasses: UNIT_CLASS_STRING,
+    HedSection.UnitModifiers: UNIT_MODIFIER_STRING,
+    HedSection.Attributes: ATTRIBUTE_DEFINITION_STRING,
+    HedSection.EndHed: END_STRING
+}
+
+
+SectionNames = {
+    HedSection.HeaderLine: "Header",
+    HedSection.Prologue: "Prologue",
+    HedSection.Schema: "Schema",
+    HedSection.EndSchema: "EndSchema",
+    HedSection.UnitsClasses: "Unit Classes",
+    HedSection.UnitModifiers: "Unit Modifiers",
+    HedSection.Attributes: "Attributes",
+    HedSection.EndHed: "EndHed"
+}
+
+ErrorsBySection = {
+    HedSection.Schema: HedExceptions.SCHEMA_START_MISSING,
+    HedSection.EndSchema: HedExceptions.SCHEMA_END_INVALID,
+    HedSection.EndHed: HedExceptions.HED_END_INVALID
+}
+required_sections = [HedSection.Schema, HedSection.EndSchema, HedSection.EndHed]
+
+
 class HedSchemaWikiParser:
     def __init__(self, wiki_file_path):
+        self.filename = wiki_file_path
         # Required properties
         self.schema_attributes = {}
         self.dictionaries = HedSchema.create_empty_dictionaries()
         self.prologue = ""
         self.epilogue = ""
 
+        self.issues = []
+
+        # Variables used while parsing.
+        self._found_sections = {}
+        self._current_section = HedSection.HeaderLine
+
         try:
             with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
-                self._populate_dictionaries(wiki_file)
+                self._read_file(wiki_file)
         except FileNotFoundError as e:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, wiki_file_path)
 
-    def _populate_dictionaries(self, wiki_file):
-        line = wiki_file.readline()
-        in_prologue = True
-        while line:
-            line_stripped = line.strip()
-            if not line_stripped:
-                pass
-            elif line.startswith(HED_NODE_STRING):
-                hed_attributes = self._get_schema_attributes(line[len(HED_NODE_STRING):])
-                self.schema_attributes = hed_attributes
-            elif line.startswith(START_STRING):
-                in_prologue = False
-                self._add_tags(wiki_file)
-            else:
-                # This is messy.  We don't want to strip formatting except newlines at the end for prologue/epilogue.
-                if line.endswith("\n"):
-                    line = line[:-1]
-                if in_prologue:
-                    if self.prologue:
-                        self.prologue += "\n"
-                    self.prologue += line
-                else:
-                    if self.epilogue:
-                        self.epilogue += "\n"
-                    self.epilogue += line
-            line = wiki_file.readline()
-
     @staticmethod
-    def _get_schema_attributes(version_line):
+    def load_wiki(wiki_file_path):
+        parser = HedSchemaWikiParser(wiki_file_path)
+
+        hed_schema = HedSchema()
+
+        hed_schema.issues = parser.issues
+        hed_schema.filename = parser.filename
+        hed_schema.prologue = parser.prologue
+        hed_schema.epilogue = parser.epilogue
+        hed_schema.set_dictionaries(parser.dictionaries)
+        hed_schema.set_attributes(parser.schema_attributes)
+
+        return hed_schema
+
+    def _get_line_iter(self, wiki_file):
+        """ This function iterates over the file line by line, keeping track of which file section it is currently in.
+        Parameters
+        ----------
+        wiki_file : file object
+            An opened .mediawiki file
+        """
+        line = wiki_file.readline()
+        while line:
+            for key, section_string in SectionStarts.items():
+                if line.startswith(section_string):
+                    if key in self._found_sections:
+                        raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
+                                           f"Found section {SectionNames[key]} twice", filename=self.filename)
+                    self._found_sections[key] = True
+
+                    if self._current_section < key:
+                        self._current_section = key
+                        # this line is already handled and we are in a new section
+                        yield False
+                        line = wiki_file.readline()
+                        continue
+                    else:
+                        error_code = HedExceptions.INVALID_SECTION_SEPARATOR
+                        if key in ErrorsBySection:
+                            error_code = ErrorsBySection[key]
+
+                        raise HedFileError(error_code,
+                                           f"Found section {SectionNames[key]} out of order in file",
+                                           filename=self.filename)
+
+            if line.startswith("!#"):
+                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
+                                   f"Invalid section separator '{line.strip()}'", filename=self.filename)
+
+            if self._current_section == HedSection.Prologue or self._current_section == HedSection.EndHed:
+                if line.strip():
+                    # we want to preserve all formatting in the prologue and epilogue.
+                    if line.endswith("\n"):
+                        line = line[:-1]
+                    yield line
+            else:
+                line = self._remove_nowiki_tag_from_line(line.strip())
+                if line:
+                    yield line
+
+            line = wiki_file.readline()
+        self._current_section = None
+
+    def _read_file(self, wiki_file):
+        """
+        Calls the parsers for each section as this goes through the file.
+
+        Parameters
+        ----------
+        wiki_file : file object
+            An opened .mediawiki file
+        """
+        self._current_section = HedSection.HeaderLine
+
+        parsers = {
+            HedSection.HeaderLine: self._read_header_line,
+            HedSection.Prologue: self._read_prologue,
+            HedSection.Schema: self._read_schema,
+            HedSection.EndSchema: self._skip_read_section,
+            HedSection.UnitsClasses: self._read_unit_classes,
+            HedSection.UnitModifiers: self._read_unit_modifiers,
+            HedSection.Attributes: self._skip_read_section,
+            HedSection.EndHed: self._read_epilogue,
+        }
+
+        file_iter = self._get_line_iter(wiki_file)
+
+        while self._current_section is not None:
+            # The iterator is responsible for updating the current_section variable.
+            # it will be set to None when at the end of the file.
+            parsers[self._current_section](file_iter)
+
+        # Validate we didn't miss any required sections.
+        for section in required_sections:
+            if section not in self._found_sections:
+                error_code = HedExceptions.INVALID_SECTION_SEPARATOR
+                if section in ErrorsBySection:
+                    error_code = ErrorsBySection[section]
+                raise HedFileError(error_code, f"Required section separator '{SectionNames[section]}' not found in file",
+                                   filename=self.filename)
+
+    def _read_header_line(self, file_iter):
+        """Adds the header line
+
+        Parameters
+        ----------
+        file_iter: iter
+            An iterator from self._get_line_iter.
+        """
+        first_line = next(file_iter)
+
+        # First line MUST be the HED line with full proper formatting.
+        if first_line.startswith(HEADER_LINE_STRING):
+            hed_attributes = self._get_schema_attributes(first_line[len(HEADER_LINE_STRING):])
+            self.issues = schema_validation_util.validate_attributes(hed_attributes, filename=self.filename)
+            self.schema_attributes = hed_attributes
+        else:
+            raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING,
+                               f"First line of file should be HED, instead found: {first_line}", filename=self.filename)
+
+        self._current_section = HedSection.Prologue
+
+    def _read_prologue(self, file_iter):
+        """Adds the prologue
+
+        Parameters
+        ----------
+        file_iter: iter
+            An iterator from self._get_line_iter.
+        """
+        for line in file_iter:
+            if line is False:
+                return
+
+            if self.prologue:
+                self.prologue += "\n"
+            self.prologue += line
+
+    def _read_epilogue(self, file_iter):
+        """Adds the epilogue
+
+        Parameters
+        ----------
+        file_iter: iter
+            An iterator from self._get_line_iter.
+        """
+        for line in file_iter:
+            if line is False:
+                return
+
+            if self.epilogue:
+                self.epilogue += "\n"
+            self.epilogue += line
+
+    def _read_schema(self, file_iter):
+        """Adds the main schema section
+
+        Parameters
+        ----------
+        file_iter: iter
+            An iterator from self._get_line_iter.
+        """
+        parent_tags = []
+        for line in file_iter:
+            if line is False:
+                return
+
+            if line.startswith(ROOT_TAG):
+                parent_tags = []
+                new_tag = self._add_tag_line(parent_tags, line)
+                parent_tags.append(new_tag)
+            else:
+                level = self._get_tag_level(line)
+                if level < len(parent_tags):
+                    parent_tags = parent_tags[:level]
+                new_tag = self._add_tag_line(parent_tags, line)
+                parent_tags.append(new_tag)
+
+    def _skip_read_section(self, file_iter):
+        """Reads from the file until it reaches a new section, discarding all lines.
+
+        Parameters
+        ----------
+        file_iter: iter
+            An iterator from self._get_line_iter.
+        """
+        for line in file_iter:
+            if line is False:
+                return
+
+    def _read_unit_classes(self, file_iter):
+        """Adds the unit classes section
+
+        Parameters
+        ----------
+        file_iter: iter
+            An iterator from self._get_line_iter.
+        """
+        self.dictionaries[HedKey.DefaultUnits] = {}
+        self.dictionaries[HedKey.Units] = {}
+        for unit_class_key in constants.UNIT_CLASS_DICTIONARY_KEYS:
+            self.dictionaries[unit_class_key] = {}
+        current_unit_class = ""
+
+        for line in file_iter:
+            if line is False:
+                return
+
+            level = self._get_tag_level(line)
+            # This is a unit class
+            if level == 1:
+                unit_class = self._get_tag_name(line)
+                unit_class_attributes = self._get_tag_attributes(line)
+                current_unit_class = unit_class
+                unit_class_desc = self._get_tag_description(line)
+                if unit_class_desc:
+                    self.dictionaries[HedKey.Descriptions][HedKey.Units + unit_class] = unit_class_desc
+                for tag_attribute in unit_class_attributes:
+                    if tag_attribute in constants.STRING_ATTRIBUTE_DICTIONARY_KEYS:
+                        attribute_value = unit_class_attributes[tag_attribute]
+                    else:
+                        attribute_value = unit_class
+                    self.dictionaries[tag_attribute][unit_class] = attribute_value
+            else:
+                unit_class_unit = self._get_tag_name(line)
+                unit_class_unit_attributes = self._get_tag_attributes(line)
+                unit_class_desc = self._get_tag_description(line)
+                if unit_class_desc:
+                    self.dictionaries[HedKey.Descriptions][HedKey.Units + unit_class_unit] = unit_class_desc
+
+                if current_unit_class not in self.dictionaries[HedKey.Units]:
+                    self.dictionaries[HedKey.Units][current_unit_class] = []
+                self.dictionaries[HedKey.Units][current_unit_class].append(unit_class_unit)
+
+                for unit_class_key in constants.UNIT_CLASS_DICTIONARY_KEYS:
+                    self.dictionaries[unit_class_key][unit_class_unit] = unit_class_unit_attributes.get(
+                        unit_class_key)
+
+    def _read_unit_modifiers(self, file_iter):
+        """Adds the unit modifiers section
+
+        Parameters
+        ----------
+        file_iter: iter
+            An iterator from self._get_line_iter.
+        """
+        self.dictionaries[HedKey.SIUnitModifier] = {}
+        self.dictionaries[HedKey.SIUnitSymbolModifier] = {}
+        for line in file_iter:
+            if line is False:
+                return
+
+            unit_modifier = self._get_tag_name(line)
+            unit_modifier_attributes = self._get_tag_attributes(line)
+            unit_modifier_desc = self._get_tag_description(line)
+
+            if unit_modifier_desc:
+                self.dictionaries[HedKey.Descriptions][HedKey.SIUnitModifier + unit_modifier] = unit_modifier_desc
+
+            for unit_modifier_key in constants.UNIT_MODIFIER_DICTIONARY_KEYS:
+                self.dictionaries[unit_modifier_key][unit_modifier] = unit_modifier_attributes.get(unit_modifier_key)
+
+    def _get_schema_attributes(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
 
         Parameters
@@ -87,13 +369,11 @@ class HedSchemaWikiParser:
         attribute_pairs = version_line.split(',')
         for pair in attribute_pairs:
             if pair.count(':') != 1:
-                continue
+                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID,
+                                   f"Found poorly matched key:value pair in header: {pair}", filename=self.filename)
             key, value = pair.split(':')
             key = key.strip()
             value = value.strip()
-            if key not in constants.HED_VALID_ATTRIBUTES:
-                continue
-
             final_attributes[key] = value
 
         return final_attributes
@@ -135,64 +415,6 @@ class HedSchemaWikiParser:
         """
         tag_line = re.sub(no_wiki_tag, '', tag_line)
         return tag_line
-
-    def _add_tags(self, wiki_file):
-        """Adds the main schema section, then calls another function to add the units etc.
-
-        Parameters
-        ----------
-        wiki_file: file object.
-            A file object that points to the HED wiki file.
-
-        Returns
-        -------
-
-        """
-        parent_tags = []
-        line = wiki_file.readline()
-        while line:
-            line = self._remove_nowiki_tag_from_line(line.strip())
-            if not line:
-                pass
-            elif line.startswith(END_SCHEMA_STRING):
-                self._add_units_and_attributes(wiki_file)
-                break
-            elif line.startswith(ROOT_TAG):
-                parent_tags = []
-                new_tag = self._add_tag_line(parent_tags, line)
-                parent_tags.append(new_tag)
-            else:
-                level = self._get_tag_level(line)
-                if level < len(parent_tags):
-                    parent_tags = parent_tags[:level]
-                new_tag = self._add_tag_line(parent_tags, line)
-                parent_tags.append(new_tag)
-            line = wiki_file.readline()
-
-    def _add_units_and_attributes(self, wiki_file):
-        """Add the units/attributes/etc sections from the wiki file.
-
-        Parameters
-        ----------
-        wiki_file: file object.
-            A file object that points to the HED wiki file.
-
-        Returns
-        -------
-
-        """
-        line = wiki_file.readline()
-        while line:
-            line = self._remove_nowiki_tag_from_line(line.strip())
-            if not line:
-                pass
-            elif line.startswith(END_STRING):
-                break
-            elif line.startswith(UNIT_MODIFIER_STRING):
-                self.add_unit_modifiers(wiki_file)
-            elif line.startswith(UNIT_CLASS_STRING):
-                self.add_unit_classes(wiki_file)
-            line = wiki_file.readline()
 
     @staticmethod
     def _get_tag_name(tag_line):
@@ -310,71 +532,3 @@ class HedSchemaWikiParser:
                     self.dictionaries[tag_attribute][long_tag_name.lower()] = attribute_value
 
         return tag_name
-
-    def add_unit_classes(self, wiki_file):
-        self.dictionaries[HedKey.DefaultUnits] = {}
-        self.dictionaries[HedKey.Units] = {}
-        for unit_class_key in constants.UNIT_CLASS_DICTIONARY_KEYS:
-            self.dictionaries[unit_class_key] = {}
-
-        line = wiki_file.readline()
-        current_unit_class = ""
-        while line:
-            line = self._remove_nowiki_tag_from_line(line.strip())
-            if not line:
-                break
-            else:
-                level = self._get_tag_level(line)
-                # This is a unit class
-                if level == 1:
-                    unit_class = self._get_tag_name(line)
-                    unit_class_attributes = self._get_tag_attributes(line)
-                    current_unit_class = unit_class
-                    unit_class_desc = self._get_tag_description(line)
-                    if unit_class_desc:
-                        self.dictionaries[HedKey.Descriptions][HedKey.Units + unit_class] = unit_class_desc
-                    for tag_attribute in unit_class_attributes:
-                        if tag_attribute in constants.STRING_ATTRIBUTE_DICTIONARY_KEYS:
-                            attribute_value = unit_class_attributes[tag_attribute]
-                        else:
-                            attribute_value = unit_class
-                        self.dictionaries[tag_attribute][unit_class] = attribute_value
-                else:
-                    unit_class_unit = self._get_tag_name(line)
-                    unit_class_unit_attributes = self._get_tag_attributes(line)
-                    unit_class_desc = self._get_tag_description(line)
-                    if unit_class_desc:
-                        self.dictionaries[HedKey.Descriptions][HedKey.Units + unit_class_unit] = unit_class_desc
-
-                    if current_unit_class not in self.dictionaries[HedKey.Units]:
-                        self.dictionaries[HedKey.Units][current_unit_class] = []
-                    self.dictionaries[HedKey.Units][current_unit_class].append(unit_class_unit)
-
-                    for unit_class_key in constants.UNIT_CLASS_DICTIONARY_KEYS:
-                        self.dictionaries[unit_class_key][unit_class_unit] = unit_class_unit_attributes.get(unit_class_key)
-
-            line = wiki_file.readline()
-
-    def add_unit_modifiers(self, wiki_file):
-        self.dictionaries[HedKey.SIUnitModifier] = {}
-        self.dictionaries[HedKey.SIUnitSymbolModifier] = {}
-
-        line = wiki_file.readline()
-        while line:
-            line = self._remove_nowiki_tag_from_line(line.strip())
-            if not line:
-                break
-            elif line.startswith(END_STRING):
-                break
-            else:
-                unit_modifier = self._get_tag_name(line)
-                unit_modifier_attributes = self._get_tag_attributes(line)
-                unit_modifier_desc = self._get_tag_description(line)
-
-                if unit_modifier_desc:
-                    self.dictionaries[HedKey.Descriptions][HedKey.SIUnitModifier + unit_modifier] = unit_modifier_desc
-
-                for unit_modifier_key in constants.UNIT_MODIFIER_DICTIONARY_KEYS:
-                    self.dictionaries[unit_modifier_key][unit_modifier] = unit_modifier_attributes.get(unit_modifier_key)
-
-            line = wiki_file.readline()
