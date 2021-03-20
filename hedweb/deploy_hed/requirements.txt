@@ -6,7 +6,7 @@ inflect==5.0.2
 et-xmlfile==1.0.1
 jdcal==1.4.1
 itsdangerous==1.1.0
-Jinja2==2.11.2
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 Werkzeug==1.0.1
 WTForms==2.3.3
