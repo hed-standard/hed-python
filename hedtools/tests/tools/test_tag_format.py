@@ -194,50 +194,51 @@ class TestConvertToLongTag(TestConvertTag):
         }
         self.validator(test_strings, expected_results, expected_errors)
 
-    def test_tag_slash_at_edge(self):
-        test_strings = {
-            'leadingSingle': '/Event',
-            'leadingExtension': '/Event/Extension',
-            'leadingMultiLevel': '/Vehicle/Train',
-            'leadingMultiLevelExtension': '/Vehicle/Train/Maglev',
-            'trailingSingle': 'Event/',
-            'trailingExtension': 'Event/Extension/',
-            'trailingMultiLevel': 'Vehicle/Train/',
-            'trailingMultiLevelExtension': 'Vehicle/Train/Maglev/',
-            'bothSingle': '/Event/',
-            'bothExtension': '/Event/Extension/',
-            'bothMultiLevel': '/Vehicle/Train/',
-            'bothMultiLevelExtension': '/Vehicle/Train/Maglev/',
-        }
-        expected_results = {
-            'leadingSingle': 'Event',
-            'leadingExtension': 'Event/Extension',
-            'leadingMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
-            'leadingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
-            'trailingSingle': 'Event',
-            'trailingExtension': 'Event/Extension',
-            'trailingMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
-            'trailingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
-            'bothSingle': 'Event',
-            'bothExtension': 'Event/Extension',
-            'bothMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
-            'bothMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
-        }
-        expected_errors = {
-            'leadingSingle': [],
-            'leadingExtension': [],
-            'leadingMultiLevel': [],
-            'leadingMultiLevelExtension': [],
-            'trailingSingle': [],
-            'trailingExtension': [],
-            'trailingMultiLevel': [],
-            'trailingMultiLevelExtension': [],
-            'bothSingle': [],
-            'bothExtension': [],
-            'bothMultiLevel': [],
-            'bothMultiLevelExtension': [],
-        }
-        self.validator(test_strings, expected_results, expected_errors)
+    # Deprecated tests
+    # def test_tag_slash_at_edge(self):
+    #     test_strings = {
+    #         'leadingSingle': '/Event',
+    #         'leadingExtension': '/Event/Extension',
+    #         'leadingMultiLevel': '/Vehicle/Train',
+    #         'leadingMultiLevelExtension': '/Vehicle/Train/Maglev',
+    #         'trailingSingle': 'Event/',
+    #         'trailingExtension': 'Event/Extension/',
+    #         'trailingMultiLevel': 'Vehicle/Train/',
+    #         'trailingMultiLevelExtension': 'Vehicle/Train/Maglev/',
+    #         'bothSingle': '/Event/',
+    #         'bothExtension': '/Event/Extension/',
+    #         'bothMultiLevel': '/Vehicle/Train/',
+    #         'bothMultiLevelExtension': '/Vehicle/Train/Maglev/',
+    #     }
+    #     expected_results = {
+    #         'leadingSingle': 'Event',
+    #         'leadingExtension': 'Event/Extension',
+    #         'leadingMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
+    #         'leadingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
+    #         'trailingSingle': 'Event',
+    #         'trailingExtension': 'Event/Extension',
+    #         'trailingMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
+    #         'trailingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
+    #         'bothSingle': 'Event',
+    #         'bothExtension': 'Event/Extension',
+    #         'bothMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
+    #         'bothMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
+    #     }
+    #     expected_errors = {
+    #         'leadingSingle': [],
+    #         'leadingExtension': [],
+    #         'leadingMultiLevel': [],
+    #         'leadingMultiLevelExtension': [],
+    #         'trailingSingle': [],
+    #         'trailingExtension': [],
+    #         'trailingMultiLevel': [],
+    #         'trailingMultiLevelExtension': [],
+    #         'bothSingle': [],
+    #         'bothExtension': [],
+    #         'bothMultiLevel': [],
+    #         'bothMultiLevelExtension': [],
+    #     }
+    #     self.validator(test_strings, expected_results, expected_errors)
 
 
 class TestConvertToShortTag(TestConvertTag):
@@ -445,50 +446,51 @@ class TestConvertToShortTag(TestConvertTag):
         }
         self.validator(test_strings, expected_results, expected_errors)
 
-    def test_tag_slash_at_edge(self):
-        test_strings = {
-            'leadingSingle': '/Event',
-            'leadingExtension': '/Event/Extension',
-            'leadingMultiLevel': '/Item/Object/Man-made/Vehicle/Train',
-            'leadingMultiLevelExtension': '/Item/Object/Man-made/Vehicle/Train/Maglev',
-            'trailingSingle': 'Event/',
-            'trailingExtension': 'Event/Extension/',
-            'trailingMultiLevel': 'Item/Object/Man-made/Vehicle/Train/',
-            'trailingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev/',
-            'bothSingle': '/Event/',
-            'bothExtension': '/Event/Extension/',
-            'bothMultiLevel': '/Item/Object/Man-made/Vehicle/Train/',
-            'bothMultiLevelExtension': '/Item/Object/Man-made/Vehicle/Train/Maglev/',
-        }
-        expected_results = {
-            'leadingSingle': 'Event',
-            'leadingExtension': 'Event/Extension',
-            'leadingMultiLevel': 'Train',
-            'leadingMultiLevelExtension': 'Train/Maglev',
-            'trailingSingle': 'Event',
-            'trailingExtension': 'Event/Extension',
-            'trailingMultiLevel': 'Train',
-            'trailingMultiLevelExtension': 'Train/Maglev',
-            'bothSingle': 'Event',
-            'bothExtension': 'Event/Extension',
-            'bothMultiLevel': 'Train',
-            'bothMultiLevelExtension': 'Train/Maglev',
-        }
-        expected_errors = {
-            'leadingSingle': [],
-            'leadingExtension': [],
-            'leadingMultiLevel': [],
-            'leadingMultiLevelExtension': [],
-            'trailingSingle': [],
-            'trailingExtension': [],
-            'trailingMultiLevel': [],
-            'trailingMultiLevelExtension': [],
-            'bothSingle': [],
-            'bothExtension': [],
-            'bothMultiLevel': [],
-            'bothMultiLevelExtension': [],
-        }
-        self.validator(test_strings, expected_results, expected_errors)
+    # Deprecated tests
+    # def test_tag_slash_at_edge(self):
+    #     test_strings = {
+    #         'leadingSingle': '/Event',
+    #         'leadingExtension': '/Event/Extension',
+    #         'leadingMultiLevel': '/Item/Object/Man-made/Vehicle/Train',
+    #         'leadingMultiLevelExtension': '/Item/Object/Man-made/Vehicle/Train/Maglev',
+    #         'trailingSingle': 'Event/',
+    #         'trailingExtension': 'Event/Extension/',
+    #         'trailingMultiLevel': 'Item/Object/Man-made/Vehicle/Train/',
+    #         'trailingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev/',
+    #         'bothSingle': '/Event/',
+    #         'bothExtension': '/Event/Extension/',
+    #         'bothMultiLevel': '/Item/Object/Man-made/Vehicle/Train/',
+    #         'bothMultiLevelExtension': '/Item/Object/Man-made/Vehicle/Train/Maglev/',
+    #     }
+    #     expected_results = {
+    #         'leadingSingle': 'Event',
+    #         'leadingExtension': 'Event/Extension',
+    #         'leadingMultiLevel': 'Train',
+    #         'leadingMultiLevelExtension': 'Train/Maglev',
+    #         'trailingSingle': 'Event',
+    #         'trailingExtension': 'Event/Extension',
+    #         'trailingMultiLevel': 'Train',
+    #         'trailingMultiLevelExtension': 'Train/Maglev',
+    #         'bothSingle': 'Event',
+    #         'bothExtension': 'Event/Extension',
+    #         'bothMultiLevel': 'Train',
+    #         'bothMultiLevelExtension': 'Train/Maglev',
+    #     }
+    #     expected_errors = {
+    #         'leadingSingle': [],
+    #         'leadingExtension': [],
+    #         'leadingMultiLevel': [],
+    #         'leadingMultiLevelExtension': [],
+    #         'trailingSingle': [],
+    #         'trailingExtension': [],
+    #         'trailingMultiLevel': [],
+    #         'trailingMultiLevelExtension': [],
+    #         'bothSingle': [],
+    #         'bothExtension': [],
+    #         'bothMultiLevel': [],
+    #         'bothMultiLevelExtension': [],
+    #     }
+    #     self.validator(test_strings, expected_results, expected_errors)
 
 
 class TestConvertHedStringToShort(TestConvertString):
@@ -517,11 +519,8 @@ class TestConvertHedStringToShort(TestConvertString):
             'threeMulti': 'Event/Sensory-event, Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5',
             'simpleGroup': '(Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5)',
             'groupAndTag': '(Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5), Item/Object/Man-made/Vehicle/Car',
-            'oneTildeGroup': 'Event/Sensory-event, (Item/Sound/Named-object-sound/Siren ~ Attribute/Environmental/Indoors)',
-            'twoTildeGroup':
-                'Event/Sensory-event, (Attribute/Agent-related/Cognitive-state/Awake ~ Attribute/Agent-related/Trait/Age/15 ~' +
-                ' Item/Sound/Named-object-sound/Siren, Item/Object/Man-made/Vehicle/Car, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),' +
-                ' Item/Object/Geometric',
+            'nestedGroup': '((Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5), Item/Object/Man-made/Vehicle/Car, Attribute/Environmental/Indoors)',
+            'nestedGroup2': '(Item/Object/Man-made/Vehicle/Car, Attribute/Environmental/Indoors, (Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5))'
         }
         expected_results = {
             'singleLevel': 'Event',
@@ -531,8 +530,8 @@ class TestConvertHedStringToShort(TestConvertString):
             'threeMulti': 'Sensory-event, Train, RGB-red/0.5',
             'simpleGroup': '(Train, RGB-red/0.5)',
             'groupAndTag': '(Train, RGB-red/0.5), Car',
-            'oneTildeGroup': 'Sensory-event, (Siren ~ Indoors)',
-            'twoTildeGroup': 'Sensory-event, (Awake ~ Age/15 ~ Siren, Car, RGB-red/0.5), Geometric',
+            'nestedGroup': '((Train, RGB-red/0.5), Car, Indoors)',
+            'nestedGroup2': '(Car, Indoors, (Train, RGB-red/0.5))'
         }
         expected_errors = {
             'singleLevel': [],
@@ -542,8 +541,8 @@ class TestConvertHedStringToShort(TestConvertString):
             'threeMulti': [],
             'simpleGroup': [],
             'groupAndTag': [],
-            'oneTildeGroup': [],
-            'twoTildeGroup': [],
+            'nestedGroup': [],
+            'nestedGroup2': [],
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -607,97 +606,99 @@ class TestConvertHedStringToShort(TestConvertString):
         }
         self.validator(test_strings, expected_results, expected_errors)
 
-    def test_string_slash_start_end(self):
-        test_strings = {
-            'leadingSingle': '/Event',
-            'leadingMultiLevel': '/Object/Man-made/Vehicle/Train',
-            'trailingSingle': 'Event/',
-            'trailingMultiLevel': 'Object/Man-made/Vehicle/Train/',
-            'bothSingle': '/Event/',
-            'bothMultiLevel': '/Object/Man-made/Vehicle/Train/',
-            'twoMixedOuter': '/Event,Object/Man-made/Vehicle/Train/',
-            'twoMixedInner': 'Event/,/Object/Man-made/Vehicle/Train',
-            'twoMixedBoth': '/Event/,/Object/Man-made/Vehicle/Train/',
-            'twoMixedBothGroup': '(/Event/,/Object/Man-made/Vehicle/Train/)',
-        }
-        expected_event = 'Event'
-        expected_train = 'Train'
-        expected_mixed = expected_event + ',' + expected_train
-        expected_results = {
-            'leadingSingle': expected_event,
-            'leadingMultiLevel': expected_train,
-            'trailingSingle': expected_event,
-            'trailingMultiLevel': expected_train,
-            'bothSingle': expected_event,
-            'bothMultiLevel': expected_train,
-            'twoMixedOuter': expected_mixed,
-            'twoMixedInner': expected_mixed,
-            'twoMixedBoth': expected_mixed,
-            'twoMixedBothGroup': '(' + expected_mixed + ')',
-        }
-        expected_errors = {
-            'leadingSingle': [],
-            'leadingMultiLevel': [],
-            'trailingSingle': [],
-            'trailingMultiLevel': [],
-            'bothSingle': [],
-            'bothMultiLevel': [],
-            'twoMixedOuter': [],
-            'twoMixedInner': [],
-            'twoMixedBoth': [],
-            'twoMixedBothGroup': [],
-        }
-        self.validator(test_strings, expected_results, expected_errors)
+    # Deprecated tests
+    # def test_string_slash_start_end(self):
+    #     test_strings = {
+    #         'leadingSingle': '/Event',
+    #         'leadingMultiLevel': '/Object/Man-made/Vehicle/Train',
+    #         'trailingSingle': 'Event/',
+    #         'trailingMultiLevel': 'Object/Man-made/Vehicle/Train/',
+    #         'bothSingle': '/Event/',
+    #         'bothMultiLevel': '/Object/Man-made/Vehicle/Train/',
+    #         'twoMixedOuter': '/Event,Object/Man-made/Vehicle/Train/',
+    #         'twoMixedInner': 'Event/,/Object/Man-made/Vehicle/Train',
+    #         'twoMixedBoth': '/Event/,/Object/Man-made/Vehicle/Train/',
+    #         'twoMixedBothGroup': '(/Event/,/Object/Man-made/Vehicle/Train/)',
+    #     }
+    #     expected_event = 'Event'
+    #     expected_train = 'Train'
+    #     expected_mixed = expected_event + ',' + expected_train
+    #     expected_results = {
+    #         'leadingSingle': expected_event,
+    #         'leadingMultiLevel': expected_train,
+    #         'trailingSingle': expected_event,
+    #         'trailingMultiLevel': expected_train,
+    #         'bothSingle': expected_event,
+    #         'bothMultiLevel': expected_train,
+    #         'twoMixedOuter': expected_mixed,
+    #         'twoMixedInner': expected_mixed,
+    #         'twoMixedBoth': expected_mixed,
+    #         'twoMixedBothGroup': '(' + expected_mixed + ')',
+    #     }
+    #     expected_errors = {
+    #         'leadingSingle': [],
+    #         'leadingMultiLevel': [],
+    #         'trailingSingle': [],
+    #         'trailingMultiLevel': [],
+    #         'bothSingle': [],
+    #         'bothMultiLevel': [],
+    #         'twoMixedOuter': [],
+    #         'twoMixedInner': [],
+    #         'twoMixedBoth': [],
+    #         'twoMixedBothGroup': [],
+    #     }
+    #     self.validator(test_strings, expected_results, expected_errors)
 
-    def test_string_extra_slash_space(self):
-        test_strings = {
-            'twoLevelDoubleSlash': 'Event//Extension',
-            'threeLevelDoubleSlash': 'Item//Object//Geometric',
-            'tripleSlashes': 'Item///Object///Geometric',
-            'mixedSingleAndDoubleSlashes': 'Item///Object/Geometric',
-            'singleSlashWithSpace': 'Event/ Extension',
-            'doubleSlashSurroundingSpace': 'Event/ /Extension',
-            'doubleSlashThenSpace': 'Event// Extension',
-            'sosPattern': 'Event///   ///Extension',
-            'alternatingSlashSpace': 'Item/ / Object/ / Geometric',
-            'leadingDoubleSlash': '//Event/Extension',
-            'trailingDoubleSlash': 'Event/Extension//',
-            'leadingDoubleSlashWithSpace': '/ /Event/Extension',
-            'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
-        }
-        expected_event_extension = 'Event/Extension'
-        expected_geometric = 'Geometric'
-        expected_results = {
-            'twoLevelDoubleSlash': expected_event_extension,
-            'threeLevelDoubleSlash': expected_geometric,
-            'tripleSlashes': expected_geometric,
-            'mixedSingleAndDoubleSlashes': expected_geometric,
-            'singleSlashWithSpace': expected_event_extension,
-            'doubleSlashSurroundingSpace': expected_event_extension,
-            'doubleSlashThenSpace': expected_event_extension,
-            'sosPattern': expected_event_extension,
-            'alternatingSlashSpace': expected_geometric,
-            'leadingDoubleSlash': expected_event_extension,
-            'trailingDoubleSlash': expected_event_extension,
-            'leadingDoubleSlashWithSpace': expected_event_extension,
-            'trailingDoubleSlashWithSpace': expected_event_extension,
-        }
-        expected_errors = {
-            'twoLevelDoubleSlash': [],
-            'threeLevelDoubleSlash': [],
-            'tripleSlashes': [],
-            'mixedSingleAndDoubleSlashes': [],
-            'singleSlashWithSpace': [],
-            'doubleSlashSurroundingSpace': [],
-            'doubleSlashThenSpace': [],
-            'sosPattern': [],
-            'alternatingSlashSpace': [],
-            'leadingDoubleSlash': [],
-            'trailingDoubleSlash': [],
-            'leadingDoubleSlashWithSpace': [],
-            'trailingDoubleSlashWithSpace': [],
-        }
-        self.validator(test_strings, expected_results, expected_errors)
+    # Deprecated tests
+    # def test_string_extra_slash_space(self):
+    #     test_strings = {
+    #         'twoLevelDoubleSlash': 'Event//Extension',
+    #         'threeLevelDoubleSlash': 'Item//Object//Geometric',
+    #         'tripleSlashes': 'Item///Object///Geometric',
+    #         'mixedSingleAndDoubleSlashes': 'Item///Object/Geometric',
+    #         'singleSlashWithSpace': 'Event/ Extension',
+    #         'doubleSlashSurroundingSpace': 'Event/ /Extension',
+    #         'doubleSlashThenSpace': 'Event// Extension',
+    #         'sosPattern': 'Event///   ///Extension',
+    #         'alternatingSlashSpace': 'Item/ / Object/ / Geometric',
+    #         'leadingDoubleSlash': '//Event/Extension',
+    #         'trailingDoubleSlash': 'Event/Extension//',
+    #         'leadingDoubleSlashWithSpace': '/ /Event/Extension',
+    #         'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
+    #     }
+    #     expected_event_extension = 'Event/Extension'
+    #     expected_geometric = 'Geometric'
+    #     expected_results = {
+    #         'twoLevelDoubleSlash': expected_event_extension,
+    #         'threeLevelDoubleSlash': expected_geometric,
+    #         'tripleSlashes': expected_geometric,
+    #         'mixedSingleAndDoubleSlashes': expected_geometric,
+    #         'singleSlashWithSpace': expected_event_extension,
+    #         'doubleSlashSurroundingSpace': expected_event_extension,
+    #         'doubleSlashThenSpace': expected_event_extension,
+    #         'sosPattern': expected_event_extension,
+    #         'alternatingSlashSpace': expected_geometric,
+    #         'leadingDoubleSlash': expected_event_extension,
+    #         'trailingDoubleSlash': expected_event_extension,
+    #         'leadingDoubleSlashWithSpace': expected_event_extension,
+    #         'trailingDoubleSlashWithSpace': expected_event_extension,
+    #     }
+    #     expected_errors = {
+    #         'twoLevelDoubleSlash': [],
+    #         'threeLevelDoubleSlash': [],
+    #         'tripleSlashes': [],
+    #         'mixedSingleAndDoubleSlashes': [],
+    #         'singleSlashWithSpace': [],
+    #         'doubleSlashSurroundingSpace': [],
+    #         'doubleSlashThenSpace': [],
+    #         'sosPattern': [],
+    #         'alternatingSlashSpace': [],
+    #         'leadingDoubleSlash': [],
+    #         'trailingDoubleSlash': [],
+    #         'leadingDoubleSlashWithSpace': [],
+    #         'trailingDoubleSlashWithSpace': [],
+    #     }
+    #     self.validator(test_strings, expected_results, expected_errors)
 
 
 class TestConvertHedStringToLong(TestConvertString):
@@ -726,8 +727,8 @@ class TestConvertHedStringToLong(TestConvertString):
             'threeMulti': 'Sensory-event, Train, RGB-red/0.5',
             'simpleGroup': '(Train, RGB-red/0.5)',
             'groupAndTag': '(Train, RGB-red/0.5), Car',
-            'oneTildeGroup': 'Sensory-event, (Siren ~ Indoors)',
-            'twoTildeGroup': 'Sensory-event, (Awake ~ Age/15 ~ Siren, Car, RGB-red/0.5), Geometric',
+            'nestedGroup': '((Train, RGB-red/0.5), Car, Indoors)',
+            'nestedGroup2': '(Car, Indoors, (Train, RGB-red/0.5))'
         }
         expected_results = {
             'singleLevel': 'Event',
@@ -737,11 +738,8 @@ class TestConvertHedStringToLong(TestConvertString):
             'threeMulti': 'Event/Sensory-event, Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5',
             'simpleGroup': '(Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5)',
             'groupAndTag': '(Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5), Item/Object/Man-made/Vehicle/Car',
-            'oneTildeGroup': 'Event/Sensory-event, (Item/Sound/Named-object-sound/Siren ~ Attribute/Environmental/Indoors)',
-            'twoTildeGroup':
-                'Event/Sensory-event, (Attribute/Agent-related/Cognitive-state/Awake ~ Attribute/Agent-related/Trait/Age/15 ~' +
-                ' Item/Sound/Named-object-sound/Siren, Item/Object/Man-made/Vehicle/Car, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),' +
-                ' Item/Object/Geometric',
+            'nestedGroup': '((Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5), Item/Object/Man-made/Vehicle/Car, Attribute/Environmental/Indoors)',
+            'nestedGroup2': '(Item/Object/Man-made/Vehicle/Car, Attribute/Environmental/Indoors, (Item/Object/Man-made/Vehicle/Train, Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5))'
         }
         expected_errors = {
             'singleLevel': [],
@@ -751,8 +749,8 @@ class TestConvertHedStringToLong(TestConvertString):
             'threeMulti': [],
             'simpleGroup': [],
             'groupAndTag': [],
-            'oneTildeGroup': [],
-            'twoTildeGroup': [],
+            'nestedGroup': [],
+            'nestedGroup2': [],
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -816,97 +814,98 @@ class TestConvertHedStringToLong(TestConvertString):
         }
         self.validator(test_strings, expected_results, expected_errors)
 
-    def test_string_slash_start_end(self):
-        test_strings = {
-            'leadingSingle': '/Event',
-            'leadingMultiLevel': '/Vehicle/Train',
-            'trailingSingle': 'Event/',
-            'trailingMultiLevel': 'Vehicle/Train/',
-            'bothSingle': '/Event/',
-            'bothMultiLevel': '/Vehicle/Train/',
-            'twoMixedOuter': '/Event,Vehicle/Train/',
-            'twoMixedInner': 'Event/,/Vehicle/Train',
-            'twoMixedBoth': '/Event/,/Vehicle/Train/',
-            'twoMixedBothGroup': '(/Event/,/Vehicle/Train/)',
-        }
-        expected_event = 'Event'
-        expected_train = 'Item/Object/Man-made/Vehicle/Train'
-        expected_mixed = expected_event + ',' + expected_train
-        expected_results = {
-            'leadingSingle': expected_event,
-            'leadingMultiLevel': expected_train,
-            'trailingSingle': expected_event,
-            'trailingMultiLevel': expected_train,
-            'bothSingle': expected_event,
-            'bothMultiLevel': expected_train,
-            'twoMixedOuter': expected_mixed,
-            'twoMixedInner': expected_mixed,
-            'twoMixedBoth': expected_mixed,
-            'twoMixedBothGroup': '(' + expected_mixed + ')',
-        }
-        expected_errors = {
-            'leadingSingle': [],
-            'leadingMultiLevel': [],
-            'trailingSingle': [],
-            'trailingMultiLevel': [],
-            'bothSingle': [],
-            'bothMultiLevel': [],
-            'twoMixedOuter': [],
-            'twoMixedInner': [],
-            'twoMixedBoth': [],
-            'twoMixedBothGroup': [],
-        }
-        self.validator(test_strings, expected_results, expected_errors)
+    # Deprecated tests
+    # def test_string_slash_start_end(self):
+    #     test_strings = {
+    #         'leadingSingle': '/Event',
+    #         'leadingMultiLevel': '/Vehicle/Train',
+    #         'trailingSingle': 'Event/',
+    #         'trailingMultiLevel': 'Vehicle/Train/',
+    #         'bothSingle': '/Event/',
+    #         'bothMultiLevel': '/Vehicle/Train/',
+    #         'twoMixedOuter': '/Event,Vehicle/Train/',
+    #         'twoMixedInner': 'Event/,/Vehicle/Train',
+    #         'twoMixedBoth': '/Event/,/Vehicle/Train/',
+    #         'twoMixedBothGroup': '(/Event/,/Vehicle/Train/)',
+    #     }
+    #     expected_event = 'Event'
+    #     expected_train = 'Item/Object/Man-made/Vehicle/Train'
+    #     expected_mixed = expected_event + ',' + expected_train
+    #     expected_results = {
+    #         'leadingSingle': expected_event,
+    #         'leadingMultiLevel': expected_train,
+    #         'trailingSingle': expected_event,
+    #         'trailingMultiLevel': expected_train,
+    #         'bothSingle': expected_event,
+    #         'bothMultiLevel': expected_train,
+    #         'twoMixedOuter': expected_mixed,
+    #         'twoMixedInner': expected_mixed,
+    #         'twoMixedBoth': expected_mixed,
+    #         'twoMixedBothGroup': '(' + expected_mixed + ')',
+    #     }
+    #     expected_errors = {
+    #         'leadingSingle': [],
+    #         'leadingMultiLevel': [],
+    #         'trailingSingle': [],
+    #         'trailingMultiLevel': [],
+    #         'bothSingle': [],
+    #         'bothMultiLevel': [],
+    #         'twoMixedOuter': [],
+    #         'twoMixedInner': [],
+    #         'twoMixedBoth': [],
+    #         'twoMixedBothGroup': [],
+    #     }
+    #     self.validator(test_strings, expected_results, expected_errors)
 
-    def test_string_extra_slash_space(self):
-        test_strings = {
-            'twoLevelDoubleSlash': 'Event//Extension',
-            'threeLevelDoubleSlash': 'Vehicle//Boat//Tanker',
-            'tripleSlashes': 'Vehicle///Boat///Tanker',
-            'mixedSingleAndDoubleSlashes': 'Vehicle///Boat/Tanker',
-            'singleSlashWithSpace': 'Event/ Extension',
-            'doubleSlashSurroundingSpace': 'Event/ /Extension',
-            'doubleSlashThenSpace': 'Event// Extension',
-            'sosPattern': 'Event///   ///Extension',
-            'alternatingSlashSpace': 'Vehicle/ / Boat/ / Tanker',
-            'leadingDoubleSlash': '//Event/Extension',
-            'trailingDoubleSlash': 'Event/Extension//',
-            'leadingDoubleSlashWithSpace': '/ /Event/Extension',
-            'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
-        }
-        expected_event_extension = 'Event/Extension'
-        expected_tanker = 'Item/Object/Man-made/Vehicle/Boat/Tanker'
-        expected_results = {
-            'twoLevelDoubleSlash': expected_event_extension,
-            'threeLevelDoubleSlash': expected_tanker,
-            'tripleSlashes': expected_tanker,
-            'mixedSingleAndDoubleSlashes': expected_tanker,
-            'singleSlashWithSpace': expected_event_extension,
-            'doubleSlashSurroundingSpace': expected_event_extension,
-            'doubleSlashThenSpace': expected_event_extension,
-            'sosPattern': expected_event_extension,
-            'alternatingSlashSpace': expected_tanker,
-            'leadingDoubleSlash': expected_event_extension,
-            'trailingDoubleSlash': expected_event_extension,
-            'leadingDoubleSlashWithSpace': expected_event_extension,
-            'trailingDoubleSlashWithSpace': expected_event_extension,
-        }
-        expected_errors = {
-            'twoLevelDoubleSlash': [],
-            'threeLevelDoubleSlash': [],
-            'tripleSlashes': [],
-            'mixedSingleAndDoubleSlashes': [],
-            'singleSlashWithSpace': [],
-            'doubleSlashSurroundingSpace': [],
-            'doubleSlashThenSpace': [],
-            'sosPattern': [],
-            'alternatingSlashSpace': [],
-            'leadingDoubleSlash': [],
-            'trailingDoubleSlash': [],
-            'leadingDoubleSlashWithSpace': [],
-            'trailingDoubleSlashWithSpace': [],
-        }
-        self.validator(test_strings, expected_results, expected_errors)
+    # def test_string_extra_slash_space(self):
+    #     test_strings = {
+    #         'twoLevelDoubleSlash': 'Event//Extension',
+    #         'threeLevelDoubleSlash': 'Vehicle//Boat//Tanker',
+    #         'tripleSlashes': 'Vehicle///Boat///Tanker',
+    #         'mixedSingleAndDoubleSlashes': 'Vehicle///Boat/Tanker',
+    #         'singleSlashWithSpace': 'Event/ Extension',
+    #         'doubleSlashSurroundingSpace': 'Event/ /Extension',
+    #         'doubleSlashThenSpace': 'Event// Extension',
+    #         'sosPattern': 'Event///   ///Extension',
+    #         'alternatingSlashSpace': 'Vehicle/ / Boat/ / Tanker',
+    #         'leadingDoubleSlash': '//Event/Extension',
+    #         'trailingDoubleSlash': 'Event/Extension//',
+    #         'leadingDoubleSlashWithSpace': '/ /Event/Extension',
+    #         'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
+    #     }
+    #     expected_event_extension = 'Event/Extension'
+    #     expected_tanker = 'Item/Object/Man-made/Vehicle/Boat/Tanker'
+    #     expected_results = {
+    #         'twoLevelDoubleSlash': expected_event_extension,
+    #         'threeLevelDoubleSlash': expected_tanker,
+    #         'tripleSlashes': expected_tanker,
+    #         'mixedSingleAndDoubleSlashes': expected_tanker,
+    #         'singleSlashWithSpace': expected_event_extension,
+    #         'doubleSlashSurroundingSpace': expected_event_extension,
+    #         'doubleSlashThenSpace': expected_event_extension,
+    #         'sosPattern': expected_event_extension,
+    #         'alternatingSlashSpace': expected_tanker,
+    #         'leadingDoubleSlash': expected_event_extension,
+    #         'trailingDoubleSlash': expected_event_extension,
+    #         'leadingDoubleSlashWithSpace': expected_event_extension,
+    #         'trailingDoubleSlashWithSpace': expected_event_extension,
+    #     }
+    #     expected_errors = {
+    #         'twoLevelDoubleSlash': [],
+    #         'threeLevelDoubleSlash': [],
+    #         'tripleSlashes': [],
+    #         'mixedSingleAndDoubleSlashes': [],
+    #         'singleSlashWithSpace': [],
+    #         'doubleSlashSurroundingSpace': [],
+    #         'doubleSlashThenSpace': [],
+    #         'sosPattern': [],
+    #         'alternatingSlashSpace': [],
+    #         'leadingDoubleSlash': [],
+    #         'trailingDoubleSlash': [],
+    #         'leadingDoubleSlashWithSpace': [],
+    #         'trailingDoubleSlashWithSpace': [],
+    #     }
+    #     self.validator(test_strings, expected_results, expected_errors)
 
 
 if __name__ == "__main__":

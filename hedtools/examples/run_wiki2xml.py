@@ -11,9 +11,19 @@ import hed
 from hed import schema
 
 if __name__ == '__main__':
-    hed_wiki_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/HED-generation3-schema.mediawiki'
+    hed_wiki_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/HED-generation2-schema-V2.0.0.mediawiki'
     local_hed_file = None
     xml_location, errors = schema.convert_schema_to_format(hed_wiki_url, local_hed_file=local_hed_file)
     hed.get_printable_issue_string(validation_issues=errors, title="Errors in HED-generation3-schema.mediawiki")
     if xml_location:
-        move(xml_location, "output.xml")
+        move(xml_location, "outputGen2.xml")
+
+    try:
+        hed_wiki_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/HED-generation3-schema-V2.0.0.mediawiki'
+        local_hed_file = None
+        xml_location, errors = schema.convert_schema_to_format(hed_wiki_url, local_hed_file=local_hed_file)
+        hed.get_printable_issue_string(validation_issues=errors, title="Errors in HED-generation3-schema.mediawiki")
+        if xml_location:
+            move(xml_location, "outputGen3.xml")
+    except KeyError:
+        print("Error: Cannot convert current Hed 3g schema.  Most likely due to attributes section being unsupported.")
