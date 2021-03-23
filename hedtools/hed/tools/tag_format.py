@@ -50,7 +50,6 @@ class TagFormat:
             error = self._error_handler.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_tag=hed_string)
             return hed_string, error
 
-        hed_string = hed_string_util.remove_slashes_and_spaces(hed_string)
 
         errors = []
         if hed_string == "":
@@ -96,8 +95,6 @@ class TagFormat:
         if not self._short_tag_mapping:
             error = self._error_handler.format_schema_error(SchemaErrors.INVALID_SCHEMA, hed_string)
             return hed_string, error
-
-        hed_string = hed_string_util.remove_slashes_and_spaces(hed_string)
 
         errors = []
         if hed_string == "":
@@ -150,12 +147,6 @@ class TagFormat:
         errors: list
             a list of errors while converting
         """
-        # Remove leading and trailing slashes
-        if hed_tag.startswith('/'):
-            hed_tag = hed_tag[1:]
-        if hed_tag.endswith('/'):
-            hed_tag = hed_tag[:-1]
-
         clean_tag = hed_tag.lower()
         split_tags = clean_tag.split("/")
 
@@ -236,11 +227,6 @@ class TagFormat:
         errors: list
             a list of errors while converting
         """
-        # Remove leading and trailing slashes
-        if hed_tag.startswith('/'):
-            hed_tag = hed_tag[1:]
-        if hed_tag.endswith('/'):
-            hed_tag = hed_tag[:-1]
 
         clean_tag = hed_tag.lower()
         split_tag = clean_tag.split("/")

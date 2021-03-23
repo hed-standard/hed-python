@@ -13,7 +13,9 @@ class Test(unittest.TestCase):
         hed_xml_file = os.path.join(cls.base_data_dir, "HED8.0.0-alpha.1.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.json_filename = os.path.join(cls.base_data_dir, "both_types_events.json")
+        cls.json_def_filename = os.path.join(cls.base_data_dir, "both_types_events_with_defs.json")
         cls.default_sidecar = ColumnDefGroup(cls.json_filename)
+        cls.json_def_sidecar = ColumnDefGroup(cls.json_def_filename)
 
     def test_invalid_filenames(self):
         # Handle missing or invalid files.
@@ -85,6 +87,13 @@ class Test(unittest.TestCase):
     #
     # def validate_entries(self, hed_schema=None, display_filename=None):
     #
+
+    def test_validate_column_group(self):
+        validation_issues = self.json_def_sidecar.validate_entries(hed_schema=self.hed_schema)
+        self.assertEqual(len(validation_issues), 0)
+
+        validation_issues = self.default_sidecar.validate_entries(hed_schema=self.hed_schema)
+        self.assertEqual(len(validation_issues), 0)
 
 if __name__ == '__main__':
     unittest.main()

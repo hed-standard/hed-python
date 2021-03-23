@@ -1,26 +1,19 @@
-from hed.util.hed_string_util import split_hed_string
-from hed.util.def_dict import DefDict
+from hed.util.hed_string import HedString, HedGroup
+from hed.util.def_dict import DefDict, DefTagNames
 
 
 class DefinitionMapper:
     """Class responsible for gathering/removing definitions from hed strings,
         and also replacing labels in hed strings with the gathered definitions."""
-    DLABEL_ORG_KEY = 'Label-def'
-    ELABEL_ORG_KEY = 'Label-exp'
-    DLABEL_KEY = DLABEL_ORG_KEY.lower()
-    ELABEL_KEY = ELABEL_ORG_KEY.lower()
-
-    DEF_KEY = "definition"
-    ORG_KEY = "organizational"
 
     def __init__(self, def_dicts=None, hed_schema=None):
         """
-        Class to handle mapping definitions from hed strings to fill them in with their vlaues.
+        Class to handle mapping definitions from hed strings to fill them in with their values.
 
         Parameters
         ----------
         def_dicts: [DefDict]
-            DefDict's containing all the definitions this mapper should initialize with.  More can be added later.
+            DefDicts containing all the definitions this mapper should initialize with.  More can be added later.
         hed_schema : HedSchema, optional
             Used to determine where definition tags are in the schema.  This is technically optional, but
             only short form definition tags will work if this is absent.
@@ -28,13 +21,13 @@ class DefinitionMapper:
         self._gathered_defs = {}
 
         if hed_schema:
-            self._def_tag_versions = hed_schema.get_all_forms_of_tag(self.DEF_KEY)
-            self._label_tag_versions = hed_schema.get_all_forms_of_tag(self.DLABEL_KEY)
+            self._def_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DEF_KEY)
+            self._label_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DLABEL_KEY)
             if not self._label_tag_versions:
-                self._label_tag_versions = [self.DLABEL_KEY + "/"]
+                self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
         else:
-            self._def_tag_versions = [self.DEF_KEY + "/"]
-            self._label_tag_versions = [self.DLABEL_KEY + "/"]
+            self._def_tag_versions = [DefTagNames.DEF_KEY + "/"]
+            self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
 
         if def_dicts:
             self.add_definitions(def_dicts)
@@ -89,48 +82,47 @@ class DefinitionMapper:
         """
         # First see if the word definition or dLabel is found at all.  Just move on if not.
         hed_string_lower = hed_string.lower()
-        if self.DLABEL_KEY not in hed_string_lower and \
-                self.DEF_KEY not in hed_string_lower:
+        if DefTagNames.DLABEL_KEY not in hed_string_lower and \
+                DefTagNames.DEF_KEY not in hed_string_lower:
             return hed_string
 
         def_tag_versions = self._def_tag_versions
         label_tag_versions = self._label_tag_versions
 
-        hed_tags = split_hed_string(hed_string)
+        split_string = HedString(hed_string)
+        remove_groups = []
 
-        indexes_to_change = []
-        for is_hed_tag, (startpos, endpos) in hed_tags:
-            tag = hed_string[startpos:endpos]
-            if is_hed_tag:
-                is_def_tag = DefinitionMapper._check_tag_starts_with(tag, def_tag_versions)
+        for tag_group in split_string.get_all_groups():
+            for tag in tag_group.tags():
+                # This case should be fairly rare compared to expanding definitions.
+                is_def_tag = DefinitionMapper._check_tag_starts_with(str(tag), def_tag_versions)
                 if is_def_tag:
-                    indexes_to_change.append((startpos, None, None))
-                    continue
+                    remove_groups.append(tag_group)
+                    break
 
-                is_label_tag = DefinitionMapper._check_tag_starts_with(tag, label_tag_versions)
+                is_label_tag = DefinitionMapper._check_tag_starts_with(str(tag), label_tag_versions)
                 if is_label_tag:
-                    indexes_to_change.append((startpos, is_label_tag, tag))
+                    placeholder = None
+                    found_slash = is_label_tag.find("/")
+                    if found_slash != -1:
+                        placeholder = is_label_tag[found_slash + 1:]
+                        is_label_tag = is_label_tag[:found_slash]
+
+                    label_tag_lower = is_label_tag.lower()
+                    # Ignore label tags we can't identify.  Probably make this a warning?
+                    if label_tag_lower not in self._gathered_defs:
+                        continue
+
+                    def_contents = self._gathered_defs[label_tag_lower].get_definition(placeholder_value=placeholder)
+
+                    def_group = HedGroup(hed_string, startpos=tag.span[0], endpos=tag.span[1], contents=def_contents)
+                    tag_group.replace_tag_object(tag, def_group)
                     continue
 
-        final_string = hed_string
-        # print(f"Original String: {final_string}")
-        # Do this in reverse order so we don't need to update string indexes
-        for tag_index, label_tag, full_label_tag in reversed(indexes_to_change):
-            replace_with = ""
-            if full_label_tag:
-                to_remove = full_label_tag
-                label_tag_lower = label_tag.lower()
-                # Just leave definitions in place if they aren't found.
-                if label_tag_lower not in self._gathered_defs:
-                    continue
-                replace_with = self._gathered_defs[label_tag_lower]
-            else:
-                extents = self._find_tag_group_extent(final_string, tag_index, remove_comma=True)
-                to_remove = hed_string[extents[0]:extents[1]]
-                # print(f"To remove: '{to_remove}'")
-            final_string = final_string.replace(to_remove, replace_with)
-        # print(final_string)
-        return final_string
+        if remove_groups:
+            split_string.remove_groups(remove_groups)
+
+        return str(split_string)
 
     @staticmethod
     def _check_tag_starts_with(hed_tag, possible_starts_with_list):
@@ -154,74 +146,3 @@ class DefinitionMapper:
                 found_tag = hed_tag[len(start_with_version):]
                 return found_tag
         return None
-
-    @staticmethod
-    def _find_tag_group_extent(hed_string, starting_tag_index, remove_comma=True):
-        """
-        Returns the starting/ending index into the string of the tag group at starting_tag_index in hed_string
-
-        eg (tag1, tag2, (tag3, tag4)) will return (0, 13) if 0 <= starting_tag_index < 13 and
-                will return (13, 24) if 13 <= starting_tag_index < 24
-                will return (0, 24) if starting_tag_index == 24
-
-        Parameters
-        ----------
-        hed_string : str
-            The hed string to gather the tag extents from
-        starting_tag_index : int
-            Index into the string to gather tag extents from
-        remove_comma : bool
-            If True, extents will include the now extraneous comma (between tag2 and tag3
-                above if removing tag3 in above example)
-        Returns
-        -------
-        start_index: int
-            The first index of the full tag group
-        end_index: int
-            The last index of the full tag group
-        """
-        paren_counter = 0
-        start_index_a = 0
-        end_index_a = len(hed_string)
-        start_index = start_index_a
-        end_index = end_index_a
-        for i in range(starting_tag_index, -1, -1):
-            if hed_string[i] == ')':
-                paren_counter += 1
-            elif hed_string[i] == '(':
-                if paren_counter == 0:
-                    start_index = i
-                    break
-                paren_counter -= 1
-
-        paren_counter = 0
-        for i in range(starting_tag_index, end_index):
-            if hed_string[i] == '(':
-                paren_counter += 1
-            elif hed_string[i] == ')':
-                if paren_counter == 0:
-                    end_index = i + 1
-                    break
-                paren_counter -= 1
-
-        if remove_comma:
-            found_comma = False
-            # First check if a comma is before the string.
-            if start_index > 0:
-                for i in range(start_index - 1, -1, -1):
-                    if hed_string[i] == ',':
-                        found_comma = True
-                    elif hed_string[i] != ' ':
-                        break
-                    start_index = i
-
-            # Now check if one is at the end if we didn't already find one.
-            if not found_comma and end_index < end_index_a:
-                for i in range(end_index, end_index_a):
-                    if hed_string[i] == ',':
-                        continue
-                    elif hed_string[i] != ' ':
-                        break
-                    end_index = i + 1
-
-        return start_index, end_index

@@ -2,7 +2,7 @@ import random
 import unittest
 import os
 
-from hed.util.hed_string_delimiter import HedStringDelimiter
+from hed.util.hed_string import HedString
 from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 from hed.util.error_types import ErrorContext
@@ -26,9 +26,7 @@ class Test(unittest.TestCase):
         cls.category_key = 'Category'
         cls.hed_string_with_multiple_unique_tags = 'event/label/this is a label,event/label/this is another label'
         cls.hed_string_with_invalid_tags = 'this/is/not/a/valid/tag1,this/is/not/a/valid/tag2'
-        cls.hed_string_with_no_required_tags = 'no/required/tags1,no/required/tags2'
-        cls.hed_string_with_too_many_tildes = '(this/is/not/a/valid/tag1~this/is/not/a/valid/tag2' \
-                                              '~this/is/not/a/valid/tag3~this/is/not/a/valid/tag4)'
+        cls.hed_string_with_no_required_tags = 'no/required/tags1,no/required/tags'
         cls.attribute_onset_tag = 'Attribute/Onset'
         cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
         cls.category_tags = 'Participant response, Stimulus'
@@ -53,28 +51,23 @@ class Test(unittest.TestCase):
         self.assertTrue(display_filename in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_individual_tags_in_hed_string(self):
-        hed_string_delimiter = HedStringDelimiter(self.hed_string_with_invalid_tags)
+        hed_string_delimiter = HedString(self.hed_string_with_invalid_tags)
         validation_issues = self.generic_hed_input_reader._validate_individual_tags_in_hed_string(hed_string_delimiter)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
     def test__validate_top_levels_in_hed_string(self):
-        hed_string_delimiter = HedStringDelimiter(self.hed_string_with_no_required_tags)
-        validation_issues = self.generic_hed_input_reader._validate_top_level_in_hed_string(hed_string_delimiter)
+        hed_string_delimiter = HedString(self.hed_string_with_no_required_tags)
+        validation_issues = self.generic_hed_input_reader._validate_tags_in_hed_string(hed_string_delimiter)
         self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
     def test__validate_tag_levels_in_hed_string(self):
-        hed_string_delimiter = HedStringDelimiter(self.hed_string_with_multiple_unique_tags)
+        hed_string_delimiter = HedString(self.hed_string_with_multiple_unique_tags)
         validation_issues = self.generic_hed_input_reader._validate_tag_levels_in_hed_string(hed_string_delimiter)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
-    def test__validate_groups_in_hed_string(self):
-        hed_string_delimiter = HedStringDelimiter(self.hed_string_with_too_many_tildes)
-        validation_issues = self.generic_hed_input_reader._validate_groups_in_hed_string(hed_string_delimiter)
-        self.assertIsInstance(validation_issues, list)
-        self.assertTrue(validation_issues)
 
     def test__append_validation_issues_if_found(self):
         row_number = random.randint(0, 100)
@@ -112,13 +105,6 @@ class Test(unittest.TestCase):
         validation_issues = self.generic_hed_input_reader.validate_column_hed_string(self.hed_string_with_invalid_tags)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
-
-    def test_get_previous_original_and_formatted_tag(self):
-        loop_index = 1
-        previous_original_tag, previous_formatted_tag = HedValidator.get_previous_original_and_formatted_tag(
-            self.original_and_formatted_tag, loop_index)
-        self.assertEqual(previous_original_tag, self.original_and_formatted_tag[0][0])
-        self.assertEqual(previous_formatted_tag, self.original_and_formatted_tag[0][1])
 
 
 if __name__ == '__main__':
