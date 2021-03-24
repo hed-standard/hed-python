@@ -63,7 +63,7 @@ class HedSchema:
         return local_wiki_file
 
     def __eq__(self, other):
-        if self.schema_attributes != other.schema_attributes:
+        if self.dictionaries != other.dictionaries:
             return False
         if self.schema_attributes != other.schema_attributes:
             return False
