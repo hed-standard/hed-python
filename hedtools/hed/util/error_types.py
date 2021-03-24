@@ -11,24 +11,25 @@ class ErrorContext:
     FILE_NAME = 'ec_filename'
     SIDECAR_COLUMN_NAME = 'ec_sidecarColumnName'
     SIDECAR_KEY_NAME = 'ec_sidecarKeyName'
-    SIDECAR_HED_STRING = 'ec_sidecarHedString'
     ROW = 'ec_row'
     COLUMN = 'ec_column'
+    HED_STRING = 'ec_HedString'
 
 
 class ValidationErrors:
     # General validation errors
     UNIT_CLASS_INVALID_UNIT = 'unitClassInvalidUnit'
-    EXTRA_DELIMITER = 'extraDelimiter'
+    EMPTY_TAG = 'extraComma'
     INVALID_CHARACTER = 'invalidCharacter'
     INVALID_COMMA = 'extraCommaOrInvalid'
     COMMA_MISSING = 'commaMissing'
     DUPLICATE = 'duplicateTag'
     PARENTHESES = 'parentheses'
     REQUIRE_CHILD = 'childRequired'
-    EXTRA_TILDE = 'tooManyTildes'
     MULTIPLE_UNIQUE = 'multipleUniqueTags'
     INVALID_TAG = 'invalidTag'
+    EXTRA_SLASHES_OR_SPACES = 'extraSlashes'
+    TILDES_NOT_SUPPORTED = 'invalidTilde'
 
 
 class ValidationWarnings:
@@ -64,7 +65,8 @@ class SchemaWarnings:
 
 class DefinitionErrors:
     WRONG_NUMBER_DEF_TAGS = 'wrongNumberDefTags'
-    WRONG_NUMBER_ORG_TAGS = 'wrongNumberOrgTags'
     WRONG_NUMBER_GROUP_TAGS = 'wrongNumberGroupTags'
+    WRONG_NUMBER_PLACEHOLDER_TAGS = 'wrongNumberPlaceholderTags'
     DUPLICATE_DEFINITION = 'duplicateDefinition'
     TAG_IN_SCHEMA = 'defAlreadyInSchema'
+    INVALID_DEF_EXTENSION = 'invalidDefExtension'

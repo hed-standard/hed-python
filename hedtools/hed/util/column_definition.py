@@ -1,9 +1,9 @@
 from enum import Enum
-from hed.util.hed_string_util import split_hed_string, split_hed_string_return_strings
-from hed.util.error_types import SidecarErrors, ErrorContext
+from hed.util.hed_string_util import split_hed_string, split_hed_string_return_tags
+from hed.util.error_types import SidecarErrors, ErrorContext, ErrorSeverity
 from hed.util import error_reporter
 from hed.validator.tag_validator import TagValidator
-
+import re
 
 class ColumnType(Enum):
     """The overall column_type of a column in column mapper, eg treat it as HED tags.
@@ -297,27 +297,25 @@ class ColumnDef:
         """
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
+
         col_validation_issues = []
-        # Hed string validation can only be done with a hed_schema
+        # Full Hed string validation can only be done with a hed_schema
         if hed_schema and self.hed_string_iter():
+            # todo: update this to do string level validation, but with possible placeholders allowed
             tag_validator = TagValidator(hed_schema, check_for_warnings=True, run_semantic_validation=True,
                                          allow_numbers_to_be_pound_sign=True, error_handler=error_handler)
             for hed_string, position in self.hed_string_iter(include_position=True):
                 error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
-                error_handler.push_error_context(ErrorContext.SIDECAR_HED_STRING, hed_string, False)
+                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string, False)
                 new_col_validation_issues = tag_validator.run_hed_string_validators(hed_string)
-                for hed_tag in split_hed_string_return_strings(hed_string):
-                    hed_tag_lower = hed_tag.lower()
-                    tag_issues = tag_validator.run_individual_tag_validators(hed_tag, hed_tag_lower)
-                    if tag_issues:
-                        new_col_validation_issues += tag_issues
+                if not new_col_validation_issues:
+                    for hed_tag in split_hed_string_return_tags(hed_string):
+                        tag_issues = tag_validator.run_individual_tag_validators(hed_tag)
+                        if tag_issues:
+                            new_col_validation_issues += tag_issues
                 if new_col_validation_issues:
                     col_validation_issues += new_col_validation_issues
-                if self.column_type == ColumnType.Categorical:
-                    if hed_string.count("#") != 0:
-                        col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.TOO_MANY_POUND_SIGNS,
-                                                                                    pound_sign_count=hed_string.count(
-                                                                                        "#"))
+                col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
                 error_handler.pop_error_context()
                 error_handler.pop_error_context()
 
@@ -332,9 +330,11 @@ class ColumnDef:
                 col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
                                                                             given_type=type(raw_hed_dict),
                                                                             expected_type="str")
-            elif raw_hed_dict.count("#") != 1:
-                col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.INVALID_NUMBER_POUND_SIGNS,
-                                                                            pound_sign_count=raw_hed_dict.count("#"))
+            else:
+                if hed_schema is None:
+                    error_handler.push_error_context(ErrorContext.HED_STRING, raw_hed_dict, False)
+                    col_validation_issues += self._validate_pound_sign_count(raw_hed_dict, error_handler)
+                    error_handler.pop_error_context()
 
         elif self.column_type == ColumnType.Categorical:
             raw_hed_dict = self._hed_dict["HED"]
@@ -346,16 +346,50 @@ class ColumnDef:
                                                                             expected_type="dict")
             else:
                 if len(raw_hed_dict) < 2:
-                    # Make this a warning
                     col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.TOO_FEW_CATEGORIES,
-                                                                                category_count=len(raw_hed_dict))
+                                                                                category_count=len(raw_hed_dict),
+                                                                                severity=ErrorSeverity.WARNING)
 
-                # Handle this error here instead of above if we don't have a dictionary for hed_string validation
                 if hed_schema is None:
-                    for key, value in raw_hed_dict.items():
-                        if value.count("#") != 0:
-                            col_validation_issues += error_handler.format_sidecar_error(
-                                SidecarErrors.TOO_MANY_POUND_SIGNS,
-                                pound_sign_count=value.count("#"))
+                    for key, hed_string in raw_hed_dict.items():
+                        error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key)
+                        error_handler.push_error_context(ErrorContext.HED_STRING, hed_string, False)
+                        col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
+                        error_handler.pop_error_context()
+                        error_handler.pop_error_context()
 
         return col_validation_issues
+
+    def _validate_pound_sign_count(self, hed_string, error_handler):
+        """Checks if a a given hed string in the column has the correct number of pound signs
+
+        This normally should be either 0 or 1, but sometimes will be higher due to the presence of definition tags.
+
+        Parameters
+        ----------
+        hed_string : str
+        error_handler : ErrorHandler
+
+        Returns
+        -------
+        issues_list: [{}]
+            A list of the pound sign errors(always 0 or 1 item in the list)
+        """
+        if self.column_type == ColumnType.Value or self.column_type == ColumnType.Attribute:
+            base_pound_sign_count = 1
+            error_type = SidecarErrors.INVALID_NUMBER_POUND_SIGNS
+        elif self.column_type == ColumnType.HEDTags or self.column_type == ColumnType.Categorical:
+            base_pound_sign_count = 0
+            error_type = SidecarErrors.TOO_MANY_POUND_SIGNS
+        else:
+            return []
+
+        definition_and_exp_pattern = "definition\/.*?\/#"
+        pattern = re.compile(definition_and_exp_pattern)
+        expected_pound_sign_count = len(pattern.findall(hed_string.lower())) * 2 + base_pound_sign_count
+
+        if hed_string.count("#") != expected_pound_sign_count:
+            return error_handler.format_sidecar_error(error_type,
+                                                      pound_sign_count=hed_string.count("#"))
+
+        return []

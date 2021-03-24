@@ -7,8 +7,11 @@
           "stop": "A blue square is displayed to indicate stopping"
        },
        "HED": {
-          "go": "Experimental-stimulu, Label/RedSquare,Description/A red square is displayed to indicate starting,Visual, Item/Object/2D Shape/Square,Attribute/Visual/Color/Red, Attribute/Visual/Rendering type/Screen,Attribute/Location/Screen/Center",
-          "stop": "Experimental-stimulus, Label/BlueSquare,Description/A blue square is displayed to indicate stopping,Visual, Item/Object/2D Shape/Square,Attribute/Visual/Color/Blue, Attribute/Visual/Rendering type/Screen,Attribute/Location/Screen/Center"
+
+          "go": "Attribute/Sensory/Bisual",
+          "go3": "Attribute/Informational/Label/ValidCustomLabel",
+          "go2": "Attribute/Sensory/Visual",
+          "go4": "Attribute/Sensory/Visual/Luminance"
        }
    },
    "response_time": {
