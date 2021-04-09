@@ -9,7 +9,6 @@ from hed.web.constants import common, file_constants
 
 from hed.web.web_utils import generate_download_file_response, generate_filename, generate_text_response, \
     get_hed_path_from_pull_down, get_uploaded_file_path_from_form, get_optional_form_field, save_text_to_upload_folder
-from hed.web.spreadsheet_utils import get_text_file_info
 app_config = current_app.config
 
 
@@ -29,7 +28,6 @@ def generate_input_from_events_form(request):
     hed_file_path, hed_display_name = get_hed_path_from_pull_down(request)
     uploaded_events_path, original_events_name = \
         get_uploaded_file_path_from_form(request, common.EVENTS_FILE, file_constants.TEXT_FILE_EXTENSIONS)
-    columns_info = get_text_file_info(uploaded_events_path)
     uploaded_json_name, original_json_name = \
         get_uploaded_file_path_from_form(request, common.JSON_FILE, file_constants.DICTIONARY_FILE_EXTENSIONS)
 

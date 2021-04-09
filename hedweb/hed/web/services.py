@@ -1,14 +1,12 @@
 import os
 import json
-import traceback
+
 from flask import current_app
 from hed.schema import hed_schema_file
 from hed.util import hed_cache
 from hed.util.error_reporter import get_printable_issue_string
-from hed.util.file_util import delete_file_if_it_exists
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
-from hed.util.error_types import ErrorContext
 
 
 app_config = current_app.config
@@ -20,7 +18,7 @@ def report_services_status(form_data):
 
     Parameters
     ----------
-    form_data: dict
+    form_data: JSON
         A Request object containing user data submitted by HEDTools.
         Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
 
@@ -31,8 +29,6 @@ def report_services_status(form_data):
         If the validation fails then a 500 error message is returned.
     """
     response = {"result": "", "error_type": "", "message": ""}
-    hed_xml_file = ''
-
     form_string = form_data.decode()
     param_dict = json.loads(form_string)
     service = param_dict.get("service", "")

@@ -7,8 +7,8 @@ from hed.web.constants import common, page_constants, route_constants
 from hed.web.web_utils import delete_file_no_exceptions, \
    handle_http_error, handle_error, save_file_to_upload_folder
 from hed.web import dictionary, events, schema, spreadsheet, services
-from hed.web.hedstring import generate_arguments_from_hedstring_form, hedstring_process
-from hed.web.spreadsheet_utils import generate_columns_info_input, get_columns_info
+from hed.web.hedstring import generate_input_from_hedstring_form, hedstring_process
+from hed.web.spreadsheet_utils import generate_input_columns_info, get_columns_info
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
@@ -31,7 +31,7 @@ def get_columns_info_results():
     """
     input_arguments = {}
     try:
-        input_arguments = generate_columns_info_input(request)
+        input_arguments = generate_input_columns_info(request)
         columns_info = get_columns_info(input_arguments)
         return json.dumps(columns_info)
     except Exception as ex:
@@ -54,7 +54,7 @@ def get_dictionary_validation_results():
     """
     input_arguments = {}
     try:
-        input_arguments = dictionary.generate_arguments_from_dictionary_form(request)
+        input_arguments = dictionary.generate_input_from_dictionary_form(request)
         return dictionary.dictionary_validate(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
@@ -124,7 +124,7 @@ def get_hedstring_results():
     # return hedstring_process(request)
 
     try:
-        input_arguments = generate_arguments_from_hedstring_form(request)
+        input_arguments = generate_input_from_hedstring_form(request)
         return json.dumps(hedstring_process(input_arguments))
     except Exception as ex:
         return handle_error(ex)
@@ -240,7 +240,7 @@ def get_spreadsheet_validation_results():
     input_arguments = {}
     try:
         input_arguments = spreadsheet.generate_input_from_spreadsheet_form(request)
-        return spreadsheet.validate_spreadsheet(input_arguments)
+        return spreadsheet.spreadsheet_validate(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
     finally:

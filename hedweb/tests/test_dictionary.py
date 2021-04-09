@@ -33,9 +33,9 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_arguments_from_dictionary_form(self):
+    def test_generate_input_from_dictionary_form(self):
         from hed.web import dictionary
-        self.assertRaises(TypeError, dictionary.generate_arguments_from_dictionary_form, {},
+        self.assertRaises(TypeError, dictionary.generate_input_from_dictionary_form, {},
                           "An exception should be raised if an empty request is passed")
 
     def test_validate_dictionary_success(self):
@@ -95,7 +95,7 @@ class Test(unittest.TestCase):
 
     # def test_generate_input_arguments_from_validation_form(self):
     #     from hed.web import dictionary
-    #     self.assertRaises(TypeError, dictionary.generate_arguments_from_dictionary_form, {},
+    #     self.assertRaises(TypeError, dictionary.generate_input_from_dictionary_form, {},
     #                       "An exception should be raised if an empty request is passed")
     #
     # def test_report_dictionary_validation_status(self):

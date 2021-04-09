@@ -1,4 +1,3 @@
-from urllib.error import URLError
 from flask import current_app
 
 from hed.util.error_reporter import get_printable_issue_string
@@ -45,7 +44,7 @@ def generate_input_from_spreadsheet_form(request):
     return input_arguments
 
 
-def validate_spreadsheet(input_arguments, hed_validator=None):
+def spreadsheet_validate(input_arguments, hed_validator=None):
     """Validates the spreadsheet.
 
     Parameters

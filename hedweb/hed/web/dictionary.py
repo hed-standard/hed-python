@@ -11,7 +11,7 @@ from hed.web.web_utils import generate_filename, generate_download_file_response
 app_config = current_app.config
 
 
-def generate_arguments_from_dictionary_form(request):
+def generate_input_from_dictionary_form(request):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters

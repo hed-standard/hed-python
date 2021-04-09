@@ -35,7 +35,7 @@ def convert_number_str_to_list(number_str):
 def delete_file_no_exceptions(file_path):
     try:
         return delete_file_if_it_exists(file_path)
-    except Exception:
+    except:
         return False
 
 
@@ -367,8 +367,8 @@ def handle_error(ex, hed_info=None, title=None):
     else:
         message = str(ex)
 
-        hed_info['message'] = f"{title}[{error_code}: {message}]"
-        return json.dumps(hed_info)
+    hed_info['message'] = f"{title}[{error_code}: {message}]"
+    return json.dumps(hed_info)
 
 
 def handle_http_error(ex):
@@ -451,7 +451,7 @@ def save_file_to_upload_folder_no_exception(file_object, delete_on_close=False):
             for line in file_object:
                 temporary_upload_file.write(line)
             file_path = temporary_upload_file.name
-    except Exception:
+    except:
         file_path = ''
     return file_path
 

@@ -32,12 +32,12 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_arguments_from_hedstring_form(self):
+    def test_generate_input_from_hedstring_form(self):
         from hed.web import hedstring
-        self.assertRaises(TypeError, hedstring.generate_arguments_from_hedstring_form, {},
+        self.assertRaises(TypeError, hedstring.generate_input_from_hedstring_form, {},
                           "An exception should be raised if an empty request is passed")
 
-    def test_process_hedstring(self):
+    def test_hedstring_process(self):
         self.assertTrue(1, "process_hedstring")
 
     def test_hedstring_convert(self):

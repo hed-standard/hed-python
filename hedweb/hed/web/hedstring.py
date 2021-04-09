@@ -9,7 +9,7 @@ from hed.web.web_exceptions import HedError
 app_config = current_app.config
 
 
-def generate_arguments_from_hedstring_form(request):
+def generate_input_from_hedstring_form(request):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters

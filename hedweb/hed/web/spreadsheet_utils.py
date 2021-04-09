@@ -1,20 +1,23 @@
 import xlrd
-import traceback
 from flask import current_app
 from hed.util.exceptions import HedFileError
-from hed.util.file_util import get_file_extension, delete_file_if_it_exists
+from hed.util.file_util import get_file_extension
 from hed.web.constants import common, file_constants, spreadsheet_constants
 from hed.web.web_utils import file_extension_is_valid, find_all_str_indices_in_list, save_file_to_upload_folder
 
 app_config = current_app.config
 
 
-def generate_columns_info_input(request):
+def generate_input_columns_info(request):
     columns_file = request.files.get(common.COLUMNS_FILE, '')
+    if columns_file:
+        filename = columns_file.filename
+    else:
+        filename = ''
     columns_path = save_file_to_upload_folder(columns_file)
     input_arguments = {
         common.COLUMNS_PATH: columns_path,
-        common.COLUMNS_DISPLAY_NAME: columns_file.get('filename', None),
+        common.COLUMNS_DISPLAY_NAME: filename,
         common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None)
     }
     return input_arguments
@@ -54,64 +57,6 @@ def get_columns_info(input_arguments):
                            f'File {columns_display_name} extension does not correspond to an Excel or tsv file',
                            columns_display_name)
     return columns_info
-
-
-def get_specific_tag_columns_from_form(request):
-    """Gets the specific tag columns from the validation form.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    dictionary
-        A dictionary containing the required tag columns. The keys will be the column numbers and the values will be
-        the name of the column.
-    """
-    column_prefix_dictionary = {}
-    for tag_column_name in spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES:
-        form_tag_column_name = tag_column_name.lower() + common.COLUMN_POSTFIX
-        if form_tag_column_name in request.form:
-            tag_column_name_index = request.form[form_tag_column_name].strip()
-            if tag_column_name_index:
-                tag_column_name_index = int(tag_column_name_index)
-
-                # todo: Remove these giant kludges at some point
-                if tag_column_name == "Long":
-                    tag_column_name = "Long Name"
-                tag_column_name = "Event/" + tag_column_name + "/"
-                # End giant kludges
-
-                column_prefix_dictionary[tag_column_name_index] = tag_column_name
-    return column_prefix_dictionary
-
-
-def get_text_file_info(file_path):
-    """Populate dictionary with information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
-
-    Parameters
-    ----------
-
-    file_path: string
-        The full path to a spreadsheet other.
-
-    Returns
-    -------
-    dictionary
-        A dictionary populated with information related to the text file columns.
-
-    """
-
-    column_info = {}
-    column_delimiter = get_column_delimiter_based_on_file_extension(file_path)
-    column_info[common.COLUMN_NAMES] = get_text_file_column_names(file_path, column_delimiter)
-    column_info[common.TAG_COLUMN_INDICES] = get_other_tag_column_indices(column_info[common.COLUMN_NAMES])
-    column_info[common.REQUIRED_TAG_COLUMN_INDICES] = get_specific_tag_column_indices(column_info[common.COLUMN_NAMES])
-    return column_info
 
 
 def get_excel_worksheet_names(workbook_file_path):
@@ -181,6 +126,38 @@ def get_specific_tag_column_indices(column_names):
     return specific_tag_column_indices
 
 
+def get_specific_tag_columns_from_form(request):
+    """Gets the specific tag columns from the validation form.
+
+    Parameters
+    ----------
+    request: Request object
+        A Request object containing user data from the validation form.
+
+    Returns
+    -------
+    dictionary
+        A dictionary containing the required tag columns. The keys will be the column numbers and the values will be
+        the name of the column.
+    """
+    column_prefix_dictionary = {}
+    for tag_column_name in spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES:
+        form_tag_column_name = tag_column_name.lower() + common.COLUMN_POSTFIX
+        if form_tag_column_name in request.form:
+            tag_column_name_index = request.form[form_tag_column_name].strip()
+            if tag_column_name_index:
+                tag_column_name_index = int(tag_column_name_index)
+
+                # todo: Remove these giant kludges at some point
+                if tag_column_name == "Long":
+                    tag_column_name = "Long Name"
+                tag_column_name = "Event/" + tag_column_name + "/"
+                # End giant kludges
+
+                column_prefix_dictionary[tag_column_name_index] = tag_column_name
+    return column_prefix_dictionary
+
+
 def get_text_file_column_names(text_file_path, column_delimiter):
     """Gets the text spreadsheet column names.
 
@@ -203,6 +180,32 @@ def get_text_file_column_names(text_file_path, column_delimiter):
     return text_file_columns
 
 
+def get_text_file_info(file_path):
+    """Populate dictionary with information related to the spreadsheet columns.
+
+    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
+
+    Parameters
+    ----------
+
+    file_path: string
+        The full path to a spreadsheet other.
+
+    Returns
+    -------
+    dictionary
+        A dictionary populated with information related to the text file columns.
+
+    """
+
+    column_info = {}
+    column_delimiter = get_column_delimiter_based_on_file_extension(file_path)
+    column_info[common.COLUMN_NAMES] = get_text_file_column_names(file_path, column_delimiter)
+    column_info[common.TAG_COLUMN_INDICES] = get_other_tag_column_indices(column_info[common.COLUMN_NAMES])
+    column_info[common.REQUIRED_TAG_COLUMN_INDICES] = get_specific_tag_column_indices(column_info[common.COLUMN_NAMES])
+    return column_info
+
+
 def get_worksheet_info(file_path, worksheet_name=None):
     opened_file = xlrd.open_workbook(file_path, on_demand=True)
     worksheet_names = opened_file.sheet_names()
@@ -212,7 +215,7 @@ def get_worksheet_info(file_path, worksheet_name=None):
     elif not worksheet_name:
         worksheet_name = worksheet_names[0]
     elif worksheet_name and worksheet_name not in worksheet_names:
-        raise HedFileError('BadWorksheetName', f'Worksheet {worksheet_name} not in Excel file')
+        raise HedFileError('BadWorksheetName', f'Worksheet {worksheet_name} not in Excel file', '')
     worksheet = opened_file.sheet_by_name(worksheet_name)
     info[common.COLUMN_NAMES] = [worksheet.cell(0, col_index).value for col_index in range(worksheet.ncols)]
     info[common.TAG_COLUMN_INDICES] = get_other_tag_column_indices(info[common.COLUMN_NAMES])

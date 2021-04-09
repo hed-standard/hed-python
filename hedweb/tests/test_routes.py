@@ -26,6 +26,10 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
+    def test_get_columns_info_results(self):
+        response = self.app.test.post('/get-columns-info')
+        self.assertEqual(400, response.status_code, 'Columns info requires data')
+
     def test_get_dictionary_validation_results(self):
         response = self.app.test.post('/dictionary-validation-submit')
         self.assertEqual(400, response.status_code, 'Dictionary validation requires data')
@@ -63,17 +67,9 @@ class Test(unittest.TestCase):
         response = self.app.test.post('/schema-conversion-submit')
         self.assertEqual(400, response.status_code, 'Converting schema requires data')
 
-    def test_get_columns_info(self):
-        response = self.app.test.post('/get-columns-info')
-        self.assertEqual(400, response.status_code, 'Returning column info requires data')
-
     def test_get_spreadsheet_validation_results(self):
         response = self.app.test.post('/spreadsheet-validation-submit')
         self.assertEqual(400, response.status_code, 'Validating spreadsheet requires data')
-
-    def test_get_worksheets_info(self):
-        response = self.app.test.post('/get-worksheets-info')
-        self.assertEqual(400, response.status_code, 'Returning worksheet info requires data')
 
     def test_render_additional_examples_page(self):
         response = self.app.test.get('/additional-examples')

@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
     #         self.app = app.test_client()
 
     def test_report_services_status(self):
-        self.assertTrue(1, "Testing generate_arguments_from_dictionary_form")
+        self.assertTrue(1, "Testing generate_input_from_dictionary_form")
 
     def test_get_services(self):
         self.assertTrue(1, "Testing generate_dictionary_validation_filename")

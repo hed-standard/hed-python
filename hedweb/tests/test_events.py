@@ -21,7 +21,6 @@ def event_input():
     return test_events
 
 
-
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
