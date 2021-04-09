@@ -1,7 +1,7 @@
 from hed.util import error_reporter
 from hed.util.error_types import SchemaErrors, ErrorContext
 from hed.util import hed_string_util
-from hed import schema
+from hed.schema.hed_schema_file import load_schema
 
 
 class TagFormat:
@@ -22,7 +22,7 @@ class TagFormat:
             Used to report errors.  Uses a default one if none passed in.
         """
         if hed_schema is None:
-            hed_schema = schema.load_schema(hed_file)
+            hed_schema = load_schema(hed_file)
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
         self._error_handler = error_handler
