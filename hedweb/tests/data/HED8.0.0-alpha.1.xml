@@ -2,7 +2,7 @@
 <HED version="8.0.0-alpha.1">
    <node>
       <name>Event</name>
-      <node suggestedTag="Task-property/Task-role">
+      <node>
          <name>Sensory-event</name>
          <description>Something perceivable by the participant. An event meant to be an experimental stimulus should also be tagged with Task-property/Task-role/Experiment-stimulus.</description>
       </node>
@@ -566,7 +566,13 @@
             <node>
                <name>Media</name>
                <node>
-                  <name>Sound-clip</name>
+                  <name>Media-clip</name>
+                  <node>
+                     <name>Audio-clip</name>
+                  </node>
+                  <node>
+                     <name>Video-clip</name>
+                  </node>
                </node>
                <node>
                   <name>Visualization</name>
@@ -662,18 +668,18 @@
                      <node>
                         <name>Keyboard</name>
                         <node>
-                           <name>Key</name>
+                           <name>Keyboard-key</name>
                            <node takesValue="true">
                               <name>#</name>
-                              <description>Value of key.</description>
+                              <description>Value of a keyboard key.</description>
                            </node>
                         </node>
-                     </node>
-                     <node>
-                        <name>Keypad</name>
-                        <node takesValue="true">
-                           <name>#</name>
-                           <description>Value of keypad key.</description>
+                        <node>
+                           <name>Keypad-key</name>
+                           <node takesValue="true">
+                              <name>#</name>
+                              <description>Value of keypad key.</description>
+                           </node>
                         </node>
                      </node>
                      <node>
@@ -1082,7 +1088,7 @@
    </node>
    <node>
       <name>Agent-property</name>
-      <node extensionAllowed="true" requireChild="true">
+      <node requireChild="true" extensionAllowed="true">
          <name>Cognitive-state</name>
          <node>
             <name>Alert</name>
@@ -1125,7 +1131,7 @@
             <name>Vegetative</name>
          </node>
       </node>
-      <node extensionAllowed="true" requireChild="true">
+      <node requireChild="true" extensionAllowed="true">
          <name>Emotional-state</name>
          <node>
             <name>Angry</name>
@@ -1219,9 +1225,18 @@
             </node>
          </node>
          <node>
+            <name>Gender</name>
+         </node>
+         <node>
             <name>Sex</name>
-            <node takesValue="true">
-               <name>#</name>
+            <node>
+               <name>Female</name>
+            </node>
+            <node>
+               <name>Male</name>
+            </node>
+            <node>
+               <name>Intersex</name>
             </node>
          </node>
          <node>
@@ -1254,10 +1269,10 @@
          <name>Agent-task-role</name>
          <description>The role of the agent in the task.</description>
          <node>
-            <name>Experiment-controller</name>
+            <name>Experimental-controller</name>
          </node>
          <node>
-            <name>Experiment-participant</name>
+            <name>Experimental-participant</name>
          </node>
          <node>
             <name>Experimenter</name>
@@ -1345,7 +1360,7 @@
             </node>
             <node>
                <name>Temperature</name>
-               <node isNumeric="true" takesValue="true">
+               <node takesValue="true" isNumeric="true">
                   <name>#</name>
                </node>
             </node>
@@ -1406,14 +1421,14 @@
             <name>Rate-of-change</name>
             <node>
                <name>Acceleration</name>
-               <node isNumeric="true" takesValue="true" unitClass="acceleration">
+               <node takesValue="true" isNumeric="true" unitClass="acceleration">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Jerk-rate</name>
                <description>Rate at which the acceleration of an object changes with respect to time.</description>
-               <node isNumeric="true" takesValue="true" unitClass="jerk">
+               <node takesValue="true" isNumeric="true" unitClass="jerk">
                   <name>#</name>
                </node>
             </node>
@@ -1427,20 +1442,20 @@
             <node requireChild="true">
                <name>Refresh-rate</name>
                <description>Number of times per second a device displays an image. Also known as the frame rate.</description>
-               <node isNumeric="true" takesValue="true">
+               <node takesValue="true" isNumeric="true">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Temporal-rate</name>
                <description>Number of occurrences in a unit of time.</description>
-               <node isNumeric="true" takesValue="true">
+               <node takesValue="true" isNumeric="true">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Velocity</name>
-               <node isNumeric="true" takesValue="true" unitClass="speed">
+               <node takesValue="true" isNumeric="true" unitClass="speed">
                   <name>#</name>
                </node>
             </node>
@@ -1488,20 +1503,20 @@
             <name>Spatial</name>
             <node>
                <name>Direction</name>
-               <node isNumeric="true" takesValue="true">
+               <node takesValue="true" isNumeric="true">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Distance</name>
                <description>Distance from a specified position in a specified Direction or grouped with an item from which the distance is measured.</description>
-               <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+               <node takesValue="true" isNumeric="true" unitClass="physicalLength">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Orientation</name>
-               <node isNumeric="true" takesValue="true">
+               <node takesValue="true" isNumeric="true">
                   <name>#</name>
                </node>
             </node>
@@ -1510,19 +1525,19 @@
                <description>Coordinates with respect a specified frame of reference or the default Screen-frame if no frame is given.</description>
                <node>
                   <name>X-position</name>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Y-position</name>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Z-position</name>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
@@ -1553,34 +1568,34 @@
                <name>Size</name>
                <node>
                   <name>Area</name>
-                  <node isNumeric="true" takesValue="true" unitClass="area">
+                  <node takesValue="true" isNumeric="true" unitClass="area">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Length</name>
                   <description>A measurement of the size along the longest dimension.</description>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Width</name>
                   <description>A measurement along the shortest of two or three dimensions.</description>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Height</name>
                   <description>A measurement in a direction perpendicular to Length and Width in 3D. In 2D, it is perpendicular to both the Length and Height.</description>
-                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
+                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Volume</name>
-                  <node isNumeric="true" takesValue="true" unitClass="volume">
+                  <node takesValue="true" isNumeric="true" unitClass="volume">
                      <name>#</name>
                   </node>
                </node>
@@ -1600,14 +1615,14 @@
             <node>
                <name>Delay</name>
                <description>An indicator that the associated tag group represents something temporally offset from the current event. The delay value can be positive or negative and should always appear in a tag group indicating what is delayed.</description>
-               <node isNumeric="true" takesValue="true" unitClass="time">
+               <node takesValue="true" isNumeric="true" unitClass="time">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Duration</name>
                <description>Time extent of something.</description>
-               <node isNumeric="true" takesValue="true" unitClass="time">
+               <node takesValue="true" isNumeric="true" unitClass="time">
                   <name>#</name>
                </node>
             </node>
@@ -1623,7 +1638,7 @@
             </node>
             <node>
                <name>Temporal-value</name>
-               <node isNumeric="true" takesValue="true" unitClass="time">
+               <node takesValue="true" isNumeric="true" unitClass="time">
                   <name>#</name>
                </node>
             </node>
@@ -1768,10 +1783,10 @@
       <node>
          <name>Task-response-type</name>
          <description>How the participant response should be interpreted in terms of the task specification.</description>
-         <node relatedTag="Inappropriate">
+         <node>
             <name>Appropriate</name>
          </node>
-         <node relatedTag="Successful">
+         <node>
             <name>Correction</name>
          </node>
          <node>
@@ -1781,19 +1796,19 @@
             <name>Imagined</name>
             <description>This is used to identity something that only happened in the imagination of the participant as in imagined movements in motor imagery paradigms.</description>
          </node>
-         <node relatedTag="Appropriate">
+         <node>
             <name>Inappropriate</name>
          </node>
-         <node relatedTag="Near-miss">
+         <node>
             <name>Indeterminate</name>
          </node>
-         <node relatedTag="Near-miss">
+         <node>
             <name>Missed</name>
          </node>
-         <node relatedTag="Miss">
+         <node>
             <name>Near-miss</name>
          </node>
-         <node relatedTag="Correction">
+         <node>
             <name>Successful</name>
          </node>
       </node>
@@ -1887,7 +1902,7 @@
             </node>
          </node>
          <node requireChild="true">
-            <name>Defexp</name>
+            <name>Def-expand</name>
             <description>A label that specifically corresponds to a Definition name and indicates that this label is in a group containing an expanded definition and should not be expanded again.</description>
             <node takesValue="true">
                <name>#</name>
@@ -1903,6 +1918,12 @@
          <node requireChild="true">
             <name>Description</name>
             <description>Human-readable text description of the event.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Experimental-note</name>
             <node takesValue="true">
                <name>#</name>
             </node>
@@ -1951,6 +1972,12 @@
                </node>
             </node>
             <node>
+               <name>Path-name</name>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node>
                <name>Subject</name>
                <node takesValue="true">
                   <name>#</name>
@@ -1978,12 +2005,32 @@
             <description>A tag designating a grouping of items such as in a set or list.</description>
          </node>
          <node>
+            <name>Control-variable</name>
+            <description>An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.</description>
+         </node>
+         <node>
             <name>Event-context</name>
             <description>A tag indicating the overall environment and setup of the experiment or a portion of the experiment. This event is often inserted into a recording at the beginning of an experimental record to describe information such as whether the experiment is conducted indoors or outdoors or whether the experiment is conducted in the real-world or in a controlled laboratory setting. Tags specifying subject metadata might also be included.</description>
          </node>
          <node>
             <name>Event-stream</name>
             <description>An ordered list of events</description>
+         </node>
+         <node>
+            <name>Experimental-condition</name>
+            <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.</description>
+         </node>
+         <node>
+            <name>Experimental-indicator</name>
+            <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent variables.</description>
+         </node>
+         <node>
+            <name>Experimental-intertrial</name>
+            <description>A tag used to indicate a part of the experiment between trials usually where nothing is happening.</description>
+         </node>
+         <node>
+            <name>Experimental-trial</name>
+            <description>A tag used to indicate a particular organizational part in the experimental design often containing a stimulus-response pair or stimulus-response-feedback triad.</description>
          </node>
          <node>
             <name>Permutation</name>
@@ -1996,22 +2043,6 @@
          <node>
             <name>Task</name>
             <description>A tag used to indicate a linkage the structured activities performed as part of the experiment.</description>
-         </node>
-         <node>
-            <name>Task-condition</name>
-            <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.</description>
-         </node>
-         <node>
-            <name>Task-control</name>
-            <description>An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.</description>
-         </node>
-         <node>
-            <name>Task-response</name>
-            <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Task-responses are sometimes called dependent variables.</description>
-         </node>
-         <node>
-            <name>Task-trial</name>
-            <description>A tag used to indicate a particular organizational part in the experimental design often containing a stimulus-response pair.</description>
          </node>
          <node>
             <name>Time-block</name>
@@ -2331,106 +2362,106 @@
       </node>
       <node extensionAllowed="true">
          <name>Categorical</name>
-         <node relatedTag="Normal">
+         <node>
             <name>Abnormal</name>
          </node>
-         <node relatedTag="None">
+         <node>
             <name>All</name>
          </node>
-         <node relatedTag="Symmetric">
+         <node>
             <name>Asymmetric</name>
          </node>
-         <node relatedTag="Incongruent">
+         <node>
             <name>Congruent</name>
          </node>
-         <node relatedTag="Unconstrained">
+         <node>
             <name>Constrained</name>
          </node>
-         <node relatedTag="Incorrect">
+         <node>
             <name>Correct</name>
          </node>
-         <node relatedTag="Shallow">
+         <node>
             <name>Deep</name>
          </node>
-         <node relatedTag="Ordered">
+         <node>
             <name>Disordered</name>
          </node>
-         <node relatedTag="True">
+         <node>
             <name>False</name>
          </node>
-         <node relatedTag="Famous">
+         <node>
             <name>Familiar</name>
             <description>Something known or encountered before.</description>
          </node>
-         <node relatedTag="Unfamiliar">
+         <node>
             <name>Famous</name>
             <description>Something known by many people but necessarily because of direct contact.</description>
          </node>
-         <node relatedTag="Medium">
+         <node>
             <name>High</name>
          </node>
-         <node relatedTag="Congruent">
+         <node>
             <name>Incongruent</name>
          </node>
-         <node relatedTag="Correct">
+         <node>
             <name>Incorrect</name>
          </node>
-         <node relatedTag="Valid">
+         <node>
             <name>Invalid</name>
          </node>
-         <node relatedTag="Voluntary">
+         <node>
             <name>Involuntary</name>
          </node>
-         <node relatedTag="Supraliminal">
+         <node>
             <name>Liminal</name>
          </node>
-         <node relatedTag="High">
+         <node>
             <name>Low</name>
          </node>
          <node>
             <name>Masked</name>
             <description>Ability to perceive influenced by presence of another stimulus</description>
          </node>
-         <node relatedTag="High">
+         <node>
             <name>Medium</name>
          </node>
-         <node relatedTag="Some">
+         <node>
             <name>None</name>
          </node>
-         <node relatedTag="Abnormal">
+         <node>
             <name>Normal</name>
          </node>
-         <node relatedTag="Positive">
+         <node>
             <name>Negative</name>
          </node>
-         <node relatedTag="Disordered">
+         <node>
             <name>Ordered</name>
          </node>
-         <node relatedTag="Negative">
+         <node>
             <name>Positive</name>
          </node>
-         <node relatedTag="Deep">
+         <node>
             <name>Shallow</name>
          </node>
-         <node relatedTag="None">
+         <node>
             <name>Some</name>
          </node>
-         <node relatedTag="Supraliminal">
+         <node>
             <name>Subliminal</name>
          </node>
-         <node relatedTag="Subliminal">
+         <node>
             <name>Supraliminal</name>
          </node>
-         <node relatedTag="Unsymmetric">
+         <node>
             <name>Symmetric</name>
          </node>
-         <node relatedTag="False">
+         <node>
             <name>True</name>
          </node>
-         <node relatedTag="Constrained">
+         <node>
             <name>Unconstrained</name>
          </node>
-         <node relatedTag="Famous">
+         <node>
             <name>Unfamiliar</name>
             <description>Something not known or encountered before.</description>
          </node>
@@ -2438,10 +2469,10 @@
             <name>Unmasked</name>
             <description>Ability to perceive not influenced by presence of another stimulus</description>
          </node>
-         <node relatedTag="Invalid">
+         <node>
             <name>Valid</name>
          </node>
-         <node relatedTag="Involuntary">
+         <node>
             <name>Voluntary</name>
          </node>
       </node>
@@ -2476,13 +2507,13 @@
             </node>
             <node>
                <name>Frequency</name>
-               <node isNumeric="true" takesValue="true" unitClass="frequency">
+               <node takesValue="true" isNumeric="true" unitClass="frequency">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Loudness</name>
-               <node isNumeric="true" takesValue="true">
+               <node takesValue="true" isNumeric="true">
                   <name>#</name>
                </node>
             </node>
@@ -2579,21 +2610,21 @@
                   <name>HSV-color</name>
                   <node>
                      <name>Hue</name>
-                     <node isNumeric="true" takesValue="true">
+                     <node takesValue="true" isNumeric="true">
                         <name>#</name>
                         <description>Angular value between 0 and 360</description>
                      </node>
                   </node>
                   <node>
                      <name>Saturation</name>
-                     <node isNumeric="true" takesValue="true">
+                     <node takesValue="true" isNumeric="true">
                         <name>#</name>
                         <description>B value of RGB between 0 and 1</description>
                      </node>
                   </node>
                   <node>
                      <name>HSV-value</name>
-                     <node isNumeric="true" takesValue="true">
+                     <node takesValue="true" isNumeric="true">
                         <name>#</name>
                         <description>G value of RGB between 0 and 1</description>
                      </node>
@@ -2603,21 +2634,21 @@
                   <name>RGB-color</name>
                   <node>
                      <name>RGB-red</name>
-                     <node isNumeric="true" takesValue="true">
+                     <node takesValue="true" isNumeric="true">
                         <name>#</name>
                         <description>R value of RGB between 0 and 1</description>
                      </node>
                   </node>
                   <node>
                      <name>RGB-blue</name>
-                     <node isNumeric="true" takesValue="true">
+                     <node takesValue="true" isNumeric="true">
                         <name>#</name>
                         <description>B value of RGB between 0 and 1</description>
                      </node>
                   </node>
                   <node>
                      <name>RGB-green</name>
-                     <node isNumeric="true" takesValue="true">
+                     <node takesValue="true" isNumeric="true">
                         <name>#</name>
                         <description>G value of RGB between 0 and 1</description>
                      </node>
@@ -2626,7 +2657,7 @@
                <node>
                   <name>Grayscale</name>
                   <description>Indicates gray scale</description>
-                  <node isNumeric="true" takesValue="true">
+                  <node takesValue="true" isNumeric="true">
                      <name>#</name>
                      <description>White intensity between 0 and 1</description>
                   </node>
@@ -3204,27 +3235,40 @@
       </node>
    </node>
    <unitClasses>
-      <unitClass defaultUnits="s">
-         <name>time</name>
+      <unitClass defaultUnits="m-per-s^2">
+         <name>acceleration</name>
          <units>
-            <unit SIUnit="true">second</unit>
-            <unit SIUnit="true" unitSymbol="true">s</unit>
-            <unit>day</unit>
-            <unit>minute</unit>
-            <unit>hour</unit>
+            <unit SIUnit="true" unitSymbol="true">m-per-s^2</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="radian">
+         <name>angle</name>
+         <units>
+            <unit SIUnit="true">radian</unit>
+            <unit SIUnit="true" unitSymbol="true">rad</unit>
+            <unit>degree</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="m^2">
+         <name>area</name>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">m^2</unit>
+            <unit unitSymbol="true">px^2</unit>
+            <unit>pixel^2</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="$">
+         <name>currency</name>
+         <units>
+            <unit>dollar</unit>
+            <unit unitSymbol="true">$</unit>
+            <unit>point</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="YYYY-MM-DDThh:mm:ss">
          <name>dateTime</name>
          <units>
             <unit>YYYY-MM-DDThh:mm:ss</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="hour:min">
-         <name>clockTime</name>
-         <units>
-            <unit>hour:min</unit>
-            <unit>hour:min:sec</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="Hz">
@@ -3234,12 +3278,30 @@
             <unit SIUnit="true" unitSymbol="true">Hz</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="radian">
-         <name>angle</name>
+      <unitClass defaultUnits="dB">
+         <name>intensity</name>
          <units>
-            <unit SIUnit="true">radian</unit>
-            <unit SIUnit="true" unitSymbol="true">rad</unit>
-            <unit>degree</unit>
+            <unit unitSymbol="true">dB</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="m-per-s^3">
+         <name>jerk</name>
+         <units>
+            <unit unitSymbol="true">m-per-s^3</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="cd">
+         <name>luminousIntensity</name>
+         <units>
+            <unit SIUnit="true">candela</unit>
+            <unit SIUnit="true" unitSymbol="true">cd</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="B">
+         <name>memorySize</name>
+         <units>
+            <unit SIUnit="true">byte</unit>
+            <unit SIUnit="true" unitSymbol="true">B</unit>
          </units>
       </unitClass>
       <unitClass defaultUnits="m">
@@ -3258,20 +3320,6 @@
             <unit unitSymbol="true">px</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="m^2">
-         <name>area</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m^2</unit>
-            <unit unitSymbol="true">px^2</unit>
-            <unit>pixel^2</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="m^3">
-         <name>volume</name>
-         <units>
-            <unit SIUnit="true" unitSymbol="true">m^3</unit>
-         </units>
-      </unitClass>
       <unitClass defaultUnits="m-per-s">
          <name>speed</name>
          <units>
@@ -3280,45 +3328,20 @@
             <unit unitSymbol="true">kph</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="m-per-s^2">
-         <name>acceleration</name>
+      <unitClass defaultUnits="s">
+         <name>time</name>
          <units>
-            <unit SIUnit="true" unitSymbol="true">m-per-s^2</unit>
+            <unit SIUnit="true">second</unit>
+            <unit SIUnit="true" unitSymbol="true">s</unit>
+            <unit>day</unit>
+            <unit>minute</unit>
+            <unit>hour</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="m-per-s^3">
-         <name>jerk</name>
+      <unitClass defaultUnits="m^3">
+         <name>volume</name>
          <units>
-            <unit unitSymbol="true">m-per-s^3</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="dB">
-         <name>intensity</name>
-         <units>
-            <unit unitSymbol="true">dB</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="cd">
-         <name>luminousIntensity</name>
-         <units>
-            <unit SIUnit="true">candela</unit>
-            <unit SIUnit="true" unitSymbol="true">cd</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="B">
-         <name>memorySize</name>
-         <units>
-            <unit SIUnit="true">byte</unit>
-            <unit SIUnit="true" unitSymbol="true">B</unit>
-         </units>
-      </unitClass>
-      <unitClass defaultUnits="$">
-         <name>currency</name>
-         <units>
-            <unit>dollar</unit>
-            <unit unitSymbol="true">$</unit>
-            <unit>point</unit>
-            <unit>fraction</unit>
+            <unit SIUnit="true" unitSymbol="true">m^3</unit>
          </units>
       </unitClass>
    </unitClasses>
@@ -3483,5 +3506,73 @@
          <name>y</name>
          <description>SI unit submultiple representing 10^-24</description>
       </unitModifier>
+      <unitModifier>
+         <name>Schema attributes</name>
+      </unitModifier>
+      <unitModifier>
+         <name>defaultUnits</name>
+         <description>Default units for a tag.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>extensionAllowed</name>
+         <description>Users can add unlimited levels of child nodes under this tag.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>isNumeric</name>
+         <description>The tag hashtag placeholder must be replaced by a numerical value.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>position</name>
+         <description>Used to specify the order of the required and recommended tags in canonical order for display. The position attribute value should be an integer and the order can start at 0 or 1. Required or recommended tags without this attribute or with negative position will be shown after the others in canonical ordering.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>predicateType</name>
+         <description>One of propertyOf, subclassOf, passThrough -- used to facilitate mapping to OWL or RDF.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>recommended</name>
+         <description>A HED string tagging an event is recommended to include this tag.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>relatedTag</name>
+         <description>Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>requireChild</name>
+         <description>One of its descendants must be chosen to tag an event.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>required</name>
+         <description>Every HED string tagging an event should include this tag.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>SIUnit</name>
+         <description>Designates the name of an SI unit so it can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>SIUnitModifier</name>
+         <description>SI unit modifier indicating a multiple or submultiple of a base unit.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>SIUnitSymbolModifier</name>
+         <description>SI unit symbol modifier indicating a multiple or submultiple of a base unit symbol.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>suggestedTag</name>
+         <description>Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>takesValue</name>
+         <description>This tag will have a hashtag placeholder child in the schema which is expected to be replaced with a user-defined value.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>unique</name>
+         <description>Only one of this tag or its descendants can be used within a single tag group or event.</description>
+      </unitModifier>
+      <unitModifier>
+         <name>unitSymbol</name>
+         <description>Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.</description>
+      </unitModifier>
    </unitModifiers>
+   <epilogue>This is the new format for the mediawiki schema</epilogue>
 </HED>

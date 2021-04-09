@@ -1,0 +1,94 @@
+{
+    "onset": {
+        "Description": "Onset of the event of the computer presentation of the hand image",
+        "Units": "s"
+    },
+    "duration": {
+        "Description": "Duration of the event",
+        "Units": "s"
+    },
+	"cue-start": {
+		"Description": "Subject presses both buttons causing cue bar to start count-down display",
+		"HED": "(Delay/#s, (Description/Subject presses both buttons causing cue bar to start count-down display, (Sensory-event, Visual, Cue, (Rectangle,  (Center-of, Screen), (Size, Decreasing))), (Experimental-participant, (Press, (Left-side, Button)), (Press, (Right-side, Button)))))"
+	},
+	"cue-end": {
+		"Description": "Count-down display bar shrinks to zero size.",
+		"HED": "(Delay/# s, (Description/Count-down display bar shrinks to zero size., (Sensory-event, Visual, Cue)))"
+	},	
+    "trial_type": {
+        "Description": "Which hand was lifted by the subject in this trial.",
+        "Levels": {
+            "left": "Subject raised left hand",
+            "right": "Subject raised right hand"
+        },
+		"HED": {
+			"left": "Description/Subject raised left hand, (Experimental-participant, (Lift, (Left-side, Hand)))",
+			"right": "Description/Subject raised right hand, (Experimental-participant, (Lift, (Right-side, Hand)))"
+		}
+    },
+    "response_time": {
+        "Description": "Reaction time to lift the left or right hand after the countdown reached zero. this is the difference between event onset and cue-end in milliseconds.",
+        "Units": "ms",
+        "HED" : "Delay/# ms"
+    },
+    "stim_file": {
+        "Description": "Stimulus file showing hand presented on screen.",
+		"HED": "Description/Stimulus file showing hand is presented on screen, Sensory-event, Visual,((Image, ID/#),(Center-of, Screen)), Experimental-stimulus"
+    },
+    "value": {
+        "Description": "The code (EEG Marker value) associated with an event ",
+        "Levels": {
+            "1": "Release of left button (i.e., raising left hand)",
+            "2": "Release of right button (i.e., raising right hand)"
+        }
+    },
+    "sample": {
+        "Description": "The sample within the EEG data at which an event occurred"
+    },
+    "stage": {
+        "Description": "The current stage of the experiment.",
+        "Levels": {
+            "1": "Stage 1. BCI acts randomly",
+            "2": "Stage 2. BCI was trained on data from stage 1.",
+            "3": "Stage 3. BCI was trained on data from stages 1 and 2."
+        },
+		"HED": {
+            "1": "Description/Stage 1 BCI acts randomly, (Definition/Random-selection, (Experimental-condition, (Random, Predict))), Def/Random-selection",
+            "2": "Description/Stage 2 BCI was trained on data from stage 1, (Definition/Trained-on-random, (Experimental-condition)), Def/Trained-on-random",
+            "3": "Description/Stage 3 BCI was trained on data from stages 1 and 2, (Definition/Trained-on-all, (Experimental-condition)), Def/Trained-on-all"
+		}
+    },
+    "latency": {
+        "Description": "Estimated beginning of the data chunk used for the BCI prediction with respect to the true event as measured by parallel port trigger in this trial.",
+        "Units": "ms"
+    },
+    "trial": {
+        "Description": "The current trial within this stage.",
+		"HED": "Experimental-trial, Item-count/#"
+    },
+    "bci_prediction": {
+        "Description": "Which hand did the BCI predict was raised in this trial.",
+        "Levels": {
+            "left": "BCI predicts participant raised left hand",
+            "right": "BCI predicts participant raised right hand"
+        },
+		"HED": {
+          "left": "Description/BCI predicts participant raised left hand, (Computational-evidence, (Left-side, Hand))",
+          "right": "Description/BCI predicts participant raised right hand, (Computational-evidence, (Right-side, Hand))"
+        }
+    },
+    "bci_prediction_valid": {
+        "Description": "Did a prediction arrive on time (if not, a random prediction was made) in this trial.",
+        "Levels": {
+            "1": "Computational prediction arrived on time",
+            "2": "Computational prediction was late so random prediction was used."
+        },
+		"HED": {
+			"1": "Description/Computational prediction arrived on time, (Computational-agent, Predict)",
+			"2": "Description/Computational prediction was late so random prediction was used., Time-out, (Random, Predict)"
+		}
+    },
+    "n_repeated": {
+        "Description": "Number of trials that had to be repeated until the present trial because of invalid participant behavior (within this stage)."
+    }
+}

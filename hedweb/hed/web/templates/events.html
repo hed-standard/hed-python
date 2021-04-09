@@ -1,14 +1,32 @@
 {% extends "layout.html" %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "column-info.html" import create_column_info %}
 {% from "json-input.html" import create_json_input %}
-{% from "spreadsheet-input.html" import spreadsheet_input %}
 {% block content %}
-    <h2>Validate spreadsheet containing HED tags</h2>
+    <h2>Validate BIDS-style event file</h2>
+    <p>
+        <i>Upload a BIDS-style tsv events file and an optional JSON events file.<br>
+            Select a HED schema, and press Validate.<br>
+            You will see either a downloadable results file or a status message.<br>
+            Note: this tool is still under development
+        </i>
+    </p>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="events-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ spreadsheet_input() }}
+        <h3>Upload BIDS-style events file:</h3>
+        <div class="form-group">
+            <label class="secondary-label" for="events-file">Events file:</label>
+            <label class="btn-group file-browse-group">
+                <button for="events-file">Browse ...</button>
+                <label id="events-display-name"></label>
+                <input type="file" name="events-file" id="events-file"/>
+            </label>
+            <p class="flash" id="events-flash"></p>
+        </div>
+
+        {{ create_column_info('false') }}
         {{ create_json_input() }}
         {{ create_hed_pulldown() }}
 
@@ -16,11 +34,11 @@
             <label>Specify additional options:</label><br>
             <div class="checkbox-group">
                 <div class="inline-field">
-                    <input type="checkbox" name="has-column-names" id="has-column-names">
-                    <label for="has-column-names">Worksheet has column names</label>
+                    <input type="checkbox" name="has-column-names" id="has-column-names" checked>
+                    <label for="has-column-names">Events file has column names</label>
                 </div>
                 <div class="inline-field">
-                    <input type="checkbox" name="check-for-warnings" id="check-for-warnings">
+                    <input type="checkbox" name="check-for-warnings" id="check-for-warnings" checked>
                     <label for="check-for-warnings">Include warnings in output file</label>
                 </div>
             </div>
@@ -32,13 +50,11 @@
         </div>
     </form>
     <script type="module">
-
+        {%  include 'js/column-info.js' %}
         {%  include 'js/form-helpers.js' %}
         {%  include 'js/hed-pulldown.js' %}
         {%  include 'js/json-input.js' %}
-        {%  include 'js/spreadsheet-input.js' %}
         {%  include 'js/events-form.js' %}
-
     </script>
 
 {% endblock %}

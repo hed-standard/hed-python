@@ -1,8 +1,7 @@
-
 import os
 import shutil
 import unittest
-
+from flask import Response
 from hed.web.app_factory import AppFactory
 
 
@@ -34,32 +33,92 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_arguments_from_validation_form(self):
+    def test_generate_input_from_dictionary_form(self):
         from hed.web import dictionary
-        self.assertRaises(TypeError, dictionary.generate_arguments_from_dictionary_form, {},
+        self.assertRaises(TypeError, dictionary.generate_input_from_dictionary_form, {},
                           "An exception should be raised if an empty request is passed")
 
-    def test_report_dictionary_validation_status(self):
-        self.assertTrue(1, "Testing report_dictionary_validation_status")
-
-    def test_validate_dictionary(self):
-        from hed.web.dictionary import validate_dictionary
+    def test_validate_dictionary_success(self):
+        from hed.web.dictionary import dictionary_validate
         from hed.schema import hed_schema_file
         inputs = test_dictionaries()
-        self.assertEqual("", validate_dictionary(inputs), "This dictionary should have no errors for 8.0.0")
+        response = dictionary_validate(inputs)
+        print(type(response) is Response)
+        self.assertTrue(type(response) is Response, "dictionary_validate should return a response if no error")
+
         hed8_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
 
         hed7_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         hed7 = hed_schema_file.load_schema(hed7_path)
-        # response = validate_dictionary(inputs, hed_schema=hed7)
+        # response = dictionary_validate(inputs, hed_schema=hed7)
         # inputs["hed-xml-file"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         # hed7 = hed_schema_file.load_schema(inputs["hed-xml_file"])
-        # self.assertEqual("", validate_dictionary(input_arguments, hed_schema=schema8),
+        # self.assertEqual("", dictionary_validate(input_arguments, hed_schema=schema8),
         #                  "This dictionary should have no errors for directly created 8.0.0")
         # schema7 = HedSchema(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml'))
-        # x = validate_dictionary(input_arguments, hed_schema=schema7, return_response=False)
-        # self.assertEqual("", validate_dictionary(input_arguments, hed_schema=schema7,return_response=False),
+        # x = dictionary_validate(input_arguments, hed_schema=schema7, return_response=False)
+        # self.assertEqual("", dictionary_validate(input_arguments, hed_schema=schema7,return_response=False),
         #                  "This dictionary should have no errors for directly created 8.0.0")
+
+        # from hed.web import dictionary
+        # print("First test.....")
+        # r = Response("download_text", mimetype='text/plain charset=utf-8',
+        #              headers={'Category': "success", 'Message': "This is a test of the response"})
+        # the_list = r.headers.getlist('Content-Length')
+        # print("HERE", int(the_list[0]))
+        # for prop, value in vars(r).items():
+        #     print(prop, ":", value)
+        #
+        # print("\nSecond test.....")
+        # r = Response("", mimetype='text/plain charset=utf-8',
+        #              headers={'Category': "success", 'Message': "This is empty"})
+        # for prop, value in vars(r).items():
+        #     print(prop, ":", value)
+        # headers = r.headers
+        # print(r.__dict__)
+        # print(dir(r))
+        # print('Headers....', r.headers)
+        # print("headers field", headers.__dict__)
+        # print("headers field", dir(headers))
+        # print("headers_item", headers.__getitem__('Content-Length'))
+        # the_list = headers.getlist('Content-Length')
+        # print("CL", the_list)
+        # the_len = int(the_list[0])
+        # print('len:', the_len)
+        # keys = headers.keys()
+        # print("Keys", keys)
+        # if r.response:
+        #     print(r.response)
+        # else:
+        #     print("Second response is empty")
+
+
+    # def test_generate_input_arguments_from_validation_form(self):
+    #     from hed.web import dictionary
+    #     self.assertRaises(TypeError, dictionary.generate_input_from_dictionary_form, {},
+    #                       "An exception should be raised if an empty request is passed")
+    #
+    # def test_report_dictionary_validation_status(self):
+    #     self.assertTrue(1, "Testing report_dictionary_validation_status")
+    #
+    # def test_validate_dictionary(self):
+    #     from hed.web.dictionary import dictionary_validate
+    #     from hed.schema import hed_schema_file
+    #     inputs = test_dictionaries()
+    #     self.assertEqual("", dictionary_validate(inputs), "This dictionary should have no errors for 8.0.0")
+    #     hed8_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+    #
+    #     hed7_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+    #     hed7 = hed_schema_file.load_schema(hed7_path)
+    #     # response = dictionary_validate(inputs, hed_schema=hed7)
+    #     # inputs["hed-xml-file"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+    #     # hed7 = hed_schema_file.load_schema(inputs["hed-xml_file"])
+    #     # self.assertEqual("", dictionary_validate(input_arguments, hed_schema=schema8),
+    #     #                  "This dictionary should have no errors for directly created 8.0.0")
+    #     # schema7 = HedSchema(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml'))
+    #     # x = dictionary_validate(input_arguments, hed_schema=schema7, return_response=False)
+    #     # self.assertEqual("", dictionary_validate(input_arguments, hed_schema=schema7,return_response=False),
+    #     #                  "This dictionary should have no errors for directly created 8.0.0")
 
 if __name__ == '__main__':
     unittest.main()

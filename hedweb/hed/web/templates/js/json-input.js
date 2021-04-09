@@ -5,14 +5,14 @@ const JSON_FILE_EXTENSIONS = ['json'];
  */
 $('#json-file').on('change',function () {
     let jsonPath = $('#json-file').val();
-    resetFormFlashMessages();
+    clearFlashMessages();
     if (cancelWasPressedInChromeFileUpload(jsonPath)) {
-        resetForm();
+        clearForm();
     }
     else if (fileHasValidExtension(jsonPath, JSON_FILE_EXTENSIONS)) {
         updateFileLabel(jsonPath, '#json-display-name');
     } else {
-        resetForm();
+        clearForm();
         flashMessageOnScreen('Please upload a JSON dictionary (.json)', 'error', 'json-flash');
     }
 });
@@ -27,7 +27,7 @@ function clearJsonFileLabel() {
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-function clearJsonFlashMessage() {
+function clearJsonInputFlashMessages() {
     flashMessageOnScreen('', 'success', 'json-flash');
 }
 
@@ -35,14 +35,3 @@ function getJsonFileLabel() {
     return $('#json-file')[0].files[0].name;
 }
 
-/**
- * Checks to see if a dictionary has been specified.
- */
-function jsonIsSpecified() {
-    let jsonFile = $('#json-file');
-    if (jsonFile[0].files.length === 0) {
-        flashMessageOnScreen('JSON is not specified.', 'error', 'json-flash');
-        return false;
-    }
-    return true;
-}

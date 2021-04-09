@@ -5,7 +5,8 @@
         events. HED tags are comma-separated path strings. The goal of HED is to describe precisely the nature of the
         events of interest occurring in an experiment using a common language,
         so that the following two things can be accomplished. First, you and/or other researchers can
-        better understand the experience and responses of the participant. Secondly, data analysis and meta-analysis can
+        better understand the experience and responses of the participant as well as the relationship of these
+        events to the task and experimental conditions. Secondly, data analysis and meta-analysis can
         more easily and flexibly compare events (and responses to events) across datasets and studies to better isolate
         common “cognitive aspects”.
     </p>
@@ -17,9 +18,9 @@
         <a href="https://github.com/hed-standard">https://github.com/hed-standard</a>.
     </p>
 
-    <h2>HED 2G and HED 3G</h2>
+    <h2>HED-2G and HED-3G</h2>
     <p>
-        HED is currently undergoing a significant revision (HED 3G or HED third generation) so that it can better
+        HED is currently undergoing a significant revision (HED-3G or HED third generation) so that it can better
         capture not only a basic description of the events, but also event relationship to task intent. The redesigned
         schema can be viewed at <a href="http://www.hedtags.org/display_hed.html?version=8.0.0-alpha.1">HED 3G viewer</a>.
     </p>
@@ -28,17 +29,45 @@
     <p>
         Several online HED tools are currently available:
         <ul>
-            <li><a href="{{ url_for('route_blueprint.render_spreadsheet_form') }}"><b>Validate spreadsheet</b></a>
-            validates HED tags in a tab-separated value or Excel spreadsheet and produces a download file with any errors.</li>
-        <li><a href="{{ url_for('route_blueprint.render_dictionary_form') }}"><b>Validate dictionary</b></a>
-            validates a JSON dictionary containing HED tags.</li>
-        <li><a href="{{ url_for('route_blueprint.render_schema_form') }}"><b>Process schema</b></a> converts HED vocabulary
-            schema between .mediawiki and .xml format. This tool also has options for checking that individual HED
-            tags conform to the requirements in the HED specification and are not duplicated elsewhere in the schema.
+            <li><a href="{{ url_for('route_blueprint.render_events_form') }}"><b>[Validate events]</b></a>
+                <b>Validate a BIDS-style events file with optional JSON sidecar.</b><br>
+                The user uploads the two files to validate. The user also specifies which version of HED to
+                validate against either by selecting a standard version from Github or uploading a local HED schema.
+                The tool first validates the sidecar if present and if the sidecar contains no errors
+                validates the events file in conjunction with the sidecar. If there are errors, the tool returns
+                a downloadable file of error messages.
+            </li>
+            <li><a href="{{ url_for('route_blueprint.render_dictionary_form') }}"><b>[Validate dictionary]</b></a>
+                <b>Validate a single BIDS-style events JSON sidecar.</b><br>
+                The user uploads the file. The user also specifies which version of HED to validate against either
+                by selecting a standard version from Github or uploading a local HED schema. If there are errors,
+                the tool returns a downloadable file of error messages.
+            </li>
+            <li><a href="{{ url_for('route_blueprint.render_spreadsheet_form') }}"><b>[Validate spreadsheet]</b></a>
+                <b>Validate an Excel or tsv file containing HED tags.</b><br>
+                The user uploads an Excel or tsv file and selects a worksheet if the file is an Excel file.
+                The user indicates which columns contain HED tags and also specifies which version of HED to
+                validate against either by selecting a standard version from Github or uploading a local HED schema.
+                If there are errors, the tool returns a downloadable file of error messages.
+            </li>
+            <li><a href="{{ url_for('route_blueprint.render_hedstring_form') }}"><b>[Process string]</b></a>
+                <b>Validate or convert a HED string.</b><br>
+                The user enters or pastes a HED string into a text box. The user also specifies which version
+                of HED to validate against either by selecting a standard version from Github or uploading a
+                local HED schema. The user selects one of three processing options: 1) Validate,  2) Convert
+                from long to short form, or 3) Convert from short to long form. The results appear in the results text box.
+            </li>
+            <li><a href="{{ url_for('route_blueprint.render_schema_form') }}"><b>[Process schema]</b></a>
+                <b>Validate or check a HED schema.</b><br>
+                The user enters the URL of a HED schema or uploads a HED schema file in either .mediawiki or
+                .xml format. If the user presses the Convert button, the tools convert the schema to the other
+                format and make the converted file available for download. If the user presses the Check button,
+                the tools make a file of HED-3G compliance errors available for download.
+            </li>
         </ul>
     </p>
     <p>
-        Additional online tools are under development. All code is open-source and available in the
+        Additional web-based tools are under development. All code is open-source and available in the
         <a href="https:/github.com/hed-standard/hed-python">hed-python</a> repository on Github.
         For more information on HED, visit the <a href="http://www.hedtags.org">documentation</a> page.
     </p>

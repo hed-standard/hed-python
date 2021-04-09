@@ -26,32 +26,9 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_delete_file_in_upload_directory(self):
-        response = self.app.test.get('/delete/file_that_does_not_exist')
-        self.assertEqual(response.status_code, 404, "Non-existent file should cause a non-found error")
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        dummy_file = os.path.join(self.app.config['UPLOAD_FOLDER'], 'HED.xml')
-        dummy_path = pathlib.Path(dummy_file)
-        self.assertFalse(dummy_path.is_file(), "Dummy file does not exist yet")
-        copyfile(hed_file, dummy_file)
-        self.assertTrue(dummy_path.is_file(), "Dummy file now exists")
-        response = self.app.test.get('/delete/HED.xml')
-        self.assertEqual(response.status_code, 204, "Dummy file should be deleted")
-
-    def test_download_file_in_upload_directory(self):
-        response = self.app.test.get('/download-file/file_that_does_not_exist')
-
-        # self.assertEqual(response.status_code, 404, "Non-existent file should cause a non-found error")
-        upload_dir = self.app.config['UPLOAD_FOLDER']
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        dummy_file = os.path.join(self.app.config['UPLOAD_FOLDER'], 'HED.xml')
-        dummy_path = pathlib.Path(dummy_file)
-        self.assertFalse(dummy_path.is_file(), "Dummy file does not exist yet")
-        copyfile(hed_file, dummy_file)
-        self.assertTrue(dummy_path.is_file(), "Dummy file now exists")
-        response = self.app.test.get('/download-file/HED.xml')
-
-        # self.assertEqual(response.status_code, 204, "Dummy file should be deleted")
+    def test_get_columns_info_results(self):
+        response = self.app.test.post('/get-columns-info')
+        self.assertEqual(400, response.status_code, 'Columns info requires data')
 
     def test_get_dictionary_validation_results(self):
         response = self.app.test.post('/dictionary-validation-submit')
@@ -62,6 +39,10 @@ class Test(unittest.TestCase):
         self.assertEqual(400, response.status_code, 'Event validation requires data')
 
     def test_get_hed_services_results(self):
+        response = self.app.test.get('/hed-services-submit')
+        self.assertEqual(405, response.status_code, 'HED services require data')
+
+    def test_get_hedstring_results(self):
         response = self.app.test.get('/hed-services-submit')
         self.assertEqual(405, response.status_code, 'HED services require data')
 
@@ -86,17 +67,9 @@ class Test(unittest.TestCase):
         response = self.app.test.post('/schema-conversion-submit')
         self.assertEqual(400, response.status_code, 'Converting schema requires data')
 
-    def test_get_spreadsheet_columns_info(self):
-        response = self.app.test.post('/get-spreadsheet-columns-info')
-        self.assertEqual(400, response.status_code, 'Returning spreadsheet column info requires data')
-
     def test_get_spreadsheet_validation_results(self):
         response = self.app.test.post('/spreadsheet-validation-submit')
         self.assertEqual(400, response.status_code, 'Validating spreadsheet requires data')
-
-    def test_get_worksheets_info(self):
-        response = self.app.test.post('/get-worksheets-info')
-        self.assertEqual(400, response.status_code, 'Returning worksheet info requires data')
 
     def test_render_additional_examples_page(self):
         response = self.app.test.get('/additional-examples')
@@ -117,6 +90,10 @@ class Test(unittest.TestCase):
     def test_render_hed_services_form(self):
         response = self.app.test.get('/hed-services')
         self.assertEqual(response.status_code, 200, "The hed-services content page should exist")
+
+    def test_render_hedstring_form(self):
+        response = self.app.test.get('/hedstring')
+        self.assertEqual(response.status_code, 200, "The hedstring content page should exist")
 
     def test_render_help_page(self):
         response = self.app.test.get('/hed-tools-help')

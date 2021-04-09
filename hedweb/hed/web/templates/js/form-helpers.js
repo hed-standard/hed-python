@@ -8,20 +8,6 @@ function cancelWasPressedInChromeFileUpload(filePath) {
     return isEmptyStr(filePath) && (window.chrome)
 }
 
-/**
- * Checks to see if any entries in an array of names are empty.
- * @param {Array} names - An array containing a list of names.
- * @returns {boolean} - True if any of the names in the array are all empty.
- */
-function columnNamesAreEmpty(names) {
-    let numberOfNames = names.length;
-    for (let i = 0; i < numberOfNames; i++) {
-        if (!isEmptyStr(names[i].trim())) {
-            return false;
-        }
-    }
-    return true;
-}
 
 /**
  * Converts a path and prefix to a text results name
@@ -43,13 +29,25 @@ function convertToResultsName(filename, prefix) {
  */
 function fileHasValidExtension(filePath, acceptedFileExtensions) {
     let fileExtension = filePath.split('.').pop();
-    if ($.inArray(fileExtension.toLowerCase(), acceptedFileExtensions) != -1) {
-        return true;
-    }
-    return false;
+    return $.inArray(fileExtension.toLowerCase(), acceptedFileExtensions) != -1
 }
 
 
+/**
+ * Checks to see if a file has been specified.
+ * @param {string} nameID - #id of the element holding the name
+ * @param {string} flashID - id of the flash element to display error message
+ * @param {string} errorMsg - error message to be displayed if file isn't in form
+ * @returns {boolean} - returns true if file is specified
+ */
+function fileIsSpecified(nameID, flashID, errorMsg) {
+    let theFile = $(nameID);
+    if (theFile[0].files.length === 0) {
+        flashMessageOnScreen(errorMsg, 'error', flashID);
+        return false;
+    }
+    return true;
+}
 
 /**
  * Flash a message on the screen.
@@ -100,6 +98,7 @@ function getFilenameFromResponseHeader(xhr, default_name) {
     return filename
 }
 
+
 /**
  * Gets standard failure response for download
  * @param {String} download - Downloaded string response blob
@@ -108,34 +107,27 @@ function getFilenameFromResponseHeader(xhr, default_name) {
  * @param {String} flash_location - ID of the flash location element for displaying response Message
  */
 function getResponseFailure(download, xhr, display_name, flash_location) {
-    console.log(download.responseText);
-    if (download.responseText.length < 100) {
-        flashMessageOnScreen(download.responseText, 'error', flash_location);
+    let info = xhr.getResponseHeader('Message')
+    let category =  xhr.getResponseHeader('Category')
+    if (info) {
+        flashMessageOnScreen(info, category, flash_location);
     } else {
-        flashMessageOnScreen('Not processed', 'error', flash_location);
+        flashMessageOnScreen('Unknown processing error occurred for ' + display_name, 'error', flash_location);
     }
 }
 
-/**
- * Gets standard response with download
- * @param {String} download - Downloaded string response blob
- * @param {Object} xhr - Dictionary containing Response header information
- * @param {String} display_name - Name used for the downloaded blob file
- * @param {String} flash_location - ID of the flash location element for displaying response Message
- */
+
 function getResponseSuccess(download, xhr, display_name, flash_location) {
     if (download) {
         let filename = getFilenameFromResponseHeader(xhr, display_name)
         triggerDownloadBlob(download, filename);
-        let info = xhr.getResponseHeader('Message')
-        let category =  xhr.getResponseHeader('Category')
-        if (info) {
-            flashMessageOnScreen(info, category, flash_location);
-        } else {
-            flashMessageOnScreen('', 'success', flash_location);
-        }
+    }
+    let info = xhr.getResponseHeader('Message')
+    let category =  xhr.getResponseHeader('Category')
+    if (info) {
+        flashMessageOnScreen(info, category, flash_location);
     } else {
-        flashMessageOnScreen('No errors found.', 'success', flash_location);
+        flashMessageOnScreen('', 'success', flash_location);
     }
 }
 
@@ -168,6 +160,17 @@ function setFlashMessageCategory(flashMessage, category) {
     } else {
         flashMessage.style.backgroundColor = '#f0f0f5';
     }
+}
+
+/**
+ * Returns the extension of a file.
+ * @param {string} filename - The filename of the file whose extension should be split off.
+ * @returns string - The file extension or an empty string if there is no extension.
+ *
+ */
+function splitExt(filename) {
+    const index = filename.lastIndexOf('.');
+    return (-1 !== index) ? [filename.substring(0, index), filename.substring(index + 1)] : [filename, ''];
 }
 
 /**

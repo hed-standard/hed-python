@@ -31,10 +31,10 @@ class Test(unittest.TestCase):
     #         app.register_blueprint(route_blueprint)
     #         self.app = app.test_client()
 
-    def test_generate_input_arguments_from_validation_form(self):
-        self.assertTrue(1, "Testing generate_arguments_from_dictionary_form")
+    def test_report_services_status(self):
+        self.assertTrue(1, "Testing generate_input_from_dictionary_form")
 
-    def test_generate_spreadsheet_validation_filename(self):
+    def test_get_services(self):
         self.assertTrue(1, "Testing generate_dictionary_validation_filename")
         # dictionary_filename = 'abc.xls'
         # expected_spreadsheet_filename = 'validated_' + dictionary_filename.rsplit('.')[0] + '.txt'
@@ -42,20 +42,11 @@ class Test(unittest.TestCase):
         # self.assertTrue(validation_file_name)
         # self.assertEqual(expected_spreadsheet_filename, validation_file_name)
 
-    def test_get_uploaded_file_paths_from_forms(self):
+    def test_get_validate_dictionary(self):
         self.assertTrue(1, "Testing get_uploaded_file_paths_from_forms")
 
-    def test_report_eeg_events_validation_status(self):
+    def test_get_validate_strings(self):
         self.assertTrue(1, "Testing report_eeg_events_validation_status")
-
-    def test_report_spreadsheet_validation_status(self):
-        self.assertTrue(1, "Testing report_dictionary_validation_status")
-
-    def test_save_validation_issues_to_file_in_upload_folder(self):
-        self.assertTrue(1, "Testing save_issues_to_upload_folder")
-
-    def test_validate_spreadsheet(self):
-        self.assertTrue(1, "Testing validate_dictionary")
 
 
 if __name__ == '__main__':

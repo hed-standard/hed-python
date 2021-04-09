@@ -1,44 +1,50 @@
 {% extends "layout.html" %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
-{% from "spreadsheet-input.html" import spreadsheet_input %}
+{% from "column-info.html" import create_column_info %}
 {% block content %}
-    <h2>Validate spreadsheet containing HED tags</h2>
+    <h2>Validate a spreadsheet with HED tags</h2>
+        <p>
+        <i>Upload a spreadsheet (tsv, txt, or Excel) and select a worksheet.<br>
+        Enter the column numbers, select a HED schema, and press Validate.<br>
+        You will see either a downloadable results file or a status message.<br>
+        </i>
+    </p>
+
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="spreadsheet-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ spreadsheet_input() }}
-
+      <h3>Upload spreadsheet file (tab-separated or Excel):</h3>
         <div class="form-group">
-            <label>Special non-prefixed tag columns (if available):</label><br>
-            <div class="textbox-group">
-                <label for="category-column">Category</label>
-                <input type="text" name="category-column" id="category-column">
-                <label for="description-column">Description</label>
-                <input type="text" name="description-column" id="description-column">
-                <label for="label-column">Label</label>
-                <input type="text" name="label-column" id="label-column">
-                <label for="long-column">Long name</label>
-                <input type="text" name="long-column" id="long-column">
-            </div>
-            <label class="secondary-label" for="tag-columns">Columns containing HED strings
-                (comma-separated):</label><br>
-            <input class="textbox-group" type="text" name="tag-columns" id="tag-columns">
-            <p class="flash" id="tag-columns-flash"></p>
-        </div>
+            <label class="secondary-label" for="spreadsheet-file">Spreadsheet file:</label>
+            <label class="btn-group file-browse-group">
+                <button>Browse ...</button>
+                <label for="spreadsheet-file" id="spreadsheet-display-name"></label>
+                <input type="file" name="spreadsheet-file" id="spreadsheet-file"/>
+            </label>
 
+        <div class="form-group" name="worksheet-select" id="worksheet-select">
+            <label class="secondary-label" for="worksheet-name">Worksheet name:</label>
+            <select name="worksheet-name" id="worksheet-name"></select>
+        </div>
+        <p class="flash" id="spreadsheet-flash"></p>
+         </div>
+
+        {{ create_column_info('true') }}
         {{ create_hed_pulldown() }}
 
+
+        <h3>Specify additional options:</h3>
         <div class="form-group">
-            <label>Specify additional options:</label><br>
             <div class="checkbox-group">
                 <div class="inline-field">
-                    <input type="checkbox" name="has-column-names" id="has-column-names">
-                    <label for="has-column-names">Worksheet has column names</label>
-                </div>
+                    <input type="checkbox" name="has-column-names" id="has-column-names" checked>
+                    <label for="has-column-names">Has column names</label>
+                </div><br>
+
                 <div class="inline-field">
-                    <input type="checkbox" name="check-for-warnings" id="check-for-warnings">
-                    <label for="check-for-warnings">Include warnings in output file</label>
+                    <input type="checkbox" name="check-for-warnings" id="check-for-warnings" checked>
+                    <label for="check-for-warnings">Include warnings</label>
                 </div>
             </div>
         </div>
@@ -49,9 +55,9 @@
         </div>
     </form>
     <script type="module">
+        {%  include 'js/column-info.js' %}
         {%  include 'js/form-helpers.js' %}
         {%  include 'js/hed-pulldown.js' %}
-        {%  include 'js/spreadsheet-input.js' %}
         {%  include 'js/spreadsheet-form.js' %}
     </script>
 

@@ -24,15 +24,12 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_validation_form(self):
+    def test_generate_input_from_spreadsheet_form(self):
         self.assertTrue(1, "Testing generate_input_from_validation_form")
 
-    def test_report_spreadsheet_validation_status(self):
-        self.assertTrue(1, "Testing report_spreadsheet_validation_status")
-
-    def test_validate_spreadsheet(self):
-        self.assertTrue(1, "Testing validate_spreadsheet")
-        # from hed.web.spreadsheet import validate_spreadsheet
+    def test_spreadsheet_validate(self):
+        self.assertTrue(1, "Testing spreadsheet_validate")
+        # from hed.web.spreadsheet import spreadsheet_validate
         # temp_name = save_file_to_upload_folder('')
         # self.assertEqual(temp_name, '', "A file with empty name cnnot be copied copied")
         # some_file = '3k32j23kj1.txt'

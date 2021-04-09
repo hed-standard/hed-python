@@ -1,46 +1,36 @@
+import os
+import shutil
 import unittest
-# from flask import current_app, jsonify, Response
-# from hed.web.utils import app_config
-# from hed.web.validation import generate_dictionary_validation_filename
-# from hed.web.app_factory import AppFactory
-# from hed.web.constants import file_constants, spreadsheet_constants
-
-# app = AppFactory.create_app('config.TestConfig')
-# with app.app_context():
-#     from hed.web import web_utils
-#     from hed.web.routes import route_blueprint
-#
-#     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX'])
-#     web_utils.create_upload_directory(app.config['UPLOAD_FOLDER'])
+from flask import Response
+from hed.web.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
-    def setUp(self):
-        print("Stuff")
-        # self.create_test_app()
-        # self.app = app.app.test_client()
-        # self.major_version_key = 'major_versions'
-        # self.hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        # self.tsv_file1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tsv_file1.txt')
+    @classmethod
+    def setUpClass(cls):
+        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
+        app = AppFactory.create_app('config.TestConfig')
+        with app.app_context():
+            from hed.web.routes import route_blueprint
+            app.register_blueprint(route_blueprint)
+            if not os.path.exists(cls.upload_directory):
+                os.mkdir(cls.upload_directory)
+            app.config['UPLOAD_FOLDER'] = cls.upload_directory
+            cls.app = app
+            cls.app.test = app.test_client()
 
-    # def create_test_app(self):
-    #     app = AppFactory.create_app('config.TestConfig')
-    #     with app.app_context():
-    #         from hed.web.routes import route_blueprint
-    #         app.register_blueprint(route_blueprint)
-    #         self.app = app.test_client()
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_schema_form(self):
         self.assertTrue(1, "Testing generate_input_from_schema_form")
 
-    def test_get_schema_conversion(self):
-        self.assertTrue(1, "Testing convert_schema")
-
-    def test_run_schema_compliance_check(self):
+    def test_schema_check(self):
         self.assertTrue(1, "Testing run_schema_compliance_check")
 
-    def test_run_schema_conversion(self):
-        self.assertTrue(1, "Testing run_schema_conversion")
+    def test_schema_convert(self):
+        self.assertTrue(1, "Testing convert_schema")
 
 
 if __name__ == '__main__':

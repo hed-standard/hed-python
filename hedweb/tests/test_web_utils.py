@@ -28,7 +28,6 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-
     def test_convert_number_str_to_list(self):
         from hed.web.web_utils import convert_number_str_to_list
         other_tag_columns_str = '1,2,3'
@@ -48,6 +47,9 @@ class Test(unittest.TestCase):
         expected_other_columns = ['A', 'B', 'C']
         with self.assertRaises(ValueError):
             other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+
+    def test_delete_file_no_exceptions(self):
+        print("Test")
 
     def test_file_extension_is_valid(self):
         from hed.web import web_utils
@@ -148,8 +150,11 @@ class Test(unittest.TestCase):
         filename = generate_filename('HED7.1.2.xml', suffix='blech', extension='.txt')
         self.assertEqual('HED7.1.2_blech.txt', filename, "Returns correct string when basename has periods")
 
+    def test_generate_text_response(self):
+        print("Stuff")
+
     def test_get_hed_path_from_pull_down(self):
-        from hed.web.constants import common_constants
+        from hed.web.constants import common
         from hed.web.web_utils import get_hed_path_from_pull_down
         mock_form = mock.Mock()
         mock_form.values = {}
@@ -181,14 +186,20 @@ class Test(unittest.TestCase):
         # actual_path = os.path.join(self.upload_directory, filename)
         # self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
         # with self.app.app_context():
-        #     the_path = save_text_to_upload_folder(text, filename)
-        #     self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
+            # the_path = save_text_to_upload_folder(text, filename)
+            # self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
+
+    # def test_handle_http_error(self):
+    #     error_code = "CODE"
+    #     error_message = "Test"
+    #
+    #     self.assertTrue(1, "Testing handle_http_error")
+
+    def test_handle_error(self):
+        print("stuff")
 
     def test_handle_http_error(self):
-        error_code = "CODE"
-        error_message = "Test"
-
-        self.assertTrue(1, "Testing handle_http_error")
+        print("stuff")
 
     def test_save_file_to_upload_folder(self):
         self.assertTrue(1, "Testing save_file_to_upload_folder")
@@ -225,13 +236,19 @@ class Test(unittest.TestCase):
         # self.assertNotEqual(mock_file, '', "It should create an actual file in the upload directory")
         # self.assertTrue(os.path.isfile(temp_name), "File should exist after it is uploaded")
 
-    def test_text_to_upload_folder(self):
+    def test_save_file_to_upload_folder_no_exception(self):
+        print("Stuff")
+
+    def test_save_text_to_upload_folder(self):
         from hed.web.web_utils import save_text_to_upload_folder
+        # from flask import Flask
+        # app = Flask(__name__)
         text = 'save me now'
         filename = 'test_save.txt'
         actual_path = os.path.join(self.upload_directory, filename)
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
         with self.app.app_context():
+            from hed.web.web_utils import save_text_to_upload_folder
             the_path = save_text_to_upload_folder(text, filename)
             self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 

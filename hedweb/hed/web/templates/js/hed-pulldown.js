@@ -11,7 +11,7 @@ $('#hed-version').on('change',function () {
     } else {
         hideOtherHEDVersionFileUpload()
     }
-    flashMessageOnScreen('', 'success', 'hed-flash');
+    flashMessageOnScreen('', 'success', 'hed-select-flash');
 });
 
 /**
@@ -26,22 +26,21 @@ $('#hed-xml-file').on('change', function () {
         updateFileLabel(hedPath, '#hed-display-name');
     } else {
         flashMessageOnScreen('Please upload a valid HED file (.xml)', 'error',
-            'hed-flash')
+            'hed-select-flash')
     }
 })
 
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-function clearHEDFlashMessage() {
-    flashMessageOnScreen('', 'success', 'hed-flash');
+function clearHedSelectFlashMessages() {
+    flashMessageOnScreen('', 'success', 'hed-select-flash');
 }
-
 
 /**
  * Gets the HED versions that are in the HED version drop-down menu.
  */
-function getHEDVersions() {
+function getHedVersions() {
     $.ajax({
             type: 'GET',
             url: "{{url_for('route_blueprint.get_major_hed_versions')}}",
@@ -49,12 +48,18 @@ function getHEDVersions() {
             processData: false,
             dataType: 'json',
             success: function (hedInfo) {
-                populateHEDVersionsDropdown(hedInfo['hed-major-versions']);
+                if (hedInfo['hed-major-versions']) {
+                     populateHEDVersionsDropdown(hedInfo['hed-major-versions']);
+                } else if (hedInfo['message'])
+                    flashMessageOnScreen(hedInfo['message'], 'error', 'hed-select-flash')
+                else {
+                    flashMessageOnScreen('Server could retrieve HED versions. Please provide your own.',
+                        'error', 'hed-select-flash')
+                }
             },
             error: function (jqXHR) {
-                console.log(jqXHR.responseJSON.message);
-                flashMessageOnScreen('Major HED versions could not be retrieved. Please provide your own.',
-                    'error', 'dictionary-flash');
+                flashMessageOnScreen('Server could retrieve HED versions. Please provide your own.',
+                    'error', 'hed-select-flash');
             }
         }
     );
@@ -75,14 +80,19 @@ function getVersionFromHEDFile(hedXMLFile) {
         processData: false,
         dataType: 'json',
         success: function (hedInfo) {
-            resetFormFlashMessages();
-            flashMessageOnScreen('Using HED version ' + hedInfo['hed-version'],
-                'success', 'hed-flash');
+            if (hedInfo['hed-version']) {
+                flashMessageOnScreen('Using HED version ' + hedInfo['hed-version'], 'success', 'hed-select-flash');
+            } else if (hedInfo['message'])
+                flashMessageOnScreen(hedInfo['message'], 'error', 'hed-select-flash')
+            else {
+                flashMessageOnScreen('Server could retrieve HED versions. Please provide your own.',
+                        'error', 'hed-select-flash')
+            }
         },
         error: function (jqXHR) {
-            console.log(jqXHR.responseJSON.message);
+            //console.log(jqXHR.responseJSON.message);
             flashMessageOnScreen('Could not get version number from HED XML file.',
-                'error', 'hed-flash');
+                'error', 'hed-select-flash');
         }
     });
 }
@@ -95,7 +105,7 @@ function hedSpecifiedWhenOtherIsSelected() {
     let hedFile = $('#hed-xml-file');
     let hedFileIsEmpty = hedFile[0].files.length === 0;
     if ($('#hed-version').val() === HED_OTHER_VERSION_OPTION && hedFileIsEmpty) {
-        flashMessageOnScreen('HED version is not specified.', 'error', 'hed-flash');
+        flashMessageOnScreen('HED version is not specified.', 'error', 'hed-select-flash');
         return false;
     }
     return true;
@@ -116,6 +126,7 @@ function hideOtherHEDVersionFileUpload() {
  */
 function populateHEDVersionsDropdown(hedVersions) {
     let hedVersionDropdown = $('#hed-version');
+    $('#hed-version').empty()
     hedVersionDropdown.append('<option value=' + hedVersions[0] + '>' + hedVersions[0] + ' (Latest)</option>');
     for (let i = 1; i < hedVersions.length; i++) {
         hedVersionDropdown.append('<option value=' + hedVersions[i] + '>' + hedVersions[i] + '</option>');

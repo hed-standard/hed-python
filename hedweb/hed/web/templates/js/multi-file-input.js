@@ -321,14 +321,14 @@
         '   <div class="file-caption-name"></div>\n' +
         '</div>\n';
     //noinspection HtmlUnknownAttribute
-    tBtnDefault = '<button type="{type}" tabindex="500" title="{title}" class="{css}" {status}>{icon}{label}</button>';
+    tBtnDefault = '<button field_type="{field_type}" tabindex="500" title="{title}" class="{css}" {status}>{icon}{label}</button>';
     tBtnLink = '<a href="{href}" tabindex="500" title="{title}" class="{css}" {status}>{icon}{label}</a>';
     tBtnBrowse = '<div tabindex="500" class="{css}" {status}>{icon}{label}</div>';
     tModal = '<div id="{id}" class="file-preview-detail-modal modal fade" tabindex="-1">\n' +
         '  <div class="modal-dialog modal-lg">\n' +
         '    <div class="modal-content">\n' +
         '      <div class="modal-header">\n' +
-        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' +
+        '        <button field_type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' +
         '        <h3 class="modal-title">{heading} <small>{title}</small></h3>\n' +
         '      </div>\n' +
         '      <div class="modal-body">\n' +
@@ -354,11 +354,11 @@
         '    <div class="file-upload-indicator" title="{indicatorTitle}">{indicator}</div>\n' +
         '    <div class="clearfix"></div>\n' +
         '</div>';
-    tActionDelete = '<button type="button" class="kv-file-remove {removeClass}" ' +
+    tActionDelete = '<button field_type="button" class="kv-file-remove {removeClass}" ' +
         'title="{removeTitle}" {dataUrl}{dataKey}>{removeIcon}</button>\n';
-    tActionUpload = '<button type="button" class="kv-file-upload {uploadClass}" title="{uploadTitle}">' +
+    tActionUpload = '<button field_type="button" class="kv-file-upload {uploadClass}" title="{uploadTitle}">' +
         '   {uploadIcon}\n</button>\n';
-    tZoom = '<button type="button" class="btn btn-default btn-xs btn-block" title="{zoomTitle}: {caption}" onclick="{dialog}">\n' +
+    tZoom = '<button field_type="button" class="btn btn-default btn-xs btn-block" title="{zoomTitle}: {caption}" onclick="{dialog}">\n' +
         '   {zoomInd}\n' +
         '</button>\n';
     tGeneric = '<div class="file-preview-frame{frameClass}" id="{previewId}" data-fileindex="{fileindex}">\n' +
@@ -366,7 +366,7 @@
         '   {footer}\n' +
         '</div>\n';
     tHtml = '<div class="file-preview-frame{frameClass}" id="{previewId}" data-fileindex="{fileindex}">\n' +
-        '    <object class="file-object" data="{data}" type="{type}" width="{width}" height="{height}">\n' +
+        '    <object class="file-object" data="{data}" field_type="{field_type}" width="{width}" height="{height}">\n' +
         '       ' + DEFAULT_PREVIEW + '\n' +
         '    </object>\n' +
         '   {footer}\n' +
@@ -383,7 +383,7 @@
     tVideo = '<div class="file-preview-frame{frameClass}" id="{previewId}" data-fileindex="{fileindex}"' +
         ' title="{caption}" ' + STYLE_SETTING + '>\n' +
         '   <video width="{width}" height="{height}" controls>\n' +
-        '       <source src="{data}" type="{type}">\n' +
+        '       <source src="{data}" field_type="{field_type}">\n' +
         '       ' + DEFAULT_PREVIEW + '\n' +
         '   </video>\n' +
         '   {footer}\n' +
@@ -391,21 +391,21 @@
     tAudio = '<div class="file-preview-frame{frameClass}" id="{previewId}" data-fileindex="{fileindex}"' +
         ' title="{caption}" ' + STYLE_SETTING + '>\n' +
         '   <audio controls>\n' +
-        '       <source src="' + '{data}' + '" type="{type}">\n' +
+        '       <source src="' + '{data}' + '" field_type="{field_type}">\n' +
         '       ' + DEFAULT_PREVIEW + '\n' +
         '   </audio>\n' +
         '   {footer}\n' +
         '</div>';
     tFlash = '<div class="file-preview-frame{frameClass}" id="{previewId}" data-fileindex="{fileindex}"' +
         ' title="{caption}" ' + STYLE_SETTING + '>\n' +
-        '   <object class="file-object" type="application/x-shockwave-flash" width="{width}" height="{height}" data="{data}">\n' +
+        '   <object class="file-object" field_type="application/x-shockwave-flash" width="{width}" height="{height}" data="{data}">\n' +
         OBJECT_PARAMS + '       ' + DEFAULT_PREVIEW + '\n' +
         '   </object>\n' +
         '   {footer}\n' +
         '</div>\n';
     tObject = '<div class="file-preview-frame{frameClass}" id="{previewId}" data-fileindex="{fileindex}"' +
         ' title="{caption}" ' + STYLE_SETTING + '>\n' +
-        '   <object class="file-object" data="{data}" type="{type}" width="{width}" height="{height}">\n' +
+        '   <object class="file-object" data="{data}" field_type="{field_type}" width="{width}" height="{height}">\n' +
         '       <param name="movie" value="{caption}" />\n' +
         OBJECT_PARAMS + '         ' + DEFAULT_PREVIEW + '\n' +
         '   </object>\n' +
@@ -636,7 +636,7 @@
             }
             $exception = '<div class="help-block alert alert-warning">' +
                 '<h4>Invalid Input Type</h4>' +
-                'You must set an input <code>type = file</code> for <b>bootstrap-fileinput</b> plugin to initialize.' +
+                'You must set an input <code>field_type = file</code> for <b>bootstrap-fileinput</b> plugin to initialize.' +
                 '</div>';
             self.$element.after($exception);
             return false;
@@ -2172,7 +2172,7 @@
             if (!isEmpty(label)) {
                 label = ' <span class="' + self.buttonLabelClass + '">' + label + '</span>';
             }
-            return tmplt.replace('{type}', btnType)
+            return tmplt.replace('{field_type}', btnType)
                 .replace('{css}', css)
                 .replace('{title}', title)
                 .replace('{status}', status)
@@ -2730,7 +2730,7 @@
         msgFileNotReadable: 'File "{name}" is not readable.',
         msgFilePreviewAborted: 'File preview aborted for "{name}".',
         msgFilePreviewError: 'An error occurred while reading the file "{name}".',
-        msgInvalidFileType: 'Invalid type for file "{name}". Only "{types}" files are supported.',
+        msgInvalidFileType: 'Invalid field_type for file "{name}". Only "{types}" files are supported.',
         msgInvalidFileExtension: 'Invalid extension for file "{name}". Only "{extensions}" files are supported.',
         msgUploadAborted: 'The file upload was aborted',
         msgValidationError: 'Validation Error',
@@ -2753,7 +2753,7 @@
      * Convert automatically file inputs with class 'file' into a bootstrap fileinput control.
      */
     $(document).ready(function () {
-        var $input = $('input.file[type=file]');
+        var $input = $('input.file[field_type=file]');
         if ($input.length) {
             $input.fileinput();
         }

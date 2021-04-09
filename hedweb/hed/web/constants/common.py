@@ -1,9 +1,12 @@
 CHECK_FOR_WARNINGS = 'check-for-warnings'
 COLUMN_NAMES = 'column-names'
-COLUMNS_NAMES_TABLE = 'columns-names-table'
+COLUMN_NAMES_TABLE = 'column-names-table'
 HAS_COLUMN_NAMES = 'has-column-names'
 COLUMN_POSTFIX = '-column'
 COLUMN_PREFIX_DICTIONARY = 'column-prefix-dictionary'
+COLUMNS_FILE = 'columns-file'
+COLUMNS_PATH = 'columns-path'
+COLUMNS_DISPLAY_NAME = 'columns-display-name'
 TAG_COLUMNS = 'tag-columns'
 TAG_COLUMN_INDICES = 'tag-column-indices'
 
@@ -11,7 +14,10 @@ DOWNLOAD_FILE = 'download-file'
 JSON_FILE = 'json-file'
 JSON_PATH = 'json-path'
 ERROR_COUNT = 'error-count'
-
+EVENTS_DISPLAY_NAME = 'events-display-name'
+EVENTS_FILE = 'events-file'
+EVENTS_FLASH = 'events-flash'
+EVENTS_PATH = 'events-path'
 EVENTS_VALIDATION_SUBMIT = 'events-validation-submit'
 EVENTS_SUBMIT_FLASH = 'events-validation-submit-flash'
 
@@ -22,10 +28,15 @@ HED_OTHER_VERSION_OPTION = 'Other'
 HED_SCHEMA_FILE = 'hed-schema-file'
 HED_SCHEMA_PATH = 'hed-schema-path'
 HED_SCHEMA_URL = 'hed-schema-url'
-HED_STRINGS = 'hed-strings'
+HED_SELECT_FLASH = 'hed-select-flash'
+HEDSTRING = 'hedstring'
+HEDSTRING_LIST = 'hedstring_list'
+HEDSTRING_OPTION = 'hedstring-option'
+HEDSTRING_TO_LONG = 'hedstring-to-long'
+HEDSTRING_TO_SHORT = 'hedstring-to-short'
+HEDSTRING_VALIDATE = 'hedstring-validate'
 HED_VERSION = 'hed-version'
 HED_XML_FILE = 'hed-xml-file'
-
 ISSUE_COUNT = 'issue-count'
 REQUIRED_TAG_COLUMN_INDICES = 'required-tag-column-indices'
 SPREADSHEET_DISPLAY_NAME = 'spreadsheet-display-name'
@@ -36,7 +47,8 @@ WARNING_COUNT = 'warning-count'
 
 WORKSHEET_NAME = 'worksheet-name'
 WORKSHEET_NAMES = 'worksheet-names'
-
+WORKSHEET_SELECT = 'worksheet-select'
+WORKSHEET_SELECTED = 'worksheet-selected'
 
 # Schema-specific constants
 SCHEMA_FORM = 'schema-form'
@@ -55,16 +67,6 @@ SCHEMA_URL_FLASH = 'schema-url-flash'
 SCHEMA_URL_DISPLAY_NAME = 'schema-url-display-name'
 SCHEMA_URL_OPTION = 'schema-url-option'
 
-SERVICE_SUBMIT = 'service-submit'
-
 # Type constants
 BOOLEAN = 'boolean'
 STRING = 'string'
-
-
-# Validation-specific constants
-VALIDATION_FORM = 'validation-form'
-VALIDATION_OUTPUT_FILE_PREFIX = 'validation_errors'
-VALIDATION_SUBMIT = 'validation-submit'
-VALIDATION_SUBMIT_FLASH = 'validation-submit-flash'
-
