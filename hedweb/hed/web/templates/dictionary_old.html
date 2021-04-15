@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% from "json-input.html" import create_json_input %}
+{% from "hed-pulldown.html" import create_hed_pulldown %}
+
+{% block content %}
+    <h2>Validate BIDS-style JSON dictionary</h2>
+    <p>
+        <i>Upload a BIDS-style JSON events file, select a HED schema, and press Validate.<br>
+        You will see either a downloadable results file or a status message.
+        </i>
+    </p>
+
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <form id="dictionary-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <div class="form-group">
+
+            {{ create_json_input() }}
+            {{ create_hed_pulldown() }}
+
+            <div class="form-group">
+                <h3>Specify additional options:</h3>
+                <div class="checkbox-group">
+                    <div class="inline-field">
+                        <input type="checkbox" name="check-for-warnings" id="check-for-warnings">
+                        <label for="check-for-warnings">Include warnings in output file</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button id="dictionary-validation-submit" type="button">Validate</button>
+                <p class="flash" id="dictionary-validation-submit-flash"></p>
+            </div>
+        </div>
+    </form>
+    <script type="module">
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/json-input.js' %}
+        {%  include 'js/hed-pulldown.js' %}
+        {%  include 'js/dictionary-form.js' %}
+    </script>
+{% endblock %}
