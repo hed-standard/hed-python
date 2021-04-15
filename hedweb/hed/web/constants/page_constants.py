@@ -1,6 +1,6 @@
 ADDITIONAL_EXAMPLES_PAGE = 'additional-examples.html'
 COMMON_ERRORS_PAGE = 'common-errors.html'
-DICTIONARY_VALIDATION_PAGE = 'dictionary.html'
+DICTIONARY_PAGE = 'dictionary.html'
 EVENTS_PAGE = 'events.html'
 HED_SERVICES_PAGE = 'hed-services.html'
 HEDSTRING_PAGE = 'hedstring.html'

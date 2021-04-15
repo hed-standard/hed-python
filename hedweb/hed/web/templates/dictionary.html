@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% from "json-input.html" import create_json_input %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "hed-options-pulldown.html" import create_hed_options_pulldown %}
 
 {% block content %}
     <h2>Validate BIDS-style JSON dictionary</h2>
@@ -18,6 +19,7 @@
 
             {{ create_json_input() }}
             {{ create_hed_pulldown() }}
+            {{ create_hed_options_pulldown() }}
 
             <div class="form-group">
                 <h3>Specify additional options:</h3>
@@ -30,8 +32,8 @@
             </div>
 
             <div class="form-group">
-                <button id="dictionary-validation-submit" type="button">Validate</button>
-                <p class="flash" id="dictionary-validation-submit-flash"></p>
+                <button id="dictionary-submit" type="button">Process</button>
+                <p class="flash" id="dictionary-submit-flash"></p>
             </div>
         </div>
     </form>

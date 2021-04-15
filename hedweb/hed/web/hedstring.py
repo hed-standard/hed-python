@@ -2,10 +2,10 @@ from flask import current_app
 
 from hed.tools.tag_format import TagFormat
 from hed.util.error_reporter import get_printable_issue_string
+from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hed.web.constants import common
 from hed.web.web_utils import form_has_option, get_hed_path_from_pull_down
-from hed.web.web_exceptions import HedError
 app_config = current_app.config
 
 
@@ -48,13 +48,12 @@ def hedstring_process(input_arguments):
 
     Returns
     -------
-    string
-        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
-        500 error message is returned.
+    Response
+        Downloadable response object.
     """
 
     if not input_arguments[common.HEDSTRING]:
-        raise HedError('EmptyHEDString', "Please enter a nonempty HED string to process")
+        raise HedFileError('EmptyHEDString', "Please enter a nonempty HED string to process","")
     if input_arguments[common.HED_OPTION_VALIDATE]:
         return hedstring_validate(input_arguments)
     elif input_arguments[common.HED_OPTION_TO_SHORT]:
@@ -62,7 +61,7 @@ def hedstring_process(input_arguments):
     elif input_arguments[common.HED_OPTION_TO_LONG]:
         return hedstring_convert(input_arguments)
     else:
-        raise HedError('UnknownProcessingMethod', "Select a hedstring processing method")
+        raise HedFileError('UnknownProcessingMethod', "Select a hedstring processing method", "")
 
 
 def hedstring_convert(input_arguments, short_to_long=True):
@@ -73,7 +72,7 @@ def hedstring_convert(input_arguments, short_to_long=True):
     input_arguments: dict
         Dictionary containing standard input form arguments
     short_to_long: bool
-        If True convert the hedstring
+        If True convert the hedstring to long form, otherwise convert to short form
     Returns
     -------
     dict
