@@ -30,9 +30,9 @@ class Test(unittest.TestCase):
         response = self.app.test.post('/get-columns-info')
         self.assertEqual(400, response.status_code, 'Columns info requires data')
 
-    def test_get_dictionary_validation_results(self):
-        response = self.app.test.post('/dictionary-validation-submit')
-        self.assertEqual(400, response.status_code, 'Dictionary validation requires data')
+    def test_get_dictionary_results(self):
+        response = self.app.test.post('/dictionary-submit')
+        self.assertEqual(400, response.status_code, 'Dictionaryrequires data')
 
     def test_get_events_validation_results(self):
         response = self.app.test.post('/events-validation-submit')

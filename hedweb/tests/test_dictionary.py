@@ -53,11 +53,11 @@ class Test(unittest.TestCase):
         # response = dictionary_validate(inputs, hed_schema=hed7)
         # inputs["hed-xml-file"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         # hed7 = hed_schema_file.load_schema(inputs["hed-xml_file"])
-        # self.assertEqual("", dictionary_validate(input_arguments, hed_schema=schema8),
+        # self.assertEqual("", dictionary_validate(arguments, hed_schema=schema8),
         #                  "This dictionary should have no errors for directly created 8.0.0")
         # schema7 = HedSchema(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml'))
-        # x = dictionary_validate(input_arguments, hed_schema=schema7, return_response=False)
-        # self.assertEqual("", dictionary_validate(input_arguments, hed_schema=schema7,return_response=False),
+        # x = dictionary_validate(arguments, hed_schema=schema7, return_response=False)
+        # self.assertEqual("", dictionary_validate(arguments, hed_schema=schema7,return_response=False),
         #                  "This dictionary should have no errors for directly created 8.0.0")
 
         # from hed.web import dictionary
@@ -113,11 +113,11 @@ class Test(unittest.TestCase):
     #     # response = dictionary_validate(inputs, hed_schema=hed7)
     #     # inputs["hed-xml-file"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
     #     # hed7 = hed_schema_file.load_schema(inputs["hed-xml_file"])
-    #     # self.assertEqual("", dictionary_validate(input_arguments, hed_schema=schema8),
+    #     # self.assertEqual("", dictionary_validate(arguments, hed_schema=schema8),
     #     #                  "This dictionary should have no errors for directly created 8.0.0")
     #     # schema7 = HedSchema(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml'))
-    #     # x = dictionary_validate(input_arguments, hed_schema=schema7, return_response=False)
-    #     # self.assertEqual("", dictionary_validate(input_arguments, hed_schema=schema7,return_response=False),
+    #     # x = dictionary_validate(arguments, hed_schema=schema7, return_response=False)
+    #     # self.assertEqual("", dictionary_validate(arguments, hed_schema=schema7,return_response=False),
     #     #                  "This dictionary should have no errors for directly created 8.0.0")
 
 if __name__ == '__main__':

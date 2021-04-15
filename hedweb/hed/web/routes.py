@@ -1,4 +1,4 @@
-from flask import render_template, Response, request, Blueprint, current_app
+from flask import render_template, request, Blueprint, current_app
 import json
 
 from hed.util import hed_cache
@@ -16,12 +16,7 @@ route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
 @route_blueprint.route(route_constants.COLUMN_INFO_ROUTE, methods=['POST'])
 def get_columns_info_results():
-    """Gets information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
-
-    Parameters
-    ----------
+    """Gets the names of the spreadsheet columns and column indices that contain HED tags.
 
     Returns
     -------
@@ -40,12 +35,9 @@ def get_columns_info_results():
         delete_file_no_exceptions(input_arguments.get(common.COLUMNS_PATH, ''))
 
 
-@route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_dictionary_validation_results():
-    """Validate the JSON dictionary in the form after submission and return an attachment containing the output.
-
-    Parameters
-    ----------
+@route_blueprint.route(route_constants.DICTIONARY_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_dictionary_results():
+    """Process the JSON dictionary in the form after submission and return an attachment containing the output.
 
     Returns
     -------
@@ -55,25 +47,22 @@ def get_dictionary_validation_results():
     input_arguments = {}
     try:
         input_arguments = dictionary.generate_input_from_dictionary_form(request)
-        return dictionary.dictionary_validate(input_arguments)
+        a = dictionary.dictionary_process(input_arguments)
+        return a
     except Exception as ex:
         return handle_http_error(ex)
     finally:
         delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
 
 
-@route_blueprint.route(route_constants.EVENTS_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_events_validation_results():
-    """Validate the spreadsheet in the form after submission and return an attachment other containing the output.
-
-    Parameters
-    ----------
+@route_blueprint.route(route_constants.EVENTS_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_events_results():
+    """Process the events file and JSON sidecar in the form and return an attachment with results.
 
     Returns
     -------
-        string
-        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
-        500 error message is returned.
+        downloadable file
+        Contains the results of processing
     """
     input_arguments = {}
     try:
@@ -89,17 +78,12 @@ def get_events_validation_results():
 
 @route_blueprint.route(route_constants.HED_SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_hed_services_results():
-    """Validate the hed strings associated with EEG events after submission from HEDTools EEGLAB plugin and
-    return json string containing the output.
-
-    Parameters
-    ----------
+    """Perform the requested hed web service and return the results in JSON.
 
     Returns
     -------
         string
-        A serialized JSON string containing information related to the EEG events' hedstrings.
-        If the validation fails then a 500 error message is returned.
+        A serialized JSON string containing processed information.
     """
     try:
         form_data = request.data
@@ -113,15 +97,11 @@ def get_hed_services_results():
 def get_hedstring_results():
     """Process hed strings entered in a text box.
 
-    Parameters
-    ----------
-
     Returns
     -------
-        Response
+        A serialized JSON string
 
     """
-    # return hedstring_process(request)
 
     try:
         input_arguments = generate_input_from_hedstring_form(request)
@@ -160,9 +140,6 @@ def get_hed_version():
 def get_major_hed_versions():
     """Gets a list of major hed versions from the hed_cache and returns as a serialized JSON string
 
-    Parameters
-    ----------
-
     Returns
     -------
     string
@@ -178,46 +155,20 @@ def get_major_hed_versions():
         return handle_error(ex)
 
 
-@route_blueprint.route(route_constants.SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_schema_compliance_check_results():
-    """Check the HED specification in the form after submission and return an attachment other containing the output.
-
-    Parameters
-    ----------
+@route_blueprint.route(route_constants.SCHEMA_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_schema_results():
+    """Get the results of schema processing.
 
     Returns
     -------
-        string
-        A serialized JSON string containing the hed specification to check. If the conversion fails then a
-        500 error message is returned.
+        downloadable file
+
     """
     input_arguments = {}
     try:
         input_arguments = schema.generate_input_from_schema_form(request)
-        return schema.schema_check(input_arguments)
-    except Exception as ex:
-        return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
-
-
-@route_blueprint.route(route_constants.SCHEMA_CONVERSION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_schema_conversion_results():
-    """Convert the given HED specification and return an attachment with the result.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-        string
-        A serialized JSON string containing information related file to convert. If the conversion fails then a
-        500 error message is returned.
-    """
-    input_arguments = {}
-    try:
-        input_arguments = schema.generate_input_from_schema_form(request)
-        return schema.schema_convert(input_arguments)
+        a = schema.schema_process(input_arguments)
+        return a
     except Exception as ex:
         return handle_http_error(ex)
     finally:
@@ -226,16 +177,12 @@ def get_schema_conversion_results():
 
 @route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_spreadsheet_validation_results():
-    """Validate the spreadsheet in the form after submission and return an attachment other containing the output.
-
-    Parameters
-    ----------
+    """Validate the spreadsheet in the form and return an attachment with validation errors.
 
     Returns
     -------
         string
-        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
-        500 error message is returned.
+        Validation errors in readable format.
     """
     input_arguments = {}
     try:
@@ -249,10 +196,7 @@ def get_spreadsheet_validation_results():
 
 @route_blueprint.route(route_constants.ADDITIONAL_EXAMPLES_ROUTE, strict_slashes=False, methods=['GET'])
 def render_additional_examples_page():
-    """Handles the site additional examples page.
-
-    Parameters
-    ----------
+    """The site additional examples page.
 
     Returns
     -------
@@ -265,15 +209,12 @@ def render_additional_examples_page():
 
 @route_blueprint.route(route_constants.COMMON_ERRORS_ROUTE, strict_slashes=False, methods=['GET'])
 def render_common_error_page():
-    """Handles the common errors page.
-
-    Parameters
-    ----------
+    """The common errors page.
 
     Returns
     -------
     Rendered template
-        A rendered template for the home page.
+        A rendered template for a page explaining common errors.
 
     """
     return render_template(page_constants.COMMON_ERRORS_PAGE)
@@ -281,34 +222,25 @@ def render_common_error_page():
 
 @route_blueprint.route(route_constants.DICTIONARY_ROUTE, strict_slashes=False, methods=['GET'])
 def render_dictionary_form():
-    """Handles the site root and Validation tab functionality.
-
-    Parameters
-    ----------
+    """Page with the dictionary processing form.
 
     Returns
     -------
     Rendered template
-        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
-        displayed. If the HTTP method is a POST then the validation form is submitted.
+        A rendered template for the dictionary form.
 
     """
-    return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
-    # return render_template(page_constants.DICTIONARY_VALIDATION_PAGE)
+    return render_template(page_constants.DICTIONARY_PAGE)
 
 
 @route_blueprint.route(route_constants.EVENTS_ROUTE, strict_slashes=False, methods=['GET'])
 def render_events_form():
-    """Handles the site root and Validation tab functionality.
-
-    Parameters
-    ----------
+    """The form for BIDS event file (with JSON sidecar) processing.
 
     Returns
     -------
     Rendered template
-        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
-        displayed. If the HTTP method is a POST then the validation form is submitted.
+        A rendered template for the events form.
 
     """
     return render_template(page_constants.EVENTS_PAGE)
@@ -316,16 +248,12 @@ def render_events_form():
 
 @route_blueprint.route(route_constants.HED_SERVICES_ROUTE, strict_slashes=False, methods=['GET'])
 def render_hed_services_form():
-    """Handles the site root and EEG Validation tab functionality.
-
-    Parameters
-    ----------
+    """Landing page for HED web services designed to be called from programs such as MATLAB.
 
     Returns
     -------
     Rendered template
-        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
-        displayed. If the HTTP method is a POST then the validation form is submitted.
+        A dummy rendered template so that the service can get a csrf token.
 
     """
     return render_template(page_constants.HED_SERVICES_PAGE)
@@ -335,14 +263,10 @@ def render_hed_services_form():
 def render_hedstring_form():
     """Renders a form for different hedstring operations.
 
-    Parameters
-    ----------
-
     Returns
     -------
     Rendered template
-        A rendered template for the hed_string_form. If the HTTP method is a GET then the form will be
-        displayed. If the HTTP method is a POST then the form is submitted.
+        A rendered template for the hedstring form.
 
     """
     return render_template(page_constants.HEDSTRING_PAGE)
@@ -350,10 +274,7 @@ def render_hedstring_form():
 
 @route_blueprint.route(route_constants.HED_TOOLS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
 def render_help_page():
-    """Handles the site help page.
-
-    Parameters
-    ----------
+    """The site help page.
 
     Returns
     -------
@@ -366,10 +287,7 @@ def render_help_page():
 
 @route_blueprint.route(route_constants.HED_TOOLS_HOME_ROUTE, strict_slashes=False, methods=['GET'])
 def render_home_page():
-    """Handles the home page.
-
-    Parameters
-    ----------
+    """The home page.
 
     Returns
     -------
@@ -384,14 +302,10 @@ def render_home_page():
 def render_schema_form():
     """Handles the site root and conversion tab functionality.
 
-    Parameters
-    ----------
-
     Returns
     -------
     Rendered template
-        A rendered template for the conversion form. If the HTTP method is a GET then the conversion form will be
-        displayed. If the HTTP method is a POST then the conversion form is submitted.
+        A rendered template for the schema processing form.
 
     """
     return render_template(page_constants.SCHEMA_PAGE)
@@ -399,16 +313,12 @@ def render_schema_form():
 
 @route_blueprint.route(route_constants.SPREADSHEET_ROUTE, strict_slashes=False, methods=['GET'])
 def render_spreadsheet_form():
-    """Handles the site root and Validation tab functionality.
-
-    Parameters
-    ----------
+    """Displays the spreadsheet Validation form.
 
     Returns
     -------
     Rendered template
-        A rendered template for the validation form. If the HTTP method is a GET then the validation form will be
-        displayed. If the HTTP method is a POST then the validation form is submitted.
+        A rendered template for the spreadsheet hed tags form.
 
     """
     return render_template(page_constants.SPREADSHEET_PAGE)

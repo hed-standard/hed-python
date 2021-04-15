@@ -5,6 +5,9 @@ from flask import current_app
 from hed.schema.hed_schema_file import load_schema, convert_schema_to_format
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.file_util import url_to_file, get_file_extension
+from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
+from hed.util.error_types import ErrorSeverity
+from hed.util.exceptions import HedFileError
 
 from hed.web.web_utils import form_has_file, form_has_option, form_has_url, \
     generate_download_file_response, generate_filename, generate_text_response, \
@@ -43,10 +46,38 @@ def generate_input_from_schema_form(request):
         arguments[common.SCHEMA_PATH] = url_to_file(schema_url)
         url_parsed = urlparse(schema_url)
         arguments[common.SCHEMA_DISPLAY_NAME] = basename(url_parsed.path)
+    if form_has_option(request, common.SCHEMA_OPTION, common.SCHEMA_OPTION_CHECK):
+        arguments[common.SCHEMA_OPTION_CHECK] = True
+    elif form_has_option(request, common.SCHEMA_OPTION, common.SCHEMA_OPTION_CONVERT):
+        arguments[common.SCHEMA_OPTION_CONVERT] = True
     return arguments
 
 
-def schema_check(input_arguments):
+def schema_process(arguments):
+    """Perform the requested action for the dictionary.
+
+    Parameters
+    ----------
+    arguments: dict
+        A dictionary with the input arguments from the dictionary form
+
+    Returns
+    -------
+      Response
+        Downloadable response object.
+    """
+
+    if not arguments[common.SCHEMA_PATH]:
+        raise HedFileError('EmptySCHEMAFile', "Please give a schema to process", "")
+    if arguments.get(common.SCHEMA_OPTION_CHECK, None):
+        return schema_check(arguments)
+    elif arguments.get(common.SCHEMA_OPTION_CONVERT, None):
+        return schema_convert(arguments)
+    else:
+        raise HedFileError('UnknownProcessingMethod', "Select a schema processing method", "")
+
+
+def schema_check(arguments):
     """Run tag comparison(map_schema from converter)
 
     returns: Response or string.
@@ -55,11 +86,11 @@ def schema_check(input_arguments):
         Response is a download success.
     """
 
-    hed_file_path = input_arguments.get(common.SCHEMA_PATH, '')
+    hed_file_path = arguments.get(common.SCHEMA_PATH, '')
     this_schema = load_schema(hed_file_path)
     issues = this_schema.check_compliance()
     if issues:
-        display_name = input_arguments.get(common.SCHEMA_DISPLAY_NAME)
+        display_name = arguments.get(common.SCHEMA_DISPLAY_NAME)
         issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
         file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
         issue_file = save_text_to_upload_folder(issue_str, file_name)
@@ -69,15 +100,15 @@ def schema_check(input_arguments):
         return generate_text_response("", msg='Schema had no HED-3G validation errors')
 
 
-def schema_convert(input_arguments):
+def schema_convert(arguments):
     """Run conversion(wiki2xml or xml2wiki from converter)
 
     returns: Response or string.
         Non empty string is an error
         Response is a download success.
     """
-    schema_file_path = input_arguments.get(common.SCHEMA_PATH)
-    display_name = input_arguments.get(common.SCHEMA_DISPLAY_NAME)
+    schema_file_path = arguments.get(common.SCHEMA_PATH)
+    display_name = arguments.get(common.SCHEMA_DISPLAY_NAME)
     input_extension = get_file_extension(schema_file_path)
     save_wiki = input_extension == file_constants.SCHEMA_XML_EXTENSION
     schema_file, issues = convert_schema_to_format(local_hed_file=schema_file_path, check_for_issues=False,
