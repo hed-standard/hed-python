@@ -26,26 +26,15 @@ $('#schema-url').on('change', function () {
 /**
  * Submits the form for conversion if we have a valid file.
  */
-$('#schema-conversion-submit').on('click', function () {
+$('#schema-submit').on('click', function () {
     if (getSchemaFilename() === "") {
         flashMessageOnScreen('No valid source input file.  See above.', 'error',
             'schema-submit-flash')
     } else {
-        submitConversionForm();
+        submitSchemaForm();
     }
 });
 
-/**
- * Submits the form for tag comparison if we have a valid file.
- */
-$('#schema-check-submit').on('click', function () {
-   if (getSchemaFilename() === "") {
-        flashMessageOnScreen('No valid source schema file.  See above.', 'error',
-            'schema-submit-flash')
-    } else {
-        submitComplianceCheckForm();
-    }
-});
 
 $('#schema-file-option').on('change', function () {
     updateForm();
@@ -137,16 +126,16 @@ function prepareForm() {
 /**
  * Submit the form and return the conversion results as an attachment
  */
-function submitConversionForm() {
+function submitSchemaForm() {
     let schemaForm = document.getElementById("schema-form");
     let formData = new FormData(schemaForm);
     let display_name = convertToOutputName(getSchemaFilename())
     clearFormFlashMessages(false);
-    flashMessageOnScreen('Specification is being converted...', 'success',
+    flashMessageOnScreen('Schema is being processed...', 'success',
         'schema-submit-flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_schema_conversion_results')}}",
+            url: "{{url_for('route_blueprint.get_schema_results')}}",
             data: formData,
             contentType: false,
             processData: false,
@@ -160,30 +149,6 @@ function submitConversionForm() {
         }
     )
     ;
-}
-
-function submitComplianceCheckForm() {
-    let schemaForm = document.getElementById("schema-form");
-    let formData = new FormData(schemaForm);
-    let display_name = convertToResultsName(getSchemaFilename(), 'HED3G_format_issues')
-    clearFormFlashMessages(false);
-    flashMessageOnScreen('Checking schema for HED-3G compliance...', 'success',
-        'schema-submit-flash')
-    $.ajax({
-            type: 'POST',
-            url: "{{url_for('route_blueprint.get_schema_compliance_check_results')}}",
-            data: formData,
-            contentType: false,
-            processData: false,
-            dataType: 'text',
-            success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'schema-submit-flash')
-            },
-            error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'schema-submit-flash')
-            }
-        }
-    )
 }
 
 function updateForm() {

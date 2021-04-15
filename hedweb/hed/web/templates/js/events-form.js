@@ -87,7 +87,7 @@ function submitForm() {
         'events-validation-submit-flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_events_validation_results')}}",
+            url: "{{url_for('route_blueprint.get_events_results')}}",
             data: formData,
             contentType: false,
             processData: false,

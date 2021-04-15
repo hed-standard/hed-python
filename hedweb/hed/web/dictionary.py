@@ -2,7 +2,7 @@ import os
 from flask import current_app
 
 from hed.util.column_def_group import ColumnDefGroup
-from hed.util.error_reporter import ErrorHandler,  get_printable_issue_string
+from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.util.error_types import ErrorSeverity
 from hed.util.exceptions import HedFileError
 from hed.schema.hed_schema_file import load_schema
@@ -29,15 +29,14 @@ def generate_input_from_dictionary_form(request):
         A dictionary containing input arguments for calling the underlying validation function.
     """
     hed_file_path, hed_display_name = get_hed_path_from_pull_down(request)
-    uploaded_file_name, original_file_name = get_uploaded_file_path_from_form(request, common.JSON_FILE,
-                                                                              file_constants.DICTIONARY_FILE_EXTENSIONS)
+    uploaded_file_name, original_file_name = \
+        get_uploaded_file_path_from_form(request, common.JSON_FILE, file_constants.DICTIONARY_FILE_EXTENSIONS)
 
     input_arguments = {
         common.HED_XML_FILE: hed_file_path,
         common.HED_DISPLAY_NAME: hed_display_name,
         common.JSON_PATH: uploaded_file_name,
         common.JSON_FILE: original_file_name,
-        common.CHECK_FOR_WARNINGS: get_optional_form_field(request, common.CHECK_FOR_WARNINGS, common.BOOLEAN)
     }
     if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
         input_arguments[common.HED_OPTION_VALIDATE] = True

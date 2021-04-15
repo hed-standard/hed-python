@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
         # hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
         # self.assertTrue(os.path.exists(hed_file), "The HED.xml file should exist in the data directory")
         # spreadsheet_path =
-        # input_arguments = {''}
+        # arguments = {''}
 
 
 def get_inputs():

@@ -155,28 +155,9 @@ def get_major_hed_versions():
         return handle_error(ex)
 
 
-@route_blueprint.route(route_constants.SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_schema_compliance_check_results():
-    """Check the HED specification in the form after submission and return an attachment other containing the output.
-
-    Returns
-    -------
-        string
-        A serialized JSON string containing the hed specification to check.
-    """
-    input_arguments = {}
-    try:
-        input_arguments = schema.generate_input_from_schema_form(request)
-        return schema.schema_check(input_arguments)
-    except Exception as ex:
-        return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
-
-
-@route_blueprint.route(route_constants.SCHEMA_CONVERSION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_schema_conversion_results():
-    """Convert the format of a HED schema.
+@route_blueprint.route(route_constants.SCHEMA_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_schema_results():
+    """Get the results of schema processing.
 
     Returns
     -------
@@ -186,7 +167,8 @@ def get_schema_conversion_results():
     input_arguments = {}
     try:
         input_arguments = schema.generate_input_from_schema_form(request)
-        return schema.schema_convert(input_arguments)
+        a = schema.schema_process(input_arguments)
+        return a
     except Exception as ex:
         return handle_http_error(ex)
     finally:

@@ -52,13 +52,13 @@ def hedstring_process(input_arguments):
         Downloadable response object.
     """
 
-    if not input_arguments[common.HEDSTRING]:
-        raise HedFileError('EmptyHEDString', "Please enter a nonempty HED string to process","")
-    if input_arguments[common.HED_OPTION_VALIDATE]:
+    if not input_arguments.get(common.HEDSTRING, None):
+        raise HedFileError('EmptyHEDString', "Please enter a nonempty HED string to process", "")
+    if input_arguments.get(common.HED_OPTION_VALIDATE, None):
         return hedstring_validate(input_arguments)
-    elif input_arguments[common.HED_OPTION_TO_SHORT]:
+    elif input_arguments.get(common.HED_OPTION_TO_SHORT, None):
         return hedstring_convert(input_arguments, short_to_long=False)
-    elif input_arguments[common.HED_OPTION_TO_LONG]:
+    elif input_arguments.get(common.HED_OPTION_TO_LONG, None):
         return hedstring_convert(input_arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a hedstring processing method", "")
