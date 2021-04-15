@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% from "json-input.html" import create_json_input %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "hed-options-pulldown.html" import create_hed_options_pulldown %}
 
 {% block content %}
     <h2>HED string quick checks</h2>
@@ -25,28 +26,7 @@
         </div>
 
         {{ create_hed_pulldown() }}
-
-        <div>
-        <h3>Pick an action: </h3>
-        <div class="form-group">
-            <input class="radio-btn" type="radio" name="hed-option"
-                   id="hed-option-validate" value="hed-option-validate"
-                   aria-label="Select this button to validate HED">
-            <label class="secondary-label">Validate</label>
-        </div>
-        <div class="form-group">
-            <input class="radio-btn" type="radio" name="hed-option"
-                   id="hed-option-to-short" value="hed-option-to-short"
-                   aria-label="Select this button to convert hed to short form">
-            <label class="secondary-label">Convert to short</label>
-      </div>
-        <div class="form-group">
-            <input class="radio-btn" type="radio" name="hed-option"
-                   id="hed-option-to-long" value="hed-option-to-long"
-                   aria-label="Select this button to convert hed to long form">
-            <label class="secondary-label">Convert to long</label>
-        </div>
-     </div>
+        {{ create_hed_options_pulldown() }}
 
         <div class="form-group">
             <button id="hedstring-submit" type="button">Process</button>
