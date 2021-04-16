@@ -26,11 +26,65 @@ class Test(unittest.TestCase):
     def test_generate_input_from_schema_form(self):
         self.assertTrue(1, "Testing generate_input_from_schema_form")
 
+    def test_schema_process(self):
+        from hed.web.schema import schema_process
+        from hed.util.exceptions import HedFileError
+        arguments = {'schema-path': ''}
+        try:
+            a = schema_process(arguments)
+        except HedFileError:
+            pass
+        except Exception:
+            self.fail('schema_process threw the wrong exception when schema-path was empty')
+        else:
+            self.fail('schema_process should have thrown a HedFileError exception when schema-path was empty')
+
     def test_schema_check(self):
-        self.assertTrue(1, "Testing run_schema_compliance_check")
+        from hed.web.schema import schema_check
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        arguments = {'schema-path': schema_path, 'schema-display-name': 'HED7.1.2.xml', 'schema-option-check': 'true'}
+        with self.app.app_context():
+            response = schema_check(arguments)
+            x = response
+            self.assertTrue(response.data, "HED 7.1.2 is not HED-3G compliant")
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        arguments = {'schema-path': schema_path, 'schema-display-name': 'HED8.0.0-alpha.1.xml', 'schema-option-check': 'true'}
+        with self.app.app_context():
+            response = schema_check(arguments)
+            x1 = response
+            self.assertFalse(response.data, "HED8.0.0-alpha.1 is HED-3G compliant")
 
     def test_schema_convert(self):
-        self.assertTrue(1, "Testing convert_schema")
+        from hed.web.schema import schema_convert
+        from hed.util.exceptions import HedFileError
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        arguments = {'schema-path': schema_path, 'schema-display-name': 'HED7.1.2.xml',
+                     'schema-option-check': 'true', 'schema-xml-extension': '.xml'}
+        with self.app.app_context():
+            response = schema_convert(arguments)
+            self.assertTrue(response.data, "HED 7.1.2.xml can be converted to mediawiki")
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        arguments = {'schema-path': schema_path, 'schema-display-name': 'HED8.0.0-alpha.1.xml',
+                     'schema-option-check': 'true'}
+        with self.app.app_context():
+            response = schema_convert(arguments)
+            self.assertTrue(response.data, "HED 8.0.0-alpha.1.xml can be converted to mediawiki")
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HEDbad.xml')
+        arguments = {'schema-path': schema_path, 'schema-display-name': 'HEDbad.xml',
+                     'schema-option-check': 'true'}
+        with self.app.app_context():
+            try:
+                response = schema_convert(arguments)
+            except HedFileError:
+                pass
+            except Exception:
+                self.fail('schema_convert threw Exception instead of HedFileError for invalid schema file header')
+            else:
+                self.fail('schema_process should throw HedFileError when the schema file header was invalid')
 
 
 if __name__ == '__main__':

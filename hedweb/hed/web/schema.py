@@ -3,10 +3,8 @@ from urllib.parse import urlparse
 from flask import current_app
 
 from hed.schema.hed_schema_file import load_schema, convert_schema_to_format
-from hed.util.error_reporter import get_printable_issue_string
 from hed.util.file_util import url_to_file, get_file_extension
-from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
-from hed.util.error_types import ErrorSeverity
+from hed.util.error_reporter import get_printable_issue_string
 from hed.util.exceptions import HedFileError
 
 from hed.web.web_utils import form_has_file, form_has_option, form_has_url, \

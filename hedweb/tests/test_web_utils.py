@@ -193,7 +193,7 @@ class Test(unittest.TestCase):
     #     error_code = "CODE"
     #     error_message = "Test"
     #
-    #     self.assertTrue(1, "Testing handle_http_error")
+    #     self.assertTrue(1, "Testing handle_http_error")+
 
     def test_handle_error(self):
         print("stuff")

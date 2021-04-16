@@ -1,0 +1,4 @@
+context: Errors in file '/tmp/tmpu4af7avc.xml'
+duplicateTerms: 	ERROR: Term(Short Tag) 'read' used 2 places in schema as: 
+		Action/Perform/Read
+		Action/Think/Read

@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<HED>
+   <node>
+      <name>Event</name>
+      <node>
+         <name>Sensory-event</name>
+         <description>Something perceivable by the participant. An event meant to be an experimental stimulus should also be tagged with Attribute/Contextual/Task-related. Other events may be tagged with Attribute/Contextual/Non task-related.</description>
+      </node>
+
+</HED>
