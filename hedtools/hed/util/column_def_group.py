@@ -157,7 +157,10 @@ class ColumnDefGroup:
         def_dicts: [DefDict]
 
         """
-        return [column_group_def.extract_defs(hed_schema, check_for_issues=False) for column_group_def in column_group_defs]
+        if column_group_defs:
+            return [column_group_def.extract_defs(hed_schema) for column_group_def in column_group_defs]
+        else:
+            return []
 
     def hed_string_iter(self, include_position=False):
         """

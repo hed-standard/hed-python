@@ -12,11 +12,11 @@ HedString - Main class for handling a hed string during processing and analysis
 """
 import hed
 from hed.util.column_def_group import ColumnDefGroup
-from hed import schema
 from hed.util.hed_string import HedString
+from hed.schema.hed_schema_file import load_schema
 
 local_hed_xml = "data/HED8.0.0-alpha.1.xml"
-hed_schema = schema.load_schema(local_hed_xml)
+hed_schema = load_schema(local_hed_xml)
 json_filename = "data/both_types_events_errors.json"
 
 # Example 1
