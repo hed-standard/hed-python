@@ -10,6 +10,7 @@ import os
 
 from hed.util.hed_file_input import HedFileInput
 from hed.schema.hed_schema_file import load_schema
+from hed.util.hed_string import HedString
 
 local_hed_file_no_dupe = 'data/HED8.0.0-alpha.1.xml'
 
@@ -25,15 +26,17 @@ def short_to_long_file(input_file, hed_schema, error_handler=None):
     input_file.save(include_formatting=True, add_suffix="_test_short_to_long")
     return input_file, error_list
 
-# def long_to_short_string(input_string):
-#     tag_formatter = TagFormat(local_hed_file_no_dupe)
-#     converted_string, errors = tag_formatter.convert_hed_string_to_short(input_string)
-#     return converted_string, errors
-#
-# def short_to_long_string(input_string):
-#     tag_formatter = TagFormat(local_hed_file_no_dupe)
-#     converted_string, errors = tag_formatter.convert_hed_string_to_long(input_string)
-#     return converted_string, errors
+
+def long_to_short_string(input_string, hed_schema):
+    hed_string_obj = HedString(input_string)
+    errors = hed_string_obj.convert_to_short(hed_schema)
+    return str(hed_string_obj), errors
+
+
+def short_to_long_string(input_string, hed_schema):
+    hed_string_obj = HedString(input_string)
+    errors = hed_string_obj.convert_to_long(hed_schema)
+    return str(hed_string_obj), errors
 
 
 if __name__ == '__main__':
@@ -52,14 +55,14 @@ if __name__ == '__main__':
                               worksheet_name='LKT Events')
     short_to_long_file(loaded_file, loaded_schema)
 
-    # inputs = 'Attribute/Sensory/Visual/Color/CSS-color/White-color/White'
-    # tag, error = long_to_short_string(inputs)
-    # print(f"Tag= {tag}, errors=[{error}]")
-    #
-    # inputs =  'Attribute/Visual/Color/CSS-color/White-color/White'
-    # tag, error = long_to_short_string(inputs)
-    # print(f"Tag= {tag}, errors=[{error}]")
-    #
-    # inputs =  'White'
-    # tag, error = short_to_long_string(inputs)
-    # print(f"Tag= {tag}, errors=[{error}]")
+    inputs = 'Attribute/Sensory/Visual/Color/CSS-color/White-color/White'
+    tag, error = long_to_short_string(inputs, loaded_schema)
+    print(f"Tag= {tag}, errors=[{error}]")
+
+    inputs =  'Attribute/Visual/Color/CSS-color/White-color/White'
+    tag, error = long_to_short_string(inputs, loaded_schema)
+    print(f"Tag= {tag}, errors=[{error}]")
+
+    inputs =  'White'
+    tag, error = short_to_long_string(inputs, loaded_schema)
+    print(f"Tag= {tag}, errors=[{error}]")
