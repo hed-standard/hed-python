@@ -25,7 +25,9 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_spreadsheet_form(self):
-        self.assertTrue(1, "Testing generate_input_from_validation_form")
+        from hed.web import spreadsheet
+        self.assertRaises(TypeError, spreadsheet.generate_input_from_spreadsheet_form, {},
+                          "An exception is raised if an empty request is passed to generate_input_from_spreadsheet")
 
     def test_spreadsheet_process(self):
         from hed.web.spreadsheet import spreadsheet_process
