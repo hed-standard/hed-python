@@ -27,16 +27,9 @@ function columnNamesAreEmpty(names) {
 }
 
 /**
- * Gets the columns information from a spreadsheet-like data file
- * @param {string} formID - ID of the form that is from
- * @param {string} pathID - Form ID of the path of a spreadsheet-like file with column names.
- * @returns string or array
- */
-
-/**
  * Gets information a file with columns. This information the names of the columns in the specified
  * worksheet and indices that contain HED tags.
- * @param {Object} columnsFile - A file with columns.
+ * @param {string} columnsFile - Name of a file with columns.
  * @param {string} worksheetName - Name of worksheet or undefined.
  * @param {boolean} repopulateWorksheet - If true repopulate the select pull down with worksheet names.
  * @param {string} flashMessage - ID name of the flash message element in which to display errors.
@@ -66,7 +59,39 @@ function setColumnsInfo(columnsFile, worksheetName=undefined, repopulateWorkshee
                }
         },
         error: function () {
-            flashMessageOnScreen('File could not be processed.', 'error', 'flashMessage');
+            flashMessageOnScreen('File could not be processed.', 'error', flashMessage);
+        }
+    });
+}
+
+
+/**
+ * Gets information a file with columns and populate the columnNames table.
+ * @param {string} columnsFile - Name of the file with columns to be determined.
+ * @param {string} worksheetName - Name of worksheet or undefined.
+ * @param {string} flashMessage - ID name of the flash message element in which to display errors.
+ */
+function setColumnsNameTable(columnsFile, worksheetName=undefined,  flashMessage) {
+    let formData = new FormData();
+    formData.append('columns-file', columnsFile);
+    if (worksheetName !== undefined) {
+        formData.append('worksheet-selected', worksheetName)
+    }
+    $.ajax({
+        type: 'POST',
+        url: "{{url_for('route_blueprint.get_columns_info_results')}}",
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: 'json',
+        success: function (info) {
+               if (info['message'])
+                    flashMessageOnScreen(info['message'], 'error', flashMessage)
+               else
+                   showColumnNames(info['column-names'])
+        },
+        error: function () {
+            flashMessageOnScreen('File could not be processed.', 'error', flashMessage);
         }
     });
 }
@@ -80,7 +105,7 @@ function hideColumnNames() {
 
 
 /**
- * Populate the required tag column textboxes from the tag column indices found in the spreadsheet columns.
+ * Populate the required tag column text boxes from the tag column indices found in the spreadsheet columns.
  * @param {object} requiredTagColumnIndices - A dictionary containing the required tag column indices found
  * in the spreadsheet. The keys are the column names and the values are the indices.
  */

@@ -1,13 +1,13 @@
 import os
 from flask import current_app
 
+from hed.schema.hed_schema_file import load_schema
+from hed.tools.tag_format import TagFormat
+from hed.web.constants import common, file_constants
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.util.error_types import ErrorSeverity
 from hed.util.exceptions import HedFileError
-from hed.schema.hed_schema_file import load_schema
-from hed.tools.tag_format import TagFormat
-from hed.web.constants import common, file_constants
 from hed.web.web_utils import form_has_option, generate_filename, generate_download_file_response, \
     generate_text_response, get_hed_path_from_pull_down, \
     get_uploaded_file_path_from_form, save_text_to_upload_folder, get_optional_form_field
@@ -32,28 +32,28 @@ def generate_input_from_dictionary_form(request):
     uploaded_file_name, original_file_name = \
         get_uploaded_file_path_from_form(request, common.JSON_FILE, file_constants.DICTIONARY_FILE_EXTENSIONS)
 
-    input_arguments = {
+    arguments = {
         common.HED_XML_FILE: hed_file_path,
         common.HED_DISPLAY_NAME: hed_display_name,
         common.JSON_PATH: uploaded_file_name,
         common.JSON_FILE: original_file_name,
     }
     if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
-        input_arguments[common.HED_OPTION_VALIDATE] = True
+        arguments[common.HED_OPTION_VALIDATE] = True
     elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_SHORT):
-        input_arguments[common.HED_OPTION_TO_SHORT] = True
+        arguments[common.HED_OPTION_TO_SHORT] = True
     elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_LONG):
-        input_arguments[common.HED_OPTION_TO_LONG] = True
+        arguments[common.HED_OPTION_TO_LONG] = True
 
-    return input_arguments
+    return arguments
 
 
-def dictionary_process(input_arguments):
+def dictionary_process(arguments):
     """Perform the requested action for the dictionary.
 
     Parameters
     ----------
-    input_arguments: dict
+    arguments: dict
         A dictionary with the input arguments from the dictionary form
 
     Returns
@@ -62,24 +62,24 @@ def dictionary_process(input_arguments):
         Downloadable response object.
     """
 
-    if not input_arguments[common.JSON_PATH]:
+    if not arguments[common.JSON_PATH]:
         raise HedFileError('EmptyDictionaryFile', "Please upload a dictionary to process", "")
-    if input_arguments.get(common.HED_OPTION_VALIDATE, None):
-        return dictionary_validate(input_arguments)
-    elif input_arguments.get(common.HED_OPTION_TO_SHORT, None):
-        return dictionary_convert(input_arguments, short_to_long=False)
-    elif input_arguments.get(common.HED_OPTION_TO_LONG, None):
-        return dictionary_convert(input_arguments)
+    if arguments.get(common.HED_OPTION_VALIDATE, None):
+        return dictionary_validate(arguments)
+    elif arguments.get(common.HED_OPTION_TO_SHORT, None):
+        return dictionary_convert(arguments, short_to_long=False)
+    elif arguments.get(common.HED_OPTION_TO_LONG, None):
+        return dictionary_convert(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a dictionary processing method", "")
 
 
-def dictionary_convert(input_arguments, short_to_long=True,  hed_schema=None):
-    """Converts a hedstring from short to long unless short_to_long is set to False, then long_to_short
+def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
+    """Converts a dictionary from short to long unless short_to_long is set to False, then long_to_short
 
     Parameters
     ----------
-    input_arguments: dict
+    arguments: dict
         Dictionary containing standard input form arguments
     short_to_long: bool
         If True convert the dictionary to long form, otherwise convert to short form
@@ -89,13 +89,13 @@ def dictionary_convert(input_arguments, short_to_long=True,  hed_schema=None):
     Returns
     -------
     Response
-        A downloadable dictionary file
+        A downloadable dictionary file or a file containing warnings
     """
 
-    json_dictionary = ColumnDefGroup(input_arguments.get(common.JSON_PATH, ''))
+    json_dictionary = ColumnDefGroup(arguments.get(common.JSON_PATH, ''))
 
     if not hed_schema:
-        hed_schema = load_schema(input_arguments.get(common.HED_XML_FILE, ''))
+        hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
     error_handler = ErrorHandler()
     tag_formatter = TagFormat(hed_schema=hed_schema, error_handler=error_handler)
     issues = []
@@ -112,9 +112,9 @@ def dictionary_convert(input_arguments, short_to_long=True,  hed_schema=None):
     else:
         suffix = '_to_short'
     issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-    display_name = input_arguments.get(common.JSON_FILE, '')
+    display_name = arguments.get(common.JSON_FILE, '')
     if issues:
-        display_name = input_arguments.get(common.JSON_FILE, '')
+        display_name = arguments.get(common.JSON_FILE, '')
         issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
         file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
         issue_file = save_text_to_upload_folder(issue_str, file_name)

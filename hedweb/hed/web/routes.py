@@ -175,9 +175,9 @@ def get_schema_results():
         delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
 
 
-@route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_spreadsheet_validation_results():
-    """Validate the spreadsheet in the form and return an attachment with validation errors.
+@route_blueprint.route(route_constants.SPREADSHEET_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_spreadsheet_results():
+    """Process the spreadsheet in the form and return an attachment with the results.
 
     Returns
     -------
@@ -187,7 +187,8 @@ def get_spreadsheet_validation_results():
     input_arguments = {}
     try:
         input_arguments = spreadsheet.generate_input_from_spreadsheet_form(request)
-        return spreadsheet.spreadsheet_validate(input_arguments)
+        a = spreadsheet.spreadsheet_process(input_arguments)
+        return spreadsheet.spreadsheet_process(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
     finally:

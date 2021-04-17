@@ -22,5 +22,5 @@ SCHEMA_ROUTE = '/schema'
 SCHEMA_SUBMIT_ROUTE = '/schema-submit'
 
 SPREADSHEET_ROUTE = '/spreadsheet'
-SPREADSHEET_VALIDATION_SUBMIT_ROUTE = '/spreadsheet-validation-submit'
+SPREADSHEET_SUBMIT_ROUTE = '/spreadsheet-submit'
 WORKSHEET_COLUMN_INFO_ROUTE = '/get-worksheets-info'

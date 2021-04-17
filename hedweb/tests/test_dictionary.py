@@ -38,18 +38,71 @@ class Test(unittest.TestCase):
         self.assertRaises(TypeError, dictionary.generate_input_from_dictionary_form, {},
                           "An exception should be raised if an empty request is passed")
 
-    def test_validate_dictionary_success(self):
+    def test_dictionary_process(self):
+        from hed.web.dictionary import dictionary_process
+        from hed.util.exceptions import HedFileError
+        arguments = {'json-path': ''}
+        try:
+            a = dictionary_process(arguments)
+        except HedFileError:
+            pass
+        except Exception:
+            self.fail('dictionary_process threw the wrong exception when dictionary-path was empty')
+        else:
+            self.fail('dictionary_process should have thrown a HedFileError exception when json-path was empty')
+
+    def test_dictionary_convert(self):
+        from hed.web.dictionary import dictionary_convert
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
+                     'json-path': json_path, 'json-file': 'good_events.json'}
+        with self.app.app_context():
+            response = dictionary_convert(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('warning', headers['Category'], "dictionary_convert issue warning if unsuccessful")
+            self.assertTrue(response.data, "good_events should not convert using HED 7.1.2.xml")
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
+                     'json-path': json_path, 'json-file': 'good_events.json'}
+        with self.app.app_context():
+            response = dictionary_convert(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('success', headers['Category'], "dictionary_convert should return success if converted")
+
+    def test_dictionary_convert(self):
         from hed.web.dictionary import dictionary_validate
-        from hed.schema import hed_schema_file
-        inputs = test_dictionaries()
-        response = dictionary_validate(inputs)
-        print(type(response) is Response)
-        self.assertTrue(type(response) is Response, "dictionary_validate should return a response if no error")
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
+                     'json-path': json_path, 'json-file': 'good_events.json'}
+        with self.app.app_context():
+            response = dictionary_validate(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('warning', headers['Category'], "dictionary_validate issues warning if validation errors")
+            self.assertTrue(response.data, "good_events should not convert using HED 7.1.2.xml")
 
-        hed8_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
+                     'json-path': json_path, 'json-file': 'good_events.json'}
+        with self.app.app_context():
+            response = dictionary_validate(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('success', headers['Category'], "dictionary_validate should return success if converted")
 
-        hed7_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        hed7 = hed_schema_file.load_schema(hed7_path)
+    # def test_validate_dictionary_success(self):
+    #     from hed.web.dictionary import dictionary_validate
+    #     from hed.schema import hed_schema_file
+    #     inputs = test_dictionaries()
+    #     response = dictionary_validate(inputs)
+    #     print(type(response) is Response)
+    #     self.assertTrue(type(response) is Response, "dictionary_validate should return a response if no error")
+
+        # hed8_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        #
+        # hed7_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        # hed7 = hed_schema_file.load_schema(hed7_path)
         # response = dictionary_validate(inputs, hed_schema=hed7)
         # inputs["hed-xml-file"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         # hed7 = hed_schema_file.load_schema(inputs["hed-xml_file"])

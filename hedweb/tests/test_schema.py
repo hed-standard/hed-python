@@ -45,14 +45,12 @@ class Test(unittest.TestCase):
         arguments = {'schema-path': schema_path, 'schema-display-name': 'HED7.1.2.xml', 'schema-option-check': 'true'}
         with self.app.app_context():
             response = schema_check(arguments)
-            x = response
             self.assertTrue(response.data, "HED 7.1.2 is not HED-3G compliant")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'schema-path': schema_path, 'schema-display-name': 'HED8.0.0-alpha.1.xml', 'schema-option-check': 'true'}
         with self.app.app_context():
             response = schema_check(arguments)
-            x1 = response
             self.assertFalse(response.data, "HED8.0.0-alpha.1 is HED-3G compliant")
 
     def test_schema_convert(self):

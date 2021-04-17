@@ -1,0 +1,94 @@
+{
+    "onset": {
+        "Description": "Onset of the event of the computer presentation of the hand image",
+        "Units": "s"
+    },
+    "duration": {
+        "Description": "Duration of the event",
+        "Units": "s"
+    },
+    "cue-start": {
+        "Description": "Subject presses both buttons causing cue bar to start count-down display",
+        "HED": "(Data-property/Spatiotemporal/Temporal/Delay/#s, (Attribute/Informational/Description/Subject presses both buttons causing cue bar to start count-down display, (Event/Sensory-event, Attribute/Sensory/Visual, Task-property/Task-stimulus-type/Cue, (Item/Object/Geometric/2D-shape/Rectangle,  (Attribute/Relational/Spatiotemporal-relation/Positional-relation/Center-of, Item/Object/Man-made-object/Device/IO-device/Output-device/Display-device/Screen), (Data-property/Spatiotemporal/Spatial/Size, Attribute/Relational/Spatiotemporal-relation/Directional-relation/Decreasing))), (Agent-property/Agent-task-role/Experimental-participant, (Action/Move/Move-arm-hand/Press, (Attribute/Relational/Spatiotemporal-relation/Positional-relation/Left-side, Item/Object/Man-made-object/Device/IO-device/Input-device/Button)), (Action/Move/Move-arm-hand/Press, (Attribute/Relational/Spatiotemporal-relation/Positional-relation/Right-side, Item/Object/Man-made-object/Device/IO-device/Input-device/Button)))))"
+    },
+    "cue-end": {
+        "Description": "Count-down display bar shrinks to zero size.",
+        "HED": "(Data-property/Spatiotemporal/Temporal/Delay/# s, (Attribute/Informational/Description/Count-down display bar shrinks to zero size., (Event/Sensory-event, Attribute/Sensory/Visual, Task-property/Task-stimulus-type/Cue)))"
+    },
+    "trial_type": {
+        "Description": "Which hand was lifted by the subject in this trial.",
+        "Levels": {
+            "left": "Subject raised left hand",
+            "right": "Subject raised right hand"
+        },
+        "HED": {
+            "left": "Attribute/Informational/Description/Subject raised left hand, (Agent-property/Agent-task-role/Experimental-participant, (Action/Move/Move-arm-hand/Lift, (Attribute/Relational/Spatiotemporal-relation/Positional-relation/Left-side, Item/Organism/Body-part/Arm/Hand)))",
+            "right": "Attribute/Informational/Description/Subject raised right hand, (Agent-property/Agent-task-role/Experimental-participant, (Action/Move/Move-arm-hand/Lift, (Attribute/Relational/Spatiotemporal-relation/Positional-relation/Right-side, Item/Organism/Body-part/Arm/Hand)))"
+        }
+    },
+    "response_time": {
+        "Description": "Reaction time to lift the left or right hand after the countdown reached zero. this is the difference between event onset and cue-end in milliseconds.",
+        "Units": "ms",
+        "HED": "Data-property/Spatiotemporal/Temporal/Delay/# ms"
+    },
+    "stim_file": {
+        "Description": "Stimulus file showing hand presented on screen.",
+        "HED": "Attribute/Informational/Description/Stimulus file showing hand is presented on screen, Event/Sensory-event, Attribute/Sensory/Visual,((Item/Object/Man-made-object/Media/Visualization/Image, Attribute/Informational/ID/#),(Attribute/Relational/Spatiotemporal-relation/Positional-relation/Center-of, Item/Object/Man-made-object/Device/IO-device/Output-device/Display-device/Screen)), Task-property/Task-role/Experimental-stimulus"
+    },
+    "value": {
+        "Description": "The code (EEG Marker value) associated with an event ",
+        "Levels": {
+            "1": "Release of left button (i.e., raising left hand)",
+            "2": "Release of right button (i.e., raising right hand)"
+        }
+    },
+    "sample": {
+        "Description": "The sample within the EEG data at which an event occurred"
+    },
+    "stage": {
+        "Description": "The current stage of the experiment.",
+        "Levels": {
+            "1": "Stage 1. BCI acts randomly",
+            "2": "Stage 2. BCI was trained on data from stage 1.",
+            "3": "Stage 3. BCI was trained on data from stages 1 and 2."
+        },
+        "HED": {
+            "1": "Attribute/Informational/Description/Stage 1 BCI acts randomly, (Attribute/Informational/Definition/Random-selection, (Attribute/Organizational/Experimental-condition, (Attribute/Relational/Spatiotemporal-relation/Variability-relation/Random, Action/Think/Predict))), Attribute/Informational/Def/Random-selection",
+            "2": "Attribute/Informational/Description/Stage 2 BCI was trained on data from stage 1, (Attribute/Informational/Definition/Trained-on-random, (Attribute/Organizational/Experimental-condition)), Attribute/Informational/Def/Trained-on-random",
+            "3": "Attribute/Informational/Description/Stage 3 BCI was trained on data from stages 1 and 2, (Attribute/Informational/Definition/Trained-on-all, (Attribute/Organizational/Experimental-condition)), Attribute/Informational/Def/Trained-on-all"
+        }
+    },
+    "latency": {
+        "Description": "Estimated beginning of the data chunk used for the BCI prediction with respect to the true event as measured by parallel port trigger in this trial.",
+        "Units": "ms"
+    },
+    "trial": {
+        "Description": "The current trial within this stage.",
+        "HED": "Attribute/Organizational/Experimental-trial, Data-property/Quantitative/Item-count/#"
+    },
+    "bci_prediction": {
+        "Description": "Which hand did the BCI predict was raised in this trial.",
+        "Levels": {
+            "left": "BCI predicts participant raised left hand",
+            "right": "BCI predicts participant raised right hand"
+        },
+        "HED": {
+            "left": "Attribute/Informational/Description/BCI predicts participant raised left hand, (Task-property/Task-effect-evidence/Computational-evidence, (Attribute/Relational/Spatiotemporal-relation/Positional-relation/Left-side, Item/Organism/Body-part/Arm/Hand))",
+            "right": "Attribute/Informational/Description/BCI predicts participant raised right hand, (Task-property/Task-effect-evidence/Computational-evidence, (Attribute/Relational/Spatiotemporal-relation/Positional-relation/Right-side, Item/Organism/Body-part/Arm/Hand))"
+        }
+    },
+    "bci_prediction_valid": {
+        "Description": "Did a prediction arrive on time (if not, a random prediction was made) in this trial.",
+        "Levels": {
+            "1": "Computational prediction arrived on time",
+            "2": "Computational prediction was late so random prediction was used."
+        },
+        "HED": {
+            "1": "Attribute/Informational/Description/Computational prediction arrived on time, (Agent/Computational-agent, Action/Think/Predict)",
+            "2": "Attribute/Informational/Description/Computational prediction was late so random prediction was used., Data-property/Spatiotemporal/Temporal/Time-out, (Attribute/Relational/Spatiotemporal-relation/Variability-relation/Random, Action/Think/Predict)"
+        }
+    },
+    "n_repeated": {
+        "Description": "Number of trials that had to be repeated until the present trial because of invalid participant behavior (within this stage)."
+    }
+}

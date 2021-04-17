@@ -1,9 +1,21 @@
 const EXCEL_FILE_EXTENSIONS = ['xlsx', 'xls'];
 const TEXT_FILE_EXTENSIONS = ['tsv', 'txt'];
 const VALID_FILE_EXTENSIONS = ['xlsx', 'xls', 'tsv', 'txt']
+
 $(function () {
     prepareForm();
 });
+
+$('#has-column-names').on('change', function() {
+    let spreadsheetFile = $('#spreadsheet-file')[0].files[0];
+    let worksheetName = $('#worksheet-name option:selected').text();
+    if ($("#has-column-names").is(':checked')) {
+            setColumnsNameTable(spreadsheetFile, worksheetName, 'spreadsheet-flash')
+        } else  {
+            hideColumnNames()
+        }
+    }
+);
 
 /**
  * Spreadsheet event handler function. Checks if the file uploaded has a valid spreadsheet extension.
@@ -35,7 +47,7 @@ $('#spreadsheet-file').on('change', function () {
 /**
  * Submits the form if the tag columns textbox is valid.
  */
-$('#spreadsheet-validation-submit').on('click', function () {
+$('#spreadsheet-submit').on('click', function () {
     if (fileIsSpecified('#spreadsheet-file', 'spreadsheet-flash', 'Spreadsheet is not specified.') &&
         tagColumnsTextboxIsValid() && hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
@@ -74,7 +86,7 @@ function clearFlashMessages() {
     clearColumnInfoFlashMessages();
     clearHedSelectFlashMessages();
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
-    flashMessageOnScreen('', 'success', 'spreadsheet-validation-submit-flash');
+    flashMessageOnScreen('', 'success', 'spreadsheet-submit-flash');
 }
 
 /**
@@ -100,7 +112,7 @@ function populateWorksheetDropdown(worksheetNames) {
 }
 
 /**
- * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
+ * Prepare the spreadsheet form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
 function prepareForm() {
@@ -121,7 +133,7 @@ function showWorksheetSelect() {
 
 
 /**
- * Submit the form and return the validation results. If there are issues then they are returned in an attachment
+ * Submit the form and return the results. If there are issues then they are returned in an attachment
  * file.
  */
 function submitForm() {
@@ -137,19 +149,19 @@ function submitForm() {
     let display_name = convertToResultsName(spreadsheetFile, prefix)
     clearFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
-        'spreadsheet-validation-submit-flash')
+        'spreadsheet-submit-flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_spreadsheet_validation_results')}}",
+            url: "{{url_for('route_blueprint.get_spreadsheet_results')}}",
             data: formData,
             contentType: false,
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
+                getResponseSuccess(download, xhr, display_name, 'spreadsheet-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
+                getResponseFailure(download, xhr, display_name, 'spreadsheet-submit-flash')
             }
         }
     )

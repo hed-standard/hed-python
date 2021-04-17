@@ -43,8 +43,8 @@ class Test(unittest.TestCase):
         self.assertEqual(405, response.status_code, 'HED services require data')
 
     def test_get_hedstring_results(self):
-        response = self.app.test.get('/hed-services-submit')
-        self.assertEqual(405, response.status_code, 'HED services require data')
+        response = self.app.test.get('/hedstring-submit')
+        self.assertEqual(405, response.status_code, 'HED string processing require data')
 
     def test_get_hed_version(self):
         response = self.app.test.post('/get-hed-version')
@@ -60,15 +60,15 @@ class Test(unittest.TestCase):
         # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
 
     def test_get_schema_compliance_check_results(self):
-        response = self.app.test.post('/schema-compliance-check-submit')
+        response = self.app.test.post('/schema-submit')
         self.assertEqual(400, response.status_code, 'Checking schema compliance requires data')
 
     def test_get_schema_conversion_results(self):
-        response = self.app.test.post('/schema-conversion-submit')
+        response = self.app.test.post('/schema-submit')
         self.assertEqual(400, response.status_code, 'Converting schema requires data')
 
     def test_get_spreadsheet_validation_results(self):
-        response = self.app.test.post('/spreadsheet-validation-submit')
+        response = self.app.test.post('/spreadsheet-submit')
         self.assertEqual(400, response.status_code, 'Validating spreadsheet requires data')
 
     def test_render_additional_examples_page(self):
