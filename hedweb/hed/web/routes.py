@@ -67,7 +67,7 @@ def get_events_results():
     input_arguments = {}
     try:
         input_arguments = events.generate_input_from_events_form(request)
-        a = events.events_validate(input_arguments)
+        a = events.events_process(input_arguments)
         return a
     except Exception as ex:
         return handle_http_error(ex)

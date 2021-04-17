@@ -17,7 +17,7 @@ def event_input():
                    common.WORKSHEET_NAME: 'LKT Events',
                    common.HAS_COLUMN_NAMES: True,
                    common.CHECK_FOR_WARNINGS: True
-    }
+                   }
     return test_events
 
 
@@ -42,13 +42,65 @@ class Test(unittest.TestCase):
     def test_generate_input_from_events_form(self):
         self.assertTrue(1, "Testing generate_input_from_events_form")
 
-    def test_events_validate(self):
+    def test_events_process(self):
+        from hed.web.events import events_process
+        from hed.util.exceptions import HedFileError
+        arguments = {'events-path': ''}
+        try:
+            a = events_process(arguments)
+        except HedFileError:
+            pass
+        except Exception:
+            self.fail('events_process threw the wrong exception when events-path was empty')
+        else:
+            self.fail('events_process should have thrown a HedFileError exception when events-path was empty')
+
+            # def test_dictionary_convert(self):
+            #     from hed.web.dictionary import dictionary_convert
+            #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+            #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+            #     arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
+            #                  'json-path': json_path, 'json-file': 'good_events.json'}
+            #     with self.app.app_context():
+            #         response = dictionary_convert(arguments)
+            #         headers = dict(response.headers)
+            #         self.assertEqual('warning', headers['Category'], "dictionary_convert issue warning if unsuccessful")
+            #         self.assertTrue(response.data, "good_events should not convert using HED 7.1.2.xml")
+            #
+            #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+            #     arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
+            #                  'json-path': json_path, 'json-file': 'good_events.json'}
+            #     with self.app.app_context():
+            #         response = dictionary_convert(arguments)
+            #         headers = dict(response.headers)
+            #         self.assertEqual('success', headers['Category'], "dictionary_convert should return success if converted")
+
+    def test_spreadsheet_validate(self):
         from hed.web.events import events_validate
-        from hed.schema import hed_schema_file
-        inputs = event_input()
-        response = events_validate(inputs)
-        print(type(response) is Response)
-        self.assertTrue(type(response) is Response, "events_validate should return a response")
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bids_events.tsv')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
+                     'events-path': events_path, 'events-file': 'bids_events.tsv',
+                     'json-path': json_path, 'json-file': 'bids_events.json'}
+
+        with self.app.app_context():
+            response = events_validate(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('success', headers['Category'],
+                             "events_validate should return success if converted")
+            self.assertFalse(response.data, "bids_events should validate using HED 7.1.2.xml")
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        arguments['hed-xml-file'] = schema_path
+        arguments['hed-display-name'] = 'HED8.0.0-alpha.1.xml'
+        with self.app.app_context():
+            response = events_validate(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('warning', headers['Category'],
+                             "events_validate has warning if validation errors")
+            self.assertTrue(response.data, "ExcelMultipleSheets should validate using HED 7.1.2.xml")
 
 
 if __name__ == '__main__':

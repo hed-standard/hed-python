@@ -6,7 +6,7 @@
     <h2>Validate BIDS-style event file</h2>
     <p>
         <i>Upload a BIDS-style tsv events file and an optional JSON events file.<br>
-            Select a HED schema, and press Validate.<br>
+            Select a HED schema, selected a processing option, and press Process.<br>
             You will see either a downloadable results file or a status message.<br>
             Note: this tool is still under development
         </i>
@@ -30,18 +30,18 @@
         {{ create_json_input() }}
         {{ create_hed_pulldown() }}
 
+        <h3>Pick an action: </h3>
         <div class="form-group">
-            <label>Specify additional options:</label><br>
-            <div class="checkbox-group">
-                <div class="inline-field">
-                    <input type="checkbox" name="has-column-names" id="has-column-names" checked>
-                    <label for="has-column-names">Events file has column names</label>
-                </div>
-                <div class="inline-field">
-                    <input type="checkbox" name="check-for-warnings" id="check-for-warnings" checked>
-                    <label for="check-for-warnings">Include warnings in output file</label>
-                </div>
-            </div>
+            <input class="radio-btn" type="radio" name="hed-option" checked
+                   id="hed-option-validate" value="hed-option-validate" aria-checked="true"
+                   aria-label="Select this button to validate HED">
+            <label class="secondary-label">Validate</label>
+        </div>
+        <div class="form-group">
+            <input class="radio-btn" type="radio" name="hed-option"
+                   id="hed-option-to-tagged-list" value="hed-option-to-tagged-list"
+                   aria-label="Select this button to convert hed to a list of tagged events">
+            <label class="secondary-label">Convert to tagged list</label>
         </div>
 
         <div class="form-group">

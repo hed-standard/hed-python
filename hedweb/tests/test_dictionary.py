@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
             headers = dict(response.headers)
             self.assertEqual('success', headers['Category'], "dictionary_convert should return success if converted")
 
-    def test_dictionary_convert(self):
+    def test_dictionary_validate(self):
         from hed.web.dictionary import dictionary_validate
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
             response = dictionary_validate(arguments)
             headers = dict(response.headers)
             self.assertEqual('warning', headers['Category'], "dictionary_validate issues warning if validation errors")
-            self.assertTrue(response.data, "good_events should not convert using HED 7.1.2.xml")
+            self.assertTrue(response.data, "good_events should not validate using HED 7.1.2.xml")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
