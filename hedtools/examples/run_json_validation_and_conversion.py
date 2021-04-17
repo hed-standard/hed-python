@@ -7,13 +7,13 @@ Example 3: Iterate over hed strings in a json sidecar.
 
 Classes Demonstrated:
 HedSchema - Opens a hed xml schema.  Used by other tools to check tag attributes in the schema.
-TagFormat - Used to convert between short and long tags
 ColumnDefGroup - Contains the data from a single json sidecar, can be validated using a HedSchema.
+HedString - Main class for handling a hed string during processing and analysis
 """
 import hed
 from hed.util.column_def_group import ColumnDefGroup
 from hed import schema
-from hed.tools.tag_format import TagFormat
+from hed.util.hed_string import HedString
 
 local_hed_xml = "data/HED8.0.0-alpha.1.xml"
 hed_schema = schema.load_schema(local_hed_xml)
@@ -27,12 +27,12 @@ print(hed.get_printable_issue_string(errors))
 
 # Example 2
 # Open the json file, convert all tags to long, and save it out
-long_tag_formatter = TagFormat(local_hed_xml)
 for column_def in json_file:
     for hed_string, position in column_def.hed_string_iter(include_position=True):
-        new_hed_string, errors = long_tag_formatter.convert_hed_string_to_long(hed_string)
-        column_def.set_hed_string(new_hed_string, position)
-        print(f"'{hed_string}' \nconverts to\n '{new_hed_string}'")
+        hed_string_obj = HedString(hed_string)
+        errors = hed_string_obj.convert_to_short(hed_schema)
+        column_def.set_hed_string(hed_string_obj, position)
+        print(f"'{hed_string_obj.get_original_hed_string()}' \nconverts to\n '{str(hed_string_obj)}'")
 
 # Save off a copy of the input json, modified.
 json_file.save_as_json(json_filename + "-long.json")

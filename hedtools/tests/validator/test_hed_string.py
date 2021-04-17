@@ -1,9 +1,9 @@
-from hed.util.hed_string import HedString, HedTag, HedGroup
+from hed.util.hed_string import HedString, HedGroup
 
-from tests.validator.test_tag_validator import TestHed
+from tests.validator.test_tag_validator import TestHed3
 
 
-class HedStrings(TestHed):
+class TestHedStrings(TestHed3):
     def validator_scalar(self, test_strings, expected_results, test_function):
         for test_key in test_strings:
             test_result = test_function(test_strings[test_key])
@@ -17,7 +17,7 @@ class HedStrings(TestHed):
             self.assertCountEqual(test_result, expected_result, test_strings[test_key])
 
 
-class TestHedString(TestHed):
+class TestHedString(TestHed3):
     @classmethod
     def setUpClass(cls):
         pass
@@ -44,19 +44,16 @@ class TestHedString(TestHed):
 
         # Just make sure it doesn't crash while parsing super invalid strings.
         for name, string in test_strings.items():
-            try:
-                hed_string = HedString(string)
-            except ValueError:
-                self.assertEqual(False, expected_result[name])
-                continue
+            hed_string = HedString(string)
 
-            self.assertEqual(True, expected_result[name])
-            # Make sure it parses each section
-            _ = hed_string.get_all_groups()
-            _ = hed_string.get_all_tags()
+            self.assertEqual(bool(hed_string._top_level_group), expected_result[name])
+            if hed_string._top_level_group:
+                # Make sure it parses each section
+                _ = hed_string.get_all_groups()
+                _ = hed_string.get_all_tags()
 
 
-class HedTagLists(HedStrings):
+class HedTagLists(TestHedStrings):
     def test_type(self):
         hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
         result = HedString.split_hed_string_into_groups(hed_string)
@@ -118,7 +115,7 @@ class HedTagLists(HedStrings):
         self.validator_list(test_strings, expected_results, test_function)
 
 
-class ProcessedHedTags(HedStrings):
+class ProcessedHedTags(TestHedStrings):
     # Update Test - These are mostly no longer relevant
     # def test_formatted_tags(self):
     #     formatted_hed_tag = 'event/category/experimental stimulus'

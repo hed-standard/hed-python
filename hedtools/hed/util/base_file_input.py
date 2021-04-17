@@ -6,6 +6,8 @@ import copy
 from hed.util.def_dict import DefDict
 from hed.util.column_mapper import ColumnMapper
 from hed.util.exceptions import HedFileError, HedExceptions
+from hed.util.error_types import ErrorContext
+from hed.util.error_reporter import ErrorHandler
 
 
 class BaseFileInput:
@@ -67,6 +69,69 @@ class BaseFileInput:
         self.file_def_dict, self.file_def_dict_issues = self.extract_definitions(hed_schema)
         # finally add the new file dict to the mapper.
         mapper.update_definition_mapper_with_file(self.file_def_dict)
+
+    def convert_to_short(self, hed_schema, error_handler=None):
+        """
+        Converts all tags in a given spreadsheet to short form
+
+        Parameters
+        ----------
+        hed_schema : HedSchema
+            The schema to use to convert tags.
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+
+        Returns
+        -------
+        issues_list: [{}]
+            A list of issues found during conversion
+        """
+        if error_handler is None:
+            error_handler = ErrorHandler()
+        error_list = []
+        for row_number, row_hed_string, column_to_hed_tags_dictionary in self:
+            error_handler.push_error_context(ErrorContext.ROW, row_number)
+            for column_number in column_to_hed_tags_dictionary:
+                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                column_hed_string = column_to_hed_tags_dictionary[column_number]
+                error_list += column_hed_string.convert_to_short(hed_schema, error_handler=error_handler)
+                self.set_cell(row_number, column_number, column_hed_string,
+                              include_column_prefix_if_exist=False)
+                error_handler.pop_error_context()
+            error_handler.pop_error_context()
+        return error_list
+
+    def convert_to_long(self, hed_schema, error_handler=None):
+        """
+        Converts all tags in a given spreadsheet to long form
+
+        Parameters
+        ----------
+        hed_schema : HedSchema
+            The schema to use to convert tags.
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+
+        Returns
+        -------
+        issues_list: [{}]
+            A list of issues found during conversion
+        """
+        if error_handler is None:
+            error_handler = ErrorHandler()
+        error_list = []
+        for row_number, row_hed_string, column_to_hed_tags_dictionary in self:
+            error_handler.push_error_context(ErrorContext.ROW, row_number)
+            for column_number in column_to_hed_tags_dictionary:
+                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                column_hed_string = column_to_hed_tags_dictionary[column_number]
+                error_list += column_hed_string.convert_to_long(hed_schema, error_handler=error_handler)
+                self.set_cell(row_number, column_number, column_hed_string,
+                              include_column_prefix_if_exist=False)
+                error_handler.pop_error_context()
+            error_handler.pop_error_context()
+
+        return error_list
 
     def extract_definitions(self, hed_schema):
         """
@@ -165,7 +230,7 @@ class BaseFileInput:
         -------
         row_number: int
             The current row number
-        row_hed_string: str
+        row_hed_string: HedString
             parsed and combined hed string for the row, gathered from all specified columns
         column_to_hed_tags_dictionary: dict
             A dict with keys column_number, value the cell at that position.
@@ -186,7 +251,7 @@ class BaseFileInput:
         -------
         row_number: int
             The current row number
-        row_hed_string: str
+        row_hed_string: HedString
             parsed and combined hed string for the row, gathered from all specified columns
         column_to_hed_tags_dictionary: dict
             A dict mapping from column number to parsed column text based on column mapper.
@@ -215,7 +280,7 @@ class BaseFileInput:
             The row number of the spreadsheet to set
         column_number : int
             The column number of the spreadsheet to set
-        new_text : str
+        new_text : HedString
             Text to enter in the given cell
         include_column_prefix_if_exist : bool
             If true and the column matches one from mapper _column_prefix_dictionary, remove the prefix
@@ -233,7 +298,7 @@ class BaseFileInput:
         adj_row_number = 1
         if self._has_column_names:
             adj_row_number += 1
-        self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = new_text
+        self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = str(new_text)
 
     @staticmethod
     def _get_dict_from_row_hed_tags(spreadsheet_row, mapper):
@@ -292,4 +357,3 @@ class BaseFileInput:
         if not worksheet_name:
             return workbook.worksheets[0]
         return workbook.get_sheet_by_name(worksheet_name)
-

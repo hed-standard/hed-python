@@ -1,5 +1,6 @@
 from hed.util.column_definition import ColumnDef, ColumnType
 from hed.util.column_def_group import ColumnDefGroup
+from hed.util.hed_string import HedString
 import copy
 
 
@@ -166,7 +167,7 @@ class ColumnMapper:
         """
         # Default 1-1 mapping if we don't have specific behavior.
         if not self._final_column_map:
-            return input_text, False
+            return HedString(input_text), False
 
         # If no entry, ignore this column.
         if column_number not in self._final_column_map:
@@ -210,7 +211,7 @@ class ColumnMapper:
             column_to_hed_tags_dictionary[column_number + 1] = translated_column
 
         result_dict["column_to_hed_tags"] = column_to_hed_tags_dictionary
-        final_hed_string = ','.join(column_to_hed_tags_dictionary.values())
+        final_hed_string = HedString.create_from_other(column_to_hed_tags_dictionary.values())
         result_dict["HED"] = final_hed_string
 
         return result_dict
@@ -225,11 +226,11 @@ class ColumnMapper:
         ----------
         column_number : int
             numbered column to use prefix check from.
-        input_text : str
+        input_text : HedString
             Text with a possible prefix
         Returns
         -------
-        prefix_removed_text : str
+        prefix_removed_text : HedString
             The string with the prefix removed, or the same string if no prefix present.
         """
         column_number -= 1

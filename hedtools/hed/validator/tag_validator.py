@@ -63,15 +63,13 @@ class TagValidator:
         else:
             self._digit_expression = self.DIGIT_EXPRESSION
 
-    def run_individual_tag_validators(self, original_tag, previous_original_tag=None):
+    def run_individual_tag_validators(self, original_tag):
         """Runs the validators on the individual tags in a HED string.
 
          Parameters
          ----------
          original_tag: HedTag
             A original tag.
-         previous_original_tag: HedTag
-            The previous original tag.
          Returns
          -------
          []
@@ -81,7 +79,7 @@ class TagValidator:
         validation_issues += self.check_tag_formatting(original_tag)
         if not validation_issues:
             if self._run_semantic_validation:
-                validation_issues += self.tag_exist_in_schema(original_tag, previous_original_tag)
+                validation_issues += self.tag_exist_in_schema(original_tag)
                 validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag)
                 validation_issues += self.check_if_tag_requires_child(original_tag)
                 if self._check_for_warnings:
@@ -107,8 +105,7 @@ class TagValidator:
         return validation_issues
 
     def run_hed_string_validators(self, hed_string):
-        """Runs the validators on the HED string. If this is passed then all the other validators are run on the tags
-           and groups in the HED string.
+        """Do the most basic high level checks of the hed string, for basic invalid characters or bad delimiters
 
          Parameters
          ----------
@@ -163,15 +160,13 @@ class TagValidator:
             validation_issues += self.check_for_required_tags(tags)
         return validation_issues
 
-    def tag_exist_in_schema(self, original_tag, previous_original_tag=''):
+    def tag_exist_in_schema(self, original_tag):
         """Reports a validation error if the tag provided is not a valid tag or doesn't take a value.
 
         Parameters
         ----------
         original_tag: HedTag
             The original tag that is used to report the error.
-        previous_original_tag: HedTag
-            The previous original tag that is used to report the error.
         Returns
         -------
         []
@@ -184,11 +179,7 @@ class TagValidator:
                 self.tag_takes_value(formatted_tag):
             return validation_issues
 
-        if not is_extension_tag and previous_original_tag and self.tag_takes_value(previous_original_tag.lower()):
-            validation_issues += self._error_handler.format_val_error(ValidationErrors.INVALID_COMMA,
-                                                                      tag=original_tag,
-                                                                      previous_tag=previous_original_tag)
-        elif not is_extension_tag:
+        if not is_extension_tag:
             validation_issues += self._error_handler.format_val_error(ValidationErrors.INVALID_TAG, tag=original_tag)
         return validation_issues
 
@@ -260,7 +251,7 @@ class TagValidator:
         """
         tag_slash_indices = self.get_tag_slash_indices(formatted_tag)
         for tag_slash_index in tag_slash_indices:
-            tag_substring = self.get_tag_substring_by_end_index(formatted_tag, tag_slash_index)
+            tag_substring = self.split_tag_substring_by_index(formatted_tag, tag_slash_index)
             if self._hed_schema.tag_has_attribute(tag_substring,
                                                   HedKey.ExtensionAllowedPropagated):
                 return True
@@ -549,6 +540,7 @@ class TagValidator:
             for unit_class in unit_classes:
                 try:
                     units += (self._hed_schema_dictionaries[HedKey.Units][unit_class])
+                # Todo: What is this exception handling doing?
                 except Exception:
                     continue
         return units
@@ -708,7 +700,7 @@ class TagValidator:
         """
         return [s.start() for s in re.finditer(slash, tag)]
 
-    def get_tag_substring_by_end_index(self, tag, end_index):
+    def split_tag_substring_by_index(self, tag, end_index):
         """Gets a tag substring from the start until the end index.
 
         Parameters
@@ -776,28 +768,6 @@ class TagValidator:
                                                            index=last_non_empty_valid_index,
                                                            hed_string=hed_string)
         return issues
-
-    def skip_iterations(self, iterator, start, end):
-        """Skips a number of iterations based on the start and end index.
-
-        Parameters
-        ----------
-        iterator: iterator
-            A iterator object.
-        start: int
-            The start position in the iterator to start skipping.
-        end: int
-            The end position in the iterator to stop skipping.
-        Returns
-        -------
-        iterator
-            An iterator with the iterations skipped.
-
-        """
-        iterations_to_skip = end - start
-        for iteration in range(iterations_to_skip):
-            next(iterator, None)
-        return iterator
 
     def report_invalid_character_error(self, character, index, hed_string):
         """Reports a error that is related to an invalid character.

@@ -1,4 +1,4 @@
-from hed.util.hed_string import HedString, HedGroup
+from hed.util.hed_string import HedString
 from hed.util.def_dict import DefDict, DefTagNames
 
 
@@ -68,12 +68,12 @@ class DefinitionMapper:
                 continue
             self._gathered_defs[def_tag] = def_value
 
-    def replace_and_remove_tags(self, hed_string):
+    def replace_and_remove_tags(self, hed_string_obj):
         """Takes a given string and returns the hed string with all definitions removed, and all labels replaced
 
         Parameters
         ----------
-        hed_string : str
+        hed_string_obj : HedString
             The hed string to modify.
         Returns
         -------
@@ -81,18 +81,17 @@ class DefinitionMapper:
             hed_string with all definitions removed and definition tags replaced with the actual definition
         """
         # First see if the word definition or dLabel is found at all.  Just move on if not.
-        hed_string_lower = hed_string.lower()
+        hed_string_lower = hed_string_obj.lower()
         if DefTagNames.DLABEL_KEY not in hed_string_lower and \
                 DefTagNames.DEF_KEY not in hed_string_lower:
-            return hed_string
+            return hed_string_obj
 
         def_tag_versions = self._def_tag_versions
         label_tag_versions = self._label_tag_versions
 
-        split_string = HedString(hed_string)
         remove_groups = []
 
-        for tag_group in split_string.get_all_groups():
+        for tag_group in hed_string_obj.get_all_groups():
             for tag in tag_group.tags():
                 # This case should be fairly rare compared to expanding definitions.
                 is_def_tag = DefinitionMapper._check_tag_starts_with(str(tag), def_tag_versions)
@@ -115,14 +114,13 @@ class DefinitionMapper:
 
                     def_contents = self._gathered_defs[label_tag_lower].get_definition(placeholder_value=placeholder)
 
-                    def_group = HedGroup(hed_string, startpos=tag.span[0], endpos=tag.span[1], contents=def_contents)
-                    tag_group.replace_tag_object(tag, def_group)
+                    tag_group.replace_tag(tag, def_contents)
                     continue
 
         if remove_groups:
-            split_string.remove_groups(remove_groups)
+            hed_string_obj.remove_groups(remove_groups)
 
-        return str(split_string)
+        return hed_string_obj
 
     @staticmethod
     def _check_tag_starts_with(hed_tag, possible_starts_with_list):

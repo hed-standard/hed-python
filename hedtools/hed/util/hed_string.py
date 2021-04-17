@@ -25,7 +25,22 @@ class HedString:
         self.hed_string = self._clean_hed_string(hed_string)
 
         # This is a tree like structure containing the entire hed string
-        self._top_level_group = self.split_hed_string_into_groups(hed_string)
+        try:
+            self._top_level_group = self.split_hed_string_into_groups(hed_string)
+        except ValueError:
+            self._top_level_group = None
+
+    @staticmethod
+    def create_from_other(hed_string_obj_list):
+        hed_string = ",".join([hed_string_obj.hed_string for hed_string_obj in hed_string_obj_list])
+        new_hed_string_obj = HedString("")
+        new_hed_string_obj.hed_string = hed_string
+        children = []
+        for hed_string_obj in hed_string_obj_list:
+            children += hed_string_obj._top_level_group.get_direct_children()
+        new_hed_string_obj._top_level_group = HedGroup(hed_string, 0, len(hed_string), include_paren=False, contents=children)
+
+        return new_hed_string_obj
 
     def get_all_groups(self):
         """
@@ -59,6 +74,45 @@ class HedString:
         """
         return self.hed_string
 
+    def calculate_canonical_forms(self, hed_schema, error_handler=None):
+        if not hed_schema.short_tag_mapping:
+            return []
+
+        validation_issues = []
+        for tag in self.get_all_tags():
+            long_form, short_index, tag_issues = hed_schema._convert_to_canonical_tag(tag, error_handler)
+            tag._long_tag = long_form
+            tag._short_tag_index = short_index
+            validation_issues += tag_issues
+
+        return validation_issues
+
+    def convert_to_short(self, hed_schema, error_handler=None):
+        once = True
+        conversion_issues = []
+        for tag in self.get_all_tags():
+            if tag._short_tag_index is None and once:
+                once = False
+                conversion_issues = self.calculate_canonical_forms(hed_schema, error_handler=error_handler)
+            tag._tag = tag.short_tag
+        return conversion_issues
+
+    def convert_to_long(self, hed_schema, error_handler=None):
+        once = True
+        conversion_issues = []
+        for tag in self.get_all_tags():
+            if tag._short_tag_index is None and once:
+                once = False
+                conversion_issues = self.calculate_canonical_forms(hed_schema, error_handler=error_handler)
+            tag._tag = tag.long_tag
+        return conversion_issues
+
+    def convert_to_original(self):
+        conversion_issues = []
+        for tag in self.get_all_tags():
+            tag._tag = tag.org_tag
+        return conversion_issues
+
     def remove_groups(self, remove_groups):
         """
         Takes a list of HedGroups, and removes any that exist from this HedString.
@@ -73,7 +127,7 @@ class HedString:
             return
 
         for group in self.get_all_groups():
-            group.children = [child for child in group.children if child not in remove_groups]
+            group._children = [child for child in group._children if child not in remove_groups]
 
     @staticmethod
     def split_hed_string_into_groups(hed_string):
@@ -114,7 +168,7 @@ class HedString:
 
                     if len(current_tag_group) > 1:
                         new_group = current_tag_group.pop()
-                        new_group.endpos = paren_end
+                        new_group._endpos = paren_end
 
                         current_tag_group[-1].append(new_group)
                     else:
@@ -139,7 +193,14 @@ class HedString:
         hed_string: str
             The updated hed string
         """
-        return str(self._top_level_group)
+        if self._top_level_group:
+            return str(self._top_level_group)
+        else:
+            return self.hed_string
+
+    def lower(self):
+        """Convenience function, equivalent to str(self).lower()"""
+        return str(self).lower()
 
 
 class HedTag:
@@ -157,11 +218,35 @@ class HedTag:
             The start and end indexes of the tag in the hed_string..
         """
         self._hed_string = hed_string
-        # This is the span into the original hed string - before spaces and such are removed.
+        # This is the span into the original hed string for this tag
         self.span = span
 
-        # The current output tag/text, uses org_tag if this is None.
+        # If this is present, use this as the output tag.  Priority is _tag, _long_tag, then _hed_string[span]
+        # this is generally only filled out if we're changing a tag from the source(adding a prefix, etc)
         self._tag = None
+
+        # The long form of the tag, if generated.
+        self._long_tag = None
+        # offset into _long_tag where the short tag starts at.
+        self._short_tag_index = None
+
+    # Note this is only valid after calling compute canonical forms
+    @property
+    def short_tag(self):
+        if self._short_tag_index is None:
+            return str(self)
+
+        return self._long_tag[self._short_tag_index:]
+
+    @property
+    def long_tag(self):
+        if self._long_tag is None:
+            return str(self)
+        return self._long_tag
+
+    @property
+    def org_tag(self):
+        return self._hed_string[self.span[0]:self.span[1]]
 
     def __str__(self):
         """
@@ -175,24 +260,43 @@ class HedTag:
         if self._tag:
             return self._tag
 
+        if self._long_tag:
+            return self._long_tag
+
         return self._hed_string[self.span[0]:self.span[1]]
 
-    @property
-    def tag(self):
-        """Returns the hed tag, identical to str(self)"""
-        return str(self)
+    def add_prefix_if_not_present(self, required_prefix):
+        """Add a prefix to this tag *unless* the tag is already formatted.
 
-    @tag.setter
-    def tag(self, new_tag):
-        """
-            Set the tag to a new value.  Eg filling in a placeholder, short to long, etc.
+        This means we verify the tag does not have the required prefix, or any partial prefix
+
+        Ex:
+        RequiredPrefix: KnownTag1/KnownTag2
+        Case 1: KnownTag1/KnownTag2/ColumnValue
+            Will not be changed, has prefix already
+        Case 2: KnownTag2/ColumnValue
+            Will not be changed, has partial prefix already
+        Case 3: ColumnValue
+            Prefix will be added.
 
         Parameters
         ----------
-        new_tag : str
-            New tag text
+        required_prefix : str
+            The full prefix to add if not present
         """
-        self._tag = new_tag
+        checking_prefix = required_prefix
+        while checking_prefix:
+            if self.lower().startswith(checking_prefix.lower()):
+                return
+            slash_index = checking_prefix.find("/") + 1
+            if slash_index == 0:
+                break
+            checking_prefix = checking_prefix[slash_index:]
+        self._tag = required_prefix + str(self)
+
+    def remove_prefix_if_present(self, prefix_to_remove):
+        if self.lower().startswith(prefix_to_remove.lower()):
+            self._tag = str(self)[len(prefix_to_remove):]
 
     def lower(self):
         """Convenience function, equivalent to str(self).lower()"""
@@ -222,12 +326,12 @@ class HedGroup:
             A list of tags and groups that will be set as the contents of this group.
         """
         if contents:
-            self.children = contents
+            self._children = contents
         else:
-            self.children = []
-        self.startpos = startpos
-        self.endpos = endpos
-        self.include_paren = include_paren
+            self._children = []
+        self._startpos = startpos
+        self._endpos = endpos
+        self._include_paren = include_paren
         self._hed_string = hed_string
 
     def append(self, new_tag_or_group):
@@ -239,7 +343,7 @@ class HedGroup:
         new_tag_or_group : HedTag or HedGroup
             The new object to add
         """
-        self.children.append(new_tag_or_group)
+        self._children.append(new_tag_or_group)
 
     def __iter__(self):
         """
@@ -249,7 +353,7 @@ class HedGroup:
         -------
         iterator over the direct children, identical to get_direct_children()
         """
-        return iter(self.children)
+        return iter(self._children)
 
     def get_direct_children(self):
         """
@@ -259,7 +363,7 @@ class HedGroup:
         -------
         iterator over the direct children
         """
-        return iter(self.children)
+        return iter(self._children)
 
     def get_all_tags(self):
         """
@@ -277,7 +381,7 @@ class HedGroup:
         while node_list:
             current_group_or_tag = node_list.pop(0)
             if isinstance(current_group_or_tag, HedGroup):
-                node_list = current_group_or_tag.children + node_list
+                node_list = current_group_or_tag._children + node_list
             else:
                 final_list.append(current_group_or_tag)
         return final_list
@@ -298,7 +402,7 @@ class HedGroup:
         while node_list:
             current_group_or_tag = node_list.pop(0)
             if isinstance(current_group_or_tag, HedGroup):
-                node_list = current_group_or_tag.children + node_list
+                node_list = current_group_or_tag._children + node_list
                 final_list.append(current_group_or_tag)
 
         return final_list
@@ -312,7 +416,10 @@ class HedGroup:
         tag_list: [HedTag]
             The list of all tags directly in this group.
         """
-        return [tag for tag in self.children if isinstance(tag, HedTag)]
+        return [tag for tag in self._children if isinstance(tag, HedTag)]
+
+    def get_original_hed_string(self):
+        return self._hed_string[self._startpos:self._endpos]
 
     @property
     def span(self):
@@ -323,7 +430,7 @@ class HedGroup:
         span: (int, int)
             The start and end index of the group(including parentheses) from the source string
         """
-        return self.startpos, self.endpos
+        return self._startpos, self._endpos
 
     def __str__(self):
         """
@@ -334,36 +441,28 @@ class HedGroup:
         str
             Returns the group as a string, including any modified HedTags
         """
-        if self.include_paren:
-            return "(" + ",".join([str(child) for child in self.children]) + ")"
+        if self._include_paren:
+            return "(" + ",".join([str(child) for child in self._children]) + ")"
         else:
-            return ",".join([str(child) for child in self.children])
+            return ",".join([str(child) for child in self._children])
 
     def lower(self):
         """Convenience function, equivalent to str(self).lower()"""
         return str(self).lower()
 
-    def replace_tag_object(self, old_tag, new_tag_or_group):
-        """
-        Takes a given HedTag(exact match, not string comparison) and replaces it with the specified one
+    def replace_tag(self, tag, new_contents):
+        """ Replaces an existing tag in the group with a new tag, list, or group
 
         Parameters
         ----------
-        old_tag : HedTag
-            The HedTag to replace
-        new_tag_or_group : HedTag or HedGroup
-            What to replace the tag with
+        tag : HedTag
+            The tag to replace.  It must exist or this will raise an error.
+        new_contents : HedTag or HedGroup or [HedTag or HedGroup]
+            What to replace the tag with.
         """
-        replace_index = self.children.index(old_tag)
-        self.children[replace_index] = new_tag_or_group
+        new_object = new_contents
+        if isinstance(new_contents, list):
+            new_object = HedGroup(tag._hed_string, startpos=tag.span[0], endpos=tag.span[1], contents=new_contents)
 
-    def set_contents(self, new_contents):
-        """
-        Sets the children of this HedGroup to be the passed in list
-
-        Parameters
-        ----------
-        new_contents : [HedTag or HedGroup]
-            The new contents of this group, obliterating any existing contents.
-        """
-        self.children = new_contents
+        replace_index = self._children.index(tag)
+        self._children[replace_index] = new_object

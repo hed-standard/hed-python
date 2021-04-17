@@ -4,6 +4,7 @@ from hed.util.error_types import ErrorContext
 from hed.util import error_reporter
 from hed.util.exceptions import HedFileError, HedExceptions
 from hed.util.def_dict import DefDict
+from hed.util.hed_string import HedString
 
 
 class ColumnDefGroup:
@@ -57,7 +58,7 @@ class ColumnDefGroup:
         new_def_dict = DefDict(hed_schema=hed_schema)
         validation_issues = []
         for hed_string in self.hed_string_iter():
-            validation_issues += new_def_dict.check_for_definitions(hed_string, error_handler=error_handler)
+            validation_issues += new_def_dict.check_for_definitions(HedString(hed_string), error_handler=error_handler)
 
         return new_def_dict, validation_issues
 
@@ -189,7 +190,7 @@ class ColumnDefGroup:
 
         Parameters
         ----------
-        new_hed_string : str
+        new_hed_string : str or HedString
             The new hed_string to replace the value at position.
         position : tuple
             This should only be a value returned from hed_string_iter

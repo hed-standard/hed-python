@@ -6,7 +6,8 @@ The dictionary is a dictionary of dictionaries. The dictionary names are the lis
 """
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema import hed_schema_constants as constants
-from hed.util import file_util
+from hed.util import file_util, error_reporter
+from hed.util.error_types import SchemaErrors
 from hed.schema.schema2xml import HedSchema2XML
 from hed.schema.schema2wiki import HedSchema2Wiki
 from hed.schema import schema_compliance
@@ -39,7 +40,6 @@ class HedSchema:
         self.dictionaries = dictionaries
         self._propagate_extension_allowed()
         self._populate_short_tag_dict()
-        self._add_hed3_compatible_tags()
 
     @property
     def filename(self):
@@ -179,7 +179,7 @@ class HedSchema:
 
     def get_all_tags(self, return_short_form=False):
         """
-        Gets a single copy of all hed terms from the schema, for hed2 or hed3 compatible.
+        Gets a list of all hed terms from the schema, compatible with Hed2 or Hed3
 
         Returns
         -------
@@ -187,19 +187,11 @@ class HedSchema:
             A list of all terms(short tags) from the schema.
         """
         final_list = []
-        if not self.has_duplicate_tags():
-            for lower_tag, org_tag in self.short_tag_mapping.items():
-                if return_short_form:
-                    final_list.append(org_tag.split('/')[-1])
-                else:
-                    final_list.append(org_tag)
-        # Fallback for hed2 style schema validation
-        else:
-            for lower_tag, org_tag in self.dictionaries[HedKey.AllTags].items():
-                if return_short_form:
-                    final_list.append(org_tag.split('/')[-1])
-                else:
-                    final_list.append(org_tag)
+        for lower_tag, org_tag in self.dictionaries[HedKey.AllTags].items():
+            if return_short_form:
+                final_list.append(org_tag.split('/')[-1])
+            else:
+                final_list.append(org_tag)
         return final_list
 
     def get_all_tag_attributes(self, tag_name, keys=None):
@@ -283,6 +275,9 @@ class HedSchema:
     @property
     def has_unit_classes(self):
         return HedKey.Units in self.dictionaries
+
+    def is_hed3_compatible(self):
+        return self.no_duplicate_tags
 
     @property
     def has_unit_modifiers(self):
@@ -377,25 +372,92 @@ class HedSchema:
                 new_short_tag_dict[short_clean_tag].append(new_tag_entry)
         self.dictionaries[HedKey.ShortTags] = new_short_tag_dict
 
-    def _add_hed3_compatible_tags(self):
+    def _convert_to_canonical_tag(self, hed_tag, error_handler=None):
         """
-        Updates the normal tag dictionaries with all the intermediate forms if this is a hed3 compatible schema."
+        This takes a hed tag(short or long form) and converts it to the long form
+        Works left to right.(mostly relevant for errors)
+        Note: This only does minimal validation
 
+        eg 'Event'                    - Returns ('Event', None)
+           'Sensory event'            - Returns ('Event/Sensory event', None)
+        Takes Value:
+           'Environmental sound/Unique Value'
+                                      - Returns ('Item/Sound/Environmental Sound/Unique Value', None)
+        Extension Allowed:
+            'Experiment control/demo_extension'
+                                      - Returns ('Event/Experiment Control/demo_extension/', None)
+            'Experiment control/demo_extension/second_part'
+                                      - Returns ('Event/Experiment Control/demo_extension/second_part', None)
+
+
+        Parameters
+        ----------
+        hed_tag: str or HedTag
+            A single hed tag(long or short)
         Returns
         -------
+        long_tag: str
+            The converted long tag
+        short_tag_index: int
+            The position the short tag starts at in long_tag
+        errors: list
+            a list of errors while converting
         """
-        if self.no_duplicate_tags:
-            for dict_key in constants.ALL_TAG_DICTIONARY_KEYS:
-                tag_dictionary = self.dictionaries[dict_key]
-                new_entries = {}
-                for full_tag, value in tag_dictionary.items():
-                    split_tags = full_tag.split("/")
-                    final_tag = ""
-                    for tag in reversed(split_tags):
-                        final_tag = tag + "/" + final_tag
-                        # We need to include the #, but make sure we don't create a tag with just # alone.
-                        if tag == "#":
-                            continue
-                        # Remove extra trailing slash.
-                        new_entries[final_tag[:-1]] = value
-                tag_dictionary.update(new_entries)
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+
+        clean_tag = hed_tag.lower()
+        split_tags = clean_tag.split("/")
+
+        index_end = 0
+        found_unknown_extension = False
+        found_index_end = 0
+        found_index_start = 0
+        found_long_org_tag = None
+        # Iterate over tags left to right keeping track of current index
+        for tag in split_tags:
+            tag_len = len(tag)
+            # Skip slashes
+            if index_end != 0:
+                index_end += 1
+            index_start = index_end
+            index_end += tag_len
+
+            # If we already found an unknown tag, it's implicitly an extension.  No known tags can follow it.
+            if not found_unknown_extension:
+                if tag not in self.short_tag_mapping:
+                    found_unknown_extension = True
+                    if not found_long_org_tag:
+                        error = error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
+                                                                   index_start, index_end)
+                        return str(hed_tag), None, error
+                    continue
+
+                long_org_tag = self.short_tag_mapping[tag]
+                tag_string = long_org_tag.lower()
+                main_hed_portion = clean_tag[:index_end]
+
+                # Verify the tag has the correct path above it.
+                if not tag_string.endswith(main_hed_portion):
+                    error = error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
+                                                               index_start, index_end,
+                                                               long_org_tag)
+                    return str(hed_tag), None, error
+                found_index_start = index_start
+                found_index_end = index_end
+                found_long_org_tag = long_org_tag
+            else:
+                # These means we found a known tag in the remainder/extension section, which is an error
+                if tag in self.short_tag_mapping:
+                    error = error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
+                                                               index_start, index_end,
+                                                               self.short_tag_mapping[tag])
+                    return str(hed_tag), None, error
+
+        remainder = str(hed_tag)[found_index_end:]
+
+        long_tag_string = found_long_org_tag + remainder
+
+        # calculate short_tag index into long tag.
+        found_index_start += (len(long_tag_string) - len(str(hed_tag)))
+        return long_tag_string, found_index_start, []

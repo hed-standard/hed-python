@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed.util.hed_file_input import HedFileInput
-
+from hed.util.hed_string import HedString
 
 class Test(unittest.TestCase):
     @classmethod
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
     def test_get_row_hed_tags(self):
         row_dict = self.generic_file_input._get_dict_from_row_hed_tags(self.row_with_hed_tags, self.generic_file_input._mapper)
         hed_string, column_to_hed_tags_dictionary = self.generic_file_input._get_row_hed_tags_from_dict(row_dict)
-        self.assertIsInstance(hed_string, str)
+        self.assertIsInstance(hed_string, HedString)
         self.assertTrue(hed_string)
         self.assertIsInstance(column_to_hed_tags_dictionary, dict)
         self.assertTrue(column_to_hed_tags_dictionary)

@@ -21,7 +21,7 @@ class ErrorHandler:
         ----------
         context_type : ErrorContext
             This should be a value from ErrorContext representing the type of scope.
-        context : str or int
+        context : str or int or HedString
             The main value for the context_type.  eg for ErrorContext.FILE_NAME this would be the actual filename.
         increment_depth_after : bool
             If True, this adds an extra tab to any subsequent errors in the scope.
@@ -98,6 +98,11 @@ class ErrorHandler:
             of warning.
 
         """
+        try:
+            tag = tag.org_tag
+        except AttributeError:
+            tag = tag
+
         error_prefix = "ERROR: "
         error_types = {
             ValidationErrors.PARENTHESES: f'{error_prefix}Number of opening and closing parentheses are unequal. '
@@ -106,15 +111,13 @@ class ErrorHandler:
             ValidationErrors.INVALID_CHARACTER: f'{error_prefix}Invalid character "{character}" at index {index} of string "{hed_string}"',
             ValidationErrors.TILDES_NOT_SUPPORTED: f'{error_prefix}Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).   "{character}" at index {index} of string "{hed_string}"',
             ValidationErrors.COMMA_MISSING: f'{error_prefix}Comma missing after - "{tag}"',
-            ValidationErrors.INVALID_COMMA: f'{error_prefix}Either "{previous_tag}" contains a comma when it should not or "{tag}" is not a valid '
-                                            'tag ',
             ValidationErrors.DUPLICATE: f'{error_prefix}Duplicate tag - "{tag}"',
             ValidationErrors.REQUIRE_CHILD: f'{error_prefix}Descendant tag required - "{tag}"',
             ValidationErrors.MULTIPLE_UNIQUE: f'{error_prefix}Multiple unique tags with prefix - "{tag_prefix}"',
             ValidationErrors.UNIT_CLASS_INVALID_UNIT: f'{error_prefix}Invalid unit - "{tag}" valid units are "{unit_class_units}"',
             ValidationErrors.INVALID_TAG: f'{error_prefix}Invalid tag - "{tag}"',
             ValidationErrors.EMPTY_TAG: f'{error_prefix}HED tags cannot be empty.  Extra comma found at: "{character}" at index {index} of string "{hed_string}"',
-            ValidationErrors.EXTRA_SLASHES_OR_SPACES: f"{error_prefix}Extra slashes or spaces '{character}' at index {index} of tag '{tag}'"
+            ValidationErrors.EXTRA_SLASHES_OR_SPACES: f"{error_prefix}Extra slashes or spaces '{character}' at index {index} of tag '{tag}'",
         }
         default_error_message = 'ERROR: Unknown error'
         error_message = error_types.get(error_type, default_error_message)
@@ -189,6 +192,11 @@ class ErrorHandler:
             of warning.
 
         """
+        try:
+            tag = tag.org_tag
+        except AttributeError:
+            tag = tag
+
         warning_prefix = "WARNING: "
 
         warning_types = {
@@ -260,19 +268,19 @@ class ErrorHandler:
         if error_index_end is None:
             error_index_end = len(hed_tag)
 
-        problem_tag = hed_tag[error_index: error_index_end]
+        problem_tag = str(hed_tag)[error_index: error_index_end]
 
         error_prefix = f"ERROR: "
 
         tag_join_delimiter = f"\n\t"
         error_types = {
-            SchemaErrors.INVALID_PARENT_NODE: f"{error_prefix}'{problem_tag}' appears as '{expected_parent_tag}' and cannot be used "
+            SchemaErrors.INVALID_PARENT_NODE: f"{error_prefix}'{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used "
                                               f"as an extension.  {error_index}, {error_index_end}",
             SchemaErrors.NO_VALID_TAG_FOUND: f"{error_prefix}'{problem_tag}' is not a valid base hed tag.  {error_index}, {error_index_end} ",
             SchemaErrors.EMPTY_TAG_FOUND: f"{error_prefix}Empty tag cannot be converted.",
             SchemaErrors.INVALID_SCHEMA: f"{error_prefix}Source hed schema is invalid as it contains duplicate tags.  "
                                          f"Please fix if you wish to be abe to convert tags. {error_index}, {error_index_end}",
-            SchemaErrors.DUPLICATE_TERMS: f"{error_prefix}Term(Short Tag) '{hed_tag}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"
+            SchemaErrors.DUPLICATE_TERMS: f"{error_prefix}Term(Short Tag) '{str(hed_tag)}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"
                                           f"{tag_join_delimiter.join(duplicate_tag_list)}"
         }
         default_error_message = f'{error_prefix}Internal Error'
@@ -280,7 +288,7 @@ class ErrorHandler:
 
         error_object = {'code': error_type,
                         'message': error_message,
-                        'source_tag': hed_tag,
+                        'source_tag': str(hed_tag),
                         'start_index': error_index,
                         'end_index': error_index_end,
                         'expected_parent_tag': expected_parent_tag,
@@ -470,7 +478,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
     """
     tab_string = tab_count * '\t'
     if context_type == ErrorContext.HED_STRING:
-        context = context.replace('\n', ' ')
+        context = str(context).replace('\n', ' ')
     error_types = {
         ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
         ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
