@@ -4,6 +4,7 @@ import os
 from hed import schema
 from hed.schema import HedKey
 from hed.util.exceptions import HedFileError
+from hed.util.hed_string import HedString
 
 
 class TestHedSchema(unittest.TestCase):
@@ -234,7 +235,9 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(desc, None)
 
     def test_get_all_tag_attributes(self):
-        tag_props = self.hed_schema_3g.get_all_tag_attributes("Jerk-rate/#")
+        test_string = HedString("Jerk-rate/#")
+        test_string.calculate_canonical_forms(self.hed_schema_3g)
+        tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
             "takesValue": "true",
             "isNumeric": "true",
@@ -247,7 +250,9 @@ class TestHedSchema(unittest.TestCase):
         }
         self.assertCountEqual(tag_props, expected_props)
 
-        tag_props = self.hed_schema_3g.get_all_tag_attributes("Agent-trait")
+        test_string = HedString("Agent-trait")
+        test_string.calculate_canonical_forms(self.hed_schema_3g)
+        tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
             HedKey.ExtensionAllowed: "true",
         }

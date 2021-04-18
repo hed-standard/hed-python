@@ -1,7 +1,6 @@
 from hed.util.hed_string import HedString, HedTag, HedGroup
 from hed.util.error_types import DefinitionErrors
 from hed.util import error_reporter
-import copy
 
 
 class DefTagNames:
@@ -15,20 +14,20 @@ class DefTagNames:
 
 
 class DefEntry:
-    def __init__(self, name, group, takes_value):
+    def __init__(self, name, contents_string, takes_value):
         """Contains info for a single definition tag
 
         Parameters
         ----------
         name : str
             The label portion of this name(not including definition/)
-        group: HedGroup
+        contents_string: str
             The contents of this definition
         takes_value : bool
             If True, expects ONE tag to have a single # sign in it.
         """
         self.name = name
-        self.contents = group
+        self.contents = contents_string
         self.takes_value = takes_value
 
     def get_definition(self, placeholder_value=None):
@@ -36,17 +35,16 @@ class DefEntry:
             return None
 
         output_contents = None
-        name=self.name
+        name = self.name
         if self.contents:
-            # Return a copy of the group so we can easily replace the placeholder tag...
-            output_contents = copy.deepcopy(self.contents)
+            hed_string = self.contents
             if placeholder_value:
-                for tag in output_contents.tags():
-                    if "#" in str(tag):
-                        tag.tag = str(tag).replace("#", placeholder_value)
+                hed_string = hed_string.replace("#", placeholder_value)
                 name = f"{name}/{placeholder_value}"
 
-        # todo: Make this point to the actual original hed string the def is from, and also possibly be a long tag.
+            output_contents = HedString.split_hed_string_into_groups(hed_string)
+
+        # Possibly update this to properly point to the original def tag
         def_tag = HedTag(f"{DefTagNames.ELABEL_ORG_KEY}/{name}", span=(0, len(f"{DefTagNames.ELABEL_ORG_KEY}/{name}")))
         if output_contents:
             return [def_tag, output_contents]
@@ -88,13 +86,13 @@ class DefDict:
     def __iter__(self):
         return iter(self._defs.items())
 
-    def check_for_definitions(self, hed_string, check_for_issues=True, error_handler=None):
+    def check_for_definitions(self, hed_string_obj, check_for_issues=True, error_handler=None):
         """
         Check a given hed string for definition tags, and add them to the dictionary if so.
 
         Parameters
         ----------
-        hed_string : str
+        hed_string_obj : HedString
             A single hed string to gather definitions from
         check_for_issues: bool
             If we should return validation issues found.(note most issues will be checked for either way,
@@ -106,7 +104,7 @@ class DefDict:
         issues_list: None or [{}]
             A list of error objects containing warnings and errors related to definitions.
         """
-        if DefTagNames.DEF_KEY not in hed_string.lower():
+        if DefTagNames.DEF_KEY not in hed_string_obj.lower():
             return []
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
@@ -114,8 +112,7 @@ class DefDict:
         validation_issues = []
         def_tag_versions = self._def_tag_versions
 
-        string_split = HedString(hed_string)
-        for tag_group in string_split.get_all_groups():
+        for tag_group in hed_string_obj.get_all_groups():
             def_tags = []
             group_tags = []
             other_tags = []
@@ -139,7 +136,8 @@ class DefDict:
 
             if len(def_tags) > 1:
                 validation_issues += error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_DEF_TAGS,
-                                                                           def_name=def_tags[0][1], tag_list=[tag[0] for tag in def_tags[1:]])
+                                                                           def_name=def_tags[0][1],
+                                                                           tag_list=[tag[0] for tag in def_tags[1:]])
                 continue
             def_tag, def_tag_name = def_tags[0]
             if len(group_tags) > 1:
@@ -179,12 +177,14 @@ class DefDict:
                         placeholder_tags.append(tag)
 
             if (len(placeholder_tags) == 1) != def_takes_value:
-                validation_issues += error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
-                                                                           def_name=def_tag_name, tag_list=placeholder_tags,
-                                                                           expected_count=1 if def_takes_value else 0)
+                validation_issues += \
+                    error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
+                                                          def_name=def_tag_name, tag_list=placeholder_tags,
+                                                          expected_count=1 if def_takes_value else 0)
                 continue
 
-            self._defs[def_tag_lower] = DefEntry(name=def_tag_name, group=group_tag, takes_value=def_takes_value)
+            self._defs[def_tag_lower] = DefEntry(name=def_tag_name, contents_string=str(group_tag),
+                                                 takes_value=def_takes_value)
 
         if check_for_issues:
             return validation_issues

@@ -1,9 +1,10 @@
 from enum import Enum
-from hed.util.hed_string_util import split_hed_string, split_hed_string_return_tags
+from hed.util.hed_string import HedString
 from hed.util.error_types import SidecarErrors, ErrorContext, ErrorSeverity
 from hed.util import error_reporter
-from hed.validator.tag_validator import TagValidator
+
 import re
+
 
 class ColumnType(Enum):
     """The overall column_type of a column in column mapper, eg treat it as HED tags.
@@ -101,7 +102,7 @@ class ColumnDef:
 
         Parameters
         ----------
-        new_hed_string : str
+        new_hed_string : str or HedString
             The new hed_string to replace the value at position.
         position : str, optional
             This should only be a value returned from hed_string_iter
@@ -112,15 +113,15 @@ class ColumnDef:
                 raise TypeError("Error: Trying to set a category HED string with no category")
             if position not in self._hed_dict["HED"]:
                 raise TypeError("Error: Not allowed to add new categories to a column")
-            self._hed_dict["HED"][position] = new_hed_string
-        elif isinstance(hed_strings, str):
+            self._hed_dict["HED"][position] = str(new_hed_string)
+        elif isinstance(hed_strings, (str, HedString)):
             if position is not None:
                 raise TypeError("Error: Trying to set a value HED string with a category")
-            self._hed_dict["HED"] = new_hed_string
+            self._hed_dict["HED"] = str(new_hed_string)
         else:
             raise TypeError("Error: Trying to set a HED string on a column_type that doesn't support it.")
 
-    def get_category_hed_string(self, category):
+    def _get_category_hed_string(self, category):
         """Fetches the hed string from a given category key.
 
         Parameters
@@ -138,7 +139,7 @@ class ColumnDef:
 
         return self._hed_dict["HED"].get(category, None)
 
-    def get_value_hed_string(self):
+    def _get_value_hed_string(self):
         """Fetches the hed_string from a given value column
 
         Returns
@@ -172,18 +173,19 @@ class ColumnDef:
         column_type = self.column_type
 
         if column_type == ColumnType.Categorical:
-            final_text = self.get_category_hed_string(input_text)
+            final_text = self._get_category_hed_string(input_text)
             if final_text:
-                return final_text, False
+                return HedString(final_text), False
             else:
                 # todo: Issue a warning here that the category key is missing.
                 pass
         elif column_type == ColumnType.Value:
-            prelim_text = self.get_value_hed_string()
+            prelim_text = self._get_value_hed_string()
             final_text = prelim_text.replace("#", input_text)
-            return final_text, False
+            return HedString(final_text), False
         elif column_type == ColumnType.HEDTags:
-            new_text = self._prepend_prefix_to_required_tag_column_if_needed(input_text, self.column_prefix)
+            hed_string_obj = HedString(input_text)
+            new_text = self._prepend_prefix_to_required_tag_column_if_needed(hed_string_obj, self.column_prefix)
             return new_text, False
         elif column_type == ColumnType.Ignore:
             return None, False
@@ -197,14 +199,14 @@ class ColumnDef:
         """Prepends the tag paths to the required tag column tags that need them.
         Parameters
         ----------
-        required_tag_column_tags: str
+        required_tag_column_tags: HedString
             A string containing HED tags associated with a required tag column that may need a tag prefix prepended to
             its tags.
         required_tag_prefix: str
             A string that will be added if missing to any given tag.
         Returns
         -------
-        string
+        HedString
             A comma separated string that contains the required HED tags with the tag prefix prepended to them if
             needed.
 
@@ -212,15 +214,10 @@ class ColumnDef:
         if not required_tag_prefix:
             return required_tag_column_tags
 
-        hed_tags = split_hed_string(required_tag_column_tags)
-        final_string = ""
-        for is_hed_tag, (startpos, endpos) in hed_tags:
-            tag = required_tag_column_tags[startpos:endpos]
-            if is_hed_tag:
-                if tag and not tag.lower().startswith(required_tag_prefix.lower()):
-                    tag = required_tag_prefix + tag
-            final_string += tag
-        return final_string
+        for tag in required_tag_column_tags.get_all_tags():
+            tag.add_prefix_if_not_present(required_tag_prefix)
+
+        return required_tag_column_tags
 
     def remove_prefix_if_needed(self, original_text):
         """
@@ -228,7 +225,7 @@ class ColumnDef:
 
         Parameters
         ----------
-        original_text : str
+        original_text : HedString
             Input text, generally from a single cell of a spreadsheet
 
         Returns
@@ -240,15 +237,9 @@ class ColumnDef:
         if not prefix_to_remove:
             return original_text
 
-        hed_tags = split_hed_string(original_text)
-        final_string = ""
-        for is_hed_tag, (startpos, endpos) in hed_tags:
-            tag = original_text[startpos:endpos]
-            if is_hed_tag:
-                if tag and tag.lower().startswith(prefix_to_remove.lower()):
-                    tag = tag[len(prefix_to_remove):]
-            final_string += tag
-        return final_string
+        for tag in original_text.get_all_tags():
+            tag.remove_prefix_if_present(prefix_to_remove)
+        return original_text
 
     @staticmethod
     def _detect_column_def_type(dict_for_entry):
@@ -299,24 +290,18 @@ class ColumnDef:
             error_handler = error_reporter.ErrorHandler()
 
         col_validation_issues = []
-        # Full Hed string validation can only be done with a hed_schema
-        if hed_schema and self.hed_string_iter():
-            # todo: update this to do string level validation, but with possible placeholders allowed
-            tag_validator = TagValidator(hed_schema, check_for_warnings=True, run_semantic_validation=True,
-                                         allow_numbers_to_be_pound_sign=True, error_handler=error_handler)
+        if self.hed_string_iter():
+            hed_validator = None
+            # Full Hed string validation can only be done with a hed_schema
+            if hed_schema is not None:
+                from hed.validator.hed_validator import HedValidator
+                hed_validator = HedValidator(check_for_warnings=True, run_semantic_validation=True,
+                                             hed_schema=hed_schema, error_handler=error_handler)
             for hed_string, position in self.hed_string_iter(include_position=True):
                 error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
-                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string, False)
-                new_col_validation_issues = tag_validator.run_hed_string_validators(hed_string)
-                if not new_col_validation_issues:
-                    for hed_tag in split_hed_string_return_tags(hed_string):
-                        tag_issues = tag_validator.run_individual_tag_validators(hed_tag)
-                        if tag_issues:
-                            new_col_validation_issues += tag_issues
-                if new_col_validation_issues:
-                    col_validation_issues += new_col_validation_issues
+                if hed_validator:
+                    col_validation_issues += hed_validator.validate_input(hed_string)
                 col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
-                error_handler.pop_error_context()
                 error_handler.pop_error_context()
 
         if self.column_type is None:
@@ -330,11 +315,6 @@ class ColumnDef:
                 col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
                                                                             given_type=type(raw_hed_dict),
                                                                             expected_type="str")
-            else:
-                if hed_schema is None:
-                    error_handler.push_error_context(ErrorContext.HED_STRING, raw_hed_dict, False)
-                    col_validation_issues += self._validate_pound_sign_count(raw_hed_dict, error_handler)
-                    error_handler.pop_error_context()
 
         elif self.column_type == ColumnType.Categorical:
             raw_hed_dict = self._hed_dict["HED"]
@@ -349,14 +329,6 @@ class ColumnDef:
                     col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.TOO_FEW_CATEGORIES,
                                                                                 category_count=len(raw_hed_dict),
                                                                                 severity=ErrorSeverity.WARNING)
-
-                if hed_schema is None:
-                    for key, hed_string in raw_hed_dict.items():
-                        error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key)
-                        error_handler.push_error_context(ErrorContext.HED_STRING, hed_string, False)
-                        col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
-                        error_handler.pop_error_context()
-                        error_handler.pop_error_context()
 
         return col_validation_issues
 
@@ -388,8 +360,8 @@ class ColumnDef:
         pattern = re.compile(definition_and_exp_pattern)
         expected_pound_sign_count = len(pattern.findall(hed_string.lower())) * 2 + base_pound_sign_count
 
-        if hed_string.count("#") != expected_pound_sign_count:
+        if str(hed_string).count("#") != expected_pound_sign_count:
             return error_handler.format_sidecar_error(error_type,
-                                                      pound_sign_count=hed_string.count("#"))
+                                                      pound_sign_count=str(hed_string).count("#"))
 
         return []
