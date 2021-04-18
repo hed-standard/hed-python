@@ -4,6 +4,8 @@ import os
 from hed.util.def_mapper import DefinitionMapper
 from hed import schema
 from hed.util.def_dict import DefDict
+from hed.util.hed_string import HedString
+
 
 class Test(unittest.TestCase):
     @classmethod
@@ -34,55 +36,55 @@ class Test(unittest.TestCase):
 
     def test_replace_and_remove_tags(self):
         def_dict = DefDict(hed_schema=self.hed_schema)
-        def_dict.check_for_definitions(self.basic_def_string)
+        def_dict.check_for_definitions(HedString(self.basic_def_string))
         def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_def_string)
-        self.assertEqual(result_string, "")
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_def_string))
+        self.assertEqual(str(result_string), "")
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_def_string_no_paren)
-        self.assertEqual(result_string, "")
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_def_string_no_paren))
+        self.assertEqual(str(result_string), "")
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_hed_string + "," + self.basic_def_string)
-        self.assertEqual(result_string, self.basic_hed_string)
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_hed_string + "," + self.basic_def_string))
+        self.assertEqual(str(result_string), self.basic_hed_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_def_string + "," + self.basic_hed_string)
-        self.assertEqual(result_string, self.basic_hed_string)
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_def_string + "," + self.basic_hed_string))
+        self.assertEqual(str(result_string), self.basic_hed_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_hed_string_with_def)
-        self.assertEqual(result_string, self.basic_hed_string + "," + self.expanded_def_string)
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_hed_string_with_def))
+        self.assertEqual(str(result_string), self.basic_hed_string + "," + self.expanded_def_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_hed_string_with_def_first)
-        self.assertEqual(result_string, self.expanded_def_string + "," + self.basic_hed_string)
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_hed_string_with_def_first))
+        self.assertEqual(str(result_string), self.expanded_def_string + "," + self.basic_hed_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_hed_string_with_def_first_paren)
-        self.assertEqual(result_string, "(" + self.expanded_def_string + "," + self.basic_hed_string + ")")
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_hed_string_with_def_first_paren))
+        self.assertEqual(str(result_string), "(" + self.expanded_def_string + "," + self.basic_hed_string + ")")
 
     def test_replace_and_remove_tags_placeholder(self):
         def_dict = DefDict(hed_schema=self.hed_schema)
-        def_dict.check_for_definitions(self.placeholder_def_string)
+        def_dict.check_for_definitions(HedString(self.placeholder_def_string))
         def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
 
-        result_string = def_mapper.replace_and_remove_tags(self.placeholder_def_string)
-        self.assertEqual(result_string, "")
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.placeholder_def_string))
+        self.assertEqual(str(result_string), "")
 
-        # result_string = def_mapper.replace_and_remove_tags(self.basic_def_string_no_paren)
-        # self.assertEqual(result_string, "")
+        # result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_def_string_no_paren)
+        # self.assertEqual(str(result_string), "")
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_hed_string + "," + self.placeholder_def_string)
-        self.assertEqual(result_string, self.basic_hed_string)
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_hed_string + "," + self.placeholder_def_string))
+        self.assertEqual(str(result_string), self.basic_hed_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.placeholder_def_string + "," + self.basic_hed_string)
-        self.assertEqual(result_string, self.basic_hed_string)
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.placeholder_def_string + "," + self.basic_hed_string))
+        self.assertEqual(str(result_string), self.basic_hed_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.placeholder_hed_string_with_def)
-        self.assertEqual(result_string, self.basic_hed_string + "," + self.placeholder_expanded_def_string)
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.placeholder_hed_string_with_def))
+        self.assertEqual(str(result_string), self.basic_hed_string + "," + self.placeholder_expanded_def_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.placeholder_hed_string_with_def_first)
-        self.assertEqual(result_string, self.placeholder_expanded_def_string + "," + self.basic_hed_string)
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.placeholder_hed_string_with_def_first))
+        self.assertEqual(str(result_string), self.placeholder_expanded_def_string + "," + self.basic_hed_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.placeholder_hed_string_with_def_first_paren)
-        self.assertEqual(result_string, "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
+        result_string = def_mapper.replace_and_remove_tags(HedString(self.placeholder_hed_string_with_def_first_paren))
+        self.assertEqual(str(result_string), "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
 
 
     def test__check_tag_starts_with(self):

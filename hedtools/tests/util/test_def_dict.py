@@ -6,7 +6,7 @@ from hed import schema
 from hed.util.def_dict import DefDict
 from hed.util import error_reporter
 from hed.util.error_types import DefinitionErrors
-
+from hed.util.hed_string import HedString
 
 class TestDefBase(unittest.TestCase):
     schema_file = '../data/HED8.0.0-alpha.1.xml'
@@ -20,9 +20,9 @@ class TestDefBase(unittest.TestCase):
     def check_def_base(self, test_strings, expected_issues):
         for test_key in test_strings:
             def_dict = DefDict(self.hed_schema)
-            test_issues = def_dict.check_for_definitions(test_strings[test_key])
+            test_issues = def_dict.check_for_definitions(HedString(test_strings[test_key]))
             expected_issue = expected_issues[test_key]
-            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
+            self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
 
 
 class TestDefDict(TestDefBase):
@@ -40,14 +40,14 @@ class TestDefDict(TestDefBase):
     def test_check_for_definitions(self):
         def_dict = DefDict(hed_schema=self.hed_schema)
         original_def_count = len(def_dict._defs)
-        def_dict.check_for_definitions(self.basic_def_string)
+        def_dict.check_for_definitions(HedString(self.basic_def_string))
         new_def_count = len(def_dict._defs)
         self.assertGreater(new_def_count, original_def_count)
 
     def test_check_for_definitions_placeholder(self):
         def_dict = DefDict(hed_schema=self.hed_schema)
         original_def_count = len(def_dict._defs)
-        def_dict.check_for_definitions(self.placehodler_def_string)
+        def_dict.check_for_definitions(HedString(self.placehodler_def_string))
         new_def_count = len(def_dict._defs)
         self.assertGreater(new_def_count, original_def_count)
 

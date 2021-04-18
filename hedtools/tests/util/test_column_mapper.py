@@ -2,8 +2,12 @@ import unittest
 import os
 
 from hed.util.column_mapper import ColumnMapper, ColumnType, ColumnDef
+from hed.util.hed_string import HedString
+from hed.schema import load_schema
 
 class Test(unittest.TestCase):
+    schema_file = '../data/HED8.0.0-alpha.1.xml'
+
     @classmethod
     def setUpClass(cls):
         cls.event_mapper = ColumnMapper()
@@ -12,8 +16,8 @@ class Test(unittest.TestCase):
         cls.zero_based_row_column_count = 3
         cls.column_prefix_dictionary = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
         cls.category_key = 'Event/Category/'
-        cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response, Event/Category/Stimulus'
-        cls.category_tags = 'Participant response, Stimulus'
+        cls.category_partipant_and_stimulus_tags = HedString('Event/Category/Participant response, Event/Category/Stimulus')
+        cls.category_tags = HedString('Participant response, Stimulus')
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
 
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
@@ -30,7 +34,12 @@ class Test(unittest.TestCase):
         cls.test_column_map = ["TestColumn"]
         cls.required_prefix = "TestRequiredPrefix/"
         cls.complex_hed_tag_required_prefix = "TestRequiredPrefix/ThisIsAHedTag, (TestRequiredPrefix/NewTag, TestRequiredPrefix/NewTag3)"
-        cls.complex_hed_tag_no_prefix = "ThisIsAHedTag, (NewTag, NewTag3)"
+        cls.complex_hed_tag_no_prefix = "ThisIsAHedTag,(NewTag,NewTag3)"
+
+        cls.short_tag_key = 'Item/Language/Character/'
+        cls.short_tag_with_missing_prefix = "D"
+        cls.short_tag_partial_prefix = 'Language/Character/'
+        cls.short_tag_partial_prefix2 = 'Character/'
 
     def test_set_column_prefix_dict(self):
         mapper = ColumnMapper()
@@ -103,7 +112,7 @@ class Test(unittest.TestCase):
         mapper.add_json_file_defs(self.basic_events_json)
         mapper.set_column_map(self.basic_column_map)
         expanded_column = mapper._expand_column(2, "go")
-        self.assertTrue(isinstance(expanded_column[0], str))
+        self.assertTrue(isinstance(expanded_column[0], HedString))
 
     def test_expand_row_tags(self):
         mapper = ColumnMapper()
@@ -114,12 +123,11 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(expanded_row, dict))
         self.assertTrue(self.basic_attribute_column in expanded_row)
 
-
     def test_remove_prefix_if_needed(self):
         mapper = ColumnMapper()
         mapper.set_column_prefix_dict({self.add_column_number: self.required_prefix})
-        no_prefix_string = mapper.remove_prefix_if_needed(self.add_column_number, self.complex_hed_tag_required_prefix)
-        self.assertEqual(no_prefix_string, self.complex_hed_tag_no_prefix)
+        no_prefix_string = mapper.remove_prefix_if_needed(self.add_column_number, HedString(self.complex_hed_tag_required_prefix))
+        self.assertEqual(str(no_prefix_string), str(self.complex_hed_tag_no_prefix))
 
     def test_subtract_1_from_dictionary_keys(self):
         one_subtracted_key_dictionary = self.event_mapper._subtract_1_from_dictionary_keys(self.integer_key_dictionary)
@@ -142,9 +150,41 @@ class Test(unittest.TestCase):
     def test__prepend_prefix_to_required_tag_column_if_needed(self):
         prepended_hed_string = ColumnDef._prepend_prefix_to_required_tag_column_if_needed(
             self.category_tags, self.category_key)
-        self.assertIsInstance(prepended_hed_string, str)
-        self.assertEqual(prepended_hed_string, self.category_partipant_and_stimulus_tags)
+        self.assertIsInstance(prepended_hed_string, HedString)
+        self.assertEqual(str(prepended_hed_string), str(self.category_partipant_and_stimulus_tags))
 
+    # Verify reading/writing a short tag to a file column with a prefix works
+    def test_add_prefix_verify_short_tag_conversion(self):
+        schema_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.schema_file)
+        hed_schema = load_schema(schema_file)
+        prepended_hed_string = ColumnDef._prepend_prefix_to_required_tag_column_if_needed(
+            HedString(self.short_tag_with_missing_prefix), self.short_tag_key)
+        prepended_hed_string.calculate_canonical_forms(hed_schema)
+        for tag in prepended_hed_string.get_all_tags():
+            self.assertEqual("Character/D", tag.short_tag)
+
+    def test_add_prefix_verify_short_tag_read(self):
+        column_mapper = ColumnMapper(column_prefix_dictionary={1: self.short_tag_key})
+        test_strings = {
+            'test_no_prefix': self.short_tag_with_missing_prefix,
+            'test_full_prefix': self.short_tag_key + self.short_tag_with_missing_prefix,
+            'test_partial_prefix1': self.short_tag_partial_prefix + self.short_tag_with_missing_prefix,
+            'test_partial_prefix2': self.short_tag_partial_prefix2 + self.short_tag_with_missing_prefix,
+        }
+        expected_results = {
+            'test_no_prefix': self.short_tag_key + self.short_tag_with_missing_prefix,
+            'test_full_prefix': self.short_tag_key + self.short_tag_with_missing_prefix,
+            'test_partial_prefix1': self.short_tag_partial_prefix + self.short_tag_with_missing_prefix,
+            'test_partial_prefix2': self.short_tag_partial_prefix2 + self.short_tag_with_missing_prefix,
+        }
+
+        for test_key in test_strings:
+            test_string = test_strings[test_key]
+            expected_result = expected_results[test_key]
+
+            expanded_row = column_mapper.expand_row_tags([test_string])
+            prepended_hed_string = expanded_row["HED"]
+            self.assertEqual(expected_result, str(prepended_hed_string))
 
 if __name__ == '__main__':
     unittest.main()
