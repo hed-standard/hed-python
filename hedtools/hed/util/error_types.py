@@ -21,7 +21,6 @@ class ValidationErrors:
     UNIT_CLASS_INVALID_UNIT = 'unitClassInvalidUnit'
     EMPTY_TAG = 'extraComma'
     INVALID_CHARACTER = 'invalidCharacter'
-    INVALID_COMMA = 'extraCommaOrInvalid'
     COMMA_MISSING = 'commaMissing'
     DUPLICATE = 'duplicateTag'
     PARENTHESES = 'parentheses'
