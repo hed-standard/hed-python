@@ -47,8 +47,7 @@ def get_dictionary_results():
     input_arguments = {}
     try:
         input_arguments = dictionary.generate_input_from_dictionary_form(request)
-        a = dictionary.dictionary_process(input_arguments)
-        return a
+        return dictionary.dictionary_process(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
     finally:
@@ -67,8 +66,7 @@ def get_events_results():
     input_arguments = {}
     try:
         input_arguments = events.generate_input_from_events_form(request)
-        a = events.events_process(input_arguments)
-        return a
+        return events.events_process(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
     finally:
@@ -169,8 +167,7 @@ def get_schema_results():
     input_arguments = {}
     try:
         input_arguments = schema.generate_input_from_schema_form(request)
-        a = schema.schema_process(input_arguments)
-        return a
+        return schema.schema_process(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
     finally:
@@ -189,7 +186,6 @@ def get_spreadsheet_results():
     input_arguments = {}
     try:
         input_arguments = spreadsheet.generate_input_from_spreadsheet_form(request)
-        a = spreadsheet.spreadsheet_process(input_arguments)
         return spreadsheet.spreadsheet_process(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)

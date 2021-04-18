@@ -1,17 +1,13 @@
 from flask import current_app
 
-from hed.schema.hed_schema_file import load_schema
-from hed.tools.tag_format import TagFormat
-from hed.util.column_def_group import ColumnDefGroup
 from hed.util.error_reporter import get_printable_issue_string
-from hed.util.error_types import ErrorSeverity
 from hed.util.exceptions import HedFileError
 from hed.util.hed_file_input import HedFileInput
 from hed.validator.hed_validator import HedValidator
 from hed.web.constants import common, file_constants
 from hed.web.web_utils import convert_number_str_to_list, form_has_option,\
     generate_filename, generate_download_file_response, \
-    generate_text_response, get_hed_path_from_pull_down, get_uploaded_file_path_from_form, \
+    get_hed_path_from_pull_down, get_uploaded_file_path_from_form, \
     get_optional_form_field, save_text_to_upload_folder, generate_text_response
 from hed.web.spreadsheet_utils import get_specific_tag_columns_from_form
 

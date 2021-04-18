@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
 {% from "column-info.html" import create_column_info %}
-{% from "hed-process-options.html" import create_hed_options_pulldown %}
+{% from "hed-process-options.html" import create_hed_process_options %}
 
 {% block content %}
     <h2>Validate a spreadsheet with HED tags</h2>
@@ -41,7 +41,7 @@
         </div>
             {{ create_column_info('true') }}
             {{ create_hed_pulldown() }}
-            {{ create_hed_options_pulldown() }}
+            {{ create_hed_process_options() }}
 
 
         <div class="form-group">

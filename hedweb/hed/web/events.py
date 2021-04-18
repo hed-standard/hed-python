@@ -152,8 +152,7 @@ def events_validate(arguments):
 
     input_file = EventFileInput(arguments.get(common.EVENTS_PATH),
                                 json_def_files=json_sidecar, hed_schema=hed_schema)
-    validator = HedValidator(hed_schema=hed_schema,
-                             check_for_warnings=arguments.get(common.CHECK_FOR_WARNINGS, False))
+    validator = HedValidator(hed_schema=hed_schema)
     issues = validator.validate_input(input_file)
     if issues:
         display_name = arguments.get(common.EVENTS_FILE, None)

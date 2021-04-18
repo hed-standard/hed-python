@@ -2,15 +2,15 @@ import os
 from flask import current_app
 
 from hed.schema.hed_schema_file import load_schema
-from hed.tools.tag_format import TagFormat
 from hed.web.constants import common, file_constants
 from hed.util.column_def_group import ColumnDefGroup
+from hed.util.hed_string import HedString
 from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.util.error_types import ErrorSeverity
 from hed.util.exceptions import HedFileError
 from hed.web.web_utils import form_has_option, generate_filename, generate_download_file_response, \
     generate_text_response, get_hed_path_from_pull_down, \
-    get_uploaded_file_path_from_form, save_text_to_upload_folder, get_optional_form_field
+    get_uploaded_file_path_from_form, save_text_to_upload_folder
 
 app_config = current_app.config
 
@@ -96,17 +96,18 @@ def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
 
     if not hed_schema:
         hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
-    error_handler = ErrorHandler()
-    tag_formatter = TagFormat(hed_schema=hed_schema, error_handler=error_handler)
     issues = []
     for column_def in json_dictionary:
         for hed_string, position in column_def.hed_string_iter(include_position=True):
+            hed_string_obj = HedString(hed_string)
             if short_to_long:
-                new_hed_string, errors = tag_formatter.convert_hed_string_to_long(hed_string)
+                errors = hed_string_obj.convert_to_long(hed_schema)
             else:
-                new_hed_string, errors = tag_formatter.convert_hed_string_to_short(hed_string)
+                errors = hed_string_obj.convert_to_short(hed_schema)
+                column_def.set_hed_string(hed_string_obj, position)
+                print(f"'{hed_string_obj.get_original_hed_string()}' \nconverts to\n '{str(hed_string_obj)}'")
             issues = issues + errors
-            column_def.set_hed_string(new_hed_string, position)
+            column_def.set_hed_string(hed_string_obj, position)
     if short_to_long:
         suffix = '_to_long'
     else:

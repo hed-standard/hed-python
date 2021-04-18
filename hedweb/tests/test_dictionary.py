@@ -60,6 +60,7 @@ class Test(unittest.TestCase):
         with self.app.app_context():
             response = dictionary_convert(arguments)
             headers = dict(response.headers)
+            print(headers['Category'])
             self.assertEqual('warning', headers['Category'], "dictionary_convert issue warning if unsuccessful")
             self.assertTrue(response.data, "good_events should not convert using HED 7.1.2.xml")
 

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% from "json-input.html" import create_json_input %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
-{% from "hed-process-options.html" import create_hed_options_pulldown %}
+{% from "hed-process-options.html" import create_hed_process_options %}
 
 {% block content %}
     <h2>HED string quick checks</h2>
@@ -26,7 +26,7 @@
         </div>
 
         {{ create_hed_pulldown() }}
-        {{ create_hed_options_pulldown() }}
+        {{ create_hed_process_options() }}
 
         <div class="form-group">
             <button id="hedstring-submit" type="button">Process</button>
