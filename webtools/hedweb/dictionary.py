@@ -2,13 +2,13 @@ import os
 from flask import current_app
 
 from hed.schema.hed_schema_file import load_schema
-from hed.web.constants import common, file_constants
+from hedweb.constants import common, file_constants
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.hed_string import HedString
 from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.util.error_types import ErrorSeverity
 from hed.util.exceptions import HedFileError
-from hed.web.web_utils import form_has_option, generate_filename, generate_download_file_response, \
+from hedweb.web_utils import form_has_option, generate_filename, generate_download_file_response, \
     generate_text_response, get_hed_path_from_pull_down, \
     get_uploaded_file_path_from_form, save_text_to_upload_folder
 

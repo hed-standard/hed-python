@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 from flask import Response
-from hed.web.app_factory import AppFactory
+from hedweb.app_factory import AppFactory, dictionary
 
 
 def test_dictionaries():
@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hed.web.routes import route_blueprint
+            from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
@@ -34,12 +34,11 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_dictionary_form(self):
-        from hed.web import dictionary
         self.assertRaises(TypeError, dictionary.generate_input_from_dictionary_form, {},
                           "An exception should be raised if an empty request is passed")
 
     def test_dictionary_process(self):
-        from hed.web.dictionary import dictionary_process
+        from hedweb.dictionary import dictionary_process
         from hed.util.exceptions import HedFileError
         arguments = {'json-path': ''}
         try:
@@ -52,7 +51,7 @@ class Test(unittest.TestCase):
             self.fail('dictionary_process should have thrown a HedFileError exception when json-path was empty')
 
     def test_dictionary_convert(self):
-        from hed.web.dictionary import dictionary_convert
+        from hedweb.dictionary import dictionary_convert
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
@@ -73,7 +72,7 @@ class Test(unittest.TestCase):
             self.assertEqual('success', headers['Category'], "dictionary_convert should return success if converted")
 
     def test_dictionary_validate(self):
-        from hed.web.dictionary import dictionary_validate
+        from hedweb.dictionary import dictionary_validate
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
@@ -93,7 +92,7 @@ class Test(unittest.TestCase):
             self.assertEqual('success', headers['Category'], "dictionary_validate should return success if converted")
 
     # def test_validate_dictionary_success(self):
-    #     from hed.web.dictionary import dictionary_validate
+    #     from hed.hedweb.dictionary import dictionary_validate
     #     from hed.schema import hed_schema_file
     #     inputs = test_dictionaries()
     #     response = dictionary_validate(inputs)
@@ -114,7 +113,7 @@ class Test(unittest.TestCase):
         # self.assertEqual("", dictionary_validate(arguments, hed_schema=schema7,return_response=False),
         #                  "This dictionary should have no errors for directly created 8.0.0")
 
-        # from hed.web import dictionary
+        # from hed.hedweb import dictionary
         # print("First test.....")
         # r = Response("download_text", mimetype='text/plain charset=utf-8',
         #              headers={'Category': "success", 'Message': "This is a test of the response"})
@@ -148,7 +147,7 @@ class Test(unittest.TestCase):
 
 
     # def test_generate_input_arguments_from_validation_form(self):
-    #     from hed.web import dictionary
+    #     from hed.hedweb import dictionary
     #     self.assertRaises(TypeError, dictionary.generate_input_from_dictionary_form, {},
     #                       "An exception should be raised if an empty request is passed")
     #
@@ -156,7 +155,7 @@ class Test(unittest.TestCase):
     #     self.assertTrue(1, "Testing report_dictionary_validation_status")
     #
     # def test_validate_dictionary(self):
-    #     from hed.web.dictionary import dictionary_validate
+    #     from hed.hedweb.dictionary import dictionary_validate
     #     from hed.schema import hed_schema_file
     #     inputs = test_dictionaries()
     #     self.assertEqual("", dictionary_validate(inputs), "This dictionary should have no errors for 8.0.0")

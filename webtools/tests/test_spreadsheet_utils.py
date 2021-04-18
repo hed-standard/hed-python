@@ -7,12 +7,12 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        from hed.web.app_factory import AppFactory
+        from hedweb.app_factory import AppFactory
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
 
-            from hed.web.routes import route_blueprint
+            from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
 
     def test_get_column_delimiter_based_on_file_extension(self):
         self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
-    #     from hed.web.utils import get_column_delimiter_based_on_file_extension
+    #     from hed.hedweb.utils import get_column_delimiter_based_on_file_extension
     #     delimiter = get_column_delimiter_based_on_file_extension('test.tsv')
     #     self.assertEqual('\t', delimiter, ".tsv files should have a tab delimiter")
     #     delimiter = get_column_delimiter_based_on_file_extension('test.TSV')
@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
         self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
 
     def test_get_excel_worksheet_names(self):
-        from hed.web.spreadsheet_utils import get_excel_worksheet_names
+        from hedweb.spreadsheet_utils import get_excel_worksheet_names
         self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         worksheet_names = get_excel_worksheet_names(self.excel_file)
         self.assertEqual(len(worksheet_names), 3, "This excel file has three worksheets")

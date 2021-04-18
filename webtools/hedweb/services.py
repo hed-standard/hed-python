@@ -86,7 +86,8 @@ def get_validate_dictionary(arguments):
         issue_str = ''
         category = 'success'
     # TODO: hed_schema needs to know its version
-    result = {'hed_version': 'xxx', 'validation_errors': issue_str, 'category': category}
+    version = hed_schema.schema_attributes.get('version', 'Unknown version')
+    result = {'hed_version': version, 'validation_errors': issue_str, 'category': category}
     return result
 
 
@@ -109,8 +110,9 @@ def get_validate_strings(arguments):
     if not hed_file_path:
         hed = arguments.get("hed_version", "")
         hed_file_path = hed_cache.get_path_from_hed_version(hed)
+    hed_schema = hed_schema_file.load_schema(hed_file_path)
     hed_strings = arguments.get("hed_strings", "")
-    hed_validator = HedValidator(hed_xml_file=hed_file_path)
+    hed_validator = HedValidator(hed_schema=hed_schema)
     issues = hed_validator.validate_input(hed_strings)
     validation_errors = []
     for i in range(len(hed_strings)):
@@ -121,4 +123,5 @@ def get_validate_strings(arguments):
         category = 'warning'
     else:
         category = 'success'
-    return {'hed_version': 'XXX', 'validation_errors': validation_errors, 'category': category}
+    version = hed_schema.schema_attributes.get('version', 'Unknown version')
+    return {'hed_version': version, 'validation_errors': validation_errors, 'category': category}

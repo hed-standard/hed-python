@@ -2,8 +2,9 @@ import xlrd
 from flask import current_app
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension
-from hed.web.constants import common, file_constants, spreadsheet_constants
-from hed.web.web_utils import file_extension_is_valid, find_all_str_indices_in_list, save_file_to_upload_folder
+from hedweb.constants import common, file_constants
+from hedweb.constants import spreadsheet_constants
+from hedweb.web_utils import file_extension_is_valid, find_all_str_indices_in_list, save_file_to_upload_folder
 
 app_config = current_app.config
 

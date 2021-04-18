@@ -7,7 +7,7 @@ from unittest import mock
 
 from flask import Response
 from werkzeug.datastructures import Headers
-from hed.web.app_factory import AppFactory
+from hedweb.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hed.web.routes import route_blueprint
+            from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_convert_number_str_to_list(self):
-        from hed.web.web_utils import convert_number_str_to_list
+        from hedweb.web_utils import convert_number_str_to_list
         other_tag_columns_str = '1,2,3'
         expected_other_columns = [1, 2, 3]
         other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         print("Test")
 
     def test_file_extension_is_valid(self):
-        from hed.web import web_utils
+        from hedweb import web_utils
         is_valid = web_utils.file_extension_is_valid('abc.xml', ['.xml', '.txt'])
         self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
         is_valid = web_utils.file_extension_is_valid('abc.XML', ['.xml', '.txt'])
@@ -67,7 +67,7 @@ class Test(unittest.TestCase):
         self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
 
     def test_find_all_str_indices_in_list(self):
-        from hed.web.web_utils import find_all_str_indices_in_list
+        from hedweb.web_utils import find_all_str_indices_in_list
         list_1 = ['a', 'a', 'c', 'd']
         search_str = 'a'
         expected_indices = [1, 2]
@@ -93,7 +93,7 @@ class Test(unittest.TestCase):
 
     def test_form_has_option(self):
         self.assertTrue(1, "Testing form_has_option")
-        from hed.web.web_utils import form_has_option
+        from hedweb.web_utils import form_has_option
         mock_form = mock.Mock()
         mock_dict = {'upload': 'me', 'download:': 'them'}
         mock_form.values = mock_dict
@@ -108,7 +108,7 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing form_has_url")
 
     def test_generate_download_file_response(self):
-        from hed.web.web_utils import generate_download_file_response
+        from hedweb.web_utils import generate_download_file_response
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
         temp_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/temp.txt')
         copyfile(hed_file, temp_file)
@@ -129,7 +129,7 @@ class Test(unittest.TestCase):
         self.assertFalse(os.path.isfile(temp_file), "Dummy has been deleted")
 
     def test_generate_filename(self):
-        from hed.web.web_utils import generate_filename
+        from hedweb.web_utils import generate_filename
         filename = generate_filename(None, prefix=None, suffix=None, extension=None)
         self.assertEqual('', filename, "Returns empty when all arguments are none")
         filename = generate_filename(None, prefix=None, suffix=None, extension='.txt')
@@ -154,8 +154,8 @@ class Test(unittest.TestCase):
         print("Stuff")
 
     def test_get_hed_path_from_pull_down(self):
-        from hed.web.constants import common
-        from hed.web.web_utils import get_hed_path_from_pull_down
+        from hedweb.constants import common
+        from hedweb.web_utils import get_hed_path_from_pull_down
         mock_form = mock.Mock()
         mock_form.values = {}
         # hed_file_path, hed_display_name = get_hed_path_from_pull_down(mock_form)
@@ -170,7 +170,7 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing get_optional_form_field")
 
     def test_get_uploaded_file_path_from_form(self):
-        from hed.web.web_utils import get_uploaded_file_path_from_form
+        from hedweb.web_utils import get_uploaded_file_path_from_form
         # with self.app.test as client:
         #     # send data as POST form to endpoint
         #     sent = {'return_url': 'my_test_url'}
@@ -203,7 +203,7 @@ class Test(unittest.TestCase):
 
     def test_save_file_to_upload_folder(self):
         self.assertTrue(1, "Testing save_file_to_upload_folder")
-        from hed.web.web_utils import save_file_to_upload_folder
+        from hedweb.web_utils import save_file_to_upload_folder
         from werkzeug.datastructures import FileStorage
         filename = 'HED.xml'
         actual_path = os.path.join(self.upload_directory, filename)
@@ -240,7 +240,7 @@ class Test(unittest.TestCase):
         print("Stuff")
 
     def test_save_text_to_upload_folder(self):
-        from hed.web.web_utils import save_text_to_upload_folder
+        from hedweb.web_utils import save_text_to_upload_folder
         # from flask import Flask
         # app = Flask(__name__)
         text = 'save me now'
@@ -248,7 +248,7 @@ class Test(unittest.TestCase):
         actual_path = os.path.join(self.upload_directory, filename)
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
         with self.app.app_context():
-            from hed.web.web_utils import save_text_to_upload_folder
+            from hedweb.web_utils import save_text_to_upload_folder
             the_path = save_text_to_upload_folder(text, filename)
             self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 

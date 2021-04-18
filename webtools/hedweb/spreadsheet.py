@@ -4,12 +4,12 @@ from hed.util.error_reporter import get_printable_issue_string
 from hed.util.exceptions import HedFileError
 from hed.util.hed_file_input import HedFileInput
 from hed.validator.hed_validator import HedValidator
-from hed.web.constants import common, file_constants
-from hed.web.web_utils import convert_number_str_to_list, form_has_option,\
+from hedweb.constants import common, file_constants
+from hedweb.web_utils import convert_number_str_to_list, form_has_option,\
     generate_filename, generate_download_file_response, \
     get_hed_path_from_pull_down, get_uploaded_file_path_from_form, \
     get_optional_form_field, save_text_to_upload_folder, generate_text_response
-from hed.web.spreadsheet_utils import get_specific_tag_columns_from_form
+from hedweb.spreadsheet_utils import get_specific_tag_columns_from_form
 
 app_config = current_app.config
 
@@ -150,7 +150,7 @@ def spreadsheet_validate(arguments, hed_validator=None):
                               tag_columns=arguments.get(common.TAG_COLUMNS, None),
                               has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
                               column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY,
-                                                                           None))
+                                                                     None))
     if not hed_validator:
         hed_validator = HedValidator(hed_xml_file=arguments.get(common.HED_XML_FILE, ''),
                                      check_for_warnings=arguments.get(common.CHECK_FOR_WARNINGS, False))

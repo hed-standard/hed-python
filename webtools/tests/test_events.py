@@ -2,8 +2,8 @@ import os
 import shutil
 import unittest
 from flask import Response
-from hed.web.app_factory import AppFactory
-from hed.web.constants import common
+from hedweb.app_factory import AppFactory
+from hedweb.constants import common
 
 
 def event_input():
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hed.web.routes import route_blueprint
+            from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing generate_input_from_events_form")
 
     def test_events_process(self):
-        from hed.web.events import events_process
+        from hedweb.events import events_process
         from hed.util.exceptions import HedFileError
         arguments = {'events-path': ''}
         try:
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
             self.fail('events_process should have thrown a HedFileError exception when events-path was empty')
 
             # def test_dictionary_convert(self):
-            #     from hed.web.dictionary import dictionary_convert
+            #     from hed.hedweb.dictionary import dictionary_convert
             #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
             #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
             #     arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
             #         self.assertEqual('success', headers['Category'], "dictionary_convert should return success if converted")
 
     def test_spreadsheet_validate(self):
-        from hed.web.events import events_validate
+        from hedweb.events import events_validate
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
@@ -100,7 +100,7 @@ class Test(unittest.TestCase):
             headers = dict(response.headers)
             self.assertEqual('warning', headers['Category'],
                              "events_validate has warning if validation errors")
-            self.assertTrue(response.data, "ExcelMultipleSheets should validate using HED 7.1.2.xml")
+            self.assertTrue(response.data, "bids_events should not validate with HED8.0.0-alpha.1.xml")
 
 
 if __name__ == '__main__':

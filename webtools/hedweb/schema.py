@@ -7,11 +7,11 @@ from hed.util.file_util import url_to_file, get_file_extension
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.exceptions import HedFileError
 
-from hed.web.web_utils import form_has_file, form_has_option, form_has_url, \
+from hedweb.web_utils import form_has_file, form_has_option, form_has_url, \
     generate_download_file_response, generate_filename, generate_text_response, \
     save_file_to_upload_folder, save_text_to_upload_folder
 
-from hed.web.constants import common, file_constants
+from hedweb.constants import common, file_constants
 
 app_config = current_app.config
 

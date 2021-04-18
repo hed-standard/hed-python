@@ -29,7 +29,7 @@ git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
 
 create_web_directory()
 {
-echo Creating web directory...
+echo Creating hedweb directory...
 mkdir "${CODE_DEPLOY_DIR}"
 cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
 cp ${WSGI_FILE} "${CODE_DEPLOY_DIR}"
@@ -39,7 +39,7 @@ cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 
 switch_to_web_directory()
 {
-echo Switching to web directory...
+echo Switching to hedweb directory...
 cd "${DEPLOY_DIR}" || error_exit "Cannot access $DEPLOY_DIR"
 }
 

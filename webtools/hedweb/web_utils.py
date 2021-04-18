@@ -9,13 +9,13 @@ from flask import current_app, Response
 from hed.util import hed_cache
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
-from hed.web.constants import common
+from hedweb.constants import common
 
 app_config = current_app.config
 
 
 def convert_number_str_to_list(number_str):
-    """Converts a string of integers to a list of integers, which is useful for web forms.
+    """Converts a string of integers to a list of integers, which is useful for hedweb forms.
 
     Parameters
     ----------
@@ -114,7 +114,7 @@ def form_has_option(request, option_name, target_value):
     request: Request
         A Request object produced by the post of a form
     option_name: str
-        String containing the name of the radio button group in the web form
+        String containing the name of the radio button group in the hedweb form
     target_value: str
         String containing the name of the selected radio button option
 

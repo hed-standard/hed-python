@@ -3,12 +3,13 @@ import json
 
 from hed.util import hed_cache
 from hed.schema import hed_schema_file
-from hed.web.constants import common, page_constants, route_constants
-from hed.web.web_utils import delete_file_no_exceptions, \
+from hedweb.constants import common, page_constants
+from hedweb.constants import route_constants
+from hedweb.web_utils import delete_file_no_exceptions, \
    handle_http_error, handle_error, save_file_to_upload_folder
-from hed.web import dictionary, events, schema, spreadsheet, services
-from hed.web.hedstring import generate_input_from_hedstring_form, hedstring_process
-from hed.web.spreadsheet_utils import generate_input_columns_info, get_columns_info
+from hedweb import dictionary, events, schema, spreadsheet, services
+from hedweb.hedstring import generate_input_from_hedstring_form, hedstring_process
+from hedweb.spreadsheet_utils import generate_input_columns_info, get_columns_info
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
@@ -76,7 +77,7 @@ def get_events_results():
 
 @route_blueprint.route(route_constants.HED_SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_hed_services_results():
-    """Perform the requested hed web service and return the results in JSON.
+    """Perform the requested hed hedweb service and return the results in JSON.
 
     Returns
     -------
@@ -247,7 +248,7 @@ def render_events_form():
 
 @route_blueprint.route(route_constants.HED_SERVICES_ROUTE, strict_slashes=False, methods=['GET'])
 def render_hed_services_form():
-    """Landing page for HED web services designed to be called from programs such as MATLAB.
+    """Landing page for HED hedweb services designed to be called from programs such as MATLAB.
 
     Returns
     -------

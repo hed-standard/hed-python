@@ -6,9 +6,9 @@ from hed.util.error_reporter import get_printable_issue_string
 from hed.util.event_file_input import EventFileInput
 from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
-from hed.web.constants import common, file_constants
+from hedweb.constants import common, file_constants
 
-from hed.web.web_utils import form_has_option, generate_download_file_response,\
+from hedweb.web_utils import form_has_option, generate_download_file_response,\
     generate_filename, generate_text_response, \
     get_hed_path_from_pull_down, get_uploaded_file_path_from_form, save_text_to_upload_folder
 app_config = current_app.config

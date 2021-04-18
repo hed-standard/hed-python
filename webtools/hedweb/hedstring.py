@@ -5,8 +5,8 @@ from hed.util.error_reporter import get_printable_issue_string
 from hed.util.hed_string import HedString
 from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
-from hed.web.constants import common
-from hed.web.web_utils import form_has_option, get_hed_path_from_pull_down
+from hedweb.constants import common
+from hedweb.web_utils import form_has_option, get_hed_path_from_pull_down
 app_config = current_app.config
 
 

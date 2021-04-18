@@ -2,7 +2,8 @@ import os
 import shutil
 import unittest
 
-from hed.web.app_factory import AppFactory
+from hedweb.app_factory import AppFactory, hedstring
+
 
 class Test(unittest.TestCase):
     @classmethod
@@ -10,7 +11,7 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hed.web.routes import route_blueprint
+            from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
@@ -23,12 +24,11 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_hedstring_form(self):
-        from hed.web import hedstring
         self.assertRaises(TypeError, hedstring.generate_input_from_hedstring_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_hedstring")
 
     def test_hedstring_process(self):
-        from hed.web.hedstring import hedstring_process
+        from hedweb.hedstring import hedstring_process
         from hed.util.exceptions import HedFileError
         arguments = {'hedstring': ''}
         try:
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
             self.fail('dictionary_process should have thrown a HedFileError exception when json-path was empty')
 
     def test_hedstring_convert(self):
-        from hed.web.hedstring import hedstring_convert
+        from hedweb.hedstring import hedstring_convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
                      'hedstring': 'Red, Blue'}
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
             self.assertEqual('success', response['category'], "hedstring_convert should return success if converted")
 
     def test_hedstring_validate(self):
-        from hed.web.hedstring import hedstring_validate
+        from hedweb.hedstring import hedstring_validate
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
                      'hedstring': 'Red, Blue'}

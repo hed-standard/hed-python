@@ -3,7 +3,7 @@ import shutil
 import unittest
 from unittest import mock
 from flask import Flask, current_app
-from hed.web.app_factory import AppFactory
+from hedweb.app_factory import AppFactory, spreadsheet
 
 
 class Test(unittest.TestCase):
@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hed.web.routes import route_blueprint
+            from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
@@ -25,12 +25,11 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_spreadsheet_form(self):
-        from hed.web import spreadsheet
         self.assertRaises(TypeError, spreadsheet.generate_input_from_spreadsheet_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_spreadsheet")
 
     def test_spreadsheet_process(self):
-        from hed.web.spreadsheet import spreadsheet_process
+        from hedweb.spreadsheet import spreadsheet_process
         from hed.util.exceptions import HedFileError
         arguments = {'spreadsheet-path': ''}
         try:
@@ -43,7 +42,7 @@ class Test(unittest.TestCase):
             self.fail('spreadsheet_process should have thrown a HedFileError exception when spreadsheet-path was empty')
 
     # def test_dictionary_convert(self):
-    #     from hed.web.dictionary import dictionary_convert
+    #     from hed.hedweb.dictionary import dictionary_convert
     #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
     #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
     #     arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
@@ -63,7 +62,7 @@ class Test(unittest.TestCase):
     #         self.assertEqual('success', headers['Category'], "dictionary_convert should return success if converted")
 
     def test_spreadsheet_validate(self):
-        from hed.web.spreadsheet import spreadsheet_validate
+        from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4:"Event/Description/"}

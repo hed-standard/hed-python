@@ -5,7 +5,7 @@ from shutil import copyfile
 import unittest
 from unittest import mock
 from flask import Flask, current_app
-from hed.web.app_factory import AppFactory
+from hedweb.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hed.web.routes import route_blueprint
+            from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
@@ -53,8 +53,8 @@ class Test(unittest.TestCase):
     def test_get_major_hed_versions(self):
         response = self.app.test.post('/get-hed-major-versions')
         self.assertEqual(405, response.status_code, 'Returning HED version list requires data')
-        # import hed.web.constants.common_constants as constants
-        # from hed.web.web_utils import find_major_hed_versions
+        # import hed.hedweb.constants.common_constants as constants
+        # from hed.hedweb.web_utils import find_major_hed_versions
         # hed_info = find_major_hed_versions()
         # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key hed-major-versions")
         # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")

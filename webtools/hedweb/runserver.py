@@ -1,5 +1,5 @@
 import os
-from hed.web.app_factory import AppFactory
+from hedweb.app_factory import AppFactory
 from hed.util import hed_cache
 from logging.handlers import RotatingFileHandler
 from logging import ERROR
@@ -30,7 +30,7 @@ def configure_app():
 
 app = configure_app()
 with app.app_context():
-    from hed.web.routes import route_blueprint
+    from hedweb.routes import route_blueprint
 
     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX'])
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
