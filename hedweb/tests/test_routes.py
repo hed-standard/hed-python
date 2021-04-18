@@ -34,21 +34,21 @@ class Test(unittest.TestCase):
         response = self.app.test.post('/dictionary-submit')
         self.assertEqual(400, response.status_code, 'Dictionaryrequires data')
 
-    def test_get_events_validation_results(self):
-        response = self.app.test.post('/events-validation-submit')
-        self.assertEqual(400, response.status_code, 'Event validation requires data')
+    def test_get_events_results(self):
+        response = self.app.test.post('/events-submit')
+        self.assertEqual(400, response.status_code, 'Event processing requires data')
 
     def test_get_hed_services_results(self):
         response = self.app.test.get('/hed-services-submit')
         self.assertEqual(405, response.status_code, 'HED services require data')
 
-    def test_get_hedstring_results(self):
-        response = self.app.test.get('/hedstring-submit')
-        self.assertEqual(405, response.status_code, 'HED string processing require data')
-
     def test_get_hed_version(self):
         response = self.app.test.post('/get-hed-version')
         self.assertEqual(400, response.status_code, 'Returning HED version requires data')
+
+    def test_get_hedstring_results(self):
+        response = self.app.test.get('/hedstring-submit')
+        self.assertEqual(405, response.status_code, 'HED string processing require data')
 
     def test_get_major_hed_versions(self):
         response = self.app.test.post('/get-hed-major-versions')
@@ -59,23 +59,19 @@ class Test(unittest.TestCase):
         # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key hed-major-versions")
         # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
 
-    def test_get_schema_compliance_check_results(self):
+    def test_get_schema_results(self):
         response = self.app.test.post('/schema-submit')
-        self.assertEqual(400, response.status_code, 'Checking schema compliance requires data')
+        self.assertEqual(400, response.status_code, 'Schema processing requires data')
 
-    def test_get_schema_conversion_results(self):
-        response = self.app.test.post('/schema-submit')
-        self.assertEqual(400, response.status_code, 'Converting schema requires data')
-
-    def test_get_spreadsheet_validation_results(self):
+    def test_get_spreadsheet_results(self):
         response = self.app.test.post('/spreadsheet-submit')
-        self.assertEqual(400, response.status_code, 'Validating spreadsheet requires data')
+        self.assertEqual(400, response.status_code, 'Spreadsheet processing requires data')
 
     def test_render_additional_examples_page(self):
         response = self.app.test.get('/additional-examples')
         self.assertEqual(response.status_code, 200, "The additional-examples content page should exist")
 
-    def test_render_common_error_page(self):
+    def test_render_common_errors_page(self):
         response = self.app.test.get('/common-errors')
         self.assertEqual(response.status_code, 200, "The common-errors content page should exist")
 

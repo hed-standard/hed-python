@@ -12,14 +12,14 @@ from hed.util.column_def_group import ColumnDefGroup
 app_config = current_app.config
 
 
-def report_services_status(form_data):
+def services_process(arguments):
     """
     Reports validation status of hed strings associated with EEG events received from EEGLAB plugin HEDTools
 
     Parameters
     ----------
-    form_data: JSON
-        A Request object containing user data submitted by HEDTools.
+    arguments dict
+        a dictionary of arguments
         Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
 
     Returns
@@ -29,9 +29,7 @@ def report_services_status(form_data):
         If the validation fails then a 500 error message is returned.
     """
     response = {"result": "", "error_type": "", "message": ""}
-    form_string = form_data.decode()
-    param_dict = json.loads(form_string)
-    service = param_dict.get("service", "")
+    service = arguments.get("service", "")
     supported_services = get_services()
     if not service:
         response["error_type"] = 'HEDServiceMissing'
@@ -42,9 +40,9 @@ def report_services_status(form_data):
     elif service == "get_services":
         response["result"] = {"supported_services": supported_services}
     elif service == "validate_json":
-        response["result"] = get_validate_dictionary(param_dict)
+        response["result"] = get_validate_dictionary(arguments)
     elif service == "validate_strings":
-        response["result"] = get_validate_strings(param_dict)
+        response["result"] = get_validate_strings(arguments)
     else:
         response["errors"] = f"{service} not implemented"
     return response
@@ -58,14 +56,14 @@ def get_services():
     return service_info
 
 
-def get_validate_dictionary(params):
+def get_validate_dictionary(arguments):
     """
     Reports validation status of hed strings
 
     Parameters
     ----------
-    params: dict
-         A Request object containing user data submitted by HEDTools.
+    arguments: dict
+         A dictionary of user data submitted by HEDTools.
          Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
 
     Returns
@@ -73,28 +71,33 @@ def get_validate_dictionary(params):
     dict
          A serialized JSON string containing information related to the hed strings validation result.
     """
-    hed = params.get("hed_version", "")
-    hed_file_path = hed_cache.get_path_from_hed_version(hed)
+    hed_file_path = arguments.get('hed_file_path', None)
+    if not hed_file_path:
+        hed = arguments.get("hed_version", "")
+        hed_file_path = hed_cache.get_path_from_hed_version(hed)
     hed_schema = hed_schema_file.load_schema(hed_file_path)
-    json_text = params.get("json_dictionary", "")
+    json_text = arguments.get("json_dictionary", "")
     json_dictionary = ColumnDefGroup(json_string=json_text)
     issues = json_dictionary.validate_entries(hed_schema)
     if issues:
         issue_str = get_printable_issue_string(issues, f"HED validation errors")
+        category = 'warning'
     else:
         issue_str = ''
-    result = {'hed_version': hed, 'validation_errors': issue_str}
+        category = 'success'
+    # TODO: hed_schema needs to know its version
+    result = {'hed_version': 'xxx', 'validation_errors': issue_str, 'category': category}
     return result
 
 
-def get_validate_strings(params):
+def get_validate_strings(arguments):
     """
     Reports validation status of hed strings
 
     Parameters
     ----------
-    params: dict
-         A Request object containing user data submitted by HEDTools.
+    arguments: dict
+         A dictionary of user data submitted data
          Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
 
     Returns
@@ -102,9 +105,11 @@ def get_validate_strings(params):
     list of dict
          A serialized JSON string containing information related to the hed strings validation result.
     """
-    hed = params.get("hed_version", "")
-    hed_file_path = hed_cache.get_path_from_hed_version(hed)
-    hed_strings = params.get("hed_strings", "")
+    hed_file_path = arguments.get('hed_file_path', None)
+    if not hed_file_path:
+        hed = arguments.get("hed_version", "")
+        hed_file_path = hed_cache.get_path_from_hed_version(hed)
+    hed_strings = arguments.get("hed_strings", "")
     hed_validator = HedValidator(hed_xml_file=hed_file_path)
     issues = hed_validator.validate_input(hed_strings)
     validation_errors = []
@@ -112,7 +117,8 @@ def get_validate_strings(params):
         issue = issues[i]
         if issue:
             validation_errors.append(get_printable_issue_string(issue, f"Errors for HED string {i+1}:"))
-        else:
-            validation_errors.append('')
-
-    return {'hed_version': hed, 'validation_errors': validation_errors}
+    if validation_errors:
+        category = 'warning'
+    else:
+        category = 'success'
+    return {'hed_version': 'XXX', 'validation_errors': validation_errors, 'category': category}

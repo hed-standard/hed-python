@@ -87,25 +87,10 @@ def get_hed_services_results():
     """
     try:
         form_data = request.data
-        status = services.report_services_status(form_data)
+        form_string = form_data.decode()
+        arguments = json.loads(form_string)
+        status = services.services_process(arguments)
         return json.dumps(status)
-    except Exception as ex:
-        return handle_error(ex)
-
-
-@route_blueprint.route(route_constants.HEDSTRING_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_hedstring_results():
-    """Process hed strings entered in a text box.
-
-    Returns
-    -------
-        A serialized JSON string
-
-    """
-
-    try:
-        input_arguments = generate_input_from_hedstring_form(request)
-        return json.dumps(hedstring_process(input_arguments))
     except Exception as ex:
         return handle_error(ex)
 
@@ -134,6 +119,23 @@ def get_hed_version():
         return handle_error(ex)
     finally:
         delete_file_no_exceptions(request.files[common.HED_XML_FILE])
+
+
+@route_blueprint.route(route_constants.HEDSTRING_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_hedstring_results():
+    """Process hed strings entered in a text box.
+
+    Returns
+    -------
+        A serialized JSON string
+
+    """
+
+    try:
+        input_arguments = generate_input_from_hedstring_form(request)
+        return json.dumps(hedstring_process(input_arguments))
+    except Exception as ex:
+        return handle_error(ex)
 
 
 @route_blueprint.route(route_constants.HED_MAJOR_VERSION_ROUTE, methods=['GET'])
@@ -209,7 +211,7 @@ def render_additional_examples_page():
 
 
 @route_blueprint.route(route_constants.COMMON_ERRORS_ROUTE, strict_slashes=False, methods=['GET'])
-def render_common_error_page():
+def render_common_errors_page():
     """The common errors page.
 
     Returns

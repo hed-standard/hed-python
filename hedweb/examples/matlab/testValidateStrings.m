@@ -22,8 +22,8 @@ options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
 data = struct();
 data.service = 'validate_strings';
-%data.hed_version = '7.1.2';
-data.hed_version = '8.0.0-alpha.1';
+data.hed_version = '7.1.2';
+%data.hed_version = '8.0.0-alpha.1';
 data.check_for_warnings = true;
 data.hed_strings = hedStrings;
 

@@ -4,7 +4,6 @@ import unittest
 
 from hed.web.app_factory import AppFactory
 
-
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

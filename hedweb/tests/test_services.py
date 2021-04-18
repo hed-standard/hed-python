@@ -1,53 +1,71 @@
-import unittest
-# from flask import current_app, jsonify, Response
-# from hed.web.utils import app_config
-# from hed.web.validation import generate_dictionary_validation_filename
-# from hed.web.app_factory import AppFactory
-# from hed.web.constants import file_constants, spreadsheet_constants
 import os
+import json
+import shutil
+import unittest
 
-# app = AppFactory.create_app('config.TestConfig')
-# with app.app_context():
-#     from hed.web import web_utils
-#     from hed.web.routes import route_blueprint
-#
-#     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX'])
-#     web_utils.create_upload_directory(app.config['UPLOAD_FOLDER'])
+from hed.web.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
-    def setUp(self):
-        print("Stuff")
-        # self.create_test_app()
-        # self.app = app.app.test_client()
-        # self.major_version_key = 'major_versions'
-        # self.hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        # self.tsv_file1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tsv_file1.txt')
+    @classmethod
+    def setUp(cls):
+        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
+        app = AppFactory.create_app('config.TestConfig')
+        with app.app_context():
+            from hed.web.routes import route_blueprint
+            app.register_blueprint(route_blueprint)
+            if not os.path.exists(cls.upload_directory):
+                os.mkdir(cls.upload_directory)
+            app.config['UPLOAD_FOLDER'] = cls.upload_directory
+            cls.app = app
+            cls.app.test = app.test_client()
 
-    # def create_test_app(self):
-    #     app = AppFactory.create_app('config.TestConfig')
-    #     with app.app_context():
-    #         from hed.web.routes import route_blueprint
-    #         app.register_blueprint(route_blueprint)
-    #         self.app = app.test_client()
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.upload_directory)
 
-    def test_report_services_status(self):
-        self.assertTrue(1, "Testing generate_input_from_dictionary_form")
+    def test_services_process(self):
+        from hed.web.services import services_process
+        arguments = {'service': ''}
+        response = services_process(arguments)
+        self.assertEqual(response["error_type"], "HEDServiceMissing", "services_process must have a service key")
 
     def test_get_services(self):
-        self.assertTrue(1, "Testing generate_dictionary_validation_filename")
-        # dictionary_filename = 'abc.xls'
-        # expected_spreadsheet_filename = 'validated_' + dictionary_filename.rsplit('.')[0] + '.txt'
-        # validation_file_name = generate_dictionary_validation_filename(dictionary_filename, worksheet_name='')
-        # self.assertTrue(validation_file_name)
-        # self.assertEqual(expected_spreadsheet_filename, validation_file_name)
+        from hed.web.services import get_services
+        arguments = {'service': 'get_services'}
+        with self.app.app_context():
+            response = get_services()
+            self.assertIsInstance(response, dict, "get_services returns a dictionary")
+            self.assertTrue(response["get_services"], "get_services dictionary has a get_services key")
 
     def test_get_validate_dictionary(self):
-        self.assertTrue(1, "Testing get_uploaded_file_paths_from_forms")
+        from hed.web.services import get_validate_dictionary
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        hed_file_path = os.path.join(base_path, 'data/HED8.0.0-alpha.1.xml')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+        with open(json_path) as f:
+            data = json.load(f)
+
+        json_text = json.dumps(data)
+        arguments = {'hed_file_path': hed_file_path, 'json_dictionary': json_text}
+        with self.app.app_context():
+            response = get_validate_dictionary(arguments)
+            self.assertEqual('success', response['category'], "get_dictionary_validation has success on good.json")
 
     def test_get_validate_strings(self):
-        self.assertTrue(1, "Testing report_eeg_events_validation_status")
+        from hed.web.services import get_validate_strings
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        hed_file_path = os.path.join(base_path, 'data/HED8.0.0-alpha.1.xml')
+        arguments = {'hed_file_path': hed_file_path, 'hed_strings': ['Red', 'Blue']}
+        with self.app.app_context():
+            response = get_validate_strings(arguments)
+            self.assertEqual('success', response['category'], "get_validate_strings has success with good strings")
 
+        hed_file_path = os.path.join(base_path, 'data/HED7.2.0.xml')
+        arguments['hed_file_path'] = hed_file_path
+        with self.app.app_context():
+            response = get_validate_strings(arguments)
+            self.assertEqual('warning', response['category'], "get_validate_strings has warning if validation errors")
 
 if __name__ == '__main__':
     unittest.main()
