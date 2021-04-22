@@ -324,11 +324,11 @@ class ColumnDef:
                 col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
                                                                             given_type=type(raw_hed_dict),
                                                                             expected_type="dict")
-            else:
-                if len(raw_hed_dict) < 2:
-                    col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.TOO_FEW_CATEGORIES,
-                                                                                category_count=len(raw_hed_dict),
-                                                                                severity=ErrorSeverity.WARNING)
+            # else:
+            #     if len(raw_hed_dict) < 2:
+            #         col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.TOO_FEW_CATEGORIES,
+            #                                                                     category_count=len(raw_hed_dict),
+            #                                                                     severity=ErrorSeverity.WARNING)
 
         return col_validation_issues
 
