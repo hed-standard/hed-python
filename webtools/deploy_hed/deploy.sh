@@ -110,4 +110,4 @@ switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-# cleanup_directory
+cleanup_directory
