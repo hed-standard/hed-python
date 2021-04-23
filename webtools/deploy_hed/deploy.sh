@@ -17,7 +17,7 @@ DEPLOY_DIR="hed-python/webtools/deploy_hed"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
-WEB_CODE_DIR="hed-python/hedweb"
+WEB_CODE_DIR="hed-python/webtools/hedweb"
 VALIDATOR_CODE_DIR="hed-python/hedtools/hed"
 
 ##### Functions
@@ -110,4 +110,4 @@ switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-cleanup_directory
+# cleanup_directory
