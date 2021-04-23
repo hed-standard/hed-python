@@ -3,10 +3,13 @@ import unittest
 import os
 
 from hed.util.hed_string import HedString
-from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 from hed.util.error_types import ErrorContext
-
+from hed.util.event_file_input import EventFileInput
+from hed.schema.hed_schema_file import load_schema
+from hed.validator.hed_validator import HedValidator
+from hed.util.column_def_group import ColumnDefGroup
+from hed.util import util_constants
 
 class Test(unittest.TestCase):
     @classmethod
@@ -40,6 +43,8 @@ class Test(unittest.TestCase):
         cls.hed_filepath_with_errors = os.path.join(cls.hed_base_dir, "ExcelMultipleSheets.xlsx")
         cls.hed_file_with_errors = HedFileInput(cls.hed_filepath_with_errors)
 
+
+
     def test__validate_input(self):
         validation_issues = self.generic_hed_input_reader.validate_input(self.base_hed_input)
         self.assertIsInstance(validation_issues, list)
@@ -68,11 +73,14 @@ class Test(unittest.TestCase):
     def test__append_validation_issues_if_found(self):
         row_number = random.randint(0, 100)
         self.assertFalse(self.validation_issues)
+        row_dict = {
+            util_constants.ROW_HED_STRING: self.hed_string_with_invalid_tags,
+            util_constants.COLUMN_TO_HED_TAGS: self.column_to_hed_tags_dictionary
+        }
         validation_issues = \
             self.generic_hed_input_reader._append_validation_issues_if_found(self.validation_issues,
                                                                              row_number,
-                                                                             self.hed_string_with_invalid_tags,
-                                                                             self.column_to_hed_tags_dictionary)
+                                                                             row_dict)
         self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
@@ -92,7 +100,8 @@ class Test(unittest.TestCase):
         validation_issues = \
             self.generic_hed_input_reader._append_column_validation_issues_if_found(self.validation_issues,
                                                                                     row_number,
-                                                                                    self.column_to_hed_tags_dictionary)
+                                                                                    self.column_to_hed_tags_dictionary,
+                                                                                    {})
         self.assertIsInstance(validation_issues, list)
         self.assertFalse(validation_issues)
 
@@ -102,6 +111,58 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
 
+    def test_complex_file_validation(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
+        hed_schema = load_schema(schema_path)
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
+        column_group = ColumnDefGroup(json_path)
+        def_dict, def_issues = column_group.extract_defs(hed_schema)
+        self.assertEqual(len(def_issues), 0)
+        input_file = EventFileInput(events_path, json_def_files=column_group,
+                                    hed_schema=hed_schema, def_dicts=def_dict)
+
+        validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
+        self.assertEqual(len(validation_issues), 0)
+
+        validator = HedValidator(hed_schema=hed_schema)
+        validation_issues = validator.validate_input(input_file)
+        self.assertEqual(len(validation_issues), 0)
+
+    def test_complex_file_validation_invalid(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
+
+        hed_schema = load_schema(schema_path)
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events_bad_defs.json")
+        column_group = ColumnDefGroup(json_path)
+        def_dict, def_issues = column_group.extract_defs(hed_schema)
+        self.assertEqual(len(def_issues), 0)
+        input_file = EventFileInput(events_path, json_def_files=column_group,
+                                    hed_schema=hed_schema, def_dicts=def_dict)
+
+        validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
+        self.assertEqual(len(validation_issues), 0)
+
+        validator = HedValidator(hed_schema=hed_schema)
+        validation_issues = validator.validate_input(input_file)
+        self.assertEqual(len(validation_issues), 42)
+
+    def test_file_bad_defs_in_spreadsheet(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.1.xml')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed3_tags_single_sheet_bad_defs.xlsx')
+        hed_schema = load_schema(schema_path)
+
+        prefixed_needed_tag_columns = {2: 'Attribute/Informational/Label/', 3: 'Attribute/Informational/Description/'}
+        loaded_file = HedFileInput(events_path, tag_columns=[4],
+                                   column_prefix_dictionary=prefixed_needed_tag_columns,
+                                   worksheet_name='LKT Events',
+                                   hed_schema=hed_schema)
+
+        validator = HedValidator(hed_schema=hed_schema)
+        validation_issues = validator.validate_input(loaded_file)
+        self.assertEqual(len(validation_issues), 2)
+            
 if __name__ == '__main__':
     unittest.main()

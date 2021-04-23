@@ -46,23 +46,23 @@ if __name__ == '__main__':
     loaded_schema = load_schema(local_hed_file_no_dupe)
     prefixed_needed_tag_columns = {2: 'Attribute/Informational/Label/', 3: 'Attribute/Informational/Description/'}
     loaded_file = HedFileInput(hed3_tags_single_sheet, tag_columns=[4],
-                              column_prefix_dictionary=prefixed_needed_tag_columns,
-                              worksheet_name='LKT Events')
+                               column_prefix_dictionary=prefixed_needed_tag_columns,
+                               worksheet_name='LKT Events')
     long_to_short_file(loaded_file, loaded_schema)
 
     loaded_file = HedFileInput(hed3_tags_single_sheet, tag_columns=[4],
-                              column_prefix_dictionary=prefixed_needed_tag_columns,
-                              worksheet_name='LKT Events')
+                               column_prefix_dictionary=prefixed_needed_tag_columns,
+                               worksheet_name='LKT Events')
     short_to_long_file(loaded_file, loaded_schema)
 
     inputs = 'Attribute/Sensory/Visual/Color/CSS-color/White-color/White'
     tag, error = long_to_short_string(inputs, loaded_schema)
     print(f"Tag= {tag}, errors=[{error}]")
 
-    inputs =  'Attribute/Visual/Color/CSS-color/White-color/White'
+    inputs = 'Attribute/Visual/Color/CSS-color/White-color/White'
     tag, error = long_to_short_string(inputs, loaded_schema)
     print(f"Tag= {tag}, errors=[{error}]")
 
-    inputs =  'White'
+    inputs = 'White'
     tag, error = short_to_long_string(inputs, loaded_schema)
     print(f"Tag= {tag}, errors=[{error}]")

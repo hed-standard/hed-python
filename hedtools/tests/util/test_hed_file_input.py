@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         file_input = HedFileInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
                                   tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
 
-        for row_number, row, dict in file_input:
+        for row_number, column_to_hed_tags in file_input:
             breakHere = 3
         breakHere = 3
         # Just make sure this didn't crash for now

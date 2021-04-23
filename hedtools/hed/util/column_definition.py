@@ -1,6 +1,6 @@
 from enum import Enum
 from hed.util.hed_string import HedString
-from hed.util.error_types import SidecarErrors, ErrorContext, ErrorSeverity
+from hed.util.error_types import SidecarErrors, ErrorContext, ValidationErrors
 from hed.util import error_reporter
 
 import re
@@ -166,9 +166,9 @@ class ColumnDef:
         -------
         hed_string: str
             The expanded column as a hed_string
-        attribute_name: str
-            If not None, contains the name of this column as an attribute.
-
+        attribute_name_or_error_message: str or {}
+            If this is a string, contains the name of this column as an attribute.
+            If the first return value is None, this is an error message dict.
         """
         column_type = self.column_type
 
@@ -177,8 +177,9 @@ class ColumnDef:
             if final_text:
                 return HedString(final_text), False
             else:
-                # todo: Issue a warning here that the category key is missing.
-                pass
+                return None, [{"error_type": ValidationErrors.HED_SIDECAR_KEY_MISSING,
+                              "tag": input_text,
+                              "category_keys": list(self._hed_dict["HED"].keys())}]
         elif column_type == ColumnType.Value:
             prelim_text = self._get_value_hed_string()
             final_text = prelim_text.replace("#", input_text)
@@ -192,7 +193,7 @@ class ColumnDef:
         elif column_type == ColumnType.Attribute:
             return input_text, self.column_name
 
-        return "BUG NO ENTRY FOUND", False
+        return None, {"error_type": "INTERNAL_ERROR"}
 
     @staticmethod
     def _prepend_prefix_to_required_tag_column_if_needed(required_tag_column_tags, required_tag_prefix):
