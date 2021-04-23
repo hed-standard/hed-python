@@ -281,11 +281,11 @@ class ErrorHandler:
         tag_join_delimiter = f"\n\t"
         error_types = {
             SchemaErrors.INVALID_PARENT_NODE: f"{error_prefix}'{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used "
-                                              f"as an extension.  {error_index}, {error_index_end}",
-            SchemaErrors.NO_VALID_TAG_FOUND: f"{error_prefix}'{problem_tag}' is not a valid base hed tag.  {error_index}, {error_index_end} ",
+                                              f"as an extension.  Problem spans hed string indexes: {error_index}, {error_index_end}",
+            SchemaErrors.NO_VALID_TAG_FOUND: f"{error_prefix}'{problem_tag}' is not a valid base hed tag.  Problem spans hed string indexes: {error_index}, {error_index_end} ",
             SchemaErrors.EMPTY_TAG_FOUND: f"{error_prefix}Empty tag cannot be converted.",
             SchemaErrors.INVALID_SCHEMA: f"{error_prefix}Source hed schema is invalid as it contains duplicate tags.  "
-                                         f"Please fix if you wish to be abe to convert tags. {error_index}, {error_index_end}",
+                                         f"Please fix if you wish to be abe to convert tags.",
             SchemaErrors.DUPLICATE_TERMS: f"{error_prefix}Term(Short Tag) '{str(hed_tag)}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"
                                           f"{tag_join_delimiter.join(duplicate_tag_list)}"
         }
