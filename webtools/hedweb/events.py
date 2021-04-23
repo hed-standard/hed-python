@@ -158,7 +158,7 @@ def events_validate(arguments):
                                                    msg='JSON dictionary had validation errors')
 
     input_file = EventFileInput(arguments.get(common.EVENTS_PATH),
-                                json_def_files=json_sidecar, hed_schema=hed_schema)
+                                json_def_files=json_sidecar, hed_schema=hed_schema, def_dicts=def_dict)
     validator = HedValidator(hed_schema=hed_schema)
     issues = validator.validate_input(input_file)
     if issues:
