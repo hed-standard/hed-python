@@ -6,7 +6,7 @@ from hed.util import error_reporter
 class DefTagNames:
     """The source names for definitions, def labels, and expanded labels"""
     DLABEL_ORG_KEY = 'def'
-    ELABEL_ORG_KEY = 'defexp'
+    ELABEL_ORG_KEY = 'def-expand'
     DEF_ORG_KEY = "Definition"
     DLABEL_KEY = DLABEL_ORG_KEY.lower()
     ELABEL_KEY = ELABEL_ORG_KEY.lower()
