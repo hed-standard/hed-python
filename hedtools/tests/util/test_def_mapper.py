@@ -4,6 +4,9 @@ import os
 from hed.util.def_mapper import DefinitionMapper
 from hed import schema
 from hed.util.def_dict import DefDict
+from hed.util.hed_string import HedString
+from hed.util import error_reporter
+
 
 class Test(unittest.TestCase):
     @classmethod
@@ -12,29 +15,119 @@ class Test(unittest.TestCase):
         hed_xml_file = os.path.join(cls.base_data_dir, "HED8.0.0-alpha.1.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.base_dict = DefDict(hed_schema=cls.hed_schema)
-        cls.def_contents_string = "(Item/TestDef1, Item/TestDef2)"
-        cls.basic_def_string = f"(Definition/TestDef, Organizational/TestOrg, {cls.def_contents_string})"
-        cls.label_def_string = f"Label-def/TestDef"
-        cls.expanded_def_string = f"(Label-exp/TestDef, Organizational/TestOrg, {cls.def_contents_string})"
-        cls.basic_hed_string = "Item/BasicTestTag1, Item/BasicTestTag2"
-        cls.basic_hed_string_with_def = f"Item/BasicTestTag1, Item/BasicTestTag2, {cls.label_def_string}"
+        cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
+        cls.basic_def_string = f"(Definition/TestDef,{cls.def_contents_string})"
+        cls.basic_def_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
+        cls.label_def_string = f"Def/TestDef"
+        cls.expanded_def_string = f"(Def-expand/TestDef,{cls.def_contents_string})"
+        cls.basic_hed_string = "Item/BasicTestTag1,Item/BasicTestTag2"
+        cls.basic_hed_string_with_def = f"{cls.basic_hed_string},{cls.label_def_string}"
+        cls.basic_hed_string_with_def_first = f"{cls.label_def_string},{cls.basic_hed_string}"
+        cls.basic_hed_string_with_def_first_paren = f"({cls.label_def_string},{cls.basic_hed_string})"
+
+        cls.placeholder_label_def_string = f"def/TestDefPlaceholder/2471"
+        cls.placeholder_def_contents = "(Item/TestDef1/#,Item/TestDef2)"
+        cls.placeholder_def_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_def_contents})"
+        cls.placeholder_expanded_def_string = f"(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2))"
+
+        cls.placeholder_hed_string_with_def = f"{cls.basic_hed_string},{cls.placeholder_label_def_string}"
+        cls.placeholder_hed_string_with_def_first = f"{cls.placeholder_label_def_string},{cls.basic_hed_string}"
+        cls.placeholder_hed_string_with_def_first_paren = f"({cls.placeholder_label_def_string},{cls.basic_hed_string})"
 
     def test_replace_and_remove_tags(self):
         def_dict = DefDict(hed_schema=self.hed_schema)
-        def_dict.check_for_definitions(self.basic_def_string)
+        def_dict.check_for_definitions(HedString(self.basic_def_string))
         def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_def_string)
-        self.assertEqual(result_string, "")
+        test_string = HedString(self.basic_def_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), "")
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_hed_string + ", " + self.basic_def_string)
-        self.assertEqual(result_string, self.basic_hed_string)
+        test_string = HedString(self.basic_def_string_no_paren)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), "")
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_def_string + ", " + self.basic_hed_string)
-        self.assertEqual(result_string, self.basic_hed_string)
+        test_string = HedString(self.basic_hed_string + "," + self.basic_def_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), self.basic_hed_string)
 
-        result_string = def_mapper.replace_and_remove_tags(self.basic_hed_string_with_def)
-        self.assertEqual(result_string, self.basic_hed_string + ", " + self.expanded_def_string)
+        test_string = HedString(self.basic_def_string + "," + self.basic_hed_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), self.basic_hed_string)
+
+        test_string = HedString(self.basic_hed_string_with_def)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), self.basic_hed_string + "," + self.expanded_def_string)
+
+        test_string = HedString(self.basic_hed_string_with_def_first)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), self.expanded_def_string + "," + self.basic_hed_string)
+
+        test_string = HedString(self.basic_hed_string_with_def_first_paren)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), "(" + self.expanded_def_string + "," + self.basic_hed_string + ")")
+
+    def test_replace_and_remove_tags_placeholder(self):
+        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict.check_for_definitions(HedString(self.placeholder_def_string))
+        def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
+
+        test_string = HedString(self.placeholder_def_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), "")
+
+        # result_string = def_mapper.replace_and_remove_tags(HedString(self.basic_def_string_no_paren)
+        # self.assertEqual(str(test_string), "")
+
+        test_string = HedString(self.basic_hed_string + "," + self.placeholder_def_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), self.basic_hed_string)
+
+        test_string = HedString(self.placeholder_def_string + "," + self.basic_hed_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), self.basic_hed_string)
+
+        test_string = HedString(self.placeholder_hed_string_with_def)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), self.basic_hed_string + "," + self.placeholder_expanded_def_string)
+
+        test_string = HedString(self.placeholder_hed_string_with_def_first)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), self.placeholder_expanded_def_string + "," + self.basic_hed_string)
+
+        test_string = HedString(self.placeholder_hed_string_with_def_first_paren)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
+
+    def test_replace_and_remove_tags_placeholder_invalid(self):
+        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict.check_for_definitions(HedString(self.placeholder_def_string))
+        def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
+
+        placeholder_label_def_string_no_placeholder = f"def/TestDefPlaceholder"
+
+        test_string = HedString(placeholder_label_def_string_no_placeholder)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), placeholder_label_def_string_no_placeholder)
+        self.assertTrue(def_issues)
+        actual_issues = []
+        for issue in def_issues:
+            actual_issues += error_reporter.ErrorHandler().format_val_error(**issue)
+
+        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict.check_for_definitions(HedString(self.basic_def_string))
+        def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
+
+        label_def_string_has_inavlid_placeholder = f"def/TestDef/54687"
+
+        test_string = HedString(label_def_string_has_inavlid_placeholder)
+        def_issues = def_mapper.replace_and_remove_tags(test_string)
+        self.assertEqual(str(test_string), label_def_string_has_inavlid_placeholder)
+        self.assertTrue(def_issues)
+        actual_issues = []
+        for issue in def_issues:
+            actual_issues += error_reporter.ErrorHandler().format_val_error(**issue)
+
 
     def test__check_tag_starts_with(self):
         possible_tag_list = ["definition", "informational/definition", "attribute/informational/definition"]
@@ -45,37 +138,6 @@ class Test(unittest.TestCase):
         for tag in test_tags:
             result = DefinitionMapper._check_tag_starts_with(tag, possible_tag_list)
             self.assertTrue(result)
-
-    def test__find_tag_group_extent(self):
-        input_strings = [
-            (1, self.basic_def_string),
-            (1, self.basic_def_string + ", " + self.basic_hed_string),
-            (1, self.basic_hed_string + ", " + self.basic_def_string),
-            (len(self.basic_hed_string) + 4, self.basic_hed_string + ", " + self.basic_def_string)
-        ]
-        expected_strings = [
-            self.basic_def_string,
-            self.basic_def_string + ", ",
-            self.basic_hed_string + ", " + self.basic_def_string,
-            ", " + self.basic_def_string
-        ]
-        expected_strings_no_comma = [
-            self.basic_def_string,
-            self.basic_def_string,
-            self.basic_hed_string + ", " + self.basic_def_string,
-            self.basic_def_string
-        ]
-
-        for (input_index, input_string), expected_string, expected_string_no_comma \
-                in zip(input_strings, expected_strings, expected_strings_no_comma):
-            min_i, max_i = DefinitionMapper._find_tag_group_extent(input_string, input_index, True)
-            result_string = input_string[min_i:max_i]
-            self.assertEqual(result_string, expected_string)
-
-            min_i, max_i = DefinitionMapper._find_tag_group_extent(input_string, input_index, False)
-            result_string = input_string[min_i:max_i]
-            self.assertEqual(result_string, expected_string_no_comma)
-
 
 if __name__ == '__main__':
     unittest.main()

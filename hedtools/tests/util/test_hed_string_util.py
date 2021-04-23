@@ -18,20 +18,23 @@ class TestHedStringUtil(unittest.TestCase):
             'double': 'Event, Event/Extension',
             'singleAndGroup': 'Event/Extension, (Event/Extension2, Event/Extension3)',
             'singleAndGroupWithBlank': 'Event/Extension, (Event, ,Event/Extension3)',
-            'manyParens': 'Event/Extension,(((((Event/Extension2, )(Event)',
-            'manyParensEndingSpace': 'Event/Extension,(((((Event/Extension2, )(Event) ',
-            'manyParensOpeningSpace': ' Event/Extension,(((((Event/Extension2, )(Event)',
-            'manyParensBothSpace': ' Event/Extension,(((((Event/Extension2, )(Event ',
+            'manyParens': 'Event/Extension,(((Event/Extension2, )(Event)',
+            'manyParensEndingSpace': 'Event/Extension,(((Event/Extension2, )(Event) ',
+            'manyParensOpeningSpace': ' Event/Extension,(((Event/Extension2, )(Event)',
+            'manyParensBothSpace': ' Event/Extension,(((Event/Extension2, )(Event ',
+            'manyClosingParens': 'Event/Extension, (Event/Extension2, ))(Event)',
         }
         expected_results = {
             'single': ['Event'],
             'double': ['Event', ', ', 'Event/Extension'],
-            'singleAndGroup': ['Event/Extension', ', (', 'Event/Extension2', ', ', 'Event/Extension3', ')'],
-            'singleAndGroupWithBlank': ['Event/Extension', ', (', 'Event', ', ,', 'Event/Extension3', ')'],
-            'manyParens': ['Event/Extension', ',(((((', 'Event/Extension2', ', )(', 'Event', ')'],
-            'manyParensEndingSpace': ['Event/Extension', ',(((((', 'Event/Extension2', ', )(', 'Event', ') '],
-            'manyParensOpeningSpace': [' ', 'Event/Extension', ',(((((', 'Event/Extension2', ', )(', 'Event', ')'],
-            'manyParensBothSpace': [' ', 'Event/Extension', ',(((((', 'Event/Extension2', ', )(', 'Event', ' '],
+            'singleAndGroup': ['Event/Extension', ', ', '(', 'Event/Extension2', ', ', 'Event/Extension3', ')'],
+            'singleAndGroupWithBlank': ['Event/Extension', ', ', '(', 'Event', ', ', ',', 'Event/Extension3', ')'],
+            'manyParens': ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
+            'manyParensEndingSpace': ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ') '],
+            'manyParensOpeningSpace': [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
+            'manyParensBothSpace': [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(',
+                                       'Event', ' '],
+            'manyClosingParens': ['Event/Extension', ', ', '(', 'Event/Extension2', ', ', ')', ')', '(', 'Event', ')']
         }
 
         self.compare_split_results(test_strings, expected_results)

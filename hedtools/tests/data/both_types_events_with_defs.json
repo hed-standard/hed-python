@@ -7,7 +7,7 @@
           "stop": "A blue square is displayed to indicate stopping"
        },
        "HED": {
-          "go": "Item/ItemTag1",
+          "go": "Item/ItemTag1, (Definition/JsonFileDef/#, (Item/JsonDef1/#,Item/JsonDef1))",
           "stop": "Item/ItemTag2"
        }
    },
@@ -15,7 +15,7 @@
        "LongName": "Response time after stimulus",
        "Description": "Time from stimulus presentation until subject presses button",
        "Units": "ms",
-       "HED": "Action/Button press/#"
+       "HED": "Def/JsonFileDef/#, Action/Button press"
    },
    "stim_file": {
        "LongName": "Stimulus file name",

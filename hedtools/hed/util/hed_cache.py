@@ -24,7 +24,7 @@ HED_VERSION_FINAL = '^[hH][eE][dD](' + HED_VERSION_P1 + HED_VERSION_P2 + HED_VER
 HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
 DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
-HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../validator/schema_cache/')
+HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../validator/hed_cache/')
 TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300
 

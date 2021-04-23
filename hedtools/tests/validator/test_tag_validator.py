@@ -1,583 +1,13 @@
 import unittest
 import os
 
-from hed.util.hed_string_delimiter import HedStringDelimiter
+from hed.util.hed_string import HedString
 from hed.validator.hed_validator import HedValidator
 from hed.util import error_reporter
 from hed.validator.tag_validator import TagValidator
 from hed import schema
+from hed.util.error_types import ValidationErrors, ValidationWarnings, SchemaErrors
 
-
-class TestHed(unittest.TestCase):
-    schema_file = '../data/HED7.1.1.xml'
-
-    @classmethod
-    def setUpClass(cls):
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_schema = schema.load_schema(hed_xml)
-        cls.error_handler = error_reporter.ErrorHandler()
-        cls.syntactic_tag_validator = TagValidator(check_for_warnings=False,
-                                                   run_semantic_validation=False)
-        cls.syntactic_warning_tag_validator = TagValidator(check_for_warnings=True,
-                                                           run_semantic_validation=False)
-        cls.semantic_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=False,
-                                                  run_semantic_validation=True)
-        cls.semantic_warning_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=True,
-                                                          run_semantic_validation=True)
-        cls.syntactic_hed_input_reader = HedValidator()
-        cls.syntactic_hed_input_reader._tag_validator = cls.syntactic_tag_validator
-        cls.syntactic_warning_hed_input_reader = HedValidator()
-        cls.syntactic_warning_hed_input_reader._tag_validator = cls.syntactic_warning_tag_validator
-        cls.semantic_hed_input_reader = HedValidator()
-        cls.semantic_hed_input_reader._tag_validator = cls.semantic_tag_validator
-        cls.semantic_warning_hed_input_reader = HedValidator()
-        cls.semantic_warning_hed_input_reader._tag_validator = cls.semantic_warning_tag_validator
-
-    def validator_base(self, test_strings, expected_results, expected_issues, test_function):
-        for test_key in test_strings:
-            hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
-            test_issues = test_function(hed_string_delimiter)
-            test_result = not test_issues
-            expected_issue = expected_issues[test_key]
-            expected_result = expected_results[test_key]
-            self.assertEqual(test_result, expected_result, test_strings[test_key])
-            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
-
-
-class FullHedString(TestHed):
-    def validator(self, test_strings, expected_results, expected_issues):
-        for test_key in test_strings:
-            test_issues = TagValidator.run_hed_string_validators(self.semantic_warning_tag_validator,
-                                                                 hed_string=test_strings[test_key])
-            test_result = not test_issues
-            expected_issue = expected_issues[test_key]
-            expected_result = expected_results[test_key]
-            self.assertEqual(test_result, expected_result, test_strings[test_key])
-            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
-
-    def test_mismatched_parentheses(self):
-        test_strings = {
-            'extraOpening':
-                '/Action/Reach/To touch,((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            'extraClosing':
-                '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            'valid':
-                '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px'
-        }
-        expected_results = {
-            'extraOpening': False,
-            'extraClosing': False,
-            'valid': True
-        }
-        expected_issues = {
-            'extraOpening': self.error_handler.format_val_error('parentheses',
-                                             opening_parentheses_count=2, closing_parentheses_count=1),
-            'extraClosing': self.error_handler.format_val_error('parentheses',
-                                             opening_parentheses_count=1, closing_parentheses_count=2),
-            'valid': []
-        }
-
-        self.validator(test_strings, expected_results, expected_issues)
-
-    def test_malformed_delimiters(self):
-        test_strings = {
-            'missingOpeningComma':
-                '/Action/Reach/To touch(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            'missingClosingComma':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px',
-            'extraOpeningComma':
-                ',/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            'extraClosingComma':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px,',
-            'extraOpeningTilde':
-                '~/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            'extraClosingTilde':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px~',
-            'multipleExtraOpeningDelimiters':
-                ',~,/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px',
-            'multipleExtraClosingDelimiters':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px,~~,',
-            'multipleExtraMiddleDelimiters':
-                '/Action/Reach/To touch,'
-                ',(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '~,/Attribute/Location/Screen/Left/23 px',
-            'valid':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px',
-            'validNestedParentheses':
-                '/Action/Reach/To touch,'
-                '((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px),Event/Duration/3 ms',
-            'validNestedParentheses2':
-                '/Action/Reach/To touch,'
-                '(((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px)),Event/Duration/3 ms',
-            'validNestedParentheses3':
-                'Thing, (Thing, (Thing))',
-            'validNestedParentheses4': 'Thing, ((Thing, (Thing)), Thing)',
-            'invalidNestedParentheses': 'Thing, ((Thing, (Thing)) Thing)'
-        }
-
-        expected_results = {
-            'missingOpeningComma': False,
-            'missingClosingComma': False,
-            'extraOpeningComma': False,
-            'extraClosingComma': False,
-            'extraOpeningTilde': False,
-            'extraClosingTilde': False,
-            'multipleExtraOpeningDelimiters': False,
-            'multipleExtraClosingDelimiters': False,
-            'multipleExtraMiddleDelimiters': False,
-            'valid': True,
-            'validNestedParentheses': True,
-            'validNestedParentheses2': True,
-            'validNestedParentheses3': True,
-            'validNestedParentheses4': True,
-            'invalidNestedParentheses': False,
-        }
-        expected_issues = {
-            'missingOpeningComma': self.error_handler.format_val_error('invalidTag', tag='/Action/Reach/To touch('),
-            'missingClosingComma': self.error_handler.format_val_error('commaMissing', tag='/Participant/Effect/Body part/Arm)'),
-            'extraOpeningComma': self.error_handler.format_val_error('extraDelimiter', character=',', index=0,
-                                                  hed_string=test_strings['extraOpeningComma']),
-            'extraClosingComma': self.error_handler.format_val_error('extraDelimiter', character=',',
-                                                  index=len(test_strings['extraClosingComma']) - 1,
-                                                  hed_string=test_strings['extraClosingComma']),
-            'extraOpeningTilde': self.error_handler.format_val_error('extraDelimiter', character='~', index=0,
-                                                  hed_string=test_strings['extraOpeningTilde']),
-            'extraClosingTilde': self.error_handler.format_val_error('extraDelimiter', character='~',
-                                                  index=len(test_strings['extraClosingTilde']) - 1,
-                                                  hed_string=test_strings['extraClosingTilde']),
-            'multipleExtraOpeningDelimiters': self.error_handler.format_val_error('extraDelimiter', character=',', index=0,
-                                                               hed_string=test_strings[
-                                                                    'multipleExtraOpeningDelimiters'])
-                                              + self.error_handler.format_val_error('extraDelimiter', character='~', index=1,
-                                                                 hed_string=test_strings[
-                                                                      'multipleExtraOpeningDelimiters'])
-                                              + self.error_handler.format_val_error('extraDelimiter', character=',', index=2,
-                                                                 hed_string=test_strings[
-                                                                      'multipleExtraOpeningDelimiters']),
-            'multipleExtraClosingDelimiters': self.error_handler.format_val_error('extraDelimiter', character=',', index=len(
-                test_strings['multipleExtraClosingDelimiters']) - 1, hed_string=test_strings[
-                'multipleExtraClosingDelimiters']) + self.error_handler.format_val_error('extraDelimiter', character='~', index=len(
-                test_strings['multipleExtraClosingDelimiters']) - 2, hed_string=test_strings[
-                'multipleExtraClosingDelimiters']) + self.error_handler.format_val_error('extraDelimiter', character='~', index=len(
-                test_strings['multipleExtraClosingDelimiters']) - 3, hed_string=test_strings[
-                'multipleExtraClosingDelimiters']) + self.error_handler.format_val_error('extraDelimiter', character=',', index=len(
-                test_strings['multipleExtraClosingDelimiters']) - 4, hed_string=test_strings[
-                'multipleExtraClosingDelimiters']),
-            'multipleExtraMiddleDelimiters': self.error_handler.format_val_error('extraDelimiter', character=',', index=23,
-                                                              hed_string=test_strings[
-                                                                   'multipleExtraMiddleDelimiters'])
-                                             + self.error_handler.format_val_error('extraDelimiter', character='~', index=125,
-                                                                hed_string=test_strings[
-                                                                     'multipleExtraMiddleDelimiters'])
-                                             + self.error_handler.format_val_error('extraDelimiter',
-                                                                character=',', index=126,
-                                                                hed_string=test_strings[
-                                                                     'multipleExtraMiddleDelimiters']),
-            'valid': [],
-            'validNestedParentheses': [],
-            'validNestedParentheses2': [],
-            'validNestedParentheses3': [],
-            'validNestedParentheses4': [],
-            'invalidNestedParentheses': self.error_handler.format_val_error('commaMissing', tag="Thing)) ")
-        }
-        self.validator(test_strings, expected_results, expected_issues)
-
-    def test_invalid_characters(self):
-        test_strings = {
-            'openingBrace':
-                '/Attribute/Object side/Left,/Participant/Effect{/Body part/Arm',
-            'closingBrace':
-                '/Attribute/Object side/Left,/Participant/Effect}/Body part/Arm',
-            'openingBracket':
-                '/Attribute/Object side/Left,/Participant/Effect[/Body part/Arm',
-            'closingBracket':
-                '/Attribute/Object side/Left,/Participant/Effect]/Body part/Arm'
-        }
-        expected_results = {
-            'openingBrace': False,
-            'closingBrace': False,
-            'openingBracket': False,
-            'closingBracket': False
-        }
-        expected_issues = {
-            'openingBrace': self.error_handler.format_val_error('invalidCharacter', character='{', index=47,
-                                             hed_string=test_strings['openingBrace']),
-            'closingBrace': self.error_handler.format_val_error('invalidCharacter', character='}', index=47,
-                                             hed_string=test_strings['closingBrace']),
-            'openingBracket': self.error_handler.format_val_error('invalidCharacter', character='[', index=47,
-                                               hed_string=test_strings['openingBracket']),
-            'closingBracket': self.error_handler.format_val_error('invalidCharacter', character=']', index=47,
-                                               hed_string=test_strings['closingBracket'])
-        }
-        self.validator(test_strings, expected_results, expected_issues)
-
-
-class IndividualHedTags(TestHed):
-    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.syntactic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.syntactic_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
-
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.semantic_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
-
-    def test_exist_in_schema(self):
-        test_strings = {
-            'takesValue': 'Event/Duration/3 ms',
-            'full': 'Attribute/Object side/Left',
-            'extensionsAllowed': 'Item/Object/Person/Driver',
-            'leafExtension': 'Event/Category/Initial context/Something',
-            'nonExtensionsAllowed': 'Event/Nonsense',
-            'illegalComma': 'Event/Label/This is a label,This/Is/A/Tag'
-        }
-        expected_results = {
-            'takesValue': True,
-            'full': True,
-            'extensionsAllowed': True,
-            'leafExtension': False,
-            'nonExtensionsAllowed': False,
-            'illegalComma': False
-        }
-        expected_issues = {
-            'takesValue': [],
-            'full': [],
-            'extensionsAllowed': [],
-            'leafExtension': self.error_handler.format_val_error('invalidTag', tag=test_strings['leafExtension']),
-            'nonExtensionsAllowed': self.error_handler.format_val_error('invalidTag', tag=test_strings['nonExtensionsAllowed']),
-            'illegalComma': self.error_handler.format_val_error('extraCommaOrInvalid', previous_tag='Event/Label/This is a label',
-                                             tag='This/Is/A/Tag')
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, False)
-
-    def test_proper_capitalization(self):
-        test_strings = {
-            'proper': 'Event/Category/Sensory presentation',
-            'camelCase': 'DoubleEvent/Something',
-            'takesValue': 'Attribute/Temporal rate/20 Hz',
-            'numeric': 'Attribute/Repetition/20',
-            'lowercase': 'Event/something'
-        }
-        expected_results = {
-            'proper': True,
-            'camelCase': True,
-            'takesValue': True,
-            'numeric': True,
-            'lowercase': False
-        }
-        expected_issues = {
-            'proper': [],
-            'camelCase': [],
-            'takesValue': [],
-            'numeric': [],
-            'lowercase': self.error_handler.format_val_warning('capitalization', tag=test_strings['lowercase'])
-        }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, True)
-
-    def test_child_required(self):
-        test_strings = {
-            'hasChild': 'Event/Category/Experimental stimulus',
-            'missingChild': 'Event/Category'
-        }
-        expected_results = {
-            'hasChild': True,
-            'missingChild': False
-        }
-        expected_issues = {
-            'hasChild': [],
-            'missingChild': self.error_handler.format_val_error('childRequired', tag=test_strings['missingChild'])
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
-    def test_required_units(self):
-        test_strings = {
-            'hasRequiredUnit': 'Event/Duration/3 ms',
-            'missingRequiredUnit': 'Event/Duration/3',
-            'notRequiredNoNumber': 'Attribute/Color/Red',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
-            'timeValue': 'Item/2D shape/Clock face/08:30',
-            'invalidTimeValue': 'Item/2D shape/Clock face/8:30'
-        }
-        expected_results = {
-            'hasRequiredUnit': True,
-            'missingRequiredUnit': False,
-            'notRequiredNoNumber': True,
-            'notRequiredNumber': True,
-            'notRequiredScientific': True,
-            'timeValue': True,
-            'invalidTimeValue': False
-        }
-        legal_clock_time_units = ['hour:min', 'hour:min:sec']
-        expected_issues = {
-            'hasRequiredUnit': [],
-            'missingRequiredUnit': self.error_handler.format_val_warning('unitClassDefaultUsed', tag=test_strings['missingRequiredUnit'],
-                                                      default_unit='s'),
-            'notRequiredNoNumber': [],
-            'notRequiredNumber': [],
-            'notRequiredScientific': [],
-            'timeValue': [],
-            'invalidTimeValue':self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['invalidTimeValue'],
-                                                unit_class_units=",".join(sorted(legal_clock_time_units))),
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
-    def test_correct_units(self):
-        test_strings = {
-            'correctUnit': 'Event/Duration/3 ms',
-            'correctUnitScientific': 'Event/Duration/3.5e1 ms',
-            'correctPluralUnit': 'Event/Duration/3 milliseconds',
-            'correctNoPluralUnit': 'Attribute/Temporal rate/3 hertz',
-            'correctNonSymbolCapitalizedUnit': 'Event/Duration/3 MilliSeconds',
-            'correctSymbolCapitalizedUnit': 'Attribute/Temporal rate/3 kHz',
-            'incorrectUnit': 'Event/Duration/3 cm',
-            'incorrectPluralUnit': 'Attribute/Temporal rate/3 hertzs',
-            'incorrectSymbolCapitalizedUnit': 'Attribute/Temporal rate/3 hz',
-            'incorrectSymbolCapitalizedUnitModifier': 'Attribute/Temporal rate/3 KHz',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5e-1',
-            'properTime': 'Item/2D shape/Clock face/08:30',
-            'invalidTime': 'Item/2D shape/Clock face/54:54'
-        }
-        expected_results = {
-            'correctUnit': True,
-            'correctUnitScientific': True,
-            'correctPluralUnit': True,
-            'correctNoPluralUnit': True,
-            'correctNonSymbolCapitalizedUnit': True,
-            'correctSymbolCapitalizedUnit': True,
-            'incorrectUnit': False,
-            'incorrectPluralUnit': False,
-            'incorrectSymbolCapitalizedUnit': False,
-            'incorrectSymbolCapitalizedUnitModifier': False,
-            'notRequiredNumber': True,
-            'notRequiredScientific': True,
-            'properTime': True,
-            'invalidTime': False
-        }
-        legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
-        legal_clock_time_units = ['hour:min', 'hour:min:sec']
-        legal_freq_units = ['Hz','hertz']
-
-        expected_issues = {
-            'correctUnit': [],
-            'correctUnitScientific': [],
-            'correctPluralUnit': [],
-            'correctNoPluralUnit': [],
-            'correctNonSymbolCapitalizedUnit': [],
-            'correctSymbolCapitalizedUnit': [],
-            'incorrectUnit': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['incorrectUnit'],
-                                              unit_class_units=",".join(sorted(legal_time_units))),
-            'incorrectPluralUnit': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['incorrectPluralUnit'],
-                                                    unit_class_units=",".join(sorted(legal_freq_units))),
-            'incorrectSymbolCapitalizedUnit': self.error_handler.format_val_error('unitClassInvalidUnit',
-                                                               tag=test_strings['incorrectSymbolCapitalizedUnit'],
-                                                               unit_class_units=",".join(sorted(legal_freq_units))),
-            'incorrectSymbolCapitalizedUnitModifier': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings[
-                'incorrectSymbolCapitalizedUnitModifier'],
-                                                                       unit_class_units=",".join(
-                                                                            sorted(legal_freq_units))),
-            'notRequiredNumber': [],
-            'notRequiredScientific': [],
-            'properTime': [],
-            'invalidTime': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['invalidTime'],
-                                            unit_class_units=",".join(sorted(legal_clock_time_units)))
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
-
-class HedTagLevels(TestHed):
-    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter: self.syntactic_warning_hed_input_reader._validate_tag_levels_in_hed_string(
-                                    hed_string_delimiter))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter:
-                                self.syntactic_hed_input_reader._validate_tag_levels_in_hed_string(
-                                    hed_string_delimiter))
-
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_tag_levels_in_hed_string(
-                                    hed_string_delimiter))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter: self.semantic_hed_input_reader._validate_tag_levels_in_hed_string(
-                                    hed_string_delimiter))
-
-    def test_no_duplicates(self):
-        test_strings = {
-            'topLevelDuplicate': 'Event/Category/Sensory presentation,Event/Category/Sensory presentation',
-            'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Sensory presentation,'
-                              'Attribute/Visual/Color/Purple,Event/Category/Sensory presentation)',
-            'noDuplicate': 'Event/Category/Sensory presentation,'
-                           'Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple',
-            'legalDuplicate': 'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,'
-                              'Event/Category/Sensory presentation)',
-        }
-        expected_results = {
-            'topLevelDuplicate': False,
-            'groupDuplicate': False,
-            'legalDuplicate': True,
-            'noDuplicate': True
-        }
-        expected_issues = {
-            'topLevelDuplicate': self.error_handler.format_val_error('duplicateTag', tag='Event/Category/Sensory presentation'),
-            'groupDuplicate': self.error_handler.format_val_error('duplicateTag', tag='Event/Category/Sensory presentation'),
-            'legalDuplicate': [],
-            'noDuplicate': []
-        }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
-
-    def test_multiple_copies_unique_tags(self):
-        test_strings = {
-            'legal': 'Event/Description/Rail vehicles,Item/Object/Vehicle/Train,'
-                     '(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)',
-            'multipleDesc': 'Event/Description/Rail vehicles,'
-                            'Event/Description/Locomotive-pulled or multiple units,'
-                            'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)'
-        }
-        expected_results = {
-            'legal': True,
-            'multipleDesc': False
-        }
-        expected_issues = {
-            'legal': [],
-            'multipleDesc': self.error_handler.format_val_error('multipleUniqueTags', tag_prefix='Event/Description')
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
-
-class TopLevelTags(TestHed):
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter: self.semantic_warning_tag_validator.run_top_level_validators(
-                                    hed_string_delimiter.get_formatted_top_level_tags()))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda hed_string_delimiter: self.semantic_tag_validator.run_top_level_validators(
-                                    hed_string_delimiter.get_formatted_top_level_tags()))
-
-    def test_includes_all_required_tags(self):
-        test_strings = {
-            'complete': 'Event/Label/Bus,Event/Category/Sensory presentation,'
-                        'Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-            'missingLabel': 'Event/Category/Sensory presentation,Event/Description/Shown a picture of a bus,'
-                            'Item/Object/Vehicle/Bus',
-            'missingCategory': 'Event/Label/Bus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-            'missingDescription': 'Event/Label/Bus,Event/Category/Sensory presentation,Item/Object/Vehicle/Bus',
-            'missingAllRequired': 'Item/Object/Vehicle/Bus',
-        }
-        expected_results = {
-            'complete': True,
-            'missingLabel': False,
-            'missingCategory': False,
-            'missingDescription': False,
-            'missingAllRequired': False,
-        }
-        expected_issues = {
-            'complete': [],
-            'missingLabel': self.error_handler.format_val_warning('requiredPrefixMissing', tag_prefix='Event/Label'),
-            'missingCategory': self.error_handler.format_val_warning('requiredPrefixMissing', tag_prefix='Event/Category'),
-            'missingDescription': self.error_handler.format_val_warning('requiredPrefixMissing', tag_prefix='Event/Description'),
-            'missingAllRequired': self.error_handler.format_val_warning('requiredPrefixMissing',
-                                                     tag_prefix='Event/Label') + self.error_handler.format_val_warning(
-                'requiredPrefixMissing', tag_prefix='Event/Category') + self.error_handler.format_val_warning('requiredPrefixMissing',
-                                                                                           tag_prefix='Event/Description'),
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
-
-class TestHedTagGroups(TestHed):
-    def validator(self, test_strings, expected_results, expected_issues):
-        self.validator_base(test_strings, expected_results, expected_issues,
-                            lambda
-                                hed_string_delimiter:
-                            self.syntactic_hed_input_reader._validate_groups_in_hed_string(
-                                hed_string_delimiter))
-
-    def test_no_more_than_two_tildes(self):
-        testStrings = {
-            'noTildeGroup': 'Event/Category/Sensory presentation,'
-                            '(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)',
-            'oneTildeGroup': 'Event/Category/Sensory presentation,'
-                             '(Item/Object/Vehicle/Car ~ Attribute/Object control/Perturb)',
-            'twoTildeGroup': 'Event/Category/Sensory presentation,'
-                             '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar,'
-                             ' Attribute/Visual/Color/Red)',
-            'invalidTildeGroup': 'Event/Category/Sensory presentation,'
-                                 '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car,'
-                                 ' Item/ID/RedCar, Attribute/Visual/Color/Red ~ Attribute/Object control/Perturb)',
-        }
-        expectedResults = {
-            'noTildeGroup': True,
-            'oneTildeGroup': True,
-            'twoTildeGroup': True,
-            'invalidTildeGroup': False
-        }
-        expectedIssues = {
-            'noTildeGroup': [],
-            'oneTildeGroup': [],
-            'twoTildeGroup': [],
-            'invalidTildeGroup': self.error_handler.format_val_error('tooManyTildes',
-                                                  tag='(Participant/ID 1 ~ Participant/Effect/Visual '
-                                                       '~ Item/Object/Vehicle/Car,'
-                                                       ' Item/ID/RedCar,'
-                                                       ' Attribute/Visual/Color/Red '
-                                                       '~ Attribute/Object control/Perturb)')
-        }
-        self.validator(testStrings, expectedResults, expectedIssues)
-
-
-class TestHedTags(TestHed):
-    def test_valid_comma_separated_paths(self):
-        hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
-        result = True
-        issues = self.semantic_tag_validator.run_hed_string_validators(hed_string)
-        self.assertEqual(result, True)
-        self.assertCountEqual(issues, [])
 
 class TestHed3(unittest.TestCase):
     schema_file = '../data/HED8.0.0-alpha.1.xml'
@@ -604,10 +34,14 @@ class TestHed3(unittest.TestCase):
         cls.semantic_warning_hed_input_reader = HedValidator()
         cls.semantic_warning_hed_input_reader._tag_validator = cls.semantic_warning_tag_validator
 
-    def validator_base(self, test_strings, expected_results, expected_issues, test_function):
+    def validator_base(self, test_strings, expected_results, expected_issues, test_function, convert_tags):
         for test_key in test_strings:
-            hed_string_delimiter = HedStringDelimiter(test_strings[test_key])
-            test_issues = test_function(hed_string_delimiter)
+            hed_string_delimiter = HedString(test_strings[test_key])
+            test_issues = []
+            if convert_tags:
+                test_issues += hed_string_delimiter.calculate_canonical_forms(self.hed_schema)
+            if not test_issues:
+                test_issues += test_function(hed_string_delimiter)
             test_result = not test_issues
             expected_issue = expected_issues[test_key]
             expected_result = expected_results[test_key]
@@ -620,30 +54,31 @@ class IndividualHedTagsShort(TestHed3):
         if check_for_warnings is True:
             self.validator_base(test_strings, expected_results, expected_issues, lambda
                 hed_string_delimiter: self.syntactic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
+                hed_string_delimiter), False)
         else:
             self.validator_base(test_strings, expected_results, expected_issues, lambda
                 hed_string_delimiter: self.syntactic_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
+                hed_string_delimiter), False)
 
     def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         if check_for_warnings is True:
             self.validator_base(test_strings, expected_results, expected_issues, lambda
                 hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
+                hed_string_delimiter), True)
         else:
             self.validator_base(test_strings, expected_results, expected_issues, lambda
                 hed_string_delimiter: self.semantic_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
+                hed_string_delimiter), True)
 
     def test_exist_in_schema(self):
         test_strings = {
             'takesValue': 'Duration/3 ms',
             'full': 'Animal-agent',
-            'extensionsAllowed': 'Animal-agent/Beaver',
+            'extensionsAllowed': 'Experiment-control/Beaver',
             'leafExtension': 'Experiment-procedure/Something',
             'nonExtensionsAllowed': 'Event/Nonsense',
-            'illegalComma': 'Label/This is a label,This/Is/Not/A/Tag'
+            'invalidExtension': 'Attribute/Red',
+            'invalidExtension2': 'Attribute/Red/Extension2'
         }
         expected_results = {
             'takesValue': True,
@@ -651,16 +86,20 @@ class IndividualHedTagsShort(TestHed3):
             'extensionsAllowed': True,
             'leafExtension': False,
             'nonExtensionsAllowed': False,
-            'illegalComma': False
+            'invalidExtension': False,
+            'invalidExtension2': False
         }
         expected_issues = {
             'takesValue': [],
             'full': [],
             'extensionsAllowed': [],
-            'leafExtension': self.error_handler.format_val_error('invalidTag', tag=test_strings['leafExtension']),
-            'nonExtensionsAllowed': self.error_handler.format_val_error('invalidTag', tag=test_strings['nonExtensionsAllowed']),
-            'illegalComma': self.error_handler.format_val_error('extraCommaOrInvalid', previous_tag='Label/This is a label',
-                                             tag='This/Is/Not/A/Tag')
+            'leafExtension': self.error_handler.format_val_error(ValidationErrors.INVALID_TAG, tag=test_strings['leafExtension']),
+            'nonExtensionsAllowed': self.error_handler.format_val_error(ValidationErrors.INVALID_TAG,
+                                                                        tag=test_strings['nonExtensionsAllowed']),
+            'invalidExtension': self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag="Attribute/Red", error_index=10, error_index_end=13,
+                                                                       expected_parent_tag="Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red"),
+            'invalidExtension2': self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag="Attribute/Red/Extension2", error_index=10, error_index_end=13,
+                                                                       expected_parent_tag="Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red"),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -684,7 +123,7 @@ class IndividualHedTagsShort(TestHed3):
             'camelCase': [],
             'takesValue': [],
             'numeric': [],
-            'lowercase': self.error_handler.format_val_warning('capitalization', tag=test_strings['lowercase'])
+            'lowercase': self.error_handler.format_val_warning(ValidationWarnings.CAPITALIZATION, tag=test_strings['lowercase'])
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, True)
 
@@ -699,7 +138,7 @@ class IndividualHedTagsShort(TestHed3):
         }
         expected_issues = {
             'hasChild': [],
-            'missingChild': self.error_handler.format_val_error('childRequired', tag=test_strings['missingChild'])
+            'missingChild': self.error_handler.format_val_error(ValidationErrors.REQUIRE_CHILD, tag=test_strings['missingChild'])
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -710,8 +149,9 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredNoNumber': 'Color/Red',
             'notRequiredNumber': 'Color/Red/0.5',
             'notRequiredScientific': 'Color/Red/5.2e-1',
-            # 'timeValue': 'Item/2D shape/Clock face/08:30',
-            # 'invalidTimeValue': 'Item/2D shape/Clock face/8:30'
+            'timeValue': 'Item/2D shape/Clock face/08:30',
+            # Update test - This one is currently marked as valid because clock face isn't in hed3
+            'invalidTimeValue': 'Item/2D shape/Clock face/8:30',
         }
         expected_results = {
             'hasRequiredUnit': True,
@@ -719,20 +159,20 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredNoNumber': True,
             'notRequiredNumber': True,
             'notRequiredScientific': True,
-            # 'timeValue': True,
-            # 'invalidTimeValue': False
+            'timeValue': True,
+            'invalidTimeValue': True,
         }
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
-            'missingRequiredUnit': self.error_handler.format_val_warning('unitClassDefaultUsed', tag=test_strings['missingRequiredUnit'],
-                                                      default_unit='s'),
+            'missingRequiredUnit': self.error_handler.format_val_warning(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
+                                                                         tag=test_strings['missingRequiredUnit'],
+                                                                         default_unit='s'),
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
             'notRequiredScientific': [],
-            # 'timeValue': [],
-            # 'invalidTimeValue':self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['invalidTimeValue'],
-            #                                     unit_class_units=",".join(sorted(legal_clock_time_units))),
+            'timeValue': [],
+            'invalidTimeValue': [],
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -750,7 +190,7 @@ class IndividualHedTagsShort(TestHed3):
             'incorrectSymbolCapitalizedUnitModifier': 'Frequency/3 KHz',
             'notRequiredNumber': 'Color/Red/0.5',
             'notRequiredScientific': 'Color/Red/5e-1',
-            # 8.0 currently has no clockTime nodes.
+            # Update tests - 8.0 currently has no clockTime nodes.
             # 'properTime': 'Item/2D shape/Clock face/08:30',
             # 'invalidTime': 'Item/2D shape/Clock face/54:54'
         }
@@ -772,7 +212,7 @@ class IndividualHedTagsShort(TestHed3):
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
-        legal_freq_units = ['Hz','hertz']
+        legal_freq_units = ['Hz', 'hertz']
 
         expected_issues = {
             'correctUnit': [],
@@ -781,126 +221,192 @@ class IndividualHedTagsShort(TestHed3):
             'correctNoPluralUnit': [],
             'correctNonSymbolCapitalizedUnit': [],
             'correctSymbolCapitalizedUnit': [],
-            'incorrectUnit': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['incorrectUnit'],
-                                              unit_class_units=",".join(sorted(legal_time_units))),
-            'incorrectPluralUnit': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['incorrectPluralUnit'],
-                                                    unit_class_units=",".join(sorted(legal_freq_units))),
-            'incorrectSymbolCapitalizedUnit': self.error_handler.format_val_error('unitClassInvalidUnit',
-                                                               tag=test_strings['incorrectSymbolCapitalizedUnit'],
-                                                               unit_class_units=",".join(sorted(legal_freq_units))),
-            'incorrectSymbolCapitalizedUnitModifier': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings[
-                'incorrectSymbolCapitalizedUnitModifier'],
+            'incorrectUnit': self.error_handler.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                 tag=test_strings['incorrectUnit'],
+                                                                 unit_class_units=",".join(sorted(legal_time_units))),
+            'incorrectPluralUnit': self.error_handler.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                       tag=test_strings['incorrectPluralUnit'],
                                                                        unit_class_units=",".join(
-                                                                            sorted(legal_freq_units))),
+                                                                           sorted(legal_freq_units))),
+            'incorrectSymbolCapitalizedUnit': self.error_handler.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                                  tag=test_strings[
+                                                                                      'incorrectSymbolCapitalizedUnit'],
+                                                                                  unit_class_units=",".join(
+                                                                                      sorted(legal_freq_units))),
+            'incorrectSymbolCapitalizedUnitModifier': self.error_handler.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                                          tag=test_strings[
+                                                                                              'incorrectSymbolCapitalizedUnitModifier'],
+                                                                                          unit_class_units=",".join(
+                                                                                              sorted(
+                                                                                                  legal_freq_units))),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
             # 'properTime': [],
-            # 'invalidTime': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['invalidTime'],
+            # 'invalidTime': self.error_handler.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, tag=test_strings['invalidTime'],
             #                                 unit_class_units=",".join(sorted(legal_clock_time_units)))
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
+    def test_extensions(self):
+        test_strings = {
+            'invalidExtension': 'Experiment-control/Animal-agent',
+        }
+        expected_results = {
+            'invalidExtension': False,
+        }
+        expected_issues = {
+            'invalidExtension': self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag='Experiment-control/Animal-agent',
+                                                                       error_index=19, error_index_end=31, expected_parent_tag="Agent/Animal-agent"),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
-class TestOldHed(TestHed):
-    schema_file = '../data/HED7.0.4.xml'
+    # Update test - this warning needs to be added, then this test will fail
+    def test_invalid_placeholder_in_normal_string(self):
+        test_strings = {
+            'invalidPlaceholder': 'Duration/# ms',
+        }
+        expected_results = {
+            'invalidPlaceholder': True,
+        }
+        expected_issues = {
+            'invalidPlaceholder': [],
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
 
-class OldIndividualHedTags(TestOldHed):
+class TestTagLevels3(TestHed3):
+    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
+        if check_for_warnings is True:
+            self.validator_base(test_strings, expected_results, expected_issues,
+                                lambda
+                                hed_string_delimiter: self.syntactic_warning_hed_input_reader._validate_tag_levels_in_hed_string(
+                                hed_string_delimiter), False)
+        else:
+            self.validator_base(test_strings, expected_results, expected_issues,
+                                lambda
+                                hed_string_delimiter:
+                                self.syntactic_hed_input_reader._validate_tag_levels_in_hed_string(
+                                hed_string_delimiter), False)
+
     def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         if check_for_warnings is True:
+            self.validator_base(test_strings, expected_results, expected_issues,
+                                lambda
+                                hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_tag_levels_in_hed_string(
+                                hed_string_delimiter), True)
+        else:
+            self.validator_base(test_strings, expected_results, expected_issues,
+                                lambda
+                                hed_string_delimiter: self.semantic_hed_input_reader._validate_tag_levels_in_hed_string(
+                                hed_string_delimiter), True)
+
+    def test_no_duplicates(self):
+        test_strings = {
+            'topLevelDuplicate': 'Event/Category/Sensory presentation,Event/Category/Sensory presentation',
+            'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Sensory presentation,'
+                              'Attribute/Visual/Color/Purple,Event/Category/Sensory presentation)',
+            'noDuplicate': 'Event/Category/Sensory presentation,'
+                           'Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple',
+            'legalDuplicate': 'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,'
+                              'Event/Category/Sensory presentation)',
+        }
+        expected_results = {
+            'topLevelDuplicate': False,
+            'groupDuplicate': False,
+            'legalDuplicate': True,
+            'noDuplicate': True
+        }
+        expected_issues = {
+            'topLevelDuplicate': self.error_handler.format_val_error(ValidationErrors.DUPLICATE,
+                                                                     tag='Event/Category/Sensory presentation'),
+            'groupDuplicate': self.error_handler.format_val_error(ValidationErrors.DUPLICATE,
+                                                                  tag='Event/Category/Sensory presentation'),
+            'legalDuplicate': [],
+            'noDuplicate': []
+        }
+        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+
+    def test_no_duplicates_semantic(self):
+        test_strings = {
+            'mixedLevelDuplicates': 'Man-made-object/Vehicle/Boat, Vehicle/Boat',
+            'mixedLevelDuplicates2': 'Man-made-object/Vehicle/Boat, Boat'
+        }
+        expected_results = {
+            'mixedLevelDuplicates': False,
+            'mixedLevelDuplicates2': False,
+        }
+        expected_issues = {
+            'mixedLevelDuplicates': self.error_handler.format_val_error(ValidationErrors.DUPLICATE,
+                                                                     tag='Vehicle/Boat'),
+            'mixedLevelDuplicates2': self.error_handler.format_val_error(ValidationErrors.DUPLICATE,
+                                                                        tag='Boat'),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+
+class IndividualHedTagFormatting(TestHed3):
+    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
+        if check_for_warnings is True:
             self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
+                hed_string_delimiter: self.syntactic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
+                hed_string_delimiter), False)
         else:
             self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.semantic_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
+                hed_string_delimiter: self.syntactic_hed_input_reader._validate_individual_tags_in_hed_string(
+                hed_string_delimiter), False)
 
-    def test_required_units(self):
+    def test_string_extra_slash_space(self):
         test_strings = {
-            'hasRequiredUnit': 'Event/Duration/3 ms',
-            'missingRequiredUnit': 'Event/Duration/3',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
-            'timeValue': 'Item/2D shape/Clock face/08:30'
+            'twoLevelDoubleSlash': 'Event//Extension',
+            'threeLevelDoubleSlash': 'Vehicle//Boat//Tanker',
+            'tripleSlashes': 'Vehicle///Boat///Tanker',
+            'mixedSingleAndDoubleSlashes': 'Vehicle//Boat/Tanker',
+            'singleSlashWithSpace': 'Event/ Extension',
+            'doubleSlashSurroundingSpace': 'Event/ /Extension',
+            'doubleSlashThenSpace': 'Event// Extension',
+            'sosPattern': 'Event///   ///Extension',
+            'alternatingSlashSpace': 'Vehicle/ / Boat/ / Tanker',
+            'leadingDoubleSlash': '//Event/Extension',
+            'trailingDoubleSlash': 'Event/Extension//',
+            'leadingDoubleSlashWithSpace': '/ /Event/Extension',
+            'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
         }
+        expected_event_extension = 'Event/Extension'
+        expected_tanker = 'Item/Object/Man-made/Vehicle/Boat/Tanker'
         expected_results = {
-            'hasRequiredUnit': True,
-            'missingRequiredUnit': False,
-            'notRequiredNumber': True,
-            'notRequiredScientific': True,
-            'timeValue': True
+            'twoLevelDoubleSlash': False,
+            'threeLevelDoubleSlash': False,
+            'tripleSlashes': False,
+            'mixedSingleAndDoubleSlashes': False,
+            'singleSlashWithSpace': False,
+            'doubleSlashSurroundingSpace': False,
+            'doubleSlashThenSpace': False,
+            'sosPattern': False,
+            'alternatingSlashSpace': False,
+            'leadingDoubleSlash': False,
+            'trailingDoubleSlash': False,
+            'leadingDoubleSlashWithSpace': False,
+            'trailingDoubleSlashWithSpace': False,
         }
-        expected_issues = {
-            'hasRequiredUnit': "",
-            'missingRequiredUnit': self.error_handler.format_val_warning('unitClassDefaultUsed', tag=test_strings['missingRequiredUnit'],
-                                                      default_unit='s'),
-            'notRequiredNumber': "",
-            'notRequiredScientific': "",
-            'timeValue': ""
+        expected_errors = {
+            'twoLevelDoubleSlash': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="//", index=5, tag=test_strings["twoLevelDoubleSlash"]),
+            'threeLevelDoubleSlash': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="//", index=7, tag=test_strings["threeLevelDoubleSlash"])
+                + self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="//", index=13, tag=test_strings["threeLevelDoubleSlash"]),
+            'tripleSlashes': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="///", index=7, tag=test_strings["tripleSlashes"])
+                + self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="///", index=14, tag=test_strings["tripleSlashes"]),
+            'mixedSingleAndDoubleSlashes': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="//", index=7, tag=test_strings["mixedSingleAndDoubleSlashes"]),
+            'singleSlashWithSpace': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="/ ", index=5, tag=test_strings["singleSlashWithSpace"]),
+            'doubleSlashSurroundingSpace': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="/ /", index=5, tag=test_strings["doubleSlashSurroundingSpace"]),
+            'doubleSlashThenSpace': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="// ", index=5, tag=test_strings["doubleSlashThenSpace"]),
+            'sosPattern': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="///   ///", index=5, tag=test_strings["sosPattern"]),
+            'alternatingSlashSpace': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="/ / ", index=7, tag=test_strings["alternatingSlashSpace"])
+                + self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="/ / ", index=15, tag=test_strings["alternatingSlashSpace"]),
+            'leadingDoubleSlash': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="//", index=0, tag=test_strings["leadingDoubleSlash"]),
+            'trailingDoubleSlash': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="//", index=15, tag=test_strings["trailingDoubleSlash"]),
+            'leadingDoubleSlashWithSpace': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="/ /", index=0, tag=test_strings["leadingDoubleSlashWithSpace"]),
+            'trailingDoubleSlashWithSpace': self.error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES, character="/ /", index=15, tag=test_strings["trailingDoubleSlashWithSpace"]),
         }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
-    def test_correct_units(self):
-        test_strings = {
-            'correctUnit': 'Event/Duration/3 ms',
-            'correctUnitWord': 'Event/Duration/3 milliseconds',
-            'correctUnitScientific': 'Event/Duration/3.5e1 ms',
-            'incorrectUnit': 'Event/Duration/3 cm',
-            'incorrectUnitWord': 'Event/Duration/3 nanoseconds',
-            'incorrectPrefix': 'Event/Duration/3 ns',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5e-1',
-            'properTime': 'Item/2D shape/Clock face/08:30',
-            'invalidTime': 'Item/2D shape/Clock face/54:54'
-        }
-        expected_results = {
-            'correctUnit': True,
-            'correctUnitWord': True,
-            'correctUnitScientific': True,
-            'incorrectUnit': False,
-            'incorrectUnitWord': False,
-            'incorrectPrefix': False,
-            'notRequiredNumber': True,
-            'notRequiredScientific': True,
-            'properTime': True,
-            'invalidTime': False
-        }
-        legal_time_units = [
-            's',
-            'second',
-            'seconds',
-            'centiseconds',
-            'centisecond',
-            'cs',
-            'hour:min',
-            'day',
-            'days',
-            'ms',
-            'milliseconds',
-            'millisecond',
-            'minute',
-            'minutes',
-            'hour',
-            'hours',
-        ]
-        expected_issues = {
-            'correctUnit': [],
-            'correctUnitWord': [],
-            'correctUnitScientific': [],
-            'incorrectUnit': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['incorrectUnit'],
-                                              unit_class_units=",".join(sorted(legal_time_units))),
-            'incorrectUnitWord': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['incorrectUnitWord'],
-                                                  unit_class_units=",".join(sorted(legal_time_units))),
-            'incorrectPrefix': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['incorrectPrefix'],
-                                                unit_class_units=",".join(sorted(legal_time_units))),
-            'notRequiredNumber': [],
-            'notRequiredScientific': [],
-            'properTime': [],
-            'invalidTime': self.error_handler.format_val_error('unitClassInvalidUnit', tag=test_strings['invalidTime'],
-                                            unit_class_units=",".join(sorted(legal_time_units)))
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
+        self.validator_syntactic(test_strings, expected_results, expected_errors, check_for_warnings=False)
 
 if __name__ == '__main__':
     unittest.main()
