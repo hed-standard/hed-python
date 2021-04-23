@@ -120,7 +120,7 @@ class ErrorHandler:
             ValidationErrors.INVALID_TAG: f'{error_prefix}Invalid tag - "{tag}"',
             ValidationErrors.EMPTY_TAG: f'{error_prefix}HED tags cannot be empty.  Extra comma found at: "{character}" at index {index} of string "{hed_string}"',
             ValidationErrors.EXTRA_SLASHES_OR_SPACES: f"{error_prefix}Extra slashes or spaces '{character}' at index {index} of tag '{tag}'",
-            ValidationErrors.CATEGORY_KEY_MISSING: f"{error_prefix}Category key '{tag}' does not exist in column.  Valid keys are: {category_keys}",
+            ValidationErrors.HED_SIDECAR_KEY_MISSING: f"{error_prefix}Category key '{tag}' does not exist in column.  Valid keys are: {category_keys}",
             ValidationErrors.HED_DEFINITION_UNMATCHED: f"{error_prefix}A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'",
             ValidationErrors.HED_DEFINITION_VALUE_MISSING: f"{error_prefix}A definition requires a placeholder value, but was not given one.  Definition: '{tag}",
             ValidationErrors.HED_DEFINITION_VALUE_EXTRA: f"{error_prefix}A definition does not take a placeholder value, but was given one.  Definition: '{tag}",

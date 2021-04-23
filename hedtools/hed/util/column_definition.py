@@ -177,7 +177,7 @@ class ColumnDef:
             if final_text:
                 return HedString(final_text), False
             else:
-                return None, [{"error_type": ValidationErrors.CATEGORY_KEY_MISSING,
+                return None, [{"error_type": ValidationErrors.HED_SIDECAR_KEY_MISSING,
                               "tag": input_text,
                               "category_keys": list(self._hed_dict["HED"].keys())}]
         elif column_type == ColumnType.Value:
