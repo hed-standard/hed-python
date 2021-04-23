@@ -1,4 +1,4 @@
-HED version: 8.0.0-alpha.2
+HED version: 8.0.0-alpha.1
 
 !# start schema 
 
@@ -138,7 +138,6 @@ HED version: 8.0.0-alpha.2
 ** Identify
 ** Imagine
 ** Predict
-** Recognize
 ** Respond
 ** Recall
 ** Repeat
@@ -639,7 +638,7 @@ HED version: 8.0.0-alpha.2
 *** Library-name 
 **** <nowiki># {takesValue}</nowiki>
 *** Path-name
-**** <nowiki># {takesValue, unitClass=posixPath}</nowiki> 
+**** <nowiki># {takesValue}</nowiki> 
 *** Subject 
 **** <nowiki># {takesValue}</nowiki>
 *** Version 
@@ -770,50 +769,42 @@ HED version: 8.0.0-alpha.2
 
 
 * Categorical <nowiki>{extensionAllowed}</nowiki>
-** Categorical-class <nowiki>[Categorical values that fall into discrete classes such as true or false. The grouping is absolute in the sense that it is the same for all participants.]</nowiki>
-*** All <nowiki>{relatedTag=Some, relatedTag=None}</nowiki>
-*** Correct <nowiki>{relatedTag=Incorrect}</nowiki>
-*** Explicit <nowiki>{relatedTag=Implicit}</nowiki>
-*** False <nowiki>{relatedTag=True}</nowiki>
-*** Implicit <nowiki>{relatedTag=Explicit}</nowiki>
-*** Incorrect <nowiki>{relatedTag=Correct}</nowiki>
-*** Invalid <nowiki>{relatedTag=Valid}</nowiki>
-*** None <nowiki>{relatedTag=All, relatedTag=Some}</nowiki>
-*** Some <nowiki>{relatedTag=All, relatedTag=None}</nowiki>
-*** True <nowiki>{relatedTag=False}</nowiki>
-*** Valid <nowiki>{relatedTag=Invalid}</nowiki>
-
-** Categorical-judgment <nowiki>[Categorical values that are based on the judgment or perception of the participant such familiar and famous.]</nowiki>
-*** Abnormal <nowiki>{relatedTag=Normal}</nowiki>
-*** Asymmetric <nowiki>{relatedTag=Symmetric}</nowiki>
-*** Congruent <nowiki>{relatedTag=Incongruent}</nowiki>
-*** Constrained <nowiki>{relatedTag=Unconstrained}</nowiki>
-*** Disordered <nowiki>{relatedTag=Ordered}</nowiki>
-*** Familiar <nowiki>{relatedTag=Unfamiliar, relatedTag=Famous}[Something known or encountered before.]</nowiki>
-*** Famous <nowiki>{relatedTag=Familiar, relatedTag=Unfamiliar}[Something known by many people but necessarily because of direct contact.]</nowiki>
-*** Incongruent <nowiki>{relatedTag=Congruent}</nowiki>
-*** Involuntary <nowiki>{relatedTag=Voluntary}</nowiki>
-*** Masked <nowiki>[Ability to perceive influenced by presence of another stimulus]</nowiki>
-*** Normal <nowiki>{relatedTag=Abnormal}</nowiki>
-*** Ordered <nowiki>{relatedTag=Disordered}</nowiki>
-*** Symmetric <nowiki>{relatedTag=Unsymmetric}</nowiki>
-*** Unconstrained <nowiki>{relatedTag=Constrained}</nowiki>
-*** Unfamiliar <nowiki>{relatedTag=Familiar,relatedTag=Famous}[Something not known or encountered before.]</nowiki>
-*** Unmasked <nowiki>[Ability to perceive not influenced by presence of another stimulus]</nowiki>
-*** Voluntary <nowiki>{relatedTag=Involuntary}</nowiki>
-** Categorical-level <nowiki>[Categorical values based on dividing a continuous variable into levels such as high and low.]</nowiki>
-*** Deep <nowiki>{relatedTag=Shallow}</nowiki>
-*** High <nowiki>{relatedTag=Low, relatedTag=Medium}</nowiki>
-*** Liminal <nowiki>{relatedTag=Subliminal, relatedTag=Supraliminal}</nowiki>
-*** Low <nowiki>{relatedTag=High}</nowiki>
-*** Medium <nowiki>{relatedTag=Low, relatedTag=High}</nowiki>
-*** Negative <nowiki>{relatedTag=Positive}</nowiki>
-*** Positive <nowiki>{relatedTag=Negative}</nowiki>
-*** Shallow <nowiki>{relatedTag=Deep}</nowiki>
-*** Subliminal <nowiki>{relatedTag=Liminal, relatedTag=Supraliminal}</nowiki>
-*** Supraliminal <nowiki>{relatedTag=Liminal, relatedTag=Subliminal}</nowiki>
-*** Thick <nowiki>{relatedTag=Thin}</nowiki>
-*** Thin <nowiki>{relatedTag=Thick}</nowiki>
+** Abnormal <nowiki>{relatedTag=Normal}</nowiki>
+** All <nowiki>{relatedTag=Some, relatedTag=None}</nowiki>
+** Asymmetric <nowiki>{relatedTag=Symmetric}</nowiki>
+** Congruent <nowiki>{relatedTag=Incongruent}</nowiki>
+** Constrained <nowiki>{relatedTag=Unconstrained}</nowiki>
+** Correct <nowiki>{relatedTag=Incorrect}</nowiki>
+** Deep <nowiki>{relatedTag=Shallow}</nowiki>
+** Disordered <nowiki>{relatedTag=Ordered}</nowiki>
+** False <nowiki>{relatedTag=True}</nowiki>
+** Familiar <nowiki>{relatedTag=Unfamiliar, relatedTag=Famous}[Something known or encountered before.]</nowiki>
+** Famous <nowiki>{relatedTag=Familiar, relatedTag=Unfamiliar}[Something known by many people but necessarily because of direct contact.]</nowiki>
+** High <nowiki>{relatedTag=Low, relatedTag=Medium}</nowiki>
+** Incongruent <nowiki>{relatedTag=Congruent}</nowiki>
+** Incorrect <nowiki>{relatedTag=Correct}</nowiki>
+** Invalid <nowiki>{relatedTag=Valid}</nowiki>
+** Involuntary <nowiki>{relatedTag=Voluntary}</nowiki>
+** Liminal <nowiki>{relatedTag=Subliminal, relatedTag=Supraliminal}</nowiki>
+** Low <nowiki>{relatedTag=High}</nowiki>
+** Masked <nowiki>[Ability to perceive influenced by presence of another stimulus]</nowiki>
+** Medium <nowiki>{relatedTag=Low, relatedTag=High}</nowiki>
+** None <nowiki>{relatedTag=All, relatedTag=Some}</nowiki>
+** Normal <nowiki>{relatedTag=Abnormal}</nowiki>
+** Negative <nowiki>{relatedTag=Positive}</nowiki>
+** Ordered <nowiki>{relatedTag=Disordered}</nowiki>
+** Positive <nowiki>{relatedTag=Negative}</nowiki>
+** Shallow <nowiki>{relatedTag=Deep}</nowiki>
+** Some <nowiki>{relatedTag=All, relatedTag=None}</nowiki>
+** Subliminal <nowiki>{relatedTag=Liminal, relatedTag=Supraliminal}</nowiki>
+** Supraliminal <nowiki>{relatedTag=Liminal, relatedTag=Subliminal}</nowiki>
+** Symmetric <nowiki>{relatedTag=Unsymmetric}</nowiki>
+** True <nowiki>{relatedTag=False}</nowiki>
+** Unconstrained <nowiki>{relatedTag=Constrained}</nowiki>
+** Unfamiliar <nowiki>{relatedTag=Familiar,relatedTag=Famous}[Something not known or encountered before.]</nowiki>
+** Unmasked <nowiki>[Ability to perceive not influenced by presence of another stimulus]</nowiki>
+** Valid <nowiki>{relatedTag=Invalid}</nowiki>
+** Voluntary <nowiki>{relatedTag=Involuntary}</nowiki>
 
 * Descriptive <nowiki>[Indicate the type of thing.]</nowiki>
 ** Abstract
@@ -1078,11 +1069,11 @@ HED version: 8.0.0-alpha.2
 ** m^2 <nowiki>{SIUnit, unitSymbol}</nowiki> 
 ** px^2 <nowiki>{unitSymbol}</nowiki> 
 ** pixel^2
-* currency <nowiki>{defaultUnits=$, allowedCharacter=$}</nowiki> 
+* currency <nowiki>{defaultUnits=$}</nowiki> 
 ** dollar 
 ** $ <nowiki>{unitSymbol}</nowiki> 
 ** point 
-* dateTime <nowiki>{defaultUnits=YYYY-MM-DDThh:mm:ss, allowedCharacter=:,allowedCharacter=-}</nowiki> 
+* dateTime <nowiki>{defaultUnits=YYYY-MM-DDThh:mm:ss}</nowiki> 
 ** YYYY-MM-DDThh:mm:ss <nowiki>[Date-times should conform to ISO8601 date-time format. Any variation on the full form is allowed.]</nowiki> 
 * frequency <nowiki>{defaultUnits=Hz}</nowiki>
 ** hertz  <nowiki>{SIUnit}</nowiki>
@@ -1097,7 +1088,6 @@ HED version: 8.0.0-alpha.2
 * memorySize <nowiki>{defaultUnits=B}</nowiki> 
 ** byte <nowiki>{SIUnit}</nowiki>
 ** B <nowiki>{SIUnit, unitSymbol}</nowiki> 
-* posixPath <nowiki>{allowedCharacter=/,allowedCharacter=:}[Posix path specification.]</nowiki> 
 * physicalLength <nowiki>{defaultUnits=m}</nowiki> 
 ** metre <nowiki>{SIUnit}</nowiki> 
 ** m <nowiki>{SIUnit, unitSymbol}</nowiki> 
@@ -1118,6 +1108,11 @@ HED version: 8.0.0-alpha.2
 ** hour <nowiki>[Should be in 24-hour format.]</nowiki>
 * volume <nowiki>{defaultUnits=m^3}</nowiki> 
 ** m^3 <nowiki>{SIUnit, unitSymbol}</nowiki> 
+
+
+
+
+
 
 
 
@@ -1165,25 +1160,22 @@ HED version: 8.0.0-alpha.2
 
 
 '''Schema attributes'''
-
-
-* allowedCharacter <nowiki>{unitClassProperty}[An attribute of unit classes schema value placeholders indicating a special character that is allowed in expressing the value of that placeholder.]</nowiki>
-* defaultUnits <nowiki>{unitClassProperty}[An attribute of unit classes specifying the default units for a tag.]</nowiki> 
-* extensionAllowed <nowiki>{boolProperty}[Users can add unlimited levels of child nodes under this tag.]</nowiki> 
-* isNumeric <nowiki>{boolProperty}[The tag hashtag placeholder must be replaced by a numerical value.]</nowiki> 
+* defaultUnits <nowiki>[Default units for a tag.]</nowiki> 
+* extensionAllowed <nowiki>[Users can add unlimited levels of child nodes under this tag.]</nowiki> 
+* isNumeric <nowiki>[The tag hashtag placeholder must be replaced by a numerical value.]</nowiki> 
 * position <nowiki>[Used to specify the order of the required and recommended tags in canonical order for display. The position attribute value should be an integer and the order can start at 0 or 1. Required or recommended tags without this attribute or with negative position will be shown after the others in canonical ordering.]</nowiki> 
 * predicateType <nowiki> [One of propertyOf, subclassOf, passThrough -- used to facilitate mapping to OWL or RDF.]</nowiki>  
-* recommended  <nowiki>{boolProperty}[A HED string tagging an event is recommended to include this tag.]</nowiki> 
+* recommended  <nowiki>[A HED string tagging an event is recommended to include this tag.]</nowiki> 
 * relatedTag <nowiki>[Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.]</nowiki> 
-* requireChild  <nowiki>{boolProperty}[One of its descendants must be chosen to tag an event.]</nowiki> 
-* required <nowiki>{boolProperty}[Every HED string tagging an event should include this tag.]</nowiki>
-* SIUnit  <nowiki>{boolProperty, unitClassProperty}[Designates the name of an SI unit so it can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.]</nowiki>
-* SIUnitModifier <nowiki>{boolProperty, unitModifierProperty}[SI unit modifier indicating a multiple or submultiple of a base unit.]</nowiki> 
-* SIUnitSymbolModifier <nowiki>{boolProperty, unitModifierProperty}[SI unit symbol modifier indicating a multiple or submultiple of a base unit symbol.]</nowiki>
+* requireChild  <nowiki>[One of its descendants must be chosen to tag an event.]</nowiki> 
+* required <nowiki>[Every HED string tagging an event should include this tag.]</nowiki>
+* SIUnit  <nowiki>[Designates the name of an SI unit so it can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.]</nowiki>
+* SIUnitModifier <nowiki>[SI unit modifier indicating a multiple or submultiple of a base unit.]</nowiki> 
+* SIUnitSymbolModifier <nowiki>[SI unit symbol modifier indicating a multiple or submultiple of a base unit symbol.]</nowiki>
 * suggestedTag <nowiki>[Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.]</nowiki> 
-* takesValue <nowiki>{boolProperty}[This tag will have a hashtag placeholder child in the schema which is expected to be replaced with a user-defined value.] </nowiki> 
-* unique <nowiki>{boolProperty}[Only one of this tag or its descendants can be used within a single tag group or event.]</nowiki> 
-* unitSymbol <nowiki>{boolProperty, unitClassProperty}[Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.]</nowiki> 
+* takesValue <nowiki>[This tag will have a hashtag placeholder child in the schema which is expected to be replaced with a user-defined value.] </nowiki> 
+* unique <nowiki>[Only one of this tag or its descendants can be used within a single tag group or event.]</nowiki> 
+* unitSymbol <nowiki>[Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.]</nowiki> 
 
 !# end hed 
 

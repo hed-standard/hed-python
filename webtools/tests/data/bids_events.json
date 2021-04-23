@@ -41,14 +41,14 @@
             "3": "Stage 3. BCI was trained on data from stages 1 and 2."
         },
 		"HED": {
-            "1": "Description/BCI acts randomly, (Definition/Random-selection, (Experimental-condition, (Random, Predict))), Def/Random-selection",
+            "1": "Description/BCI acts randomly, (Definition/Random-selection, (Experimental-condition, Random, Predict)), Def/Random-selection",
             "2": "Description/BCI was trained on data from stage 1., (Definition/Trained-on-random, (Experimental-condition)), Def/Trained-on-random",
             "3": "Description/BCI was trained on data from stages 1 and 2., (Definition/Trained-on-all, (Experimental-condition)), Def/Trained-on-all"
 		}
     },
 	"trial": {
 		"Description": "The number of the trial in the experiment.",
-		"HED": "Description/The number of the trial in the experiment, (Experimental-trial, Item-count/#)"
+		"HED": "Description/The number of the trial in the experiment, Experimental-trial, Item-count/#"
 	},
     "latency": {
         "Description": "Estimated beginning of the data chunk used for the BCI prediction with respect to the true event as measured by parallel port trigger in this trial.",
