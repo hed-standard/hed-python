@@ -1,6 +1,6 @@
 from hed.util.hed_string import HedString
 from hed.util.def_dict import DefDict, DefTagNames
-
+from hed.util.error_types import ValidationErrors
 
 class DefinitionMapper:
     """Class responsible for gathering/removing definitions from hed strings,
@@ -68,34 +68,38 @@ class DefinitionMapper:
                 continue
             self._gathered_defs[def_tag] = def_value
 
-    def replace_and_remove_tags(self, hed_string_obj):
+    def replace_and_remove_tags(self, hed_string_obj, validate_only=False):
         """Takes a given string and returns the hed string with all definitions removed, and all labels replaced
 
         Parameters
         ----------
         hed_string_obj : HedString
             The hed string to modify.
+        validate_only: bool
+            If true, this returns issues with expanding definitions but does not modify the string.
         Returns
         -------
-        modified_hed_string: str
-            hed_string with all definitions removed and definition tags replaced with the actual definition
+        def_issues: []
+            Issues found related to expanding definitions.  Usually mismatched placeholders, or a missing definition.
         """
         # First see if the word definition or dLabel is found at all.  Just move on if not.
         hed_string_lower = hed_string_obj.lower()
         if DefTagNames.DLABEL_KEY not in hed_string_lower and \
                 DefTagNames.DEF_KEY not in hed_string_lower:
-            return hed_string_obj
+            return []
 
         def_tag_versions = self._def_tag_versions
         label_tag_versions = self._label_tag_versions
 
         remove_groups = []
-
+        def_issues = []
         for tag_group in hed_string_obj.get_all_groups():
             for tag in tag_group.tags():
                 # This case should be fairly rare compared to expanding definitions.
                 is_def_tag = DefinitionMapper._check_tag_starts_with(str(tag), def_tag_versions)
                 if is_def_tag:
+                    if validate_only:
+                        continue
                     remove_groups.append(tag_group)
                     break
 
@@ -108,19 +112,30 @@ class DefinitionMapper:
                         is_label_tag = is_label_tag[:found_slash]
 
                     label_tag_lower = is_label_tag.lower()
-                    # Ignore label tags we can't identify.  Probably make this a warning?
-                    if label_tag_lower not in self._gathered_defs:
+                    def_entry = self._gathered_defs.get(label_tag_lower)
+                    if def_entry is None:
+                        def_issues += [{"error_type": ValidationErrors.HED_DEFINITION_UNMATCHED,
+                                       "tag": is_label_tag}]
                         continue
 
-                    def_contents = self._gathered_defs[label_tag_lower].get_definition(placeholder_value=placeholder)
-
+                    def_contents = def_entry.get_definition(placeholder_value=placeholder)
+                    if def_contents is None:
+                        if def_entry.takes_value:
+                            def_issues += [{"error_type": ValidationErrors.HED_DEFINITION_VALUE_MISSING,
+                                           "tag": tag}]
+                        else:
+                            def_issues += [{"error_type": ValidationErrors.HED_DEFINITION_VALUE_EXTRA,
+                                            "tag": tag}]
+                        continue
+                    if validate_only:
+                       continue
                     tag_group.replace_tag(tag, def_contents)
                     continue
 
         if remove_groups:
             hed_string_obj.remove_groups(remove_groups)
 
-        return hed_string_obj
+        return def_issues
 
     @staticmethod
     def _check_tag_starts_with(hed_tag, possible_starts_with_list):

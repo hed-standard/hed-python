@@ -12,6 +12,7 @@ from hed.schema.hed_schema_file import load_schema
 from hed.util.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
+from hed.util import util_constants
 
 
 class HedValidator:
@@ -150,13 +151,12 @@ class HedValidator:
         validation_issues : [{}]
         """
         validation_issues = []
-        for row_number, row_hed_string, column_to_hed_tags_dictionary in hed_input:
-            validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
-                                                                        column_to_hed_tags_dictionary)
+        validation_issues += hed_input.file_def_dict_issues
+        for row_number, row_dict in hed_input.parse_dataframe(return_row_dict=True):
+            validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_dict)
         return validation_issues
 
-    def _append_validation_issues_if_found(self, validation_issues, row_number, row_hed_string,
-                                           column_to_hed_tags_dictionary):
+    def _append_validation_issues_if_found(self, validation_issues, row_number, row_dict):
         """Appends the issues associated with a particular row and/or column in a spreadsheet.
 
          Parameters
@@ -175,8 +175,12 @@ class HedValidator:
              The issues with the appended issues found in the particular row.
 
          """
+        row_hed_string = row_dict[util_constants.ROW_HED_STRING]
+        column_to_hed_tags_dictionary = row_dict[util_constants.COLUMN_TO_HED_TAGS]
+        expansion_column_issues = row_dict.get(util_constants.COLUMN_ISSUES, {})
+        self._append_column_validation_issues_if_found(validation_issues, row_number, column_to_hed_tags_dictionary,
+                                                       expansion_column_issues)
         self._append_row_validation_issues_if_found(validation_issues, row_number, row_hed_string)
-        self._append_column_validation_issues_if_found(validation_issues, row_number, column_to_hed_tags_dictionary)
         return validation_issues
 
     def _append_row_validation_issues_if_found(self, validation_issues, row_number, row_hed_string):
@@ -206,7 +210,8 @@ class HedValidator:
             self._error_handler.pop_error_context()
         return validation_issues
 
-    def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
+    def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary,
+                                                  expansion_issues):
         """Appends the issues associated with a particular row column in a spreadsheet.
 
          Parameters
@@ -217,19 +222,27 @@ class HedValidator:
             The row number that the issues are associated with.
         column_to_hed_tags_dictionary: dict
             A dictionary which associates columns with HED tags
+        expansion_issues: {int: {}}
+            A dict containing an issue expanding a column that should be added as an error.
+            This is primarily a missing category key in a json file.
          Returns
          -------
          []
              The issues with the appended issues found in the particular row column.
-
          """
         if column_to_hed_tags_dictionary:
             self._error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number in column_to_hed_tags_dictionary.keys():
+            for column_number, column_issues in expansion_issues.items():
+                self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                for issue in column_issues:
+                    validation_issues += self._error_handler.format_val_error(**issue)
+                self._error_handler.pop_error_context()
+            for column_number in column_to_hed_tags_dictionary:
                 self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
                 self._error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
                                                        increment_depth_after=False)
+                validation_issues += column_hed_string.calculate_canonical_forms(self._hed_schema, self._error_handler)
                 validation_issues += self.validate_column_hed_string(column_hed_string)
                 self._error_handler.pop_error_context()
                 self._error_handler.pop_error_context()

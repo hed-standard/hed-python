@@ -31,7 +31,7 @@ class DefEntry:
         self.takes_value = takes_value
 
     def get_definition(self, placeholder_value=None):
-        if self.takes_value and not placeholder_value:
+        if self.takes_value == (placeholder_value is None):
             return None
 
         output_contents = None
@@ -142,11 +142,13 @@ class DefDict:
             def_tag, def_tag_name = def_tags[0]
             if len(group_tags) > 1:
                 validation_issues += error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                           def_name=def_tag_name, tag_list=group_tags)
+                                                                           def_name=def_tag_name,
+                                                                           tag_list=group_tags + other_tags)
                 continue
             if len(other_tags) > 0:
                 validation_issues += error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                           def_name=def_tag_name, tag_list=other_tags)
+                                                                           def_name=def_tag_name,
+                                                                           tag_list=other_tags + group_tags)
                 continue
 
             group_tag = group_tags[0] if group_tags else None

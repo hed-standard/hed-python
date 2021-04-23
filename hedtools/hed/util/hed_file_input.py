@@ -6,7 +6,7 @@ class HedFileInput(BaseFileInput):
     """A class to parse basic hed style spreadsheets into a more general format."""
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
-                 definition_mapper=None):
+                 definition_mapper=None, hed_schema=None):
         """Constructor for the HedFileInput class.
 
         Parameters
@@ -28,6 +28,8 @@ class HedFileInput(BaseFileInput):
             and the fifth column contains tags that needs Event/Category/ prepended to them.
         definition_mapper: DefinitionMapper
             The definition mapper to use to remove and replace definition labels in HED data.
+        hed_schema: HedSchema
+             Used to create definitions.
         """
         if tag_columns is None:
             tag_columns = [2]
@@ -36,4 +38,4 @@ class HedFileInput(BaseFileInput):
 
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   definition_mapper=definition_mapper)
-        super().__init__(filename, worksheet_name, has_column_names, new_mapper)
+        super().__init__(filename, worksheet_name, has_column_names, new_mapper, hed_schema=hed_schema)

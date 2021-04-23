@@ -1,6 +1,7 @@
 from hed.util.column_definition import ColumnDef, ColumnType
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.hed_string import HedString
+from hed.util import util_constants
 import copy
 
 
@@ -164,6 +165,10 @@ class ColumnMapper:
         -------
         expanded_text : str or None
             The text after expansion.  Returns None if this column is undefined or the given text is null.
+        attribute_name_or_error_message: False or str
+            Depends on the value of first return value.
+            If None, this is an error message.
+            If string, this is an attribute name, that should be stored separately..
         """
         # Default 1-1 mapping if we don't have specific behavior.
         if not self._final_column_map:
@@ -199,20 +204,32 @@ class ColumnMapper:
         """
         result_dict = {}
         column_to_hed_tags_dictionary = {}
+        issues_dict = {}
         for column_number, cell_text in enumerate(row_text):
-            translated_column, attribute_name = self._expand_column(column_number, str(cell_text))
+            translated_column, attribute_name_or_error = self._expand_column(column_number, str(cell_text))
             if translated_column is None:
+                if attribute_name_or_error:
+                    if column_number + 1 not in issues_dict:
+                        issues_dict[column_number + 1] = []
+                    issues_dict[column_number + 1] = attribute_name_or_error
                 continue
-            if attribute_name:
-                result_dict[attribute_name] = translated_column
+            if attribute_name_or_error:
+                result_dict[attribute_name_or_error] = translated_column
                 continue
             if self._def_mapper:
-                translated_column = self._def_mapper.replace_and_remove_tags(translated_column)
+                new_issues = self._def_mapper.replace_and_remove_tags(translated_column)
+                if new_issues:
+                    if column_number + 1 not in issues_dict:
+                        issues_dict[column_number + 1] = []
+                    issues_dict[column_number + 1] += new_issues
+
             column_to_hed_tags_dictionary[column_number + 1] = translated_column
 
-        result_dict["column_to_hed_tags"] = column_to_hed_tags_dictionary
+        result_dict[util_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
+        if issues_dict:
+            result_dict[util_constants.COLUMN_ISSUES] = issues_dict
         final_hed_string = HedString.create_from_other(column_to_hed_tags_dictionary.values())
-        result_dict["HED"] = final_hed_string
+        result_dict[util_constants.ROW_HED_STRING] = final_hed_string
 
         return result_dict
 

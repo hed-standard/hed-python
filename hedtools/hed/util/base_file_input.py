@@ -8,6 +8,7 @@ from hed.util.column_mapper import ColumnMapper
 from hed.util.exceptions import HedFileError, HedExceptions
 from hed.util.error_types import ErrorContext
 from hed.util.error_reporter import ErrorHandler
+from hed.util import util_constants
 
 
 class BaseFileInput:
@@ -33,10 +34,10 @@ class BaseFileInput:
          has_column_names: bool
              True if file has column names. The validation will skip over the first line of the file. False, if
              otherwise.
-         mapper: ColumnMapper object
+         mapper: ColumnMapper
              Pass in a built column mapper(see HedFileInput or EventFileInput for examples), or None to just
              retrieve all columns as hed tags.
-         hed_schema: HedSchema object
+         hed_schema: HedSchema
              Used to create definitions.
          """
         if mapper is None:
@@ -89,7 +90,7 @@ class BaseFileInput:
         if error_handler is None:
             error_handler = ErrorHandler()
         error_list = []
-        for row_number, row_hed_string, column_to_hed_tags_dictionary in self:
+        for row_number, column_to_hed_tags_dictionary in self:
             error_handler.push_error_context(ErrorContext.ROW, row_number)
             for column_number in column_to_hed_tags_dictionary:
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
@@ -120,7 +121,7 @@ class BaseFileInput:
         if error_handler is None:
             error_handler = ErrorHandler()
         error_list = []
-        for row_number, row_hed_string, column_to_hed_tags_dictionary in self:
+        for row_number, column_to_hed_tags_dictionary in self:
             error_handler.push_error_context(ErrorContext.ROW, row_number)
             for column_number in column_to_hed_tags_dictionary:
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
@@ -133,7 +134,7 @@ class BaseFileInput:
 
         return error_list
 
-    def extract_definitions(self, hed_schema):
+    def extract_definitions(self, hed_schema, error_handler=None):
         """
         Gathers and validates all definitions found in this spreadsheet
 
@@ -141,6 +142,8 @@ class BaseFileInput:
         ----------
         hed_schema : HedSchema
             Used to know where definition tags are located in the schema
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
 
         Returns
         -------
@@ -149,10 +152,18 @@ class BaseFileInput:
         validation_issues: [{}]
             A list of all issues found with the definitions.
         """
+        if error_handler is None:
+            error_handler = ErrorHandler()
         new_def_dict = DefDict(hed_schema=hed_schema)
         validation_issues = []
-        for row_number, row_hed_string, column_to_hed_tags_dictionary in self.iter_raw():
-            validation_issues += new_def_dict.check_for_definitions(row_hed_string)
+        for row_number, column_to_hed_tags in self.iter_raw():
+            error_handler.push_error_context(ErrorContext.ROW, row_number)
+            for column_number, hed_string_obj in column_to_hed_tags.items():
+                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                validation_issues += new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
+                error_handler.pop_error_context()
+            error_handler.pop_error_context()
+
         return new_def_dict, validation_issues
 
     def save(self, filename=None, include_formatting=False, output_processed_file=False,
@@ -184,7 +195,7 @@ class BaseFileInput:
         # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
         if output_processed_file:
             output_file = copy.deepcopy(self)
-            for row_number, row_hed_string, column_to_hed_tags_dictionary in self:
+            for row_number, column_to_hed_tags_dictionary in self:
                 for column_number in column_to_hed_tags_dictionary:
                     new_text = column_to_hed_tags_dictionary[column_number]
                     output_file.set_cell(row_number, column_number, new_text)
@@ -238,7 +249,7 @@ class BaseFileInput:
         default_mapper = ColumnMapper()
         return self.parse_dataframe(default_mapper)
 
-    def parse_dataframe(self, mapper=None):
+    def parse_dataframe(self, mapper=None, return_row_dict=False):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -246,15 +257,15 @@ class BaseFileInput:
         ----------
         mapper : ColumnMapper
             The column name to column number mapper
-
+        return_row_dict: bool
+            If True, this returns the full row_dict including issues.
+            If False, returns just the HedStrings for each column
         Yields
         -------
         row_number: int
             The current row number
-        row_hed_string: HedString
-            parsed and combined hed string for the row, gathered from all specified columns
-        column_to_hed_tags_dictionary: dict
-            A dict mapping from column number to parsed column text based on column mapper.
+        row_dict: dict
+            A dict containing the parsed row, including: "HED", "column_to_hed_tags", and possibly "column_issues"
         """
         if mapper is None:
             mapper = self._mapper
@@ -268,8 +279,10 @@ class BaseFileInput:
                 continue
 
             row_dict = self._get_dict_from_row_hed_tags(text_file_row, mapper)
-            row_hed_string, column_to_hed_tags_dictionary = self._get_row_hed_tags_from_dict(row_dict)
-            yield row_number + start_at_one, row_hed_string, column_to_hed_tags_dictionary
+            if return_row_dict:
+                yield row_number + start_at_one, row_dict
+            else:
+                yield row_number + start_at_one, row_dict[util_constants.COLUMN_TO_HED_TAGS]
 
     def set_cell(self, row_number, column_number, new_text, include_column_prefix_if_exist=False):
         """
@@ -323,7 +336,7 @@ class BaseFileInput:
             dictionary which associates columns with HED tags
 
         """
-        return row_dict["HED"], row_dict["column_to_hed_tags"]
+        return row_dict[util_constants.ROW_HED_STRING], row_dict[util_constants.COLUMN_TO_HED_TAGS]
 
     @staticmethod
     def _is_extension_type(filename, allowed_exts):

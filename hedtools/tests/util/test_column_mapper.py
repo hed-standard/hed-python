@@ -4,6 +4,8 @@ import os
 from hed.util.column_mapper import ColumnMapper, ColumnType, ColumnDef
 from hed.util.hed_string import HedString
 from hed.schema import load_schema
+from hed.util import util_constants
+
 
 class Test(unittest.TestCase):
     schema_file = '../data/HED8.0.0-alpha.1.xml'
@@ -183,7 +185,7 @@ class Test(unittest.TestCase):
             expected_result = expected_results[test_key]
 
             expanded_row = column_mapper.expand_row_tags([test_string])
-            prepended_hed_string = expanded_row["HED"]
+            prepended_hed_string = expanded_row[util_constants.ROW_HED_STRING]
             self.assertEqual(expected_result, str(prepended_hed_string))
 
 if __name__ == '__main__':
