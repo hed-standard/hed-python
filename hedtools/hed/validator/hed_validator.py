@@ -7,10 +7,12 @@ the get_validation_issues() function.
 from hed.util.error_types import ErrorContext
 from hed.util import hed_cache
 from hed.util import error_reporter
-from hed import schema
-from hed.util.hed_string_delimiter import HedStringDelimiter
+
+from hed.schema.hed_schema_file import load_schema
+from hed.util.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
+from hed.util import util_constants
 
 
 class HedValidator:
@@ -134,7 +136,7 @@ class HedValidator:
         if hed_xml_file is None and get_specific_version is None:
             hed_cache.cache_all_hed_xml_versions()
         final_hed_xml_file = hed_cache.get_local_file(hed_xml_file, get_specific_version)
-        hed_schema = schema.load_schema(final_hed_xml_file)
+        hed_schema = load_schema(final_hed_xml_file)
         return hed_schema
 
     def _validate_hed_tags_in_file(self, hed_input):
@@ -149,13 +151,12 @@ class HedValidator:
         validation_issues : [{}]
         """
         validation_issues = []
-        for row_number, row_hed_string, column_to_hed_tags_dictionary in hed_input:
-            validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_hed_string,
-                                                                        column_to_hed_tags_dictionary)
+        validation_issues += hed_input.file_def_dict_issues
+        for row_number, row_dict in hed_input.parse_dataframe(return_row_dict=True):
+            validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_dict)
         return validation_issues
 
-    def _append_validation_issues_if_found(self, validation_issues, row_number, row_hed_string,
-                                           column_to_hed_tags_dictionary):
+    def _append_validation_issues_if_found(self, validation_issues, row_number, row_dict):
         """Appends the issues associated with a particular row and/or column in a spreadsheet.
 
          Parameters
@@ -174,10 +175,12 @@ class HedValidator:
              The issues with the appended issues found in the particular row.
 
          """
-        validation_issues = self._append_row_validation_issues_if_found(validation_issues, row_number,
-                                                                        row_hed_string)
-        validation_issues = self._append_column_validation_issues_if_found(validation_issues, row_number,
-                                                                           column_to_hed_tags_dictionary)
+        row_hed_string = row_dict[util_constants.ROW_HED_STRING]
+        column_to_hed_tags_dictionary = row_dict[util_constants.COLUMN_TO_HED_TAGS]
+        expansion_column_issues = row_dict.get(util_constants.COLUMN_ISSUES, {})
+        self._append_column_validation_issues_if_found(validation_issues, row_number, column_to_hed_tags_dictionary,
+                                                       expansion_column_issues)
+        self._append_row_validation_issues_if_found(validation_issues, row_number, row_hed_string)
         return validation_issues
 
     def _append_row_validation_issues_if_found(self, validation_issues, row_number, row_hed_string):
@@ -199,14 +202,16 @@ class HedValidator:
          """
         if row_hed_string:
             self._error_handler.push_error_context(ErrorContext.ROW, row_number)
-            hed_string_delimiter = HedStringDelimiter(row_hed_string)
-            row_validation_issues = self._validate_top_level_in_hed_string(hed_string_delimiter)
-            row_validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
+            self._error_handler.push_error_context(ErrorContext.HED_STRING, row_hed_string, increment_depth_after=False)
+            row_validation_issues = self._validate_tags_in_hed_string(row_hed_string)
+            row_validation_issues += self._validate_tag_levels_in_hed_string(row_hed_string)
             validation_issues += row_validation_issues
+            self._error_handler.pop_error_context()
             self._error_handler.pop_error_context()
         return validation_issues
 
-    def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary):
+    def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary,
+                                                  expansion_issues):
         """Appends the issues associated with a particular row column in a spreadsheet.
 
          Parameters
@@ -217,18 +222,29 @@ class HedValidator:
             The row number that the issues are associated with.
         column_to_hed_tags_dictionary: dict
             A dictionary which associates columns with HED tags
+        expansion_issues: {int: {}}
+            A dict containing an issue expanding a column that should be added as an error.
+            This is primarily a missing category key in a json file.
          Returns
          -------
          []
              The issues with the appended issues found in the particular row column.
-
          """
         if column_to_hed_tags_dictionary:
             self._error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number in column_to_hed_tags_dictionary.keys():
+            for column_number, column_issues in expansion_issues.items():
+                self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                for issue in column_issues:
+                    validation_issues += self._error_handler.format_val_error(**issue)
+                self._error_handler.pop_error_context()
+            for column_number in column_to_hed_tags_dictionary:
                 self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
+                self._error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
+                                                       increment_depth_after=False)
+                validation_issues += column_hed_string.calculate_canonical_forms(self._hed_schema, self._error_handler)
                 validation_issues += self.validate_column_hed_string(column_hed_string)
+                self._error_handler.pop_error_context()
                 self._error_handler.pop_error_context()
             self._error_handler.pop_error_context()
         return validation_issues
@@ -247,11 +263,10 @@ class HedValidator:
 
          """
         validation_issues = []
-        validation_issues += self._tag_validator.run_hed_string_validators(column_hed_string)
+        validation_issues += self._tag_validator.run_hed_string_validators(str(column_hed_string))
         if not validation_issues:
-            hed_string_delimiter = HedStringDelimiter(column_hed_string)
-            validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter)
-            validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter)
+            validation_issues += self._validate_individual_tags_in_hed_string(column_hed_string)
+            validation_issues += self._validate_groups_in_hed_string(column_hed_string)
         return validation_issues
 
     def _validate_hed_strings(self, hed_strings):
@@ -270,14 +285,18 @@ class HedValidator:
         eeg_issues = []
         for i in range(0, len(hed_strings)):
             hed_string = hed_strings[i]
-            validation_issues = self._tag_validator.run_hed_string_validators(hed_string)
+            hed_string_obj = HedString(hed_string)
+            self._error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
+            validation_issues = self._tag_validator.run_hed_string_validators(str(hed_string_obj))
             if not validation_issues:
-                hed_string_delimiter = HedStringDelimiter(hed_string)
-                validation_issues += self._validate_top_level_in_hed_string(hed_string_delimiter)
-                validation_issues += self._validate_tag_levels_in_hed_string(hed_string_delimiter)
-                validation_issues += self._validate_individual_tags_in_hed_string(hed_string_delimiter)
-                validation_issues += self._validate_groups_in_hed_string(hed_string_delimiter)
+                validation_issues += hed_string_obj.calculate_canonical_forms(self._hed_schema, self._error_handler)
+                if not validation_issues:
+                    validation_issues += self._validate_tags_in_hed_string(hed_string_obj)
+                    validation_issues += self._validate_tag_levels_in_hed_string(hed_string_obj)
+                    validation_issues += self._validate_individual_tags_in_hed_string(hed_string_obj)
+                    validation_issues += self._validate_groups_in_hed_string(hed_string_obj)
             eeg_issues.append(validation_issues)
+            self._error_handler.pop_error_context()
         return eeg_issues
 
     def _validate_tag_levels_in_hed_string(self, hed_string_delimiter):
@@ -286,8 +305,8 @@ class HedValidator:
 
          Parameters
          ----------
-         hed_string_delimiter: HedStringDelimiter
-            A HEDStringDelimiter object.
+         hed_string_delimiter: HedString
+            A HedString object.
          Returns
          -------
          list
@@ -295,32 +314,28 @@ class HedValidator:
 
          """
         validation_issues = []
-        tag_groups = hed_string_delimiter.get_tag_groups()
-        formatted_tag_groups = hed_string_delimiter.get_formatted_tag_groups()
-        original_and_formatted_tag_groups = zip(tag_groups, formatted_tag_groups)
-        for original_tag_group, formatted_tag_group in original_and_formatted_tag_groups:
-            validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group, formatted_tag_group)
-        top_level_tags = hed_string_delimiter.get_top_level_tags()
-        formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags()
-        validation_issues += self._tag_validator.run_tag_level_validators(top_level_tags, formatted_top_level_tags)
+        tag_groups = hed_string_delimiter.get_all_groups()
+        for original_tag_group in tag_groups:
+            validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group.tags())
+
         return validation_issues
 
-    def _validate_top_level_in_hed_string(self, hed_string_delimiter):
-        """Validates the top-level tags in a HED string.
+    def _validate_tags_in_hed_string(self, hed_string_delimiter):
+        """Validates the multi-tag properties in a hed string, eg required tags.
 
          Parameters
          ----------
-         hed_string_delimiter: HedStringDelimiter
-            A HEDStringDelimiter object.
+         hed_string_delimiter: HedString
+            A HedString  object.
          Returns
          -------
          list
-             The issues associated with the top-level tags in the HED string.
+             The issues associated with the tags in the HED string.
 
          """
         validation_issues = []
-        formatted_top_level_tags = hed_string_delimiter.get_formatted_top_level_tags()
-        validation_issues += self._tag_validator.run_top_level_validators(formatted_top_level_tags)
+        tags = hed_string_delimiter.get_all_tags()
+        validation_issues += self._tag_validator._run_tag_validators(tags)
         return validation_issues
 
     def _validate_groups_in_hed_string(self, hed_string_delimiter):
@@ -328,8 +343,8 @@ class HedValidator:
 
          Parameters
          ----------
-         hed_string_delimiter: HedStringDelimiter
-            A HEDStringDelimiter object.
+         hed_string_delimiter: HedString
+            A HedString  object.
          Returns
          -------
          list
@@ -337,11 +352,9 @@ class HedValidator:
 
          """
         validation_issues = []
-        tag_groups = hed_string_delimiter.get_tag_groups()
-        tag_group_strings = hed_string_delimiter.get_tag_group_strings()
-        tag_groups_with_strings = zip(tag_groups, tag_group_strings)
-        for tag_group, tag_group_string in tag_groups_with_strings:
-            validation_issues += self._tag_validator.run_tag_group_validators(tag_group, tag_group_string)
+        tag_groups = hed_string_delimiter.get_all_groups()
+        for tag_group in tag_groups:
+            validation_issues += self._tag_validator.run_tag_group_validators(tag_group)
         return validation_issues
 
     def _validate_individual_tags_in_hed_string(self, hed_string_delimiter):
@@ -349,8 +362,8 @@ class HedValidator:
 
          Parameters
          ----------
-         hed_string_delimiter: HedStringDelimiter
-            A HEDStringDelimiter object.
+         hed_string_delimiter: HedString
+            A HedString  object.
          Returns
          -------
          list
@@ -358,37 +371,9 @@ class HedValidator:
 
          """
         validation_issues = []
-        tag_set = hed_string_delimiter.get_tags()
-        formatted_tag_set = hed_string_delimiter.get_formatted_tags()
-        original_and_formatted_tags = list(zip(tag_set, formatted_tag_set))
-        for index, (original_tag, formatted_tag) in enumerate(original_and_formatted_tags):
-            previous_original_tag, previous_formatted_tag = HedValidator.get_previous_original_and_formatted_tag(
-                original_and_formatted_tags, index)
+        tags = hed_string_delimiter.get_all_tags()
+        for hed_tag in tags:
             validation_issues += \
-                self._tag_validator.run_individual_tag_validators(original_tag, formatted_tag,
-                                                                  previous_original_tag=previous_original_tag,
-                                                                  previous_formatted_tag=previous_formatted_tag)
+                self._tag_validator.run_individual_tag_validators(hed_tag)
+
         return validation_issues
-
-    @staticmethod
-    def get_previous_original_and_formatted_tag(original_and_formatted_tags, loop_index):
-        """Retrieves the previous original and formatted tag from a list of tuples.
-
-        Parameters
-        ----------
-        original_and_formatted_tags: []
-            A list of tuples containing the original and formatted tags.
-        loop_index: int
-            The current index in the loop.
-        Returns
-        -------
-        tuple
-             A tuple containing the previous original and formatted tag.
-
-        """
-        previous_original_tag = ''
-        previous_formatted_tag = ''
-        if loop_index > 0:
-            previous_original_tag = original_and_formatted_tags[loop_index - 1][0]
-            previous_formatted_tag = original_and_formatted_tags[loop_index - 1][1]
-        return previous_original_tag, previous_formatted_tag

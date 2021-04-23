@@ -52,7 +52,10 @@ class EventFileInput(BaseFileInput):
 
         # This stuff is mostly here to make this easier to use for development
         # you should generally create the DefDict and ColumnDefGroup before reaching this point.
-        self.column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
+        if json_def_files:
+            self.column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
+        else:
+            self.column_group_defs = None
         if def_dicts is None:
             self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs, hed_schema)
         else:

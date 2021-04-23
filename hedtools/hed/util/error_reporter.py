@@ -21,7 +21,7 @@ class ErrorHandler:
         ----------
         context_type : ErrorContext
             This should be a value from ErrorContext representing the type of scope.
-        context : str or int
+        context : str or int or HedString
             The main value for the context_type.  eg for ErrorContext.FILE_NAME this would be the actual filename.
         increment_depth_after : bool
             If True, this adds an extra tab to any subsequent errors in the scope.
@@ -66,7 +66,7 @@ class ErrorHandler:
 
     def format_val_error(self, error_type, hed_string='', tag='', tag_prefix='', previous_tag='',
                          character='', index=0, unit_class_units='', opening_parentheses_count=0,
-                         closing_parentheses_count=0):
+                         closing_parentheses_count=0, category_keys=None):
         """Reports the abc error based on the type of error.
 
         Parameters
@@ -75,8 +75,8 @@ class ErrorHandler:
             The type of abc error.
         hed_string: str
             The full HED string in which the error occurred
-        tag: str
-            The tag that generated the error. The original tag not the formatted one.
+        tag: HedTag or str
+            The tag that generated the error.
         tag_prefix: str
             The tag prefix that generated the error.
         previous_tag: str
@@ -91,6 +91,8 @@ class ErrorHandler:
             The number of opening parentheses.
         closing_parentheses_count: int
             The number of closing parentheses.
+        category_keys: [str]
+            List of valid category keys for the given column
         Returns
         -------
         issue_list: [{}]
@@ -98,22 +100,30 @@ class ErrorHandler:
             of warning.
 
         """
+        try:
+            tag = tag.org_tag
+        except AttributeError:
+            tag = tag
+
         error_prefix = "ERROR: "
         error_types = {
             ValidationErrors.PARENTHESES: f'{error_prefix}Number of opening and closing parentheses are unequal. '
                                           f'{opening_parentheses_count} opening parentheses. {closing_parentheses_count} '
                                           'closing parentheses',
             ValidationErrors.INVALID_CHARACTER: f'{error_prefix}Invalid character "{character}" at index {index} of string "{hed_string}"',
+            ValidationErrors.TILDES_NOT_SUPPORTED: f'{error_prefix}Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).   "{character}" at index {index} of string "{hed_string}"',
             ValidationErrors.COMMA_MISSING: f'{error_prefix}Comma missing after - "{tag}"',
-            ValidationErrors.INVALID_COMMA: f'{error_prefix}Either "{previous_tag}" contains a comma when it should not or "{tag}" is not a valid '
-                                            'tag ',
             ValidationErrors.DUPLICATE: f'{error_prefix}Duplicate tag - "{tag}"',
             ValidationErrors.REQUIRE_CHILD: f'{error_prefix}Descendant tag required - "{tag}"',
-            ValidationErrors.EXTRA_TILDE: f'{error_prefix}Too many tildes - group "{tag}"',
             ValidationErrors.MULTIPLE_UNIQUE: f'{error_prefix}Multiple unique tags with prefix - "{tag_prefix}"',
             ValidationErrors.UNIT_CLASS_INVALID_UNIT: f'{error_prefix}Invalid unit - "{tag}" valid units are "{unit_class_units}"',
             ValidationErrors.INVALID_TAG: f'{error_prefix}Invalid tag - "{tag}"',
-            ValidationErrors.EXTRA_DELIMITER: f'{error_prefix}Extra delimiter "{character}" at index {index} of string "{hed_string}"',
+            ValidationErrors.EMPTY_TAG: f'{error_prefix}HED tags cannot be empty.  Extra comma found at: "{character}" at index {index} of string "{hed_string}"',
+            ValidationErrors.EXTRA_SLASHES_OR_SPACES: f"{error_prefix}Extra slashes or spaces '{character}' at index {index} of tag '{tag}'",
+            ValidationErrors.HED_SIDECAR_KEY_MISSING: f"{error_prefix}Category key '{tag}' does not exist in column.  Valid keys are: {category_keys}",
+            ValidationErrors.HED_DEFINITION_UNMATCHED: f"{error_prefix}A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'",
+            ValidationErrors.HED_DEFINITION_VALUE_MISSING: f"{error_prefix}A definition requires a placeholder value, but was not given one.  Definition: '{tag}",
+            ValidationErrors.HED_DEFINITION_VALUE_EXTRA: f"{error_prefix}A definition does not take a placeholder value, but was given one.  Definition: '{tag}",
         }
         default_error_message = 'ERROR: Unknown error'
         error_message = error_types.get(error_type, default_error_message)
@@ -123,7 +133,7 @@ class ErrorHandler:
         return error_object_list
 
     def format_sidecar_error(self, error_type, column_name="", given_type="", expected_type="", pound_sign_count=0,
-                             category_count=0):
+                             category_count=0, severity=ErrorSeverity.ERROR):
         """
         Formats a json sidecar error to human readable
 
@@ -141,7 +151,8 @@ class ErrorHandler:
             The number of pound signs found in the string.
         category_count : int
             The number of categories found in this column.
-
+        severity: ErrorSeverity
+            If this is an error or warning.
         Returns
         -------
         issue_list: [{}]
@@ -154,7 +165,7 @@ class ErrorHandler:
             SidecarErrors.WRONG_HED_DATA_TYPE: f"{error_prefix}Invalid HED string datatype sidecar. Should be '{expected_type}', but got '{given_type}'",
             SidecarErrors.INVALID_NUMBER_POUND_SIGNS: f"{error_prefix}There should be exactly one # character in a sidecar string. Found {pound_sign_count}",
             SidecarErrors.TOO_MANY_POUND_SIGNS: f"{error_prefix}There should be no # characters in a category sidecar string. Found {pound_sign_count}",
-            SidecarErrors.TOO_FEW_CATEGORIES: f"{error_prefix}A category column should have at least two cues. Found {category_count}",
+            SidecarErrors.TOO_FEW_CATEGORIES: f"{error_prefix}A category column should have at least two keys. Found {category_count}",
             SidecarErrors.UNKNOWN_COLUMN_TYPE: f"{error_prefix}Could not automatically identify column '{column_name}' type from file. "
                                               f"Most likely the column definition in question needs a # sign to replace a number somewhere."
         }
@@ -162,7 +173,7 @@ class ErrorHandler:
         default_error_message = f'{error_prefix}Unknown error {error_type}'
         error_message = error_types.get(error_type, default_error_message)
 
-        error_object = {'code': error_type, 'message': error_message, 'severity': ErrorSeverity.ERROR}
+        error_object = {'code': error_type, 'message': error_message, 'severity': severity}
 
         error_object_list = self._add_context_to_errors(error_object)
         return error_object_list
@@ -174,8 +185,8 @@ class ErrorHandler:
         ----------
         warning_type: string
             The type of abc warning.
-        tag: string
-            The tag that generated the warning. The original tag not the formatted one.
+        tag: str or HedTag
+            The tag that generated the warning.
         default_unit: string
             The default unit class unit associated with the warning.
         tag_prefix: string
@@ -187,6 +198,11 @@ class ErrorHandler:
             of warning.
 
         """
+        try:
+            tag = tag.org_tag
+        except AttributeError:
+            tag = tag
+
         warning_prefix = "WARNING: "
 
         warning_types = {
@@ -258,19 +274,19 @@ class ErrorHandler:
         if error_index_end is None:
             error_index_end = len(hed_tag)
 
-        problem_tag = hed_tag[error_index: error_index_end]
+        problem_tag = str(hed_tag)[error_index: error_index_end]
 
         error_prefix = f"ERROR: "
 
         tag_join_delimiter = f"\n\t"
         error_types = {
-            SchemaErrors.INVALID_PARENT_NODE: f"{error_prefix}'{problem_tag}' appears as '{expected_parent_tag}' and cannot be used "
+            SchemaErrors.INVALID_PARENT_NODE: f"{error_prefix}'{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used "
                                               f"as an extension.  {error_index}, {error_index_end}",
             SchemaErrors.NO_VALID_TAG_FOUND: f"{error_prefix}'{problem_tag}' is not a valid base hed tag.  {error_index}, {error_index_end} ",
             SchemaErrors.EMPTY_TAG_FOUND: f"{error_prefix}Empty tag cannot be converted.",
             SchemaErrors.INVALID_SCHEMA: f"{error_prefix}Source hed schema is invalid as it contains duplicate tags.  "
                                          f"Please fix if you wish to be abe to convert tags. {error_index}, {error_index_end}",
-            SchemaErrors.DUPLICATE_TERMS: f"{error_prefix}Term(Short Tag) '{hed_tag}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"
+            SchemaErrors.DUPLICATE_TERMS: f"{error_prefix}Term(Short Tag) '{str(hed_tag)}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"
                                           f"{tag_join_delimiter.join(duplicate_tag_list)}"
         }
         default_error_message = f'{error_prefix}Internal Error'
@@ -278,7 +294,7 @@ class ErrorHandler:
 
         error_object = {'code': error_type,
                         'message': error_message,
-                        'source_tag': hed_tag,
+                        'source_tag': str(hed_tag),
                         'start_index': error_index,
                         'end_index': error_index_end,
                         'expected_parent_tag': expected_parent_tag,
@@ -332,19 +348,24 @@ class ErrorHandler:
         error_object_list = self._add_context_to_errors(error_object)
         return error_object_list
 
-    def format_definition_error(self, error_type, def_name, tag_list=None):
+    def format_definition_error(self, error_type, def_name, tag_list=None, expected_count=0):
+        tag_list_strings = tag_list
+        if tag_list:
+            tag_list_strings = [str(tag) for tag in tag_list]
         error_prefix = f"ERROR: "
         error_types = {
             DefinitionErrors.WRONG_NUMBER_DEF_TAGS:
-                f"{error_prefix}Too many def tags found in definition for {def_name}.  Expected 1, also found: {tag_list}",
-            DefinitionErrors.WRONG_NUMBER_ORG_TAGS:
-                f"{error_prefix}Too many org tags found in definition for {def_name}.  Expected 0 or 1, found: {tag_list}",
+                f"{error_prefix}Too many def tags found in definition for {def_name}.  Expected 1, also found: {tag_list_strings}",
             DefinitionErrors.WRONG_NUMBER_GROUP_TAGS:
-                f"{error_prefix}Too many group tags found in definition for {def_name}.  Expected 1, found: {tag_list}",
+                f"{error_prefix}Too many group tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}",
+            DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS:
+                f"{error_prefix}Incorrect number placeholder tags found in definition for {def_name}.  Expected {expected_count}, found: {tag_list_strings}",
             DefinitionErrors.DUPLICATE_DEFINITION:
                 f"{error_prefix}Duplicate definition found for '{def_name}'.",
             DefinitionErrors.TAG_IN_SCHEMA:
-                f"{error_prefix}Term '{def_name}' already used as term in schema and cannot be re-used as a definition."
+                f"{error_prefix}Term '{def_name}' already used as term in schema and cannot be re-used as a definition.",
+            DefinitionErrors.INVALID_DEF_EXTENSION:
+                f"{error_prefix}Term '{def_name}' has an invalid extension.  Definitions can only have one term."
         }
         default_error_message = f'{error_prefix}Internal Error'
         error_message = error_types.get(error_type, default_error_message)
@@ -462,14 +483,16 @@ def _format_single_context_string(context_type, context, tab_count=0):
         A string containing the context, including tabs.
     """
     tab_string = tab_count * '\t'
+    if context_type == ErrorContext.HED_STRING:
+        context = str(context).replace('\n', ' ')
     error_types = {
         ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
         ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
         ErrorContext.SIDECAR_KEY_NAME: f"Key: {context}",
-        ErrorContext.SIDECAR_HED_STRING: f"hed_string: {context}",
         ErrorContext.ROW: f'Issues in row {context}:',
         ErrorContext.COLUMN: f'Issues in column {context}:',
-        ErrorContext.CUSTOM_TITLE: context
+        ErrorContext.CUSTOM_TITLE: context,
+        ErrorContext.HED_STRING: f"hed string: {context}",
     }
     context_portion = error_types[context_type]
     context_string = f"{tab_string}{context_portion}\n"

@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h2>Process HED Schema</h2>
+    <p>
+        <i>Select a HED schema source URL or upload a file and pick an action.<br>
+            You will see either a downloadable results file or a status message.
+        </i>
+    </p>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/schema-form.css') }}">
+    <form id="schema-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <h3>Select a schema source file (.xml/.mediawiki): </h3>
+        <div class="form-group" id="schema-url-group">
+            <input class="radio-btn" type="radio" name="schema-upload-options"
+                   id="schema-url-option" value="schema-url-option" aria-label="Select this button for HED schema URL">
+            <label class="secondary-label">Enter HED schema URL:</label>
+            <label class="btn-group url-browse-group">
+                <label id="schema-url-display-name"></label>
+                <input type="url" name="schema-url" id="schema-url" aria-label="Enter schema URL here">
+            </label>
+            <p class="flash" id="schema-url-flash"></p>
+        </div>
+
+        <div class="form-group" id="schema-file-group">
+            <input class="radio-btn" type="radio" name="schema-upload-options" id="schema-file-option"
+                   value="schema-file-option" aria-label="Select this button for HED schema file">
+            <label class="secondary-label" for="schema-file">Upload HED schema file:</label>
+            <label class="btn-group file-browse-group">
+                <button aria-label="Button for uploading HED file">Browse ...</button>
+                <label id="schema-file-display-name"></label>
+                <input type="file" name="schema-file" id="schema-file" aria-label="Enter schema file to upload here"/>
+            </label>
+            <p class="flash" id="schema-file-flash"></p>
+        </div>
+
+        <h3>Pick an action: </h3>
+        <div class="form-group">
+            <input class="radio-btn" type="radio" name="schema-option"
+                   id="schema-option-convert" value="schema-option-convert"
+                   aria-label="Select this button to convert schema HED schema">
+            <label class="secondary-label">Convert schema format</label>
+        </div>
+        <div class="form-group">
+            <input class="radio-btn" type="radio" name="schema-option"
+                   id="schema-option-check" value="schema-option-check"
+                   aria-label="Select this button to check HED-3G complicance">
+            <label class="secondary-label">Check HED-3G format</label>
+        </div>
+
+        <div class="form-group">
+            <button id="schema-submit" type="button">Process</button>
+        </div>
+
+        <div class="form-group">
+            <p class="flash" id="schema-submit-flash"></p>
+        </div>
+
+    </form>
+    <script type="module">
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/schema-form.js' %}
+    </script>
+
+{% endblock %}

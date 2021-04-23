@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "column-info.html" import create_column_info %}
+{% from "hed-process-options.html" import create_hed_process_options %}
+
+{% block content %}
+    <h2>Validate a spreadsheet with HED tags</h2>
+    <p>
+        <i>Upload a spreadsheet (tsv, txt, or Excel) and select a worksheet.<br>
+            Enter the column numbers, select a HED schema, select an action and press Process.<br>
+            You will see either a downloadable results file or a status message.<br>
+        </i>
+    </p>
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <form id="spreadsheet-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <h3>Upload spreadsheet file (tab-separated or Excel):</h3>
+        <div class="form-group">
+            <label class="secondary-label" for="spreadsheet-file">Spreadsheet file:</label>
+            <label class="btn-group file-browse-group">
+                <button>Browse ...</button>
+                <label for="spreadsheet-file" id="spreadsheet-display-name"></label>
+                <input type="file" name="spreadsheet-file" id="spreadsheet-file"/>
+            </label>
+
+            <div class="form-group" name="worksheet-select" id="worksheet-select">
+                <label class="secondary-label" for="worksheet-name">Worksheet name:</label>
+                <select name="worksheet-name" id="worksheet-name"></select>
+            </div>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <div class="inline-field">
+                        <input type="checkbox" name="has-column-names" id="has-column-names" checked>
+                        <label for="has-column-names">Has column names</label>
+                    </div>
+                </div>
+                <p class="flash" id="spreadsheet-flash"></p>
+            </div>
+        </div>
+            {{ create_column_info('true') }}
+            {{ create_hed_pulldown() }}
+            {{ create_hed_process_options() }}
+
+
+        <div class="form-group">
+            <button id="spreadsheet-submit" type="button">Process</button>
+            <p class="flash" id="spreadsheet-submit-flash"></p>
+        </div>
+    </form>
+    <script type="module">
+        {%  include 'js/column-info.js' %}
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/hed-pulldown.js' %}
+        {%  include 'js/spreadsheet-form.js' %}
+    </script>
+
+{% endblock %}

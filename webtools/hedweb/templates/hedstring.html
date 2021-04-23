@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% from "json-input.html" import create_json_input %}
+{% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "hed-process-options.html" import create_hed_process_options %}
+
+{% block content %}
+    <h2>HED string quick checks</h2>
+        <p>
+        <i>Enter or paste a HED string in the upper text box.<br>
+        Choose a HED schema version, pick an action, and press Process.<br>
+        You will see either the results in the lower text box or a status message below.
+        </i>
+    </p>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <form id="hedstring-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+     <h3>Enter HED string in the top box [result appears in lower box]: </h3>
+        <div class="form-group">
+                <textarea rows="5" cols="60" wrap="soft" maxlength="25000"
+                          name="hedstring-input" id="hedstring-input"></textarea>
+            <p> </p>
+                <textarea rows="5" cols="60" wrap="soft" maxlength="25000"
+                          name="hedstring-result" id="hedstring-result"></textarea>
+            <p class="flash" id="hedstring-flash"></p>
+        </div>
+
+        {{ create_hed_pulldown() }}
+        {{ create_hed_process_options() }}
+
+        <div class="form-group">
+            <button id="hedstring-submit" type="button">Process</button>
+        </div>
+
+        <div class="form-group">
+            <p class="flash" id="hedstring-submit-flash"></p>
+        </div>
+
+    </form>
+    <script type="module">
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/hed-pulldown.js' %}
+        {%  include 'js/hedstring-form.js' %}
+    </script>
+{% endblock %}

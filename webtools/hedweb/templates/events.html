@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "column-info.html" import create_column_info %}
+{% from "json-input.html" import create_json_input %}
+{% block content %}
+    <h2>Validate BIDS-style event file</h2>
+    <p>
+        <i>Upload a BIDS-style tsv events file and an optional JSON events file.<br>
+            Select a HED schema, selected a processing option, and press Process.<br>
+            You will see either a downloadable results file or a status message.
+        </i>
+    </p>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <form id="events-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <h3>Upload BIDS-style events file:</h3>
+        <div class="form-group">
+            <label class="secondary-label" for="events-file">Events file:</label>
+            <label class="btn-group file-browse-group">
+                <button for="events-file">Browse ...</button>
+                <label id="events-display-name"></label>
+                <input type="file" name="events-file" id="events-file"/>
+            </label>
+            <p class="flash" id="events-flash"></p>
+        </div>
+
+        {{ create_column_info('false') }}
+        {{ create_json_input() }}
+        {{ create_hed_pulldown() }}
+
+        <h3>Pick an action: </h3>
+        <div class="form-group">
+            <input class="radio-btn" type="radio" name="hed-option" checked
+                   id="hed-option-validate" value="hed-option-validate" aria-checked="true"
+                   aria-label="Select this button to validate HED">
+            <label class="secondary-label">Validate</label>
+        </div>
+        <div class="form-group">
+            <input class="radio-btn" type="radio" name="hed-option"
+                   id="hed-option-to-tagged-list" value="hed-option-to-tagged-list"
+                   aria-label="Select this button to convert hed to a list of tagged events">
+            <label class="secondary-label">Convert to tagged list</label>
+        </div>
+
+        <div class="form-group">
+            <button id="events-validation-submit" type="button">Validate</button>
+            <p class="flash" id="events-validation-submit-flash"></p>
+        </div>
+    </form>
+    <script type="module">
+        {%  include 'js/column-info.js' %}
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/hed-pulldown.js' %}
+        {%  include 'js/json-input.js' %}
+        {%  include 'js/events-form.js' %}
+    </script>
+
+{% endblock %}

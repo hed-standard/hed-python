@@ -4,6 +4,7 @@ import os
 from hed import schema
 from hed.schema import HedKey
 from hed.util.exceptions import HedFileError
+from hed.util.hed_string import HedString
 
 
 class TestHedSchema(unittest.TestCase):
@@ -219,7 +220,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(len(desc_dict), 358)
 
         desc_dict = self.hed_schema_3g.get_desc_dict()
-        self.assertEqual(len(desc_dict), 193)
+        self.assertEqual(len(desc_dict), 228)
 
     def test_get_tag_description(self):
         # Test known tag
@@ -234,12 +235,13 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(desc, None)
 
     def test_get_all_tag_attributes(self):
-        tag_props = self.hed_schema.get_all_tag_attributes("Event/Category")
+        test_string = HedString("Jerk-rate/#")
+        test_string.calculate_canonical_forms(self.hed_schema_3g)
+        tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
-            "position": "1",
-            "predicateType": "passThrough",
-            "requireChild": "true",
-            "required": "true"
+            "takesValue": "true",
+            "isNumeric": "true",
+            "unitClass": 'jerk'
         }
         self.assertCountEqual(tag_props, expected_props)
 
@@ -248,10 +250,11 @@ class TestHedSchema(unittest.TestCase):
         }
         self.assertCountEqual(tag_props, expected_props)
 
-        tag_props = self.hed_schema_3g.get_all_tag_attributes("Agent-trait")
+        test_string = HedString("Agent-trait")
+        test_string.calculate_canonical_forms(self.hed_schema_3g)
+        tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
             HedKey.ExtensionAllowed: "true",
-            HedKey.RequireChild: "true"
         }
         self.assertCountEqual(tag_props, expected_props)
         # also test long form.
@@ -281,4 +284,4 @@ class TestHedSchema(unittest.TestCase):
 
     def test_short_tag_mapping(self):
         self.assertFalse(self.hed_schema.short_tag_mapping)
-        self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 986)
+        self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 1011)

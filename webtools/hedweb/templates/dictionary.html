@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% from "json-input.html" import create_json_input %}
+{% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "hed-process-options.html" import create_hed_process_options %}
+
+{% block content %}
+    <h2>Process BIDS-style JSON dictionary</h2>
+    <p>
+        <i>Upload a BIDS-style JSON events file, select a HED schema, choose option and press Process.<br>
+        You will see a downloadable results file and/or a status message.
+        </i>
+    </p>
+
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <form id="dictionary-form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <div class="form-group">
+
+            {{ create_json_input() }}
+            {{ create_hed_pulldown() }}
+            {{ create_hed_process_options() }}
+
+            <div class="form-group">
+                <button id="dictionary-submit" type="button">Process</button>
+                <p class="flash" id="dictionary-submit-flash"></p>
+            </div>
+        </div>
+    </form>
+    <script type="module">
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/json-input.js' %}
+        {%  include 'js/hed-pulldown.js' %}
+        {%  include 'js/dictionary-form.js' %}
+    </script>
+{% endblock %}

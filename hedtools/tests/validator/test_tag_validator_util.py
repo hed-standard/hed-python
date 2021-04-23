@@ -1,7 +1,7 @@
 import unittest
 
 from hed.validator.tag_validator import TagValidator
-from tests.validator.test_tag_validator import TestHed
+from tests.validator.test_tag_validator_2g import TestHed
 
 
 class StringUtilityFunctions(TestHed):

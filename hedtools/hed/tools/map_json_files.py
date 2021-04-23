@@ -1,7 +1,8 @@
 """Basic easy to use functions showing how to iterate over a given json file and convert all HED tags"""
 import os
 from hed.util.column_def_group import ColumnDefGroup
-from hed.tools.tag_format import TagFormat
+
+raise NotImplementedError("This file needs to be updated to the new hed string system.")
 
 
 def map_json_file(json_filename, out_filename, mapping_function):

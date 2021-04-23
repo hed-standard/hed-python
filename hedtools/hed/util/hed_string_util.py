@@ -1,5 +1,3 @@
-import re
-
 
 def split_hed_string(hed_string):
     """
@@ -22,11 +20,11 @@ def split_hed_string(hed_string):
         end_pos: int
             index of end of string in hed_string
     """
-    tag_delimiters = ",()~"
+    tag_delimiters = ",()"
     current_spacing = 0
-    inside_d = True
+    found_symbol = True
     result_positions = []
-    start_pos = None
+    tag_start_pos = None
     last_end_pos = 0
     for i, char in enumerate(hed_string):
         if char == " ":
@@ -34,82 +32,58 @@ def split_hed_string(hed_string):
             continue
 
         if char in tag_delimiters:
-            if not inside_d:
-                inside_d = True
-                if start_pos is not None:
-                    last_end_pos = i - current_spacing
-                    # view_string = hed_string[start_pos: last_end_pos]
-                    result_positions.append((True, (start_pos, last_end_pos)))
-                    current_spacing = 0
-                    start_pos = None
+            if found_symbol:
+                # view_string = hed_string[last_end_pos: i]
+                if last_end_pos != i:
+                    result_positions.append((False, (last_end_pos, i)))
+                last_end_pos = i
+            elif not found_symbol:
+                found_symbol = True
+                last_end_pos = i - current_spacing
+                # view_string = hed_string[tag_start_pos: last_end_pos]
+                result_positions.append((True, (tag_start_pos, last_end_pos)))
+                current_spacing = 0
+                tag_start_pos = None
             continue
 
         # If we have a current delimiter, end it here.
-        if inside_d and last_end_pos is not None:
+        if found_symbol and last_end_pos is not None:
             # view_string = hed_string[last_end_pos: i]
             if last_end_pos != i:
                 result_positions.append((False, (last_end_pos, i)))
             last_end_pos = None
 
+        found_symbol = False
         current_spacing = 0
-        inside_d = False
-        if start_pos is None:
-            start_pos = i
+        if tag_start_pos is None:
+            tag_start_pos = i
 
     if last_end_pos is not None and len(hed_string) != last_end_pos:
         # view_string = hed_string[last_end_pos: len(hed_string)]
         result_positions.append((False, (last_end_pos, len(hed_string))))
-    if start_pos is not None:
-        # view_string = hed_string[start_pos: len(hed_string)]
-        result_positions.append((True, (start_pos, len(hed_string) - current_spacing)))
+    if tag_start_pos is not None:
+        # view_string = hed_string[tag_start_pos: len(hed_string)]
+        result_positions.append((True, (tag_start_pos, len(hed_string) - current_spacing)))
         if current_spacing:
             result_positions.append((False, (len(hed_string) - current_spacing, len(hed_string))))
 
-    # debug_result_strings = [hed_string[startpos:endpos] for (is_hed_string, (startpos, endpos)) in result_positions]
     return result_positions
 
 
-def split_hed_string_return_strings(hed_string):
+def split_hed_string_return_tags(hed_string):
     """
-    An easier to use variant of split_hed_string if you don't need positions or delimiters.
+    An easier to use variant of split_hed_string if you're only interested in tags
 
     Parameters
     ----------
     hed_string : str
         A hed string to split into tags
-
     Returns
     -------
-    hed_tags: [str]
+    hed_tags: [HedTag]
         The string split apart into hed tags with all delimiters removed
     """
+    from hed.util.hed_string import HedTag
     result_positions = split_hed_string(hed_string)
-    return [hed_string[startpos:endpos] for (is_hed_tag, (startpos, endpos)) in result_positions if is_hed_tag]
-
-
-# Regular expression for cleaning up repeated slashes and spaces around slashes.
-pattern_doubleslash = re.compile(r"[\s/]*/+[\s/]*")
-
-
-def remove_slashes_and_spaces(hed_string):
-    """
-    Removes duplicate slashes and extra spaces around tags from hed strings.
-
-    Examples:   '//' -> '/'
-                'Event//Extension' -> 'Event/Extension'
-                'Event  //Extension' -> 'Event/Extension'
-
-    Parameters
-    ----------
-    hed_string : str
-        A hed string that potentially has extra slashes or spaces.
-
-    Returns
-    -------
-    cleaned_string: str
-        The hed_string with redundant slashes and spaces removed.
-    """
-    simplified_string = pattern_doubleslash.sub('/', hed_string)
-    # Temp - Remove newlines as well
-    simplified_string = simplified_string.replace('\n', '')
-    return simplified_string
+    return [HedTag(hed_string, span) for (is_hed_tag, span) in
+            result_positions if is_hed_tag]

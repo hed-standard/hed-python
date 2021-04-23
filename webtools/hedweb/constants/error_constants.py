@@ -1,0 +1,8 @@
+NOT_FOUND_ERROR = 404
+NO_CONTENT_SUCCESS = 204
+ERROR_KEY = 'error'
+FILE_DOES_NOT_EXIST_NOW = "File doesn't exist"
+
+
+
+

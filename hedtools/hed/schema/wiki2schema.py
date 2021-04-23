@@ -5,7 +5,7 @@ import re
 from hed.schema import hed_schema_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from hed.util.exceptions import HedFileError, HedExceptions
-from hed.schema import HedSchema
+from hed.schema.hed_schema import HedSchema
 from hed.schema import schema_validation_util
 
 ROOT_TAG = '\'\'\''
