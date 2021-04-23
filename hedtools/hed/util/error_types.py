@@ -29,7 +29,7 @@ class ValidationErrors:
     INVALID_TAG = 'invalidTag'
     EXTRA_SLASHES_OR_SPACES = 'extraSlashes'
     TILDES_NOT_SUPPORTED = 'invalidTilde'
-    CATEGORY_KEY_MISSING = 'categoryKeyMissing'
+    HED_SIDECAR_KEY_MISSING = 'categoryKeyMissing'
 
     HED_DEFINITION_UNMATCHED = "HED_DEFINITION_UNMATCHED"
     HED_DEFINITION_VALUE_MISSING = "HED_DEFINITION_VALUE_MISSING"
