@@ -142,6 +142,13 @@ def events_validate(arguments):
     json_sidecar = None
     if arguments.get(common.JSON_PATH, ''):  # If dictionary is provided and it has errors return those errors
         json_sidecar = ColumnDefGroup(arguments.get(common.JSON_PATH, ''))
+        def_dict, issues = json_sidecar.extract_defs(hed_schema)
+        if issues:
+            issue_str = get_printable_issue_string(issues, f"{common.JSON_FILE} HED dictionary errors")
+            file_name = generate_filename(common.JSON_FILE, suffix='_dictionary_errors', extension='.txt')
+            issue_file = save_text_to_upload_folder(issue_str, file_name)
+            return generate_download_file_response(issue_file, display_name=file_name, category='warning',
+                                                   msg='JSON sidecar had dictionary errors')
         issues = json_sidecar.validate_entries(hed_schema)
         if issues:
             issue_str = get_printable_issue_string(issues, f"{common.JSON_FILE} HED validation errors")
