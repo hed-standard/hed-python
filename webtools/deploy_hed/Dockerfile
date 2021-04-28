@@ -18,6 +18,6 @@ mkdir -p /var/cache/schema_cache && \
 chown -R www-data:www-data /var/cache/schema_cache
 COPY ./httpd.conf /etc/apache2/apache2.conf
 COPY ./hedtools /var/www/hedtools/
-COPY ./hedtools/hedweb /var/www/hedtools/hedweb/
+COPY ./webtools/hedweb /var/www/hedtools/hed/hedweb/
 ENTRYPOINT /usr/sbin/apache2 -D FOREGROUND -f /etc/apache2/apache2.conf
 ENV HEDTOOLS_CONFIG_CLASS=config.ProductionConfig
