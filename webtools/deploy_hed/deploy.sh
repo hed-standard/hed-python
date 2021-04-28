@@ -9,7 +9,7 @@ IMAGE_NAME="hedtools:latest"
 CONTAINER_NAME="hedtools"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${PWD}/hed-python"
-GIT_REPO_BRANCH="master"
+GIT_REPO_BRANCH="web-work"
 HOST_PORT=33000
 CONTAINER_PORT=80
 
@@ -110,4 +110,4 @@ switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-cleanup_directory
+# cleanup_directory
