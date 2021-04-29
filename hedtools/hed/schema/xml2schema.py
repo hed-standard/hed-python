@@ -2,7 +2,7 @@
 This module is used to create a HedSchema object from an XML file or tree.
 """
 
-from defusedxml.ElementTree import parse
+from defusedxml import ElementTree
 import xml
 from hed.util.exceptions import HedFileError, HedExceptions
 from hed.schema import hed_schema_constants as constants
@@ -22,8 +22,8 @@ class HedSchemaXMLParser:
     PROLOGUE_ELEMENT = "prologue"
     EPILOGUE_ELEMENT = "epilogue"
 
-    def __init__(self, hed_xml_file_path):
-        self._root_element = self._parse_hed_xml_file(hed_xml_file_path)
+    def __init__(self, hed_xml_file_path, schema_as_string=None):
+        self._root_element = self._parse_hed_xml(hed_xml_file_path, schema_as_string)
         # Used to find parent elements of XML nodes during file parsing
         self._parent_map = {c: p for p in self._root_element.iter() for c in p}
 
@@ -35,8 +35,8 @@ class HedSchemaXMLParser:
         self._populate_dictionaries()
 
     @staticmethod
-    def load_xml(xml_file_path):
-        parser = HedSchemaXMLParser(xml_file_path)
+    def load_xml(xml_file_path=None, schema_as_string=None):
+        parser = HedSchemaXMLParser(xml_file_path, schema_as_string)
 
         hed_schema = HedSchema()
 
@@ -49,22 +49,31 @@ class HedSchemaXMLParser:
         return hed_schema
 
     @staticmethod
-    def _parse_hed_xml_file(hed_xml_file_path):
+    def _parse_hed_xml(hed_xml_file_path, schema_as_string=None):
         """Parses a XML file and returns the root element.
 
         Parameters
         ----------
         hed_xml_file_path: str
             The path to a HED XML file.
-
+        schema_as_string: str
+            Alternate input, a full schema XML file as a string.
         Returns
         -------
         RestrictedElement
             The root element of the HED XML file.
 
         """
+        root = None
+        if schema_as_string and hed_xml_file_path:
+            raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.", hed_xml_file_path)
+
         try:
-            hed_xml_tree = parse(hed_xml_file_path)
+            if hed_xml_file_path:
+                hed_xml_tree = ElementTree.parse(hed_xml_file_path)
+                root = hed_xml_tree.getroot()
+            else:
+                root = ElementTree.fromstring(schema_as_string)
         except xml.etree.ElementTree.ParseError as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, hed_xml_file_path)
         except FileNotFoundError as e:
@@ -72,7 +81,7 @@ class HedSchemaXMLParser:
         except TypeError as e:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), hed_xml_file_path)
 
-        return hed_xml_tree.getroot()
+        return root
 
     def _populate_dictionaries(self):
         """Populates a dictionary of dictionaries that contains all of the tags, tag attributes, unit class units,
