@@ -7,7 +7,8 @@ from hed.util import file_util
 
 def load_schema(hed_file_path):
     if not hed_file_path:
-        raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file", filename=hed_file_path)
+        raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file",
+                           filename=hed_file_path)
 
     if hed_file_path.lower().endswith(".xml"):
         hed_schema = HedSchemaXMLParser.load_xml(hed_file_path)
@@ -17,6 +18,21 @@ def load_schema(hed_file_path):
         return hed_schema
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_file_path)
+
+
+def from_string(schema_string, file_type=".xml"):
+    if not schema_string:
+        raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string",
+                           filename=schema_string)
+
+    if file_type.endswith(".xml"):
+        hed_schema = HedSchemaXMLParser.load_xml(schema_as_string=schema_string)
+        return hed_schema
+    elif file_type.endswith(".mediawiki"):
+        hed_schema = HedSchemaWikiParser.load_wiki(schema_as_string=schema_string)
+        return hed_schema
+    else:
+        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
 
 
 # todo: this could be updated to also support .mediawiki format.
@@ -33,7 +49,7 @@ def get_hed_xml_version(hed_xml_file_path):
         The version number of the HED XML file.
 
     """
-    root_node = HedSchemaXMLParser._parse_hed_xml_file(hed_xml_file_path)
+    root_node = HedSchemaXMLParser._parse_hed_xml(hed_xml_file_path)
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
