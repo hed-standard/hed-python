@@ -70,7 +70,7 @@ required_sections = [HedSection.Schema, HedSection.EndSchema, HedSection.EndHed]
 
 
 class HedSchemaWikiParser:
-    def __init__(self, wiki_file_path):
+    def __init__(self, wiki_file_path, schema_as_string):
         self.filename = wiki_file_path
         # Required properties
         self.schema_attributes = {}
@@ -85,14 +85,20 @@ class HedSchemaWikiParser:
         self._current_section = HedSection.HeaderLine
 
         try:
-            with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
-                self._read_file(wiki_file)
+            if wiki_file_path and schema_as_string:
+                raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.",
+                                   wiki_file_path)
+            if wiki_file_path:
+                with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
+                    self._read_wiki(wiki_file)
+            else:
+                self._read_wiki(schema_as_string.split("\n"))
         except FileNotFoundError as e:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, wiki_file_path)
 
     @staticmethod
-    def load_wiki(wiki_file_path):
-        parser = HedSchemaWikiParser(wiki_file_path)
+    def load_wiki(wiki_file_path=None, schema_as_string=None):
+        parser = HedSchemaWikiParser(wiki_file_path, schema_as_string)
 
         hed_schema = HedSchema()
 
@@ -105,15 +111,15 @@ class HedSchemaWikiParser:
 
         return hed_schema
 
-    def _get_line_iter(self, wiki_file):
+    def _get_line_iter(self, wiki_lines):
         """ This function iterates over the file line by line, keeping track of which file section it is currently in.
         Parameters
         ----------
-        wiki_file : file object
-            An opened .mediawiki file
+        wiki_lines : iter(str)
+            An opened .mediawiki file or other list of lines
         """
-        line = wiki_file.readline()
-        while line:
+        for line in wiki_lines:
+            found_section = False
             for key, section_string in SectionStarts.items():
                 if line.startswith(section_string):
                     if key in self._found_sections:
@@ -125,8 +131,8 @@ class HedSchemaWikiParser:
                         self._current_section = key
                         # this line is already handled and we are in a new section
                         yield False
-                        line = wiki_file.readline()
-                        continue
+                        found_section = True
+                        break
                     else:
                         error_code = HedExceptions.INVALID_SECTION_SEPARATOR
                         if key in ErrorsBySection:
@@ -135,6 +141,9 @@ class HedSchemaWikiParser:
                         raise HedFileError(error_code,
                                            f"Found section {SectionNames[key]} out of order in file",
                                            filename=self.filename)
+
+            if found_section:
+                continue
 
             if line.startswith("!#"):
                 raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
@@ -151,16 +160,15 @@ class HedSchemaWikiParser:
                 if line:
                     yield line
 
-            line = wiki_file.readline()
         self._current_section = None
 
-    def _read_file(self, wiki_file):
+    def _read_wiki(self, wiki_lines):
         """
         Calls the parsers for each section as this goes through the file.
 
         Parameters
         ----------
-        wiki_file : file object
+        wiki_lines : iter(str)
             An opened .mediawiki file
         """
         self._current_section = HedSection.HeaderLine
@@ -176,7 +184,7 @@ class HedSchemaWikiParser:
             HedSection.EndHed: self._read_epilogue,
         }
 
-        file_iter = self._get_line_iter(wiki_file)
+        file_iter = self._get_line_iter(wiki_lines)
 
         while self._current_section is not None:
             # The iterator is responsible for updating the current_section variable.
