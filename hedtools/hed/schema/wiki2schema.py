@@ -14,7 +14,7 @@ START_STRING = '!# start schema'
 END_SCHEMA_STRING = "!# end schema"
 UNIT_CLASS_STRING = '\'\'\'Unit classes'
 UNIT_MODIFIER_STRING = '\'\'\'Unit modifiers'
-ATTRIBUTE_DEFINITION_STRING = '\'\'\'Attribute Definitions:'
+ATTRIBUTE_DEFINITION_STRING = "'''Schema attributes"
 END_STRING = '!# end hed'
 
 
