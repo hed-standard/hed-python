@@ -3,6 +3,10 @@ import os
 
 from hed.util.hed_file_input import HedFileInput
 from hed.util.hed_string import HedString
+from hed.schema import load_schema
+from hed.util.column_def_group import ColumnDefGroup
+from hed.util.event_file_input import EventFileInput
+
 
 class Test(unittest.TestCase):
     @classmethod
@@ -45,6 +49,27 @@ class Test(unittest.TestCase):
         self.assertTrue(hed_string)
         self.assertIsInstance(column_to_hed_tags_dictionary, dict)
         self.assertTrue(column_to_hed_tags_dictionary)
+
+    def test_file_as_string(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
+
+        hed_schema = load_schema(schema_path)
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
+        column_group = ColumnDefGroup(json_path)
+        def_dict, def_issues = column_group.extract_defs(hed_schema)
+        self.assertEqual(len(def_issues), 0)
+        input_file = EventFileInput(events_path, json_def_files=column_group,
+                                    hed_schema=hed_schema, def_dicts=def_dict)
+
+        events_file_as_string = "".join([line for line in open(events_path)])
+        input_file_from_string = EventFileInput(events_path, json_def_files=column_group,
+                                                hed_schema=hed_schema, def_dicts=def_dict,
+                                                data_as_csv_string=events_file_as_string)
+
+        for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
+            self.assertEqual(row_number, row_number2)
+            self.assertEqual(column_dict, column_dict)
 
     # Add more tests here
 

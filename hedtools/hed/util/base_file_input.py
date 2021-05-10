@@ -2,6 +2,7 @@ import os
 import openpyxl
 import pandas
 import copy
+import io
 
 from hed.util.def_dict import DefDict
 from hed.util.column_mapper import ColumnMapper
@@ -22,7 +23,7 @@ class BaseFileInput:
     COMMA_DELIMITER = ','
 
     def __init__(self, filename, worksheet_name=None, has_column_names=True, mapper=None,
-                 hed_schema=None):
+                 hed_schema=None, data_as_csv_string=None):
         """Constructor for the BaseFileInput class.
 
          Parameters
@@ -39,6 +40,8 @@ class BaseFileInput:
              retrieve all columns as hed tags.
          hed_schema: HedSchema
              Used to create definitions.
+         data_as_csv_string: str or None
+            The data to treat as this file.  eg web services passing a string.
          """
         if mapper is None:
             mapper = ColumnMapper()
@@ -57,7 +60,10 @@ class BaseFileInput:
                 worksheet_to_load = 0
             self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header)
         elif self.is_text_file():
-            self._dataframe = pandas.read_csv(filename, '\t', header=pandas_header)
+            csv_filename_or_data = filename
+            if data_as_csv_string:
+                csv_filename_or_data = io.StringIO(data_as_csv_string)
+            self._dataframe = pandas.read_csv(csv_filename_or_data, '\t', header=pandas_header)
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
 
