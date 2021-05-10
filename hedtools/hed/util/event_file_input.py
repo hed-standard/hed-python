@@ -11,7 +11,8 @@ class EventFileInput(BaseFileInput):
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
-                 hed_schema=None, def_dicts=None):
+                 hed_schema=None, def_dicts=None,
+                 data_as_csv_string=None):
         """Constructor for the EventFileInput class.
 
         Parameters
@@ -42,6 +43,8 @@ class EventFileInput(BaseFileInput):
             DefDict's containing all the definitions this file should use - other than the ones coming from the file
             itself.
             If this is NOT passed, the class will instead gather definitions from any passed in ColumnDefGroups
+        data_as_csv_string: str or None
+            The data to treat as this file.  eg web services passing a string.
         """
         if tag_columns is None:
             tag_columns = []
@@ -70,7 +73,8 @@ class EventFileInput(BaseFileInput):
                                   attribute_columns=attribute_columns,
                                   definition_mapper=def_mapper)
 
-        super().__init__(filename, worksheet_name, has_column_names, new_mapper)
+        super().__init__(filename, worksheet_name, has_column_names, new_mapper,
+                                  data_as_csv_string=data_as_csv_string)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
