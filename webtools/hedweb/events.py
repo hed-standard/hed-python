@@ -1,4 +1,6 @@
 from flask import current_app
+from werkzeug import Response
+import pandas as pd
 
 from hed.schema.hed_schema_file import load_schema
 from hed.util.column_def_group import ColumnDefGroup
@@ -43,8 +45,8 @@ def generate_input_from_events_form(request):
     }
     if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
         arguments[common.HED_OPTION_VALIDATE] = True
-    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_TAGGED_LIST):
-        arguments[common.HED_OPTION_TO_SHORT] = True
+    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_ASSEMBLE):
+        arguments[common.HED_OPTION_ASSEMBLE] = True
     return arguments
 
 
@@ -66,14 +68,14 @@ def events_process(arguments):
         raise HedFileError('EmptyEventsFile', "Please upload an events file to process", "")
     if arguments.get(common.HED_OPTION_VALIDATE, None):
         return events_validate(arguments)
-    elif arguments.get(common.HED_OPTION_TO_TAGGED_LIST, None):
-        return events_convert(arguments)
+    elif arguments.get(common.HED_OPTION_ASSEMBLE, None):
+        return events_assemble(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select an events file processing method", "")
 
 
-def events_convert(arguments, hed_schema=None):
-    """Converts an events file into a tagged event list
+def events_assemble(arguments, hed_schema=None):
+    """Converts an events file from short to long unless short_to_long is set to False, then long_to_short
 
     Parameters
     ----------
@@ -88,58 +90,53 @@ def events_convert(arguments, hed_schema=None):
         A downloadable spreadsheet file or a file containing warnings
     """
 
-    return generate_text_response('Not available', category='warning', msg='Spreadsheet conversion not implemented yet')
-    #
-    # if not hed_schema:
-    #     hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
-    # error_handler = ErrorHandler()
-    # tag_formatter = TagFormat(hed_schema=hed_schema, error_handler=error_handler)
-    # issues = []
-    # for column_def in json_dictionary:
-    #     for hed_string, position in column_def.hed_string_iter(include_position=True):
-    #         if short_to_long:
-    #             new_hed_string, errors = tag_formatter.convert_hed_string_to_long(hed_string)
-    #         else:
-    #             new_hed_string, errors = tag_formatter.convert_hed_string_to_short(hed_string)
-    #         issues = issues + errors
-    #         column_def.set_hed_string(new_hed_string, position)
-    # if short_to_long:
-    #     suffix = '_to_long'
-    # else:
-    #     suffix = '_to_short'
-    # issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-    # display_name = arguments.get(common.JSON_FILE, '')
-    # if issues:
-    #     display_name = arguments.get(common.JSON_FILE, '')
-    #     issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
-    #     file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
-    #     issue_file = save_text_to_upload_folder(issue_str, file_name)
-    #     return generate_download_file_response(issue_file, display_name=file_name, category='warning',
-    #                                            msg='JSON dictionary had conversion errors')
-    # else:
-    #     file_name = generate_filename(display_name, suffix=suffix, extension='.json')
-    #     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_name)
-    #     json_dictionary.save_as_json(file_path)
-    #     return generate_download_file_response(file_path, display_name=file_name, category='success',
-    #                                            msg='JSON dictionary was successfully converted')
+    if not hed_schema:
+        hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
+
+    results = events_validate(arguments, hed_schema)
+    if results.data:
+        return results
+
+    if arguments.get(common.JSON_PATH, ''):  # If dictionary is provided and it has errors return those errors
+        json_sidecar = ColumnDefGroup(arguments.get(common.JSON_PATH, ''))
+        def_dict = json_sidecar.extract_defs(hed_schema)
+    else:
+        json_sidecar = None
+        def_dict = None
+    event_file = EventFileInput(arguments.get(common.EVENTS_PATH),
+                                json_def_files=json_sidecar, hed_schema=hed_schema, def_dicts=def_dict)
+    hed_tags = []
+    onsets = []
+    for row_number, row_dict in event_file.parse_dataframe(return_row_dict=True):
+        hed_tags.append(row_dict.get("HED", "").hed_string)
+        onsets.append(row_dict.get("onset", "n/a"))
+    data = {'onset': onsets, 'HED': hed_tags}
+    df = pd.DataFrame(data)
+    file_name = generate_filename(common.EVENTS_FILE, suffix='_expanded', extension='.tsv')
+    df.to_csv(file_name, '\t', index=False, header=True)
+    return generate_download_file_response(file_name, display_name=file_name, category='success',
+                                           msg='Events file successfully expanded')
 
 
-def events_validate(arguments):
+def events_validate(arguments, hed_schema=None):
     """Reports the spreadsheet validation status.
 
     Parameters
     ----------
     arguments: dict
         A dictionary of the values extracted from the form
+    hed_schema: str or HedSchema
+        Version number or path or HedSchema object to be used
 
     Returns
     -------
     Response
          The validation results as a Response object
     """
-
-    hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
+    if not hed_schema:
+        hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
     json_sidecar = None
+    def_dict = None
     if arguments.get(common.JSON_PATH, ''):  # If dictionary is provided and it has errors return those errors
         json_sidecar = ColumnDefGroup(arguments.get(common.JSON_PATH, ''))
         def_dict, issues = json_sidecar.extract_defs(hed_schema)

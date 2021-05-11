@@ -9,7 +9,7 @@ DICTIONARY_ROUTE = '/dictionary'
 DICTIONARY_SUBMIT_ROUTE = '/dictionary-submit'
 
 EVENTS_ROUTE = '/events'
-EVENTS_SUBMIT_ROUTE = '/events-validation-submit'
+EVENTS_SUBMIT_ROUTE = '/events-submit'
 HED_MAJOR_VERSION_ROUTE = '/get-hed-major-versions'
 HED_SERVICES_SUBMIT_ROUTE = '/hed-services-submit'
 HED_SERVICES_ROUTE = '/hed-services'

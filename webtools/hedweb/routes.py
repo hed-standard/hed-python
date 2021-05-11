@@ -71,13 +71,13 @@ def get_events_results():
     except Exception as ex:
         return handle_http_error(ex)
     finally:
-        delete_file_no_exceptions(input_arguments.get(common.SPREADSHEET_PATH, ''))
+        delete_file_no_exceptions(input_arguments.get(common.EVENTS_PATH, ''))
         delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.HED_SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_hed_services_results():
-    """Perform the requested hed hedweb service and return the results in JSON.
+    """Perform the requested web service and return the results in JSON.
 
     Returns
     -------

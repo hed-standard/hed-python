@@ -30,7 +30,7 @@ $('#events-file').on('change', function () {
 /**
  * Submits the form if there is an events file and an available hed schema
  */
-$('#events-validation-submit').on('click', function () {
+$('#events-submit').on('click', function () {
     if (fileIsSpecified('#events-file', 'events-flash', 'Events file is not specified.')
         && hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
@@ -57,7 +57,7 @@ function clearFlashMessages() {
     clearHedSelectFlashMessages();
     clearJsonInputFlashMessages();
     flashMessageOnScreen('', 'success', 'events-flash');
-    flashMessageOnScreen('', 'success', 'events-validation-submit-flash');
+    flashMessageOnScreen('', 'success', 'events-submit-flash');
 }
 
 
@@ -84,7 +84,7 @@ function submitForm() {
     let display_name = convertToResultsName(eventsFile, prefix)
     clearFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
-        'events-validation-submit-flash')
+        'events-submit-flash')
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.get_events_results')}}",
@@ -93,10 +93,10 @@ function submitForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'events-validation-submit-flash')
+                getResponseSuccess(download, xhr, display_name, 'events-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'events-validation-submit-flash')
+                getResponseFailure(download, xhr, display_name, 'events-submit-flash')
             }
         }
     )

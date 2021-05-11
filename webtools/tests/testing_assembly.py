@@ -1,8 +1,7 @@
 import os
-import hed
+import pandas as pd
 from hed.util.event_file_input import EventFileInput
 from hed.schema.hed_schema_file import load_schema
-from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.error_reporter import get_printable_issue_string
 
@@ -10,7 +9,7 @@ if __name__ == '__main__':
     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
     local_hed_file = 'data/HED8.0.0-alpha.1.xml'
     example_data_path = 'data'  # path to example data
-    events_path= os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+    events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
 
     hed_schema = load_schema(schema_path)
     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/bids_events.json")
@@ -19,17 +18,18 @@ if __name__ == '__main__':
     if def_issues:
         print(get_printable_issue_string(def_issues,
                                          title="There should be no errors in the definitions from the sidecars:"))
-    input_file = EventFileInput(events_path, json_def_files=column_group,
+    event_file = EventFileInput(events_path, json_def_files=column_group,
                                 hed_schema=hed_schema, def_dicts=def_dict)
 
-    validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
-    if validation_issues:
-        print(get_printable_issue_string(validation_issues,
-                                         title="There should be no errors with the sidecar.  \""
-                                         "This will likely cause other errors if there are."))
-    validator = HedValidator(hed_schema=hed_schema)
-    validation_issues = validator.validate_input(input_file)
-    print(get_printable_issue_string(validation_issues, "Normal hed string errors"))
-    row_dict = input_file._get_dict_from_row_hed_tags(input_file.row_with_hed_tags, input_file._mapper)
-    hed_string, column_to_hed_tags_dictionary = input_file.generic_file_input._get_row_hed_tags_from_dict(row_dict)
-    print("to_here")
+    # for row_number, columns_to_row_dict in event_file:
+    hed_tags = []
+    onsets = []
+    for row_number, row_dict in event_file.parse_dataframe(return_row_dict=True):
+        assembled_row_hed_string = row_dict.get("HED", "")
+        onset = row_dict.get("onset", "n/a")
+        hed_tags.append(row_dict.get("HED", "").hed_string)
+        onsets.append(row_dict.get("onset", "n/a"))
+    data = {'onset': onsets, 'HED': hed_tags}
+    df = pd.DataFrame(data)
+    final_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/myTemp.tsv')
+    df.to_csv(final_filename, '\t', index=False, header=True)
