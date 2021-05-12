@@ -54,7 +54,7 @@ def get_hed_xml_version(hed_xml_file_path):
 
 
 def convert_schema_to_format(hed_url=None, local_hed_file=None, check_for_issues=True,
-                             display_filename=None, save_as_mediawiki=False):
+                             display_filename=None, save_as_mediawiki=False, save_as_legacy_xml=False):
     """
     Loads a local schema file or from a URL, then outputs a temporary file with the requested format.
 
@@ -71,6 +71,9 @@ def convert_schema_to_format(hed_url=None, local_hed_file=None, check_for_issues
         Useful for temp filenames.
     save_as_mediawiki: bool
         If True, save as .mediawiki.  if False, save as .xml
+    save_as_legacy_xml: bool
+        If True(and save_as_mediawiki is False), will save using the old legacy XML format.
+
     Returns
     -------
     output_filename: str
@@ -91,6 +94,6 @@ def convert_schema_to_format(hed_url=None, local_hed_file=None, check_for_issues
     if save_as_mediawiki:
         output_filename = hed_schema.save_as_mediawiki()
     else:
-        output_filename = hed_schema.save_as_xml()
+        output_filename = hed_schema.save_as_xml(save_as_legacy_xml)
 
     return output_filename, issue_list

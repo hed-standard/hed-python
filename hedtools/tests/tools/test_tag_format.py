@@ -8,7 +8,7 @@ from hed.schema.hed_schema_file import load_schema
 
 
 class TestTagFormat(unittest.TestCase):
-    schema_file = '../data/reduced_no_dupe.xml'
+    schema_file = '../data/legacy_xml/reduced_no_dupe.xml'
 
     @classmethod
     def setUpClass(cls):

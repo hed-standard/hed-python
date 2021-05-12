@@ -150,7 +150,8 @@ class Test(unittest.TestCase):
         self.assertEqual(len(validation_issues), 42)
 
     def test_file_bad_defs_in_spreadsheet(self):
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/legacy_xml/HED8.0.0-alpha.1.xml')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = load_schema(schema_path)
 

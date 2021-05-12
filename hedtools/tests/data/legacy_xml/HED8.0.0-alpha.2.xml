@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
-<HED version="8.0.0-alpha.1">
+<HED version="8.0.0-alpha.2">
    <node>
       <name>Event</name>
-      <node>
+      <node suggestedTag="Task-property/Task-role">
          <name>Sensory-event</name>
          <description>Something perceivable by the participant. An event meant to be an experimental stimulus should also be tagged with Task-property/Task-role/Experiment-stimulus.</description>
       </node>
@@ -431,6 +431,9 @@
          </node>
          <node>
             <name>Predict</name>
+         </node>
+         <node>
+            <name>Recognize</name>
          </node>
          <node>
             <name>Respond</name>
@@ -1088,7 +1091,7 @@
    </node>
    <node>
       <name>Agent-property</name>
-      <node requireChild="true" extensionAllowed="true">
+      <node extensionAllowed="true" requireChild="true">
          <name>Cognitive-state</name>
          <node>
             <name>Alert</name>
@@ -1123,6 +1126,7 @@
          </node>
          <node>
             <name>Passive</name>
+            <description>Observing but not allowed to make any behavioral outputs. The resting state is not considered passive.</description>
          </node>
          <node>
             <name>Resting</name>
@@ -1131,7 +1135,7 @@
             <name>Vegetative</name>
          </node>
       </node>
-      <node requireChild="true" extensionAllowed="true">
+      <node extensionAllowed="true" requireChild="true">
          <name>Emotional-state</name>
          <node>
             <name>Angry</name>
@@ -1360,7 +1364,7 @@
             </node>
             <node>
                <name>Temperature</name>
-               <node takesValue="true" isNumeric="true">
+               <node isNumeric="true" takesValue="true">
                   <name>#</name>
                </node>
             </node>
@@ -1421,14 +1425,14 @@
             <name>Rate-of-change</name>
             <node>
                <name>Acceleration</name>
-               <node takesValue="true" isNumeric="true" unitClass="acceleration">
+               <node isNumeric="true" takesValue="true" unitClass="acceleration">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Jerk-rate</name>
                <description>Rate at which the acceleration of an object changes with respect to time.</description>
-               <node takesValue="true" isNumeric="true" unitClass="jerk">
+               <node isNumeric="true" takesValue="true" unitClass="jerk">
                   <name>#</name>
                </node>
             </node>
@@ -1442,20 +1446,20 @@
             <node requireChild="true">
                <name>Refresh-rate</name>
                <description>Number of times per second a device displays an image. Also known as the frame rate.</description>
-               <node takesValue="true" isNumeric="true">
+               <node isNumeric="true" takesValue="true">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Temporal-rate</name>
                <description>Number of occurrences in a unit of time.</description>
-               <node takesValue="true" isNumeric="true">
+               <node isNumeric="true" takesValue="true">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Velocity</name>
-               <node takesValue="true" isNumeric="true" unitClass="speed">
+               <node isNumeric="true" takesValue="true" unitClass="speed">
                   <name>#</name>
                </node>
             </node>
@@ -1503,20 +1507,20 @@
             <name>Spatial</name>
             <node>
                <name>Direction</name>
-               <node takesValue="true" isNumeric="true">
+               <node isNumeric="true" takesValue="true">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Distance</name>
                <description>Distance from a specified position in a specified Direction or grouped with an item from which the distance is measured.</description>
-               <node takesValue="true" isNumeric="true" unitClass="physicalLength">
+               <node isNumeric="true" takesValue="true" unitClass="physicalLength">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Orientation</name>
-               <node takesValue="true" isNumeric="true">
+               <node isNumeric="true" takesValue="true">
                   <name>#</name>
                </node>
             </node>
@@ -1525,19 +1529,19 @@
                <description>Coordinates with respect a specified frame of reference or the default Screen-frame if no frame is given.</description>
                <node>
                   <name>X-position</name>
-                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Y-position</name>
-                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Z-position</name>
-                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
@@ -1568,34 +1572,34 @@
                <name>Size</name>
                <node>
                   <name>Area</name>
-                  <node takesValue="true" isNumeric="true" unitClass="area">
+                  <node isNumeric="true" takesValue="true" unitClass="area">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Length</name>
                   <description>A measurement of the size along the longest dimension.</description>
-                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Width</name>
                   <description>A measurement along the shortest of two or three dimensions.</description>
-                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Height</name>
                   <description>A measurement in a direction perpendicular to Length and Width in 3D. In 2D, it is perpendicular to both the Length and Height.</description>
-                  <node takesValue="true" isNumeric="true" unitClass="physicalLength">
+                  <node isNumeric="true" takesValue="true" unitClass="physicalLength">
                      <name>#</name>
                   </node>
                </node>
                <node>
                   <name>Volume</name>
-                  <node takesValue="true" isNumeric="true" unitClass="volume">
+                  <node isNumeric="true" takesValue="true" unitClass="volume">
                      <name>#</name>
                   </node>
                </node>
@@ -1615,14 +1619,14 @@
             <node>
                <name>Delay</name>
                <description>An indicator that the associated tag group represents something temporally offset from the current event. The delay value can be positive or negative and should always appear in a tag group indicating what is delayed.</description>
-               <node takesValue="true" isNumeric="true" unitClass="time">
+               <node isNumeric="true" takesValue="true" unitClass="time">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Duration</name>
                <description>Time extent of something.</description>
-               <node takesValue="true" isNumeric="true" unitClass="time">
+               <node isNumeric="true" takesValue="true" unitClass="time">
                   <name>#</name>
                </node>
             </node>
@@ -1638,7 +1642,7 @@
             </node>
             <node>
                <name>Temporal-value</name>
-               <node takesValue="true" isNumeric="true" unitClass="time">
+               <node isNumeric="true" takesValue="true" unitClass="time">
                   <name>#</name>
                </node>
             </node>
@@ -1735,6 +1739,7 @@
          </node>
          <node>
             <name>Behavioral-evidence</name>
+            <description>This tag is placed in Agent-action events and grouped  with Task-related tags to specify the type of what that action means with respect to the task. For example if a button press indicates a target then Participant-indication would be grouped with Target.</description>
          </node>
       </node>
       <node>
@@ -1783,10 +1788,10 @@
       <node>
          <name>Task-response-type</name>
          <description>How the participant response should be interpreted in terms of the task specification.</description>
-         <node>
+         <node relatedTag="Inappropriate">
             <name>Appropriate</name>
          </node>
-         <node>
+         <node relatedTag="Successful">
             <name>Correction</name>
          </node>
          <node>
@@ -1796,19 +1801,19 @@
             <name>Imagined</name>
             <description>This is used to identity something that only happened in the imagination of the participant as in imagined movements in motor imagery paradigms.</description>
          </node>
-         <node>
+         <node relatedTag="Appropriate">
             <name>Inappropriate</name>
          </node>
-         <node>
+         <node relatedTag="Missed,Near-miss">
             <name>Indeterminate</name>
          </node>
-         <node>
+         <node relatedTag="Indeterminate,Near-miss">
             <name>Missed</name>
          </node>
-         <node>
+         <node relatedTag="Indeterminate,Miss">
             <name>Near-miss</name>
          </node>
-         <node>
+         <node relatedTag="Correction">
             <name>Successful</name>
          </node>
       </node>
@@ -1987,6 +1992,7 @@
                <name>Version</name>
                <node takesValue="true">
                   <name>#</name>
+                  <description>Usually is a semantic version.</description>
                </node>
             </node>
          </node>
@@ -2236,6 +2242,7 @@
                </node>
                <node>
                   <name>Bilateral</name>
+                  <description>Used designate activities or items that occur on both sides or on top and bottom.</description>
                </node>
                <node>
                   <name>Bottom-of</name>
@@ -2363,117 +2370,141 @@
       <node extensionAllowed="true">
          <name>Categorical</name>
          <node>
-            <name>Abnormal</name>
+            <name>Categorical-class</name>
+            <description>Categorical values that fall into discrete classes such as true or false. The grouping is absolute in the sense that it is the same for all participants.</description>
+            <node relatedTag="Some,None">
+               <name>All</name>
+            </node>
+            <node relatedTag="Incorrect">
+               <name>Correct</name>
+            </node>
+            <node relatedTag="Implicit">
+               <name>Explicit</name>
+            </node>
+            <node relatedTag="True">
+               <name>False</name>
+            </node>
+            <node relatedTag="Explicit">
+               <name>Implicit</name>
+            </node>
+            <node relatedTag="Correct">
+               <name>Incorrect</name>
+            </node>
+            <node relatedTag="Valid">
+               <name>Invalid</name>
+            </node>
+            <node relatedTag="All,Some">
+               <name>None</name>
+            </node>
+            <node relatedTag="All,None">
+               <name>Some</name>
+            </node>
+            <node relatedTag="False">
+               <name>True</name>
+            </node>
+            <node relatedTag="Invalid">
+               <name>Valid</name>
+            </node>
          </node>
          <node>
-            <name>All</name>
+            <name>Categorical-judgment</name>
+            <description>Categorical values that are based on the judgment or perception of the participant such familiar and famous.</description>
+            <node relatedTag="Normal">
+               <name>Abnormal</name>
+            </node>
+            <node relatedTag="Symmetric">
+               <name>Asymmetric</name>
+            </node>
+            <node relatedTag="Incongruent">
+               <name>Congruent</name>
+            </node>
+            <node relatedTag="Unconstrained">
+               <name>Constrained</name>
+            </node>
+            <node relatedTag="Ordered">
+               <name>Disordered</name>
+            </node>
+            <node relatedTag="Unfamiliar,Famous">
+               <name>Familiar</name>
+               <description>Something known or encountered before.</description>
+            </node>
+            <node relatedTag="Familiar,Unfamiliar">
+               <name>Famous</name>
+               <description>Something known by many people but necessarily because of direct contact.</description>
+            </node>
+            <node relatedTag="Congruent">
+               <name>Incongruent</name>
+            </node>
+            <node relatedTag="Voluntary">
+               <name>Involuntary</name>
+            </node>
+            <node>
+               <name>Masked</name>
+               <description>Ability to perceive influenced by presence of another stimulus</description>
+            </node>
+            <node relatedTag="Abnormal">
+               <name>Normal</name>
+            </node>
+            <node relatedTag="Disordered">
+               <name>Ordered</name>
+            </node>
+            <node relatedTag="Unsymmetric">
+               <name>Symmetric</name>
+            </node>
+            <node relatedTag="Constrained">
+               <name>Unconstrained</name>
+            </node>
+            <node relatedTag="Familiar,Famous">
+               <name>Unfamiliar</name>
+               <description>Something not known or encountered before.</description>
+            </node>
+            <node>
+               <name>Unmasked</name>
+               <description>Ability to perceive not influenced by presence of another stimulus</description>
+            </node>
+            <node relatedTag="Involuntary">
+               <name>Voluntary</name>
+            </node>
          </node>
          <node>
-            <name>Asymmetric</name>
-         </node>
-         <node>
-            <name>Congruent</name>
-         </node>
-         <node>
-            <name>Constrained</name>
-         </node>
-         <node>
-            <name>Correct</name>
-         </node>
-         <node>
-            <name>Deep</name>
-         </node>
-         <node>
-            <name>Disordered</name>
-         </node>
-         <node>
-            <name>False</name>
-         </node>
-         <node>
-            <name>Familiar</name>
-            <description>Something known or encountered before.</description>
-         </node>
-         <node>
-            <name>Famous</name>
-            <description>Something known by many people but necessarily because of direct contact.</description>
-         </node>
-         <node>
-            <name>High</name>
-         </node>
-         <node>
-            <name>Incongruent</name>
-         </node>
-         <node>
-            <name>Incorrect</name>
-         </node>
-         <node>
-            <name>Invalid</name>
-         </node>
-         <node>
-            <name>Involuntary</name>
-         </node>
-         <node>
-            <name>Liminal</name>
-         </node>
-         <node>
-            <name>Low</name>
-         </node>
-         <node>
-            <name>Masked</name>
-            <description>Ability to perceive influenced by presence of another stimulus</description>
-         </node>
-         <node>
-            <name>Medium</name>
-         </node>
-         <node>
-            <name>None</name>
-         </node>
-         <node>
-            <name>Normal</name>
-         </node>
-         <node>
-            <name>Negative</name>
-         </node>
-         <node>
-            <name>Ordered</name>
-         </node>
-         <node>
-            <name>Positive</name>
-         </node>
-         <node>
-            <name>Shallow</name>
-         </node>
-         <node>
-            <name>Some</name>
-         </node>
-         <node>
-            <name>Subliminal</name>
-         </node>
-         <node>
-            <name>Supraliminal</name>
-         </node>
-         <node>
-            <name>Symmetric</name>
-         </node>
-         <node>
-            <name>True</name>
-         </node>
-         <node>
-            <name>Unconstrained</name>
-         </node>
-         <node>
-            <name>Unfamiliar</name>
-            <description>Something not known or encountered before.</description>
-         </node>
-         <node>
-            <name>Unmasked</name>
-            <description>Ability to perceive not influenced by presence of another stimulus</description>
-         </node>
-         <node>
-            <name>Valid</name>
-         </node>
-         <node>
-            <name>Voluntary</name>
+            <name>Categorical-level</name>
+            <description>Categorical values based on dividing a continuous variable into levels such as high and low.</description>
+            <node relatedTag="Shallow">
+               <name>Deep</name>
+            </node>
+            <node relatedTag="Low,Medium">
+               <name>High</name>
+            </node>
+            <node relatedTag="Subliminal,Supraliminal">
+               <name>Liminal</name>
+            </node>
+            <node relatedTag="High">
+               <name>Low</name>
+            </node>
+            <node relatedTag="Low,High">
+               <name>Medium</name>
+            </node>
+            <node relatedTag="Positive">
+               <name>Negative</name>
+            </node>
+            <node relatedTag="Negative">
+               <name>Positive</name>
+            </node>
+            <node relatedTag="Deep">
+               <name>Shallow</name>
+            </node>
+            <node relatedTag="Liminal,Supraliminal">
+               <name>Subliminal</name>
+            </node>
+            <node relatedTag="Liminal,Subliminal">
+               <name>Supraliminal</name>
+            </node>
+            <node relatedTag="Thin">
+               <name>Thick</name>
+            </node>
+            <node relatedTag="Thick">
+               <name>Thin</name>
+            </node>
          </node>
       </node>
       <node>
@@ -2507,13 +2538,13 @@
             </node>
             <node>
                <name>Frequency</name>
-               <node takesValue="true" isNumeric="true" unitClass="frequency">
+               <node isNumeric="true" takesValue="true" unitClass="frequency">
                   <name>#</name>
                </node>
             </node>
             <node>
                <name>Loudness</name>
-               <node takesValue="true" isNumeric="true">
+               <node isNumeric="true" takesValue="true">
                   <name>#</name>
                </node>
             </node>
@@ -2610,21 +2641,21 @@
                   <name>HSV-color</name>
                   <node>
                      <name>Hue</name>
-                     <node takesValue="true" isNumeric="true">
+                     <node isNumeric="true" takesValue="true">
                         <name>#</name>
                         <description>Angular value between 0 and 360</description>
                      </node>
                   </node>
                   <node>
                      <name>Saturation</name>
-                     <node takesValue="true" isNumeric="true">
+                     <node isNumeric="true" takesValue="true">
                         <name>#</name>
                         <description>B value of RGB between 0 and 1</description>
                      </node>
                   </node>
                   <node>
                      <name>HSV-value</name>
-                     <node takesValue="true" isNumeric="true">
+                     <node isNumeric="true" takesValue="true">
                         <name>#</name>
                         <description>G value of RGB between 0 and 1</description>
                      </node>
@@ -2634,21 +2665,21 @@
                   <name>RGB-color</name>
                   <node>
                      <name>RGB-red</name>
-                     <node takesValue="true" isNumeric="true">
+                     <node isNumeric="true" takesValue="true">
                         <name>#</name>
                         <description>R value of RGB between 0 and 1</description>
                      </node>
                   </node>
                   <node>
                      <name>RGB-blue</name>
-                     <node takesValue="true" isNumeric="true">
+                     <node isNumeric="true" takesValue="true">
                         <name>#</name>
                         <description>B value of RGB between 0 and 1</description>
                      </node>
                   </node>
                   <node>
                      <name>RGB-green</name>
-                     <node takesValue="true" isNumeric="true">
+                     <node isNumeric="true" takesValue="true">
                         <name>#</name>
                         <description>G value of RGB between 0 and 1</description>
                      </node>
@@ -2657,7 +2688,7 @@
                <node>
                   <name>Grayscale</name>
                   <description>Indicates gray scale</description>
-                  <node takesValue="true" isNumeric="true">
+                  <node isNumeric="true" takesValue="true">
                      <name>#</name>
                      <description>White intensity between 0 and 1</description>
                   </node>
@@ -3257,7 +3288,7 @@
             <unit>pixel^2</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="$">
+      <unitClass allowedCharacter="$" defaultUnits="$">
          <name>currency</name>
          <units>
             <unit>dollar</unit>
@@ -3265,7 +3296,7 @@
             <unit>point</unit>
          </units>
       </unitClass>
-      <unitClass defaultUnits="YYYY-MM-DDThh:mm:ss">
+      <unitClass allowedCharacter=":,-" defaultUnits="YYYY-MM-DDThh:mm:ss">
          <name>dateTime</name>
          <units>
             <unit>YYYY-MM-DDThh:mm:ss</unit>
@@ -3303,6 +3334,11 @@
             <unit SIUnit="true">byte</unit>
             <unit SIUnit="true" unitSymbol="true">B</unit>
          </units>
+      </unitClass>
+      <unitClass allowedCharacter="/,:">
+         <name>posixPath</name>
+         <description>Posix path specification.</description>
+         <units/>
       </unitClass>
       <unitClass defaultUnits="m">
          <name>physicalLength</name>
@@ -3505,73 +3541,6 @@
       <unitModifier SIUnitSymbolModifier="true">
          <name>y</name>
          <description>SI unit submultiple representing 10^-24</description>
-      </unitModifier>
-      <unitModifier>
-         <name>Schema attributes</name>
-      </unitModifier>
-      <unitModifier>
-         <name>defaultUnits</name>
-         <description>Default units for a tag.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>extensionAllowed</name>
-         <description>Users can add unlimited levels of child nodes under this tag.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>isNumeric</name>
-         <description>The tag hashtag placeholder must be replaced by a numerical value.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>position</name>
-         <description>Used to specify the order of the required and recommended tags in canonical order for display. The position attribute value should be an integer and the order can start at 0 or 1. Required or recommended tags without this attribute or with negative position will be shown after the others in canonical ordering.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>predicateType</name>
-         <description>One of propertyOf, subclassOf, passThrough -- used to facilitate mapping to OWL or RDF.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>recommended</name>
-         <description>A HED string tagging an event is recommended to include this tag.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>relatedTag</name>
-         <description>Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>requireChild</name>
-         <description>One of its descendants must be chosen to tag an event.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>required</name>
-         <description>Every HED string tagging an event should include this tag.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>SIUnit</name>
-         <description>Designates the name of an SI unit so it can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>SIUnitModifier</name>
-         <description>SI unit modifier indicating a multiple or submultiple of a base unit.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>SIUnitSymbolModifier</name>
-         <description>SI unit symbol modifier indicating a multiple or submultiple of a base unit symbol.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>suggestedTag</name>
-         <description>Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>takesValue</name>
-         <description>This tag will have a hashtag placeholder child in the schema which is expected to be replaced with a user-defined value.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>unique</name>
-         <description>Only one of this tag or its descendants can be used within a single tag group or event.</description>
-      </unitModifier>
-      <unitModifier>
-         <name>unitSymbol</name>
-         <description>Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.</description>
       </unitModifier>
    </unitModifiers>
    <epilogue>This is the new format for the mediawiki schema</epilogue>

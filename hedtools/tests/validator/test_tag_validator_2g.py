@@ -10,7 +10,7 @@ from hed.util.error_types import ValidationErrors, ValidationWarnings
 
 
 class TestHed(unittest.TestCase):
-    schema_file = '../data/HED7.1.1.xml'
+    schema_file = '../data/legacy_xml/HED7.1.1.xml'
 
     @classmethod
     def setUpClass(cls):
@@ -647,7 +647,7 @@ class TestHedTags(TestHed):
 
 
 class TestOldHed(TestHed):
-    schema_file = '../data/HED7.0.4.xml'
+    schema_file = '../data/legacy_xml/HED7.0.4.xml'
 
 
 class OldIndividualHedTags(TestOldHed):

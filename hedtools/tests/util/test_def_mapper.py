@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "HED8.0.0-alpha.1.xml")
+        hed_xml_file = os.path.join(cls.base_data_dir, "legacy_xml/HED8.0.0-alpha.2.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.base_dict = DefDict(hed_schema=cls.hed_schema)
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
