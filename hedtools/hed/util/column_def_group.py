@@ -76,6 +76,19 @@ class ColumnDefGroup:
         with open(save_filename, "w") as fp:
             json.dump(output_dict, fp, indent=4)
 
+    def get_as_json_string(self):
+        """
+        Returns this entire column definition group as a json string.
+        Returns
+        -------
+        json_string: str
+            The json string representing this column definition group.
+        """
+        output_dict = {}
+        for entry in self._column_settings.values():
+            output_dict[entry.column_name] = entry.hed_dict
+        return json.dumps(output_dict, indent=4)
+
     def add_json_string(self, json_string):
         """
             Loads column definitions from a given json string
