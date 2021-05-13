@@ -8,7 +8,7 @@ from hed.util import util_constants
 
 
 class Test(unittest.TestCase):
-    schema_file = '../data/HED8.0.0-alpha.1.xml'
+    schema_file = '../data/legacy_xml/HED8.0.0-alpha.1.xml'
 
     @classmethod
     def setUpClass(cls):

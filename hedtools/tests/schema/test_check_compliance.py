@@ -8,7 +8,7 @@ from hed.util.error_types import SchemaWarnings
 
 class Test(unittest.TestCase):
     # A known schema with many issues.
-    schema_file = '../data/HED7.1.1.xml'
+    schema_file = '../data/legacy_xml/HED7.1.1.xml'
 
     @classmethod
     def setUpClass(cls):

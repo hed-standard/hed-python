@@ -9,7 +9,7 @@ from hed.util.error_types import DefinitionErrors
 from hed.util.hed_string import HedString
 
 class TestDefBase(unittest.TestCase):
-    schema_file = '../data/HED8.0.0-alpha.1.xml'
+    schema_file = '../data/legacy_xml/HED8.0.0-alpha.1.xml'
 
     @classmethod
     def setUpClass(cls):
