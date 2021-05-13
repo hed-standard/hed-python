@@ -200,11 +200,7 @@ class BaseFileInput:
 
         # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
         if output_processed_file:
-            output_file = copy.deepcopy(self)
-            for row_number, column_to_hed_tags_dictionary in self:
-                for column_number in column_to_hed_tags_dictionary:
-                    new_text = column_to_hed_tags_dictionary[column_number]
-                    output_file.set_cell(row_number, column_number, new_text)
+            output_file = self._get_processed_copy()
         else:
             output_file = self
 
@@ -229,6 +225,25 @@ class BaseFileInput:
                 output_file._dataframe.to_excel(final_filename, header=self._has_column_names)
         elif self.is_text_file():
             output_file._dataframe.to_csv(final_filename, '\t', index=False, header=output_file._has_column_names)
+
+    def to_csv(self, output_processed_file=False):
+        """
+            Returns the file as a csv string.
+
+        Parameters
+        ----------
+        output_processed_file : bool
+            Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
+        Returns
+        -------
+        """
+        # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
+        if output_processed_file:
+            output_file = self._get_processed_copy()
+        else:
+            output_file = self
+        csv_string = output_file._dataframe.to_csv(None, '\t', index=False, header=output_file._has_column_names)
+        return csv_string
 
     # Make filename read only.
     @property
@@ -376,3 +391,20 @@ class BaseFileInput:
         if not worksheet_name:
             return workbook.worksheets[0]
         return workbook.get_sheet_by_name(worksheet_name)
+
+    def _get_processed_copy(self):
+        """
+        Returns a copy of this file with processing applied(definitions replaced, columns expanded, etc)
+
+        Returns
+        -------
+        file_copy: BaseFileInput
+            The copy.
+        """
+        output_file = copy.deepcopy(self)
+        for row_number, column_to_hed_tags_dictionary in self:
+            for column_number in column_to_hed_tags_dictionary:
+                new_text = column_to_hed_tags_dictionary[column_number]
+                output_file.set_cell(row_number, column_number, new_text)
+
+        return output_file
