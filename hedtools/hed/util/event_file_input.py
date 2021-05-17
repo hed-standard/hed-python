@@ -11,7 +11,7 @@ class EventFileInput(BaseFileInput):
     def __init__(self, filename, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
-                 hed_schema=None, def_dicts=None,
+                 def_dicts=None,
                  data_as_csv_string=None):
         """Constructor for the EventFileInput class.
 
@@ -37,8 +37,6 @@ class EventFileInput(BaseFileInput):
         attribute_columns: str or int or [str] or [int]
             A list of column names or numbers to treat as attributes.
             Default: ["duration", "onset"]
-        hed_schema: HedSchema
-           Used by column mapper to do (optional) hed string validation, and also to gather definition tags correctly.
         def_dicts: [DefDict]
             DefDict's containing all the definitions this file should use - other than the ones coming from the file
             itself.
@@ -60,14 +58,14 @@ class EventFileInput(BaseFileInput):
         else:
             self.column_group_defs = None
         if def_dicts is None:
-            self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs, hed_schema)
+            self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs)
         else:
             if not isinstance(def_dicts, list):
                 self.def_dicts = [def_dicts]
             else:
                 self.def_dicts = def_dicts
 
-        def_mapper = DefinitionMapper(self.def_dicts, hed_schema=hed_schema)
+        def_mapper = DefinitionMapper(self.def_dicts)
         new_mapper = ColumnMapper(json_def_files=self.column_group_defs, tag_columns=tag_columns,
                                   column_prefix_dictionary=column_prefix_dictionary,
                                   attribute_columns=attribute_columns,

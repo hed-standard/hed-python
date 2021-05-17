@@ -118,10 +118,10 @@ class Test(unittest.TestCase):
         hed_schema = load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict, def_issues = column_group.extract_defs(hed_schema)
+        def_dict, def_issues = column_group.extract_defs()
         self.assertEqual(len(def_issues), 0)
         input_file = EventFileInput(events_path, json_def_files=column_group,
-                                    hed_schema=hed_schema, def_dicts=def_dict)
+                                    def_dicts=def_dict)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)
@@ -137,10 +137,10 @@ class Test(unittest.TestCase):
         hed_schema = load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events_bad_defs.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict, def_issues = column_group.extract_defs(hed_schema)
+        def_dict, def_issues = column_group.extract_defs()
         self.assertEqual(len(def_issues), 0)
         input_file = EventFileInput(events_path, json_def_files=column_group,
-                                    hed_schema=hed_schema, def_dicts=def_dict)
+                                    def_dicts=def_dict)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)

@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         hed_xml_file = os.path.join(cls.base_data_dir, "legacy_xml/HED8.0.0-alpha.2.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
-        cls.base_dict = DefDict(hed_schema=cls.hed_schema)
+        cls.base_dict = DefDict()
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
         cls.basic_def_string = f"(Definition/TestDef,{cls.def_contents_string})"
         cls.basic_def_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
@@ -35,9 +35,9 @@ class Test(unittest.TestCase):
         cls.placeholder_hed_string_with_def_first_paren = f"({cls.placeholder_label_def_string},{cls.basic_hed_string})"
 
     def test_replace_and_remove_tags(self):
-        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict = DefDict()
         def_dict.check_for_definitions(HedString(self.basic_def_string))
-        def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
+        def_mapper = DefinitionMapper(def_dict)
 
         test_string = HedString(self.basic_def_string)
         def_issues = def_mapper.replace_and_remove_tags(test_string)
@@ -68,9 +68,9 @@ class Test(unittest.TestCase):
         self.assertEqual(str(test_string), "(" + self.expanded_def_string + "," + self.basic_hed_string + ")")
 
     def test_replace_and_remove_tags_placeholder(self):
-        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict = DefDict()
         def_dict.check_for_definitions(HedString(self.placeholder_def_string))
-        def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
+        def_mapper = DefinitionMapper(def_dict)
 
         test_string = HedString(self.placeholder_def_string)
         def_issues = def_mapper.replace_and_remove_tags(test_string)
@@ -100,9 +100,9 @@ class Test(unittest.TestCase):
         self.assertEqual(str(test_string), "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
 
     def test_replace_and_remove_tags_placeholder_invalid(self):
-        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict = DefDict()
         def_dict.check_for_definitions(HedString(self.placeholder_def_string))
-        def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
+        def_mapper = DefinitionMapper(def_dict)
 
         placeholder_label_def_string_no_placeholder = f"def/TestDefPlaceholder"
 
@@ -114,9 +114,9 @@ class Test(unittest.TestCase):
         for issue in def_issues:
             actual_issues += error_reporter.ErrorHandler().format_val_error(**issue)
 
-        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict = DefDict()
         def_dict.check_for_definitions(HedString(self.basic_def_string))
-        def_mapper = DefinitionMapper(def_dict, hed_schema=self.hed_schema)
+        def_mapper = DefinitionMapper(def_dict)
 
         label_def_string_has_inavlid_placeholder = f"def/TestDef/54687"
 
@@ -130,13 +130,13 @@ class Test(unittest.TestCase):
 
 
     def test__check_tag_starts_with(self):
-        possible_tag_list = ["definition", "informational/definition", "attribute/informational/definition"]
+        target_tag_name = "definition/"
 
         test_tags = ["Definition/TempTestDef", "Informational/Definition/TempTestDef",
                      "Attribute/Informational/Definition/TempTestDef"]
 
         for tag in test_tags:
-            result = DefinitionMapper._check_tag_starts_with(tag, possible_tag_list)
+            result = DefinitionMapper._check_tag_starts_with(tag, target_tag_name)
             self.assertTrue(result)
 
 if __name__ == '__main__':

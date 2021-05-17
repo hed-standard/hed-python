@@ -6,7 +6,7 @@ class DefinitionMapper:
     """Class responsible for gathering/removing definitions from hed strings,
         and also replacing labels in hed strings with the gathered definitions."""
 
-    def __init__(self, def_dicts=None, hed_schema=None):
+    def __init__(self, def_dicts=None):
         """
         Class to handle mapping definitions from hed strings to fill them in with their values.
 
@@ -14,20 +14,11 @@ class DefinitionMapper:
         ----------
         def_dicts: [DefDict]
             DefDicts containing all the definitions this mapper should initialize with.  More can be added later.
-        hed_schema : HedSchema, optional
-            Used to determine where definition tags are in the schema.  This is technically optional, but
-            only short form definition tags will work if this is absent.
         """
         self._gathered_defs = {}
 
-        if hed_schema:
-            self._def_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DEF_KEY)
-            self._label_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DLABEL_KEY)
-            if not self._label_tag_versions:
-                self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
-        else:
-            self._def_tag_versions = [DefTagNames.DEF_KEY + "/"]
-            self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
+        self._def_tag_name = DefTagNames.DEF_KEY.lower()
+        self._label_tag_name = DefTagNames.DLABEL_KEY.lower()
 
         if def_dicts:
             self.add_definitions(def_dicts)
@@ -84,26 +75,25 @@ class DefinitionMapper:
         """
         # First see if the word definition or dLabel is found at all.  Just move on if not.
         hed_string_lower = hed_string_obj.lower()
-        if DefTagNames.DLABEL_KEY not in hed_string_lower and \
-                DefTagNames.DEF_KEY not in hed_string_lower:
+        if self._def_tag_name not in hed_string_lower and \
+                self._label_tag_name not in hed_string_lower:
             return []
 
-        def_tag_versions = self._def_tag_versions
-        label_tag_versions = self._label_tag_versions
 
         remove_groups = []
         def_issues = []
         for tag_group in hed_string_obj.get_all_groups():
             for tag in tag_group.tags():
+                tag_as_string = str(tag)
                 # This case should be fairly rare compared to expanding definitions.
-                is_def_tag = DefinitionMapper._check_tag_starts_with(str(tag), def_tag_versions)
+                is_def_tag = DefinitionMapper._check_tag_starts_with(tag_as_string, DefTagNames.DEF_KEY)
                 if is_def_tag:
                     if validate_only:
                         continue
                     remove_groups.append(tag_group)
                     break
 
-                is_label_tag = DefinitionMapper._check_tag_starts_with(str(tag), label_tag_versions)
+                is_label_tag = DefinitionMapper._check_tag_starts_with(tag_as_string, DefTagNames.DLABEL_KEY)
                 if is_label_tag:
                     placeholder = None
                     found_slash = is_label_tag.find("/")
@@ -138,24 +128,25 @@ class DefinitionMapper:
         return def_issues
 
     @staticmethod
-    def _check_tag_starts_with(hed_tag, possible_starts_with_list):
+    def _check_tag_starts_with(hed_tag, target_tag_short_name):
         """ Check if a given tag starts with a given string, and returns the tag with the prefix removed if it does.
 
         Parameters
         ----------
         hed_tag : str
             A single input tag
-        possible_starts_with_list : list
-            A list of strings to check as the prefix.
-            Generally this will be all short/intermediate/long forms of a specific tag
-            eg. ['definitional', 'informational/definitional', 'attribute/informational/definitional']
+        target_tag_short_name : str
+            The string to match eg find target_tag_short_name in hed_tag
         Returns
         -------
             str: the tag without the removed prefix, or None
         """
         hed_tag_lower = hed_tag.lower()
-        for start_with_version in possible_starts_with_list:
-            if hed_tag_lower.startswith(start_with_version):
-                found_tag = hed_tag[len(start_with_version):]
-                return found_tag
+        found_index = hed_tag_lower.find(target_tag_short_name)
+
+        if found_index == -1:
+            return None
+
+        if found_index == 0 or hed_tag_lower[found_index - 1] == "/":
+            return hed_tag[found_index + len(target_tag_short_name):]
         return None
