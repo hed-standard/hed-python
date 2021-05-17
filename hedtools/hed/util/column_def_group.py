@@ -35,14 +35,12 @@ class ColumnDefGroup:
         """
         return iter(self._column_settings.values())
 
-    def extract_defs(self, hed_schema, error_handler=None):
+    def extract_defs(self, error_handler=None):
         """
             Finds all definitions in the hed strings of this column def group.
 
         Parameters
         ----------
-        hed_schema : HedSchema
-            Schema to use for checking if definition names are already used, and to locate definition tags.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         Returns
@@ -55,7 +53,7 @@ class ColumnDefGroup:
         """
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
-        new_def_dict = DefDict(hed_schema=hed_schema)
+        new_def_dict = DefDict()
         validation_issues = []
         for hed_string in self.hed_string_iter():
             validation_issues += new_def_dict.check_for_definitions(HedString(hed_string), error_handler=error_handler)
@@ -156,7 +154,7 @@ class ColumnDefGroup:
         return loaded_files
 
     @staticmethod
-    def extract_defs_from_list(column_group_defs, hed_schema):
+    def extract_defs_from_list(column_group_defs):
         """
             Take a list of column def groups, and return a list of def dicts extracted from them.
             This is primarily for quick development tests.  It is not suggested you use this.
@@ -164,14 +162,13 @@ class ColumnDefGroup:
         Parameters
         ----------
         column_group_defs : [ColumnDefGroup]
-        hed_schema : HedSchema
         Returns
         -------
         def_dicts: [DefDict]
 
         """
         if column_group_defs:
-            return [column_group_def.extract_defs(hed_schema) for column_group_def in column_group_defs]
+            return [column_group_def.extract_defs() for column_group_def in column_group_defs]
         else:
             return []
 

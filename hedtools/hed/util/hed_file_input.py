@@ -29,8 +29,6 @@ class HedFileInput(BaseFileInput):
             and the fifth column contains tags that needs Event/Category/ prepended to them.
         definition_mapper: DefinitionMapper
             The definition mapper to use to remove and replace definition labels in HED data.
-        hed_schema: HedSchema
-             Used to create definitions.
         data_as_csv_string: str or None
             The data to treat as this file.  eg web services passing a string.
         """
@@ -41,5 +39,5 @@ class HedFileInput(BaseFileInput):
 
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   definition_mapper=definition_mapper)
-        super().__init__(filename, worksheet_name, has_column_names, new_mapper, hed_schema=hed_schema,
+        super().__init__(filename, worksheet_name, has_column_names, new_mapper,
                                   data_as_csv_string=data_as_csv_string)
