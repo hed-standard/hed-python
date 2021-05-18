@@ -23,7 +23,7 @@ class BaseFileInput:
     COMMA_DELIMITER = ','
 
     def __init__(self, filename, worksheet_name=None, has_column_names=True, mapper=None,
-                 hed_schema=None, data_as_csv_string=None):
+                 data_as_csv_string=None):
         """Constructor for the BaseFileInput class.
 
          Parameters
@@ -38,8 +38,6 @@ class BaseFileInput:
          mapper: ColumnMapper
              Pass in a built column mapper(see HedFileInput or EventFileInput for examples), or None to just
              retrieve all columns as hed tags.
-         hed_schema: HedSchema
-             Used to create definitions.
          data_as_csv_string: str or None
             The data to treat as this file.  eg web services passing a string.
          """
@@ -73,7 +71,7 @@ class BaseFileInput:
             self._mapper.set_column_map(columns)
 
         # Now that the file is fully initialized, gather the definitions from it.
-        self.file_def_dict, self.file_def_dict_issues = self.extract_definitions(hed_schema)
+        self.file_def_dict, self.file_def_dict_issues = self.extract_definitions()
         # finally add the new file dict to the mapper.
         mapper.update_definition_mapper_with_file(self.file_def_dict)
 
@@ -140,7 +138,7 @@ class BaseFileInput:
 
         return error_list
 
-    def extract_definitions(self, hed_schema, error_handler=None):
+    def extract_definitions(self, error_handler=None):
         """
         Gathers and validates all definitions found in this spreadsheet
 
@@ -160,7 +158,7 @@ class BaseFileInput:
         """
         if error_handler is None:
             error_handler = ErrorHandler()
-        new_def_dict = DefDict(hed_schema=hed_schema)
+        new_def_dict = DefDict()
         validation_issues = []
         for row_number, column_to_hed_tags in self.iter_raw():
             error_handler.push_error_context(ErrorContext.ROW, row_number)

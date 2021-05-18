@@ -54,17 +54,16 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
-        hed_schema = load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict, def_issues = column_group.extract_defs(hed_schema)
+        def_dict, def_issues = column_group.extract_defs()
         self.assertEqual(len(def_issues), 0)
         input_file = EventFileInput(events_path, json_def_files=column_group,
-                                    hed_schema=hed_schema, def_dicts=def_dict)
+                                    def_dicts=def_dict)
 
         events_file_as_string = "".join([line for line in open(events_path)])
         input_file_from_string = EventFileInput(events_path, json_def_files=column_group,
-                                                hed_schema=hed_schema, def_dicts=def_dict,
+                                                def_dicts=def_dict,
                                                 data_as_csv_string=events_file_as_string)
 
         for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
