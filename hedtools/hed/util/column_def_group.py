@@ -157,7 +157,8 @@ class ColumnDefGroup:
     def extract_defs_from_list(column_group_defs):
         """
             Take a list of column def groups, and return a list of def dicts extracted from them.
-            This is primarily for quick development tests.  It is not suggested you use this.
+            This is primarily for quick development tests.  It is not suggested you use this, as
+            validation issues will not be returned.
 
         Parameters
         ----------
@@ -165,10 +166,9 @@ class ColumnDefGroup:
         Returns
         -------
         def_dicts: [DefDict]
-
         """
         if column_group_defs:
-            return [column_group_def.extract_defs() for column_group_def in column_group_defs]
+            return [column_group_def.extract_defs()[0] for column_group_def in column_group_defs]
         else:
             return []
 
