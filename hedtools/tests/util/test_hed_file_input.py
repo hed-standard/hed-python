@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
 
 
     def test_get_row_hed_tags(self):
-        row_dict = self.generic_file_input._get_dict_from_row_hed_tags(self.row_with_hed_tags, self.generic_file_input._mapper)
+        row_dict = self.generic_file_input._mapper.expand_row_tags(self.row_with_hed_tags)
         hed_string, column_to_hed_tags_dictionary = self.generic_file_input._get_row_hed_tags_from_dict(row_dict)
         self.assertIsInstance(hed_string, HedString)
         self.assertTrue(hed_string)
