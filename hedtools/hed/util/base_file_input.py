@@ -249,7 +249,7 @@ class BaseFileInput:
         return self._filename
 
     def __iter__(self):
-        return self.parse_dataframe()
+        return self.iter_dataframe()
 
     def iter_raw(self):
         """Generates an iterator that goes over every row in the file without modification.
@@ -266,9 +266,9 @@ class BaseFileInput:
             A dict with keys column_number, value the cell at that position.
         """
         default_mapper = ColumnMapper()
-        return self.parse_dataframe(default_mapper)
+        return self.iter_dataframe(default_mapper)
 
-    def parse_dataframe(self, mapper=None, return_row_dict=False):
+    def iter_dataframe(self, mapper=None, return_row_dict=False, do_not_expand_labels=False):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -279,6 +279,9 @@ class BaseFileInput:
         return_row_dict: bool
             If True, this returns the full row_dict including issues.
             If False, returns just the HedStrings for each column
+        do_not_expand_labels: bool
+            If true, this will still remove all definition/ tags, but will not expand label tags.
+
         Yields
         -------
         row_number: int
@@ -297,7 +300,7 @@ class BaseFileInput:
             if all(text_file_row.isnull()):
                 continue
 
-            row_dict = self._get_dict_from_row_hed_tags(text_file_row, mapper)
+            row_dict = mapper.expand_row_tags(text_file_row, do_not_expand_labels)
             if return_row_dict:
                 yield row_number + start_at_one, row_dict
             else:
@@ -331,11 +334,6 @@ class BaseFileInput:
         if self._has_column_names:
             adj_row_number += 1
         self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = str(new_text)
-
-    @staticmethod
-    def _get_dict_from_row_hed_tags(spreadsheet_row, mapper):
-        row_dict = mapper.expand_row_tags(spreadsheet_row)
-        return row_dict
 
     @staticmethod
     def _get_row_hed_tags_from_dict(row_dict):
