@@ -3,9 +3,9 @@ import os
 
 from hed.util.hed_file_input import HedFileInput
 from hed.util.hed_string import HedString
-from hed.schema import load_schema
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.event_file_input import EventFileInput
+from hed.util.exceptions import HedFileError
 
 
 class Test(unittest.TestCase):
@@ -51,7 +51,6 @@ class Test(unittest.TestCase):
         self.assertTrue(column_to_hed_tags_dictionary)
 
     def test_file_as_string(self):
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
@@ -64,11 +63,15 @@ class Test(unittest.TestCase):
         events_file_as_string = "".join([line for line in open(events_path)])
         input_file_from_string = EventFileInput(events_path, json_def_files=column_group,
                                                 def_dicts=def_dict,
-                                                data_as_csv_string=events_file_as_string)
+                                                csv_string=events_file_as_string)
 
         for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
             self.assertEqual(row_number, row_number2)
             self.assertEqual(column_dict, column_dict)
+
+    def test_bad_file_inputs(self):
+        self.assertRaises(HedFileError, EventFileInput, None)
+
 
     # Add more tests here
 
