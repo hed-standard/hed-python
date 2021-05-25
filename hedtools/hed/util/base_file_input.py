@@ -22,13 +22,13 @@ class BaseFileInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename, worksheet_name=None, has_column_names=True, mapper=None,
-                 data_as_csv_string=None):
+    def __init__(self, filename=None, worksheet_name=None, has_column_names=True, mapper=None,
+                 csv_string=None):
         """Constructor for the BaseFileInput class.
 
          Parameters
          ----------
-         filename: str
+         filename: str or None
              An xml/tsv file to open.
          worksheet_name: str
              The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
@@ -38,7 +38,7 @@ class BaseFileInput:
          mapper: ColumnMapper
              Pass in a built column mapper(see HedFileInput or EventFileInput for examples), or None to just
              retrieve all columns as hed tags.
-         data_as_csv_string: str or None
+         csv_string: str or None
             The data to treat as this file.  eg web services passing a string.
          """
         if mapper is None:
@@ -52,16 +52,19 @@ class BaseFileInput:
             pandas_header = None
 
         self._dataframe = None
-        if self.is_spreadsheet_file():
+        if not filename and not csv_string:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Filename specified and no string data passed in", filename)
+
+        if csv_string or self.is_text_file():
+            csv_filename_or_data = filename
+            if csv_string:
+                csv_filename_or_data = io.StringIO(csv_string)
+            self._dataframe = pandas.read_csv(csv_filename_or_data, '\t', header=pandas_header)
+        elif self.is_spreadsheet_file():
             worksheet_to_load = self._worksheet_name
             if worksheet_to_load is None:
                 worksheet_to_load = 0
             self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header)
-        elif self.is_text_file():
-            csv_filename_or_data = filename
-            if data_as_csv_string:
-                csv_filename_or_data = io.StringIO(data_as_csv_string)
-            self._dataframe = pandas.read_csv(csv_filename_or_data, '\t', header=pandas_header)
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
 

@@ -158,8 +158,7 @@ class Test(unittest.TestCase):
         prefixed_needed_tag_columns = {2: 'Attribute/Informational/Label/', 3: 'Attribute/Informational/Description/'}
         loaded_file = HedFileInput(events_path, tag_columns=[4],
                                    column_prefix_dictionary=prefixed_needed_tag_columns,
-                                   worksheet_name='LKT Events',
-                                   hed_schema=hed_schema)
+                                   worksheet_name='LKT Events')
 
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = validator.validate_input(loaded_file)
