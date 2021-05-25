@@ -8,16 +8,15 @@ from hed.util import error_reporter
 class EventFileInput(BaseFileInput):
     """A class to parse bids style spreadsheets into a more general format."""
 
-    def __init__(self, filename, worksheet_name=None, tag_columns=None,
+    def __init__(self, filename=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
-                 def_dicts=None,
-                 data_as_csv_string=None):
+                 def_dicts=None, csv_string=None):
         """Constructor for the EventFileInput class.
 
         Parameters
         ----------
-        filename: str
+        filename: str or None
             An xml/tsv file to open.
         worksheet_name: str
             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
@@ -41,7 +40,7 @@ class EventFileInput(BaseFileInput):
             DefDict's containing all the definitions this file should use - other than the ones coming from the file
             itself.
             If this is NOT passed, the class will instead gather definitions from any passed in ColumnDefGroups
-        data_as_csv_string: str or None
+        csv_string: str or None
             The data to treat as this file.  eg web services passing a string.
         """
         if tag_columns is None:
@@ -72,7 +71,7 @@ class EventFileInput(BaseFileInput):
                                   definition_mapper=def_mapper)
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper,
-                                  data_as_csv_string=data_as_csv_string)
+                                  csv_string=csv_string)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
