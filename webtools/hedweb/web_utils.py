@@ -300,10 +300,10 @@ def generate_text_response(download_text, msg_category='success', msg=''):
 
 def get_events(arguments, json_dictionary=None, def_dicts=None):
     if common.EVENTS_STRING in arguments:
-        events = EventFileInput(None, data_as_csv_string=arguments[common.EVENTS_STRING],
+        events = EventFileInput(csv_string=arguments[common.EVENTS_STRING],
                                 json_def_files=json_dictionary, def_dicts=def_dicts)
     elif common.EVENTS_PATH in arguments:
-        events = EventFileInput(arguments[common.EVENTS_PATH],
+        events = EventFileInput(filename=arguments[common.EVENTS_PATH],
                                 json_def_files=json_dictionary, def_dicts=def_dicts)
     else:
         raise HedFileError('NoEventsFile', 'No events file was provided', '')
@@ -436,7 +436,7 @@ def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
 
 
 def handle_error(ex, hed_info=None, title=None, return_as_str=True):
-    """Handles an error by logging and running an error as Response or simple string
+    """Handles an error by logging and returning a dictionary or simple string
 
     Parameters
     ----------

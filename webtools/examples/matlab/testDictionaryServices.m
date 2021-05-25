@@ -1,5 +1,6 @@
 %% Shows how to call hed-services to obtain a list of services
-host = 'http://127.0.0.1:5000';
+%host = 'http://127.0.0.1:5000';
+host = 'https://hedtools.ucsd.edu/hed';
 csrf_url = [host '/services']; 
 services_url = [host '/services_submit'];
 dictionary_file = '../data/good_dictionary.json';
@@ -24,6 +25,8 @@ data.service = 'dictionary_validate';
 data.schema_version = '8.0.0-alpha.1';
 data.json_string = string(json_text);
 data.display_name = 'my JSON dictionary';
+data.check_for_warnings = false;
+%data.check_for_warnings = true;
 
 %% Send the request and get the response 
 response = webwrite(services_url, data, options);

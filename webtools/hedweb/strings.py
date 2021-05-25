@@ -39,7 +39,7 @@ def generate_input_from_string_form(request):
         arguments[common.COMMAND] = common.COMMAND_TO_SHORT
     elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_LONG):
         arguments[common.COMMAND] = common.COMMAND_TO_LONG
-
+    arguments[common.CHECK_FOR_WARNINGS] = form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
     return arguments
 
 
@@ -135,7 +135,7 @@ def string_validate(arguments, hed_schema=None):
         hed_strings = arguments[common.STRING_LIST]
     else:
         raise HedFileError('NoStringList', 'No list of HED strings was entered', '')
-    hed_validator = HedValidator(hed_schema=hed_schema)
+    hed_validator = HedValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
 
     validation_errors = []
     for pos, string in enumerate(hed_strings, start=1):

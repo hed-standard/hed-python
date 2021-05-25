@@ -20,7 +20,7 @@ $('#events_file').on('change', function () {
     }
     updateFileLabel(eventsPath, '#events_display_name');
     if (fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
-        setColumnsInfo(eventsFile, undefined, false, 'events_flash');
+        setColumnsInfo(eventsFile, 'events_flash', undefined, true, false, false);
     } else {
         clearForm();
         flashMessageOnScreen('Please upload a tsv file (.tsv, .txt)', 'error', 'events_flash');

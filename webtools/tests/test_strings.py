@@ -46,6 +46,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {common.COMMAND: common.COMMAND_TO_LONG, common.SCHEMA_PATH: schema_path,
+                     common.CHECK_FOR_WARNINGS: True, common.DEFS_EXPAND: True,
                      common.SCHEMA_DISPLAY_NAME: 'HED 7.1.2.xml', 'string_list': ['Red, Blue']}
         with self.app.app_context():
             response = string_convert(arguments)
@@ -53,6 +54,7 @@ class Test(unittest.TestCase):
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {common.COMMAND: common.COMMAND_TO_LONG, common.SCHEMA_PATH: schema_path,
+                     common.CHECK_FOR_WARNINGS: True, common.DEFS_EXPAND: True,
                      common.SCHEMA_DISPLAY_NAME: 'HED8.0.0-alpha.1.xml', 'string_list': ['Red, Blue']}
         with self.app.app_context():
             response = string_convert(arguments)
@@ -64,6 +66,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {common.COMMAND: common.COMMAND_VALIDATE,
+                     common.CHECK_FOR_WARNINGS: True, common.DEFS_EXPAND: True,
                      common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED 7.1.2.xml',
                      'string_list': ['Red, Blue']}
         with self.app.app_context():
@@ -72,6 +75,7 @@ class Test(unittest.TestCase):
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {common.COMMAND: common.COMMAND_VALIDATE,
+                     common.CHECK_FOR_WARNINGS: True, common.DEFS_EXPAND: True,
                      common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED8.0.0-alpha.1.xml',
                      'string_list': ['Red, Blue']}
         with self.app.app_context():

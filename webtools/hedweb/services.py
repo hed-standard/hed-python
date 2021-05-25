@@ -6,6 +6,7 @@ from hedweb.constants import common
 from hedweb.dictionary import dictionary_convert, dictionary_validate
 from hedweb.events import events_assemble, events_validate
 from hedweb.strings import string_convert, string_validate
+from hedweb.web_utils import handle_error
 
 app_config = current_app.config
 
@@ -41,7 +42,6 @@ def services_list():
     return {'command': '', 'data': data, 'output_display_name': '',
             'schema_version': '', 'msg_category': 'success',
             'msg': "List of available services and their meanings"}
-    return
 
 
 def services_process(arguments):

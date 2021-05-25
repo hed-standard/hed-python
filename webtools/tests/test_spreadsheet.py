@@ -50,7 +50,8 @@ class Test(unittest.TestCase):
         arguments = {common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED 7.1.2.xml',
                      common.SPREADSHEET_PATH: spreadsheet_path, common.SPREADSHEET_FILE: 'ExcelMultipleSheets.xlsx',
                      common.WORKSHEET_SELECTED: 'LKT Events', common.HAS_COLUMN_NAMES: True,
-                     common.TAG_COLUMNS: [5], common.COLUMN_PREFIX_DICTIONARY: prefix_dict}
+                     common.TAG_COLUMNS: [5], common.COLUMN_PREFIX_DICTIONARY: prefix_dict,
+                     common.CHECK_FOR_WARNINGS: True, common.DEFS_EXPAND: True}
 
         with self.app.app_context():
             results = spreadsheet_validate(arguments)

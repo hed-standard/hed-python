@@ -47,6 +47,7 @@ def generate_input_from_schema_form(request):
         arguments[common.COMMAND] = common.COMMAND_CONVERT
     elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_VALIDATE):
         arguments[common.COMMAND] = common.COMMAND_VALIDATE
+    arguments[common.CHECK_FOR_WARNINGS] = form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
     return arguments
 
 

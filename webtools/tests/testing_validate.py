@@ -19,14 +19,14 @@ if __name__ == '__main__':
     if def_issues:
         print(get_printable_issue_string(def_issues,
                                          title="There should be no errors in the definitions from the sidecars:"))
-    event_file = EventFileInput(events_path, json_def_files=json_dictionary)
+    event_file = EventFileInput(filename=events_path, json_def_files=json_dictionary)
 
     validator = HedValidator(hed_schema=hed_schema)
     issues = validator.validate_input(event_file)
     issue_str = get_printable_issue_string(issues, f"HED validation errors")
     print(issue_str)
 
-    event_file = EventFileInput(events_path, json_def_files=json_dictionary, def_dicts=def_dicts)
+    event_file = EventFileInput(filename=events_path, json_def_files=json_dictionary, def_dicts=def_dicts)
 
     validator = HedValidator(hed_schema=hed_schema)
     issues = validator.validate_input(event_file)

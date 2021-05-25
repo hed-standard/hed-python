@@ -31,7 +31,8 @@
                 [
                     "schema_version",
                     "hed_schema_string"
-                ]
+                ],
+                "check_for_warnings"
             ]
         },
         "events_assemble": {
@@ -43,7 +44,9 @@
                     "schema_version",
                     "hed_schema_string"
                 ],
-                "json_string"
+                "json_string",
+                "check_for_warnings",
+                "defs_expand"
             ]
         },
         "events_validate": {
@@ -55,7 +58,8 @@
                     "schema_version",
                     "hed_schema_string"
                 ],
-                "json_string"
+                "json_string",
+                "check_for_warnings"
             ]
         },
         "spreadsheet_validate": {
@@ -65,7 +69,8 @@
                 [
                     "schema_version",
                     "hed_schema_string"
-                ]
+                ],
+                "check_for_warnings"
             ]
         },
         "strings_to_long": {
@@ -95,31 +100,34 @@
                 [
                     "schema_version",
                     "hed_schema_string"
-                ]
+                ],
+                "check_for_warnings"
             ]
         }
     },
     "meanings": {
+        "check_for_warnings": "If true, check for warnings in addition to errors.",
         "command": "Operation to perform.",
-        "events_string": "A BIDS events file as a string",
+        "defs_expand": "If true assembly expands definitions, replacing def/XXX with def-expand/XXX.",
+        "events_string": "A BIDS events file as a string.",
         "hed_columns": "A list of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are used.",
-        "hed_schema_string": "HED XML schema as a string",
-        "hed_strings": "List of HED strings to be processed",
-        "schema_version": "Version of HED to used in processing",
+        "hed_schema_string": "HED XML schema as a string.",
+        "hed_strings": "List of HED strings to be processed.",
+        "schema_version": "Version of HED to used in processing.",
         "json_string": "JSON sidecar as a string",
-        "json_strings": "A list of BIDS JSON sidecars as strings",
-        "spreadsheet_string": "A spreadsheet tsv as a string"
+        "json_strings": "A list of BIDS JSON sidecars as strings.",
+        "spreadsheet_string": "A spreadsheet tsv as a string."
     },
     "returns": {
         "service": "Name of the requested service.",
-        "results": "Results of the operation",
-        "error_type": "Type of error if the service failed",
-        "error_msg": "Explanation of the message if the service failed"
+        "results": "Results of the operation.",
+        "error_type": "Type of error if the service failed.",
+        "error_msg": "Explanation of the message if the service failed."
     },
     "results": {
-        "command": "The command that was executed in response to the service request",
+        "command": "The command that was executed in response to the service request.",
         "data": "The data returned by the service. This could be a list of errors or the processed result depending on what happened.",
-        "schema_version": "The version of the HED schema used in the processing",
+        "schema_version": "The version of the HED schema used in the processing.",
         "msg_category": "One of success, warning, or failure depending on the result of processing the service.",
         "msg": "Explanation of the result of service processing."
     }

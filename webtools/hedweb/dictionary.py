@@ -45,6 +45,7 @@ def generate_input_from_dictionary_form(request):
         arguments[common.COMMAND] = common.COMMAND_TO_LONG
     else:
         arguments[common.COMMAND] = ''
+    arguments[common.CHECK_FOR_WARNINGS] = form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
     return arguments
 
 

@@ -5,7 +5,11 @@
         <input class="radio-btn" type="radio" name="command_option" checked
                id="command_assemble" value="command_assemble"
                aria-label="Select this button to assemble" aria-checked="true">
-        <label class="secondary-label">Assemble</label>
+        <label class="secondary-label">Assemble</label> &nbsp
+        (<input type="checkbox" name="defs_expand" id="defs_expand" checked>
+        <label for="expand_defs">Expand defs</label> &nbsp
+        <input type="checkbox" name="check_for_warnings" id="check_for_warnings" checked>
+        <label for="expand_defs">Check for warnings)</label>
     </div>
     {% endif %}
 
@@ -41,7 +45,9 @@
         <input class="radio-btn" type="radio" name="command_option" checked
                id="command_validate" value="command_validate"
                aria-label="Select this button to validate" aria-checked="true">
-        <label class="secondary-label">Validate</label>
+        <label class="secondary-label">Validate</label>  &nbsp
+        (<input type="checkbox" name="check_for_warnings" id="check_for_warnings" checked>
+        <label for="expand_defs">Check for warnings)</label>
     </div>
     {% endif %}
 {% endmacro %}

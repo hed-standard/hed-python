@@ -48,6 +48,8 @@ def generate_input_from_events_form(request):
         arguments[common.COMMAND] = common.COMMAND_ASSEMBLE
     else:
         arguments[common.COMMAND] = ''
+    arguments[common.DEFS_EXPAND] = form_has_option(request, common.DEFS_EXPAND, 'on')
+    arguments[common.CHECK_FOR_WARNINGS] = form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
     return arguments
 
 
@@ -112,13 +114,15 @@ def events_assemble(arguments, hed_schema=None):
         return results
     hed_tags = []
     onsets = []
-    for row_number, row_dict in events_file.iter_dataframe(return_row_dict=True):
+    no_expand = not arguments.get(common.DEFS_EXPAND, True)
+    for row_number, row_dict in events_file.iter_dataframe(return_row_dict=True, do_not_expand_labels=no_expand):
         hed_tags.append(str(row_dict.get("HED", "")))
         onsets.append(row_dict.get("onset", "n/a"))
     data = {'onset': onsets, 'HED': hed_tags}
     df = pd.DataFrame(data)
     csv_string = df.to_csv(None, sep='\t', index=False, header=True)
-    file_name = generate_filename(common.EVENTS_FILE, suffix='_expanded', extension='.tsv')
+    file_name = arguments.get(common.EVENTS_DISPLAY_NAME, 'events_file')
+    file_name = generate_filename(file_name, suffix='_expanded', extension='.tsv')
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     return {'command': arguments.get('command', ''), 'data': csv_string, 'output_display_name': file_name,
             'schema_version': schema_version, 'msg_category': 'success',
@@ -179,7 +183,7 @@ def events_validate(arguments, hed_schema=None, events=None):
 
         events = get_events(arguments, json_dictionary=json_dictionary)
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    validator = HedValidator(hed_schema=hed_schema)
+    validator = HedValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
     issues = validator.validate_input(events)
     if issues:
         display_name = arguments.get(common.EVENTS_FILE, None)

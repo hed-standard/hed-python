@@ -30,11 +30,13 @@ function columnNamesAreEmpty(names) {
  * Gets information a file with columns. This information the names of the columns in the specified
  * worksheet and indices that contain HED tags.
  * @param {string} columnsFile - Name of a file with columns.
+ * @param {string} flashMessageLocation - ID name of the flash message element in which to display errors.
  * @param {string} worksheetName - Name of worksheet or undefined.
+ * @param {boolean} hasColumnNames - If true has column names
  * @param {boolean} repopulateWorksheet - If true repopulate the select pull down with worksheet names.
- * @param {string} flashMessage - ID name of the flash message element in which to display errors.
+ * @param {boolean} showIndices - Show boxes with indices.
  */
-function setColumnsInfo(columnsFile, worksheetName=undefined, repopulateWorksheet=true, flashMessage) {
+function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefined, hasColumnNames, repopulateWorksheet=true, showIndices) {
     let formData = new FormData();
     formData.append('columns_file', columnsFile);
     if (worksheetName !== undefined) {
@@ -48,18 +50,22 @@ function setColumnsInfo(columnsFile, worksheetName=undefined, repopulateWorkshee
         processData: false,
         dataType: 'json',
         success: function (info) {
-               if (info['message'])
-                    flashMessageOnScreen(info['message'], 'error', flashMessage)
-               else {
-                   if (repopulateWorksheet) {
-                       populateWorksheetDropdown(info['worksheet_names']);
-                   }
-                   let hasColumns = $('#has_column_names').prop('checked')
-                   setComponentsRelatedToColumns(info, hasColumns, true);
-               }
+            if (info['message'])
+                flashMessageOnScreen(info['message'], 'error', flashMessageLocation)
+            else {
+                if (repopulateWorksheet) {
+                    populateWorksheetDropdown(info['worksheet_names']);
+                }
+                if (hasColumnNames) {
+                    showColumnNames(info['column_names'])
+                }
+                if (showIndices) {
+                    setComponentsRelatedToColumns(info, hasColumnsNames, showIndices)
+                }
+            }
         },
         error: function () {
-            flashMessageOnScreen('File could not be processed.', 'error', flashMessage);
+            flashMessageOnScreen('File could not be processed.', 'error', flashMessageLocation);
         }
     });
 }
@@ -69,9 +75,9 @@ function setColumnsInfo(columnsFile, worksheetName=undefined, repopulateWorkshee
  * Gets information a file with columns and populate the columnNames table.
  * @param {string} columnsFile - Name of the file with columns to be determined.
  * @param {string} worksheetName - Name of worksheet or undefined.
- * @param {string} flashMessage - ID name of the flash message element in which to display errors.
+ * @param {string} flashMessageLocation - ID name of the flash message element in which to display errors.
  */
-function setColumnsNameTable(columnsFile, worksheetName=undefined,  flashMessage) {
+function setColumnsNameTable(columnsFile, worksheetName=undefined,  flashMessageLocation) {
     let formData = new FormData();
     formData.append('columns_file', columnsFile);
     if (worksheetName !== undefined) {
@@ -85,13 +91,13 @@ function setColumnsNameTable(columnsFile, worksheetName=undefined,  flashMessage
         processData: false,
         dataType: 'json',
         success: function (info) {
-               if (info['message'])
-                    flashMessageOnScreen(info['message'], 'error', flashMessage)
-               else
-                   showColumnNames(info['column_names'])
+        if (info['message'])
+            flashMessageOnScreen(info['message'], 'error', flashMessageLocation)
+        else
+            showColumnNames(info['column_names'])
         },
         error: function () {
-            flashMessageOnScreen('File could not be processed.', 'error', flashMessage);
+            flashMessageOnScreen('File could not be processed.', 'error', flashMessageLocation);
         }
     });
 }

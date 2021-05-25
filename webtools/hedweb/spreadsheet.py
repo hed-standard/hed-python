@@ -46,6 +46,8 @@ def generate_input_from_spreadsheet_form(request):
         arguments[common.COMMAND_TO_SHORT] = True
     elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_LONG):
         arguments[common.COMMAND_TO_LONG] = True
+    arguments[common.DEFS_EXPAND] = form_has_option(request, common.DEFS_EXPAND, 'on')
+    arguments[common.CHECK_FOR_WARNINGS] = form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
     return arguments
 
 
@@ -130,7 +132,7 @@ def spreadsheet_validate(arguments, hed_schema=None, spreadsheet=None):
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if not spreadsheet:
         spreadsheet = get_spreadsheet(arguments)
-    validator = HedValidator(hed_schema=hed_schema)
+    validator = HedValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
     issues = validator.validate_input(spreadsheet)
     if issues:
         display_name = arguments.get(common.SPREADSHEET_FILE, None)

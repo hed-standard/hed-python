@@ -1,5 +1,6 @@
 %% Shows how to call hed-services to obtain a list of services
-host = 'http://127.0.0.1:5000';
+%host = 'http://127.0.0.1:5000';
+host = 'https://hedtools.ucsd.edu/hed';
 csrf_url = [host '/services']; 
 services_url = [host '/services_submit'];
 dictionary_file = '../data/good_dictionary.json';
@@ -19,13 +20,17 @@ header = ["Content-Type" "application/json"; ...
 options = weboptions('MediaType', 'application/json', 'Timeout', Inf, ...
                      'HeaderFields', header);
 data = struct();
-data.service = 'events_validate';
-%data.service = 'events_assemble';
+%data.service = 'events_validate';
+data.service = 'events_assemble';
 %data.schema_version = '7.1.2';
 data.schema_version = '8.0.0-alpha.1';
 data.json_string = string(json_text);
 data.events_string = string(events_text);
-data.display_name = 'my_events_test';
+data.events_display_name = 'my_events_test';
+data.defs_expand = true;
+%data.defs_expand = false;
+%data.check_for_warnings = false;
+data.check_for_warnings = true;
 
 %% Send the request and get the response 
 response = webwrite(services_url, data, options);

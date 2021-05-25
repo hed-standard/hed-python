@@ -16,6 +16,7 @@ COLUMNS_FILE = 'columns_file'
 COLUMNS_PATH = 'columns_path'
 COLUMNS_DISPLAY_NAME = 'columns_display_name'
 
+DEFS_EXPAND = 'defs_expand'
 HAS_COLUMN_NAMES = 'has_column_names'
 TAG_COLUMNS = 'tag_columns'
 COLUMN_INDICES = 'column_indices'
