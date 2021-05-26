@@ -562,11 +562,7 @@ class TagValidator:
         default_unit = ''
         unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
         if self.is_unit_class_tag(formatted_tag):
-            has_default_attribute = self._hed_schema.tag_has_attribute(unit_class_tag,
-                                                                       HedKey.Default)
-            if has_default_attribute:
-                default_unit = self._hed_schema_dictionaries[HedKey.Default][unit_class_tag]
-            elif unit_class_tag in self._hed_schema_dictionaries[HedKey.UnitClass]:
+            if unit_class_tag in self._hed_schema_dictionaries[HedKey.UnitClass]:
                 unit_classes = \
                     self._hed_schema_dictionaries[HedKey.UnitClass][unit_class_tag].split(',')
                 first_unit_class = unit_classes[0]

@@ -8,15 +8,17 @@ from hed.util.hed_string import HedString
 
 
 class TestHedSchema(unittest.TestCase):
-    schema_file = '../data/HED7.1.1.xml'
-    schema_file_3g = '../data/HED8.0.0-alpha.1.xml'
+    schema_file = '../data/legacy_xml/HED7.1.1.xml'
+    schema_file_3g_xml = '../data/legacy_xml/HED8.0.0-alpha.1.xml'
+    schema_file_3g = '../data/HED8.0.0-alpha.2.mediawiki'
 
     @classmethod
     def setUpClass(cls):
         cls.hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
         cls.hed_schema = schema.load_schema(cls.hed_xml)
-        cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g)
-        cls.hed_schema_3g = schema.load_schema(cls.hed_xml_3g)
+        cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g_xml)
+        cls.hed_wiki_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g)
+        cls.hed_schema_3g = schema.load_schema(cls.hed_wiki_3g)
         cls.hed_schema_dictionaries = cls.hed_schema.dictionaries
 
     def test_invalid_schema(self):
@@ -56,7 +58,7 @@ class TestHedSchema(unittest.TestCase):
                                                                        display_filename=display_filename))
 
     def test_attribute_keys(self):
-        tag_dictionary_keys = ['default', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
+        tag_dictionary_keys = ['defaultUnits', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
                                'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
         for key in tag_dictionary_keys:
             self.assertIn(key, self.hed_schema_dictionaries, key + ' not found.')
@@ -78,13 +80,23 @@ class TestHedSchema(unittest.TestCase):
         self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
 
     def test_default_unit_tags(self):
-        default_unit_tags = {
-            'attribute/blink/time shut/#': 's',
-            'attribute/blink/duration/#': 's',
-            'attribute/blink/pavr/#': 'centiseconds',
-            'attribute/blink/navr/#': 'centiseconds',
-        }
-        actual_tags_dictionary = self.hed_schema_dictionaries['default']
+        default_unit_tags = {'acceleration': 'm-per-s^2',
+             'angle': 'radian',
+             'area': 'm^2',
+             'clockTime': 'hour:min',
+             'currency': '$',
+             'dateTime': 'YYYY-MM-DDThh:mm:ss',
+             'frequency': 'Hz',
+             'intensity': 'dB',
+             'jerk': 'm-per-s^3',
+             'luminousIntensity': 'cd',
+             'memorySize': 'B',
+             'physicalLength': 'm',
+             'pixels': 'px',
+             'speed': 'm-per-s',
+             'time': 's',
+             'volume': 'm^3'}
+        actual_tags_dictionary = self.hed_schema_dictionaries['defaultUnits']
         self.assertDictEqual(actual_tags_dictionary, default_unit_tags)
 
     def test_unit_classes(self):
@@ -152,7 +164,7 @@ class TestHedSchema(unittest.TestCase):
         }
         expected_results = {
             'value': {
-                'default': False,
+                'defaultUnits': False,
                 'extensionAllowed': False,
                 'extensionAllowedPropagated': False,
                 'isNumeric': True,
@@ -167,7 +179,7 @@ class TestHedSchema(unittest.TestCase):
                 'unitClass': True,
             },
             'valueParent': {
-                'default': False,
+                'defaultUnits': False,
                 'extensionAllowed': False,
                 'extensionAllowedPropagated': True,
                 'isNumeric': False,
@@ -182,7 +194,7 @@ class TestHedSchema(unittest.TestCase):
                 'unitClass': False,
             },
             'allowedExtension': {
-                'default': False,
+                'defaultUnits': False,
                 'extensionAllowed': False,
                 'extensionAllowedPropagated': True,
                 'isNumeric': False,
@@ -217,17 +229,17 @@ class TestHedSchema(unittest.TestCase):
 
     def test_get_desc_dict(self):
         desc_dict = self.hed_schema.get_desc_dict()
-        self.assertEqual(len(desc_dict), 358)
+        self.assertEqual(len(desc_dict), 376)
 
         desc_dict = self.hed_schema_3g.get_desc_dict()
-        self.assertEqual(len(desc_dict), 228)
+        self.assertEqual(len(desc_dict), 255)
 
     def test_get_tag_description(self):
         # Test known tag
         desc = self.hed_schema.get_tag_description("Event/Category")
         self.assertEqual(desc, "This is meant to designate the reason this event was recorded")
         # Test known unit modifier
-        desc = self.hed_schema.get_tag_description("deca", HedKey.SIUnitModifier)
+        desc = self.hed_schema.get_tag_description("deca", HedKey.UnitModifiers)
         self.assertEqual(desc, "SI unit multiple representing 10^1")
 
         # test unknown tag.
@@ -284,4 +296,4 @@ class TestHedSchema(unittest.TestCase):
 
     def test_short_tag_mapping(self):
         self.assertFalse(self.hed_schema.short_tag_mapping)
-        self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 1011)
+        self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 1023)

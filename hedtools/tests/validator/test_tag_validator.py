@@ -10,7 +10,7 @@ from hed.util.error_types import ValidationErrors, ValidationWarnings, SchemaErr
 
 
 class TestHed3(unittest.TestCase):
-    schema_file = '../data/HED8.0.0-alpha.1.xml'
+    schema_file = '../data/legacy_xml/HED8.0.0-alpha.1.xml'
 
     @classmethod
     def setUpClass(cls):

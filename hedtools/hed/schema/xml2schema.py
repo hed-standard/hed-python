@@ -2,69 +2,63 @@
 This module is used to create a HedSchema object from an XML file or tree.
 """
 
-from defusedxml.ElementTree import parse
+from defusedxml import ElementTree
 import xml
 from hed.util.exceptions import HedFileError, HedExceptions
-from hed.schema import hed_schema_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema.hed_schema import HedSchema
+from hed.schema import xml_constants
 
 
 class HedSchemaXMLParser:
-    # These should mostly match the HedKey values
-    # These are repeated here for clarification primarily
-    DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = HedKey.DefaultUnits
-    DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE = HedKey.Default
-    UNIT_CLASS_ELEMENT = HedKey.UnitClass
-    UNIT_CLASS_UNIT_ELEMENT = 'unit'
-    UNIT_CLASS_UNITS_ELEMENT = HedKey.Units
-    UNIT_MODIFIER_ELEMENT = 'unitModifier'
-    PROLOGUE_ELEMENT = "prologue"
-    EPILOGUE_ELEMENT = "epilogue"
-
-    def __init__(self, hed_xml_file_path):
-        self._root_element = self._parse_hed_xml_file(hed_xml_file_path)
+    def __init__(self, hed_xml_file_path, schema_as_string=None):
+        self._root_element = self._parse_hed_xml(hed_xml_file_path, schema_as_string)
         # Used to find parent elements of XML nodes during file parsing
         self._parent_map = {c: p for p in self._root_element.iter() for c in p}
 
-        # Required properties
-        self.schema_attributes = self._get_schema_attributes()
-        self.dictionaries = HedSchema.create_empty_dictionaries()
-        self.prologue = self._get_prologue()
-        self.epilogue = self._get_epilogue()
+        self._legacy_style_xml = False
+        self._schema = HedSchema()
+        self._schema.filename = hed_xml_file_path
+        self._schema.header_attributes = self._get_header_attributes()
+
+        self._populate_attribute_dictionaries()
+
+        self._schema.prologue = self._get_prologue()
+        self._schema.epilogue = self._get_epilogue()
         self._populate_dictionaries()
+        self._schema.finalize_dictionaries()
 
     @staticmethod
-    def load_xml(xml_file_path):
-        parser = HedSchemaXMLParser(xml_file_path)
-
-        hed_schema = HedSchema()
-
-        hed_schema.filename = xml_file_path
-        hed_schema.prologue = parser.prologue
-        hed_schema.epilogue = parser.epilogue
-        hed_schema.set_dictionaries(parser.dictionaries)
-        hed_schema.set_attributes(parser.schema_attributes)
-
-        return hed_schema
+    def load_xml(xml_file_path=None, schema_as_string=None):
+        parser = HedSchemaXMLParser(xml_file_path, schema_as_string)
+        return parser._schema
 
     @staticmethod
-    def _parse_hed_xml_file(hed_xml_file_path):
+    def _parse_hed_xml(hed_xml_file_path, schema_as_string=None):
         """Parses a XML file and returns the root element.
 
         Parameters
         ----------
         hed_xml_file_path: str
             The path to a HED XML file.
-
+        schema_as_string: str
+            Alternate input, a full schema XML file as a string.
         Returns
         -------
         RestrictedElement
             The root element of the HED XML file.
 
         """
+        if schema_as_string and hed_xml_file_path:
+            raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.",
+                               hed_xml_file_path)
+
         try:
-            hed_xml_tree = parse(hed_xml_file_path)
+            if hed_xml_file_path:
+                hed_xml_tree = ElementTree.parse(hed_xml_file_path)
+                root = hed_xml_tree.getroot()
+            else:
+                root = ElementTree.fromstring(schema_as_string)
         except xml.etree.ElementTree.ParseError as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, hed_xml_file_path)
         except FileNotFoundError as e:
@@ -72,7 +66,7 @@ class HedSchemaXMLParser:
         except TypeError as e:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), hed_xml_file_path)
 
-        return hed_xml_tree.getroot()
+        return root
 
     def _populate_dictionaries(self):
         """Populates a dictionary of dictionaries that contains all of the tags, tag attributes, unit class units,
@@ -92,6 +86,32 @@ class HedSchemaXMLParser:
         self._populate_unit_class_dictionaries()
         self._populate_unit_modifier_dictionaries()
 
+    def _populate_attribute_dictionaries(self):
+        """Populates a dictionary of dictionaries associated with attributes and their properties
+
+        If this section is not found, default HED2 attributes will be added from hed_2g_attributes.py
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        section_name = xml_constants.get_section_name(HedKey.Attributes)
+        attribute_section = self._get_elements_by_name(section_name)
+        if not attribute_section:
+            self._schema.add_hed2_attributes()
+            self._legacy_style_xml = True
+            return
+        attribute_section = attribute_section[0]
+
+        def_element_name = xml_constants.get_element_name(HedKey.Attributes)
+        attribute_elements = self._get_elements_by_name(def_element_name, attribute_section)
+        for element in attribute_elements:
+            attribute_name = self._get_element_tag_value(element)
+            self._schema._add_attribute_name_to_dict(attribute_name)
+            self._parse_node(element, HedKey.Attributes)
+
     def _populate_tag_dictionaries(self):
         """Populates a dictionary of dictionaries associated with tags and their attributes.
 
@@ -104,19 +124,13 @@ class HedSchemaXMLParser:
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
-        for dict_key in constants.TAG_ATTRIBUTE_KEYS:
-            tags, tag_elements = self._get_tags_by_attribute(dict_key)
-            if dict_key in constants.STRING_ATTRIBUTE_DICTIONARY_KEYS:
-                tag_dictionary = self._create_tag_to_attribute_dictionary(tags, tag_elements, dict_key)
+        tag_elements = self._get_elements_by_name("node")
+        for tag_element in tag_elements:
+            tag = self._get_tag_path_from_tag_element(tag_element)
+            if self._legacy_style_xml:
+                self._parse_node_old(tag_element, HedKey.AllTags, tag)
             else:
-                tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
-            self.dictionaries[dict_key] = tag_dictionary
-
-        # Finally handle the special cases of all tags, and descriptions
-        tags, tag_elements = self._get_all_tags()
-        tag_dictionary = self._string_list_to_lowercase_dictionary(tags)
-        self.dictionaries[HedKey.Descriptions] = self._get_element_desc(tags, tag_elements)
-        self.dictionaries[HedKey.AllTags] = tag_dictionary
+                self._parse_node(tag_element, HedKey.AllTags, tag)
 
     def _populate_unit_class_dictionaries(self):
         """Populates a dictionary of dictionaries associated with all of the unit classes, unit class units, and unit
@@ -132,13 +146,50 @@ class HedSchemaXMLParser:
             default units.
 
         """
-        unit_class_elements = self._get_elements_by_name(self.UNIT_CLASS_ELEMENT)
-        if len(unit_class_elements) == 0:
-            self.has_unit_classes = False
+        section_name = xml_constants.get_section_name(HedKey.Units, self._legacy_style_xml)
+        units_section_nodes = self._get_elements_by_name(section_name)
+        if len(units_section_nodes) == 0:
             return
-        self.has_unit_classes = True
-        self._populate_unit_class_default_unit_dictionary(unit_class_elements)
-        self._populate_unit_class_units_dictionary(unit_class_elements)
+        units_section = units_section_nodes[0]
+
+        def_element_name = xml_constants.get_element_name(HedKey.Units, self._legacy_style_xml)
+        unit_class_elements = self._get_elements_by_name(def_element_name, units_section)
+
+        if self._legacy_style_xml:
+            for unit_class_element in unit_class_elements:
+                self._parse_node_old(unit_class_element, HedKey.Units, skip_adding_name=True)
+                element_name = self._get_element_tag_value(unit_class_element)
+                self._schema._add_unit_class_unit(element_name, None)
+                element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
+                if not element_units:
+                    # Support super legacy format where units were just comma separated on a single line.
+                    element_units = self._get_element_tag_value(unit_class_element,
+                                                                xml_constants.UNIT_CLASS_UNITS_ELEMENT)
+                    if element_units:
+                        units = element_units.split(',')
+                        units_list = [unit.lower() for unit in units]
+                        for unit in units_list:
+                            self._schema._add_unit_class_unit(element_name, unit)
+                        continue
+                    element_units = []
+
+                element_unit_names = [element.text for element in element_units]
+                for unit in element_unit_names:
+                    self._schema._add_unit_class_unit(element_name, unit)
+                for element in element_units:
+                    self._parse_node_old(element, HedKey.Units, element_name=element.text,
+                                         skip_adding_name=True)
+        else:
+            for unit_class_element in unit_class_elements:
+                self._parse_node(unit_class_element, HedKey.Units, skip_adding_name=True)
+                element_name = self._get_element_tag_value(unit_class_element)
+                element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
+                element_unit_names = [self._get_element_tag_value(element) for element in element_units]
+                self._schema._add_unit_class_unit(element_name, None)
+                for unit in element_unit_names:
+                    self._schema._add_unit_class_unit(element_name, unit)
+                for element in element_units:
+                    self._parse_node(element, HedKey.Units, skip_adding_name=True)
 
     def _populate_unit_modifier_dictionaries(self):
         """
@@ -148,127 +199,78 @@ class HedSchemaXMLParser:
         -------
 
         """
-        unit_modifier_elements = self._get_elements_by_name(self.UNIT_MODIFIER_ELEMENT)
-        if len(unit_modifier_elements) == 0:
-            self.has_unit_modifiers = False
+        section_name = xml_constants.get_section_name(HedKey.UnitModifiers, self._legacy_style_xml)
+        unit_modifier_section_nodes = self._get_elements_by_name(section_name)
+        if len(unit_modifier_section_nodes) == 0:
             return
-        self.has_unit_modifiers = True
-        for unit_modifier_key in constants.UNIT_MODIFIER_DICTIONARY_KEYS:
-            self.dictionaries[unit_modifier_key] = {}
-        for unit_modifier_element in unit_modifier_elements:
-            unit_modifier_name = self._get_element_tag_value(unit_modifier_element)
-            unit_modifier_desc = self._get_element_tag_value(unit_modifier_element, "description")
-            if unit_modifier_desc:
-                self.dictionaries[HedKey.Descriptions][HedKey.SIUnitModifier + unit_modifier_name] = unit_modifier_desc
-            for unit_modifier_key in constants.UNIT_MODIFIER_DICTIONARY_KEYS:
-                self.dictionaries[unit_modifier_key][unit_modifier_name] = unit_modifier_element.get(unit_modifier_key)
-
-    def _populate_unit_class_units_dictionary(self, unit_class_elements):
-        """Populates a dictionary that contains unit class units.
-
-        Parameters
-        ----------
-        unit_class_elements: list
-            A list of unit class elements.
-
-        Returns
-        -------
-        {}
-            A dictionary that contains all the unit class units.
-
-        """
-        self.dictionaries[HedKey.Units] = {}
-        for unit_class_key in constants.UNIT_CLASS_DICTIONARY_KEYS:
-            self.dictionaries[unit_class_key] = {}
-        for unit_class_element in unit_class_elements:
-            element_name = self._get_element_tag_value(unit_class_element)
-            element_desc = self._get_element_tag_value(unit_class_element, "description")
-            if element_desc:
-                self.dictionaries[HedKey.Descriptions][HedKey.Units + element_name] = element_desc
-            element_units = self._get_elements_by_name(self.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
-            if not element_units:
-                element_units = self._get_element_tag_value(unit_class_element, self.UNIT_CLASS_UNITS_ELEMENT)
-                units = element_units.split(',')
-                units_list = list(map(lambda unit: unit.lower(), units))
-                self.dictionaries[HedKey.Units][element_name] = units_list
-                continue
-            element_unit_names = list(map(lambda element: element.text, element_units))
-            self.dictionaries[HedKey.Units][element_name] = element_unit_names
-            for element_unit in element_units:
-                unit_name = element_unit.text
-                for unit_class_key in constants.UNIT_CLASS_DICTIONARY_KEYS:
-                    self.dictionaries[unit_class_key][unit_name] = element_unit.get(unit_class_key)
-
-    def _populate_unit_class_default_unit_dictionary(self, unit_class_elements):
-        """Populates a dictionary that contains unit class default units.
-
-        Parameters
-        ----------
-        unit_class_elements: list
-            A list of unit class elements.
-
-        Returns
-        -------
-        {}
-            A dictionary that contains all the unit class default units.
-
-        """
-        self.dictionaries[HedKey.DefaultUnits] = {}
-        for unit_class_element in unit_class_elements:
-            unit_class_element_name = self._get_element_tag_value(unit_class_element)
-            # this is handled in _populate_unit_class_units_dictionary for now.
-            # unit_class_desc = self._get_element_tag_value(unit_class_element, "description")
-            default_unit = unit_class_element.get(self.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE)
-            if default_unit is None:
-                self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = \
-                    unit_class_element.attrib[self.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE]
+        unit_modifier_section = unit_modifier_section_nodes[0]
+        def_element_name = xml_constants.get_element_name(HedKey.UnitModifiers, self._legacy_style_xml)
+        node_elements = self._get_elements_by_name(def_element_name, unit_modifier_section)
+        for node_element in node_elements:
+            if self._legacy_style_xml:
+                self._parse_node_old(node_element, key_class=HedKey.UnitModifiers)
             else:
-                self.dictionaries[HedKey.DefaultUnits][unit_class_element_name] = default_unit
+                self._parse_node(node_element, key_class=HedKey.UnitModifiers)
 
-    @staticmethod
-    def _create_tag_to_attribute_dictionary(tag_list, tag_element_list, attribute_name):
-        """Populates the dictionaries associated with default unit tags in the attribute dictionary.
-
-        Parameters
-        ----------
-        tag_list: []
-            A list containing tags that have a specific attribute.
-        tag_element_list: []
-            A list containing tag elements that have a specific attribute.
-        attribute_name: str
-            The name of the attribute associated with the tags and tag elements.
+    def _get_header_attributes(self):
+        """
+            Gets the schema attributes form the XML root node
 
         Returns
         -------
-        {}
-            The attribute dictionary that has been populated with dictionaries associated with tags.
+        attribute_dict: {str: str}
 
         """
-        dictionary = {}
-        for index, tag in enumerate(tag_list):
-            dictionary[tag.lower()] = tag_element_list[index].attrib[attribute_name]
-        return dictionary
+        return self._root_element.attrib
 
-    @staticmethod
-    def _string_list_to_lowercase_dictionary(string_list):
-        """Converts a string list into a dictionary. The keys in the dictionary will be the lowercase values of the
-           strings in the list.
+    def _get_prologue(self):
+        prologue_elements = self._get_elements_by_name(xml_constants.PROLOGUE_ELEMENT)
+        if len(prologue_elements) == 1:
+            return prologue_elements[0].text
+        return ""
 
-        Parameters
-        ----------
-        string_list: list
-            A list containing string elements.
+    def _get_epilogue(self):
+        epilogue_elements = self._get_elements_by_name(xml_constants.EPILOGUE_ELEMENT)
+        if len(epilogue_elements) == 1:
+            return epilogue_elements[0].text
+        return ""
 
-        Returns
-        -------
-        {}
-            A dictionary containing the strings in the list.
+    def _parse_node_old(self, node_element, key_class, element_name=None, skip_adding_name=False):
+        if element_name:
+            node_name = element_name
+        else:
+            node_name = self._get_element_tag_value(node_element)
 
-        """
-        lowercase_dictionary = {}
-        for string_element in string_list:
-            lowercase_dictionary[string_element.lower()] = string_element
-        return lowercase_dictionary
+        node_desc = self._get_element_tag_value(node_element, xml_constants.DESCRIPTION_ELEMENT)
+        if not skip_adding_name:
+            self._schema._add_tag_to_dict(node_name, key_class, node_name)
+        self._schema._add_description_to_dict(node_name, node_desc, key_class)
+
+        for attribute_name in node_element.attrib:
+            new_value = node_element.get(attribute_name)
+            if new_value and attribute_name == xml_constants.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE:
+                attribute_name = xml_constants.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE
+            self._schema._add_attribute_to_dict(node_name, attribute_name, new_value, key_class)
+
+    def _parse_node(self, node_element, key_class, element_name=None, skip_adding_name=False):
+        if element_name:
+            node_name = element_name
+        else:
+            node_name = self._get_element_tag_value(node_element)
+        attribute_desc = self._get_element_tag_value(node_element, xml_constants.DESCRIPTION_ELEMENT)
+        if not skip_adding_name:
+            self._schema._add_tag_to_dict(node_name, key_class)
+        self._schema._add_description_to_dict(node_name, attribute_desc, key_class=key_class)
+
+        for attribute_element in node_element:
+            if attribute_element.tag != xml_constants.ATTRIBUTE_PROPERTY_ELEMENTS[key_class]:
+                continue
+            attribute_name = self._get_element_tag_value(attribute_element)
+            attribute_value_elements = self._get_elements_by_name("value", attribute_element)
+            attribute_value = ",".join(element.text for element in attribute_value_elements)
+            if not attribute_value:
+                attribute_value = True
+            self._schema._add_attribute_to_dict(node_name, attribute_name, attribute_value, key_class)
 
     def _get_ancestor_tag_names(self, tag_element):
         """Gets all the ancestor tag names of a tag element.
@@ -295,7 +297,7 @@ class HedSchemaXMLParser:
         return ancestor_tags
 
     @staticmethod
-    def _get_element_tag_value(element, tag_name='name'):
+    def _get_element_tag_value(element, tag_name=xml_constants.NAME_ELEMENT):
         """Gets the value of the element's tag.
 
         Parameters
@@ -332,7 +334,7 @@ class HedSchemaXMLParser:
         """
         parent_tag_element = self._parent_map[tag_element]
         if parent_tag_element is not None:
-            return parent_tag_element.findtext('name')
+            return parent_tag_element.findtext(xml_constants.NAME_ELEMENT)
         else:
             return ''
 
@@ -354,71 +356,6 @@ class HedSchemaXMLParser:
         ancestor_tag_names.insert(0, self._get_element_tag_value(tag_element))
         ancestor_tag_names.reverse()
         return '/'.join(ancestor_tag_names)
-
-    def _get_schema_attributes(self):
-        """
-            Gets the schema attributes form the XML root node
-
-        Returns
-        -------
-        attribute_dict: {str: str}
-
-        """
-        return self._root_element.attrib
-
-    def _get_prologue(self):
-        prologue_elements = self._get_elements_by_name(self.PROLOGUE_ELEMENT)
-        if len(prologue_elements) == 1:
-            return prologue_elements[0].text
-        return ""
-
-    def _get_epilogue(self):
-        epilogue_elements = self._get_elements_by_name(self.EPILOGUE_ELEMENT)
-        if len(epilogue_elements) == 1:
-            return epilogue_elements[0].text
-        return ""
-
-    def _get_tags_by_attribute(self, attribute_name):
-        """Gets the tag that have a specific attribute.
-
-        Parameters
-        ----------
-        attribute_name: str
-            The name of the attribute associated with the tags.
-
-        Returns
-        -------
-        tuple
-            A tuple containing tags and tag elements that have a specified attribute.
-
-        """
-        tags = []
-        tag_elements = self._root_element.findall('.//node[@%s]' % attribute_name)
-        for attribute_tag_element in tag_elements:
-            tag = self._get_tag_path_from_tag_element(attribute_tag_element)
-            tags.append(tag)
-        return tags, tag_elements
-
-    def _get_all_tags(self, tag_element_name='node'):
-        """Gets the tags that have a specific attribute.
-
-        Parameters
-        ----------
-        tag_element_name: str
-            The XML tag name of the tag elements. The default is 'node'.
-
-        Returns
-        -------
-        tuple
-            A tuple containing all the tags and tag elements in the XML file.
-
-        """
-        tags = []
-        tag_elements = self._root_element.findall('.//%s' % tag_element_name)
-        for tag_element in tag_elements:
-            tag = self._get_tag_path_from_tag_element(tag_element)
-            tags.append(tag)
-        return tags, tag_elements
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """Gets the elements that have a specific element name.
@@ -442,26 +379,3 @@ class HedSchemaXMLParser:
         else:
             elements = parent_element.findall('.//%s' % element_name)
         return elements
-
-    @staticmethod
-    def _get_element_desc(tags, tag_elements):
-        """
-            Create a dictionary of descriptions for the given tags and elements
-
-        Parameters
-        ----------
-        tags : [str]
-            The list of tags to get descriptions for
-        tag_elements : [Element]
-            The matching list of XML elements to get descriptions from
-        Returns
-        -------
-        desc_dict: {str: str}
-            {tag : description} for any tags that have one.
-        """
-        tags_desc = {}
-        for tag, tag_element in zip(tags, tag_elements):
-            for child in tag_element:
-                if child.tag == "description":
-                    tags_desc[tag] = child.text
-        return tags_desc

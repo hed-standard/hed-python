@@ -1,11 +1,7 @@
 """Allows output of HedSchema objects as .mediawiki format"""
 
 from hed.schema.hed_schema_constants import HedKey
-from hed.schema import hed_schema_constants as constants
-
-START_HED_STRING = "!# start schema"
-END_SCHEMA_STRING = "!# end schema"
-END_HED_STRING = "!# end hed"
+from hed.schema import wiki_constants
 
 
 class HedSchema2Wiki:
@@ -31,28 +27,29 @@ class HedSchema2Wiki:
 
         self._output_header(hed_schema)
         self._output_tags(hed_schema)
-        self.current_tag_string = END_SCHEMA_STRING
+        self.current_tag_string = wiki_constants.END_SCHEMA_STRING
         self._flush_current_tag()
         self._output_units(hed_schema)
         self._output_unit_modifiers(hed_schema)
+        self._output_attributes(hed_schema)
         self._output_footer(hed_schema)
 
         return self.output
 
     def _output_header(self, hed_schema):
         hed_attrib_string = self._get_attribs_string_from_schema(hed_schema)
-        self.current_tag_string = f"HED {hed_attrib_string}"
+        self.current_tag_string = f"{wiki_constants.HEADER_LINE_STRING} {hed_attrib_string}"
         self._flush_current_tag()
         self._add_blank_line()
         self.current_tag_string += hed_schema.prologue
         self._flush_current_tag()
         self._add_blank_line()
-        self.current_tag_string = START_HED_STRING
+        self.current_tag_string = wiki_constants.START_HED_STRING
         self._flush_current_tag()
 
     def _output_footer(self, hed_schema):
         self._add_blank_line()
-        self.current_tag_string = END_HED_STRING
+        self.current_tag_string = wiki_constants.END_HED_STRING
         self._flush_current_tag()
         self._add_blank_line()
         self.current_tag_string += hed_schema.epilogue
@@ -81,29 +78,44 @@ class HedSchema2Wiki:
         self._add_blank_line()
 
     def _output_units(self, hed_schema):
-        self.current_tag_string += "'''Unit classes'''"
+        if not hed_schema.has_unit_classes:
+            return
+
+        self.current_tag_string += wiki_constants.UNIT_CLASS_STRING
         self._flush_current_tag()
         for unit_name, unit_types in hed_schema.dictionaries[HedKey.Units].items():
             self.current_tag_string += f"* {unit_name}"
-            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.Units,
-                                                                  keys=constants.UNIT_CLASS_ATTRIBUTES)
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.Units)
             self._flush_current_tag()
 
             for unit_type in unit_types:
                 self.current_tag_string += f"** {unit_type}"
                 self.current_tag_extra += self._format_props_and_desc(
-                    hed_schema, unit_type, HedKey.Units, keys=constants.UNIT_CLASS_ATTRIBUTES)
+                    hed_schema, unit_type, HedKey.Units)
                 self._flush_current_tag()
 
         self._add_blank_line()
 
     def _output_unit_modifiers(self, hed_schema):
-        self.current_tag_string += "'''Unit modifiers'''"
+        if not hed_schema.has_unit_modifiers:
+            return
+
+        self.current_tag_string += wiki_constants.UNIT_MODIFIER_STRING
         self._flush_current_tag()
-        for modifier_name in hed_schema.dictionaries[HedKey.SIUnitModifier]:
+        for modifier_name in hed_schema.dictionaries[HedKey.UnitModifiers]:
             self.current_tag_string += f"* {modifier_name}"
             self.current_tag_extra += self._format_props_and_desc(
-                hed_schema, modifier_name, HedKey.SIUnitModifier, keys=constants.UNIT_MODIFIER_ATTRIBUTES)
+                hed_schema, modifier_name, HedKey.UnitModifiers)
+            self._flush_current_tag()
+
+    def _output_attributes(self, hed_schema):
+        self._add_blank_line()
+        self.current_tag_string += wiki_constants.ATTRIBUTE_DEFINITION_STRING
+        self._flush_current_tag()
+        self._add_blank_line()
+        for attribute_name in hed_schema.dictionaries[HedKey.Attributes]:
+            self.current_tag_string += f"* {attribute_name}"
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, attribute_name, HedKey.Attributes)
             self._flush_current_tag()
 
     def _flush_current_tag(self):
@@ -120,12 +132,12 @@ class HedSchema2Wiki:
         self.output.append("")
 
     # Should this be a function?
-    def _format_props_and_desc(self, hed_schema, tag_name, tag_class=HedKey.AllTags, keys=None):
+    def _format_props_and_desc(self, hed_schema, tag_name, key_class=HedKey.AllTags):
         prop_string = ""
-        tag_props = hed_schema.get_all_tag_attributes(tag_name, keys)
+        tag_props = hed_schema.get_all_tag_attributes(tag_name, key_class=key_class)
         if tag_props:
             prop_string += self._format_tag_props(tag_props)
-        desc = hed_schema.get_tag_description(tag_name, tag_class)
+        desc = hed_schema.get_tag_description(tag_name, key_class)
         if desc:
             if tag_props:
                 prop_string += " "
@@ -152,7 +164,7 @@ class HedSchema2Wiki:
         for prop, value in tag_props.items():
             if value is None or value is False:
                 continue
-            if value is True or value == "true":
+            if value is True:
                 final_props.append(prop)
             else:
                 if "," in value:
@@ -186,8 +198,8 @@ class HedSchema2Wiki:
             A string of the attributes that can be written to a .mediawiki formatted file
         """
         # Hardcode version to always be the first thing in attributes
-        attrib_values = [f"version:{hed_schema.schema_attributes['version']}"]
+        attrib_values = [f"version:{hed_schema.header_attributes['version']}"]
         attrib_values.extend([f"{attr}:{value}" for attr, value in
-                              hed_schema.schema_attributes.items() if attr != "version"])
+                              hed_schema.header_attributes.items() if attr != "version"])
         final_attrib_string = ", ".join(attrib_values)
         return final_attrib_string

@@ -118,10 +118,10 @@ class Test(unittest.TestCase):
         hed_schema = load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict, def_issues = column_group.extract_defs(hed_schema)
+        def_dict, def_issues = column_group.extract_defs()
         self.assertEqual(len(def_issues), 0)
         input_file = EventFileInput(events_path, json_def_files=column_group,
-                                    hed_schema=hed_schema, def_dicts=def_dict)
+                                    def_dicts=def_dict)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)
@@ -137,10 +137,10 @@ class Test(unittest.TestCase):
         hed_schema = load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events_bad_defs.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict, def_issues = column_group.extract_defs(hed_schema)
+        def_dict, def_issues = column_group.extract_defs()
         self.assertEqual(len(def_issues), 0)
         input_file = EventFileInput(events_path, json_def_files=column_group,
-                                    hed_schema=hed_schema, def_dicts=def_dict)
+                                    def_dicts=def_dict)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)
@@ -150,15 +150,15 @@ class Test(unittest.TestCase):
         self.assertEqual(len(validation_issues), 42)
 
     def test_file_bad_defs_in_spreadsheet(self):
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/legacy_xml/HED8.0.0-alpha.1.xml')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = load_schema(schema_path)
 
         prefixed_needed_tag_columns = {2: 'Attribute/Informational/Label/', 3: 'Attribute/Informational/Description/'}
         loaded_file = HedFileInput(events_path, tag_columns=[4],
                                    column_prefix_dictionary=prefixed_needed_tag_columns,
-                                   worksheet_name='LKT Events',
-                                   hed_schema=hed_schema)
+                                   worksheet_name='LKT Events')
 
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = validator.validate_input(loaded_file)

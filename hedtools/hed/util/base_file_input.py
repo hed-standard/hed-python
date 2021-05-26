@@ -2,6 +2,7 @@ import os
 import openpyxl
 import pandas
 import copy
+import io
 
 from hed.util.def_dict import DefDict
 from hed.util.column_mapper import ColumnMapper
@@ -21,13 +22,13 @@ class BaseFileInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename, worksheet_name=None, has_column_names=True, mapper=None,
-                 hed_schema=None):
+    def __init__(self, filename=None, worksheet_name=None, has_column_names=True, mapper=None,
+                 csv_string=None):
         """Constructor for the BaseFileInput class.
 
          Parameters
          ----------
-         filename: str
+         filename: str or None
              An xml/tsv file to open.
          worksheet_name: str
              The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
@@ -37,8 +38,8 @@ class BaseFileInput:
          mapper: ColumnMapper
              Pass in a built column mapper(see HedFileInput or EventFileInput for examples), or None to just
              retrieve all columns as hed tags.
-         hed_schema: HedSchema
-             Used to create definitions.
+         csv_string: str or None
+            The data to treat as this file.  eg web services passing a string.
          """
         if mapper is None:
             mapper = ColumnMapper()
@@ -51,13 +52,19 @@ class BaseFileInput:
             pandas_header = None
 
         self._dataframe = None
-        if self.is_spreadsheet_file():
+        if not filename and not csv_string:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Filename specified and no string data passed in", filename)
+
+        if csv_string or self.is_text_file():
+            csv_filename_or_data = filename
+            if csv_string:
+                csv_filename_or_data = io.StringIO(csv_string)
+            self._dataframe = pandas.read_csv(csv_filename_or_data, '\t', header=pandas_header)
+        elif self.is_spreadsheet_file():
             worksheet_to_load = self._worksheet_name
             if worksheet_to_load is None:
                 worksheet_to_load = 0
             self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header)
-        elif self.is_text_file():
-            self._dataframe = pandas.read_csv(filename, '\t', header=pandas_header)
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
 
@@ -67,7 +74,7 @@ class BaseFileInput:
             self._mapper.set_column_map(columns)
 
         # Now that the file is fully initialized, gather the definitions from it.
-        self.file_def_dict, self.file_def_dict_issues = self.extract_definitions(hed_schema)
+        self.file_def_dict, self.file_def_dict_issues = self.extract_definitions()
         # finally add the new file dict to the mapper.
         mapper.update_definition_mapper_with_file(self.file_def_dict)
 
@@ -134,7 +141,7 @@ class BaseFileInput:
 
         return error_list
 
-    def extract_definitions(self, hed_schema, error_handler=None):
+    def extract_definitions(self, error_handler=None):
         """
         Gathers and validates all definitions found in this spreadsheet
 
@@ -154,7 +161,7 @@ class BaseFileInput:
         """
         if error_handler is None:
             error_handler = ErrorHandler()
-        new_def_dict = DefDict(hed_schema=hed_schema)
+        new_def_dict = DefDict()
         validation_issues = []
         for row_number, column_to_hed_tags in self.iter_raw():
             error_handler.push_error_context(ErrorContext.ROW, row_number)
@@ -194,11 +201,7 @@ class BaseFileInput:
 
         # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
         if output_processed_file:
-            output_file = copy.deepcopy(self)
-            for row_number, column_to_hed_tags_dictionary in self:
-                for column_number in column_to_hed_tags_dictionary:
-                    new_text = column_to_hed_tags_dictionary[column_number]
-                    output_file.set_cell(row_number, column_number, new_text)
+            output_file = self._get_processed_copy()
         else:
             output_file = self
 
@@ -224,13 +227,32 @@ class BaseFileInput:
         elif self.is_text_file():
             output_file._dataframe.to_csv(final_filename, '\t', index=False, header=output_file._has_column_names)
 
+    def to_csv(self, output_processed_file=False):
+        """
+            Returns the file as a csv string.
+
+        Parameters
+        ----------
+        output_processed_file : bool
+            Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
+        Returns
+        -------
+        """
+        # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
+        if output_processed_file:
+            output_file = self._get_processed_copy()
+        else:
+            output_file = self
+        csv_string = output_file._dataframe.to_csv(None, '\t', index=False, header=output_file._has_column_names)
+        return csv_string
+
     # Make filename read only.
     @property
     def filename(self):
         return self._filename
 
     def __iter__(self):
-        return self.parse_dataframe()
+        return self.iter_dataframe()
 
     def iter_raw(self):
         """Generates an iterator that goes over every row in the file without modification.
@@ -247,9 +269,9 @@ class BaseFileInput:
             A dict with keys column_number, value the cell at that position.
         """
         default_mapper = ColumnMapper()
-        return self.parse_dataframe(default_mapper)
+        return self.iter_dataframe(default_mapper)
 
-    def parse_dataframe(self, mapper=None, return_row_dict=False):
+    def iter_dataframe(self, mapper=None, return_row_dict=False, do_not_expand_labels=False):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -260,6 +282,9 @@ class BaseFileInput:
         return_row_dict: bool
             If True, this returns the full row_dict including issues.
             If False, returns just the HedStrings for each column
+        do_not_expand_labels: bool
+            If true, this will still remove all definition/ tags, but will not expand label tags.
+
         Yields
         -------
         row_number: int
@@ -278,7 +303,7 @@ class BaseFileInput:
             if all(text_file_row.isnull()):
                 continue
 
-            row_dict = self._get_dict_from_row_hed_tags(text_file_row, mapper)
+            row_dict = mapper.expand_row_tags(text_file_row, do_not_expand_labels)
             if return_row_dict:
                 yield row_number + start_at_one, row_dict
             else:
@@ -312,11 +337,6 @@ class BaseFileInput:
         if self._has_column_names:
             adj_row_number += 1
         self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = str(new_text)
-
-    @staticmethod
-    def _get_dict_from_row_hed_tags(spreadsheet_row, mapper):
-        row_dict = mapper.expand_row_tags(spreadsheet_row)
-        return row_dict
 
     @staticmethod
     def _get_row_hed_tags_from_dict(row_dict):
@@ -370,3 +390,20 @@ class BaseFileInput:
         if not worksheet_name:
             return workbook.worksheets[0]
         return workbook.get_sheet_by_name(worksheet_name)
+
+    def _get_processed_copy(self):
+        """
+        Returns a copy of this file with processing applied(definitions replaced, columns expanded, etc)
+
+        Returns
+        -------
+        file_copy: BaseFileInput
+            The copy.
+        """
+        output_file = copy.deepcopy(self)
+        for row_number, column_to_hed_tags_dictionary in self:
+            for column_number in column_to_hed_tags_dictionary:
+                new_text = column_to_hed_tags_dictionary[column_number]
+                output_file.set_cell(row_number, column_number, new_text)
+
+        return output_file

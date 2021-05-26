@@ -5,9 +5,9 @@ from hed.util import error_reporter
 
 class DefTagNames:
     """The source names for definitions, def labels, and expanded labels"""
-    DLABEL_ORG_KEY = 'def'
-    ELABEL_ORG_KEY = 'def-expand'
-    DEF_ORG_KEY = "Definition"
+    DLABEL_ORG_KEY = 'Def/'
+    ELABEL_ORG_KEY = 'Def-expand/'
+    DEF_ORG_KEY = "Definition/"
     DLABEL_KEY = DLABEL_ORG_KEY.lower()
     ELABEL_KEY = ELABEL_ORG_KEY.lower()
     DEF_KEY = DEF_ORG_KEY.lower()
@@ -45,7 +45,7 @@ class DefEntry:
             output_contents = HedString.split_hed_string_into_groups(hed_string)
 
         # Possibly update this to properly point to the original def tag
-        def_tag = HedTag(f"{DefTagNames.ELABEL_ORG_KEY}/{name}", span=(0, len(f"{DefTagNames.ELABEL_ORG_KEY}/{name}")))
+        def_tag = HedTag(f"{DefTagNames.ELABEL_ORG_KEY}{name}", span=(0, len(f"{DefTagNames.ELABEL_ORG_KEY}{name}")))
         if output_contents:
             return [def_tag, output_contents]
         else:
@@ -57,31 +57,26 @@ class DefDict:
 
         A bids style file might have many of these(one for each json dict, and another for the actual file)
     """
-    def __init__(self, hed_schema=None):
+    def __init__(self):
         """
         Class responsible for gathering and storing a group of definitions to be considered a single source.
 
         A bids style file might have many of these(one for each json dict, and another for the actual file)
         Parameters
         ----------
-        hed_schema : HedSchema, optional
-            Used to determine where definition tags are in the schema.  This is technically optional, but
-            only short form definition tags will work if this is absent.  This is also used to verify definitions
-            are not already used as terms.
         """
         self._defs = {}
-        self._schema = hed_schema
 
-        if hed_schema:
-            self._def_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DEF_KEY)
-            self._label_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DLABEL_KEY)
-            if not self._label_tag_versions:
-                self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
-            self._short_tag_mapping = hed_schema.short_tag_mapping
-        else:
-            self._def_tag_versions = [DefTagNames.DEF_KEY + "/"]
-            self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
-            self._short_tag_mapping = None
+        # if hed_schema:
+        #     self._def_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DEF_KEY)
+        #     self._label_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DLABEL_KEY)
+        #     if not self._label_tag_versions:
+        #         self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
+        #     self._short_tag_mapping = hed_schema.short_tag_mapping
+        # else:
+        #     self._def_tag_versions = [DefTagNames.DEF_KEY + "/"]
+        #     self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
+        #     self._short_tag_mapping = None
 
     def __iter__(self):
         return iter(self._defs.items())
@@ -110,8 +105,6 @@ class DefDict:
             error_handler = error_reporter.ErrorHandler()
 
         validation_issues = []
-        def_tag_versions = self._def_tag_versions
-
         for tag_group in hed_string_obj.get_all_groups():
             def_tags = []
             group_tags = []
@@ -121,7 +114,7 @@ class DefDict:
                     group_tags.append(tag_or_group)
                     continue
                 else:
-                    new_def_tag = self._check_tag_starts_with(str(tag_or_group), def_tag_versions)
+                    new_def_tag = self._check_tag_starts_with(str(tag_or_group), DefTagNames.DEF_KEY)
                     if new_def_tag:
                         def_tags.append((tag_or_group, new_def_tag))
                         continue
@@ -166,10 +159,12 @@ class DefDict:
             if def_tag_lower in self._defs:
                 validation_issues += error_handler.format_definition_error(DefinitionErrors.DUPLICATE_DEFINITION,
                                                                            def_name=def_tag_name)
+                continue
 
-            if self._short_tag_mapping and def_tag_lower in self._short_tag_mapping:
-                validation_issues += error_handler.format_definition_error(DefinitionErrors.TAG_IN_SCHEMA,
-                                                                           def_name=def_tag_name)
+            # Todo: restore this functionality or add it elsewhere
+            # if self._short_tag_mapping and def_tag_lower in self._short_tag_mapping:
+            #     validation_issues += error_handler.format_definition_error(DefinitionErrors.TAG_IN_SCHEMA,
+            #                                                                def_name=def_tag_name)
 
             # Verify placeholders here.
             placeholder_tags = []
@@ -192,24 +187,25 @@ class DefDict:
             return validation_issues
 
     @staticmethod
-    def _check_tag_starts_with(hed_tag, possible_starts_with_list):
+    def _check_tag_starts_with(hed_tag, target_tag_short_name):
         """ Check if a given tag starts with a given string, and returns the tag with the prefix removed if it does.
 
         Parameters
         ----------
         hed_tag : str
             A single input tag
-        possible_starts_with_list : list
-            A list of strings to check as the prefix.
-            Generally this will be all short/intermediate/long forms of a specific tag
-            eg. ['definitional', 'informational/definitional', 'attribute/informational/definitional']
+        target_tag_short_name : str
+            The string to match eg find target_tag_short_name in hed_tag
         Returns
         -------
             str: the tag without the removed prefix, or None
         """
         hed_tag_lower = hed_tag.lower()
-        for start_with_version in possible_starts_with_list:
-            if hed_tag_lower.startswith(start_with_version):
-                found_tag = hed_tag[len(start_with_version):]
-                return found_tag
+        found_index = hed_tag_lower.find(target_tag_short_name)
+
+        if found_index == -1:
+            return None
+
+        if found_index == 0 or hed_tag_lower[found_index - 1] == "/":
+            return hed_tag[found_index + len(target_tag_short_name):]
         return None

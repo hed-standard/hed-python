@@ -9,7 +9,7 @@ from hed.util.error_types import DefinitionErrors
 from hed.util.hed_string import HedString
 
 class TestDefBase(unittest.TestCase):
-    schema_file = '../data/HED8.0.0-alpha.1.xml'
+    schema_file = '../data/legacy_xml/HED8.0.0-alpha.1.xml'
 
     @classmethod
     def setUpClass(cls):
@@ -19,9 +19,12 @@ class TestDefBase(unittest.TestCase):
 
     def check_def_base(self, test_strings, expected_issues):
         for test_key in test_strings:
-            def_dict = DefDict(self.hed_schema)
+            def_dict = DefDict()
             test_issues = def_dict.check_for_definitions(HedString(test_strings[test_key]))
             expected_issue = expected_issues[test_key]
+            print(test_key)
+            print(str(expected_issue))
+            print(str(test_issues))
             self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
 
 
@@ -38,14 +41,14 @@ class TestDefDict(TestDefBase):
     placehodler_def_string = f"Definition/TestDefPlaceholder/#,{placeholder_def_contents}"
 
     def test_check_for_definitions(self):
-        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict = DefDict()
         original_def_count = len(def_dict._defs)
         def_dict.check_for_definitions(HedString(self.basic_def_string))
         new_def_count = len(def_dict._defs)
         self.assertGreater(new_def_count, original_def_count)
 
     def test_check_for_definitions_placeholder(self):
-        def_dict = DefDict(hed_schema=self.hed_schema)
+        def_dict = DefDict()
         original_def_count = len(def_dict._defs)
         def_dict.check_for_definitions(HedString(self.placehodler_def_string))
         new_def_count = len(def_dict._defs)
@@ -63,7 +66,7 @@ class TestDefDict(TestDefBase):
             'twoGroupTags': f"Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2}",
             'duplicateDef': f"(Definition/Def1), (Definition/Def1, {self.def_contents_string})",
             'duplicateDef2': f"(Definition/Def1), (Definition/Def1/#, {self.placeholder_def_contents})",
-            'defAlreadyTagInSchema': f"Definition/Item",
+            # 'defAlreadyTagInSchema': f"Definition/Item",
             'defTooManyPlaceholders': self.placeholder_invalid_def_string,
             'invalidPlaceholder': f"Definition/InvalidDef1/InvalidPlaceholder",
             'invalidPlaceholderExtension': f"Definition/InvalidDef1/thispartisnotallowed/#",
@@ -77,7 +80,8 @@ class TestDefDict(TestDefBase):
             'twoGroupTags': self.error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1", [self.def_contents_string, self.def_contents_string2]),
             'duplicateDef': self.error_handler.format_definition_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
             'duplicateDef2': self.error_handler.format_definition_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
-            'defAlreadyTagInSchema': self.error_handler.format_definition_error(DefinitionErrors.TAG_IN_SCHEMA, "Item"),
+            # Todo: restore this
+            # 'defAlreadyTagInSchema': self.error_handler.format_definition_error(DefinitionErrors.TAG_IN_SCHEMA, "Item"),
             'defTooManyPlaceholders': self.error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "TestDefPlaceholder",
                                                                                  ["Item/TestDef1/#", "Item/TestDef2/#"], expected_count=1),
             'invalidPlaceholderExtension': self.error_handler.format_definition_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1/thispartisnotallowed"),
@@ -87,13 +91,13 @@ class TestDefDict(TestDefBase):
         self.check_def_base(test_strings, expected_results)
 
     def test__check_tag_starts_with(self):
-        possible_tag_list = ["definition", "informational/definition", "attribute/informational/definition"]
+        target_tag_name = "definition/"
 
         test_tags = ["Definition/TempTestDef", "Informational/Definition/TempTestDef",
                      "Attribute/Informational/Definition/TempTestDef"]
 
         for tag in test_tags:
-            result = DefinitionMapper._check_tag_starts_with(tag, possible_tag_list)
+            result = DefinitionMapper._check_tag_starts_with(tag, target_tag_name)
             self.assertTrue(result)
 
 

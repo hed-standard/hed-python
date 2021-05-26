@@ -1,28 +1,15 @@
 """Allows output of HedSchema objects as .xml format"""
 
-from hed.schema.hed_schema_constants import HedKey
-from hed.schema import hed_schema_constants as constants
-from xml.etree.ElementTree import Element, SubElement
 
-TAG_ELEMENT = "node"
-TAG_NAME_ELEMENT = "name"
-TAG_DESCRIPTION_ELEMENT = "description"
-TRUE_ATTRIBUTE = "true"
-FALSE_ATTRIBUTE = "false"
-unit_class_element = 'unitClass'
-unit_class_name_element = 'name'
-unit_class_units_element = 'units'
-unit_class_unit_element = 'unit'
-unit_modifier_element = 'unitModifier'
-unit_modifier_name_element = 'name'
-unit_modifier_description_element = 'description'
-PROLOGUE_ELEMENT = "prologue"
-EPILOGUE_ELEMENT = "epilogue"
+from xml.etree.ElementTree import Element, SubElement
+from hed.schema.hed_schema_constants import HedKey
+from hed.schema import xml_constants
 
 
 class HedSchema2XML:
-    def __init__(self):
+    def __init__(self, save_as_legacy_format=True):
         self.hed_node = None
+        self.save_as_legacy_format = save_as_legacy_format
 
     def process_schema(self, hed_schema):
         """
@@ -43,6 +30,8 @@ class HedSchema2XML:
         self._output_tags(hed_schema)
         self._output_units(hed_schema)
         self._output_unit_modifiers(hed_schema)
+        if not self.save_as_legacy_format:
+            self._output_attributes(hed_schema)
         self._output_footer(hed_schema)
         return self.hed_node
 
@@ -50,10 +39,10 @@ class HedSchema2XML:
     # Top level output functions
     # =========================================
     def _output_header(self, hed_schema):
-        for attrib_name, attrib_value in hed_schema.schema_attributes.items():
+        for attrib_name, attrib_value in hed_schema.header_attributes.items():
             self.hed_node.set(attrib_name, attrib_value)
         if hed_schema.prologue:
-            prologue_node = SubElement(self.hed_node, PROLOGUE_ELEMENT)
+            prologue_node = SubElement(self.hed_node, xml_constants.PROLOGUE_ELEMENT)
             prologue_node.text = hed_schema.prologue
 
     def _output_tags(self, hed_schema):
@@ -61,54 +50,60 @@ class HedSchema2XML:
         tag_levels = {}
         for tag in all_tags:
             if "/" not in tag:
-                root_tag = self._add_tag_node(hed_schema, self.hed_node, tag)
+                root_tag = self._add_node(hed_schema, self.hed_node, tag)
                 tag_levels[0] = root_tag
             else:
                 level = tag.count("/")
                 short_tag = tag.split("/")[-1]
                 parent_tag = tag_levels[level - 1]
-                child_tag = self._add_tag_node(hed_schema, parent_tag, tag, short_tag)
+                child_tag = self._add_node(hed_schema, parent_tag, tag, short_tag_name=short_tag)
                 tag_levels[level] = child_tag
 
     def _output_units(self, hed_schema):
         if not hed_schema.has_unit_classes:
             return
-        unit_class_node = SubElement(self.hed_node, 'unitClasses')
+        unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Units,
+                                                                                     self.save_as_legacy_format))
         for unit_class, unit_types in hed_schema.dictionaries[HedKey.Units].items():
-            unit_class_attributes = hed_schema.get_all_tag_attributes(unit_class, keys=constants.UNIT_CLASS_ATTRIBUTES)
-            unit_class_units = []
-            unit_class_units_attributes = []
+            unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedKey.Units)
+            if self.save_as_legacy_format:
+                unit_class_node = SubElement(unit_class_node, xml_constants.UNIT_CLASS_UNITS_ELEMENT)
 
             for unit_class_unit in unit_types:
-                unit_class_unit_attributes = hed_schema.get_all_tag_attributes(unit_class_unit,
-                                                                               keys=constants.UNIT_CLASS_ATTRIBUTES)
-                unit_class_units.append(unit_class_unit)
-                unit_class_units_attributes.append(unit_class_unit_attributes)
-
-            self._add_unit_class_node(unit_class_node, unit_class, unit_class_units,
-                                      unit_class_attributes, unit_class_units_attributes)
+                # These units nodes are the only "special case" from the old schema where behavior differs.
+                if self.save_as_legacy_format:
+                    unit_node = SubElement(unit_class_node, xml_constants.UNIT_CLASS_UNIT_ELEMENT)
+                    attributes = hed_schema.get_all_tag_attributes(unit_class_unit, key_class=HedKey.Units)
+                    HedSchema2XML._add_tag_node_attributes_old_format(unit_node, attributes)
+                    unit_node.text = unit_class_unit
+                else:
+                    self._add_node(hed_schema, unit_class_node, unit_class_unit, HedKey.Units,
+                                   sub_node_name="unit")
 
     def _output_unit_modifiers(self, hed_schema):
         if not hed_schema.has_unit_modifiers:
             return
-        unit_modifier_node = SubElement(self.hed_node, 'unitModifiers')
-        for modifier_name in hed_schema.dictionaries[HedKey.SIUnitModifier]:
-            unit_modifier_attributes = hed_schema.get_all_tag_attributes(modifier_name,
-                                                                         keys=constants.UNIT_MODIFIER_ATTRIBUTES)
-            unit_modifier_description = hed_schema.get_tag_description(modifier_name, HedKey.SIUnitModifier)
-            self._add_unit_modifier_node(unit_modifier_node, modifier_name,
-                                         unit_modifier_attributes, unit_modifier_description)
+        unit_modifier_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.UnitModifiers,
+                                                                                      self.save_as_legacy_format))
+        for modifier_name in hed_schema.dictionaries[HedKey.UnitModifiers]:
+            self._add_node(hed_schema, unit_modifier_node, modifier_name, HedKey.UnitModifiers)
+
+    def _output_attributes(self, hed_schema):
+        attributes_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Attributes,
+                                                                                           self.save_as_legacy_format))
+        for attribute_name in hed_schema.dictionaries[HedKey.Attributes]:
+            self._add_node(hed_schema, attributes_section_node, attribute_name, HedKey.Attributes)
 
     def _output_footer(self, hed_schema):
         if hed_schema.epilogue:
-            prologue_node = SubElement(self.hed_node, EPILOGUE_ELEMENT)
+            prologue_node = SubElement(self.hed_node, xml_constants.EPILOGUE_ELEMENT)
             prologue_node.text = hed_schema.epilogue
 
     # =========================================
     # Output helper functions to create nodes
     # =========================================
     @staticmethod
-    def _add_tag_node_attributes(tag_node, tag_attributes):
+    def _add_tag_node_attributes(tag_node, tag_attributes, attribute_node_name=xml_constants.ATTRIBUTE_ELEMENT):
         """Adds the attributes to a tag.
 
         Parameters
@@ -117,21 +112,51 @@ class HedSchema2XML:
             A tag element.
         tag_attributes: {str:str}
             A dictionary of attributes to add to this node
-
+        attribute_node_name: str
+            The type of the node to use for attributes.  Mostly used to override to property for attributes section.
         Returns
         -------
+        """
+        for attribute, value in tag_attributes.items():
+            if value is False:
+                continue
 
+            node_name = attribute_node_name
+            attribute_node = SubElement(tag_node, node_name)
+            name_node = SubElement(attribute_node, xml_constants.NAME_ELEMENT)
+            name_node.text = attribute
+
+            if value is True:
+                continue
+            else:
+                if not isinstance(value, list):
+                    value = value.split(",")
+
+                for single_value in value:
+                    value_node = SubElement(attribute_node, xml_constants.VALUE_ELEMENT)
+                    value_node.text = single_value
+
+    @staticmethod
+    def _add_tag_node_attributes_old_format(tag_node, tag_attributes):
+        """Adds the attributes to a tag.
+
+        Parameters
+        ----------
+        tag_node: Element
+            A tag element.
+        tag_attributes: {str:str}
+            A dictionary of attributes to add to this node
         """
         for attribute, value in tag_attributes.items():
             if value is True:
-                tag_node.set(attribute, TRUE_ATTRIBUTE)
+                tag_node.set(attribute, xml_constants.TRUE_ATTRIBUTE)
             elif value is False:
                 continue
             else:
                 tag_node.set(attribute, value)
 
-    @staticmethod
-    def _add_tag_node(hed_schema, parent_node, tag_name, short_tag_name=None):
+    def _add_node(self, hed_schema, parent_node, full_name, key_class=HedKey.AllTags, short_tag_name=None,
+                  sub_node_name=None):
         """
             Creates a tag node and adds it to the parent.
 
@@ -141,11 +166,14 @@ class HedSchema2XML:
             HedSchema to pull tag info from
         parent_node : Element
             The parent tag node
-        tag_name : str
-            Long version of the tag name
+        full_name : str
+            Long version of the tag/modifier/unit name
+        key_class: str
+            The type of node we are adding.  eg HedKey.AllTags, HedKey.UnitModifiers, etc.
         short_tag_name : str
-            Short version of the tag name(even in HED 2G)
-
+            The short version of the tag if this is a tag.  Even for hed2g.
+        sub_node_name: str or None
+            Overrides the default node element name if present.
         Returns
         -------
         Element
@@ -153,81 +181,26 @@ class HedSchema2XML:
         """
         tag_node = None
         if short_tag_name is None:
-            short_tag_name = tag_name
-        if tag_name:
-            tag_description = hed_schema.get_tag_description(tag_name)
-            tag_attributes = hed_schema.get_all_tag_attributes(tag_name)
-            tag_node = SubElement(parent_node, TAG_ELEMENT)
-            name_node = SubElement(tag_node, TAG_NAME_ELEMENT)
+            short_tag_name = full_name
+
+        if sub_node_name:
+            tag_element = sub_node_name
+        else:
+            tag_element = xml_constants.get_element_name(key_class, self.save_as_legacy_format)
+        if full_name:
+            tag_description = hed_schema.get_tag_description(full_name, key_class=key_class)
+            tag_attributes = hed_schema.get_all_tag_attributes(full_name, key_class=key_class)
+            tag_node = SubElement(parent_node, tag_element)
+            name_node = SubElement(tag_node, xml_constants.NAME_ELEMENT)
             name_node.text = short_tag_name
             if tag_description:
-                description_node = SubElement(tag_node, TAG_DESCRIPTION_ELEMENT)
+                description_node = SubElement(tag_node, xml_constants.DESCRIPTION_ELEMENT)
                 description_node.text = tag_description
             if tag_attributes:
-                HedSchema2XML._add_tag_node_attributes(tag_node, tag_attributes)
+                if not self.save_as_legacy_format:
+                    attribute_node_name = xml_constants.ATTRIBUTE_PROPERTY_ELEMENTS[key_class]
+                    HedSchema2XML._add_tag_node_attributes(tag_node, tag_attributes,
+                                                           attribute_node_name=attribute_node_name)
+                else:
+                    HedSchema2XML._add_tag_node_attributes_old_format(tag_node, tag_attributes)
         return tag_node
-
-    @staticmethod
-    def _add_unit_class_node(parent_node, unit_class, unit_class_units, unit_class_attributes,
-                             unit_class_unit_attributes):
-        """Adds a unit class to its parent.
-
-        Parameters
-        ----------
-        parent_node: Element
-            The parent of the unit class.
-        unit_class: Element
-            The unit class.
-        unit_class_units: list
-            A list of unit class units.
-        unit_class_attributes: list
-            A list of unit class attributes.
-        unit_class_unit_attributes: list
-            A list of attributes for a specific unit
-
-        Returns
-        -------
-        Element
-            The unit class element.
-        """
-        unit_class_node = SubElement(parent_node, unit_class_element)
-        name_node = SubElement(unit_class_node, unit_class_name_element)
-        name_node.text = unit_class
-        units_node = SubElement(unit_class_node, unit_class_units_element)
-        for unit, attributes in zip(unit_class_units, unit_class_unit_attributes):
-            unit_node = SubElement(units_node, unit_class_unit_element)
-            HedSchema2XML._add_tag_node_attributes(unit_node, attributes)
-            unit_node.text = unit
-        if unit_class_attributes:
-            HedSchema2XML._add_tag_node_attributes(unit_class_node, unit_class_attributes)
-        return unit_class_node
-
-    @staticmethod
-    def _add_unit_modifier_node(parent_node, unit_modifier, unit_modifier_attributes, unit_modifier_description):
-        """Adds a unit modifier to its parent.
-
-        Parameters
-        ----------
-        parent_node: Element
-            The parent of the unit modifier.
-        unit_modifier: Element
-            The unit modifier.
-        unit_modifier_attributes: list
-            A list of unit modifier attributes.
-        unit_modifier_description: string
-            The unit modifier description.
-
-        Returns
-        -------
-        Element
-            The unit modifier element.
-        """
-        unit_modifier_node = SubElement(parent_node, unit_modifier_element)
-        name_node = SubElement(unit_modifier_node, unit_modifier_name_element)
-        name_node.text = unit_modifier
-        if unit_modifier_description:
-            description_node = SubElement(unit_modifier_node, unit_modifier_description_element)
-            description_node.text = unit_modifier_description
-        if unit_modifier_attributes:
-            HedSchema2XML._add_tag_node_attributes(unit_modifier_node, unit_modifier_attributes)
-        return unit_modifier_node

@@ -4,8 +4,7 @@ unit class attributes in a dictionary.
 
 The dictionary is a dictionary of dictionaries. The dictionary names are the list in HedKey from hed_schema_constants.
 """
-from hed.schema.hed_schema_constants import HedKey
-from hed.schema import hed_schema_constants as constants
+from hed.schema.hed_schema_constants import HedKey, ATTRIBUTE_PROPERTIES
 from hed.util import file_util, error_reporter
 from hed.util.error_types import SchemaErrors
 from hed.schema.schema2xml import HedSchema2XML
@@ -25,33 +24,61 @@ class HedSchema:
             A HedSchema object.
         """
         self.no_duplicate_tags = True
-        self.schema_attributes = {}
+        # rename to schema header probably.
+        self.header_attributes = {}
         self._filename = None
-        self.dictionaries = self.create_empty_dictionaries()
+        self.dictionaries = self._create_empty_dictionaries()
         self.prologue = ""
         self.epilogue = ""
 
         self.issues = []
 
-    def set_attributes(self, schema_attributes):
-        self.schema_attributes = schema_attributes
+    def get_as_mediawiki_string(self):
+        """
+        Return the schema to a mediawiki string
 
-    def set_dictionaries(self, dictionaries):
-        self.dictionaries = dictionaries
-        self._propagate_extension_allowed()
-        self._populate_short_tag_dict()
+        Returns
+        -------
+        filename: str
+            The schema string
+        """
+        schema2wiki = HedSchema2Wiki()
+        output_strings = schema2wiki.process_schema(self)
+        return '\n'.join(output_strings)
 
-    @property
-    def filename(self):
-        return self._filename
+    def get_as_xml_string(self, save_as_legacy_format=False):
+        """
+        Return the schema to an xml string
 
-    @filename.setter
-    def filename(self, value):
-        if self._filename is None:
-            self._filename = value
+        Parameters
+        ----------
+        save_as_legacy_format : bool
+            You should never use this.  Some information will not be saved if old format.
 
-    def save_as_xml(self):
-        schema2xml = HedSchema2XML()
+        Returns
+        -------
+        filename: str
+            The schema string
+        """
+        schema2xml = HedSchema2XML(save_as_legacy_format=save_as_legacy_format)
+        xml_tree = schema2xml.process_schema(self)
+        return file_util._xml_element_2_str(xml_tree)
+
+    def save_as_xml(self, save_as_legacy_format=False):
+        """
+        Save the schema to a temporary file, returning the filename.
+
+        Parameters
+        ----------
+        save_as_legacy_format : bool
+            You should never use this.  Some information will not be saved if old format.
+
+        Returns
+        -------
+        filename: str
+            The newly created schema filename
+        """
+        schema2xml = HedSchema2XML(save_as_legacy_format=save_as_legacy_format)
         xml_tree = schema2xml.process_schema(self)
         local_xml_file = file_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
         return local_xml_file
@@ -62,29 +89,14 @@ class HedSchema:
         local_wiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
         return local_wiki_file
 
-    def __eq__(self, other):
-        if self.dictionaries != other.dictionaries:
-            return False
-        if self.schema_attributes != other.schema_attributes:
-            return False
-        if self.no_duplicate_tags != other.no_duplicate_tags:
-            return False
-        if self.prologue != other.prologue:
-            return False
-        if self.epilogue != other.epilogue:
-            return False
-        return True
+    @property
+    def filename(self):
+        return self._filename
 
-    @staticmethod
-    def create_empty_dictionaries():
-        """
-        Initializes a dictionary with the minimum so the tools won't crash
-        """
-        dictionaries = {}
-        for tag in constants.ALL_TAG_DICTIONARY_KEYS:
-            dictionaries[tag] = {}
-        dictionaries[HedKey.Descriptions] = {}
-        return dictionaries
+    @filename.setter
+    def filename(self, value):
+        if self._filename is None:
+            self._filename = value
 
     def check_compliance(self, also_check_for_warnings=True, display_filename=None,
                          error_handler=None):
@@ -106,30 +118,6 @@ class HedSchema:
             A list of all warnings and errors found in the file.
         """
         return schema_compliance.check_compliance(self, also_check_for_warnings, display_filename, error_handler)
-
-    def dupe_tag_iter(self, return_detailed_info=False):
-        """
-        An iterator that goes over each line of the duplicate tags dict, including descriptive ones.
-
-        Parameters
-        ----------
-        return_detailed_info : bool
-            If true, also returns header lines listing the number of duplicate tags for each short tag.
-
-        Yields
-        -------
-        text_line: str
-            A list of long tags that have duplicates, with optional descriptive short tag lines.
-        """
-        duplicate_dict = self.find_duplicate_tags()
-        prefix_string = ""
-        if return_detailed_info:
-            prefix_string = "\t"
-        for tag_name in duplicate_dict:
-            if return_detailed_info:
-                yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions:"
-            for tag_entry in duplicate_dict[tag_name]:
-                yield f"{prefix_string}{tag_entry}"
 
     def find_duplicate_tags(self):
         """Finds all tags that are not unique.
@@ -158,7 +146,7 @@ class HedSchema:
         """
         return self.dictionaries[HedKey.Descriptions]
 
-    def get_tag_description(self, tag_name, tag_class=HedKey.AllTags):
+    def get_tag_description(self, tag_name, key_class=HedKey.AllTags):
         """
             If a description exists for the given name, returns it
 
@@ -166,16 +154,16 @@ class HedSchema:
         ----------
         tag_name : str
             A hed tag name(or unit/unit modifier etc) with proper capitalization.
-        tag_class: str, default HedKey.AllTags
+        key_class: str, default HedKey.AllTags
             A HedKey indicating what type of description you are asking for.  (All tags, Units, Unit modifier)
 
         Returns
         -------
         description: str or None
         """
-        if tag_class == HedKey.AllTags:
-            tag_class = ""
-        return self.dictionaries[HedKey.Descriptions].get(tag_class + tag_name, None)
+        if key_class == HedKey.AllTags:
+            tag_name = tag_name.lower()
+        return self.dictionaries[HedKey.Descriptions].get(f"{key_class}_{tag_name}", None)
 
     def get_all_tags(self, return_short_form=False):
         """
@@ -194,7 +182,12 @@ class HedSchema:
                 final_list.append(org_tag)
         return final_list
 
-    def get_all_tag_attributes(self, tag_name, keys=None):
+    def get_tag_attribute_names(self):
+        return [key_name for key_name in self.dictionaries[HedKey.Attributes]
+                if key_name not in self.dictionaries[HedKey.UnitClassProperty]
+                and key_name not in self.dictionaries[HedKey.UnitModifierProperty]]
+
+    def get_all_tag_attributes(self, tag_name, key_class=HedKey.AllTags, keys=None):
         """
             Gathers all attributes for a given tag name.  If keys is none, gets all normal hed tag attributes.
 
@@ -202,8 +195,10 @@ class HedSchema:
         ----------
         tag_name : str
             The name of the tag to check
+        key_class: str
+            The type of attributes we are asking for.  eg Tag, Units, Unit modifiers, or attributes.
         keys : [str]
-            A list of HedKey tags.
+            If this is filled in, use these exact keys and ignore the key_class parameter.
 
         Returns
         -------
@@ -211,16 +206,21 @@ class HedSchema:
             {key_name : attribute_value}
         """
         if keys is None:
-            keys = constants.TAG_ATTRIBUTE_KEYS
+            keys = self._get_attributes_for_class(key_class)
+            if keys is None:
+                raise KeyError("Invalid key_class property type")
         attributes = {}
         for key in keys:
             check_name = tag_name
-            if key in constants.TAG_ATTRIBUTE_KEYS:
+            if key in self.get_tag_attribute_names():
                 check_name = tag_name.lower()
+            if key not in self.dictionaries:
+                # Potentially raise or return an error here.
+                continue
             if check_name in self.dictionaries[key]:
                 value = self.dictionaries[key][check_name]
                 # A tag attribute is considered True if the tag name and dictionary value are the same, ignoring capitalization
-                if value and check_name.lower() == value.lower():
+                if value is True or value and check_name.lower() == value.lower():
                     attributes[key] = True
                 else:
                     if value is None:
@@ -316,6 +316,92 @@ class HedSchema:
             return True
         return False
 
+    def finalize_dictionaries(self):
+        self._propagate_extension_allowed()
+        self._populate_short_tag_dict()
+
+    def dupe_tag_iter(self, return_detailed_info=False):
+        """
+        An iterator that goes over each line of the duplicate tags dict, including descriptive ones.
+
+        Parameters
+        ----------
+        return_detailed_info : bool
+            If true, also returns header lines listing the number of duplicate tags for each short tag.
+
+        Yields
+        -------
+        text_line: str
+            A list of long tags that have duplicates, with optional descriptive short tag lines.
+        """
+        duplicate_dict = self.find_duplicate_tags()
+        prefix_string = ""
+        if return_detailed_info:
+            prefix_string = "\t"
+        for tag_name in duplicate_dict:
+            if return_detailed_info:
+                yield f"Duplicate tag found {tag_name} - {len(duplicate_dict[tag_name])} versions:"
+            for tag_entry in duplicate_dict[tag_name]:
+                yield f"{prefix_string}{tag_entry}"
+
+    def __eq__(self, other):
+        if self.dictionaries != other.dictionaries:
+            # Comment the following back in for easy debugging of schema that should be equal.
+            # dict_keys = set(list(self.dictionaries.keys()) + list(other.dictionaries.keys()))
+            # for dict_key in dict_keys:
+            #     if dict_key not in self.dictionaries:
+            #         print(f"{dict_key} dict not in self")
+            #         continue
+            #     if dict_key not in other.dictionaries:
+            #         print(f"{dict_key} dict not in other")
+            #         continue
+            #     dict1 = self.dictionaries[dict_key]
+            #     dict2 = other.dictionaries[dict_key]
+            #     if dict1 != dict2:
+            #         print(f"DICT {dict_key} NOT EQUAL")
+            #         key_union = set(list(dict1.keys()) + list(dict2.keys()))
+            #         for key in key_union:
+            #             if key not in dict1:
+            #                 print(f"{key} not in dict1")
+            #                 continue
+            #             if key not in dict2:
+            #                 print(f"{key} not in dict2")
+            #                 continue
+            #             if dict1[key] != dict2[key]:
+            #                 print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
+            return False
+        if self.header_attributes != other.header_attributes:
+            return False
+        if self.no_duplicate_tags != other.no_duplicate_tags:
+            return False
+        if self.prologue != other.prologue:
+            return False
+        if self.epilogue != other.epilogue:
+            return False
+        return True
+
+    @staticmethod
+    def _create_empty_dictionaries():
+        """
+        Initializes a dictionary with the minimum so the tools won't crash
+        """
+        dictionaries = {}
+
+        # Add main sections
+        dictionaries[HedKey.AllTags] = {}
+        dictionaries[HedKey.Units] = {}
+        dictionaries[HedKey.UnitModifiers] = {}
+        dictionaries[HedKey.Attributes] = {}
+
+        dictionaries[HedKey.UnknownAttributes] = {}
+
+        dictionaries[HedKey.Descriptions] = {}
+
+        for attribute_property_name in ATTRIBUTE_PROPERTIES:
+            dictionaries[attribute_property_name] = {}
+
+        return dictionaries
+
     def _propagate_extension_allowed(self):
         """
         Populates the ExtensionAllowedPropagated based on the ExtensionAllowed one.
@@ -325,6 +411,7 @@ class HedSchema:
 
         """
         allowed_extensions = self.dictionaries[HedKey.ExtensionAllowed]
+        self.dictionaries[HedKey.ExtensionAllowedPropagated] = {}
         for long_tag in self.dictionaries[HedKey.AllTags].values():
             lower_tag = long_tag.lower()
             if lower_tag in allowed_extensions:
@@ -429,7 +516,7 @@ class HedSchema:
                     found_unknown_extension = True
                     if not found_long_org_tag:
                         error = error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
-                                                                   index_start, index_end)
+                                                                  index_start, index_end)
                         return str(hed_tag), None, error
                     continue
 
@@ -440,8 +527,8 @@ class HedSchema:
                 # Verify the tag has the correct path above it.
                 if not tag_string.endswith(main_hed_portion):
                     error = error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
-                                                               index_start, index_end,
-                                                               long_org_tag)
+                                                              index_start, index_end,
+                                                              long_org_tag)
                     return str(hed_tag), None, error
                 found_index_start = index_start
                 found_index_end = index_end
@@ -450,8 +537,8 @@ class HedSchema:
                 # These means we found a known tag in the remainder/extension section, which is an error
                 if tag in self.short_tag_mapping:
                     error = error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
-                                                               index_start, index_end,
-                                                               self.short_tag_mapping[tag])
+                                                              index_start, index_end,
+                                                              self.short_tag_mapping[tag])
                     return str(hed_tag), None, error
 
         remainder = str(hed_tag)[found_index_end:]
@@ -461,3 +548,103 @@ class HedSchema:
         # calculate short_tag index into long tag.
         found_index_start += (len(long_tag_string) - len(str(hed_tag)))
         return long_tag_string, found_index_start, []
+
+    def _get_attributes_for_class(self, key_class):
+        """
+        Returns the valid attributes for this section
+
+        Parameters
+        ----------
+        key_class : str
+            The HedKey for this section.
+
+        Returns
+        -------
+        attributes: [str] or {str:}
+            A list of all the attributes for this section.  May return a dict where the keys are the attribute names.
+        """
+        attribute_dict = {
+            HedKey.Attributes: ATTRIBUTE_PROPERTIES,
+            HedKey.AllTags: self.get_tag_attribute_names(),
+            HedKey.Units: self.dictionaries[HedKey.UnitClassProperty],
+            HedKey.UnitModifiers: self.dictionaries[HedKey.UnitModifierProperty]
+        }
+
+        return attribute_dict[key_class]
+
+    # Semi private functions for adding new tags and classes(used by loaders)
+    def _add_tag_to_dict(self, long_tag_name, key_class=HedKey.AllTags, value=None):
+        if value is None:
+            value = long_tag_name
+        if key_class == HedKey.AllTags:
+            self.dictionaries[key_class][long_tag_name.lower()] = value
+        else:
+            self.dictionaries[key_class][long_tag_name] = value
+
+    def _add_attribute_to_dict(self, tag_name, attribute_name, new_value, key_class):
+        if not new_value:
+            return
+
+        if attribute_name in self.dictionaries[HedKey.BoolProperty]:
+            # This case will only happen if someone has a slightly malformed schema where they use
+            # "extensionAllowed=true" instead of just "extensionAllowed"
+            if new_value is True or new_value == "true":
+                new_value = tag_name
+            elif new_value is False or new_value == "false":
+                return
+
+        # Tags are case insensitive.
+        if key_class == HedKey.AllTags:
+            tag_name = tag_name.lower()
+
+        valid_attribute_classes = self._get_attributes_for_class(key_class)
+        # This might have duplicates as it's unknown and could be in other sections.
+        if attribute_name in self.dictionaries[HedKey.UnknownAttributes] \
+                or attribute_name not in valid_attribute_classes:
+            tag_name = key_class + "_" + tag_name
+            attribute_name = "invalidAttribute_" + attribute_name
+            if attribute_name not in self.dictionaries:
+                self.dictionaries[attribute_name] = {}
+                self.dictionaries[HedKey.UnknownAttributes][attribute_name] = "true"
+
+        self.dictionaries[attribute_name][tag_name] = new_value
+
+    def _add_unit_class_unit(self, unit_class, unit_class_unit):
+        if unit_class not in self.dictionaries[HedKey.Units]:
+            self.dictionaries[HedKey.Units][unit_class] = []
+        if unit_class_unit is not None:
+            self.dictionaries[HedKey.Units][unit_class].append(unit_class_unit)
+
+    def _add_description_to_dict(self, tag_name, desc, key_class=HedKey.AllTags):
+        if desc:
+            if key_class == HedKey.AllTags:
+                tag_name = tag_name.lower()
+            self.dictionaries[HedKey.Descriptions][f"{key_class}_{tag_name}"] = desc
+
+    def _add_attribute_name_to_dict(self, attribute_name):
+        if attribute_name in self.dictionaries[HedKey.Attributes]:
+            raise ValueError(f"Duplicate attribute {attribute_name} found in attributes section.")
+        self.dictionaries[HedKey.Attributes][attribute_name] = attribute_name
+        self.dictionaries[attribute_name] = {}
+
+    def add_hed2_attributes(self, only_add_if_none_present=True):
+        """
+        This adds the default attributes for old hed2 schema without an attribute section
+
+        Parameters
+        ----------
+        only_add_if_none_present : bool
+            If True(default), will only add attributes if there is currently none.
+            If False, will add any missing attributes.
+        """
+        if only_add_if_none_present and self.dictionaries[HedKey.Attributes]:
+            return
+
+        from hed.schema import hed_2g_attributes
+        for attribute_name, (attribute_props, attribute_desc) in hed_2g_attributes.attributes.items():
+            if attribute_name not in self.dictionaries[HedKey.Attributes]:
+                self._add_attribute_name_to_dict(attribute_name)
+                self._add_description_to_dict(attribute_name, attribute_desc, HedKey.Attributes)
+
+                for attribute_property_name in attribute_props:
+                    self._add_attribute_to_dict(attribute_name, attribute_property_name, True, HedKey.Attributes)

@@ -8,15 +8,15 @@ from hed.util import error_reporter
 class EventFileInput(BaseFileInput):
     """A class to parse bids style spreadsheets into a more general format."""
 
-    def __init__(self, filename, worksheet_name=None, tag_columns=None,
+    def __init__(self, filename=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
-                 hed_schema=None, def_dicts=None):
+                 def_dicts=None, csv_string=None):
         """Constructor for the EventFileInput class.
 
         Parameters
         ----------
-        filename: str
+        filename: str or None
             An xml/tsv file to open.
         worksheet_name: str
             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
@@ -36,12 +36,12 @@ class EventFileInput(BaseFileInput):
         attribute_columns: str or int or [str] or [int]
             A list of column names or numbers to treat as attributes.
             Default: ["duration", "onset"]
-        hed_schema: HedSchema
-           Used by column mapper to do (optional) hed string validation, and also to gather definition tags correctly.
         def_dicts: [DefDict]
             DefDict's containing all the definitions this file should use - other than the ones coming from the file
             itself.
             If this is NOT passed, the class will instead gather definitions from any passed in ColumnDefGroups
+        csv_string: str or None
+            The data to treat as this file.  eg web services passing a string.
         """
         if tag_columns is None:
             tag_columns = []
@@ -57,20 +57,21 @@ class EventFileInput(BaseFileInput):
         else:
             self.column_group_defs = None
         if def_dicts is None:
-            self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs, hed_schema)
+            self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs)
         else:
             if not isinstance(def_dicts, list):
                 self.def_dicts = [def_dicts]
             else:
                 self.def_dicts = def_dicts
 
-        def_mapper = DefinitionMapper(self.def_dicts, hed_schema=hed_schema)
+        def_mapper = DefinitionMapper(self.def_dicts)
         new_mapper = ColumnMapper(json_def_files=self.column_group_defs, tag_columns=tag_columns,
                                   column_prefix_dictionary=column_prefix_dictionary,
                                   attribute_columns=attribute_columns,
                                   definition_mapper=def_mapper)
 
-        super().__init__(filename, worksheet_name, has_column_names, new_mapper)
+        super().__init__(filename, worksheet_name, has_column_names, new_mapper,
+                                  csv_string=csv_string)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"

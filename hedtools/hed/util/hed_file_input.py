@@ -4,14 +4,14 @@ from hed.util.base_file_input import BaseFileInput
 
 class HedFileInput(BaseFileInput):
     """A class to parse basic hed style spreadsheets into a more general format."""
-    def __init__(self, filename, worksheet_name=None, tag_columns=None,
+    def __init__(self, filename=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
-                 definition_mapper=None, hed_schema=None):
+                 definition_mapper=None, csv_string=None):
         """Constructor for the HedFileInput class.
 
         Parameters
         ----------
-        filename: str
+        filename: str or None
             An xml/tsv file to open.
         worksheet_name: str
             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
@@ -28,8 +28,8 @@ class HedFileInput(BaseFileInput):
             and the fifth column contains tags that needs Event/Category/ prepended to them.
         definition_mapper: DefinitionMapper
             The definition mapper to use to remove and replace definition labels in HED data.
-        hed_schema: HedSchema
-             Used to create definitions.
+        csv_string: str or None
+            The data to treat as this file.  eg web services passing a string.
         """
         if tag_columns is None:
             tag_columns = [2]
@@ -38,4 +38,5 @@ class HedFileInput(BaseFileInput):
 
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   definition_mapper=definition_mapper)
-        super().__init__(filename, worksheet_name, has_column_names, new_mapper, hed_schema=hed_schema)
+        super().__init__(filename, worksheet_name, has_column_names, new_mapper,
+                                  csv_string=csv_string)
