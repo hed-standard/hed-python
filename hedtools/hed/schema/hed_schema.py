@@ -33,6 +33,37 @@ class HedSchema:
 
         self.issues = []
 
+    def get_as_mediawiki_string(self):
+        """
+        Return the schema to a mediawiki string
+
+        Returns
+        -------
+        filename: str
+            The schema string
+        """
+        schema2wiki = HedSchema2Wiki()
+        output_strings = schema2wiki.process_schema(self)
+        return '\n'.join(output_strings)
+
+    def get_as_xml_string(self, save_as_legacy_format=False):
+        """
+        Return the schema to an xml string
+
+        Parameters
+        ----------
+        save_as_legacy_format : bool
+            You should never use this.  Some information will not be saved if old format.
+
+        Returns
+        -------
+        filename: str
+            The schema string
+        """
+        schema2xml = HedSchema2XML(save_as_legacy_format=save_as_legacy_format)
+        xml_tree = schema2xml.process_schema(self)
+        return file_util._xml_element_2_str(xml_tree)
+
     def save_as_xml(self, save_as_legacy_format=False):
         """
         Save the schema to a temporary file, returning the filename.
@@ -598,7 +629,7 @@ class HedSchema:
 
     def add_hed2_attributes(self, only_add_if_none_present=True):
         """
-        This adds the default attributes for old hed2 scehma without an attribute section
+        This adds the default attributes for old hed2 schema without an attribute section
 
         Parameters
         ----------

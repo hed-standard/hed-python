@@ -1,6 +1,6 @@
 
 function clearColumnInfoFlashMessages() {
-    flashMessageOnScreen('', 'success', 'tag-columns-flash');
+    flashMessageOnScreen('', 'success', 'tag_columns_flash');
 }
 /**
  * Clears tag column text boxes.
@@ -30,36 +30,42 @@ function columnNamesAreEmpty(names) {
  * Gets information a file with columns. This information the names of the columns in the specified
  * worksheet and indices that contain HED tags.
  * @param {string} columnsFile - Name of a file with columns.
+ * @param {string} flashMessageLocation - ID name of the flash message element in which to display errors.
  * @param {string} worksheetName - Name of worksheet or undefined.
+ * @param {boolean} hasColumnNames - If true has column names
  * @param {boolean} repopulateWorksheet - If true repopulate the select pull down with worksheet names.
- * @param {string} flashMessage - ID name of the flash message element in which to display errors.
+ * @param {boolean} showIndices - Show boxes with indices.
  */
-function setColumnsInfo(columnsFile, worksheetName=undefined, repopulateWorksheet=true, flashMessage) {
+function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefined, hasColumnNames, repopulateWorksheet=true, showIndices) {
     let formData = new FormData();
-    formData.append('columns-file', columnsFile);
+    formData.append('columns_file', columnsFile);
     if (worksheetName !== undefined) {
-        formData.append('worksheet-selected', worksheetName)
+        formData.append('worksheet_selected', worksheetName)
     }
     $.ajax({
         type: 'POST',
-        url: "{{url_for('route_blueprint.get_columns_info_results')}}",
+        url: "{{url_for('route_blueprint.columns_info_results')}}",
         data: formData,
         contentType: false,
         processData: false,
         dataType: 'json',
         success: function (info) {
-               if (info['message'])
-                    flashMessageOnScreen(info['message'], 'error', flashMessage)
-               else {
-                   if (repopulateWorksheet) {
-                       populateWorksheetDropdown(info['worksheet-names']);
-                   }
-                   let hasColumns = $('#has-column-names').prop('checked')
-                   setComponentsRelatedToColumns(info, hasColumns, true);
-               }
+            if (info['message'])
+                flashMessageOnScreen(info['message'], 'error', flashMessageLocation)
+            else {
+                if (repopulateWorksheet) {
+                    populateWorksheetDropdown(info['worksheet_names']);
+                }
+                if (hasColumnNames) {
+                    showColumnNames(info['column_names'])
+                }
+                if (showIndices) {
+                    setComponentsRelatedToColumns(info, hasColumnsNames, showIndices)
+                }
+            }
         },
         error: function () {
-            flashMessageOnScreen('File could not be processed.', 'error', flashMessage);
+            flashMessageOnScreen('File could not be processed.', 'error', flashMessageLocation);
         }
     });
 }
@@ -69,29 +75,29 @@ function setColumnsInfo(columnsFile, worksheetName=undefined, repopulateWorkshee
  * Gets information a file with columns and populate the columnNames table.
  * @param {string} columnsFile - Name of the file with columns to be determined.
  * @param {string} worksheetName - Name of worksheet or undefined.
- * @param {string} flashMessage - ID name of the flash message element in which to display errors.
+ * @param {string} flashMessageLocation - ID name of the flash message element in which to display errors.
  */
-function setColumnsNameTable(columnsFile, worksheetName=undefined,  flashMessage) {
+function setColumnsNameTable(columnsFile, worksheetName=undefined,  flashMessageLocation) {
     let formData = new FormData();
-    formData.append('columns-file', columnsFile);
+    formData.append('columns_file', columnsFile);
     if (worksheetName !== undefined) {
-        formData.append('worksheet-selected', worksheetName)
+        formData.append('worksheet_selected', worksheetName)
     }
     $.ajax({
         type: 'POST',
-        url: "{{url_for('route_blueprint.get_columns_info_results')}}",
+        url: "{{url_for('route_blueprint.columns_info_results')}}",
         data: formData,
         contentType: false,
         processData: false,
         dataType: 'json',
         success: function (info) {
-               if (info['message'])
-                    flashMessageOnScreen(info['message'], 'error', flashMessage)
-               else
-                   showColumnNames(info['column-names'])
+        if (info['message'])
+            flashMessageOnScreen(info['message'], 'error', flashMessageLocation)
+        else
+            showColumnNames(info['column_names'])
         },
         error: function () {
-            flashMessageOnScreen('File could not be processed.', 'error', flashMessage);
+            flashMessageOnScreen('File could not be processed.', 'error', flashMessageLocation);
         }
     });
 }
@@ -100,7 +106,7 @@ function setColumnsNameTable(columnsFile, worksheetName=undefined,  flashMessage
  * Hides  columns section in the form.
  */
 function hideColumnNames() {
-    $('#column-names').hide();
+    $('#column_names').hide();
 }
 
 
@@ -111,7 +117,7 @@ function hideColumnNames() {
  */
 function populateRequiredTagColumnTextboxes(requiredTagColumnIndices) {
     for (let key in requiredTagColumnIndices) {
-        $('#' + key.toLowerCase() + '-column').val(requiredTagColumnIndices[key].toString());
+        $('#' + key.toLowerCase() + '_column').val(requiredTagColumnIndices[key].toString());
     }
 }
 
@@ -121,14 +127,14 @@ function populateRequiredTagColumnTextboxes(requiredTagColumnIndices) {
  * columns.
  */
 function populateTagColumnsTextbox(tagColumnIndices) {
-    $('#tag-columns').val(tagColumnIndices.sort().map(String));
+    $('#tag_columns').val(tagColumnIndices.sort().map(String));
 }
 
 /**
  * Clears tag column text boxes.
  */
 function removeColumnTable() {
-    $('#column-names-table').children().remove();
+    $('#column_names_table').children().remove();
 }
 
 /**
@@ -140,17 +146,17 @@ function removeColumnTable() {
  */
 function setComponentsRelatedToColumns(columnsInfo, hasColumns = true, showIndices = false) {
     clearTagColumnTextboxes();
-    if (!hasColumns || columnNamesAreEmpty(columnsInfo['column-names']) ) {
+    if (!hasColumns || columnNamesAreEmpty(columnsInfo['column_names']) ) {
         setComponentsRelatedToEmptyColumnNames();
     } else {
-        setComponentsRelatedToNonEmptyColumnNames(columnsInfo['column-names']);
+        setComponentsRelatedToNonEmptyColumnNames(columnsInfo['column_names']);
     }
     if (showIndices) {
-        if (!tagColumnsIndicesAreEmpty(columnsInfo['tag-column-indices'])) {
-            populateTagColumnsTextbox(columnsInfo['tag-column-indices']);
+        if (!tagColumnsIndicesAreEmpty(columnsInfo['COLUMN_INDICES'])) {
+            populateTagColumnsTextbox(columnsInfo['COLUMN_INDICES']);
         }
-        if (Object.keys(columnsInfo['required-tag-column-indices']).length !== 0) {
-            populateRequiredTagColumnTextboxes(columnsInfo['required-tag-column-indices']);
+        if (Object.keys(columnsInfo['required_column_indices']).length !== 0) {
+            populateRequiredTagColumnTextboxes(columnsInfo['required_column_indices']);
         }
     }
 }
@@ -178,7 +184,7 @@ function setComponentsRelatedToNonEmptyColumnNames(columnNames) {
  * @param {boolean} value - is checked if true and unchecked if false
  */
 function setHasColumnNamesCheckbox(value) {
-    $('#has-column-names').prop('checked', value);
+    $('#has_column_names').prop('checked', value);
 }
 
 /**
@@ -186,8 +192,8 @@ function setHasColumnNamesCheckbox(value) {
  * @param {Array} columnNames - An array containing the spreadsheet column names.
  */
 function showColumnNames(columnNames) {
-    $('#column-names').show();
-    let columnTable = $('#column-names-table');
+    $('#column_names').show();
+    let columnTable = $('#column_names_table');
     let columnNamesRow = $('<tr/>');
     let numberOfColumnNames = columnNames.length;
     columnTable.empty();
@@ -213,14 +219,14 @@ function tagColumnsIndicesAreEmpty(tagColumnsIndices) {
  * @returns {boolean} - True if the tags columns textbox is valid.
  */
 function tagColumnsTextboxIsValid() {
-    let otherTagColumns = $('#tag-columns').val().trim();
+    let otherTagColumns = $('#tag_columns').val().trim();
     let valid = true;
     if (!isEmptyStr(otherTagColumns)) {
         let pattern = new RegExp('^([ \\d]+,)*[ \\d]+$');
         let valid = pattern.test(otherTagColumns);
         if (!valid) {
             flashMessageOnScreen('Tag column(s) must be a number or a comma-separated list of numbers',
-                'error', 'tag-columns-flash')
+                'error', 'tag_columns_flash')
         }
     }
     return valid;

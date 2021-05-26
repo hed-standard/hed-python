@@ -79,7 +79,7 @@ def get_excel_worksheet_names(workbook_file_path):
     return worksheet_names
 
 
-def get_other_tag_column_indices(column_names):
+def get_other_column_indices(column_names):
     """Gets the other tag column indices in a spreadsheet. The indices found will be one-based.
 
     Parameters
@@ -93,15 +93,15 @@ def get_other_tag_column_indices(column_names):
         A list containing the tag column indices found in a spreadsheet.
 
     """
-    tag_column_indices = []
+    column_indices = []
     for tag_column_name in spreadsheet_constants.OTHER_TAG_COLUMN_NAMES:
         found_indices = find_all_str_indices_in_list(column_names, tag_column_name)
         if found_indices:
-            tag_column_indices.extend(found_indices)
-    return tag_column_indices
+            column_indices.extend(found_indices)
+    return column_indices
 
 
-def get_specific_tag_column_indices(column_names):
+def get_specific_column_indices(column_names):
     """Gets the required tag column indices in a spreadsheet. The indices found will be one-based.
 
     Parameters
@@ -115,7 +115,7 @@ def get_specific_tag_column_indices(column_names):
         A dictionary containing the required tag column indices found in a spreadsheet.
 
     """
-    specific_tag_column_indices = {}
+    specific_column_indices = {}
     specific_tag_column_names = spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY.keys()
     for specific_tag_column_name in specific_tag_column_names:
         alternative_specific_tag_column_names = spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY[
@@ -123,8 +123,8 @@ def get_specific_tag_column_indices(column_names):
         for alternative_specific_tag_column_name in alternative_specific_tag_column_names:
             indices = find_all_str_indices_in_list(column_names, alternative_specific_tag_column_name)
             if indices:
-                specific_tag_column_indices[specific_tag_column_name] = indices[0]
-    return specific_tag_column_indices
+                specific_column_indices[specific_tag_column_name] = indices[0]
+    return specific_column_indices
 
 
 def get_specific_tag_columns_from_form(request):
@@ -202,8 +202,8 @@ def get_text_file_info(file_path):
     column_info = {}
     column_delimiter = get_column_delimiter_based_on_file_extension(file_path)
     column_info[common.COLUMN_NAMES] = get_text_file_column_names(file_path, column_delimiter)
-    column_info[common.TAG_COLUMN_INDICES] = get_other_tag_column_indices(column_info[common.COLUMN_NAMES])
-    column_info[common.REQUIRED_TAG_COLUMN_INDICES] = get_specific_tag_column_indices(column_info[common.COLUMN_NAMES])
+    column_info[common.COLUMN_INDICES] = get_other_column_indices(column_info[common.COLUMN_NAMES])
+    column_info[common.REQUIRED_COLUMN_INDICES] = get_specific_column_indices(column_info[common.COLUMN_NAMES])
     return column_info
 
 
@@ -219,8 +219,8 @@ def get_worksheet_info(file_path, worksheet_name=None):
         raise HedFileError('BadWorksheetName', f'Worksheet {worksheet_name} not in Excel file', '')
     worksheet = opened_file.sheet_by_name(worksheet_name)
     info[common.COLUMN_NAMES] = [worksheet.cell(0, col_index).value for col_index in range(worksheet.ncols)]
-    info[common.TAG_COLUMN_INDICES] = get_other_tag_column_indices(info[common.COLUMN_NAMES])
-    info[common.REQUIRED_TAG_COLUMN_INDICES] = get_specific_tag_column_indices(info[common.COLUMN_NAMES])
+    info[common.COLUMN_INDICES] = get_other_column_indices(info[common.COLUMN_NAMES])
+    info[common.REQUIRED_COLUMN_INDICES] = get_specific_column_indices(info[common.COLUMN_NAMES])
     info[common.WORKSHEET_SELECTED] = worksheet_name
     opened_file.release_resources()
     return info

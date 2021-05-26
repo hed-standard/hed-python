@@ -15,12 +15,11 @@ if __name__ == '__main__':
     hed_schema = load_schema(schema_path)
     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/bids_events.json")
     column_group = ColumnDefGroup(json_path)
-    def_dict, def_issues = column_group.extract_defs(hed_schema)
+    def_dict, def_issues = column_group.extract_defs()
     if def_issues:
         print(get_printable_issue_string(def_issues,
                                          title="There should be no errors in the definitions from the sidecars:"))
-    input_file = EventFileInput(events_path, json_def_files=column_group,
-                                hed_schema=hed_schema, def_dicts=def_dict)
+    input_file = EventFileInput(filename=events_path, json_def_files=column_group)
 
     validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
     if validation_issues:
@@ -30,3 +29,9 @@ if __name__ == '__main__':
     validator = HedValidator(hed_schema=hed_schema)
     validation_issues = validator.validate_input(input_file)
     print(get_printable_issue_string(validation_issues, "Normal hed string errors"))
+
+    events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+    with open(events_path, "r") as myfile:
+        events_string = myfile.read()
+    input_file = EventFileInput(csv_string=events_string)
+    # input_file = EventFileInput(data_as_csv_string=events_string)

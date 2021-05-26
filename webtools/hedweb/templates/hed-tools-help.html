@@ -39,7 +39,7 @@
         was
         selected. If a spreadsheet has multiple worksheets, HED Validator selects the first one by default
         (ImaginedEmotion), but provides a drop down for you to select a different one:</p>
-    <img src="{{ url_for('static', filename='img/specify-columns.png') }}">
+    <img src="{{ url_for('static', filename='img/specify_columns.png') }}">
     <p>By default, the HED Validator assumes that the first row of the spreadsheet contains the names of the columns
         and
         uses these names to guess which columns correspond to special tags such as Event/Category or Event/Label. In
@@ -52,7 +52,7 @@
         next to it so that it gets the proper values for Long Name. In addition, the Validator also missed that
         column 8
         (called Other) also contained HED tags. After correcting we have:</p>
-    <img src="{{ url_for('static', filename='img/correct-columns.png') }}">
+    <img src="{{ url_for('static', filename='img/correct_columns.png') }}">
     <h3 id="select_other_options">Step 3: Select the other options.</h3>
     <p>You can validate your file against any valid HED schema. The Validator automatically retrieves the latest HED
         version and also has copies of each of the previous major HED versions available through the HED version

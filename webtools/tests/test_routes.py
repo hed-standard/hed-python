@@ -31,36 +31,41 @@ class Test(unittest.TestCase):
         self.assertEqual(400, response.status_code, 'Columns info requires data')
 
     def test_get_dictionary_results(self):
-        response = self.app.test.post('/dictionary-submit')
+        response = self.app.test.post('/dictionary_submit')
         self.assertEqual(400, response.status_code, 'Dictionaryrequires data')
 
     def test_get_events_results(self):
-        response = self.app.test.post('/events-submit')
-        self.assertEqual(404, response.status_code, 'Event processing requires data')
+        response = self.app.test.post('/events_submit')
+        self.assertEqual(400, response.status_code, 'Event processing requires data')
 
     def test_get_hed_services_results(self):
         response = self.app.test.get('/hed-services-submit')
         self.assertEqual(405, response.status_code, 'HED services require data')
 
-    def test_get_hed_version(self):
-        response = self.app.test.post('/get-hed-version')
+    def test_get_schema_version(self):
+        response = self.app.test.post('/get_schema_version')
         self.assertEqual(400, response.status_code, 'Returning HED version requires data')
 
     def test_get_hedstring_results(self):
-        response = self.app.test.get('/hedstring-submit')
+        response = self.app.test.get('/string_submit')
         self.assertEqual(405, response.status_code, 'HED string processing require data')
 
-    def test_get_major_hed_versions(self):
-        response = self.app.test.post('/get-hed-major-versions')
-        self.assertEqual(405, response.status_code, 'Returning HED version list requires data')
+    def test_get_schema_versions(self):
+        with self.app.app_context():
+            response = self.app.test.post('/get_schema_versions')
+            self.assertEqual(400, response.status_code, 'Returning HED version list requires data')
+            resp = self.app.client.post('/get_schema_versions')
+            print(resp)
+        # response = self.app.test.post('/get_schema_versions')
+        # self.assertEqual(405, response.status_code, 'Returning HED version list requires data')
         # import hed.hedweb.constants.common_constants as constants
-        # from hed.hedweb.web_utils import find_major_hed_versions
-        # hed_info = find_major_hed_versions()
-        # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key hed-major-versions")
+        # from hed.hedweb.web_utils import find_major_schema_versions
+        # hed_info = find_major_schema_versions()
+        # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key schema_versions")
         # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
 
     def test_get_schema_results(self):
-        response = self.app.test.post('/schema-submit')
+        response = self.app.test.post('/schema_submit')
         self.assertEqual(400, response.status_code, 'Schema processing requires data')
 
     def test_get_spreadsheet_results(self):

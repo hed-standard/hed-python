@@ -1,8 +1,8 @@
 {% macro create_column_info(show_indices) %}
 
-    <div class="form-group" id="column-names">
+    <div class="form-group" id="column_names">
         <h3>Column names:</h3>
-        <table id="column-names-table"></table>
+        <table id="column_names_table"></table>
     </div>
     {% if show_indices in ['true'] %}
         <div class="form-group">
@@ -10,20 +10,20 @@
             <label class="secondary-label">Indicate specific non-prefixed tag columns (column numbers start with
                 1):</label><br>
             <div class="textbox-group">
-                <label for="category-column">Category</label>
-                <input class='indices' type="text" name="category-column" id="category-column">
-                <label for="description-column">Description</label>
-                <input class='indices' type="text" name="description-column" id="description-column">
-                <label for="label-column">Label</label>
-                <input class='indices' type="text" name="label-column" id="label-column">
-                <label for="long-column">Long name</label>
-                <input class='indices' type="text" name="long-column" id="long-column">
+                <label for="category_column">Category</label>
+                <input class='indices' type="text" name="category_column" id="category_column">
+                <label for="description_column">Description</label>
+                <input class='indices' type="text" name="description_column" id="description_column">
+                <label for="label_column">Label</label>
+                <input class='indices' type="text" name="label_column" id="label_column">
+                <label for="long_column">Long name</label>
+                <input class='indices' type="text" name="long_column" id="long_column">
             </div>
         </div>
         <div class="form-group">
-            <label class="secondary-label" for="tag-columns">List columns (comma-separated) with HED strings:</label>
-            <input class="text" type="text" name="tag-columns" id="tag-columns">
+            <label class="secondary-label" for="tag_columns">List columns (comma-separated) with HED strings:</label>
+            <input class="text" type="text" name="tag_columns" id="tag_columns">
         </div>
     {% endif %}
-    <p class="flash" id="tag-columns-flash"></p>
+    <p class="flash" id="tag_columns_flash"></p>
 {% endmacro %}

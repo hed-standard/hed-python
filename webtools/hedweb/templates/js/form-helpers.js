@@ -52,7 +52,7 @@ function fileIsSpecified(nameID, flashID, errorMsg) {
 /**
  * Flash a message on the screen.
  * @param {String} message - The message that will be flashed on the screen.
- * @param {String} category - The category of the message. The categories are 'error', 'success', and 'other'.
+ * @param {String} category - The msg_category of the message. The categories are 'error', 'success', and 'other'.
  * @param {String} flashMessageElementId - ID of the flash element
  */
 function flashMessageOnScreen(message, category, flashMessageElementId) {
@@ -148,7 +148,7 @@ function isEmptyStr(str) {
 /**
  * Flash a message on the screen.
  * @param {Object} flashMessage - The li element containing the flash message.
- * @param {String} category - The category of the message. The categories are 'error', 'success', and 'other'.
+ * @param {String} category - The msg_category of the message. The categories are 'error', 'success', and 'other'.
  */
 function setFlashMessageCategory(flashMessage, category) {
     if ("error" === category) {

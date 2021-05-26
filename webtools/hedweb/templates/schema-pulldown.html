@@ -1,0 +1,17 @@
+{% macro create_schema_pulldown() %}
+        <h3>Choose a HED schema version:</h3>
+        <div class="form-group">
+            <label class="secondary-label" for="schema_version">HED schema version:</label>
+            <select name="schema_version" id="schema_version"></select><br>
+        </div>
+
+        <div class="form-group" id="schema_other_version">
+            <label class="secondary-label" for="schema_file">Upload HED schema:</label>
+            <label class="btn-group file-browse-group">
+                <button for="schema_file">Browse ...</button>
+                <label id="schema_display_name"></label>
+                <input type="file" name="schema_file" id="schema_file"/>
+            </label>
+            <p class="flash" id="schema_select_flash"></p>
+        </div>
+{% endmacro %}

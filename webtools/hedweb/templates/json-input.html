@@ -1,12 +1,12 @@
 {% macro create_json_input() %}
     <h3>Upload BIDS-style JSON dictionary:</h3>
         <div class="form-group">
-            <label class="secondary-label" for="json-file">JSON file:</label>
+            <label class="secondary-label" for="json_file">JSON file:</label>
             <label class="btn-group file-browse-group">
-                <button for="json-file">Browse ...</button>
-                <label id="json-display-name"></label>
-                <input type="file" name="json-file" id="json-file"/>
+                <button for="json_file">Browse ...</button>
+                <label id="json_display_name"></label>
+                <input type="file" name="json_file" id="json_file"/>
             </label>
-            <p class="flash" id="json-flash"></p>
+            <p class="flash" id="json_flash"></p>
         </div>
 {% endmacro %}

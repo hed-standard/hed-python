@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% from "schema-pulldown.html" import create_schema_pulldown %}
+{% from "process-options.html" import create_process_options %}
+
+{% block content %}
+    <h2>HED string quick checks</h2>
+        <p>
+        <i>Enter or paste a HED string in the upper text box.<br>
+        Choose a HED schema version, pick an action, and press Process.<br>
+        You will see either the results in the lower text box or a status message below.
+        </i>
+    </p>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <form id="string_form" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+     <h3>Enter HED string in the top box [result appears in lower box]: </h3>
+        <div class="form-group">
+                <textarea rows="5" cols="60" wrap="soft" maxlength="25000"
+                          name="string_input" id="string_input"></textarea>
+            <p> </p>
+                <textarea rows="5" cols="60" wrap="soft" maxlength="25000"
+                          name="string_result" id="string_result"></textarea>
+            <p class="flash" id="string_flash"></p>
+        </div>
+
+        {{ create_schema_pulldown() }}
+        {{ create_process_options(to_long=True,to_short=True,validate=True) }}
+
+        <div class="form-group">
+            <button id="string_submit" type="button">Process</button>
+        </div>
+
+        <div class="form-group">
+            <p class="flash" id="string_submit_flash"></p>
+        </div>
+
+    </form>
+    <script type="module">
+        {%  include 'js/form-helpers.js' %}
+        {%  include 'js/schema-pulldown.js' %}
+        {%  include 'js/string-form.js' %}
+    </script>
+{% endblock %}
