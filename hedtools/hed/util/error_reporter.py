@@ -4,8 +4,178 @@ This module is used to report errors found in the validation.
 You can scope the formatted errors with calls to push_error_context and pop_error_context.
 """
 
-from hed.util.error_types import ValidationErrors, ValidationWarnings, SchemaErrors, \
-    SidecarErrors, SchemaWarnings, ErrorContext, ErrorSeverity, DefinitionErrors
+from hed.util.error_types import ErrorContext, ErrorSeverity
+
+from functools import wraps
+
+
+error_functions = {}
+
+
+def hed_error(error_type, default_severity=ErrorSeverity.ERROR):
+    """
+    Decorator for errors in error handler or inherited classes.
+
+    Parameters
+    ----------
+    error_type : str
+        This should be a value from error_types, but doesn't strictly have to be.
+    default_severity: ErrorSeverity
+        The default severity for the decorated error
+    """
+    def inner_decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, hed_string=None, severity=default_severity, **kwargs):
+            """
+            Wrapper function for error handling non-tag errors
+
+           Parameters
+           ----------
+           self: ErrorHandler
+               The error handler that's dealing with this error
+           args:
+               Any other non keyword args
+           hed_string: str, Optional
+               Optional way to pass the current hed_string.  Will normally be gathered from error_context
+           severity: ErrorSeverity, Optional
+               Will override the default error value if passed.(If you want to turn a warning into an error)
+           kwargs:
+               Any keyword args to be passed down to error message function
+           Returns
+           -------
+           error_list: [{}]
+           """
+            base_message, error_vars = func(*args, **kwargs)
+            error_object = self._create_error_object(error_type, base_message, severity, hed_string, **error_vars)
+            return [error_object]
+
+        if error_type in error_functions:
+            raise KeyError(f"{error_type} defined more than once.")
+
+        error_functions[error_type] = wrapper
+        return wrapper
+
+    return inner_decorator
+
+
+def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=False):
+    """
+    Decorator for errors in error handler or inherited classes.
+
+    Parameters
+    ----------
+    error_type : str
+        This should be a value from error_types, but doesn't strictly have to be.
+    default_severity: ErrorSeverity
+        The default severity for the decorated error
+    has_sub_tag : bool
+        Determines if this error message also wants a sub_tag passed down.  eg "This" in "This/Is/A/Tag"
+    """
+    def inner_decorator(func):
+        if has_sub_tag:
+            @wraps(func)
+            def wrapper(self, tag, index, index_end, *args, hed_string=None, severity=default_severity,
+                        **kwargs):
+                """
+                Wrapper function for error handling tag errors with sub tags.
+
+                Parameters
+                ----------
+                self: ErrorHandler
+                    The error handler that's dealing with this error
+                tag: HedTag or str
+                    The hed tag object with the problem
+                index: int,
+                    The index into the tag with a problem(usually 0)
+                index_end: int
+                    the last index into the tag with a problem(usually len(tag)
+                args:
+                    Any other non keyword args
+                hed_string: str, Optional
+                    Optional way to pass the current hed_string.  Will normally be gathered from error_context
+                severity: ErrorSeverity, Optional
+                    Will override the default error value if passed.(If you want to turn a warning into an error)
+                kwargs:
+                    Any keyword args to be passed down to error message function
+                Returns
+                -------
+                error_list: [{}]
+                """
+                tag_as_string = str(tag)
+                if index_end is None:
+                    index_end = len(tag_as_string)
+                problem_tag = tag_as_string[index: index_end]
+                try:
+                    hed_string = tag._hed_string
+                    tag = tag.org_tag
+                except AttributeError:
+                    pass
+
+                if not hed_string:
+                    hed_string = tag
+
+                base_message, error_vars = func(tag, problem_tag, *args, **kwargs)
+                base_message += f"  Problem spans tag indexes: {index}, {index_end}"
+                error_object = self._create_error_object(error_type, base_message, severity, hed_string, **error_vars,
+                                                         index=index, index_end=index_end, source_tag=tag)
+
+                return [error_object]
+
+            if error_type in error_functions:
+                raise KeyError(f"{error_type} defined more than once.")
+
+            error_functions[error_type] = wrapper
+            return wrapper
+        else:
+            @wraps(func)
+            def wrapper(self, tag, *args, hed_string=None, severity=default_severity, **kwargs):
+                """
+                Wrapper function for error handling tag errors
+
+                Parameters
+                ----------
+                self: ErrorHandler
+                    The error handler that's dealing with this error
+                tag: HedTag or str
+                    The hed tag object with the problem
+                args:
+                    Any other non keyword args
+                hed_string: str, Optional
+                    Optional way to pass the current hed_string.  Will normally be gathered from error_context
+                severity: ErrorSeverity, Optional
+                    Will override the default error value if passed.(If you want to turn a warning into an error)
+                kwargs:
+                    Any keyword args to be passed down to error message function
+                Returns
+                -------
+                error_list: [{}]
+                """
+                try:
+                    hed_string = tag._hed_string
+                    tag = tag.org_tag
+                except AttributeError:
+                    pass
+
+                if not hed_string:
+                    hed_string = tag
+
+                base_message, error_vars = func(tag, *args, **kwargs)
+                error_object = self._create_error_object(error_type, base_message, severity, hed_string, **error_vars,
+                                                         source_tag=tag)
+
+                return [error_object]
+
+            if error_type in error_functions:
+                raise KeyError(f"{error_type} defined more than once.")
+
+            error_functions[error_type] = wrapper
+            return wrapper
+
+    return inner_decorator
+
+
+# Import after hed_error decorators are defined.
+from hed.util import error_messages
 
 
 class ErrorHandler:
@@ -64,318 +234,55 @@ class ErrorHandler:
 
         return [error_object]
 
-    def format_val_error(self, error_type, hed_string='', tag='', tag_prefix='', previous_tag='',
-                         character='', index=0, unit_class_units='', opening_parentheses_count=0,
-                         closing_parentheses_count=0, category_keys=None):
-        """Reports the abc error based on the type of error.
+    def _create_error_object(self, error_type, base_message, severity, hed_string, **kwargs):
+        if severity == ErrorSeverity.ERROR:
+            error_prefix = "ERROR: "
+        else:
+            error_prefix = "WARNING: "
+        error_message = error_prefix + base_message
+        error_object = {'code': error_type,
+                        'message': error_message,
+                        'severity': severity
+                        }
 
-        Parameters
-        ----------
-        error_type: str
-            The type of abc error.
-        hed_string: str
-            The full HED string in which the error occurred
-        tag: HedTag or str
-            The tag that generated the error.
-        tag_prefix: str
-            The tag prefix that generated the error.
-        previous_tag: str
-            The previous tag that potentially could have generated the error. This is passed in with the tag.
-        index: int
-            The index in the string of where the error occurred.
-        character: str
-            The character in the string that generated the error.
-        unit_class_units: str
-            The unit class units that are associated with the error.
-        opening_parentheses_count: int
-            The number of opening parentheses.
-        closing_parentheses_count: int
-            The number of closing parentheses.
-        category_keys: [str]
-            List of valid category keys for the given column
-        Returns
-        -------
-        issue_list: [{}]
-            A list containing a single dictionary with the warning type and warning message related to a particular type
-            of warning.
+        if hed_string:
+            error_object[ErrorContext.HED_STRING] = (hed_string, False)
 
+        self._add_context_to_errors(error_object)
+
+        for key, value in kwargs.items():
+            error_object.setdefault(key, value)
+
+        return error_object
+
+    def format_error(self, error_type, *args, **kwargs):
         """
-        try:
-            tag = tag.org_tag
-        except AttributeError:
-            tag = tag
+            The parameters vary based on what type of error this is.
 
-        error_prefix = "ERROR: "
-        error_types = {
-            ValidationErrors.PARENTHESES: f'{error_prefix}Number of opening and closing parentheses are unequal. '
-                                          f'{opening_parentheses_count} opening parentheses. {closing_parentheses_count} '
-                                          'closing parentheses',
-            ValidationErrors.INVALID_CHARACTER: f'{error_prefix}Invalid character "{character}" at index {index} of string "{hed_string}"',
-            ValidationErrors.TILDES_NOT_SUPPORTED: f'{error_prefix}Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).   "{character}" at index {index} of string "{hed_string}"',
-            ValidationErrors.COMMA_MISSING: f'{error_prefix}Comma missing after - "{tag}"',
-            ValidationErrors.DUPLICATE: f'{error_prefix}Duplicate tag - "{tag}"',
-            ValidationErrors.REQUIRE_CHILD: f'{error_prefix}Descendant tag required - "{tag}"',
-            ValidationErrors.MULTIPLE_UNIQUE: f'{error_prefix}Multiple unique tags with prefix - "{tag_prefix}"',
-            ValidationErrors.UNIT_CLASS_INVALID_UNIT: f'{error_prefix}Invalid unit - "{tag}" valid units are "{unit_class_units}"',
-            ValidationErrors.INVALID_TAG: f'{error_prefix}Invalid tag - "{tag}"',
-            ValidationErrors.EMPTY_TAG: f'{error_prefix}HED tags cannot be empty.  Extra comma found at: "{character}" at index {index} of string "{hed_string}"',
-            ValidationErrors.EXTRA_SLASHES_OR_SPACES: f"{error_prefix}Extra slashes or spaces '{character}' at index {index} of tag '{tag}'",
-            ValidationErrors.HED_SIDECAR_KEY_MISSING: f"{error_prefix}Category key '{tag}' does not exist in column.  Valid keys are: {category_keys}",
-            ValidationErrors.HED_DEFINITION_UNMATCHED: f"{error_prefix}A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'",
-            ValidationErrors.HED_DEFINITION_VALUE_MISSING: f"{error_prefix}A definition requires a placeholder value, but was not given one.  Definition: '{tag}",
-            ValidationErrors.HED_DEFINITION_VALUE_EXTRA: f"{error_prefix}A definition does not take a placeholder value, but was given one.  Definition: '{tag}",
-        }
-        default_error_message = 'ERROR: Unknown error'
-        error_message = error_types.get(error_type, default_error_message)
-
-        error_object = {'code': error_type, 'message': error_message, 'severity': ErrorSeverity.ERROR}
-        error_object_list = self._add_context_to_errors(error_object)
-        return error_object_list
-
-    def format_sidecar_error(self, error_type, column_name="", given_type="", expected_type="", pound_sign_count=0,
-                             category_count=0, severity=ErrorSeverity.ERROR):
-        """
-        Formats a json sidecar error to human readable
+            This is mostly intended a way to assemble errors and add context later.
 
         Parameters
         ----------
         error_type : str
-            This should be a value from SidecarErrors
-        column_name : str
-            The column name this error is from
-        given_type : str
-            A str representing the type of the variable there is an error with
-        expected_type : str
-            A str representing the expected type of the variable there is an error with
-        pound_sign_count : int
-            The number of pound signs found in the string.
-        category_count : int
-            The number of categories found in this column.
-        severity: ErrorSeverity
-            If this is an error or warning.
+            The type of error for this.  Registered with @hed_error or @hed_tag_error.
+        kwargs :
+            The other parameters to pass down to the error handling func.
         Returns
         -------
-        issue_list: [{}]
-            A list containing a single dictionary with the warning type and warning message related to a particular type
-            of warning.
+        error: [{}]
+            A single error
         """
-        error_prefix = "ERROR: "
-        error_types = {
-            SidecarErrors.BLANK_HED_STRING: f"{error_prefix}No HED string found for Value or Category column.",
-            SidecarErrors.WRONG_HED_DATA_TYPE: f"{error_prefix}Invalid HED string datatype sidecar. Should be '{expected_type}', but got '{given_type}'",
-            SidecarErrors.INVALID_NUMBER_POUND_SIGNS: f"{error_prefix}There should be exactly one # character in a sidecar string. Found {pound_sign_count}",
-            SidecarErrors.TOO_MANY_POUND_SIGNS: f"{error_prefix}There should be no # characters in a category sidecar string. Found {pound_sign_count}",
-            SidecarErrors.TOO_FEW_CATEGORIES: f"{error_prefix}A category column should have at least two keys. Found {category_count}",
-            SidecarErrors.UNKNOWN_COLUMN_TYPE: f"{error_prefix}Could not automatically identify column '{column_name}' type from file. "
-                                              f"Most likely the column definition in question needs a # sign to replace a number somewhere."
-        }
+        error_func = error_functions.get(error_type)
+        if not error_func:
+            error_object_list = self.val_error_unknown(*args, **kwargs)
+            error_object_list[0]['code'] = error_type
+            return error_object_list
 
-        default_error_message = f'{error_prefix}Unknown error {error_type}'
-        error_message = error_types.get(error_type, default_error_message)
+        return error_func(self, *args, **kwargs)
 
-        error_object = {'code': error_type, 'message': error_message, 'severity': severity}
-
-        error_object_list = self._add_context_to_errors(error_object)
-        return error_object_list
-
-    def format_val_warning(self, warning_type, tag='', default_unit='', tag_prefix=''):
-        """Reports the abc warning based on the type of warning.
-
-        Parameters
-        ----------
-        warning_type: string
-            The type of abc warning.
-        tag: str or HedTag
-            The tag that generated the warning.
-        default_unit: string
-            The default unit class unit associated with the warning.
-        tag_prefix: string
-            The tag prefix that generated the warning.
-        Returns
-        -------
-        issue_list: [{}]
-            A list containing a single dictionary with the warning type and warning message related to a particular type
-            of warning.
-
-        """
-        try:
-            tag = tag.org_tag
-        except AttributeError:
-            tag = tag
-
-        warning_prefix = "WARNING: "
-
-        warning_types = {
-            ValidationWarnings.CAPITALIZATION: f'{warning_prefix}First word not capitalized or camel case - "{tag}"',
-            ValidationWarnings.REQUIRED_PREFIX_MISSING: f'{warning_prefix}Tag with prefix "{tag_prefix}" is required',
-            ValidationWarnings.UNIT_CLASS_DEFAULT_USED: f'{warning_prefix}No unit specified. Using "{default_unit}" as the default - "{tag}"'
-        }
-        default_warning_message = 'WARNING: Unknown warning'
-        warning_message = warning_types.get(warning_type, default_warning_message)
-
-        warning_object = {'code': warning_type, 'message': warning_message, 'severity': ErrorSeverity.WARNING}
-        warning_object_list = self._add_context_to_errors(warning_object)
-        return warning_object_list
-
-    def reformat_schema_error(self, error, hed_string, offset):
-        """
-        Updates a schema error from hed_tag indexing to hed_string indexing.
-
-        Parameters
-        ----------
-        error : {}
-            An error returned from format_schema_error
-        hed_string : str
-            The full hed_string the error is from.
-        offset : int
-            The index into hed_string where the reported error hed_tag started
-        Returns
-        -------
-        {}
-            The same error with index changed if it was a schema error.
-        """
-        # Bail early if this isn't a schema error
-        if "start_index" not in error:
-            return error
-
-        error_type = error["code"]
-        error_index = error["start_index"]
-        error_index_end = error["end_index"]
-        expected_parent_tag = error["expected_parent_tag"]
-
-        reformatted_error = self.format_schema_error(error_type, hed_string, error_index + offset, error_index_end + offset, expected_parent_tag)
-        return reformatted_error
-
-    def format_schema_error(self, error_type, hed_tag, error_index=0, error_index_end=None, expected_parent_tag=None,
-                            duplicate_tag_list=()):
-        """Reports the abc error based on the type of error.
-
-        Parameters
-        ----------
-        error_type: str
-            The type of abc error.
-        hed_tag: str
-            The hed tag with a problem
-        error_index: int
-            The index where the error starts
-        error_index_end: int
-            The index where the error stops
-        expected_parent_tag: str
-            The expected full path of the tag from the schema.
-        duplicate_tag_list: []
-            A list of all all possible parents for this tag, if there is more than one.
-        Returns
-        -------
-        issue_list: [{}]
-            A list containing a single dictionary with the warning type and warning message related to a particular type
-            of warning.
-
-        """
-        if error_index_end is None:
-            error_index_end = len(hed_tag)
-
-        problem_tag = str(hed_tag)[error_index: error_index_end]
-
-        error_prefix = f"ERROR: "
-
-        tag_join_delimiter = f"\n\t"
-        error_types = {
-            SchemaErrors.INVALID_PARENT_NODE: f"{error_prefix}'{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used "
-                                              f"as an extension.  Problem spans hed string indexes: {error_index}, {error_index_end}",
-            SchemaErrors.NO_VALID_TAG_FOUND: f"{error_prefix}'{problem_tag}' is not a valid base hed tag.  Problem spans hed string indexes: {error_index}, {error_index_end} ",
-            SchemaErrors.EMPTY_TAG_FOUND: f"{error_prefix}Empty tag cannot be converted.",
-            SchemaErrors.INVALID_SCHEMA: f"{error_prefix}Source hed schema is invalid as it contains duplicate tags.  "
-                                         f"Please fix if you wish to be abe to convert tags.",
-            SchemaErrors.DUPLICATE_TERMS: f"{error_prefix}Term(Short Tag) '{str(hed_tag)}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"
-                                          f"{tag_join_delimiter.join(duplicate_tag_list)}"
-        }
-        default_error_message = f'{error_prefix}Internal Error'
-        error_message = error_types.get(error_type, default_error_message)
-
-        error_object = {'code': error_type,
-                        'message': error_message,
-                        'source_tag': str(hed_tag),
-                        'start_index': error_index,
-                        'end_index': error_index_end,
-                        'expected_parent_tag': expected_parent_tag,
-                        'severity': ErrorSeverity.ERROR}
-
-        error_object_list = self._add_context_to_errors(error_object)
-        return error_object_list
-
-    def format_schema_warning(self, error_type, hed_tag, hed_desc=None, error_index=0, problem_char=None):
-        """Reports the abc warning based on the type of error.
-
-        Parameters
-        ----------
-        error_type: str
-            The type of abc error.
-        hed_tag: str
-            The hed tag this error is from
-        hed_desc: str
-            The description this error is from
-        error_index: int
-            The position of the character with a problem
-        problem_char: char
-            The invalid character
-        Returns
-        -------
-        issue_list: [{}]
-            A list containing a single dictionary with the warning type and warning message related to a particular type
-            of warning.
-
-        """
-        problem_tag = hed_tag
-
-        warning_prefix = f"WARNING: "
-        error_types = {
-            SchemaWarnings.INVALID_CHARACTERS_IN_DESC: f"{warning_prefix}Invalid character '{problem_char}' in desc "
-                                                       f"for '{problem_tag}' at position {error_index}.  '{hed_desc}",
-            SchemaWarnings.INVALID_CHARACTERS_IN_TAG: f"{warning_prefix}Invalid character '{problem_char}' in tag "
-                                                       f"'{problem_tag}' at position {error_index}.",
-            SchemaWarnings.INVALID_CAPITALIZATION: f"{warning_prefix}First character just be a capital letter or number.  "
-                                                   f"Found character '{problem_char}' in tag "
-                                                   f"'{problem_tag}' at position {error_index}.",
-        }
-        default_warning_message = f'{warning_prefix}Internal Error'
-        warning_message = error_types.get(error_type, default_warning_message)
-
-        error_object = {'code': error_type,
-                        'message': warning_message,
-                        'source_tag': hed_tag,
-                        'severity': ErrorSeverity.WARNING}
-
-        error_object_list = self._add_context_to_errors(error_object)
-        return error_object_list
-
-    def format_definition_error(self, error_type, def_name, tag_list=None, expected_count=0):
-        tag_list_strings = tag_list
-        if tag_list:
-            tag_list_strings = [str(tag) for tag in tag_list]
-        error_prefix = f"ERROR: "
-        error_types = {
-            DefinitionErrors.WRONG_NUMBER_DEF_TAGS:
-                f"{error_prefix}Too many def tags found in definition for {def_name}.  Expected 1, also found: {tag_list_strings}",
-            DefinitionErrors.WRONG_NUMBER_GROUP_TAGS:
-                f"{error_prefix}Too many group tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}",
-            DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS:
-                f"{error_prefix}Incorrect number placeholder tags found in definition for {def_name}.  Expected {expected_count}, found: {tag_list_strings}",
-            DefinitionErrors.DUPLICATE_DEFINITION:
-                f"{error_prefix}Duplicate definition found for '{def_name}'.",
-            DefinitionErrors.TAG_IN_SCHEMA:
-                f"{error_prefix}Term '{def_name}' already used as term in schema and cannot be re-used as a definition.",
-            DefinitionErrors.INVALID_DEF_EXTENSION:
-                f"{error_prefix}Term '{def_name}' has an invalid extension.  Definitions can only have one term."
-        }
-        default_error_message = f'{error_prefix}Internal Error'
-        error_message = error_types.get(error_type, default_error_message)
-
-        error_object = {'code': error_type,
-                        'message': error_message,
-                        'severity': ErrorSeverity.ERROR}
-
-        error_object_list = self._add_context_to_errors(error_object)
-        return error_object_list
+    @hed_error("Unknown")
+    def val_error_unknown(*args, **kwargs):
+        return f"Unknown error.  Args: {str(args)}", kwargs
 
     @staticmethod
     def filter_issues_by_severity(issues_list, severity):

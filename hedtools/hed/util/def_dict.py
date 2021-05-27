@@ -128,20 +128,18 @@ class DefDict:
                 continue
 
             if len(def_tags) > 1:
-                validation_issues += error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_DEF_TAGS,
-                                                                           def_name=def_tags[0][1],
-                                                                           tag_list=[tag[0] for tag in def_tags[1:]])
+                validation_issues += error_handler.format_error(DefinitionErrors.WRONG_NUMBER_DEF_TAGS,
+                                                                def_name=def_tags[0][1],
+                                                                tag_list=[tag[0] for tag in def_tags[1:]])
                 continue
             def_tag, def_tag_name = def_tags[0]
             if len(group_tags) > 1:
-                validation_issues += error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                           def_name=def_tag_name,
-                                                                           tag_list=group_tags + other_tags)
+                validation_issues += error_handler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+                                                                def_name=def_tag_name, tag_list=group_tags + other_tags)
                 continue
             if len(other_tags) > 0:
-                validation_issues += error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                           def_name=def_tag_name,
-                                                                           tag_list=other_tags + group_tags)
+                validation_issues += error_handler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+                                                                def_name=def_tag_name, tag_list=other_tags + group_tags)
                 continue
 
             group_tag = group_tags[0] if group_tags else None
@@ -152,18 +150,18 @@ class DefDict:
 
             def_tag_lower = def_tag_name.lower()
             if "/" in def_tag_lower or "#" in def_tag_lower:
-                validation_issues += error_handler.format_definition_error(
-                    DefinitionErrors.INVALID_DEF_EXTENSION, def_name=def_tag_name)
+                validation_issues += error_handler.format_error(DefinitionErrors.INVALID_DEF_EXTENSION,
+                                                                def_name=def_tag_name)
                 continue
 
             if def_tag_lower in self._defs:
-                validation_issues += error_handler.format_definition_error(DefinitionErrors.DUPLICATE_DEFINITION,
-                                                                           def_name=def_tag_name)
+                validation_issues += error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION,
+                                                                def_name=def_tag_name)
                 continue
 
             # Todo: restore this functionality or add it elsewhere
             # if self._short_tag_mapping and def_tag_lower in self._short_tag_mapping:
-            #     validation_issues += error_handler.format_definition_error(DefinitionErrors.TAG_IN_SCHEMA,
+            #     validation_issues += error_handler.format_error(DefinitionErrors.TAG_IN_SCHEMA,
             #                                                                def_name=def_tag_name)
 
             # Verify placeholders here.
@@ -175,9 +173,9 @@ class DefDict:
 
             if (len(placeholder_tags) == 1) != def_takes_value:
                 validation_issues += \
-                    error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
-                                                          def_name=def_tag_name, tag_list=placeholder_tags,
-                                                          expected_count=1 if def_takes_value else 0)
+                    error_handler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
+                                               def_name=def_tag_name, tag_list=placeholder_tags,
+                                               expected_count=1 if def_takes_value else 0)
                 continue
 
             self._defs[def_tag_lower] = DefEntry(name=def_tag_name, contents_string=str(group_tag),

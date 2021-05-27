@@ -6,6 +6,7 @@ from hed.util.column_definition import ColumnDef
 from hed.util.exceptions import HedFileError
 from hed import schema
 
+
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -14,19 +15,15 @@ class Test(unittest.TestCase):
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.json_filename = os.path.join(cls.base_data_dir, "both_types_events.json")
         cls.json_def_filename = os.path.join(cls.base_data_dir, "both_types_events_with_defs.json")
+        cls.json_errors_filename = os.path.join(cls.base_data_dir, "json_errors.json")
         cls.default_sidecar = ColumnDefGroup(cls.json_filename)
         cls.json_def_sidecar = ColumnDefGroup(cls.json_def_filename)
+        cls.errors_sidecar = ColumnDefGroup(cls.json_errors_filename)
 
     def test_invalid_filenames(self):
         # Handle missing or invalid files.
         invalid_json = "invalidxmlfile.json"
-        json_dict = None
-        try:
-            json_dict = ColumnDefGroup(invalid_json)
-        except HedFileError as e:
-            pass
-
-        self.assertFalse(json_dict)
+        self.assertRaises(HedFileError, ColumnDefGroup, invalid_json)
 
         json_dict = None
         try:
@@ -57,7 +54,6 @@ class Test(unittest.TestCase):
             input_string = fp.read()
             json_file = ColumnDefGroup(json_string=input_string)
             self.assertTrue(json_file)
-
 
     def test__iter__(self):
         columns_target = 3
@@ -94,6 +90,10 @@ class Test(unittest.TestCase):
 
         validation_issues = self.default_sidecar.validate_entries(hed_schema=self.hed_schema)
         self.assertEqual(len(validation_issues), 0)
+
+        validation_issues = self.errors_sidecar.validate_entries(hed_schema=self.hed_schema)
+        self.assertEqual(len(validation_issues), 6)
+
 
 if __name__ == '__main__':
     unittest.main()

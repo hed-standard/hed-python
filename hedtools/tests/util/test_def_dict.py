@@ -22,9 +22,6 @@ class TestDefBase(unittest.TestCase):
             def_dict = DefDict()
             test_issues = def_dict.check_for_definitions(HedString(test_strings[test_key]))
             expected_issue = expected_issues[test_key]
-            print(test_key)
-            print(str(expected_issue))
-            print(str(test_issues))
             self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
 
 
@@ -73,19 +70,19 @@ class TestDefDict(TestDefBase):
         }
         expected_results = {
             'noGroupTag': [],
-            'placeholderNoGroupTag': self.error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "InvalidDef1",
-                                                                                 [], expected_count=1),
-            'placeholderWrongSpot': self.error_handler.format_definition_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1#"),
-            'twoDefTags': self.error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_DEF_TAGS, "ValidDef1", ["Definition/InvalidDef2"]),
-            'twoGroupTags': self.error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1", [self.def_contents_string, self.def_contents_string2]),
-            'duplicateDef': self.error_handler.format_definition_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
-            'duplicateDef2': self.error_handler.format_definition_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
+            'placeholderNoGroupTag': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "InvalidDef1",
+                                                                                 expected_count=1, tag_list=[]),
+            'placeholderWrongSpot': self.error_handler.format_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1#"),
+            'twoDefTags': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_DEF_TAGS, "ValidDef1", ["Definition/InvalidDef2"]),
+            'twoGroupTags': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1", [self.def_contents_string, self.def_contents_string2]),
+            'duplicateDef': self.error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
+            'duplicateDef2': self.error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
             # Todo: restore this
-            # 'defAlreadyTagInSchema': self.error_handler.format_definition_error(DefinitionErrors.TAG_IN_SCHEMA, "Item"),
-            'defTooManyPlaceholders': self.error_handler.format_definition_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "TestDefPlaceholder",
-                                                                                 ["Item/TestDef1/#", "Item/TestDef2/#"], expected_count=1),
-            'invalidPlaceholderExtension': self.error_handler.format_definition_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1/thispartisnotallowed"),
-            'invalidPlaceholder': self.error_handler.format_definition_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1/InvalidPlaceholder"),
+            # 'defAlreadyTagInSchema': self.error_handler.format_error(DefinitionErrors.TAG_IN_SCHEMA, "Item"),
+            'defTooManyPlaceholders': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "TestDefPlaceholder",
+                                                                                 expected_count=1, tag_list=["Item/TestDef1/#", "Item/TestDef2/#"]),
+            'invalidPlaceholderExtension': self.error_handler.format_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1/thispartisnotallowed"),
+            'invalidPlaceholder': self.error_handler.format_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1/InvalidPlaceholder"),
         }
 
         self.check_def_base(test_strings, expected_results)
