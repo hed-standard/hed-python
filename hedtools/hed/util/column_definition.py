@@ -178,8 +178,8 @@ class ColumnDef:
                 return HedString(final_text), False
             else:
                 return None, [{"error_type": ValidationErrors.HED_SIDECAR_KEY_MISSING,
-                              "tag": input_text,
-                              "category_keys": list(self._hed_dict["HED"].keys())}]
+                               "tag": input_text,
+                               "category_keys": list(self._hed_dict["HED"].keys())}]
         elif column_type == ColumnType.Value:
             prelim_text = self._get_value_hed_string()
             final_text = prelim_text.replace("#", input_text)
@@ -268,6 +268,9 @@ class ColumnDef:
         if isinstance(hed_entry, dict):
             return ColumnType.Categorical
 
+        if not isinstance(hed_entry, str):
+            return None
+
         if "#" not in dict_for_entry["HED"]:
             return None
 
@@ -300,36 +303,25 @@ class ColumnDef:
                                              hed_schema=hed_schema, error_handler=error_handler)
             for hed_string, position in self.hed_string_iter(include_position=True):
                 error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
-                if hed_validator:
-                    col_validation_issues += hed_validator.validate_input(hed_string)
-                col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
+                if not hed_string:
+                    col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
+                if not isinstance(hed_string, str):
+                    col_validation_issues += error_handler.format_error(SidecarErrors.WRONG_HED_DATA_TYPE,
+                                                                        given_type=type(hed_string),
+                                                                        expected_type="str")
+                else:
+                    if hed_validator:
+                        col_validation_issues += hed_validator.validate_input(hed_string)
+                    col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
                 error_handler.pop_error_context()
 
         if self.column_type is None:
-            col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
-                                                                        column_name=self.column_name)
-        elif self.column_type == ColumnType.Value:
-            raw_hed_dict = self._hed_dict["HED"]
-            if not raw_hed_dict:
-                col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.BLANK_HED_STRING)
-            elif not isinstance(raw_hed_dict, str):
-                col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                                            given_type=type(raw_hed_dict),
-                                                                            expected_type="str")
-
+            col_validation_issues += error_handler.format_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
+                                                                column_name=self.column_name)
         elif self.column_type == ColumnType.Categorical:
             raw_hed_dict = self._hed_dict["HED"]
             if not raw_hed_dict:
-                col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.BLANK_HED_STRING)
-            elif not isinstance(raw_hed_dict, dict):
-                col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                                            given_type=type(raw_hed_dict),
-                                                                            expected_type="dict")
-            # else:
-            #     if len(raw_hed_dict) < 2:
-            #         col_validation_issues += error_handler.format_sidecar_error(SidecarErrors.TOO_FEW_CATEGORIES,
-            #                                                                     category_count=len(raw_hed_dict),
-            #                                                                     severity=ErrorSeverity.WARNING)
+                col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
 
         return col_validation_issues
 
@@ -362,7 +354,6 @@ class ColumnDef:
         expected_pound_sign_count = len(pattern.findall(hed_string.lower())) * 2 + base_pound_sign_count
 
         if str(hed_string).count("#") != expected_pound_sign_count:
-            return error_handler.format_sidecar_error(error_type,
-                                                      pound_sign_count=str(hed_string).count("#"))
+            return error_handler.format_error(error_type, pound_sign_count=str(hed_string).count("#"))
 
         return []

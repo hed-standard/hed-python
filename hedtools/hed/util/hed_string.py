@@ -38,7 +38,8 @@ class HedString:
         children = []
         for hed_string_obj in hed_string_obj_list:
             children += hed_string_obj._top_level_group.get_direct_children()
-        new_hed_string_obj._top_level_group = HedGroup(hed_string, 0, len(hed_string), include_paren=False, contents=children)
+        new_hed_string_obj._top_level_group = HedGroup(hed_string, 0, len(hed_string),
+                                                       include_paren=False, contents=children)
 
         return new_hed_string_obj
 
@@ -75,9 +76,6 @@ class HedString:
         return self.hed_string
 
     def calculate_canonical_forms(self, hed_schema, error_handler=None):
-        if not hed_schema.short_tag_mapping:
-            return []
-
         validation_issues = []
         for tag in self.get_all_tags():
             long_form, short_index, tag_issues = hed_schema._convert_to_canonical_tag(tag, error_handler)

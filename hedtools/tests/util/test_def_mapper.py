@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
         self.assertTrue(def_issues)
         actual_issues = []
         for issue in def_issues:
-            actual_issues += error_reporter.ErrorHandler().format_val_error(**issue)
+            actual_issues += error_reporter.ErrorHandler().format_error(**issue)
 
         def_dict = DefDict()
         def_dict.check_for_definitions(HedString(self.basic_def_string))
@@ -161,7 +161,7 @@ class Test(unittest.TestCase):
         self.assertTrue(def_issues)
         actual_issues = []
         for issue in def_issues:
-            actual_issues += error_reporter.ErrorHandler().format_val_error(**issue)
+            actual_issues += error_reporter.ErrorHandler().format_error(**issue)
 
 
     def test__check_tag_starts_with(self):

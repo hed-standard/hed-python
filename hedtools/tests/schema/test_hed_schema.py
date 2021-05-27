@@ -58,8 +58,8 @@ class TestHedSchema(unittest.TestCase):
                                                                        display_filename=display_filename))
 
     def test_attribute_keys(self):
-        tag_dictionary_keys = ['defaultUnits', 'extensionAllowed', 'isNumeric', 'position', 'predicateType', 'recommended',
-                               'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
+        tag_dictionary_keys = ['defaultUnits', 'extensionAllowed', 'isNumeric', 'position', 'predicateType',
+                               'recommended', 'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
         for key in tag_dictionary_keys:
             self.assertIn(key, self.hed_schema_dictionaries, key + ' not found.')
             self.assertIsInstance(self.hed_schema_dictionaries[key], dict, key + ' not a dictionary.')
@@ -80,7 +80,8 @@ class TestHedSchema(unittest.TestCase):
         self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
 
     def test_default_unit_tags(self):
-        default_unit_tags = {'acceleration': 'm-per-s^2',
+        default_unit_tags = {
+             'acceleration': 'm-per-s^2',
              'angle': 'radian',
              'area': 'm^2',
              'clockTime': 'hour:min',
@@ -275,7 +276,7 @@ class TestHedSchema(unittest.TestCase):
 
     def test_get_all_forms_of_tag(self):
         tag_forms = self.hed_schema.get_all_forms_of_tag("Category")
-        expected_forms = []
+        expected_forms = ["event/category"]
         self.assertCountEqual(tag_forms, expected_forms)
 
         tag_forms = self.hed_schema_3g.get_all_forms_of_tag("Definition")
@@ -295,5 +296,5 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(self.hed_schema_3g.has_duplicate_tags())
 
     def test_short_tag_mapping(self):
-        self.assertFalse(self.hed_schema.short_tag_mapping)
+        self.assertEqual(len(self.hed_schema.short_tag_mapping), 993)
         self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 1023)

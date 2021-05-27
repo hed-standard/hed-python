@@ -1,7 +1,7 @@
 
 class ErrorSeverity:
     ERROR = 1
-    WARNING = 2
+    WARNING = 10
 
 
 class ErrorContext:
@@ -26,7 +26,9 @@ class ValidationErrors:
     PARENTHESES = 'parentheses'
     REQUIRE_CHILD = 'childRequired'
     MULTIPLE_UNIQUE = 'multipleUniqueTags'
-    INVALID_TAG = 'invalidTag'
+    INVALID_EXTENSION = 'invalidExtension'
+    INVALID_PARENT_NODE = "invalidParent"
+    NO_VALID_TAG_FOUND = "invalidTag"
     EXTRA_SLASHES_OR_SPACES = 'extraSlashes'
     TILDES_NOT_SUPPORTED = 'invalidTilde'
     HED_SIDECAR_KEY_MISSING = 'categoryKeyMissing'
@@ -48,16 +50,10 @@ class SidecarErrors:
     WRONG_HED_DATA_TYPE = 'wrongHedDataType'
     INVALID_NUMBER_POUND_SIGNS = 'invalidNumberPoundSigns'
     TOO_MANY_POUND_SIGNS = 'tooManyPoundSigns'
-    TOO_FEW_CATEGORIES = 'tooFewCategories'
     UNKNOWN_COLUMN_TYPE = 'sidecarUnknownColumn'
 
 
 class SchemaErrors:
-    # Schema mapping errors
-    INVALID_PARENT_NODE = "invalidParent"
-    NO_VALID_TAG_FOUND = "invalidTag"
-    INVALID_SCHEMA = 'invalidSchema'
-    EMPTY_TAG_FOUND = 'emptyTag'
     DUPLICATE_TERMS = 'duplicateTerms'
 
 

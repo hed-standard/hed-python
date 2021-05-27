@@ -1,5 +1,5 @@
 from hed.util import error_reporter
-from hed.util.error_types import SchemaErrors, SchemaWarnings, ErrorContext
+from hed.util.error_types import SchemaWarnings, ErrorContext, SchemaErrors
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
@@ -37,8 +37,8 @@ def check_compliance(hed_schema, also_check_for_warnings=True, display_filename=
     if hed_schema.has_duplicate_tags():
         duplicate_dict = hed_schema.find_duplicate_tags()
         for tag_name, long_org_tags in duplicate_dict.items():
-            issues_list += error_handler.format_schema_error(SchemaErrors.DUPLICATE_TERMS, tag_name,
-                                                             duplicate_tag_list=long_org_tags)
+            issues_list += error_handler.format_error(SchemaErrors.DUPLICATE_TERMS, tag_name,
+                                                      duplicate_tag_list=long_org_tags)
 
     if also_check_for_warnings:
         hed_terms = hed_schema.get_all_tags(True)
@@ -73,15 +73,15 @@ def validate_schema_term(hed_term, error_handler):
 
     for i, char in enumerate(hed_term):
         if i == 0 and not (char.isdigit() or char.isupper()):
-            issues_list += error_handler.format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, hed_term,
-                                                               error_index=i, problem_char=char)
+            issues_list += error_handler.format_error(SchemaWarnings.INVALID_CAPITALIZATION,
+                                                      hed_term, char_index=i, problem_char=char)
             continue
         if char in ALLOWED_TAG_CHARS:
             continue
         if char.isalnum():
             continue
-        issues_list += error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, hed_term,
-                                                           error_index=i, problem_char=char)
+        issues_list += error_handler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG,
+                                                  hed_term, char_index=i, problem_char=char)
     return issues_list
 
 
@@ -111,7 +111,6 @@ def validate_schema_description(tag_name, hed_description, error_handler):
             continue
         if char in ALLOWED_DESC_CHARS:
             continue
-        issues_list += error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, tag_name,
-                                                           hed_description, i, char)
+        issues_list += error_handler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC,
+                                                  hed_description, tag_name, char_index=i, problem_char=char)
     return issues_list
-
