@@ -6,10 +6,10 @@ The dictionary is a dictionary of dictionaries. The dictionary names are the lis
 """
 from hed.schema.hed_schema_constants import HedKey, ATTRIBUTE_PROPERTIES
 from hed.util import file_util, error_reporter
-from hed.util.error_types import SchemaErrors
 from hed.schema.schema2xml import HedSchema2XML
 from hed.schema.schema2wiki import HedSchema2Wiki
 from hed.schema import schema_compliance
+from hed.util.error_types import ValidationErrors
 
 
 class HedSchema:
@@ -24,7 +24,6 @@ class HedSchema:
             A HedSchema object.
         """
         self.no_duplicate_tags = True
-        # rename to schema header probably.
         self.header_attributes = {}
         self._filename = None
         self.dictionaries = self._create_empty_dictionaries()
@@ -219,7 +218,7 @@ class HedSchema:
                 continue
             if check_name in self.dictionaries[key]:
                 value = self.dictionaries[key][check_name]
-                # A tag attribute is considered True if the tag name and dictionary value are the same, ignoring capitalization
+                # A tag attribute is True if the tag name and dictionary value are the same, ignoring capitalization
                 if value is True or value and check_name.lower() == value.lower():
                     attributes[key] = True
                 else:
@@ -231,9 +230,14 @@ class HedSchema:
 
     def get_all_forms_of_tag(self, short_tag_to_check):
         """
-        Given a short tag, return all the longer versions of it.  Always returns empty list if not a valid HED3G schema.
+        Given a short tag, return all the longer versions of it.
 
-        eg: "definition" will return
+        This is primarily used to match definition tags without converting them to long first.
+
+        Note: In hed2 schema the tags may be unrelated if multiple copies of the term exist, and only the long
+              forms will be returned.
+
+        eg in hed3: "definition" will return
                 ["definition", "informational/definition", "attribute/informational/definition"]
 
         Parameters
@@ -245,19 +249,24 @@ class HedSchema:
         -------
         tag_versions: [str]
             A list of all short, intermediate, and long versions of the passed in short tag.
-            Returns empty list if no versions found.
         """
         try:
             tag_entry = self.short_tag_mapping[short_tag_to_check.lower()]
         except (KeyError, TypeError):
             return []
 
-        split_tags = tag_entry.lower().split("/")
-        final_tag = ""
-        all_forms = []
-        for tag in reversed(split_tags):
-            final_tag = tag + "/" + final_tag
-            all_forms.append(final_tag)
+        if self.is_hed3_compatible:
+            split_tags = tag_entry.lower().split("/")
+            final_tag = ""
+            all_forms = []
+            for tag in reversed(split_tags):
+                final_tag = tag + "/" + final_tag
+                all_forms.append(final_tag)
+        else:
+            if isinstance(tag_entry, list):
+                all_forms = [tag.lower() for tag in tag_entry]
+            else:
+                all_forms = [tag_entry.lower()]
 
         return all_forms
 
@@ -276,6 +285,7 @@ class HedSchema:
     def has_unit_classes(self):
         return HedKey.Units in self.dictionaries
 
+    @property
     def is_hed3_compatible(self):
         return self.no_duplicate_tags
 
@@ -286,16 +296,16 @@ class HedSchema:
     @property
     def short_tag_mapping(self):
         """
-        This returns the short->long tag dictionary if we have a hed3 compatible schema.
+        This returns the short->long tag dictionary.
+
 
         Returns
         -------
-        short_tag_dict: {}
-            Returns the short tag mapping dictionary, or None if this is not a hed3 compatible schema.
+        short_tag_dict: {str:str} or {str:str or list}
+            Returns the short tag mapping dictionary.  If this is hed2 and has duplicates, the values of the dict
+            may contain lists in addition to strings.
         """
-        if self.no_duplicate_tags:
-            return self.dictionaries[HedKey.ShortTags]
-        return None
+        return self.dictionaries[HedKey.ShortTags]
 
     def tag_has_attribute(self, tag, tag_attribute):
         """Checks to see if the tag has a specific attribute.
@@ -515,31 +525,57 @@ class HedSchema:
                 if tag not in self.short_tag_mapping:
                     found_unknown_extension = True
                     if not found_long_org_tag:
-                        error = error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND, hed_tag,
-                                                                  index_start, index_end)
+                        error = error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                           hed_tag, index=index_start, index_end=index_end)
                         return str(hed_tag), None, error
                     continue
 
-                long_org_tag = self.short_tag_mapping[tag]
-                tag_string = long_org_tag.lower()
-                main_hed_portion = clean_tag[:index_end]
+                long_org_tags = self.short_tag_mapping[tag]
+                long_org_tag = None
+                if isinstance(long_org_tags, str):
+                    tag_string = long_org_tags.lower()
 
-                # Verify the tag has the correct path above it.
-                if not tag_string.endswith(main_hed_portion):
-                    error = error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
-                                                              index_start, index_end,
-                                                              long_org_tag)
+                    main_hed_portion = clean_tag[:index_end]
+
+                    # Verify the tag has the correct path above it.
+                    if tag_string.endswith(main_hed_portion):
+                        long_org_tag = long_org_tags
+                else:
+                    for org_tag_string in long_org_tags:
+                        tag_string = org_tag_string.lower()
+
+                        main_hed_portion = clean_tag[:index_end]
+
+                        if tag_string.endswith(main_hed_portion):
+                            long_org_tag = org_tag_string
+                            break
+                if not long_org_tag:
+                    error = error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=hed_tag,
+                                                       index=index_start, index_end=index_end,
+                                                       expected_parent_tag=long_org_tags)
                     return str(hed_tag), None, error
+
+                # In hed2 compatible, make sure this is a long form of a tag or throw an invalid base tag error.
+                if not self.is_hed3_compatible:
+                    if not clean_tag.startswith(long_org_tag.lower()):
+                        error = error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                           hed_tag, index=index_start, index_end=index_end)
+                        return str(hed_tag), None, error
+
                 found_index_start = index_start
                 found_index_end = index_end
                 found_long_org_tag = long_org_tag
             else:
                 # These means we found a known tag in the remainder/extension section, which is an error
                 if tag in self.short_tag_mapping:
-                    error = error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, hed_tag,
-                                                              index_start, index_end,
-                                                              self.short_tag_mapping[tag])
+                    error = error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, hed_tag,
+                                                       index=index_start, index_end=index_end,
+                                                       expected_parent_tag=self.short_tag_mapping[tag])
                     return str(hed_tag), None, error
+
+        # Finally don't actually adjust the tag if it's hed2 style.
+        if not self.is_hed3_compatible:
+            return str(hed_tag), None, []
 
         remainder = str(hed_tag)[found_index_end:]
 

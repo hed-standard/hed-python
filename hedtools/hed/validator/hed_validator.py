@@ -8,7 +8,7 @@ from hed.util.error_types import ErrorContext
 from hed.util import hed_cache
 from hed.util import error_reporter
 
-from hed.schema.hed_schema_file import load_schema
+from hed import schema
 from hed.util.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
@@ -136,7 +136,7 @@ class HedValidator:
         if hed_xml_file is None and get_specific_version is None:
             hed_cache.cache_all_hed_xml_versions()
         final_hed_xml_file = hed_cache.get_local_file(hed_xml_file, get_specific_version)
-        hed_schema = load_schema(final_hed_xml_file)
+        hed_schema = schema.load_schema(final_hed_xml_file)
         return hed_schema
 
     def _validate_hed_tags_in_file(self, hed_input):
@@ -235,7 +235,7 @@ class HedValidator:
             for column_number, column_issues in expansion_issues.items():
                 self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 for issue in column_issues:
-                    validation_issues += self._error_handler.format_val_error(**issue)
+                    validation_issues += self._error_handler.format_error(**issue)
                 self._error_handler.pop_error_context()
             for column_number in column_to_hed_tags_dictionary:
                 self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)

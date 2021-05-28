@@ -40,13 +40,14 @@ class Test(unittest.TestCase):
             "@invalidcharatstart",
         ]
         expected_issues = [
-            self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, test_terms[0], error_index=0, problem_char="i"),
+            self.error_handler.format_error(SchemaWarnings.INVALID_CAPITALIZATION, test_terms[0], char_index=0,
+                                            problem_char="i"),
             [],
             [],
-            self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, test_terms[3], error_index=11,
-                                  problem_char="#"),
-            self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CAPITALIZATION, test_terms[4], error_index=0,
-                                  problem_char="@"),
+            self.error_handler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, test_terms[3], char_index=11,
+                                            problem_char="#"),
+            self.error_handler.format_error(SchemaWarnings.INVALID_CAPITALIZATION, test_terms[4], char_index=0,
+                                            problem_char="@"),
         ]
         self.validate_term_base(test_terms, expected_issues)
 
@@ -61,14 +62,14 @@ class Test(unittest.TestCase):
             [],
             [],
             [],
-            self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=60,
-                                  problem_char="@")
-            + self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=61,
-                                  problem_char="$")
-            + self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=62,
-                                  problem_char="%")
-            + self.error_handler.format_schema_warning(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, "dummy", test_descs[3], error_index=63,
-                                  problem_char="*")
-            ,
+            self.error_handler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
+                                            char_index=60, problem_char="@")
+            + self.error_handler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
+                                              char_index=61, problem_char="$")
+            + self.error_handler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
+                                              char_index=62, problem_char="%")
+            + self.error_handler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
+                                              char_index=63, problem_char="*")
+
         ]
         self.validate_desc_base(test_descs, expected_issues)
