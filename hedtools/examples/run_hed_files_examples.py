@@ -14,6 +14,8 @@ import hed
 from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 from hed.util.exceptions import HedFileError
+from hed import schema
+
 
 if __name__ == '__main__':
     # Set up the file names for the tests
@@ -25,10 +27,12 @@ if __name__ == '__main__':
     unsupported_csv_format = os.path.join(example_data_path, 'UnsupportedFormatCSV.csv')
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
 
-    hed_validator_old = HedValidator(xml_version_number='7.1.1')
-    hed_validator_local = HedValidator(hed_xml_file=local_hed_file)
-    hed_validator_local_warnings = HedValidator(hed_xml_file=local_hed_file, check_for_warnings=True
-                                                )
+    hed_schema_cached = schema.load_schema_version(xml_version_number='7.1.1')
+    hed_validator_old = HedValidator(hed_schema=hed_schema_cached)
+    hed_schema_local = schema.load_schema(local_hed_file)
+    hed_validator_local = HedValidator(hed_schema=hed_schema_local)
+    hed_validator_local_warnings = HedValidator(hed_schema=hed_schema_local, check_for_warnings=True)
+
     # Example 1a: Valid TSV file with default version of HED
     print(valid_tsv_file)
     input_file = HedFileInput(valid_tsv_file, tag_columns=[2])

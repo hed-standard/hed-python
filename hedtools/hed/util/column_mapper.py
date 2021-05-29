@@ -184,7 +184,7 @@ class ColumnMapper:
         column_entry = self._final_column_map[column_number]
         return column_entry.expand(input_text)
 
-    def expand_row_tags(self, row_text, do_not_expand_labels=False):
+    def expand_row_tags(self, row_text, expand_defs=True):
         """
         Expands all mapped columns from a given row
 
@@ -192,8 +192,8 @@ class ColumnMapper:
         ----------
         row_text : [str]
             The text for the given row, one entry per column number.
-        do_not_expand_labels: bool
-            If true, this will still remove all definition/ tags, but will not expand label tags.
+        expand_defs: bool
+            If False, this will still remove all definition/ tags, but will not expand label tags.
 
         Returns
         -------
@@ -219,7 +219,7 @@ class ColumnMapper:
                 result_dict[attribute_name_or_error] = translated_column
                 continue
             if self._def_mapper:
-                new_issues = self._def_mapper.replace_and_remove_tags(translated_column, do_not_expand_labels)
+                new_issues = self._def_mapper.replace_and_remove_tags(translated_column, expand_defs)
                 if new_issues:
                     if column_number + 1 not in issues_dict:
                         issues_dict[column_number + 1] = []

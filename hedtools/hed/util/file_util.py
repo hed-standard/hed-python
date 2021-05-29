@@ -92,6 +92,24 @@ def url_to_file(resource_url):
         return opened_file.name
 
 
+def url_to_string(resource_url):
+    """Get the data from the specified url as a string
+
+    Parameters
+    ----------
+    resource_url: str
+        The URL to the resource.
+
+    Returns
+    -------
+    str
+       The data at the target url
+    """
+    url_request = urllib.request.urlopen(resource_url)
+    url_data = str(url_request.read(), 'utf-8')
+    return url_data
+
+
 def write_errors_to_file(issues, extension=".txt"):
     """
     Writes an array of issue dictionaries to a temporary file.
