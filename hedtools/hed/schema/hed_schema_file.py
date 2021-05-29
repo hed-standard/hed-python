@@ -127,4 +127,4 @@ def convert_schema_to_format(hed_schema, check_for_issues=True,
     else:
         output_string = hed_schema.get_as_xml_string(save_as_legacy_xml)
 
-    return [output_string], issue_list
+    return output_string, issue_list
