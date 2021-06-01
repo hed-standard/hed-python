@@ -1,7 +1,7 @@
 import unittest
 import os
 import itertools
-from hed.util import hed_cache
+from hed.schema import hed_cache
 
 
 class Test(unittest.TestCase):
@@ -23,8 +23,8 @@ class Test(unittest.TestCase):
         cls.specific_hed_url = """https://raw.githubusercontent.com/hed-standard/hed-specification/HED-restructure/hedxml/HED7.1.1.xml"""
         cls.base_api_url = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
 
-    def test_get_latest_hed_version_path(self):
-        latest_hed_version_path = hed_cache.get_latest_hed_version_path()
+    def test_get_hed_version_path(self):
+        latest_hed_version_path = hed_cache.get_hed_version_path()
         self.assertIsInstance(latest_hed_version_path, str)
 
     def test_get_latest_semantic_version_in_list(self):
@@ -49,13 +49,11 @@ class Test(unittest.TestCase):
         hed_cache.set_cache_directory(saved_cache_dir)
         self.assertTrue(hed_cache.HED_CACHE_DIRECTORY == saved_cache_dir)
 
-    def test_get_local_file(self):
-        hed_xml_filename = hed_cache.get_local_file(self.hed_base_dir, self.hed_test_version)
+    def test_get_version_path_2(self):
+        hed_xml_filename = hed_cache.get_hed_version_path(self.hed_base_dir, self.hed_test_version)
         self.assertTrue(hed_xml_filename)
-        hed_xml_filename = hed_cache.get_local_file(self.hed_base_dir, self.hed_invalid_version)
+        hed_xml_filename = hed_cache.get_hed_version_path(self.hed_base_dir, self.hed_invalid_version)
         self.assertFalse(hed_xml_filename)
-        hed_xml_filename = hed_cache.get_local_file(self.default_hed_xml)
-        self.assertTrue(hed_xml_filename)
 
     def test_cache_specific_url(self):
         local_filename = hed_cache.cache_specific_url(self.specific_hed_url, None, self.hed_cache_dir)

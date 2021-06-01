@@ -59,15 +59,15 @@ class DefinitionMapper:
                 continue
             self._gathered_defs[def_tag] = def_value
 
-    def replace_and_remove_tags(self, hed_string_obj, do_not_expand_labels=False):
+    def replace_and_remove_tags(self, hed_string_obj, expand_defs=True):
         """Takes a given string and returns the hed string with all definitions removed, and all labels replaced
 
         Parameters
         ----------
         hed_string_obj : HedString
             The hed string to modify.
-        do_not_expand_labels: bool
-            If true, this will still remove all definition/ tags, but will not expand label tags.
+        expand_defs: bool
+            If False, this will still remove all definition/ tags, but will not expand label tags.
         Returns
         -------
         def_issues: []
@@ -114,7 +114,7 @@ class DefinitionMapper:
                             def_issues += [{"error_type": ValidationErrors.HED_DEFINITION_VALUE_EXTRA,
                                             "tag": tag}]
                         continue
-                    if do_not_expand_labels:
+                    if not expand_defs:
                        continue
                     tag_group.replace_tag(tag, def_contents)
                     continue

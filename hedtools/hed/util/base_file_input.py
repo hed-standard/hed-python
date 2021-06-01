@@ -271,7 +271,7 @@ class BaseFileInput:
         default_mapper = ColumnMapper()
         return self.iter_dataframe(default_mapper)
 
-    def iter_dataframe(self, mapper=None, return_row_dict=False, do_not_expand_labels=False):
+    def iter_dataframe(self, mapper=None, return_row_dict=False, expand_defs=True):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -282,8 +282,8 @@ class BaseFileInput:
         return_row_dict: bool
             If True, this returns the full row_dict including issues.
             If False, returns just the HedStrings for each column
-        do_not_expand_labels: bool
-            If true, this will still remove all definition/ tags, but will not expand label tags.
+        expand_defs: bool
+            If False, this will still remove all definition/ tags, but will not expand label tags.
 
         Yields
         -------
@@ -303,7 +303,7 @@ class BaseFileInput:
             if all(text_file_row.isnull()):
                 continue
 
-            row_dict = mapper.expand_row_tags(text_file_row, do_not_expand_labels)
+            row_dict = mapper.expand_row_tags(text_file_row, expand_defs)
             if return_row_dict:
                 yield row_number + start_at_one, row_dict
             else:

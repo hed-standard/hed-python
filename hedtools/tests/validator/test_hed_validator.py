@@ -6,16 +6,17 @@ from hed.util.hed_string import HedString
 from hed.util.hed_file_input import HedFileInput
 from hed.util.error_types import ErrorContext
 from hed.util.event_file_input import EventFileInput
-from hed.schema.hed_schema_file import load_schema
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util import util_constants
+from hed import schema
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_hed_input = 'Attribute/Temporal/Onset'
-        cls.generic_hed_input_reader = HedValidator(xml_version_number='7.1.1')
+        hed_schema = schema.load_schema_version(xml_version_number='7.1.1')
+        cls.generic_hed_input_reader = HedValidator(hed_schema=hed_schema)
         cls.text_file_with_extension = 'file_with_extension.txt'
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
         cls.float_value = 1.1
@@ -115,7 +116,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
-        hed_schema = load_schema(schema_path)
+        hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         column_group = ColumnDefGroup(json_path)
         def_dict, def_issues = column_group.extract_defs()
@@ -134,7 +135,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
-        hed_schema = load_schema(schema_path)
+        hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events_bad_defs.json")
         column_group = ColumnDefGroup(json_path)
         def_dict, def_issues = column_group.extract_defs()
@@ -153,7 +154,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    '../data/legacy_xml/HED8.0.0-alpha.1.xml')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed3_tags_single_sheet_bad_defs.xlsx')
-        hed_schema = load_schema(schema_path)
+        hed_schema = schema.load_schema(schema_path)
 
         prefixed_needed_tag_columns = {2: 'Attribute/Informational/Label/', 3: 'Attribute/Informational/Description/'}
         loaded_file = HedFileInput(events_path, tag_columns=[4],

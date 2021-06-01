@@ -5,7 +5,6 @@ the get_validation_issues() function.
 
 """
 from hed.util.error_types import ErrorContext
-from hed.util import hed_cache
 from hed.util import error_reporter
 
 from hed import schema
@@ -17,7 +16,6 @@ from hed.util import util_constants
 
 class HedValidator:
     def __init__(self, check_for_warnings=False, run_semantic_validation=True,
-                 hed_xml_file='', xml_version_number=None,
                  hed_schema=None, error_handler=None):
         """Constructor for the HedValidator class.
 
@@ -27,13 +25,6 @@ class HedValidator:
             True if the validator should check for warnings. False if the validator should only report errors.
         run_semantic_validation: bool
             True if the validator should check the HED data against a schema. False for syntax-only validation.
-        hed_xml_file: str
-            A path to a specific hed xml file, or a directory containing a hed xml file.
-            Note: An invalid schema here will throw a HedFileError exception.  Use hed_schema to pass an already
-            created schema.
-        xml_version_number: str
-            HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
-                or does not point to a specific xml file.
         hed_schema: HedSchema
             Name of already prepared HedSchema to use.  This overrides hed_xml_file and xml_version_number.
         error_handler : ErrorHandler or None
@@ -48,12 +39,8 @@ class HedValidator:
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
         self._error_handler = error_handler
+        self._hed_schema = hed_schema
         if run_semantic_validation:
-            if hed_schema is None:
-                self._hed_schema = self._get_hed_schema(hed_xml_file,
-                                                        get_specific_version=xml_version_number)
-            else:
-                self._hed_schema = hed_schema
             self._tag_validator = TagValidator(hed_schema=self._hed_schema,
                                                check_for_warnings=check_for_warnings,
                                                run_semantic_validation=True,
@@ -112,32 +99,6 @@ class HedValidator:
 
         """
         return self._tag_validator
-
-    @staticmethod
-    def _get_hed_schema(hed_xml_file, get_specific_version=None):
-        """
-        Gets a HedSchema object based on the hed xml file specified. If no HED file is specified then the latest
-           file will be retrieved.
-
-        Parameters
-        ----------
-        hed_xml_file: str
-            A path to a specific hed xml file, or a directory containing a hed xml file.
-        get_specific_version: str
-            HED version format string. Expected format: 'X.Y.Z'  Only applies if hed_xml_file is empty,
-                or does not point to a specific xml file.
-        Returns
-        -------
-        HedSchema
-            A HedSchema object.
-
-        """
-        # If we're not asking for a specific file, for ease of use cache the ones from github.
-        if hed_xml_file is None and get_specific_version is None:
-            hed_cache.cache_all_hed_xml_versions()
-        final_hed_xml_file = hed_cache.get_local_file(hed_xml_file, get_specific_version)
-        hed_schema = schema.load_schema(final_hed_xml_file)
-        return hed_schema
 
     def _validate_hed_tags_in_file(self, hed_input):
         """
