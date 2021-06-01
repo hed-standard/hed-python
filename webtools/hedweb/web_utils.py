@@ -7,8 +7,6 @@ from werkzeug.utils import secure_filename
 from flask import current_app, Response
 
 from hed import schema
-#from hed.schema.hed_schema_file import load_schema, from_string
-from hed.util import file_util
 from hed.util.event_file_input import EventFileInput
 from hed.util.hed_file_input import HedFileInput
 from hed.util.column_def_group import ColumnDefGroup
@@ -327,7 +325,7 @@ def get_hed_path_from_pull_down(request):
         hed_file_path = ''
         schema_display_name = ''
     elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
-        hed_file_path = hed_cache.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+        hed_file_path = schema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
         schema_display_name = os.path.basename(hed_file_path)
     elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and \
             common.SCHEMA_PATH in request.files:
@@ -346,10 +344,10 @@ def get_hed_schema(arguments):
     elif common.SCHEMA_PATH in arguments:
         hed_schema = schema.load_schema(hed_file_path=arguments[common.SCHEMA_PATH])
     elif common.SCHEMA_URL in arguments:
-        #hed_file_path = file_util.url_to_file(arguments[common.SCHEMA_URL])
+        # hed_file_path = file_util.url_to_file(arguments[common.SCHEMA_URL])
         hed_schema = schema.load_schema(hed_url_path=arguments[common.SCHEMA_URL])
     elif common.SCHEMA_VERSION in arguments:
-        hed_file_path = hed_cache.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
+        hed_file_path = schema.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
         hed_schema = schema.load_schema_version(hed_file_path)
     else:
         raise HedFileError('NoHEDSchema', 'No valid HED schema was provided', '')

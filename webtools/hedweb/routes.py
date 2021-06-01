@@ -8,7 +8,8 @@ from hedweb.constants import common, page_constants
 from hedweb.constants import route_constants
 from hedweb.web_utils import delete_file_no_exceptions, \
    handle_http_error, handle_error, save_file_to_upload_folder
-from hedweb import dictionary, events, schema, spreadsheet, services
+from hedweb import dictionary, events, spreadsheet, services
+from hedweb.schema import generate_input_from_schema_form, schema_process
 from hedweb.strings import generate_input_from_string_form, string_process
 from hedweb.spreadsheet_utils import generate_input_columns_info, get_columns_info
 
@@ -153,8 +154,8 @@ def schema_results():
     """
     input_arguments = {}
     try:
-        input_arguments = schema.generate_input_from_schema_form(request)
-        return schema.schema_process(input_arguments)
+        input_arguments = generate_input_from_schema_form(request)
+        return schema_process(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
     finally:
