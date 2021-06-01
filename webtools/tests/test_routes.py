@@ -1,10 +1,6 @@
 import os
-import pathlib
 import shutil
-from shutil import copyfile
 import unittest
-from unittest import mock
-from flask import Flask, current_app
 from hedweb.app_factory import AppFactory
 
 
@@ -32,7 +28,7 @@ class Test(unittest.TestCase):
 
     def test_get_dictionary_results(self):
         response = self.app.test.post('/dictionary_submit')
-        self.assertEqual(400, response.status_code, 'Dictionaryrequires data')
+        self.assertEqual(400, response.status_code, 'Dictionary requires data')
 
     def test_get_events_results(self):
         response = self.app.test.post('/events_submit')
@@ -98,7 +94,7 @@ class Test(unittest.TestCase):
 
     def test_render_help_page(self):
         response = self.app.test.get('/hed-tools-help')
-        self.assertEqual(response.status_code, 200, "The hed-tools-help content page should exist" )
+        self.assertEqual(response.status_code, 200, "The hed-tools-help content page should exist")
 
     def test_render_home_page(self):
         response = self.app.test.get('/')

@@ -114,8 +114,9 @@ def events_assemble(arguments, hed_schema=None):
         return results
     hed_tags = []
     onsets = []
-    no_expand = not arguments.get(common.DEFS_EXPAND, True)
-    for row_number, row_dict in events_file.iter_dataframe(return_row_dict=True, do_not_expand_labels=no_expand):
+
+    for row_number, row_dict in events_file.iter_dataframe(return_row_dict=True,
+                                                           expand_defs=arguments.get(common.DEFS_EXPAND, True)):
         hed_tags.append(str(row_dict.get("HED", "")))
         onsets.append(row_dict.get("onset", "n/a"))
     data = {'onset': onsets, 'HED': hed_tags}

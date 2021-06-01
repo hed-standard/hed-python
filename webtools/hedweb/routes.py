@@ -1,8 +1,9 @@
 from flask import render_template, request, Blueprint, current_app
 import json
 
-from hed.util import hed_cache
-from hed.schema import hed_schema_file
+from hed import schema
+# from hed.util import hed_cache
+# from hed.schema import hed_schema_file
 from hedweb.constants import common, page_constants
 from hedweb.constants import route_constants
 from hedweb.web_utils import delete_file_no_exceptions, \
@@ -95,7 +96,7 @@ def schema_version_results():
         hed_info = {}
         if common.SCHEMA_PATH in request.files:
             hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
-            hed_info[common.SCHEMA_VERSION] = hed_schema_file.get_hed_xml_version(hed_file_path)
+            hed_info[common.SCHEMA_VERSION] = schema.get_hed_xml_version(hed_file_path)
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
@@ -115,8 +116,8 @@ def schema_versions_results():
     """
 
     try:
-        hed_cache.cache_all_hed_xml_versions()
-        hed_info = {common.SCHEMA_VERSION_LIST: hed_cache.get_all_hed_versions()}
+        schema.cache_all_hed_xml_versions()
+        hed_info = {common.SCHEMA_VERSION_LIST: schema.get_all_hed_versions()}
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)

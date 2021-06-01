@@ -6,8 +6,9 @@ from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
 from flask import current_app, Response
 
-from hed.schema.hed_schema_file import load_schema, from_string
-from hed.util import hed_cache, file_util
+from hed import schema
+#from hed.schema.hed_schema_file import load_schema, from_string
+from hed.util import file_util
 from hed.util.event_file_input import EventFileInput
 from hed.util.hed_file_input import HedFileInput
 from hed.util.column_def_group import ColumnDefGroup
@@ -341,15 +342,15 @@ def get_hed_path_from_pull_down(request):
 def get_hed_schema(arguments):
     if common.SCHEMA_STRING in arguments:
         schema_format = arguments.get(common.SCHEMA_FORMAT, ".xml")
-        hed_schema = from_string(arguments[common.SCHEMA_STRING], file_type=schema_format)
+        hed_schema = schema.from_string(schema_string=arguments[common.SCHEMA_STRING], file_type=schema_format)
     elif common.SCHEMA_PATH in arguments:
-        hed_schema = load_schema(arguments[common.SCHEMA_PATH])
+        hed_schema = schema.load_schema(hed_file_path=arguments[common.SCHEMA_PATH])
     elif common.SCHEMA_URL in arguments:
-        hed_file_path = file_util.url_to_file(arguments[common.SCHEMA_URL])
-        hed_schema = load_schema(hed_file_path)
+        #hed_file_path = file_util.url_to_file(arguments[common.SCHEMA_URL])
+        hed_schema = schema.load_schema(hed_url_path=arguments[common.SCHEMA_URL])
     elif common.SCHEMA_VERSION in arguments:
         hed_file_path = hed_cache.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
-        hed_schema = load_schema(hed_file_path)
+        hed_schema = schema.load_schema_version(hed_file_path)
     else:
         raise HedFileError('NoHEDSchema', 'No valid HED schema was provided', '')
     return hed_schema
