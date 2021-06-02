@@ -17,7 +17,6 @@ pluralize.defnoun("hertz", "hertz")
 
 class TagValidator:
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+'
-    DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$'
     DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
     INVALID_STRING_CHARS = '[]{}~'
     OPENING_GROUP_CHARACTER = '('
@@ -57,11 +56,6 @@ class TagValidator:
         self._check_for_warnings = check_for_warnings
         self._run_semantic_validation = run_semantic_validation
         self._placeholders_allowed_in_strings = allow_numbers_to_be_pound_sign
-
-        if allow_numbers_to_be_pound_sign:
-            self._digit_expression = self.DIGIT_OR_POUND_EXPRESSION
-        else:
-            self._digit_expression = self.DIGIT_EXPRESSION
 
     def run_individual_tag_validators(self, original_tag):
         """Runs the validators on the individual tags in a HED string.
@@ -327,7 +321,7 @@ class TagValidator:
         """
         validation_issues = []
         formatted_tag = original_tag.lower()
-        if not self.tag_exists_in_schema(formatted_tag) and self.is_unit_class_tag(formatted_tag):
+        if self.is_unit_class_tag(formatted_tag):
             tag_unit_classes = self.get_tag_unit_classes(formatted_tag)
             formatted_tag_unit_value = self.get_tag_name(formatted_tag)
             original_tag_unit_value = self.get_tag_name(str(original_tag))
@@ -356,6 +350,14 @@ class TagValidator:
                 validation_issues += self._error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
                                                                       original_tag,
                                                                       unit_class_units=tag_unit_class_units)
+
+        # todo: further improve this indexing
+        if not self._placeholders_allowed_in_strings and "#" in formatted_tag:
+            pound_index = original_tag.org_tag.find("#")
+            validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_CHARACTER,
+                                                                  character="#", char_index=pound_index,
+                                                                  hed_string=original_tag.org_tag)
+
         return validation_issues
 
     def get_valid_unit_plural(self, unit):
@@ -466,7 +468,7 @@ class TagValidator:
         formatted_tag = original_tag.lower()
         if self.is_unit_class_tag(formatted_tag):
             tag_unit_values = self.get_tag_name(formatted_tag)
-            if re.search(self._digit_expression, tag_unit_values):
+            if re.search(self.DIGIT_OR_POUND_EXPRESSION, tag_unit_values):
                 default_unit = self.get_unit_class_default_unit(formatted_tag)
                 validation_issues += self._error_handler.format_error(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
                                                                       tag=original_tag,

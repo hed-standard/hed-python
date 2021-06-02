@@ -7,7 +7,6 @@ the get_validation_issues() function.
 from hed.util.error_types import ErrorContext
 from hed.util import error_reporter
 
-from hed import schema
 from hed.util.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
 from hed.util.hed_file_input import BaseFileInput
@@ -16,7 +15,7 @@ from hed.util import util_constants
 
 class HedValidator:
     def __init__(self, check_for_warnings=False, run_semantic_validation=True,
-                 hed_schema=None, error_handler=None):
+                 hed_schema=None, allow_numbers_to_be_pound_sign=False, error_handler=None):
         """Constructor for the HedValidator class.
 
         Parameters
@@ -26,7 +25,9 @@ class HedValidator:
         run_semantic_validation: bool
             True if the validator should check the HED data against a schema. False for syntax-only validation.
         hed_schema: HedSchema
-            Name of already prepared HedSchema to use.  This overrides hed_xml_file and xml_version_number.
+            HedSchema object to use to use for validation
+        allow_numbers_to_be_pound_sign: bool
+            If true, considers # equal to a number for validation purposes.  This is so it can validate templates.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         Returns
@@ -44,12 +45,14 @@ class HedValidator:
             self._tag_validator = TagValidator(hed_schema=self._hed_schema,
                                                check_for_warnings=check_for_warnings,
                                                run_semantic_validation=True,
+                                               allow_numbers_to_be_pound_sign=allow_numbers_to_be_pound_sign,
                                                error_handler=self._error_handler)
 
         # Fall back to syntax validation if we don't have a tag validator at this point
         if self._tag_validator is None:
             self._tag_validator = TagValidator(check_for_warnings=check_for_warnings,
                                                run_semantic_validation=False,
+                                               allow_numbers_to_be_pound_sign=allow_numbers_to_be_pound_sign,
                                                error_handler=self._error_handler)
 
         self._run_semantic_validation = run_semantic_validation
@@ -73,6 +76,7 @@ class HedValidator:
         is_file = isinstance(hed_input, BaseFileInput)
         if not display_filename and is_file:
             display_filename = hed_input.filename
+
         if isinstance(hed_input, list):
             validation_issues = self._validate_hed_strings(hed_input)
         elif is_file:

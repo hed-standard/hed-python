@@ -212,7 +212,7 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredNumber': True,
             'notRequiredScientific': True,
             # 'properTime': True,
-            # 'invalidTime': False
+            # 'invalidTime': True
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
@@ -225,17 +225,17 @@ class IndividualHedTagsShort(TestHed3):
             'correctNoPluralUnit': [],
             'correctNonSymbolCapitalizedUnit': [],
             'correctSymbolCapitalizedUnit': [],
-            'incorrectUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
+            'incorrectUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
                                                                  tag=test_strings['incorrectUnit'],
                                                                  unit_class_units=legal_time_units),
-            'incorrectPluralUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
+            'incorrectPluralUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
                                                                        tag=test_strings['incorrectPluralUnit'],
                                                                        unit_class_units=legal_freq_units),
-            'incorrectSymbolCapitalizedUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
+            'incorrectSymbolCapitalizedUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
                                                                                   tag=test_strings[
                                                                                       'incorrectSymbolCapitalizedUnit'],
                                                                                   unit_class_units=legal_freq_units),
-            'incorrectSymbolCapitalizedUnitModifier': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
+            'incorrectSymbolCapitalizedUnitModifier': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
                                                                                           tag=test_strings[
                                                                                               'incorrectSymbolCapitalizedUnitModifier'],
                                                                                           unit_class_units=
@@ -244,7 +244,7 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredScientific': [],
             # 'properTime': [],
             # 'invalidTime': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,  tag=test_strings['invalidTime'],
-            #                                 unit_class_units=",".join(sorted(legal_clock_time_units)))
+            #                                 unit_class_units=legal_clock_time_units)
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -262,16 +262,17 @@ class IndividualHedTagsShort(TestHed3):
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
-    # Update test - this warning needs to be added, then this test will fail
     def test_invalid_placeholder_in_normal_string(self):
         test_strings = {
             'invalidPlaceholder': 'Duration/# ms',
         }
         expected_results = {
-            'invalidPlaceholder': True,
+            'invalidPlaceholder': False,
         }
         expected_issues = {
-            'invalidPlaceholder': [],
+            'invalidPlaceholder': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER,
+                                                                  character="#", char_index=9,
+                                                                  hed_string="Duration/# ms"),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
