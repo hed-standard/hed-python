@@ -432,7 +432,7 @@ class IndividualHedTags(TestHed):
             'notRequiredScientific': 'Attribute/Color/Red/5e-1',
             'properTime': 'Item/2D shape/Clock face/08:30',
             'invalidTime': 'Item/2D shape/Clock face/54:54',
-            # Todo: find out which of these should be valid, right now both are.
+            # Theses should both fail, as this tag validator isn't set to accept placeholders
             'placeholderNoUnit': 'Event/Duration/#',
             'placeholderUnit': 'Event/Duration/# ms',
             'placeholderWrongUnit': 'Event/Duration/# hz'
@@ -452,8 +452,8 @@ class IndividualHedTags(TestHed):
             'notRequiredScientific': True,
             'properTime': True,
             'invalidTime': False,
-            'placeholderNoUnit': True,
-            'placeholderUnit': True,
+            'placeholderNoUnit': False,
+            'placeholderUnit': False,
             'placeholderWrongUnit': False
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
@@ -486,9 +486,17 @@ class IndividualHedTags(TestHed):
             'properTime': [],
             'invalidTime': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,  tag=test_strings['invalidTime'],
                                                                unit_class_units=legal_clock_time_units),
-            'placeholderUnit': [],
-            'placeholderNoUnit': [],
-            'placeholderWrongUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
+
+            'placeholderNoUnit': self.error_handler.format_error(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
+                                                                      tag=test_strings['placeholderNoUnit'],
+                                                                      default_unit="s")
+                                + self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, char_index=15, character="#",
+                                                                  hed_string=test_strings["placeholderNoUnit"]),
+            'placeholderUnit': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, char_index=15, character="#",
+                                                                  hed_string=test_strings["placeholderUnit"]),
+            'placeholderWrongUnit': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, char_index=15, character="#",
+                                                                  hed_string=test_strings["placeholderWrongUnit"])
+                                    + self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
                                                                  tag=test_strings['placeholderWrongUnit'],
                                                                  unit_class_units=legal_time_units),
         }

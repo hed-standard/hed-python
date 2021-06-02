@@ -300,7 +300,8 @@ class ColumnDef:
             if hed_schema is not None:
                 from hed.validator.hed_validator import HedValidator
                 hed_validator = HedValidator(check_for_warnings=True, run_semantic_validation=True,
-                                             hed_schema=hed_schema, error_handler=error_handler)
+                                             hed_schema=hed_schema, error_handler=error_handler,
+                                             allow_numbers_to_be_pound_sign=True)
             for hed_string, position in self.hed_string_iter(include_position=True):
                 error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
                 if not hed_string:
