@@ -184,6 +184,7 @@ class HedSchema:
     def get_tag_attribute_names(self):
         return [key_name for key_name in self.dictionaries[HedKey.Attributes]
                 if key_name not in self.dictionaries[HedKey.UnitClassProperty]
+                and key_name not in self.dictionaries[HedKey.UnitProperty]
                 and key_name not in self.dictionaries[HedKey.UnitModifierProperty]]
 
     def get_all_tag_attributes(self, tag_name, key_class=HedKey.AllTags, keys=None):
@@ -283,7 +284,7 @@ class HedSchema:
 
     @property
     def has_unit_classes(self):
-        return HedKey.Units in self.dictionaries
+        return HedKey.UnitClasses in self.dictionaries
 
     @property
     def is_hed3_compatible(self):
@@ -399,6 +400,7 @@ class HedSchema:
 
         # Add main sections
         dictionaries[HedKey.AllTags] = {}
+        dictionaries[HedKey.UnitClasses] = {}
         dictionaries[HedKey.Units] = {}
         dictionaries[HedKey.UnitModifiers] = {}
         dictionaries[HedKey.Attributes] = {}
@@ -602,7 +604,8 @@ class HedSchema:
         attribute_dict = {
             HedKey.Attributes: ATTRIBUTE_PROPERTIES,
             HedKey.AllTags: self.get_tag_attribute_names(),
-            HedKey.Units: self.dictionaries[HedKey.UnitClassProperty],
+            HedKey.UnitClasses: self.dictionaries[HedKey.UnitClassProperty],
+            HedKey.Units: self.dictionaries[HedKey.UnitProperty],
             HedKey.UnitModifiers: self.dictionaries[HedKey.UnitModifierProperty]
         }
 
@@ -646,10 +649,11 @@ class HedSchema:
         self.dictionaries[attribute_name][tag_name] = new_value
 
     def _add_unit_class_unit(self, unit_class, unit_class_unit):
-        if unit_class not in self.dictionaries[HedKey.Units]:
-            self.dictionaries[HedKey.Units][unit_class] = []
+        if unit_class not in self.dictionaries[HedKey.UnitClasses]:
+            self.dictionaries[HedKey.UnitClasses][unit_class] = []
         if unit_class_unit is not None:
-            self.dictionaries[HedKey.Units][unit_class].append(unit_class_unit)
+            self.dictionaries[HedKey.UnitClasses][unit_class].append(unit_class_unit)
+        self.dictionaries[HedKey.Units][unit_class_unit] = unit_class_unit
 
     def _add_description_to_dict(self, tag_name, desc, key_class=HedKey.AllTags):
         if desc:

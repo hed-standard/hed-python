@@ -40,7 +40,9 @@ class TestHedSchema(unittest.TestCase):
     def _remove_units_descriptions(hed_schema, skip="posixPath"):
         # Remove units descriptions, as that is unsupported in old XML
         desc_dict = hed_schema.dictionaries['descriptions']
-        units_removed_dict = {key: value for key, value in desc_dict.items() if not key.startswith(HedKey.Units + "_") or skip in key}
+        units_removed_dict = {key: value for key, value in desc_dict.items() if not key.startswith(HedKey.UnitClasses + "_") or skip in key}
+        units_removed_dict = {key: value for key, value in units_removed_dict.items() if
+                              not key.startswith(HedKey.Units + "_") or skip in key}
         hed_schema.dictionaries['descriptions'] = units_removed_dict
 
     @staticmethod

@@ -49,12 +49,13 @@ class TagValidator:
             error_handler = error_reporter.ErrorHandler()
         self._error_handler = error_handler
         self._hed_schema = hed_schema
+        self._check_for_warnings = check_for_warnings
+        self._run_semantic_validation = run_semantic_validation
         if hed_schema:
             self._hed_schema_dictionaries = hed_schema.dictionaries
         else:
             self._hed_schema_dictionaries = None
-        self._check_for_warnings = check_for_warnings
-        self._run_semantic_validation = run_semantic_validation
+            self._run_semantic_validation = False
         self._placeholders_allowed_in_strings = allow_numbers_to_be_pound_sign
 
     def run_individual_tag_validators(self, original_tag):
@@ -327,17 +328,17 @@ class TagValidator:
             original_tag_unit_value = self.get_tag_name(str(original_tag))
             tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag))
             if (TagValidator.DATE_TIME_UNIT_CLASS in
-                    self._hed_schema_dictionaries[HedKey.Units]):
+                    self._hed_schema_dictionaries[HedKey.UnitClasses]):
                 if (TagValidator.DATE_TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
             if (TagValidator.CLOCK_TIME_UNIT_CLASS in
-                    self._hed_schema_dictionaries[HedKey.Units]):
+                    self._hed_schema_dictionaries[HedKey.UnitClasses]):
                 if (TagValidator.CLOCK_TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
             elif (TagValidator.TIME_UNIT_CLASS in
-                  self._hed_schema_dictionaries[HedKey.Units]):
+                  self._hed_schema_dictionaries[HedKey.UnitClasses]):
                 if (TagValidator.TIME_UNIT_CLASS in tag_unit_classes
                         and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
                     return validation_issues
@@ -537,7 +538,7 @@ class TagValidator:
 
             for unit_class in unit_classes:
                 try:
-                    units += (self._hed_schema_dictionaries[HedKey.Units][unit_class])
+                    units += (self._hed_schema_dictionaries[HedKey.UnitClasses][unit_class])
                 # Todo: What is this exception handling doing?
                 except Exception:
                     continue

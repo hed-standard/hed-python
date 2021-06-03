@@ -11,8 +11,8 @@ ColumnDefGroup - Contains the data from a single json sidecar, can be validated 
 HedString - Main class for handling a hed string during processing and analysis
 """
 import hed
-from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_string import HedString
+from hed.models.column_def_group import ColumnDefGroup
+from hed.models.hed_string import HedString
 from hed.schema.hed_schema_file import load_schema
 
 local_hed_xml = "data/HED8.0.0-alpha.1.xml"

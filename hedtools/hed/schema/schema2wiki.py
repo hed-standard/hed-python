@@ -83,9 +83,9 @@ class HedSchema2Wiki:
 
         self.current_tag_string += wiki_constants.UNIT_CLASS_STRING
         self._flush_current_tag()
-        for unit_name, unit_types in hed_schema.dictionaries[HedKey.Units].items():
+        for unit_name, unit_types in hed_schema.dictionaries[HedKey.UnitClasses].items():
             self.current_tag_string += f"* {unit_name}"
-            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.Units)
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.UnitClasses)
             self._flush_current_tag()
 
             for unit_type in unit_types:

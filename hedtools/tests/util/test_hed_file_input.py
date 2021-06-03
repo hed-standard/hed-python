@@ -1,10 +1,10 @@
 import unittest
 import os
 
-from hed.util.hed_file_input import HedFileInput
-from hed.util.hed_string import HedString
-from hed.util.column_def_group import ColumnDefGroup
-from hed.util.event_file_input import EventFileInput
+from hed.models.hed_input import HedInput
+from hed.models.hed_string import HedString
+from hed.models.column_def_group import ColumnDefGroup
+from hed.models.events_input import EventsInput
 from hed.util.exceptions import HedFileError
 
 
@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         cls.default_test_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                   "../data/ExcelMultipleSheets.xlsx")
-        cls.generic_file_input = HedFileInput(cls.default_test_file_name)
+        cls.generic_file_input = HedInput(cls.default_test_file_name)
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
         cls.one_based_tag_columns = [1, 2, 3]
         cls.zero_based_tag_columns = [0, 1, 2, 3, 4]
@@ -32,8 +32,8 @@ class Test(unittest.TestCase):
         tag_columns = [4]
         worksheet_name = 'LKT Events'
 
-        file_input = HedFileInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
-                                  tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+        file_input = HedInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
+                              tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
 
         for row_number, column_to_hed_tags in file_input:
             breakHere = 3
@@ -57,20 +57,20 @@ class Test(unittest.TestCase):
         column_group = ColumnDefGroup(json_path)
         def_dict, def_issues = column_group.extract_defs()
         self.assertEqual(len(def_issues), 0)
-        input_file = EventFileInput(events_path, json_def_files=column_group,
-                                    def_dicts=def_dict)
+        input_file = EventsInput(events_path, json_def_files=column_group,
+                                 def_dicts=def_dict)
 
         events_file_as_string = "".join([line for line in open(events_path)])
-        input_file_from_string = EventFileInput(events_path, json_def_files=column_group,
-                                                def_dicts=def_dict,
-                                                csv_string=events_file_as_string)
+        input_file_from_string = EventsInput(events_path, json_def_files=column_group,
+                                             def_dicts=def_dict,
+                                             csv_string=events_file_as_string)
 
         for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
             self.assertEqual(row_number, row_number2)
             self.assertEqual(column_dict, column_dict)
 
     def test_bad_file_inputs(self):
-        self.assertRaises(HedFileError, EventFileInput, None)
+        self.assertRaises(HedFileError, EventsInput, None)
 
 
     # Add more tests here

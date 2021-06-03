@@ -1,4 +1,5 @@
-from hed.util.hed_string import HedString, HedGroup
+from hed.models.hed_string import HedString
+from hed.models.hed_group import HedGroup
 
 from tests.validator.test_tag_validator import TestHed3
 

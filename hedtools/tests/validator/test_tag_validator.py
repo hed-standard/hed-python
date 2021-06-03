@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from hed.util.hed_string import HedString
+from hed.models.hed_string import HedString
 from hed.validator.hed_validator import HedValidator
 from hed.util import error_reporter
 from hed.validator.tag_validator import TagValidator

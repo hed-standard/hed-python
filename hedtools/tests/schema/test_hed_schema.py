@@ -4,7 +4,7 @@ import os
 from hed import schema
 from hed.schema import HedKey
 from hed.util.exceptions import HedFileError
-from hed.util.hed_string import HedString
+from hed.models.hed_string import HedString
 
 
 class TestHedSchema(unittest.TestCase):
@@ -137,8 +137,8 @@ class TestHedSchema(unittest.TestCase):
             'area': ['m^2', 'px^2', 'pixel^2'],
             'volume': ['m^3'],
         }
-        actual_default_units_dictionary = self.hed_schema_dictionaries['defaultUnits']
-        actual_all_units_dictionary = self.hed_schema_dictionaries['units']
+        actual_default_units_dictionary = self.hed_schema_dictionaries[HedKey.DefaultUnits]
+        actual_all_units_dictionary = self.hed_schema_dictionaries[HedKey.UnitClasses]
         self.assertDictEqual(actual_default_units_dictionary, default_units)
         self.assertDictEqual(actual_all_units_dictionary, all_units)
 

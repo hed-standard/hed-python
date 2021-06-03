@@ -2,12 +2,12 @@ import random
 import unittest
 import os
 
-from hed.util.hed_string import HedString
-from hed.util.hed_file_input import HedFileInput
+from hed.models.hed_string import HedString
+from hed.models.hed_input import HedInput
 from hed.util.error_types import ErrorContext
-from hed.util.event_file_input import EventFileInput
+from hed.models.events_input import EventsInput
 from hed.validator.hed_validator import HedValidator
-from hed.util.column_def_group import ColumnDefGroup
+from hed.models.column_def_group import ColumnDefGroup
 from hed.util import util_constants
 from hed import schema
 
@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
                                           ('Event/Description/Test', 'event/description/test')]
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
         cls.hed_filepath_with_errors = os.path.join(cls.hed_base_dir, "ExcelMultipleSheets.xlsx")
-        cls.hed_file_with_errors = HedFileInput(cls.hed_filepath_with_errors)
+        cls.hed_file_with_errors = HedInput(cls.hed_filepath_with_errors)
 
 
 
@@ -121,8 +121,8 @@ class Test(unittest.TestCase):
         column_group = ColumnDefGroup(json_path)
         def_dict, def_issues = column_group.extract_defs()
         self.assertEqual(len(def_issues), 0)
-        input_file = EventFileInput(events_path, json_def_files=column_group,
-                                    def_dicts=def_dict)
+        input_file = EventsInput(events_path, json_def_files=column_group,
+                                 def_dicts=def_dict)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)
@@ -140,8 +140,8 @@ class Test(unittest.TestCase):
         column_group = ColumnDefGroup(json_path)
         def_dict, def_issues = column_group.extract_defs()
         self.assertEqual(len(def_issues), 0)
-        input_file = EventFileInput(events_path, json_def_files=column_group,
-                                    def_dicts=def_dict)
+        input_file = EventsInput(events_path, json_def_files=column_group,
+                                 def_dicts=def_dict)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)
@@ -157,9 +157,9 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
 
         prefixed_needed_tag_columns = {2: 'Attribute/Informational/Label/', 3: 'Attribute/Informational/Description/'}
-        loaded_file = HedFileInput(events_path, tag_columns=[4],
-                                   column_prefix_dictionary=prefixed_needed_tag_columns,
-                                   worksheet_name='LKT Events')
+        loaded_file = HedInput(events_path, tag_columns=[4],
+                               column_prefix_dictionary=prefixed_needed_tag_columns,
+                               worksheet_name='LKT Events')
 
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = validator.validate_input(loaded_file)
