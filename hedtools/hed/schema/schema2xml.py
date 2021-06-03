@@ -62,10 +62,10 @@ class HedSchema2XML:
     def _output_units(self, hed_schema):
         if not hed_schema.has_unit_classes:
             return
-        unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Units,
+        unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.UnitClasses,
                                                                                      self.save_as_legacy_format))
-        for unit_class, unit_types in hed_schema.dictionaries[HedKey.Units].items():
-            unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedKey.Units)
+        for unit_class, unit_types in hed_schema.dictionaries[HedKey.UnitClasses].items():
+            unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedKey.UnitClasses)
             if self.save_as_legacy_format:
                 unit_class_node = SubElement(unit_class_node, xml_constants.UNIT_CLASS_UNITS_ELEMENT)
 

@@ -1,10 +1,10 @@
 import unittest
 import os
 
-from hed.util.def_mapper import DefinitionMapper
+from hed.models.def_mapper import DefinitionMapper
 from hed import schema
-from hed.util.def_dict import DefDict
-from hed.util.hed_string import HedString
+from hed.models.def_dict import DefDict
+from hed.models.hed_string import HedString
 from hed.util import error_reporter
 
 

@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed.util import error_reporter
-from hed.util.hed_string import HedString
+from hed.models.hed_string import HedString
 from hed.schema.hed_schema_file import load_schema
 from hed.util.error_types import ValidationErrors
 

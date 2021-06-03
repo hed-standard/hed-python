@@ -146,18 +146,18 @@ class HedSchemaXMLParser:
             default units.
 
         """
-        section_name = xml_constants.get_section_name(HedKey.Units, self._legacy_style_xml)
+        section_name = xml_constants.get_section_name(HedKey.UnitClasses, self._legacy_style_xml)
         units_section_nodes = self._get_elements_by_name(section_name)
         if len(units_section_nodes) == 0:
             return
         units_section = units_section_nodes[0]
 
-        def_element_name = xml_constants.get_element_name(HedKey.Units, self._legacy_style_xml)
+        def_element_name = xml_constants.get_element_name(HedKey.UnitClasses, self._legacy_style_xml)
         unit_class_elements = self._get_elements_by_name(def_element_name, units_section)
 
         if self._legacy_style_xml:
             for unit_class_element in unit_class_elements:
-                self._parse_node_old(unit_class_element, HedKey.Units, skip_adding_name=True)
+                self._parse_node_old(unit_class_element, HedKey.UnitClasses, skip_adding_name=True)
                 element_name = self._get_element_tag_value(unit_class_element)
                 self._schema._add_unit_class_unit(element_name, None)
                 element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
@@ -181,7 +181,7 @@ class HedSchemaXMLParser:
                                          skip_adding_name=True)
         else:
             for unit_class_element in unit_class_elements:
-                self._parse_node(unit_class_element, HedKey.Units, skip_adding_name=True)
+                self._parse_node(unit_class_element, HedKey.UnitClasses, skip_adding_name=True)
                 element_name = self._get_element_tag_value(unit_class_element)
                 element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
                 element_unit_names = [self._get_element_tag_value(element) for element in element_units]

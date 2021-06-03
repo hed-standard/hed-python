@@ -1,8 +1,8 @@
 import unittest
 import os
 
-from hed.util.column_def_group import ColumnDefGroup
-from hed.util.column_definition import ColumnDef
+from hed.models.column_def_group import ColumnDefGroup
+from hed.models.column_definition import ColumnDef
 from hed.util.exceptions import HedFileError
 from hed import schema
 

@@ -38,13 +38,13 @@ UNIT_MODIFIER_DEF_ELEMENT_LEGACY = "unitModifier"
 def get_section_name(key_class, legacy_format=False):
     if not legacy_format:
         section_names = {
-            HedKey.Units: UNIT_CLASS_SECTION_ELEMENT,
+            HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
             HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
         }
     else:
         section_names = {
-            HedKey.Units: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
+            HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
             HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT_LEGACY,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
         }
@@ -56,14 +56,14 @@ def get_element_name(key_class, legacy_format=False):
     if not legacy_format:
         element_names = {
             HedKey.AllTags: TAG_DEF_ELEMENT,
-            HedKey.Units: UNIT_CLASS_DEF_ELEMENT,
+            HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
             HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
         }
     else:
         element_names = {
             HedKey.AllTags: TAG_DEF_ELEMENT,
-            HedKey.Units: UNIT_CLASS_DEF_ELEMENT_LEGACY,
+            HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT_LEGACY,
             HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT_LEGACY,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
         }
@@ -73,6 +73,7 @@ def get_element_name(key_class, legacy_format=False):
 
 ATTRIBUTE_PROPERTY_ELEMENTS = {
     HedKey.AllTags: ATTRIBUTE_ELEMENT,
+    HedKey.UnitClasses: ATTRIBUTE_ELEMENT,
     HedKey.Units: ATTRIBUTE_ELEMENT,
     HedKey.UnitModifiers: ATTRIBUTE_ELEMENT,
     HedKey.Attributes: ATTRIBUTE_PROPERTY_ELEMENT

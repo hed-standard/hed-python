@@ -1,8 +1,8 @@
 import unittest
 import os
 
-from hed.util.column_mapper import ColumnMapper, ColumnType, ColumnDef
-from hed.util.hed_string import HedString
+from hed.models.column_mapper import ColumnMapper, ColumnType, ColumnDef
+from hed.models.hed_string import HedString
 from hed.schema import load_schema
 from hed.util import util_constants
 
