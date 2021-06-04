@@ -7,7 +7,9 @@ class HedKey:
     """
     # overarching category listing all tags
     AllTags = 'tags'
-    # Overarching category listing all units
+    # Overarching category listing all unit classes
+    UnitClasses = 'unitClasses'
+    # Overarching category listing all units(not divided by type)
     Units = 'units'
     # Overarching category listing all unit modifiers.
     UnitModifiers = 'unitModifiers'
@@ -30,6 +32,7 @@ class HedKey:
 
     BoolProperty = 'boolProperty'
     UnitClassProperty = 'unitClassProperty'
+    UnitProperty = 'unitProperty'
     UnitModifierProperty = 'unitModifierProperty'
 
     # Attributes found in file, but not definitions
@@ -52,6 +55,6 @@ class HedKey:
     ShortTags = 'shortTags'
 
 
-ATTRIBUTE_PROPERTIES = [HedKey.BoolProperty, HedKey.UnitClassProperty, HedKey.UnitModifierProperty]
+ATTRIBUTE_PROPERTIES = [HedKey.BoolProperty, HedKey.UnitClassProperty, HedKey.UnitProperty, HedKey.UnitModifierProperty]
 VERSION_ATTRIBUTE = 'version'
 

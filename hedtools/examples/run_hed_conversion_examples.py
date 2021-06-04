@@ -3,14 +3,14 @@ Examples of opening a HED dataset spreadsheet, processing it, then saving it bac
 This example is specifically converting tags between short and long form.
 
 Classes Demonstrated:
-HedFileInput - Used to open/modify/save a spreadsheet
+HedInput - Used to open/modify/save a spreadsheet
 HedSchema - Used to convert hed strings between short and long forms
 """
 import os
 
-from hed.util.hed_file_input import HedFileInput
+from hed.models.hed_input import HedInput
 from hed.schema.hed_schema_file import load_schema
-from hed.util.hed_string import HedString
+from hed.models.hed_string import HedString
 
 local_hed_file_no_dupe = 'data/HED8.0.0-alpha.1.xml'
 
@@ -45,14 +45,14 @@ if __name__ == '__main__':
 
     loaded_schema = load_schema(local_hed_file_no_dupe)
     prefixed_needed_tag_columns = {2: 'Attribute/Informational/Label/', 3: 'Attribute/Informational/Description/'}
-    loaded_file = HedFileInput(hed3_tags_single_sheet, tag_columns=[4],
-                               column_prefix_dictionary=prefixed_needed_tag_columns,
-                               worksheet_name='LKT Events')
+    loaded_file = HedInput(hed3_tags_single_sheet, tag_columns=[4],
+                           column_prefix_dictionary=prefixed_needed_tag_columns,
+                           worksheet_name='LKT Events')
     long_to_short_file(loaded_file, loaded_schema)
 
-    loaded_file = HedFileInput(hed3_tags_single_sheet, tag_columns=[4],
-                               column_prefix_dictionary=prefixed_needed_tag_columns,
-                               worksheet_name='LKT Events')
+    loaded_file = HedInput(hed3_tags_single_sheet, tag_columns=[4],
+                           column_prefix_dictionary=prefixed_needed_tag_columns,
+                           worksheet_name='LKT Events')
     short_to_long_file(loaded_file, loaded_schema)
 
     inputs = 'Attribute/Sensory/Visual/Color/CSS-color/White-color/White'

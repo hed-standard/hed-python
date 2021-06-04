@@ -1,12 +1,12 @@
 import unittest
 import os
 
-from hed.util.def_mapper import DefinitionMapper
+from hed.models.def_mapper import DefinitionMapper
 from hed import schema
-from hed.util.def_dict import DefDict
+from hed.models.def_dict import DefDict
 from hed.util import error_reporter
 from hed.util.error_types import DefinitionErrors
-from hed.util.hed_string import HedString
+from hed.models.hed_string import HedString
 
 class TestDefBase(unittest.TestCase):
     schema_file = '../data/legacy_xml/HED8.0.0-alpha.1.xml'

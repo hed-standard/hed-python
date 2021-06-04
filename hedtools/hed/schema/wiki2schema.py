@@ -320,10 +320,11 @@ class HedSchemaWikiParser:
             if level == 1:
                 current_unit_class = unit_class
                 self._schema._add_unit_class_unit(current_unit_class, None)
+                self._add_single_line(line, HedKey.UnitClasses, skip_adding_name=True)
             # This is a unit class unit
             else:
                 self._schema._add_unit_class_unit(current_unit_class, unit_class)
-            self._add_single_line(line, HedKey.Units, skip_adding_name=True)
+                self._add_single_line(line, HedKey.Units, skip_adding_name=True)
 
     def _read_unit_modifiers(self, file_iter):
         """Adds the unit modifiers section

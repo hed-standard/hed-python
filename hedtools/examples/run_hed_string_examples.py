@@ -6,12 +6,13 @@ HedValidator - Validates a given input string or file
 """
 
 import hed
+from hed import schema
 from hed.validator.hed_validator import HedValidator
 
 if __name__ == '__main__':
     local_hed_file = 'data/HED7.1.1.xml'   # path HED v7.1.1 stored locally
-
-    hed_validator_old = HedValidator(hed_xml_file=local_hed_file)
+    hed_schema = schema.load_schema(local_hed_file)
+    hed_validator_old = HedValidator(hed_schema)
     hed_validator_current = HedValidator()
     hed_validator_no_semantic = HedValidator(run_semantic_validation=False)
 

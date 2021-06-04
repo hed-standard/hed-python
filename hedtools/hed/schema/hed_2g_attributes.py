@@ -11,13 +11,13 @@ attributes = {
     "relatedTag": ((), "Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools."),
     "requireChild": (("boolProperty", ), "One of its descendants must be chosen to tag an event."),
     "required": (("boolProperty", ), "Every HED string tagging an event should include this tag."),
-    "SIUnit": (("boolProperty", "unitClassProperty"), "Designates the name of an SI unit so it can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard."),
+    "SIUnit": (("boolProperty", "unitProperty"), "Designates the name of an SI unit so it can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard."),
     "SIUnitModifier": (("boolProperty","unitModifierProperty"), "SI unit modifier indicating a multiple or submultiple of a base unit."),
     "SIUnitSymbolModifier": (("boolProperty", "unitModifierProperty"), "SI unit symbol modifier indicating a multiple or submultiple of a base unit symbol."),
     "suggestedTag": ((), "Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools."),
     "takesValue": (("boolProperty", ), "This tag will have a hashtag placeholder child in the schema which is expected to be replaced with a user-defined value."),
     "unique": (("boolProperty", ), "Only one of this tag or its descendants can be used within a single tag group or event."),
-    "unitSymbol": (("boolProperty", "unitClassProperty"), "Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized."),
+    "unitSymbol": (("boolProperty", "unitProperty"), "Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized."),
     "unitClass": ((), "Specifies the type of a unit for a tag."),
 }
 

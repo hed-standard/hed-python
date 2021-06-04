@@ -7,9 +7,9 @@ the get_validation_issues() function.
 from hed.util.error_types import ErrorContext
 from hed.util import error_reporter
 
-from hed.util.hed_string import HedString
+from hed.models.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
-from hed.util.hed_file_input import BaseFileInput
+from hed.models.hed_input import BaseInput
 from hed.util import util_constants
 
 
@@ -63,8 +63,8 @@ class HedValidator:
 
         Parameters
         ----------
-        hed_input: str or list or HedFileInput object
-            A list of HED strings, a single HED string, or a HedFileInput object.
+        hed_input: str or list or HedInput object
+            A list of HED strings, a single HED string, or a HedInput object.
             If it is a single string or a list, validate them as hed strings.
         display_filename: str
             If present, will use this as the filename for context, rather than using the actual filename
@@ -73,7 +73,7 @@ class HedValidator:
         -------
         validation_issues : [{}]
         """
-        is_file = isinstance(hed_input, BaseFileInput)
+        is_file = isinstance(hed_input, BaseInput)
         if not display_filename and is_file:
             display_filename = hed_input.filename
 
@@ -109,7 +109,7 @@ class HedValidator:
 
         Parameters
         ----------
-        hed_input: HedFileInput object
+        hed_input: HedInput object
             A file to validate.  This function does no type checking on this.
         Returns
         -------

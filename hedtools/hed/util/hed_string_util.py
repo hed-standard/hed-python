@@ -83,7 +83,7 @@ def split_hed_string_return_tags(hed_string):
     hed_tags: [HedTag]
         The string split apart into hed tags with all delimiters removed
     """
-    from hed.util.hed_string import HedTag
+    from hed.models.hed_tag import HedTag
     result_positions = split_hed_string(hed_string)
     return [HedTag(hed_string, span) for (is_hed_tag, span) in
             result_positions if is_hed_tag]
