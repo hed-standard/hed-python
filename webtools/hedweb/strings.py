@@ -1,7 +1,9 @@
 from flask import current_app
 from werkzeug import Response
+
+from hed import models
 from hed.util.error_reporter import get_printable_issue_string
-from hed.util.hed_string import HedString
+
 from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common
@@ -93,7 +95,7 @@ def string_convert(arguments, hed_schema=None):
     string_list = []
     conversion_errors = []
     for pos, string in enumerate(arguments.get(common.STRING_LIST), start=1):
-        hed_string_obj = HedString(string)
+        hed_string_obj = models.HedString(string)
         if arguments[common.COMMAND] == common.COMMAND_TO_LONG:
             issues = hed_string_obj.convert_to_long(hed_schema)
         else:

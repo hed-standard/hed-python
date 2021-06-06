@@ -1,15 +1,13 @@
 from flask import current_app
 from werkzeug import Response
 
-from hedweb.constants import common, file_constants
-from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_string import HedString
+from hed import models
 from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.util.error_types import ErrorSeverity
 from hed.util.exceptions import HedFileError
-from hedweb.web_utils import form_has_option, generate_filename, \
-    generate_response_download_file_from_text, get_hed_schema, get_json_dictionary, \
-    generate_text_response, get_hed_path_from_pull_down, get_uploaded_file_path_from_form
+from hedweb.constants import common, file_constants
+from hedweb.web_utils import form_has_option, generate_filename, get_hed_schema, get_json_dictionary, \
+    get_hed_path_from_pull_down, get_uploaded_file_path_from_form, package_results
 
 app_config = current_app.config
 
@@ -74,15 +72,7 @@ def dictionary_process(arguments):
         results = dictionary_convert(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a dictionary processing method", "")
-    msg = results.get('msg', '')
-    msg_category = results.get('msg_category', 'success')
-
-    if results['data']:
-        display_name = results.get('output_display_name', '')
-        return generate_response_download_file_from_text(results['data'], display_name=display_name,
-                                                         msg_category=msg_category, msg=msg)
-    else:
-        return generate_text_response("", msg=msg, msg_category=msg_category)
+    return package_results(results)
 
 
 def dictionary_convert(arguments, hed_schema=None, json_dictionary=None):
@@ -119,7 +109,7 @@ def dictionary_convert(arguments, hed_schema=None, json_dictionary=None):
     issues = []
     for column_def in json_dictionary:
         for hed_string, position in column_def.hed_string_iter(include_position=True):
-            hed_string_obj = HedString(hed_string)
+            hed_string_obj = models.HedString(hed_string)
             if suffix == '_to_long':
                 errors = hed_string_obj.convert_to_long(hed_schema)
             else:

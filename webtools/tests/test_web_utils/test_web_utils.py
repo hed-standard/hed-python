@@ -1,5 +1,4 @@
 import os
-import pathlib
 import shutil
 from shutil import copyfile
 import unittest
@@ -159,7 +158,6 @@ class Test(unittest.TestCase):
         mock_form = mock.Mock()
         mock_form.values = {}
 
-
     def test_get_optional_form_field(self):
         self.assertTrue(1, "Testing get_optional_form_field")
 
@@ -180,8 +178,8 @@ class Test(unittest.TestCase):
         # actual_path = os.path.join(self.upload_directory, filename)
         # self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
         # with self.app.app_context():
-            # the_path = save_text_to_upload_folder(text, filename)
-            # self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
+        # the_path = save_text_to_upload_folder(text, filename)
+        # self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 
     # def test_handle_http_error(self):
     #     error_code = "CODE"

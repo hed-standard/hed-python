@@ -7,9 +7,7 @@ from werkzeug.utils import secure_filename
 from flask import current_app, Response
 
 from hed import schema
-from hed.util.event_file_input import EventFileInput
-from hed.util.hed_file_input import HedFileInput
-from hed.util.column_def_group import ColumnDefGroup
+from hed import models
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 from hedweb.constants import common
@@ -299,11 +297,11 @@ def generate_text_response(download_text, msg_category='success', msg=''):
 
 def get_events(arguments, json_dictionary=None, def_dicts=None):
     if common.EVENTS_STRING in arguments:
-        events = EventFileInput(csv_string=arguments[common.EVENTS_STRING],
-                                json_def_files=json_dictionary, def_dicts=def_dicts)
+        events = models.EventsInput(csv_string=arguments[common.EVENTS_STRING],
+                                    json_def_files=json_dictionary, def_dicts=def_dicts)
     elif common.EVENTS_PATH in arguments:
-        events = EventFileInput(filename=arguments[common.EVENTS_PATH],
-                                json_def_files=json_dictionary, def_dicts=def_dicts)
+        events = models.EventsInput(filename=arguments[common.EVENTS_PATH],
+                                    json_def_files=json_dictionary, def_dicts=def_dicts)
     else:
         raise HedFileError('NoEventsFile', 'No events file was provided', '')
     return events
@@ -356,9 +354,9 @@ def get_hed_schema(arguments):
 
 def get_json_dictionary(arguments, json_optional=False):
     if common.JSON_STRING in arguments:
-        json_dictionary = ColumnDefGroup(json_string=arguments[common.JSON_STRING])
+        json_dictionary = models.ColumnDefGroup(json_string=arguments[common.JSON_STRING])
     elif common.JSON_PATH in arguments:
-        json_dictionary = ColumnDefGroup(json_filename=arguments[common.JSON_PATH])
+        json_dictionary = models.ColumnDefGroup(json_filename=arguments[common.JSON_PATH])
     elif json_optional:
         json_dictionary = None
     else:
@@ -399,11 +397,11 @@ def get_spreadsheet(arguments):
     if common.SPREADSHEET_STRING in arguments:
         spreadsheet = None
     elif common.SPREADSHEET_PATH in arguments:
-        spreadsheet = HedFileInput(arguments.get(common.SPREADSHEET_PATH, None),
-                                   worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
-                                   tag_columns=arguments.get(common.TAG_COLUMNS, None),
-                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
-                                   column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY, None))
+        spreadsheet = models.HedInput(arguments.get(common.SPREADSHEET_PATH, None),
+                                      worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
+                                      tag_columns=arguments.get(common.TAG_COLUMNS, None),
+                                      has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
+                                      column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY, None))
     else:
         raise HedFileError('NoSpreadsheet', 'No spreadsheet was provided', '')
     return spreadsheet
@@ -500,6 +498,17 @@ def handle_http_error(ex):
     current_app.logger.error(error_message)
     return generate_text_response('', msg_category='error', msg=error_message)
 
+
+def package_results(results):
+    msg = results.get('msg', '')
+    msg_category = results.get('msg_category', 'success')
+
+    if results['data']:
+        display_name = results.get('output_display_name', '')
+        return generate_response_download_file_from_text(results['data'], display_name=display_name,
+                                                         msg_category=msg_category, msg=msg)
+    else:
+        return generate_text_response("", msg=msg, msg_category=msg_category)
 
 def save_file_to_upload_folder(file_object, delete_on_close=False):
     """Save a file_object to the upload folder.

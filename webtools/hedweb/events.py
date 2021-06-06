@@ -3,14 +3,12 @@ from werkzeug import Response
 import pandas as pd
 
 from hed.util.error_reporter import get_printable_issue_string
-from hed.util.event_file_input import EventFileInput
 from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common, file_constants
 from hedweb.dictionary import dictionary_validate
-from hedweb.web_utils import form_has_option, generate_response_download_file_from_text,\
-    generate_filename, generate_text_response, get_events, get_hed_schema, get_json_dictionary, \
-    get_hed_path_from_pull_down, get_uploaded_file_path_from_form
+from hedweb.web_utils import form_has_option, get_events, get_hed_schema, get_json_dictionary, \
+    generate_filename, get_hed_path_from_pull_down, get_uploaded_file_path_from_form, package_results
 app_config = current_app.config
 
 
@@ -74,15 +72,7 @@ def events_process(arguments):
         results = events_assemble(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', 'Select an events file processing method', '')
-    msg = results.get('msg', '')
-    category = results.get('msg_category', 'success')
-
-    if results['data']:
-        display_name = results.get('events_display_name', '')
-        return generate_response_download_file_from_text(results['data'], display_name=display_name,
-                                                         msg_category=category, msg=msg)
-    else:
-        return generate_text_response('', msg=msg, msg_category=category)
+    return package_results(results)
 
 
 def events_assemble(arguments, hed_schema=None):

@@ -2,12 +2,12 @@ from flask import current_app
 
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.exceptions import HedFileError
-from hed.util.hed_file_input import HedFileInput
+
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common, file_constants
 from hedweb.web_utils import convert_number_str_to_list, form_has_option,\
-    generate_filename, generate_response_download_file_from_text, generate_text_response, get_hed_schema, \
-    get_hed_path_from_pull_down, get_spreadsheet, get_uploaded_file_path_from_form, get_optional_form_field
+    generate_filename, get_hed_schema, get_hed_path_from_pull_down, \
+    get_spreadsheet, get_uploaded_file_path_from_form, get_optional_form_field, package_results
 from hedweb.spreadsheet_utils import get_specific_tag_columns_from_form
 
 app_config = current_app.config
@@ -75,15 +75,7 @@ def spreadsheet_process(arguments):
         results = spreadsheet_convert(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a spreadsheet processing method", "")
-    msg = results.get('msg', '')
-    msg_category = results.get('msg_category', 'success')
-
-    if results['data']:
-        display_name = results.get('output_display_name', '')
-        return generate_response_download_file_from_text(results['data'], display_name=display_name,
-                                                         msg_category=msg_category, msg=msg)
-    else:
-        return generate_text_response("", msg=msg, msg_category=msg_category)
+    return package_results(results)
 
 
 def spreadsheet_convert(arguments, short_to_long=True, hed_schema=None):
