@@ -27,7 +27,7 @@ class HedString:
 
         # This is a tree like structure containing the entire hed string
         try:
-            self._top_level_group = self.split_hed_string_into_groups(hed_string)
+            self._top_level_group = self.split_hed_string_into_groups(self.hed_string)
         except ValueError:
             self._top_level_group = None
 
