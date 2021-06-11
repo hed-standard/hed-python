@@ -46,11 +46,14 @@ class HedSchema2XML:
             prologue_node.text = hed_schema.prologue
 
     def _output_tags(self, hed_schema):
+        schema_node = self.hed_node
+        if not self.save_as_legacy_format:
+            schema_node = SubElement(self.hed_node, xml_constants.SCHEMA_ELEMENT)
         all_tags = hed_schema.get_all_tags()
         tag_levels = {}
         for tag in all_tags:
             if "/" not in tag:
-                root_tag = self._add_node(hed_schema, self.hed_node, tag)
+                root_tag = self._add_node(hed_schema, schema_node, tag)
                 tag_levels[0] = root_tag
             else:
                 level = tag.count("/")
