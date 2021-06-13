@@ -1,9 +1,8 @@
 import os
-import hed
-from hed.util.event_file_input import EventFileInput
+from hed.models import EventsInput
 from hed.schema.hed_schema_file import load_schema
 from hed.validator.hed_validator import HedValidator
-from hed.util.column_def_group import ColumnDefGroup
+from hed.models import ColumnDefGroup
 from hed.util.error_reporter import get_printable_issue_string
 
 if __name__ == '__main__':
@@ -19,7 +18,7 @@ if __name__ == '__main__':
     if def_issues:
         print(get_printable_issue_string(def_issues,
                                          title="There should be no errors in the definitions from the sidecars:"))
-    input_file = EventFileInput(filename=events_path, json_def_files=column_group)
+    input_file = EventsInput(filename=events_path, json_def_files=column_group)
 
     validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
     if validation_issues:
@@ -33,5 +32,5 @@ if __name__ == '__main__':
     events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
     with open(events_path, "r") as myfile:
         events_string = myfile.read()
-    input_file = EventFileInput(csv_string=events_string)
+    input_file = EventsInput(csv_string=events_string)
     # input_file = EventFileInput(data_as_csv_string=events_string)

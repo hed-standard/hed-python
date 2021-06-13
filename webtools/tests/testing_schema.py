@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 # from hed.schema.hed_schema_file import from_string
 from hed import schema
 
@@ -15,10 +14,10 @@ if __name__ == '__main__':
     # hed_schema = schema.from_string(schema_string)
 
     # Load schema and save as legacy XML
-    hed_schema = schema.load_schema(schema_path)
-    temp_path, issues = schema.convert_schema_to_format(local_hed_file=schema_path, save_as_legacy_xml=True)
-    schema_save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.3a.xml')
-    print(temp_path)
+    hed_schema = schema.load_schema(hed_file_path=schema_path)
+    temp_path, issues = schema.convert_schema_to_format(hed_schema, save_as_legacy_xml=True)
+    schema_save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.3.xml')
+    schema_version = schema.get_hed_xml_version(temp_path)
+    print(schema_version)
     if issues:
         print('Had issues')
-    schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
