@@ -7,7 +7,7 @@ from hedweb.app_factory import AppFactory
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
+        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/../data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
             from hedweb.routes import route_blueprint
@@ -48,11 +48,7 @@ class Test(unittest.TestCase):
             response = self.app.test.post('/schema_versions')
         self.assertEqual(400, response.status_code, 'Returning HED version requires data')
 
-    def test_string_results(self):
-        response = self.app.test.get('/string_submit')
-        self.assertEqual(405, response.status_code, 'HED string processing require data')
-
-    def test_get_schema_versions(self):
+    def test_schema_versions(self):
         import json
         with self.app.app_context():
             response = self.app.test.post('/schema_versions')
@@ -64,31 +60,56 @@ class Test(unittest.TestCase):
             v_list = v_dict["schema_version_list"]
             self.assertIsInstance(v_list, list, "The versions are in a list")
 
-
-        # response = self.app.test.post('/get_schema_versions')
-        # self.assertEqual(405, response.status_code, 'Returning HED version list requires data')
-        # import hed.hedweb.constants.common_constants as constants
-        # from hed.hedweb.web_utils import find_major_schema_versions
-        # hed_info = find_major_schema_versions()
-        # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key schema_versions")
-        # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
-
     def test_schema_version_results(self):
         import io
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/../data/HED8.0.0-alpha.1.xml')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_string = io.StringIO()
         schema_string.write(x)
         with self.app.app_context():
-            response = self.app.test.post('/schema_version',  content_type='multipart/form-data',
-                                          data={'schema_path' : (schema_string, 'my_schema.xml')})
+            response = self.app.test.post('/schema_version', content_type='multipart/form-data',
+                                          data={'schema_path': (schema_string, 'my_schema.xml')})
             self.assertEqual(200, response.status_code, 'The HED version list does not require data')
         print("here")
 
     def test_get_spreadsheet_results(self):
         response = self.app.test.post('/spreadsheet-submit')
         self.assertEqual(400, response.status_code, 'Spreadsheet processing requires data')
+
+    def test_string_results_empty_data(self):
+        import json
+        response = self.app.test.post('/string_submit')
+        self.assertEqual(200, response.status_code, 'HED string request succeeds even when no data')
+        self.assertTrue(response.data, "The returned data is not empty")
+        response_dict = json.loads(response.data)
+        self.assertIsInstance(response_dict, dict, "The versions are returned in a dictionary")
+        self.assertTrue(response_dict["message"], "The message is not empty")
+
+    def test_string_results_validate(self):
+        import json
+        with self.app.app_context():
+            response = self.app.test.post('/string_submit', content_type='multipart/form-data',
+                                          data={'schema_version': '8.0.0-alpha.1',
+                                                'command_option': 'command_validate',
+                                                'check_for_warnings': 'on',
+                                                'string_input': 'Red,Blue,Label/3'})
+
+            self.assertEqual(200, response.status_code, 'Validation of a valid string has a response')
+            response_dict = json.loads(response.data)
+            self.assertEqual("success", response_dict["msg_category"], "The list should validate successfully")
+            self.assertFalse(response_dict["data"], "No data should be returned if validation successful")
+
+            response = self.app.test.post('/string_submit', content_type='multipart/form-data',
+                                          data={'schema_version': '8.0.0-alpha.1',
+                                                'command_option': 'command_validate',
+                                                'check_for_warnings': 'on',
+                                                'string_input': 'Blob,Blue,Label/3'})
+            self.assertEqual(200, response.status_code, 'Validation of an invalid string has a response')
+            response_dict = json.loads(response.data)
+            self.assertEqual("warning", response_dict["msg_category"],
+                             "Invalid hed string validation generates a warning")
+            self.assertTrue(response_dict["data"], "The data should have error messages")
 
     def test_render_additional_examples_page(self):
         response = self.app.test.get('/additional-examples')
