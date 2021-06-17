@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+    <!-- XML Schema Generated from XML Document on Tue Jun 15 2021 15:23:43 GMT-0500 (Central Daylight Time) -->
+    <!-- with XmlGrid.net Free Online Service http://xmlgrid.net -->
+    <xs:element name="HED">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="schema">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="node" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="name" type="xs:string"></xs:element>
+                                        <xs:element name="description" type="xs:string"></xs:element>
+                                        <xs:element name="attribute">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="name" type="xs:string"></xs:element>
+                                                    <xs:element name="value" type="xs:string"></xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="node" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="name" type="xs:string"></xs:element>
+                                                    <xs:element name="description" type="xs:string"></xs:element>
+                                                    <xs:element name="attribute">
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element name="name" type="xs:string"></xs:element>
+                                                                <xs:element name="value" type="xs:string"></xs:element>
+                                                            </xs:sequence>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="unitClassDefinitions">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="unitClassDefinition" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="name" type="xs:string"></xs:element>
+                                        <xs:element name="attribute">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="name" type="xs:string"></xs:element>
+                                                    <xs:element name="value" type="xs:string"></xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="unit">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="name" type="xs:string"></xs:element>
+                                                    <xs:element name="attribute" maxOccurs="unbounded">
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element name="name" type="xs:string"></xs:element>
+                                                            </xs:sequence>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="unitModifierDefinitions">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="unitModifierDefinition" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="name" type="xs:string"></xs:element>
+                                        <xs:element name="description" type="xs:string"></xs:element>
+                                        <xs:element name="attribute">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="name" type="xs:string"></xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="schemaAttributeDefinitions">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="schemaAttributeDefinition" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="name" type="xs:string"></xs:element>
+                                        <xs:element name="description" type="xs:string"></xs:element>
+                                        <xs:element name="property">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="name" type="xs:string"></xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="propertyDefinitions">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="propertyDefinition" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="name" type="xs:string"></xs:element>
+                                        <xs:element name="description" type="xs:string"></xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="epilogue" type="xs:string"></xs:element>
+            </xs:sequence>
+            <xs:attribute name="version" type="xs:string"></xs:attribute>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

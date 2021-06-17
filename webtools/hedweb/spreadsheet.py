@@ -2,8 +2,8 @@ from flask import current_app
 
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.exceptions import HedFileError
-
 from hed.validator.hed_validator import HedValidator
+
 from hedweb.constants import common, file_constants
 from hedweb.web_utils import convert_number_str_to_list, form_has_option,\
     generate_filename, get_hed_schema, get_hed_path_from_pull_down, \

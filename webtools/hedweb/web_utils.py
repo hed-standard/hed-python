@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
 from flask import current_app, Response
 
-from hed import schema
+from hed import schema as hedschema
 from hed import models
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
@@ -323,10 +323,9 @@ def get_hed_path_from_pull_down(request):
         hed_file_path = ''
         schema_display_name = ''
     elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
-        hed_file_path = schema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
         schema_display_name = os.path.basename(hed_file_path)
-    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and \
-            common.SCHEMA_PATH in request.files:
+    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and common.SCHEMA_PATH in request.files:
         hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
         schema_display_name = request.files[common.SCHEMA_PATH].filename
     else:
@@ -338,15 +337,15 @@ def get_hed_path_from_pull_down(request):
 def get_hed_schema(arguments):
     if common.SCHEMA_STRING in arguments:
         schema_format = arguments.get(common.SCHEMA_FORMAT, ".xml")
-        hed_schema = schema.from_string(schema_string=arguments[common.SCHEMA_STRING], file_type=schema_format)
+        hed_schema = hedschema.from_string(schema_string=arguments[common.SCHEMA_STRING], file_type=schema_format)
     elif common.SCHEMA_PATH in arguments:
-        hed_schema = schema.load_schema(hed_file_path=arguments[common.SCHEMA_PATH])
+        hed_schema = hedschema.load_schema(hed_file_path=arguments[common.SCHEMA_PATH])
     elif common.SCHEMA_URL in arguments:
         # hed_file_path = file_util.url_to_file(arguments[common.SCHEMA_URL])
-        hed_schema = schema.load_schema(hed_url_path=arguments[common.SCHEMA_URL])
+        hed_schema = hedschema.load_schema(hed_url_path=arguments[common.SCHEMA_URL])
     elif common.SCHEMA_VERSION in arguments:
-        hed_file_path = schema.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
-        hed_schema = schema.load_schema_version(hed_file_path)
+        hed_file_path = hedschema.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
+        hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
     else:
         raise HedFileError('NoHEDSchema', 'No valid HED schema was provided', '')
     return hed_schema
@@ -509,6 +508,7 @@ def package_results(results):
                                                          msg_category=msg_category, msg=msg)
     else:
         return generate_text_response("", msg=msg, msg_category=msg_category)
+
 
 def save_file_to_upload_folder(file_object, delete_on_close=False):
     """Save a file_object to the upload folder.

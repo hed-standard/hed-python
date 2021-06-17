@@ -15,6 +15,7 @@ class Test(unittest.TestCase):
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
             app.config['UPLOAD_FOLDER'] = cls.upload_directory
+            app.config['WTF_CSRF_ENABLED'] = False
             cls.app = app
             cls.app.test = app.test_client()
 
@@ -34,22 +35,35 @@ class Test(unittest.TestCase):
         response = self.app.test.post('/events_submit')
         self.assertEqual(400, response.status_code, 'Event processing requires data')
 
-    def test_get_hed_services_results(self):
-        response = self.app.test.get('/hed-services-submit')
+    def test_get_services_results(self):
+        response = self.app.test.get('/services_submit')
         self.assertEqual(405, response.status_code, 'HED services require data')
 
     def test_get_schema_version(self):
         response = self.app.test.post('/get_schema_version')
         self.assertEqual(400, response.status_code, 'Returning HED version requires data')
 
-    def test_get_hedstring_results(self):
+    def test_schema_versions(self):
+        with self.app.app_context():
+            response = self.app.test.post('/schema_versions')
+        self.assertEqual(400, response.status_code, 'Returning HED version requires data')
+
+    def test_string_results(self):
         response = self.app.test.get('/string_submit')
         self.assertEqual(405, response.status_code, 'HED string processing require data')
 
     def test_get_schema_versions(self):
+        import json
         with self.app.app_context():
-            response = self.app.test.post('/get_schema_versions')
-            self.assertEqual(404, response.status_code, 'Returning HED version list requires data')
+            response = self.app.test.post('/schema_versions')
+            self.assertEqual(200, response.status_code, 'The HED version list does not require data')
+            versions = response.data
+            self.assertTrue(versions, "The returned data is not empty")
+            v_dict = json.loads(versions)
+            self.assertIsInstance(v_dict, dict, "The versions are returned in a dictionary")
+            v_list = v_dict["schema_version_list"]
+            self.assertIsInstance(v_list, list, "The versions are in a list")
+
 
         # response = self.app.test.post('/get_schema_versions')
         # self.assertEqual(405, response.status_code, 'Returning HED version list requires data')
@@ -59,9 +73,18 @@ class Test(unittest.TestCase):
         # self.assertTrue(constants.HED_MAJOR_VERSIONS in hed_info, "The information has key schema_versions")
         # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
 
-    def test_get_schema_results(self):
-        response = self.app.test.post('/schema_submit')
-        self.assertEqual(404, response.status_code, 'Schema processing requires data')
+    def test_schema_version_results(self):
+        import io
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_string = io.StringIO()
+        schema_string.write(x)
+        with self.app.app_context():
+            response = self.app.test.post('/schema_version',  content_type='multipart/form-data',
+                                          data={'schema_path' : (schema_string, 'my_schema.xml')})
+            self.assertEqual(200, response.status_code, 'The HED version list does not require data')
+        print("here")
 
     def test_get_spreadsheet_results(self):
         response = self.app.test.post('/spreadsheet-submit')
@@ -83,12 +106,12 @@ class Test(unittest.TestCase):
         response = self.app.test.get('/events')
         self.assertEqual(response.status_code, 200, "The events content page should exist")
 
-    def test_render_hed_services_form(self):
-        response = self.app.test.get('/hed-services')
+    def test_render_services_form(self):
+        response = self.app.test.get('/services')
         self.assertEqual(response.status_code, 200, "The hed-services content page should exist")
 
     def test_render_hedstring_form(self):
-        response = self.app.test.get('/hedstring')
+        response = self.app.test.get('/string')
         self.assertEqual(response.status_code, 200, "The hedstring content page should exist")
 
     def test_render_help_page(self):

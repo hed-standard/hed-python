@@ -3,9 +3,9 @@ from werkzeug import Response
 
 from hed import models
 from hed.util.error_reporter import get_printable_issue_string
-
 from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
+
 from hedweb.constants import common
 from hedweb.web_utils import form_has_option, get_hed_path_from_pull_down, get_hed_schema
 

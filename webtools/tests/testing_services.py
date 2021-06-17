@@ -1,5 +1,7 @@
 import os
 import json
+from hedweb.app_factory import AppFactory
+
 
 
 def get_service_string(service_info):
@@ -30,9 +32,18 @@ def get_service_string(service_info):
 
 
 if __name__ == '__main__':
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    the_path = os.path.join(dir_path, '../hedweb/static/resources/services.json')
-    with open(the_path) as f:
-        services_info = json.load(f)
-    s_info = get_service_string(services_info)
-    print(s_info)
+    # dir_path = os.path.dirname(os.path.realpath(__file__))
+    # the_path = os.path.join(dir_path, '../hedweb/static/resources/services.json')
+    # with open(the_path) as f:
+    #     services_info = json.load(f)
+    # s_info = get_service_string(services_info)
+    # print(s_info)
+
+    arguments = {'service': 'string_to_long', 'schema_version': '8.0.0-alpha.1',
+                 'string_list': ['Red,Blue', 'Green', 'White,Black'],
+                 'check_for_warnings': True, 'command': 'command_to_long'}
+    app = AppFactory.create_app('config.TestConfig')
+    with app.app_context():
+        from hedweb.services import services_process
+        response = services_process(arguments)
+        print(response)
