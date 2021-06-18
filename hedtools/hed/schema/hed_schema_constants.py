@@ -15,6 +15,8 @@ class HedKey:
     UnitModifiers = 'unitModifiers'
     # These are the allowed attributes list, gathered from the schema on load.
     Attributes = 'attributes'
+    # These are the allowed attribute property list, gathered from the schema on load.
+    Properties = 'properties'
 
     AllowedCharacter = 'allowedCharacter'
     ExtensionAllowed = 'extensionAllowed'
@@ -55,6 +57,5 @@ class HedKey:
     ShortTags = 'shortTags'
 
 
-ATTRIBUTE_PROPERTIES = [HedKey.BoolProperty, HedKey.UnitClassProperty, HedKey.UnitProperty, HedKey.UnitModifierProperty]
 VERSION_ATTRIBUTE = 'version'
 

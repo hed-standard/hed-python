@@ -29,6 +29,9 @@ UNIT_MODIFIER_SECTION_ELEMENT = "unitModifierDefinitions"
 UNIT_MODIFIER_DEF_ELEMENT = "unitModifierDefinition"
 SCHEMA_ATTRIBUTES_SECTION_ELEMENT = "schemaAttributeDefinitions"
 SCHEMA_ATTRIBUTES_DEF_ELEMENT = "schemaAttributeDefinition"
+SCHEMA_PROPERTIES_SECTION_ELEMENT = "propertyDefinitions"
+SCHEMA_PROPERTIES_DEF_ELEMENT = "propertyDefinition"
+
 
 UNIT_CLASS_SECTION_ELEMENT_LEGACY = "unitClasses"
 UNIT_CLASS_DEF_ELEMENT_LEGACY = "unitClass"
@@ -42,12 +45,14 @@ def get_section_name(key_class, legacy_format=False):
             HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
             HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
+            HedKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
         }
     else:
         section_names = {
             HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
             HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT_LEGACY,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
+            HedKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
         }
 
     return section_names.get(key_class, None)
@@ -60,6 +65,7 @@ def get_element_name(key_class, legacy_format=False):
             HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
             HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
+            HedKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
         }
     else:
         element_names = {
@@ -67,6 +73,7 @@ def get_element_name(key_class, legacy_format=False):
             HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT_LEGACY,
             HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT_LEGACY,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
+            HedKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
         }
 
     return element_names.get(key_class, (None, None))
