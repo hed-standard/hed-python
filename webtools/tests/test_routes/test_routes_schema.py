@@ -32,119 +32,330 @@ class Test(unittest.TestCase):
         self.assertFalse(response.data, "The response data for empty schema request is empty")
 
     def test_schema_results_convert_valid_mediawiki(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
-
-        with open(json_path, 'r') as sc:
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED-generation3-schema-8.0.0-alpha.3.mediawiki')
+        with open(schema_path, 'r') as sc:
             x = sc.read()
-        json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '8.0.0-alpha.1',
-                          'command_option': 'command_to_long',
-                          'json_file': (json_buffer, 'bids_events.json'),
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_convert',
+                          'schema_file': (schema_buffer, 'HED-generation3-schema-8.0.0-alpha.3.mediawiki'),
                           'check_for_warnings': 'on'}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'To long of a valid dictionary has a response')
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Convert of a valid mediawiki has a response')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
-                             "The valid dictionary should convert to long successfully")
-            self.assertTrue(response.data, "The converted to long dictionary should not be empty")
-            json_buffer.close()
+                             "The valid mediawiki should convert to xml successfully")
+            self.assertTrue(response.data, "The converted schema should not be empty")
+            self.assertEqual('attachment filename=HED-generation3-schema-8.0.0-alpha.3.xml',
+                             headers_dict['Content-Disposition'], "Convert of valid mediawiki should return xml")
+            schema_buffer.close()
 
-    def test_dictionary_results_to_long_invalid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
-        with open(json_path, 'r') as sc:
+    def test_schema_results_convert_valid_gen2_mediawiki(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED-generation2-schema-7.2.0.mediawiki')
+        with open(schema_path, 'r') as sc:
             x = sc.read()
-        json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '7.2.0',
-                          'command_option': 'command_to_long',
-                          'json_file': (json_buffer, 'bids_events.json'),
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_convert',
+                          'schema_file': (schema_buffer, 'HED-generation2-schema-7.2.0.mediawiki'),
                           'check_for_warnings': 'on'}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Conversion of an invalid dictionary to long has a response')
-            headers_dict = dict(response.headers)
-            self.assertEqual("warning", headers_dict["Category"],
-                             "Conversion of an invalid dictionary to long generates a warning")
-            self.assertTrue(response.data,
-                            "The response data for invalid conversion to long should have error messages")
-            json_buffer.close()
-
-    def test_dictionary_results_to_short_valid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
-
-        with open(json_path, 'r') as sc:
-            x = sc.read()
-        json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-        with self.app.app_context():
-            input_data = {'schema_version': '8.0.0-alpha.1',
-                          'command_option': 'command_to_short',
-                          'json_file': (json_buffer, 'bids_events.json'),
-                          'check_for_warnings': 'on'}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'To short of a valid dictionary has a response')
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Convert of a valid gen2 mediawiki has a response')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
-                             "The valid dictionary should convert to short successfully")
-            self.assertTrue(response.data, "The converted to short dictionary should not be empty")
-            json_buffer.close()
+                             "The valid gen2 mediawiki should convert to xml successfully")
+            self.assertTrue(response.data, "The converted gen2 schema should not be empty")
+            self.assertEqual('attachment filename=HED-generation2-schema-7.2.0.xml',
+                             headers_dict['Content-Disposition'],
+                             "Conversion of valid gen2 mediawiki should return xml")
+            schema_buffer.close()
 
-    def test_dictionary_results_to_short_valid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
-        with open(json_path, 'r') as sc:
+    def test_schema_results_convert_invalid_mediawiki(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED-generation3-schema-8.0.0-alpha.3Bad.mediawiki')
+        with open(schema_path, 'r') as sc:
             x = sc.read()
-        json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '7.2.0',
-                          'command_option': 'command_to_short',
-                          'json_file': (json_buffer, 'bids_events.json'),
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_convert',
+                          'schema_file': (schema_buffer, 'HED-generation3-schema-8.0.0-alpha.3Bad.mediawiki'),
                           'check_for_warnings': 'on'}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Conversion of an invalid dictionary to short has a response')
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Convert of a invalid mediawiki has a response')
             headers_dict = dict(response.headers)
-            self.assertEqual("warning", headers_dict["Category"],
-                             "Conversion of an invalid dictionary to short generates a warning")
-            self.assertTrue(response.data,
-                            "The response data for invalid conversion to short should have error messages")
-            json_buffer.close()
+            self.assertEqual("error", headers_dict["Category"],
+                             "The invalid mediawiki should not convert to xml successfully")
+            self.assertFalse(response.data, "The response data for invalid mediawiki conversion should be empty")
+            self.assertTrue(headers_dict['Message'],
+                            "The error message for invalid mediawiki conversion should not be empty")
+            self.assertEqual(None, headers_dict.get('Content-Disposition', None),
+                             "A file should not be returned for invalid mediawiki conversion")
+            schema_buffer.close()
 
-    def test_dictionary_results_validate_valid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
-
-        with open(json_path, 'r') as sc:
+    def test_schema_results_convert_invalid_gen2_mediawiki(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED-generation2-schema-7.2.0Bad.mediawiki')
+        with open(schema_path, 'r') as sc:
             x = sc.read()
-        json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '8.0.0-alpha.1',
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_convert',
+                          'schema_file': (schema_buffer, 'HED-generation2-schema-7.2.0Bad.mediawiki'),
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Convert of a invalid gen2 mediawiki has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("error", headers_dict["Category"],
+                             "The invalid gen2 mediawiki should not convert to xml successfully")
+            self.assertFalse(response.data, "The response data for invalid gen2 mediawiki conversion should be empty")
+            self.assertTrue(headers_dict['Message'],
+                            "The error message for invalid gen2 mediawiki conversion should not be empty")
+            self.assertEqual(None, headers_dict.get('Content-Disposition', None),
+                             "A file should not be returned for invalid gen2 mediawiki conversion")
+            schema_buffer.close()
+
+    def test_schema_results_convert_valid_xml(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED8.0.0-alpha.3.xml')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_convert',
+                          'schema_file': (schema_buffer, 'HED8.0.0-alpha.3.xml'),
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Convert of a valid xml has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("success", headers_dict["Category"],
+                             "The valid xml should validate successfully")
+            self.assertTrue(response.data, "The validated schema should not be empty")
+            self.assertEqual('attachment filename=HED8.0.0-alpha.3.mediawiki',
+                             headers_dict['Content-Disposition'],
+                             "Validation of valid xml should not return a file")
+            schema_buffer.close()
+
+    def test_schema_results_convert_valid_gen2_xml(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED7.2.0.xml')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_convert',
+                          'schema_file': (schema_buffer, 'HED7.2.0.xml'),
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Convert of a valid gen2 xml has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("success", headers_dict["Category"],
+                             "The valid gen2 xml should convert to mediawiki successfully")
+            self.assertTrue(response.data, "The converted gen2 schema should not be empty")
+            self.assertEqual('attachment filename=HED7.2.0.mediawiki',
+                             headers_dict['Content-Disposition'],
+                             "Conversion of valid gen2 xml should return mediawiki")
+            schema_buffer.close()
+
+    def test_schema_results_convert_valid_xml_url(self):
+        schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0-alpha.2.xml'
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_url_option',
+                          'command_option': 'command_convert',
+                          'schema_url': schema_url,
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Conversion of a valid xml url has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("success", headers_dict["Category"],
+                             "The valid xml url should convert to mediawiki successfully")
+            self.assertTrue(response.data, "The converted xml url schema should not be empty")
+            self.assertEqual('attachment filename=HED8.0.0-alpha.2.mediawiki',
+                             headers_dict['Content-Disposition'], "Conversion of valid xml url should return mediawiki")
+
+
+    def test_schema_results_validate_valid_mediawiki(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED-generation3-schema-8.0.0-alpha.3.mediawiki')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'command_validate',
-                          'json_file': (json_buffer, 'bids_events.json'),
+                          'schema_file': (schema_buffer, 'HED-generation3-schema-8.0.0-alpha.3.mediawiki'),
                           'check_for_warnings': 'on'}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Validation of a valid dictionary has a response')
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Validation of a valid mediawiki has a response')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
-                             "The valid dictionary should validate successfully")
-            self.assertFalse(response.data, "The response for validated dictionary should be empty")
-            json_buffer.close()
+                             "The valid mediawiki should validate successfully")
+            self.assertFalse(response.data, "The response data for validated mediawiki should be empty")
+            self.assertEqual(None, headers_dict.get('Content-Disposition', None),
+                             "Validation of valid mediawiki should not return a file")
+            schema_buffer.close()
 
-    def test_dictionary_results_validate_invalid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
-        with open(json_path, 'r') as sc:
+    def test_schema_results_validate_valid_gen2_mediawiki(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED-generation2-schema-7.2.0.mediawiki')
+        with open(schema_path, 'r') as sc:
             x = sc.read()
-        json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '7.2.0',
+            input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'command_validate',
-                          'json_file': (json_buffer, 'bids_events.json'),
+                          'schema_file': (schema_buffer, 'HED-generation2-schema-7.2.0.mediawiki'),
                           'check_for_warnings': 'on'}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Validation of an invalid dictionary to short has a response')
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Validation of a valid gen2 mediawiki has a response')
             headers_dict = dict(response.headers)
             self.assertEqual("warning", headers_dict["Category"],
-                             "Validation of an invalid dictionary to short generates a warning")
-            self.assertTrue(response.data,
-                            "The response data for invalid validation should have error messages")
-            json_buffer.close()
+                             "The valid gen2 mediawiki should is not compliant and should return a warning")
+            self.assertTrue(response.data, "The validated gen2 schema response data has non compliance errors")
+            self.assertTrue(headers_dict['Content-Disposition'],
+                             "The validation of valid gen2 mediawiki still returns a file of errors")
+            schema_buffer.close()
 
+    def test_schema_results_validate_invalid_mediawiki(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED-generation3-schema-8.0.0-alpha.3Bad.mediawiki')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_validate',
+                          'schema_file': (schema_buffer, 'HED-generation3-schema-8.0.0-alpha.3Bad.mediawiki'),
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Validation of a invalid mediawiki has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("error", headers_dict["Category"],
+                             "The invalid mediawiki should return validation errors successfully")
+            self.assertFalse(response.data, "The response data for invalid mediawiki validation should be empty")
+            self.assertTrue(headers_dict['Message'],
+                            "The error message for invalid mediawiki conversion should not be empty")
+            self.assertEqual(None, headers_dict.get('Content-Disposition', None),
+                             "A file should not be returned for invalid mediawiki validation")
+            schema_buffer.close()
+
+    def test_schema_results_validate_invalid_gen2_mediawiki(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED-generation2-schema-7.2.0Bad.mediawiki')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_validate',
+                          'schema_file': (schema_buffer, 'HED-generation2-schema-7.2.0Bad.mediawiki'),
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Validation of a invalid gen2 mediawiki has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("error", headers_dict["Category"],
+                             "The invalid gen2 mediawiki should validate with errors ")
+            self.assertFalse(response.data, "The response data for invalid gen2 mediawiki validation should be empty")
+            self.assertTrue(headers_dict['Message'],
+                            "The error message for invalid gen2 mediawiki validation should not be empty")
+            self.assertEqual(None, headers_dict.get('Content-Disposition', None),
+                             "A file should not be returned for invalid gen2 mediawiki validation")
+            schema_buffer.close()
+
+    def test_schema_results_validate_valid_xml(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HED8.0.0-alpha.3.xml')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_validate',
+                          'schema_file': (schema_buffer, 'HED8.0.0-alpha.3.xml'),
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Validation of a valid xml has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("success", headers_dict["Category"],
+                             "The valid xml should validate successfully")
+            self.assertFalse(response.data, "The validated schema data should be empty")
+            self.assertEqual(None, headers_dict.get('Content-Disposition', None),
+                             "Validation of valid xml should return any response data")
+            schema_buffer.close()
+
+    def test_schema_results_validate_valid_gen2_xml(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED7.2.0.xml')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_file_option',
+                          'command_option': 'command_validate',
+                          'schema_file': (schema_buffer, 'HED7.2.0.xml'),
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Validation of a valid gen2 xml has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("warning", headers_dict["Category"],
+                             "The valid gen2 xml should still have compliance errors")
+            self.assertTrue(response.data, "The validated gen2 schema should not be empty")
+            self.assertTrue(headers_dict['Content-Disposition'],
+                             "Validation of valid gen2 xml should return validation error file")
+            schema_buffer.close()
+
+    def test_schema_results_convert_valid_xml(self):
+        schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0-alpha.2.xml'
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_url_option',
+                          'command_option': 'command_convert',
+                          'schema_url': schema_url,
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Conversion of a valid xml url has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("success", headers_dict["Category"],
+                             "The valid xml url should convert to mediawiki successfully")
+            self.assertTrue(response.data, "The converted xml url schema should not be empty")
+            self.assertEqual('attachment filename=HED8.0.0-alpha.2.mediawiki',
+                             headers_dict['Content-Disposition'], "Conversion of valid xml url should return mediawiki")
+
+    def test_schema_results_convert_valid_xml_url(self):
+        schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0-alpha.2.xml'
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_url_option',
+                          'command_option': 'command_convert',
+                          'schema_url': schema_url,
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Conversion of a valid xml url has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("success", headers_dict["Category"],
+                             "The valid xml url should convert to mediawiki successfully")
+            self.assertTrue(response.data, "The converted xml url schema should not be empty")
+            self.assertEqual('attachment filename=HED8.0.0-alpha.2.mediawiki',
+                             headers_dict['Content-Disposition'], "Conversion of valid xml url should return mediawiki")
+
+    def test_schema_results_validate_valid_xml_url(self):
+        schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0-alpha.2.xml'
+        with self.app.app_context():
+            input_data = {'schema_upload_options': 'schema_url_option',
+                          'command_option': 'command_validate',
+                          'schema_url': schema_url,
+                          'check_for_warnings': 'on'}
+            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Validation of a valid xml url has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("success", headers_dict["Category"],
+                             "The valid xml url should be successful")
+            self.assertFalse(response.data, "The validated xml url schema should return empty response data")
+            self.assertEqual(None, headers_dict.get('Content-Disposition', None),
+                             "Validation of valid xml url should not return an error file")
 
 if __name__ == '__main__':
     unittest.main()
