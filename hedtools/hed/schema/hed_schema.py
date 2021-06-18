@@ -4,7 +4,7 @@ unit class attributes in a dictionary.
 
 The dictionary is a dictionary of dictionaries. The dictionary names are the list in HedKey from hed_schema_constants.
 """
-from hed.schema.hed_schema_constants import HedKey, ATTRIBUTE_PROPERTIES
+from hed.schema.hed_schema_constants import HedKey
 from hed.util import file_util, error_reporter
 from hed.schema.schema2xml import HedSchema2XML
 from hed.schema.schema2wiki import HedSchema2Wiki
@@ -358,28 +358,28 @@ class HedSchema:
     def __eq__(self, other):
         if self.dictionaries != other.dictionaries:
             # Comment the following back in for easy debugging of schema that should be equal.
-            # dict_keys = set(list(self.dictionaries.keys()) + list(other.dictionaries.keys()))
-            # for dict_key in dict_keys:
-            #     if dict_key not in self.dictionaries:
-            #         print(f"{dict_key} dict not in self")
-            #         continue
-            #     if dict_key not in other.dictionaries:
-            #         print(f"{dict_key} dict not in other")
-            #         continue
-            #     dict1 = self.dictionaries[dict_key]
-            #     dict2 = other.dictionaries[dict_key]
-            #     if dict1 != dict2:
-            #         print(f"DICT {dict_key} NOT EQUAL")
-            #         key_union = set(list(dict1.keys()) + list(dict2.keys()))
-            #         for key in key_union:
-            #             if key not in dict1:
-            #                 print(f"{key} not in dict1")
-            #                 continue
-            #             if key not in dict2:
-            #                 print(f"{key} not in dict2")
-            #                 continue
-            #             if dict1[key] != dict2[key]:
-            #                 print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
+            dict_keys = set(list(self.dictionaries.keys()) + list(other.dictionaries.keys()))
+            for dict_key in dict_keys:
+                if dict_key not in self.dictionaries:
+                    print(f"{dict_key} dict not in self")
+                    continue
+                if dict_key not in other.dictionaries:
+                    print(f"{dict_key} dict not in other")
+                    continue
+                dict1 = self.dictionaries[dict_key]
+                dict2 = other.dictionaries[dict_key]
+                if dict1 != dict2:
+                    print(f"DICT {dict_key} NOT EQUAL")
+                    key_union = set(list(dict1.keys()) + list(dict2.keys()))
+                    for key in key_union:
+                        if key not in dict1:
+                            print(f"{key} not in dict1")
+                            continue
+                        if key not in dict2:
+                            print(f"{key} not in dict2")
+                            continue
+                        if dict1[key] != dict2[key]:
+                            print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
             return False
         if self.header_attributes != other.header_attributes:
             return False
@@ -404,13 +404,11 @@ class HedSchema:
         dictionaries[HedKey.Units] = {}
         dictionaries[HedKey.UnitModifiers] = {}
         dictionaries[HedKey.Attributes] = {}
+        dictionaries[HedKey.Properties] = {}
 
         dictionaries[HedKey.UnknownAttributes] = {}
 
         dictionaries[HedKey.Descriptions] = {}
-
-        for attribute_property_name in ATTRIBUTE_PROPERTIES:
-            dictionaries[attribute_property_name] = {}
 
         return dictionaries
 
@@ -602,7 +600,8 @@ class HedSchema:
             A list of all the attributes for this section.  May return a dict where the keys are the attribute names.
         """
         attribute_dict = {
-            HedKey.Attributes: ATTRIBUTE_PROPERTIES,
+            HedKey.Properties: [],
+            HedKey.Attributes: self.dictionaries[HedKey.Properties],
             HedKey.AllTags: self.get_tag_attribute_names(),
             HedKey.UnitClasses: self.dictionaries[HedKey.UnitClassProperty],
             HedKey.Units: self.dictionaries[HedKey.UnitProperty],
@@ -667,6 +666,13 @@ class HedSchema:
         self.dictionaries[HedKey.Attributes][attribute_name] = attribute_name
         self.dictionaries[attribute_name] = {}
 
+    def _add_property_name_to_dict(self, prop_name, prop_desc):
+        if prop_name in self.dictionaries[HedKey.Properties]:
+            raise ValueError(f"Duplicate property {prop_name} found in properties section.")
+        self.dictionaries[HedKey.Properties][prop_name] = prop_name
+        self.dictionaries[prop_name] = {}
+        self._add_description_to_dict(prop_name, prop_desc, HedKey.Properties)
+
     def add_hed2_attributes(self, only_add_if_none_present=True):
         """
         This adds the default attributes for old hed2 schema without an attribute section
@@ -684,7 +690,24 @@ class HedSchema:
         for attribute_name, (attribute_props, attribute_desc) in hed_2g_attributes.attributes.items():
             if attribute_name not in self.dictionaries[HedKey.Attributes]:
                 self._add_attribute_name_to_dict(attribute_name)
-                self._add_description_to_dict(attribute_name, attribute_desc, HedKey.Attributes)
+            self._add_description_to_dict(attribute_name, attribute_desc, HedKey.Attributes)
 
-                for attribute_property_name in attribute_props:
-                    self._add_attribute_to_dict(attribute_name, attribute_property_name, True, HedKey.Attributes)
+            for attribute_property_name in attribute_props:
+                self._add_attribute_to_dict(attribute_name, attribute_property_name, True, HedKey.Attributes)
+
+    def add_default_properties(self, only_add_if_none_present=True):
+        """
+            This adds the default properties for a hed3 schema.
+
+            Parameters
+            ----------
+            only_add_if_none_present : bool
+                If True(default), will only add properties if there is currently none.
+                If False, will add any missing properties.
+                """
+        if only_add_if_none_present and self.dictionaries[HedKey.Properties]:
+            return
+
+        from hed.schema import hed_2g_attributes
+        for prop_name, prop_desc in hed_2g_attributes.properties.items():
+            self._add_property_name_to_dict(prop_name, prop_desc)

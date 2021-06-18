@@ -21,3 +21,9 @@ attributes = {
     "unitClass": ((), "Specifies the type of a unit for a tag."),
 }
 
+properties = {
+    "boolProperty": "Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.",
+    "unitClassProperty": "Indicates that the schema attribute is meant to be applied to unit classes.",
+    "unitModifierProperty": "Indicates that the schema attribute is meant to be applied to unit modifier classes.",
+    "unitProperty": "Indicates that the schema attribute is meant to be applied to units within a unit class.", 
+}

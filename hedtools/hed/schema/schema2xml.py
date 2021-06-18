@@ -32,6 +32,7 @@ class HedSchema2XML:
         self._output_unit_modifiers(hed_schema)
         if not self.save_as_legacy_format:
             self._output_attributes(hed_schema)
+            self._output_properties(hed_schema)
         self._output_footer(hed_schema)
         return self.hed_node
 
@@ -96,6 +97,12 @@ class HedSchema2XML:
                                                                                            self.save_as_legacy_format))
         for attribute_name in hed_schema.dictionaries[HedKey.Attributes]:
             self._add_node(hed_schema, attributes_section_node, attribute_name, HedKey.Attributes)
+
+    def _output_properties(self, hed_schema):
+        properties_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Properties,
+                                                                                           self.save_as_legacy_format))
+        for property_name in hed_schema.dictionaries[HedKey.Properties]:
+            self._add_node(hed_schema, properties_section_node, property_name, HedKey.Properties)
 
     def _output_footer(self, hed_schema):
         if hed_schema.epilogue:

@@ -230,10 +230,10 @@ class TestHedSchema(unittest.TestCase):
 
     def test_get_desc_dict(self):
         desc_dict = self.hed_schema.get_desc_dict()
-        self.assertEqual(len(desc_dict), 376)
+        self.assertEqual(len(desc_dict), 380)
 
         desc_dict = self.hed_schema_3g.get_desc_dict()
-        self.assertEqual(len(desc_dict), 255)
+        self.assertEqual(len(desc_dict), 259)
 
     def test_get_tag_description(self):
         # Test known tag
