@@ -27,10 +27,10 @@ class Test(unittest.TestCase):
     def test_string_results_empty_data(self):
         response = self.app.test.post('/string_submit')
         self.assertEqual(200, response.status_code, 'HED string request succeeds even when no data')
-        self.assertTrue(response.data, "The returned data is not empty")
+        self.assertTrue(response.data, "The returned data for empty string question is not empty")
         response_dict = json.loads(response.data)
-        self.assertIsInstance(response_dict, dict, "The versions are returned in a dictionary")
-        self.assertTrue(response_dict["message"], "The message is not empty")
+        self.assertIsInstance(response_dict, dict, "The empty string response data is returned in a dictionary")
+        self.assertTrue(response_dict["message"], "The empty string response message is not empty")
 
     def test_string_results_to_long(self):
         with self.app.app_context():

@@ -428,6 +428,7 @@ def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
     if form_has_file(request, file_key, valid_extensions):
         uploaded_file_name = save_file_to_upload_folder(request.files[file_key])
         original_file_name = request.files[file_key].filename
+        request.files[file_key].close()
     return uploaded_file_name, original_file_name
 
 
@@ -533,6 +534,7 @@ def save_file_to_upload_folder(file_object, delete_on_close=False):
                                                             dir=current_app.config['UPLOAD_FOLDER'])
         for line in file_object:
             temporary_upload_file.write(line)
+        temporary_upload_file.close()
         return temporary_upload_file.name
     else:
         raise("UnableToUploadFile", "File could not uploaded", "UnknownFile")
