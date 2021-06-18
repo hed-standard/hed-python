@@ -6,13 +6,13 @@ from hed.models import ColumnDefGroup
 from hed.util.error_reporter import get_printable_issue_string
 
 if __name__ == '__main__':
-    schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-    local_hed_file = 'data/HED8.0.0-alpha.1.xml'
-    example_data_path = 'data'  # path to example data
-    events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+    schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.1.xml')
+    local_hed_file = '../data/HED8.0.0-alpha.1.xml'
+    example_data_path = '../data'  # path to example data
+    events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
     hed_schema = load_schema(schema_path)
-    json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/bids_events.json")
+    json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
     column_group = ColumnDefGroup(json_path)
     def_dict, def_issues = column_group.extract_defs()
     if def_issues:
@@ -31,5 +31,5 @@ if __name__ == '__main__':
     data = {'onset': onsets, 'HED': hed_tags}
 
     df = pd.DataFrame(data)
-    final_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/myTemp.tsv')
+    final_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
     df.to_csv(final_filename, '\t', index=False, header=True)

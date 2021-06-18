@@ -139,7 +139,7 @@ class Test(unittest.TestCase):
                              'get_hed_schema HedSchema object should have correct version')
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/' \
-                     + 'master/HED-generation3-schema-8.0.0-alpha.1.mediawiki'
+                     + 'master/HED-generation3-schema-8.0.0-beta.1.mediawiki'
         arguments = {common.SCHEMA_URL: schema_url}
         with self.app.app_context():
             hed_schema = get_hed_schema(arguments)
@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
             issues = hed_schema.issues
             self.assertFalse(issues, "Issues should be empty")
             schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-            self.assertEqual('8.0.0-alpha.1', schema_version,
+            self.assertEqual('8.0.0-beta.1', schema_version,
                              'get_hed_schema HedSchema object should have correct version')
 
 

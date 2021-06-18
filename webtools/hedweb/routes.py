@@ -106,25 +106,6 @@ def schema_version_results():
         delete_file_no_exceptions(request.files[common.SCHEMA_PATH])
 
 
-@route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['GET', 'POST'])
-def schema_versions_results():
-    """Gets a list of hed versions from the hed_cache and returns as a serialized JSON string
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing a list of the HED versions.
-
-    """
-
-    try:
-        hedschema.cache_all_hed_xml_versions()
-        hed_info = {common.SCHEMA_VERSION_LIST: hedschema.get_all_hed_versions()}
-        return json.dumps(hed_info)
-    except Exception as ex:
-        return handle_error(ex)
-
-
 @route_blueprint.route(route_constants.SCHEMA_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def schema_results():
     """Get the results of schema processing.
@@ -142,6 +123,25 @@ def schema_results():
         return handle_http_error(ex)
     finally:
         delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
+
+
+@route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['GET', 'POST'])
+def schema_versions_results():
+    """Gets a list of hed versions from the hed_cache and returns as a serialized JSON string
+
+    Returns
+    -------
+    string
+        A serialized JSON string containing a list of the HED versions.
+
+    """
+
+    try:
+        hedschema.cache_all_hed_xml_versions()
+        hed_info = {common.SCHEMA_VERSION_LIST: hedschema.get_all_hed_versions()}
+        return json.dumps(hed_info)
+    except Exception as ex:
+        return handle_error(ex)
 
 
 @route_blueprint.route(route_constants.SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])

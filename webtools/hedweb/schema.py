@@ -84,30 +84,6 @@ def schema_process(arguments):
         return generate_text_response("", msg=msg, msg_category=msg_category)
 
 
-def schema_validate(arguments):
-    """Run tag comparison(map_schema from converter)
-
-    returns: Response or string.
-        Empty string is success, but nothing to download.
-        Non empty string is an error
-        Response is a download success.
-    """
-    hed_schema = get_hed_schema(arguments)
-    display_name = arguments.get(common.SCHEMA_DISPLAY_NAME)
-    schema_version = hed_schema.header_attributes.get('version', 'Unknown')
-    issues = schema_compliance.check_compliance(hed_schema)
-    if issues:
-        issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
-        file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
-        return {'command': arguments.get('command', ''), 'data': issue_str, 'output_display_name': file_name,
-                'schema_version': schema_version, 'msg_category': 'warning',
-                'msg': 'Schema is not HED 3G compliant'}
-    else:
-        return {'command': arguments.get('command', ''), 'data': '', 'output_display_name': display_name,
-                'schema_version': schema_version, 'msg_category': 'success',
-                'msg': 'Schema had no HED-3G validation errors'}
-
-
 def schema_convert(arguments):
     """Run conversion(wiki2xml or xml2wiki from converter)
 
@@ -140,3 +116,27 @@ def schema_convert(arguments):
     return {'command': arguments.get('command', ''), 'data': data, 'output_display_name': file_name,
             'schema_version': schema_version, 'msg_category': 'success',
             'msg': 'Schema was successfully converted'}
+
+
+def schema_validate(arguments):
+    """Run tag comparison(map_schema from converter)
+
+    returns: Response or string.
+        Empty string is success, but nothing to download.
+        Non empty string is an error
+        Response is a download success.
+    """
+    hed_schema = get_hed_schema(arguments)
+    display_name = arguments.get(common.SCHEMA_DISPLAY_NAME)
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown')
+    issues = schema_compliance.check_compliance(hed_schema)
+    if issues:
+        issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
+        file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
+        return {'command': arguments.get('command', ''), 'data': issue_str, 'output_display_name': file_name,
+                'schema_version': schema_version, 'msg_category': 'warning',
+                'msg': 'Schema is not HED 3G compliant'}
+    else:
+        return {'command': arguments.get('command', ''), 'data': '', 'output_display_name': display_name,
+                'schema_version': schema_version, 'msg_category': 'success',
+                'msg': 'Schema had no HED-3G validation errors'}

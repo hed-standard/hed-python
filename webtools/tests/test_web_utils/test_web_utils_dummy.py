@@ -8,7 +8,7 @@ from hedweb.app_factory import AppFactory
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
+        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
             from hedweb.routes import route_blueprint

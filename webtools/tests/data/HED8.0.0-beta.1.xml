@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="8.0.0-beta.1">
+<HED version="8.0.0-beta.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxsd-test/HED8.0.0-beta.1a.xsd">
    <schema>
       <node>
          <name>Event</name>
@@ -306,11 +306,19 @@
                   </node>
                   <node>
                      <name>Press</name>
-                     <description>Apply pressure to something to flatten, shape, or smooth it.</description>
+                     <description>Apply pressure to something to flatten, shape, smooth or depress it. This action tag should be used to indicate key presses and mouse clicks.</description>
+                     <attribute>
+                        <name>relatedTag</name>
+                        <value>Push</value>
+                     </attribute>
                   </node>
                   <node>
                      <name>Push</name>
-                     <description>Apply force in order to move something away.</description>
+                     <description>Apply force in order to move something away. Use Press to indicate a key press or mouse click.</description>
+                     <attribute>
+                        <name>relatedTag</name>
+                        <value>Press</value>
+                     </attribute>
                   </node>
                   <node>
                      <name>Reach</name>
@@ -3073,6 +3081,10 @@
                <description>A tag designating a grouping of items such as in a set or list.</description>
             </node>
             <node>
+               <name>Condition-variable</name>
+               <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.</description>
+            </node>
+            <node>
                <name>Control-variable</name>
                <description>An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.</description>
             </node>
@@ -3085,15 +3097,7 @@
             </node>
             <node>
                <name>Event-stream</name>
-               <description>An ordered list of events.</description>
-            </node>
-            <node>
-               <name>Experimental-condition</name>
-               <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.</description>
-            </node>
-            <node>
-               <name>Experimental-indicator</name>
-               <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent variables.</description>
+               <description>A special HED tag indicating that this event is a member of an ordered succession of events.</description>
             </node>
             <node>
                <name>Experimental-intertrial</name>
@@ -3102,6 +3106,10 @@
             <node>
                <name>Experimental-trial</name>
                <description>Designates a run or execution of an activity, for example, one execution of a script. A tag used to indicate a particular organizational part in the experimental design often containing a stimulus-response pair or stimulus-response-feedback triad.</description>
+            </node>
+            <node>
+               <name>Indicator-variable</name>
+               <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent variables.</description>
             </node>
             <node>
                <name>Permutation</name>
@@ -5641,9 +5649,28 @@
          </property>
       </schemaAttributeDefinition>
    </schemaAttributeDefinitions>
-   <epilogue>This is the new format for the mediawiki schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties. These are:
-* boolProperty - indicates that that attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.
-* unitClassProperty - indicates that this attribute is designed to be applied to unit classes.
-* unitModifierProperty - indicates that this attribute is designed to be applied to unit classes.
-* unitProperty - indicates that this a applies to units within a unit class. </epilogue>
+   <propertyDefinitions>
+        <propertyDefinition>
+            <name>boolProperty</name>
+            <description>Indicates that the schema attribute represents something that is either true or false and does
+                not have a value. Attributes without this value are assumed to have string values.
+            </description>
+        </propertyDefinition>
+        <propertyDefinition>
+            <name>unitClassProperty</name>
+            <description>Indicates that the schema attribute is meant to be applied to unit classes.</description>
+        </propertyDefinition>
+        <propertyDefinition>
+            <name>unitModifierProperty</name>
+            <description>Indicates that the schema attribute is meant to be applied to unit modifier classes.
+            </description>
+        </propertyDefinition>
+        <propertyDefinition>
+            <name>unitProperty</name>
+            <description>Indicates that the schema attribute is meant to be applied to units within a unit class.
+            </description>
+        </propertyDefinition>
+    </propertyDefinitions>
+    <epilogue>This is the new format for the mediawiki schema. The schema attribute properties are used to cross-check that only valid properties are used in the Schema attribute sections during schema validation.
+    </epilogue>
 </HED>

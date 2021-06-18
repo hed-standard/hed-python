@@ -6,13 +6,13 @@ from hed.models import ColumnDefGroup
 from hed.util.error_reporter import get_printable_issue_string
 
 if __name__ == '__main__':
-    schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-    local_hed_file = 'data/HED8.0.0-alpha.1.xml'
-    example_data_path = 'data'  # path to example data
-    events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+    schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/../data/HED8.0.0-alpha.1.xml')
+    local_hed_file = '../data/HED8.0.0-alpha.1.xml'
+    example_data_path = '../data'  # path to example data
+    events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/../data/bids_events.tsv')
 
     hed_schema = load_schema(schema_path)
-    json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/bids_events.json")
+    json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/../data/bids_events.json")
     json_dictionary = ColumnDefGroup(json_path)
     def_dicts, def_issues = json_dictionary.extract_defs()
     if def_issues:
