@@ -21,6 +21,7 @@ class HedSchemaXMLParser:
         self._schema.filename = hed_xml_file_path
         self._schema.header_attributes = self._get_header_attributes()
 
+        self._populate_property_dictionaries()
         self._populate_attribute_dictionaries()
 
         self._schema.prologue = self._get_prologue()
@@ -85,6 +86,31 @@ class HedSchemaXMLParser:
         self._populate_tag_dictionaries()
         self._populate_unit_class_dictionaries()
         self._populate_unit_modifier_dictionaries()
+
+    def _populate_property_dictionaries(self):
+        """Populates a dictionary of dictionaries associated with properties
+
+        If this section is not found, default HED2 attributes will be added from hed_2g_attributes.py
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        section_name = xml_constants.get_section_name(HedKey.Properties)
+        properties_section = self._get_elements_by_name(section_name)
+        if not properties_section:
+            self._schema.add_default_properties()
+            return
+        properties_section = properties_section[0]
+
+        def_element_name = xml_constants.get_element_name(HedKey.Properties)
+        attribute_elements = self._get_elements_by_name(def_element_name, properties_section)
+        for element in attribute_elements:
+            attribute_name = self._get_element_tag_value(element)
+            attribute_desc = self._get_element_tag_value(element, tag_name="description")
+            self._schema._add_property_name_to_dict(attribute_name, attribute_desc)
 
     def _populate_attribute_dictionaries(self):
         """Populates a dictionary of dictionaries associated with attributes and their properties
