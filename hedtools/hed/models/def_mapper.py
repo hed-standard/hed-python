@@ -1,6 +1,7 @@
 from hed.models.hed_string import HedString
 from hed.models.def_dict import DefDict, DefTagNames
-from hed.util.error_types import ValidationErrors
+from hed.errors.error_types import ValidationErrors
+
 
 class DefinitionMapper:
     """Class responsible for gathering/removing definitions from hed strings,
@@ -81,16 +82,19 @@ class DefinitionMapper:
 
         remove_groups = []
         def_issues = []
-        for tag_group in hed_string_obj.get_all_groups():
+        # We need to check for definitions to remove in ONLY the top level groups.
+        # We need to check for labels to expand in ALL groups
+        for tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
             for tag in tag_group.tags():
                 tag_as_string = str(tag)
-                # This case should be fairly rare compared to expanding definitions.
-                is_def_tag = DefinitionMapper._check_tag_starts_with(tag_as_string, DefTagNames.DEF_KEY)
-                if is_def_tag:
-                    remove_groups.append(tag_group)
-                    break
+                if is_top_level:
+                    # This case should be fairly rare compared to expanding definitions.
+                    is_def_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DEF_KEY)
+                    if is_def_tag:
+                        remove_groups.append(tag_group)
+                        break
 
-                is_label_tag = DefinitionMapper._check_tag_starts_with(tag_as_string, DefTagNames.DLABEL_KEY)
+                is_label_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DLABEL_KEY)
                 if is_label_tag:
                     placeholder = None
                     found_slash = is_label_tag.find("/")
@@ -105,8 +109,8 @@ class DefinitionMapper:
                                        "tag": is_label_tag}]
                         continue
 
-                    def_contents = def_entry.get_definition(placeholder_value=placeholder)
-                    if def_contents is None:
+                    def_tag_name, def_contents = def_entry.get_definition(tag, placeholder_value=placeholder)
+                    if def_tag_name is None:
                         if def_entry.takes_value:
                             def_issues += [{"error_type": ValidationErrors.HED_DEFINITION_VALUE_MISSING,
                                            "tag": tag}]
@@ -116,6 +120,9 @@ class DefinitionMapper:
                         continue
                     if not expand_defs:
                        continue
+
+                    tag.tag = def_tag_name
+
                     tag_group.replace_tag(tag, def_contents)
                     continue
 
@@ -123,27 +130,3 @@ class DefinitionMapper:
             hed_string_obj.remove_groups(remove_groups)
 
         return def_issues
-
-    @staticmethod
-    def _check_tag_starts_with(hed_tag, target_tag_short_name):
-        """ Check if a given tag starts with a given string, and returns the tag with the prefix removed if it does.
-
-        Parameters
-        ----------
-        hed_tag : str
-            A single input tag
-        target_tag_short_name : str
-            The string to match eg find target_tag_short_name in hed_tag
-        Returns
-        -------
-            str: the tag without the removed prefix, or None
-        """
-        hed_tag_lower = hed_tag.lower()
-        found_index = hed_tag_lower.find(target_tag_short_name)
-
-        if found_index == -1:
-            return None
-
-        if found_index == 0 or hed_tag_lower[found_index - 1] == "/":
-            return hed_tag[found_index + len(target_tag_short_name):]
-        return None

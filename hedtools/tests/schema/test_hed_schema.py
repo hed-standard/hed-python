@@ -3,7 +3,7 @@ import os
 
 from hed import schema
 from hed.schema import HedKey
-from hed.util.exceptions import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed.models.hed_string import HedString
 
 
@@ -230,10 +230,11 @@ class TestHedSchema(unittest.TestCase):
 
     def test_get_desc_dict(self):
         desc_dict = self.hed_schema.get_desc_dict()
-        self.assertEqual(len(desc_dict), 380)
+        self.assertEqual(len(desc_dict), 383)
 
         desc_dict = self.hed_schema_3g.get_desc_dict()
-        self.assertEqual(len(desc_dict), 259)
+        self.assertEqual(len(desc_dict), 262)
+
 
     def test_get_tag_description(self):
         # Test known tag
@@ -249,7 +250,7 @@ class TestHedSchema(unittest.TestCase):
 
     def test_get_all_tag_attributes(self):
         test_string = HedString("Jerk-rate/#")
-        test_string.calculate_canonical_forms(self.hed_schema_3g)
+        test_string.convert_to_canonical_forms(self.hed_schema_3g)
         tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
             "takesValue": "true",
@@ -264,7 +265,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertCountEqual(tag_props, expected_props)
 
         test_string = HedString("Agent-trait")
-        test_string.calculate_canonical_forms(self.hed_schema_3g)
+        test_string.convert_to_canonical_forms(self.hed_schema_3g)
         tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
             HedKey.ExtensionAllowed: "true",

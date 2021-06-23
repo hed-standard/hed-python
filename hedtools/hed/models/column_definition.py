@@ -1,7 +1,7 @@
 from enum import Enum
 from hed.models.hed_string import HedString
-from hed.util.error_types import SidecarErrors, ErrorContext, ValidationErrors
-from hed.util import error_reporter
+from hed.errors.error_types import SidecarErrors, ErrorContext, ValidationErrors
+from hed.errors import error_reporter
 
 import re
 
@@ -295,11 +295,11 @@ class ColumnDef:
 
         col_validation_issues = []
         if self.hed_string_iter():
-            hed_validator = None
+            event_validator = None
             # Full Hed string validation can only be done with a hed_schema
             if hed_schema is not None:
-                from hed.validator.hed_validator import HedValidator
-                hed_validator = HedValidator(check_for_warnings=True, run_semantic_validation=True,
+                from hed.validator.event_validator import EventValidator
+                event_validator = EventValidator(check_for_warnings=True, run_semantic_validation=True,
                                              hed_schema=hed_schema, error_handler=error_handler,
                                              allow_numbers_to_be_pound_sign=True)
             for hed_string, position in self.hed_string_iter(include_position=True):
@@ -311,8 +311,8 @@ class ColumnDef:
                                                                         given_type=type(hed_string),
                                                                         expected_type="str")
                 else:
-                    if hed_validator:
-                        col_validation_issues += hed_validator.validate_input(hed_string)
+                    if event_validator:
+                        col_validation_issues += event_validator.validate_input(hed_string)
                     col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
                 error_handler.pop_error_context()
 

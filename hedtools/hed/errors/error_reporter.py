@@ -4,7 +4,7 @@ This module is used to report errors found in the validation.
 You can scope the formatted errors with calls to push_error_context and pop_error_context.
 """
 
-from hed.util.error_types import ErrorContext, ErrorSeverity
+from hed.errors.error_types import ErrorContext, ErrorSeverity
 
 from functools import wraps
 
@@ -12,7 +12,14 @@ from functools import wraps
 error_functions = {}
 
 
-def hed_error(error_type, default_severity=ErrorSeverity.ERROR):
+def _register_error_function(error_type, wrapper_func):
+    if error_type in error_functions:
+        raise KeyError(f"{error_type} defined more than once.")
+
+    error_functions[error_type] = wrapper_func
+
+
+def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None):
     """
     Decorator for errors in error handler or inherited classes.
 
@@ -22,10 +29,15 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR):
         This should be a value from error_types, but doesn't strictly have to be.
     default_severity: ErrorSeverity
         The default severity for the decorated error
+    actual_code: str
+        The actual error to report to the outside world
     """
+    if actual_code is None:
+        actual_code = error_type
+
     def inner_decorator(func):
         @wraps(func)
-        def wrapper(self, *args, hed_string=None, severity=default_severity, **kwargs):
+        def wrapper(self, *args, severity=default_severity, **kwargs):
             """
             Wrapper function for error handling non-tag errors
 
@@ -35,8 +47,6 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR):
                The error handler that's dealing with this error
            args:
                Any other non keyword args
-           hed_string: str, Optional
-               Optional way to pass the current hed_string.  Will normally be gathered from error_context
            severity: ErrorSeverity, Optional
                Will override the default error value if passed.(If you want to turn a warning into an error)
            kwargs:
@@ -46,19 +56,16 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR):
            error_list: [{}]
            """
             base_message, error_vars = func(*args, **kwargs)
-            error_object = self._create_error_object(error_type, base_message, severity, hed_string, **error_vars)
+            error_object = self._create_error_object(actual_code, base_message, severity, **error_vars)
             return [error_object]
 
-        if error_type in error_functions:
-            raise KeyError(f"{error_type} defined more than once.")
-
-        error_functions[error_type] = wrapper
+        _register_error_function(error_type, wrapper_func=wrapper)
         return wrapper
 
     return inner_decorator
 
 
-def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=False):
+def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=False, actual_code=None):
     """
     Decorator for errors in error handler or inherited classes.
 
@@ -70,11 +77,16 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
         The default severity for the decorated error
     has_sub_tag : bool
         Determines if this error message also wants a sub_tag passed down.  eg "This" in "This/Is/A/Tag"
+    actual_code: str
+        The actual error to report to the outside world
     """
+    if actual_code is None:
+        actual_code = error_type
+
     def inner_decorator(func):
         if has_sub_tag:
             @wraps(func)
-            def wrapper(self, tag, index, index_end, *args, hed_string=None, severity=default_severity,
+            def wrapper(self, tag, index_in_tag, index_in_tag_end, *args, severity=default_severity,
                         **kwargs):
                 """
                 Wrapper function for error handling tag errors with sub tags.
@@ -87,12 +99,10 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     The hed tag object with the problem
                 index: int,
                     The index into the tag with a problem(usually 0)
-                index_end: int
+                index_in_tag_end: int
                     the last index into the tag with a problem(usually len(tag)
                 args:
                     Any other non keyword args
-                hed_string: str, Optional
-                    Optional way to pass the current hed_string.  Will normally be gathered from error_context
                 severity: ErrorSeverity, Optional
                     Will override the default error value if passed.(If you want to turn a warning into an error)
                 kwargs:
@@ -102,33 +112,26 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 error_list: [{}]
                 """
                 tag_as_string = str(tag)
-                if index_end is None:
-                    index_end = len(tag_as_string)
-                problem_tag = tag_as_string[index: index_end]
+                if index_in_tag_end is None:
+                    index_in_tag_end = len(tag_as_string)
+                problem_sub_tag = tag_as_string[index_in_tag: index_in_tag_end]
                 try:
-                    hed_string = tag._hed_string
-                    tag = tag.org_tag
+                    org_tag_text = tag.org_tag
                 except AttributeError:
-                    pass
+                    org_tag_text = "PlaceholderYouShouldNotSee"
 
-                if not hed_string:
-                    hed_string = tag
-
-                base_message, error_vars = func(tag, problem_tag, *args, **kwargs)
-                base_message += f"  Problem spans tag indexes: {index}, {index_end}"
-                error_object = self._create_error_object(error_type, base_message, severity, hed_string, **error_vars,
-                                                         index=index, index_end=index_end, source_tag=tag)
+                base_message, error_vars = func(org_tag_text, problem_sub_tag, *args, **kwargs)
+                base_message += f"  Problem spans tag indexes: {index_in_tag}, {index_in_tag_end}"
+                error_object = self._create_error_object(actual_code, base_message, severity, **error_vars,
+                                                         index_in_tag=index_in_tag, index_in_tag_end=index_in_tag_end, source_tag=tag)
 
                 return [error_object]
 
-            if error_type in error_functions:
-                raise KeyError(f"{error_type} defined more than once.")
-
-            error_functions[error_type] = wrapper
+            _register_error_function(error_type, wrapper_func=wrapper)
             return wrapper
         else:
             @wraps(func)
-            def wrapper(self, tag, *args, hed_string=None, severity=default_severity, **kwargs):
+            def wrapper(self, tag, *args, severity=default_severity, **kwargs):
                 """
                 Wrapper function for error handling tag errors
 
@@ -140,8 +143,6 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     The hed tag object with the problem
                 args:
                     Any other non keyword args
-                hed_string: str, Optional
-                    Optional way to pass the current hed_string.  Will normally be gathered from error_context
                 severity: ErrorSeverity, Optional
                     Will override the default error value if passed.(If you want to turn a warning into an error)
                 kwargs:
@@ -151,31 +152,23 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 error_list: [{}]
                 """
                 try:
-                    hed_string = tag._hed_string
-                    tag = tag.org_tag
+                    org_tag_text = tag.org_tag
                 except AttributeError:
-                    pass
-
-                if not hed_string:
-                    hed_string = tag
-
-                base_message, error_vars = func(tag, *args, **kwargs)
-                error_object = self._create_error_object(error_type, base_message, severity, hed_string, **error_vars,
+                    org_tag_text = "PlaceholderYouShouldNotSee"
+                base_message, error_vars = func(org_tag_text, *args, **kwargs)
+                error_object = self._create_error_object(actual_code, base_message, severity, **error_vars,
                                                          source_tag=tag)
 
                 return [error_object]
 
-            if error_type in error_functions:
-                raise KeyError(f"{error_type} defined more than once.")
-
-            error_functions[error_type] = wrapper
+            _register_error_function(error_type, wrapper_func=wrapper)
             return wrapper
 
     return inner_decorator
 
 
 # Import after hed_error decorators are defined.
-from hed.util import error_messages
+from hed.errors import error_messages
 
 
 class ErrorHandler:
@@ -234,7 +227,7 @@ class ErrorHandler:
 
         return [error_object]
 
-    def _create_error_object(self, error_type, base_message, severity, hed_string, **kwargs):
+    def _create_error_object(self, error_type, base_message, severity, **kwargs):
         if severity == ErrorSeverity.ERROR:
             error_prefix = "ERROR: "
         else:
@@ -245,21 +238,44 @@ class ErrorHandler:
                         'severity': severity
                         }
 
-        if hed_string:
-            error_object[ErrorContext.HED_STRING] = (hed_string, False)
-
         self._add_context_to_errors(error_object)
 
         for key, value in kwargs.items():
             error_object.setdefault(key, value)
 
+        # This part is optional as you can always generate these as needed.
+        start, end = self._get_tag_span_to_error_object(error_object)
+        if start is not None and end is not None:
+            error_object["char_index"] = start + error_object.get('index_in_tag', 0)
+            index_in_tag_end = end
+            if 'index_in_tag_end' in error_object:
+                index_in_tag_end = start + error_object['index_in_tag_end']
+            error_object['char_index_end'] = index_in_tag_end
         return error_object
+
+    @staticmethod
+    def _get_tag_span_to_error_object(error_object):
+        if ErrorContext.HED_STRING not in error_object:
+            return None, None
+
+        if 'char_index' in error_object:
+            char_index = error_object['char_index']
+            char_index_end = error_object.get('char_index_end', char_index + 1)
+            return char_index, char_index_end
+        elif 'source_tag' in error_object:
+            source_tag = error_object['source_tag']
+            if isinstance(source_tag, int):
+                return None, None
+        else:
+            return None, None
+
+        hed_string = error_object[ErrorContext.HED_STRING][0]
+        span = hed_string._get_org_tag_span(source_tag)
+        return span
 
     def format_error(self, error_type, *args, **kwargs):
         """
             The parameters vary based on what type of error this is.
-
-            This is mostly intended a way to assemble errors and add context later.
 
         Parameters
         ----------

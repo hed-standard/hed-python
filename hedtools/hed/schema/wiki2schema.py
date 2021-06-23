@@ -3,7 +3,7 @@ This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
 from hed.schema.hed_schema_constants import HedKey
-from hed.util.exceptions import HedFileError, HedExceptions
+from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.hed_schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema import wiki_constants

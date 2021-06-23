@@ -1,8 +1,8 @@
 import json
 from hed.models.column_definition import ColumnDef
-from hed.util.error_types import ErrorContext
-from hed.util import error_reporter
-from hed.util.exceptions import HedFileError, HedExceptions
+from hed.errors.error_types import ErrorContext
+from hed.errors import error_reporter
+from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.models.def_dict import DefDict
 from hed.models.hed_string import HedString
 

@@ -1,22 +1,22 @@
 """
-This module contains the HedValidator class which is used to validate the tags in a HED string or a file. The file
-types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after creating a HedValidator class call
+This module contains the EventValidator class which is used to validate the tags in a HED string or a file. The file
+types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after creating a EventValidator class call
 the get_validation_issues() function.
 
 """
-from hed.util.error_types import ErrorContext
-from hed.util import error_reporter
+from hed.errors.error_types import ErrorContext
+from hed.errors import error_reporter
 
 from hed.models.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
 from hed.models.hed_input import BaseInput
-from hed.util import util_constants
+from hed.models import model_constants
 
 
-class HedValidator:
+class EventValidator:
     def __init__(self, check_for_warnings=False, run_semantic_validation=True,
                  hed_schema=None, allow_numbers_to_be_pound_sign=False, error_handler=None):
-        """Constructor for the HedValidator class.
+        """Constructor for the EventValidator class.
 
         Parameters
         ----------
@@ -32,8 +32,8 @@ class HedValidator:
             Used to report errors.  Uses a default one if none passed in.
         Returns
         -------
-        HedValidator object
-            A HedValidator object.
+        EventValidator object
+            A EventValidator object.
 
         """
         self._tag_validator = None
@@ -90,19 +90,34 @@ class HedValidator:
             self._error_handler.pop_error_context()
         return validation_issues
 
-    def get_tag_validator(self):
-        """Gets a TagValidator object.
+    def _validate_hed_strings(self, hed_strings):
+        """Validates the tags in an array of HED strings
 
-        Parameters
-        ----------
+         Parameters
+         ----------
+         hed_strings: [str]
+            An array of HED strings.
+         Returns
+         -------
+         []
+             The issues associated with the HED strings.
 
-        Returns
-        -------
-        TagValidator object
-            A TagValidator object.
-
-        """
-        return self._tag_validator
+         """
+        eeg_issues = []
+        for i in range(0, len(hed_strings)):
+            hed_string = hed_strings[i]
+            hed_string_obj = HedString(hed_string)
+            self._error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
+            validation_issues = self._tag_validator.run_hed_string_validators(hed_string_obj)
+            if not validation_issues:
+                validation_issues += hed_string_obj.convert_to_canonical_forms(self._hed_schema, self._error_handler)
+                if not validation_issues:
+                    validation_issues += self._validate_tags_in_hed_string(hed_string_obj)
+                    validation_issues += self._validate_groups_in_hed_string(hed_string_obj)
+                    validation_issues += self._validate_individual_tags_in_hed_string(hed_string_obj)
+            eeg_issues.append(validation_issues)
+            self._error_handler.pop_error_context()
+        return eeg_issues
 
     def _validate_hed_tags_in_file(self, hed_input):
         """
@@ -140,43 +155,15 @@ class HedValidator:
              The issues with the appended issues found in the particular row.
 
          """
-        row_hed_string = row_dict[util_constants.ROW_HED_STRING]
-        column_to_hed_tags_dictionary = row_dict[util_constants.COLUMN_TO_HED_TAGS]
-        expansion_column_issues = row_dict.get(util_constants.COLUMN_ISSUES, {})
-        self._append_column_validation_issues_if_found(validation_issues, row_number, column_to_hed_tags_dictionary,
-                                                       expansion_column_issues)
-        self._append_row_validation_issues_if_found(validation_issues, row_number, row_hed_string)
+        row_hed_string = row_dict[model_constants.ROW_HED_STRING]
+        column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
+        expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
+        self._append_row_validation_issues_if_found(validation_issues, row_number, column_to_hed_tags_dictionary,
+                                                    row_hed_string, expansion_column_issues)
         return validation_issues
 
-    def _append_row_validation_issues_if_found(self, validation_issues, row_number, row_hed_string):
-        """Appends the issues associated with a particular row in a spreadsheet.
-
-         Parameters
-         ----------
-        validation_issues: str
-            A  string that contains all the issues found in the spreadsheet.
-        row_number: int
-            The row number that the issues are associated with.
-        row_hed_string: str
-            The HED string associated with a row.
-         Returns
-         -------
-         []
-             The issues with the appended issues found in the particular row.
-
-         """
-        if row_hed_string:
-            self._error_handler.push_error_context(ErrorContext.ROW, row_number)
-            self._error_handler.push_error_context(ErrorContext.HED_STRING, row_hed_string, increment_depth_after=False)
-            row_validation_issues = self._validate_tags_in_hed_string(row_hed_string)
-            row_validation_issues += self._validate_tag_levels_in_hed_string(row_hed_string)
-            validation_issues += row_validation_issues
-            self._error_handler.pop_error_context()
-            self._error_handler.pop_error_context()
-        return validation_issues
-
-    def _append_column_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary,
-                                                  expansion_issues):
+    def _append_row_validation_issues_if_found(self, validation_issues, row_number, column_to_hed_tags_dictionary,
+                                               row_hed_string, expansion_issues):
         """Appends the issues associated with a particular row column in a spreadsheet.
 
          Parameters
@@ -187,6 +174,8 @@ class HedValidator:
             The row number that the issues are associated with.
         column_to_hed_tags_dictionary: dict
             A dictionary which associates columns with HED tags
+        row_hed_string: str
+            The HED string associated with a row.
         expansion_issues: {int: {}}
             A dict containing an issue expanding a column that should be added as an error.
             This is primarily a missing category key in a json file.
@@ -197,80 +186,48 @@ class HedValidator:
          """
         if column_to_hed_tags_dictionary:
             self._error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number, column_issues in expansion_issues.items():
-                self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                for issue in column_issues:
-                    validation_issues += self._error_handler.format_error(**issue)
-                self._error_handler.pop_error_context()
+            column_failed = False
             for column_number in column_to_hed_tags_dictionary:
+                new_column_issues = []
                 self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                if column_number in expansion_issues:
+                    column_issues = expansion_issues[column_number]
+                    for issue in column_issues:
+                        new_column_issues += self._error_handler.format_error(**issue)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
                 self._error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
                                                        increment_depth_after=False)
-                validation_issues += column_hed_string.calculate_canonical_forms(self._hed_schema, self._error_handler)
-                validation_issues += self.validate_column_hed_string(column_hed_string)
+                new_column_issues += self._tag_validator.run_hed_string_validators(column_hed_string)
+                if not new_column_issues:
+                    new_column_issues += column_hed_string.convert_to_canonical_forms(self._hed_schema,
+                                                                                     self._error_handler)
+
+                if not new_column_issues:
+                    new_column_issues += self._validate_individual_tags_in_hed_string(column_hed_string)
+                else:
+                    column_failed = True
+
                 self._error_handler.pop_error_context()
+                self._error_handler.pop_error_context()
+                validation_issues += new_column_issues
+
+            if not column_failed:
+                self._error_handler.push_error_context(ErrorContext.HED_STRING, row_hed_string,
+                                                       increment_depth_after=False)
+                row_validation_issues = self._validate_tags_in_hed_string(row_hed_string)
+                row_validation_issues += self._validate_groups_in_hed_string(row_hed_string)
+                validation_issues += row_validation_issues
                 self._error_handler.pop_error_context()
             self._error_handler.pop_error_context()
         return validation_issues
 
-    def validate_column_hed_string(self, column_hed_string):
-        """Appends the issues associated with a particular row in a spreadsheet.
-
-         Parameters
-         ----------
-        column_hed_string: str
-            The HED string associated with a row column.
-         Returns
-         -------
-         issues: list
-             The issues associated with a particular row column.
-
-         """
-        validation_issues = []
-        validation_issues += self._tag_validator.run_hed_string_validators(str(column_hed_string))
-        if not validation_issues:
-            validation_issues += self._validate_individual_tags_in_hed_string(column_hed_string)
-            validation_issues += self._validate_groups_in_hed_string(column_hed_string)
-        return validation_issues
-
-    def _validate_hed_strings(self, hed_strings):
-        """Validates the tags in an array of HED strings
-
-         Parameters
-         ----------
-         hed_strings: [str]
-            An array of HED strings.
-         Returns
-         -------
-         []
-             The issues associated with the HED strings.
-
-         """
-        eeg_issues = []
-        for i in range(0, len(hed_strings)):
-            hed_string = hed_strings[i]
-            hed_string_obj = HedString(hed_string)
-            self._error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
-            validation_issues = self._tag_validator.run_hed_string_validators(str(hed_string_obj))
-            if not validation_issues:
-                validation_issues += hed_string_obj.calculate_canonical_forms(self._hed_schema, self._error_handler)
-                if not validation_issues:
-                    validation_issues += self._validate_tags_in_hed_string(hed_string_obj)
-                    validation_issues += self._validate_tag_levels_in_hed_string(hed_string_obj)
-                    validation_issues += self._validate_individual_tags_in_hed_string(hed_string_obj)
-                    validation_issues += self._validate_groups_in_hed_string(hed_string_obj)
-            eeg_issues.append(validation_issues)
-            self._error_handler.pop_error_context()
-        return eeg_issues
-
-    def _validate_tag_levels_in_hed_string(self, hed_string_delimiter):
+    def _validate_groups_in_hed_string(self, hed_string_obj):
         """Validates the tags at each level in a HED string. This pertains to the top-level, all groups, and nested
            groups.
 
          Parameters
          ----------
-         hed_string_delimiter: HedString
+         hed_string_obj: HedString
             A HedString object.
          Returns
          -------
@@ -279,18 +236,19 @@ class HedValidator:
 
          """
         validation_issues = []
-        tag_groups = hed_string_delimiter.get_all_groups()
-        for original_tag_group in tag_groups:
-            validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group.tags())
+        for original_tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
+            is_group = original_tag_group.is_group()
+            validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group.tags(), is_top_level,
+                                                                              is_group)
 
         return validation_issues
 
-    def _validate_tags_in_hed_string(self, hed_string_delimiter):
+    def _validate_tags_in_hed_string(self, hed_string_obj):
         """Validates the multi-tag properties in a hed string, eg required tags.
 
          Parameters
          ----------
-         hed_string_delimiter: HedString
+         hed_string_obj: HedString
             A HedString  object.
          Returns
          -------
@@ -299,35 +257,16 @@ class HedValidator:
 
          """
         validation_issues = []
-        tags = hed_string_delimiter.get_all_tags()
-        validation_issues += self._tag_validator._run_tag_validators(tags)
+        tags = hed_string_obj.get_all_tags()
+        validation_issues += self._tag_validator.run_all_tags_validators(tags)
         return validation_issues
 
-    def _validate_groups_in_hed_string(self, hed_string_delimiter):
-        """Validates the groups in a HED string.
-
-         Parameters
-         ----------
-         hed_string_delimiter: HedString
-            A HedString  object.
-         Returns
-         -------
-         list
-             The issues associated with the groups in the HED string.
-
-         """
-        validation_issues = []
-        tag_groups = hed_string_delimiter.get_all_groups()
-        for tag_group in tag_groups:
-            validation_issues += self._tag_validator.run_tag_group_validators(tag_group)
-        return validation_issues
-
-    def _validate_individual_tags_in_hed_string(self, hed_string_delimiter):
+    def _validate_individual_tags_in_hed_string(self, hed_string_obj):
         """Validates the individual tags in a HED string.
 
          Parameters
          ----------
-         hed_string_delimiter: HedString
+         hed_string_obj: HedString
             A HedString  object.
          Returns
          -------
@@ -336,7 +275,7 @@ class HedValidator:
 
          """
         validation_issues = []
-        tags = hed_string_delimiter.get_all_tags()
+        tags = hed_string_obj.get_all_tags()
         for hed_tag in tags:
             validation_issues += \
                 self._tag_validator.run_individual_tag_validators(hed_tag)

@@ -1,6 +1,6 @@
 import unittest
-from hed.util import error_reporter
-from hed.util.error_types import ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings
+from hed.errors import error_reporter
+from hed.errors.error_types import ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings
 
 
 class Test(unittest.TestCase):
