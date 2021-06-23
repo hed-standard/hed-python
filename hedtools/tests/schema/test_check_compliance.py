@@ -2,8 +2,8 @@ import unittest
 import os
 from hed.schema import schema_compliance
 from hed import schema
-from hed.util import error_reporter
-from hed.util.error_types import SchemaWarnings
+from hed.errors import error_reporter
+from hed.errors.error_types import SchemaWarnings
 
 
 class Test(unittest.TestCase):

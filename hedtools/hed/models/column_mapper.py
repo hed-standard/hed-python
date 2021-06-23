@@ -1,7 +1,7 @@
 from hed.models.column_definition import ColumnDef, ColumnType
 from hed.models.column_def_group import ColumnDefGroup
 from hed.models.hed_string import HedString
-from hed.util import util_constants
+from hed.models import model_constants
 import copy
 
 
@@ -227,11 +227,11 @@ class ColumnMapper:
 
             column_to_hed_tags_dictionary[column_number + 1] = translated_column
 
-        result_dict[util_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
+        result_dict[model_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
         if issues_dict:
-            result_dict[util_constants.COLUMN_ISSUES] = issues_dict
+            result_dict[model_constants.COLUMN_ISSUES] = issues_dict
         final_hed_string = HedString.create_from_other(column_to_hed_tags_dictionary.values())
-        result_dict[util_constants.ROW_HED_STRING] = final_hed_string
+        result_dict[model_constants.ROW_HED_STRING] = final_hed_string
 
         return result_dict
 

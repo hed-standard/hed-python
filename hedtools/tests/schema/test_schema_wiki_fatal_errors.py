@@ -2,8 +2,7 @@ import unittest
 import os
 
 from hed import schema
-from hed.schema import HedKey
-from hed.util.exceptions import HedFileError, HedExceptions
+from hed.errors.exceptions import HedFileError, HedExceptions
 
 
 class TestHedSchema(unittest.TestCase):
@@ -38,3 +37,4 @@ class TestHedSchema(unittest.TestCase):
                 formated_error = e.format_error_message()
                 self.assertEqual(e.error_type, error)
                 pass
+>>>>>>> b22dc7640931f200ceb027b2b613e378b7f53af8

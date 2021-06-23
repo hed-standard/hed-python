@@ -1,20 +1,24 @@
 """
-Examples of creating a HedValidator and validating various Hed Strings with it.
+Examples of creating a EventValidator and validating various Hed Strings with it.
 
 Classes Demonstrated:
-HedValidator - Validates a given input string or file
+EventValidator - Validates a given input string or file
 """
 
 import hed
 from hed import schema
-from hed.validator.hed_validator import HedValidator
+from hed.validator.event_validator import EventValidator
 
 if __name__ == '__main__':
     local_hed_file = 'data/HED7.1.1.xml'   # path HED v7.1.1 stored locally
     hed_schema = schema.load_schema(local_hed_file)
-    hed_validator_old = HedValidator(hed_schema)
-    hed_validator_current = HedValidator()
-    hed_validator_no_semantic = HedValidator(run_semantic_validation=False)
+    hed_validator_old = EventValidator(hed_schema)
+    hed_validator_current = EventValidator()
+    hed_validator_no_semantic = EventValidator(run_semantic_validation=False)
+    hed_string_test = "Sensory-event,Visual,Experimental-stimulus,Green,Non-target,(Letter/D, Center-of-Screen)\n\n\n"
+    validation_issues = hed_validator_old.validate_input(hed_string_test)
+    print(hed.get_printable_issue_string(validation_issues,
+                                         title='[Example 1a] hed_string_1 should have no issues with HEDv7.1.1'))
 
     # Example 1a: Valid HED string for HED <= v7.1.1
     hed_string_1 = 'Event/Label/ButtonPuskDeny, Event/Description/Button push to deny access to the ID holder,' \

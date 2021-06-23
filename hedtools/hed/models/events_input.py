@@ -2,7 +2,7 @@ from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
 from hed.models.column_def_group import ColumnDefGroup
 from hed.models.def_mapper import DefinitionMapper
-from hed.util import error_reporter
+from hed.errors import error_reporter
 
 
 class EventsInput(BaseInput):

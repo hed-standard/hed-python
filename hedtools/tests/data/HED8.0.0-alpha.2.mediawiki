@@ -1179,7 +1179,9 @@ HED version: 8.0.0-alpha.2
 * SIUnitModifier <nowiki>{boolProperty, unitModifierProperty}[SI unit modifier indicating a multiple or submultiple of a base unit.]</nowiki> 
 * SIUnitSymbolModifier <nowiki>{boolProperty, unitModifierProperty}[SI unit symbol modifier indicating a multiple or submultiple of a base unit symbol.]</nowiki>
 * suggestedTag <nowiki>[Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.]</nowiki> 
-* takesValue <nowiki>{boolProperty}[This tag will have a hashtag placeholder child in the schema which is expected to be replaced with a user-defined value.] </nowiki> 
+* tagGroup <nowiki>{boolProperty}[A schema attribute indicating the tag can only appear inside a tag group.] </nowiki>
+* takesValue <nowiki>{boolProperty}[A schema attribute indicating the tag is a hashtag placeholder which is expected to be replaced with a user-defined value.] </nowiki>
+* topLevelTagGroup <nowiki>{boolProperty}[A schema attribute indicating that this tag (or its descendants) can only appear in a top-level tag group.] </nowiki>
 * unique <nowiki>{boolProperty}[Only one of this tag or its descendants can be used within a single tag group or event.]</nowiki> 
 * unitSymbol <nowiki>{boolProperty, unitProperty}[Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
 * unitClass <nowiki>[Specifies the type of a unit for a tag.]</nowiki>

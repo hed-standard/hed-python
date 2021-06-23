@@ -1,19 +1,19 @@
 """
-Examples of creating a HedValidator and validating various spreadsheets using it.
+Examples of creating a EventValidator and validating various spreadsheets using it.
 Also contains examples of catching HedFileErrors for invalid input.
 
 Classes Demonstrated:
 HedInput - Used to open/modify/save a spreadsheet
-HedValidator - Validates a given input string or file
+EventValidator - Validates a given input string or file
 HedFileError - Exception thrown when a file cannot be opened.(parsing error, file not found error, etc)
 """
 
 import os
 import hed
 
-from hed.validator.hed_validator import HedValidator
+from hed.validator.event_validator import EventValidator
 from hed.models.hed_input import HedInput
-from hed.util.exceptions import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed import schema
 
 
@@ -28,10 +28,10 @@ if __name__ == '__main__':
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
 
     hed_schema_cached = schema.load_schema_version(xml_version_number='7.1.1')
-    hed_validator_old = HedValidator(hed_schema=hed_schema_cached)
+    hed_validator_old = EventValidator(hed_schema=hed_schema_cached)
     hed_schema_local = schema.load_schema(local_hed_file)
-    hed_validator_local = HedValidator(hed_schema=hed_schema_local)
-    hed_validator_local_warnings = HedValidator(hed_schema=hed_schema_local, check_for_warnings=True)
+    hed_validator_local = EventValidator(hed_schema=hed_schema_local)
+    hed_validator_local_warnings = EventValidator(hed_schema=hed_schema_local, check_for_warnings=True)
 
     # Example 1a: Valid TSV file with default version of HED
     print(valid_tsv_file)
