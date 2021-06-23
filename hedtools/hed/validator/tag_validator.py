@@ -824,6 +824,9 @@ class TagValidator:
         attribute_name_or_value: bool or str
             Returns the name or value of the specified attribute
         """
+        if not original_tag.extension_or_value_portion:
+            return False
+
         if key not in self._hed_schema_dictionaries:
             return False
         value_class_tag = original_tag.base_tag.lower() + "/#"
