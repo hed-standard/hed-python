@@ -4,8 +4,8 @@ This module contains the actual formatted error messages for each type.
 Add new errors here, or any other file imported after error_reporter.py.
 """
 
-from hed.util.error_reporter import hed_error, hed_tag_error
-from hed.util.error_types import ValidationErrors, ValidationWarnings, SchemaErrors, \
+from hed.errors.error_reporter import hed_error, hed_tag_error
+from hed.errors.error_types import ValidationErrors, ValidationWarnings, SchemaErrors, \
     SidecarErrors, SchemaWarnings, ErrorSeverity, DefinitionErrors
 
 
@@ -23,21 +23,36 @@ def val_error_invalid_unit(tag, unit_class_units):
 
 
 @hed_error(ValidationErrors.EMPTY_TAG)
-def val_error_extra_comma(character, char_index):
-    return f"HED tags cannot be empty.  Extra comma found at: '{character}' at index {char_index}'", {}
+def val_error_extra_comma(source_string, char_index):
+    character = source_string[char_index]
+    return f"HED tags cannot be empty.  Extra comma found at: '{character}' at index {char_index}'", {
+               'char_index': char_index
+           }
 
 
 @hed_error(ValidationErrors.INVALID_CHARACTER)
-def val_error_invalid_char(character, char_index):
-    return f'Invalid character "{character}" at index {char_index}"', {}
+def val_error_invalid_char(source_string, char_index):
+    character = source_string[char_index]
+    return f'Invalid character "{character}" at index {char_index}"', {
+               'char_index': char_index
+           }
+
+
+@hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True, actual_code=ValidationErrors.INVALID_CHARACTER)
+def val_error_invalid_tag_character(tag, problem_tag):
+    return f"Invalid character {problem_tag} in {tag}", {}
+
 
 
 @hed_error(ValidationErrors.TILDES_NOT_SUPPORTED)
-def val_error_tildes_not_supported(character, char_index):
-    return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'", {}
+def val_error_tildes_not_supported(source_string, char_index):
+    character = source_string[char_index]
+    return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'", {
+               'char_index': char_index
+           }
 
 
-@hed_tag_error(ValidationErrors.COMMA_MISSING)
+@hed_error(ValidationErrors.COMMA_MISSING)
 def val_error_comma_missing(tag):
     return f"Comma missing after - '{tag}'", {}
 
@@ -105,6 +120,22 @@ def val_error_def_value_extra(tag):
     return f"A definition does not take a placeholder value, but was given one.  Definition: '{tag}", {}
 
 
+@hed_tag_error(ValidationErrors.HED_TOP_LEVEL_TAG)
+def val_error_top_level_tag(tag):
+    return f"A tag that must be in a top level group was found in another location.  {str(tag)}", {}
+
+
+@hed_tag_error(ValidationErrors.HED_TAG_GROUP_TAG)
+def val_error_tag_group_tag(tag):
+    return f"A tag that must be in a group was found in another location.  {str(tag)}", {}
+
+
+@hed_tag_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS)
+def val_error_top_level_tags(tag, multiple_tags):
+    tags_as_string = [str(tag) for tag in multiple_tags]
+    return f"Multiple top level tags found in a single group.  First one found: {str(tag)}.  Remainder:{str(tags_as_string)}", {}
+
+
 @hed_error(ValidationWarnings.REQUIRED_PREFIX_MISSING, default_severity=ErrorSeverity.WARNING)
 def val_warning_required_prefix_missing(tag_prefix):
     return f"Tag with prefix '{tag_prefix}' is required", {}
@@ -120,7 +151,7 @@ def val_warning_default_units_used(tag, default_unit):
     return f"No unit specified. Using '{default_unit}' as the default - '{tag}'", {}
 
 
-@hed_tag_error(SchemaErrors.DUPLICATE_TERMS)
+@hed_error(SchemaErrors.DUPLICATE_TERMS)
 def schema_error_duplicate_terms(tag, duplicate_tag_list):
     tag_join_delimiter = f"\n\t"
     return f"Term(Short Tag) '{str(tag)}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"\

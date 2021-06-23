@@ -4,7 +4,7 @@ import os
 from hed.models.column_mapper import ColumnMapper, ColumnType, ColumnDef
 from hed.models.hed_string import HedString
 from hed.schema import load_schema
-from hed.util import util_constants
+from hed.models import model_constants
 
 
 class Test(unittest.TestCase):
@@ -161,7 +161,7 @@ class Test(unittest.TestCase):
         hed_schema = load_schema(schema_file)
         prepended_hed_string = ColumnDef._prepend_prefix_to_required_tag_column_if_needed(
             HedString(self.short_tag_with_missing_prefix), self.short_tag_key)
-        prepended_hed_string.calculate_canonical_forms(hed_schema)
+        prepended_hed_string.convert_to_canonical_forms(hed_schema)
         for tag in prepended_hed_string.get_all_tags():
             self.assertEqual("Character/D", tag.short_tag)
 
@@ -185,7 +185,7 @@ class Test(unittest.TestCase):
             expected_result = expected_results[test_key]
 
             expanded_row = column_mapper.expand_row_tags([test_string])
-            prepended_hed_string = expanded_row[util_constants.ROW_HED_STRING]
+            prepended_hed_string = expanded_row[model_constants.ROW_HED_STRING]
             self.assertEqual(expected_result, str(prepended_hed_string))
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ class TestConverterBase(unittest.TestCase):
     xml_file = '../data/legacy_xml/HED8.0.0-alpha.2.xml'
     wiki_file = '../data/HED8.0.0-alpha.2.mediawiki'
     can_compare = True
-
+    can_legacy = True
     @classmethod
     def setUpClass(cls):
         cls.xml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.xml_file)
@@ -84,19 +84,19 @@ class TestConverterBase(unittest.TestCase):
         self.assertEqual(loaded_schema, wiki_schema_copy)
 
     def test_wikischema2legacyxml(self):
-        # todo: Update this with the new attributes.
-        saved_filename = self.hed_schema_wiki.save_as_xml(save_as_legacy_format=True)
-        try:
-            loaded_schema = schema.load_schema(saved_filename)
-        finally:
-            os.remove(saved_filename)
+        if self.can_legacy:
+            saved_filename = self.hed_schema_wiki.save_as_xml(save_as_legacy_format=True)
+            try:
+                loaded_schema = schema.load_schema(saved_filename)
+            finally:
+                os.remove(saved_filename)
 
-        wiki_schema_copy = copy.deepcopy(self.hed_schema_wiki)
-        self._remove_units_descriptions(wiki_schema_copy)
-        wiki_schema_copy.add_hed2_attributes(only_add_if_none_present=False)
-        self._remove_unknown_attributes(loaded_schema)
+            wiki_schema_copy = copy.deepcopy(self.hed_schema_wiki)
+            self._remove_units_descriptions(wiki_schema_copy)
+            wiki_schema_copy.add_hed2_attributes(only_add_if_none_present=False)
+            self._remove_unknown_attributes(loaded_schema)
 
-        self.assertEqual(loaded_schema, wiki_schema_copy)
+            self.assertEqual(loaded_schema, wiki_schema_copy)
 
     def test_wikischema2wiki(self):
         saved_filename = self.hed_schema_wiki.save_as_mediawiki()
@@ -142,9 +142,10 @@ class TestPropertyAdded(TestConverterBase):
     xml_file = '../data/hed_pairs/added_prop.xml'
     wiki_file = '../data/hed_pairs/added_prop.mediawiki'
     can_compare = True
-
+    can_legacy = False
 
 class TestPropertyAddedUsage(TestConverterBase):
     xml_file = '../data/hed_pairs/added_prop_with_usage.xml'
     wiki_file = '../data/hed_pairs/added_prop_with_usage.mediawiki'
     can_compare = True
+    can_legacy = False

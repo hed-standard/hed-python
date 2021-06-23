@@ -1,11 +1,10 @@
 import unittest
 import os
 
-from hed.models.def_mapper import DefinitionMapper
 from hed import schema
 from hed.models.def_dict import DefDict
-from hed.util import error_reporter
-from hed.util.error_types import DefinitionErrors
+from hed.errors import error_reporter
+from hed.errors.error_types import DefinitionErrors
 from hed.models.hed_string import HedString
 
 class TestDefBase(unittest.TestCase):
@@ -35,7 +34,7 @@ class TestDefDict(TestDefBase):
     basic_hed_string_with_def = f"Item/BasicTestTag1,Item/BasicTestTag2,{label_def_string}"
 
     placeholder_def_contents = "(Item/TestDef1/#,Item/TestDef2)"
-    placehodler_def_string = f"Definition/TestDefPlaceholder/#,{placeholder_def_contents}"
+    placehodler_def_string = f"(Definition/TestDefPlaceholder/#,{placeholder_def_contents})"
 
     def test_check_for_definitions(self):
         def_dict = DefDict()
@@ -47,7 +46,7 @@ class TestDefDict(TestDefBase):
     def test_check_for_definitions_placeholder(self):
         def_dict = DefDict()
         original_def_count = len(def_dict._defs)
-        def_dict.check_for_definitions(HedString(self.placehodler_def_string))
+        issues = def_dict.check_for_definitions(HedString(self.placehodler_def_string))
         new_def_count = len(def_dict._defs)
         self.assertGreater(new_def_count, original_def_count)
 
@@ -56,17 +55,17 @@ class TestDefDict(TestDefBase):
 
     def test_definitions(self):
         test_strings = {
-            'noGroupTag': "Definition/ValidDef1",
-            'placeholderNoGroupTag': "Definition/InvalidDef1/#",
-            'placeholderWrongSpot': "Definition/InvalidDef1#",
-            'twoDefTags': f"Definition/ValidDef1,Definition/InvalidDef2,{self.def_contents_string}",
-            'twoGroupTags': f"Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2}",
+            'noGroupTag': "(Definition/ValidDef1)",
+            'placeholderNoGroupTag': "(Definition/InvalidDef1/#)",
+            'placeholderWrongSpot': "(Definition/InvalidDef1#)",
+            'twoDefTags': f"(Definition/ValidDef1,Definition/InvalidDef2,{self.def_contents_string})",
+            'twoGroupTags': f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
             'duplicateDef': f"(Definition/Def1), (Definition/Def1, {self.def_contents_string})",
             'duplicateDef2': f"(Definition/Def1), (Definition/Def1/#, {self.placeholder_def_contents})",
             # 'defAlreadyTagInSchema': f"Definition/Item",
             'defTooManyPlaceholders': self.placeholder_invalid_def_string,
-            'invalidPlaceholder': f"Definition/InvalidDef1/InvalidPlaceholder",
-            'invalidPlaceholderExtension': f"Definition/InvalidDef1/thispartisnotallowed/#",
+            'invalidPlaceholder': f"(Definition/InvalidDef1/InvalidPlaceholder)",
+            'invalidPlaceholderExtension': f"(Definition/InvalidDef1/thispartisnotallowed/#)",
         }
         expected_results = {
             'noGroupTag': [],
@@ -94,7 +93,7 @@ class TestDefDict(TestDefBase):
                      "Attribute/Informational/Definition/TempTestDef"]
 
         for tag in test_tags:
-            result = DefinitionMapper._check_tag_starts_with(tag, target_tag_name)
+            result = DefDict._check_tag_starts_with(tag, target_tag_name)
             self.assertTrue(result)
 
 

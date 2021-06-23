@@ -1,6 +1,6 @@
 from semantic_version import Version
 from hed.schema import hed_schema_constants as constants
-from hed.util.exceptions import HedExceptions, HedFileError
+from hed.errors.exceptions import HedExceptions, HedFileError
 
 
 def _validate_library_name(library_name):

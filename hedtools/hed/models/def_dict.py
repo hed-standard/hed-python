@@ -1,8 +1,7 @@
 from hed.models.hed_string import HedString
 from hed.models.hed_group import HedGroup
-from hed.models.hed_tag import HedTag
-from hed.util.error_types import DefinitionErrors
-from hed.util import error_reporter
+from hed.errors.error_types import DefinitionErrors
+from hed.errors import error_reporter
 
 
 class DefTagNames:
@@ -32,11 +31,11 @@ class DefEntry:
         self.contents = contents_string
         self.takes_value = takes_value
 
-    def get_definition(self, placeholder_value=None):
+    def get_definition(self, tag, placeholder_value=None):
         if self.takes_value == (placeholder_value is None):
-            return None
+            return None, []
 
-        output_contents = None
+        output_contents = [tag]
         name = self.name
         if self.contents:
             hed_string = self.contents
@@ -44,14 +43,9 @@ class DefEntry:
                 hed_string = hed_string.replace("#", placeholder_value)
                 name = f"{name}/{placeholder_value}"
 
-            output_contents = HedString.split_hed_string_into_groups(hed_string)
+            output_contents += HedString.split_hed_string_into_groups(hed_string)
 
-        # Possibly update this to properly point to the original def tag
-        def_tag = HedTag(f"{DefTagNames.ELABEL_ORG_KEY}{name}", span=(0, len(f"{DefTagNames.ELABEL_ORG_KEY}{name}")))
-        if output_contents:
-            return [def_tag, output_contents]
-        else:
-            return [def_tag]
+        return f"{DefTagNames.ELABEL_ORG_KEY}{name}", output_contents
 
 
 class DefDict:
@@ -107,7 +101,7 @@ class DefDict:
             error_handler = error_reporter.ErrorHandler()
 
         validation_issues = []
-        for tag_group in hed_string_obj.get_all_groups():
+        for tag_group in hed_string_obj.groups():
             def_tags = []
             group_tags = []
             other_tags = []

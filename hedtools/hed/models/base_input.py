@@ -6,10 +6,10 @@ import io
 
 from hed.models.def_dict import DefDict
 from hed.models.column_mapper import ColumnMapper
-from hed.util.exceptions import HedFileError, HedExceptions
-from hed.util.error_types import ErrorContext
-from hed.util.error_reporter import ErrorHandler
-from hed.util import util_constants
+from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.errors.error_types import ErrorContext
+from hed.errors.error_reporter import ErrorHandler
+from hed.models import model_constants
 
 
 class BaseInput:
@@ -307,7 +307,7 @@ class BaseInput:
             if return_row_dict:
                 yield row_number + start_at_one, row_dict
             else:
-                yield row_number + start_at_one, row_dict[util_constants.COLUMN_TO_HED_TAGS]
+                yield row_number + start_at_one, row_dict[model_constants.COLUMN_TO_HED_TAGS]
 
     def set_cell(self, row_number, column_number, new_text, include_column_prefix_if_exist=False):
         """
@@ -356,7 +356,7 @@ class BaseInput:
             dictionary which associates columns with HED tags
 
         """
-        return row_dict[util_constants.ROW_HED_STRING], row_dict[util_constants.COLUMN_TO_HED_TAGS]
+        return row_dict[model_constants.ROW_HED_STRING], row_dict[model_constants.COLUMN_TO_HED_TAGS]
 
     @staticmethod
     def _is_extension_type(filename, allowed_exts):

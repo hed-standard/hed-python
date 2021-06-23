@@ -66,7 +66,6 @@ class HedFileError(Exception):
         }
         default_error_message = f'{error_prefix}Internal Error'
         error_message = error_types.get(error_type, default_error_message)
-        print(error_message)
 
         error_object = {'code': error_type,
                         'message': error_message}

@@ -28,9 +28,12 @@ class HedKey:
     Recommended = 'recommended'
     RequiredPrefix = 'required'
     RequireChild = 'requireChild'
+    TagGroup = 'tagGroup'
     TakesValue = 'takesValue'
+    TopLevelTagGroup = 'topLevelTagGroup'
     Unique = 'unique'
     UnitClass = 'unitClass'
+    UnitPrefix = 'unitPrefix'
 
     BoolProperty = 'boolProperty'
     UnitClassProperty = 'unitClassProperty'
