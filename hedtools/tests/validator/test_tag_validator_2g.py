@@ -478,7 +478,9 @@ class IndividualHedTags(TestHed):
             'placeholderNoUnit': 'Event/Duration/#',
             'placeholderUnit': 'Event/Duration/# ms',
             'placeholderWrongUnit': 'Event/Duration/# hz',
-            'placeholderWrongUnitSecondTag': 'Event, Event/Duration/# hz'
+            'placeholderWrongUnitSecondTag': 'Event, Event/Duration/# hz',
+            'noExtensionRequireChild': 'Event/Duration',
+            'noExtension': 'Attribute/Temporal rate'
         }
         expected_results = {
             'correctUnit': True,
@@ -498,7 +500,9 @@ class IndividualHedTags(TestHed):
             'placeholderNoUnit': False,
             'placeholderUnit': False,
             'placeholderWrongUnit': False,
-            'placeholderWrongUnitSecondTag': False
+            'placeholderWrongUnitSecondTag': False,
+            'noExtensionRequireChild': False,
+            'noExtension': True
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
@@ -546,6 +550,8 @@ class IndividualHedTags(TestHed):
                                     + self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
                                                                        tag=1,
                                                                        unit_class_units=legal_time_units),
+            'noExtensionRequireChild': self.format_error_but_not_really(ValidationErrors.REQUIRE_CHILD, tag=0),
+            'noExtension': []
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
