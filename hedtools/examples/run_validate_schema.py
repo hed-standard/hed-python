@@ -4,7 +4,7 @@ Example of how to validate a given hed schema file.
 Functions Demonstrated:
 hed_schema.check_compliance - Checks if a HedSchema object is hed3 compatible.
 """
-from hed.util.error_reporter import get_printable_issue_string
+from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_file import load_schema
 
 if __name__ == '__main__':

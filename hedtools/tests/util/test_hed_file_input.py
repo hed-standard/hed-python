@@ -5,7 +5,7 @@ from hed.models.hed_input import HedInput
 from hed.models.hed_string import HedString
 from hed.models.column_def_group import ColumnDefGroup
 from hed.models.events_input import EventsInput
-from hed.util.exceptions import HedFileError
+from hed.errors.exceptions import HedFileError
 
 
 class Test(unittest.TestCase):
@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
 
         for row_number, column_to_hed_tags in file_input:
             breakHere = 3
-        breakHere = 3
+
         # Just make sure this didn't crash for now
         self.assertTrue(True)
 
@@ -60,7 +60,8 @@ class Test(unittest.TestCase):
         input_file = EventsInput(events_path, json_def_files=column_group,
                                  def_dicts=def_dict)
 
-        events_file_as_string = "".join([line for line in open(events_path)])
+        with open(events_path) as file:
+            events_file_as_string = "".join([line for line in file])
         input_file_from_string = EventsInput(events_path, json_def_files=column_group,
                                              def_dicts=def_dict,
                                              csv_string=events_file_as_string)

@@ -43,6 +43,9 @@ class HedGroup:
         """
         self._children.append(new_tag_or_group)
 
+    def __bool__(self):
+        return bool(self._children)
+
     def __iter__(self):
         """
         Returns an iterator over all HedTags and HedGroups that are in this group.  Not recursive.
@@ -84,9 +87,17 @@ class HedGroup:
                 final_list.append(current_group_or_tag)
         return final_list
 
-    def get_all_groups(self):
+    def is_group(self):
+        return self._include_paren
+
+    def get_all_groups(self, also_return_depth=False):
         """
         Returns all the HedGroups, including descendants and self.
+
+        Parameters
+        ----------
+        also_return_depth : bool
+            If True, this yields tuples(group, depth) rather than just groups
 
         Returns
         -------
@@ -103,6 +114,10 @@ class HedGroup:
                 node_list = current_group_or_tag._children + node_list
                 final_list.append(current_group_or_tag)
 
+        if also_return_depth:
+            top_groups = self.groups()
+
+            final_list = [(group, group in top_groups) for group in final_list]
         return final_list
 
     def tags(self):
@@ -115,6 +130,17 @@ class HedGroup:
             The list of all tags directly in this group.
         """
         return [tag for tag in self._children if isinstance(tag, HedTag)]
+
+    def groups(self):
+        """
+        Returns the direct child groups of this group, filtering out HedTag children
+
+        Returns
+        -------
+        group_list: [HedGroup]
+            The list of all tags directly in this group.
+        """
+        return [group for group in self._children if isinstance(group, HedGroup)]
 
     def get_original_hed_string(self):
         return self._hed_string[self._startpos:self._endpos]
@@ -141,8 +167,7 @@ class HedGroup:
         """
         if self._include_paren:
             return "(" + ",".join([str(child) for child in self._children]) + ")"
-        else:
-            return ",".join([str(child) for child in self._children])
+        return ",".join([str(child) for child in self._children])
 
     def lower(self):
         """Convenience function, equivalent to str(self).lower()"""
@@ -164,3 +189,20 @@ class HedGroup:
 
         replace_index = self._children.index(tag)
         self._children[replace_index] = new_object
+
+    def remove_groups(self, remove_groups):
+        """
+        Takes a list of HedGroups, and removes any that exist from this HedString.
+
+        Parameters
+        ----------
+        remove_groups : [HedGroup or HedTag]
+            A list of groups or tags to remove
+        """
+        if self in remove_groups:
+            self._children = []
+            self._hed_string = ""
+            return
+
+        for group in self.get_all_groups():
+            group._children = [child for child in group._children if child not in remove_groups]

@@ -1,5 +1,6 @@
 from hed.models.hed_string import HedString
 from hed.models.hed_group import HedGroup
+import unittest
 
 from tests.validator.test_tag_validator import TestHed3
 
@@ -47,9 +48,8 @@ class TestHedString(TestHed3):
         for name, string in test_strings.items():
             hed_string = HedString(string)
 
-            self.assertEqual(bool(hed_string._top_level_group), expected_result[name])
-            if hed_string._top_level_group:
-                # Make sure it parses each section
+            self.assertEqual(bool(hed_string), expected_result[name])
+            if bool(hed_string):
                 _ = hed_string.get_all_groups()
                 _ = hed_string.get_all_tags()
 
@@ -58,7 +58,7 @@ class HedTagLists(TestHedStrings):
     def test_type(self):
         hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
         result = HedString.split_hed_string_into_groups(hed_string)
-        self.assertIsInstance(result, HedGroup)
+        self.assertIsInstance(result, list)
 
     # def test_top_level_tags(self):
     #     hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
@@ -70,8 +70,9 @@ class HedTagLists(TestHedStrings):
     def test_group_tags(self):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
                      '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
-        result = HedString.split_hed_string_into_groups(hed_string)
-        tags_as_strings = [str(tag) for tag in result.get_direct_children()]
+        string_obj = HedString(hed_string)
+        #result = HedString.split_hed_string_into_groups(hed_string)
+        tags_as_strings = [str(tag) for tag in string_obj.get_direct_children()]
         self.assertCountEqual(tags_as_strings, ['/Action/Reach/To touch',
                                        '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',
                                        '/Attribute/Location/Screen/Top/70 px',
@@ -174,23 +175,39 @@ class ProcessedHedTags(TestHedStrings):
             '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',
         ])
 
-    # Update Test - These are mostly no longer relevant
-    # def test_parsed_formatted_tags(self):
-    #     hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
-    #                  '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
-    #     formatted_hed_string = 'action/reach/to touch,(attribute/object side/left,participant/effect/body part/arm),' \
-    #                            'attribute/location/screen/top/70 px,attribute/location/screen/left/23 px '
-    #     parsed_string = HedString(hed_string)
-    #     parsed_formatted_string = HedString(formatted_hed_string)
-    #     self.assertCountEqual(
-    #         parsed_string.lower_tags(),
-    #         parsed_formatted_string.get_tags(),
-    #     )
-    #     self.assertCountEqual(
-    #         parsed_string.lower_tag_group_lists(),
-    #         parsed_formatted_string.get_tag_groups_lists(),
-    #     )
-    #     self.assertCountEqual(
-    #         parsed_string.lower_top_level_tags(),
-    #         parsed_formatted_string.get_top_level_tags(),
-    #     )
+
+class TestHedStringUtil(unittest.TestCase):
+    def compare_split_results(self, test_strings, expected_results):
+        for test_key in test_strings:
+            test_string = test_strings[test_key]
+            expected_result = expected_results[test_key]
+            actual_results = HedString.split_hed_string(test_string)
+            decoded_results = [test_string[start:end] for (is_tag, (start, end)) in actual_results]
+            self.assertEqual(decoded_results, expected_result)
+
+    def test_split_hed_string(self):
+        test_strings = {
+            'single': 'Event',
+            'double': 'Event, Event/Extension',
+            'singleAndGroup': 'Event/Extension, (Event/Extension2, Event/Extension3)',
+            'singleAndGroupWithBlank': 'Event/Extension, (Event, ,Event/Extension3)',
+            'manyParens': 'Event/Extension,(((Event/Extension2, )(Event)',
+            'manyParensEndingSpace': 'Event/Extension,(((Event/Extension2, )(Event) ',
+            'manyParensOpeningSpace': ' Event/Extension,(((Event/Extension2, )(Event)',
+            'manyParensBothSpace': ' Event/Extension,(((Event/Extension2, )(Event ',
+            'manyClosingParens': 'Event/Extension, (Event/Extension2, ))(Event)',
+        }
+        expected_results = {
+            'single': ['Event'],
+            'double': ['Event', ', ', 'Event/Extension'],
+            'singleAndGroup': ['Event/Extension', ', ', '(', 'Event/Extension2', ', ', 'Event/Extension3', ')'],
+            'singleAndGroupWithBlank': ['Event/Extension', ', ', '(', 'Event', ', ', ',', 'Event/Extension3', ')'],
+            'manyParens': ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
+            'manyParensEndingSpace': ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ') '],
+            'manyParensOpeningSpace': [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
+            'manyParensBothSpace': [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(',
+                                       'Event', ' '],
+            'manyClosingParens': ['Event/Extension', ', ', '(', 'Event/Extension2', ', ', ')', ')', '(', 'Event', ')']
+        }
+
+        self.compare_split_results(test_strings, expected_results)

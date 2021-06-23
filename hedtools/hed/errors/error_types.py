@@ -21,6 +21,7 @@ class ValidationErrors:
     UNIT_CLASS_INVALID_UNIT = 'unitClassInvalidUnit'
     EMPTY_TAG = 'extraComma'
     INVALID_CHARACTER = 'invalidCharacter'
+    INVALID_TAG_CHARACTER = 'invalidTagCharacter'
     COMMA_MISSING = 'commaMissing'
     DUPLICATE = 'duplicateTag'
     PARENTHESES = 'parentheses'
@@ -37,6 +38,9 @@ class ValidationErrors:
     HED_DEFINITION_VALUE_MISSING = "HED_DEFINITION_VALUE_MISSING"
     HED_DEFINITION_VALUE_EXTRA = "HED_DEFINITION_VALUE_EXTRA"
 
+    HED_TOP_LEVEL_TAG = "HED_TOP_LEVEL_TAG"
+    HED_MULTIPLE_TOP_TAGS = "HED_MULTIPLE_TOP_TAGS"
+    HED_TAG_GROUP_TAG = "HED_TAG_GROUP_TAG"
 
 class ValidationWarnings:
     REQUIRED_PREFIX_MISSING = 'requiredPrefixMissing'

@@ -2,8 +2,7 @@ import unittest
 import os
 
 from hed import schema
-from hed.schema import HedKey
-from hed.util.exceptions import HedFileError, HedExceptions
+from hed.errors.exceptions import HedFileError, HedExceptions
 
 
 class TestHedSchema(unittest.TestCase):

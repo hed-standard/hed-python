@@ -3,7 +3,7 @@ Examples of creating an EventsInput to open a spreadsheet, process it, then save
 
 Classes Demonstrated:
 HedSchema - Opens a hed xml schema.  Used by other tools to check tag attributes in the schema.
-HedValidator - Validates a given input string or file
+EventValidator - Validates a given input string or file
 EventsInput - Used to open/modify/save a bids style spreadsheet, with json sidecars and definitions.
 HedFileError - Exception thrown when a file cannot be opened.(parsing error, file not found error, etc)
 ColumnDefGroup - Contains the data from a single json sidecar, can be validated using a HedSchema.
@@ -14,7 +14,7 @@ import os
 import hed
 from hed.models.events_input import EventsInput
 from hed.schema.hed_schema_file import load_schema
-from hed.validator.hed_validator import HedValidator
+from hed.validator.event_validator import EventValidator
 from hed.models.column_def_group import ColumnDefGroup
 
 if __name__ == '__main__':
@@ -40,7 +40,7 @@ if __name__ == '__main__':
         print(hed.get_printable_issue_string(validation_issues,
                                              title="There should be no errors with the sidecar.  \""
                                              "This will likely cause other errors if there are."))
-    validator = HedValidator(hed_schema=hed_schema)
+    validator = EventValidator(hed_schema=hed_schema)
     validation_issues = validator.validate_input(input_file)
     print(hed.get_printable_issue_string(validation_issues, "Normal hed string errors"))
 

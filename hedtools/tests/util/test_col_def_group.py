@@ -3,7 +3,7 @@ import os
 
 from hed.models.column_def_group import ColumnDefGroup
 from hed.models.column_definition import ColumnDef
-from hed.util.exceptions import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed import schema
 
 

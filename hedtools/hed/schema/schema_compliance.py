@@ -1,5 +1,5 @@
-from hed.util import error_reporter
-from hed.util.error_types import SchemaWarnings, ErrorContext, SchemaErrors
+from hed.errors import error_reporter
+from hed.errors.error_types import SchemaWarnings, ErrorContext, SchemaErrors
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"

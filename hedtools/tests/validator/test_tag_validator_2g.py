@@ -2,84 +2,32 @@ import unittest
 import os
 
 from hed.models.hed_string import HedString
-from hed.validator.hed_validator import HedValidator
-from hed.util import error_reporter
-from hed.util.error_types import ValidationErrors, ValidationWarnings
-from hed.validator.tag_validator import TagValidator
-from hed import schema
+from hed.errors.error_types import ValidationErrors, ValidationWarnings
+from tests.validator.test_tag_validator import TestValidatorBase
 
 
-class TestHed(unittest.TestCase):
+class TestHed(TestValidatorBase):
     schema_file = '../data/legacy_xml/HED7.1.1.xml'
-
-    @classmethod
-    def setUpClass(cls):
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_schema = schema.load_schema(hed_xml)
-        cls.error_handler = error_reporter.ErrorHandler()
-        cls.syntactic_tag_validator = TagValidator(check_for_warnings=False,
-                                                   run_semantic_validation=False)
-        cls.syntactic_warning_tag_validator = TagValidator(check_for_warnings=True,
-                                                           run_semantic_validation=False)
-        cls.semantic_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=False,
-                                                  run_semantic_validation=True)
-        cls.semantic_warning_tag_validator = TagValidator(cls.hed_schema, check_for_warnings=True,
-                                                          run_semantic_validation=True)
-        cls.syntactic_hed_input_reader = HedValidator()
-        cls.syntactic_hed_input_reader._tag_validator = cls.syntactic_tag_validator
-        cls.syntactic_warning_hed_input_reader = HedValidator()
-        cls.syntactic_warning_hed_input_reader._tag_validator = cls.syntactic_warning_tag_validator
-        cls.semantic_hed_input_reader = HedValidator(hed_schema=cls.hed_schema)
-        cls.semantic_hed_input_reader._tag_validator = cls.semantic_tag_validator
-        cls.semantic_warning_hed_input_reader = HedValidator(hed_schema=cls.hed_schema)
-        cls.semantic_warning_hed_input_reader._tag_validator = cls.semantic_warning_tag_validator
-
-    def validator_base(self, test_strings, expected_results, expected_issues, test_function, convert_tags=False):
-        for test_key in test_strings:
-            hed_string_delimiter = HedString(test_strings[test_key])
-            test_issues = []
-            if convert_tags:
-                test_issues += hed_string_delimiter.calculate_canonical_forms(self.hed_schema)
-            if not test_issues:
-                test_issues += test_function(hed_string_delimiter)
-            test_result = not test_issues
-            expected_issue = expected_issues[test_key]
-            expected_result = expected_results[test_key]
-            self.assertEqual(test_result, expected_result, test_strings[test_key])
-            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
-
-    # Likely temp during restructure.  Same as above but function takes a string.
-    def validator_base_string(self, test_strings, expected_results, expected_issues, test_function):
-        for test_key in test_strings:
-            test_issues = test_function(test_strings[test_key])
-            test_result = not test_issues
-            expected_issue = expected_issues[test_key]
-            expected_result = expected_results[test_key]
-            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
-            self.assertEqual(test_result, expected_result, test_strings[test_key])
 
 
 class FullHedString(TestHed):
-    def validator(self, test_strings, expected_results, expected_issues):
-        for test_key in test_strings:
-            test_issues = self.semantic_warning_tag_validator.run_hed_string_validators(hed_string=test_strings[test_key])
-            test_result = not test_issues
-            expected_issue = expected_issues[test_key]
-            expected_result = expected_results[test_key]
-            self.assertEqual(test_result, expected_result, test_strings[test_key])
-            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
+    compute_forms = False
+
+    @staticmethod
+    def string_obj_func(validator):
+        return validator._tag_validator.run_hed_string_validators
 
     def test_mismatched_parentheses(self):
         test_strings = {
             'extraOpening':
-                '/Action/Reach/To touch,((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+                'Action/Reach/To touch,((Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
+                'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px',
             'extraClosing':
-                '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+                'Action/Reach/To touch,(Attribute/Object side/Left,Participant/Effect/Body part/Arm),),'
+                'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px',
             'valid':
-                '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px'
+                'Action/Reach/To touch,(Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
+                'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px'
         }
         expected_results = {
             'extraOpening': False,
@@ -87,72 +35,69 @@ class FullHedString(TestHed):
             'valid': True
         }
         expected_issues = {
-            'extraOpening': self.error_handler.format_error(ValidationErrors.PARENTHESES, opening_parentheses_count=2,
-                                                                     closing_parentheses_count=1),
-                                                                     #hed_string=test_strings['extraOpening']
-                                                                     # ),
-            'extraClosing': self.error_handler.format_error(ValidationErrors.PARENTHESES, opening_parentheses_count=1,
-                                                                     closing_parentheses_count=2),
-                                                                     #hed_string=test_strings['extraClosing']),
+            'extraOpening': self.format_error_but_not_really(ValidationErrors.PARENTHESES, opening_parentheses_count=2,
+                                                             closing_parentheses_count=1),
+            'extraClosing': self.format_error_but_not_really(ValidationErrors.PARENTHESES, opening_parentheses_count=1,
+                                                             closing_parentheses_count=2),
             'valid': []
         }
 
-        self.validator(test_strings, expected_results, expected_issues)
+        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 
     def test_malformed_delimiters(self):
         test_strings = {
             'missingOpeningComma':
-                '/Action/Reach/To touch(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+                'Action/Reach/To touch(Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
+                'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px',
             'missingClosingComma':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px',
+                'Action/Reach/To touch,'
+                '(Attribute/Object side/Left,Participant/Effect/Body part/Arm)Attribute/Location/Screen/Top/70 px,'
+                'Attribute/Location/Screen/Left/23 px',
             'extraOpeningComma':
-                ',/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+                ',Action/Reach/To touch,'
+                '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
+                'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px',
             'extraClosingComma':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px,',
+                'Action/Reach/To touch,'
+                '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),Attribute/Location/Screen/Top/70 px,'
+                'Attribute/Location/Screen/Left/23 px,',
             # 'extraOpeningParen':
-            #     '(/Action/Reach/To touch,'
-            #     '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-            #     '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+            #     '(Action/Reach/To touch,'
+            #     '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
+            #     'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px',
             # 'extraClosingParen':
-            #     '/Action/Reach/To touch,'
-            #     '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-            #     '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px)',
+            #     'Action/Reach/To touch,'
+            #     '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
+            #     'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px)',
             'multipleExtraOpeningDelimiters':
-                ',,,/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px',
+                ',,,Action/Reach/To touch,'
+                '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),Attribute/Location/Screen/Top/70 px,'
+                'Attribute/Location/Screen/Left/23 px',
             'multipleExtraClosingDelimiters':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px,,,,',
+                'Action/Reach/To touch,'
+                '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
+                'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px,,,,',
             'multipleExtraMiddleDelimiters':
-                '/Action/Reach/To touch,'
-                ',(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                ',,/Attribute/Location/Screen/Left/23 px',
+                'Action/Reach/To touch,'
+                ',(Attribute/Object side/Left,Participant/Effect/Body part/Arm),Attribute/Location/Screen/Top/70 px,'
+                ',,Attribute/Location/Screen/Left/23 px',
             'valid':
-                '/Action/Reach/To touch,'
-                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px',
+                'Action/Reach/To touch,'
+                '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),Attribute/Location/Screen/Top/70 px,'
+                'Attribute/Location/Screen/Left/23 px',
             'validNestedParentheses':
-                '/Action/Reach/To touch,'
-                '((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px),Event/Duration/3 ms',
+                'Action/Reach/To touch,'
+                '((Attribute/Object side/Left,Participant/Effect/Body part/Arm),Attribute/Location/Screen/Top/70 px,'
+                'Attribute/Location/Screen/Left/23 px),Event/Duration/3 ms',
             'validNestedParentheses2':
-                '/Action/Reach/To touch,'
-                '(((/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),/Attribute/Location/Screen/Top/70 px,'
-                '/Attribute/Location/Screen/Left/23 px)),Event/Duration/3 ms',
+                'Action/Reach/To touch,'
+                '(((Attribute/Object side/Left,Participant/Effect/Body part/Arm),Attribute/Location/Screen/Top/70 px,'
+                'Attribute/Location/Screen/Left/23 px)),Event/Duration/3 ms',
             'validNestedParentheses3':
                 'Thing, (Thing, (Thing))',
             'validNestedParentheses4': 'Thing, ((Thing, (Thing)), Thing)',
             'invalidNestedParentheses': 'Thing, ((Thing, (Thing)) Thing)',
-            #'emptyGroup': 'Thing, ()'
+            # 'emptyGroup': 'Thing, ()'
         }
 
         expected_results = {
@@ -174,87 +119,91 @@ class FullHedString(TestHed):
             # 'emptyGroup': False
         }
         expected_issues = {
-            'missingOpeningComma': self.error_handler.format_error(ValidationErrors.COMMA_MISSING, 
-                                                                       tag='/Action/Reach/To touch('),
-            'missingClosingComma': self.error_handler.format_error(ValidationErrors.COMMA_MISSING, 
-                                                                       tag='/Participant/Effect/Body part/Arm)'),
-            'extraOpeningComma': self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',', char_index=0,
-                                                                          hed_string=test_strings['extraOpeningComma']),
-            'extraClosingComma': self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',',
-                                                                          char_index=len(
-                                                                              test_strings['extraClosingComma']) - 1,
-                                                                          hed_string=test_strings['extraClosingComma']),
-            # 'extraOpeningParen': self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character='(', index=0,
-            #                                       hed_string=test_strings['extraOpeningParen']),
-            # 'extraClosingParen': self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=')',
-            #                                       index=len(test_strings['extraClosingParen']) - 1,
-            #                                       hed_string=test_strings['extraClosingParen']),
-            'extraOpeningParen': self.error_handler.format_error(ValidationErrors.PARENTHESES, opening_parentheses_count=2,
-                                                                          closing_parentheses_count=1),
-            'extraClosingParen': self.error_handler.format_error(ValidationErrors.PARENTHESES, opening_parentheses_count=1,
-                                                                          closing_parentheses_count=2),
-            'multipleExtraOpeningDelimiters': self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',',
-                                                                                       char_index=0,
-                                                                                       hed_string=test_strings[
-                                                                                           'multipleExtraOpeningDelimiters'])
-                                              + self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',',
-                                                                                         char_index=1,
-                                                                                         hed_string=test_strings[
-                                                                                             'multipleExtraOpeningDelimiters'])
-                                              + self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',',
-                                                                                         char_index=2,
-                                                                                         hed_string=test_strings[
-                                                                                             'multipleExtraOpeningDelimiters']),
-            'multipleExtraClosingDelimiters': self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',',
-                                                                                       char_index=len(test_strings[
-                                                                                                          'multipleExtraClosingDelimiters']) - 1,
-                                                                                       hed_string=test_strings[
-                                                                                           'multipleExtraClosingDelimiters'])
-                                              + self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',',
-                                                                                         char_index=len(test_strings[
-                                                                                                            'multipleExtraClosingDelimiters']) - 2,
-                                                                                         hed_string=test_strings[
-                                                                                             'multipleExtraClosingDelimiters'])
-                                              + self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',',
-                                                                                         char_index=len(test_strings[
-                                                                                                            'multipleExtraClosingDelimiters']) - 3,
-                                                                                         hed_string=test_strings[
-                                                                                             'multipleExtraClosingDelimiters'])
-                                              + self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',',
-                                                                                         char_index=len(test_strings[
-                                                                                                            'multipleExtraClosingDelimiters']) - 4,
-                                                                                         hed_string=test_strings[
-                                                                                             'multipleExtraClosingDelimiters']),
-            'multipleExtraMiddleDelimiters': self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',', char_index=23,
-                                                                                      hed_string=test_strings[
-                                                                                          'multipleExtraMiddleDelimiters'])
-                                             + self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',', char_index=125,
-                                                                                        hed_string=test_strings[
-                                                                                            'multipleExtraMiddleDelimiters'])
-                                             + self.error_handler.format_error(ValidationErrors.EMPTY_TAG, character=',', char_index=126,
-                                                                                        hed_string=test_strings[
-                                                                                            'multipleExtraMiddleDelimiters']),
+            'missingOpeningComma': self.format_error_but_not_really(ValidationErrors.COMMA_MISSING,
+                                                                    tag="Action/Reach/To touch("),
+            'missingClosingComma': self.format_error_but_not_really(ValidationErrors.COMMA_MISSING,
+                                                                    tag="Participant/Effect/Body part/Arm)"),
+            'extraOpeningComma': self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                  source_string=test_strings['extraOpeningComma'],
+                                                                  char_index=0),
+            'extraClosingComma': self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                  source_string=test_strings['extraClosingComma'],
+                                                                  char_index=len(
+                                                                      test_strings['extraClosingComma']) - 1),
+            # 'extraOpeningParen': self.format_error_but_not_really(ValidationErrors.EMPTY_TAG, character='(', index_in_tag=0),
+            # 'extraClosingParen': self.format_error_but_not_really(ValidationErrors.EMPTY_TAG, character=')',
+            #                                       index_in_tag=len(test_strings['extraClosingParen']) - 1),
+            'extraOpeningParen': self.format_error_but_not_really(ValidationErrors.PARENTHESES,
+                                                                  opening_parentheses_count=2,
+                                                                  closing_parentheses_count=1),
+            'extraClosingParen': self.format_error_but_not_really(ValidationErrors.PARENTHESES,
+                                                                  opening_parentheses_count=1,
+                                                                  closing_parentheses_count=2),
+            'multipleExtraOpeningDelimiters': self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                               source_string=test_strings[
+                                                                                   'multipleExtraOpeningDelimiters'],
+                                                                               char_index=0)
+                                              + self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                                 source_string=test_strings[
+                                                                                     'multipleExtraOpeningDelimiters'],
+                                                                                 char_index=1)
+                                              + self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                                 source_string=test_strings[
+                                                                                     'multipleExtraOpeningDelimiters'],
+                                                                                 char_index=2),
+            'multipleExtraClosingDelimiters': self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                               source_string=test_strings[
+                                                                                   'multipleExtraClosingDelimiters'],
+                                                                               char_index=len(test_strings[
+                                                                                                  'multipleExtraClosingDelimiters']) - 1)
+                                              + self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                                 source_string=test_strings[
+                                                                                     'multipleExtraClosingDelimiters'],
+                                                                                 char_index=len(test_strings[
+                                                                                                    'multipleExtraClosingDelimiters']) - 2)
+                                              + self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                                 source_string=test_strings[
+                                                                                     'multipleExtraClosingDelimiters'],
+                                                                                 char_index=len(test_strings[
+                                                                                                    'multipleExtraClosingDelimiters']) - 3)
+                                              + self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                                 source_string=test_strings[
+                                                                                     'multipleExtraClosingDelimiters'],
+                                                                                 char_index=len(test_strings[
+                                                                                                    'multipleExtraClosingDelimiters']) - 4),
+            'multipleExtraMiddleDelimiters': self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                              source_string=test_strings[
+                                                                                  'multipleExtraMiddleDelimiters'],
+                                                                              char_index=22)
+                                             + self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                                source_string=test_strings[
+                                                                                    'multipleExtraMiddleDelimiters'],
+                                                                                char_index=121)
+                                             + self.format_error_but_not_really(ValidationErrors.EMPTY_TAG,
+                                                                                source_string=test_strings[
+                                                                                    'multipleExtraMiddleDelimiters'],
+                                                                                char_index=122),
             'valid': [],
             'validNestedParentheses': [],
             'validNestedParentheses2': [],
             'validNestedParentheses3': [],
             'validNestedParentheses4': [],
-            'invalidNestedParentheses': self.error_handler.format_error(ValidationErrors.COMMA_MISSING, 
-                                                                            tag="Thing)) "),
+            'invalidNestedParentheses': self.format_error_but_not_really(ValidationErrors.COMMA_MISSING,
+                                                                         tag="Thing)) "),
             # 'emptyGroup': []
         }
-        self.validator(test_strings, expected_results, expected_issues)
+        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 
     def test_invalid_characters(self):
         test_strings = {
             'openingBrace':
-                '/Attribute/Object side/Left,/Participant/Effect{/Body part/Arm',
+                'Attribute/Object side/Left,Participant/Effect{/Body part/Arm',
             'closingBrace':
-                '/Attribute/Object side/Left,/Participant/Effect}/Body part/Arm',
+                'Attribute/Object side/Left,Participant/Effect}/Body part/Arm',
             'openingBracket':
-                '/Attribute/Object side/Left,/Participant/Effect[/Body part/Arm',
+                'Attribute/Object side/Left,Participant/Effect[/Body part/Arm',
             'closingBracket':
-                '/Attribute/Object side/Left,/Participant/Effect]/Body part/Arm'
+                'Attribute/Object side/Left,Participant/Effect]/Body part/Arm'
         }
         expected_results = {
             'openingBrace': False,
@@ -263,38 +212,133 @@ class FullHedString(TestHed):
             'closingBracket': False
         }
         expected_issues = {
-            'openingBrace': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, character='{', char_index=47,
-                                                                hed_string=test_strings['openingBrace']),
-            'closingBrace': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, character='}', char_index=47,
-                                                                hed_string=test_strings['closingBrace']),
-            'openingBracket': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, character='[', char_index=47,
-                                                                  hed_string=test_strings['openingBracket']),
-            'closingBracket': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, character=']', char_index=47,
-                                                                  hed_string=test_strings['closingBracket'])
+            'openingBrace': self.format_error_but_not_really(ValidationErrors.INVALID_CHARACTER, char_index=45,
+                                                             source_string=test_strings['openingBrace']),
+            'closingBrace': self.format_error_but_not_really(ValidationErrors.INVALID_CHARACTER, char_index=45,
+                                                             source_string=test_strings['closingBrace']),
+            'openingBracket': self.format_error_but_not_really(ValidationErrors.INVALID_CHARACTER, char_index=45,
+                                                               source_string=test_strings['openingBracket']),
+            'closingBracket': self.format_error_but_not_really(ValidationErrors.INVALID_CHARACTER, char_index=45,
+                                                               source_string=test_strings['closingBracket'])
         }
-        self.validator(test_strings, expected_results, expected_issues)
+        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+
+    def test_string_extra_slash_space(self):
+        test_strings = {
+            'twoLevelDoubleSlash': 'Event//Extension',
+            'threeLevelDoubleSlash': 'Vehicle//Boat//Tanker',
+            'tripleSlashes': 'Vehicle///Boat///Tanker',
+            'mixedSingleAndDoubleSlashes': 'Vehicle//Boat/Tanker',
+            'singleSlashWithSpace': 'Event/ Extension',
+            'doubleSlashSurroundingSpace': 'Event/ /Extension',
+            'doubleSlashThenSpace': 'Event// Extension',
+            'sosPattern': 'Event///   ///Extension',
+            'alternatingSlashSpace': 'Vehicle/ / Boat/ / Tanker',
+            'leadingDoubleSlash': '//Event/Extension',
+            'trailingDoubleSlash': 'Event/Extension//',
+            'leadingDoubleSlashWithSpace': '/ /Event/Extension',
+            'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
+        }
+        expected_event_extension = 'Event/Extension'
+        expected_tanker = 'Item/Object/Man-made/Vehicle/Boat/Tanker'
+        expected_results = {
+            'twoLevelDoubleSlash': False,
+            'threeLevelDoubleSlash': False,
+            'tripleSlashes': False,
+            'mixedSingleAndDoubleSlashes': False,
+            'singleSlashWithSpace': False,
+            'doubleSlashSurroundingSpace': False,
+            'doubleSlashThenSpace': False,
+            'sosPattern': False,
+            'alternatingSlashSpace': False,
+            'leadingDoubleSlash': False,
+            'trailingDoubleSlash': False,
+            'leadingDoubleSlashWithSpace': False,
+            'trailingDoubleSlashWithSpace': False,
+        }
+        expected_errors = {
+            'twoLevelDoubleSlash': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=5,
+                                                                    index_in_tag_end=7, tag=0),
+            'threeLevelDoubleSlash': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=7,
+                                                                      index_in_tag_end=9, tag=0)
+                                     + self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES,
+                                                                        index_in_tag=13, index_in_tag_end=15, tag=0),
+            'tripleSlashes': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=7,
+                                                              index_in_tag_end=10, tag=0)
+                             + self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=14,
+                                                                index_in_tag_end=17, tag=0),
+            'mixedSingleAndDoubleSlashes': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES,
+                                                                            index_in_tag=7, index_in_tag_end=9, tag=0),
+            'singleSlashWithSpace': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=5,
+                                                                     index_in_tag_end=7, tag=0),
+            'doubleSlashSurroundingSpace': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES,
+                                                                            index_in_tag=5, index_in_tag_end=8, tag=0),
+            'doubleSlashThenSpace': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=5,
+                                                                     index_in_tag_end=8, tag=0),
+            'sosPattern': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=5,
+                                                           index_in_tag_end=14, tag=0),
+            'alternatingSlashSpace': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=7,
+                                                                      index_in_tag_end=11, tag=0)
+                                     + self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES,
+                                                                        index_in_tag=15, index_in_tag_end=19, tag=0),
+            'leadingDoubleSlash': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=0,
+                                                                   index_in_tag_end=2, tag=0),
+            'trailingDoubleSlash': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES, index_in_tag=15,
+                                                                    index_in_tag_end=17, tag=0),
+            'leadingDoubleSlashWithSpace': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES,
+                                                                            index_in_tag=0, index_in_tag_end=3, tag=0),
+            'trailingDoubleSlashWithSpace': self.format_error_but_not_really(ValidationErrors.EXTRA_SLASHES_OR_SPACES,
+                                                                             index_in_tag=15, index_in_tag_end=18, tag=0),
+        }
+        self.validator_syntactic(test_strings, expected_results, expected_errors, False)
+
+    def test_no_more_than_two_tildes(self):
+        test_strings = {
+            'noTildeGroup': 'Event/Category/Initial context,'
+                            '(Item/Object/Vehicle/Train,Event/Category/Initial context)',
+            'oneTildeGroup': 'Event/Category/Initial context,'
+                             '(Item/Object/Vehicle/Car ~ Attribute/Object control/Perturb)',
+            'twoTildeGroup': 'Event/Category/Initial context,'
+                             '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar,'
+                             ' Attribute/Visual/Color/Red)',
+            'invalidTildeGroup': 'Event/Category/Initial context,'
+                                 '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car,'
+                                 ' Item/ID/RedCar, Attribute/Visual/Color/Red ~ Attribute/Object control/Perturb)',
+        }
+        expected_results = {
+            'noTildeGroup': True,
+            'oneTildeGroup': False,
+            'twoTildeGroup': False,
+            'invalidTildeGroup': False
+        }
+        expected_issues = {
+            'noTildeGroup': [],
+            'oneTildeGroup': self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                              source_string=test_strings['oneTildeGroup'],
+                                                              char_index=56),
+            'twoTildeGroup': self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                              source_string=test_strings['twoTildeGroup'],
+                                                              char_index=49)
+                             + self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                                source_string=test_strings['twoTildeGroup'],
+                                                                char_index=77),
+            'invalidTildeGroup': self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                                  source_string=test_strings['invalidTildeGroup'],
+                                                                  char_index=49)
+                                 + self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                                    source_string=test_strings['invalidTildeGroup'],
+                                                                    char_index=77)
+                                 + self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                                    source_string=test_strings['invalidTildeGroup'],
+                                                                    char_index=147)
+        }
+        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 
 
 class IndividualHedTags(TestHed):
-    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.syntactic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.syntactic_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
-
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings, convert_tags=False):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter), convert_tags=convert_tags)
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.semantic_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter), convert_tags=convert_tags)
+    @staticmethod
+    def string_obj_func(validator):
+        return validator._validate_individual_tags_in_hed_string
 
     def test_exist_in_schema(self):
         test_strings = {
@@ -323,30 +367,28 @@ class IndividualHedTags(TestHed):
             'takesValue': [],
             'full': [],
             'extensionsAllowed': [],
-            'leafExtension': self.error_handler.format_error(ValidationErrors.INVALID_EXTENSION, tag=test_strings['leafExtension']),
-            'nonExtensionsAllowed': self.error_handler.format_error(ValidationErrors.INVALID_EXTENSION, 
-                                                                        tag=test_strings['nonExtensionsAllowed']),
-            'usedToBeIllegalComma': self.error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND, 
-                                                                        tag="This/Is/A/Tag",
-                                                                        index=0, index_end=4,
-                                                                        hed_string=test_strings['usedToBeIllegalComma']),
-            'testExtensionExists': self.error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, tag="Item/Object/Person/Event",
-                                                                           index=19, index_end=24,
-                                                                           expected_parent_tag="Event"),
-            'testExtensionExists2': self.error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND, 
-                                                                        tag="Category/Initial Context/Category",
-                                                                        index=0, index_end=8,
-                                                                        hed_string=test_strings['testExtensionExists2']),
-            'testInvalidShortForm': self.error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND, 
-                                                                        index=0, index_end=8,
-                                                                        tag="Category/Initial Context"),
+            'leafExtension': self.format_error_but_not_really(ValidationErrors.INVALID_EXTENSION, tag=0),
+            'nonExtensionsAllowed': self.format_error_but_not_really(ValidationErrors.INVALID_EXTENSION,
+                                                                     tag=0),
+            'usedToBeIllegalComma': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                                     tag=1,
+                                                                     index_in_tag=0, index_in_tag_end=4),
+            'testExtensionExists': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                                                    index_in_tag=19, index_in_tag_end=24,
+                                                                    expected_parent_tag="Event"),
+            'testExtensionExists2': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                                     tag=0,
+                                                                     index_in_tag=0, index_in_tag_end=8),
+            'testInvalidShortForm': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                                     index_in_tag=0, index_in_tag_end=8,
+                                                                     tag=0),
         }
-        self.validator_semantic(test_strings, expected_results, expected_issues, False, convert_tags=True)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_proper_capitalization(self):
         test_strings = {
-            'proper': 'Event/Category/Sensory presentation',
-            'camelCase': 'DoubleEvent/Something',
+            'proper': 'Event/Category/Initial context',
+            'camelCase': 'EvEnt/Something',
             'takesValue': 'Attribute/Temporal rate/20 Hz',
             'numeric': 'Attribute/Repetition/20',
             'lowercase': 'Event/something'
@@ -363,7 +405,7 @@ class IndividualHedTags(TestHed):
             'camelCase': [],
             'takesValue': [],
             'numeric': [],
-            'lowercase': self.error_handler.format_error(ValidationWarnings.CAPITALIZATION, tag=test_strings['lowercase'])
+            'lowercase': self.format_error_but_not_really(ValidationWarnings.CAPITALIZATION, tag=0)
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, True)
 
@@ -378,7 +420,7 @@ class IndividualHedTags(TestHed):
         }
         expected_issues = {
             'hasChild': [],
-            'missingChild': self.error_handler.format_error(ValidationErrors.REQUIRE_CHILD, tag=test_strings['missingChild'])
+            'missingChild': self.format_error_but_not_really(ValidationErrors.REQUIRE_CHILD, tag=0)
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -386,9 +428,9 @@ class IndividualHedTags(TestHed):
         test_strings = {
             'hasRequiredUnit': 'Event/Duration/3 ms',
             'missingRequiredUnit': 'Event/Duration/3',
-            'notRequiredNoNumber': 'Attribute/Color/Red',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
+            'notRequiredNoNumber': 'Attribute/Visual/Color/Red',
+            'notRequiredNumber': 'Attribute/Visual/Color/Red/0.5',
+            'notRequiredScientific': 'Attribute/Visual/Color/Red/5.2e-1',
             'timeValue': 'Item/2D shape/Clock face/08:30',
             'invalidTimeValue': 'Item/2D shape/Clock face/8:30'
         }
@@ -404,15 +446,15 @@ class IndividualHedTags(TestHed):
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
-            'missingRequiredUnit': self.error_handler.format_error(ValidationWarnings.UNIT_CLASS_DEFAULT_USED, tag=test_strings['missingRequiredUnit'],
-                                                                         default_unit='s'),
+            'missingRequiredUnit': self.format_error_but_not_really(ValidationWarnings.UNIT_CLASS_DEFAULT_USED, tag=0,
+                                                                    default_unit='s'),
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
             'notRequiredScientific': [],
             'timeValue': [],
-            'invalidTimeValue': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
-                                                                    tag=test_strings['invalidTimeValue'],
-                                                                    unit_class_units=legal_clock_time_units),
+            'invalidTimeValue': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                 tag=0,
+                                                                 unit_class_units=legal_clock_time_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -428,14 +470,15 @@ class IndividualHedTags(TestHed):
             'incorrectPluralUnit': 'Attribute/Temporal rate/3 hertzs',
             'incorrectSymbolCapitalizedUnit': 'Attribute/Temporal rate/3 hz',
             'incorrectSymbolCapitalizedUnitModifier': 'Attribute/Temporal rate/3 KHz',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5e-1',
+            'notRequiredNumber': 'Attribute/Visual/Color/Red/0.5',
+            'notRequiredScientific': 'Attribute/Visual/Color/Red/5e-1',
             'properTime': 'Item/2D shape/Clock face/08:30',
             'invalidTime': 'Item/2D shape/Clock face/54:54',
             # Theses should both fail, as this tag validator isn't set to accept placeholders
             'placeholderNoUnit': 'Event/Duration/#',
             'placeholderUnit': 'Event/Duration/# ms',
-            'placeholderWrongUnit': 'Event/Duration/# hz'
+            'placeholderWrongUnit': 'Event/Duration/# hz',
+            'placeholderWrongUnitSecondTag': 'Event, Event/Duration/# hz'
         }
         expected_results = {
             'correctUnit': True,
@@ -454,7 +497,8 @@ class IndividualHedTags(TestHed):
             'invalidTime': False,
             'placeholderNoUnit': False,
             'placeholderUnit': False,
-            'placeholderWrongUnit': False
+            'placeholderWrongUnit': False,
+            'placeholderWrongUnitSecondTag': False
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
@@ -467,77 +511,59 @@ class IndividualHedTags(TestHed):
             'correctNoPluralUnit': [],
             'correctNonSymbolCapitalizedUnit': [],
             'correctSymbolCapitalizedUnit': [],
-            'incorrectUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
-                                                                 tag=test_strings['incorrectUnit'],
-                                                                 unit_class_units=legal_time_units),
-            'incorrectPluralUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
-                                                                       tag=test_strings['incorrectPluralUnit'],
-                                                                       unit_class_units=legal_freq_units),
-            'incorrectSymbolCapitalizedUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
-                                                                                  tag=test_strings[
-                                                                                      'incorrectSymbolCapitalizedUnit'],
-                                                                                  unit_class_units=legal_freq_units),
-            'incorrectSymbolCapitalizedUnitModifier': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
-                                                                                          tag=test_strings[
-                                                                                              'incorrectSymbolCapitalizedUnitModifier'],
-                                                                                          unit_class_units=legal_freq_units),
+            'incorrectUnit': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                              tag=0,
+                                                              unit_class_units=legal_time_units),
+            'incorrectPluralUnit': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                    tag=0,
+                                                                    unit_class_units=legal_freq_units),
+            'incorrectSymbolCapitalizedUnit': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                               tag=0,
+                                                                               unit_class_units=legal_freq_units),
+            'incorrectSymbolCapitalizedUnitModifier': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                                       tag=0,
+                                                                                       unit_class_units=legal_freq_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
             'properTime': [],
-            'invalidTime': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,  tag=test_strings['invalidTime'],
-                                                               unit_class_units=legal_clock_time_units),
+            'invalidTime': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT, tag=0,
+                                                            unit_class_units=legal_clock_time_units),
 
-            'placeholderNoUnit': self.error_handler.format_error(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
-                                                                      tag=test_strings['placeholderNoUnit'],
-                                                                      default_unit="s")
-                                + self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, char_index=15, character="#",
-                                                                  hed_string=test_strings["placeholderNoUnit"]),
-            'placeholderUnit': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, char_index=15, character="#",
-                                                                  hed_string=test_strings["placeholderUnit"]),
-            'placeholderWrongUnit': self.error_handler.format_error(ValidationErrors.INVALID_CHARACTER, char_index=15, character="#",
-                                                                  hed_string=test_strings["placeholderWrongUnit"])
-                                    + self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
-                                                                 tag=test_strings['placeholderWrongUnit'],
-                                                                 unit_class_units=legal_time_units),
+            'placeholderNoUnit': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                  tag=0, index_in_tag=15, index_in_tag_end=16)
+                                 + self.format_error_but_not_really(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
+                                                                    tag=0,
+                                                                    default_unit="s"),
+            'placeholderUnit': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                  tag=0, index_in_tag=15, index_in_tag_end=16),
+            'placeholderWrongUnit': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                  tag=0, index_in_tag=15, index_in_tag_end=16)
+                                    + self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                       tag=0,
+                                                                       unit_class_units=legal_time_units),
+            'placeholderWrongUnitSecondTag': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                     tag=1, index_in_tag=15, index_in_tag_end=16)
+                                    + self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                       tag=1,
+                                                                       unit_class_units=legal_time_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
 
 class HedTagLevels(TestHed):
-    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter: self.syntactic_warning_hed_input_reader._validate_tag_levels_in_hed_string(
-                                    hed_string_delimiter))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter:
-                                self.syntactic_hed_input_reader._validate_tag_levels_in_hed_string(
-                                    hed_string_delimiter))
-
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_tag_levels_in_hed_string(
-                                    hed_string_delimiter))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter: self.semantic_hed_input_reader._validate_tag_levels_in_hed_string(
-                                    hed_string_delimiter))
+    @staticmethod
+    def string_obj_func(validator):
+        return validator._validate_groups_in_hed_string
 
     def test_no_duplicates(self):
         test_strings = {
-            'topLevelDuplicate': 'Event/Category/Sensory presentation,Event/Category/Sensory presentation',
-            'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Sensory presentation,'
-                              'Attribute/Visual/Color/Purple,Event/Category/Sensory presentation)',
-            'noDuplicate': 'Event/Category/Sensory presentation,'
+            'topLevelDuplicate': 'Event/Category/Initial context,Event/Category/Initial context',
+            'groupDuplicate': 'Item/Object/Vehicle/Train,(Event/Category/Initial context,'
+                              'Attribute/Visual/Color/Purple,Event/Category/Initial context)',
+            'noDuplicate': 'Event/Category/Initial context,'
                            'Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple',
             'legalDuplicate': 'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,'
-                              'Event/Category/Sensory presentation)',
+                              'Event/Category/Initial context)',
         }
         expected_results = {
             'topLevelDuplicate': False,
@@ -546,62 +572,30 @@ class HedTagLevels(TestHed):
             'noDuplicate': True
         }
         expected_issues = {
-            'topLevelDuplicate': self.error_handler.format_error(ValidationErrors.DUPLICATE, 
-                                                                     tag='Event/Category/Sensory presentation',
-                                                                     hed_string=test_strings["topLevelDuplicate"]),
-            'groupDuplicate': self.error_handler.format_error(ValidationErrors.DUPLICATE, 
-                                                                  tag='Event/Category/Sensory presentation',
-                                                                  hed_string=test_strings["groupDuplicate"]),
+            'topLevelDuplicate': self.format_error_but_not_really(ValidationErrors.DUPLICATE,
+                                                                  tag=1),
+            'groupDuplicate': self.format_error_but_not_really(ValidationErrors.DUPLICATE,
+                                                               tag=3),
             'legalDuplicate': [],
             'noDuplicate': []
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 
-    def test_multiple_copies_unique_tags(self):
-        test_strings = {
-            'legal': 'Event/Description/Rail vehicles,Item/Object/Vehicle/Train,'
-                     '(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)',
-            'multipleDesc': 'Event/Description/Rail vehicles,'
-                            'Event/Description/Locomotive-pulled or multiple units,'
-                            'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)',
-            # This is legal as this is a hed2 schema, thus doesn't have a short form Description/
-            'multipleDescIncShort': 'Event/Description/Rail vehicles,'
-                            'Description/Locomotive-pulled or multiple units,'
-                            'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)'
-        }
-        expected_results = {
-            'legal': True,
-            'multipleDesc': False,
-            'multipleDescIncShort': True
-        }
-        expected_issues = {
-            'legal': [],
-            'multipleDesc': self.error_handler.format_error(ValidationErrors.MULTIPLE_UNIQUE, tag_prefix='Event/Description'),
-            'multipleDescIncShort': []
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
 
 class RequiredTags(TestHed):
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda
-                                    hed_string_delimiter: self.semantic_warning_tag_validator._run_tag_validators(
-                                    hed_string_delimiter.get_all_tags()))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues,
-                                lambda hed_string_delimiter: self.semantic_tag_validator._run_tag_validators(
-                                    hed_string_delimiter.get_all_tags()))
+    @staticmethod
+    def string_obj_func(validator):
+        return validator._validate_tags_in_hed_string
 
     def test_includes_all_required_tags(self):
         test_strings = {
-            'complete': 'Event/Label/Bus,Event/Category/Sensory presentation,'
-                        'Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-            'missingLabel': 'Event/Category/Sensory presentation,Event/Description/Shown a picture of a bus,'
+            'complete': 'Event/Label/Bus,Event/Category/Initial context,'
+                        'Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus,'
+                        'Event/Category/NotMissing',
+            'missingLabel': 'Event/Category/Initial context,Event/Description/Shown a picture of a bus,'
                             'Item/Object/Vehicle/Bus',
             'missingCategory': 'Event/Label/Bus,Event/Description/Shown a picture of a bus,Item/Object/Vehicle/Bus',
-            'missingDescription': 'Event/Label/Bus,Event/Category/Sensory presentation,Item/Object/Vehicle/Bus',
+            'missingDescription': 'Event/Label/Bus,Event/Category/Initial context,Item/Object/Vehicle/Bus',
             'missingAllRequired': 'Item/Object/Vehicle/Bus',
         }
         expected_results = {
@@ -613,80 +607,105 @@ class RequiredTags(TestHed):
         }
         expected_issues = {
             'complete': [],
-            'missingLabel': self.error_handler.format_error(ValidationWarnings.REQUIRED_PREFIX_MISSING,  tag_prefix='Event/Label'),
-            'missingCategory': self.error_handler.format_error(ValidationWarnings.REQUIRED_PREFIX_MISSING,
-                                                                     tag_prefix='Event/Category'),
-            'missingDescription': self.error_handler.format_error(ValidationWarnings.REQUIRED_PREFIX_MISSING,
-                                                                        tag_prefix='Event/Description'),
-            'missingAllRequired': self.error_handler.format_error(ValidationWarnings.REQUIRED_PREFIX_MISSING,
-                                                                        tag_prefix='Event/Label')
-                                  + self.error_handler.format_error(ValidationWarnings.REQUIRED_PREFIX_MISSING,
-                                                                    tag_prefix='Event/Category')
-                                  + self.error_handler.format_error(ValidationWarnings.REQUIRED_PREFIX_MISSING,
-                                                                    tag_prefix='Event/Description'),
+            'missingLabel': self.format_error_but_not_really(ValidationWarnings.REQUIRED_PREFIX_MISSING,
+                                                             tag_prefix='Event/Label'),
+            'missingCategory': self.format_error_but_not_really(ValidationWarnings.REQUIRED_PREFIX_MISSING,
+                                                                tag_prefix='Event/Category'),
+            'missingDescription': self.format_error_but_not_really(ValidationWarnings.REQUIRED_PREFIX_MISSING,
+                                                                   tag_prefix='Event/Description'),
+            'missingAllRequired': self.format_error_but_not_really(ValidationWarnings.REQUIRED_PREFIX_MISSING,
+                                                                   tag_prefix='Event/Label')
+                                  + self.format_error_but_not_really(ValidationWarnings.REQUIRED_PREFIX_MISSING,
+                                                                     tag_prefix='Event/Category')
+                                  + self.format_error_but_not_really(ValidationWarnings.REQUIRED_PREFIX_MISSING,
+                                                                     tag_prefix='Event/Description'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
+    def test_multiple_copies_unique_tags(self):
+        test_strings = {
+            'legal': 'Event/Description/Rail vehicles,Item/Object/Vehicle/Train,'
+                     '(Item/Object/Vehicle/Train,Event/Category/Initial context)',
+            'multipleDesc': 'Event/Description/Rail vehicles,'
+                            'Event/Description/Locomotive-pulled or multiple units,'
+                            'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Initial context)',
+            # I think this is illegal in hed2 style schema now.
+            'multipleDescIncShort': 'Event/Description/Rail vehicles,'
+                            'Description/Locomotive-pulled or multiple units,'
+                            'Item/Object/Vehicle/Train,(Item/Object/Vehicle/Train,Event/Category/Initial context)'
+        }
+        expected_results = {
+            'legal': True,
+            'multipleDesc': False,
+            'multipleDescIncShort': False
+        }
+        expected_issues = {
+            'legal': [],
+            'multipleDesc': self.format_error_but_not_really(ValidationErrors.MULTIPLE_UNIQUE,
+                                                             tag_prefix='Event/Description'),
+            'multipleDescIncShort': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                                      tag=1, index_in_tag=0, index_in_tag_end=11)
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
 
 class TestHedInvalidChars(TestHed):
-    def validator(self, test_strings, expected_results, expected_issues):
-        self.validator_base_string(test_strings, expected_results, expected_issues,
-                                   lambda
-                                       string:
-                                   self.syntactic_hed_input_reader._tag_validator.run_hed_string_validators(
-                                       string))
+    compute_forms = False
+
+    @staticmethod
+    def string_obj_func(validator):
+        return validator._tag_validator.run_hed_string_validators
 
     def test_no_more_than_two_tildes(self):
-        testStrings = {
-            'noTildeGroup': 'Event/Category/Sensory presentation,'
-                            '(Item/Object/Vehicle/Train,Event/Category/Sensory presentation)',
-            'oneTildeGroup': 'Event/Category/Sensory presentation,'
+        test_strings = {
+            'noTildeGroup': 'Event/Category/Initial context,'
+                            '(Item/Object/Vehicle/Train,Event/Category/Initial context)',
+            'oneTildeGroup': 'Event/Category/Initial context,'
                              '(Item/Object/Vehicle/Car ~ Attribute/Object control/Perturb)',
-            'twoTildeGroup': 'Event/Category/Sensory presentation,'
+            'twoTildeGroup': 'Event/Category/Initial context,'
                              '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar,'
                              ' Attribute/Visual/Color/Red)',
-            'invalidTildeGroup': 'Event/Category/Sensory presentation,'
+            'invalidTildeGroup': 'Event/Category/Initial context,'
                                  '(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car,'
                                  ' Item/ID/RedCar, Attribute/Visual/Color/Red ~ Attribute/Object control/Perturb)',
         }
-        expectedResults = {
+        expected_results = {
             'noTildeGroup': True,
             'oneTildeGroup': False,
             'twoTildeGroup': False,
             'invalidTildeGroup': False
         }
-        expectedIssues = {
+        expected_issues = {
             'noTildeGroup': [],
-            'oneTildeGroup': self.error_handler.format_error(ValidationErrors.TILDES_NOT_SUPPORTED, 
-                                                                 hed_string=testStrings['oneTildeGroup'],
-                                                                 character="~", char_index=61),
-            'twoTildeGroup': self.error_handler.format_error(ValidationErrors.TILDES_NOT_SUPPORTED, 
-                                                                 hed_string=testStrings['twoTildeGroup'],
-                                                                 character="~", char_index=54)
-                             + self.error_handler.format_error(ValidationErrors.TILDES_NOT_SUPPORTED, 
-                                                                   hed_string=testStrings['twoTildeGroup'],
-                                                                   character="~", char_index=82),
-            'invalidTildeGroup': self.error_handler.format_error(ValidationErrors.TILDES_NOT_SUPPORTED, 
-                                                                     hed_string=testStrings['invalidTildeGroup'],
-                                                                     character="~", char_index=54)
-                                 + self.error_handler.format_error(ValidationErrors.TILDES_NOT_SUPPORTED, 
-                                                                       hed_string=testStrings['invalidTildeGroup'],
-                                                                       character="~", char_index=82)
-                                 + self.error_handler.format_error(ValidationErrors.TILDES_NOT_SUPPORTED, 
-                                                                       hed_string=testStrings['invalidTildeGroup'],
-                                                                       character="~", char_index=152)
+            'oneTildeGroup': self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                              source_string=test_strings['oneTildeGroup'],
+                                                              char_index=56),
+            'twoTildeGroup': self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                              source_string=test_strings['twoTildeGroup'],
+                                                              char_index=49)
+                             + self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                                source_string=test_strings['twoTildeGroup'],
+                                                                char_index=77),
+            'invalidTildeGroup': self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                                  source_string=test_strings['invalidTildeGroup'],
+                                                                  char_index=49)
+                                 + self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                                    source_string=test_strings['invalidTildeGroup'],
+                                                                    char_index=77)
+                                 + self.format_error_but_not_really(ValidationErrors.TILDES_NOT_SUPPORTED,
+                                                                    source_string=test_strings['invalidTildeGroup'],
+                                                                    char_index=147)
         }
-        self.validator(testStrings, expectedResults, expectedIssues)
+        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 
 
 class TestHedTags(TestHed):
     def test_valid_comma_separated_paths(self):
         hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
         result = True
-        issues = self.semantic_tag_validator.run_hed_string_validators(hed_string)
+        issues = self.semantic_tag_validator.run_hed_string_validators(HedString(hed_string))
         self.assertEqual(result, True)
         self.assertCountEqual(issues, [])
-
 
 
 class TestOldHed(TestHed):
@@ -694,22 +713,16 @@ class TestOldHed(TestHed):
 
 
 class OldIndividualHedTags(TestOldHed):
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        if check_for_warnings is True:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.semantic_warning_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
-        else:
-            self.validator_base(test_strings, expected_results, expected_issues, lambda
-                hed_string_delimiter: self.semantic_hed_input_reader._validate_individual_tags_in_hed_string(
-                hed_string_delimiter))
+    @staticmethod
+    def string_obj_func(validator):
+        return validator._validate_individual_tags_in_hed_string
 
     def test_required_units(self):
         test_strings = {
             'hasRequiredUnit': 'Event/Duration/3 ms',
             'missingRequiredUnit': 'Event/Duration/3',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5.2e-1',
+            'notRequiredNumber': 'Attribute/Visual/Color/Red/0.5',
+            'notRequiredScientific': 'Attribute/Visual/Color/Red/5.2e-1',
             'timeValue': 'Item/2D shape/Clock face/08:30'
         }
         expected_results = {
@@ -721,8 +734,8 @@ class OldIndividualHedTags(TestOldHed):
         }
         expected_issues = {
             'hasRequiredUnit': "",
-            'missingRequiredUnit': self.error_handler.format_error(ValidationWarnings.UNIT_CLASS_DEFAULT_USED, tag=test_strings['missingRequiredUnit'],
-                                                                         default_unit='s'),
+            'missingRequiredUnit': self.format_error_but_not_really(ValidationWarnings.UNIT_CLASS_DEFAULT_USED, tag=0,
+                                                                    default_unit='s'),
             'notRequiredNumber': "",
             'notRequiredScientific': "",
             'timeValue': ""
@@ -737,8 +750,8 @@ class OldIndividualHedTags(TestOldHed):
             'incorrectUnit': 'Event/Duration/3 cm',
             'incorrectUnitWord': 'Event/Duration/3 nanoseconds',
             'incorrectPrefix': 'Event/Duration/3 ns',
-            'notRequiredNumber': 'Attribute/Color/Red/0.5',
-            'notRequiredScientific': 'Attribute/Color/Red/5e-1',
+            'notRequiredNumber': 'Attribute/Visual/Color/Red/0.5',
+            'notRequiredScientific': 'Attribute/Visual/Color/Red/5e-1',
             'properTime': 'Item/2D shape/Clock face/08:30',
             'invalidTime': 'Item/2D shape/Clock face/54:54'
         }
@@ -776,20 +789,20 @@ class OldIndividualHedTags(TestOldHed):
             'correctUnit': [],
             'correctUnitWord': [],
             'correctUnitScientific': [],
-            'incorrectUnit': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
-                                                                 tag=test_strings['incorrectUnit'],
-                                                                 unit_class_units=legal_time_units),
-            'incorrectUnitWord': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
-                                                                     tag=test_strings['incorrectUnitWord'],
-                                                                     unit_class_units=legal_time_units),
-            'incorrectPrefix': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT, 
-                                                                   tag=test_strings['incorrectPrefix'],
-                                                                   unit_class_units=legal_time_units),
+            'incorrectUnit': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                              tag=0,
+                                                              unit_class_units=legal_time_units),
+            'incorrectUnitWord': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                  tag=0,
+                                                                  unit_class_units=legal_time_units),
+            'incorrectPrefix': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                                                tag=0,
+                                                                unit_class_units=legal_time_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
             'properTime': [],
-            'invalidTime': self.error_handler.format_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,  tag=test_strings['invalidTime'],
-                                                               unit_class_units=legal_time_units)
+            'invalidTime': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT, tag=0,
+                                                            unit_class_units=legal_time_units)
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
