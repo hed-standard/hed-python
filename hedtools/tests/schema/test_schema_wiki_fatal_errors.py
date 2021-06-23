@@ -37,4 +37,3 @@ class TestHedSchema(unittest.TestCase):
                 formated_error = e.format_error_message()
                 self.assertEqual(e.error_type, error)
                 pass
->>>>>>> b22dc7640931f200ceb027b2b613e378b7f53af8
