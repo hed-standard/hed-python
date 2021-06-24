@@ -78,11 +78,16 @@ def load_schema_version(xml_folder=None, xml_version_number=None):
     HedSchema
         A HedSchema object.
     """
-    # If we're not asking for a specific file, for ease of use cache the ones from github.
-    if xml_folder is None and xml_version_number is None:
-        hed_cache.cache_all_hed_xml_versions()
-    final_hed_xml_file = hed_cache.get_hed_version_path(xml_folder, xml_version_number)
-    hed_schema = load_schema(final_hed_xml_file)
+    try:
+        final_hed_xml_file = hed_cache.get_hed_version_path(xml_folder, xml_version_number)
+        hed_schema = load_schema(final_hed_xml_file)
+    except HedFileError as e:
+        if e.error_type == HedExceptions.FILE_NOT_FOUND:
+            hed_cache.cache_all_hed_xml_versions()
+            final_hed_xml_file = hed_cache.get_hed_version_path(xml_folder, xml_version_number)
+            hed_schema = load_schema(final_hed_xml_file)
+        else:
+            raise e
     return hed_schema
 
 
