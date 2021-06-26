@@ -14,7 +14,7 @@ from hedweb.utils.io_utils import get_hed_schema
 app_config = current_app.config
 
 
-def generate_input_from_string_form(request):
+def get_input_from_string_form(request):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters

@@ -13,7 +13,7 @@ from hedweb.utils.io_utils import handle_error
 app_config = current_app.config
 
 
-def generate_input_from_service_request(request):
+def get_input_from_service_request(request):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters

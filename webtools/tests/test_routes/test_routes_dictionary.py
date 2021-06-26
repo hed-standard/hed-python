@@ -4,6 +4,7 @@ import shutil
 import unittest
 from flask import Response
 from hedweb.app_factory import AppFactory
+from hedweb.constants import common
 
 
 class Test(unittest.TestCase):
@@ -29,7 +30,7 @@ class Test(unittest.TestCase):
         response = self.app.test.post('/dictionary_submit')
         self.assertEqual(200, response.status_code, 'HED dictionary request succeeds even when no data')
         self.assertTrue(isinstance(response, Response),
-                        'dictionary_process to short should return a Response when no data')
+                        'dictionary_submit to short should return a Response when no data')
         header_dict = dict(response.headers)
         self.assertEqual("error", header_dict["Category"], "The header category when no dictionary is error ")
         self.assertFalse(response.data, "The response data for empty dictionary request is empty")
@@ -41,13 +42,13 @@ class Test(unittest.TestCase):
             x = sc.read()
         json_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '8.0.0-alpha.2',
-                          'command_option': 'command_to_long',
-                          'json_file': (json_buffer, 'bids_events.json'),
-                          'check_for_warnings': 'on'}
+            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.2',
+                          common.COMMAND_OPTION: common.COMMAND_TO_LONG,
+                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
-                            'dictionary to long should return a Response when valid dictionary')
+                            'dictionary_submit should return a Response when valid to long dictionary')
             self.assertEqual(200, response.status_code, 'To long of a valid dictionary has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
@@ -61,14 +62,14 @@ class Test(unittest.TestCase):
             x = sc.read()
         json_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '7.2.0',
-                          'command_option': 'command_to_long',
-                          'json_file': (json_buffer, 'bids_events.json'),
-                          'check_for_warnings': 'on'}
+            input_data = {common.SCHEMA_VERSION: '7.2.0',
+                          common.COMMAND_OPTION: common.COMMAND_TO_LONG,
+                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          common.CHECK_FOR_WARNINGS: 'on'}
 
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
-                            'dictionary to long should return a Response when invalid dictionary')
+                            'dictionary_submit should return a Response when invalid to long dictionary')
             self.assertEqual(200, response.status_code, 'Conversion of an invalid dictionary to long has valid status')
             headers_dict = dict(response.headers)
             self.assertEqual("warning", headers_dict["Category"],
@@ -84,13 +85,13 @@ class Test(unittest.TestCase):
             x = sc.read()
         json_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '8.0.0-alpha.2',
-                          'command_option': 'command_to_short',
-                          'json_file': (json_buffer, 'bids_events_alpha.json'),
-                          'check_for_warnings': 'on'}
+            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.2',
+                           common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
+                           common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
+                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
-                            'dictionary to short should return a Response when valid dictionary')
+                            'dictionary_submit should return a Response when valid to short dictionary')
             self.assertEqual(200, response.status_code, 'To short of a valid dictionary has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
@@ -105,13 +106,13 @@ class Test(unittest.TestCase):
             x = sc.read()
         json_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '8.0.0-alpha.2',
-                          'command_option': 'command_validate',
-                          'json_file': (json_buffer, 'bids_events_alpha.json'),
-                          'check_for_warnings': 'on'}
+            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.2',
+                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
+                          common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
-                            'dictionary valif should return a Response when valid dictionary')
+                            'dictionary_submit should return a Response when valid dictionary')
             self.assertEqual(200, response.status_code, 'Validation of a valid dictionary has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
@@ -125,13 +126,13 @@ class Test(unittest.TestCase):
             x = sc.read()
         json_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '7.2.0',
-                          'command_option': 'command_to_short',
-                          'json_file': (json_buffer, 'bids_events_alpha.json'),
-                          'check_for_warnings': 'on'}
+            input_data = {common.SCHEMA_VERSION: '7.2.0',
+                          common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
+                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
+                          common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
-                            'dictionary_process to short should return a response object when invalid dictionary')
+                            'dictionary_submit should return a response object when invalid to short dictionary')
             self.assertEqual(200, response.status_code, 'Conversion of invalid dictionary to short has valid status')
             headers_dict = dict(response.headers)
             self.assertEqual("warning", headers_dict["Category"],
@@ -146,13 +147,13 @@ class Test(unittest.TestCase):
             x = sc.read()
         json_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {'schema_version': '7.2.0',
-                          'command_option': 'command_validate',
-                          'json_file': (json_buffer, 'bids_events_alpha.json'),
-                          'check_for_warnings': 'on'}
+            input_data = {common.SCHEMA_VERSION: '7.2.0',
+                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
+                          common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
-                            'dictionary_process validate should return a response object when invalid dictionary')
+                            'dictionary_submit validate should return a response object when invalid dictionary')
             self.assertEqual(200, response.status_code,
                              'Validation of an invalid dictionary to short has a valid status code')
             headers_dict = dict(response.headers)

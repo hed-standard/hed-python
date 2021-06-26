@@ -3,6 +3,9 @@ import shutil
 import unittest
 
 import hed.schema as hedschema
+from hed import models
+from hedweb.constants import common
+
 from hedweb.app_factory import AppFactory
 
 
@@ -25,32 +28,32 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_dictionary_form(self):
-        from hedweb.dictionary import generate_input_from_dictionary_form
-        self.assertRaises(TypeError, generate_input_from_dictionary_form, {},
+        from hedweb.dictionary import get_input_from_dictionary_form
+        self.assertRaises(TypeError, get_input_from_dictionary_form, {},
                           "An exception should be raised if an empty request is passed")
 
     def test_dictionary_process_empty_file(self):
         from hedweb.dictionary import dictionary_process
         from hed.errors.exceptions import HedFileError
-        arguments = {'json_path': ''}
-        try:
-            dictionary_process(arguments)
-        except HedFileError:
-            pass
-        except Exception:
-            self.fail('dictionary_process threw the wrong exception when dictionary-path was empty')
-        else:
-            self.fail('dictionary_process should have thrown a HedFileError exception when json_path was empty')
+        with self.app.app_context():
+            arguments = {'json_path': ''}
+            try:
+                dictionary_process(arguments)
+            except HedFileError:
+                pass
+            except Exception:
+                self.fail('dictionary_process threw the wrong exception when dictionary-path was empty')
+            else:
+                self.fail('dictionary_process should have thrown a HedFileError exception when json_path was empty')
 
     def test_dictionary_process(self):
         from hedweb.dictionary import dictionary_process
-        from hed import models
-        from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_dictionary = models.ColumnDefGroup(json_filename=json_path, display_name='bids_json')
-        arguments = {common.SCHEMA: hed_schema, 'json_dictionary': json_dictionary, 'command': common.COMMAND_TO_SHORT}
+        arguments = {common.SCHEMA: hed_schema, common.JSON_DICTIONARY: json_dictionary,
+                     common.JSON_DISPLAY_NAME: 'bids_json', common.COMMAND: common.COMMAND_TO_SHORT}
         with self.app.app_context():
             results = dictionary_process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -62,7 +65,9 @@ class Test(unittest.TestCase):
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        arguments = {common.SCHEMA: hed_schema, 'json_dictionary': json_dictionary, 'command': common.COMMAND_TO_SHORT}
+        arguments = {common.SCHEMA: hed_schema, common.JSON_DICTIONARY: json_dictionary,
+                     common.JSON_DISPLAY_NAME: 'bids_json', common.COMMAND: common.COMMAND_TO_SHORT}
+
         with self.app.app_context():
             results = dictionary_process(arguments)
             self.assertTrue(isinstance(results, dict),

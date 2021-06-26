@@ -16,7 +16,7 @@ from hedweb.constants import common, file_constants
 app_config = current_app.config
 
 
-def generate_input_from_schema_form(request):
+def get_input_from_schema_form(request):
     """Gets the conversion function input arguments from a request object associated with the conversion form.
 
     Parameters

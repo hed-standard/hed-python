@@ -23,8 +23,8 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_spreadsheet_form(self):
-        from hedweb.spreadsheet import generate_input_from_spreadsheet_form
-        self.assertRaises(TypeError, generate_input_from_spreadsheet_form, {},
+        from hedweb.spreadsheet import get_input_from_spreadsheet_form
+        self.assertRaises(TypeError, get_input_from_spreadsheet_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_spreadsheet")
 
     def test_spreadsheet_process_empty_file(self):

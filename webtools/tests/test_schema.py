@@ -23,8 +23,8 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_schema_form(self):
-        from hedweb.schema import generate_input_from_schema_form
-        self.assertRaises(TypeError, generate_input_from_schema_form, {},
+        from hedweb.schema import get_input_from_schema_form
+        self.assertRaises(TypeError, get_input_from_schema_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_schema")
 
     def test_schema_process(self):

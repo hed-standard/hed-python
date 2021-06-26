@@ -14,7 +14,7 @@ from hedweb.utils.spreadsheet_utils import get_specific_tag_columns_from_form, c
 app_config = current_app.config
 
 
-def generate_input_from_spreadsheet_form(request):
+def get_input_from_spreadsheet_form(request):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
     Parameters

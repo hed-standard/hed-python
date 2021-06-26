@@ -24,8 +24,8 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_hedstring_form(self):
-        from hedweb.strings import generate_input_from_string_form
-        self.assertRaises(TypeError, generate_input_from_string_form, {},
+        from hedweb.strings import get_input_from_string_form
+        self.assertRaises(TypeError, get_input_from_string_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_hedstring")
 
     def test_string_process(self):

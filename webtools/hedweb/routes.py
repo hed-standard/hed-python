@@ -9,8 +9,8 @@ from hedweb.constants import route_constants
 from hedweb.utils.web_utils import handle_http_error, package_results
 from hedweb.utils.io_utils import delete_file_no_exceptions, handle_error, save_file_to_upload_folder
 from hedweb import dictionary, events, spreadsheet, services
-from hedweb.schema import generate_input_from_schema_form, schema_process
-from hedweb.strings import generate_input_from_string_form, string_process
+from hedweb.schema import get_input_from_schema_form, schema_process
+from hedweb.strings import get_input_from_string_form, string_process
 from hedweb.utils.spreadsheet_utils import generate_input_columns_info, get_columns_info
 
 app_config = current_app.config
@@ -49,13 +49,11 @@ def dictionary_results():
     """
     input_arguments = {}
     try:
-        input_arguments = dictionary.generate_input_from_dictionary_form(request)
+        input_arguments = dictionary.get_input_from_dictionary_form(request)
         a = dictionary.dictionary_process(input_arguments)
         return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.EVENTS_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -69,7 +67,7 @@ def events_results():
     """
     input_arguments = {}
     try:
-        input_arguments = events.generate_input_from_events_form(request)
+        input_arguments = events.get_input_from_events_form(request)
         a = events.events_process(input_arguments)
         return package_results(a)
     except Exception as ex:
@@ -90,7 +88,7 @@ def schema_results():
     """
 
     try:
-        arguments = generate_input_from_schema_form(request)
+        arguments = get_input_from_schema_form(request)
         return schema_process(arguments)
     except Exception as ex:
         return handle_http_error(ex)
@@ -151,7 +149,7 @@ def services_results():
         A serialized JSON string containing processed information.
     """
     try:
-        arguments = services.generate_input_from_service_request(request)
+        arguments = services.get_input_from_service_request(request)
         status = services.services_process(arguments)
         return json.dumps(status)
     except Exception as ex:
@@ -169,7 +167,7 @@ def spreadsheet_results():
     """
     input_arguments = {}
     try:
-        input_arguments = spreadsheet.generate_input_from_spreadsheet_form(request)
+        input_arguments = spreadsheet.get_input_from_spreadsheet_form(request)
         return spreadsheet.spreadsheet_process(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
@@ -188,7 +186,7 @@ def string_results():
     """
 
     try:
-        input_arguments = generate_input_from_string_form(request)
+        input_arguments = get_input_from_string_form(request)
         a = json.dumps(string_process(input_arguments))
         return a
         # return json.dumps(string_process(input_arguments))
