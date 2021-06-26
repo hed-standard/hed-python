@@ -23,7 +23,7 @@ class BaseInput:
     COMMA_DELIMITER = ','
 
     def __init__(self, filename=None, worksheet_name=None, has_column_names=True, mapper=None,
-                 csv_string=None):
+                 csv_string=None, display_name=None):
         """Constructor for the BaseInput class.
 
          Parameters
@@ -47,6 +47,7 @@ class BaseInput:
         self._filename = filename
         self._worksheet_name = worksheet_name
         self._has_column_names = has_column_names
+        self.display_name = display_name
         pandas_header = 0
         if not self._has_column_names:
             pandas_header = None
