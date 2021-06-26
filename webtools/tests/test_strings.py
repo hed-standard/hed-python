@@ -48,15 +48,15 @@ class Test(unittest.TestCase):
         string_list = ['Red, Blue']
 
         with self.app.app_context():
-            response = string_convert(hed_schema, string_list)
-            self.assertEqual('warning', response['msg_category'], "hedstring_convert issue warning if unsuccessful")
+            results = string_convert(hed_schema, string_list)
+            self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
-            response = string_convert(hed_schema, string_list)
-            self.assertEqual('success', response['msg_category'],
+            results = string_convert(hed_schema, string_list)
+            self.assertEqual('success', results['msg_category'],
                              "hedstring_convert should return success if converted")
 
     def test_string_convert_to_long(self):
@@ -66,15 +66,15 @@ class Test(unittest.TestCase):
         string_list = ['Red, Blue']
 
         with self.app.app_context():
-            response = string_convert(hed_schema, string_list, to_short=False)
-            self.assertEqual('warning', response['msg_category'], "hedstring_convert issue warning if unsuccessful")
+            results = string_convert(hed_schema, string_list, to_short=False)
+            self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
-            response = string_convert(hed_schema, string_list, to_short=False)
-            self.assertEqual('success', response['msg_category'],
+            results = string_convert(hed_schema, string_list, to_short=False)
+            self.assertEqual('success', results['msg_category'],
                              "hedstring_convert should return success if converted")
 
     def test_string_validate(self):
@@ -84,14 +84,14 @@ class Test(unittest.TestCase):
         string_list = ['Red, Blue']
 
         with self.app.app_context():
-            response = string_validate(hed_schema, string_list)
-            self.assertEqual('warning', response['msg_category'], "string_validate has warning if validation errors")
+            results = string_validate(hed_schema, string_list)
+            self.assertEqual('warning', results['msg_category'], "string_validate has warning if validation errors")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            response = string_validate(hed_schema, string_list)
-            self.assertEqual('success', response['msg_category'], "string_validate should return success if converted")
+            results = string_validate(hed_schema, string_list)
+            self.assertEqual('success', results['msg_category'], "string_validate should return success if converted")
 
 
 if __name__ == '__main__':

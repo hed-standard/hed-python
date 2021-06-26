@@ -3,6 +3,7 @@ import json
 import shutil
 import unittest
 from hedweb.app_factory import AppFactory
+from hedweb.constants import common
 
 
 class Test(unittest.TestCase):
@@ -35,10 +36,10 @@ class Test(unittest.TestCase):
     def test_string_results_to_long(self):
         with self.app.app_context():
             test_string = 'Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red'
-            input_data = {'schema_version': '8.0.0-alpha.1',
-                          'command_option': 'command_to_long',
-                          'check_for_warnings': 'on',
-                          'string_input': test_string}
+            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                          common.COMMAND_OPTION: 'command_to_long',
+                          common.CHECK_FOR_WARNINGS: 'on',
+                          common.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'To long of a long string has a response')
@@ -66,10 +67,10 @@ class Test(unittest.TestCase):
     def test_string_results_to_short(self):
         with self.app.app_context():
             test_string = 'Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red'
-            input_data = {'schema_version': '8.0.0-alpha.1',
-                          'command_option': 'command_to_short',
-                          'check_for_warnings': 'on',
-                          'string_input': test_string}
+            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                          common.COMMAND_OPTION: 'command_to_short',
+                          common.CHECK_FOR_WARNINGS: 'on',
+                          common.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'To short of a long string has a response')
@@ -97,10 +98,10 @@ class Test(unittest.TestCase):
     def test_string_results_validate(self):
         with self.app.app_context():
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
-                                          data={'schema_version': '8.0.0-alpha.1',
-                                                'command_option': 'command_validate',
-                                                'check_for_warnings': 'on',
-                                                'string_input': 'Red,Blue,Label/3'})
+                                          data={common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                                                common.COMMAND_OPTION: 'command_validate',
+                                                common.CHECK_FOR_WARNINGS: 'on',
+                                                common.STRING_INPUT: 'Red,Blue,Label/3'})
 
             self.assertEqual(200, response.status_code, 'Validation of a valid string has a response')
             response_dict = json.loads(response.data)
@@ -108,10 +109,10 @@ class Test(unittest.TestCase):
             self.assertFalse(response_dict["data"], "No data should be returned if validation successful")
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
-                                          data={'schema_version': '8.0.0-alpha.1',
-                                                'command_option': 'command_validate',
-                                                'check_for_warnings': 'on',
-                                                'string_input': 'Blob,Blue,Label/3'})
+                                          data={common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                                                common.COMMAND_OPTION: 'command_validate',
+                                                common.CHECK_FOR_WARNINGS: 'on',
+                                                common.STRING_INPUT: 'Blob,Blue,Label/3'})
             self.assertEqual(200, response.status_code, 'Validation of an invalid string has a response')
             response_dict = json.loads(response.data)
             self.assertEqual("warning", response_dict["msg_category"],

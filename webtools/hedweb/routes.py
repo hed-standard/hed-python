@@ -187,8 +187,8 @@ def string_results():
 
     try:
         input_arguments = get_input_from_string_form(request)
-        a = json.dumps(string_process(input_arguments))
-        return a
+        a = string_process(input_arguments)
+        return json.dumps(a)
         # return json.dumps(string_process(input_arguments))
     except Exception as ex:
         return handle_error(ex)

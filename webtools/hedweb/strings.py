@@ -28,7 +28,7 @@ def get_input_from_string_form(request):
         A dictionary containing input arguments for calling the underlying validation function.
     """
     hed_schema = get_hed_schema_from_pull_down(request)
-    hed_string = request.form[common.STRING_INPUT]
+    hed_string = request.form.get(common.STRING_INPUT, None)
     if hed_string:
         string_list = [hed_string]
     else:
@@ -54,18 +54,17 @@ def string_process(arguments):
         Downloadable response object.
     """
     hed_schema = arguments.get('schema', None)
+    command = arguments.get(common.COMMAND, None)
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
     string_list = arguments.get(common.STRING_LIST, None)
     if not string_list:
         raise HedFileError('EmptyHedStringList', "Please provide a list of HED strings to be processed", "")
-    if common.COMMAND not in arguments:
-        raise HedFileError('MissingCommand', 'Command is missing', '')
-    if arguments[common.COMMAND] == common.COMMAND_VALIDATE:
+    if command == common.COMMAND_VALIDATE:
         results = string_validate(hed_schema, string_list)
-    elif arguments[common.COMMAND] == common.COMMAND_TO_SHORT:
+    elif command == common.COMMAND_TO_SHORT:
         results = string_convert(hed_schema, string_list)
-    elif arguments[common.COMMAND] == common.COMMAND_TO_LONG:
+    elif command == common.COMMAND_TO_LONG:
         results = string_convert(hed_schema, string_list, to_short=False)
     else:
         raise HedFileError('UnknownProcessingMethod', 'Select a hedstring processing method', '')
@@ -144,10 +143,11 @@ def string_validate(hed_schema, string_list):
         if issues:
             validation_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
     if validation_errors:
-        return {'command': common.COMMAND_VALIDATE, 'data': validation_errors,
-                'schema_version': schema_version, 'msg_category': 'warning',
+        print(common.COMMAND)
+        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': validation_errors,
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': 'Strings had validation errors'}
     else:
-        return {'command': common.COMMAND_VALIDATE, 'data': '',
-                'schema_version': schema_version, 'msg_category': 'success',
+        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': 'Strings validated successfully...'}
