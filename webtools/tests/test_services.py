@@ -2,6 +2,9 @@ import os
 import json
 import shutil
 import unittest
+from hed import schema as hedschema
+from hed import models
+from hedweb.constants import common
 
 from hedweb.app_factory import AppFactory
 
@@ -45,7 +48,10 @@ class Test(unittest.TestCase):
         json_text = json.dumps(data)
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxsd-test/HED8.0.0-beta.1.xml'
-        arguments = {'service': 'dictionary_validate', 'schema_url': schema_url, 'json_string': json_text}
+        hed_schema =  hedschema.load_schema(hed_url_path=schema_url)
+        json_dictionary = models.ColumnDefGroup(json_string=json_text, display_name='JSON_Dictionary')
+        arguments = {common.SERVICE: 'dictionary_validate', common.SCHEMA: hed_schema,
+                     common.JSON_DICTIONARY: json_dictionary}
         with self.app.app_context():
             response = services_process(arguments)
             self.assertFalse(response['error_type'],
@@ -53,11 +59,11 @@ class Test(unittest.TestCase):
             results = response['results']
             self.assertEqual('success', results['msg_category'],
                              "dictionary_validation services has success on bids.json")
-            self.assertEqual('8.0.0-beta.1', results['schema_version'], 'Version 8.0.0.-beta.1 was used')
+            self.assertEqual('8.0.0-beta.1', results[common.SCHEMA_VERSION], 'Version 8.0.0.-beta.1 was used')
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml/HED7.2.0.xml'
-        arguments = {'service': 'dictionary_validate', 'schema_url': schema_url, 'json_string': json_text}
+        arguments[common.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
         with self.app.app_context():
             response = services_process(arguments)
             self.assertFalse(response['error_type'],

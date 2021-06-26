@@ -35,9 +35,6 @@ OTHER_VERSION_OPTION = 'Other'
 
 HEDSTRING = 'hedstring'
 
-
-
-
 JSON_DICTIONARY = 'json_dictionary'
 JSON_DISPLAY_NAME = 'json_display_name'
 JSON_FILE = 'json_file'
@@ -67,6 +64,8 @@ SCHEMA_URL_FLASH = 'schema_url_flash'
 SCHEMA_URL_OPTION = 'schema_url_option'
 SCHEMA_VERSION = 'schema_version'
 SCHEMA_VERSION_LIST = 'schema_version_list'
+
+SERVICE = 'service'
 
 REQUIRED_COLUMN_INDICES = 'required_column_indices'
 SPREADSHEET = 'spreadsheet'

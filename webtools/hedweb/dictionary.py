@@ -53,7 +53,7 @@ def dictionary_process(arguments):
       dict
         A dictionary of results.
     """
-    hed_schema = arguments.get('schema', None)
+    hed_schema = arguments.get(common.SCHEMA, None)
     command = arguments.get(common.COMMAND, None)
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")

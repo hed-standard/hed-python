@@ -27,40 +27,35 @@ def get_input_from_service_request(request):
         A dictionary containing input arguments for calling the underlying validation function.
     """
 
-
     form_data = request.data
     form_string = form_data.decode()
     service_request = json.loads(form_string)
-    arguments = {'service': service_request.get('service', None),
-                 common.SCHEMA: None, common.JSON_DICTIONARY: None, 'events': None,
+    arguments = {common.SERVICE: service_request.get(common.SERVICE, None),
+                 common.SCHEMA: None,
+                 common.JSON_DICTIONARY: None,
+                 common.EVENTS: None,
                  common.SPREADSHEET: None,
-                 common.STRINGS:  service_request.get(common.STRING_LIST, None),
-                 common.CHECK_FOR_WARNINGS: service_request.get('check_for_warnings', True),
-                 common.DEFS_EXPAND: service_request.get('defs_expand', True)}
+                 common.STRING_LIST: service_request.get(common.STRING_LIST, None),
+                 common.CHECK_FOR_WARNINGS: service_request.get(common.CHECK_FOR_WARNINGS, True),
+                 common.DEFS_EXPAND: service_request.get(common.DEFS_EXPAND, True)}
     if common.JSON_STRING in service_request:
-        arguments[common.JSON_DICTIONARY] = \
-            models.ColumnDefGroup(json_string=service_request[common.JSON_STRING])
+        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=service_request[common.JSON_STRING],
+                                                                  display_name='JSON_Dictionary')
+    if common.EVENTS_STRING in service_request:
+        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=service_request[common.JSON_STRING],
+                                                                  display_name='JSON_Dictionary')
+        arguments[common.EVENTS] = models.EventsInput(csv_string=service_request[common.EVENTS_STRING],
+                                                      json_def_files=arguments.get(common.JSON_DICTIONARY, None),
+                                                      display_name='Events')
     if common.SCHEMA_STRING in service_request:
         arguments[common.SCHEMA] = hedschema.from_string(service_request[common.SCHEMA_STRING])
+    elif common.SCHEMA_URL in service_request:
+        schema_url = service_request[common.SCHEMA_URL]
+        arguments[common.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
     elif common.SCHEMA_VERSION in service_request:
-       hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
-       arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=hed_file_path)
-
-    if common.JSON_STRING in request.files:
-        f = request.files[common.JSON_FILE]
-        display_name = secure_filename(f.filename)
-        json_dictionary = models.ColumnDefGroup(json_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'))
-    else:
-        raise HedFileError('NoJSONDictionary', "Please provide a JSON dictionary", "")
-    arguments = {
-        common.SCHEMA: hed_schema,
-        common.JSON_DICTIONARY: json_dictionary,
-        common.JSON_DISPLAY_NAME: display_name,
-        common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
-        common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
-    }
+        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+        arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=hed_file_path)
     return arguments
-
 
 
 def services_process(arguments):
@@ -124,6 +119,7 @@ def services_process(arguments):
         response['error_msg'] = errors['error_msg']
     return response
 
+
 def services_list():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     the_path = os.path.join(dir_path, './static/resources/services.json')
@@ -152,6 +148,6 @@ def services_list():
     for result_val, meaning in results.items():
         results_string += f'\t{result_val}: {meaning}\n'
     data = services_string + meanings_string + returns_string + results_string
-    return {'command': '', 'data': data, 'output_display_name': '',
-            'schema_version': '', 'msg_category': 'success',
+    return {common.COMMAND: '', 'data': data, 'output_display_name': '',
+            common.SCHEMA_VERSION: '', 'msg_category': 'success',
             'msg': "List of available services and their meanings"}
