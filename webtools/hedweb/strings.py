@@ -63,16 +63,16 @@ def string_process(arguments):
     if command == common.COMMAND_VALIDATE:
         results = string_validate(hed_schema, string_list)
     elif command == common.COMMAND_TO_SHORT:
-        results = string_convert(hed_schema, string_list)
+        results = string_convert(hed_schema, string_list, command=common.COMMAND_TO_SHORT)
     elif command == common.COMMAND_TO_LONG:
-        results = string_convert(hed_schema, string_list, to_short=False)
+        results = string_convert(hed_schema, string_list)
     else:
         raise HedFileError('UnknownProcessingMethod', 'Select a hedstring processing method', '')
     return results
 
 
-def string_convert(hed_schema, string_list, to_short=True):
-    """Converts a list of strings from short form to long form unless short_to_long is true
+def string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
+    """Converts a list of strings from long to short unless command is not COMMAND_TO_LONG then converts to short
 
     Parameters
     ----------
@@ -80,8 +80,8 @@ def string_convert(hed_schema, string_list, to_short=True):
         The HED schema to be used in processing
     string_list: list
         A list of string to be processed
-    short_to_long: bool
-        If true convert from short to long
+   command: str
+        Name of the command to execute if not COMMAND_TO_LONG
 
     Returns
     -------
@@ -97,24 +97,21 @@ def string_convert(hed_schema, string_list, to_short=True):
     conversion_errors = []
     for pos, string in enumerate(string_list, start=1):
         hed_string_obj = models.HedString(string)
-        if to_short:
-            issues = hed_string_obj.convert_to_short(hed_schema)
-        else:
+        if command == common.COMMAND_TO_LONG:
             issues = hed_string_obj.convert_to_long(hed_schema)
+        else:
+            issues = hed_string_obj.convert_to_short(hed_schema)
         if issues:
             conversion_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
         strings.append(str(hed_string_obj))
-    if to_short:
-        command = common.COMMAND_TO_SHORT
-    else:
-        command = common.COMMAND_TO_LONG
+
     if conversion_errors:
-        return {'command': command, 'data': conversion_errors, 'additional_info': string_list,
-                'schema_version': schema_version, 'msg_category': 'warning',
+        return {common.COMMAND: command, 'data': conversion_errors, 'additional_info': string_list,
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': 'Some strings had conversion errors, results of conversion in additional_info'}
     else:
-        return {'command': command, 'data': strings,
-                'schema_version': schema_version, 'msg_category': 'success',
+        return {common.COMMAND: command, 'data': strings,
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': 'Strings converted successfully'}
 
 

@@ -73,7 +73,7 @@ def dictionary_process(arguments):
 
 
 def dictionary_convert(hed_schema, json_dictionary, command=common.COMMAND_TO_LONG):
-    """Converts a dictionary from short to long unless short_to_long is set to False, then long_to_short
+    """Converts a dictionary from long to short unless unless the command is not COMMAND_TO_LONG then converts to short
 
     Parameters
     ----------
@@ -82,7 +82,7 @@ def dictionary_convert(hed_schema, json_dictionary, command=common.COMMAND_TO_LO
     json_dictionary: ColumnDefGroup
         Previously created ColumnDefGroup
     command: str
-        Name of the command to execute
+        Name of the command to execute if not COMMAND_TO_LONG
 
     Returns
     -------
@@ -102,7 +102,7 @@ def dictionary_convert(hed_schema, json_dictionary, command=common.COMMAND_TO_LO
     for column_def in json_dictionary:
         for hed_string, position in column_def.hed_string_iter(include_position=True):
             hed_string_obj = models.HedString(hed_string)
-            if suffix == '_to_long':
+            if command == common.COMMAND_TO_LONG:
                 errors = hed_string_obj.convert_to_long(hed_schema)
             else:
                 errors = hed_string_obj.convert_to_short(hed_schema)
@@ -116,13 +116,13 @@ def dictionary_convert(hed_schema, json_dictionary, command=common.COMMAND_TO_LO
         issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
         file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
         return {common.COMMAND: command, 'data': issue_str, 'output_display_name': file_name,
-                'schema_version': schema_version, 'msg_category': 'warning',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': f'JSON file {display_name} had validation errors'}
     else:
         file_name = generate_filename(display_name, suffix=suffix, extension='.json')
         data = json_dictionary.get_as_json_string()
         return {common.COMMAND: command, 'data': data, 'output_display_name': file_name,
-                'schema_version': schema_version, 'msg_category': 'success',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f'JSON dictionary {display_name} was successfully converted'}
 
 
@@ -151,17 +151,17 @@ def dictionary_validate(hed_schema, json_dictionary):
         issue_str = get_printable_issue_string(issues, f"JSON dictionary {display_name} definition errors")
         file_name = generate_filename(display_name, suffix='_dictionary_errors', extension='.txt')
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
-                'schema_version': schema_version, 'msg_category': 'warning',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': f"JSON dictionary {display_name} had definition errors"}
 
     issues = json_dictionary.validate_entries(hed_schema)
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON dictionary {display_name } validation errors")
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
-        return {common.COMMAND: 'common.COMMAND_VALIDATE', 'data': issue_str, 'output_display_name': file_name,
-                'schema_version': schema_version, 'msg_category': 'warning',
+        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': f'JSON dictionary {display_name} had validation errors'}
     else:
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
-                'schema_version': schema_version, 'msg_category': 'success',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f'JSON file {display_name} had no validation errors'}

@@ -1,4 +1,4 @@
-import xlrd
+import openpyxl
 from flask import current_app
 from hed.errors.exceptions import HedFileError
 from hed.util.file_util import get_file_extension
@@ -58,25 +58,6 @@ def get_columns_info(input_arguments):
                            f'File {columns_display_name} extension does not correspond to an Excel or tsv file',
                            columns_display_name)
     return columns_info
-
-
-def get_excel_worksheet_names(workbook_file_path):
-    """Gets the worksheet names in an Excel workbook.
-
-    Parameters
-    ----------
-    workbook_file_path: string
-        The full path to an Excel workbook other.
-
-    Returns
-    -------
-    list
-        A list containing the worksheet names in an Excel workbook.
-
-    """
-    opened_workbook_file = xlrd.open_workbook(workbook_file_path)
-    worksheet_names = opened_workbook_file.sheet_names()
-    return worksheet_names
 
 
 def get_other_column_indices(column_names):
@@ -208,8 +189,8 @@ def get_text_file_info(file_path):
 
 
 def get_worksheet_info(file_path, worksheet_name=None):
-    opened_file = xlrd.open_workbook(file_path, on_demand=True)
-    worksheet_names = opened_file.sheet_names()
+    wb = openpyxl.load_workbook(file_path, read_only=True)
+    worksheet_names = wb.sheetnames
     info = {common.COLUMNS_FILE: file_path, common.WORKSHEET_NAMES: worksheet_names}
     if not worksheet_names:
         raise HedFileError('BadExcelFile', 'Excel files must worksheets', None)
@@ -217,12 +198,12 @@ def get_worksheet_info(file_path, worksheet_name=None):
         worksheet_name = worksheet_names[0]
     elif worksheet_name and worksheet_name not in worksheet_names:
         raise HedFileError('BadWorksheetName', f'Worksheet {worksheet_name} not in Excel file', '')
-    worksheet = opened_file.sheet_by_name(worksheet_name)
-    info[common.COLUMN_NAMES] = [worksheet.cell(0, col_index).value for col_index in range(worksheet.ncols)]
+    headers = [c.value for c in next(wb[worksheet_name].iter_rows(min_row=1, max_row=1))]
+    info[common.COLUMN_NAMES] = headers
     info[common.COLUMN_INDICES] = get_other_column_indices(info[common.COLUMN_NAMES])
     info[common.REQUIRED_COLUMN_INDICES] = get_specific_column_indices(info[common.COLUMN_NAMES])
     info[common.WORKSHEET_SELECTED] = worksheet_name
-    opened_file.release_resources()
+    wb.close()
     return info
 
 

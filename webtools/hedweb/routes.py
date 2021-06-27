@@ -2,8 +2,6 @@ from flask import render_template, request, Blueprint, current_app
 import json
 
 from hed import schema as hedschema
-# from hed.util import hed_cache
-# from hed.schema import hed_schema_file
 from hedweb.constants import common, page_constants
 from hedweb.constants import route_constants
 from hedweb.utils.web_utils import handle_http_error, package_results
@@ -72,9 +70,6 @@ def events_results():
         return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.EVENTS_PATH, ''))
-        delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SCHEMA_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -168,7 +163,8 @@ def spreadsheet_results():
     input_arguments = {}
     try:
         input_arguments = spreadsheet.get_input_from_spreadsheet_form(request)
-        return spreadsheet.spreadsheet_process(input_arguments)
+        a = spreadsheet.spreadsheet_process(input_arguments)
+        return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
     finally:
@@ -189,7 +185,6 @@ def string_results():
         input_arguments = get_input_from_string_form(request)
         a = string_process(input_arguments)
         return json.dumps(a)
-        # return json.dumps(string_process(input_arguments))
     except Exception as ex:
         return handle_error(ex)
 

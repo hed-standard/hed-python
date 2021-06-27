@@ -7,7 +7,6 @@ from unittest import mock
 from flask import Response
 from werkzeug.datastructures import Headers
 
-import hedweb.utils.io_utils
 from hedweb.app_factory import AppFactory
 
 
@@ -63,7 +62,7 @@ class Test(unittest.TestCase):
                         "generate_download_file_response should have an attachment filename")
         self.assertIsInstance(download_response, Response, "generate_download_file_response should generate Response")
 
-        #TODO: seem to have an issue with the deleting temporary files
+        # TODO: seem to have an issue with the deleting temporary files
         # self.assertFalse(temp_path.is_file(), "After download temporary download file should have been deleted")
         if os.path.isfile(temp_file):
             os.remove(temp_file)

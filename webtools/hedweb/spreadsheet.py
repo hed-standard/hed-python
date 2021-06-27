@@ -1,15 +1,15 @@
 from flask import current_app
 
+from hed import models
+from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 
 from hedweb.constants import common, file_constants
-from hedweb.utils.web_utils import form_has_option, \
-    get_hed_path_from_pull_down, \
-    get_uploaded_file_path_from_form, get_optional_form_field, package_results
-from hedweb.utils.io_utils import get_spreadsheet, generate_filename, get_hed_schema
-from hedweb.utils.spreadsheet_utils import get_specific_tag_columns_from_form, convert_number_str_to_list
+from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, get_uploaded_file_path_from_form, \
+get_optional_form_field
+from hedweb.utils.io_utils import generate_filename
 
 app_config = current_app.config
 
@@ -27,28 +27,35 @@ def get_input_from_spreadsheet_form(request):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, schema_display_name = get_hed_path_from_pull_down(request)
+    arguments = {
+        common.SCHEMA: get_hed_schema_from_pull_down(request),
+        common.SPREADSHEET: None,
+        common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+        common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
+    }
+
     uploaded_file_name, original_file_name = \
         get_uploaded_file_path_from_form(request, common.SPREADSHEET_FILE, file_constants.SPREADSHEET_FILE_EXTENSIONS)
 
-    arguments = {
-        common.SCHEMA_PATH: hed_file_path,
-        common.SCHEMA_DISPLAY_NAME: schema_display_name,
-        common.SPREADSHEET_PATH: uploaded_file_name,
-        common.SPREADSHEET_FILE: original_file_name,
-        common.TAG_COLUMNS: convert_number_str_to_list(request.form[common.TAG_COLUMNS]),
-        common.COLUMN_PREFIX_DICTIONARY: get_specific_tag_columns_from_form(request),
-        common.WORKSHEET_SELECTED: get_optional_form_field(request, common.WORKSHEET_SELECTED, common.STRING),
-        common.HAS_COLUMN_NAMES: get_optional_form_field(request, common.HAS_COLUMN_NAMES, common.BOOLEAN)
-    }
-    if form_has_option(request, common.COMMAND_OPTION, common.COMMAND_VALIDATE):
-        arguments[common.COMMAND_VALIDATE] = True
-    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_SHORT):
-        arguments[common.COMMAND_TO_SHORT] = True
-    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_LONG):
-        arguments[common.COMMAND_TO_LONG] = True
-    arguments[common.DEFS_EXPAND] = form_has_option(request, common.DEFS_EXPAND, 'on')
-    arguments[common.CHECK_FOR_WARNINGS] = form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
+    spreadsheet = models.HedInput(uploaded_file_name,
+                                  worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
+                                  tag_columns=arguments.get(common.TAG_COLUMNS, None),
+                                  has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
+                                  column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY, None),
+                                  display_name=original_file_name)
+    arguments[common.SPREADSHEET] = spreadsheet
+    # arguments = { \
+    #     common.SCHEMA: get_hed_schema_from_pull_down(request),
+    #     common.SPREADSHEET: None,
+    #     common.COMMAND = request.values.get(common.COMMAND_OPTION, ''),
+    #     common.TAG_COLUMNS: convert_number_str_to_list(request.form[common.TAG_COLUMNS]),
+    #     common.COLUMN_PREFIX_DICTIONARY: get_specific_tag_columns_from_form(request),
+    #     common.WORKSHEET_SELECTED: get_optional_form_field(request, common.WORKSHEET_SELECTED, common.STRING),
+    #     common.HAS_COLUMN_NAMES: get_optional_form_field(request, common.HAS_COLUMN_NAMES, common.BOOLEAN),
+    #     common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
+    #     common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on')
+    # }
+
     return arguments
 
 
@@ -65,77 +72,75 @@ def spreadsheet_process(arguments):
       Response
         Downloadable response object.
     """
+    hed_schema = arguments.get('schema', None)
+    command = arguments.get(common.COMMAND, None)
+    if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
+        raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
+    spreadsheet = arguments.get(common.SPREADSHEET, 'None')
+    if not spreadsheet or not isinstance(spreadsheet, models.HedInput):
+        raise HedFileError('InvalidSpreadsheet', "An spreadsheet was given but could not be processed", "")
 
-    if not arguments[common.SPREADSHEET_PATH]:
-        raise HedFileError('EmptySpreadsheetFile', "Please upload a spreadsheet to process", "")
-    if arguments.get(common.COMMAND_VALIDATE, None):
-        results = spreadsheet_validate(arguments)
-    elif arguments.get(common.COMMAND_TO_SHORT, None):
-        results = spreadsheet_convert(arguments, short_to_long=False)
-    elif arguments.get(common.COMMAND_TO_LONG, None):
-        results = spreadsheet_convert(arguments)
+    if command == common.COMMAND_VALIDATE:
+        results = spreadsheet_validate(hed_schema, spreadsheet)
+    elif command == common.COMMAND_TO_SHORT:
+        results = spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_SHORT)
+    elif command == common.COMMAND_TO_LONG:
+        results = spreadsheet_convert(hed_schema, spreadsheet)
     else:
-        raise HedFileError('UnknownProcessingMethod', "Select a spreadsheet processing method", "")
-    return package_results(results)
+        raise HedFileError('UnknownSpreadsheetProcessingMethod', f"Command {command} is missing or invalid", "")
+    return results
 
 
-def spreadsheet_convert(arguments, short_to_long=True, hed_schema=None):
-    """Converts a spreadsheet from short to long unless short_to_long is set to False, then long_to_short
+def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG):
+    """Converts a spreadsheet long to short unless unless the command is not COMMAND_TO_LONG then converts to short
 
     Parameters
     ----------
-    arguments: dict
-        Dictionary containing standard input form arguments
-    short_to_long: bool
-        If True convert the dictionary to long form, otherwise convert to short form
-    hed_schema:str or HedSchema
-        Version number or path or HedSchema object to be used
+    hed_schema:HedSchema
+        HedSchema object to be used
+    spreadsheet: HedInput
+        Previously created HedInput object
+    command: str
+        Name of the command to execute if not COMMAND_TO_LONG
 
     Returns
     -------
-    Response
-        A downloadable spreadsheet file or a file containing warnings
+    dict
+        A downloadable dictionary file or a file containing warnings
     """
-    if not hed_schema:
-        hed_schema = get_hed_schema(arguments)
+
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    return {'command': arguments.get('command', ''), 'data': '',
-            'schema_version': schema_version, 'msg_category': 'warning',
+    return {common.COMMAND: common.COMMAND_TO_LONG, 'data': '',
+            common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
             'msg': 'This convert command has not yet been implemented for spreadsheets'}
 
 
-def spreadsheet_validate(arguments, hed_schema=None, spreadsheet=None):
+def spreadsheet_validate(hed_schema, spreadsheet):
     """ Validates the spreadsheet.
 
     Parameters
     ----------
-    arguments: dictionary
-        A dictionary containing the arguments for the validation function.
     hed_schema: str or HedSchema
         Version number or path or HedSchema object to be used
     spreadsheet: HedFileInput
-        Spreadsheet object
+        Spreadsheet input object to be validated
+
     Returns
     -------
-    HedValidator object
-        A HedValidator object containing the validation results.
+    dict
+         A dictionary containing results of validation in standard form
     """
-    if not hed_schema:
-        hed_schema = get_hed_schema(arguments)
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    if not spreadsheet:
-        spreadsheet = get_spreadsheet(arguments)
-    validator = EventValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
+    validator = EventValidator(hed_schema=hed_schema)
     issues = validator.validate_input(spreadsheet)
+    display_name = spreadsheet.get_display_name()
     if issues:
-        display_name = arguments.get(common.SPREADSHEET_FILE, None)
-        issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
-
+        issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
-        return {'command': arguments.get('command', ''), 'data': issue_str, "output_display_name": file_name,
-                'schema_version': schema_version, "msg_category": "warning",
-                'msg': "Spreadsheet file had validation errors"}
+        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
+                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+                'msg': f"Spreadsheet {display_name} had validation errors"}
     else:
-        return {'command': arguments.get('command', ''), 'data': '',
-                'schema_version': schema_version, 'msg_category': 'success',
-                'msg': 'Spreadsheet file had no validation errors'}
+        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+                'msg': f'Spreadsheet {display_name} had no validation errors'}

@@ -39,7 +39,6 @@ class Test(unittest.TestCase):
         self.assertTrue(other_tag_columns)
         self.assertEqual(expected_other_columns, other_tag_columns)
         other_tag_columns_str = 'A,B,C'
-        expected_other_columns = ['A', 'B', 'C']
         with self.assertRaises(ValueError):
             other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
 
@@ -86,15 +85,6 @@ class Test(unittest.TestCase):
     def test_get_column_info_dictionary(self):
         self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                        '../../data/ExcelMultipleSheets.xlsx')
-
-    def test_get_excel_worksheet_names(self):
-        from hedweb.utils.spreadsheet_utils import get_excel_worksheet_names
-        self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                       '../../data/ExcelMultipleSheets.xlsx')
-        worksheet_names = get_excel_worksheet_names(self.excel_file)
-        self.assertEqual(len(worksheet_names), 3, "This excel file has three worksheets")
-        self.assertIn('PVT Events', worksheet_names, "PVT Events is one of the worksheet names")
-        self.assertNotIn('Temp', worksheet_names, "Temp is not one of the worksheet names")
 
     def test_get_other_tag_column_indices(self):
         self.assertTrue(1, "Testing get_other_tag_column_indices")

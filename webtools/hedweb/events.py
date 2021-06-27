@@ -69,7 +69,7 @@ def events_process(arguments):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
     events = arguments.get(common.EVENTS, 'None')
     if not events or not isinstance(events, models.EventsInput):
-        raise HedFileError('InvalidEventsFile', "An events file was give but could not be processed", "")
+        raise HedFileError('InvalidEventsFile', "An events file was given but could not be processed", "")
 
     if command == common.COMMAND_VALIDATE:
         results = events_validate(hed_schema, events)
@@ -148,9 +148,9 @@ def events_validate(hed_schema, events):
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
-                'schema_version': schema_version, "msg_category": "warning",
+                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
                 'msg': f"Events file {display_name} had validation errors"}
     else:
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
-                'schema_version': schema_version, 'msg_category': 'success',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f"Events file {display_name} had no validation errors"}
