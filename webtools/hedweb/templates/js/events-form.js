@@ -13,7 +13,7 @@ $('#events_file').on('change', function () {
     let eventsPath = events.val();
     let eventsFile = events[0].files[0];
     clearFlashMessages();
-    removeColumnTable();
+    removeColumnInfo(false);
     if (cancelWasPressedInChromeFileUpload(eventsPath)) {
         clearForm();
         return;
@@ -45,7 +45,7 @@ function clearForm() {
     $('#events_form')[0].reset();
     $('#events_display_name').text('');
     clearFlashMessages();
-    hideColumnNames();
+    hideColumnInfo(false);
     hideOtherSchemaVersionFileUpload();
 }
 
@@ -68,7 +68,7 @@ function clearFlashMessages() {
 function prepareForm() {
     clearForm();
     getSchemaVersions()
-    hideColumnNames();
+    hideColumnInfo(false);
     hideOtherSchemaVersionFileUpload();
 }
 

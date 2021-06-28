@@ -7,9 +7,8 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 
 from hedweb.constants import common, file_constants
-from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, get_uploaded_file_path_from_form, \
-get_optional_form_field
-from hedweb.utils.io_utils import generate_filename
+from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, get_uploaded_file_path_from_form
+from hedweb.utils.io_utils import generate_filename, get_prefix_dict
 
 app_config = current_app.config
 
@@ -31,17 +30,18 @@ def get_input_from_spreadsheet_form(request):
         common.SCHEMA: get_hed_schema_from_pull_down(request),
         common.SPREADSHEET: None,
         common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+        common.HAS_COLUMN_NAMES: form_has_option(request, common.HAS_COLUMN_NAMES, 'on'),
         common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
     }
 
     uploaded_file_name, original_file_name = \
         get_uploaded_file_path_from_form(request, common.SPREADSHEET_FILE, file_constants.SPREADSHEET_FILE_EXTENSIONS)
-
+    tag_columns, prefix_dict = get_prefix_dict(request.form)
     spreadsheet = models.HedInput(uploaded_file_name,
                                   worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
-                                  tag_columns=arguments.get(common.TAG_COLUMNS, None),
+                                  tag_columns=tag_columns,
                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
-                                  column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY, None),
+                                  column_prefix_dictionary=prefix_dict,
                                   display_name=original_file_name)
     arguments[common.SPREADSHEET] = spreadsheet
     # arguments = { \

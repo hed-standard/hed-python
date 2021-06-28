@@ -9,7 +9,7 @@ from hedweb.utils.io_utils import delete_file_no_exceptions, handle_error, save_
 from hedweb import dictionary, events, spreadsheet, services
 from hedweb.schema import get_input_from_schema_form, schema_process
 from hedweb.strings import get_input_from_string_form, string_process
-from hedweb.utils.spreadsheet_utils import generate_input_columns_info, get_columns_info
+from hedweb.utils.spreadsheet_utils import get_input_columns_info, get_columns_info
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
@@ -27,7 +27,7 @@ def columns_info_results():
     """
     input_arguments = {}
     try:
-        input_arguments = generate_input_columns_info(request)
+        input_arguments = get_input_columns_info(request)
         columns_info = get_columns_info(input_arguments)
         return json.dumps(columns_info)
     except Exception as ex:

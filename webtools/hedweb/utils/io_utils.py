@@ -113,6 +113,24 @@ def generate_filename(base_name, prefix=None, suffix=None, extension=None):
     return filename
 
 
+def get_prefix_dict(form):
+    tag_columns = []
+    prefix_dict = {}
+    keys = form.keys()
+    for key in keys:
+        if not key.startswith('Column') or key.endswith('check'):
+            continue
+        pieces = key.split('_')
+        check = 'Column_' + pieces[1] + '_check'
+        if form.get(check, None) != 'on':
+            continue
+        if form[key]:
+            print(int(pieces[1]) + 1, form[key])
+            prefix_dict[int(pieces[1]) + 1] = form[key]
+        else:
+            tag_columns.append(int(pieces[1]) + 1)
+    return tag_columns, prefix_dict
+
 def get_events(arguments, json_dictionary=None, def_dicts=None):
     if common.EVENTS_STRING in arguments:
         events = models.EventsInput(csv_string=arguments[common.EVENTS_STRING],

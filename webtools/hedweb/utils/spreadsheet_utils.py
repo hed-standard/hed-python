@@ -9,7 +9,7 @@ from hedweb.utils.io_utils import file_extension_is_valid, save_file_to_upload_f
 app_config = current_app.config
 
 
-def generate_input_columns_info(request):
+def get_input_columns_info(request):
     columns_file = request.files.get(common.COLUMNS_FILE, '')
     if columns_file:
         filename = columns_file.filename
@@ -52,7 +52,7 @@ def get_columns_info(input_arguments):
     if file_extension_is_valid(columns_path, file_constants.EXCEL_FILE_EXTENSIONS):
         columns_info = get_worksheet_info(columns_path, worksheet_name)
     elif file_extension_is_valid(columns_path, file_constants.TEXT_FILE_EXTENSIONS):
-        columns_info = get_text_file_info(columns_path)
+        columns_info = {common.COLUMN_NAMES: get_text_file_first_row(columns_path)}
     else:
         raise HedFileError('BadFileExtension',
                            f'File {columns_display_name} extension does not correspond to an Excel or tsv file',
@@ -140,52 +140,25 @@ def get_specific_tag_columns_from_form(request):
     return column_prefix_dictionary
 
 
-def get_text_file_column_names(text_file_path, column_delimiter):
-    """Gets the text spreadsheet column names.
+def get_text_file_first_row(text_file_path):
+    """Gets the contents of the first row of the text file.
 
     Parameters
     ----------
     text_file_path: string
         The path to a text other.
-    column_delimiter: string
-        The spreadsheet column delimiter.
 
     Returns
     -------
-    string
-        The spreadsheet column delimiter based on the other extension.
+    list
+        list containing first row.
 
     """
+    column_delimiter = get_column_delimiter_based_on_file_extension(text_file_path)
     with open(text_file_path, 'r', encoding='utf-8') as opened_text_file:
         first_line = opened_text_file.readline()
         text_file_columns = first_line.split(column_delimiter)
     return text_file_columns
-
-
-def get_text_file_info(file_path):
-    """Populate dictionary with information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
-
-    Parameters
-    ----------
-
-    file_path: string
-        The full path to a spreadsheet other.
-
-    Returns
-    -------
-    dictionary
-        A dictionary populated with information related to the text file columns.
-
-    """
-
-    column_info = {}
-    column_delimiter = get_column_delimiter_based_on_file_extension(file_path)
-    column_info[common.COLUMN_NAMES] = get_text_file_column_names(file_path, column_delimiter)
-    column_info[common.COLUMN_INDICES] = get_other_column_indices(column_info[common.COLUMN_NAMES])
-    column_info[common.REQUIRED_COLUMN_INDICES] = get_specific_column_indices(column_info[common.COLUMN_NAMES])
-    return column_info
 
 
 def get_worksheet_info(file_path, worksheet_name=None):
@@ -200,8 +173,6 @@ def get_worksheet_info(file_path, worksheet_name=None):
         raise HedFileError('BadWorksheetName', f'Worksheet {worksheet_name} not in Excel file', '')
     headers = [c.value for c in next(wb[worksheet_name].iter_rows(min_row=1, max_row=1))]
     info[common.COLUMN_NAMES] = headers
-    info[common.COLUMN_INDICES] = get_other_column_indices(info[common.COLUMN_NAMES])
-    info[common.REQUIRED_COLUMN_INDICES] = get_specific_column_indices(info[common.COLUMN_NAMES])
     info[common.WORKSHEET_SELECTED] = worksheet_name
     wb.close()
     return info

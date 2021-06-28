@@ -100,14 +100,14 @@ class Test(unittest.TestCase):
     #         json_buffer.close()
 
     def test_spreadsheet_results_validate_valid(self):
-        spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
+        spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/ExcelMultipleSheets.xlsx')
         with open(spreadsheet_path, 'r') as sc:
             x = sc.read()
         spreadsheet_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {common.SCHEMA_VERSION: '7.1.2',
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.TAG_COLUMNS: "5"
+                          common.TAG_COLUMNS: "5",
                           common.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
@@ -118,7 +118,7 @@ class Test(unittest.TestCase):
             self.assertEqual("success", headers_dict["Category"],
                              "The valid dictionary should validate successfully")
             self.assertFalse(response.data, "The response for validated dictionary should be empty")
-            json_buffer.close()
+            spreadsheet_buffer.close()
 
     def test_dictionary_results_to_short_invalid(self):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')

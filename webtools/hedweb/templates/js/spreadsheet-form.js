@@ -12,7 +12,7 @@ $('#has_column_names').on('change', function() {
     if ($("#has_column_names").is(':checked')) {
             setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, true, false, true)
         } else  {
-            hideColumnNames()
+            hideColumnInfo(true)
         }
     }
 );
@@ -25,13 +25,12 @@ $('#spreadsheet_file').on('change', function () {
     let spreadsheetPath = spreadsheet.val();
     let spreadsheetFile = spreadsheet[0].files[0];
     clearFlashMessages();
-    removeColumnTable()
+    removeColumnInfo(true)
     if (!fileHasValidExtension(spreadsheetPath, VALID_FILE_EXTENSIONS)) {
         clearForm();
         flashMessageOnScreen('Upload a valid spreadsheet (.xlsx, .xls, .tsv, .txt)', 'error', 'spreadsheet_flash');
         return
     }
-    clearTagColumnTextboxes();
     updateFileLabel(spreadsheetPath, '#spreadsheet_display_name');
     let worksheetName = undefined
     if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
@@ -50,7 +49,7 @@ $('#spreadsheet_file').on('change', function () {
  */
 $('#spreadsheet_submit').on('click', function () {
     if (fileIsSpecified('#spreadsheet_file', 'spreadsheet_flash', 'Spreadsheet is not specified.') &&
-        tagColumnsTextboxIsValid() && schemaSpecifiedWhenOtherIsSelected()) {
+        schemaSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
@@ -74,8 +73,7 @@ function clearForm() {
     $('#spreadsheet_form')[0].reset();
     $('#spreadsheet_display_name').text('');
     $('#worksheet_name').empty();
-    clearTagColumnTextboxes();
-    hideColumnNames();
+    hideColumnInfo(true);
     hideWorksheetSelect()
     hideOtherSchemaVersionFileUpload()
 }
@@ -119,7 +117,7 @@ function populateWorksheetDropdown(worksheetNames) {
 function prepareForm() {
     clearForm();
     getSchemaVersions()
-    hideColumnNames();
+    hideColumnInfo(true);
     hideWorksheetSelect();
     hideOtherSchemaVersionFileUpload();
 }

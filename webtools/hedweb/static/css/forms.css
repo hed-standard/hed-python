@@ -41,6 +41,11 @@
     text-align: center;
 }
 
+.form-group input[type="text"].wide_text {
+    width: 20rem;
+    text-align: center;
+}
+
 .textbox-group input[type="text"] {
     width: 4rem;
 }
