@@ -2,6 +2,7 @@ import os
 import shutil
 import unittest
 import hed.schema as hedschema
+from hedweb.constants import common
 from hedweb.app_factory import AppFactory
 
 
@@ -66,14 +67,14 @@ class Test(unittest.TestCase):
         string_list = ['Red, Blue']
 
         with self.app.app_context():
-            results = string_convert(hed_schema, string_list, to_short=False)
+            results = string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
             self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
-            results = string_convert(hed_schema, string_list, to_short=False)
+            results = string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
             self.assertEqual('success', results['msg_category'],
                              "hedstring_convert should return success if converted")
 

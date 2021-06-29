@@ -2,12 +2,14 @@ import json
 import os
 import tempfile
 
+import openpyxl
 from flask import current_app
 from hed import models, schema as hedschema
 from hed.errors.exceptions import HedFileError
 from hed.util.file_util import delete_file_if_it_exists, get_file_extension
 from werkzeug.utils import secure_filename
 
+import hedweb.constants
 from hedweb.constants import common
 
 
@@ -294,3 +296,62 @@ def save_text_to_upload_folder(text, filename):
         text_file.write(text)
     text_file.close()
     return file_path
+
+
+def get_text_file_first_row(text_file_path):
+    """Gets the contents of the first row of the text file.
+
+    Parameters
+    ----------
+    text_file_path: string
+        The path to a text other.
+
+    Returns
+    -------
+    list
+        list containing first row.
+
+    """
+    column_delimiter = get_delimiter_from_file_extension(text_file_path)
+    with open(text_file_path, 'r', encoding='utf-8') as opened_text_file:
+        first_line = opened_text_file.readline()
+        text_file_columns = first_line.split(column_delimiter)
+    return text_file_columns
+
+
+def get_delimiter_from_file_extension(pathname):
+    """Gets the file column delimiter based on the extension.
+
+    Parameters
+    ----------
+    pathname: string
+        A path or file name.
+
+    Returns
+    -------
+    string
+        The file column delimiter based on the extension.
+
+    """
+    column_delimiter = ''
+    file_extension = get_file_extension(pathname).lower()
+    if file_extension in hedweb.constants.file_constants.FILE_EXTENSION_TO_DELIMITER_DICTIONARY:
+        column_delimiter = hedweb.constants.file_constants.FILE_EXTENSION_TO_DELIMITER_DICTIONARY.get(file_extension)
+    return column_delimiter
+
+
+def get_worksheet_info(file_path, worksheet_name=None):
+    wb = openpyxl.load_workbook(file_path, read_only=True)
+    worksheet_names = wb.sheetnames
+    info = {common.COLUMNS_FILE: file_path, common.WORKSHEET_NAMES: worksheet_names}
+    if not worksheet_names:
+        raise HedFileError('BadExcelFile', 'Excel files must worksheets', None)
+    elif not worksheet_name:
+        worksheet_name = worksheet_names[0]
+    elif worksheet_name and worksheet_name not in worksheet_names:
+        raise HedFileError('BadWorksheetName', f'Worksheet {worksheet_name} not in Excel file', '')
+    headers = [c.value for c in next(wb[worksheet_name].iter_rows(min_row=1, max_row=1))]
+    info[common.COLUMN_NAMES] = headers
+    info[common.WORKSHEET_SELECTED] = worksheet_name
+    wb.close()
+    return info

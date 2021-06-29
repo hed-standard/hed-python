@@ -23,64 +23,64 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_convert_number_str_to_list(self):
-        from hedweb.utils.spreadsheet_utils import convert_number_str_to_list
-        other_tag_columns_str = '1,2,3'
-        expected_other_columns = [1, 2, 3]
-        other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
-        self.assertTrue(other_tag_columns)
-        self.assertEqual(expected_other_columns, other_tag_columns)
-        other_tag_columns_str = ''
-        other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
-        self.assertEqual(len(other_tag_columns), 0, "")
-        other_tag_columns_str = '2,4,3'
-        expected_other_columns = [2, 4, 3]
-        other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
-        self.assertTrue(other_tag_columns)
-        self.assertEqual(expected_other_columns, other_tag_columns)
-        other_tag_columns_str = 'A,B,C'
-        with self.assertRaises(ValueError):
-            other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
-
-    def test_find_all_str_indices_in_list(self):
-        from hedweb.utils.spreadsheet_utils import find_all_str_indices_in_list
-        list_1 = ['a', 'a', 'c', 'd']
-        search_str = 'a'
-        expected_indices = [1, 2]
-        indices = find_all_str_indices_in_list(list_1, search_str)
-        self.assertTrue(indices)
-        self.assertIsInstance(indices, list)
-        self.assertEqual(expected_indices, indices)
-        search_str = 'A'
-        expected_indices = [1, 2]
-        indices = find_all_str_indices_in_list(list_1, search_str)
-        self.assertTrue(indices)
-        self.assertIsInstance(indices, list)
-        self.assertEqual(expected_indices, indices)
-        search_str = 'Apple'
-        expected_indices = []
-        indices = find_all_str_indices_in_list(list_1, search_str)
-        self.assertFalse(indices)
-        self.assertIsInstance(indices, list)
-        self.assertEqual(expected_indices, indices)
+    # def test_convert_number_str_to_list(self):
+    #     from hedweb.utils.spreadsheet_utils import convert_number_str_to_list
+    #     other_tag_columns_str = '1,2,3'
+    #     expected_other_columns = [1, 2, 3]
+    #     other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+    #     self.assertTrue(other_tag_columns)
+    #     self.assertEqual(expected_other_columns, other_tag_columns)
+    #     other_tag_columns_str = ''
+    #     other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+    #     self.assertEqual(len(other_tag_columns), 0, "")
+    #     other_tag_columns_str = '2,4,3'
+    #     expected_other_columns = [2, 4, 3]
+    #     other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+    #     self.assertTrue(other_tag_columns)
+    #     self.assertEqual(expected_other_columns, other_tag_columns)
+    #     other_tag_columns_str = 'A,B,C'
+    #     with self.assertRaises(ValueError):
+    #         other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+    #
+    # def test_find_all_str_indices_in_list(self):
+    #     from hedweb.utils.spreadsheet_utils import find_all_str_indices_in_list
+    #     list_1 = ['a', 'a', 'c', 'd']
+    #     search_str = 'a'
+    #     expected_indices = [1, 2]
+    #     indices = find_all_str_indices_in_list(list_1, search_str)
+    #     self.assertTrue(indices)
+    #     self.assertIsInstance(indices, list)
+    #     self.assertEqual(expected_indices, indices)
+    #     search_str = 'A'
+    #     expected_indices = [1, 2]
+    #     indices = find_all_str_indices_in_list(list_1, search_str)
+    #     self.assertTrue(indices)
+    #     self.assertIsInstance(indices, list)
+    #     self.assertEqual(expected_indices, indices)
+    #     search_str = 'Apple'
+    #     expected_indices = []
+    #     indices = find_all_str_indices_in_list(list_1, search_str)
+    #     self.assertFalse(indices)
+    #     self.assertIsInstance(indices, list)
+    #     self.assertEqual(expected_indices, indices)
 
     def test_generate_input_columns_info(self):
-        self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
+        self.assertTrue(1, "Testing get_delimiter_from_file_extension")
 
     def test_get_column_delimiter_based_on_file_extension(self):
-        self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
-    #     from hed.hedweb.utils import get_column_delimiter_based_on_file_extension
-    #     delimiter = get_column_delimiter_based_on_file_extension('test.tsv')
+        self.assertTrue(1, "Testing get_delimiter_from_file_extension")
+    #     from hed.hedweb.utils import get_delimiter_from_file_extension
+    #     delimiter = get_delimiter_from_file_extension('test.tsv')
     #     self.assertEqual('\t', delimiter, ".tsv files should have a tab delimiter")
-    #     delimiter = get_column_delimiter_based_on_file_extension('test.TSV')
+    #     delimiter = get_delimiter_from_file_extension('test.TSV')
     #     self.assertEqual('\t', delimiter, ".TSV files should have a tab delimiter")
-    #     delimiter = get_column_delimiter_based_on_file_extension('test')
+    #     delimiter = get_delimiter_from_file_extension('test')
     #     self.assertEqual('', delimiter, "Files with no extension should have an empty delimiter")
-    #     delimiter = get_column_delimiter_based_on_file_extension('test.xlsx')
+    #     delimiter = get_delimiter_from_file_extension('test.xlsx')
     #     self.assertEqual('', delimiter, "Excel files should have an empty delimiter")
 
     def test_get_columns_info(self):
-        self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
+        self.assertTrue(1, "Testing get_delimiter_from_file_extension")
 
     def test_get_column_info_dictionary(self):
         self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),

@@ -8,9 +8,25 @@ from hed.validator.event_validator import EventValidator
 
 from hedweb.constants import common, file_constants
 from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, get_uploaded_file_path_from_form
-from hedweb.utils.io_utils import generate_filename, get_prefix_dict
+from hedweb.utils.io_utils import generate_filename, get_prefix_dict, file_extension_is_valid, get_text_file_first_row, \
+    save_file_to_upload_folder, get_worksheet_info
 
 app_config = current_app.config
+
+
+def get_columns_info(input_arguments):
+    columns_path = input_arguments.get(common.COLUMNS_PATH)
+    worksheet_name = input_arguments.get(common.WORKSHEET_NAME, None)
+    columns_display_name = input_arguments.get(common.COLUMNS_DISPLAY_NAME, 'Unknown')
+    if file_extension_is_valid(columns_path, file_constants.EXCEL_FILE_EXTENSIONS):
+        columns_info = get_worksheet_info(columns_path, worksheet_name)
+    elif file_extension_is_valid(columns_path, file_constants.TEXT_FILE_EXTENSIONS):
+        columns_info = {common.COLUMN_NAMES: get_text_file_first_row(columns_path)}
+    else:
+        raise HedFileError('BadFileExtension',
+                           f'File {columns_display_name} extension does not correspond to an Excel or tsv file',
+                           columns_display_name)
+    return columns_info
 
 
 def get_input_from_spreadsheet_form(request):
@@ -44,18 +60,6 @@ def get_input_from_spreadsheet_form(request):
                                   column_prefix_dictionary=prefix_dict,
                                   display_name=original_file_name)
     arguments[common.SPREADSHEET] = spreadsheet
-    # arguments = { \
-    #     common.SCHEMA: get_hed_schema_from_pull_down(request),
-    #     common.SPREADSHEET: None,
-    #     common.COMMAND = request.values.get(common.COMMAND_OPTION, ''),
-    #     common.TAG_COLUMNS: convert_number_str_to_list(request.form[common.TAG_COLUMNS]),
-    #     common.COLUMN_PREFIX_DICTIONARY: get_specific_tag_columns_from_form(request),
-    #     common.WORKSHEET_SELECTED: get_optional_form_field(request, common.WORKSHEET_SELECTED, common.STRING),
-    #     common.HAS_COLUMN_NAMES: get_optional_form_field(request, common.HAS_COLUMN_NAMES, common.BOOLEAN),
-    #     common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
-    #     common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on')
-    # }
-
     return arguments
 
 
@@ -144,3 +148,18 @@ def spreadsheet_validate(hed_schema, spreadsheet):
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
                 common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f'Spreadsheet {display_name} had no validation errors'}
+
+
+def get_input_columns_info(request):
+    columns_file = request.files.get(common.COLUMNS_FILE, '')
+    if columns_file:
+        filename = columns_file.filename
+    else:
+        filename = ''
+    columns_path = save_file_to_upload_folder(columns_file)
+    input_arguments = {
+        common.COLUMNS_PATH: columns_path,
+        common.COLUMNS_DISPLAY_NAME: filename,
+        common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None)
+    }
+    return input_arguments

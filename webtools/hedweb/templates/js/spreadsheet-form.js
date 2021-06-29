@@ -12,7 +12,7 @@ $('#has_column_names').on('change', function() {
     if ($("#has_column_names").is(':checked')) {
             setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, true, false, true)
         } else  {
-            hideColumnInfo(true)
+            setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, false, false, true)
         }
     }
 );
@@ -35,13 +35,17 @@ $('#spreadsheet_file').on('change', function () {
     let worksheetName = undefined
     if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
         worksheetName = $('#worksheet_name option:selected').text();
-        showWorksheetSelect();
+        $('#worksheet_select').show();;
     }
     else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
         $('#worksheet_name').empty();
-        hideWorksheetSelect();
+        $('#worksheet_select').hide();
     }
-    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, true, true, true);
+    if ($("#has_column_names").is(':checked')) {
+        setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, true, true, true)
+    } else {
+        setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, false, true, true)
+    }
 });
 
 /**
@@ -102,7 +106,7 @@ function hideWorksheetSelect() {
 function populateWorksheetDropdown(worksheetNames) {
     if (Array.isArray(worksheetNames) && worksheetNames.length > 0) {
         let worksheetDropdown = $('#worksheet_name');
-        showWorksheetSelect();
+        $('#worksheet_select').show();
         worksheetDropdown.empty();
         for (let i = 0; i < worksheetNames.length; i++) {
             $('#worksheet_name').append(new Option(worksheetNames[i], worksheetNames[i]) );
