@@ -1,5 +1,4 @@
 from flask import current_app
-from werkzeug import Response
 
 from hed import models
 from hed import schema as hedschema
@@ -9,23 +8,22 @@ from hed.validator.event_validator import EventValidator
 
 from hedweb.constants import common
 from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down
-from hedweb.utils.io_utils import get_hed_schema
 
 app_config = current_app.config
 
 
 def get_input_from_string_form(request):
-    """Gets the validation function input arguments from a request object associated with the validation form.
+    """Gets input arguments from a request object associated with the string form.
 
     Parameters
     ----------
     request: Request object
-        A Request object containing user data from the validation form.
+        A Request object containing user data from the string form.
 
     Returns
     -------
-    dictionary
-        A dictionary containing input arguments for calling the underlying validation function.
+    dict
+        A dictionary containing input arguments for calling the underlying string processing functions.
     """
     hed_schema = get_hed_schema_from_pull_down(request)
     hed_string = request.form.get(common.STRING_INPUT, None)
@@ -41,17 +39,17 @@ def get_input_from_string_form(request):
 
 
 def string_process(arguments):
-    """Perform the requested action on the HED string.
+    """Perform the requested string processing action
 
     Parameters
     ----------
     arguments: dict
-        A dictionary with the input arguments from the hedstring form
+        A dictionary with the input arguments from the string form or string service request.
 
     Returns
     -------
-    Response
-        Downloadable response object.
+    dict
+        A dictionary with the results in standard format.
     """
     hed_schema = arguments.get('schema', None)
     command = arguments.get(common.COMMAND, None)
@@ -86,7 +84,7 @@ def string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
     Returns
     -------
     dict
-        A dictionary with string_results as the key
+        A dictionary with the results of string processing in standard format.
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')

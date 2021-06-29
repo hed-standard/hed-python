@@ -17,12 +17,12 @@ app_config = current_app.config
 
 
 def get_input_from_schema_form(request):
-    """Gets the conversion function input arguments from a request object associated with the conversion form.
+    """Gets the input for schema processing from the schema form.
 
     Parameters
     ----------
     request: Request object
-        A Request object containing user data from the conversion form.
+        A Request object containing user data from the schema form
 
     Returns
     -------
@@ -54,17 +54,17 @@ def get_input_from_schema_form(request):
 
 
 def schema_process(arguments):
-    """Perform the requested action for the dictionary.
+    """Perform the requested action for the schema.
 
     Parameters
     ----------
     arguments: dict
-        A dictionary with the input arguments from the dictionary form
+        A dictionary with the input arguments from the schema form
 
     Returns
     -------
-      Response
-        Downloadable response object.
+      dict
+        A dictionary with results in standard format
     """
 
     hed_schema = arguments.get('schema', None)
@@ -79,11 +79,11 @@ def schema_process(arguments):
         results = schema_convert(hed_schema, display_name)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a schema processing method", "")
-    return package_results(results)
+    return results
 
 
 def schema_convert(hed_schema, display_name):
-    """Run conversion(wiki2xml or xml2wiki from converter)
+    """Return a string representation of hed_schema in the desired format
 
     Parameters
     ----------

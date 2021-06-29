@@ -7,6 +7,7 @@ from flask import current_app
 from hed import models, schema as hedschema
 from hed.errors.exceptions import HedFileError
 from hed.util.file_util import delete_file_if_it_exists, get_file_extension
+from hedweb.constants import file_constants
 from werkzeug.utils import secure_filename
 
 import hedweb.constants
@@ -115,34 +116,33 @@ def generate_filename(base_name, prefix=None, suffix=None, extension=None):
     return filename
 
 
-def get_prefix_dict(form):
+def get_prefix_dict(form_dict):
+    """Returns a tag prefix dictionary from a form dictionary.
+
+    Parameters
+    ----------
+   form_dict: dict
+        The dictionary returned from a form that contains a column prefix table
+    Returns
+    -------
+    dict
+        A dictionary whose keys are column numbers (starting with 1) and values are tag prefixes to prepend.
+    """
     tag_columns = []
     prefix_dict = {}
-    keys = form.keys()
+    keys = form_dict.keys()
     for key in keys:
         if not key.startswith('Column') or key.endswith('check'):
             continue
         pieces = key.split('_')
         check = 'Column_' + pieces[1] + '_check'
-        if form.get(check, None) != 'on':
+        if form_dict.get(check, None) != 'on':
             continue
-        if form[key]:
-            print(int(pieces[1]) + 1, form[key])
-            prefix_dict[int(pieces[1]) + 1] = form[key]
+        if form_dict[key]:
+            prefix_dict[int(pieces[1]) + 1] = form_dict[key]
         else:
             tag_columns.append(int(pieces[1]) + 1)
     return tag_columns, prefix_dict
-
-def get_events(arguments, json_dictionary=None, def_dicts=None):
-    if common.EVENTS_STRING in arguments:
-        events = models.EventsInput(csv_string=arguments[common.EVENTS_STRING],
-                                    json_def_files=json_dictionary, def_dicts=def_dicts)
-    elif common.EVENTS_PATH in arguments:
-        events = models.EventsInput(filename=arguments[common.EVENTS_PATH],
-                                    json_def_files=json_dictionary, def_dicts=def_dicts)
-    else:
-        raise HedFileError('NoEventsFile', 'No events file was provided', '')
-    return events
 
 
 def get_hed_schema(arguments):
@@ -160,18 +160,6 @@ def get_hed_schema(arguments):
     else:
         raise HedFileError('NoHEDSchema', 'No valid HED schema was provided', '')
     return hed_schema
-
-
-def get_json_dictionary(arguments, json_optional=False):
-    if common.JSON_STRING in arguments:
-        json_dictionary = models.ColumnDefGroup(json_string=arguments[common.JSON_STRING])
-    elif common.JSON_PATH in arguments:
-        json_dictionary = models.ColumnDefGroup(json_filename=arguments[common.JSON_PATH])
-    elif json_optional:
-        json_dictionary = None
-    else:
-        raise HedFileError('NoJSONDictionary', 'No JSON dictionary was provided', '')
-    return json_dictionary
 
 
 def handle_error(ex, hed_info=None, title=None, return_as_str=True):
@@ -212,7 +200,6 @@ def handle_error(ex, hed_info=None, title=None, return_as_str=True):
         return json.dumps(hed_info)
     else:
         return hed_info
-
 
 
 def save_file_to_upload_folder(file_object, delete_on_close=False):

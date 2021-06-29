@@ -14,17 +14,17 @@ app_config = current_app.config
 
 
 def get_input_from_service_request(request):
-    """Gets the validation function input arguments from a request object associated with the validation form.
+    """Gets a dictionary of input from a service request.
 
     Parameters
     ----------
     request: Request object
-        A Request object containing user data from the validation form.
+        A Request object containing user data for the service request.
 
     Returns
     -------
     dictionary
-        A dictionary containing input arguments for calling the underlying validation function.
+        A dictionary containing input arguments for calling the service request.
     """
 
     form_data = request.data
@@ -60,19 +60,17 @@ def get_input_from_service_request(request):
 
 def services_process(arguments):
     """
-    Reports validation status of hed strings associated with EEG events received from EEGLAB plugin HEDTools
+    Calls the desired service processing function and returns results
 
     Parameters
     ----------
-    arguments dict
-        a dictionary of arguments
-        Keys include "hed_strings", "check_for_warnings", and "schema_file"
+    arguments: dict
+        a dictionary of arguments for the processing
 
     Returns
     -------
-    string
-        A serialized JSON string containing information related to the hed strings validation result.
-        If the validation fails then a 500 error message is returned.
+    dist
+        A dictionary of results in standard response format to be jsonified.
     """
 
     service = arguments.get('service', '')
@@ -121,6 +119,14 @@ def services_process(arguments):
 
 
 def services_list():
+    """
+     Returns a formatted string describing services using the resources/services.json file
+
+     Returns
+     -------
+     str
+         A formatted string listing available services.
+     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
     the_path = os.path.join(dir_path, './static/resources/services.json')
     with open(the_path) as f:

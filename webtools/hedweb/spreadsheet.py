@@ -8,8 +8,8 @@ from hed.validator.event_validator import EventValidator
 
 from hedweb.constants import common, file_constants
 from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, get_uploaded_file_path_from_form
-from hedweb.utils.io_utils import generate_filename, get_prefix_dict, file_extension_is_valid, get_text_file_first_row, \
-    save_file_to_upload_folder, get_worksheet_info
+from hedweb.utils.io_utils import generate_filename, get_prefix_dict, file_extension_is_valid, \
+    get_text_file_first_row, save_file_to_upload_folder, get_worksheet_info
 
 app_config = current_app.config
 
@@ -30,17 +30,17 @@ def get_columns_info(input_arguments):
 
 
 def get_input_from_spreadsheet_form(request):
-    """Gets the validation function input arguments from a request object associated with the validation form.
+    """Gets input argument dictionary from the spreadsheet form request.
 
     Parameters
     ----------
     request: Request object
-        A Request object containing user data from the validation form.
+        A Request object containing user data from the spreadsheet form.
 
     Returns
     -------
     dictionary
-        A dictionary containing input arguments for calling the underlying validation function.
+        A dictionary containing input arguments for calling the underlying spreadsheet functions
     """
     arguments = {
         common.SCHEMA: get_hed_schema_from_pull_down(request),
@@ -69,12 +69,12 @@ def spreadsheet_process(arguments):
     Parameters
     ----------
     arguments: dict
-        A dictionary with the input arguments from the dictionary form
+        A dictionary with the input arguments from the spreadsheet form.
 
     Returns
     -------
-      Response
-        Downloadable response object.
+      dict
+        A dictionary of results from spreadsheet processing in standard form.
     """
     hed_schema = arguments.get('schema', None)
     command = arguments.get(common.COMMAND, None)
@@ -132,7 +132,7 @@ def spreadsheet_validate(hed_schema, spreadsheet):
     Returns
     -------
     dict
-         A dictionary containing results of validation in standard form
+         A dictionary containing results of validation in standard format
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     validator = EventValidator(hed_schema=hed_schema)

@@ -131,7 +131,7 @@ def events_validate(hed_schema, events):
     Returns
     -------
     dict
-         A dictionary containing results of validation in standard form
+         A dictionary containing results of validation in standard format
     """
 
     for json_dictionary in events.column_group_defs:

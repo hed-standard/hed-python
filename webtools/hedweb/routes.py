@@ -1,11 +1,12 @@
 from flask import render_template, request, Blueprint, current_app
+from werkzeug.utils import secure_filename
 import json
 
 from hed import schema as hedschema
 from hedweb.constants import common, page_constants
-from hedweb.constants import route_constants
+from hedweb.constants import route_constants, file_constants
 from hedweb.utils.web_utils import handle_http_error, package_results
-from hedweb.utils.io_utils import delete_file_no_exceptions, handle_error, save_file_to_upload_folder
+from hedweb.utils.io_utils import delete_file_no_exceptions, handle_error
 from hedweb import dictionary, events, spreadsheet, services
 from hedweb.schema import get_input_from_schema_form, schema_process
 from hedweb.strings import get_input_from_string_form, string_process
@@ -17,12 +18,12 @@ route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
 @route_blueprint.route(route_constants.COLUMN_INFO_ROUTE, methods=['POST'])
 def columns_info_results():
-    """Gets the names of the spreadsheet columns and column indices that contain HED tags.
+    """Gets the names of the spreadsheet columns and worksheet names if any.
 
     Returns
     -------
     string
-        A serialized JSON string containing information related to the spreadsheet columns.
+        A serialized JSON string containing information related to the column and worksheet information.
 
     """
     input_arguments = {}
@@ -38,7 +39,7 @@ def columns_info_results():
 
 @route_blueprint.route(route_constants.DICTIONARY_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def dictionary_results():
-    """Process the JSON dictionary in the form after submission and return an attachment containing the output.
+    """Process the JSON dictionary after form submission and return an attachment containing the output.
 
     Returns
     -------
@@ -81,10 +82,10 @@ def schema_results():
         downloadable file if schema errors on validation or conversion was successful
 
     """
-
     try:
         arguments = get_input_from_schema_form(request)
-        return schema_process(arguments)
+        a = schema_process(arguments)
+        return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
 
@@ -106,13 +107,13 @@ def schema_version_results():
     try:
         hed_info = {}
         if common.SCHEMA_PATH in request.files:
-            hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
-            hed_info[common.SCHEMA_VERSION] = hedschema.get_hed_xml_version(hed_file_path)
+            f = request.files[common.SCHEMA_PATH]
+            hed_schema = hedschema.from_string(f.stream.read(file_constants.BYTE_LIMIT).decode('ascii'),
+                                               file_type=secure_filename(f.filename))
+            hed_info[common.SCHEMA_VERSION] = hed_schema.header_attributes['version']
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
-    finally:
-        delete_file_no_exceptions(request.files[common.SCHEMA_PATH])
 
 
 @route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['GET', 'POST'])

@@ -188,31 +188,6 @@ def generate_text_response(download_text, msg_category='success', msg=''):
         headers['Content-Length'] = len(download_text)
     return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
 
-def get_hed_schema_from_pull_down(request):
-    """Creates a HedSchema object from a section of form that uses a pull-down box and hed_cache
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from a form.
-
-    Returns
-    -------
-    tuple: str
-        A HedSchema object
-    """
-    if common.SCHEMA_VERSION not in request.form:
-        hed_schema = None
-    elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
-        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
-        hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
-    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and common.SCHEMA_PATH in request.files:
-        f = request.files[common.SCHEMA_PATH]
-        hed_schema = hedschema.from_string(f.read(file_constants.BYTE_LIMIT).decode('ascii'),
-                                           file_type=secure_filename(f.filename))
-    else:
-        hed_schema = ''
-    return hed_schema
-
 
 def get_hed_path_from_pull_down(request):
     """Gets the hed path from a section of form that uses a pull-down box and hed_cache
@@ -253,6 +228,8 @@ def get_hed_schema_from_pull_down(request):
     tuple: str
         A HedSchema object
     """
+    x = request.form
+    y = request.values
     if common.SCHEMA_VERSION not in request.form:
         raise HedFileError("NoSchemaError", "Must provide a valid schema or schema version", "")
     elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
@@ -263,37 +240,8 @@ def get_hed_schema_from_pull_down(request):
         hed_schema = hedschema.from_string(f.read(file_constants.BYTE_LIMIT).decode('ascii'),
                                            file_type=secure_filename(f.filename))
     else:
-        raise HedFileError("NoSchemaFile", "Must provide a valid path", "")
+        raise HedFileError("NoSchemaFile", "Must provide a valid schema for upload if other chosen", "")
     return hed_schema
-
-
-def get_optional_form_field(request, form_field_name, field_type=''):
-    """Gets the specified optional form field if present.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from the validation form.
-    form_field_name: string
-        The name of the optional form field.
-    field_type: str
-        Name of expected type: 'boolean' or 'string'
-
-    Returns
-    -------
-    boolean or string
-        A boolean or string value based on the form field type.
-
-    """
-    form_field_value = ''
-    if field_type == common.BOOLEAN:
-        form_field_value = False
-        if form_field_name in request.form:
-            form_field_value = True
-    elif field_type == common.STRING:
-        if form_field_name in request.form:
-            form_field_value = request.form[form_field_name]
-    return form_field_value
 
 
 def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
