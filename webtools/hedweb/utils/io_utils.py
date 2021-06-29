@@ -139,9 +139,9 @@ def get_prefix_dict(form_dict):
         if form_dict.get(check, None) != 'on':
             continue
         if form_dict[key]:
-            prefix_dict[int(pieces[1]) + 1] = form_dict[key]
+            prefix_dict[int(pieces[1])] = form_dict[key]
         else:
-            tag_columns.append(int(pieces[1]) + 1)
+            tag_columns.append(int(pieces[1]))
     return tag_columns, prefix_dict
 
 

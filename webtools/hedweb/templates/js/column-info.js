@@ -98,14 +98,14 @@ function showColumnPrefixes(columnNames, hasColumnNames=true) {
     let numberOfColumnNames = columnNames.length;
     columnPrefixTable.empty();
     let contents = columnHeader;
-    for (let i = 0; i < numberOfColumnNames; i++) {
-        let column = "Column_" + (i + 1)
-        let columnName = columnNames[i]
-        if (!hasColumnNames || columnNames[i] === "") {
+    for (let i = 1; i <= numberOfColumnNames; i++) {
+        let column = "Column_" + i
+        let columnName = columnNames[i-1]
+        if (!hasColumnNames || columnNames[i-1] === "") {
             columnName = column
         }
         let checkName = column + "_check";
-        let checkInput = column + (i+1) + "_input";
+        let checkInput = column + "_input";
         let row = '<tr><td><input type="checkbox" name="' + checkName + '" id="' + checkName + '" checked></td>' +
             '<td>' + columnName + '</td>' +
             '<td><input class="wide_text" type="text" name="' + checkInput + '" id="' + checkInput + '" size="50"></td></tr>';

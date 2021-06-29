@@ -228,8 +228,7 @@ def get_hed_schema_from_pull_down(request):
     tuple: str
         A HedSchema object
     """
-    x = request.form
-    y = request.values
+
     if common.SCHEMA_VERSION not in request.form:
         raise HedFileError("NoSchemaError", "Must provide a valid schema or schema version", "")
     elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:

@@ -42,10 +42,9 @@ class Test(unittest.TestCase):
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            json_file = FileStorage(stream=json_buffer, filename='bids_events_alpha.json')
-            input_data = {common.SCHEMA_VERSION: '8.0.0-beta.1',
+            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.2',
                           common.COMMAND_OPTION: common.COMMAND_TO_LONG,
-                          common.JSON_FILE: json_file,
+                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
@@ -62,11 +61,10 @@ class Test(unittest.TestCase):
         with open(json_path, 'r') as sc:
             x = sc.read()
         json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-        json_file = FileStorage(stream=json_buffer, filename='bids_events_alpha.json')
         with self.app.app_context():
             input_data = {common.SCHEMA_VERSION: '7.2.0',
                           common.COMMAND_OPTION: common.COMMAND_TO_LONG,
-                          common.JSON_FILE: json_file,
+                          common.JSON_FILE: (json_buffer, 'HED7.2.0.xml'),
                           common.CHECK_FOR_WARNINGS: 'on'}
 
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
@@ -82,20 +80,19 @@ class Test(unittest.TestCase):
 
     def test_dictionary_results_to_short_valid(self):
         with self.app.app_context():
-            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            json_file = FileStorage(stream=json_buffer, filename='bids_events_alpha.json')
+            json_file = FileStorage(stream=json_buffer, filename='bids_events.json')
             schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
-            with open(json_path, 'r') as sc:
+            with open(schema_path, 'r') as sc:
                 y = sc.read()
             schema_buffer = io.BytesIO(bytes(y, 'utf-8'))
-            schema_file = FileStorage(stream=schema_buffer, filename='HED8.0.0-beta.1.xml')
-            input_data = {common.SCHEMA_VERSION: 'other',
-                          common.SCHEMA_PATH: schema_file,
+            input_data = {common.SCHEMA_VERSION: 'Other',
+                          common.SCHEMA_PATH: (schema_buffer, 'HED8.0.0-beta.1.xml'),
                           common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
-                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
+                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
@@ -110,21 +107,40 @@ class Test(unittest.TestCase):
     def test_dictionary_results_validate_valid(self):
         with self.app.app_context():
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
-
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            json_file = FileStorage(stream=json_buffer, filename='bids_events_alpha.json')
+
+            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.2',
+                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
+                          common.CHECK_FOR_WARNINGS: 'on'}
+            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary_submit should return a Response when valid dictionary')
+            self.assertEqual(200, response.status_code, 'Validation of a valid dictionary has a valid status code')
+            headers_dict = dict(response.headers)
+            self.assertEqual("success", headers_dict["Category"],
+                             "The valid dictionary should validate successfully")
+            self.assertFalse(response.data, "The response for validated dictionary should be empty")
+            json_buffer.close()
+
+    def test_dictionary_results_validate_valid_other(self):
+        with self.app.app_context():
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
+            with open(json_path, 'r') as sc:
+                x = sc.read()
+            json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+
             schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
-            #schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.xml')
             with open(schema_path, 'r') as sc:
                 y = sc.read()
             schema_buffer = io.BytesIO(bytes(y, 'utf-8'))
-            schema_file = FileStorage(stream=schema_buffer, filename='HED8.0.0-beta.1.xml')
-            input_data = {common.SCHEMA_VERSION: 'other',
-                          common.SCHEMA_PATH: schema_file,
+
+            input_data = {common.SCHEMA_VERSION: 'Other',
+                          common.SCHEMA_PATH: (schema_buffer, 'HED8.0.0-beta.1.xml'),
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.JSON_FILE: json_file,
+                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
@@ -142,11 +158,10 @@ class Test(unittest.TestCase):
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            json_file = FileStorage(stream=json_buffer, filename='HED8.0.0-alpha.1.xml')
 
             input_data = {common.SCHEMA_VERSION: '7.2.0',
                           common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
-                          common.JSON_FILE: json_file,
+                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
@@ -165,10 +180,9 @@ class Test(unittest.TestCase):
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            json_file = FileStorage(stream=json_buffer, filename='bids_events_alpha.json')
             input_data = {common.SCHEMA_VERSION: '7.2.0',
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.JSON_FILE: json_file,
+                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data',
                                           data=input_data)

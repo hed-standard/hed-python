@@ -3,6 +3,7 @@ import os
 import shutil
 import unittest
 from flask import Response
+from werkzeug.datastructures import FileStorage
 from hedweb.app_factory import AppFactory
 from hedweb.constants import common
 
@@ -100,14 +101,27 @@ class Test(unittest.TestCase):
     #         json_buffer.close()
 
     def test_spreadsheet_results_validate_valid(self):
-        spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/ExcelMultipleSheets.xlsx')
-        with open(spreadsheet_path, 'r') as sc:
-            x = sc.read()
-        spreadsheet_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            '../data/ExcelMultipleSheets.xlsx')
+            with open(spreadsheet_path, 'rb') as sc:
+                x = sc.read()
+            spreadsheet_buffer = io.BytesIO(bytes(x))
+            myFile = FileStorage(stream=spreadsheet_buffer, filename='ExcelMultipleSheets.xlsx',
+                                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             input_data = {common.SCHEMA_VERSION: '7.1.2',
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.TAG_COLUMNS: "5",
+                          common.WORKSHEET_NAME: 'LKT Events',
+                          common.WORKSHEET_SELECTED: 'LKT Events',
+                          common.HAS_COLUMN_NAMES: 'on',
+                          'Column_1_input': '',
+                          'Column_2_check': 'on',
+                          'Column_2_input': 'Event/Label/',
+                          'Column_3_input': '',
+                          'Column_4_check': 'on',
+                          'Column_4_input': 'Event/Description/',
+                          'Column_5_check': 'on',
+                          'Column_5_input': '',
                           common.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
@@ -120,38 +134,30 @@ class Test(unittest.TestCase):
             self.assertFalse(response.data, "The response for validated dictionary should be empty")
             spreadsheet_buffer.close()
 
-    def test_dictionary_results_to_short_invalid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
-        with open(json_path, 'r') as sc:
-            x = sc.read()
-        json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+    def test_spreadsheet_results_validate_invalid(self):
         with self.app.app_context():
-            input_data = {common.SCHEMA_VERSION: '7.2.0',
-                          common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
-                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
-                          common.CHECK_FOR_WARNINGS: 'on'}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertTrue(isinstance(response, Response),
-                            'dictionary_submit should return a response object when invalid to short dictionary')
-            self.assertEqual(200, response.status_code, 'Conversion of invalid dictionary to short has valid status')
-            headers_dict = dict(response.headers)
-            self.assertEqual("warning", headers_dict["Category"],
-                             "Conversion of an invalid dictionary to short generates a warning")
-            self.assertTrue(response.data,
-                            "The response data for invalid conversion to short should have error messages")
-            json_buffer.close()
-
-    def test_dictionary_results_validate_invalid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
-        with open(json_path, 'r') as sc:
-            x = sc.read()
-        json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-        with self.app.app_context():
-            input_data = {common.SCHEMA_VERSION: '7.2.0',
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/ExcelMultipleSheets.xlsx')
+            with open(spreadsheet_path, 'rb') as sc:
+                x = sc.read()
+            spreadsheet_buffer = io.BytesIO(bytes(x))
+            myFile = FileStorage(stream=spreadsheet_buffer, filename='ExcelMultipleSheets.xlsx',
+                                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
+                          common.WORKSHEET_NAME: 'LKT Events',
+                          common.WORKSHEET_SELECTED: 'LKT Events',
+                          common.HAS_COLUMN_NAMES: 'on',
+                          'Column_1_input': '',
+                          'Column_2_check': 'on',
+                          'Column_2_input': 'Event/Label/',
+                          'Column_3_input': '',
+                          'Column_4_check': 'on',
+                          'Column_4_input': 'Event/Description/',
+                          'Column_5_check': 'on',
+                          'Column_5_input': '',
+                          common.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
                           common.CHECK_FOR_WARNINGS: 'on'}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
+            response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'dictionary_submit validate should return a response object when invalid dictionary')
             self.assertEqual(200, response.status_code,
@@ -161,7 +167,7 @@ class Test(unittest.TestCase):
                              "Validation of an invalid dictionary to short generates a warning")
             self.assertTrue(response.data,
                             "The response data for invalid validation should have error messages")
-            json_buffer.close()
+            spreadsheet_buffer.close()
 
 
 if __name__ == '__main__':
