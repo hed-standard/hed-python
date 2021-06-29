@@ -9,7 +9,7 @@ from hed.models.hed_string import HedString
 
 class ColumnDefGroup:
     """This stores column definitions for parsing hed spreadsheets, generally loaded from a single json file."""
-    def __init__(self, json_filename=None, json_string=None):
+    def __init__(self, json_filename=None, json_string=None, display_name=None):
         """
 
         Parameters
@@ -21,6 +21,7 @@ class ColumnDefGroup:
         """
         self._json_filename = None
         self._column_settings = {}
+        self.display_name = display_name
         if json_string:
             self.add_json_string(json_string)
         if json_filename:

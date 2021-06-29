@@ -11,7 +11,7 @@ class EventsInput(BaseInput):
     def __init__(self, filename=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
-                 def_dicts=None, csv_string=None):
+                 def_dicts=None, csv_string=None, display_name=None):
         """Constructor for the EventsInput class.
 
         Parameters
@@ -71,7 +71,7 @@ class EventsInput(BaseInput):
                                   definition_mapper=def_mapper)
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper,
-                                  csv_string=csv_string)
+                                  csv_string=csv_string, display_name=display_name)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"

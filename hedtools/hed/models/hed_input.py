@@ -6,7 +6,7 @@ class HedInput(BaseInput):
     """A class to parse basic hed style spreadsheets into a more general format."""
     def __init__(self, filename=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
-                 definition_mapper=None, csv_string=None):
+                 definition_mapper=None, csv_string=None, display_name=None):
         """Constructor for the HedInput class.
 
         Parameters
@@ -39,4 +39,4 @@ class HedInput(BaseInput):
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   definition_mapper=definition_mapper)
         super().__init__(filename, worksheet_name, has_column_names, new_mapper,
-                                  csv_string=csv_string)
+                                  csv_string=csv_string, display_name=display_name)

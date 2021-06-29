@@ -50,7 +50,6 @@ def load_schema(hed_file_path=None, hed_url_path=None):
 # todo: this could be updated to also support .mediawiki format.
 def get_hed_xml_version(hed_xml_file_path):
     """Gets the version number from a HED XML file.
-
     Parameters
     ----------
     hed_xml_file_path: str
@@ -59,7 +58,6 @@ def get_hed_xml_version(hed_xml_file_path):
     -------
     str
         The version number of the HED XML file.
-
     """
     root_node = HedSchemaXMLParser._parse_hed_xml(hed_xml_file_path)
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
@@ -69,19 +67,16 @@ def load_schema_version(xml_folder=None, xml_version_number=None):
     """
     Gets a HedSchema object based on the hed xml file specified. If no HED file is specified then the latest
        file will be retrieved.
-
     Parameters
     ----------
     xml_folder: str
         Path to a
     xml_version_number: str
         HED version format string. Expected format: 'X.Y.Z'
-
     Returns
     -------
     HedSchema
         A HedSchema object.
-
     """
     try:
         final_hed_xml_file = hed_cache.get_hed_version_path(xml_folder, xml_version_number)
@@ -100,7 +95,6 @@ def convert_schema_to_format(hed_schema, check_for_issues=True,
                              display_filename=None, save_as_mediawiki=False, save_as_legacy_xml=False):
     """
     Loads a local schema file or from a URL, then outputs a temporary file with the requested format.
-
     Parameters
     ----------
     hed_schema: HedSchema
@@ -114,7 +108,6 @@ def convert_schema_to_format(hed_schema, check_for_issues=True,
         If True, save as .mediawiki.  if False, save as .xml
     save_as_legacy_xml: bool
         If True(and save_as_mediawiki is False), will save using the old legacy XML format.
-
     Returns
     -------
     output_string: [str]
