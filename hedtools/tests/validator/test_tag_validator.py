@@ -5,7 +5,7 @@ from hed.models.hed_string import HedString
 from hed.validator.event_validator import EventValidator
 from hed.errors import error_reporter
 from hed import schema
-from hed.errors.error_types import ValidationErrors, ValidationWarnings, ErrorContext
+from hed.errors.error_types import ValidationErrors, ErrorContext
 
 
 class TestHedBase(unittest.TestCase):
@@ -46,7 +46,15 @@ class TestHedBase(unittest.TestCase):
         formatted_errors = []
         for code, args, kwargs in params:
             if 'tag' in kwargs and isinstance(kwargs['tag'], int):
-                kwargs['tag'] = hed_string.get_all_tags()[kwargs['tag']]
+                tag_index = kwargs['tag']
+                if tag_index >= 1000:
+                    tag_index = tag_index - 1000
+                    source_list = hed_string.get_all_groups()
+                else:
+                    source_list = hed_string.get_all_tags()
+                if tag_index >= len(source_list):
+                    raise ValueError("Bad group or tax index in expected errors for unit tests")
+                kwargs['tag'] = source_list[tag_index]
             formatted_errors += error_handler.format_error(code, *args, **kwargs)
 
         return formatted_errors
@@ -86,9 +94,12 @@ class TestValidatorBase(TestHedBase):
             test_result = not test_issues
             expected_params = expected_issues[test_key]
             expected_result = expected_results[test_key]
-
             expected_issue = self.really_format_errors(error_handler, hed_string=hed_string_obj,
                                                        params=expected_params)
+
+            print(test_key)
+            print(str(expected_issue))
+            print(str(test_issues))
             error_handler.pop_error_context()
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
@@ -175,7 +186,7 @@ class IndividualHedTagsShort(TestHed3):
             'camelCase': [],
             'takesValue': [],
             'numeric': [],
-            'lowercase': self.format_error_but_not_really(ValidationWarnings.CAPITALIZATION, tag=0)
+            'lowercase': self.format_error_but_not_really(ValidationErrors.HED_STYLE_WARNING, tag=0)
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, True)
 
@@ -190,7 +201,7 @@ class IndividualHedTagsShort(TestHed3):
         }
         expected_issues = {
             'hasChild': [],
-            'missingChild': self.format_error_but_not_really(ValidationErrors.REQUIRE_CHILD, tag=0)
+            'missingChild': self.format_error_but_not_really(ValidationErrors.HED_TAG_REQUIRES_CHILD, tag=0)
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -201,9 +212,9 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredNoNumber': 'Color/Red',
             'notRequiredNumber': 'Color/Red/0.5',
             'notRequiredScientific': 'Color/Red/5.2e-1',
-            'timeValue': 'Item/2D shape/Clock face/08:30',
+            'timeValue': 'Clock-face/08:30',
             # Update test - This one is currently marked as valid because clock face isn't in hed3
-            'invalidTimeValue': 'Item/2D shape/Clock face/8:30',
+            'invalidTimeValue': 'Clock-face/8:30',
         }
         expected_results = {
             'hasRequiredUnit': True,
@@ -217,7 +228,7 @@ class IndividualHedTagsShort(TestHed3):
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
-            'missingRequiredUnit': self.format_error_but_not_really(ValidationWarnings.UNIT_CLASS_DEFAULT_USED, tag=0,
+            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_MISSING, tag=0,
                                                                     default_unit='s'),
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
@@ -241,6 +252,8 @@ class IndividualHedTagsShort(TestHed3):
             'incorrectSymbolCapitalizedUnitModifier': 'Frequency/3 KHz',
             'notRequiredNumber': 'Color/Red/0.5',
             'notRequiredScientific': 'Color/Red/5e-1',
+            'specialAllowedCharBadUnit': 'Creation-date/bad_date',
+            'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01'
             # Update tests - 8.0 currently has no clockTime nodes.
             # 'properTime': 'Item/2D shape/Clock face/08:30',
             # 'invalidTime': 'Item/2D shape/Clock face/54:54'
@@ -258,11 +271,14 @@ class IndividualHedTagsShort(TestHed3):
             'incorrectSymbolCapitalizedUnitModifier': False,
             'notRequiredNumber': True,
             'notRequiredScientific': True,
-            # 'properTime': True,
-            # 'invalidTime': True
+            'specialAllowedCharBadUnit': False,
+            'specialAllowedCharUnit': True,
+            'properTime': True,
+            'invalidTime': True
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
+        legal_datetime_units = ['YYYY-MM-DDThh:mm:ss']
         legal_freq_units = ['Hz', 'hertz']
 
         expected_issues = {
@@ -272,19 +288,22 @@ class IndividualHedTagsShort(TestHed3):
             'correctNoPluralUnit': [],
             'correctNonSymbolCapitalizedUnit': [],
             'correctSymbolCapitalizedUnit': [],
-            'incorrectUnit': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+            'incorrectUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
                                                               tag=0, unit_class_units=legal_time_units),
-            'incorrectPluralUnit': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+            'incorrectPluralUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
                                                                     tag=0, unit_class_units=legal_freq_units),
-            'incorrectSymbolCapitalizedUnit': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+            'incorrectSymbolCapitalizedUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
                                                                                tag=0,
                                                                                unit_class_units=legal_freq_units),
             'incorrectSymbolCapitalizedUnitModifier': self.format_error_but_not_really(
-                ValidationErrors.UNIT_CLASS_INVALID_UNIT, tag=0, unit_class_units=legal_freq_units),
+                ValidationErrors.HED_UNITS_INVALID, tag=0, unit_class_units=legal_freq_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
+            'specialAllowedCharBadUnit':  self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
+                                                                           tag=0, unit_class_units=legal_datetime_units),
+            'specialAllowedCharUnit': []
             # 'properTime': [],
-            # 'invalidTime': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,  tag=0,
+            # 'invalidTime': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,  tag=0,
             #                                 unit_class_units=legal_clock_time_units)
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
@@ -313,7 +332,8 @@ class IndividualHedTagsShort(TestHed3):
         expected_issues = {
             'invalidPlaceholder': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
                                                                    tag=0,
-                                                                   index_in_tag=9, index_in_tag_end=10),
+                                                                   index_in_tag=9, index_in_tag_end=10,
+                                                                   actual_error=ValidationErrors.HED_VALUE_INVALID),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -328,13 +348,13 @@ class IndividualHedTagsShort(TestHed3):
         }
         tag_unit_class_units = ['day', 'hour', 'minute', 's', 'second']
         expected_issues = {
-            'orgTagDifferent': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+            'orgTagDifferent': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
                                                                 tag=0,
                                                                 unit_class_units=tag_unit_class_units),
-            'orgTagDifferent2': self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+            'orgTagDifferent2': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
                                                                  tag=0,
                                                                  unit_class_units=tag_unit_class_units)
-                                + self.format_error_but_not_really(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
+                                + self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
                                                                    tag=1,
                                                                    unit_class_units=tag_unit_class_units),
         }
@@ -364,9 +384,9 @@ class TestTagLevels3(TestHed3):
             'noDuplicate': True
         }
         expected_issues = {
-            'topLevelDuplicate': self.format_error_but_not_really(ValidationErrors.DUPLICATE,
+            'topLevelDuplicate': self.format_error_but_not_really(ValidationErrors.HED_TAG_REPEATED,
                                                                   tag=1),
-            'groupDuplicate': self.format_error_but_not_really(ValidationErrors.DUPLICATE,
+            'groupDuplicate': self.format_error_but_not_really(ValidationErrors.HED_TAG_REPEATED,
                                                                tag=3),
             'legalDuplicate': [],
             'noDuplicate': []
@@ -383,9 +403,9 @@ class TestTagLevels3(TestHed3):
             'mixedLevelDuplicates2': False,
         }
         expected_issues = {
-            'mixedLevelDuplicates': self.format_error_but_not_really(ValidationErrors.DUPLICATE,
+            'mixedLevelDuplicates': self.format_error_but_not_really(ValidationErrors.HED_TAG_REPEATED,
                                                                      tag=1),
-            'mixedLevelDuplicates2': self.format_error_but_not_really(ValidationErrors.DUPLICATE,
+            'mixedLevelDuplicates2': self.format_error_but_not_really(ValidationErrors.HED_TAG_REPEATED,
                                                                       tag=1),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)

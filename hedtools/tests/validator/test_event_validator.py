@@ -170,6 +170,18 @@ class Test(unittest.TestCase):
         validation_issues = validator.validate_input(loaded_file)
         self.assertEqual(len(validation_issues), 2)
 
+    def test_error_spans_from_file(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/tag_error_span_test.tsv')
+
+        hed_schema = schema.load_schema(schema_path)
+
+        input_file = EventsInput(events_path, tag_columns=[2, 3])
+        validator = EventValidator(hed_schema=hed_schema)
+        validation_issues = validator.validate_input(input_file)
+        self.assertEqual(validation_issues[0]['char_index'], 6)
+        self.assertEqual(validation_issues[1]['char_index'], 6)
+        self.assertEqual(len(validation_issues), 2)
             
 if __name__ == '__main__':
     unittest.main()

@@ -1,10 +1,10 @@
-HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/raw/master/hedxsd-test/HED8.0.0-beta.1a.xsd
+HED version="8.0.0-beta.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0-beta.1.xsd"
 
 !# start schema
 
 '''Event''' <nowiki>{suggestedTag=Task-property}[Something that happens at a given place and time. Elements of this subtree designate the general category in which an event falls.]</nowiki>
 * Sensory-event <nowiki>{suggestedTag=Task-event-role}[Something perceivable by an agent. An event meant to be an experimental stimulus should also be tagged with Task-event-role/Experiment-stimulus.]</nowiki>
-* Agent-action <nowiki>{suggestedTag=Task-role}[Any action engaged in by an agent. An event that is a participant response to an experiment stimulus should also be tagged with Agent-property/Agent-task-role/Participant-response.]</nowiki>
+* Agent-action <nowiki>{suggestedTag=Task-event-role}[Any action engaged in by an agent. An event that is a participant response to an experiment stimulus should also be tagged with Agent-property/Agent-task-role/Participant-response.]</nowiki>
 * Data-feature <nowiki>{suggestedTag=Data-property}[An event derived from the data itself or possibly inserted in a post-hoc fashion. Examples are markers for interictal spikes or alpha bursts.]</nowiki>
 * Experiment-control <nowiki>[An event pertaining to the control of the experiment during its operation.]</nowiki>
 * Experiment-procedure <nowiki>[An event indicating an experimental procedure as in doing a saliva swab on a participant during the experiment or administering a survey.]</nowiki>
@@ -14,7 +14,6 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 '''Agent''' <nowiki>{suggestedTag=Agent-property}[Something in the experiment that takes an active role or produces an effect. The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be something that simulates something else.]</nowiki>
 * Animal-agent <nowiki>[An animal that is present and acting to produce an effect.]</nowiki>
 * Avatar-agent <nowiki>[An agent associated with an icon or figure representing a particular person in venues such as video games or internet forums.]</nowiki>
-* Computational-agent <nowiki>[An agent whose decisions about its actions can be explained in terms of computation.]</nowiki>
 * Controller-agent <nowiki>[An outside controller such as the experimental control software or hardware.]</nowiki>
 * Human-agent <nowiki>[A person who takes an active role or produces a specified effect.]</nowiki>
 * Robotic-agent <nowiki>[An agent that is a mechanical device capable of performing a variety of often complex tasks on command or by being programmed in advance.]</nowiki>
@@ -542,7 +541,7 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 *** Onset <nowiki>{topLevelTagGroup}[Labels the start or beginning of something, usually an event.]</nowiki>
 *** Offset <nowiki>{topLevelTagGroup}[Labels the time at which something stops.]</nowiki>
 *** Pause <nowiki>[Indicates the temporary interruption of  the operation a process and subsequently wait for a signal to continue.]</nowiki>
-*** Time-value <nowiki>{unitClass=time}[A value with units of time. Usually grouped with tags identifying what the value represents.]</nowiki>
+*** Time-value <nowiki>[A value with units of time. Usually grouped with tags identifying what the value represents.]</nowiki>
 **** <nowiki># {takesValue, isNumeric, unitClass=time}</nowiki>
 *** Time-out <nowiki>[A cancellation or cessation that automatically occurs when a predefined interval of time has passed without a certain event occurring.]</nowiki>
 *** Time-sync <nowiki>[A synchronization signal whose purpose to help synchronize different signals or processes. Often used to indicate a marker inserted into the recorded data to allow post hoc synchronization of concurrently recorded data streams.]</nowiki>
@@ -633,19 +632,19 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 '''Attribute''' <nowiki>{extensionAllowed} [A characteristic of some entity. A quality or feature regarded as a characteristic or inherent part of someone or something. HED attributes are adjectives or adverbs.]</nowiki>
 * Informational <nowiki>[A quality that pertains to information.]</nowiki>
 ** Def <nowiki>{requireChild} [A HED-specific utility tag used with a defined name to represent the tags associated with that definition.]</nowiki>
-*** <nowiki># {takesValue}</nowiki>
+*** <nowiki># {takesValue, unitClass=nameClass}</nowiki>
 ** Def-expand <nowiki>{requireChild, tagGroup} [A HED specific utility tag that is grouped with an expanded definition. The child value of the Def-expand is the name of the expanded definition.]</nowiki>
-*** <nowiki># {takesValue}</nowiki>   creation date
+*** <nowiki># {takesValue, unitClass=nameClass}</nowiki>   creation date
 ** Definition <nowiki>{requireChild, topLevelTagGroup}[A HED-specific utility tag whose child value is the name of the concept and the tag group associated with the tag is an English language explanation of a concept.]</nowiki>
-*** <nowiki># {takesValue}</nowiki>
+*** <nowiki># {takesValue, unitClass=nameClass}</nowiki>
 ** Description <nowiki>{requireChild} [An explanation of what the tag group it is in means. If the description is at the top-level of an event string, the description applies to the event.]</nowiki>
-*** <nowiki># {takesValue}</nowiki>
+*** <nowiki># {takesValue, unitClass=textClass}</nowiki>
 ** Experimental-note <nowiki>[A brief written record about the experiment.]</nowiki>
-*** <nowiki># {takesValue}</nowiki>
+*** <nowiki># {takesValue, unitClass=textClass}</nowiki>
 ** ID <nowiki>{requireChild} [An alphanumeric name that identifies either a unique object or a unique class of objects. Here the object or class may be an idea, physical countable object (or class), or physical uncountable substance (or class).]</nowiki>
-*** <nowiki># {takesValue}</nowiki>
+*** <nowiki># {takesValue, unitClass=textClass}</nowiki>
 ** Label <nowiki>{requireChild} [A string of 20 or fewer characters identifying something. Labels usually refer to general classes of things while IDs refer to specific instances. A term that is associated with some entity. A brief description given for purposes of identification; an identifying or descriptive marker that is attached to an object.]</nowiki>
-*** <nowiki># {takesValue}</nowiki>
+*** <nowiki># {takesValue, unitClass=nameClass}</nowiki>
 ** Metadata <nowiki>[Data about data; information that describes another set of data.]</nowiki>
 *** CogAtlas <nowiki>[The Cognitive Atlas ID number of somthing.]</nowiki>
 **** <nowiki># {takesValue}</nowiki>
@@ -654,7 +653,7 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 *** Creation-date <nowiki>{requireChild}[The date on which data creation of this element began.]</nowiki>
 **** <nowiki># {takesValue, unitClass=datetime}</nowiki>
 *** Library-name <nowiki>[Official name of a HED library.]</nowiki>
-**** <nowiki># {takesValue}</nowiki>
+**** <nowiki># {takesValue, unitClass=nameClass}</nowiki>
 *** Pathname <nowiki>[The specification of a node (file or directory) in a hierarchical file system, usually specified by listing the nodes top-down.]</nowiki>
 **** <nowiki># {takesValue}</nowiki>
 *** Subject-identifier <nowiki>[A sequence of characters used to identify, name, or characterize a trial or study subject.]</nowiki>
@@ -1115,6 +1114,8 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 ** hour <nowiki>[Should be in 24-hour format.]</nowiki>
 * volume <nowiki>{defaultUnits=m^3}</nowiki>
 ** m^3 <nowiki>{SIUnit, unitSymbol}</nowiki>
+* nameClass <nowiki>[Unit class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underbar.]</nowiki>
+* textClass <nowiki>[Unit class designating values that have the characteristics of text such as in descriptions.]</nowiki>
 
 
 '''Unit modifiers''' <nowiki>[Unit multiples and submultiples.]</nowiki>
@@ -1160,7 +1161,7 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 * y <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-24]</nowiki>
 
 
-'''Schema attributes''' <nowiki>[Allowed node attributes.]</nowiki>
+'''Schema attributes''' <nowiki>[Allowed node, unit class or unit modifier attributes.]</nowiki>
 * allowedCharacter <nowiki>{unitClassProperty}[A schema attribute of unit classes specifying a special character that is allowed in expressing the value of a placeholder with those units.]</nowiki>
 * defaultUnits <nowiki>{unitClassProperty}[A schema attribute of unit classes specifying the default units for a tag.]</nowiki>
 * extensionAllowed <nowiki>{boolProperty}[A schema attribute indicating that users can add unlimited levels of child nodes under this tag.]</nowiki>
@@ -1181,12 +1182,11 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 * unitPrefix <nowiki>{boolProperty, unitProperty}[A schema attribute applied specifically to unit elements to designate that the unit indicator is a prefix (e.g., dollar sign in the currency units).]</nowiki>
 * unitSymbol <nowiki>{boolProperty, unitProperty}[A schema attribute indicating this tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
 
-'''Properties'''
+'''Properties''' <nowiki>[Properties of the schema attributes themselves. These are used for schema handling and verification.]</nowiki>
 * boolProperty <nowiki>[Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.]</nowiki>
 * unitClassProperty <nowiki>[Indicates that the schema attribute is meant to be applied to unit classes.]</nowiki>
 * unitModifierProperty <nowiki>[Indicates that the schema attribute is meant to be applied to unit modifier classes.]</nowiki>
 * unitProperty <nowiki>[Indicates that the schema attribute is meant to be applied to units within a unit class.]</nowiki>
-
 !# end hed
 
-This is the new format for the mediawiki schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
