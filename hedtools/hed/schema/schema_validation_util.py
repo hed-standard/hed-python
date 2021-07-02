@@ -21,6 +21,17 @@ def _validate_version_string(version_string):
     return True
 
 
+def is_hed3_version_number(version_string):
+    try:
+        version = Version(version_string)
+        if version.major >= 8:
+            return True
+    except ValueError as e:
+        return False
+
+    return False
+
+
 attribute_validators = {
         "version": (_validate_version_string, HedExceptions.BAD_HED_SEMANTIC_VERSION),
         "library": (_validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)

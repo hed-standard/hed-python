@@ -23,13 +23,15 @@ class HedString(HedGroup):
         """
         # This is a tree like structure containing the entire hed string
         hed_string = self._clean_hed_string(hed_string)
+
+        # The sub HedStrings that make up this object.  Empty if this is the lowest level one.
+        self._component_strings = []
         try:
-            contents, self._flat_tags = self.split_hed_string_into_groups(hed_string, also_return_flat_version=True)
+            contents = self.split_hed_string_into_groups(hed_string)
         except ValueError:
             contents = []
-            self._flat_tags = []
 
-        super().__init__(hed_string, include_paren=False, contents=contents)
+        super().__init__(hed_string, include_paren=False, contents=contents, startpos=0, endpos=len(hed_string))
 
     @staticmethod
     def create_from_other(hed_string_obj_list):
@@ -49,13 +51,9 @@ class HedString(HedGroup):
             The combined hed string, containing all tags and delimiters from the list
         """
         new_hed_string_obj = HedString("")
-        first_one = True
         for hed_string_obj in hed_string_obj_list:
-            if not first_one:
-                new_hed_string_obj._flat_tags.append(",")
-            first_one = False
-            new_hed_string_obj._flat_tags += hed_string_obj._flat_tags
             new_hed_string_obj._children += hed_string_obj._children
+        new_hed_string_obj._component_strings = hed_string_obj_list
 
         hed_string = ",".join([hed_string_obj._hed_string for hed_string_obj in hed_string_obj_list])
         new_hed_string_obj._hed_string = hed_string
@@ -75,30 +73,17 @@ class HedString(HedGroup):
         return validation_issues
 
     def convert_to_short(self, hed_schema, error_handler=None):
-        once = True
-        conversion_issues = []
-        for tag in self.get_all_tags():
-            if tag._short_tag_index is None and once:
-                once = False
-                conversion_issues = self.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
-            tag._tag = tag.short_tag
-        return conversion_issues
+        conversion_issues = self.convert_to_canonical_forms(hed_schema, error_handler)
+        short_string = self.get_as_short()
+        return short_string, conversion_issues
 
     def convert_to_long(self, hed_schema, error_handler=None):
-        once = True
-        conversion_issues = []
-        for tag in self.get_all_tags():
-            if tag._short_tag_index is None and once:
-                once = False
-                conversion_issues = self.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
-            tag._tag = tag.long_tag
-        return conversion_issues
+        conversion_issues = self.convert_to_canonical_forms(hed_schema, error_handler)
+        short_string = self.get_as_long()
+        return short_string, conversion_issues
 
     def convert_to_original(self):
-        conversion_issues = []
-        for tag in self.get_all_tags():
-            tag._tag = tag.org_tag
-        return conversion_issues
+        return self._get_as_type("org_tag")
 
     @staticmethod
     def split_hed_string_into_groups(hed_string, also_return_flat_version=False):
@@ -114,17 +99,14 @@ class HedString(HedGroup):
         """
         # Stack variable while processing
         current_tag_group = [[]]
-        flat_tags = []
 
         input_tags = HedString.split_hed_string(hed_string)
         for is_hed_tag, (startpos, endpos) in input_tags:
             if is_hed_tag:
                 new_tag = HedTag(hed_string, (startpos, endpos))
                 current_tag_group[-1].append(new_tag)
-                flat_tags.append(new_tag)
             else:
                 string_portion = hed_string[startpos:endpos]
-                flat_tags.append(string_portion)
                 delimiter_index = 0
                 for i, char in enumerate(string_portion):
                     if not char.isspace():
@@ -152,23 +134,23 @@ class HedString(HedGroup):
         if len(current_tag_group) != 1:
             raise ValueError(f"Unmatched opening parentheses in hed string {hed_string}")
 
-        if also_return_flat_version:
-            return current_tag_group[0], flat_tags
         return current_tag_group[0]
 
     @staticmethod
     def _clean_hed_string(hed_string):
         return hed_string.replace("\n", " ")
 
-    def _get_org_tag_span(self, tag):
+    def _get_org_span(self, tag_or_group):
         """
-            If this tag was in the original hed string, find it's original span.
+            If this tag or group was in the original hed string, find it's original span.
 
-            If the hed tag was not in the original string, returns (None, None)
+            This handles all cases of strings, including hed strings made of other hed strings.
+
+            If the hed tag or group was not in the original string, returns (None, None)
 
         Parameters
         ----------
-        tag : HedTag
+        tag_or_group : HedTag or HedGroup
             The hed tag to locate in this string.
 
         Returns
@@ -176,21 +158,23 @@ class HedString(HedGroup):
         tag_span: (int or None, int or None)
             The starting and ending index of the given tag in the original string
         """
-        tag_list = self._flat_tags
-        try:
-            tag_index = tag_list.index(tag)
-        except ValueError:
-            # Mainly a concern for replaced groups(is that a concern?)
+        strings_list = self._component_strings
+        found_string = None
+        string_start_index = 0
+        if not self._component_strings:
+            if tag_or_group in self.get_original_tags_and_groups():
+                return tag_or_group.span
+        for string in strings_list:
+            if tag_or_group in string.get_original_tags_and_groups():
+                found_string = string
+                break
+            # Add 1 for comma
+            string_start_index += string.span[1] + 1
+
+        if not found_string:
             return None, None
 
-        final_string = ""
-        if tag_index > 0:
-            final_tag_list = tag_list[:tag_index]
-            final_string += "".join(text if isinstance(text, str) else text.org_tag for text in final_tag_list)
-
-
-        length = len(final_string)
-        return length, length + len(tag_list[tag_index].org_tag)
+        return tag_or_group.span[0] + string_start_index, tag_or_group.span[1] + string_start_index
 
     @staticmethod
     def split_hed_string(hed_string):

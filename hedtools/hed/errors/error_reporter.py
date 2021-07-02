@@ -4,10 +4,8 @@ This module is used to report errors found in the validation.
 You can scope the formatted errors with calls to push_error_context and pop_error_context.
 """
 
-from hed.errors.error_types import ErrorContext, ErrorSeverity
-
 from functools import wraps
-
+from hed.errors.error_types import ErrorContext, ErrorSeverity
 
 error_functions = {}
 
@@ -97,7 +95,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     The error handler that's dealing with this error
                 tag: HedTag or str
                     The hed tag object with the problem
-                index: int,
+                index_in_tag: int,
                     The index into the tag with a problem(usually 0)
                 index_in_tag_end: int
                     the last index into the tag with a problem(usually len(tag)
@@ -111,7 +109,11 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 -------
                 error_list: [{}]
                 """
-                tag_as_string = str(tag)
+                try:
+                    tag_as_string = tag.tag
+                except AttributeError:
+                    tag_as_string = "PlaceholderYouShouldNotSee2"
+
                 if index_in_tag_end is None:
                     index_in_tag_end = len(tag_as_string)
                 problem_sub_tag = tag_as_string[index_in_tag: index_in_tag_end]
@@ -139,7 +141,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 ----------
                 self: ErrorHandler
                     The error handler that's dealing with this error
-                tag: HedTag or str
+                tag: HedTag or HedGroup
                     The hed tag object with the problem
                 args:
                     Any other non keyword args
@@ -151,9 +153,13 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 -------
                 error_list: [{}]
                 """
-                try:
+                from hed.models.hed_tag import HedTag
+                from hed.models.hed_group import HedGroup
+                if isinstance(tag, HedTag):
                     org_tag_text = tag.org_tag
-                except AttributeError:
+                elif isinstance(tag, HedGroup):
+                    org_tag_text = tag.get_original_hed_string()
+                else:
                     org_tag_text = "PlaceholderYouShouldNotSee"
                 base_message, error_vars = func(org_tag_text, *args, **kwargs)
                 error_object = self._create_error_object(actual_code, base_message, severity, **error_vars,
@@ -246,11 +252,18 @@ class ErrorHandler:
         # This part is optional as you can always generate these as needed.
         start, end = self._get_tag_span_to_error_object(error_object)
         if start is not None and end is not None:
-            error_object["char_index"] = start + error_object.get('index_in_tag', 0)
-            index_in_tag_end = end
-            if 'index_in_tag_end' in error_object:
-                index_in_tag_end = start + error_object['index_in_tag_end']
-            error_object['char_index_end'] = index_in_tag_end
+            source_tag = error_object.get('source_tag', None)
+            # Todo: Move this functionality somewhere more centralized.
+            # If the tag has been modified from the original, don't try to use sub indexing.
+            if source_tag and source_tag._tag:
+                 new_start, new_end = start, end
+            else:
+                new_start = start + error_object.get('index_in_tag', 0)
+                index_in_tag_end = end
+                if 'index_in_tag_end' in error_object:
+                    index_in_tag_end = start + error_object['index_in_tag_end']
+                new_end = index_in_tag_end
+            error_object['char_index'], error_object['char_index_end'] = new_start, new_end
         return error_object
 
     @staticmethod
@@ -270,10 +283,10 @@ class ErrorHandler:
             return None, None
 
         hed_string = error_object[ErrorContext.HED_STRING][0]
-        span = hed_string._get_org_tag_span(source_tag)
+        span = hed_string._get_org_span(source_tag)
         return span
 
-    def format_error(self, error_type, *args, **kwargs):
+    def format_error(self, error_type, *args, actual_error=None, **kwargs):
         """
             The parameters vary based on what type of error this is.
 
@@ -281,6 +294,10 @@ class ErrorHandler:
         ----------
         error_type : str
             The type of error for this.  Registered with @hed_error or @hed_tag_error.
+        args: args
+            Any remaining non keyword args.
+        actual_error: str or None
+            The code to actually add to report out.  Useful for errors that are shared like invalid character.
         kwargs :
             The other parameters to pass down to the error handling func.
         Returns
@@ -294,7 +311,10 @@ class ErrorHandler:
             error_object_list[0]['code'] = error_type
             return error_object_list
 
-        return error_func(self, *args, **kwargs)
+        error = error_func(self, *args, **kwargs)
+        if actual_error:
+            error[0]['code'] = actual_error
+        return error
 
     @hed_error("Unknown")
     def val_error_unknown(*args, **kwargs):

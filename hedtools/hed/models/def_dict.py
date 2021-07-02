@@ -6,12 +6,12 @@ from hed.errors import error_reporter
 
 class DefTagNames:
     """The source names for definitions, def labels, and expanded labels"""
-    DLABEL_ORG_KEY = 'Def/'
-    ELABEL_ORG_KEY = 'Def-expand/'
-    DEF_ORG_KEY = "Definition/"
-    DLABEL_KEY = DLABEL_ORG_KEY.lower()
-    ELABEL_KEY = ELABEL_ORG_KEY.lower()
+    DEF_ORG_KEY = 'Def/'
+    DEF_EXPAND_ORG_KEY = 'Def-expand/'
+    DEFINITION_ORG_KEY = "Definition/"
     DEF_KEY = DEF_ORG_KEY.lower()
+    DEF_EXPAND_KEY = DEF_EXPAND_ORG_KEY.lower()
+    DEFINITION_KEY = DEFINITION_ORG_KEY.lower()
 
 
 class DefEntry:
@@ -45,7 +45,7 @@ class DefEntry:
 
             output_contents += HedString.split_hed_string_into_groups(hed_string)
 
-        return f"{DefTagNames.ELABEL_ORG_KEY}{name}", output_contents
+        return f"{DefTagNames.DEF_EXPAND_ORG_KEY}{name}", output_contents
 
 
 class DefDict:
@@ -64,14 +64,14 @@ class DefDict:
         self._defs = {}
 
         # if hed_schema:
-        #     self._def_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DEF_KEY)
-        #     self._label_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DLABEL_KEY)
+        #     self._def_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DEFINITION_KEY)
+        #     self._label_tag_versions = hed_schema.get_all_forms_of_tag(DefTagNames.DEF_KEY)
         #     if not self._label_tag_versions:
-        #         self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
+        #         self._label_tag_versions = [DefTagNames.DEF_KEY + "/"]
         #     self._short_tag_mapping = hed_schema.short_tag_mapping
         # else:
-        #     self._def_tag_versions = [DefTagNames.DEF_KEY + "/"]
-        #     self._label_tag_versions = [DefTagNames.DLABEL_KEY + "/"]
+        #     self._def_tag_versions = [DefTagNames.DEFINITION_KEY + "/"]
+        #     self._label_tag_versions = [DefTagNames.DEF_KEY + "/"]
         #     self._short_tag_mapping = None
 
     def __iter__(self):
@@ -95,7 +95,7 @@ class DefDict:
         issues_list: None or [{}]
             A list of error objects containing warnings and errors related to definitions.
         """
-        if DefTagNames.DEF_KEY not in hed_string_obj.lower():
+        if DefTagNames.DEFINITION_KEY not in hed_string_obj.lower():
             return []
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
@@ -110,7 +110,7 @@ class DefDict:
                     group_tags.append(tag_or_group)
                     continue
                 else:
-                    new_def_tag = self._check_tag_starts_with(str(tag_or_group), DefTagNames.DEF_KEY)
+                    new_def_tag = self._check_tag_starts_with(str(tag_or_group), DefTagNames.DEFINITION_KEY)
                     if new_def_tag:
                         def_tags.append((tag_or_group, new_def_tag))
                         continue
@@ -124,7 +124,7 @@ class DefDict:
                 continue
 
             if len(def_tags) > 1:
-                validation_issues += error_handler.format_error(DefinitionErrors.WRONG_NUMBER_DEF_TAGS,
+                validation_issues += error_handler.format_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
                                                                 def_name=def_tags[0][1],
                                                                 tag_list=[tag[0] for tag in def_tags[1:]])
                 continue
@@ -146,7 +146,7 @@ class DefDict:
 
             def_tag_lower = def_tag_name.lower()
             if "/" in def_tag_lower or "#" in def_tag_lower:
-                validation_issues += error_handler.format_error(DefinitionErrors.INVALID_DEF_EXTENSION,
+                validation_issues += error_handler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
                                                                 def_name=def_tag_name)
                 continue
 
