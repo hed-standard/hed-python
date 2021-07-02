@@ -38,22 +38,20 @@ def get_input_from_service_request(request):
                  common.STRING_LIST: service_request.get(common.STRING_LIST, None),
                  common.CHECK_FOR_WARNINGS: service_request.get(common.CHECK_FOR_WARNINGS, True),
                  common.DEFS_EXPAND: service_request.get(common.DEFS_EXPAND, True)}
-    if common.JSON_STRING in service_request:
+    if common.JSON_STRING in service_request and service_request[common.JSON_STRING]:
         arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=service_request[common.JSON_STRING],
                                                                   display_name='JSON_Dictionary')
-    if common.EVENTS_STRING in service_request:
-        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=service_request[common.JSON_STRING],
-                                                                  display_name='JSON_Dictionary')
+    if common.EVENTS_STRING in service_request and service_request[common.EVENTS_STRING]:
         arguments[common.EVENTS] = models.EventsInput(csv_string=service_request[common.EVENTS_STRING],
                                                       json_def_files=arguments.get(common.JSON_DICTIONARY, None),
                                                       display_name='Events')
-    if common.SCHEMA_STRING in service_request:
+    if common.SCHEMA_STRING in service_request and service_request[common.SCHEMA_STRING]:
         arguments[common.SCHEMA] = hedschema.from_string(service_request[common.SCHEMA_STRING])
-    elif common.SCHEMA_URL in service_request:
+    elif common.SCHEMA_URL in service_request and service_request[common.SCHEMA_URL]:
         schema_url = service_request[common.SCHEMA_URL]
         arguments[common.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
-    elif common.SCHEMA_VERSION in service_request:
-        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+    elif common.SCHEMA_VERSION in service_request and service_request[common.SCHEMA_VERSION]:
+        hed_file_path = hedschema.get_path_from_hed_version(service_request[common.SCHEMA_VERSION])
         arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=hed_file_path)
     return arguments
 

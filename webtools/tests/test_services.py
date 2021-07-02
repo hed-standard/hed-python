@@ -47,8 +47,8 @@ class Test(unittest.TestCase):
             data = json.load(f)
         json_text = json.dumps(data)
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
-                     + 'hedxsd-test/HED8.0.0-beta.1.xml'
-        hed_schema =  hedschema.load_schema(hed_url_path=schema_url)
+                     + 'hedxml/HED8.0.0-beta.1.xml'
+        hed_schema = hedschema.load_schema(hed_url_path=schema_url)
         json_dictionary = models.ColumnDefGroup(json_string=json_text, display_name='JSON_Dictionary')
         arguments = {common.SERVICE: 'dictionary_validate', common.SCHEMA: hed_schema,
                      common.JSON_DICTIONARY: json_dictionary}
