@@ -71,8 +71,8 @@ class TestDefDict(TestDefBase):
             'noGroupTag': [],
             'placeholderNoGroupTag': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "InvalidDef1",
                                                                                  expected_count=1, tag_list=[]),
-            'placeholderWrongSpot': self.error_handler.format_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1#"),
-            'twoDefTags': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_DEF_TAGS, "ValidDef1", ["Definition/InvalidDef2"]),
+            'placeholderWrongSpot': self.error_handler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, "InvalidDef1#"),
+            'twoDefTags': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS, "ValidDef1", ["Definition/InvalidDef2"]),
             'twoGroupTags': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1", [self.def_contents_string, self.def_contents_string2]),
             'duplicateDef': self.error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
             'duplicateDef2': self.error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
@@ -80,8 +80,8 @@ class TestDefDict(TestDefBase):
             # 'defAlreadyTagInSchema': self.error_handler.format_error(DefinitionErrors.TAG_IN_SCHEMA, "Item"),
             'defTooManyPlaceholders': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "TestDefPlaceholder",
                                                                                  expected_count=1, tag_list=["Item/TestDef1/#", "Item/TestDef2/#"]),
-            'invalidPlaceholderExtension': self.error_handler.format_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1/thispartisnotallowed"),
-            'invalidPlaceholder': self.error_handler.format_error(DefinitionErrors.INVALID_DEF_EXTENSION, "InvalidDef1/InvalidPlaceholder"),
+            'invalidPlaceholderExtension': self.error_handler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, "InvalidDef1/thispartisnotallowed"),
+            'invalidPlaceholder': self.error_handler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, "InvalidDef1/InvalidPlaceholder"),
         }
 
         self.check_def_base(test_strings, expected_results)

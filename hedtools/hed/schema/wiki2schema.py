@@ -129,6 +129,12 @@ class HedSchemaWikiParser:
             if found_section:
                 continue
 
+            if (self._current_section != HedSection.Schema and line.startswith(wiki_constants.ROOT_TAG) and
+                    not (line.startswith(wiki_constants.OLD_SYNTAX_SECTION_NAME) and not self._schema.is_hed3_schema)):
+
+                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
+                                   f"Invalid section separator '{line.strip()}'", filename=self.filename)
+
             if line.startswith("!#"):
                 raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
                                    f"Invalid section separator '{line.strip()}'", filename=self.filename)
@@ -357,6 +363,33 @@ class HedSchemaWikiParser:
             self._add_single_line(line, HedKey.Attributes)
 
     def _get_header_attributes(self, version_line):
+        """Extracts all valid attributes like version from the HED line in .mediawiki format.
+
+        Parameters
+        ----------
+        version_line: string
+            The line in the wiki file that contains the version or other attributes.
+
+        Returns
+        -------
+        {}: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}
+        """
+        if "=" not in version_line:
+            return self._get_header_attributes_old(version_line)
+
+        attr_pattern = "([^ ]+?)=\"(.*?)\""
+        attr_re = re.compile(attr_pattern)
+
+        final_attributes = {}
+
+        for match in attr_re.finditer(version_line):
+            attr_name = match.group(1)
+            attr_value = match.group(2)
+            final_attributes[attr_name] = attr_value
+
+        return final_attributes
+
+    def _get_header_attributes_old(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
 
         Parameters

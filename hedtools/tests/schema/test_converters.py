@@ -11,6 +11,7 @@ class TestConverterBase(unittest.TestCase):
     wiki_file = '../data/HED8.0.0-alpha.2.mediawiki'
     can_compare = True
     can_legacy = True
+
     @classmethod
     def setUpClass(cls):
         cls.xml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.xml_file)
@@ -147,5 +148,11 @@ class TestPropertyAdded(TestConverterBase):
 class TestPropertyAddedUsage(TestConverterBase):
     xml_file = '../data/hed_pairs/added_prop_with_usage.xml'
     wiki_file = '../data/hed_pairs/added_prop_with_usage.mediawiki'
+    can_compare = True
+    can_legacy = False
+
+class TestBeta2(TestConverterBase):
+    xml_file = '../data/hed_pairs/beta.2.xml'
+    wiki_file = '../data/hed_pairs/beta.2.mediawiki'
     can_compare = True
     can_legacy = False

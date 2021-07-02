@@ -4,7 +4,7 @@ types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after cr
 the get_validation_issues() function.
 
 """
-from hed.errors.error_types import ErrorContext
+from hed.errors.error_types import ErrorContext, ValidationErrors
 from hed.errors import error_reporter
 
 from hed.models.hed_string import HedString
@@ -190,13 +190,13 @@ class EventValidator:
             for column_number in column_to_hed_tags_dictionary:
                 new_column_issues = []
                 self._error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                column_hed_string = column_to_hed_tags_dictionary[column_number]
+                self._error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
+                                                       increment_depth_after=False)
                 if column_number in expansion_issues:
                     column_issues = expansion_issues[column_number]
                     for issue in column_issues:
                         new_column_issues += self._error_handler.format_error(**issue)
-                column_hed_string = column_to_hed_tags_dictionary[column_number]
-                self._error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
-                                                       increment_depth_after=False)
                 new_column_issues += self._tag_validator.run_hed_string_validators(column_hed_string)
                 if not new_column_issues:
                     new_column_issues += column_hed_string.convert_to_canonical_forms(self._hed_schema,
@@ -238,6 +238,8 @@ class EventValidator:
         validation_issues = []
         for original_tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
             is_group = original_tag_group.is_group()
+            if not original_tag_group and is_group:
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_GROUP_EMPTY, tag=original_tag_group)
             validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group.tags(), is_top_level,
                                                                               is_group)
 

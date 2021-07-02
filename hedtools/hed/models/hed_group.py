@@ -27,6 +27,7 @@ class HedGroup:
             self._children = contents
         else:
             self._children = []
+        self._original_children = self._children
         self._startpos = startpos
         self._endpos = endpos
         self._include_paren = include_paren
@@ -45,16 +46,6 @@ class HedGroup:
 
     def __bool__(self):
         return bool(self._children)
-
-    def __iter__(self):
-        """
-        Returns an iterator over all HedTags and HedGroups that are in this group.  Not recursive.
-
-        Returns
-        -------
-        iterator over the direct children, identical to get_direct_children()
-        """
-        return iter(self._children)
 
     def get_direct_children(self):
         """
@@ -85,6 +76,18 @@ class HedGroup:
                 node_list = current_group_or_tag._children + node_list
             else:
                 final_list.append(current_group_or_tag)
+        return final_list
+
+    def get_original_tags_and_groups(self):
+        node_list = [self]
+        final_list = []
+
+        # Using an iterator is worse performance wise here.
+        while node_list:
+            current_group_or_tag = node_list.pop(0)
+            if isinstance(current_group_or_tag, HedGroup):
+                node_list = current_group_or_tag._original_children + node_list
+            final_list.append(current_group_or_tag)
         return final_list
 
     def is_group(self):
@@ -169,6 +172,47 @@ class HedGroup:
             return "(" + ",".join([str(child) for child in self._children]) + ")"
         return ",".join([str(child) for child in self._children])
 
+    def get_as_short(self):
+        """
+        Convert this HedGroup to a short tag string
+
+        Returns
+        -------
+        str
+            Returns the group as a string, returning all tags as short tags.
+        """
+        return self._get_as_type("short_tag")
+
+    def get_as_long(self):
+        """
+        Convert this HedGroup to a long tag string
+
+        Returns
+        -------
+        str
+            Returns the group as a string, returning all tags as long tags.
+        """
+        return self._get_as_type("long_tag")
+
+    def _get_as_type(self, tag_attribute):
+        """
+
+        Parameters
+        ----------
+        tag_attribute : str
+            The hed_tag property to use to construct the string.  Most commonly short_tag or long_tag.
+
+        Returns
+        -------
+        group_as_string: str
+            The constructed string
+        """
+        result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
+                           child._get_as_type(tag_attribute) for child in self._children])
+        if self._include_paren:
+            return f"({result})"
+        return result
+
     def lower(self):
         """Convenience function, equivalent to str(self).lower()"""
         return str(self).lower()
@@ -183,6 +227,8 @@ class HedGroup:
         new_contents : HedTag or HedGroup or [HedTag or HedGroup]
             What to replace the tag with.
         """
+        if self._original_children is self._children:
+            self._original_children = self._children.copy()
         new_object = new_contents
         if isinstance(new_contents, list):
             new_object = HedGroup(tag._hed_string, startpos=tag.span[0], endpos=tag.span[1], contents=new_contents)
@@ -199,6 +245,9 @@ class HedGroup:
         remove_groups : [HedGroup or HedTag]
             A list of groups or tags to remove
         """
+        if self._original_children is self._children:
+            self._original_children = self._children.copy()
+
         if self in remove_groups:
             self._children = []
             self._hed_string = ""

@@ -19,15 +19,19 @@ class TestConvertTag(TestTagFormat):
             error_handler = error_reporter.ErrorHandler()
             error_handler.reset_error_context()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string_obj, increment_depth_after=False)
+            test_issues = test_string_obj.convert_to_canonical_forms(self.hed_schema, error_handler)
             if convert_to_short:
-                test_issues = HedString.convert_to_short(test_string_obj, self.hed_schema, error_handler)
+                string_result = test_string_obj.get_as_short()
             else:
-                test_issues = HedString.convert_to_long(test_string_obj, self.hed_schema, error_handler)
+                string_result = test_string_obj.get_as_long()
             expected_params = expected_errors[test_key]
             expected_result = expected_results[test_key]
 
             expected_issue = self.really_format_errors(error_handler, hed_string=test_string_obj, params=expected_params)
-            self.assertEqual(str(test_string_obj), expected_result, test_strings[test_key])
+            print(test_key)
+            print(expected_issue)
+            print(test_issues)
+            self.assertEqual(string_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
 

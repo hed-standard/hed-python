@@ -209,8 +209,8 @@ class HedSchema2Wiki:
             A string of the attributes that can be written to a .mediawiki formatted file
         """
         # Hardcode version to always be the first thing in attributes
-        attrib_values = [f"version:{hed_schema.header_attributes['version']}"]
-        attrib_values.extend([f"{attr}:{value}" for attr, value in
+        attrib_values = [f"version=\"{hed_schema.header_attributes['version']}\""]
+        attrib_values.extend([f"{attr}=\"{value}\"" for attr, value in
                               hed_schema.header_attributes.items() if attr != "version"])
-        final_attrib_string = ", ".join(attrib_values)
+        final_attrib_string = " ".join(attrib_values)
         return final_attrib_string
