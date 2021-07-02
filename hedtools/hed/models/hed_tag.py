@@ -22,8 +22,8 @@ class HedTag:
         # This is the span into the original hed string for this tag
         self.span = span
 
-        # If this is present, use this as the output tag.  Priority is _tag, _long_tag, then _hed_string[span]
-        # this is generally only filled out if we're changing a tag from the source(adding a prefix, etc)
+        # If this is present, use this as the org tag for most purposes.  This is generally only filled out
+        # if the tag has a prefix added, or is an expanded def.
         self._tag = None
 
         # The long form of the tag, if generated.
@@ -58,18 +58,49 @@ class HedTag:
     @property
     def base_tag(self):
         """
-            Returns the short version of the tag, without value or extension
+            Returns the long version of the tag, without value or extension
 
             Note: only valid after calling convert_to_canonical_forms
         Returns
         -------
         base_tag: str
-            The short version of the tag, without value or extension
+            The long version of the tag, without value or extension
         """
         if self._extension_index is None:
             return str(self)
 
         return self._long_tag[:self._extension_index]
+
+    @property
+    def org_base_tag(self):
+        """
+            Returns the original version of the tag, without value or extension
+
+            Warning: This could be empty in the original tag had a prefix prepended.
+                eg a column where "Label/" is prepended, thus the column value has zero base portion.
+
+            Note: only valid after calling convert_to_canonical_forms
+        Returns
+        -------
+        base_tag: str
+            The original version of the tag, without value or extension
+        """
+        if self._extension_index is None:
+            return str(self)
+
+        # This mess could be optimized better
+        extension_len = len(self.extension_or_value_portion)
+        if not extension_len:
+            return self.tag
+
+        org_len = len(self.tag)
+        if org_len == extension_len:
+            return ""
+
+        return self.tag[:org_len-(extension_len + 1)]
+
+    def tag_modified(self):
+        return bool(self._tag)
 
     @property
     def tag(self):
@@ -82,8 +113,13 @@ class HedTag:
         tag: str
             The custom set user version of the tag.
         """
-        return self._tag
+        if self._tag:
+            return self._tag
 
+        return self.org_tag
+
+    # Honestly this should probably be removed
+    # this should be replaced with a "set long tag" which updates the short and long versions automatically.
     @tag.setter
     def tag(self, new_tag_val):
         """
@@ -99,7 +135,7 @@ class HedTag:
             New (implicitly long form) of tag to set
         """
         if self._long_tag:
-            raise ValueError("Can edit tags before calculating canonical forms.")
+            raise ValueError("Can only edit tags before calculating canonical forms.  This could be updated to instead remove computed forms.")
         self._tag = new_tag_val
 
     @property
@@ -137,11 +173,11 @@ class HedTag:
         str
             Return the original tag if we haven't set a new tag.(eg short to long)
         """
-        if self._tag:
-            return self._tag
-
         if self._long_tag:
             return self._long_tag
+
+        if self._tag:
+            return self._tag
 
         return self._hed_string[self.span[0]:self.span[1]]
 
@@ -172,7 +208,7 @@ class HedTag:
             if slash_index == 0:
                 break
             checking_prefix = checking_prefix[slash_index:]
-        self._tag = required_prefix + str(self)
+        self._tag = required_prefix + self.org_tag
 
     def remove_prefix_if_present(self, prefix_to_remove):
         if self.lower().startswith(prefix_to_remove.lower()):

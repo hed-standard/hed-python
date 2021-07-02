@@ -2711,7 +2711,7 @@
                   </attribute>
                   <attribute>
                      <name>unitClass</name>
-                     <value>datetime</value>
+                     <value>dateTime</value>
                   </attribute>
                </node>
             </node>

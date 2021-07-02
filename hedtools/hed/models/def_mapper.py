@@ -18,8 +18,8 @@ class DefinitionMapper:
         """
         self._gathered_defs = {}
 
-        self._def_tag_name = DefTagNames.DEF_KEY.lower()
-        self._label_tag_name = DefTagNames.DLABEL_KEY.lower()
+        self._def_tag_name = DefTagNames.DEFINITION_KEY.lower()
+        self._label_tag_name = DefTagNames.DEF_KEY.lower()
 
         if def_dicts:
             self.add_definitions(def_dicts)
@@ -37,11 +37,11 @@ class DefinitionMapper:
             def_dicts = [def_dicts]
         for def_dict in def_dicts:
             if isinstance(def_dict, DefDict):
-                self._add_definitions_from_group(def_dict)
+                self._add_definitions_from_dict(def_dict)
             else:
                 print(f"Invalid input type '{type(def_dict)} passed to DefinitionMapper.  Skipping.")
 
-    def _add_definitions_from_group(self, def_dict):
+    def _add_definitions_from_dict(self, def_dict):
         """
             Gather definitions from a single def group and add it to the mapper
 
@@ -89,12 +89,12 @@ class DefinitionMapper:
                 tag_as_string = str(tag)
                 if is_top_level:
                     # This case should be fairly rare compared to expanding definitions.
-                    is_def_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DEF_KEY)
+                    is_def_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DEFINITION_KEY)
                     if is_def_tag:
                         remove_groups.append(tag_group)
                         break
 
-                is_label_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DLABEL_KEY)
+                is_label_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DEF_KEY)
                 if is_label_tag:
                     placeholder = None
                     found_slash = is_label_tag.find("/")
@@ -105,17 +105,17 @@ class DefinitionMapper:
                     label_tag_lower = is_label_tag.lower()
                     def_entry = self._gathered_defs.get(label_tag_lower)
                     if def_entry is None:
-                        def_issues += [{"error_type": ValidationErrors.HED_DEFINITION_UNMATCHED,
-                                       "tag": is_label_tag}]
+                        def_issues += [{"error_type": ValidationErrors.HED_DEF_UNMATCHED,
+                                       "tag": tag}]
                         continue
 
                     def_tag_name, def_contents = def_entry.get_definition(tag, placeholder_value=placeholder)
                     if def_tag_name is None:
                         if def_entry.takes_value:
-                            def_issues += [{"error_type": ValidationErrors.HED_DEFINITION_VALUE_MISSING,
+                            def_issues += [{"error_type": ValidationErrors.HED_DEF_VALUE_MISSING,
                                            "tag": tag}]
                         else:
-                            def_issues += [{"error_type": ValidationErrors.HED_DEFINITION_VALUE_EXTRA,
+                            def_issues += [{"error_type": ValidationErrors.HED_DEF_VALUE_EXTRA,
                                             "tag": tag}]
                         continue
                     if not expand_defs:

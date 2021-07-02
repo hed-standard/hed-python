@@ -11,6 +11,7 @@ from hed.schema.schema2xml import HedSchema2XML
 from hed.schema.schema2wiki import HedSchema2Wiki
 from hed.schema import schema_compliance
 from hed.errors.error_types import ValidationErrors
+from hed.schema import schema_validation_util
 
 
 class HedSchema:
@@ -32,6 +33,7 @@ class HedSchema:
         self.epilogue = ""
 
         self.issues = []
+        self._is_hed3_schema = None
 
     def get_as_mediawiki_string(self):
         """
@@ -101,6 +103,10 @@ class HedSchema:
     @property
     def version(self):
         return self.header_attributes['version']
+
+    @property
+    def library(self):
+        return self.header_attributes.get('library')
 
     def check_compliance(self, also_check_for_warnings=True, display_filename=None,
                          error_handler=None):
@@ -296,6 +302,13 @@ class HedSchema:
         return self.no_duplicate_tags
 
     @property
+    def is_hed3_schema(self):
+        if self._is_hed3_schema is not None:
+            return self._is_hed3_schema
+
+        return self.library or schema_validation_util.is_hed3_version_number(self.version)
+
+    @property
     def has_unit_modifiers(self):
         return HedKey.SIUnitModifier in self.dictionaries
 
@@ -333,6 +346,7 @@ class HedSchema:
         return False
 
     def finalize_dictionaries(self):
+        self._is_hed3_schema = self.is_hed3_schema
         self._propagate_extension_allowed()
         self._populate_short_tag_dict()
 
@@ -362,7 +376,7 @@ class HedSchema:
 
     def __eq__(self, other):
         if self.dictionaries != other.dictionaries:
-            # # Comment the following back in for easy debugging of schema that should be equal.
+            # Comment the following back in for easy debugging of schema that should be equal.
             # dict_keys = set(list(self.dictionaries.keys()) + list(other.dictionaries.keys()))
             # for dict_key in dict_keys:
             #     if dict_key not in self.dictionaries:
@@ -494,7 +508,7 @@ class HedSchema:
 
         Parameters
         ----------
-        hed_tag: str or HedTag
+        hed_tag: HedTag
             A single hed tag(long or short)
         Returns
         -------
@@ -510,7 +524,7 @@ class HedSchema:
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
 
-        clean_tag = hed_tag.lower()
+        clean_tag = hed_tag.tag.lower()
         split_tags = clean_tag.split("/")
 
         index_in_tag_end = 0
@@ -674,12 +688,16 @@ class HedSchema:
     def _add_attribute_name_to_dict(self, attribute_name):
         if attribute_name in self.dictionaries[HedKey.Attributes]:
             raise ValueError(f"Duplicate attribute {attribute_name} found in attributes section.")
+        if attribute_name in self.dictionaries:
+            raise ValueError(f"Attribute '{attribute_name}' is already in dictionary as reserved and cannot be re-used.")
         self.dictionaries[HedKey.Attributes][attribute_name] = attribute_name
         self.dictionaries[attribute_name] = {}
 
     def _add_property_name_to_dict(self, prop_name, prop_desc):
         if prop_name in self.dictionaries[HedKey.Properties]:
             raise ValueError(f"Duplicate property {prop_name} found in properties section.")
+        if prop_name in self.dictionaries:
+            raise ValueError(f"Property '{prop_name}' is already in dictionary as reserved and cannot be re-used.")
         self.dictionaries[HedKey.Properties][prop_name] = prop_name
         self.dictionaries[prop_name] = {}
         self._add_description_to_dict(prop_name, prop_desc, HedKey.Properties)

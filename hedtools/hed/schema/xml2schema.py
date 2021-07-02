@@ -238,6 +238,18 @@ class HedSchemaXMLParser:
             else:
                 self._parse_node(node_element, key_class=HedKey.UnitModifiers)
 
+    def _reformat_xsd_attrib(self, attrib_dict):
+        final_attrib = {}
+        for attrib_name in attrib_dict:
+            if attrib_name == xml_constants.NO_NAMESPACE_XSD_KEY:
+                xsd_value = attrib_dict[attrib_name]
+                final_attrib[xml_constants.NS_ATTRIB] = xml_constants.XSI_SOURCE
+                final_attrib[xml_constants.NO_LOC_ATTRIB] = xsd_value
+            else:
+                final_attrib[attrib_name] = attrib_dict[attrib_name]
+
+        return final_attrib
+
     def _get_header_attributes(self):
         """
             Gets the schema attributes form the XML root node
@@ -247,7 +259,8 @@ class HedSchemaXMLParser:
         attribute_dict: {str: str}
 
         """
-        return self._root_element.attrib
+        return self._reformat_xsd_attrib(self._root_element.attrib)
+
 
     def _get_prologue(self):
         prologue_elements = self._get_elements_by_name(xml_constants.PROLOGUE_ELEMENT)

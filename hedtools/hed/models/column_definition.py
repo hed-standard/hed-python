@@ -300,10 +300,11 @@ class ColumnDef:
             if hed_schema is not None:
                 from hed.validator.event_validator import EventValidator
                 event_validator = EventValidator(check_for_warnings=True, run_semantic_validation=True,
-                                             hed_schema=hed_schema, error_handler=error_handler,
-                                             allow_numbers_to_be_pound_sign=True)
+                                                 hed_schema=hed_schema, error_handler=error_handler,
+                                                 allow_numbers_to_be_pound_sign=True)
             for hed_string, position in self.hed_string_iter(include_position=True):
                 error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
+                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string, increment_depth_after=False)
                 if not hed_string:
                     col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
                 if not isinstance(hed_string, str):
@@ -314,6 +315,7 @@ class ColumnDef:
                     if event_validator:
                         col_validation_issues += event_validator.validate_input(hed_string)
                     col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
+                error_handler.pop_error_context()
                 error_handler.pop_error_context()
 
         if self.column_type is None:
@@ -343,10 +345,10 @@ class ColumnDef:
         """
         if self.column_type == ColumnType.Value or self.column_type == ColumnType.Attribute:
             base_pound_sign_count = 1
-            error_type = SidecarErrors.INVALID_NUMBER_POUND_SIGNS
+            error_type = SidecarErrors.INVALID_POUND_SIGNS_VALUE
         elif self.column_type == ColumnType.HEDTags or self.column_type == ColumnType.Categorical:
             base_pound_sign_count = 0
-            error_type = SidecarErrors.TOO_MANY_POUND_SIGNS
+            error_type = SidecarErrors.INVALID_POUND_SIGNS_CATEGORY
         else:
             return []
 
