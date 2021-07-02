@@ -65,7 +65,8 @@ class BaseInput:
             worksheet_to_load = self._worksheet_name
             if worksheet_to_load is None:
                 worksheet_to_load = 0
-            self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header)
+            self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header,
+                                                engine="openpyxl")
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
 
