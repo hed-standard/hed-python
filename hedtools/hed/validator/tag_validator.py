@@ -460,9 +460,10 @@ class TagValidator:
 
             if not validated_unit:
                 tag_unit_class_units = self.get_tag_unit_class_units(original_tag)
-                validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                                                      original_tag,
-                                                                      unit_class_units=tag_unit_class_units)
+                if tag_unit_class_units:
+                    validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_INVALID,
+                                                                          original_tag,
+                                                                          unit_class_units=tag_unit_class_units)
 
             # There are some missing compatibilities with old schemas.
             if self._hed_schema.is_hed3_schema:
