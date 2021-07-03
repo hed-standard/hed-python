@@ -156,3 +156,9 @@ class TestBeta2(TestConverterBase):
     wiki_file = '../data/hed_pairs/beta.2.mediawiki'
     can_compare = True
     can_legacy = False
+
+class TestBeta3(TestConverterBase):
+    xml_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
+    wiki_file = '../data/hed_pairs/HED8.0.0-beta.3.mediawiki'
+    can_compare = True
+    can_legacy = False

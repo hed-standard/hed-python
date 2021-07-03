@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
         cls.hed_filepath_major_errors = os.path.join(cls.hed_base_dir, "bids_events_invalid.tsv")
         cls.hed_file_with_major_errors = HedInput(cls.hed_filepath_major_errors, tag_columns=[3])
 
-        hed_schema2 = schema.load_schema(os.path.join(cls.hed_base_dir, "HED8.0.0-alpha.3.xml"))
+        hed_schema2 = schema.load_schema(os.path.join(cls.hed_base_dir, "HED8.0.0-alpha.3_add_currency.xml"))
         cls.generic_hed_input_reader2 = EventValidator(hed_schema=hed_schema2)
         cls.hed_filepath_major_errors_multi_column = os.path.join(cls.hed_base_dir, "bids_events_invalid_columns.tsv")
         cls.hed_file_with_major_errors_multi_column = HedInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[3, 4])
@@ -157,7 +157,7 @@ class Test(unittest.TestCase):
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED8.0.0-alpha.3.xml')
+                                   '../data/HED8.0.0-alpha.3_add_currency.xml')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = schema.load_schema(schema_path)
 

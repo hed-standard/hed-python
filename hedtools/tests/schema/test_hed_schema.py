@@ -230,7 +230,7 @@ class TestHedSchema(unittest.TestCase):
 
     def test_get_desc_dict(self):
         desc_dict = self.hed_schema.get_desc_dict()
-        self.assertEqual(len(desc_dict), 383)
+        self.assertEqual(len(desc_dict), 385)
 
         desc_dict = self.hed_schema_3g.get_desc_dict()
         self.assertEqual(len(desc_dict), 262)
