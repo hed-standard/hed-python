@@ -37,7 +37,8 @@ SCHEMA_ATTRIBUTES_SECTION_ELEMENT = "schemaAttributeDefinitions"
 SCHEMA_ATTRIBUTES_DEF_ELEMENT = "schemaAttributeDefinition"
 SCHEMA_PROPERTIES_SECTION_ELEMENT = "propertyDefinitions"
 SCHEMA_PROPERTIES_DEF_ELEMENT = "propertyDefinition"
-
+SCHEMA_VALUE_CLASSES_SECTION_ELEMENT = "valueClassDefinitions"
+SCHEMA_VALUE_CLASSES_DEF_ELEMENT = "valueClassDefinition"
 
 UNIT_CLASS_SECTION_ELEMENT_LEGACY = "unitClasses"
 UNIT_CLASS_DEF_ELEMENT_LEGACY = "unitClass"
@@ -50,6 +51,7 @@ def get_section_name(key_class, legacy_format=False):
         section_names = {
             HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
             HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
+            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
             HedKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
         }
@@ -57,6 +59,7 @@ def get_section_name(key_class, legacy_format=False):
         section_names = {
             HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
             HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT_LEGACY,
+            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
             HedKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
         }
@@ -70,6 +73,7 @@ def get_element_name(key_class, legacy_format=False):
             HedKey.AllTags: TAG_DEF_ELEMENT,
             HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
             HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
+            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
             HedKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
         }
@@ -78,6 +82,7 @@ def get_element_name(key_class, legacy_format=False):
             HedKey.AllTags: TAG_DEF_ELEMENT,
             HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT_LEGACY,
             HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT_LEGACY,
+            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
             HedKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
         }
@@ -90,5 +95,6 @@ ATTRIBUTE_PROPERTY_ELEMENTS = {
     HedKey.UnitClasses: ATTRIBUTE_ELEMENT,
     HedKey.Units: ATTRIBUTE_ELEMENT,
     HedKey.UnitModifiers: ATTRIBUTE_ELEMENT,
+    HedKey.ValueClasses: ATTRIBUTE_ELEMENT,
     HedKey.Attributes: ATTRIBUTE_PROPERTY_ELEMENT
 }
