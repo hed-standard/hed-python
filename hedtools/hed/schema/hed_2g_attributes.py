@@ -1,7 +1,7 @@
 
 # Dictionary of attributes for hed2 schema, so we can add them if not present.
 attributes = {
-    "allowedCharacter": (("unitClassProperty", ), "A schema attribute of unit classes specifying a special character that is allowed in expressing the value of a placeholder with those units."),
+    "allowedCharacter": (("valueClassProperty", ), "A schema attribute of value classes specifying a special character that is allowed in expressing the value of a placeholder with those units."),
     "defaultUnits": (("unitClassProperty", ), "A schema attribute of unit classes specifying the default units for a tag."),
     "extensionAllowed": (("boolProperty", ), "A schema attribute indicating that users can add unlimited levels of child nodes under this tag."),
     "isNumeric": (("boolProperty", ), "A schema attribute indicating that the tag hashtag placeholder must be replaced by a numerical value."),
@@ -22,11 +22,13 @@ attributes = {
     "unitClass": ((), "A schema attribute specifying which unit class this value tag belongs to."),
     "unitPrefix": (("boolProperty", "unitProperty"), "A schema attribute applied specifically to unit elements to designate that the unit indicator is a prefix (e.g., dollar sign in the currency units)."),
     "unitSymbol": (("boolProperty", "unitProperty"), "A schema attribute indicating this tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized."),
+    "valueClass": ((), "A schema attribute indicating this is a value class."),
 }
 
 properties = {
     "boolProperty": "Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.",
     "unitClassProperty": "Indicates that the schema attribute is meant to be applied to unit classes.",
     "unitModifierProperty": "Indicates that the schema attribute is meant to be applied to unit modifier classes.",
-    "unitProperty": "Indicates that the schema attribute is meant to be applied to units within a unit class.", 
+    "unitProperty": "Indicates that the schema attribute is meant to be applied to units within a unit class.",
+    "valueClassProperty": "Indicates that the schema attribute is meant to be applied to value classes.",
 }

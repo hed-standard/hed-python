@@ -8,6 +8,22 @@
          <value>Task-property</value>
       </attribute>
       <node>
+         <name>Currency-Test</name>
+         <node>
+            <name>#</name>
+            <attribute>
+               <name>isNumeric</name>
+            </attribute>
+            <attribute>
+               <name>takesValue</name>
+            </attribute>
+            <attribute>
+               <name>unitClass</name>
+               <value>currency</value>
+            </attribute>
+         </node>
+      </node>
+      <node>
          <name>Sensory-event</name>
          <description>Something perceivable by the participant. An event meant to be an experimental stimulus should also be tagged with Task-property/Task-role/Experiment-stimulus.</description>
          <attribute>

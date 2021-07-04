@@ -458,36 +458,22 @@ class TagValidator:
                     validated_unit = unit_class_type
                     break
 
+            tag_unit_class_units = self.get_tag_unit_class_units(original_tag)
             if not validated_unit:
-                tag_unit_class_units = self.get_tag_unit_class_units(original_tag)
                 if tag_unit_class_units:
                     validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_INVALID,
                                                                           original_tag,
                                                                           unit_class_units=tag_unit_class_units)
 
-            # There are some missing compatibilities with old schemas.
-            if self._hed_schema.is_hed3_schema:
-                # Gather list of allowed characters
-                unit_class_unit_allowed_chars = self.DEFAULT_ALLOWED_PLACEHOLDER_CHARS
-                if self._placeholders_allowed_in_strings:
-                    unit_class_unit_allowed_chars += "#"
-                if found_unit:
-                    unit_class_unit_allowed_chars += self._hed_schema_dictionaries[HedKey.AllowedCharacter].get(found_unit, "")
-
-                validation_issues += self._check_invalid_chars(formatted_tag_unit_value, unit_class_unit_allowed_chars, original_tag,
-                                                               starting_index=len(original_tag.org_base_tag) + 1,
-                                                               actual_error=ValidationErrors.HED_VALUE_INVALID)
-            # Skip allowed chars with old schema, but still check for placeholder
-            else:
-                if not self._placeholders_allowed_in_strings:
-                    starting_index = len(original_tag.org_base_tag) + 1
-                    for i, character in enumerate(formatted_tag_unit_value):
-                        if character == "#":
-                            validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
-                                                                                  tag=original_tag,
-                                                                                  index_in_tag=starting_index + i,
-                                                                                  index_in_tag_end=starting_index + i + 1,
-                                                                                  actual_error=ValidationErrors.HED_VALUE_INVALID)
+            # Special characters are now implicitly checked as "valid units".  Any characters in a unit will be allowed.
+            if not self._placeholders_allowed_in_strings:
+                for i, character in enumerate(formatted_tag_unit_value):
+                    if character == "#":
+                        validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                              tag=original_tag,
+                                                                              index_in_tag=len(original_tag.org_base_tag) + 1 + i,
+                                                                              index_in_tag_end=len(original_tag.org_base_tag) + 1 + i + 1,
+                                                                              actual_error=ValidationErrors.HED_VALUE_INVALID)
 
         return validation_issues
 

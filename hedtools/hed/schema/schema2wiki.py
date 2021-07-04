@@ -31,6 +31,7 @@ class HedSchema2Wiki:
         self._flush_current_tag()
         self._output_units(hed_schema)
         self._output_unit_modifiers(hed_schema)
+        self._output_value_classes(hed_schema)
         self._output_attributes(hed_schema)
         self._output_properties(hed_schema)
         self._output_footer(hed_schema)
@@ -100,7 +101,6 @@ class HedSchema2Wiki:
     def _output_unit_modifiers(self, hed_schema):
         if not hed_schema.has_unit_modifiers:
             return
-
         self.current_tag_string += wiki_constants.UNIT_MODIFIER_STRING
         self._flush_current_tag()
         for modifier_name in hed_schema.dictionaries[HedKey.UnitModifiers]:
@@ -109,11 +109,22 @@ class HedSchema2Wiki:
                 hed_schema, modifier_name, HedKey.UnitModifiers)
             self._flush_current_tag()
 
+    def _output_value_classes(self, hed_schema):
+        if not hed_schema.has_value_classes:
+            return
+        self._add_blank_line()
+        self.current_tag_string += wiki_constants.VALUE_CLASS_STRING
+        self._flush_current_tag()
+        for value_name in hed_schema.dictionaries[HedKey.ValueClasses]:
+            self.current_tag_string += f"* {value_name}"
+            self.current_tag_extra += self._format_props_and_desc(
+                hed_schema, value_name, HedKey.ValueClasses)
+            self._flush_current_tag()
+
     def _output_attributes(self, hed_schema):
         self._add_blank_line()
         self.current_tag_string += wiki_constants.ATTRIBUTE_DEFINITION_STRING
         self._flush_current_tag()
-        self._add_blank_line()
         for attribute_name in hed_schema.dictionaries[HedKey.Attributes]:
             self.current_tag_string += f"* {attribute_name}"
             self.current_tag_extra += self._format_props_and_desc(hed_schema, attribute_name, HedKey.Attributes)
@@ -123,7 +134,6 @@ class HedSchema2Wiki:
         self._add_blank_line()
         self.current_tag_string += wiki_constants.ATTRIBUTE_PROPERTY_STRING
         self._flush_current_tag()
-        self._add_blank_line()
         for prop_name in hed_schema.dictionaries[HedKey.Properties]:
             self.current_tag_string += f"* {prop_name}"
             self.current_tag_extra += self._format_props_and_desc(hed_schema, prop_name, HedKey.Properties)
