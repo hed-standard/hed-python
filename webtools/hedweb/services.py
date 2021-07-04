@@ -7,8 +7,9 @@ from hed import schema as hedschema
 from hedweb.constants import common
 from hedweb.dictionary import dictionary_process
 from hedweb.events import events_process
+from hedweb.spreadsheet import spreadsheet_process
 from hedweb.strings import string_process
-from hedweb.utils.io_utils import handle_error
+from hedweb.utils.io_utils import get_prefix_dict, handle_error
 
 app_config = current_app.config
 
@@ -35,25 +36,31 @@ def get_input_from_service_request(request):
                  common.JSON_DICTIONARY: None,
                  common.EVENTS: None,
                  common.SPREADSHEET: None,
+                 common.HAS_COLUMN_NAMES: service_request.get(common.HAS_COLUMN_NAMES, None),
                  common.STRING_LIST: service_request.get(common.STRING_LIST, None),
                  common.CHECK_FOR_WARNINGS: service_request.get(common.CHECK_FOR_WARNINGS, True),
                  common.DEFS_EXPAND: service_request.get(common.DEFS_EXPAND, True)}
-    if common.JSON_STRING in service_request:
+    if common.JSON_STRING in service_request and service_request[common.JSON_STRING]:
         arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=service_request[common.JSON_STRING],
                                                                   display_name='JSON_Dictionary')
-    if common.EVENTS_STRING in service_request:
-        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=service_request[common.JSON_STRING],
-                                                                  display_name='JSON_Dictionary')
+    if common.EVENTS_STRING in service_request and service_request[common.EVENTS_STRING]:
         arguments[common.EVENTS] = models.EventsInput(csv_string=service_request[common.EVENTS_STRING],
                                                       json_def_files=arguments.get(common.JSON_DICTIONARY, None),
                                                       display_name='Events')
-    if common.SCHEMA_STRING in service_request:
+    if common.SPREADSHEET_STRING in service_request and service_request[common.SCHEMA_STRING]:
+        tag_columns, prefix_dict = get_prefix_dict(service_request)
+        arguments[common.SPREADSHEET] = models.HedInput(tag_columns=tag_columns,
+                                                        has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
+                                                        column_prefix_dictionary=prefix_dict,
+                                                        csv_string=service_request[common.SCHEMA_STRING],
+                                                        display_name='spreadsheet')
+    if common.SCHEMA_STRING in service_request and service_request[common.SCHEMA_STRING]:
         arguments[common.SCHEMA] = hedschema.from_string(service_request[common.SCHEMA_STRING])
-    elif common.SCHEMA_URL in service_request:
+    elif common.SCHEMA_URL in service_request and service_request[common.SCHEMA_URL]:
         schema_url = service_request[common.SCHEMA_URL]
         arguments[common.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
-    elif common.SCHEMA_VERSION in service_request:
-        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+    elif common.SCHEMA_VERSION in service_request and service_request[common.SCHEMA_VERSION]:
+        hed_file_path = hedschema.get_path_from_hed_version(service_request[common.SCHEMA_VERSION])
         arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=hed_file_path)
     return arguments
 
@@ -97,8 +104,8 @@ def services_process(arguments):
             arguments['command'] = common.COMMAND_VALIDATE
             response["results"] = events_process(arguments)
         elif service == "spreadsheet_validate":
-            response["error_type"] = 'HEDServiceNotYetImplemented'
-            response["error_msg"] = f"{service} not yet implemented"
+            arguments['command'] = common.COMMAND_VALIDATE
+            response["results"] = spreadsheet_process(arguments)
         elif service == "string_to_long":
             arguments['command'] = common.COMMAND_TO_LONG
             response["results"] = string_process(arguments)

@@ -130,8 +130,8 @@ class Test(unittest.TestCase):
             self.assertEqual(200, response.status_code, 'Validation of a valid dictionary has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
-                             "The valid dictionary should validate successfully")
-            self.assertFalse(response.data, "The response for validated dictionary should be empty")
+                             "The valid spreadsheet should validate successfully")
+            self.assertFalse(response.data, "The response for validated spreadsheet should be empty")
             spreadsheet_buffer.close()
 
     def test_spreadsheet_results_validate_invalid(self):

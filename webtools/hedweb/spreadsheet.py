@@ -53,7 +53,7 @@ def get_input_from_spreadsheet_form(request):
     uploaded_file_name, original_file_name = \
         get_uploaded_file_path_from_form(request, common.SPREADSHEET_FILE, file_constants.SPREADSHEET_FILE_EXTENSIONS)
     tag_columns, prefix_dict = get_prefix_dict(request.form)
-    spreadsheet = models.HedInput(uploaded_file_name,
+    spreadsheet = models.HedInput(filename=uploaded_file_name,
                                   worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
                                   tag_columns=tag_columns,
                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
@@ -114,9 +114,29 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    return {common.COMMAND: common.COMMAND_TO_LONG, 'data': '',
-            common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
-            'msg': 'This convert command has not yet been implemented for spreadsheets'}
+    results = spreadsheet_validate(hed_schema, spreadsheet)
+    if results['data']:
+        return results
+
+    display_name = spreadsheet.get_display_name()
+
+    if command == common.COMMAND_TO_LONG:
+        suffix = '_to_long'
+        issues = spreadsheet.convert_to_long(hed_schema)
+    else:
+        suffix = '_to_short'
+        issues = spreadsheet.convert_to_short(hed_schema)
+    if issues:
+        issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} had conversion errors")
+        file_name = generate_filename(display_name, suffix='_conversion_errors', extension='.txt')
+
+        return {common.COMMAND: common.command, 'data': issue_str, "output_display_name": file_name,
+                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+                'msg': f"Spreadsheet {display_name} had conversion errors"}
+    else:
+        return {common.COMMAND: common.command, 'data': '',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+                'msg': f'Spreadsheet {display_name} had no conversion errors'}
 
 
 def spreadsheet_validate(hed_schema, spreadsheet):

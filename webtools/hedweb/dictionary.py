@@ -103,12 +103,11 @@ def dictionary_convert(hed_schema, json_dictionary, command=common.COMMAND_TO_LO
         for hed_string, position in column_def.hed_string_iter(include_position=True):
             hed_string_obj = models.HedString(hed_string)
             if command == common.COMMAND_TO_LONG:
-                errors = hed_string_obj.convert_to_long(hed_schema)
+                converted_string, errors = hed_string_obj.convert_to_long(hed_schema)
             else:
-                errors = hed_string_obj.convert_to_short(hed_schema)
-                column_def.set_hed_string(hed_string_obj, position)
+                converted_string, errors = hed_string_obj.convert_to_short(hed_schema)
             issues = issues + errors
-            column_def.set_hed_string(hed_string_obj, position)
+            column_def.set_hed_string(converted_string, position)
 
     # issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
     display_name = json_dictionary.display_name

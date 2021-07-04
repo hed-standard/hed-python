@@ -145,23 +145,6 @@ def get_prefix_dict(form_dict):
     return tag_columns, prefix_dict
 
 
-def get_hed_schema(arguments):
-    if common.SCHEMA_STRING in arguments:
-        schema_format = arguments.get(common.SCHEMA_FORMAT, ".xml")
-        hed_schema = hedschema.from_string(schema_string=arguments[common.SCHEMA_STRING], file_type=schema_format)
-    elif common.SCHEMA_PATH in arguments:
-        hed_schema = hedschema.load_schema(hed_file_path=arguments[common.SCHEMA_PATH])
-    elif common.SCHEMA_URL in arguments:
-        # hed_file_path = file_util.url_to_file(arguments[common.SCHEMA_URL])
-        hed_schema = hedschema.load_schema(hed_url_path=arguments[common.SCHEMA_URL])
-    elif common.SCHEMA_VERSION in arguments:
-        hed_file_path = hedschema.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
-        hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
-    else:
-        raise HedFileError('NoHEDSchema', 'No valid HED schema was provided', '')
-    return hed_schema
-
-
 def handle_error(ex, hed_info=None, title=None, return_as_str=True):
     """Handles an error by logging and returning a dictionary or simple string
 
