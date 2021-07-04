@@ -196,7 +196,8 @@ class HedSchema:
         return [key_name for key_name in self.dictionaries[HedKey.Attributes]
                 if key_name not in self.dictionaries[HedKey.UnitClassProperty]
                 and key_name not in self.dictionaries[HedKey.UnitProperty]
-                and key_name not in self.dictionaries[HedKey.UnitModifierProperty]]
+                and key_name not in self.dictionaries[HedKey.UnitModifierProperty]
+                and key_name not in self.dictionaries[HedKey.ValueClassProperty]]
 
     def get_all_tag_attributes(self, tag_name, key_class=HedKey.AllTags, keys=None):
         """
@@ -313,6 +314,10 @@ class HedSchema:
         return HedKey.SIUnitModifier in self.dictionaries
 
     @property
+    def has_value_classes(self):
+        return bool(self.dictionaries[HedKey.ValueClasses])
+
+    @property
     def short_tag_mapping(self):
         """
         This returns the short->long tag dictionary.
@@ -376,7 +381,8 @@ class HedSchema:
 
     def __eq__(self, other):
         if self.dictionaries != other.dictionaries:
-            # Comment the following back in for easy debugging of schema that should be equal.
+            # print("Hed Schema not equal:")
+            # # Comment the following back in for easy debugging of schema that should be equal.
             # dict_keys = set(list(self.dictionaries.keys()) + list(other.dictionaries.keys()))
             # for dict_key in dict_keys:
             #     if dict_key not in self.dictionaries:
@@ -422,6 +428,7 @@ class HedSchema:
         dictionaries[HedKey.UnitClasses] = {}
         dictionaries[HedKey.Units] = {}
         dictionaries[HedKey.UnitModifiers] = {}
+        dictionaries[HedKey.ValueClasses] = {}
         dictionaries[HedKey.Attributes] = {}
         dictionaries[HedKey.Properties] = {}
 
@@ -621,16 +628,21 @@ class HedSchema:
         attributes: [str] or {str:}
             A list of all the attributes for this section.  May return a dict where the keys are the attribute names.
         """
-        attribute_dict = {
-            HedKey.Properties: [],
-            HedKey.Attributes: self.dictionaries[HedKey.Properties],
-            HedKey.AllTags: self.get_tag_attribute_names(),
-            HedKey.UnitClasses: self.dictionaries[HedKey.UnitClassProperty],
-            HedKey.Units: self.dictionaries[HedKey.UnitProperty],
-            HedKey.UnitModifiers: self.dictionaries[HedKey.UnitModifierProperty]
+        if key_class == HedKey.AllTags:
+            return self.get_tag_attribute_names()
+        attrib_classes = {
+            HedKey.Properties: None,
+            HedKey.Attributes: HedKey.Properties,
+            HedKey.UnitClasses: HedKey.UnitClassProperty,
+            HedKey.Units: HedKey.UnitProperty,
+            HedKey.UnitModifiers: HedKey.UnitModifierProperty,
+            HedKey.ValueClasses: HedKey.ValueClassProperty
         }
+        attrib_class = attrib_classes.get(key_class, None)
+        if attrib_class is None:
+            return []
 
-        return attribute_dict[key_class]
+        return self.dictionaries[attrib_class]
 
     # Semi private functions for adding new tags and classes(used by loaders)
     def _add_tag_to_dict(self, long_tag_name, key_class=HedKey.AllTags, value=None):
@@ -680,10 +692,16 @@ class HedSchema:
         self.dictionaries[HedKey.Units][unit_class_unit] = unit_class_unit
 
     def _add_description_to_dict(self, tag_name, desc, key_class=HedKey.AllTags):
+        if key_class == HedKey.AllTags:
+            tag_name = tag_name.lower()
+        desc_key = f"{key_class}_{tag_name}"
         if desc:
-            if key_class == HedKey.AllTags:
-                tag_name = tag_name.lower()
-            self.dictionaries[HedKey.Descriptions][f"{key_class}_{tag_name}"] = desc
+            self.dictionaries[HedKey.Descriptions][desc_key] = desc
+        else:
+            try:
+                del self.dictionaries[HedKey.Descriptions][desc_key]
+            except KeyError:
+                pass
 
     def _add_attribute_name_to_dict(self, attribute_name):
         if attribute_name in self.dictionaries[HedKey.Attributes]:
@@ -712,6 +730,16 @@ class HedSchema:
             If True(default), will only add attributes if there is currently none.
             If False, will add any missing attributes.
         """
+        if HedKey.ValueClassProperty not in self.dictionaries:
+            self._add_single_default_property(HedKey.ValueClassProperty)
+
+        # !BFK! for handling old files.  If allowed character is a unit class property, ignore it entirely.
+        if HedKey.AllowedCharacter in self.dictionaries[HedKey.UnitClassProperty]:
+            del self.dictionaries[HedKey.AllowedCharacter]
+            del self.dictionaries[HedKey.UnitClassProperty][HedKey.AllowedCharacter]
+            del self.dictionaries[HedKey.Attributes][HedKey.AllowedCharacter]
+            self._add_description_to_dict(HedKey.AllowedCharacter, None, key_class=HedKey.Attributes)
+
         if only_add_if_none_present and self.dictionaries[HedKey.Attributes]:
             return
 
@@ -729,6 +757,11 @@ class HedSchema:
         for attribute_property_name in attribute_props:
             self._add_attribute_to_dict(attribute_name, attribute_property_name, True, HedKey.Attributes)
 
+    def _add_single_default_property(self, prop_name):
+        from hed.schema import hed_2g_attributes
+        prop_desc = hed_2g_attributes.properties[prop_name]
+        self._add_property_name_to_dict(prop_name, prop_desc)
+
     def add_default_properties(self, only_add_if_none_present=True):
         """
             This adds the default properties for a hed3 schema.
@@ -743,8 +776,8 @@ class HedSchema:
             return
 
         from hed.schema import hed_2g_attributes
-        for prop_name, prop_desc in hed_2g_attributes.properties.items():
-            self._add_property_name_to_dict(prop_name, prop_desc)
+        for prop_name in hed_2g_attributes.properties:
+            self._add_single_default_property(prop_name)
 
     def update_old_hed_schema(self):
         if HedKey.UnitPrefix not in self.dictionaries:

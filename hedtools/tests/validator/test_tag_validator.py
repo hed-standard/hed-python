@@ -120,7 +120,7 @@ class TestValidatorBase(TestHedBase):
 
 
 class TestHed3(TestValidatorBase):
-    schema_file = "../data/HED8.0.0-alpha.3.xml"
+    schema_file = "../data/HED8.0.0-alpha.3_add_currency.xml"
 
 
 class IndividualHedTagsShort(TestHed3):
@@ -253,7 +253,9 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredNumber': 'Color/Red/0.5',
             'notRequiredScientific': 'Color/Red/5e-1',
             'specialAllowedCharBadUnit': 'Creation-date/bad_date',
-            'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01'
+            'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01',
+            'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
+            'specialNotAllowedCharCurrency': 'Event/Currency-Test/@100'
             # Update tests - 8.0 currently has no clockTime nodes.
             # 'properTime': 'Item/2D shape/Clock face/08:30',
             # 'invalidTime': 'Item/2D shape/Clock face/54:54'
@@ -274,12 +276,15 @@ class IndividualHedTagsShort(TestHed3):
             'specialAllowedCharBadUnit': False,
             'specialAllowedCharUnit': True,
             'properTime': True,
-            'invalidTime': True
+            'invalidTime': True,
+            'specialAllowedCharCurrency': True,
+            'specialNotAllowedCharCurrency': False,
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
         legal_datetime_units = ['YYYY-MM-DDThh:mm:ss']
         legal_freq_units = ['Hz', 'hertz']
+        legal_currency_units = ['dollar', "$", "point"]
 
         expected_issues = {
             'correctUnit': [],
@@ -301,10 +306,14 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredScientific': [],
             'specialAllowedCharBadUnit':  self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
                                                                            tag=0, unit_class_units=legal_datetime_units),
-            'specialAllowedCharUnit': []
+            'specialAllowedCharUnit': [],
             # 'properTime': [],
             # 'invalidTime': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,  tag=0,
             #                                 unit_class_units=legal_clock_time_units)
+            'specialAllowedCharCurrency': [],
+            'specialNotAllowedCharCurrency': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
+                                                                               tag=0,
+                                                                               unit_class_units=legal_currency_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
