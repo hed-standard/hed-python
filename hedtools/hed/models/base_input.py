@@ -60,7 +60,7 @@ class BaseInput:
             csv_filename_or_data = filename
             if csv_string:
                 csv_filename_or_data = io.StringIO(csv_string)
-            self._dataframe = pandas.read_csv(csv_filename_or_data, '\t', header=pandas_header)
+            self._dataframe = pandas.read_csv(csv_filename_or_data, delimiter='\t', header=pandas_header)
         elif self.is_spreadsheet_file():
             worksheet_to_load = self._worksheet_name
             if worksheet_to_load is None:
