@@ -22,7 +22,10 @@ class HedSchemaXMLParser:
         self._schema.header_attributes = self._get_header_attributes()
 
         self._populate_property_dictionaries()
+        self._schema.add_default_properties()
         self._populate_attribute_dictionaries()
+        self._schema.add_hed2_attributes()
+        self._populate_value_class_dictionaries()
 
         self._schema.prologue = self._get_prologue()
         self._schema.epilogue = self._get_epilogue()
@@ -101,7 +104,6 @@ class HedSchemaXMLParser:
         section_name = xml_constants.get_section_name(HedKey.Properties)
         properties_section = self._get_elements_by_name(section_name)
         if not properties_section:
-            self._schema.add_default_properties()
             return
         properties_section = properties_section[0]
 
@@ -126,7 +128,6 @@ class HedSchemaXMLParser:
         section_name = xml_constants.get_section_name(HedKey.Attributes)
         attribute_section = self._get_elements_by_name(section_name)
         if not attribute_section:
-            self._schema.add_hed2_attributes()
             self._legacy_style_xml = True
             return
         attribute_section = attribute_section[0]
@@ -137,6 +138,19 @@ class HedSchemaXMLParser:
             attribute_name = self._get_element_tag_value(element)
             self._schema._add_attribute_name_to_dict(attribute_name)
             self._parse_node(element, HedKey.Attributes)
+
+    def _populate_value_class_dictionaries(self):
+        section_name = xml_constants.get_section_name(HedKey.ValueClasses)
+        value_class_section = self._get_elements_by_name(section_name)
+        if not value_class_section:
+            return
+        value_class_section = value_class_section[0]
+        def_element_name = xml_constants.get_element_name(HedKey.ValueClasses)
+        attribute_elements = self._get_elements_by_name(def_element_name, value_class_section)
+        for element in attribute_elements:
+            attribute_name = self._get_element_tag_value(element)
+            self._schema._add_tag_to_dict(attribute_name, key_class=HedKey.ValueClasses)
+            self._parse_node(element, HedKey.ValueClasses)
 
     def _populate_tag_dictionaries(self):
         """Populates a dictionary of dictionaries associated with tags and their attributes.

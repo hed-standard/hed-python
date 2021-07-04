@@ -27,9 +27,10 @@ class HedSection:
     EndSchema = 5
     UnitsClasses = 6
     UnitModifiers = 7
-    Attributes = 8
-    Properties = 9
-    EndHed = 10
+    ValueClasses = 8
+    Attributes = 9
+    Properties = 10
+    EndHed = 11
 
 
 SectionStarts = {
@@ -37,6 +38,7 @@ SectionStarts = {
     HedSection.EndSchema: wiki_constants.END_SCHEMA_STRING,
     HedSection.UnitsClasses: wiki_constants.UNIT_CLASS_STRING,
     HedSection.UnitModifiers: wiki_constants.UNIT_MODIFIER_STRING,
+    HedSection.ValueClasses: wiki_constants.VALUE_CLASS_STRING,
     HedSection.Attributes: wiki_constants.ATTRIBUTE_DEFINITION_STRING,
     HedSection.Properties: wiki_constants.ATTRIBUTE_PROPERTY_STRING,
     HedSection.EndHed: wiki_constants.END_HED_STRING
@@ -50,6 +52,7 @@ SectionNames = {
     HedSection.EndSchema: "EndSchema",
     HedSection.UnitsClasses: "Unit Classes",
     HedSection.UnitModifiers: "Unit Modifiers",
+    HedSection.ValueClasses: "Value Classes",
     HedSection.Attributes: "Attributes",
     HedSection.Properties: "Properties",
     HedSection.EndHed: "EndHed"
@@ -176,6 +179,7 @@ class HedSchemaWikiParser:
             HedSection.Schema: self._read_schema,
             HedSection.UnitsClasses: self._read_unit_classes,
             HedSection.UnitModifiers: self._read_unit_modifiers,
+            HedSection.ValueClasses: self._read_value_classes,
         }
 
         self._run_parse_pass(parsers_pass1, wiki_lines)
@@ -342,6 +346,20 @@ class HedSchemaWikiParser:
                 return
 
             self._add_single_line(line, HedKey.UnitModifiers)
+
+    def _read_value_classes(self, file_iter):
+        """Adds the unit modifiers section
+
+                Parameters
+                ----------
+                file_iter: iter
+                    An iterator from self._get_line_iter.
+                """
+        for line in file_iter:
+            if line is False:
+                return
+
+            self._add_single_line(line, HedKey.ValueClasses)
 
     def _read_properties(self, file_iter):
         for line in file_iter:

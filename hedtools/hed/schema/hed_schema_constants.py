@@ -13,6 +13,8 @@ class HedKey:
     Units = 'units'
     # Overarching category listing all unit modifiers.
     UnitModifiers = 'unitModifiers'
+    # Overarching category listing all value classes
+    ValueClasses = "valueClasses"
     # These are the allowed attributes list, gathered from the schema on load.
     Attributes = 'attributes'
     # These are the allowed attribute property list, gathered from the schema on load.
@@ -39,6 +41,7 @@ class HedKey:
     UnitClassProperty = 'unitClassProperty'
     UnitProperty = 'unitProperty'
     UnitModifierProperty = 'unitModifierProperty'
+    ValueClassProperty = 'valueClassProperty'
 
     # Attributes found in file, but not definitions
     UnknownAttributes = 'unknownAttributes'
