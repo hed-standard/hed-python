@@ -114,9 +114,29 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    return {common.COMMAND: common.COMMAND_TO_LONG, 'data': '',
-            common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
-            'msg': 'This convert command has not yet been implemented for spreadsheets'}
+    results = spreadsheet_validate(hed_schema, spreadsheet)
+    if results['data']:
+        return results
+
+    display_name = spreadsheet.get_display_name()
+
+    if command == common.COMMAND_TO_LONG:
+        suffix = '_to_long'
+        issues = spreadsheet.convert_to_long(hed_schema)
+    else:
+        suffix = '_to_short'
+        issues = spreadsheet.convert_to_short(hed_schema)
+    if issues:
+        issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} had conversion errors")
+        file_name = generate_filename(display_name, suffix='_conversion_errors', extension='.txt')
+
+        return {common.COMMAND: common.command, 'data': issue_str, "output_display_name": file_name,
+                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+                'msg': f"Spreadsheet {display_name} had conversion errors"}
+    else:
+        return {common.COMMAND: common.command, 'data': '',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+                'msg': f'Spreadsheet {display_name} had no conversion errors'}
 
 
 def spreadsheet_validate(hed_schema, spreadsheet):

@@ -101,7 +101,6 @@ def string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
             converted_string, issues = hed_string_obj.convert_to_short(hed_schema)
         if issues:
             conversion_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
-        x = str(hed_string_obj)
         strings.append(converted_string)
 
     if conversion_errors:
