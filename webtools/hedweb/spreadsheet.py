@@ -53,7 +53,7 @@ def get_input_from_spreadsheet_form(request):
     uploaded_file_name, original_file_name = \
         get_uploaded_file_path_from_form(request, common.SPREADSHEET_FILE, file_constants.SPREADSHEET_FILE_EXTENSIONS)
     tag_columns, prefix_dict = get_prefix_dict(request.form)
-    spreadsheet = models.HedInput(uploaded_file_name,
+    spreadsheet = models.HedInput(filename=uploaded_file_name,
                                   worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
                                   tag_columns=tag_columns,
                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),

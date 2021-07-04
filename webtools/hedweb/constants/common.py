@@ -73,7 +73,7 @@ SPREADSHEET_DISPLAY_NAME = 'spreadsheet_display_name'
 SPREADSHEET_FILE = 'spreadsheet_file'
 SPREADSHEET_FLASH = 'spreadsheet_flash'
 SPREADSHEET_PATH = 'spreadsheet_path'
-SPREADSHEET_STRING = ''
+SPREADSHEET_STRING = 'spreadsheet_string'
 SPREADSHEET_SUBMIT_FLASH = 'spreadsheet_submit_flash'
 
 STRING_INPUT = 'string_input'

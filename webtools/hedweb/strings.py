@@ -96,12 +96,13 @@ def string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
     for pos, string in enumerate(string_list, start=1):
         hed_string_obj = models.HedString(string)
         if command == common.COMMAND_TO_LONG:
-            issues = hed_string_obj.convert_to_long(hed_schema)
+            converted_string, issues = hed_string_obj.convert_to_long(hed_schema)
         else:
-            issues = hed_string_obj.convert_to_short(hed_schema)
+            converted_string, issues = hed_string_obj.convert_to_short(hed_schema)
         if issues:
             conversion_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
-        strings.append(str(hed_string_obj))
+        x = str(hed_string_obj)
+        strings.append(converted_string)
 
     if conversion_errors:
         return {common.COMMAND: command, 'data': conversion_errors, 'additional_info': string_list,

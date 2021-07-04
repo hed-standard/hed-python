@@ -30,7 +30,7 @@ print(hed.get_printable_issue_string(errors))
 for column_def in json_file:
     for hed_string, position in column_def.hed_string_iter(include_position=True):
         hed_string_obj = HedString(hed_string)
-        errors = hed_string_obj.convert_to_short(hed_schema)
+        errors = hed_string_obj.convert_to_long(hed_schema)
         column_def.set_hed_string(hed_string_obj, position)
         print(f"'{hed_string_obj.get_original_hed_string()}' \nconverts to\n '{str(hed_string_obj)}'")
 

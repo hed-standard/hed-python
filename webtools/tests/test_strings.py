@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         else:
             self.fail('string_process should have thrown a HedFileError exception string_list is empty')
 
-    def test_string_convert_to_short(self):
+    def test_string_convert_to_short_invalid(self):
         from hedweb.strings import string_convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
@@ -52,13 +52,20 @@ class Test(unittest.TestCase):
             results = string_convert(hed_schema, string_list)
             self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
+    def test_string_convert_to_short_valid(self):
+        from hedweb.strings import string_convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-
+        string_list = ['Red, Blue']
         with self.app.app_context():
             results = string_convert(hed_schema, string_list)
             self.assertEqual('success', results['msg_category'],
                              "hedstring_convert should return success if converted")
+            # schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
+            #
+            # hed_schema = load_schema(hed_file_path=schema_path)
+            # hed_strings = ['Red']
+            # x = string_convert(hed_schema, hed_strings, command=common.COMMAND_TO_LONG)
 
     def test_string_convert_to_long(self):
         from hedweb.strings import string_convert

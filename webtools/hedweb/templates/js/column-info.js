@@ -94,7 +94,7 @@ function showColumnNames(columnNames) {
 function showColumnPrefixes(columnNames, hasColumnNames=true) {
     $('#column_prefixes').show();
     let columnPrefixTable = $('#column_prefix_table');
-    let columnHeader = '<table><tr><th>Has tags</th><th>Column names</th><th>Tag prefix to use</th></tr>'
+    let columnHeader = '<table><tr><th>Has tags</th><th>Column names</th><th>Tag prefix to use (prefixes end in /)</th></tr>'
     let numberOfColumnNames = columnNames.length;
     columnPrefixTable.empty();
     let contents = columnHeader;
