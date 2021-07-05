@@ -25,6 +25,10 @@ class TagValidator:
     CLOCK_TIME_UNIT_CLASS = 'clockTime'
     DATE_TIME_UNIT_CLASS = 'dateTime'
     TIME_UNIT_CLASS = 'time'
+
+    DATE_TIME_VALUE_CLASS = 'dateTime'
+    NUMERIC_VALUE_CLASS = "numericClass"
+
     DEFAULT_ALLOWED_PLACEHOLDER_CHARS = ".+-^ _"
     TAG_ALLOWED_CHARS = "-_/"
 
@@ -63,6 +67,11 @@ class TagValidator:
             self.DATE_TIME_UNIT_CLASS: self._is_date_time,
             self.CLOCK_TIME_UNIT_CLASS: self._is_clock_face_time,
             self.TIME_UNIT_CLASS: self._is_clock_face_time,
+        }
+
+        self.VALUE_CLASS_TYPE_DICT = {
+            self.DATE_TIME_VALUE_CLASS: self._is_date_time,
+            self.NUMERIC_VALUE_CLASS: self._validate_numeric_value_class,
         }
 
     # ==========================================================================
@@ -109,6 +118,8 @@ class TagValidator:
                 validation_issues += self.check_tag_unit_class_units_are_valid(original_tag)
                 if self._check_for_warnings:
                     validation_issues += self.check_tag_unit_class_units_exist(original_tag)
+            elif self.is_value_class_tag(original_tag):
+                validation_issues += self.check_tag_value_class_valid(original_tag)
             elif original_tag.extension_or_value_portion:
                 validation_issues += self.check_for_invalid_extension_chars(original_tag)
 
@@ -207,6 +218,21 @@ class TagValidator:
         """
         return self._value_tag_has_attribute(original_tag, HedKey.UnitClass)
 
+    def is_value_class_tag(self, original_tag):
+        """Checks to see if the tag has the 'valueClass' attribute.
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The tag that is used to do the validation.
+        Returns
+        -------
+        bool
+            True if the tag has the 'valueClass' attribute. False, if otherwise.
+
+        """
+        return self._value_tag_has_attribute(original_tag, HedKey.ValueClass)
+
     def get_tag_unit_classes(self, original_tag):
         """Gets the unit classes associated with a particular tag.
 
@@ -249,6 +275,9 @@ class TagValidator:
             if unit:
                 units += unit
         return units
+
+    def get_tag_value_class(self, original_tag):
+        return self._value_tag_has_attribute(original_tag, HedKey.ValueClass, return_value=True)
 
     def get_unit_class_default_unit(self, original_tag):
         """Gets the default unit class unit that is associated with the specified tag.
@@ -433,28 +462,24 @@ class TagValidator:
         validation_issues = []
         if self.is_unit_class_tag(original_tag):
             validated_unit = None
-            found_unit = None
             tag_unit_classes = self.get_tag_unit_classes(original_tag)
             original_tag_unit_value = original_tag.extension_or_value_portion
             formatted_tag_unit_value = original_tag_unit_value.lower()
 
             # Check for special known types with extra validation, like clock face or dates.
             for unit_class_type in tag_unit_classes:
-                valid_func = self.UNIT_CLASS_TYPE_DICT.get(unit_class_type)
-                if valid_func:
-                    found_unit = unit_class_type
-                    if valid_func(formatted_tag_unit_value):
-                        validated_unit = unit_class_type
-                        break
-
+                if not self._hed_schema.has_value_classes:
+                    valid_func = self.UNIT_CLASS_TYPE_DICT.get(unit_class_type)
+                    if valid_func:
+                        if valid_func(formatted_tag_unit_value):
+                            validated_unit = unit_class_type
+                            break
                 unit_class_units = self._hed_schema_dictionaries[HedKey.UnitClasses].get(unit_class_type)
                 stripped_value = self._validate_units(original_tag_unit_value,
                                                       formatted_tag_unit_value,
                                                       unit_class_units)
-                if stripped_value != formatted_tag_unit_value:
-                    found_unit = unit_class_type
 
-                if re.search(self.DIGIT_OR_POUND_EXPRESSION, stripped_value):
+                if self._validate_value_class_portion(original_tag, stripped_value):
                     validated_unit = unit_class_type
                     break
 
@@ -464,18 +489,45 @@ class TagValidator:
                     validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_INVALID,
                                                                           original_tag,
                                                                           unit_class_units=tag_unit_class_units)
-
-            # Special characters are now implicitly checked as "valid units".  Any characters in a unit will be allowed.
-            if not self._placeholders_allowed_in_strings:
-                for i, character in enumerate(formatted_tag_unit_value):
-                    if character == "#":
-                        validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
-                                                                              tag=original_tag,
-                                                                              index_in_tag=len(original_tag.org_base_tag) + 1 + i,
-                                                                              index_in_tag_end=len(original_tag.org_base_tag) + 1 + i + 1,
-                                                                              actual_error=ValidationErrors.HED_VALUE_INVALID)
-
+            validation_issues += self._check_for_placeholder(original_tag)
         return validation_issues
+
+    def check_tag_value_class_valid(self, original_tag):
+        """Reports a validation error if the tag provided has has an invalid value portion
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The original tag that is used to report the error.
+        Returns
+        -------
+        error_list: []
+            A validation issues list. If no issues are found then an empty list is returned.
+        """
+        validation_issues = []
+        if not self._validate_value_class_portion(original_tag, original_tag.extension_or_value_portion):
+            validation_issues += self._error_handler.format_error(ValidationErrors.HED_VALUE_INVALID,
+                                                                  original_tag)
+
+        validation_issues += self._check_for_placeholder(original_tag)
+        return validation_issues
+
+    def _validate_value_class_portion(self, original_tag, portion_to_validate):
+        if not self._hed_schema.has_value_classes:
+            return self._validate_numeric_value_class(portion_to_validate)
+        if not self.is_value_class_tag(original_tag):
+            return False
+
+        value_class = self.get_tag_value_class(original_tag)
+
+        valid_func = self.VALUE_CLASS_TYPE_DICT.get(value_class)
+        if valid_func:
+            if valid_func(portion_to_validate):
+                return True
+        else:
+            return True
+
+        return False
 
     def check_tag_requires_child(self, original_tag):
         """Reports a validation error if the tag provided has the 'requireChild' attribute.
@@ -766,6 +818,24 @@ class TagValidator:
         except ValueError:
             return False
 
+    def _validate_numeric_value_class(self, numeric_string):
+        """Checks to see if the specified string is a valid ISO 8601 datetime string.
+
+        Parameters
+        ----------
+        numeric_string: str
+            A string that should be only a number, with no units at all.
+        Returns
+        -------
+        bool
+            True if the numeric string is valid. False, if otherwise.
+
+        """
+        if re.search(self.DIGIT_OR_POUND_EXPRESSION, numeric_string):
+            return True
+
+        return False
+    
     def _report_invalid_character_error(self, hed_string, index):
         """Reports a error that is related to an invalid character.
 
@@ -897,6 +967,32 @@ class TagValidator:
         if return_value:
             return value
         return bool(value)
+
+    def _check_for_placeholder(self, original_tag):
+        """
+            Checks for a placeholder character in the extension/value portion of a tag, unless they are allowed.
+
+        Parameters
+        ----------
+        original_tag : HedTag
+
+        Returns
+        -------
+        error_list: [{}]
+        """
+        validation_issues = []
+        if not self._placeholders_allowed_in_strings:
+            starting_index = len(original_tag.org_base_tag) + 1
+            for i, character in enumerate(original_tag.extension_or_value_portion):
+                if character == "#":
+                    validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                          tag=original_tag,
+                                                                          index_in_tag=starting_index + i,
+                                                                          index_in_tag_end=starting_index + i + 1,
+                                                                          actual_error=ValidationErrors.HED_VALUE_INVALID)
+
+        return validation_issues
+
 
     def _check_invalid_chars(self, check_string, allowed_chars, source_tag, starting_index=0, actual_error=None):
         validation_issues = []

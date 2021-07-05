@@ -36,6 +36,7 @@ class HedKey:
     Unique = 'unique'
     UnitClass = 'unitClass'
     UnitPrefix = 'unitPrefix'
+    ValueClass = "valueClass"
 
     BoolProperty = 'boolProperty'
     UnitClassProperty = 'unitClassProperty'
