@@ -100,6 +100,11 @@ def val_error_no_valid_tag(tag, problem_tag):
     return f"'{problem_tag}' in {tag} is not a valid base hed tag.", {}
 
 
+@hed_tag_error(ValidationErrors.HED_VALUE_INVALID)
+def val_error_no_value(tag):
+    return f"''{tag}' has an invalid value portion.", {}
+
+
 @hed_tag_error(ValidationErrors.HED_NODE_NAME_EMPTY, has_sub_tag=True)
 def val_error_extra_slashes_spaces(tag, problem_tag):
     return f"Extra slashes or spaces '{problem_tag}' in tag '{tag}'", {}
