@@ -651,7 +651,7 @@ HED version="8.0.0-beta.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 *** CogPo <nowiki>[The CogPO ID number of something.]</nowiki>
 **** <nowiki># {takesValue}</nowiki>
 *** Creation-date <nowiki>{requireChild}[The date on which data creation of this element began.]</nowiki>
-**** <nowiki># {takesValue, valueClass=datetime}</nowiki>
+**** <nowiki># {takesValue, valueClass=dateTime}</nowiki>
 *** Library-name <nowiki>[Official name of a HED library.]</nowiki>
 **** <nowiki># {takesValue, valueClass=nameClass}</nowiki>
 *** Pathname <nowiki>[The specification of a node (file or directory) in a hierarchical file system, usually specified by listing the nodes top-down.]</nowiki>
@@ -1191,6 +1191,8 @@ HED version="8.0.0-beta.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 * unitModifierProperty <nowiki>[Indicates that the schema attribute is meant to be applied to unit modifier classes.]</nowiki>
 * unitProperty <nowiki>[Indicates that the schema attribute is meant to be applied to units within a unit class.]</nowiki>
 * valueClassProperty <nowiki>[Indicates that the schema attribute is meant to be applied to value classes.]</nowiki>
-!# end hed
 
+'''Epilogue'''
 This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+
+!# end hed
