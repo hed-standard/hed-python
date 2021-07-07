@@ -1,126 +1,12 @@
 import unittest
 import os
 
-from hed.models.hed_string import HedString
-from hed.validator.event_validator import EventValidator
-from hed.errors import error_reporter
-from hed import schema
 from hed.errors.error_types import ValidationErrors, ErrorContext
-
-
-class TestHedBase(unittest.TestCase):
-    schema_file = None
-
-    @classmethod
-    def setUpClass(cls):
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_schema = schema.load_schema(hed_xml)
-        cls.error_handler = error_reporter.ErrorHandler()
-
-    def format_error_but_not_really(self, error_type, *args, **kwargs):
-        """
-            The parameters vary based on what type of error this is.
-
-            Note: If you want to pass a tag as a number to this function, you will need to pass tag as a keyword.
-
-        Parameters
-        ----------
-        error_type : str
-            The type of error for this.  Registered with @hed_error or @hed_tag_error.
-        args: args
-            The rest of the unnamed args
-        kwargs :
-            The other parameters to pass down to the error handling func.
-        Returns
-        -------
-        error: [{}]
-            A single error
-        """
-        _ = self.error_handler.format_error(error_type, *args, **kwargs)
-        # Save off params
-        params = [error_type, args, kwargs]
-        # return params
-        return [params]
-
-    def really_format_errors(self, error_handler, hed_string, params):
-        formatted_errors = []
-        for code, args, kwargs in params:
-            if 'tag' in kwargs and isinstance(kwargs['tag'], int):
-                tag_index = kwargs['tag']
-                if tag_index >= 1000:
-                    tag_index = tag_index - 1000
-                    source_list = hed_string.get_all_groups()
-                else:
-                    source_list = hed_string.get_all_tags()
-                if tag_index >= len(source_list):
-                    raise ValueError("Bad group or tax index in expected errors for unit tests")
-                kwargs['tag'] = source_list[tag_index]
-            formatted_errors += error_handler.format_error(code, *args, **kwargs)
-
-        return formatted_errors
-
-
-class TestValidatorBase(TestHedBase):
-    compute_forms = True
-    hed_schema = None
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.error_handler = error_reporter.ErrorHandler()
-        cls.syntactic_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                        run_semantic_validation=False, check_for_warnings=False)
-        cls.syntactic_tag_validator = cls.syntactic_hed_input_reader._tag_validator
-        cls.syntactic_warning_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                                run_semantic_validation=False, check_for_warnings=True)
-        cls.syntactic_warning_tag_validator = cls.syntactic_warning_hed_input_reader._tag_validator
-        cls.semantic_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                       run_semantic_validation=True, check_for_warnings=False)
-        cls.semantic_tag_validator = cls.semantic_hed_input_reader._tag_validator
-        cls.semantic_warning_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                               run_semantic_validation=True, check_for_warnings=True)
-        cls.semantic_warning_tag_validator = cls.semantic_warning_hed_input_reader._tag_validator
-
-    def validator_base(self, test_strings, expected_results, expected_issues, test_function, error_handler):
-        for test_key in test_strings:
-            hed_string_obj = HedString(test_strings[test_key])
-            error_handler.reset_error_context()
-            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
-            test_issues = []
-            if self.compute_forms:
-                test_issues += hed_string_obj.convert_to_canonical_forms(self.hed_schema, error_handler)
-            if not test_issues:
-                test_issues += test_function(hed_string_obj)
-            test_result = not test_issues
-            expected_params = expected_issues[test_key]
-            expected_result = expected_results[test_key]
-            expected_issue = self.really_format_errors(error_handler, hed_string=hed_string_obj,
-                                                       params=expected_params)
-
-            print(test_key)
-            print(str(expected_issue))
-            print(str(test_issues))
-            error_handler.pop_error_context()
-            self.assertEqual(test_result, expected_result, test_strings[test_key])
-            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
-
-    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        validator = self.syntactic_hed_input_reader
-        if check_for_warnings is True:
-            validator = self.syntactic_warning_hed_input_reader
-        self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator), validator._error_handler)
-
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        validator = self.semantic_hed_input_reader
-        if check_for_warnings is True:
-            validator = self.semantic_warning_hed_input_reader
-        self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator), validator._error_handler)
+from tests.validator.test_tag_validator import TestValidatorBase
 
 
 class TestHed3(TestValidatorBase):
-    schema_file = "../data/hed_pairs/HED8.0.0-beta.3.xml"
+    schema_file = "../data/HED8.0.0-alpha.3_add_currency.xml"
 
 
 class IndividualHedTagsShort(TestHed3):
@@ -171,7 +57,7 @@ class IndividualHedTagsShort(TestHed3):
             'proper': 'Event/Sensory-event',
             'camelCase': 'EvEnt/Something',
             'takesValue': 'Attribute/Temporal rate/20 Hz',
-            'numeric': 'Repetition-number/20',
+            'numeric': 'Repetition/20',
             'lowercase': 'Event/something'
         }
         expected_results = {
@@ -250,13 +136,12 @@ class IndividualHedTagsShort(TestHed3):
             'incorrectPluralUnit': 'Frequency/3 hertzs',
             'incorrectSymbolCapitalizedUnit': 'Frequency/3 hz',
             'incorrectSymbolCapitalizedUnitModifier': 'Frequency/3 KHz',
-            'notRequiredNumber': 'Accuracy/0.5',
-            'notRequiredScientific': 'Accuracy/5e-1',
+            'notRequiredNumber': 'Color/Red/0.5',
+            'notRequiredScientific': 'Color/Red/5e-1',
             'specialAllowedCharBadUnit': 'Creation-date/bad_date',
             'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01',
-            # todo: restore these when we have a currency node in the valid beta schema.
-            # 'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
-            # 'specialNotAllowedCharCurrency': 'Event/Currency-Test/@100'
+            'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
+            'specialNotAllowedCharCurrency': 'Event/Currency-Test/@100'
             # Update tests - 8.0 currently has no clockTime nodes.
             # 'properTime': 'Item/2D shape/Clock face/08:30',
             # 'invalidTime': 'Item/2D shape/Clock face/54:54'
@@ -278,8 +163,8 @@ class IndividualHedTagsShort(TestHed3):
             'specialAllowedCharUnit': True,
             'properTime': True,
             'invalidTime': True,
-            # 'specialAllowedCharCurrency': True,
-            # 'specialNotAllowedCharCurrency': False,
+            'specialAllowedCharCurrency': True,
+            'specialNotAllowedCharCurrency': False,
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
@@ -305,16 +190,16 @@ class IndividualHedTagsShort(TestHed3):
                 ValidationErrors.HED_UNITS_INVALID, tag=0, unit_class_units=legal_freq_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
-            'specialAllowedCharBadUnit':  self.format_error_but_not_really(ValidationErrors.HED_VALUE_INVALID,
-                                                                           tag=0),
+            'specialAllowedCharBadUnit':  self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
+                                                                           tag=0, unit_class_units=legal_datetime_units),
             'specialAllowedCharUnit': [],
             # 'properTime': [],
             # 'invalidTime': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,  tag=0,
             #                                 unit_class_units=legal_clock_time_units)
-            # 'specialAllowedCharCurrency': [],
-            # 'specialNotAllowedCharCurrency': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
-            #                                                                    tag=0,
-            #                                                                    unit_class_units=legal_currency_units),
+            'specialAllowedCharCurrency': [],
+            'specialNotAllowedCharCurrency': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
+                                                                               tag=0,
+                                                                               unit_class_units=legal_currency_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 

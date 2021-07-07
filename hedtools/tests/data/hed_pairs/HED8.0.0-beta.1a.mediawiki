@@ -1187,6 +1187,7 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 * unitModifierProperty <nowiki>[Indicates that the schema attribute is meant to be applied to unit modifier classes.]</nowiki>
 * unitProperty <nowiki>[Indicates that the schema attribute is meant to be applied to units within a unit class.]</nowiki>
 
-!# end hed
-
+'''Epilogue'''
 This is the new format for the mediawiki schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+
+!# end hed

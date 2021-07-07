@@ -30,10 +30,12 @@ class HedSection:
     ValueClasses = 8
     Attributes = 9
     Properties = 10
-    EndHed = 11
+    Epilogue = 11
+    EndHed = 12
 
 
 SectionStarts = {
+    HedSection.Prologue: wiki_constants.PROLOGUE_SECTION_ELEMENT,
     HedSection.Schema: wiki_constants.START_HED_STRING,
     HedSection.EndSchema: wiki_constants.END_SCHEMA_STRING,
     HedSection.UnitsClasses: wiki_constants.UNIT_CLASS_STRING,
@@ -41,6 +43,7 @@ SectionStarts = {
     HedSection.ValueClasses: wiki_constants.VALUE_CLASS_STRING,
     HedSection.Attributes: wiki_constants.ATTRIBUTE_DEFINITION_STRING,
     HedSection.Properties: wiki_constants.ATTRIBUTE_PROPERTY_STRING,
+    HedSection.Epilogue: wiki_constants.EPILOGUE_SECTION_ELEMENT,
     HedSection.EndHed: wiki_constants.END_HED_STRING
 }
 
@@ -142,7 +145,7 @@ class HedSchemaWikiParser:
                 raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
                                    f"Invalid section separator '{line.strip()}'", filename=self.filename)
 
-            if self._current_section == HedSection.Prologue or self._current_section == HedSection.EndHed:
+            if self._current_section == HedSection.Prologue or self._current_section == HedSection.Epilogue:
                 if line.strip():
                     # we want to preserve all formatting in the prologue and epilogue.
                     if line.endswith("\n"):
@@ -168,7 +171,7 @@ class HedSchemaWikiParser:
             HedSection.HeaderLine: self._read_header_line,
             HedSection.Prologue: self._read_prologue,
             HedSection.Properties: self._read_properties,
-            HedSection.EndHed: self._read_epilogue,
+            HedSection.Epilogue: self._read_epilogue,
         }
 
         parsers_pass2 = {
@@ -218,7 +221,6 @@ class HedSchemaWikiParser:
             An iterator from self._get_line_iter.
         """
         first_line = next(file_iter)
-
         # First line MUST be the HED line with full proper formatting.
         if first_line.startswith(wiki_constants.HEADER_LINE_STRING):
             hed_attributes = self._get_header_attributes(first_line[len(wiki_constants.HEADER_LINE_STRING):])
@@ -230,7 +232,13 @@ class HedSchemaWikiParser:
             raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING,
                                f"First line of file should be HED, instead found: {first_line}", filename=self.filename)
 
-        self._current_section = HedSection.Prologue
+        for line in file_iter:
+            if line is False:
+                return
+
+            raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID,
+                               f"There should be no other content in the between the HED line in the header and either the prologue or schema sections.", filename=self.filename)
+
 
     def _read_prologue(self, file_iter):
         """Adds the prologue
@@ -243,7 +251,6 @@ class HedSchemaWikiParser:
         prologue = ""
         for line in file_iter:
             if line is False:
-                self.prologue = prologue
                 self._schema.prologue = prologue
                 return
 
@@ -262,14 +269,13 @@ class HedSchemaWikiParser:
         epilogue = ""
         for line in file_iter:
             if line is False:
+                self._schema.epilogue = epilogue
                 break
 
             if epilogue:
                 epilogue += "\n"
             epilogue += line
 
-        self.epilogue = epilogue
-        self._schema.epilogue = epilogue
 
     def _read_schema(self, file_iter):
         """Adds the main schema section
