@@ -78,7 +78,7 @@ def string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
         The HED schema to be used in processing
     string_list: list
         A list of string to be processed
-   command: str
+    command: str
         Name of the command to execute if not COMMAND_TO_LONG
 
     Returns
@@ -138,7 +138,6 @@ def string_validate(hed_schema, string_list):
         if issues:
             validation_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
     if validation_errors:
-        print(common.COMMAND)
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': validation_errors,
                 common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': 'Strings had validation errors'}

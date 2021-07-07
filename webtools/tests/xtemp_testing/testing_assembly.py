@@ -31,5 +31,5 @@ if __name__ == '__main__':
     data = {'onset': onsets, 'HED': hed_tags}
 
     df = pd.DataFrame(data)
-    final_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
+    final_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_assembled.tsv')
     df.to_csv(final_filename, '\t', index=False, header=True)

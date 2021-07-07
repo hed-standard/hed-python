@@ -41,7 +41,24 @@ response1 = webwrite(services_url, sdata1, options);
 response1 = jsondecode(response1);
 output_report(response1, 'Example 1 output');
 
-% %% Example 2: Validate an incorrect events file. HED schema is URL.
+
+%% Example 2: Validate an incorrect spreadsheet file. HED schema is URL.
+sdata2 = get_input_template();
+sdata2.service = 'spreadsheet_validate';
+sdata2.schema_url =['https://raw.githubusercontent.com/hed-standard/' ...
+    'hed-specification/master/hedxml/HED7.2.0.xml'];
+sdata2.spreadsheet_string = spreadsheet_text;
+sdata2.Column_2_input = 'Event/Label/';
+sdata2.Column_2_check = 'on';
+sdata2.Column_4_input = 'Event/Description/';
+sdata2.Column_4_check = 'on';
+sdata2.Column_5_input = '';
+sdata2.Column_5_check = 'on';
+sdata2.has_column_names = true;
+response2 = webwrite(services_url, sdata2, options);
+response2 = jsondecode(response2);
+output_report(response2, 'Example 2 output');
+
 % sdata2 = get_input_template();
 % sdata2.service = 'events_validate';
 % sdata2.schema_url = ['https://raw.githubusercontent.com/hed-standard/' ...

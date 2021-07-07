@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
         self.assertFalse(os.path.isfile(temp_file), "Dummy has been deleted")
 
     def test_generate_text_response(self):
-        print("Stuff")
+        self.assertTrue(True, "Testing to be done")
 
     def test_get_hed_path_from_pull_down(self):
         mock_form = mock.Mock()
@@ -79,10 +79,10 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing get_optional_form_field")
 
     def test_handle_error(self):
-        print("stuff")
+        self.assertTrue(True, "Testing to be done")
 
     def test_handle_http_error(self):
-        print("stuff")
+        self.assertTrue(True, "Testing to be done")
 
     def test_save_file_to_upload_folder(self):
         self.assertTrue(1, "Testing save_file_to_upload_folder")
@@ -91,8 +91,8 @@ class Test(unittest.TestCase):
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/HED8.0.0-beta.1.xml')
         # with open(hed_file) as f:
-        #     upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
-        #     with self.app.app_context():
+        #    upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
+        #    with self.app.app_context():
         #         the_path = save_file_to_upload_folder(upload_file)
         #         self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 
@@ -118,11 +118,9 @@ class Test(unittest.TestCase):
         # self.assertTrue(os.path.isfile(temp_name), "File should exist after it is uploaded")
 
     def test_save_file_to_upload_folder_no_exception(self):
-        print("Stuff")
+        self.assertTrue(True, "Test to be done")
 
     def test_save_text_to_upload_folder(self):
-        # from flask import Flask
-        # app = Flask(__name__)
         text = 'save me now'
         filename = 'test_save.txt'
         actual_path = os.path.join(self.upload_directory, filename)

@@ -4,7 +4,7 @@ import tempfile
 
 import openpyxl
 from flask import current_app
-from hed import models, schema as hedschema
+from hed import models
 from hed.errors.exceptions import HedFileError
 from hed.util.file_util import delete_file_if_it_exists, get_file_extension
 from hedweb.constants import file_constants

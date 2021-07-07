@@ -46,7 +46,7 @@ def dictionary_results():
         download file
         A text file with the validation errors.
     """
-    input_arguments = {}
+
     try:
         input_arguments = dictionary.get_input_from_dictionary_form(request)
         a = dictionary.dictionary_process(input_arguments)
@@ -64,7 +64,7 @@ def events_results():
         downloadable file
         Contains the results of processing
     """
-    input_arguments = {}
+
     try:
         input_arguments = events.get_input_from_events_form(request)
         a = events.events_process(input_arguments)

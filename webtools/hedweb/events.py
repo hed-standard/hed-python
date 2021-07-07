@@ -28,15 +28,11 @@ def get_input_from_events_form(request):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    arguments = {
-        common.SCHEMA: get_hed_schema_from_pull_down(request),
-        common.EVENTS: None,
-        common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
-        common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
-        common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on')
-    }
+    arguments = {common.SCHEMA: get_hed_schema_from_pull_down(request), common.EVENTS: None,
+                 common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+                 common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
+                 common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on')}
 
-    arguments[common.SCHEMA] = get_hed_schema_from_pull_down(request)
     json_dictionary = None
     if common.JSON_FILE in request.files:
         f = request.files[common.JSON_FILE]
@@ -66,7 +62,7 @@ def events_process(arguments):
     hed_schema = arguments.get('schema', None)
     command = arguments.get(common.COMMAND, None)
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
-        raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
+        raise HedFileError('BadHedSchema', "Please provide a valid HedSchema for event processing", "")
     events = arguments.get(common.EVENTS, 'None')
     if not events or not isinstance(events, models.EventsInput):
         raise HedFileError('InvalidEventsFile', "An events file was given but could not be processed", "")

@@ -56,8 +56,8 @@ class Test(unittest.TestCase):
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/HED8.0.0-beta.1.xml')
         # with open(hed_file) as f:
-        #     upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
-        #     with self.app.app_context():
+        #    upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
+        #    with self.app.app_context():
         #         the_path = save_file_to_upload_folder(upload_file)
         #         self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 
@@ -66,15 +66,15 @@ class Test(unittest.TestCase):
     def test_generate_filename(self):
         from hedweb.utils.io_utils import generate_filename
         filename = generate_filename(None, prefix=None, suffix=None, extension=None)
-        self.assertEqual('', filename, "Returns empty when all arguments are none")
+        self.assertEqual('', filename, "Return empty when all arguments are none")
         filename = generate_filename(None, prefix=None, suffix=None, extension='.txt')
-        self.assertEqual('', filename, "Returns empty when base_name, prefix, and suffix are None, but extension is not")
+        self.assertEqual('', filename, "Return empty when base_name, prefix, and suffix are None, but extension is not")
         filename = generate_filename('c:/temp.json', prefix=None, suffix=None, extension='.txt')
         self.assertEqual('c_temp.txt', filename,
                          "Returns stripped base_name + extension when prefix, and suffix are None")
         filename = generate_filename('temp.json', prefix='prefix', suffix='suffix', extension='.txt')
         self.assertEqual('prefix_temp_suffix.txt', filename,
-                         "Returns stripped base_name + extension when prefix, and suffix are None")
+                         "Return stripped base_name + extension when prefix, and suffix are None")
         filename = generate_filename(None, prefix='prefix', suffix='suffix', extension='.txt')
         self.assertEqual('prefix_suffix.txt', filename,
                          "Returns correct string when no base_name")
@@ -115,7 +115,7 @@ class Test(unittest.TestCase):
     #     self.assertTrue(1, "Testing handle_http_error")+
 
     def test_handle_error(self):
-        print("stuff")
+        self.assertTrue(True, "Testing to be done")
 
     def test_save_file_to_upload_folder(self):
         self.assertTrue(1, "Testing save_file_to_upload_folder")
@@ -124,8 +124,8 @@ class Test(unittest.TestCase):
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/HED8.0.0-beta.1.xml')
         # with open(hed_file) as f:
-        #     upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
-        #     with self.app.app_context():
+        #    upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
+        #    with self.app.app_context():
         #         the_path = save_file_to_upload_folder(upload_file)
         #         self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 
@@ -151,11 +151,9 @@ class Test(unittest.TestCase):
         # self.assertTrue(os.path.isfile(temp_name), "File should exist after it is uploaded")
 
     def test_save_file_to_upload_folder_no_exception(self):
-        print("Stuff")
+        self.assertTrue(True, "Testing to be done")
 
     def test_save_text_to_upload_folder(self):
-        # from flask import Flask
-        # app = Flask(__name__)
         text = 'save me now'
         filename = 'test_save.txt'
         actual_path = os.path.join(self.upload_directory, filename)
