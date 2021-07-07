@@ -80,6 +80,9 @@ class BaseInput:
         # finally add the new file dict to the mapper.
         mapper.update_definition_mapper_with_file(self.file_def_dict)
 
+    def get_data_frame(self):
+        return self.get_data_frame
+
     def get_display_name(self):
         return self._display_name
 
