@@ -3,7 +3,7 @@ import io
 import pathlib
 import pandas as pd
 from urllib.parse import urlparse
-from flask import current_app, Response
+from flask import current_app, Response, send_file
 from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
@@ -171,16 +171,17 @@ def generate_download_file_response(download_file, display_name=None, header=Non
                              'Category': category, 'Message': msg})
 
 
-def generate_response_download_from_spreadsheet(spreadsheet, display_name='temp.tsv',
-                                                msg_category='success', msg=''):
+def generate_download_spreadsheet(spreadsheet, display_name='temp.tsv', msg_category='success', msg=''):
     df = spreadsheet.get_dataframe()
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer) as writer:
         df.to_excel(writer)
+    response = send_file(buffer, as_attachment=True)
+    response.headers = {'Content-Disposition': f"attachment filename={display_name}",
+                        'Category': msg_category, 'Message': msg}
+    response.mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    return response
 
-    return Response(buffer, mimetype='text/plain charset=utf-8',
-                    headers={'Content-Disposition': f"attachment filename={display_name}",
-                             'Category': msg_category, 'Message': msg})
 
 def generate_text_response(download_text, msg_category='success', msg=''):
     """Generates a download other response.
@@ -318,12 +319,11 @@ def package_results(results):
     msg_category = results.get('msg_category', 'success')
     display_name = results.get('output_display_name', '')
     if results['data']:
-
         return generate_response_download_file_from_text(results['data'], display_name=display_name,
                                                          msg_category=msg_category, msg=msg)
     elif results.get('spreadsheet', None):
         return generate_response_download_from_spreadsheet(results['spreadsheet'], display_name=display_name,
-                                                                msg_category=msg_category, msg=msg)
+                                                           msg_category=msg_category, msg=msg)
 
     else:
         return generate_text_response("", msg=msg, msg_category=msg_category)

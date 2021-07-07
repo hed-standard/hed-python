@@ -1,4 +1,5 @@
 import os
+import io
 import shutil
 from shutil import copyfile
 import unittest
@@ -6,7 +7,7 @@ from unittest import mock
 
 from flask import Response
 from werkzeug.datastructures import Headers
-
+from hedweb.constants import common
 from hedweb.app_factory import AppFactory
 
 
@@ -21,6 +22,7 @@ class Test(unittest.TestCase):
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
             app.config['UPLOAD_FOLDER'] = cls.upload_directory
+            app.config['WTF_CSRF_ENABLED'] = False
             cls.app = app
             cls.app.test = app.test_client()
 
@@ -29,7 +31,28 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_form_has_file(self):
-        self.assertTrue(1, "Testing form_has_file")
+        with self.app.app_context():
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_events_alpha.json')
+            with open(json_path, 'r') as sc:
+                x = sc.read()
+            json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+            input_data =  {common.SCHEMA_VERSION: '7.2.0', common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+                           common.JSON_FILE: (json_buffer, 'bids_events_alpha.json')}
+            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
+            headers_dict = dict(response.headers)
+            self.assertTrue(1, "Testing form_has_file")
+
+    def test_form_has_file(self):
+        with self.app.app_context():
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_events_alpha.json')
+            with open(json_path, 'r') as sc:
+                x = sc.read()
+            json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+            input_data =  {common.SCHEMA_VERSION: '7.2.0', common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+                           common.JSON_FILE: (json_buffer, 'bids_events_alpha.json')}
+            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
+            headers_dict = dict(response.headers)
+            self.assertTrue(1, "Testing form_has_file")
 
     def test_form_has_option(self):
         self.assertTrue(1, "Testing form_has_option")
@@ -70,6 +93,23 @@ class Test(unittest.TestCase):
 
     def test_generate_text_response(self):
         self.assertTrue(True, "Testing to be done")
+
+    def test_generate_download_spreadsheet(self):
+        with self.app.app_context():
+            from hed.models import HedInput
+            from hedweb.utils.web_utils import generate_download_spreadsheet
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            '../../data/ExcelMultipleSheets.xlsx')
+
+            spreadsheet = HedInput(filename=spreadsheet_path, worksheet_name='LKT 8Beta3',
+                                   tag_columns=[5], has_column_names=True,
+                                   column_prefix_dictionary={2:'Attribute/Informational/Label/',
+                                                             4:'Attribute/Informational/Description/'},
+                                   display_name='ExcelMultipleSheets.xlsx')
+            response = generate_download_spreadsheet(spreadsheet,
+                                                     display_name='ExcelMultipleSheets_download.xlsx',
+                                                     msg_category='success', msg='Successful download')
+            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response')
 
     def test_get_hed_path_from_pull_down(self):
         mock_form = mock.Mock()
