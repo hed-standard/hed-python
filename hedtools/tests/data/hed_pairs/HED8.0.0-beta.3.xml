@@ -3061,7 +3061,7 @@
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
-                        <value>datetime</value>
+                        <value>dateTime</value>
                      </attribute>
                   </node>
                </node>

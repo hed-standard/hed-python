@@ -1186,6 +1186,7 @@ HED version: 8.0.0-alpha.2
 * unitSymbol <nowiki>{boolProperty, unitProperty}[Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
 * unitClass <nowiki>[Specifies the type of a unit for a tag.]</nowiki>
 
-!# end hed 
-
+'''Epilogue'''
 This is the new format for the mediawiki schema
+
+!# end hed 
