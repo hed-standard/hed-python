@@ -28,6 +28,8 @@ class TestHedSchema(unittest.TestCase):
         for filename, error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename
 
+            print(filename)
+            print(f"Expected Error {error}")
             hed_schema = None
             try:
                 hed_schema = schema.load_schema(full_filename)
@@ -35,5 +37,6 @@ class TestHedSchema(unittest.TestCase):
                 self.assertFalse(True)
             except HedFileError as e:
                 formated_error = e.format_error_message()
+                print(f"Testing Error {e.error_type}")
                 self.assertEqual(e.error_type, error)
                 pass
