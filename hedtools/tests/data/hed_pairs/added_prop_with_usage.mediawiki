@@ -1189,6 +1189,7 @@ HED version:8.0.0-beta.1
 * unitProperty <nowiki>[Indicates that the schema attribute is meant to be applied to units within a unit class.]</nowiki>
 * testingNewProperty <nowiki>[New Test Property]</nowiki>
 
-!# end hed
-
+'''Epilogue'''
 This is the new format for the mediawiki schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+
+!# end hed

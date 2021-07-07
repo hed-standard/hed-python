@@ -1,5 +1,7 @@
 HED version="8.0.0-beta.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0-beta.1.xsd"
 
+'''Prologue'''
+
 !# start schema
 
 '''Event''' <nowiki>{suggestedTag=Task-property}[Something that happens at a given place and time. Elements of this subtree designate the general category in which an event falls.]</nowiki>
@@ -1187,6 +1189,8 @@ HED version="8.0.0-beta.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 * unitClassProperty <nowiki>[Indicates that the schema attribute is meant to be applied to unit classes.]</nowiki>
 * unitModifierProperty <nowiki>[Indicates that the schema attribute is meant to be applied to unit modifier classes.]</nowiki>
 * unitProperty <nowiki>[Indicates that the schema attribute is meant to be applied to units within a unit class.]</nowiki>
-!# end hed
 
+'''Epilogue'''
 This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+
+!# end hed

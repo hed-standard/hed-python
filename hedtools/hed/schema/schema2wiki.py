@@ -43,6 +43,8 @@ class HedSchema2Wiki:
         self.current_tag_string = f"{wiki_constants.HEADER_LINE_STRING} {hed_attrib_string}"
         self._flush_current_tag()
         self._add_blank_line()
+        self.current_tag_string = wiki_constants.PROLOGUE_SECTION_ELEMENT
+        self._flush_current_tag()
         self.current_tag_string += hed_schema.prologue
         self._flush_current_tag()
         self._add_blank_line()
@@ -50,11 +52,12 @@ class HedSchema2Wiki:
         self._flush_current_tag()
 
     def _output_footer(self, hed_schema):
-        self._add_blank_line()
-        self.current_tag_string = wiki_constants.END_HED_STRING
+        self.current_tag_string = wiki_constants.EPILOGUE_SECTION_ELEMENT
+        self._flush_current_tag()
+        self.current_tag_string += hed_schema.epilogue
         self._flush_current_tag()
         self._add_blank_line()
-        self.current_tag_string += hed_schema.epilogue
+        self.current_tag_string = wiki_constants.END_HED_STRING
         self._flush_current_tag()
 
     def _output_tags(self, hed_schema):
