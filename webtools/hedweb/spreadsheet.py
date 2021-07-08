@@ -1,4 +1,6 @@
+import os
 from flask import current_app
+from werkzeug.utils import secure_filename
 
 from hed import models
 from hed import schema as hedschema
@@ -120,24 +122,28 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
         return results
 
     display_name = spreadsheet.get_display_name()
+    display_ext = os.path.splitext(secure_filename(display_name))[1]
 
     if command == common.COMMAND_TO_LONG:
         suffix = '_to_long'
-        issues = spreadsheet.convert_to_long(hed_schema)
+        # issues = spreadsheet.convert_to_long(hed_schema)
     else:
         suffix = '_to_short'
-        issues = spreadsheet.convert_to_short(hed_schema)
-    if issues:
-        issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} had conversion errors")
-        file_name = generate_filename(display_name, suffix='_conversion_errors_' + suffix, extension='.txt')
+        # issues = spreadsheet.convert_to_short(hed_schema)
 
-        return {common.COMMAND: command, 'data': issue_str, "output_display_name": file_name,
-                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
-                'msg': f"Spreadsheet {display_name} had conversion errors"}
-    else:
-        return {common.COMMAND: command, 'data': '', common.SPREADSHEET: spreadsheet,
-                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
-                'msg': f'Spreadsheet {display_name} converted_successfully'}
+    spreadsheet.save(filename='myTemp.xlsx')
+    file_name = generate_filename(display_name, suffix=suffix, extension=display_ext)
+    # if issues:
+    #     issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} had conversion errors")
+    #     file_name = generate_filename(display_name, suffix='_conversion_errors_' + suffix, extension='.txt')
+    #
+    #     return {common.COMMAND: command, 'data': issue_str, "output_display_name": file_name,
+    #             common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+    #             'msg': f"Spreadsheet {display_name} had conversion errors"}
+    # else:
+    return {common.COMMAND: command, 'data': '', common.SPREADSHEET: spreadsheet, 'output_display_name': file_name,
+            common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+            'msg': f'Spreadsheet {display_name} converted_successfully'}
 
 
 def spreadsheet_validate(hed_schema, spreadsheet):

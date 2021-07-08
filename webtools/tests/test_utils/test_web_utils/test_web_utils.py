@@ -36,8 +36,8 @@ class Test(unittest.TestCase):
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            input_data =  {common.SCHEMA_VERSION: '7.2.0', common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                           common.JSON_FILE: (json_buffer, 'bids_events_alpha.json')}
+            input_data = {common.SCHEMA_VERSION: '7.2.0', common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+                          common.JSON_FILE: (json_buffer, 'bids_events_alpha.json')}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             headers_dict = dict(response.headers)
             self.assertTrue(1, "Testing form_has_file")
@@ -71,19 +71,19 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing form_has_url")
 
     def test_generate_download_file_response(self):
-        from hedweb.utils.web_utils import generate_download_file_response
+        from hedweb.utils.web_utils import generate_download_file
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/HED8.0.0-beta.1.xml')
         temp_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/temp.txt')
         copyfile(hed_file, temp_file)
         self.assertTrue(os.path.isfile(temp_file), "Dummy file exists")
-        download_response = generate_download_file_response(temp_file)
-        self.assertIsInstance(download_response, Response, "generate_download_file_response should generate Response")
+        download_response = generate_download_file(temp_file)
+        self.assertIsInstance(download_response, Response, "generate_download_file should generate Response")
         response_headers = download_response.headers
-        self.assertIsInstance(response_headers, Headers, "generate_download_file_response should generate Response")
+        self.assertIsInstance(response_headers, Headers, "generate_download_file should generate Response")
         header_content = response_headers.get_all('Content-Disposition')
         self.assertTrue(header_content[0].startswith("attachment filename="),
-                        "generate_download_file_response should have an attachment filename")
-        self.assertIsInstance(download_response, Response, "generate_download_file_response should generate Response")
+                        "generate_download_file should have an attachment filename")
+        self.assertIsInstance(download_response, Response, "generate_download_file should generate Response")
 
         # TODO: seem to have an issue with the deleting temporary files
         # self.assertFalse(temp_path.is_file(), "After download temporary download file should have been deleted")
@@ -94,8 +94,9 @@ class Test(unittest.TestCase):
     def test_generate_text_response(self):
         self.assertTrue(True, "Testing to be done")
 
-    def test_generate_download_spreadsheet(self):
-        with self.app.app_context():
+    def test_generate_download_spreadsheet_excel(self):
+        with self.app.test_request_context():
+
             from hed.models import HedInput
             from hedweb.utils.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -110,6 +111,32 @@ class Test(unittest.TestCase):
                                                      display_name='ExcelMultipleSheets_download.xlsx',
                                                      msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response')
+
+    def test_generate_download_spreadsheet_tsv(self):
+        with self.app.test_request_context():
+
+            from hed.models import HedInput
+            from hedweb.utils.web_utils import generate_download_spreadsheet
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            '../../data/LKTEventCodes8Beta3.tsv')
+
+            spreadsheet = HedInput(filename=spreadsheet_path,
+                                   tag_columns=[5], has_column_names=True,
+                                   column_prefix_dictionary={2:'Attribute/Informational/Label/',
+                                                             4:'Attribute/Informational/Description/'},
+                                   display_name='LKTEventCodes8Beta3.tsv')
+            response = generate_download_spreadsheet(spreadsheet,
+                                                     display_name='LKTEventCodes8Beta3_download.tsv',
+                                                     msg_category='success', msg='Successful download')
+            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
+            headers_dict = dict(response.headers)
+            self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
+            self.assertEqual('text/tab-separated-values', response.mimetype,
+                             "generate_download_spreadsheet should return tab-separated text for tsv files")
+            x = int(headers_dict['Content-Length'])
+            self.assertGreater(int(headers_dict['Content-Length']), 0,
+                               "generate_download_spreadsheet download should be non-empty")
+            print("to here")
 
     def test_get_hed_path_from_pull_down(self):
         mock_form = mock.Mock()

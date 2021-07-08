@@ -373,7 +373,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 
 '''Agent-property''' <nowiki>{extensionAllowed}[Something that pertains to an agent.]</nowiki>
 * Agent-state <nowiki>[The state of the agent.]</nowiki>
-** Cognitive-state <nowiki>[The state of the cognitive processes or state of mind of the agent.]</nowiki>
+** Agent-cognitive-state <nowiki>[The state of the cognitive processes or state of mind of the agent.]</nowiki>
 *** Alert <nowiki>[Condition of heightened watchfulness or preparation for action.]</nowiki>
 *** Anesthetized <nowiki>[Having lost sensation to pain or having senses dulled due to the effects of an anesthetic.]</nowiki>
 *** Asleep <nowiki>[Having entered a periodic, readily reversible state of reduced awareness and metabolic activity, usually accompanied by physical relaxation and brain activity.]</nowiki>
@@ -415,6 +415,11 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Sitting <nowiki>[In a seated position.]</nowiki>
 *** Standing <nowiki>[Assuming or maintaining an erect upright position. ]</nowiki>
 *** Supported-by-chin-rest <nowiki>[Using a device that supports the chin and head.]</nowiki>
+* Agent-task-role <nowiki>[The function or part that is ascribed to an agent in performing the task.]</nowiki>
+** Experiment-actor <nowiki>[An agent who plays a predetermined role to create the experiment scenario.]</nowiki>
+** Experiment-controller <nowiki>[An agent exerting control over some aspect of the experiment.]</nowiki>
+** Experiment-participant <nowiki>[Someone who takes part in an activity related to an experiment.]</nowiki>
+** Experimenter <nowiki>[Person who is the owner of the experiment and has its responsibility.]</nowiki>
 * Agent-trait <nowiki>[A genetically, environmentally, or socially determined characteristic of an agent.]</nowiki> 
 ** Age <nowiki>[Length of time elapsed time since birth of the agent.]</nowiki>
 *** <nowiki># {takesValue}</nowiki>
@@ -427,11 +432,6 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Left-handed <nowiki>[Preference for using the left hand or foot for tasks requiring the use of a single hand or foot.]</nowiki>
 *** Right-handed <nowiki>[Preference for using the right hand or foot for tasks requiring the use of a single hand or foot.]</nowiki>
 *** Ambidextrous <nowiki>[Having no overall dominance in the use of right or left hand or foot in the performance of tasks that require one hand or foot.]</nowiki>
-* Agent-task-role <nowiki>[The function or part that is ascribed to an agent in performing the task.]</nowiki>
-** Experiment-actor <nowiki>[An agent who plays a predetermined role to create the experiment.]</nowiki>
-** Experiment-controller <nowiki>[An agent exerting control over some aspect of the experiment.]</nowiki>
-** Experiment-participant <nowiki>[Someone who takes part in an activity related to an experiment.]</nowiki>
-** Experimenter <nowiki>[Person who is the owner of the experiment and has its responsibility.]</nowiki>
 
 '''Data-property''' <nowiki>{extensionAllowed}[Something that pertains to data or information.]</nowiki>
 * Data-source-type <nowiki>[The type of place, person, or thing from which the data comes or can be obtained.]</nowiki>

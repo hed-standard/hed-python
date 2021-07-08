@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
         print('generate_response_download_file_from_text')
 
     def test_generate_download_file_response(self):
-        print('generate_download_file_response')
+        print('generate_download_file')
 
     def test_generate_filename(self):
         print('generate_filename')

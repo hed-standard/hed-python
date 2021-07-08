@@ -54,6 +54,19 @@
       <xs:element type="unitModifierDefinitionType" name="unitModifierDefinition" maxOccurs="unbounded" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
+    <xs:complexType name="valueClassDefinitionType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="xs:string" name="description" minOccurs="0"/>
+      <xs:element type="attributeType" name="attribute" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="valueClassDefinitionsType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="description" minOccurs="0"/>
+      <xs:element type="valueClassDefinitionType" name="valueClassDefinition" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="propertyType">
     <xs:sequence>
       <xs:element type="xs:string" name="name"/>
@@ -89,8 +102,9 @@
       <xs:element type="schemaType" name="schema" maxOccurs="1" minOccurs="1"/>
       <xs:element type="unitClassDefinitionsType" name="unitClassDefinitions" maxOccurs="1" minOccurs="1" />
       <xs:element type="unitModifierDefinitionsType" name="unitModifierDefinitions" maxOccurs="1" minOccurs="1" />
+	  <xs:element type="valueClassDefinitionsType" name="valueClassDefinitions" maxOccurs="1" minOccurs="1" />
       <xs:element type="schemaAttributeDefinitionsType" name="schemaAttributeDefinitions" maxOccurs="1" minOccurs="1" />
-      <xs:element type="propertyDefinitionsType" name="propertyDefinitions" maxOccurs="1" minOccurs="2"/>
+      <xs:element type="propertyDefinitionsType" name="propertyDefinitions" maxOccurs="1" minOccurs="1"/>
       <xs:element type="xs:string" name="epilogue" maxOccurs="1" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="version"/>

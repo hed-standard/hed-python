@@ -165,11 +165,10 @@ def spreadsheet_results():
     try:
         input_arguments = spreadsheet.get_input_from_spreadsheet_form(request)
         a = spreadsheet.spreadsheet_process(input_arguments)
-        return package_results(a)
+        response = package_results(a)
+        return response
     except Exception as ex:
         return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.SPREADSHEET_PATH, ''))
 
 
 @route_blueprint.route(route_constants.STRING_SUBMIT_ROUTE, strict_slashes=False, methods=['GET', 'POST'])

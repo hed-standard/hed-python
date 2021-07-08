@@ -270,7 +270,7 @@
                   </node>
                </node>
                <node>
-                  <name>Move-arm-hand</name>
+                  <name>Move-upper-extremity</name>
                   <description>Move some part of arm, shoulder and or arm.</description>
                   <node>
                      <name>Clap-hands</name>
@@ -346,7 +346,7 @@
                   </node>
                </node>
                <node>
-                  <name>Move-leg-foot</name>
+                  <name>Move-lower-extremity</name>
                   <description>Move some part of leg or foot.</description>
                   <node>
                      <name>Curl-toes</name>
@@ -516,7 +516,7 @@
             </node>
             <node>
                <name>Repeat</name>
-               <description>Make, do, or perform again.</description>
+               <description>Make do or perform again.</description>
             </node>
             <node>
                <name>Rest</name>
@@ -1508,171 +1508,195 @@
             <name>extensionAllowed</name>
          </attribute>
          <node>
-            <name>Cognitive-state</name>
-            <description>The state of the cognitive processes or state of mind of the agent.</description>
+            <name>Agent-state</name>
+            <description>The state of the agent.</description>
             <node>
-               <name>Alert</name>
-               <description>Condition of heightened watchfulness or preparation for action.</description>
+               <name>Agent-cognitive-state</name>
+               <description>The state of the cognitive processes or state of mind of the agent.</description>
+               <node>
+                  <name>Alert</name>
+                  <description>Condition of heightened watchfulness or preparation for action.</description>
+               </node>
+               <node>
+                  <name>Anesthetized</name>
+                  <description>Having lost sensation to pain or having senses dulled due to the effects of an anesthetic.</description>
+               </node>
+               <node>
+                  <name>Asleep</name>
+                  <description>Having entered a periodic, readily reversible state of reduced awareness and metabolic activity, usually accompanied by physical relaxation and brain activity.</description>
+               </node>
+               <node>
+                  <name>Attentive</name>
+                  <description>Concentrating and focusing mental energy on the task or surroundings.</description>
+               </node>
+               <node>
+                  <name>Awake</name>
+                  <description>In a non sleeping state.</description>
+               </node>
+               <node>
+                  <name>Brain-dead</name>
+                  <description>Characterized by the irreversible absence of cortical and brain stem functioning.</description>
+               </node>
+               <node>
+                  <name>Comatose</name>
+                  <description>In a state of profound unconsciousness associated with markedly depressed cerebral activity.</description>
+               </node>
+               <node>
+                  <name>Drowsy</name>
+                  <description>In a state of near-sleep, a strong desire for sleep, or sleeping for unusually long periods.</description>
+               </node>
+               <node>
+                  <name>Intoxicated</name>
+                  <description>In a state with disturbed psychophysiological functions and responses as a result of administration or ingestion of a psychoactive substance.</description>
+               </node>
+               <node>
+                  <name>Locked-in</name>
+                  <description>In a state of complete paralysis of all voluntary muscles except for the ones that control the movements of the eyes.</description>
+               </node>
+               <node>
+                  <name>Passive</name>
+                  <description>Not responding or initiating an action in response to a stimulus.</description>
+               </node>
+               <node>
+                  <name>Resting</name>
+                  <description>A state in which the agent is not exhibiting any physical exertion.</description>
+               </node>
+               <node>
+                  <name>Vegetative</name>
+                  <description>A state of wakefulness and conscience, but (in contrast to coma) with involuntary opening of the eyes and movements (such as teeth grinding, yawning, or thrashing of the extremities).</description>
+               </node>
             </node>
             <node>
-               <name>Anesthetized</name>
-               <description>Having lost sensation to pain or having senses dulled due to the effects of an anesthetic.</description>
+               <name>Agent-emotional-state</name>
+               <description>The status of the general temperament and outlook of an agent.</description>
+               <node>
+                  <name>Angry</name>
+                  <description>Experiencing emotions characterized by marked annoyance or hostility.</description>
+               </node>
+               <node>
+                  <name>Aroused</name>
+                  <description>In a state reactive to stimuli leading to increased heart rate and blood pressure, sensory alertness, mobility and readiness to respond.</description>
+               </node>
+               <node>
+                  <name>Awed</name>
+                  <description>Filled with wonder. Feeling grand, sublime or powerful emotions characterized by a combination of joy, fear, admiration, reverence, and/or respect.</description>
+               </node>
+               <node>
+                  <name>Compassionate</name>
+                  <description>Feeling or showing sympathy and concern for others often evoked for a person who is in distress and associated with altruistic motivation.</description>
+               </node>
+               <node>
+                  <name>Content</name>
+                  <description>Feeling  satisfaction with things as they are.</description>
+               </node>
+               <node>
+                  <name>Disgusted</name>
+                  <description>Feeling revulsion or profound disapproval aroused by something unpleasant or offensive.</description>
+               </node>
+               <node>
+                  <name>Emotionally-neutral</name>
+                  <description>Feeling neither satisfied nor dissatisfied.</description>
+               </node>
+               <node>
+                  <name>Empathetic</name>
+                  <description>Understanding and sharing the feelings of another. Being aware of, being sensitive to, and vicariously experiencing the feelings, thoughts, and experience of another.</description>
+               </node>
+               <node>
+                  <name>Excited</name>
+                  <description>Feeling great enthusiasm and eagerness.</description>
+               </node>
+               <node>
+                  <name>Fearful</name>
+                  <description>Feeling apprehension that one may be in danger.</description>
+               </node>
+               <node>
+                  <name>Frustrated</name>
+                  <description>Feeling annoyed as a result of being blocked, thwarted, disappointed or defeated.</description>
+               </node>
+               <node>
+                  <name>Grieving</name>
+                  <description>Feeling sorrow in response to loss, whether physical or abstract.</description>
+               </node>
+               <node>
+                  <name>Happy</name>
+                  <description>Feeling pleased and content.</description>
+               </node>
+               <node>
+                  <name>Jealous</name>
+                  <description>Feeling threatened by a rival in a relationship with another individual, in particular an intimate partner, usually involves feelings of threat, fear, suspicion, distrust, anxiety, anger, betrayal, and rejection.</description>
+               </node>
+               <node>
+                  <name>Joyful</name>
+                  <description>Feeling delight or intense happiness.</description>
+               </node>
+               <node>
+                  <name>Loving</name>
+                  <description>Feeling a strong positive emotion of affection and attraction.</description>
+               </node>
+               <node>
+                  <name>Relieved</name>
+                  <description>No longer feeling pain, distress,  anxiety, or reassured.</description>
+               </node>
+               <node>
+                  <name>Sad</name>
+                  <description>Feeling grief or unhappiness.</description>
+               </node>
+               <node>
+                  <name>Stressed</name>
+                  <description>Experiencing mental or emotional strain or tension.</description>
+               </node>
             </node>
             <node>
-               <name>Asleep</name>
-               <description>Having entered a periodic, readily reversible state of reduced awareness and metabolic activity, usually accompanied by physical relaxation and brain activity.</description>
-            </node>
-            <node>
-               <name>Attentive</name>
-               <description>Concentrating and focusing mental energy on the task or surroundings.</description>
-            </node>
-            <node>
-               <name>Awake</name>
-               <description>In a non sleeping state.</description>
-            </node>
-            <node>
-               <name>Brain-dead</name>
-               <description>Characterized by the irreversible absence of cortical and brain stem functioning.</description>
-            </node>
-            <node>
-               <name>Comatose</name>
-               <description>In a state of profound unconsciousness associated with markedly depressed cerebral activity.</description>
-            </node>
-            <node>
-               <name>Drowsy</name>
-               <description>In a state of near-sleep, a strong desire for sleep, or sleeping for unusually long periods.</description>
-            </node>
-            <node>
-               <name>Intoxicated</name>
-               <description>In a state with disturbed psychophysiological functions and responses as a result of administration or ingestion of a psychoactive substance.</description>
-            </node>
-            <node>
-               <name>Locked-in</name>
-               <description>In a state of complete paralysis of all voluntary muscles except for the ones that control the movements of the eyes.</description>
-            </node>
-            <node>
-               <name>Passive</name>
-               <description>Not responding or initiating an action in response to a stimulus.</description>
-            </node>
-            <node>
-               <name>Resting</name>
-               <description>A state in which the agent is not exhibiting any physical exertion.</description>
-            </node>
-            <node>
-               <name>Vegetative</name>
-               <description>A state of wakefulness and conscience, but (in contrast to coma) with involuntary opening of the eyes and movements (such as teeth grinding, yawning, or thrashing of the extremities).</description>
+               <name>Agent-postural-state</name>
+               <description>Pertaining to the position in which agent holds their body.</description>
+               <node>
+                  <name>Crouching</name>
+                  <description>Adopting a position where the knees are bent and the upper body is brought forward and down, sometimes to avoid detection or to defend oneself.</description>
+               </node>
+               <node>
+                  <name>Kneeling</name>
+                  <description>Positioned where one or both knees are on the ground.</description>
+               </node>
+               <node>
+                  <name>On-treadmill</name>
+                  <description>Ambulation on an exercise apparatus with an endless moving belt to support moving in place.</description>
+               </node>
+               <node>
+                  <name>Prone</name>
+                  <description>Positioned in a recumbent body position whereby the person lies on its stomach and faces downward.</description>
+               </node>
+               <node>
+                  <name>Sitting</name>
+                  <description>In a seated position.</description>
+               </node>
+               <node>
+                  <name>Standing</name>
+                  <description>Assuming or maintaining an erect upright position.</description>
+               </node>
+               <node>
+                  <name>Supported-by-chin-rest</name>
+                  <description>Using a device that supports the chin and head.</description>
+               </node>
             </node>
          </node>
          <node>
-            <name>Emotional-state</name>
-            <description>The status of the general temperament and outlook of an agent.</description>
+            <name>Agent-task-role</name>
+            <description>The function or part that is ascribed to an agent in performing the task.</description>
             <node>
-               <name>Angry</name>
-               <description>Experiencing emotions characterized by marked annoyance or hostility.</description>
+               <name>Experiment-actor</name>
+               <description>An agent who plays a predetermined role to create the experiment scenario.</description>
             </node>
             <node>
-               <name>Aroused</name>
-               <description>In a state reactive to stimuli leading to increased heart rate and blood pressure, sensory alertness, mobility and readiness to respond.</description>
+               <name>Experiment-controller</name>
+               <description>An agent exerting control over some aspect of the experiment.</description>
             </node>
             <node>
-               <name>Awed</name>
-               <description>Filled with wonder. Feeling grand, sublime or powerful emotions characterized by a combination of joy, fear, admiration, reverence, and/or respect.</description>
+               <name>Experiment-participant</name>
+               <description>Someone who takes part in an activity related to an experiment.</description>
             </node>
             <node>
-               <name>Compassionate</name>
-               <description>Feeling or showing sympathy and concern for others often evoked for a person who is in distress and associated with altruistic motivation.</description>
-            </node>
-            <node>
-               <name>Content</name>
-               <description>Feeling  satisfaction with things as they are.</description>
-            </node>
-            <node>
-               <name>Disgusted</name>
-               <description>Feeling revulsion or profound disapproval aroused by something unpleasant or offensive.</description>
-            </node>
-            <node>
-               <name>Emotionally-neutral</name>
-               <description>Feeling neither satisfied nor dissatisfied.</description>
-            </node>
-            <node>
-               <name>Empathetic</name>
-               <description>Understanding and sharing the feelings of another. Being aware of, being sensitive to, and vicariously experiencing the feelings, thoughts, and experience of another.</description>
-            </node>
-            <node>
-               <name>Excited</name>
-               <description>Feeling great enthusiasm and eagerness.</description>
-            </node>
-            <node>
-               <name>Fearful</name>
-               <description>Feeling apprehension that one may be in danger.</description>
-            </node>
-            <node>
-               <name>Frustrated</name>
-               <description>Feeling annoyed as a result of being blocked, thwarted, disappointed or defeated.</description>
-            </node>
-            <node>
-               <name>Grieving</name>
-               <description>Feeling sorrow in response to loss, whether physical or abstract.</description>
-            </node>
-            <node>
-               <name>Happy</name>
-               <description>Feeling pleased and content.</description>
-            </node>
-            <node>
-               <name>Jealous</name>
-               <description>Feeling threatened by a rival in a relationship with another individual, in particular an intimate partner, usually involves feelings of threat, fear, suspicion, distrust, anxiety, anger, betrayal, and rejection.</description>
-            </node>
-            <node>
-               <name>Joyful</name>
-               <description>Feeling delight or intense happiness.</description>
-            </node>
-            <node>
-               <name>Loving</name>
-               <description>Feeling a strong positive emotion of affection and attraction.</description>
-            </node>
-            <node>
-               <name>Relieved</name>
-               <description>No longer feeling pain, distress,  anxiety, or reassured.</description>
-            </node>
-            <node>
-               <name>Sad</name>
-               <description>Feeling grief or unhappiness.</description>
-            </node>
-            <node>
-               <name>Stressed</name>
-               <description>Experiencing mental or emotional strain or tension.</description>
-            </node>
-         </node>
-         <node>
-            <name>Postural-state</name>
-            <description>Pertaining to the position in which agent holds their body.</description>
-            <node>
-               <name>Crouching</name>
-               <description>Adopting a position where the knees are bent and the upper body is brought forward and down, sometimes to avoid detection or to defend oneself.</description>
-            </node>
-            <node>
-               <name>Kneeling</name>
-               <description>Positioned where one or both knees are on the ground.</description>
-            </node>
-            <node>
-               <name>On-treadmill</name>
-               <description>Ambulation on an exercise apparatus with an endless moving belt to support moving in place.</description>
-            </node>
-            <node>
-               <name>Prone</name>
-               <description>Positioned in a recumbent body position whereby the person lies on its stomach and faces downward.</description>
-            </node>
-            <node>
-               <name>Sitting</name>
-               <description>In a seated position.</description>
-            </node>
-            <node>
-               <name>Standing</name>
-               <description>Assuming or maintaining an erect upright position.</description>
-            </node>
-            <node>
-               <name>Supported-by-chin-rest</name>
-               <description>Using a device that supports the chin and head.</description>
+               <name>Experimenter</name>
+               <description>Person who is the owner of the experiment and has its responsibility.</description>
             </node>
          </node>
          <node>
@@ -1723,70 +1747,6 @@
                   <name>Ambidextrous</name>
                   <description>Having no overall dominance in the use of right or left hand or foot in the performance of tasks that require one hand or foot.</description>
                </node>
-            </node>
-         </node>
-         <node>
-            <name>Agent-social-role</name>
-            <description>The function or part that is ascribed to an individual agent with respect to in a community.</description>
-            <node>
-               <name>Brother</name>
-               <description>Being a male sibling.</description>
-            </node>
-            <node>
-               <name>Child</name>
-               <description>Having an age below the legal age of majority.</description>
-            </node>
-            <node>
-               <name>Father</name>
-               <description>Being a male parent.</description>
-            </node>
-            <node>
-               <name>Mother</name>
-               <description>Being a female parent.</description>
-            </node>
-            <node>
-               <name>Sister</name>
-               <description>Being a female sibling.</description>
-            </node>
-         </node>
-         <node>
-            <name>Agent-task-role</name>
-            <description>The function or part that is ascribed to an agent in performing the task.</description>
-            <node>
-               <name>Experimental-controller</name>
-               <description>An agent acting to control the experiment.</description>
-            </node>
-            <node>
-               <name>Experimental-participant</name>
-               <description>Someone who takes part in an activity related to an experiment.</description>
-            </node>
-            <node>
-               <name>Experimenter</name>
-               <description>Person who is the owner of the experiment and has its responsibility.</description>
-            </node>
-            <node>
-               <name>Follower</name>
-               <description>A person who follows the lead of another.</description>
-            </node>
-            <node>
-               <name>Friend</name>
-               <description>A person whom an individual knows, likes, and trusts.</description>
-            </node>
-            <node>
-               <name>Leader</name>
-               <description>A person who leads or commands an activity, project, group, organization, or country.</description>
-            </node>
-            <node>
-               <name>Stranger</name>
-               <description>A person not known in a particular place or community.</description>
-            </node>
-            <node>
-               <name>Student</name>
-               <description>A person who is enrolled in an educational institution. A person who acquires knowledge and skill from some educator during an education process.</description>
-            </node>
-            <node>
-               <name>Teacher</name>
-               <description>An agent who instructs or educates others.</description>
             </node>
          </node>
       </node>
@@ -2613,23 +2573,39 @@
             <name>extensionAllowed</name>
          </attribute>
          <node>
-            <name>Task-attentional-strategy</name>
+            <name>Task-attentional-demand</name>
             <description>Strategy for allocating attention toward goal-relevant information.</description>
             <node>
                <name>Bottom-up-attention</name>
                <description>Attentional guidance purely by externally driven factors to stimuli that are salient because of their inherent properties relative to the background. Sometimes this is referred to as stimulus driven.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Top-down-attention</value>
+               </attribute>
             </node>
             <node>
                <name>Covert-attention</name>
                <description>Paying attention without moving the eyes.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Overt-attention</value>
+               </attribute>
             </node>
             <node>
                <name>Divided-attention</name>
                <description>Integrating parallel multiple stimuli. Behavior involving responding simultaneously to multiple tasks or multiple task demands.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Focused-attention</value>
+               </attribute>
             </node>
             <node>
                <name>Focused-attention</name>
                <description>Responding discretely to specific visual, auditory, or tactile stimuli.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Divided-attention</value>
+               </attribute>
             </node>
             <node>
                <name>Orienting-attention</name>
@@ -2638,6 +2614,10 @@
             <node>
                <name>Overt-attention</name>
                <description>Selectively processing one location over others by moving the eyes to point at that location.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Covert-attention</value>
+               </attribute>
             </node>
             <node>
                <name>Selective-attention</name>
@@ -2650,6 +2630,10 @@
             <node>
                <name>Top-down-attention</name>
                <description>Voluntary allocation of attention to certain features. Sometimes this is referred to goal-oriented attention.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Bottom-up-attention</value>
+               </attribute>
             </node>
          </node>
          <node>
@@ -2902,6 +2886,470 @@
          <attribute>
             <name>extensionAllowed</name>
          </attribute>
+         <node>
+            <name>Anatomical</name>
+            <description>Relating to bodily structure.</description>
+         </node>
+         <node>
+            <name>Categorical</name>
+            <description>Indicates that something can take on a limited and usually fixed number of possible values.</description>
+            <node>
+               <name>Categorical-class</name>
+               <description>Categorical values that fall into discrete classes such as true or false. The grouping is absolute in the sense that it is the same for all participants.</description>
+               <node>
+                  <name>All</name>
+                  <description>To a complete degree or to the full or entire extent.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Some</value>
+                     <value>None</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Correct</name>
+                  <description>Free from error; especially conforming to fact or truth.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Incorrect</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Explicit</name>
+                  <description>Stated clearly and in detail, leaving no room for confusion or doubt.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Implicit</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>False</name>
+                  <description>Not in accordance with facts, reality or definitive criteria.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>True</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Implicit</name>
+                  <description>Implied though not plainly expressed.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Explicit</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Invalid</name>
+                  <description>Not true because based on erroneous information or unsound reasoning or not conforming to the correct format or specifications.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Valid</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>None</name>
+                  <description>No person or thing, nobody, not any.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>All</value>
+                     <value>Some</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Some</name>
+                  <description>At least a small amount or number of, but not a large amount of, or often.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>All</value>
+                     <value>None</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>True</name>
+                  <description>Conforming to facts, reality or definitive criteria.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>False</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Valid</name>
+                  <description>Allowable, usable, or acceptable.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Invalid</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Wrong</name>
+                  <description>Not accurate, correct, or appropriate.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Correct</value>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>Categorical-judgment</name>
+               <description>Categorical values that are based on the judgment or perception of the participant such familiar and famous.</description>
+               <node>
+                  <name>Abnormal</name>
+                  <description>Deviating in any way from the state, position, structure, condition, behavior, or rule which is considered a norm.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Normal</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Asymmetrical</name>
+                  <description>Lacking symmetry or having parts that fail to correspond to one another in shape, size, or arrangement; lacking symmetry.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Symmetrical</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Congruent</name>
+                  <description>Concordance of multiple evidence lines. In agreement or harmony.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Incongruent</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Constrained</name>
+                  <description>Keeping something within particular limits or bounds.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Unconstrained</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Disordered</name>
+                  <description>Not neatly arranged; confused and untidy. A structural quality in which the parts of an object are non-rigid.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Ordered</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Familiar</name>
+                  <description>Recognized, familiar, or within the scope of knowledge.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Unfamiliar</value>
+                     <value>Famous</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Famous</name>
+                  <description>A person who has a high degree of recognition by the general population for his or her success or accomplishments; a famous person.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Familiar</value>
+                     <value>UnfamiliarrelatedTag</value>
+                     <value>Unfamiliar</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Incongruent</name>
+                  <description>Not in agreement or harmony.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Congruent</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Involuntary</name>
+                  <description>An action that is not made by choice. In the body, involuntary actions (such as blushing) occur automatically, and cannot be controlled by choice.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Voluntary</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Masked</name>
+                  <description>Information exists but is not provided or is partially obscured due to security,  privacy, or other concerns.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Unmasked</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Normal</name>
+                  <description>Being approximately average or within certain limits; conforming with or constituting a norm or standard or level or type or social norm.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Abnormal</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Ordered</name>
+                  <description>Conforming to a logical or comprehensible arrangement of separate elements; a condition of regular or proper arrangement.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Disordered</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Symmetrical</name>
+                  <description>Made up of exactly similar parts facing each other or around an axis; showing symmetry.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Asymmetrical</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Unconstrained</name>
+                  <description>Moving without restriction.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Constrained</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Unfamiliar</name>
+                  <description>Not having knowledge or experience of.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Familiar</value>
+                     <value>Famous</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Unmasked</name>
+                  <description>Information is revealed.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Masked</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Voluntary</name>
+                  <description>Using free will or design; not forced or compelled; controlled by individual volition.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Involuntary</value>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>Categorical-level</name>
+               <description>Categorical values based on dividing a continuous variable into levels such as high and low.</description>
+               <node>
+                  <name>Deep</name>
+                  <description>Extending relatively far inward or downward.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Shallow</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>High</name>
+                  <description>Having an elevated level or position or degree; having a greater than normal in degree or intensity or amount.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Low</value>
+                     <value>Medium</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Liminal</name>
+                  <description>Situated at a sensory threshold; barely perceptible or capable of eliciting a response.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Subliminal</value>
+                     <value>Supraliminal</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Low</name>
+                  <description>A minimum level or position or degree; less than normal in degree, intensity or amount.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>High</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Medium</name>
+                  <description>Mid-way between small and large in number, quantity, magnitude or extent.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Low</value>
+                     <value>High</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Negative</name>
+                  <description>Involving disadvantage or harm.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Positive</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Positive</name>
+                  <description>Involving advantage or good.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Negative</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Shallow</name>
+                  <description>Having a depth which is relatively low.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Deep</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Subliminal</name>
+                  <description>Situated below a sensory threshold; imperceptible or not capable of eliciting a response.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Liminal</value>
+                     <value>Supraliminal</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Supraliminal</name>
+                  <description>Situated above a sensory threshold; perceptible or capable of eliciting a response.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Liminal</value>
+                     <value>Subliminal</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Thick</name>
+                  <description>Wide in width, extent or cross-section.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Thin</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Thin</name>
+                  <description>Narrow in width, extent or cross-section.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Thick</value>
+                  </attribute>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Descriptive</name>
+            <description>Involving a written or verbal account, representation, statement, or explanation of something.</description>
+            <node>
+               <name>Abstract</name>
+               <description>A concept or idea not associated with any specific instance.</description>
+            </node>
+            <node>
+               <name>Clinical</name>
+               <description>Relating to the examination and treatment of patients dependent on direct observation.</description>
+            </node>
+            <node>
+               <name>Complex</name>
+               <description>Hard, involved or complicated, elaborate, having many parts.</description>
+            </node>
+            <node>
+               <name>Composite</name>
+               <description>Consisting of separate interconnected parts.</description>
+            </node>
+            <node>
+               <name>Numerical</name>
+               <description>A numeral or string of numerals expressing value, quantity, or identification.</description>
+            </node>
+            <node>
+               <name>Symbolic</name>
+               <description>A representation such as a tattoo with a specific meaning. Significant purely in terms of what is being represented or implied.</description>
+            </node>
+         </node>
+         <node>
+            <name>Environmental</name>
+            <description>Relating to or arising from the surroundings of an agent.</description>
+            <node>
+               <name>Indoors</name>
+               <description>Located inside a building or enclosure.</description>
+            </node>
+            <node>
+               <name>Outdoors</name>
+               <description>Any area outside a building or shelter.</description>
+            </node>
+            <node>
+               <name>Real-world</name>
+               <description>Located in a place that exists in real space and time under realistic conditions.</description>
+            </node>
+            <node>
+               <name>Virtual-world</name>
+               <description>Using technology that creates immersive, computer-generated experiences that a person can interact with and navigate through. The digital content is generally delivered to the user through some type of headset and responds to changes in head position or through interaction with other types of sensors. Existing in a virtual setting such as a simulation or game environment.</description>
+            </node>
+            <node>
+               <name>Augmented-reality</name>
+               <description>Using technology that enhances real-world experiences with computer-derived digital overlays to change some aspects of perception of the natural environment. The digital content is shown to the user through a smart device or glasses and responds to changes in the environment.</description>
+            </node>
+            <node>
+               <name>Motion-platform</name>
+               <description>A mechanism that creates the feelings of being in a real motion environment.</description>
+            </node>
+            <node>
+               <name>Urban</name>
+               <description>Relating to, located in, or characteristic of a city or densely populated area.</description>
+            </node>
+            <node>
+               <name>Rural</name>
+               <description>Of or pertaining to the country as opposed to the city.</description>
+               <node>
+                  <name>Wooden-walkway</name>
+                  <description>A path made out of wood.</description>
+               </node>
+            </node>
+            <node>
+               <name>Terrain</name>
+               <description>Characterization of the physical features of a tract of land.</description>
+               <node>
+                  <name>Composite-terrain</name>
+                  <description>Tracts of land characterized by a mixure of physical features.</description>
+               </node>
+               <node>
+                  <name>Dirt-terrain</name>
+                  <description>Tracts of land characterized by a soil surface and lack of vegetation.</description>
+               </node>
+               <node>
+                  <name>Grassy-terrain</name>
+                  <description>Tracts of land covered by grass.</description>
+               </node>
+               <node>
+                  <name>Gravel-terrain</name>
+                  <description>Tracts of land covered by a surface consisting a loose aggregation of small water-worn or pounded stones.</description>
+               </node>
+               <node>
+                  <name>Leaf-covered-terrain</name>
+                  <description>Tracts of land covered by leaves and composited organic material.</description>
+               </node>
+               <node>
+                  <name>Muddy-terrain</name>
+                  <description>Tracts of land covered by a liquid or semi-liquid mixture of water and some combination of soil, silt, and clay.</description>
+               </node>
+               <node>
+                  <name>Paved-terrain</name>
+                  <description>Tracts of land covered  with concrete, asphalt, stones, or bricks.</description>
+               </node>
+               <node>
+                  <name>Rocky-terrain</name>
+                  <description>Tracts of land consisting or full of rock or rocks.</description>
+               </node>
+               <node>
+                  <name>Sloped-terrain</name>
+                  <description>Tracts of land arranged in a sloping position; inclined.</description>
+               </node>
+               <node>
+                  <name>Uneven-terrain</name>
+                  <description>Tracts of land that are not level, smooth, or regular.</description>
+               </node>
+            </node>
+         </node>
          <node>
             <name>Informational</name>
             <description>A quality that pertains to information.</description>
@@ -3598,382 +4046,6 @@
                   <name>Hotter-than</name>
                   <description>(A (Hotter-than B)) means A has more heat energy than the object against which it is compared; the absence of heat.</description>
                </node>
-            </node>
-         </node>
-         <node>
-            <name>Categorical</name>
-            <description>Indicates that something can take on a limited and usually fixed number of possible values.</description>
-            <node>
-               <name>Categorical-class</name>
-               <description>Categorical values that fall into discrete classes such as true or false. The grouping is absolute in the sense that it is the same for all participants.</description>
-               <node>
-                  <name>All</name>
-                  <description>To a complete degree or to the full or entire extent.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Some</value>
-                     <value>None</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Correct</name>
-                  <description>Free from error; especially conforming to fact or truth.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Incorrect</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Explicit</name>
-                  <description>Stated clearly and in detail, leaving no room for confusion or doubt.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Implicit</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>False</name>
-                  <description>Not in accordance with facts, reality or definitive criteria.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>True</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Implicit</name>
-                  <description>Implied though not plainly expressed.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Explicit</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Invalid</name>
-                  <description>Not true because based on erroneous information or unsound reasoning or not conforming to the correct format or specifications.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Valid</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>None</name>
-                  <description>No person or thing, nobody, not any.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>All</value>
-                     <value>Some</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Some</name>
-                  <description>At least a small amount or number of, but not a large amount of, or often.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>All</value>
-                     <value>None</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>True</name>
-                  <description>Conforming to facts, reality or definitive criteria.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>False</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Valid</name>
-                  <description>Allowable, usable, or acceptable.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Invalid</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Wrong</name>
-                  <description>Not accurate, correct, or appropriate.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Correct</value>
-                  </attribute>
-               </node>
-            </node>
-            <node>
-               <name>Categorical-judgment</name>
-               <description>Categorical values that are based on the judgment or perception of the participant such familiar and famous.</description>
-               <node>
-                  <name>Abnormal</name>
-                  <description>Deviating in any way from the state, position, structure, condition, behavior, or rule which is considered a norm.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Normal</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Asymmetrical</name>
-                  <description>Lacking symmetry or having parts that fail to correspond to one another in shape, size, or arrangement; lacking symmetry.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Symmetrical</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Congruent</name>
-                  <description>Concordance of multiple evidence lines. In agreement or harmony.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Incongruent</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Constrained</name>
-                  <description>Keeping something within particular limits or bounds.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Unconstrained</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Disordered</name>
-                  <description>Not neatly arranged; confused and untidy. A structural quality in which the parts of an object are non-rigid.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Ordered</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Familiar</name>
-                  <description>Recognized, familiar, or within the scope of knowledge.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Unfamiliar</value>
-                     <value>Famous</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Famous</name>
-                  <description>A person who has a high degree of recognition by the general population for his or her success or accomplishments; a famous person.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Familiar</value>
-                     <value>UnfamiliarrelatedTag</value>
-                     <value>Unfamiliar</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Incongruent</name>
-                  <description>Not in agreement or harmony.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Congruent</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Involuntary</name>
-                  <description>An action that is not made by choice. In the body, involuntary actions (such as blushing) occur automatically, and cannot be controlled by choice.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Voluntary</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Masked</name>
-                  <description>Information exists but is not provided or is partially obscured due to security,  privacy, or other concerns.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Unmasked</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Normal</name>
-                  <description>Being approximately average or within certain limits; conforming with or constituting a norm or standard or level or type or social norm.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Abnormal</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Ordered</name>
-                  <description>Conforming to a logical or comprehensible arrangement of separate elements; a condition of regular or proper arrangement.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Disordered</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Symmetrical</name>
-                  <description>Made up of exactly similar parts facing each other or around an axis; showing symmetry.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Asymmetrical</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Unconstrained</name>
-                  <description>Moving without restriction.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Constrained</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Unfamiliar</name>
-                  <description>Not having knowledge or experience of.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Familiar</value>
-                     <value>Famous</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Unmasked</name>
-                  <description>Information is revealed.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Masked</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Voluntary</name>
-                  <description>Using free will or design; not forced or compelled; controlled by individual volition.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Involuntary</value>
-                  </attribute>
-               </node>
-            </node>
-            <node>
-               <name>Categorical-level</name>
-               <description>Categorical values based on dividing a continuous variable into levels such as high and low.</description>
-               <node>
-                  <name>Deep</name>
-                  <description>Extending relatively far inward or downward.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Shallow</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>High</name>
-                  <description>Having an elevated level or position or degree; having a greater than normal in degree or intensity or amount.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Low</value>
-                     <value>Medium</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Liminal</name>
-                  <description>Situated at a sensory threshold; barely perceptible or capable of eliciting a response.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Subliminal</value>
-                     <value>Supraliminal</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Low</name>
-                  <description>A minimum level or position or degree; less than normal in degree, intensity or amount.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>High</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Medium</name>
-                  <description>Mid-way between small and large in number, quantity, magnitude or extent.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Low</value>
-                     <value>High</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Negative</name>
-                  <description>Involving disadvantage or harm.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Positive</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Positive</name>
-                  <description>Involving advantage or good.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Negative</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Shallow</name>
-                  <description>Having a depth which is relatively low.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Deep</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Subliminal</name>
-                  <description>Situated below a sensory threshold; imperceptible or not capable of eliciting a response.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Liminal</value>
-                     <value>Supraliminal</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Supraliminal</name>
-                  <description>Situated above a sensory threshold; perceptible or capable of eliciting a response.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Liminal</value>
-                     <value>Subliminal</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Thick</name>
-                  <description>Wide in width, extent or cross-section.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Thin</value>
-                  </attribute>
-               </node>
-               <node>
-                  <name>Thin</name>
-                  <description>Narrow in width, extent or cross-section.</description>
-                  <attribute>
-                     <name>relatedTag</name>
-                     <value>Thick</value>
-                  </attribute>
-               </node>
-            </node>
-         </node>
-         <node>
-            <name>Descriptive</name>
-            <description>Involving a written or verbal account, representation, statement, or explanation of something.</description>
-            <node>
-               <name>Abstract</name>
-               <description>A concept or idea not associated with any specific instance.</description>
-            </node>
-            <node>
-               <name>Clinical</name>
-               <description>Relating to the examination and treatment of patients dependent on direct observation.</description>
-            </node>
-            <node>
-               <name>Complex</name>
-               <description>Hard, involved or complicated, elaborate, having many parts.</description>
-            </node>
-            <node>
-               <name>Composite</name>
-               <description>Consisting of separate interconnected parts.</description>
-            </node>
-            <node>
-               <name>Numerical</name>
-               <description>A numeral or string of numerals expressing value, quantity, or identification.</description>
-            </node>
-            <node>
-               <name>Symbolic</name>
-               <description>A representation such as a tattoo with a specific meaning. Significant purely in terms of what is being represented or implied.</description>
             </node>
          </node>
          <node>
@@ -4874,94 +4946,6 @@
                </node>
             </node>
          </node>
-         <node>
-            <name>Environmental</name>
-            <description>Relating to or arising from the surroundings of an agent.</description>
-            <node>
-               <name>Indoors</name>
-               <description>Located inside a building or enclosure.</description>
-            </node>
-            <node>
-               <name>Outdoors</name>
-               <description>Any area outside a building or shelter.</description>
-            </node>
-            <node>
-               <name>Real-world</name>
-               <description>Located in a place that exists in real space and time under realistic conditions.</description>
-            </node>
-            <node>
-               <name>Virtual-world</name>
-               <description>Using technology that creates immersive, computer-generated experiences that a person can interact with and navigate through. The digital content is generally delivered to the user through some type of headset and responds to changes in head position or through interaction with other types of sensors. Existing in a virtual setting such as a simulation or game environment.</description>
-            </node>
-            <node>
-               <name>Augmented-reality</name>
-               <description>Using technology that enhances real-world experiences with computer-derived digital overlays to change some aspects of perception of the natural environment. The digital content is shown to the user through a smart device or glasses and responds to changes in the environment.</description>
-            </node>
-            <node>
-               <name>Motion-platform</name>
-               <description>A mechanism that creates the feelings of being in a real motion environment.</description>
-            </node>
-            <node>
-               <name>Urban</name>
-               <description>Relating to, located in, or characteristic of a city or densely populated area.</description>
-            </node>
-            <node>
-               <name>Rural</name>
-               <description>Of or pertaining to the country as opposed to the city.</description>
-               <node>
-                  <name>Wooden-walkway</name>
-                  <description>A path made out of wood.</description>
-               </node>
-            </node>
-            <node>
-               <name>Terrain</name>
-               <description>Characterization of the physical features of a tract of land.</description>
-               <node>
-                  <name>Composite-terrain</name>
-                  <description>Tracts of land characterized by a mixure of physical features.</description>
-               </node>
-               <node>
-                  <name>Dirt-terrain</name>
-                  <description>Tracts of land characterized by a soil surface and lack of vegetation.</description>
-               </node>
-               <node>
-                  <name>Grassy-terrain</name>
-                  <description>Tracts of land covered by grass.</description>
-               </node>
-               <node>
-                  <name>Gravel-terrain</name>
-                  <description>Tracts of land covered by a surface consisting a loose aggregation of small water-worn or pounded stones.</description>
-               </node>
-               <node>
-                  <name>Leaf-covered-terrain</name>
-                  <description>Tracts of land covered by leaves and composited organic material.</description>
-               </node>
-               <node>
-                  <name>Muddy-terrain</name>
-                  <description>Tracts of land covered by a liquid or semi-liquid mixture of water and some combination of soil, silt, and clay.</description>
-               </node>
-               <node>
-                  <name>Paved-terrain</name>
-                  <description>Tracts of land covered  with concrete, asphalt, stones, or bricks.</description>
-               </node>
-               <node>
-                  <name>Rocky-terrain</name>
-                  <description>Tracts of land consisting or full of rock or rocks.</description>
-               </node>
-               <node>
-                  <name>Sloped-terrain</name>
-                  <description>Tracts of land arranged in a sloping position; inclined.</description>
-               </node>
-               <node>
-                  <name>Uneven-terrain</name>
-                  <description>Tracts of land that are not level, smooth, or regular.</description>
-               </node>
-            </node>
-         </node>
-         <node>
-            <name>Anatomical</name>
-            <description>Relating to bodily structure.</description>
-         </node>
       </node>
    </schema>
    <unitClassDefinitions>
@@ -5565,7 +5549,7 @@
       </valueClassDefinition>
       <valueClassDefinition>
          <name>numericClass</name>
-         <description>Value must be numeric.</description>
+         <description>Value must be a valid numeric.</description>
       </valueClassDefinition>
       <valueClassDefinition>
          <name>posixPath</name>
@@ -5591,14 +5575,14 @@
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>defaultUnits</name>
-         <description>A schema attribute of unit classes specifying the default units for a tag.</description>
+         <description>A schema attribute of unit classes specifying the default units to use if the placeholder has a unit class but the substituted value has no units.</description>
          <property>
             <name>unitClassProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>extensionAllowed</name>
-         <description>A schema attribute indicating that users can add unlimited levels of child nodes under this tag.</description>
+         <description>A schema attribute indicating that users can add unlimited levels of child nodes under this tag. This tag is propagated to child nodes with the exception of the hashtag placeholders.</description>
          <property>
             <name>boolProperty</name>
          </property>
@@ -5671,7 +5655,7 @@
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>takesValue</name>
-         <description>A schema attribute indicating the tag is a hashtag placeholder which is expected to be replaced with a user-defined value.</description>
+         <description>A schema attribute indicating the tag is a hashtag placeholder that is expected to be replaced with a user-defined value.</description>
          <property>
             <name>boolProperty</name>
          </property>
@@ -5741,5 +5725,6 @@
          <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
       </propertyDefinition>
    </propertyDefinitions>
-   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.</epilogue>
+   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+</epilogue>
 </HED>

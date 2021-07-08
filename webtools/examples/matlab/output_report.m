@@ -20,4 +20,10 @@ if isfield(response, 'results') && ~isempty(response.results)
             end
         end
     end
+
+    %% Output the spreadsheet if available
+    if  isfield(results, 'spreadsheet')
+        fprintf('\n----Spreadsheet result----\n');
+        fprintf(results.spreadsheet);
+    end
 end
