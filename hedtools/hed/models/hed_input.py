@@ -39,4 +39,4 @@ class HedInput(BaseInput):
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   definition_mapper=definition_mapper)
         super().__init__(filename, worksheet_name, has_column_names, new_mapper,
-                                  csv_string=csv_string, display_name=display_name)
+                         csv_string=csv_string, display_name=display_name)
