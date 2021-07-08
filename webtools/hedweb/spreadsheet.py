@@ -1,4 +1,6 @@
+import os
 from flask import current_app
+from werkzeug.utils import secure_filename
 
 from hed import models
 from hed import schema as hedschema
@@ -45,6 +47,7 @@ def get_input_from_spreadsheet_form(request):
     arguments = {
         common.SCHEMA: get_hed_schema_from_pull_down(request),
         common.SPREADSHEET: None,
+        common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None),
         common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
         common.HAS_COLUMN_NAMES: form_has_option(request, common.HAS_COLUMN_NAMES, 'on'),
         common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
@@ -54,7 +57,7 @@ def get_input_from_spreadsheet_form(request):
         get_uploaded_file_path_from_form(request, common.SPREADSHEET_FILE, file_constants.SPREADSHEET_FILE_EXTENSIONS)
     tag_columns, prefix_dict = get_prefix_dict(request.form)
     spreadsheet = models.HedInput(filename=uploaded_file_name,
-                                  worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
+                                  worksheet_name=arguments.get(common.WORKSHEET_NAME, None),
                                   tag_columns=tag_columns,
                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
                                   column_prefix_dictionary=prefix_dict,
@@ -119,24 +122,28 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
         return results
 
     display_name = spreadsheet.get_display_name()
+    display_ext = os.path.splitext(secure_filename(display_name))[1]
 
     if command == common.COMMAND_TO_LONG:
         suffix = '_to_long'
-        issues = spreadsheet.convert_to_long(hed_schema)
+        # issues = spreadsheet.convert_to_long(hed_schema)
     else:
         suffix = '_to_short'
-        issues = spreadsheet.convert_to_short(hed_schema)
-    if issues:
-        issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} had conversion errors")
-        file_name = generate_filename(display_name, suffix='_conversion_errors', extension='.txt')
+        # issues = spreadsheet.convert_to_short(hed_schema)
 
-        return {common.COMMAND: common.command, 'data': issue_str, "output_display_name": file_name,
-                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
-                'msg': f"Spreadsheet {display_name} had conversion errors"}
-    else:
-        return {common.COMMAND: common.command, 'data': '',
-                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
-                'msg': f'Spreadsheet {display_name} had no conversion errors'}
+    spreadsheet.save(filename='myTemp.xlsx')
+    file_name = generate_filename(display_name, suffix=suffix, extension=display_ext)
+    # if issues:
+    #     issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} had conversion errors")
+    #     file_name = generate_filename(display_name, suffix='_conversion_errors_' + suffix, extension='.txt')
+    #
+    #     return {common.COMMAND: command, 'data': issue_str, "output_display_name": file_name,
+    #             common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+    #             'msg': f"Spreadsheet {display_name} had conversion errors"}
+    # else:
+    return {common.COMMAND: command, 'data': '', common.SPREADSHEET: spreadsheet, 'output_display_name': file_name,
+            common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+            'msg': f'Spreadsheet {display_name} converted_successfully'}
 
 
 def spreadsheet_validate(hed_schema, spreadsheet):

@@ -99,7 +99,7 @@ function showColumnPrefixes(columnNames, hasColumnNames=true) {
     columnPrefixTable.empty();
     let contents = columnHeader;
     for (let i = 1; i <= numberOfColumnNames; i++) {
-        let column = "Column_" + i
+        let column = "column_" + i
         let columnName = columnNames[i-1]
         if (!hasColumnNames || columnNames[i-1] === "") {
             columnName = column

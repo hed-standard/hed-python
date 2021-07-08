@@ -47,12 +47,12 @@ def get_input_from_service_request(request):
         arguments[common.EVENTS] = models.EventsInput(csv_string=service_request[common.EVENTS_STRING],
                                                       json_def_files=arguments.get(common.JSON_DICTIONARY, None),
                                                       display_name='Events')
-    if common.SPREADSHEET_STRING in service_request and service_request[common.SCHEMA_STRING]:
+    if common.SPREADSHEET_STRING in service_request and service_request[common.SPREADSHEET_STRING]:
         tag_columns, prefix_dict = get_prefix_dict(service_request)
         arguments[common.SPREADSHEET] = models.HedInput(tag_columns=tag_columns,
                                                         has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
                                                         column_prefix_dictionary=prefix_dict,
-                                                        csv_string=service_request[common.SCHEMA_STRING],
+                                                        csv_string=service_request[common.SPREADSHEET_STRING],
                                                         display_name='spreadsheet')
     if common.SCHEMA_STRING in service_request and service_request[common.SCHEMA_STRING]:
         arguments[common.SCHEMA] = hedschema.from_string(service_request[common.SCHEMA_STRING])
@@ -103,6 +103,14 @@ def services_process(arguments):
         elif service == "events_validate":
             arguments['command'] = common.COMMAND_VALIDATE
             response["results"] = events_process(arguments)
+        elif service == "spreadsheet_to_long":
+            arguments['command'] = common.COMMAND_TO_LONG
+            results = spreadsheet_process(arguments)
+            response["results"] = package_spreadsheet(results)
+        elif service == "spreadsheet_to_short":
+            arguments['command'] = common.COMMAND_TO_SHORT
+            results = spreadsheet_process(arguments)
+            response["results"] = package_spreadsheet(results)
         elif service == "spreadsheet_validate":
             arguments['command'] = common.COMMAND_VALIDATE
             response["results"] = spreadsheet_process(arguments)
@@ -123,6 +131,12 @@ def services_process(arguments):
         response['error_type'] = errors['error_type']
         response['error_msg'] = errors['error_msg']
     return response
+
+
+def package_spreadsheet(results):
+    if results['msg_category'] == 'success' and common.SPREADSHEET in results:
+        results[common.SPREADSHEET] = results[common.SPREADSHEET].to_csv()
+    return results
 
 
 def services_list():

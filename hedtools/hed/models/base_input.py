@@ -80,8 +80,17 @@ class BaseInput:
         # finally add the new file dict to the mapper.
         mapper.update_definition_mapper_with_file(self.file_def_dict)
 
+    def get_dataframe(self):
+        return self._dataframe
+
     def get_display_name(self):
         return self._display_name
+
+    def has_column_names(self):
+        return self._has_column_names
+
+    def get_worksheet_name(self):
+        return self._worksheet_name
 
     def convert_to_short(self, hed_schema, error_handler=None):
         """

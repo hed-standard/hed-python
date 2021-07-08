@@ -1,7 +1,11 @@
 import os
+import io
 import pathlib
+import pandas as pd
+import xlsxwriter
+
 from urllib.parse import urlparse
-from flask import current_app, Response
+from flask import current_app, Response, send_file
 from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
@@ -81,47 +85,13 @@ def form_has_url(request, url_field, valid_extensions):
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
 
-def generate_response_download_file_from_text(download_text, display_name=None,
-                                              header=None, msg_category='success', msg=''):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    download_text: str
-        Text with newlines for iterating.
-    display_name: str
-        Name to be assigned to the file in the response
-    header: str
-        Optional header -- header for download file blob
-    msg_category: str
-        Category of the message to be displayed ('Success', 'Error', 'Warning')
-    msg: str
-        Optional message to be displayed in the submit-flash-field
-
-    Returns
-    -------
-    response object
-        A response object containing the downloaded file.
-
-    """
-    if not display_name:
-        display_name = 'download.txt'
-
-    if not download_text:
-        raise HedFileError('EmptyDownloadText', f"No download text given", "")
-
-    def generate():
-        if header:
-            yield header
-        for issue in download_text.splitlines(True):
-            yield issue
-
-    return Response(generate(), mimetype='text/plain charset=utf-8',
-                    headers={'Content-Disposition': f"attachment filename={display_name}",
-                             'Category': msg_category, 'Message': msg})
+def generate_excel_download_response():
+    print('hello')
 
 
-def generate_download_file_response(download_file, display_name=None, header=None, category='success', msg=''):
+
+
+def generate_download_file(download_file, display_name=None, header=None, category='success', msg=''):
     """Generates a download other response.
 
     Parameters
@@ -163,6 +133,65 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     return Response(generate(), mimetype='text/plain charset=utf-8',
                     headers={'Content-Disposition': f"attachment filename={display_name}",
                              'Category': category, 'Message': msg})
+
+def generate_response_download_file_from_text(download_text, display_name=None,
+                                              header=None, msg_category='success', msg=''):
+    """Generates a download other response.
+
+    Parameters
+    ----------
+    download_text: str
+        Text with newlines for iterating.
+    display_name: str
+        Name to be assigned to the file in the response
+    header: str
+        Optional header -- header for download file blob
+    msg_category: str
+        Category of the message to be displayed ('Success', 'Error', 'Warning')
+    msg: str
+        Optional message to be displayed in the submit-flash-field
+
+    Returns
+    -------
+    response object
+        A response object containing the downloaded file.
+
+    """
+    if not display_name:
+        display_name = 'download.txt'
+
+    if not download_text:
+        raise HedFileError('EmptyDownloadText', f"No download text given", "")
+
+    def generate():
+        if header:
+            yield header
+        for issue in download_text.splitlines(True):
+            yield issue
+
+    return Response(generate(), mimetype='text/plain charset=utf-8',
+                    headers={'Content-Disposition': f"attachment filename={display_name}",
+                             'Category': msg_category, 'Message': msg})
+
+
+def generate_download_spreadsheet(spreadsheet, display_name, msg_category='success', msg=''):
+    df = spreadsheet.get_dataframe()
+    ext = os.path.splitext(secure_filename(display_name))[1]
+    buffer = io.BytesIO()
+    if ext == '.xlsx':
+        writer = pd.ExcelWriter(buffer, engine="openpyxl")
+        df.to_excel(writer, sheet_name='temp1', index=False)
+        writer.save()
+        writer.close()
+    else:
+        df.to_csv(buffer, '\t', index=False, header=spreadsheet.has_column_names())
+    buffer.seek(0)
+    print(display_name)
+    response = send_file(buffer, as_attachment=True, download_name=display_name)
+    response.headers['Category'] = msg_category
+    response.headers['Message'] = msg
+    response.headers['Content-Transfer-Encoding'] = 'Base64'
+    return response
 
 
 def generate_text_response(download_text, msg_category='success', msg=''):
@@ -299,10 +328,12 @@ def handle_http_error(ex):
 def package_results(results):
     msg = results.get('msg', '')
     msg_category = results.get('msg_category', 'success')
-
+    display_name = results.get('output_display_name', '')
     if results['data']:
-        display_name = results.get('output_display_name', '')
         return generate_response_download_file_from_text(results['data'], display_name=display_name,
                                                          msg_category=msg_category, msg=msg)
+    elif results.get('spreadsheet', None):
+        return generate_download_spreadsheet(results['spreadsheet'], display_name=display_name,
+                                                           msg_category=msg_category, msg=msg)
     else:
         return generate_text_response("", msg=msg, msg_category=msg_category)

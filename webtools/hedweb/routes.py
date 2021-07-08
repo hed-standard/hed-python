@@ -46,7 +46,7 @@ def dictionary_results():
         download file
         A text file with the validation errors.
     """
-    input_arguments = {}
+
     try:
         input_arguments = dictionary.get_input_from_dictionary_form(request)
         a = dictionary.dictionary_process(input_arguments)
@@ -64,7 +64,7 @@ def events_results():
         downloadable file
         Contains the results of processing
     """
-    input_arguments = {}
+
     try:
         input_arguments = events.get_input_from_events_form(request)
         a = events.events_process(input_arguments)
@@ -165,11 +165,10 @@ def spreadsheet_results():
     try:
         input_arguments = spreadsheet.get_input_from_spreadsheet_form(request)
         a = spreadsheet.spreadsheet_process(input_arguments)
-        return package_results(a)
+        response = package_results(a)
+        return response
     except Exception as ex:
         return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.SPREADSHEET_PATH, ''))
 
 
 @route_blueprint.route(route_constants.STRING_SUBMIT_ROUTE, strict_slashes=False, methods=['GET', 'POST'])

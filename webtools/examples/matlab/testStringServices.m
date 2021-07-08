@@ -1,12 +1,12 @@
 %% Shows how to call hed-services to process a list of hedstrings.
 % 
-%  Example 1: Validate a correct list of strings. HED schema is version.
+%  Example 1: Validate valid list of strings using HED version.
 %
-%  Example 2: Validate an incorrect list of strings. HED schema is URL.
+%  Example 2: Validate invalid list of strings using HED URL.
 %
-%  Example 3: Validate an incorrect list of strings. Upload HED schema.
+%  Example 3: Validate invalid list of strings uploading HED schema.
 %
-%  Example 4: Convert valid strings to long. HED schema is version.
+%  Example 4: Convert valid strings to long using HED version.
 %
 %% Setup requires a csrf_url and services_url. Must set header and options.
 host = 'http://127.0.0.1:5000';
@@ -21,7 +21,7 @@ header = ["Content-Type" "application/json"; ...
 options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
                  
-%% Example 1: Validate a correct list of strings. HED schema is version.
+%% Example 1: Validate invalid list of strings using HED URL.
 sdata1 = get_input_template();
 sdata1.service = 'string_validate';
 sdata1.schema_version = '8.0.0-alpha.1';
@@ -40,17 +40,16 @@ response2 = webwrite(services_url, sdata2, options);
 response2 = jsondecode(response2);
 output_report(response2, 'Example 2 output');
 
-%% Example 3: Validate an incorrect list of strings. Upload HED schema.
+%% Example 3: Validate invalid list of strings uploading HED schema.
 sdata3 = get_input_template();
 sdata3.service = 'string_validate';
-sdata3.schema_url = ['https://raw.githubusercontent.com/hed-standard/' ...
-    'hed-specification/master/hedxml/HED8.0.0-alpha.1.xml'];
+sdata3.schema_string = fileread('../data/HED8.0.0-alpha.1.xml');
 sdata3.string_list = {['Red,Blue,Blech'], ['Green'], ['White,Black,Binge']}; 
 response3 = webwrite(services_url, sdata3, options);
 response3 = jsondecode(response3);
 output_report(response3, 'Example 3 output');
 
-%% Example 4: Convert valid strings to long. HED schema is version.
+%% Example 4: Convert valid strings to long using HED version.
 sdata4 = get_input_template();
 sdata4.service = 'string_to_long';
 schema_text = fileread('../data/HED8.0.0-alpha.1.xml');

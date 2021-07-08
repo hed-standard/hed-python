@@ -1,4 +1,4 @@
-HED version: 8.0.0-alpha.3
+HED version="8.0.0-alpha.3"
 
 !# start schema 
 
@@ -1156,6 +1156,7 @@ HED version: 8.0.0-alpha.3
 * yocto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-24]</nowiki> 
 * y <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-24]</nowiki>  
 
+'''Value classes''' <nowiki>[Specification of the rules for the values provided by users.]</nowiki>
 
 '''Schema attributes'''
 * allowedCharacter <nowiki>{unitClassProperty}[A schema attribute of unit classes specifying a special character that is allowed in expressing the value of a placeholder with those units.]</nowiki>
@@ -1177,11 +1178,15 @@ HED version: 8.0.0-alpha.3
 * unitClass <nowiki>[A schema attribute specifying which unit class this value tag belongs to.]</nowiki> 
 * unitPrefix <nowiki>{boolProperty, unitProperty}[A schema attribute applied specifically to unit elements to designate that the unit indicator is a prefix (e.g., dollar sign in the currency units).]</nowiki> 
 * unitSymbol <nowiki>{boolProperty, unitProperty}[A schema attribute indicating this tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
-!# end hed 
 
+'''Properties''' <nowiki>[Properties of the schema attributes themselves. These are used for schema handling and verification.]</nowiki>
+
+'''Epilogue'''
 This is the new format for the mediawiki schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties. These are:
 
 * boolProperty - indicates that that attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.
 * unitClassProperty - indicates that this attribute is designed to be applied to unit classes.
 * unitModifierProperty - indicates that this attribute is designed to be applied to unit classes.
 * unitProperty - indicates that this a applies to units within a unit class. 
+
+!# end hed 

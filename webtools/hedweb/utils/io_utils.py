@@ -4,7 +4,7 @@ import tempfile
 
 import openpyxl
 from flask import current_app
-from hed import models, schema as hedschema
+from hed import models
 from hed.errors.exceptions import HedFileError
 from hed.util.file_util import delete_file_if_it_exists, get_file_extension
 from hedweb.constants import file_constants
@@ -111,6 +111,11 @@ def generate_filename(base_name, prefix=None, suffix=None, extension=None):
     filename = pieces[0]
     for name in pieces[1:]:
         filename = filename + '_' + name
+    # if not extension and base_name:
+    #     extension = os.path.splitext(secure_filename(base_name))[1]
+    # else:
+    #     extension = ''
+    # filename = filename + '.' + secure_filename(extension)
     if extension:
         filename = filename + '.' + secure_filename(extension)
     return filename
@@ -132,10 +137,10 @@ def get_prefix_dict(form_dict):
     prefix_dict = {}
     keys = form_dict.keys()
     for key in keys:
-        if not key.startswith('Column') or key.endswith('check'):
+        if not key.startswith('column') or key.endswith('check'):
             continue
         pieces = key.split('_')
-        check = 'Column_' + pieces[1] + '_check'
+        check = 'column_' + pieces[1] + '_check'
         if form_dict.get(check, None) != 'on':
             continue
         if form_dict[key]:

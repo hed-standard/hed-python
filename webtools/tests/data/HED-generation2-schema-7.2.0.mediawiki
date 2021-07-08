@@ -1,5 +1,6 @@
-HED version: 7.2.0
+HED version="7.2.0"
 
+'''Prologue'''
 Changelog
 * 3/16/2021: v.7.2.0 Adopted the new format for mediawiki files.
 * 11/22/2020: v. 7.1.2 Add extensionAllowed to top-level Item subtree.
@@ -1287,6 +1288,7 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 * yocto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-24]</nowiki> 
 * y <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-24]</nowiki>  
 
+'''Value classes''' <nowiki>[Specification of the rules for the values provided by users.]</nowiki>
 
 '''Schema attributes'''
 * default <nowiki>[Tag assumed to be present if not explicitly given.]</nowiki> 
@@ -1303,8 +1305,11 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 * SIUnitSymbolModifier <nowiki>[SI unit symbol modifier indicating a multiple or submultiple of a base unit symbol.]</nowiki> 
 * takesValue <nowiki>[This tag will have a "#" placeholder child in the schema which is expected to be replaced with a user-defined value.] </nowiki> 
 * unique <nowiki>[Only one of this tag or its descendants can be used within a single tag group or event.]</nowiki> 
-* unitSymbol <nowiki>[Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.]</nowiki> 
+* unitSymbol <nowiki>[Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
+
+'''Properties''' <nowiki>[Properties of the schema attributes themselves. These are used for schema handling and verification.]</nowiki>
+
+'''Epilogue'''
+Note: This is the new version of the .mediawiki designed to support prologues and epilogues.
 
 !# end hed
-
-Note: This is the new version of the .mediawiki designed to support prologues and epilogues.

@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         else:
             self.fail('spreadsheet_process should have thrown a HedFileError exception when spreadsheet-path was empty')
 
-    def test_spreadsheet_process(self):
+    def test_spreadsheet_process_validate_invalid(self):
         from hedweb.spreadsheet import spreadsheet_process
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
                                       worksheet_name='LKT Events',
                                       tag_columns=[5],
                                       has_column_names=True,
-                                      column_prefix_dictionary= prefix_dict,
+                                      column_prefix_dictionary=prefix_dict,
                                       display_name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
                      common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
@@ -67,7 +67,7 @@ class Test(unittest.TestCase):
             self.assertEqual('warning', results['msg_category'],
                              'spreadsheet_process validate should give warning when spreadsheet has errors')
             self.assertTrue(results['data'],
-                            'spreadsheet_process should validate using HED 8.0.0-beta.1')
+                            'spreadsheet_process validate should return validation errors using HED 8.0.0-beta.1')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
             self.assertEqual('success', results['msg_category'],
                              'spreadsheet_process should return success if converted')
 
-    def test_spreadsheet_validate(self):
+    def test_spreadsheet_validate_valid_excel(self):
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
@@ -99,14 +99,59 @@ class Test(unittest.TestCase):
             self.assertEqual('success', results["msg_category"],
                              'spreadsheet_validate msg_category should be success when no errors')
 
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.3.xml')
+        prefix_dict = {2: "Attribute/Informational/Label/", 4: "Attribute/Informational/Description/"}
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        spreadsheet = models.HedInput(spreadsheet_path,
+                                      worksheet_name='LKT 8Beta3',
+                                      tag_columns=[5],
+                                      has_column_names=True,
+                                      column_prefix_dictionary=prefix_dict,
+                                      display_name=spreadsheet_path)
+        with self.app.app_context():
+            results = spreadsheet_validate(hed_schema, spreadsheet)
+            self.assertFalse(results['data'],
+                             'spreadsheet_validate results should not have a data key when no validation errors')
+            self.assertEqual('success', results["msg_category"],
+                             'spreadsheet_validate msg_category should be success when no errors')
+
+    def test_spreadsheet_validate_valid_excel(self):
+        from hedweb.spreadsheet import spreadsheet_validate
+        spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        prefix_dict = {2: "Attribute/Informational/Label/", 4: "Attribute/Informational/Description/"}
+        spreadsheet = models.HedInput(spreadsheet_path,
+                                      worksheet_name='LKT 8Beta3',
+                                      tag_columns=[5],
+                                      has_column_names=True,
+                                      column_prefix_dictionary=prefix_dict,
+                                      display_name=spreadsheet_path)
+        with self.app.app_context():
+            results = spreadsheet_validate(hed_schema, spreadsheet)
+            self.assertFalse(results['data'],
+                            'spreadsheet_validate results should have empty data when no errors')
+            self.assertEqual('success', results['msg_category'],
+                             'spreadsheet_validate msg_category should be success when no errors')
+
+    def test_spreadsheet_validate_invalid_excel(self):
+        from hedweb.spreadsheet import spreadsheet_validate
+        spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        prefix_dict = {2: "Attribute/Informational/Label/", 4: "Attribute/Informational/Description/"}
+        spreadsheet = models.HedInput(spreadsheet_path,
+                                      worksheet_name='LKT 8Beta3',
+                                      tag_columns=[5],
+                                      has_column_names=True,
+                                      column_prefix_dictionary=prefix_dict,
+                                      display_name=spreadsheet_path)
         with self.app.app_context():
             results = spreadsheet_validate(hed_schema, spreadsheet)
             self.assertTrue(results['data'],
-                            'spreadsheet_validate results should have a data key when validation errors')
+                            'spreadsheet_validate results should have empty data when errors')
             self.assertEqual('warning', results['msg_category'],
-                             'spreadsheet_validate msg_category should be warning when errors')
+                             'spreadsheet_validate msg_category should be warning when no erros')
 
 
 if __name__ == '__main__':

@@ -9,8 +9,9 @@
             "Parameters": [
                 "json_string",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ]
             ]
         },
@@ -19,8 +20,9 @@
             "Parameters": [
                 "json_string",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ]
             ]
         },
@@ -29,8 +31,9 @@
             "Parameters": [
                 "json_string",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ],
                 "check_for_warnings"
             ]
@@ -41,8 +44,9 @@
             "Parameters": [
                 "events_string",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ],
                 "json_string",
                 "check_for_warnings",
@@ -55,8 +59,9 @@
             "Parameters": [
                 "events_string",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ],
                 "json_string",
                 "check_for_warnings"
@@ -67,10 +72,16 @@
             "Parameters": [
                 "spreadsheet_string",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ],
-                "check_for_warnings"
+                [
+                    "column_x_input",
+                    "column_x_check"
+                ],
+                "check_for_warnings",
+                "has_column_names"
             ]
         },
         "strings_to_long": {
@@ -78,8 +89,9 @@
             "Parameters": [
                 "string_list",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ]
             ]
         },
@@ -88,8 +100,9 @@
             "Parameters": [
                 "string_list",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ]
             ]
         },
@@ -98,8 +111,9 @@
             "Parameters": [
                 "string_list",
                 [
-                    "schema_version",
-                    "schema_string"
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
                 ],
                 "check_for_warnings"
             ]
@@ -107,13 +121,16 @@
     },
     "meanings": {
         "check_for_warnings": "If true, check for warnings when validating.",
-        "defs_expand": "If true assembly expands definitions, replacing def/XXX with def-expand/XXX.",
+        "column_x_check"
+        "defs_expand": "If true, assembly expands definitions and replaces def/XXX with def-expand/XXX.",
         "events_string": "A BIDS events file as a string.",
+        "has_column_names": "If true, the first row of the spreadsheet is interpreted as column names.",
         "hed_columns": "A list of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are used.",
         "hed_strings": "List of HED strings to be processed.",
         "json_string": "JSON sidecar as a string",
         "json_strings": "A list of BIDS JSON sidecars as strings.",
         "schema_string": "HED XML schema as a string.",
+        "schema_url": "A URL from which a HED schema can be downloaded.",
         "schema_version": "Version of HED to used in processing.",
         "spreadsheet_string": "A spreadsheet tsv as a string."
     },
