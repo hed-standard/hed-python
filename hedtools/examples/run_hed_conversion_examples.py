@@ -29,14 +29,12 @@ def short_to_long_file(input_file, hed_schema, error_handler=None):
 
 def long_to_short_string(input_string, hed_schema):
     hed_string_obj = HedString(input_string)
-    errors = hed_string_obj.convert_to_short(hed_schema)
-    return str(hed_string_obj), errors
+    return hed_string_obj.convert_to_short(hed_schema)
 
 
 def short_to_long_string(input_string, hed_schema):
     hed_string_obj = HedString(input_string)
-    errors = hed_string_obj.convert_to_long(hed_schema)
-    return str(hed_string_obj), errors
+    return hed_string_obj.convert_to_long(hed_schema)
 
 
 if __name__ == '__main__':
