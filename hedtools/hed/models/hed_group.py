@@ -181,7 +181,7 @@ class HedGroup:
         str
             Returns the group as a string, returning all tags as short tags.
         """
-        return self._get_as_type("short_tag")
+        return self.get_as_form("short_tag")
 
     def get_as_long(self):
         """
@@ -192,23 +192,29 @@ class HedGroup:
         str
             Returns the group as a string, returning all tags as long tags.
         """
-        return self._get_as_type("long_tag")
+        return self.get_as_form("long_tag")
 
-    def _get_as_type(self, tag_attribute):
+    def get_as_form(self, tag_attribute, tag_transformer=None):
         """
 
         Parameters
         ----------
         tag_attribute : str
             The hed_tag property to use to construct the string.  Most commonly short_tag or long_tag.
-
+        tag_transformer: func or None
+            A function that is applied to each tag string before returning.
+            signature: str def(HedTag, str)
         Returns
         -------
         group_as_string: str
             The constructed string
         """
-        result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
-                           child._get_as_type(tag_attribute) for child in self._children])
+        if tag_transformer:
+            result = ",".join([tag_transformer(child, child.__getattribute__(tag_attribute)) if isinstance(child, HedTag) else
+                               child.get_as_form(tag_attribute, tag_transformer) for child in self._children])
+        else:
+            result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
+                               child.get_as_form(tag_attribute) for child in self._children])
         if self._include_paren:
             return f"({result})"
         return result
