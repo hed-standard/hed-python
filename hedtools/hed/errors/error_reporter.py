@@ -123,7 +123,6 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     org_tag_text = "PlaceholderYouShouldNotSee"
 
                 base_message, error_vars = func(org_tag_text, problem_sub_tag, *args, **kwargs)
-                base_message += f"  Problem spans tag indexes: {index_in_tag}, {index_in_tag_end}"
                 error_object = self._create_error_object(actual_code, base_message, severity, **error_vars,
                                                          index_in_tag=index_in_tag, index_in_tag_end=index_in_tag_end, source_tag=tag)
 
@@ -264,6 +263,8 @@ class ErrorHandler:
                     index_in_tag_end = start + error_object['index_in_tag_end']
                 new_end = index_in_tag_end
             error_object['char_index'], error_object['char_index_end'] = new_start, new_end
+            error_message += f"  Problem spans string indexes: {new_start}, {new_end}"
+            error_object['message'] = error_message
         return error_object
 
     @staticmethod

@@ -235,33 +235,27 @@ class ColumnMapper:
 
         return result_dict
 
-    def remove_prefix_if_needed(self, column_number, input_text):
+    def get_prefix_remove_func(self, column_number):
         """
-        Remove required prefix from the given text if the specified column has a prefix.
-
-        This is used when saving text back out to a spreadsheet, so we don't save the prefixes out.
+        Returns a function that will remove the prefix for the given column.
 
         Parameters
         ----------
         column_number : int
             numbered column to use prefix check from.
-        input_text : HedString
-            Text with a possible prefix
         Returns
         -------
-        prefix_removed_text : HedString
-            The string with the prefix removed, or the same string if no prefix present.
+            A function taking a tag and string, returning a string.
         """
         column_number -= 1
         if column_number not in self._final_column_map:
-            return input_text
+            return None
 
         entry = self._final_column_map[column_number]
         if not entry.column_prefix:
-            return input_text
+            return None
 
-        final_text = entry.remove_prefix_if_needed(input_text)
-        return final_text
+        return entry.remove_prefix_if_needed
 
     def _add_column_def(self, new_column_entry):
         """

@@ -4,6 +4,7 @@ from hed.validator.tag_validator import TagValidator
 from tests.validator.test_tag_validator_2g import TestHed
 from hed.models.hed_tag import HedTag
 
+
 class StringUtilityFunctions(TestHed):
     # def test_replace_tag_values_with_pound(self):
     #     slash_string = 'Event/Duration/4 ms'
