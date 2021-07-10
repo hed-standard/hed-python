@@ -101,18 +101,36 @@ function getFilenameFromResponseHeader(xhr, default_name) {
 
 /**
  * Gets standard failure response for download
- * @param {String} download - Downloaded string response blob
  * @param {Object} xhr - Dictionary containing Response header information
+ * @param {String} status - a status text message
+ * @param {String} errorThrown - name of the error thrown
  * @param {String} display_name - Name used for the downloaded blob file
  * @param {String} flash_location - ID of the flash location element for displaying response Message
  */
-function getResponseFailure(download, xhr, display_name, flash_location) {
-    let info = xhr.getResponseHeader('Message')
-    let category =  xhr.getResponseHeader('Category')
+function getResponseFailure( xhr, status, errorThrown, display_name, flash_location) {
+    let info = xhr.getResponseHeader('Message');
+    let category =  xhr.getResponseHeader('Category');
+    if (!info) {
+        info = 'Unknown processing error occurred';
+    }
+    info = info + '[Source: ' + display_name + ']' + '[Status:' + status + ']' + '[Error:' + errorThrown + ']';
+    flashMessageOnScreen(info, category, flash_location);
+}
+
+function getResponseSuccessA(download, xhr, display_name, flash_location) {
+    let info = xhr.getResponseHeader('Message');
+    let category =  xhr.getResponseHeader('Category');
+    let contentType = xhr.getResponseHeader('Content-type');
+    if (download) {
+        let filename = getFilenameFromResponseHeader(xhr, display_name)
+        triggerDownloadBlobA(download, filename, contentType);
+    }
+    // let info = xhr.getResponseHeader('Message');
+    // let category =  xhr.getResponseHeader('Category');
     if (info) {
         flashMessageOnScreen(info, category, flash_location);
     } else {
-        flashMessageOnScreen('Unknown processing error occurred for ' + display_name, 'error', flash_location);
+        flashMessageOnScreen('', 'success', flash_location);
     }
 }
 
@@ -138,10 +156,7 @@ function getResponseSuccess(download, xhr, display_name, flash_location) {
  * @returns {boolean} - True if the string is null or its length is 0.
  */
 function isEmptyStr(str) {
-    if (str === null || str.length === 0) {
-        return true;
-    }
-    return false;
+    return (str === null || str.length === 0)
 }
 
 
@@ -177,7 +192,21 @@ function splitExt(filename) {
  * Trigger the "save as" dialog for a text blob to save as a file with display name.
  */
 function triggerDownloadBlob(download_text_blob, display_name) {
-    const url = window.URL.createObjectURL(new Blob([download_text_blob]));
+    // const url = window.URL.createObjectURL(new Blob([download_text_blob]));
+    const url = URL.createObjectURL(new Blob([download_text_blob]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', display_name);
+    document.body.appendChild(link);
+    link.click();
+}
+
+/**
+ * Trigger the "save as" dialog for a text blob to save as a file with display name.
+ */
+function triggerDownloadBlobA(download_text_blob, display_name, content_type) {
+    // const url = window.URL.createObjectURL(new Blob([download_text_blob]));
+    const url = URL.createObjectURL(new Blob([download_text_blob], {type:content_type}));
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', display_name);

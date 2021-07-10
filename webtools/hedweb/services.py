@@ -53,7 +53,7 @@ def get_input_from_service_request(request):
                                                         has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
                                                         column_prefix_dictionary=prefix_dict,
                                                         csv_string=service_request[common.SPREADSHEET_STRING],
-                                                        display_name='spreadsheet')
+                                                        display_name='spreadsheet.tsv')
     if common.SCHEMA_STRING in service_request and service_request[common.SCHEMA_STRING]:
         arguments[common.SCHEMA] = hedschema.from_string(service_request[common.SCHEMA_STRING])
     elif common.SCHEMA_URL in service_request and service_request[common.SCHEMA_URL]:

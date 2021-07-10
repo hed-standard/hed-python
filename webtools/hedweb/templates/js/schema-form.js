@@ -143,8 +143,8 @@ function submitSchemaForm() {
             success: function (download, status, xhr) {
                 getResponseSuccess(download, xhr, display_name, 'schema_submit_flash')
             },
-            error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'schema_submit_flash')
+            error: function (xhr, status, errorThrown) {
+                getResponseFailure(xhr, status, errorThrown, display_name, 'schema_submit_flash')
             }
         }
     )

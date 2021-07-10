@@ -147,7 +147,8 @@ def services_results():
     try:
         arguments = services.get_input_from_service_request(request)
         status = services.services_process(arguments)
-        return json.dumps(status)
+        a = json.dumps(status)
+        return a
     except Exception as ex:
         return handle_error(ex)
 

@@ -35,7 +35,7 @@ $('#spreadsheet_file').on('change', function () {
     let worksheetName = undefined
     if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
         worksheetName = $('#worksheet_name option:selected').text();
-        $('#worksheet_select').show();;
+        $('#worksheet_select').show();
     }
     else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
         $('#worksheet_name').empty();
@@ -77,8 +77,8 @@ function clearForm() {
     $('#spreadsheet_form')[0].reset();
     $('#spreadsheet_display_name').text('');
     $('#worksheet_name').empty();
+    $('#worksheet_select').hide();
     hideColumnInfo(true);
-    hideWorksheetSelect()
     hideOtherSchemaVersionFileUpload()
 }
 
@@ -121,11 +121,7 @@ function populateWorksheetDropdown(worksheetNames) {
 function prepareForm() {
     clearForm();
     getSchemaVersions()
-    hideColumnInfo(true);
-    hideWorksheetSelect();
-    hideOtherSchemaVersionFileUpload();
 }
-
 
 /**
  * Show the worksheet select section.
@@ -133,7 +129,6 @@ function prepareForm() {
 function showWorksheetSelect() {
     $('#worksheet_select').show();
 }
-
 
 /**
  * Submit the form and return the results. If there are issues then they are returned in an attachment
@@ -151,21 +146,41 @@ function submitForm() {
     let spreadsheetFile = $('#spreadsheet_file')[0].files[0].name;
     let display_name = convertToResultsName(spreadsheetFile, prefix)
     clearFlashMessages();
-    flashMessageOnScreen('Worksheet is being validated ...', 'success',
+    flashMessageOnScreen('Spreadsheet is being processed ...', 'success',
         'spreadsheet_submit_flash')
-    $.ajax({
-            type: 'POST',
-            url: "{{url_for('route_blueprint.spreadsheet_results')}}",
-            data: formData,
-            contentType: false,
-            processData: false,
-            dataType: 'text',
-            success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'spreadsheet_submit_flash')
-            },
-            error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'spreadsheet_submit_flash')
+    if (fileHasValidExtension(spreadsheetFile, EXCEL_FILE_EXTENSIONS) &&
+        !$("#command_validate").prop("checked")) {
+       $.ajax({
+                type: 'POST',
+                url: "{{url_for('route_blueprint.spreadsheet_results')}}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                success: function (data, status, xhr) {
+                    let x = status
+                    getResponseSuccessA(data, xhr, display_name, 'spreadsheet_submit_flash')
+                },
+                error: function (xhr, status, errorThrown) {
+                    getResponseFailure(xhr, status, errorThrown, display_name, 'spreadsheet_submit_flash')
+                }
             }
-        }
-    )
+        )
+    } else {
+        $.ajax({
+                type: 'POST',
+                url: "{{url_for('route_blueprint.spreadsheet_results')}}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'text',
+                success: function (download, status, xhr) {
+                    getResponseSuccess(download, xhr, display_name, 'spreadsheet_submit_flash')
+                },
+                error: function (xhr, status, errorThrown) {
+                    getResponseFailure(xhr, status, errorThrown, display_name, 'spreadsheet_submit_flash')
+                }
+            }
+        )
+    }
 }

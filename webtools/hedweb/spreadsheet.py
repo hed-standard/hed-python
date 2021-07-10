@@ -131,7 +131,6 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
         suffix = '_to_short'
         # issues = spreadsheet.convert_to_short(hed_schema)
 
-    spreadsheet.save(filename='myTemp.xlsx')
     file_name = generate_filename(display_name, suffix=suffix, extension=display_ext)
     # if issues:
     #     issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} had conversion errors")

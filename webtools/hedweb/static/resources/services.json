@@ -121,7 +121,8 @@
     },
     "meanings": {
         "check_for_warnings": "If true, check for warnings when validating.",
-        "column_x_check"
+        "column_x_check": "If present with value 'on' indicates that column number x has HED tags",
+        "column_x_input": "Contains the prefix appended to column x if x has HED tags.",
         "defs_expand": "If true, assembly expands definitions and replaces def/XXX with def-expand/XXX.",
         "events_string": "A BIDS events file as a string.",
         "has_column_names": "If true, the first row of the spreadsheet is interpreted as column names.",
