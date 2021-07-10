@@ -83,7 +83,7 @@ class HedString(HedGroup):
         return short_string, conversion_issues
 
     def convert_to_original(self):
-        return self._get_as_type("org_tag")
+        return self.get_as_form("org_tag")
 
     @staticmethod
     def split_hed_string_into_groups(hed_string, also_return_flat_version=False):

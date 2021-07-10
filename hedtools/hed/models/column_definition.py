@@ -220,14 +220,16 @@ class ColumnDef:
 
         return required_tag_column_tags
 
-    def remove_prefix_if_needed(self, original_text):
+    def remove_prefix_if_needed(self, original_tag, current_tag_text):
         """
         Remove prefix from all tags in given hed string if this column has a required prefix
 
         Parameters
         ----------
-        original_text : HedString
-            Input text, generally from a single cell of a spreadsheet
+        original_tag: HedTag
+            The original hed tag being written.
+        current_tag_text : str
+            A single tag as a string, in any form.
 
         Returns
         -------
@@ -236,11 +238,11 @@ class ColumnDef:
         """
         prefix_to_remove = self.column_prefix
         if not prefix_to_remove:
-            return original_text
+            return current_tag_text
 
-        for tag in original_text.get_all_tags():
-            tag.remove_prefix_if_present(prefix_to_remove)
-        return original_text
+        if current_tag_text.lower().startswith(prefix_to_remove.lower()):
+            current_tag_text = current_tag_text[len(prefix_to_remove):]
+        return current_tag_text
 
     @staticmethod
     def _detect_column_def_type(dict_for_entry):

@@ -116,7 +116,7 @@ class BaseInput:
             for column_number in column_to_hed_tags_dictionary:
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_short(hed_schema, error_handler=error_handler)
+                error_list += column_hed_string.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
                 self.set_cell(row_number, column_number, column_hed_string,
                               include_column_prefix_if_exist=False)
                 error_handler.pop_error_context()
@@ -147,9 +147,9 @@ class BaseInput:
             for column_number in column_to_hed_tags_dictionary:
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_long(hed_schema, error_handler=error_handler)
+                error_list += column_hed_string.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
                 self.set_cell(row_number, column_number, column_hed_string,
-                              include_column_prefix_if_exist=False)
+                              include_column_prefix_if_exist=False, tag_form="long_tag")
                 error_handler.pop_error_context()
             error_handler.pop_error_context()
 
@@ -323,7 +323,8 @@ class BaseInput:
             else:
                 yield row_number + start_at_one, row_dict[model_constants.COLUMN_TO_HED_TAGS]
 
-    def set_cell(self, row_number, column_number, new_text, include_column_prefix_if_exist=False):
+    def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
+                 tag_form="short_tag"):
         """
 
         Parameters
@@ -332,25 +333,29 @@ class BaseInput:
             The row number of the spreadsheet to set
         column_number : int
             The column number of the spreadsheet to set
-        new_text : HedString
+        new_string_obj : HedString
             Text to enter in the given cell
         include_column_prefix_if_exist : bool
             If true and the column matches one from mapper _column_prefix_dictionary, remove the prefix
-
+        tag_form: str
+            The version of the tags we would like to use from the hed string.(short_tag, long_tag, base_tag, etc)
+            Any attribute of a HedTag that returns a string is valid.
         Returns
         -------
 
         """
-        if not include_column_prefix_if_exist:
-            new_text = self._mapper.remove_prefix_if_needed(column_number, new_text)
-
         if self._dataframe is None:
             raise ValueError("No data frame loaded")
 
+        transform_func = None
+        if not include_column_prefix_if_exist:
+            transform_func = self._mapper.get_prefix_remove_func(column_number)
+
+        new_text = new_string_obj.get_as_form(tag_form, transform_func)
         adj_row_number = 1
         if self._has_column_names:
             adj_row_number += 1
-        self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = str(new_text)
+        self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = new_text
 
     @staticmethod
     def _get_row_hed_tags_from_dict(row_dict):
