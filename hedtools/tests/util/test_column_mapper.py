@@ -128,7 +128,9 @@ class Test(unittest.TestCase):
     def test_remove_prefix_if_needed(self):
         mapper = ColumnMapper()
         mapper.set_column_prefix_dict({self.add_column_number: self.required_prefix})
-        no_prefix_string = mapper.remove_prefix_if_needed(self.add_column_number, HedString(self.complex_hed_tag_required_prefix))
+        remove_prefix_func = mapper.get_prefix_remove_func(self.add_column_number)
+        test_string_obj = HedString(self.complex_hed_tag_required_prefix)
+        no_prefix_string = test_string_obj.get_as_form("org_tag", remove_prefix_func)
         self.assertEqual(str(no_prefix_string), str(self.complex_hed_tag_no_prefix))
 
     def test_subtract_1_from_dictionary_keys(self):
