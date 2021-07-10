@@ -15,7 +15,7 @@ from hed.models import model_constants
 class BaseInput:
     """Handles parsing the actual on disk hed files to a more general format."""
     TEXT_EXTENSION = ['.tsv', '.txt']
-    EXCEL_EXTENSION = ['.xls', '.xlsx']
+    EXCEL_EXTENSION = ['.xlsx']
     FILE_EXTENSION = [*TEXT_EXTENSION, *EXCEL_EXTENSION]
     STRING_INPUT = 'string'
     FILE_INPUT = 'file'
