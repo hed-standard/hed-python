@@ -1,6 +1,6 @@
 """
 This module contains the EventValidator class which is used to validate the tags in a HED string or a file. The file
-types include .tsv, .txt, .xls, and .xlsx. To get the validation issues after creating a EventValidator class call
+types include .tsv, .txt,, and .xlsx. To get the validation issues after creating a EventValidator class call
 the get_validation_issues() function.
 
 """
