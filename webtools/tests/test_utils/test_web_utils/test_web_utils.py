@@ -4,6 +4,7 @@ import shutil
 from shutil import copyfile
 import unittest
 from unittest import mock
+from openpyxl import load_workbook
 
 from flask import Response
 from werkzeug.datastructures import Headers
@@ -92,7 +93,18 @@ class Test(unittest.TestCase):
         self.assertFalse(os.path.isfile(temp_file), "Dummy has been deleted")
 
     def test_generate_text_response(self):
-        self.assertTrue(True, "Testing to be done")
+        with self.app.test_request_context():
+            from hedweb.utils.web_utils import generate_text_response
+            text = "The quick brown fox."
+            message = "My mess"
+            response = generate_text_response(text, msg_category='success', msg=message)
+            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual(200, response.status_code, 'generate_download_text should return status code 200')
+            self.assertEqual(message, headers_dict['Message'], 'The message should match')
+            self.assertEqual('success', headers_dict['Category'], "The category should be success")
+            str_data = str(response.data, 'utf-8')
+            self.assertEqual(text, str_data, "The data sent should be the same")
 
     def test_generate_download_spreadsheet_excel(self):
         with self.app.test_request_context():
@@ -100,7 +112,7 @@ class Test(unittest.TestCase):
             from hed.models import HedInput
             from hedweb.utils.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                            '../../data/ExcelMultipleSheets.xlsx')
+                                            '../../data/ExcelOneSheet.xlsx')
 
             spreadsheet = HedInput(filename=spreadsheet_path, worksheet_name='LKT 8Beta3',
                                    tag_columns=[5], has_column_names=True,
@@ -110,7 +122,12 @@ class Test(unittest.TestCase):
             response = generate_download_spreadsheet(spreadsheet,
                                                      display_name='ExcelMultipleSheets_download.xlsx',
                                                      msg_category='success', msg='Successful download')
+
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response')
+            wb = load_workbook(filename=io.BytesIO(response.data))
+            headers_dict = dict(response.headers)
+            self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
+
 
     def test_generate_download_spreadsheet_tsv(self):
         with self.app.test_request_context():
@@ -136,7 +153,6 @@ class Test(unittest.TestCase):
             x = int(headers_dict['Content-Length'])
             self.assertGreater(int(headers_dict['Content-Length']), 0,
                                "generate_download_spreadsheet download should be non-empty")
-            print("to here")
 
     def test_get_hed_path_from_pull_down(self):
         mock_form = mock.Mock()

@@ -1,7 +1,7 @@
 BYTE_LIMIT = -1
 TEXT_EXTENSION = '.txt'
-SPREADSHEET_FILE_EXTENSIONS = ['.xls', '.xlsx', '.txt', '.tsv']
-EXCEL_FILE_EXTENSIONS = ['.xls', '.xlsx']
+SPREADSHEET_FILE_EXTENSIONS = ['.xlsx', '.txt', '.tsv']
+EXCEL_FILE_EXTENSIONS = ['.xlsx']
 DICTIONARY_FILE_EXTENSIONS = ['.json']
 TEXT_FILE_EXTENSIONS = ['.txt', '.tsv']
 SCHEMA_WIKI_EXTENSION = '.mediawiki'

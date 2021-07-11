@@ -2,7 +2,6 @@ import os
 import io
 import pathlib
 import pandas as pd
-import xlsxwriter
 
 from urllib.parse import urlparse
 from flask import current_app, Response, send_file
@@ -89,8 +88,6 @@ def generate_excel_download_response():
     print('hello')
 
 
-
-
 def generate_download_file(download_file, display_name=None, header=None, category='success', msg=''):
     """Generates a download other response.
 
@@ -134,6 +131,7 @@ def generate_download_file(download_file, display_name=None, header=None, catego
                     headers={'Content-Disposition': f"attachment filename={display_name}",
                              'Category': category, 'Message': msg})
 
+
 def generate_response_download_file_from_text(download_text, display_name=None,
                                               header=None, msg_category='success', msg=''):
     """Generates a download other response.
@@ -174,7 +172,22 @@ def generate_response_download_file_from_text(download_text, display_name=None,
                              'Category': msg_category, 'Message': msg})
 
 
+def generate_download_test():
+    import openpyxl
+    spath = 'd:/ExcelOneSheet.xlsx'
+    wb_obj = openpyxl.load_workbook(spath)
+    file = io.BytesIO()
+    wb_obj.save(file)
+    file.seek(0)
+    response = send_file(file, download_name=f"temp.xlsx", as_attachment=True)
+    response.direct_passthrough = False
+    response.headers['Category'] = 'success'
+    response.headers['Message'] = 'test'
+    return response
+
+
 def generate_download_spreadsheet(spreadsheet, display_name, msg_category='success', msg=''):
+    # return generate_download_test()
     df = spreadsheet.get_dataframe()
     ext = os.path.splitext(secure_filename(display_name))[1]
     buffer = io.BytesIO()
@@ -186,11 +199,12 @@ def generate_download_spreadsheet(spreadsheet, display_name, msg_category='succe
     else:
         df.to_csv(buffer, '\t', index=False, header=spreadsheet.has_column_names())
     buffer.seek(0)
-    print(display_name)
     response = send_file(buffer, as_attachment=True, download_name=display_name)
     response.headers['Category'] = msg_category
     response.headers['Message'] = msg
-    response.headers['Content-Transfer-Encoding'] = 'Base64'
+    # response.headers['Content-Transfer-Encoding'] = 'Base64'
+    # response.implicit_sequence_conversion = False
+    response.direct_passthrough = False
     return response
 
 
@@ -334,6 +348,6 @@ def package_results(results):
                                                          msg_category=msg_category, msg=msg)
     elif results.get('spreadsheet', None):
         return generate_download_spreadsheet(results['spreadsheet'], display_name=display_name,
-                                                           msg_category=msg_category, msg=msg)
+                                             msg_category=msg_category, msg=msg)
     else:
         return generate_text_response("", msg=msg, msg_category=msg_category)
