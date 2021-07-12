@@ -40,12 +40,12 @@ class BaseInput:
              retrieve all columns as hed tags.
          csv_string: str or None
             The data to treat as this file.  eg web services passing a string.
+         display_name: str or None
+            Optional field for how this file will report errors.
          """
         if mapper is None:
             mapper = ColumnMapper()
         self._mapper = mapper
-        self._filename = filename
-        self._worksheet_name = worksheet_name
         self._has_column_names = has_column_names
         self._display_name = display_name
         pandas_header = 0
@@ -54,15 +54,16 @@ class BaseInput:
 
         self._dataframe = None
         if not filename and not csv_string:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Filename specified and no string data passed in", filename)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND,
+                               "Filename specified and no string data passed in", filename)
 
-        if csv_string or self.is_text_file():
+        if csv_string or self.is_text_file(filename):
             csv_filename_or_data = filename
             if csv_string:
                 csv_filename_or_data = io.StringIO(csv_string)
             self._dataframe = pandas.read_csv(csv_filename_or_data, delimiter='\t', header=pandas_header)
-        elif self.is_spreadsheet_file():
-            worksheet_to_load = self._worksheet_name
+        elif self.is_spreadsheet_file(filename):
+            worksheet_to_load = worksheet_name
             if worksheet_to_load is None:
                 worksheet_to_load = 0
             self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header,
@@ -83,14 +84,46 @@ class BaseInput:
     def get_dataframe(self):
         return self._dataframe
 
-    def get_display_name(self):
+    @property
+    def display_name(self):
         return self._display_name
 
     def has_column_names(self):
         return self._has_column_names
 
-    def get_worksheet_name(self):
-        return self._worksheet_name
+    def _convert_to_form(self, hed_schema, tag_form, error_handler):
+        """
+        Converts all tags in a given spreadsheet to a given form
+
+        Parameters
+        ----------
+        hed_schema : HedSchema
+            The schema to use to convert tags.
+        tag_form: str
+            The form to convert the tags to.  (short_tag, long_tag, base_tag, etc)
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+
+        Returns
+        -------
+        issues_list: [{}]
+            A list of issues found during conversion
+        """
+        if error_handler is None:
+            error_handler = ErrorHandler()
+        error_list = []
+        for row_number, column_to_hed_tags_dictionary in self:
+            error_handler.push_error_context(ErrorContext.ROW, row_number)
+            for column_number in column_to_hed_tags_dictionary:
+                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                column_hed_string = column_to_hed_tags_dictionary[column_number]
+                error_list += column_hed_string.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
+                self.set_cell(row_number, column_number, column_hed_string,
+                              include_column_prefix_if_exist=False, tag_form=tag_form)
+                error_handler.pop_error_context()
+            error_handler.pop_error_context()
+
+        return error_list
 
     def convert_to_short(self, hed_schema, error_handler=None):
         """
@@ -108,20 +141,7 @@ class BaseInput:
         issues_list: [{}]
             A list of issues found during conversion
         """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        error_list = []
-        for row_number, column_to_hed_tags_dictionary in self:
-            error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number in column_to_hed_tags_dictionary:
-                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
-                self.set_cell(row_number, column_number, column_hed_string,
-                              include_column_prefix_if_exist=False)
-                error_handler.pop_error_context()
-            error_handler.pop_error_context()
-        return error_list
+        return self._convert_to_form(hed_schema, "short_tag", error_handler)
 
     def convert_to_long(self, hed_schema, error_handler=None):
         """
@@ -139,21 +159,7 @@ class BaseInput:
         issues_list: [{}]
             A list of issues found during conversion
         """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        error_list = []
-        for row_number, column_to_hed_tags_dictionary in self:
-            error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number in column_to_hed_tags_dictionary:
-                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
-                self.set_cell(row_number, column_number, column_hed_string,
-                              include_column_prefix_if_exist=False, tag_form="long_tag")
-                error_handler.pop_error_context()
-            error_handler.pop_error_context()
-
-        return error_list
+        return self._convert_to_form(hed_schema, "long_tag", error_handler)
 
     def extract_definitions(self, error_handler=None):
         """
@@ -161,8 +167,6 @@ class BaseInput:
 
         Parameters
         ----------
-        hed_schema : HedSchema
-            Used to know where definition tags are located in the schema
         error_handler : ErrorHandler
             The error handler to use for context, uses a default one if none.
 
@@ -187,31 +191,27 @@ class BaseInput:
 
         return new_def_dict, validation_issues
 
-    def save(self, filename=None, include_formatting=False, output_processed_file=False,
-             add_suffix=None):
+    def to_excel(self, filename, output_processed_file=False,
+                 source_for_formatting=None, source_for_formatting_sheet=None):
         """
 
         Parameters
         ----------
-        filename : str or None
-            if filename is empty, use the original filename that the file was opened from.
-        include_formatting : bool
-            If it's a spreadsheet, this will attempt to reopen the file and preserve formatting lost from pandas.
+        filename : str or file like
+            Location to save this file.  Can be filename, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
-        add_suffix: str
-            if present, adds a suffix to the passed in filename(before extension)
+        source_for_formatting: str or file like
+            If present, use this the source spreadsheet for text formatting
+        source_for_formatting_sheet: str or int
+            Name or number of the sheet to derive formatting from.
+
         Returns
         -------
 
         """
         if not filename:
-            filename = self._filename
-        base_filename, extension = os.path.splitext(filename)
-        final_filename = base_filename
-        if add_suffix:
-            final_filename += add_suffix
-        final_filename += extension
+            raise ValueError("Empty file name or object passed in to BaseInput.save.")
 
         # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
         if output_processed_file:
@@ -219,34 +219,33 @@ class BaseInput:
         else:
             output_file = self
 
-        if output_file.is_spreadsheet_file():
-            if include_formatting:
-                # To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
-                # this is not ideal
-                old_workbook = openpyxl.load_workbook(self._filename)
-                old_worksheet = self.get_worksheet(old_workbook, worksheet_name=self._worksheet_name)
-                # excel spreadsheets are 1 based, then add another 1 for column names if present
-                adj_row_for_col_names = 1
-                if self._has_column_names:
-                    adj_row_for_col_names += 1
-                adj_for_one_based_cols = 1
-                for row_number, text_file_row in output_file._dataframe.iterrows():
-                    for column_number, column_text in enumerate(text_file_row):
-                        old_worksheet.cell(row_number + adj_row_for_col_names,
-                                           column_number + adj_for_one_based_cols).value = \
-                            output_file._dataframe.iloc[row_number, column_number]
-                old_workbook.save(final_filename)
-            else:
-                output_file._dataframe.to_excel(final_filename, header=self._has_column_names)
-        elif self.is_text_file():
-            output_file._dataframe.to_csv(final_filename, '\t', index=False, header=output_file._has_column_names)
+        if source_for_formatting:
+            # To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
+            # this is not ideal
+            old_workbook = openpyxl.load_workbook(source_for_formatting)
+            old_worksheet = self.get_worksheet(old_workbook, worksheet_name=source_for_formatting_sheet)
+            # excel spreadsheets are 1 based, then add another 1 for column names if present
+            adj_row_for_col_names = 1
+            if self._has_column_names:
+                adj_row_for_col_names += 1
+            adj_for_one_based_cols = 1
+            for row_number, text_file_row in output_file._dataframe.iterrows():
+                for column_number, column_text in enumerate(text_file_row):
+                    old_worksheet.cell(row_number + adj_row_for_col_names,
+                                       column_number + adj_for_one_based_cols).value = \
+                        output_file._dataframe.iloc[row_number, column_number]
+            old_workbook.save(filename)
+        else:
+            output_file._dataframe.to_excel(filename, header=self._has_column_names)
 
-    def to_csv(self, output_processed_file=False):
+    def to_csv(self, filename, output_processed_file=False):
         """
             Returns the file as a csv string.
 
         Parameters
         ----------
+        filename : str or file like or None
+            Location to save this file.  Can be filename, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
         Returns
@@ -257,13 +256,9 @@ class BaseInput:
             output_file = self._get_processed_copy()
         else:
             output_file = self
-        csv_string = output_file._dataframe.to_csv(None, '\t', index=False, header=output_file._has_column_names)
-        return csv_string
-
-    # Make filename read only.
-    @property
-    def filename(self):
-        return self._filename
+        csv_string_if_filename_none = output_file._dataframe.to_csv(filename, '\t', index=False,
+                                                                    header=output_file._has_column_names)
+        return csv_string_if_filename_none
 
     def __iter__(self):
         return self.iter_dataframe()
@@ -382,14 +377,17 @@ class BaseInput:
         filename, ext = os.path.splitext(filename)
         return ext in allowed_exts
 
-    def is_spreadsheet_file(self):
-        return BaseInput._is_extension_type(self._filename, BaseInput.EXCEL_EXTENSION)
+    @staticmethod
+    def is_spreadsheet_file(filename):
+        return BaseInput._is_extension_type(filename, BaseInput.EXCEL_EXTENSION)
 
-    def is_text_file(self):
-        return BaseInput._is_extension_type(self._filename, BaseInput.TEXT_EXTENSION)
+    @staticmethod
+    def is_text_file(filename):
+        return BaseInput._is_extension_type(filename, BaseInput.TEXT_EXTENSION)
 
-    def is_valid_extension(self):
-        return self._is_extension_type(self._filename, BaseInput.FILE_EXTENSION)
+    @staticmethod
+    def is_valid_extension(filename):
+        return BaseInput._is_extension_type(filename, BaseInput.FILE_EXTENSION)
 
     @staticmethod
     def get_worksheet(workbook, worksheet_name=None):
