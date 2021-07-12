@@ -22,14 +22,15 @@ class BaseInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename=None, worksheet_name=None, has_column_names=True, mapper=None,
-                 csv_string=None, display_name=None):
+    def __init__(self, filename, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, display_name=None):
         """Constructor for the BaseInput class.
 
          Parameters
          ----------
-         filename: str or None
-             An xml/tsv file to open.
+         filename: str or file like
+             An xlsx/tsv file to open.
+         file_type: str
+            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
          worksheet_name: str
              The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
          has_column_names: bool
@@ -38,8 +39,6 @@ class BaseInput:
          mapper: ColumnMapper
              Pass in a built column mapper(see HedInput or EventsInput for examples), or None to just
              retrieve all columns as hed tags.
-         csv_string: str or None
-            The data to treat as this file.  eg web services passing a string.
          display_name: str or None
             Optional field for how this file will report errors.
          """
@@ -52,17 +51,18 @@ class BaseInput:
         if not self._has_column_names:
             pandas_header = None
 
-        self._dataframe = None
-        if not filename and not csv_string:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND,
-                               "Filename specified and no string data passed in", filename)
+        if not filename:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty filename passed to BaseInput.", filename)
 
-        if csv_string or self.is_text_file(filename):
-            csv_filename_or_data = filename
-            if csv_string:
-                csv_filename_or_data = io.StringIO(csv_string)
-            self._dataframe = pandas.read_csv(csv_filename_or_data, delimiter='\t', header=pandas_header)
-        elif self.is_spreadsheet_file(filename):
+        input_type = file_type
+        if file_type is None and isinstance(filename, str):
+            _, input_type = os.path.splitext(filename)
+
+        self._dataframe = None
+
+        if input_type in self.TEXT_EXTENSION:
+            self._dataframe = pandas.read_csv(filename, delimiter='\t', header=pandas_header)
+        elif input_type in self.EXCEL_EXTENSION:
             worksheet_to_load = worksheet_name
             if worksheet_to_load is None:
                 worksheet_to_load = 0
@@ -371,23 +371,6 @@ class BaseInput:
 
         """
         return row_dict[model_constants.ROW_HED_STRING], row_dict[model_constants.COLUMN_TO_HED_TAGS]
-
-    @staticmethod
-    def _is_extension_type(filename, allowed_exts):
-        filename, ext = os.path.splitext(filename)
-        return ext in allowed_exts
-
-    @staticmethod
-    def is_spreadsheet_file(filename):
-        return BaseInput._is_extension_type(filename, BaseInput.EXCEL_EXTENSION)
-
-    @staticmethod
-    def is_text_file(filename):
-        return BaseInput._is_extension_type(filename, BaseInput.TEXT_EXTENSION)
-
-    @staticmethod
-    def is_valid_extension(filename):
-        return BaseInput._is_extension_type(filename, BaseInput.FILE_EXTENSION)
 
     @staticmethod
     def get_worksheet(workbook, worksheet_name=None):
