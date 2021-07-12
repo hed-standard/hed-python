@@ -75,7 +75,7 @@ class EventValidator:
         """
         is_file = isinstance(hed_input, BaseInput)
         if not display_filename and is_file:
-            display_filename = hed_input.filename
+            display_filename = hed_input.display_name
 
         if isinstance(hed_input, list):
             validation_issues = self._validate_hed_strings(hed_input)
@@ -200,7 +200,7 @@ class EventValidator:
                 new_column_issues += self._tag_validator.run_hed_string_validators(column_hed_string)
                 if not new_column_issues:
                     new_column_issues += column_hed_string.convert_to_canonical_forms(self._hed_schema,
-                                                                                     self._error_handler)
+                                                                                      self._error_handler)
 
                 if not new_column_issues:
                     new_column_issues += self._validate_individual_tags_in_hed_string(column_hed_string)
@@ -239,7 +239,8 @@ class EventValidator:
         for original_tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
             is_group = original_tag_group.is_group()
             if not original_tag_group and is_group:
-                validation_issues += self._error_handler.format_error(ValidationErrors.HED_GROUP_EMPTY, tag=original_tag_group)
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_GROUP_EMPTY,
+                                                                      tag=original_tag_group)
             validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group.tags(), is_top_level,
                                                                               is_group)
 

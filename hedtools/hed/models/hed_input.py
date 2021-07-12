@@ -4,15 +4,17 @@ from hed.models.base_input import BaseInput
 
 class HedInput(BaseInput):
     """A class to parse basic hed style spreadsheets into a more general format."""
-    def __init__(self, filename=None, worksheet_name=None, tag_columns=None,
+    def __init__(self, filename=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  definition_mapper=None, csv_string=None, display_name=None):
         """Constructor for the HedInput class.
 
         Parameters
         ----------
-        filename: str or None
-            An xml/tsv file to open.
+        filename: str or file like
+             An xlsx/tsv file to open.
+        file_type: str
+            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
         worksheet_name: str
             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
         tag_columns: []
@@ -38,5 +40,5 @@ class HedInput(BaseInput):
 
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   definition_mapper=definition_mapper)
-        super().__init__(filename, worksheet_name, has_column_names, new_mapper,
-                         csv_string=csv_string, display_name=display_name)
+        super().__init__(filename, file_type, worksheet_name, has_column_names, new_mapper,
+                         display_name=display_name)

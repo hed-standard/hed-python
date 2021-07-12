@@ -44,5 +44,10 @@ if __name__ == '__main__':
     validation_issues = validator.validate_input(input_file)
     print(hed.get_printable_issue_string(validation_issues, "Normal hed string errors"))
 
-    input_file.save(include_formatting=True, add_suffix="_test_output", output_processed_file=False)
-    input_file.save(include_formatting=True, add_suffix="_proc_test_output", output_processed_file=True)
+    output_filename = hed3_tags_single_sheet + "_test_output.xlsx"
+    input_file.to_excel(output_filename, output_processed_file=False, source_for_formatting=hed3_tags_single_sheet,
+                        source_for_formatting_sheet='LKT Events')
+    output_filename = hed3_tags_single_sheet + "_proc_test_output.xlsx"
+    input_file.to_excel(output_filename, output_processed_file=True, source_for_formatting=hed3_tags_single_sheet,
+                        source_for_formatting_sheet='LKT Events')
+    breakHEre = 3
