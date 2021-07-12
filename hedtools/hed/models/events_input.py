@@ -71,7 +71,7 @@ class EventsInput(BaseInput):
                                   definition_mapper=def_mapper)
 
         super().__init__(filename, worksheet_name, has_column_names, new_mapper,
-                                  csv_string=csv_string, display_name=display_name)
+                         csv_string=csv_string, display_name=display_name)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
