@@ -1,4 +1,5 @@
 import os
+import io
 import json
 
 from flask import current_app
@@ -44,16 +45,15 @@ def get_input_from_service_request(request):
         arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=service_request[common.JSON_STRING],
                                                                   display_name='JSON_Dictionary')
     if common.EVENTS_STRING in service_request and service_request[common.EVENTS_STRING]:
-        arguments[common.EVENTS] = models.EventsInput(csv_string=service_request[common.EVENTS_STRING],
+        arguments[common.EVENTS] = models.EventsInput(filename=io.StringIO(service_request[common.EVENTS_STRING]),
                                                       json_def_files=arguments.get(common.JSON_DICTIONARY, None),
-                                                      display_name='Events')
+                                                      file_type='.tsv', display_name='Events')
     if common.SPREADSHEET_STRING in service_request and service_request[common.SPREADSHEET_STRING]:
         tag_columns, prefix_dict = get_prefix_dict(service_request)
-        arguments[common.SPREADSHEET] = models.HedInput(tag_columns=tag_columns,
-                                                        has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
-                                                        column_prefix_dictionary=prefix_dict,
-                                                        csv_string=service_request[common.SPREADSHEET_STRING],
-                                                        display_name='spreadsheet.tsv')
+        arguments[common.SPREADSHEET] = \
+            models.HedInput(filename=io.StringIO(service_request[common.SPREADSHEET_STRING]), file_type=".tsv",
+                            tag_columns=tag_columns, has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
+                            column_prefix_dictionary=prefix_dict, display_name='spreadsheet.tsv')
     if common.SCHEMA_STRING in service_request and service_request[common.SCHEMA_STRING]:
         arguments[common.SCHEMA] = hedschema.from_string(service_request[common.SCHEMA_STRING])
     elif common.SCHEMA_URL in service_request and service_request[common.SCHEMA_URL]:
@@ -135,7 +135,7 @@ def services_process(arguments):
 
 def package_spreadsheet(results):
     if results['msg_category'] == 'success' and common.SPREADSHEET in results:
-        results[common.SPREADSHEET] = results[common.SPREADSHEET].to_csv()
+        results[common.SPREADSHEET] = results[common.SPREADSHEET].to_csv(filename=None)
     return results
 
 

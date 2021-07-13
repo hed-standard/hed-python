@@ -3,10 +3,11 @@ from werkzeug.utils import secure_filename
 import json
 
 from hed import schema as hedschema
+from hed.util.file_util import delete_file_if_it_exists
 from hedweb.constants import common, page_constants
 from hedweb.constants import route_constants, file_constants
 from hedweb.utils.web_utils import handle_http_error, package_results
-from hedweb.utils.io_utils import delete_file_no_exceptions, handle_error
+from hedweb.utils.io_utils import handle_error
 from hedweb import dictionary, events, spreadsheet, services
 from hedweb.schema import get_input_from_schema_form, schema_process
 from hedweb.strings import get_input_from_string_form, string_process
@@ -34,7 +35,7 @@ def columns_info_results():
     except Exception as ex:
         return handle_error(ex)
     finally:
-        delete_file_no_exceptions(input_arguments.get(common.COLUMNS_PATH, ''))
+        delete_file_if_it_exists(input_arguments.get(common.COLUMNS_PATH, ''))
 
 
 @route_blueprint.route(route_constants.DICTIONARY_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])

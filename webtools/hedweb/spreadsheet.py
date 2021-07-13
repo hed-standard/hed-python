@@ -121,15 +121,15 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
     if results['data']:
         return results
 
-    display_name = spreadsheet.get_display_name()
+    display_name = spreadsheet.display_name
     display_ext = os.path.splitext(secure_filename(display_name))[1]
 
     if command == common.COMMAND_TO_LONG:
         suffix = '_to_long'
-        # issues = spreadsheet.convert_to_long(hed_schema)
+        ssues = spreadsheet.convert_to_long(hed_schema)
     else:
         suffix = '_to_short'
-        # issues = spreadsheet.convert_to_short(hed_schema)
+        issues = spreadsheet.convert_to_short(hed_schema)
 
     file_name = generate_filename(display_name, suffix=suffix, extension=display_ext)
     # if issues:
@@ -163,7 +163,7 @@ def spreadsheet_validate(hed_schema, spreadsheet):
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     validator = EventValidator(hed_schema=hed_schema)
     issues = validator.validate_input(spreadsheet)
-    display_name = spreadsheet.get_display_name()
+    display_name = spreadsheet.display_name
     if issues:
         issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')

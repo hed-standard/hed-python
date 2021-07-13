@@ -9,8 +9,9 @@ from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.errors.exceptions import HedFileError
+from hed.util.file_util import delete_file_if_it_exists
 from hedweb.constants import common, file_constants
-from hedweb.utils.io_utils import delete_file_no_exceptions, file_extension_is_valid, save_file_to_upload_folder
+from hedweb.utils.io_utils import file_extension_is_valid, save_file_to_upload_folder
 
 app_config = current_app.config
 
@@ -125,7 +126,7 @@ def generate_download_file(download_file, display_name=None, header=None, catego
                 yield header
             for line in download:
                 yield line
-            delete_file_no_exceptions(download_file)
+            delete_file_if_it_exists(download_file)
 
     return Response(generate(), mimetype='text/plain charset=utf-8',
                     headers={'Content-Disposition': f"attachment filename={display_name}",

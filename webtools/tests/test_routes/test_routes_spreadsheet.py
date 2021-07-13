@@ -136,7 +136,8 @@ class Test(unittest.TestCase):
 
     def test_spreadsheet_results_validate_invalid(self):
         with self.app.app_context():
-            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/ExcelMultipleSheets.xlsx')
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            '../data/ExcelMultipleSheets.xlsx')
             with open(spreadsheet_path, 'rb') as sc:
                 x = sc.read()
             spreadsheet_buffer = io.BytesIO(bytes(x))

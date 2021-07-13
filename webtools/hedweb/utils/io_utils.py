@@ -4,35 +4,13 @@ import tempfile
 
 import openpyxl
 from flask import current_app
-from hed import models
 from hed.errors.exceptions import HedFileError
-from hed.util.file_util import delete_file_if_it_exists, get_file_extension
+from hed.util.file_util import get_file_extension
 from hedweb.constants import file_constants
 from werkzeug.utils import secure_filename
 
 import hedweb.constants
 from hedweb.constants import common
-
-
-def get_spreadsheet(arguments):
-    if common.SPREADSHEET_STRING in arguments:
-        spreadsheet = None
-    elif common.SPREADSHEET_PATH in arguments:
-        spreadsheet = models.HedInput(arguments.get(common.SPREADSHEET_PATH, None),
-                                      worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
-                                      tag_columns=arguments.get(common.TAG_COLUMNS, None),
-                                      has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
-                                      column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY, None))
-    else:
-        raise HedFileError('NoSpreadsheet', 'No spreadsheet was provided', '')
-    return spreadsheet
-
-
-def delete_file_no_exceptions(file_path):
-    try:
-        return delete_file_if_it_exists(file_path)
-    except:
-        return False
 
 
 def file_extension_is_valid(filename, accepted_file_extensions=None):

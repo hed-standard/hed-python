@@ -18,8 +18,8 @@ if __name__ == '__main__':
     if def_issues:
         print(get_printable_issue_string(def_issues,
                                          title="There should be no errors in the definitions from the sidecars:"))
-    input_file = EventsInput(filename=events_path, json_def_files=column_group)
-
+    input_file = EventsInput(filename=events_path, json_def_files=column_group, display_name='bids_events.tsv')
+    print(input_file.display_name)
     validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
     if validation_issues:
         print(get_printable_issue_string(validation_issues,

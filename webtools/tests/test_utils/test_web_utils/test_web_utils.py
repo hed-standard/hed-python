@@ -32,18 +32,31 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_form_has_file(self):
-        with self.app.app_context():
+        # with self.app.test_request_context():
+        with self.app.test as c:
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_events_alpha.json')
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
             input_data = {common.SCHEMA_VERSION: '7.2.0', common.COMMAND_OPTION: common.COMMAND_VALIDATE,
                           common.JSON_FILE: (json_buffer, 'bids_events_alpha.json')}
-            response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
+            response = c.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
             headers_dict = dict(response.headers)
             self.assertTrue(1, "Testing form_has_file")
+            print('hwlp')
+        # with self.app.app_context():
+        #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_events_alpha.json')
+        #     with open(json_path, 'r') as sc:
+        #         x = sc.read()
+        #     json_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        #     input_data = {common.SCHEMA_VERSION: '7.2.0', common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+        #                   common.JSON_FILE: (json_buffer, 'bids_events_alpha.json')}
+        #     response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
+        #     headers_dict = dict(response.headers)
+        #     self.assertTrue(1, "Testing form_has_file")
+        #     print('hwlp')
 
-    def test_form_has_file(self):
+    def test_form_has_fileA(self):
         with self.app.app_context():
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_events_alpha.json')
             with open(json_path, 'r') as sc:

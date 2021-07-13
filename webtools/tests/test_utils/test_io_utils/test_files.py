@@ -24,28 +24,24 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_delete_file_no_exceptions(self):
-        print("Test")
-
     def test_file_extension_is_valid(self):
-        is_valid = hedweb.utils.io_utils.file_extension_is_valid('abc.xml', ['.xml', '.txt'])
+        from hedweb.utils.io_utils import file_extension_is_valid
+        is_valid = file_extension_is_valid('abc.xml', ['.xml', '.txt'])
         self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
-        is_valid = hedweb.utils.io_utils.file_extension_is_valid('abc.XML', ['.xml', '.txt'])
+        is_valid = file_extension_is_valid('abc.XML', ['.xml', '.txt'])
         self.assertTrue(is_valid, 'File name has a valid extension if capitalized version of valid extension')
-        is_valid = hedweb.utils.io_utils.file_extension_is_valid('abc.temp', ['.xml', '.txt'])
+        is_valid = file_extension_is_valid('abc.temp', ['.xml', '.txt'])
         self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
-        is_valid = hedweb.utils.io_utils.file_extension_is_valid('abc')
+        is_valid = file_extension_is_valid('abc')
         self.assertTrue(is_valid, 'File names with no extension are valid when no valid extensions provided')
-        is_valid = hedweb.utils.io_utils.file_extension_is_valid('abc', ['.xml', '.txt'])
+        is_valid = file_extension_is_valid('abc', ['.xml', '.txt'])
         self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
-        is_valid = hedweb.utils.io_utils.file_extension_is_valid('C:abc.Txt', ['.xml', '.txt'])
+        is_valid = file_extension_is_valid('C:abc.Txt', ['.xml', '.txt'])
         self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
 
     def test_file_to_string(self):
         from hedweb.utils.io_utils import file_to_string
-
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_events_alpha.json')
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_events.tsv')
 
         with open(json_path, 'r') as sc:
             x = sc.read()
