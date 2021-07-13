@@ -73,8 +73,40 @@ class Test(unittest.TestCase):
     def test_bad_file_inputs(self):
         self.assertRaises(HedFileError, EventsInput, None)
 
+    def test_loading_binary(self):
+        with open(self.default_test_file_name, "rb") as f:
+            self.assertRaises(HedFileError, HedInput, f)
 
-    # Add more tests here
+        with open(self.default_test_file_name, "rb") as f:
+            opened_binary_file = HedInput(f, file_type=".xlsx")
+            self.assertTrue(True)
+
+    def test_to_excel(self):
+        test_input_file = self.generic_file_input
+        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/ExcelMultipleSheets_resave.xlsx")
+        test_input_file.to_excel(test_output_name)
+
+        test_input_file = self.generic_file_input
+        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "../data/ExcelMultipleSheets_resave_formatting.xlsx")
+        test_input_file.to_excel(test_output_name, source_for_formatting=self.default_test_file_name)
+
+        #Test to a file stream
+        test_input_file = self.generic_file_input
+        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "../data/ExcelMultipleSheets_fileio.xlsx")
+        with open(test_output_name, "wb") as f, open(self.default_test_file_name, "rb") as f2:
+            test_input_file.to_excel(f, source_for_formatting=f2)
+
+    def test_to_csv(self):
+        test_input_file = self.generic_file_input
+        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "../data/ExcelMultipleSheets_resave.csv")
+        test_input_file.to_csv(test_output_name)
+
+        test_input_file = self.generic_file_input
+        file_as_csv = test_input_file.to_csv(None)
+        self.assertIsInstance(file_as_csv, str)
 
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ from hed.errors import error_reporter
 class EventsInput(BaseInput):
     """A class to parse bids style spreadsheets into a more general format."""
 
-    def __init__(self, filename=None, worksheet_name=None, tag_columns=None,
+    def __init__(self, filename=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
                  def_dicts=None, csv_string=None, display_name=None):
@@ -16,8 +16,10 @@ class EventsInput(BaseInput):
 
         Parameters
         ----------
-        filename: str or None
-            An xml/tsv file to open.
+         filename: str or file like
+             An xlsx/tsv file to open.
+        file_type: str
+            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
         worksheet_name: str
             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
         tag_columns: []
@@ -70,8 +72,8 @@ class EventsInput(BaseInput):
                                   attribute_columns=attribute_columns,
                                   definition_mapper=def_mapper)
 
-        super().__init__(filename, worksheet_name, has_column_names, new_mapper,
-                                  csv_string=csv_string, display_name=display_name)
+        super().__init__(filename, file_type, worksheet_name, has_column_names, new_mapper,
+                         display_name=display_name)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
