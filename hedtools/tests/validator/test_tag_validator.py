@@ -209,9 +209,9 @@ class IndividualHedTagsShort(TestHed3):
         test_strings = {
             'hasRequiredUnit': 'Duration/3 ms',
             'missingRequiredUnit': 'Duration/3',
-            'notRequiredNoNumber': 'Color/Red',
-            'notRequiredNumber': 'Color/Red/0.5',
-            'notRequiredScientific': 'Color/Red/5.2e-1',
+            'notRequiredNoNumber': 'Age',
+            'notRequiredNumber': 'Age/0.5',
+            'notRequiredScientific': 'Age/5.2e-1',
             'timeValue': 'Clock-face/08:30',
             # Update test - This one is currently marked as valid because clock face isn't in hed3
             'invalidTimeValue': 'Clock-face/8:30',
@@ -222,8 +222,8 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredNoNumber': True,
             'notRequiredNumber': True,
             'notRequiredScientific': True,
-            'timeValue': True,
-            'invalidTimeValue': True,
+            'timeValue': False,
+            'invalidTimeValue': False,
         }
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
@@ -233,8 +233,10 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
             'notRequiredScientific': [],
-            'timeValue': [],
-            'invalidTimeValue': [],
+            'timeValue': self.format_error_but_not_really(ValidationErrors.HED_TAG_EXTENDED, tag=0,
+                                                          index_in_tag=10, index_in_tag_end=None),
+            'invalidTimeValue': self.format_error_but_not_really(ValidationErrors.HED_TAG_EXTENDED, tag=0,
+                                                                 index_in_tag=10, index_in_tag_end=None),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
