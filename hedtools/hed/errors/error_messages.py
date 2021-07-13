@@ -35,6 +35,11 @@ def val_error_empty_group(tag):
     return f"HED tags cannot be empty.  Extra delimiters found: '{tag}'", {}
 
 
+@hed_tag_error(ValidationErrors.HED_TAG_EXTENDED, has_sub_tag=True, default_severity=ErrorSeverity.WARNING)
+def val_error_tag_extended(tag, problem_tag):
+    return f"Hed tag is extended. '{problem_tag}' in {tag}", {}
+
+
 @hed_error(ValidationErrors.HED_CHARACTER_INVALID)
 def val_error_invalid_char(source_string, char_index):
     character = source_string[char_index]
@@ -122,20 +127,20 @@ def val_error_def_unmatched(tag):
 
 @hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING)
 def val_error_def_value_missing(tag):
-    return f"A definition requires a placeholder value, but was not given one.  Definition: '{tag}'", {}
+    return f"A def tag requires a placeholder value, but was not given one.  Definition: '{tag}'", {}
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA)
 def val_error_def_value_extra(tag):
-    return f"A definition does not take a placeholder value, but was given one.  Definition: '{tag}", {}
+    return f"A def tag does not take a placeholder value, but was given one.  Definition: '{tag}", {}
 
 
-@hed_tag_error(ValidationErrors.HED_TOP_LEVEL_TAG)
+@hed_tag_error(ValidationErrors.HED_TOP_LEVEL_TAG, actual_code=ValidationErrors.HED_TAG_GROUP_ERROR)
 def val_error_top_level_tag(tag):
     return f"A tag that must be in a top level group was found in another location.  {str(tag)}", {}
 
 
-@hed_tag_error(ValidationErrors.HED_TAG_GROUP_TAG)
+@hed_tag_error(ValidationErrors.HED_TAG_GROUP_TAG, actual_code=ValidationErrors.HED_TAG_GROUP_ERROR)
 def val_error_tag_group_tag(tag):
     return f"A tag that must be in a group was found in another location.  {str(tag)}", {}
 
