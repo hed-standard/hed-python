@@ -444,6 +444,10 @@ class TagValidator:
         is_extension_tag = self.is_extension_allowed_tag(original_tag)
         if not is_extension_tag:
             validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_EXTENSION, tag=original_tag)
+        elif self._check_for_warnings:
+            validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_EXTENDED, tag=original_tag,
+                                                                  index_in_tag=len(original_tag.org_base_tag),
+                                                                  index_in_tag_end=None)
         return validation_issues
 
     def check_tag_unit_class_units_are_valid(self, original_tag):

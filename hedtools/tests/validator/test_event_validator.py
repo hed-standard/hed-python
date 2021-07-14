@@ -149,7 +149,7 @@ class Test(unittest.TestCase):
                                  def_dicts=def_dict)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
-        self.assertEqual(len(validation_issues), 0)
+        self.assertEqual(len(validation_issues), 1)
 
         validator = EventValidator(hed_schema=hed_schema)
         validation_issues = validator.validate_input(input_file)
