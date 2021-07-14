@@ -1,33 +1,49 @@
 import os
+import io
 from flask import current_app
 from werkzeug.utils import secure_filename
-
+import openpyxl
 from hed import models
 from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
+from hed.util.file_util import get_file_extension
 
 from hedweb.constants import common, file_constants
-from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, get_uploaded_file_path_from_form
+from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down
 from hedweb.utils.io_utils import generate_filename, get_prefix_dict, file_extension_is_valid, \
-    get_text_file_first_row, save_file_to_upload_folder, get_worksheet_info
+    get_text_file_first_row
 
 app_config = current_app.config
 
 
-def get_columns_info(input_arguments):
-    columns_path = input_arguments.get(common.COLUMNS_PATH)
-    worksheet_name = input_arguments.get(common.WORKSHEET_NAME, None)
-    columns_display_name = input_arguments.get(common.COLUMNS_DISPLAY_NAME, 'Unknown')
-    if file_extension_is_valid(columns_path, file_constants.EXCEL_FILE_EXTENSIONS):
-        columns_info = get_worksheet_info(columns_path, worksheet_name)
-    elif file_extension_is_valid(columns_path, file_constants.TEXT_FILE_EXTENSIONS):
-        columns_info = {common.COLUMN_NAMES: get_text_file_first_row(columns_path)}
+def get_columns_info(request):
+    columns_file = request.files.get(common.COLUMNS_FILE, '')
+    if columns_file:
+        filename = columns_file.filename
+    else:
+        raise HedFileError('MissingSpreadsheetFile', 'An uploadable file was not provided', '')
+    worksheet = request.form.get(common.WORKSHEET_SELECTED, None)
+
+    if file_extension_is_valid(filename, file_constants.EXCEL_FILE_EXTENSIONS):
+        wb = openpyxl.load_workbook(columns_file, read_only=True)
+        worksheet_names = wb.sheetnames
+        if not worksheet_names:
+            raise HedFileError('BadExcelFile', 'Excel files must worksheets', None)
+        elif not worksheet:
+            worksheet = worksheet_names[0]
+        elif worksheet and worksheet not in worksheet_names:
+            raise HedFileError('BadWorksheetName', f'Worksheet {worksheet} not in Excel file', '')
+        headers = [c.value for c in next(wb[worksheet].iter_rows(min_row=1, max_row=1))]
+        columns_info = {common.COLUMNS_FILE: filename, common.COLUMN_NAMES: headers,
+                        common.WORKSHEET_SELECTED: worksheet, common.WORKSHEET_NAMES: worksheet_names}
+        wb.close()
+    elif file_extension_is_valid(filename, file_constants.TEXT_FILE_EXTENSIONS):
+        columns_info = {common.COLUMN_NAMES: get_text_file_first_row(io.StringIO(columns_file.read().decode("utf-8")))}
     else:
         raise HedFileError('BadFileExtension',
-                           f'File {columns_display_name} extension does not correspond to an Excel or tsv file',
-                           columns_display_name)
+                           f'File {filename} extension does not correspond to an Excel or tsv file', '')
     return columns_info
 
 
@@ -47,21 +63,24 @@ def get_input_from_spreadsheet_form(request):
     arguments = {
         common.SCHEMA: get_hed_schema_from_pull_down(request),
         common.SPREADSHEET: None,
+        common.SPREADSHEET_ORIGINAL_FILE: None,
         common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None),
         common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
         common.HAS_COLUMN_NAMES: form_has_option(request, common.HAS_COLUMN_NAMES, 'on'),
         common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
     }
 
-    uploaded_file_name, original_file_name = \
-        get_uploaded_file_path_from_form(request, common.SPREADSHEET_FILE, file_constants.SPREADSHEET_FILE_EXTENSIONS)
     tag_columns, prefix_dict = get_prefix_dict(request.form)
-    spreadsheet = models.HedInput(filename=uploaded_file_name,
+    filename = request.files[common.SPREADSHEET_FILE].filename
+    file_ext = get_file_extension(filename)
+    if file_ext in common.EXCEL_FILE_EXTENSIONS:
+        arguments[common.SPREADSHEET_ORIGINAL_FILE] = request.files[common.SPREADSHEET_FILE]
+    spreadsheet = models.HedInput(filename=request.files[common.SPREADSHEET_FILE], file_type=file_ext,
                                   worksheet_name=arguments.get(common.WORKSHEET_NAME, None),
                                   tag_columns=tag_columns,
                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
                                   column_prefix_dictionary=prefix_dict,
-                                  display_name=original_file_name)
+                                  display_name=filename)
     arguments[common.SPREADSHEET] = spreadsheet
     return arguments
 
@@ -126,7 +145,7 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
 
     if command == common.COMMAND_TO_LONG:
         suffix = '_to_long'
-        ssues = spreadsheet.convert_to_long(hed_schema)
+        issues = spreadsheet.convert_to_long(hed_schema)
     else:
         suffix = '_to_short'
         issues = spreadsheet.convert_to_short(hed_schema)
@@ -174,18 +193,3 @@ def spreadsheet_validate(hed_schema, spreadsheet):
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
                 common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f'Spreadsheet {display_name} had no validation errors'}
-
-
-def get_input_columns_info(request):
-    columns_file = request.files.get(common.COLUMNS_FILE, '')
-    if columns_file:
-        filename = columns_file.filename
-    else:
-        filename = ''
-    columns_path = save_file_to_upload_folder(columns_file)
-    input_arguments = {
-        common.COLUMNS_PATH: columns_path,
-        common.COLUMNS_DISPLAY_NAME: filename,
-        common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None)
-    }
-    return input_arguments

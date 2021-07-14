@@ -187,7 +187,7 @@ def generate_download_test():
     return response
 
 
-def generate_download_spreadsheet(spreadsheet, display_name, msg_category='success', msg=''):
+def generate_download_spreadsheet(spreadsheet, source_format, display_name, msg_category='success', msg=''):
     # return generate_download_test()
     df = spreadsheet.get_dataframe()
     ext = os.path.splitext(secure_filename(display_name))[1]
@@ -340,7 +340,7 @@ def handle_http_error(ex):
     return generate_text_response('', msg_category='error', msg=error_message)
 
 
-def package_results(results):
+def package_results(results, arguments=None):
     msg = results.get('msg', '')
     msg_category = results.get('msg_category', 'success')
     display_name = results.get('output_display_name', '')
@@ -348,7 +348,8 @@ def package_results(results):
         return generate_response_download_file_from_text(results['data'], display_name=display_name,
                                                          msg_category=msg_category, msg=msg)
     elif results.get('spreadsheet', None):
-        return generate_download_spreadsheet(results['spreadsheet'], display_name=display_name,
+        return generate_download_spreadsheet(results[common.SPREADSHEET],
+                                             results[common.SPREADSHEET_ORIGINAL_FILE],
                                              msg_category=msg_category, msg=msg)
     else:
         return generate_text_response("", msg=msg, msg_category=msg_category)

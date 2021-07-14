@@ -251,12 +251,12 @@ def save_text_to_upload_folder(text, filename):
     return file_path
 
 
-def get_text_file_first_row(text_file_path):
+def get_text_file_first_row(filename, delimiter='\t'):
     """Gets the contents of the first row of the text file.
 
     Parameters
     ----------
-    text_file_path: string
+    text_file_path: str or file-like
         The path to a text other.
 
     Returns
@@ -265,10 +265,13 @@ def get_text_file_first_row(text_file_path):
         list containing first row.
 
     """
-    column_delimiter = get_delimiter_from_file_extension(text_file_path)
-    with open(text_file_path, 'r', encoding='utf-8') as opened_text_file:
-        first_line = opened_text_file.readline()
-        text_file_columns = first_line.split(column_delimiter)
+
+    if isinstance(filename, str):
+        with open(filename, 'r', encoding='utf-8') as opened_text_file:
+            first_line = opened_text_file.readline()
+    else:
+        first_line = filename.readline()
+    text_file_columns = first_line.split(delimiter)
     return text_file_columns
 
 

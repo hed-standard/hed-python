@@ -136,6 +136,8 @@ def services_process(arguments):
 def package_spreadsheet(results):
     if results['msg_category'] == 'success' and common.SPREADSHEET in results:
         results[common.SPREADSHEET] = results[common.SPREADSHEET].to_csv(filename=None)
+    elif common.SPREADSHEET in results:
+        del results[common.SPREADSHEET]
     return results
 
 
