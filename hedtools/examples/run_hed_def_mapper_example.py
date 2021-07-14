@@ -45,9 +45,7 @@ if __name__ == '__main__':
     print(hed.get_printable_issue_string(validation_issues, "Normal hed string errors"))
 
     output_filename = hed3_tags_single_sheet + "_test_output.xlsx"
-    input_file.to_excel(output_filename, output_processed_file=False, source_for_formatting=hed3_tags_single_sheet,
-                        source_for_formatting_sheet='LKT Events')
+    input_file.to_excel(output_filename, output_processed_file=False)
     output_filename = hed3_tags_single_sheet + "_proc_test_output.xlsx"
-    input_file.to_excel(output_filename, output_processed_file=True, source_for_formatting=hed3_tags_single_sheet,
-                        source_for_formatting_sheet='LKT Events')
+    input_file.to_excel(output_filename, output_processed_file=True)
     breakHEre = 3
