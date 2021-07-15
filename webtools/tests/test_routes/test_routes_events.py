@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(response, Response),
                         'events_results validate should return a response object when empty events')
         header_dict = dict(response.headers)
-        self.assertEqual("error", header_dict["Category"], "The header category when no events is error ")
+        self.assertEqual("error", header_dict["Category"], "The header msg_category when no events is error ")
         self.assertFalse(response.data, "The response data for empty events request is empty")
 
     def test_events_results_assemble_valid(self):

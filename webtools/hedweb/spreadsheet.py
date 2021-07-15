@@ -64,6 +64,7 @@ def get_input_from_spreadsheet_form(request):
         common.SCHEMA: get_hed_schema_from_pull_down(request),
         common.SPREADSHEET: None,
         common.SPREADSHEET_ORIGINAL_FILE: None,
+        common.SPREADSHEET_TYPE: file_constants.TSV_EXTENSION,
         common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None),
         common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
         common.HAS_COLUMN_NAMES: form_has_option(request, common.HAS_COLUMN_NAMES, 'on'),
@@ -74,8 +75,10 @@ def get_input_from_spreadsheet_form(request):
     filename = request.files[common.SPREADSHEET_FILE].filename
     file_ext = get_file_extension(filename)
     if file_ext in common.EXCEL_FILE_EXTENSIONS:
+        arguments[common.SPREADSHEET_TYPE] = file_constants.EXCEL_EXTENSION
         arguments[common.SPREADSHEET_ORIGINAL_FILE] = request.files[common.SPREADSHEET_FILE]
-    spreadsheet = models.HedInput(filename=request.files[common.SPREADSHEET_FILE], file_type=file_ext,
+    spreadsheet = models.HedInput(filename=request.files[common.SPREADSHEET_FILE],
+                                  file_type=arguments[common.SPREADSHEET_TYPE],
                                   worksheet_name=arguments.get(common.WORKSHEET_NAME, None),
                                   tag_columns=tag_columns,
                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),

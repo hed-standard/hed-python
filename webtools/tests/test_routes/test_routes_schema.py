@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         response = self.app.test.post('/schema_submit')
         self.assertEqual(200, response.status_code, 'HED schema request succeeds even when no data')
         header_dict = dict(response.headers)
-        self.assertEqual("error", header_dict["Category"], "The header category when no schema request data is error ")
+        self.assertEqual("error", header_dict["Category"], "The header msg_category when no schema request data is error ")
         self.assertFalse(response.data, "The response data for empty schema request is empty")
 
     def test_schema_results_convert_valid_mediawiki(self):

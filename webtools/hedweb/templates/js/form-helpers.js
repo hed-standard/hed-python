@@ -126,7 +126,7 @@ function getResponseSuccessA(download, xhr, display_name, flash_location) {
         triggerDownloadBlobA(download, filename, contentType);
     }
     // let info = xhr.getResponseHeader('Message');
-    // let category =  xhr.getResponseHeader('Category');
+    // let msg_category =  xhr.getResponseHeader('Category');
     if (info) {
         flashMessageOnScreen(info, category, flash_location);
     } else {

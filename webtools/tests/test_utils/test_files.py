@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
 
     def test_file_to_string(self):
         from hedweb.utils.io_utils import file_to_string
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_events_alpha.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
 
         with open(json_path, 'r') as sc:
             x = sc.read()
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         filename = 'HED8.0.0-beta.1.xml'
         actual_path = os.path.join(self.upload_directory, filename)
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/HED8.0.0-beta.1.xml')
+        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
         # with open(hed_file) as f:
         #    upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
         #    with self.app.app_context():
@@ -118,7 +118,7 @@ class Test(unittest.TestCase):
         filename = 'HED8.0.0-beta.1.xml'
         actual_path = os.path.join(self.upload_directory, filename)
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/HED8.0.0-beta.1.xml')
+        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
         # with open(hed_file) as f:
         #    upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
         #    with self.app.app_context():

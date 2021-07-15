@@ -75,6 +75,7 @@ SPREADSHEET_FLASH = 'spreadsheet_flash'
 SPREADSHEET_ORIGINAL_FILE = 'spreadsheet_original_file'
 SPREADSHEET_PATH = 'spreadsheet_path'
 SPREADSHEET_STRING = 'spreadsheet_string'
+SPREADSHEET_TYPE = 'spreadsheet_type'
 SPREADSHEET_SUBMIT_FLASH = 'spreadsheet_submit_flash'
 
 STRING_INPUT = 'string_input'
