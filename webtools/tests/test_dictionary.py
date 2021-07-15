@@ -2,6 +2,8 @@ import os
 import shutil
 import unittest
 
+from werkzeug.test import create_environ
+from werkzeug.wrappers import Request
 import hed.schema as hedschema
 from hed import models
 from hedweb.constants import common
@@ -27,10 +29,30 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_dictionary_form(self):
+    def test_generate_input_from_dictionary_form_empty(self):
         from hedweb.dictionary import get_input_from_dictionary_form
         self.assertRaises(TypeError, get_input_from_dictionary_form, {},
                           "An exception should be raised if an empty request is passed")
+
+    def test_generate_input_from_dictionary_form(self):
+        from hed.models import ColumnDefGroup
+        from hed.schema import HedSchema
+        from hedweb.dictionary import get_input_from_dictionary_form
+        with self.app.test:
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
+            with open(json_path, 'rb') as fp:
+                environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                                         common.COMMAND_OPTION: common.COMMAND_TO_LONG})
+            request = Request(environ)
+            arguments = get_input_from_dictionary_form(request)
+            self.assertIsInstance(arguments[common.JSON_DICTIONARY], ColumnDefGroup,
+                                  "generate_input_from_dictionary_form should have a JSON dictionary")
+            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+                                  "generate_input_from_dictionary_form should have a HED schema")
+            self.assertEqual(common.COMMAND_TO_LONG, arguments[common.COMMAND],
+                             "generate_input_from_dictionary_form should have a command")
+            self.assertFalse(arguments[common.CHECK_FOR_WARNINGS],
+                             "generate_input_from_dictionary_form should have check for warnings false when not given")
 
     def test_dictionary_process_empty_file(self):
         from hedweb.dictionary import dictionary_process

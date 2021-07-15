@@ -95,8 +95,8 @@ function submitForm() {
             success: function (download, status, xhr) {
                 getResponseSuccess(download, xhr, display_name, 'events_submit_flash')
             },
-            error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'events_submit_flash')
+            error: function (xhr, status, errorThrown) {
+                getResponseFailure(xhr, status, errorThrown, display_name, 'events_submit_flash')
             }
         }
     )

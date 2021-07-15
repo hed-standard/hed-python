@@ -29,7 +29,7 @@ def get_input_from_events_form(request):
         A dictionary containing input arguments for calling the underlying validation function.
     """
     arguments = {common.SCHEMA: get_hed_schema_from_pull_down(request), common.EVENTS: None,
-                 common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+                 common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
                  common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
                  common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on')}
 
@@ -40,9 +40,12 @@ def get_input_from_events_form(request):
                                                 display_name=secure_filename(f.filename))
     if common.EVENTS_FILE in request.files:
         f = request.files[common.EVENTS_FILE]
-        arguments[common.EVENTS] = models.EventsInput(csv_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
+        arguments[common.EVENTS] = models.EventsInput(filename=f, file_type=".tsv",
                                                       json_def_files=json_dictionary,
                                                       display_name=secure_filename(f.filename))
+        # arguments[common.EVENTS] = models.EventsInput(csv_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
+        #                                               json_def_files=json_dictionary,
+        #                                               display_name=secure_filename(f.filename))
     return arguments
 
 
@@ -107,7 +110,7 @@ def events_assemble(hed_schema, events, defs_expand=True):
     data = {'onset': onsets, 'HED': hed_tags}
     df = pd.DataFrame(data)
     csv_string = df.to_csv(None, sep='\t', index=False, header=True)
-    display_name = events.get_display_name()
+    display_name = events.display_name
     file_name = generate_filename(display_name, suffix='_expanded', extension='.tsv')
     return {common.COMMAND: common.COMMAND_ASSEMBLE, 'data': csv_string, 'output_display_name': file_name,
             'schema_version': schema_version, 'msg_category': 'success',
@@ -139,7 +142,7 @@ def events_validate(hed_schema, events):
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     validator = EventValidator(hed_schema=hed_schema)
     issues = validator.validate_input(events)
-    display_name = events.get_display_name()
+    display_name = events.display_name
     if issues:
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')

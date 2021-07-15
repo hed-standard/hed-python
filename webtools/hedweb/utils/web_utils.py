@@ -2,7 +2,6 @@ import os
 import io
 import pathlib
 import pandas as pd
-import xlsxwriter
 
 from urllib.parse import urlparse
 from flask import current_app, Response, send_file
@@ -10,13 +9,14 @@ from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.errors.exceptions import HedFileError
+from hed.util.file_util import delete_file_if_it_exists
 from hedweb.constants import common, file_constants
-from hedweb.utils.io_utils import delete_file_no_exceptions, file_extension_is_valid, save_file_to_upload_folder
+from hedweb.utils.io_utils import file_extension_is_valid, save_file_to_upload_folder
 
 app_config = current_app.config
 
 
-def form_has_file(request, file_field, valid_extensions):
+def form_has_file(request, file_field, valid_extensions=None):
     """Checks to see if a file name with valid extension is present in the request object.
 
     Parameters
@@ -41,7 +41,7 @@ def form_has_file(request, file_field, valid_extensions):
 
 
 def form_has_option(request, option_name, target_value):
-    """Checks if the given option has a specific value. This is used for radio buttons.
+    """Checks if the given option has a specific value. This is used for radio buttons and check boxes.
 
     Parameters
     ----------
@@ -58,12 +58,12 @@ def form_has_option(request, option_name, target_value):
         True if the target radio button has been set and false otherwise
     """
 
-    if option_name in request.values and request.values[option_name] == target_value:
+    if option_name in request.form and request.form[option_name] == target_value:
         return True
     return False
 
 
-def form_has_url(request, url_field, valid_extensions):
+def form_has_url(request, url_field, valid_extensions=None):
     """Checks to see if the url_field has a value with a valid extension.
 
     Parameters
@@ -81,6 +81,8 @@ def form_has_url(request, url_field, valid_extensions):
         True if a URL is present in request object.
 
     """
+    if url_field not in request.form:
+        return False
     parsed_url = urlparse(request.form.get(url_field))
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
@@ -89,9 +91,7 @@ def generate_excel_download_response():
     print('hello')
 
 
-
-
-def generate_download_file(download_file, display_name=None, header=None, category='success', msg=''):
+def generate_download_file(download_file, display_name=None, header=None, msg_category='success', msg=''):
     """Generates a download other response.
 
     Parameters
@@ -102,7 +102,7 @@ def generate_download_file(download_file, display_name=None, header=None, catego
         Name to be assigned to the file in the response
     header: str
         Optional header -- header for download file blob
-    category: str
+    msg_category: str
         Category of the message to be displayed ('Success', 'Error', 'Warning')
     msg: str
         Optional message to be displayed in the submit-flash-field
@@ -128,11 +128,12 @@ def generate_download_file(download_file, display_name=None, header=None, catego
                 yield header
             for line in download:
                 yield line
-            delete_file_no_exceptions(download_file)
+            delete_file_if_it_exists(download_file)
 
     return Response(generate(), mimetype='text/plain charset=utf-8',
                     headers={'Content-Disposition': f"attachment filename={display_name}",
-                             'Category': category, 'Message': msg})
+                             'Category': msg_category, 'Message': msg})
+
 
 def generate_response_download_file_from_text(download_text, display_name=None,
                                               header=None, msg_category='success', msg=''):
@@ -174,23 +175,55 @@ def generate_response_download_file_from_text(download_text, display_name=None,
                              'Category': msg_category, 'Message': msg})
 
 
-def generate_download_spreadsheet(spreadsheet, display_name, msg_category='success', msg=''):
-    df = spreadsheet.get_dataframe()
-    ext = os.path.splitext(secure_filename(display_name))[1]
+def generate_download_test():
+    import openpyxl
+    spath = 'd:/ExcelOneSheet.xlsx'
+    wb_obj = openpyxl.load_workbook(spath)
+    file = io.BytesIO()
+    wb_obj.save(file)
+    file.seek(0)
+    response = send_file(file, download_name=f"temp.xlsx", as_attachment=True)
+    response.direct_passthrough = False
+    response.headers['Category'] = 'success'
+    response.headers['Message'] = 'test'
+    return response
+
+
+def generate_download_spreadsheet(results,  msg_category='success', msg=''):
+    # return generate_download_test()
+    spreadsheet = results[common.SPREADSHEET]
+    display_name = results[common.OUTPUT_DISPLAY_NAME]
+
+    if not spreadsheet.loaded_workbook:
+        return generate_response_download_file_from_text(spreadsheet.to_csv(), display_name=display_name,
+                                                  msg_category=msg_category, msg=msg)
     buffer = io.BytesIO()
-    if ext == '.xlsx':
-        writer = pd.ExcelWriter(buffer, engine="openpyxl")
-        df.to_excel(writer, sheet_name='temp1', index=False)
-        writer.save()
-        writer.close()
-    else:
-        df.to_csv(buffer, '\t', index=False, header=spreadsheet.has_column_names())
-    buffer.seek(0)
-    print(display_name)
-    response = send_file(buffer, as_attachment=True, download_name=display_name)
+    spreadsheet.to_excel(buffer)
+
+    # df = spreadsheet.get_dataframe()
+    # ext = os.path.splitext(secure_filename(display_name))[1]
+    # buffer = io.BytesIO()
+    # if ext == '.xlsx':
+    #     writer = pd.ExcelWriter(buffer, engine="openpyxl")
+    #     df.to_excel(writer, sheet_name='temp1', index=False)
+    #     writer.save()
+    #     writer.close()
+    # else:
+    #     df.to_csv(buffer, '\t', index=False, header=spreadsheet.has_column_names())
+    # buffer.seek(0)
+    # response = send_file(buffer, as_attachment=True, download_name=display_name)
+    # response.headers['Category'] = msg_category
+    # response.headers['Message'] = msg
+    # response.headers['Content-Transfer-Encoding'] = 'Base64'
+    # response.implicit_sequence_conversion = False
+    # response.direct_passthrough = True
+    # return response
+    response = send_file('d:/Research/HEDPython/hed-python/hedweb/tests/data/ExcelOneSheet.xlsx')
     response.headers['Category'] = msg_category
     response.headers['Message'] = msg
     response.headers['Content-Transfer-Encoding'] = 'Base64'
+    response.implicit_sequence_conversion = True
+    response.direct_passthrough = False
     return response
 
 
@@ -332,8 +365,7 @@ def package_results(results):
     if results['data']:
         return generate_response_download_file_from_text(results['data'], display_name=display_name,
                                                          msg_category=msg_category, msg=msg)
-    elif results.get('spreadsheet', None):
-        return generate_download_spreadsheet(results['spreadsheet'], display_name=display_name,
-                                                           msg_category=msg_category, msg=msg)
-    else:
+    elif not results.get('spreadsheet', None):
         return generate_text_response("", msg=msg, msg_category=msg_category)
+    else:
+        return generate_download_spreadsheet(results, msg_category=msg_category, msg=msg)

@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(response, Response),
                         'dictionary_submit to short should return a Response when no data')
         header_dict = dict(response.headers)
-        self.assertEqual("error", header_dict["Category"], "The header category when no dictionary is error ")
+        self.assertEqual("error", header_dict["Category"], "The header msg_category when no dictionary is error ")
         self.assertFalse(response.data, "The response data for empty dictionary request is empty")
 
     def test_dictionary_results_to_long_valid(self):

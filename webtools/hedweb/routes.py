@@ -6,11 +6,11 @@ from hed import schema as hedschema
 from hedweb.constants import common, page_constants
 from hedweb.constants import route_constants, file_constants
 from hedweb.utils.web_utils import handle_http_error, package_results
-from hedweb.utils.io_utils import delete_file_no_exceptions, handle_error
+from hedweb.utils.io_utils import handle_error
 from hedweb import dictionary, events, spreadsheet, services
 from hedweb.schema import get_input_from_schema_form, schema_process
 from hedweb.strings import get_input_from_string_form, string_process
-from hedweb.spreadsheet import get_columns_info, get_input_columns_info
+from hedweb.spreadsheet import get_columns_info
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
@@ -26,15 +26,11 @@ def columns_info_results():
         A serialized JSON string containing information related to the column and worksheet information.
 
     """
-    input_arguments = {}
     try:
-        input_arguments = get_input_columns_info(request)
-        columns_info = get_columns_info(input_arguments)
+        columns_info = get_columns_info(request)
         return json.dumps(columns_info)
     except Exception as ex:
         return handle_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.COLUMNS_PATH, ''))
 
 
 @route_blueprint.route(route_constants.DICTIONARY_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -147,7 +143,8 @@ def services_results():
     try:
         arguments = services.get_input_from_service_request(request)
         status = services.services_process(arguments)
-        return json.dumps(status)
+        a = json.dumps(status)
+        return a
     except Exception as ex:
         return handle_error(ex)
 
@@ -161,10 +158,10 @@ def spreadsheet_results():
         string
         Validation errors in readable format.
     """
-    input_arguments = {}
+
     try:
-        input_arguments = spreadsheet.get_input_from_spreadsheet_form(request)
-        a = spreadsheet.spreadsheet_process(input_arguments)
+        arguments = spreadsheet.get_input_from_spreadsheet_form(request)
+        a = spreadsheet.spreadsheet_process(arguments)
         response = package_results(a)
         return response
     except Exception as ex:

@@ -34,7 +34,6 @@ class Test(unittest.TestCase):
         self.assertTrue(response_dict["message"], "The empty string response message is not empty")
 
     def test_string_results_to_long(self):
-        from hedweb import routes
         with self.app.app_context():
             test_string = 'Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red'
             input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
@@ -97,7 +96,6 @@ class Test(unittest.TestCase):
             self.assertTrue(response_dict["data"][0], "The data should have error messages")
 
     def test_string_results_validate(self):
-        from hedweb import routes
         with self.app.app_context():
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
                                           data={common.SCHEMA_VERSION: '8.0.0-alpha.1',
