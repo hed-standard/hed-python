@@ -47,7 +47,7 @@ def get_input_from_schema_form(request):
 
     arguments = {common.SCHEMA: schema,
                  common.SCHEMA_DISPLAY_NAME: display_name,
-                 common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+                 common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
                  common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
                  }
     return arguments

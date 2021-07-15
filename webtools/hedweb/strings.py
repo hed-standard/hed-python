@@ -31,7 +31,7 @@ def get_input_from_string_form(request):
         string_list = [hed_string]
     else:
         raise HedFileError('EmptyHedString', 'Must enter a HED string', '')
-    arguments = {common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+    arguments = {common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
                  common.SCHEMA: hed_schema,
                  common.STRING_LIST: string_list,
                  common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')}

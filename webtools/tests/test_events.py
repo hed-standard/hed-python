@@ -1,6 +1,9 @@
 import os
 import shutil
 import unittest
+from werkzeug.test import create_environ
+from werkzeug.wrappers import Request
+
 from hed import schema as hedschema
 from hed import models
 from hed.errors.exceptions import HedFileError
@@ -26,11 +29,34 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_events_form(self):
+    def test_generate_input_from_events_form_empty(self):
         from hedweb.events import get_input_from_events_form
         self.assertRaises(TypeError, get_input_from_events_form, {},
                           "An exception should be raised if an empty request is passed")
         self.assertTrue(1, "Testing get_input_from_events_form")
+
+    def test_generate_input_from_events_form(self):
+        from hed.models import ColumnDefGroup, EventsInput
+        from hed.schema import HedSchema
+        from hedweb.events import get_input_from_events_form
+        with self.app.test:
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
+            events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
+            with open(json_path, 'rb') as fp:
+                with open(events_path, 'rb') as fpe:
+                    environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                                             common.EVENTS_FILE: fpe, common.DEFS_EXPAND: 'on',
+                                             common.COMMAND_OPTION: common.COMMAND_ASSEMBLE})
+            request = Request(environ)
+            arguments = get_input_from_events_form(request)
+            self.assertIsInstance(arguments[common.EVENTS], EventsInput,
+                                  "generate_input_from_events_form should have an events object")
+            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+                                  "generate_input_from_events_form should have a HED schema")
+            self.assertEqual(common.COMMAND_ASSEMBLE, arguments[common.COMMAND],
+                             "generate_input_from_events_form should have a command")
+            self.assertTrue(arguments[common.DEFS_EXPAND],
+                            "generate_input_from_events_form should have defs_expand true when on")
 
     def test_events_process_empty_file(self):
         # Test for empty events_path

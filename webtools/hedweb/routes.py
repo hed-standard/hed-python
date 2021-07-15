@@ -162,7 +162,7 @@ def spreadsheet_results():
     try:
         arguments = spreadsheet.get_input_from_spreadsheet_form(request)
         a = spreadsheet.spreadsheet_process(arguments)
-        response = package_results(a, arguments)
+        response = package_results(a)
         return response
     except Exception as ex:
         return handle_http_error(ex)

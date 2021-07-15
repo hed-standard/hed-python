@@ -1,6 +1,8 @@
 import os
 import shutil
 import unittest
+from werkzeug.test import create_environ
+from werkzeug.wrappers import Request
 import hed.schema as hedschema
 from hedweb.constants import common
 from hedweb.app_factory import AppFactory
@@ -24,10 +26,28 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_hedstring_form(self):
+    def test_get_input_from_string_form_empty(self):
         from hedweb.strings import get_input_from_string_form
         self.assertRaises(TypeError, get_input_from_string_form, {},
-                          "An exception is raised if an empty request is passed to generate_input_from_hedstring")
+                          "An exception is raised if an empty request is passed to get_input_from_string_form")
+
+    def test_get_input_from_string_form(self):
+        from hed.schema import HedSchema
+        from hedweb.strings import get_input_from_string_form
+        with self.app.test:
+            environ = create_environ(data={common.STRING_INPUT: 'Red,Blue', common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                                           common.CHECK_FOR_WARNINGS: 'on',
+                                           common.COMMAND_OPTION: common.COMMAND_VALIDATE})
+            request = Request(environ)
+            arguments = get_input_from_string_form(request)
+            self.assertIsInstance(arguments[common.STRING_LIST], list,
+                                  "get_input_from_string_form should have a string list")
+            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+                                  "get_input_from_string_form should have a HED schema")
+            self.assertEqual(common.COMMAND_VALIDATE, arguments[common.COMMAND],
+                             "get_input_from_string_form should have a command")
+            self.assertTrue(arguments[common.CHECK_FOR_WARNINGS],
+                            "get_input_from_string_form should have check_for_warnings true when on")
 
     def test_string_process(self):
         from hedweb.strings import string_process

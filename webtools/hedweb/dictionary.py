@@ -26,7 +26,7 @@ def get_input_from_dictionary_form(request):
         A dictionary containing input arguments for calling the underlying dictionary processing functions.
     """
     arguments = {common.SCHEMA: get_hed_schema_from_pull_down(request), common.JSON_DICTIONARY: None,
-                 common.COMMAND: request.values.get(common.COMMAND_OPTION, None),
+                 common.COMMAND: request.form.get(common.COMMAND_OPTION, None),
                  common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')}
     if common.JSON_FILE in request.files:
         f = request.files[common.JSON_FILE]

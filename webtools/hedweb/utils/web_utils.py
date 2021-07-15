@@ -189,18 +189,16 @@ def generate_download_test():
     return response
 
 
-def generate_download_spreadsheet(results, arguments,  msg_category='success', msg=''):
+def generate_download_spreadsheet(results,  msg_category='success', msg=''):
     # return generate_download_test()
     spreadsheet = results[common.SPREADSHEET]
-    file_type = arguments[common.SPREADSHEET_TYPE]
     display_name = results[common.OUTPUT_DISPLAY_NAME]
+
+    if not spreadsheet.loaded_workbook:
+        return generate_response_download_file_from_text(spreadsheet.to_csv(), display_name=display_name,
+                                                  msg_category=msg_category, msg=msg)
     buffer = io.BytesIO()
-    if file_type == file_constants.TSV_EXTENSION:
-        spreadsheet.to_csv(buffer)
-    else:
-        worksheet = arguments[common.WORKSHEET_NAME]
-        original = results[common.SPREADSHEET_ORIGINAL_FILE]
-        spreadsheet.to_excel(buffer, source_for_formatting=original, source_for_formatting_sheet=worksheet)
+    spreadsheet.to_excel(buffer)
 
     # df = spreadsheet.get_dataframe()
     # ext = os.path.splitext(secure_filename(display_name))[1]
@@ -213,11 +211,18 @@ def generate_download_spreadsheet(results, arguments,  msg_category='success', m
     # else:
     #     df.to_csv(buffer, '\t', index=False, header=spreadsheet.has_column_names())
     # buffer.seek(0)
-    response = send_file(buffer, as_attachment=True, download_name=display_name)
-    response.headers['Category'] = msg_category
-    response.headers['Message'] = msg
+    # response = send_file(buffer, as_attachment=True, download_name=display_name)
+    # response.headers['Category'] = msg_category
+    # response.headers['Message'] = msg
     # response.headers['Content-Transfer-Encoding'] = 'Base64'
     # response.implicit_sequence_conversion = False
+    # response.direct_passthrough = True
+    # return response
+    response = send_file('d:/Research/HEDPython/hed-python/hedweb/tests/data/ExcelOneSheet.xlsx')
+    response.headers['Category'] = msg_category
+    response.headers['Message'] = msg
+    response.headers['Content-Transfer-Encoding'] = 'Base64'
+    response.implicit_sequence_conversion = True
     response.direct_passthrough = False
     return response
 
@@ -353,7 +358,7 @@ def handle_http_error(ex):
     return generate_text_response('', msg_category='error', msg=error_message)
 
 
-def package_results(results, arguments=None):
+def package_results(results):
     msg = results.get('msg', '')
     msg_category = results.get('msg_category', 'success')
     display_name = results.get('output_display_name', '')
@@ -363,4 +368,4 @@ def package_results(results, arguments=None):
     elif not results.get('spreadsheet', None):
         return generate_text_response("", msg=msg, msg_category=msg_category)
     else:
-        return generate_download_spreadsheet(results, arguments,  msg_category=msg_category, msg=msg)
+        return generate_download_spreadsheet(results, msg_category=msg_category, msg=msg)

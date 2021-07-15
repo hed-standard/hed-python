@@ -1,6 +1,8 @@
 import os
 import shutil
 import unittest
+from werkzeug.test import create_environ
+from werkzeug.wrappers import Request
 
 import hed.schema as hedschema
 from hed import models
@@ -27,10 +29,41 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_spreadsheet_form(self):
+    def test_get_input_from_spreadsheet_form_empty(self):
         from hedweb.spreadsheet import get_input_from_spreadsheet_form
         self.assertRaises(TypeError, get_input_from_spreadsheet_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_spreadsheet")
+
+    def test_get_input_from_spreadsheet_form(self):
+        from hed.models import HedInput
+        from hed.schema import HedSchema
+        from hedweb.spreadsheet import get_input_from_spreadsheet_form
+        with self.app.test:
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/ExcelOneSheet.xlsx')
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/HED8.0.0-beta.3.xml')
+            with open(spreadsheet_path, 'rb') as fp:
+                with open(schema_path, 'rb') as sp:
+                    environ = create_environ(data={common.SPREADSHEET_FILE: fp,
+                                             common.SCHEMA_VERSION: common.OTHER_VERSION_OPTION,
+                                             common.SCHEMA_PATH: sp,
+                                             'column_5_check': 'on', 'column_5_input': '',
+                                             common.WORKSHEET_SELECTED: 'LKT 8Beta3',
+                                             common.HAS_COLUMN_NAMES: 'on',
+                                             common.COMMAND_OPTION: common.COMMAND_VALIDATE})
+
+            request = Request(environ)
+            arguments = get_input_from_spreadsheet_form(request)
+            self.assertIsInstance(arguments[common.SPREADSHEET], HedInput,
+                                  "generate_input_from_spreadsheet_form should have an events object")
+            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+                                  "generate_input_from_spreadsheet_form should have a HED schema")
+            self.assertEqual(common.COMMAND_VALIDATE, arguments[common.COMMAND],
+                             "generate_input_from_spreadsheet_form should have a command")
+            self.assertEqual('LKT 8Beta3', arguments[common.WORKSHEET_NAME],
+                             "generate_input_from_spreadsheet_form should have a worksheet name")
+            self.assertTrue(arguments[common.HAS_COLUMN_NAMES],
+                            "generate_input_from_spreadsheet_form should have column names")
+
 
     def test_spreadsheet_process_empty_file(self):
         from hedweb.constants import common
@@ -115,7 +148,7 @@ class Test(unittest.TestCase):
             self.assertEqual('success', results["msg_category"],
                              'spreadsheet_validate msg_category should be success when no errors')
 
-    def test_spreadsheet_validate_valid_excel(self):
+    def test_spreadsheet_validate_valid_excel1(self):
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')

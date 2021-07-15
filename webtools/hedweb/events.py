@@ -29,7 +29,7 @@ def get_input_from_events_form(request):
         A dictionary containing input arguments for calling the underlying validation function.
     """
     arguments = {common.SCHEMA: get_hed_schema_from_pull_down(request), common.EVENTS: None,
-                 common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+                 common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
                  common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
                  common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on')}
 

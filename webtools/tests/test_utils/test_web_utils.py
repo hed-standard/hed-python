@@ -148,31 +148,50 @@ class Test(unittest.TestCase):
     #         headers_dict = dict(response.headers)
     #         self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
 
+    def test_generate_download_spreadsheet_excel(self):
+        with self.app.test_request_context():
+            from hed.models import HedInput
+            from hedweb.constants import common
+            from hedweb.utils.web_utils import generate_download_spreadsheet
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/ExcelOneSheet.xlsx')
 
-    # def test_generate_download_spreadsheet_tsv(self):
-    #     with self.app.test_request_context():
-    #
-    #         from hed.models import HedInput
-    #         from hedweb.utils.web_utils import generate_download_spreadsheet
-    #         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                         '../data/LKTEventCodes8Beta3.tsv')
-    #
-    #         spreadsheet = HedInput(filename=spreadsheet_path,
-    #                                tag_columns=[5], has_column_names=True,
-    #                                column_prefix_dictionary={2:'Attribute/Informational/Label/',
-    #                                                          4:'Attribute/Informational/Description/'},
-    #                                display_name='LKTEventCodes8Beta3.tsv')
-    #         response = generate_download_spreadsheet(spreadsheet, spreadsheet_path,
-    #                                                  display_name='LKTEventCodes8Beta3_download.tsv',
-    #                                                  msg_category='success', msg='Successful download')
-    #         self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
-    #         headers_dict = dict(response.headers)
-    #         self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
-    #         self.assertEqual('text/tab-separated-values', response.mimetype,
-    #                          "generate_download_spreadsheet should return tab-separated text for tsv files")
-    #         x = int(headers_dict['Content-Length'])
-    #         self.assertGreater(int(headers_dict['Content-Length']), 0,
-    #                            "generate_download_spreadsheet download should be non-empty")
+            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
+                                   tag_columns=[5], has_column_names=True,
+                                   column_prefix_dictionary={2:'Attribute/Informational/Label/',
+                                                             4:'Attribute/Informational/Description/'},
+                                   display_name='ExcelOneSheet.xlsx')
+            results = {common.SPREADSHEET:spreadsheet, common.OUTPUT_DISPLAY_NAME:'ExcelOneSheetA.xlsx'}
+            response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
+            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
+            headers_dict = dict(response.headers)
+            self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
+            self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response.mimetype,
+                             "generate_download_spreadsheet should return spreadsheetml for excel files")
+            self.assertTrue(headers_dict['Content-Disposition'].startswith('attachment; filename='),
+                            "generate_download_spreadsheet excel should be downloaded as an attachment")
+
+    def test_generate_download_spreadsheet_tsv(self):
+        with self.app.test_request_context():
+            from hed.models import HedInput
+            from hedweb.constants import common
+            from hedweb.utils.web_utils import generate_download_spreadsheet
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            '../data/LKTEventCodes8Beta3.tsv')
+
+            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.tsv',
+                                   tag_columns=[5], has_column_names=True,
+                                   column_prefix_dictionary={2:'Attribute/Informational/Label/',
+                                                             4:'Attribute/Informational/Description/'},
+                                   display_name='LKTEventCodes8Beta3.tsv')
+            results = {common.SPREADSHEET:spreadsheet, common.OUTPUT_DISPLAY_NAME:'LKTEventCodes8Beta3.tsv'}
+            response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
+            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
+            headers_dict = dict(response.headers)
+            self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
+            self.assertEqual('text/plain charset=utf-8', response.mimetype,
+                             "generate_download_spreadsheet should return text for tsv files")
+            self.assertTrue(headers_dict['Content-Disposition'].startswith('attachment filename='),
+                             "generate_download_spreadsheet tsv should be downloaded as an attachment")
 
     def test_get_hed_path_from_pull_down(self):
         mock_form = mock.Mock()
@@ -220,18 +239,6 @@ class Test(unittest.TestCase):
         # self.assertNotEqual(mock_file, '', "It should create an actual file in the upload directory")
         # self.assertTrue(os.path.isfile(temp_name), "File should exist after it is uploaded")
 
-    def test_save_file_to_upload_folder_no_exception(self):
-        self.assertTrue(True, "Test to be done")
-
-    def test_save_text_to_upload_folder(self):
-        text = 'save me now'
-        filename = 'test_save.txt'
-        actual_path = os.path.join(self.upload_directory, filename)
-        self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
-        with self.app.app_context():
-            from hedweb.utils.io_utils import save_text_to_upload_folder
-            the_path = save_text_to_upload_folder(text, filename)
-            self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
 
 
 if __name__ == '__main__':

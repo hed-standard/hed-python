@@ -190,6 +190,9 @@ function submitForm() {
                 // ab.href = downloadUrl;
                 // ab.download = "downloadFile.xlsx";
                 // document.body.appendChild(ab);
+            },
+            error: function (xhr, status, errorThrown) {
+                getResponseFailure(xhr, status, errorThrown, display_name, 'spreadsheet_submit_flash')
             }
         })
         // $.ajax({
