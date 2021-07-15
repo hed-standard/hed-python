@@ -89,14 +89,14 @@ class Test(unittest.TestCase):
         test_input_file = self.generic_file_input
         test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                         "../data/ExcelMultipleSheets_resave_formatting.xlsx")
-        test_input_file.to_excel(test_output_name, source_for_formatting=self.default_test_file_name)
+        test_input_file.to_excel(test_output_name)
 
         #Test to a file stream
         test_input_file = self.generic_file_input
         test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                         "../data/ExcelMultipleSheets_fileio.xlsx")
-        with open(test_output_name, "wb") as f, open(self.default_test_file_name, "rb") as f2:
-            test_input_file.to_excel(f, source_for_formatting=f2)
+        with open(test_output_name, "wb") as f:
+            test_input_file.to_excel(f)
 
     def test_to_csv(self):
         test_input_file = self.generic_file_input
@@ -107,6 +107,17 @@ class Test(unittest.TestCase):
         test_input_file = self.generic_file_input
         file_as_csv = test_input_file.to_csv(None)
         self.assertIsInstance(file_as_csv, str)
+
+    def test_loading_and_reloading(self):
+        test_input_file = self.generic_file_input
+        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "../data/ExcelMultipleSheets_test_save.xlsx")
+
+        test_input_file.to_excel(test_output_name)
+
+        reloaded_input = HedInput(test_output_name)
+
+        self.assertTrue(test_input_file._dataframe.equals(reloaded_input._dataframe))
 
 
 if __name__ == '__main__':
