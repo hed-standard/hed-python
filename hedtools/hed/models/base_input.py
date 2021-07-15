@@ -83,15 +83,25 @@ class BaseInput:
         # finally add the new file dict to the mapper.
         mapper.update_definition_mapper_with_file(self.file_def_dict)
 
-    def get_dataframe(self):
+    @property
+    def dataframe(self):
         return self._dataframe
 
     @property
     def display_name(self):
         return self._display_name
 
+    @property
     def has_column_names(self):
         return self._has_column_names
+
+    @property
+    def loaded_workbook(self):
+        return self._loaded_workbook
+
+    @property
+    def worksheet_name(self):
+        return self._worksheet_name
 
     def _convert_to_form(self, hed_schema, tag_form, error_handler):
         """
@@ -231,7 +241,7 @@ class BaseInput:
         else:
             output_file._dataframe.to_excel(filename, header=self._has_column_names)
 
-    def to_csv(self, filename, output_processed_file=False):
+    def to_csv(self, filename=None, output_processed_file=False):
         """
             Returns the file as a csv string.
 
@@ -377,9 +387,13 @@ class BaseInput:
         -------
         worksheet
         """
-        if not worksheet_name:
+        if worksheet_name and self._loaded_workbook:
+            # return self._loaded_workbook.get_sheet_by_name(worksheet_name)
+            return self._loaded_workbook[worksheet_name]
+        elif self._loaded_workbook:
             return self._loaded_workbook.worksheets[0]
-        return self._loaded_workbook.get_sheet_by_name(worksheet_name)
+        else:
+            return None
 
     def _get_processed_copy(self):
         """
