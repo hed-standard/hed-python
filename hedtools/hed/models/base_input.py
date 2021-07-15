@@ -4,6 +4,7 @@ import pandas
 import copy
 import io
 
+from itertools import islice
 from hed.models.def_dict import DefDict
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -47,6 +48,9 @@ class BaseInput:
         self._mapper = mapper
         self._has_column_names = has_column_names
         self._display_name = display_name
+        # This is the loaded workbook if we loaded originally from an excel file.
+        self._loaded_workbook = None
+        self._worksheet_name = worksheet_name
         pandas_header = 0
         if not self._has_column_names:
             pandas_header = None
@@ -63,11 +67,9 @@ class BaseInput:
         if input_type in self.TEXT_EXTENSION:
             self._dataframe = pandas.read_csv(filename, delimiter='\t', header=pandas_header)
         elif input_type in self.EXCEL_EXTENSION:
-            worksheet_to_load = worksheet_name
-            if worksheet_to_load is None:
-                worksheet_to_load = 0
-            self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header,
-                                                engine="openpyxl")
+            self._loaded_workbook = openpyxl.load_workbook(filename)
+            loaded_worksheet = self.get_worksheet(self._worksheet_name)
+            self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
 
@@ -191,8 +193,7 @@ class BaseInput:
 
         return new_def_dict, validation_issues
 
-    def to_excel(self, filename, output_processed_file=False,
-                 source_for_formatting=None, source_for_formatting_sheet=None):
+    def to_excel(self, filename, output_processed_file=False):
         """
 
         Parameters
@@ -201,11 +202,6 @@ class BaseInput:
             Location to save this file.  Can be filename, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
-        source_for_formatting: str or file like
-            If present, use this the source spreadsheet for text formatting
-        source_for_formatting_sheet: str or int
-            Name or number of the sheet to derive formatting from.
-
         Returns
         -------
 
@@ -219,11 +215,8 @@ class BaseInput:
         else:
             output_file = self
 
-        if source_for_formatting:
-            # To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
-            # this is not ideal
-            old_workbook = openpyxl.load_workbook(source_for_formatting)
-            old_worksheet = self.get_worksheet(old_workbook, worksheet_name=source_for_formatting_sheet)
+        if self._loaded_workbook:
+            old_worksheet = self.get_worksheet(self._worksheet_name)
             # excel spreadsheets are 1 based, then add another 1 for column names if present
             adj_row_for_col_names = 1
             if self._has_column_names:
@@ -234,7 +227,7 @@ class BaseInput:
                     old_worksheet.cell(row_number + adj_row_for_col_names,
                                        column_number + adj_for_one_based_cols).value = \
                         output_file._dataframe.iloc[row_number, column_number]
-            old_workbook.save(filename)
+            self._loaded_workbook.save(filename)
         else:
             output_file._dataframe.to_excel(filename, header=self._has_column_names)
 
@@ -372,15 +365,12 @@ class BaseInput:
         """
         return row_dict[model_constants.ROW_HED_STRING], row_dict[model_constants.COLUMN_TO_HED_TAGS]
 
-    @staticmethod
-    def get_worksheet(workbook, worksheet_name=None):
+    def get_worksheet(self, worksheet_name=None):
         """
             Returns the requested worksheet from the workbook by name
 
         Parameters
         ----------
-        workbook : openpyxl.workbook.Workbook
-
         worksheet_name : str
             Returns the requested worksheet by name, or the first one if no name passed in.
         Returns
@@ -388,8 +378,8 @@ class BaseInput:
         worksheet
         """
         if not worksheet_name:
-            return workbook.worksheets[0]
-        return workbook.get_sheet_by_name(worksheet_name)
+            return self._loaded_workbook.worksheets[0]
+        return self._loaded_workbook.get_sheet_by_name(worksheet_name)
 
     def _get_processed_copy(self):
         """
@@ -407,3 +397,29 @@ class BaseInput:
                 output_file.set_cell(row_number, column_number, new_text)
 
         return output_file
+
+    @staticmethod
+    def _get_dataframe_from_worksheet(worksheet, has_headers):
+        """
+        Creates a pandas dataframe from the given worksheet object
+
+        Parameters
+        ----------
+        worksheet : Worksheet
+            The loaded worksheet to convert
+        has_headers : bool
+            If this worksheet has column headers or not.
+
+        Returns
+        -------
+        dataframe: DataFrame
+            The converted data frame.
+        """
+        if has_headers:
+            data = worksheet.values
+            # first row is columns
+            cols = next(data)
+            data = list(data)
+            return pandas.DataFrame(data, columns=cols)
+        else:
+            return pandas.DataFrame(worksheet.values)

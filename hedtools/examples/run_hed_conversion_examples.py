@@ -15,19 +15,15 @@ from hed.models.hed_string import HedString
 local_hed_file_no_dupe = 'data/HED8.0.0-alpha.1.xml'
 
 
-def long_to_short_file(input_file, output_filename, hed_schema, source_for_formatting=None,
-                       source_for_formatting_sheet=None, error_handler=None):
+def long_to_short_file(input_file, output_filename, hed_schema, error_handler=None):
     error_list = input_file.convert_to_short(hed_schema, error_handler)
-    input_file.to_excel(output_filename, source_for_formatting=source_for_formatting,
-                        source_for_formatting_sheet=source_for_formatting_sheet)
+    input_file.to_excel(output_filename, )
     return input_file, error_list
 
 
-def short_to_long_file(input_file, output_filename, hed_schema, source_for_formatting=None,
-                       source_for_formatting_sheet=None, error_handler=None):
+def short_to_long_file(input_file, output_filename, hed_schema, error_handler=None):
     error_list = input_file.convert_to_long(hed_schema, error_handler)
-    input_file.to_excel(output_filename, source_for_formatting=source_for_formatting,
-                        source_for_formatting_sheet=source_for_formatting_sheet)
+    input_file.to_excel(output_filename)
     return input_file, error_list
 
 
@@ -51,15 +47,13 @@ if __name__ == '__main__':
                            column_prefix_dictionary=prefixed_needed_tag_columns,
                            worksheet_name='LKT Events')
     output_filename = hed3_tags_single_sheet + "_short_form.xlsx"
-    long_to_short_file(loaded_file, output_filename, loaded_schema, source_for_formatting=hed3_tags_single_sheet,
-                       source_for_formatting_sheet="LKT Events")
+    long_to_short_file(loaded_file, output_filename, loaded_schema)
 
     output_filename = hed3_tags_single_sheet + "_long_form.xlsx"
     loaded_file = HedInput(hed3_tags_single_sheet, tag_columns=[4],
                            column_prefix_dictionary=prefixed_needed_tag_columns,
                            worksheet_name='LKT Events')
-    short_to_long_file(loaded_file, output_filename, loaded_schema, source_for_formatting=hed3_tags_single_sheet,
-                       source_for_formatting_sheet="LKT Events")
+    short_to_long_file(loaded_file, output_filename, loaded_schema)
 
     inputs = 'Attribute/Sensory/Visual/Color/CSS-color/White-color/White'
     tag, error = long_to_short_string(inputs, loaded_schema)
