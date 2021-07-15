@@ -125,12 +125,12 @@ def val_error_def_unmatched(tag):
     return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'", {}
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING)
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.HED_DEF_INVALID)
 def val_error_def_value_missing(tag):
     return f"A def tag requires a placeholder value, but was not given one.  Definition: '{tag}'", {}
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA)
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.HED_DEF_INVALID)
 def val_error_def_value_extra(tag):
     return f"A def tag does not take a placeholder value, but was given one.  Definition: '{tag}", {}
 
@@ -145,7 +145,7 @@ def val_error_tag_group_tag(tag):
     return f"A tag that must be in a group was found in another location.  {str(tag)}", {}
 
 
-@hed_tag_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS)
+@hed_tag_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, actual_code=ValidationErrors.HED_TAG_GROUP_ERROR)
 def val_error_top_level_tags(tag, multiple_tags):
     tags_as_string = [str(tag) for tag in multiple_tags]
     return f"Multiple top level tags found in a single group.  First one found: {str(tag)}.  Remainder:{str(tags_as_string)}", {}
