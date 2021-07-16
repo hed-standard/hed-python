@@ -76,16 +76,15 @@ class Test(unittest.TestCase):
         from hedweb.strings import string_convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        string_list = ['Red, Blue']
+        string_list = ['Attribute/Informational/Description/Blech, Blue']
         with self.app.app_context():
-            results = string_convert(hed_schema, string_list)
+            results = string_convert(hed_schema, string_list, common.COMMAND_TO_SHORT)
+            data = results['data']
+            self.assertTrue(data, 'convert string to short returns data')
+            self.assertIsInstance(data, list, "convert string to short returns data in a list")
+            self.assertEqual("Description/Blech,Blue", data[0], "convert string to short returns the correct short form.")
             self.assertEqual('success', results['msg_category'],
                              "hedstring_convert should return success if converted")
-            # schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
-            #
-            # hed_schema = load_schema(hed_file_path=schema_path)
-            # hed_strings = ['Red']
-            # x = string_convert(hed_schema, hed_strings, command=common.COMMAND_TO_LONG)
 
     def test_string_convert_to_long(self):
         from hedweb.strings import string_convert

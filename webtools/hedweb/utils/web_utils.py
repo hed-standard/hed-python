@@ -4,7 +4,7 @@ import pathlib
 import pandas as pd
 
 from urllib.parse import urlparse
-from flask import current_app, Response, send_file
+from flask import current_app, Response, send_file, make_response
 from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
@@ -196,34 +196,16 @@ def generate_download_spreadsheet(results,  msg_category='success', msg=''):
 
     if not spreadsheet.loaded_workbook:
         return generate_response_download_file_from_text(spreadsheet.to_csv(), display_name=display_name,
-                                                  msg_category=msg_category, msg=msg)
+                                                         msg_category=msg_category, msg=msg)
     buffer = io.BytesIO()
     spreadsheet.to_excel(buffer)
-
-    # df = spreadsheet.get_dataframe()
-    # ext = os.path.splitext(secure_filename(display_name))[1]
-    # buffer = io.BytesIO()
-    # if ext == '.xlsx':
-    #     writer = pd.ExcelWriter(buffer, engine="openpyxl")
-    #     df.to_excel(writer, sheet_name='temp1', index=False)
-    #     writer.save()
-    #     writer.close()
-    # else:
-    #     df.to_csv(buffer, '\t', index=False, header=spreadsheet.has_column_names())
-    # buffer.seek(0)
-    # response = send_file(buffer, as_attachment=True, download_name=display_name)
-    # response.headers['Category'] = msg_category
-    # response.headers['Message'] = msg
-    # response.headers['Content-Transfer-Encoding'] = 'Base64'
-    # response.implicit_sequence_conversion = False
-    # response.direct_passthrough = True
-    # return response
-    response = send_file('d:/Research/HEDPython/hed-python/hedweb/tests/data/ExcelOneSheet.xlsx')
+    buffer.seek(0)
+    response = make_response()
+    response.data = buffer.read()
+    response.headers['Content-Disposition'] = 'attachment; filename=' + display_name
     response.headers['Category'] = msg_category
     response.headers['Message'] = msg
-    response.headers['Content-Transfer-Encoding'] = 'Base64'
-    response.implicit_sequence_conversion = True
-    response.direct_passthrough = False
+    response.mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     return response
 
 

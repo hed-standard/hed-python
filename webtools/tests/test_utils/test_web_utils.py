@@ -170,6 +170,28 @@ class Test(unittest.TestCase):
             self.assertTrue(headers_dict['Content-Disposition'].startswith('attachment; filename='),
                             "generate_download_spreadsheet excel should be downloaded as an attachment")
 
+    def test_generate_download_spreadsheet_excel_code(self):
+        with self.app.test_request_context():
+            from hed.models import HedInput
+            from hedweb.constants import common
+            from hedweb.utils.web_utils import generate_download_spreadsheet
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/ExcelOneSheet.xlsx')
+
+            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
+                                   tag_columns=[5], has_column_names=True,
+                                   column_prefix_dictionary={2:'Attribute/Informational/Label/',
+                                                             4:'Attribute/Informational/Description/'},
+                                   display_name='ExcelOneSheet.xlsx')
+            results = {common.SPREADSHEET:spreadsheet, common.OUTPUT_DISPLAY_NAME:'ExcelOneSheetA.xlsx'}
+            response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
+            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
+            headers_dict = dict(response.headers)
+            self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
+            self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response.mimetype,
+                             "generate_download_spreadsheet should return spreadsheetml for excel files")
+            self.assertTrue(headers_dict['Content-Disposition'].startswith('attachment; filename='),
+                            "generate_download_spreadsheet excel should be downloaded as an attachment")
+
     def test_generate_download_spreadsheet_tsv(self):
         with self.app.test_request_context():
             from hed.models import HedInput

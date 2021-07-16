@@ -64,7 +64,6 @@ class Test(unittest.TestCase):
             self.assertTrue(arguments[common.HAS_COLUMN_NAMES],
                             "generate_input_from_spreadsheet_form should have column names")
 
-
     def test_spreadsheet_process_empty_file(self):
         from hedweb.constants import common
         from hedweb.spreadsheet import spreadsheet_process
@@ -102,8 +101,20 @@ class Test(unittest.TestCase):
             self.assertTrue(results['data'],
                             'spreadsheet_process validate should return validation errors using HED 8.0.0-beta.1')
 
+    def test_spreadsheet_process_validate_valid(self):
+        from hedweb.spreadsheet import spreadsheet_process
+        spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4: "Event/Description/"}
+        spreadsheet = models.HedInput(spreadsheet_path,
+                                      worksheet_name='LKT Events',
+                                      tag_columns=[5],
+                                      has_column_names=True,
+                                      column_prefix_dictionary=prefix_dict,
+                                      display_name=spreadsheet_path)
+        arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
+                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
         arguments[common.SCHEMA] = hed_schema
 
         with self.app.app_context():
@@ -111,7 +122,7 @@ class Test(unittest.TestCase):
             self.assertTrue(isinstance(results, dict),
                             'spreadsheet_process should return a dict when no errors')
             self.assertEqual('success', results['msg_category'],
-                             'spreadsheet_process should return success if converted')
+                             'spreadsheet_process should return success if validated')
 
     def test_spreadsheet_validate_valid_excel(self):
         from hedweb.spreadsheet import spreadsheet_validate
@@ -121,22 +132,6 @@ class Test(unittest.TestCase):
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         spreadsheet = models.HedInput(spreadsheet_path,
                                       worksheet_name='LKT Events',
-                                      tag_columns=[5],
-                                      has_column_names=True,
-                                      column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
-        with self.app.app_context():
-            results = spreadsheet_validate(hed_schema, spreadsheet)
-            self.assertFalse(results['data'],
-                             'spreadsheet_validate results should not have a data key when no validation errors')
-            self.assertEqual('success', results["msg_category"],
-                             'spreadsheet_validate msg_category should be success when no errors')
-
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.3.xml')
-        prefix_dict = {2: "Attribute/Informational/Label/", 4: "Attribute/Informational/Description/"}
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        spreadsheet = models.HedInput(spreadsheet_path,
-                                      worksheet_name='LKT 8Beta3',
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,

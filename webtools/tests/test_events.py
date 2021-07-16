@@ -29,14 +29,14 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_events_form_empty(self):
+    def test_get_input_from_events_form_empty(self):
         from hedweb.events import get_input_from_events_form
         self.assertRaises(TypeError, get_input_from_events_form, {},
                           "An exception should be raised if an empty request is passed")
         self.assertTrue(1, "Testing get_input_from_events_form")
 
-    def test_generate_input_from_events_form(self):
-        from hed.models import ColumnDefGroup, EventsInput
+    def test_get_input_from_events_form(self):
+        from hed.models import EventsInput
         from hed.schema import HedSchema
         from hedweb.events import get_input_from_events_form
         with self.app.test:
@@ -50,13 +50,13 @@ class Test(unittest.TestCase):
             request = Request(environ)
             arguments = get_input_from_events_form(request)
             self.assertIsInstance(arguments[common.EVENTS], EventsInput,
-                                  "generate_input_from_events_form should have an events object")
+                                  "get_input_from_events_form should have an events object")
             self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
-                                  "generate_input_from_events_form should have a HED schema")
+                                  "get_input_from_events_form should have a HED schema")
             self.assertEqual(common.COMMAND_ASSEMBLE, arguments[common.COMMAND],
-                             "generate_input_from_events_form should have a command")
+                             "get_input_from_events_form should have a command")
             self.assertTrue(arguments[common.DEFS_EXPAND],
-                            "generate_input_from_events_form should have defs_expand true when on")
+                            "get_input_from_events_form should have defs_expand true when on")
 
     def test_events_process_empty_file(self):
         # Test for empty events_path
