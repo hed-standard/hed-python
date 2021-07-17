@@ -47,19 +47,18 @@ class ColumnDefGroup:
         Returns
         -------
         def_dicts: DefDict
-            A DefDict containing all the definitions found
-        validation_issues: [{}]
-            A list of all errors and warnings found while extracting definitions.
-
+            A DefDict containing all the definitions found.
         """
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
         new_def_dict = DefDict()
-        validation_issues = []
         for hed_string in self.hed_string_iter():
-            validation_issues += new_def_dict.check_for_definitions(HedString(hed_string), error_handler=error_handler)
+            hed_string_obj = HedString(hed_string)
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, False)
+            new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
+            error_handler.pop_error_context()
 
-        return new_def_dict, validation_issues
+        return new_def_dict
 
     def save_as_json(self, save_filename):
         """

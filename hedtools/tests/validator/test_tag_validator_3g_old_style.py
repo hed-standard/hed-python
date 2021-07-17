@@ -114,7 +114,7 @@ class IndividualHedTagsShort(TestHed3):
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
-            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_MISSING, tag=0,
+            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_DEFAULT_USED, tag=0,
                                                                     default_unit='s'),
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],

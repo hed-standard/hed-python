@@ -131,7 +131,7 @@ class EventValidator:
         validation_issues : [{}]
         """
         validation_issues = []
-        validation_issues += hed_input.file_def_dict_issues
+        validation_issues += hed_input.file_def_dict.get_def_issues(hed_schema=self._hed_schema)
         for row_number, row_dict in hed_input.iter_dataframe(return_row_dict=True):
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_dict)
         return validation_issues

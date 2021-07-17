@@ -161,7 +161,7 @@ def val_warning_capitalization(tag):
     return f"First word not capitalized or camel case - '{tag}'", {}
 
 
-@hed_tag_error(ValidationErrors.HED_UNITS_MISSING, default_severity=ErrorSeverity.WARNING)
+@hed_tag_error(ValidationErrors.HED_UNITS_DEFAULT_USED, default_severity=ErrorSeverity.WARNING)
 def val_warning_default_units_used(tag, default_unit):
     return f"No unit specified. Using '{default_unit}' as the default - '{tag}'", {}
 

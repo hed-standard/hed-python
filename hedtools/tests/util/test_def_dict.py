@@ -19,9 +19,9 @@ class TestDefBase(unittest.TestCase):
     def check_def_base(self, test_strings, expected_issues):
         for test_key in test_strings:
             def_dict = DefDict()
-            test_issues = def_dict.check_for_definitions(HedString(test_strings[test_key]))
+            def_dict.check_for_definitions(HedString(test_strings[test_key]))
             expected_issue = expected_issues[test_key]
-            self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
+            self.assertCountEqual(def_dict.get_def_issues(hed_schema=self.hed_schema), expected_issue, HedString(test_strings[test_key]))
 
 
 class TestDefDict(TestDefBase):
@@ -46,7 +46,7 @@ class TestDefDict(TestDefBase):
     def test_check_for_definitions_placeholder(self):
         def_dict = DefDict()
         original_def_count = len(def_dict._defs)
-        issues = def_dict.check_for_definitions(HedString(self.placehodler_def_string))
+        def_dict.check_for_definitions(HedString(self.placehodler_def_string))
         new_def_count = len(def_dict._defs)
         self.assertGreater(new_def_count, original_def_count)
 
@@ -62,7 +62,7 @@ class TestDefDict(TestDefBase):
             'twoGroupTags': f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
             'duplicateDef': f"(Definition/Def1), (Definition/Def1, {self.def_contents_string})",
             'duplicateDef2': f"(Definition/Def1), (Definition/Def1/#, {self.placeholder_def_contents})",
-            # 'defAlreadyTagInSchema': f"Definition/Item",
+            'defAlreadyTagInSchema': f"(Definition/Item)",
             'defTooManyPlaceholders': self.placeholder_invalid_def_string,
             'invalidPlaceholder': f"(Definition/InvalidDef1/InvalidPlaceholder)",
             'invalidPlaceholderExtension': f"(Definition/InvalidDef1/thispartisnotallowed/#)",
@@ -76,8 +76,7 @@ class TestDefDict(TestDefBase):
             'twoGroupTags': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1", [self.def_contents_string, self.def_contents_string2]),
             'duplicateDef': self.error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
             'duplicateDef2': self.error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
-            # Todo: restore this
-            # 'defAlreadyTagInSchema': self.error_handler.format_error(DefinitionErrors.TAG_IN_SCHEMA, "Item"),
+            'defAlreadyTagInSchema': self.error_handler.format_error(DefinitionErrors.TAG_IN_SCHEMA, "Item"),
             'defTooManyPlaceholders': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "TestDefPlaceholder",
                                                                                  expected_count=1, tag_list=["Item/TestDef1/#", "Item/TestDef2/#"]),
             'invalidPlaceholderExtension': self.error_handler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, "InvalidDef1/thispartisnotallowed"),

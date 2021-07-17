@@ -79,7 +79,7 @@ class BaseInput:
             self._mapper.set_column_map(columns)
 
         # Now that the file is fully initialized, gather the definitions from it.
-        self.file_def_dict, self.file_def_dict_issues = self.extract_definitions()
+        self.file_def_dict = self.extract_definitions()
         # finally add the new file dict to the mapper.
         mapper.update_definition_mapper_with_file(self.file_def_dict)
 
@@ -186,22 +186,21 @@ class BaseInput:
         -------
         def_dict: DefDict
             Contains all the definitions located in the file
-        validation_issues: [{}]
-            A list of all issues found with the definitions.
         """
         if error_handler is None:
             error_handler = ErrorHandler()
         new_def_dict = DefDict()
-        validation_issues = []
         for row_number, column_to_hed_tags in self.iter_raw():
             error_handler.push_error_context(ErrorContext.ROW, row_number)
             for column_number, hed_string_obj in column_to_hed_tags.items():
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                validation_issues += new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
+                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
+                new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
+                error_handler.pop_error_context()
                 error_handler.pop_error_context()
             error_handler.pop_error_context()
 
-        return new_def_dict, validation_issues
+        return new_def_dict
 
     def to_excel(self, filename, output_processed_file=False):
         """
