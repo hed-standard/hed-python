@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
     def test_dictionary_process(self):
         from hedweb.dictionary import dictionary_process
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_dictionary = models.ColumnDefGroup(json_filename=json_path, display_name='bids_json')
         arguments = {common.SCHEMA: hed_schema, common.JSON_DICTIONARY: json_dictionary,
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         json_dictionary = models.ColumnDefGroup(json_filename=json_path, display_name='bids_events')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         arguments = {common.SCHEMA: hed_schema,
                      'json_dictionary': json_dictionary, common.COMMAND: common.COMMAND_TO_LONG}
@@ -128,7 +128,7 @@ class Test(unittest.TestCase):
         from hedweb.dictionary import dictionary_convert
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         json_dictionary = models.ColumnDefGroup(json_filename=json_path, display_name='bids_events')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = dictionary_convert(hed_schema, json_dictionary)
@@ -150,7 +150,7 @@ class Test(unittest.TestCase):
         from hedweb.dictionary import dictionary_validate
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         json_dictionary = models.ColumnDefGroup(json_filename=json_path, display_name='bids_events')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = dictionary_validate(hed_schema, json_dictionary)
