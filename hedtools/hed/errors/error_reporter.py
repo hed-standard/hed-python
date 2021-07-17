@@ -5,6 +5,7 @@ You can scope the formatted errors with calls to push_error_context and pop_erro
 """
 
 from functools import wraps
+import copy
 from hed.errors.error_types import ErrorContext, ErrorSeverity
 
 error_functions = {}
@@ -35,14 +36,12 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
 
     def inner_decorator(func):
         @wraps(func)
-        def wrapper(self, *args, severity=default_severity, **kwargs):
+        def wrapper(*args, severity=default_severity, **kwargs):
             """
             Wrapper function for error handling non-tag errors
 
            Parameters
            ----------
-           self: ErrorHandler
-               The error handler that's dealing with this error
            args:
                Any other non keyword args
            severity: ErrorSeverity, Optional
@@ -54,7 +53,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
            error_list: [{}]
            """
             base_message, error_vars = func(*args, **kwargs)
-            error_object = self._create_error_object(actual_code, base_message, severity, **error_vars)
+            error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars)
             return [error_object]
 
         _register_error_function(error_type, wrapper_func=wrapper)
@@ -84,15 +83,13 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
     def inner_decorator(func):
         if has_sub_tag:
             @wraps(func)
-            def wrapper(self, tag, index_in_tag, index_in_tag_end, *args, severity=default_severity,
+            def wrapper(tag, index_in_tag, index_in_tag_end, *args, severity=default_severity,
                         **kwargs):
                 """
                 Wrapper function for error handling tag errors with sub tags.
 
                 Parameters
                 ----------
-                self: ErrorHandler
-                    The error handler that's dealing with this error
                 tag: HedTag or str
                     The hed tag object with the problem
                 index_in_tag: int,
@@ -123,7 +120,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     org_tag_text = "PlaceholderYouShouldNotSee"
 
                 base_message, error_vars = func(org_tag_text, problem_sub_tag, *args, **kwargs)
-                error_object = self._create_error_object(actual_code, base_message, severity, **error_vars,
+                error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
                                                          index_in_tag=index_in_tag, index_in_tag_end=index_in_tag_end, source_tag=tag)
 
                 return [error_object]
@@ -132,14 +129,12 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
             return wrapper
         else:
             @wraps(func)
-            def wrapper(self, tag, *args, severity=default_severity, **kwargs):
+            def wrapper(tag, *args, severity=default_severity, **kwargs):
                 """
                 Wrapper function for error handling tag errors
 
                 Parameters
                 ----------
-                self: ErrorHandler
-                    The error handler that's dealing with this error
                 tag: HedTag or HedGroup
                     The hed tag object with the problem
                 args:
@@ -161,8 +156,8 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 else:
                     org_tag_text = "PlaceholderYouShouldNotSee"
                 base_message, error_vars = func(org_tag_text, *args, **kwargs)
-                error_object = self._create_error_object(actual_code, base_message, severity, **error_vars,
-                                                         source_tag=tag)
+                error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
+                                                                 source_tag=tag)
 
                 return [error_object]
 
@@ -213,7 +208,11 @@ class ErrorHandler:
         This function should not be needed with proper usage."""
         self.error_context = []
 
-    def _add_context_to_errors(self, error_object=None):
+    def get_error_context_copy(self):
+        return copy.deepcopy(self.error_context)
+
+    @staticmethod
+    def _add_context_to_errors(error_object, error_context_to_add):
         """
         Takes an error object and adds relevant context around it, such as row number, or column name.
 
@@ -221,18 +220,24 @@ class ErrorHandler:
         ----------
         error_object : {}
             Generated error containing at least a code and message entry.
-
+        error_context_to_add: []
+            Source context to use.  If none, gets it from the error handler directly at this time.
         Returns
         -------
         error_object_list: [{}]
             The passed in error with any needed context strings added to the start.
         """
-        for (context_type, context, increment_count) in self.error_context:
+        if error_object is None:
+            error_object = {}
+        if error_context_to_add is None:
+            error_context_to_add = self.error_context
+        for (context_type, context, increment_count) in error_context_to_add:
             error_object[context_type] = (context, increment_count)
 
-        return [error_object]
+        return error_object
 
-    def _create_error_object(self, error_type, base_message, severity, **kwargs):
+    @staticmethod
+    def _create_error_object(error_type, base_message, severity, **kwargs):
         if severity == ErrorSeverity.ERROR:
             error_prefix = "ERROR: "
         else:
@@ -243,28 +248,9 @@ class ErrorHandler:
                         'severity': severity
                         }
 
-        self._add_context_to_errors(error_object)
-
         for key, value in kwargs.items():
             error_object.setdefault(key, value)
 
-        # This part is optional as you can always generate these as needed.
-        start, end = self._get_tag_span_to_error_object(error_object)
-        if start is not None and end is not None:
-            source_tag = error_object.get('source_tag', None)
-            # Todo: Move this functionality somewhere more centralized.
-            # If the tag has been modified from the original, don't try to use sub indexing.
-            if source_tag and source_tag._tag:
-                 new_start, new_end = start, end
-            else:
-                new_start = start + error_object.get('index_in_tag', 0)
-                index_in_tag_end = end
-                if 'index_in_tag_end' in error_object:
-                    index_in_tag_end = start + error_object['index_in_tag_end']
-                new_end = index_in_tag_end
-            error_object['char_index'], error_object['char_index_end'] = new_start, new_end
-            error_message += f"  Problem spans string indexes: {new_start}, {new_end}"
-            error_object['message'] = error_message
         return error_object
 
     @staticmethod
@@ -306,16 +292,63 @@ class ErrorHandler:
         error: [{}]
             A single error
         """
+        return self.format_error_from_context(error_type, self.error_context, *args, actual_error=actual_error, **kwargs)
+
+    @staticmethod
+    def format_error_from_context(error_type, error_context, *args, actual_error=None, **kwargs):
+        """
+            The parameters vary based on what type of error this is.
+
+        Parameters
+        ----------
+        error_type : str
+            The type of error for this.  Registered with @hed_error or @hed_tag_error.
+        error_context: []
+            A list containing the error context to use for this error.  Generally returned from _add_context_to_errors
+        args: args
+            Any remaining non keyword args.
+        actual_error: str or None
+            The code to actually add to report out.  Useful for errors that are shared like invalid character.
+        kwargs :
+            The other parameters to pass down to the error handling func.
+        Returns
+        -------
+        error: [{}]
+            A single error
+        """
         error_func = error_functions.get(error_type)
         if not error_func:
-            error_object_list = self.val_error_unknown(*args, **kwargs)
+            error_object_list = ErrorHandler.val_error_unknown(*args, **kwargs)
             error_object_list[0]['code'] = error_type
+            ErrorHandler._add_context_to_errors(error_object_list[0], error_context)
             return error_object_list
 
-        error = error_func(self, *args, **kwargs)
+        error_object_list = error_func(*args, **kwargs)
         if actual_error:
-            error[0]['code'] = actual_error
-        return error
+            error_object_list[0]['code'] = actual_error
+
+        ErrorHandler._add_context_to_errors(error_object_list[0], error_context)
+        ErrorHandler._update_error_with_char_pos(error_object_list[0])
+        return error_object_list
+
+    @staticmethod
+    def _update_error_with_char_pos(error_object):
+        # This part is optional as you can always generate these as needed.
+        start, end = ErrorHandler._get_tag_span_to_error_object(error_object)
+        if start is not None and end is not None:
+            source_tag = error_object.get('source_tag', None)
+            # Todo: Move this functionality somewhere more centralized.
+            # If the tag has been modified from the original, don't try to use sub indexing.
+            if source_tag and source_tag._tag:
+                 new_start, new_end = start, end
+            else:
+                new_start = start + error_object.get('index_in_tag', 0)
+                index_in_tag_end = end
+                if 'index_in_tag_end' in error_object:
+                    index_in_tag_end = start + error_object['index_in_tag_end']
+                new_end = index_in_tag_end
+            error_object['char_index'], error_object['char_index_end'] = new_start, new_end
+            error_object['message'] += f"  Problem spans string indexes: {new_start}, {new_end}"
 
     @hed_error("Unknown")
     def val_error_unknown(*args, **kwargs):
