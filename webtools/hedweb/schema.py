@@ -9,8 +9,7 @@ from hed.util.file_util import get_file_extension
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 
-from hedweb.utils.web_utils import form_has_file, form_has_option, form_has_url
-from hedweb.utils.io_utils import generate_filename
+from hedweb.utils.web_utils import form_has_file, form_has_option, form_has_url, generate_filename
 from hedweb.constants import common, file_constants
 
 app_config = current_app.config

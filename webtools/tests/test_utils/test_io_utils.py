@@ -24,23 +24,8 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_file_extension_is_valid(self):
-        from hedweb.utils.io_utils import file_extension_is_valid
-        is_valid = file_extension_is_valid('abc.xml', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
-        is_valid = file_extension_is_valid('abc.XML', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if capitalized version of valid extension')
-        is_valid = file_extension_is_valid('abc.temp', ['.xml', '.txt'])
-        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
-        is_valid = file_extension_is_valid('abc')
-        self.assertTrue(is_valid, 'File names with no extension are valid when no valid extensions provided')
-        is_valid = file_extension_is_valid('abc', ['.xml', '.txt'])
-        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
-        is_valid = file_extension_is_valid('C:abc.Txt', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
 
     def test_file_to_string(self):
-        from hedweb.utils.io_utils import file_to_string
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
 
         with open(json_path, 'r') as sc:
@@ -59,27 +44,7 @@ class Test(unittest.TestCase):
 
         # temp_name = save_file_to_upload_folder('')
 
-    def test_generate_filename(self):
-        from hedweb.utils.io_utils import generate_filename
-        filename = generate_filename(None, prefix=None, suffix=None, extension=None)
-        self.assertEqual('', filename, "Return empty when all arguments are none")
-        filename = generate_filename(None, prefix=None, suffix=None, extension='.txt')
-        self.assertEqual('', filename, "Return empty when base_name, prefix, and suffix are None, but extension is not")
-        filename = generate_filename('c:/temp.json', prefix=None, suffix=None, extension='.txt')
-        self.assertEqual('c_temp.txt', filename,
-                         "Returns stripped base_name + extension when prefix, and suffix are None")
-        filename = generate_filename('temp.json', prefix='prefix', suffix='suffix', extension='.txt')
-        self.assertEqual('prefix_temp_suffix.txt', filename,
-                         "Return stripped base_name + extension when prefix, and suffix are None")
-        filename = generate_filename(None, prefix='prefix', suffix='suffix', extension='.txt')
-        self.assertEqual('prefix_suffix.txt', filename,
-                         "Returns correct string when no base_name")
-        filename = generate_filename('event-strategy-v3_task-matchingpennies_events.json',
-                                     suffix='blech', extension='.txt')
-        self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
-                         "Returns correct string when base_name with hyphens")
-        filename = generate_filename('HED7.1.2.xml', suffix='blech', extension='.txt')
-        self.assertEqual('HED7.1.2_blech.txt', filename, "Returns correct string when base_name has periods")
+
 
     def test_get_optional_form_field(self):
         self.assertTrue(1, "Testing get_optional_form_field")
@@ -110,8 +75,6 @@ class Test(unittest.TestCase):
     #
     #     self.assertTrue(1, "Testing handle_http_error")+
 
-    def test_handle_error(self):
-        self.assertTrue(True, "Testing to be done")
 
     def test_save_file_to_upload_folder(self):
         self.assertTrue(1, "Testing save_file_to_upload_folder")
@@ -154,10 +117,7 @@ class Test(unittest.TestCase):
         filename = 'test_save.txt'
         actual_path = os.path.join(self.upload_directory, filename)
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
-        with self.app.app_context():
-            from hedweb.utils.io_utils import save_text_to_upload_folder
-            the_path = save_text_to_upload_folder(text, filename)
-            self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
+
 
 
 if __name__ == '__main__':

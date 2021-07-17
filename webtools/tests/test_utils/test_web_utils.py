@@ -1,12 +1,6 @@
 import os
-import io
 import shutil
-from shutil import copyfile
 import unittest
-from unittest import mock
-from openpyxl import load_workbook
-
-from werkzeug.datastructures import Headers
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request, Response
 from hedweb.app_factory import AppFactory
@@ -31,13 +25,28 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
+    def test_file_extension_is_valid(self):
+        from hedweb.utils.web_utils import file_extension_is_valid
+        is_valid = file_extension_is_valid('abc.xml', ['.xml', '.txt'])
+        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
+        is_valid = file_extension_is_valid('abc.XML', ['.xml', '.txt'])
+        self.assertTrue(is_valid, 'File name has a valid extension if capitalized version of valid extension')
+        is_valid = file_extension_is_valid('abc.temp', ['.xml', '.txt'])
+        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
+        is_valid = file_extension_is_valid('abc')
+        self.assertTrue(is_valid, 'File names with no extension are valid when no valid extensions provided')
+        is_valid = file_extension_is_valid('abc', ['.xml', '.txt'])
+        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
+        is_valid = file_extension_is_valid('C:abc.Txt', ['.xml', '.txt'])
+        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
+
     def test_form_has_file(self):
         from hedweb.utils.web_utils import form_has_file
         from hedweb.constants import file_constants
-        with self.app.test as c:
+        with self.app.test as _:
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
             with open(json_path, 'rb') as fp:
-               environ = create_environ(data={'json_file': fp})
+                environ = create_environ(data={'json_file': fp})
 
             request = Request(environ)
             self.assertTrue(form_has_file(request, 'json_file'), "Form has file when no extension requirements")
@@ -50,15 +59,15 @@ class Test(unittest.TestCase):
     def test_form_has_option(self):
         from hedweb.utils.web_utils import form_has_option
         from hedweb.constants import common
-        with self.app.test as c:
+        with self.app.test as _:
             environ = create_environ(data={common.CHECK_FOR_WARNINGS: 'on'})
             request = Request(environ)
             self.assertTrue(form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
                             "Form has the required option when set")
             self.assertFalse(form_has_option(request, common.CHECK_FOR_WARNINGS, 'off'),
-                            "Form does not have required option when target value is wrong one")
+                             "Form does not have required option when target value is wrong one")
             self.assertFalse(form_has_option(request, 'blank', 'on'),
-                            "Form does not have required option when option is not in the form")
+                             "Form does not have required option when option is not in the form")
 
     def test_form_has_url(self):
         from hedweb.utils.web_utils import form_has_url
@@ -69,53 +78,39 @@ class Test(unittest.TestCase):
             self.assertTrue(form_has_url(request, common.SCHEMA_URL), "Form has a URL that is specified")
             self.assertFalse(form_has_url(request, 'temp'), "Form does not have a field that is not specified")
             self.assertFalse(form_has_url(request, common.SCHEMA_URL, file_constants.SPREADSHEET_EXTENSIONS),
-                                         "Form does not URL with the wrong extension")
+                             "Form does not URL with the wrong extension")
 
-    def test_generate_download_file_valid(self):
-        from hedweb.utils.web_utils import generate_download_file
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
-        with self.app.test_request_context():
-            response = generate_download_file(hed_file, 'HED.xml', msg_category='success', msg='Successful')
-            self.assertIsInstance(response, Response, 'generate_download_file returns a response for real file')
-            self.assertEqual(200, response.status_code, "Generate_download_file has status code 200 for real file")
-            header_content = dict(response.headers)
-            self.assertEqual('success', header_content['Category'], "The msg_category is success")
-            self.assertEqual('attachment filename=HED.xml', header_content['Content-Disposition'],
-                             "generate_download_file has the correct attachment file name")
+    # def test_generate_download_file_valid(self):
+    #     from hedweb.utils.web_utils import generate_download_file
+    #     hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
+    #     with self.app.test_request_context():
+    #         response = generate_download_file(hed_file, 'HED.xml', msg_category='success', msg='Successful')
+    #         self.assertIsInstance(response, Response, 'generate_download_file returns a response for real file')
+    #         self.assertEqual(200, response.status_code, "Generate_download_file has status code 200 for real file")
+    #         header_content = dict(response.headers)
+    #         self.assertEqual('success', header_content['Category'], "The msg_category is success")
+    #         self.assertEqual('attachment filename=HED.xml', header_content['Content-Disposition'],
+    #                          "generate_download_file has the correct attachment file name")
 
-    def test_generate_download_file_bad_file(self):
-        from hedweb.utils.web_utils import generate_download_file
-        from hed.errors.exceptions import HedFileError
-        with self.app.test_request_context():
-            try:
-                generate_download_file('badfile.xml', 'HED.xml', msg_category='success', msg='Successful')
-            except HedFileError:
-                pass
-            except Exception:
-                self.fail('generate_download_file threw the wrong exception for non-existent file')
-            else:
-                self.fail('generate_download_file should have thrown a HedFileError exception when file did not exist')
+    # def test_generate_download_file_bad_file(self):
+    #     from hedweb.utils.web_utils import generate_download_file
+    #     from hed.errors.exceptions import HedFileError
+    #     with self.app.test_request_context():
+    #         try:
+    #             generate_download_file('badfile.xml', 'HED.xml', msg_category='success', msg='Successful')
+    #         except HedFileError:
+    #             pass
+    #         except Exception:
+    #             self.fail('generate_download_file threw the wrong exception for non-existent file')
+    #         else:
+    #             self.fail('generate_download_file should have thrown a HedFileError exception when file did not exist')
 
-    def test_generate_text_response(self):
-        with self.app.test_request_context():
-            from hedweb.utils.web_utils import generate_text_response
-            text = "The quick brown fox."
-            message = "My mess"
-            response = generate_text_response(text, msg_category='success', msg=message)
-            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response')
-            headers_dict = dict(response.headers)
-            self.assertEqual(200, response.status_code, 'generate_download_text should return status code 200')
-            self.assertEqual(message, headers_dict['Message'], 'The message should match')
-            self.assertEqual('success', headers_dict['Category'], "The msg_category should be success")
-            str_data = str(response.data, 'utf-8')
-            self.assertEqual(text, str_data, "The data sent should be the same")
-
-    def test_generate_response_download_file_from_text(self):
-        from hedweb.utils.web_utils import generate_response_download_file_from_text
+    def test_generate_download_file_from_text(self):
+        from hedweb.utils.web_utils import generate_download_file_from_text
         with self.app.test_request_context():
             the_text = 'The quick brown fox\nIs too slow'
-            response = generate_response_download_file_from_text(the_text, 'temp',
-                                                                 msg_category='success', msg='Successful')
+            response = generate_download_file_from_text(the_text, 'temp',
+                                                        msg_category='success', msg='Successful')
             self.assertIsInstance(response, Response,
                                   'Generate_response_download_file_from_text returns a response for string')
             self.assertEqual(200, response.status_code,
@@ -124,29 +119,6 @@ class Test(unittest.TestCase):
             self.assertEqual('success', header_content['Category'], "The msg_category is success")
             self.assertEqual('attachment filename=temp', header_content['Content-Disposition'],
                              "generate_download_file has the correct attachment file name")
-
-    # def test_generate_download_spreadsheet_excel(self):
-    #     with self.app.test_request_context():
-    #
-    #         from hed.models import HedInput
-    #         from hedweb.utils.web_utils import generate_download_spreadsheet
-    #         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                         '../data/ExcelOneSheet.xlsx')
-    #
-    #         spreadsheet = HedInput(filename=spreadsheet_path, worksheet_name='LKT 8Beta3',
-    #                                tag_columns=[5], has_column_names=True,
-    #                                column_prefix_dictionary={2:'Attribute/Informational/Label/',
-    #                                                          4:'Attribute/Informational/Description/'},
-    #                                display_name='ExcelMultipleSheets.xlsx')
-    #         response = generate_download_spreadsheet(spreadsheet, spreadsheet_path,
-    #                                                  display_name='ExcelMultipleSheets_download.xlsx',
-    #                                                  msg_category='success', msg='Successful download')
-    #
-    #         self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response')
-    #         wb = load_workbook(filename=io.BytesIO(response.data))
-    #         wb.save('D:/Research/temp1.xlsx')
-    #         headers_dict = dict(response.headers)
-    #         self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
 
     def test_generate_download_spreadsheet_excel(self):
         with self.app.test_request_context():
@@ -157,12 +129,12 @@ class Test(unittest.TestCase):
 
             spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
                                    tag_columns=[5], has_column_names=True,
-                                   column_prefix_dictionary={2:'Attribute/Informational/Label/',
-                                                             4:'Attribute/Informational/Description/'},
+                                   column_prefix_dictionary={2: 'Attribute/Informational/Label/',
+                                                             4: 'Attribute/Informational/Description/'},
                                    display_name='ExcelOneSheet.xlsx')
-            results = {common.SPREADSHEET:spreadsheet, common.OUTPUT_DISPLAY_NAME:'ExcelOneSheetA.xlsx'}
+            results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
-            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
+            self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for xlsx files')
             headers_dict = dict(response.headers)
             self.assertEqual(200, response.status_code, 'generate_download_spreadsheet should return status code 200')
             self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response.mimetype,
@@ -179,10 +151,10 @@ class Test(unittest.TestCase):
 
             spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
                                    tag_columns=[5], has_column_names=True,
-                                   column_prefix_dictionary={2:'Attribute/Informational/Label/',
-                                                             4:'Attribute/Informational/Description/'},
+                                   column_prefix_dictionary={2: 'Attribute/Informational/Label/',
+                                                             4: 'Attribute/Informational/Description/'},
                                    display_name='ExcelOneSheet.xlsx')
-            results = {common.SPREADSHEET:spreadsheet, common.OUTPUT_DISPLAY_NAME:'ExcelOneSheetA.xlsx'}
+            results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
             headers_dict = dict(response.headers)
@@ -198,14 +170,14 @@ class Test(unittest.TestCase):
             from hedweb.constants import common
             from hedweb.utils.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                            '../data/LKTEventCodes8Beta3.tsv')
+                                            '../data/LKTEventCodesHED3.tsv')
 
             spreadsheet = HedInput(filename=spreadsheet_path, file_type='.tsv',
                                    tag_columns=[5], has_column_names=True,
-                                   column_prefix_dictionary={2:'Attribute/Informational/Label/',
-                                                             4:'Attribute/Informational/Description/'},
-                                   display_name='LKTEventCodes8Beta3.tsv')
-            results = {common.SPREADSHEET:spreadsheet, common.OUTPUT_DISPLAY_NAME:'LKTEventCodes8Beta3.tsv'}
+                                   column_prefix_dictionary={2: 'Attribute/Informational/Label/',
+                                                             4: 'Attribute/Informational/Description/'},
+                                   display_name='LKTEventCodesHED3.tsv')
+            results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'LKTEventCodesHED3.tsv'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
             headers_dict = dict(response.headers)
@@ -213,54 +185,117 @@ class Test(unittest.TestCase):
             self.assertEqual('text/plain charset=utf-8', response.mimetype,
                              "generate_download_spreadsheet should return text for tsv files")
             self.assertTrue(headers_dict['Content-Disposition'].startswith('attachment filename='),
-                             "generate_download_spreadsheet tsv should be downloaded as an attachment")
+                            "generate_download_spreadsheet tsv should be downloaded as an attachment")
 
-    def test_get_hed_path_from_pull_down(self):
-        mock_form = mock.Mock()
-        mock_form.values = {}
+    def test_generate_filename(self):
+        from hedweb.utils.web_utils import generate_filename
+        filename = generate_filename(None, prefix=None, suffix=None, extension=None)
+        self.assertEqual('', filename, "Return empty when all arguments are none")
+        filename = generate_filename(None, prefix=None, suffix=None, extension='.txt')
+        self.assertEqual('', filename, "Return empty when base_name, prefix, and suffix are None, but extension is not")
+        filename = generate_filename('c:/temp.json', prefix=None, suffix=None, extension='.txt')
+        self.assertEqual('c_temp.txt', filename,
+                         "Returns stripped base_name + extension when prefix, and suffix are None")
+        filename = generate_filename('temp.json', prefix='prefix', suffix='suffix', extension='.txt')
+        self.assertEqual('prefix_temp_suffix.txt', filename,
+                         "Return stripped base_name + extension when prefix, and suffix are None")
+        filename = generate_filename(None, prefix='prefix', suffix='suffix', extension='.txt')
+        self.assertEqual('prefix_suffix.txt', filename,
+                         "Returns correct string when no base_name")
+        filename = generate_filename('event-strategy-v3_task-matchingpennies_events.json',
+                                     suffix='blech', extension='.txt')
+        self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
+                         "Returns correct string when base_name with hyphens")
+        filename = generate_filename('HED7.1.2.xml', suffix='blech', extension='.txt')
+        self.assertEqual('HED7.1.2_blech.txt', filename, "Returns correct string when base_name has periods")
 
-    def test_get_optional_form_field(self):
-        self.assertTrue(1, "Testing get_optional_form_field")
+    def test_generate_text_response(self):
+        with self.app.test_request_context():
+            from hedweb.utils.web_utils import generate_text_response
+            download_text = 'testme'
+            test_msg = 'testing'
+            response = generate_text_response(download_text, msg_category='success', msg=test_msg)
+            self.assertIsInstance(response, Response, 'generate_download_text_response returns a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual(200, response.status_code, 'generate_download_text_response should return status code 200')
+            self.assertEqual('text/plain charset=utf-8', response.mimetype,
+                             "generate_download_download_text_response should return text")
+            self.assertEqual(test_msg, headers_dict['Message'],
+                             "generate_download_text_response have the correct message in the response")
+            self.assertEqual(download_text, response.data.decode('ascii'),
+                             "generate_download_text_response have the download text as response data")
+
+    def test_get_hed_schema_from_pull_down_empty(self):
+        from hed.errors.exceptions import HedFileError
+
+        from hedweb.utils.web_utils import get_hed_schema_from_pull_down
+        with self.app.test:
+            environ = create_environ(data={})
+            request = Request(environ)
+            try:
+                get_hed_schema_from_pull_down(request)
+            except HedFileError:
+                pass
+            except Exception:
+                self.fail('get_hed_schema_from_pull_down threw the wrong exception when data was empty')
+            else:
+                self.fail('get_hed_schema_from_pull_down should throw a HedFileError exception when data was empty')
+
+    def test_get_hed_schema_from_pull_down_version(self):
+        from hed.schema import HedSchema
+        from hedweb.constants import common
+        from hedweb.utils.web_utils import get_hed_schema_from_pull_down
+        with self.app.test:
+            environ = create_environ(data={common.SCHEMA_VERSION: '8.0.0-alpha.1'})
+            request = Request(environ)
+            hed_schema = get_hed_schema_from_pull_down(request)
+            self.assertIsInstance(hed_schema, HedSchema,
+                                  "get_hed_schema_from_pull_down should return a HedSchema object")
+
+    def test_get_hed_schema_from_pull_down_other(self):
+        from hed.schema import HedSchema
+        from hedweb.constants import common
+        from hedweb.utils.web_utils import get_hed_schema_from_pull_down
+        with self.app.test:
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.4.xml')
+            with open(schema_path, 'rb') as fp:
+                environ = create_environ(data={common.SCHEMA_VERSION: common.OTHER_VERSION_OPTION,
+                                               common.SCHEMA_PATH: fp})
+            request = Request(environ)
+            hed_schema = get_hed_schema_from_pull_down(request)
+            self.assertIsInstance(hed_schema, HedSchema,
+                                  "get_hed_schema_from_pull_down should return a HedSchema object")
 
     def test_handle_error(self):
-        self.assertTrue(True, "Testing to be done")
+        from hed.errors.exceptions import HedFileError, HedExceptions
+        from hedweb.utils.web_utils import handle_error
+        ex = HedFileError(HedExceptions.BAD_PARAMETERS, "This had bad parameters", 'my.file')
+        output = handle_error(ex)
+        self.assertIsInstance(output, str, "handle_error should return a string if return_as_str")
+        output1 = handle_error(ex, return_as_str=False)
+        self.assertIsInstance(output1, dict, "handle_error should return a dict if not return_as_str")
+        self.assertTrue('message' in output1, "handle_error dict should have a message")
+        output2 = handle_error(ex, {'mykey': 'blech'}, return_as_str=False)
+        self.assertTrue('mykey' in output2, "handle_error dict should include passed dictionary")
 
     def test_handle_http_error(self):
-        self.assertTrue(True, "Testing to be done")
-
-    def test_save_file_to_upload_folder(self):
-        self.assertTrue(1, "Testing save_file_to_upload_folder")
-        filename = 'HED8.0.0-beta.1.xml'
-        actual_path = os.path.join(self.upload_directory, filename)
-        self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
-        # with open(hed_file) as f:
-        #    upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
-        #    with self.app.app_context():
-        #         the_path = save_file_to_upload_folder(upload_file)
-        #         self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
-
-        # temp_name = save_file_to_upload_folder('')
-        # self.assertEqual(temp_name, '', "A file with empty name cnnot be copied copied")
-        # some_file = '3k32j23kj1.txt'
-        # temp_name = save_file_to_upload_folder(some_file)
-        # self.assertEqual(temp_name, '', "A file that does not exist cannot be copied")
-        # hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        #
-        # self.assertTrue(os.path.exists(hed_file), "The HED.xml file should exist in the data directory")
-        # actual_path = os.path.join(self.upload_directory, filename)
-        # self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
-        # with self.app.app_context():
-        #     the_path = save_text_to_upload_folder(text, filename)
-        #     self.assertEqual(1, os.path.isfile(the_path), f"{the_path} should exist after saving")
-        # mock_file = mock.Mock()
-        # mock_file.filename = hed_file
-        # TODO: Context not working this is not tested
-        # with Test.app_context():
-        #     temp_name = save_file_to_upload_folder(mock_file)
-        # self.assertNotEqual(mock_file, '', "It should create an actual file in the upload directory")
-        # self.assertTrue(os.path.isfile(temp_name), "File should exist after it is uploaded")
-
+        from hed.errors.exceptions import HedFileError, HedExceptions
+        from hedweb.utils.web_utils import handle_http_error
+        with self.app.test_request_context():
+            ex = HedFileError(HedExceptions.BAD_PARAMETERS, "This had bad parameters", 'my.file')
+            response = handle_http_error(ex)
+            headers = dict(response.headers)
+            self.assertEqual('error', headers["Category"], "handle_http_error should have category error")
+            self.assertTrue(headers['Message'].startswith(HedExceptions.BAD_PARAMETERS),
+                            "handle_http_error error message starts with the error_type")
+            self.assertFalse(response.data, "handle_http_error should have empty data")
+            ex = Exception()
+            response = handle_http_error(ex)
+            headers = dict(response.headers)
+            self.assertEqual('error', headers["Category"], "handle_http_error should have category error")
+            self.assertTrue(headers['Message'].startswith('Exception'),
+                            "handle_http_error error message starts with the error_type")
+            self.assertFalse(response.data, "handle_http_error should have empty data")
 
 
 if __name__ == '__main__':

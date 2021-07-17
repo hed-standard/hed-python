@@ -1,19 +1,38 @@
-import os
 import io
-import pathlib
-import pandas as pd
-
+import json
+import os
 from urllib.parse import urlparse
-from flask import current_app, Response, send_file, make_response
+from flask import current_app, Response, make_response
 from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.errors.exceptions import HedFileError
-from hed.util.file_util import delete_file_if_it_exists
 from hedweb.constants import common, file_constants
-from hedweb.utils.io_utils import file_extension_is_valid, save_file_to_upload_folder
 
 app_config = current_app.config
+
+
+def file_extension_is_valid(filename, accepted_file_extensions=None):
+    """Checks the other extension against a list of accepted ones.
+
+    Parameters
+    ----------
+    filename: string
+        The name of the other.
+
+    accepted_file_extensions: list
+        A list containing all of the accepted other extensions or an empty list of all are accepted
+
+    Returns
+    -------
+    boolean
+        True if the other has a valid other extension.
+
+    """
+    if not accepted_file_extensions or os.path.splitext(filename.lower())[1] in accepted_file_extensions:
+        return True
+    else:
+        return False
 
 
 def form_has_file(request, file_field, valid_extensions=None):
@@ -87,56 +106,8 @@ def form_has_url(request, url_field, valid_extensions=None):
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
 
-def generate_excel_download_response():
-    print('hello')
-
-
-def generate_download_file(download_file, display_name=None, header=None, msg_category='success', msg=''):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    download_file: str
-        Local path of the file to be downloaded into the response.
-    display_name: str
-        Name to be assigned to the file in the response
-    header: str
-        Optional header -- header for download file blob
-    msg_category: str
-        Category of the message to be displayed ('Success', 'Error', 'Warning')
-    msg: str
-        Optional message to be displayed in the submit-flash-field
-
-    Returns
-    -------
-    response object
-        A response object containing the downloaded file.
-
-    """
-    if not display_name:
-        display_name = download_file
-
-    if not download_file:
-        raise HedFileError('FileInvalid', f"No download file given", "")
-
-    if not pathlib.Path(download_file).is_file():
-        raise HedFileError('FileDoesNotExist', f"File {download_file} not found", "")
-
-    def generate():
-        with open(download_file, 'r', encoding='utf-8') as download:
-            if header:
-                yield header
-            for line in download:
-                yield line
-            delete_file_if_it_exists(download_file)
-
-    return Response(generate(), mimetype='text/plain charset=utf-8',
-                    headers={'Content-Disposition': f"attachment filename={display_name}",
-                             'Category': msg_category, 'Message': msg})
-
-
-def generate_response_download_file_from_text(download_text, display_name=None,
-                                              header=None, msg_category='success', msg=''):
+def generate_download_file_from_text(download_text, display_name=None,
+                                     header=None, msg_category='success', msg=''):
     """Generates a download other response.
 
     Parameters
@@ -175,28 +146,14 @@ def generate_response_download_file_from_text(download_text, display_name=None,
                              'Category': msg_category, 'Message': msg})
 
 
-def generate_download_test():
-    import openpyxl
-    spath = 'd:/ExcelOneSheet.xlsx'
-    wb_obj = openpyxl.load_workbook(spath)
-    file = io.BytesIO()
-    wb_obj.save(file)
-    file.seek(0)
-    response = send_file(file, download_name=f"temp.xlsx", as_attachment=True)
-    response.direct_passthrough = False
-    response.headers['Category'] = 'success'
-    response.headers['Message'] = 'test'
-    return response
-
-
 def generate_download_spreadsheet(results,  msg_category='success', msg=''):
     # return generate_download_test()
     spreadsheet = results[common.SPREADSHEET]
     display_name = results[common.OUTPUT_DISPLAY_NAME]
 
     if not spreadsheet.loaded_workbook:
-        return generate_response_download_file_from_text(spreadsheet.to_csv(), display_name=display_name,
-                                                         msg_category=msg_category, msg=msg)
+        return generate_download_file_from_text(spreadsheet.to_csv(), display_name=display_name,
+                                                msg_category=msg_category, msg=msg)
     buffer = io.BytesIO()
     spreadsheet.to_excel(buffer)
     buffer.seek(0)
@@ -207,6 +164,46 @@ def generate_download_spreadsheet(results,  msg_category='success', msg=''):
     response.headers['Message'] = msg
     response.mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     return response
+
+
+def generate_filename(base_name, prefix=None, suffix=None, extension=None):
+    """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
+
+    Parameters
+    ----------
+   base_name: str
+        The name of the base, usually the name of the file that the issues were generated from
+    prefix: str
+        The prefix prepended to the front of the base_name
+    suffix: str
+        The suffix appended to the end of the base_name
+    Returns
+    -------
+    string
+        The name of the attachment other containing the issues.
+    """
+
+    pieces = []
+    if prefix:
+        pieces = pieces + [secure_filename(prefix)]
+    if base_name:
+        pieces.append(os.path.splitext(secure_filename(base_name))[0])
+    if suffix:
+        pieces = pieces + [secure_filename(suffix)]
+
+    if not pieces:
+        return ''
+    filename = pieces[0]
+    for name in pieces[1:]:
+        filename = filename + '_' + name
+    # if not extension and base_name:
+    #     extension = os.path.splitext(secure_filename(base_name))[1]
+    # else:
+    #     extension = ''
+    # filename = filename + '.' + secure_filename(extension)
+    if extension:
+        filename = filename + '.' + secure_filename(extension)
+    return filename
 
 
 def generate_text_response(download_text, msg_category='success', msg=''):
@@ -231,33 +228,6 @@ def generate_text_response(download_text, msg_category='success', msg=''):
     if len(download_text) > 0:
         headers['Content-Length'] = len(download_text)
     return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
-
-
-def get_hed_path_from_pull_down(request):
-    """Gets the hed path from a section of form that uses a pull-down box and hed_cache
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from a form.
-
-    Returns
-    -------
-    tuple: str, str
-        The HED XML local path and the HED display file name
-    """
-    if common.SCHEMA_VERSION not in request.form:
-        hed_file_path = ''
-        schema_display_name = ''
-    elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
-        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
-        schema_display_name = os.path.basename(hed_file_path)
-    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and common.SCHEMA_PATH in request.files:
-        hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
-        schema_display_name = request.files[common.SCHEMA_PATH].filename
-    else:
-        hed_file_path = ''
-        schema_display_name = ''
-    return hed_file_path, schema_display_name
 
 
 def get_hed_schema_from_pull_down(request):
@@ -287,30 +257,44 @@ def get_hed_schema_from_pull_down(request):
     return hed_schema
 
 
-def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
-    """Gets the other paths of the uploaded files in the form.
+def handle_error(ex, hed_info=None, title=None, return_as_str=True):
+    """Handles an error by returning a dictionary or simple string
 
     Parameters
     ----------
-    request: Request object
-        A Request object containing user data from a form.
-    file_key: str
-        key name in the files dictionary of the Request object
-    valid_extensions: list of str
-        List of valid extensions
-
+    ex: Exception
+        The exception raised.
+    hed_info: dict
+        A dictionary of information.
+    title: str
+        A title to be included with the message.
+    return_as_str: bool
+        If true return as string otherwise as dictionary
     Returns
     -------
-    tuple
-        A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
+    str or dict
+
     """
-    uploaded_file_name = ''
-    original_file_name = ''
-    if form_has_file(request, file_key, valid_extensions):
-        uploaded_file_name = save_file_to_upload_folder(request.files[file_key])
-        original_file_name = request.files[file_key].filename
-        request.files[file_key].close()
-    return uploaded_file_name, original_file_name
+
+    if not hed_info:
+        hed_info = {}
+    if hasattr(ex, 'error_type'):
+        error_code = ex.error_type
+    else:
+        error_code = type(ex).__name__
+
+    if not title:
+        title = ''
+    if hasattr(ex, 'message'):
+        message = ex.message
+    else:
+        message = str(ex)
+
+    hed_info['message'] = f"{title}[{error_code}: {message}]"
+    if return_as_str:
+        return json.dumps(hed_info)
+    else:
+        return hed_info
 
 
 def handle_http_error(ex):
@@ -336,7 +320,6 @@ def handle_http_error(ex):
     else:
         message = str(ex)
     error_message = f"{error_code}: [{message}]"
-    current_app.logger.error(error_message)
     return generate_text_response('', msg_category='error', msg=error_message)
 
 
@@ -345,8 +328,8 @@ def package_results(results):
     msg_category = results.get('msg_category', 'success')
     display_name = results.get('output_display_name', '')
     if results['data']:
-        return generate_response_download_file_from_text(results['data'], display_name=display_name,
-                                                         msg_category=msg_category, msg=msg)
+        return generate_download_file_from_text(results['data'], display_name=display_name,
+                                                msg_category=msg_category, msg=msg)
     elif not results.get('spreadsheet', None):
         return generate_text_response("", msg=msg, msg_category=msg_category)
     else:

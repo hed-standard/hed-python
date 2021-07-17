@@ -20,14 +20,14 @@
             "right-raised-nomatch": "Subject raised right hand and computer presented image of left hand."
         },
         "HED": {
-          "cue": "Description/Subject presses both buttons causing cue bar to start count-down display, (Sensory-event, Visual, Cue, ((Rectangle, (Position, (Center-of, Screen)), (Size, Decreasing)))), (Agent-action, Experimental-participant, (Press, Hold-down, (Left-side, Mouse-button)), (Press, Hold-down, (Right-side, Mouse-button)))",
-          "go": "Description/Onset of the go signal which is the disappearance of the cue bar, Sensory-event, (Visual, Experimental-stimulus, Instructional, Rectangle)",
-          "right-raised": "Description/Subject raised right hand thereby releasing right button, (Agent-action, Experimental-participant, (Lift, (Right-side, Hand)), (Release, (Right-side, Mouse-button)))",
-          "left-raised": "Description/Subject raised left hand thereby releasing left button, (Agent-action, Experimental-participant, (Lift, (Left-side, Hand)), (Release, (Left-side, Mouse-button)))",
-          "left-raised-match": "Description/Computer presented image of left hand thereby matching a previously raised left hand, (Sensory-event, Visual, (Drawing, ID/left_hand.png,(Left-side, Hand)), (Feedback, (Intended-effect, Penalty)))",
-          "left-raised-nomatch": "Description/Computer presented image of left hand thereby not matching previously raised right hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png, (Left-side, Hand)), (Feedback, (Intended-effect, Reward)))",
-          "right-raised-match": "Description/Computer presented image of right hand thereby matching a previously raised right hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png,(Right-side, Hand)), (Feedback, (Intended-effect, Penalty)))",
-          "right-raised-nomatch": "Description/Computer presented image of right hand thereby not matching a previously raised left hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png, (Right-side, Hand)), (Feedback, (Intended-effect, Reward)))"
+          "cue": "Description/Subject presses both buttons causing cue bar to start count-down display, (Sensory-event, Visual-modality, Cue, ((Rectangle, (Position, (Center-of, Computer-screen)), (Size, Decreasing)))), (Agent-action, Experiment-participant, (Press, Hold-down, (Left-side, Mouse-button)), (Press, Hold-down, (Right-side, Mouse-button)))",
+          "go": "Description/Onset of the go signal which is the disappearance of the cue bar, Sensory-event, (Visual-modality, Experimental-stimulus, Instructional, Rectangle)",
+          "right-raised": "Description/Subject raised right hand thereby releasing right button, (Agent-action, Experiment-participant, (Lift, (Right-side, Hand)), (Release, (Right-side, Mouse-button)))",
+          "left-raised": "Description/Subject raised left hand thereby releasing left button, (Agent-action, Experiment-participant, (Lift, (Left-side, Hand)), (Release, (Left-side, Mouse-button)))",
+          "left-raised-match": "Description/Computer presented image of left hand thereby matching a previously raised left hand, (Sensory-event, Visual-modality, (Drawing, ID/left_hand.png,(Left-side, Hand)), (Feedback, (Intended-effect, Penalty)))",
+          "left-raised-nomatch": "Description/Computer presented image of left hand thereby not matching previously raised right hand, (Sensory-event, Visual-modality, (Drawing, ID/right_hand.png, (Left-side, Hand)), (Feedback, (Intended-effect, Reward)))",
+          "right-raised-match": "Description/Computer presented image of right hand thereby matching a previously raised right hand, (Sensory-event, Visual-modality, (Drawing, ID/right_hand.png,(Right-side, Hand)), (Feedback, (Intended-effect, Penalty)))",
+          "right-raised-nomatch": "Description/Computer presented image of right hand thereby not matching a previously raised left hand, (Sensory-event, Visual-modality, (Drawing, ID/right_hand.png, (Right-side, Hand)), (Feedback, (Intended-effect, Reward)))"
         }
 	},
     "sample": {
