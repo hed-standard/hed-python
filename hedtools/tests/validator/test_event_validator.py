@@ -124,8 +124,8 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict, def_issues = column_group.extract_defs()
-        self.assertEqual(len(def_issues), 0)
+        def_dict = column_group.extract_defs()
+        self.assertEqual(len(def_dict.get_def_issues(hed_schema=hed_schema)), 0)
         input_file = EventsInput(events_path, json_def_files=column_group,
                                  def_dicts=def_dict)
 
@@ -143,8 +143,8 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events_bad_defs.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict, def_issues = column_group.extract_defs()
-        self.assertEqual(len(def_issues), 0)
+        def_dict = column_group.extract_defs()
+        self.assertEqual(len(def_dict.get_def_issues(hed_schema=hed_schema)), 0)
         input_file = EventsInput(events_path, json_def_files=column_group,
                                  def_dicts=def_dict)
 

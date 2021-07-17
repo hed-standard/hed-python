@@ -457,7 +457,7 @@ class IndividualHedTags(TestHed):
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
-            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_MISSING, tag=0,
+            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_DEFAULT_USED, tag=0,
                                                                     default_unit='s'),
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
@@ -548,7 +548,7 @@ class IndividualHedTags(TestHed):
             'placeholderNoUnit': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
                                                                   tag=0, index_in_tag=15, index_in_tag_end=16,
                                                                   actual_error=ValidationErrors.HED_VALUE_INVALID)
-                                 + self.format_error_but_not_really(ValidationErrors.HED_UNITS_MISSING,
+                                 + self.format_error_but_not_really(ValidationErrors.HED_UNITS_DEFAULT_USED,
                                                                     tag=0,
                                                                     default_unit="s"),
             'placeholderUnit': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
@@ -771,7 +771,7 @@ class OldIndividualHedTags(TestOldHed):
         }
         expected_issues = {
             'hasRequiredUnit': "",
-            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_MISSING, tag=0,
+            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_DEFAULT_USED, tag=0,
                                                                     default_unit='s'),
             'notRequiredNumber': "",
             'notRequiredScientific': "",
