@@ -568,7 +568,7 @@ class TagValidator:
             tag_unit_values = original_tag.extension_or_value_portion
             if re.search(self.DIGIT_OR_POUND_EXPRESSION, tag_unit_values):
                 default_unit = self.get_unit_class_default_unit(original_tag)
-                validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_MISSING,
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
                                                                       tag=original_tag,
                                                                       default_unit=default_unit)
         return validation_issues

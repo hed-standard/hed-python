@@ -41,13 +41,16 @@ class ValidationErrors:
     HED_TAG_REPEATED = 'HED_TAG_REPEATED'
     HED_TAG_REQUIRES_CHILD = 'HED_TAG_REQUIRES_CHILD'
     HED_TILDES_UNSUPPORTED = 'HED_TILDES_UNSUPPORTED'
-    # HED_UNITS_DEFAULT_USED
     HED_UNITS_INVALID = 'HED_UNITS_INVALID'
-    HED_UNITS_MISSING = 'HED_UNITS_MISSING'
+    HED_UNITS_DEFAULT_USED = 'HED_UNITS_DEFAULT_USED'
     HED_VALUE_INVALID = 'HED_VALUE_INVALID'
-    # HED_VALUE_IS_NODE
     # HED_VERSION_WARNING
 
+# Look into if def/ are validated in:
+#     Sidecar
+#     files
+#
+# Same two with definition/
 
     # Below here shows what the given error maps to
     # HED_TAG_EMPTY

@@ -138,6 +138,9 @@ class IndividualHedTagsShort(TestHed3):
             'invalidExtension': 'Attribute/Red',
             'invalidExtension2': 'Attribute/Red/Extension2',
             'usedToBeIllegalComma': 'Attribute/Informational/Label/This is a label,This/Is/A/Tag',
+            'illegalDef': 'Def/Item',
+            'illegalDefExpand': 'Def-expand/Item',
+            'illegalDefinition': 'Definition/Item',
         }
         expected_results = {
             'takesValue': True,
@@ -147,7 +150,10 @@ class IndividualHedTagsShort(TestHed3):
             'nonExtensionsAllowed': False,
             'invalidExtension': False,
             'invalidExtension2': False,
-            'usedToBeIllegalComma': False
+            'usedToBeIllegalComma': False,
+            'illegalDef': False,
+            'illegalDefExpand': False,
+            'illegalDefinition': False,
         }
         expected_issues = {
             'takesValue': [],
@@ -163,6 +169,12 @@ class IndividualHedTagsShort(TestHed3):
                                                                   expected_parent_tag="Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red"),
             'usedToBeIllegalComma': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, tag=1,
                                                                      index_in_tag=0, index_in_tag_end=4),
+            'illegalDef': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=4,
+                                                           index_in_tag_end=8, expected_parent_tag="Item"),
+            'illegalDefExpand': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=11,
+                                                                 index_in_tag_end=15, expected_parent_tag="Item"),
+            'illegalDefinition': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=11,
+                                                                  index_in_tag_end=15, expected_parent_tag="Item"),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -228,7 +240,7 @@ class IndividualHedTagsShort(TestHed3):
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
-            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_MISSING, tag=0,
+            'missingRequiredUnit': self.format_error_but_not_really(ValidationErrors.HED_UNITS_DEFAULT_USED, tag=0,
                                                                     default_unit='s'),
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
