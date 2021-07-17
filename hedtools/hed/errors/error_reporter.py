@@ -229,8 +229,6 @@ class ErrorHandler:
         """
         if error_object is None:
             error_object = {}
-        if error_context_to_add is None:
-            error_context_to_add = self.error_context
         for (context_type, context, increment_count) in error_context_to_add:
             error_object[context_type] = (context, increment_count)
 

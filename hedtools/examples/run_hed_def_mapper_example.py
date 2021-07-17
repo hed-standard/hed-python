@@ -26,7 +26,8 @@ if __name__ == '__main__':
     prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
     json_file = "data/both_types_events_def_example.json"
     column_group = ColumnDefGroup(json_file)
-    def_dict, def_issues = column_group.extract_defs()
+    def_dict = column_group.extract_defs()
+    def_issues = def_dict.get_def_issues(hed_schema=hed_schema)
     if def_issues:
         print(hed.get_printable_issue_string(def_issues,
                                              title="There should be no errors in the definitions from the sidecars:"))
