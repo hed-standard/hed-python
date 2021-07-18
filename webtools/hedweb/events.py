@@ -9,7 +9,7 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 from hedweb.constants import common, file_constants
 from hedweb.dictionary import dictionary_validate
-from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
+from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
 
@@ -39,8 +39,12 @@ def get_input_from_events_form(request):
                                                 display_name=secure_filename(f.filename))
     if common.EVENTS_FILE in request.files:
         f = request.files[common.EVENTS_FILE]
+        if json_dictionary:
+            def_dicts = json_dictionary.extract_defs()
+        else:
+            def_dicts = None
         arguments[common.EVENTS] = models.EventsInput(filename=f, file_type=".tsv",
-                                                      json_def_files=json_dictionary,
+                                                      json_def_files=json_dictionary, def_dicts = def_dicts,
                                                       display_name=secure_filename(f.filename))
         # arguments[common.EVENTS] = models.EventsInput(csv_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
         #                                               json_def_files=json_dictionary,
@@ -139,9 +143,14 @@ def events_validate(hed_schema, events):
                 return results
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    validator = EventValidator(hed_schema=hed_schema)
-    issues = validator.validate_input(events)
     display_name = events.display_name
+    def_dicts = events.def_dicts
+    issues = []
+    if def_dicts:
+        issues = def_dicts[0].get_def_issues(hed_schema)
+    if not issues:
+        validator = EventValidator(hed_schema=hed_schema)
+        issues = validator.validate_input(events)
     if issues:
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')

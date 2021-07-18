@@ -11,7 +11,7 @@ from hed.validator.event_validator import EventValidator
 from hed.util.file_util import get_file_extension
 
 from hedweb.constants import common, file_constants
-from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, file_extension_is_valid, \
+from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, file_extension_is_valid, \
     generate_filename
 
 app_config = current_app.config

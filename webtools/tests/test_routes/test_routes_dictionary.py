@@ -85,12 +85,12 @@ class Test(unittest.TestCase):
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
             json_file = FileStorage(stream=json_buffer, filename='bids_events.json')
-            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.4.xml')
             with open(schema_path, 'r') as sc:
                 y = sc.read()
             schema_buffer = io.BytesIO(bytes(y, 'utf-8'))
             input_data = {common.SCHEMA_VERSION: 'Other',
-                          common.SCHEMA_PATH: (schema_buffer, 'HED8.0.0-beta.1.xml'),
+                          common.SCHEMA_PATH: (schema_buffer, 'HED8.0.0-beta.4.xml'),
                           common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
                           common.JSON_FILE: (json_buffer, 'bids_events.json'),
                           common.CHECK_FOR_WARNINGS: 'on'}
@@ -132,13 +132,13 @@ class Test(unittest.TestCase):
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
 
-            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.4.xml')
             with open(schema_path, 'r') as sc:
                 y = sc.read()
             schema_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
             input_data = {common.SCHEMA_VERSION: 'Other',
-                          common.SCHEMA_PATH: (schema_buffer, 'HED8.0.0-beta.1.xml'),
+                          common.SCHEMA_PATH: (schema_buffer, 'HED8.0.0-beta.4.xml'),
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
                           common.JSON_FILE: (json_buffer, 'bids_events.json'),
                           common.CHECK_FOR_WARNINGS: 'on'}

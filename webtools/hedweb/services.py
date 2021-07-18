@@ -10,7 +10,7 @@ from hedweb.dictionary import dictionary_process
 from hedweb.events import events_process
 from hedweb.spreadsheet import spreadsheet_process, get_prefix_dict
 from hedweb.strings import string_process
-from hedweb.utils.web_utils import handle_error
+from hedweb.web_utils import handle_error
 
 app_config = current_app.config
 

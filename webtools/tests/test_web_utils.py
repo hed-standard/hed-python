@@ -9,7 +9,7 @@ from hedweb.app_factory import AppFactory
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/upload')
+        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
             from hedweb.routes import route_blueprint
@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_file_extension_is_valid(self):
-        from hedweb.utils.web_utils import file_extension_is_valid
+        from hedweb.web_utils import file_extension_is_valid
         is_valid = file_extension_is_valid('abc.xml', ['.xml', '.txt'])
         self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
         is_valid = file_extension_is_valid('abc.XML', ['.xml', '.txt'])
@@ -41,10 +41,10 @@ class Test(unittest.TestCase):
         self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
 
     def test_form_has_file(self):
-        from hedweb.utils.web_utils import form_has_file
+        from hedweb.web_utils import form_has_file
         from hedweb.constants import file_constants
         with self.app.test as _:
-            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_alpha.json')
             with open(json_path, 'rb') as fp:
                 environ = create_environ(data={'json_file': fp})
 
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
                             "Form has file when extensions and form field match")
 
     def test_form_has_option(self):
-        from hedweb.utils.web_utils import form_has_option
+        from hedweb.web_utils import form_has_option
         from hedweb.constants import common
         with self.app.test as _:
             environ = create_environ(data={common.CHECK_FOR_WARNINGS: 'on'})
@@ -70,7 +70,7 @@ class Test(unittest.TestCase):
                              "Form does not have required option when option is not in the form")
 
     def test_form_has_url(self):
-        from hedweb.utils.web_utils import form_has_url
+        from hedweb.web_utils import form_has_url
         from hedweb.constants import common, file_constants
         with self.app.test as _:
             environ = create_environ(data={common.SCHEMA_URL: 'https://www.google.com/my.json'})
@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
     #             self.fail('generate_download_file should have thrown a HedFileError exception when file did not exist')
 
     def test_generate_download_file_from_text(self):
-        from hedweb.utils.web_utils import generate_download_file_from_text
+        from hedweb.web_utils import generate_download_file_from_text
         with self.app.test_request_context():
             the_text = 'The quick brown fox\nIs too slow'
             response = generate_download_file_from_text(the_text, 'temp',
@@ -124,8 +124,8 @@ class Test(unittest.TestCase):
         with self.app.test_request_context():
             from hed.models import HedInput
             from hedweb.constants import common
-            from hedweb.utils.web_utils import generate_download_spreadsheet
-            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/ExcelOneSheet.xlsx')
+            from hedweb.web_utils import generate_download_spreadsheet
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelOneSheet.xlsx')
 
             spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
                                    tag_columns=[5], has_column_names=True,
@@ -146,8 +146,8 @@ class Test(unittest.TestCase):
         with self.app.test_request_context():
             from hed.models import HedInput
             from hedweb.constants import common
-            from hedweb.utils.web_utils import generate_download_spreadsheet
-            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/ExcelOneSheet.xlsx')
+            from hedweb.web_utils import generate_download_spreadsheet
+            spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelOneSheet.xlsx')
 
             spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
                                    tag_columns=[5], has_column_names=True,
@@ -168,9 +168,9 @@ class Test(unittest.TestCase):
         with self.app.test_request_context():
             from hed.models import HedInput
             from hedweb.constants import common
-            from hedweb.utils.web_utils import generate_download_spreadsheet
+            from hedweb.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                            '../data/LKTEventCodesHED3.tsv')
+                                            'data/LKTEventCodesHED3.tsv')
 
             spreadsheet = HedInput(filename=spreadsheet_path, file_type='.tsv',
                                    tag_columns=[5], has_column_names=True,
@@ -188,7 +188,7 @@ class Test(unittest.TestCase):
                             "generate_download_spreadsheet tsv should be downloaded as an attachment")
 
     def test_generate_filename(self):
-        from hedweb.utils.web_utils import generate_filename
+        from hedweb.web_utils import generate_filename
         filename = generate_filename(None, prefix=None, suffix=None, extension=None)
         self.assertEqual('', filename, "Return empty when all arguments are none")
         filename = generate_filename(None, prefix=None, suffix=None, extension='.txt')
@@ -211,7 +211,7 @@ class Test(unittest.TestCase):
 
     def test_generate_text_response(self):
         with self.app.test_request_context():
-            from hedweb.utils.web_utils import generate_text_response
+            from hedweb.web_utils import generate_text_response
             download_text = 'testme'
             test_msg = 'testing'
             response = generate_text_response(download_text, msg_category='success', msg=test_msg)
@@ -228,7 +228,7 @@ class Test(unittest.TestCase):
     def test_get_hed_schema_from_pull_down_empty(self):
         from hed.errors.exceptions import HedFileError
 
-        from hedweb.utils.web_utils import get_hed_schema_from_pull_down
+        from hedweb.web_utils import get_hed_schema_from_pull_down
         with self.app.test:
             environ = create_environ(data={})
             request = Request(environ)
@@ -244,7 +244,7 @@ class Test(unittest.TestCase):
     def test_get_hed_schema_from_pull_down_version(self):
         from hed.schema import HedSchema
         from hedweb.constants import common
-        from hedweb.utils.web_utils import get_hed_schema_from_pull_down
+        from hedweb.web_utils import get_hed_schema_from_pull_down
         with self.app.test:
             environ = create_environ(data={common.SCHEMA_VERSION: '8.0.0-alpha.1'})
             request = Request(environ)
@@ -255,9 +255,9 @@ class Test(unittest.TestCase):
     def test_get_hed_schema_from_pull_down_other(self):
         from hed.schema import HedSchema
         from hedweb.constants import common
-        from hedweb.utils.web_utils import get_hed_schema_from_pull_down
+        from hedweb.web_utils import get_hed_schema_from_pull_down
         with self.app.test:
-            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.4.xml')
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
             with open(schema_path, 'rb') as fp:
                 environ = create_environ(data={common.SCHEMA_VERSION: common.OTHER_VERSION_OPTION,
                                                common.SCHEMA_PATH: fp})
@@ -268,7 +268,7 @@ class Test(unittest.TestCase):
 
     def test_handle_error(self):
         from hed.errors.exceptions import HedFileError, HedExceptions
-        from hedweb.utils.web_utils import handle_error
+        from hedweb.web_utils import handle_error
         ex = HedFileError(HedExceptions.BAD_PARAMETERS, "This had bad parameters", 'my.file')
         output = handle_error(ex)
         self.assertIsInstance(output, str, "handle_error should return a string if return_as_str")
@@ -280,7 +280,7 @@ class Test(unittest.TestCase):
 
     def test_handle_http_error(self):
         from hed.errors.exceptions import HedFileError, HedExceptions
-        from hedweb.utils.web_utils import handle_http_error
+        from hedweb.web_utils import handle_http_error
         with self.app.test_request_context():
             ex = HedFileError(HedExceptions.BAD_PARAMETERS, "This had bad parameters", 'my.file')
             response = handle_http_error(ex)

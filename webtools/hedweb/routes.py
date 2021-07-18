@@ -5,7 +5,7 @@ import json
 from hed import schema as hedschema
 from hedweb.constants import common, page_constants
 from hedweb.constants import route_constants, file_constants
-from hedweb.utils.web_utils import handle_http_error, package_results, handle_error
+from hedweb.web_utils import handle_http_error, package_results, handle_error
 from hedweb import dictionary, events, spreadsheet, services
 from hedweb.schema import get_input_from_schema_form, schema_process
 from hedweb.strings import get_input_from_string_form, string_process
