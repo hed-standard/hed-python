@@ -148,136 +148,32 @@ function submitForm() {
     clearFlashMessages();
     flashMessageOnScreen('Spreadsheet is being processed ...', 'success',
         'spreadsheet_submit_flash')
-    if (fileHasValidExtension(spreadsheetFile, EXCEL_FILE_EXTENSIONS) &&
-        !$("#command_validate").prop("checked")) {
-        $.ajax({
-            type: 'POST',
-            url: "{{url_for('route_blueprint.spreadsheet_results')}}",
-            data: formData,
-            contentType: false,
-            processData: false,
-            // xhrFields:{
-            //     responseType: 'blob'
-            // },
-            xhr: function () {
-                let xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState == 2) {
-                        if (xhr.status == 200) {
-                            xhr.responseType = "blob";
-                        } else {
-                            xhr.responseType = "text";
-                        }
+    let isExcel = fileHasValidExtension(spreadsheetFile, EXCEL_FILE_EXTENSIONS) &&
+            !$("#command_validate").prop("checked");
+    $.ajax({
+        type: 'POST',
+        url: "{{url_for('route_blueprint.spreadsheet_results')}}",
+        data: formData,
+        contentType: false,
+        processData: false,
+        xhr: function () {
+            let xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 2) {
+                    if (xhr.status == 200 && isExcel) {
+                        xhr.responseType = "blob";
+                    } else {
+                        xhr.responseType = "text";
                     }
-                };
-                return xhr;
-            },
-            success: function (data, status, xqXHR) {
-                //Convert the Byte Data to BLOB object.
-                let bData = data;
-                let types = xqXHR.getAllResponseHeaders();
-                let type = xqXHR.getResponseHeader("Content-type");
-                let url = window.URL || window.webkitURL;
-                let blob = new Blob([bData], {type: type});
-                let link = url.createObjectURL(blob);
-                let a = $("<a />");
-                a.attr("download", "temp.xlsx");
-                a.attr("href", link);
-                $("body").append(a);
-                a[0].click();
-                // let downloadUrl = URL.createObjectURL(data);
-                // let ab = document.createElement("a");
-                // ab.href = downloadUrl;
-                // ab.download = "downloadFile.xlsx";
-                // document.body.appendChild(ab);
-            },
-            error: function (xhr, status, errorThrown) {
-                getResponseFailure(xhr, status, errorThrown, display_name, 'spreadsheet_submit_flash')
-            }
-        })
-        // $.ajax({
-        //     type: 'POST',
-        //     url: "{{url_for('route_blueprint.spreadsheet_results')}}",
-        //     data: formData,
-        //     contentType: false,
-        //     processData: false,
-        //     xhr: function () {
-        //         let xhr = new XMLHttpRequest();
-        //         xhr.onreadystatechange = function () {
-        //             if (xhr.readyState == 2) {
-        //                 if (xhr.status == 200) {
-        //                     xhr.responseType = "blob";
-        //                 } else {
-        //                     xhr.responseType = "text";
-        //                 }
-        //             }
-        //         };
-        //         return xhr;
-        //     },
-        //     success: function (data, status, xqXHR) {
-        //         //Convert the Byte Data to BLOB object.
-        //         let bdata = data;
-        //         let types = xqXHR.getAllResponseHeaders();
-        //         let type = xqXHR.getResponseHeader("Content-type");
-        //         // let bytes = new Array(bdata.length);
-        //         // for (let i = 0; i < bdata.length; i++) {
-        //         //     bytes[i] = bdata.charCodeAt(i);
-        //         // }
-        //         // let binData = new Uint8Array(bytes);
-        //         let binData = data;
-        //
-        //         // let blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-        //         let blob = new Blob([binData], {type: type});
-        //         let url = window.URL || window.webkitURL;
-        //         let link = url.createObjectURL(blob);
-        //         let a = $("<a />");
-        //         a.attr("download", "temp.xlsx");
-        //         a.attr("href", link);
-        //         $("body").append(a);
-        //         a[0].click();
-        //         // $("body").remove(a);
-        //     }
-        // })
-       // $.ajax({
-       //          type: 'POST',
-       //          url: "{{url_for('route_blueprint.spreadsheet_results')}}",
-       //          data: formData,
-       //          contentType: false,
-       //          processData: false,
-       //          dataType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-       //          success: function (data, status, xhr) {
-       //              let x = status
-       //              getResponseSuccessA(data, xhr, display_name, 'spreadsheet_submit_flash')
-       //          },
-       //          error: function (xhr, status, errorThrown) {
-       //              getResponseFailure(xhr, status, errorThrown, display_name, 'spreadsheet_submit_flash')
-       //          }
-       //      }
-    } else {
-        $.ajax({
-                type: 'POST',
-                url: "{{url_for('route_blueprint.spreadsheet_results')}}",
-                data: formData,
-                contentType: false,
-                processData: false,
-                dataType: 'text',
-                success: function (download, status, xhr) {
-                    getResponseSuccess(download, xhr, display_name, 'spreadsheet_submit_flash')
-                },
-                error: function (xhr, status, errorThrown) {
-                    getResponseFailure(xhr, status, errorThrown, display_name, 'spreadsheet_submit_flash')
                 }
-            }
-        )
-    }
-}
-
-function save(name, data, type, isBinary) {
-    if (isBinary) {
-        var bytes = new Array(data.length);
-        for (var i = 0; i < data.length; i++) {
-            bytes[i] = data.charCodeAt(i);
+            };
+            return xhr;
+        },
+        success: function (data, status, xqXHR) {
+            getResponseSuccess(data, xqXHR, display_name, 'spreadsheet_submit_flash')
+        },
+        error: function (xhr, status, errorThrown) {
+            getResponseFailure(xhr, status, errorThrown, display_name, 'spreadsheet_submit_flash')
         }
-        data = new Uint8Array(bytes);
-    }
+    })
 }

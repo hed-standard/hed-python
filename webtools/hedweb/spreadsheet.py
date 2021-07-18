@@ -11,9 +11,8 @@ from hed.validator.event_validator import EventValidator
 from hed.util.file_util import get_file_extension
 
 from hedweb.constants import common, file_constants
-from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down
-from hedweb.utils.io_utils import generate_filename, get_prefix_dict, file_extension_is_valid, \
-    get_text_file_first_row
+from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, file_extension_is_valid, \
+    generate_filename
 
 app_config = current_app.config
 
@@ -194,3 +193,57 @@ def spreadsheet_validate(hed_schema, spreadsheet):
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
                 common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f'Spreadsheet {display_name} had no validation errors'}
+
+
+def get_prefix_dict(form_dict):
+    """Returns a tag prefix dictionary from a form dictionary.
+
+    Parameters
+    ----------
+   form_dict: dict
+        The dictionary returned from a form that contains a column prefix table
+    Returns
+    -------
+    dict
+        A dictionary whose keys are column numbers (starting with 1) and values are tag prefixes to prepend.
+    """
+    tag_columns = []
+    prefix_dict = {}
+    keys = form_dict.keys()
+    for key in keys:
+        if not key.startswith('column') or key.endswith('check'):
+            continue
+        pieces = key.split('_')
+        check = 'column_' + pieces[1] + '_check'
+        if form_dict.get(check, None) != 'on':
+            continue
+        if form_dict[key]:
+            prefix_dict[int(pieces[1])] = form_dict[key]
+        else:
+            tag_columns.append(int(pieces[1]))
+    return tag_columns, prefix_dict
+
+
+def get_text_file_first_row(filename, delimiter='\t'):
+    """Gets the contents of the first row of the text file.
+
+    Parameters
+    ----------
+    filename: str or file-like
+        The path to a text other.
+    delimiter: str
+
+    Returns
+    -------
+    list
+        list containing first row.
+
+    """
+
+    if isinstance(filename, str):
+        with open(filename, 'r', encoding='utf-8') as opened_text_file:
+            first_line = opened_text_file.readline()
+    else:
+        first_line = filename.readline()
+    text_file_columns = first_line.split(delimiter)
+    return text_file_columns

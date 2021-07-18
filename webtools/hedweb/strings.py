@@ -7,7 +7,7 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 
 from hedweb.constants import common
-from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down
+from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down
 
 app_config = current_app.config
 

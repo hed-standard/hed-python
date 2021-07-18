@@ -29,14 +29,14 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_events_form_empty(self):
+    def test_get_input_from_events_form_empty(self):
         from hedweb.events import get_input_from_events_form
         self.assertRaises(TypeError, get_input_from_events_form, {},
                           "An exception should be raised if an empty request is passed")
         self.assertTrue(1, "Testing get_input_from_events_form")
 
-    def test_generate_input_from_events_form(self):
-        from hed.models import ColumnDefGroup, EventsInput
+    def test_get_input_from_events_form(self):
+        from hed.models import EventsInput
         from hed.schema import HedSchema
         from hedweb.events import get_input_from_events_form
         with self.app.test:
@@ -50,13 +50,13 @@ class Test(unittest.TestCase):
             request = Request(environ)
             arguments = get_input_from_events_form(request)
             self.assertIsInstance(arguments[common.EVENTS], EventsInput,
-                                  "generate_input_from_events_form should have an events object")
+                                  "get_input_from_events_form should have an events object")
             self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
-                                  "generate_input_from_events_form should have a HED schema")
+                                  "get_input_from_events_form should have a HED schema")
             self.assertEqual(common.COMMAND_ASSEMBLE, arguments[common.COMMAND],
-                             "generate_input_from_events_form should have a command")
+                             "get_input_from_events_form should have a command")
             self.assertTrue(arguments[common.DEFS_EXPAND],
-                            "generate_input_from_events_form should have defs_expand true when on")
+                            "get_input_from_events_form should have defs_expand true when on")
 
     def test_events_process_empty_file(self):
         # Test for empty events_path
@@ -75,10 +75,12 @@ class Test(unittest.TestCase):
         from hedweb.events import events_process
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_dictionary = models.ColumnDefGroup(json_filename=json_path, display_name='bids_json')
-        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary, display_name='bids_events')
+        def_dicts = json_dictionary.extract_defs()
+        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary,
+                                    display_name='bids_events', def_dicts=def_dicts)
         arguments = {common.EVENTS: events, common.COMMAND: common.COMMAND_VALIDATE, common.DEFS_EXPAND: True,
                      common.CHECK_FOR_WARNINGS: True, common.SCHEMA: hed_schema}
         with self.app.app_context():
@@ -102,10 +104,12 @@ class Test(unittest.TestCase):
         from hedweb.events import events_assemble
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_dictionary = models.ColumnDefGroup(json_filename=json_path, display_name='bids_json')
-        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary, display_name='bids_events')
+        def_dicts = json_dictionary.extract_defs()
+        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary,
+                                    display_name='bids_events', def_dicts=def_dicts)
         with self.app.app_context():
             results = events_assemble(hed_schema, events, defs_expand=True)
             self.assertTrue('data' in results,
@@ -113,7 +117,7 @@ class Test(unittest.TestCase):
             self.assertEqual('success', results["msg_category"],
                              'events_assemble msg_category should be success when no errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = events_assemble(hed_schema, events, defs_expand=True)
@@ -126,10 +130,12 @@ class Test(unittest.TestCase):
         from hedweb.events import events_validate
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_dictionary = models.ColumnDefGroup(json_filename=json_path, display_name='bids_json')
-        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary, display_name='bids_events')
+        def_dicts = json_dictionary.extract_defs()
+        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary,
+                                    def_dicts=def_dicts, display_name='bids_events')
 
         with self.app.app_context():
             results = events_validate(hed_schema, events)
@@ -138,7 +144,7 @@ class Test(unittest.TestCase):
             self.assertEqual('warning', results["msg_category"],
                              'events_validate msg_category should be warning when errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():

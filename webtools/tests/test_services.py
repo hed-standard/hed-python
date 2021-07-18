@@ -2,6 +2,9 @@ import os
 import json
 import shutil
 import unittest
+from werkzeug.test import create_environ
+from werkzeug.wrappers import Request
+
 from hed import schema as hedschema
 from hed import models
 from hedweb.constants import common
@@ -27,7 +30,36 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_services_process(self):
+    def test_get_input_from_service_request_empty(self):
+        from hedweb.services import get_input_from_service_request
+        self.assertRaises(TypeError, get_input_from_service_request, {},
+                          "An exception should be raised if an empty request is passed")
+        self.assertTrue(1, "Testing get_input_from_service_request")
+
+    def test_get_input_from_service_request(self):
+        from hed.models.column_def_group import ColumnDefGroup
+        from hed.schema import HedSchema
+        from hedweb.services import get_input_from_service_request
+        with self.app.test:
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
+            events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
+            with open(json_path, 'rb') as fp:
+                json_string = fp.read().decode('ascii')
+            json_data = {common.JSON_STRING: json_string, common.CHECK_FOR_WARNINGS: 'on',
+                         common.SCHEMA_VERSION: '8.0.0-alpha.1', common.SERVICE: 'dictionary_validate'}
+            environ = create_environ(json=json_data)
+            request = Request(environ)
+            arguments = get_input_from_service_request(request)
+            self.assertIsInstance(arguments[common.JSON_DICTIONARY], ColumnDefGroup,
+                                  "get_input_from_service_request should have a dictionary object")
+            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+                                  "get_input_from_service_request should have a HED schema")
+            self.assertEqual('dictionary_validate', arguments[common.SERVICE],
+                             "get_input_from_service_request should have a service request")
+            self.assertTrue(arguments[common.CHECK_FOR_WARNINGS],
+                            "get_input_from_service_request should have check_for_warnings true when on")
+
+    def test_services_process_empty(self):
         from hedweb.services import services_process
         arguments = {'service': ''}
         response = services_process(arguments)
@@ -55,10 +87,10 @@ class Test(unittest.TestCase):
         with self.app.app_context():
             response = services_process(arguments)
             self.assertFalse(response['error_type'],
-                             'dictionary_validation services should not have a error when file is valid')
+                             'dictionary_validation services should not have a fatal error when file is invalid')
             results = response['results']
-            self.assertEqual('success', results['msg_category'],
-                             "dictionary_validation services has success on bids.json")
+            self.assertEqual('warning', results['msg_category'],
+                             "dictionary_validation services has failure on bids.json")
             self.assertEqual('8.0.0-beta.1', results[common.SCHEMA_VERSION], 'Version 8.0.0.-beta.1 was used')
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \

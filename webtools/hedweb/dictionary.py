@@ -6,8 +6,7 @@ from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hedweb.constants import common, file_constants
-from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down
-from hedweb.utils.io_utils import generate_filename
+from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
 
@@ -141,7 +140,8 @@ def dictionary_validate(hed_schema, json_dictionary):
     if not json_dictionary or not isinstance(json_dictionary, models.ColumnDefGroup):
         raise HedFileError('BadDictionaryFile', "Please provide a dictionary to process", "")
     display_name = json_dictionary.display_name
-    def_dict, issues = json_dictionary.extract_defs()
+    def_dict = json_dictionary.extract_defs()
+    issues = def_dict.get_def_issues(hed_schema)
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON dictionary {display_name} definition errors")
         file_name = generate_filename(display_name, suffix='_dictionary_errors', extension='.txt')

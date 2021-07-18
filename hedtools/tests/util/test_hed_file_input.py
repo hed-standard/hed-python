@@ -1,5 +1,6 @@
 import unittest
 import os
+import io
 
 from hed.models.hed_input import HedInput
 from hed.models.hed_string import HedString
@@ -61,10 +62,10 @@ class Test(unittest.TestCase):
                                  def_dicts=def_dict)
 
         with open(events_path) as file:
-            events_file_as_string = "".join([line for line in file])
-        input_file_from_string = EventsInput(events_path, json_def_files=column_group,
-                                             def_dicts=def_dict,
-                                             csv_string=events_file_as_string)
+            events_file_as_string = io.StringIO(file.read())
+        input_file_from_string = EventsInput(filename=events_file_as_string,
+                                             file_type='.tsv', json_def_files=column_group,
+                                             def_dicts=def_dict)
 
         for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
             self.assertEqual(row_number, row_number2)
