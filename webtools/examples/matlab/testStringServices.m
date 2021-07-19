@@ -20,41 +20,53 @@ header = ["Content-Type" "application/json"; ...
 
 options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
-                 
-%% Example 1: Validate invalid list of strings using HED URL.
-sdata1 = get_input_template();
-sdata1.service = 'string_validate';
-sdata1.schema_version = '8.0.0-alpha.1';
-sdata1.string_list = {['Red,Blue'], ['Green'], ['White,Black']}; 
+
+%% Read in the schema text for the examples
+schema_text = fileread('../data/HED8.0.0-alpha.1.xml');
+good_strings = {['Red,Blue'], ['Green'], ['White,Black']}; 
+bad_strings = {['Red,Blue,Blech'], ['Green'], ['White,Black,Binge']}; 
+
+%% Example 1: Validate valid list of strings using HED URL.
+sdata1 = struct('service', 'string_validate', 'service_parameters', []);
+parameters = struct('schema_version', '8.0.0-alpha.1', ...
+                    'string_list', '', ...
+                    'check_for_warnings', true);
+parameters.string_list = good_strings;
+sdata1.service_parameters = parameters;
 response1 = webwrite(services_url, sdata1, options);
 response1 = jsondecode(response1);
 output_report(response1, 'Example 1 output');
 
-%% Example 2: Validate an incorrect list of strings. HED schema is URL.
-sdata2 = get_input_template();
-sdata2.service = 'string_validate';
-sdata2.schema_url = ['https://raw.githubusercontent.com/hed-standard/' ...
-    'hed-specification/master/hedxml/HED8.0.0-alpha.1.xml'];
-sdata2.string_list = {['Red,Blue,Blech'], ['Green'], ['White,Black,Binge']}; 
+%% Example 2: Validate a list of invalid strings. HED schema is URL.
+myURL = ['https://raw.githubusercontent.com/hed-standard/' ...
+         'hed-specification/master/hedxml/HED8.0.0-alpha.1.xml'];
+sdata2 = struct('service', 'string_validate', 'service_parameters', []);
+parameters = struct('schema_url', myURL, ...
+                    'string_list', '', ...
+                    'check_for_warnings', true);
+parameters.string_list = bad_strings;
+sdata2.service_parameters = parameters;
 response2 = webwrite(services_url, sdata2, options);
 response2 = jsondecode(response2);
 output_report(response2, 'Example 2 output');
 
-%% Example 3: Validate invalid list of strings uploading HED schema.
-sdata3 = get_input_template();
-sdata3.service = 'string_validate';
-sdata3.schema_string = fileread('../data/HED8.0.0-alpha.1.xml');
-sdata3.string_list = {['Red,Blue,Blech'], ['Green'], ['White,Black,Binge']}; 
+%% Example 3: Validate list of invalid strings uploading HED schema.
+sdata3 = struct('service', 'string_validate', 'service_parameters', []);
+parameters = struct('schema_string', schema_text, ...
+                    'string_list', '', ...
+                    'check_for_warnings', true);
+parameters.string_list = bad_strings;               
+sdata3.service_parameters = parameters;
 response3 = webwrite(services_url, sdata3, options);
 response3 = jsondecode(response3);
 output_report(response3, 'Example 3 output');
 
 %% Example 4: Convert valid strings to long using HED version.
-sdata4 = get_input_template();
-sdata4.service = 'string_to_long';
-schema_text = fileread('../data/HED8.0.0-alpha.1.xml');
-sdata4.schema_string = schema_text;
-sdata4.string_list = {['Red,Blue'], ['Green'], ['White,Black']}; 
+sdata4 = struct('service', 'string_to_long', 'service_parameters', []);
+parameters = struct('schema_version', '8.0.0-alpha.1', ...
+                    'string_list', '');
+parameters.string_list = good_strings;               
+sdata4.service_parameters = parameters;
 response4 = webwrite(services_url, sdata4, options);
 response4 = jsondecode(response4);
 output_report(response4, 'Example 4 output');

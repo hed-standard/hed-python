@@ -44,7 +44,7 @@ def get_input_from_events_form(request):
         else:
             def_dicts = None
         arguments[common.EVENTS] = models.EventsInput(filename=f, file_type=".tsv",
-                                                      json_def_files=json_dictionary, def_dicts = def_dicts,
+                                                      json_def_files=json_dictionary, def_dicts=def_dicts,
                                                       display_name=secure_filename(f.filename))
         # arguments[common.EVENTS] = models.EventsInput(csv_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
         #                                               json_def_files=json_dictionary,

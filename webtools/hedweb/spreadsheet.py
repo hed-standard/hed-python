@@ -145,20 +145,12 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
 
     if command == common.COMMAND_TO_LONG:
         suffix = '_to_long'
-        issues = spreadsheet.convert_to_long(hed_schema)
+        spreadsheet.convert_to_long(hed_schema)
     else:
         suffix = '_to_short'
-        issues = spreadsheet.convert_to_short(hed_schema)
+        spreadsheet.convert_to_short(hed_schema)
 
     file_name = generate_filename(display_name, suffix=suffix, extension=display_ext)
-    # if issues:
-    #     issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} had conversion errors")
-    #     file_name = generate_filename(display_name, suffix='_conversion_errors_' + suffix, extension='.txt')
-    #
-    #     return {common.COMMAND: command, 'data': issue_str, "output_display_name": file_name,
-    #             common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
-    #             'msg': f"Spreadsheet {display_name} had conversion errors"}
-    # else:
     return {common.COMMAND: command, 'data': '', common.SPREADSHEET: spreadsheet, 'output_display_name': file_name,
             common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
             'msg': f'Spreadsheet {display_name} converted_successfully'}

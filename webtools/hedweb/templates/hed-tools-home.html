@@ -3,75 +3,40 @@
     <h2>What is HED?</h2>
     <p>HED (Hierarchical Event Descriptors) is a framework for systematically describing both laboratory and real-world
         events. HED tags are comma-separated path strings. The goal of HED is to describe precisely the nature of the
-        events of interest occurring in an experiment using a common language,
-        so that the following two things can be accomplished. First, you and/or other researchers can
-        better understand the experience and responses of the participant as well as the relationship of these
-        events to the task and experimental conditions. Secondly, data analysis and meta-analysis can
-        more easily and flexibly compare events (and responses to events) across datasets and studies to better isolate
-        common “cognitive aspects”.
-    </p>
-
-    <p>The HED framework has been developed for neurological imaging data (e.g., EEG, MEG, iEEG,
+        events of interest occurring in an experiment using a common structured vocabulary and standardized tools.
+        The HED framework has been developed for neurological imaging data (e.g., EEG, MEG, iEEG,
         fMRI), physiological (e.g., ECG, EMG, GSR) as well as multimodal experiment (e.g., mobile brain/body imaging).
         HED has been adopted as part of the BIDS (<a href="http://bids.neuroimaging.io">http://bids.neuroimaging.io</a>)
-        standard for brain imaging.The HED standards group maintains the HED schema and tools at
-        <a href="https://github.com/hed-standard">https://github.com/hed-standard</a>.
+        standard for brain imaging. The HED standards group maintains the HED schema and tools at
+        <a href="https://github.com/hed-standard">https://github.com/hed-standard</a>. The HED schema can be viewed
+        using the <a href="https://www.hedtags.org/display_hed_test.html?version=8.0.0-beta.4">HED viewer</a>.
     </p>
 
-    <h2>HED-2G and HED-3G</h2>
+    <h3>HED versions (3G versus 2G)</h3>
     <p>
-        HED is currently undergoing a significant revision (HED-3G or HED third generation) so that it can better
-        capture not only a basic description of the events, but also event relationship to task intent. The redesigned
-        schema can be viewed at <a href="http://www.hedtags.org/display_hed.html?version=8.0.0-alpha.1">HED 3G viewer</a>.
+        HED (starting with HED version 8.0.0) uses a new more powerful framework for annotation, known as HED-3G
+        or HED third generation. Versions earlier than 8.0.0 use a less
+        powerful framework (known as HED-2G) and will be deprecated in the coming year. You should always
+        use versions HED 8.0.0 or greater for annotation.
     </p>
 
-    <h2>HED online tools</h2>
+    <h3>HED online tools help</h3>
     <p>
-        Several online HED tools are currently available:
-        <ul>
-            <li><a href="{{ url_for('route_blueprint.render_events_form') }}"><b>[Process events]</b></a>
-                <b>Process a BIDS-style events file with optional JSON sidecar.</b><br>
-                The user uploads the two files to process. The user also specifies which version of HED to
-                use either by selecting a standard version from Github or uploading a local HED schema.
-                The tool first validates the sidecar if present and if the sidecar contains no errors
-                validates the events file in conjunction with the sidecar. If there are errors, the tool returns
-                a downloadable file of error messages. If the process command was assemble and there were no validation
-                errors, the tool returns a downloadable two-column file: the first column is the onset time and the
-                second column is the assembled event string for that event.
-            </li>
-            <li><a href="{{ url_for('route_blueprint.render_dictionary_form') }}"><b>[Process dictionary]</b></a>
-                <b>Process a single BIDS-style events JSON sidecar.</b><br>
-                The user uploads the file. The user also specifies which version of HED to use against either
-                by selecting a standard version from Github or uploading a local HED schema. The tool first
-                validates the JSON file and any included definitions. If there are errors,
-                the tool returns a downloadable file of error messages.  Otherwise, if the command was convert
-                to long, the tool returns a downloadable JSON file with all of the tags converted to long.
-                Similarly, if the command was convert to short, the tool returns a downloadable JSON file with all
-                of the tags converted to short form.
-            </li>
-            <li><a href="{{ url_for('route_blueprint.render_spreadsheet_form') }}"><b>[Process spreadsheet]</b></a>
-                <b>Process an Excel or tsv file containing HED tags.</b><br>
-                The user uploads an Excel or tsv file and selects a worksheet if the file is an Excel file.
-                The user indicates which columns contain HED tags and also specifies which version of HED to
-                use either by selecting a standard version from Github or uploading a local HED schema.
-                If there are errors, the tool returns a downloadable file of error messages.
-            </li>
-            <li><a href="{{ url_for('route_blueprint.render_string_form') }}"><b>[Process string]</b></a>
-                <b>Process a HED string.</b><br>
-                The user enters or pastes a HED string into a text box. The user also specifies which version
-                of HED to use either by selecting a standard version from Github or uploading a
-                local HED schema. The user selects one of three processing options: 1) Validate,  2) Convert
-                from long to short form, or 3) Convert from short to long form. The results appear in the results text box.
-            </li>
-            <li><a href="{{ url_for('route_blueprint.render_schema_form') }}"><b>[Process schema]</b></a>
-                <b>Process a HED schema.</b><br>
-                The user enters the URL of a HED schema or uploads a HED schema file in either .mediawiki or
-                .xml format. If the command is convert, the tool converts the schema to the other
-                format and makes the converted file available for download. If the user presses the Check button,
-                the tools make a file of HED-3G compliance errors available for download.
-            </li>
-        </ul>
+        More detailed help on using these online tools is available at:
+        <a href="{{ url_for('route_blueprint.render_commands_help_page') }}"><b>[Help pages for online tools]</b></a>
     </p>
+
+   <h3>HED services help</h3>
+    <p>
+    The HED online tools are also available as callable web services. More detailed help on calling these
+        services is available at:
+        <a href="{{ url_for('route_blueprint.render_services_help_page') }}"><b>[Help pages for HED web services]</b></a>
+    </p>
+    <p>
+        Downloadable examples of calling these services from a MATLAB program can be found at:
+        <a href="https://github.com/hed-standard/hed-python/tree/master/webtools/examples"><b>[Github MATLAB examples]</b></a>
+     </p>
+    <h3>Additional information</h3>
     <p>
         Additional web-based tools are under development. All code is open-source and available in the
         <a href="https:/github.com/hed-standard/hed-python">hed-python</a> repository on Github.

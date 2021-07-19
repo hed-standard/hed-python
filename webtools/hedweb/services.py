@@ -32,35 +32,42 @@ def get_input_from_service_request(request):
     form_data = request.data
     form_string = form_data.decode()
     service_request = json.loads(form_string)
+    parameters = service_request.get(common.SERVICE_PARAMETERS, None)
+    if not parameters:
+        parameters = service_request
     arguments = {common.SERVICE: service_request.get(common.SERVICE, None),
                  common.SCHEMA: None,
                  common.JSON_DICTIONARY: None,
                  common.EVENTS: None,
                  common.SPREADSHEET: None,
-                 common.HAS_COLUMN_NAMES: service_request.get(common.HAS_COLUMN_NAMES, None),
-                 common.STRING_LIST: service_request.get(common.STRING_LIST, None),
-                 common.CHECK_FOR_WARNINGS: service_request.get(common.CHECK_FOR_WARNINGS, True),
-                 common.DEFS_EXPAND: service_request.get(common.DEFS_EXPAND, True)}
-    if common.JSON_STRING in service_request and service_request[common.JSON_STRING]:
-        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=service_request[common.JSON_STRING],
+                 common.HAS_COLUMN_NAMES: parameters.get(common.HAS_COLUMN_NAMES, False),
+                 common.STRING_LIST: parameters.get(common.STRING_LIST, None),
+                 common.CHECK_FOR_WARNINGS: parameters.get(common.CHECK_FOR_WARNINGS, True),
+                 common.DEFS_EXPAND: parameters.get(common.DEFS_EXPAND, True)}
+    if common.JSON_STRING in parameters and parameters[common.JSON_STRING]:
+        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=parameters[common.JSON_STRING],
                                                                   display_name='JSON_Dictionary')
-    if common.EVENTS_STRING in service_request and service_request[common.EVENTS_STRING]:
-        arguments[common.EVENTS] = models.EventsInput(filename=io.StringIO(service_request[common.EVENTS_STRING]),
-                                                      json_def_files=arguments.get(common.JSON_DICTIONARY, None),
-                                                      file_type='.tsv', display_name='Events')
-    if common.SPREADSHEET_STRING in service_request and service_request[common.SPREADSHEET_STRING]:
-        tag_columns, prefix_dict = get_prefix_dict(service_request)
+    if common.EVENTS_STRING in parameters and parameters[common.EVENTS_STRING]:
+        if arguments[common.JSON_DICTIONARY]:
+            def_dicts = arguments[common.JSON_DICTIONARY].extract_defs()
+        else:
+            def_dicts = None
+        arguments[common.EVENTS] = models.EventsInput(filename=io.StringIO(parameters[common.EVENTS_STRING]),
+                                                      json_def_files=arguments[common.JSON_DICTIONARY],
+                                                      def_dicts=def_dicts, file_type='.tsv', display_name='Events')
+    if common.SPREADSHEET_STRING in parameters and parameters[common.SPREADSHEET_STRING]:
+        tag_columns, prefix_dict = get_prefix_dict(parameters)
         arguments[common.SPREADSHEET] = \
-            models.HedInput(filename=io.StringIO(service_request[common.SPREADSHEET_STRING]), file_type=".tsv",
+            models.HedInput(filename=io.StringIO(parameters[common.SPREADSHEET_STRING]), file_type=".tsv",
                             tag_columns=tag_columns, has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
                             column_prefix_dictionary=prefix_dict, display_name='spreadsheet.tsv')
-    if common.SCHEMA_STRING in service_request and service_request[common.SCHEMA_STRING]:
-        arguments[common.SCHEMA] = hedschema.from_string(service_request[common.SCHEMA_STRING])
-    elif common.SCHEMA_URL in service_request and service_request[common.SCHEMA_URL]:
-        schema_url = service_request[common.SCHEMA_URL]
+    if common.SCHEMA_STRING in parameters and parameters[common.SCHEMA_STRING]:
+        arguments[common.SCHEMA] = hedschema.from_string(parameters[common.SCHEMA_STRING])
+    elif common.SCHEMA_URL in parameters and parameters[common.SCHEMA_URL]:
+        schema_url = parameters[common.SCHEMA_URL]
         arguments[common.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
-    elif common.SCHEMA_VERSION in service_request and service_request[common.SCHEMA_VERSION]:
-        hed_file_path = hedschema.get_path_from_hed_version(service_request[common.SCHEMA_VERSION])
+    elif common.SCHEMA_VERSION in parameters and parameters[common.SCHEMA_VERSION]:
+        hed_file_path = hedschema.get_path_from_hed_version(parameters[common.SCHEMA_VERSION])
         arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=hed_file_path)
     return arguments
 

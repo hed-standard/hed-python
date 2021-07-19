@@ -1,4 +1,4 @@
-HED version="8.0.0-beta.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0-beta.3.xsd"
+HED version="8.0.0-beta.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0-beta.3.xsd"
 
 '''Prologue'''
 This schema is the first version that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
@@ -15,7 +15,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 * Measurement-event <nowiki>{suggestedTag=Data-property}[A discrete measure returned by an instrument.]</nowiki>
 
 '''Agent''' <nowiki>{suggestedTag=Agent-property}[Someone or something that takes an active role or produces a specified effect.The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be something that simulates something else.]</nowiki>
-* Animal-agent <nowiki>[An agent living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement, as distinguished from a plant or mineral.]</nowiki>
+* Animal-agent <nowiki>[An agent that is an animal.]</nowiki>
 * Avatar-agent <nowiki>[An agent associated with an icon or avatar representing another agent.]</nowiki>
 * Controller-agent <nowiki>[An agent experiment control software or hardware.]</nowiki> 
 * Human-agent <nowiki>[A person who takes an active role or produces a specified effect.]</nowiki>
@@ -50,20 +50,22 @@ This schema is the first version that includes an xsd and requires unit class, u
 ***** Close-eyes <nowiki>[Lower and keep eyelids in a closed position.]</nowiki>
 ***** Fixate <nowiki>[Direct eyes to a specific point or target.]</nowiki>
 ***** Inhibit-blinks <nowiki>[Purposely prevent blinking.]</nowiki>
-***** Lift-eyebrows <nowiki>[Move eyebrows upward.]</nowiki>
 ***** Open-eyes <nowiki>[Raise eyelids to expose pupil.]</nowiki>
 ***** Saccade <nowiki>[Move eyes rapidly between fixation points.]</nowiki>
 ***** Stare <nowiki>[Look fixedly or vacantly at someone or something with eyes wide open.]</nowiki>
-***** Widen-eyes <nowiki>[Open eyes and possibly with eyebrows lifted especially to express surprise or fear.]</nowiki>
-**** Move-jaw <nowiki>[Move lower part of the jaw and head.]</nowiki>
+***** Wink <nowiki>{suggestedTag=Communicate-gesturally}[Close and open one eye quickly, typically to indicate that something is a joke or a secret or as a signal of affection or greeting.]</nowiki>
+**** Move-face <nowiki>[Move the face or jaw.]</nowiki>
 ***** Bite <nowiki>[Seize with teeth or jaws an object or organism so as to grip or break the surface covering.]</nowiki>
 ***** Burp <nowiki>[Noisily release air from the stomach through the mouth; belch.]</nowiki>
 ***** Chew <nowiki>[Repeatedly grinding, tearing, and or crushing with teeth or jaws.]</nowiki>
 ***** Clear-throat <nowiki>[Cough slightly so as to speak more clearly, attract attention, or to express hesitancy before saying something awkward.]</nowiki>
-***** Frown <nowiki>[Express disapproval, displeasure, or concentration, typically by turning down the corners of the mouth.]</nowiki>
+***** Frown <nowiki>{suggested-Tag=Communicate-gesturally}[Express disapproval, displeasure, or concentration, typically by turning down the corners of the mouth.]</nowiki>
+***** Grimace <nowiki>{suggested-Tag=Communicate-gesturally}[Make a twisted expression, typically expressing disgust, pain, or wry amusement.]</nowiki>
 ***** Gurgle <nowiki>[Make a hollow bubbling sound like that made by water running out of a bottle.]</nowiki>
-***** Smile <nowiki>[Form facial features into a pleased, kind, or amused expression, typically with the corners of the mouth turned up and the front teeth exposed.]</nowiki>
+***** Raise-eyebrows <nowiki>[Move eyebrows upward.]</nowiki>
+***** Smile <nowiki>{suggested-Tag=Communicate-gesturally}[Form facial features into a pleased, kind, or amused expression, typically with the corners of the mouth turned up and the front teeth exposed.]</nowiki>
 ***** Swallow <nowiki>[Cause or allow something, especially food or drink to pass down the throat.]</nowiki>
+***** Widen-eyes <nowiki>[Open eyes and possibly with eyebrows lifted especially to express surprise or fear.]</nowiki>
 ***** Yawn <nowiki>[Take a deep involuntary  inhalation with the mouth open often as a sign of drowsiness or boredom.]</nowiki>
 **** Nod-head <nowiki>[Tilt head in alternating up and down arcs along the sagittal plane. It is most commonly, but not universally, used to indicate agreement, acceptance, or acknowledgement.]</nowiki>
 **** Shake-head <nowiki>[Turn head from side to side as a way of showing disagreement or refusal.]</nowiki>
@@ -91,6 +93,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 **** Jump <nowiki>[Move off the ground or other surface through sudden muscular effort in the legs.]</nowiki>
 **** Kick <nowiki>[Strike out or flail with the foot or feet.  Strike using the leg, in unison usually with an area of the knee or lower using the foot.]</nowiki>
 **** Pedal <nowiki>[Move by working the pedals of a bicycle or other machine.]</nowiki>
+**** Press-foot <nowiki>[Move by pressing foot.]</nowiki>
 **** Run <nowiki>[Travel on foot at a fast pace.]</nowiki>
 **** Step <nowiki>[Put one leg in front of the other and shift weight onto it.]</nowiki>
 ***** Heel-strike <nowiki>[Strike the ground with the heel during a step.]</nowiki>
@@ -108,6 +111,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 ***	Wave <nowiki>[Raise hand and move left and right, as a greeting or sign of departure.]</nowiki>
 ** Communicate-musically <nowiki>[Communicate using music.]</nowiki>
 *** Hum <nowiki>[Make a low, steady continuous sound like that of a bee. Sing with the lips closed and without uttering speech.]</nowiki>
+*** Play-instrument <nowiki>[Make musical sounds using an instrument.]</nowiki>
 *** Sing <nowiki>[Produce musical tones by means of the voice.]</nowiki>
 *** Vocalize <nowiki>[Utter vocal sounds.]</nowiki>
 *** Whistle <nowiki>[Produce a shrill clear sound by forcing breath out or air in through the puckered lips.]</nowiki>
@@ -117,6 +121,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Gulp  <nowiki>[Swallow quickly or in large mouthfuls, often audibly, sometimes to indicate apprehension.]</nowiki>
 ***	Laugh <nowiki>[Make the spontaneous sounds and movements of the face and body that are the instinctive expressions of lively amusement and sometimes also of contempt or derision.]</nowiki>
 *** Scream <nowiki>[Make loud, vociferous cries or yells to express pain, excitement, or fear.]</nowiki>
+*** Shout <nowiki>[Say something very loudly.]</nowiki>
 *** Sigh <nowiki>[Emit a long, deep, audible breath expressing sadness, relief, tiredness, or a similar feeling.]</nowiki>
 *** Speak <nowiki>[Communicate using spoken language.]</nowiki>
 * Perform <nowiki>[Carry out or accomplish an action, task, or function.]</nowiki>
@@ -161,7 +166,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 * Biological-item <nowiki>[An entity that is biological, that is related to living organisms.]</nowiki>
 ** Organism <nowiki>[A living entity, more specifically a biological entity that consists of one or more cells and is capable of genomic replication (independently or not).]</nowiki>
 *** Animal <nowiki>[A living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement.]</nowiki>
-**** Human <nowiki>[The bipedal primate mammal Homo sapiens.]</nowiki>
+*** Human <nowiki>[The bipedal primate mammal Homo sapiens.]</nowiki>
 *** Plant <nowiki>[Any living organism that typically synthesizes its food from inorganic substances and possesses cellulose cell walls.]</nowiki>
 ** Anatomical-item <nowiki>[A biological structure, system, fluid or other substance excluding single molecular entities.]</nowiki>
 *** Body-part <nowiki>[Any part of an organism.]</nowiki>
@@ -178,8 +183,9 @@ This schema is the first version that includes an xsd and requires unit class, u
 ****** Nose <nowiki>[A structure of special sense serving as an organ of the sense of smell and as an entrance to the respiratory tract.]</nowiki>
 ****** Mouth <nowiki>[The proximal portion of the digestive tract, containing the oral cavity and bounded by the oral opening.]</nowiki>
 ****** Teeth <nowiki>[The hard bonelike structures in the jaws. A collection of teeth arranged in some pattern in the mouth or other part of the body.]</nowiki>
-**** Arm <nowiki>[For clinical purposes this term is also used to refer to the whole superior limb.]</nowiki>
+**** Upper-extremity <nowiki>[For clinical purposes this term is also used to refer to the whole superior limb.]</nowiki>
 ***** Elbow <nowiki>[A type of hinge joint located between the forearm and upper arm.]</nowiki>
+***** Forearm <nowiki>[Lower part of the arm between the elbow and wrist.]</nowiki>
 ***** Hand <nowiki>[The distal portion of the upper extremity. It consists of the carpus, metacarpus, and digits.]</nowiki>
 ****** Finger <nowiki>[Any of the digits of the hand.]</nowiki>
 ******* Index-finger <nowiki>[The second finger from the radial side of the hand, next to the thumb.]</nowiki>
@@ -187,22 +193,34 @@ This schema is the first version that includes an xsd and requires unit class, u
 ******* Middle-finger <nowiki>[The middle or third finger from the radial side of the hand.]</nowiki>
 ******* Ring-finger <nowiki>[The fourth finger from the radial side of the hand.]</nowiki>
 ******* Thumb <nowiki>[The thick and short hand digit which is next to the index finger in humans.]</nowiki>
+****** Hand-palm <nowiki>[The part of the inner surface of the hand that extends from the wrist to the bases of the fingers.]</nowiki>
+****** Knuckles <nowiki>[A part of a finger at a joint where the bone is near the surface, especially where the finger joins the hand.]</nowiki>
+***** Shoulder <nowiki>[Joint attaching upper arm to trunk.]</nowiki>
+***** Upper-arm <nowiki>[Portion of arm between shoulder and elbow.]</nowiki>
 ***** Wrist <nowiki>[A joint between the distal end of the radius and the proximal row of carpal bones.]</nowiki>
-**** Leg <nowiki>[For clinical purposes this term is also used to refer to the whole inferior limb.]</nowiki>
+**** Lower-extremity <nowiki>[For clinical purposes this term is also used to refer to the whole inferior limb.]</nowiki>
 ***** Ankle <nowiki>[A gliding joint between the distal ends of the tibia and fibula and the proximal end of the talus.]</nowiki>
+***** Calf <nowiki>[The fleshy part at the back of the leg below the knee.]</nowiki>
 ***** Foot <nowiki>[The structure found below the ankle joint required for locomotion.]</nowiki>
 ****** Toe <nowiki>[One of the terminal digits of the foot.]</nowiki>
 ***** Knee <nowiki>[A joint connecting the lower part of the femur with the upper part of the tibia.]</nowiki>
+***** Shin <nowiki>[Front part of the leg below the knee.]</nowiki>
+***** Thigh <nowiki>[Upper part of the leg between hip and knee.]</nowiki>
 **** Torso <nowiki>[The body excluding the head and neck and limbs.]</nowiki>
+***** Back-torso <nowiki>[The rear surface of the human body from the shoulders to the hips.]</nowiki>
+***** Buttocks <nowiki>[The round fleshy parts that form the lower rear area of a human trunk.]</nowiki>
 ***** Chest <nowiki>[The anterior side of the thorax from the neck to the abdomen.]</nowiki>
+***** Gentalia <nowiki>[The external organs of reproduction.]</nowiki>
 ***** Hip <nowiki>[The lateral prominence of the pelvis from the waist to the thigh.]</nowiki>
 ***** Waist <nowiki>[The abdominal circumference at the navel.]</nowiki>
 *** Organ <nowiki>[A unique macroscopic anatomic structure that is composed of various tissues and performs specific functions as for example heart or liver.]</nowiki>
 *** Tissue <nowiki>[An anatomical structure consisting of similarly specialized cells and intercellular matrix, aggregated according to genetically determined spatial relationships, performing a specific function.]</nowiki>
 * Language-item <nowiki>{suggestedTag=Attribute/Sensory}[An entity related to a systematic means of communicating by the use of sounds, symbols, or gestures.]</nowiki>
 ** Character <nowiki>[A hieroglyphic character or symbol; a pictograph.]</nowiki>
+** Clause <nowiki>[A  unit of grammatical organization next below the sentence in rank, usually consisting of a subject and predicate.]</nowiki>
 ** Glyph <nowiki>[A hieroglyphic character or symbol; a pictograph.]</nowiki>
 ** Nonword <nowiki>[A group of letters or speech sounds that looks or sounds like a word but that is not accepted as such by native speakers.]</nowiki>
+** Paragraph <nowiki>[A distinct section of a piece of writing, usually dealing with a single theme.]</nowiki>
 ** Phoneme <nowiki>[A speech sound that is distinguished by the speakers of a particular language.]</nowiki>
 ** Phrase <nowiki>[A phrase is a group of words functioning as a single unit in the syntax of a sentence.]</nowiki>
 ** Sentence <nowiki>[A set of words that is complete in itself, conveying a statement, question, exclamation, or command and typically containing an explicit or implied subject and a predicate containing a finite verb.]</nowiki>
@@ -213,7 +231,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 ** Geometric-object <nowiki>[An object or a representation that has structure and topology in space.]</nowiki>
 *** Pattern <nowiki>[An arrangement of objects, facts, behaviors, or other things which have scientific, mathematical, geometric, statistical, or other meaning.]</nowiki>
 **** Dots <nowiki>[A small round mark or spot.]</nowiki>
-**** Led-pattern <nowiki>[A pattern created by lighting selected members of a fixed light emitting diode array.]</nowiki>
+**** LED-pattern <nowiki>[A pattern created by lighting selected members of a fixed light emitting diode array.]</nowiki>
 *** 2D-shape <nowiki>[A planar, two-dimensional shape.]</nowiki>
 **** Clockface <nowiki>[The dial face of a clock. A location identifier based on clockface numbering or anatomic subregion.]</nowiki>
 **** Cross <nowiki>[A figure or mark formed by two intersecting lines crossing at their midpoints.]</nowiki>
@@ -246,9 +264,13 @@ This schema is the first version that includes an xsd and requires unit class, u
 **** Assistive-device <nowiki>[A device that help an individual accomplish a task.]</nowiki>
 ***** Glasses <nowiki>[Frames with lenses worn in front of the eye for vision correction, eye protection, or protection from UV rays.]</nowiki>
 ***** Writing-device <nowiki>[A device used for writing.]</nowiki>
-****** Pen <nowiki>[A common writing instrument used to apply ink to a surface, usually paper, for writing or drawing.]</nowiki>
-****** Pencil <nowiki>[An implement for writing or drawing, constructed of a narrow, solid pigment core in a protective casing that prevents the core from being broken or marking the hand.]</nowiki>
-**** Computing-device <nowiki>[An electronic device which take inputs, process the inputs and then calculate results from the inputs.]</nowiki>
+****** Pen <nowiki>[A common writing instrument used to apply ink to a surface for writing or drawing.]</nowiki>
+****** Pencil <nowiki>[An implement for writing or drawing that is constructed of a narrow solid pigment core in a protective casing that prevents the core from being broken or marking the hand.]</nowiki>
+**** Computing-device <nowiki>[An electronic device which take inputs and processes results from the inputs.]</nowiki>
+***** Cellphone <nowiki>[A telephone with access to a cellular radio system so it can be used over a wide area, without a physical connection to a network.]</nowiki>
+***** Desktop-computer <nowiki>[A computer suitable for use at an ordinary desk.]</nowiki>
+***** Laptop-computer <nowiki>[A computer that is portable and suitable for use while traveling.]</nowiki>
+***** Tablet-computer <nowiki>[A small portable computer that accepts input directly on to its screen rather than via a keyboard or mouse.]</nowiki>
 **** Engine <nowiki>[A motor is a machine designed to convert one or more forms of energy into mechanical energy.]</nowiki>
 **** IO-device <nowiki>[Hardware used by a human (or other system) to communicate with a computer.]</nowiki>
 ***** Input-device <nowiki>[A piece of equipment used to provide data and control signals to an information processing system such as a computer or information appliance.]</nowiki>
@@ -264,25 +286,23 @@ This schema is the first version that includes an xsd and requires unit class, u
 ******** <nowiki># {takesValue}[Value of keypad key.]</nowiki>
 ****** Microphone <nowiki>[A device designed to convert sound to an electrical signal.]</nowiki>
 ****** Push-button <nowiki>[A switch designed to be operated by pressing a button.]</nowiki>
-***** Network-device <nowiki>[A collection of two or more computers and/or associated devices that are linked together with communications equipment.]</nowiki>
 ***** Output-device <nowiki>[Any piece of computer hardware equipment which converts information into human understandable form.]</nowiki>
 ****** Display-device <nowiki>[An output device for presentation of information in visual or tactile form the latter used for example in tactile electronic displays for blind people.]</nowiki>
 ******* Head-mounted-display <nowiki>[An instrument that functions as a display device, worn on the head or as part of a helmet, that has a small display optic in front of one (monocular HMD) or each eye (binocular HMD).]</nowiki>
 ******* LED-display <nowiki>[A LED display is a flat panel display that uses an array of light-emitting diodes as pixels for a video display.]</nowiki>
-******* Screen <nowiki>[An electronic device designed as a display or a physical device designed to be a protective meshwork.]</nowiki>
+******* Computer-screen <nowiki>[An electronic device designed as a display or a physical device designed to be a protective meshwork.]</nowiki>
 ******** Computer-window <nowiki>[A part of a computer screen that contains a display different from the rest of the screen. A window is a graphical control element consisting of a visual area containing some of the graphical user interface of the program it belongs to and is framed by a window decoration.]</nowiki>
 ****** Auditory-device <nowiki>[A device designed to produce sound.]</nowiki>
 ******* Headphones <nowiki>[An instrument that consists of a pair of small loudspeakers, or less commonly a single speaker, held close to ears and connected to a signal source such as an audio amplifier, radio, CD player or portable media player.]</nowiki>
 ******* Speaker-device <nowiki>[A device designed to convert electrical signals to sounds that can be heard.]</nowiki>
 ***** Recording-device <nowiki>[A device that copies information in a signal into a persistent information bearer.]</nowiki>
-****** EEG-recording <nowiki>[A recording of electric currents developed in the brain by means of electrodes applied to the scalp, to the surface of the brain, or placed within the substance of the brain.]</nowiki>
-****** File-recording <nowiki>[A file is an information-bearing object that contains a physical embodiment of some information using a particular character encoding.]</nowiki>
-****** MEG-recording <nowiki>[The measurement of the magnetic fields produced by electrical activity in the brain, usually conducted externally, using extremely sensitive devices.]</nowiki>
-****** Motion-capture <nowiki>[A recording of the movement of objects or people.]</nowiki>
-****** Tape-recording <nowiki>[A sound recording and reproduction usually using magnetic tape for storage that can be saved and played back.]</nowiki>
+****** EEG-recorder <nowiki>[A device for recording electric currents in the brain using electrodes applied to the scalp, to the surface of the brain, or placed within the substance of the brain.]</nowiki>
+****** File-storage <nowiki>[A device for recording digital information to a permanent media.]</nowiki>
+****** MEG-recorder <nowiki>[A device for measuring the magnetic fields produced by electrical activity in the brain, usually conducted externally.]</nowiki>
+****** Motion-capture <nowiki>[A device for recording the movement of objects or people.]</nowiki>
+****** Tape-recorder <nowiki>[A device for recording and reproduction usually using magnetic tape for storage that can be saved and played back.]</nowiki>
 ***** Touchscreen <nowiki>[A control component that operates an electronic device by pressing the display on the screen.]</nowiki>
 **** Machine <nowiki>[A human-made device that uses power to apply forces and control movement to perform an action.]</nowiki>
-***** Noisemaker <nowiki>[A device such as a horn or rattle used to make noise at parties.]</nowiki>
 **** Measurement-device <nowiki>[A device in which a measure function inheres.]</nowiki>
 ***** Clock <nowiki>[A device designed to indicate the time of day or to measure the time duration of an event or action.]</nowiki>
 ****** Clock-face <nowiki>[A location identifier based on clockface numbering or anatomic subregion.]</nowiki>
@@ -303,12 +323,12 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Media <nowiki>[Media are audo/visual/audiovisual modes of communicating information for mass consumption.]</nowiki>
 **** Media-clip <nowiki>[A short segment of media.]</nowiki>
 ***** Audio-clip <nowiki>[A short segment of audio.]</nowiki>
+***** Audiovisual-clip <nowiki>[A short media segment containing both audio and video.]</nowiki>
 ***** Video-clip <nowiki>[A short segment of video.]</nowiki>
 **** Visualization <nowiki>[An planned process that creates images, diagrams or animations from the input data.]</nowiki>
 ***** Animation <nowiki>[A form of graphical illustration that changes with time to give a sense of motion or represent dynamic changes in the portrayal.]</nowiki>
 ***** Art-installation <nowiki>[A large-scale, mixed-media constructions, often designed for a specific place or for a temporary period of time.]</nowiki>
-***** Braille <nowiki>[]</nowiki>
-***** Cutout <nowiki>[]</nowiki>
+***** Braille <nowiki>[A display using a system of raised dots that can be read with the fingers by people who are blind.]</nowiki>
 ***** Image <nowiki>[Any record of an imaging event whether physical or electronic.]</nowiki>
 ****** Cartoon <nowiki>[A type of illustration, sometimes animated, typically in a non-realistic or semi-realistic style. The specific meaning has evolved over time, but the modern usage usually refers to either: an image or series of images intended for satire, caricature, or humor; or a motion picture that relies on a sequence of illustrations for its animation.]</nowiki>
 ****** Drawing <nowiki>[A representation of an object or outlining a figure, plan, or sketch by means of lines.]</nowiki>
@@ -317,7 +337,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 ****** Photograph <nowiki>[An image recorded by a camera.]</nowiki>
 ***** Movie <nowiki>[A sequence of images displayed in succession giving the illusion of continuous movement.]</nowiki>
 ***** Outline-visualization <nowiki>[A visualization consisting of a line or set of lines enclosing or indicating the shape of an object in a sketch or diagram.]</nowiki>
-***** Point-light-visualization <nowiki>[]</nowiki>
+***** Point-light-visualization <nowiki>[A display in which action is depicted using a few points of light, often generated from discrete sensors in motion capture.]</nowiki>
 ***** Sculpture <nowiki>[A two- or three-dimensional representative or abstract forms, especially by carving stone or wood or by casting metal or plaster.]</nowiki>
 ***** Stick-figure-visualization <nowiki>[A drawing showing the head of a human being or animal as a circle and all other parts as straight lines.]</nowiki>
 *** Navigational-object <nowiki>[An object whose purpose is to assist directed movement from one location to another.]</nowiki>
@@ -350,7 +370,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Tone <nowiki>[A musical note, warble, or other sound used as a particular signal on a telephone or answering machine.]</nowiki>
 *** Instrument-sound <nowiki>[Sound produced by a musical instrument.]</nowiki>
 *** Vocalized-sound <nowiki>[Musical sound produced by vocal cords in a biological agent.]</nowiki>
-** Named-animal-sound <nowiki>[]</nowiki>
+** Named-animal-sound <nowiki>[A sound recognizable as being associated with particular animals.]</nowiki>
 *** Barking <nowiki>[Sharp explosive cries like sounds made by certain animals, especially a dog, fox, or seal.]</nowiki>
 *** Bleating <nowiki>[Wavering cries like sounds made by a sheep, goat, or calf. ]</nowiki>
 *** Crowing <nowiki>[Loud shrill sounds characteristic of roosters.]</nowiki>
@@ -407,6 +427,14 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Relieved <nowiki>[No longer feeling pain, distress,  anxiety, or reassured.]</nowiki>
 *** Sad <nowiki>[Feeling grief or unhappiness.]</nowiki>
 *** Stressed <nowiki>[Experiencing mental or emotional strain or tension.]</nowiki>
+** Agent-physiological-state <nowiki>[Having to do with the mechanical, physical, or biochemical function of an agent.]</nowiki>
+*** Healthy <nowiki>{relatedTag=Sick}[Having no significant health-related issues.]</nowiki>
+*** Hungry <nowiki>{relatedTag=Sated, relatedTag=Thirsty}[Being in a state of craving or desiring food.]</nowiki>
+*** Rested <nowiki>{relatedTag=Tired}[Feeling refreshed and relaxed.]</nowiki>
+*** Sated <nowiki>{relatedTag=Hungry}[Feeling full.]</nowiki>
+*** Sick <nowiki>{relatedTag=Healthy}[Being in a state of ill health, bodily malfunction, or discomfort.]</nowiki>
+*** Thirsty <nowiki>{relatedTag=Hungry}[Feeling a need to drink.]</nowiki>
+*** Tired <nowiki>{relatedTag=Rested}[Feeling in need of sleep or rest.]</nowiki>
 ** Agent-postural-state <nowiki>[Pertaining to the position in which agent holds their body.]</nowiki> 
 *** Crouching <nowiki>[Adopting a position where the knees are bent and the upper body is brought forward and down, sometimes to avoid detection or to defend oneself.]</nowiki>
 *** Kneeling <nowiki>[Positioned where one or both knees are on the ground.]</nowiki>
@@ -414,7 +442,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Prone <nowiki>[Positioned in a recumbent body position whereby the person lies on its stomach and faces downward.]</nowiki>
 *** Sitting <nowiki>[In a seated position.]</nowiki>
 *** Standing <nowiki>[Assuming or maintaining an erect upright position. ]</nowiki>
-*** Supported-by-chin-rest <nowiki>[Using a device that supports the chin and head.]</nowiki>
+*** Seated-with-chin-rest <nowiki>[Using a device that supports the chin and head.]</nowiki>
 * Agent-task-role <nowiki>[The function or part that is ascribed to an agent in performing the task.]</nowiki>
 ** Experiment-actor <nowiki>[An agent who plays a predetermined role to create the experiment scenario.]</nowiki>
 ** Experiment-controller <nowiki>[An agent exerting control over some aspect of the experiment.]</nowiki>
@@ -423,6 +451,14 @@ This schema is the first version that includes an xsd and requires unit class, u
 * Agent-trait <nowiki>[A genetically, environmentally, or socially determined characteristic of an agent.]</nowiki> 
 ** Age <nowiki>[Length of time elapsed time since birth of the agent.]</nowiki>
 *** <nowiki># {takesValue}</nowiki>
+** Agent-experience-level <nowiki>[Amount of skill or knowledge that the agent has as pertains to the task.]</nowiki>
+*** Expert-level {relatedTag=Intermediate-experience-level, relatedTag=Novice-level}<nowiki>[Having comprehensive and authoritative knowledge of or skill in a particular area related to the task.]</nowiki>
+*** Intermediate-experience-level <nowiki>{relatedTag=Expert-level, relatedTag=Novice-level}[Having a moderate amount of knowledge or skill related to the task.]</nowiki>
+*** Novice-level <nowiki>{relatedTag=Expert-level, relatedTag=Intermediate-experience-level} [Being inexperienced in a field or situation related to the task.]</nowiki>
+** Agent-height <nowiki>[The vertical dimension of an agent.]</nowiki>
+*** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+** Agent-weight <nowiki>[The heaviness of an agent.]</nowiki>
+*** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 ** Gender <nowiki>[Characteristics that are socially constructed, including norms, behaviors, and roles based on sex.]</nowiki>
 ** Sex <nowiki>[Physical properties or qualities by which male is distinguished from female.]</nowiki>
 *** Female <nowiki>[Biological sex of an individual with female sexual organs such ova.]</nowiki>
@@ -444,6 +480,8 @@ This schema is the first version that includes an xsd and requires unit class, u
 ** Electromagnetic-property <nowiki>[A characteristic of matter such as electrical conductivity that governs its interaction with electrical or magnetic forces.]</nowiki>
 ** Mechanical-property <nowiki>[A physical quality that inheres in an bearer by virtue of how that bearer behaves when subjected to forces or displacements and the effect of their bodies on their environment.]</nowiki>
 *** Pressure <nowiki>[The force applied to a unit area of surface.]</nowiki>
+**** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+*** Weight <nowiki>[The relative mass or the quantity of matter contained in a body, giving rise to a downward force.]</nowiki>
 **** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 ** Organic-property <nowiki>[Relating to or containing elemental carbon or carbon compounds.]</nowiki>
 ** Thermodynamic-property <nowiki>[Property related to heat and other forms of energy (such as mechanical, electrical, or chemical energy), and, by extension, of the relationships between all forms of energy.]</nowiki>
@@ -570,6 +608,7 @@ This schema is the first version that includes an xsd and requires unit class, u
 ** Overt-attention <nowiki>{relatedTag=Covert-attention}[Selectively processing one location over others by moving the eyes to point at that location.]</nowiki>
 ** Selective-attention <nowiki>[Maintaining a behavioral or cognitive set in the face of distracting or competing stimuli. Ability to pay attention to a limited array of all available sensory information.]</nowiki>
 ** Sustained-attention <nowiki>[Maintaining a consistent behavioral response during continuous and repetitive activity.]</nowiki>
+** Switched-attention <nowiki>[Having to switch attention between two or more modalities of presentation.]</nowiki>
 ** Top-down-attention <nowiki>{relatedTag=Bottom-up-attention}[Voluntary allocation of attention to certain features. Sometimes this is referred to goal-oriented attention.]</nowiki>
 * Task-effect-evidence <nowiki>[The evidence supporting the conclusion that the event had the specified effect.]</nowiki>
 ** Computational-evidence <nowiki>[A type of evidence in which data are produced, and/or generated, and/or analyzed on a computer.]</nowiki> 
@@ -577,41 +616,42 @@ This schema is the first version that includes an xsd and requires unit class, u
 ** Intended-effect <nowiki>[A phenomenon that is intended to follow and be caused by some previous phenomenon.]</nowiki> 
 ** Behavioral-evidence <nowiki>[An indication or conclusion based on the behavior of an agent.]</nowiki>
 * Task-event-role <nowiki>[The purpose of an event with respect to the task.]</nowiki>
-** Activity <nowiki> [Something that is part of the overall task or is necessary to the overall experiment but is not directly part of a stimulus-response cycle. Examples would be taking a survey or provided providing a silva sample.]</nowiki>
-** Background-subtask <nowiki>[A part of the task which should be performed in the background as for example inhibiting blinks due to instruction while performing the primary task.]</nowiki>
 ** Experimental-stimulus <nowiki>[Part of something designed to elicit a response in the experiment.]</nowiki>
-** Failure <nowiki>[A descriptor indicating a failure.]</nowiki>
 ** Incidental <nowiki> [Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.]</nowiki>
 ** Instructional <nowiki> [Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.]</nowiki>
 ** Mishap <nowiki> [Unplanned disruption such as an equipment or experiment control abnormality or experimenter error.]</nowiki>
 ** Participant-response <nowiki> [Something related to a participant actions in performing the task.]</nowiki>
-** Primary-subtask <nowiki>[A part of the task which should be the primary focus of the participant.]</nowiki>
+** Task-activity <nowiki> [Something that is part of the overall task or is necessary to the overall experiment but is not directly part of a stimulus-response cycle. Examples would be taking a survey or provided providing a silva sample.]</nowiki>
 ** Warning <nowiki>[Something that should warn the participant that the parameters of the task have been or are about to be exceeded such as a warning message about getting too close to the shoulder of the road in a driving task.]</nowiki> 
-* Task-response-type <nowiki>[How the participant response should be interpreted in terms of the task specification.]</nowiki>
-** Appropriate <nowiki>{relatedTag=Inappropriate}[Suitable or proper in the circumstances.]</nowiki>
-** Correction <nowiki>{relatedTag=Successful}[Offering an improvement to replace a mistake; setting right; something substituted for an error.]</nowiki>
-** Erroneous <nowiki>[Something wrong or incorrect.]</nowiki>
-** Imagined <nowiki>[Form a mental image or concept of something. This is used to identity something that only happened in the imagination of the participant as in imagined movements in motor imagery paradigms.]</nowiki>
-** Inappropriate <nowiki>{relatedTag=Appropriate}[Not in keeping with what is correct or proper.]</nowiki>
-** Indeterminate <nowiki>{relatedTag=Missed,relatedTag=Near-miss}[Cannot distinguish between two or more possible values in the current context.]</nowiki>
-** Missed <nowiki>{relatedTag=Indeterminate,relatedTag=Near-miss}[Not existing; not able to be found.]</nowiki>
-** Near-miss <nowiki>{relatedTag=Indeterminate,relatedTag=Miss}[A narrowly avoided collision or other accident.]</nowiki>
-** Successful <nowiki>{relatedTag=Correction}[Something that accomplishes its intended purpose.]</nowiki>
+* Task-action-type <nowiki>[How an agent action should be interpreted in terms of the task specification.]</nowiki>
+** Appropriate-action <nowiki>{relatedTag=Inappropriate-action}[An action suitable or proper in the circumstances.]</nowiki>
+** Correct-action <nowiki>{relatedTag=Incorrect-action, relatedTag=Indeterminate-action}[An action that was a correct response in the context of the task.]</nowiki>
+** Correction <nowiki>[An action offering an improvement to replace a mistake; setting right; something substituted for an error.]</nowiki>
+** Incorrect-action <nowiki>{relatedTag=Correct-action, relatedTag=Indeterminate-action}[An action considered wrong or incorrect in the context of the task.]</nowiki>
+** Imagined-action <nowiki>[Form a mental image or concept of something. This is used to identity something that only happened in the imagination of the participant as in imagined movements in motor imagery paradigms.]</nowiki>
+** Inappropriate-action <nowiki>{relatedTag=Appropriate-action}[An action not in keeping with what is correct or proper for the task.]</nowiki>
+** Indeterminate-action <nowiki>{relatedTag=Correct-action,relatedTag=Incorrect-action, relatedTag=Miss, relatedTag=Near-miss}[An action that cannot be distinguished between two or more possibibities in the current context. This tag might be applied when an outside evaluator or a classification algorithm cannot determine a definitive result.]</nowiki>
+** Omitted-action <nowiki>[An expected response was skipped.]</nowiki>
+** Miss <nowiki><nowiki>{relatedTag=Near-miss}[An action considered to be a failure in the context of the task. For example, if the agent is supposed to try to hit a target and misses.]</nowiki>
+** Near-miss <nowiki>{relatedTag=Miss}[An action barely satisfied the requirements of the task. In a driving experiment for example this could pertain to a narrowly avoided collision or other accident.]</nowiki>
+* Task-relationship <nowiki>[Specifying organizational importance of sub-tasks.]</nowiki>
+** Background-subtask <nowiki>[A part of the task which should be performed in the background as for example inhibiting blinks due to instruction while performing the primary task.]</nowiki>
+** Primary-subtask <nowiki>[A part of the task which should be the primary focus of the participant.]</nowiki>
 * Task-stimulus-role <nowiki>[The role the stimulus plays in the task.]</nowiki>
 ** Cue <nowiki>[A signal for an action, a pattern of stimuli indicating a particular response.]</nowiki>
 ** Distractor <nowiki>[A person or thing that distracts or a plausible but incorrect option in a multiple-choice question.]</nowiki>
-** Expected <nowiki>[Considered likely or probable; anticipated. Something of low information value as in frequent non-targets in an RSVP paradigm.]</nowiki>
+** Expected <nowiki>{relatedTag=Unexpected, suggestedTag=Target}[Considered likely, probable or anticipated. Something of low information value as in frequent non-targets in an RSVP paradigm.]</nowiki>
 ** Extraneous <nowiki>[Irrelevant or unrelated to the subject being dealt with.]</nowiki>
 ** Feedback <nowiki>[An evaluative response to an inquiry, process, event, or activity.]</nowiki>
 ** Go-signal <nowiki>{relatedTag=Stop-signal}[An indicator to proceed with a planned action.]</nowiki>
 ** Meaningful <nowiki>[Conveying significant or relevant information.]</nowiki>
 ** Newly-learned <nowiki>[Representing recently acquired information or understanding.]</nowiki>
 ** Non-informative <nowiki>[Something that is not useful in forming an opinion or judging an outcome.]</nowiki>
-** Non-target <nowiki>{suggestedTag=Expected}[Something other than that done or looked for. Also tag Expected if the Non-target is frequent.] </nowiki> 
+** Non-target <nowiki>{relatedTag=Target}[Something other than that done or looked for. Also tag Expected if the Non-target is frequent.] </nowiki> 
 ** Not-meaningful <nowiki>[Not having a serious, important, or useful quality or purpose.]</nowiki>
 ** Novel <nowiki>[Having no previous example or precedent or parallel; of a kind not seen before.]</nowiki> 
-** Oddball <nowiki> [Something strange, bizarre, unusal, or infrequent.]</nowiki>
-** Planned <nowiki>[Something that was decided on or arranged in advance.]</nowiki>
+** Oddball <nowiki> {relatedTag=Unexpected, suggestedTag=Target}[Something unusual, or infrequent.]</nowiki>
+** Planned <nowiki>{relatedTag=Unplanned}[Something that was decided on or arranged in advance.]</nowiki>
 ** Penalty <nowiki>[A disadvantage, loss, or hardship due to some action.]</nowiki>
 ** Priming <nowiki>[An implicit memory effect in which exposure to a stimulus influences response to a later stimulus.]</nowiki>
 ** Query <nowiki>[A sentence of inquiry that asks for a reply; a request for information (as in a formal request to a database or search engine or in interrogating a subject for an answer).]</nowiki>
@@ -620,10 +660,10 @@ This schema is the first version that includes an xsd and requires unit class, u
 ** Target <nowiki>[Something fixed as a goal or point of examination; something to point at; a destination. Something an agent is looking for.]</nowiki> 
 ** Threat <nowiki>[An indicator that signifies hostility and predicts an increased probability of attack.]</nowiki>
 ** Timed <nowiki>[Something planned or scheduled to be done at a particular time or lasting for a specified amount of time.]</nowiki>
-** Unexpected <nowiki>[Something that is not planned or anticipated.]</nowiki>
+** Unexpected <nowiki>{relatedTag=Expected}[Something that is not anticipated.]</nowiki>
+** Unplanned <nowiki>{relatedTag=Planned}[Something that has not been planned as part of the task.]</nowiki>
 
 '''Attribute''' <nowiki>{extensionAllowed} [A characteristic of some entity. A quality or feature regarded as a characteristic or inherent part of someone or something. HED attributes are adjectives or adverbs.]</nowiki>
-* Anatomical <nowiki>[Relating to bodily structure.]</nowiki>
 * Categorical <nowiki>[Indicates that something can take on a limited and usually fixed number of possible values.]</nowiki>
 ** Categorical-class <nowiki>[Categorical values that fall into discrete classes such as true or false. The grouping is absolute in the sense that it is the same for all participants.]</nowiki>
 *** All <nowiki>{relatedTag=Some, relatedTag=None}[To a complete degree or to the full or entire extent.]</nowiki>
@@ -640,16 +680,20 @@ This schema is the first version that includes an xsd and requires unit class, u
 ** Categorical-judgment <nowiki>[Categorical values that are based on the judgment or perception of the participant such familiar and famous.]</nowiki>
 *** Abnormal <nowiki>{relatedTag=Normal}[Deviating in any way from the state, position, structure, condition, behavior, or rule which is considered a norm.]</nowiki>
 *** Asymmetrical <nowiki>{relatedTag=Symmetrical}[Lacking symmetry or having parts that fail to correspond to one another in shape, size, or arrangement; lacking symmetry.]</nowiki>
+*** Audible <nowiki>{relatedTag=Inaudible}[A sound that can be perceived by the participant.]</nowiki>
 *** Congruent <nowiki>{relatedTag=Incongruent}[Concordance of multiple evidence lines. In agreement or harmony.]</nowiki>
+*** Complex <nowiki>{relatedTag=Simple}[Hard, involved or complicated, elaborate, having many parts.]</nowiki>
 *** Constrained <nowiki>{relatedTag=Unconstrained}[Keeping something within particular limits or bounds.]</nowiki>
 *** Disordered <nowiki>{relatedTag=Ordered}[Not neatly arranged; confused and untidy. A structural quality in which the parts of an object are non-rigid.]</nowiki>
 *** Familiar <nowiki>{relatedTag=Unfamiliar, relatedTag=Famous}[Recognized, familiar, or within the scope of knowledge.]</nowiki>
 *** Famous <nowiki>{relatedTag=Familiar,relatedTag=Unfamiliar}{relatedTag=Familiar, relatedTag=Unfamiliar}[A person who has a high degree of recognition by the general population for his or her success or accomplishments; a famous person.]</nowiki>
+*** Inaudible <nowiki>{relatedTag=Audible}[A sound below the threshold of perception of the participant.]</nowiki>
 *** Incongruent <nowiki>{relatedTag=Congruent}[Not in agreement or harmony.]</nowiki>
 *** Involuntary <nowiki>{relatedTag=Voluntary}[An action that is not made by choice. In the body, involuntary actions (such as blushing) occur automatically, and cannot be controlled by choice.]</nowiki>
 *** Masked <nowiki>{relatedTag=Unmasked}[Information exists but is not provided or is partially obscured due to security,  privacy, or other concerns.]</nowiki>
 *** Normal <nowiki>{relatedTag=Abnormal}[Being approximately average or within certain limits; conforming with or constituting a norm or standard or level or type or social norm.]</nowiki>
 *** Ordered <nowiki>{relatedTag=Disordered}[Conforming to a logical or comprehensible arrangement of separate elements; a condition of regular or proper arrangement.]</nowiki>
+*** Simple <nowiki>{relatedTag=Complex}[Easily understood or presenting no difficulties.]</nowiki>
 *** Symmetrical <nowiki>{relatedTag=Asymmetrical}[Made up of exactly similar parts facing each other or around an axis; showing symmetry.]</nowiki>
 *** Unconstrained <nowiki>{relatedTag=Constrained}[Moving without restriction.]</nowiki>
 *** Unfamiliar <nowiki>{relatedTag=Familiar,relatedTag=Famous}[Not having knowledge or experience of.]</nowiki>
@@ -668,13 +712,6 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Supraliminal <nowiki>{relatedTag=Liminal, relatedTag=Subliminal}[Situated above a sensory threshold; perceptible or capable of eliciting a response.]</nowiki>
 *** Thick <nowiki>{relatedTag=Thin}[Wide in width, extent or cross-section.]</nowiki>
 *** Thin <nowiki>{relatedTag=Thick}[Narrow in width, extent or cross-section.]</nowiki>
-* Descriptive <nowiki>[Involving a written or verbal account, representation, statement, or explanation of something.]</nowiki>
-** Abstract <nowiki>[A concept or idea not associated with any specific instance.]</nowiki>
-** Clinical <nowiki>[Relating to the examination and treatment of patients dependent on direct observation.]</nowiki>
-** Complex <nowiki>[Hard, involved or complicated, elaborate, having many parts.]</nowiki>
-** Composite <nowiki>[Consisting of separate interconnected parts.]</nowiki>
-** Numerical <nowiki>[A numeral or string of numerals expressing value, quantity, or identification.]</nowiki>
-** Symbolic <nowiki>[A representation such as a tattoo with a specific meaning. Significant purely in terms of what is being represented or implied.]</nowiki>
 * Environmental <nowiki>[Relating to or arising from the surroundings of an agent.]</nowiki>
 ** Indoors <nowiki>[Located inside a building or enclosure.]</nowiki>
 ** Outdoors <nowiki>[Any area outside a building or shelter.]</nowiki>
@@ -843,216 +880,224 @@ This schema is the first version that includes an xsd and requires unit class, u
 *** Hot <nowiki>[Characterized by an excess of heat.]</nowiki>
 *** Hotter-than <nowiki>[(A (Hotter-than B)) means A has more heat energy than the object against which it is compared; the absence of heat.]</nowiki>
 * Sensory <nowiki>[Relating to sensation or the physical senses; transmitted or perceived by the senses.]</nowiki>
-** Auditory <nowiki>[Of or relating to the process of hearing.]</nowiki>
-*** Audible <nowiki>[Any action or condition designed to cause the registration or perception of a stimulus by organs and receptors involved in the sense of hearing.]</nowiki>
-*** Loudness <nowiki>[A physical quality inhering in a sound wave by virtue of the maximum magnitude (value without regard to sign) of its disturbance.]</nowiki>
-**** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
-*** Monophonic <nowiki> [Relating to sound transmission, recording, or reproduction involving a single transmission path.]</nowiki>  
-*** Silent <nowiki>[The absence of ambient audible sound, the emission of sounds of such low intensity that they do not draw attention to themselves, or the state of having ceased to produce sounds.]</nowiki>
-*** Stereophonic <nowiki> [Relating to, or constituting sound reproduction involving the use of separated microphones and two transmission channels to achieve the sound separation of a live hearing.]</nowiki> 
-*** Timbre <nowiki>[The quality of tone distinctive of a particular singing voice or musical instrument.]</nowiki>  
-** Gustatory <nowiki>[Concerned with tasting or the sense of taste.]</nowiki>
-*** Bitter <nowiki>[Having a sharp, pungent taste.]</nowiki>
-*** Salty <nowiki>[Tasting of or like salt.]</nowiki>
-*** Savory <nowiki>[Belonging to a taste that is salty or spicy rather than sweet.]</nowiki>
-*** Sour <nowiki>[Having a sharp, acidic taste.]</nowiki>
-*** Sweet <nowiki>[Having or resembling the taste of sugar.]</nowiki>
-** Tactile <nowiki>[Of or connected with the sense of touch.]</nowiki>
-*** Tactile-pressure <nowiki>[Having a feeling of heaviness.]</nowiki>
-*** Tactile-texture <nowiki>[Having a feeling of roughness.]</nowiki>
-*** Tactile-vibration <nowiki>[Having a feeling of mechanical oscillation.]</nowiki>
-** Olfactory <nowiki>[Having to do with the faculty of smell.]</nowiki>
-** Somatic <nowiki>[Having to do with feelings in the body.]</nowiki>
-*** Pain <nowiki>[The sensation of discomfort, distress, or agony, resulting from the stimulation of specialized nerve endings.]</nowiki>
-*** Stress <nowiki>[The negative mental, emotional, and physical reactions that occur when environmental stressors are perceived as exceeding the adaptive capacities of the individual.]</nowiki>
-** Vestibular <nowiki>[Relating to or affecting the perception of body position and movement.]</nowiki>
-** Visual <nowiki>[Relating to or using sight; able to be seen.]</nowiki>
-*** Luminance <nowiki>[A quality that exists by virtue of the luminous intensity per unit area projected in a given direction.]</nowiki>
-*** Color <nowiki>[The appearance of objects (or light sources) described in terms of perception of their hue and lightness (or brightness) and saturation.]</nowiki>
-**** Color-shade <nowiki>[A slight degree of difference between colors, especially with regard to how light or dark it is or as distinguished from one nearly like it.]</nowiki>
-***** Dark-shade <nowiki>[A color tone not reflecting much light.]</nowiki>
-***** Light-shade <nowiki>[A color tone reflecting more light.]</nowiki>
-**** HSV-color <nowiki>[A color representation that models how colors appear under light.]</nowiki>
-***** Hue <nowiki>[Attribute of a visual sensation according to which an area appears to be similar to one of the perceived colors.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass} [Angular value between 0 and 360]</nowiki> 
-***** Saturation <nowiki>[Colorfulness of a stimulus relative to its own brightness.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki> 
-***** HSV-value <nowiki>[AAttribute of a visual sensation according to which an area appears to emit more or less light.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
-**** RGB-color <nowiki>[A color from the RGB schema.]</nowiki>
-***** RGB-red <nowiki>[The red component.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass} [R value of RGB between 0 and 1]</nowiki> 
-***** RGB-blue <nowiki>[The blue component.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki> 
-***** RGB-green <nowiki>[The green component.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass} [G value of RGB between 0 and 1]</nowiki> 
-**** Grayscale <nowiki>[Using a color map composed of shades of gray, varying from black at the weakest intensity to white at the strongest.]</nowiki> 
-***** <nowiki># {takesValue, valueClass=numericClass} [White intensity between 0 and 1]</nowiki>
-**** CSS-color <nowiki>[One of 140 colors supported by all browsers. For more details such as the color RGB or HEX values,  check:  https://www.w3schools.com/colors/colors_groups.asp]</nowiki> 
-***** Blue-color <nowiki>[CSS color group]</nowiki>
-****** CadetBlue <nowiki>[CSS-color 0x5F9EA0]</nowiki>
-****** SteelBlue <nowiki>[CSS-color 0x4682B4]</nowiki>
-****** LightSteelBlue <nowiki>[CSS-color 0xB0C4DE]</nowiki>
-****** LightBlue <nowiki>[CSS-color 0xADD8E6]</nowiki>
-****** PowderBlue <nowiki>[CSS-color 0xB0E0E6]</nowiki>
-****** LightSkyBlue <nowiki>[CSS-color 0x87CEFA]</nowiki>
-****** SkyBlue <nowiki>[CSS-color 0x87CEEB]</nowiki>
-****** CornflowerBlue <nowiki>[CSS-color 0x6495ED]</nowiki>
-****** DeepSkyBlue <nowiki>[CSS-color 0x00BFFF]</nowiki>
-****** DodgerBlue <nowiki>[CSS-color 0x1E90FF]</nowiki>
-****** RoyalBlue <nowiki>[CSS-color 0x4169E1]</nowiki>
-****** Blue <nowiki>[CSS-color 0x0000FF]</nowiki>
-****** MediumBlue <nowiki>[CSS-color 0x0000CD]</nowiki>
-****** DarkBlue <nowiki>[CSS-color 0x00008B]</nowiki>
-****** Navy <nowiki>[CSS-color 0x000080]</nowiki>
-****** MidnightBlue <nowiki>[CSS-color 0x191970]</nowiki>
-***** Brown-color <nowiki>[CSS color group]</nowiki>
-****** Cornsilk <nowiki>[CSS-color 0xFFF8DC]</nowiki>
-****** BlanchedAlmond <nowiki>[CSS-color 0xFFEBCD]</nowiki>
-****** Bisque <nowiki>[CSS-color 0xFFE4C4]</nowiki>
-****** NavajoWhite <nowiki>[CSS-color 0xFFDEAD]</nowiki>
-****** Wheat <nowiki>[CSS-color 0xF5DEB3]</nowiki>
-****** BurlyWood <nowiki>[CSS-color 0xDEB887]</nowiki>
-****** Tan <nowiki>[CSS-color 0xD2B48C]</nowiki>
-****** RosyBrown <nowiki>[CSS-color 0xBC8F8F]</nowiki>
-****** SandyBrown <nowiki>[CSS-color 0xF4A460]</nowiki>
-****** GoldenRod <nowiki>[CSS-color 0xDAA520]</nowiki>
-****** DarkGoldenRod <nowiki>[CSS-color 0xB8860B]</nowiki>
-****** Peru <nowiki>[CSS-color 0xCD853F]</nowiki>
-****** Chocolate <nowiki>[CSS-color 0xD2691E]</nowiki>
-****** Olive <nowiki>[CSS-color 0x808000]</nowiki>
-****** SaddleBrown <nowiki>[CSS-color 0x8B4513]</nowiki>
-****** Sienna <nowiki>[CSS-color 0xA0522D]</nowiki>
-****** Brown <nowiki>[CSS-color 0xA52A2A]</nowiki>
-****** Maroon <nowiki>[CSS-color 0x800000]</nowiki>
-***** Cyan-color <nowiki>[CSS color group]</nowiki>
-****** Aqua <nowiki>[CSS-color 0x00FFFF]</nowiki>
-****** Cyan <nowiki>[CSS-color 0x00FFFF]</nowiki>
-****** LightCyan <nowiki>[CSS-color 0xE0FFFF]</nowiki>
-****** PaleTurquoise <nowiki>[CSS-color 0xAFEEEE]</nowiki>
-****** Aquamarine <nowiki>[CSS-color 0x7FFFD4]</nowiki>
-****** Turquoise <nowiki>[CSS-color 0x40E0D0]</nowiki>
-****** MediumTurquoise <nowiki>[CSS-color 0x48D1CC]</nowiki>
-****** DarkTurquoise <nowiki>[CSS-color 0x00CED1]</nowiki>
-***** Green-color <nowiki>[CSS color group]</nowiki>
-****** GreenYellow <nowiki>[CSS-color 0xADFF2F]</nowiki>
-****** Chartreuse <nowiki>[CSS-color 0x7FFF00]</nowiki>
-****** LawnGreen <nowiki>[CSS-color 0x7CFC00]</nowiki>
-****** Lime <nowiki>[CSS-color 0x00FF00]</nowiki>
-****** LimeGreen <nowiki>[CSS-color 0x32CD32]</nowiki>
-****** PaleGreen <nowiki>[CSS-color 0x98FB98]</nowiki>
-****** LightGreen <nowiki>[CSS-color 0x90EE90]</nowiki>
-****** MediumSpringGreen <nowiki>[CSS-color 0x00FA9A]</nowiki>
-****** SpringGreen <nowiki>[CSS-color 0x00FF7F]</nowiki>
-****** MediumSeaGreen <nowiki>[CSS-color 0x3CB371]</nowiki>
-****** SeaGreen <nowiki>[CSS-color 0x2E8B57]</nowiki>
-****** ForestGreen <nowiki>[CSS-color 0x228B22]</nowiki>
-****** Green <nowiki>[CSS-color 0x008000]</nowiki>
-****** DarkGreen <nowiki>[CSS-color 0x006400]</nowiki>
-****** YellowGreen <nowiki>[CSS-color 0x9ACD32]</nowiki>
-****** OliveDrab <nowiki>[CSS-color 0x6B8E23]</nowiki>
-****** DarkOliveGreen <nowiki>[CSS-color 0x556B2F]</nowiki>
-****** MediumAquaMarine <nowiki>[CSS-color 0x66CDAA]</nowiki>
-****** DarkSeaGreen <nowiki>[CSS-color 0x8FBC8F]</nowiki>
-****** LightSeaGreen <nowiki>[CSS-color 0x20B2AA]</nowiki>
-****** DarkCyan <nowiki>[CSS-color 0x008B8B]</nowiki>
-****** Teal <nowiki>[CSS-color 0x008080]</nowiki>
-***** Gray-color <nowiki>[CSS color group]</nowiki>
-****** Gainsboro <nowiki>[CSS-color 0xDCDCDC]</nowiki>
-****** LightGray <nowiki>[CSS-color 0xD3D3D3]</nowiki>
-****** Silver <nowiki>[CSS-color 0xC0C0C0]</nowiki>
-****** DarkGray <nowiki>[CSS-color 0xA9A9A9]</nowiki>
-****** DimGray <nowiki>[CSS-color 0x696969]</nowiki>
-****** Gray <nowiki>[CSS-color 0x808080]</nowiki>
-****** LightSlateGray <nowiki>[CSS-color 0x778899]</nowiki>
-****** SlateGray <nowiki>[CSS-color 0x708090]</nowiki>
-****** DarkSlateGray <nowiki>[CSS-color 0x2F4F4F]</nowiki>
-****** Black <nowiki>[CSS-color 0x000000]</nowiki>
-***** Orange-color <nowiki>[CSS color group]</nowiki>
-****** Orange <nowiki>[CSS-color 0xFFA500]</nowiki>
-****** DarkOrange <nowiki>[CSS-color 0xFF8C00]</nowiki>
-****** Coral <nowiki>[CSS-color 0xFF7F50]</nowiki>
-****** Tomato <nowiki>[CSS-color 0xFF6347]</nowiki>
-****** OrangeRed <nowiki>[CSS-color 0xFF4500]</nowiki>
-***** Pink-color <nowiki>[CSS color group]</nowiki>
-****** Pink <nowiki>[CSS-color 0xFFC0CB]</nowiki>
-****** LightPink <nowiki>[CSS-color 0xFFB6C1]</nowiki>
-****** HotPink <nowiki>[CSS-color 0xFF69B4]</nowiki>
-****** DeepPink <nowiki>[CSS-color 0xFF1493]</nowiki>
-****** PaleVioletRed <nowiki>[CSS-color 0xDB7093]</nowiki>
-****** MediumVioletRed <nowiki>[CSS-color 0xC71585]</nowiki>
-***** Purple-color <nowiki>[CSS color group]</nowiki>
-****** Lavender <nowiki>[CSS-color 0xE6E6FA]</nowiki>
-****** Thistle <nowiki>[CSS-color 0xD8BFD8]</nowiki>
-****** Plum <nowiki>[CSS-color 0xDDA0DD]</nowiki>
-****** Orchid <nowiki>[CSS-color 0xDA70D6]</nowiki>
-****** Violet <nowiki>[CSS-color 0xEE82EE]</nowiki>
-****** Fuchsia <nowiki>[CSS-color 0xFF00FF]</nowiki>
-****** Magenta <nowiki>[CSS-color 0xFF00FF]</nowiki>
-****** MediumOrchid <nowiki>[CSS-color 0xBA55D3]</nowiki>
-****** DarkOrchid <nowiki>[CSS-color 0x9932CC]</nowiki>
-****** DarkViolet <nowiki>[CSS-color 0x9400D3]</nowiki>
-****** BlueViolet <nowiki>[CSS-color 0x8A2BE2]</nowiki>
-****** DarkMagenta <nowiki>[CSS-color 0x8B008B]</nowiki>
-****** Purple <nowiki>[CSS-color 0x800080]</nowiki>
-****** MediumPurple <nowiki>[CSS-color 0x9370DB]</nowiki>
-****** MediumSlateBlue <nowiki>[CSS-color 0x7B68EE]</nowiki>
-****** SlateBlue <nowiki>[CSS-color 0x6A5ACD]</nowiki>
-****** DarkSlateBlue <nowiki>[CSS-color 0x483D8B]</nowiki>
-****** RebeccaPurple <nowiki>[CSS-color 0x663399]</nowiki>
-****** Indigo <nowiki>[CSS-color 0x4B0082]</nowiki>
-***** Red-color <nowiki>[CSS color group]</nowiki>
-****** LightSalmon <nowiki>[CSS-color 0xFFA07A]</nowiki>
-****** Salmon <nowiki>[CSS-color 0xFA8072]</nowiki>
-****** DarkSalmon <nowiki>[CSS-color 0xE9967A]</nowiki>
-****** LightCoral <nowiki>[CSS-color 0xF08080]</nowiki>
-****** IndianRed <nowiki>[CSS-color 0xCD5C5C]</nowiki>
-****** Crimson <nowiki>[CSS-color 0xDC143C]</nowiki>
-****** Red <nowiki>[CSS-color 0xFF0000]</nowiki>
-****** FireBrick <nowiki>[CSS-color 0xB22222]</nowiki>
-****** DarkRed <nowiki>[CSS-color 0x8B0000]</nowiki>
-***** Yellow-color <nowiki>[CSS color group]</nowiki>
-****** Gold <nowiki>[CSS-color 0xFFD700]</nowiki>
-****** Yellow <nowiki>[CSS-color 0xFFFF00]</nowiki>
-****** LightYellow <nowiki>[CSS-color 0xFFFFE0]</nowiki>
-****** LemonChiffon <nowiki>[CSS-color 0xFFFACD]</nowiki>
-****** LightGoldenRodYellow <nowiki>[CSS-color 0xFAFAD2]</nowiki>
-****** PapayaWhip <nowiki>[CSS-color 0xFFEFD5]</nowiki>
-****** Moccasin <nowiki>[CSS-color 0xFFE4B5]</nowiki>
-****** PeachPuff <nowiki>[CSS-color 0xFFDAB9]</nowiki>
-****** PaleGoldenRod <nowiki>[CSS-color 0xEEE8AA]</nowiki>
-****** Khaki <nowiki>[CSS-color 0xF0E68C]</nowiki>
-****** DarkKhaki <nowiki>[CSS-color 0xBDB76B]</nowiki>
-***** White-color <nowiki>[CSS color group]</nowiki>
-****** White <nowiki>[CSS-color 0xFFFFFF]</nowiki>
-****** Snow <nowiki>[CSS-color 0xFFFAFA]</nowiki>
-****** HoneyDew <nowiki>[CSS-color 0xF0FFF0]</nowiki>
-****** MintCream <nowiki>[CSS-color 0xF5FFFA]</nowiki>
-****** Azure <nowiki>[CSS-color 0xF0FFFF]</nowiki>
-****** AliceBlue <nowiki>[CSS-color 0xF0F8FF]</nowiki>
-****** GhostWhite <nowiki>[CSS-color 0xF8F8FF]</nowiki>
-****** WhiteSmoke <nowiki>[CSS-color 0xF5F5F5]</nowiki>
-****** SeaShell <nowiki>[CSS-color 0xFFF5EE]</nowiki>
-****** Beige <nowiki>[CSS-color 0xF5F5DC]</nowiki>
-****** OldLace <nowiki>[CSS-color 0xFDF5E6]</nowiki>
-****** FloralWhite <nowiki>[CSS-color 0xFFFAF0]</nowiki>
-****** Ivory <nowiki>[CSS-color 0xFFFFF0]</nowiki>
-****** AntiqueWhite <nowiki>[CSS-color 0xFAEBD7]</nowiki>
-****** Linen <nowiki>[CSS-color 0xFAF0E6]</nowiki>
-****** LavenderBlush <nowiki>[CSS-color 0xFFF0F5]</nowiki>
-****** MistyRose <nowiki>[CSS-color 0xFFE4E1]</nowiki>
-*** View <nowiki>[A specific visual representation of data, situations, topics, etc.]</nowiki>
-**** 2D-view <nowiki>[A view showing only two dimensions.]</nowiki>
-**** 3D-view <nowiki>[A view showing three dimensions.]</nowiki>
-**** Background-view <nowiki>[Parts of the view that are farthest from the viewer and usually the not part of the visual focus.]</nowiki>
-**** Bistable-view <nowiki>[Something having two stable visual forms that have two distinguishable stable forms as in optical illusions.]</nowiki>
-**** Foreground-view <nowiki>[Parts of the view that are closest to the viewer and usually the most important part of the visual focus.]</nowiki>
-**** Foveal-view <nowiki>[Visual presentation directly on the fovea. A view projected on the small depression in the retina containing only cones and where vision is most acute.]</nowiki>
-**** Map-view <nowiki>[A diagrammatic representation of an area of land or sea showing physical features, cities, roads.]</nowiki>
-***** Aerial-view <nowiki>[Elevated view of an object from above, with a perspective as though the observer were a bird.]</nowiki>
-***** Satellite-view <nowiki>[A representation as captured by technology such as a satellite.]</nowiki>
-***** Street-view <nowiki>[A 360-degrees panoramic view from a position on the ground.]</nowiki>
-**** Peripheral-view <nowiki>[Indirect vision as it occurs outside the point of fixation.]</nowiki>
+** Sensory-modality <nowiki>[Indication of which senses are affected by or used to perceive something.]</nowiki>
+*** Auditory-modality <nowiki>[Using the sense of hearing.]</nowiki>
+*** Gustatory-modality <nowiki>[Using the sense of taste.]</nowiki>
+*** Olfactory-modality <nowiki>[Using the sense of smell.]</nowiki>
+*** Somatic-modality <nowiki>[Using the feelings in the body or of the nervous system.]</nowiki>
+*** Tactile-modality <nowiki>[Using the sense of touch.]</nowiki>
+*** Vestibular-modality <nowiki>[Using the sense of balance or body position.]</nowiki>
+*** Visual-modality <nowiki>[Using the sense of sight.]</nowiki>
+** Sensory-property <nowiki>[A property related to something sensed or perceived.]</nowiki>
+*** Auditory-property <nowiki>[Using the sense of hearing.]</nowiki>
+**** Loudness <nowiki>[A physical quality inhering in a sound wave by virtue of the maximum magnitude (value without regard to sign) of its disturbance.]</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+**** Monophonic <nowiki> [Relating to sound transmission, recording, or reproduction involving a single transmission path.]</nowiki>  
+**** Silent <nowiki>[The absence of ambient audible sound or the state of having ceased to produce sounds.]</nowiki>
+**** Stereophonic <nowiki> [Relating to, or constituting sound reproduction involving the use of separated microphones and two transmission channels to achieve the sound separation of a live hearing.]</nowiki> 
+**** Timbre <nowiki>[The quality of tone distinctive of a particular singing voice or musical instrument.]</nowiki>  
+*** Gustatory-property <nowiki>[Concerned with tasting or the sense of taste.]</nowiki>
+**** Bitter <nowiki>[Having a sharp, pungent taste.]</nowiki>
+**** Salty <nowiki>[Tasting of or like salt.]</nowiki>
+**** Savory <nowiki>[Belonging to a taste that is salty or spicy rather than sweet.]</nowiki>
+**** Sour <nowiki>[Having a sharp, acidic taste.]</nowiki>
+**** Sweet <nowiki>[Having or resembling the taste of sugar.]</nowiki>
+*** Olfactory-property <nowiki>[Having to do with the faculty of smell.]</nowiki>
+*** Somatic-property <nowiki>[Having to do with feelings in the body.]</nowiki>
+**** Pain <nowiki>[The sensation of discomfort, distress, or agony, resulting from the stimulation of specialized nerve endings.]</nowiki>
+**** Stress <nowiki>[The negative mental, emotional, and physical reactions that occur when environmental stressors are perceived as exceeding the adaptive capacities of the individual.]</nowiki>
+*** Tactile-property <nowiki>[Of or connected with the sense of touch.]</nowiki>
+**** Tactile-pressure <nowiki>[Having a feeling of heaviness.]</nowiki>
+**** Tactile-texture <nowiki>[Having a feeling of roughness.]</nowiki>
+**** Tactile-vibration <nowiki>[Having a feeling of mechanical oscillation.]</nowiki>
+*** Vestibular-property <nowiki>[Relating to or affecting the perception of body position and movement.]</nowiki>
+*** Visual-property <nowiki>[Relating to or using sight; able to be seen.]</nowiki>
+**** Luminance <nowiki>[A quality that exists by virtue of the luminous intensity per unit area projected in a given direction.]</nowiki>
+**** Color <nowiki>[The appearance of objects (or light sources) described in terms of perception of their hue and lightness (or brightness) and saturation.]</nowiki>
+***** CSS-color <nowiki>[One of 140 colors supported by all browsers. For more details such as the color RGB or HEX values,  check:  https://www.w3schools.com/colors/colors_groups.asp]</nowiki> 
+****** Blue-color <nowiki>[CSS color group]</nowiki>
+******* CadetBlue <nowiki>[CSS-color 0x5F9EA0]</nowiki>
+******* SteelBlue <nowiki>[CSS-color 0x4682B4]</nowiki>
+******* LightSteelBlue <nowiki>[CSS-color 0xB0C4DE]</nowiki>
+******* LightBlue <nowiki>[CSS-color 0xADD8E6]</nowiki>
+******* PowderBlue <nowiki>[CSS-color 0xB0E0E6]</nowiki>
+******* LightSkyBlue <nowiki>[CSS-color 0x87CEFA]</nowiki>
+******* SkyBlue <nowiki>[CSS-color 0x87CEEB]</nowiki>
+******* CornflowerBlue <nowiki>[CSS-color 0x6495ED]</nowiki>
+******* DeepSkyBlue <nowiki>[CSS-color 0x00BFFF]</nowiki>
+******* DodgerBlue <nowiki>[CSS-color 0x1E90FF]</nowiki>
+******* RoyalBlue <nowiki>[CSS-color 0x4169E1]</nowiki>
+******* Blue <nowiki>[CSS-color 0x0000FF]</nowiki>
+******* MediumBlue <nowiki>[CSS-color 0x0000CD]</nowiki>
+******* DarkBlue <nowiki>[CSS-color 0x00008B]</nowiki>
+******* Navy <nowiki>[CSS-color 0x000080]</nowiki>
+******* MidnightBlue <nowiki>[CSS-color 0x191970]</nowiki>
+****** Brown-color <nowiki>[CSS color group]</nowiki>
+******* Cornsilk <nowiki>[CSS-color 0xFFF8DC]</nowiki>
+******* BlanchedAlmond <nowiki>[CSS-color 0xFFEBCD]</nowiki>
+******* Bisque <nowiki>[CSS-color 0xFFE4C4]</nowiki>
+******* NavajoWhite <nowiki>[CSS-color 0xFFDEAD]</nowiki>
+******* Wheat <nowiki>[CSS-color 0xF5DEB3]</nowiki>
+******* BurlyWood <nowiki>[CSS-color 0xDEB887]</nowiki>
+******* Tan <nowiki>[CSS-color 0xD2B48C]</nowiki>
+******* RosyBrown <nowiki>[CSS-color 0xBC8F8F]</nowiki>
+******* SandyBrown <nowiki>[CSS-color 0xF4A460]</nowiki>
+******* GoldenRod <nowiki>[CSS-color 0xDAA520]</nowiki>
+******* DarkGoldenRod <nowiki>[CSS-color 0xB8860B]</nowiki>
+******* Peru <nowiki>[CSS-color 0xCD853F]</nowiki>
+******* Chocolate <nowiki>[CSS-color 0xD2691E]</nowiki>
+******* Olive <nowiki>[CSS-color 0x808000]</nowiki>
+******* SaddleBrown <nowiki>[CSS-color 0x8B4513]</nowiki>
+******* Sienna <nowiki>[CSS-color 0xA0522D]</nowiki>
+******* Brown <nowiki>[CSS-color 0xA52A2A]</nowiki>
+******* Maroon <nowiki>[CSS-color 0x800000]</nowiki>
+****** Cyan-color <nowiki>[CSS color group]</nowiki>
+******* Aqua <nowiki>[CSS-color 0x00FFFF]</nowiki>
+******* Cyan <nowiki>[CSS-color 0x00FFFF]</nowiki>
+******* LightCyan <nowiki>[CSS-color 0xE0FFFF]</nowiki>
+******* PaleTurquoise <nowiki>[CSS-color 0xAFEEEE]</nowiki>
+******* Aquamarine <nowiki>[CSS-color 0x7FFFD4]</nowiki>
+******* Turquoise <nowiki>[CSS-color 0x40E0D0]</nowiki>
+******* MediumTurquoise <nowiki>[CSS-color 0x48D1CC]</nowiki>
+******* DarkTurquoise <nowiki>[CSS-color 0x00CED1]</nowiki>
+****** Green-color <nowiki>[CSS color group]</nowiki>
+******* GreenYellow <nowiki>[CSS-color 0xADFF2F]</nowiki>
+******* Chartreuse <nowiki>[CSS-color 0x7FFF00]</nowiki>
+******* LawnGreen <nowiki>[CSS-color 0x7CFC00]</nowiki>
+******* Lime <nowiki>[CSS-color 0x00FF00]</nowiki>
+******* LimeGreen <nowiki>[CSS-color 0x32CD32]</nowiki>
+******* PaleGreen <nowiki>[CSS-color 0x98FB98]</nowiki>
+******* LightGreen <nowiki>[CSS-color 0x90EE90]</nowiki>
+******* MediumSpringGreen <nowiki>[CSS-color 0x00FA9A]</nowiki>
+******* SpringGreen <nowiki>[CSS-color 0x00FF7F]</nowiki>
+******* MediumSeaGreen <nowiki>[CSS-color 0x3CB371]</nowiki>
+******* SeaGreen <nowiki>[CSS-color 0x2E8B57]</nowiki>
+******* ForestGreen <nowiki>[CSS-color 0x228B22]</nowiki>
+******* Green <nowiki>[CSS-color 0x008000]</nowiki>
+******* DarkGreen <nowiki>[CSS-color 0x006400]</nowiki>
+******* YellowGreen <nowiki>[CSS-color 0x9ACD32]</nowiki>
+******* OliveDrab <nowiki>[CSS-color 0x6B8E23]</nowiki>
+******* DarkOliveGreen <nowiki>[CSS-color 0x556B2F]</nowiki>
+******* MediumAquaMarine <nowiki>[CSS-color 0x66CDAA]</nowiki>
+******* DarkSeaGreen <nowiki>[CSS-color 0x8FBC8F]</nowiki>
+******* LightSeaGreen <nowiki>[CSS-color 0x20B2AA]</nowiki>
+******* DarkCyan <nowiki>[CSS-color 0x008B8B]</nowiki>
+******* Teal <nowiki>[CSS-color 0x008080]</nowiki>
+****** Gray-color <nowiki>[CSS color group]</nowiki>
+******* Gainsboro <nowiki>[CSS-color 0xDCDCDC]</nowiki>
+******* LightGray <nowiki>[CSS-color 0xD3D3D3]</nowiki>
+******* Silver <nowiki>[CSS-color 0xC0C0C0]</nowiki>
+******* DarkGray <nowiki>[CSS-color 0xA9A9A9]</nowiki>
+******* DimGray <nowiki>[CSS-color 0x696969]</nowiki>
+******* Gray <nowiki>[CSS-color 0x808080]</nowiki>
+******* LightSlateGray <nowiki>[CSS-color 0x778899]</nowiki>
+******* SlateGray <nowiki>[CSS-color 0x708090]</nowiki>
+******* DarkSlateGray <nowiki>[CSS-color 0x2F4F4F]</nowiki>
+******* Black <nowiki>[CSS-color 0x000000]</nowiki>
+****** Orange-color <nowiki>[CSS color group]</nowiki>
+******* Orange <nowiki>[CSS-color 0xFFA500]</nowiki>
+******* DarkOrange <nowiki>[CSS-color 0xFF8C00]</nowiki>
+******* Coral <nowiki>[CSS-color 0xFF7F50]</nowiki>
+******* Tomato <nowiki>[CSS-color 0xFF6347]</nowiki>
+******* OrangeRed <nowiki>[CSS-color 0xFF4500]</nowiki>
+****** Pink-color <nowiki>[CSS color group]</nowiki>
+******* Pink <nowiki>[CSS-color 0xFFC0CB]</nowiki>
+******* LightPink <nowiki>[CSS-color 0xFFB6C1]</nowiki>
+******* HotPink <nowiki>[CSS-color 0xFF69B4]</nowiki>
+******* DeepPink <nowiki>[CSS-color 0xFF1493]</nowiki>
+******* PaleVioletRed <nowiki>[CSS-color 0xDB7093]</nowiki>
+******* MediumVioletRed <nowiki>[CSS-color 0xC71585]</nowiki>
+****** Purple-color <nowiki>[CSS color group]</nowiki>
+******* Lavender <nowiki>[CSS-color 0xE6E6FA]</nowiki>
+******* Thistle <nowiki>[CSS-color 0xD8BFD8]</nowiki>
+******* Plum <nowiki>[CSS-color 0xDDA0DD]</nowiki>
+******* Orchid <nowiki>[CSS-color 0xDA70D6]</nowiki>
+******* Violet <nowiki>[CSS-color 0xEE82EE]</nowiki>
+******* Fuchsia <nowiki>[CSS-color 0xFF00FF]</nowiki>
+******* Magenta <nowiki>[CSS-color 0xFF00FF]</nowiki>
+******* MediumOrchid <nowiki>[CSS-color 0xBA55D3]</nowiki>
+******* DarkOrchid <nowiki>[CSS-color 0x9932CC]</nowiki>
+******* DarkViolet <nowiki>[CSS-color 0x9400D3]</nowiki>
+******* BlueViolet <nowiki>[CSS-color 0x8A2BE2]</nowiki>
+******* DarkMagenta <nowiki>[CSS-color 0x8B008B]</nowiki>
+******* Purple <nowiki>[CSS-color 0x800080]</nowiki>
+******* MediumPurple <nowiki>[CSS-color 0x9370DB]</nowiki>
+******* MediumSlateBlue <nowiki>[CSS-color 0x7B68EE]</nowiki>
+******* SlateBlue <nowiki>[CSS-color 0x6A5ACD]</nowiki>
+******* DarkSlateBlue <nowiki>[CSS-color 0x483D8B]</nowiki>
+******* RebeccaPurple <nowiki>[CSS-color 0x663399]</nowiki>
+******* Indigo <nowiki>[CSS-color 0x4B0082]</nowiki>
+****** Red-color <nowiki>[CSS color group]</nowiki>
+******* LightSalmon <nowiki>[CSS-color 0xFFA07A]</nowiki>
+******* Salmon <nowiki>[CSS-color 0xFA8072]</nowiki>
+******* DarkSalmon <nowiki>[CSS-color 0xE9967A]</nowiki>
+******* LightCoral <nowiki>[CSS-color 0xF08080]</nowiki>
+******* IndianRed <nowiki>[CSS-color 0xCD5C5C]</nowiki>
+******* Crimson <nowiki>[CSS-color 0xDC143C]</nowiki>
+******* Red <nowiki>[CSS-color 0xFF0000]</nowiki>
+******* FireBrick <nowiki>[CSS-color 0xB22222]</nowiki>
+******* DarkRed <nowiki>[CSS-color 0x8B0000]</nowiki>
+****** Yellow-color <nowiki>[CSS color group]</nowiki>
+******* Gold <nowiki>[CSS-color 0xFFD700]</nowiki>
+******* Yellow <nowiki>[CSS-color 0xFFFF00]</nowiki>
+******* LightYellow <nowiki>[CSS-color 0xFFFFE0]</nowiki>
+******* LemonChiffon <nowiki>[CSS-color 0xFFFACD]</nowiki>
+******* LightGoldenRodYellow <nowiki>[CSS-color 0xFAFAD2]</nowiki>
+******* PapayaWhip <nowiki>[CSS-color 0xFFEFD5]</nowiki>
+******* Moccasin <nowiki>[CSS-color 0xFFE4B5]</nowiki>
+******* PeachPuff <nowiki>[CSS-color 0xFFDAB9]</nowiki>
+******* PaleGoldenRod <nowiki>[CSS-color 0xEEE8AA]</nowiki>
+******* Khaki <nowiki>[CSS-color 0xF0E68C]</nowiki>
+******* DarkKhaki <nowiki>[CSS-color 0xBDB76B]</nowiki>
+****** White-color <nowiki>[CSS color group]</nowiki>
+******* White <nowiki>[CSS-color 0xFFFFFF]</nowiki>
+******* Snow <nowiki>[CSS-color 0xFFFAFA]</nowiki>
+******* HoneyDew <nowiki>[CSS-color 0xF0FFF0]</nowiki>
+******* MintCream <nowiki>[CSS-color 0xF5FFFA]</nowiki>
+******* Azure <nowiki>[CSS-color 0xF0FFFF]</nowiki>
+******* AliceBlue <nowiki>[CSS-color 0xF0F8FF]</nowiki>
+******* GhostWhite <nowiki>[CSS-color 0xF8F8FF]</nowiki>
+******* WhiteSmoke <nowiki>[CSS-color 0xF5F5F5]</nowiki>
+******* SeaShell <nowiki>[CSS-color 0xFFF5EE]</nowiki>
+******* Beige <nowiki>[CSS-color 0xF5F5DC]</nowiki>
+******* OldLace <nowiki>[CSS-color 0xFDF5E6]</nowiki>
+******* FloralWhite <nowiki>[CSS-color 0xFFFAF0]</nowiki>
+******* Ivory <nowiki>[CSS-color 0xFFFFF0]</nowiki>
+******* AntiqueWhite <nowiki>[CSS-color 0xFAEBD7]</nowiki>
+******* Linen <nowiki>[CSS-color 0xFAF0E6]</nowiki>
+******* LavenderBlush <nowiki>[CSS-color 0xFFF0F5]</nowiki>
+******* MistyRose <nowiki>[CSS-color 0xFFE4E1]</nowiki>
+***** Color-shade <nowiki>[A slight degree of difference between colors, especially with regard to how light or dark it is or as distinguished from one nearly like it.]</nowiki>
+****** Dark-shade <nowiki>[A color tone not reflecting much light.]</nowiki>
+****** Light-shade <nowiki>[A color tone reflecting more light.]</nowiki>
+***** Grayscale <nowiki>[Using a color map composed of shades of gray, varying from black at the weakest intensity to white at the strongest.]</nowiki> 
+****** <nowiki># {takesValue, valueClass=numericClass} [White intensity between 0 and 1]</nowiki>
+***** HSV-color <nowiki>[A color representation that models how colors appear under light.]</nowiki>
+****** Hue <nowiki>[Attribute of a visual sensation according to which an area appears to be similar to one of the perceived colors.]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [Angular value between 0 and 360]</nowiki> 
+****** Saturation <nowiki>[Colorfulness of a stimulus relative to its own brightness.]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki> 
+****** HSV-value <nowiki>[AAttribute of a visual sensation according to which an area appears to emit more or less light.]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
+***** RGB-color <nowiki>[A color from the RGB schema.]</nowiki>
+****** RGB-red <nowiki>[The red component.]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [R value of RGB between 0 and 1]</nowiki> 
+****** RGB-blue <nowiki>[The blue component.]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki> 
+****** RGB-green <nowiki>[The green component.]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [G value of RGB between 0 and 1]</nowiki> 
+**** View <nowiki>[A specific visual representation of data, situations, topics, etc.]</nowiki>
+***** 2D-view <nowiki>[A view showing only two dimensions.]</nowiki>
+***** 3D-view <nowiki>[A view showing three dimensions.]</nowiki>
+***** Background-view <nowiki>[Parts of the view that are farthest from the viewer and usually the not part of the visual focus.]</nowiki>
+***** Bistable-view <nowiki>[Something having two stable visual forms that have two distinguishable stable forms as in optical illusions.]</nowiki>
+***** Foreground-view <nowiki>[Parts of the view that are closest to the viewer and usually the most important part of the visual focus.]</nowiki>
+***** Foveal-view <nowiki>[Visual presentation directly on the fovea. A view projected on the small depression in the retina containing only cones and where vision is most acute.]</nowiki>
+***** Map-view <nowiki>[A diagrammatic representation of an area of land or sea showing physical features, cities, roads.]</nowiki>
+****** Aerial-view <nowiki>[Elevated view of an object from above, with a perspective as though the observer were a bird.]</nowiki>
+****** Satellite-view <nowiki>[A representation as captured by technology such as a satellite.]</nowiki>
+****** Street-view <nowiki>[A 360-degrees panoramic view from a position on the ground.]</nowiki>
+***** Peripheral-view <nowiki>[Indirect vision as it occurs outside the point of fixation.]</nowiki>
 
 
 

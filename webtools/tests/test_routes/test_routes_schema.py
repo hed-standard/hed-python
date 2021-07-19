@@ -33,14 +33,14 @@ class Test(unittest.TestCase):
 
     def test_schema_results_convert_valid_mediawiki(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED-generation3-schema-8.0.0-alpha.3.mediawiki')
+                                   '../data/HED-generation3-schema-8.0.0-beta.4.mediawiki')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'command_convert',
-                          'schema_file': (schema_buffer, 'HED-generation3-schema-8.0.0-alpha.3.mediawiki'),
+                          'schema_file': (schema_buffer, 'HED-generation3-schema-8.0.0-beta.4.mediawiki'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a valid mediawiki has a response')
@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
             self.assertEqual("success", headers_dict["Category"],
                              "The valid mediawiki should convert to xml successfully")
             self.assertTrue(response.data, "The converted schema should not be empty")
-            self.assertEqual('attachment filename=HED-generation3-schema-8.0.0-alpha.3.xml',
+            self.assertEqual('attachment filename=HED-generation3-schema-8.0.0-beta.4.xml',
                              headers_dict['Content-Disposition'], "Convert of valid mediawiki should return xml")
             schema_buffer.close()
 
@@ -122,14 +122,14 @@ class Test(unittest.TestCase):
 
     def test_schema_results_convert_valid_xml(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED8.0.0-alpha.3.xml')
+                                   '../data/HED8.0.0-beta.4.xml')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'command_convert',
-                          'schema_file': (schema_buffer, 'HED8.0.0-alpha.3.xml'),
+                          'schema_file': (schema_buffer, 'HED8.0.0-beta.4.xml'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a valid xml has a response')
@@ -182,14 +182,14 @@ class Test(unittest.TestCase):
 
     def test_schema_results_validate_valid_mediawiki(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED-generation3-schema-8.0.0-alpha.3.mediawiki')
+                                   '../data/HED-generation3-schema-8.0.0-beta.4.mediawiki')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'command_validate',
-                          'schema_file': (schema_buffer, 'HED-generation3-schema-8.0.0-alpha.3.mediawiki'),
+                          'schema_file': (schema_buffer, 'HED-generation3-schema-8.0.0-beta.4.mediawiki'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a valid mediawiki has a response')
@@ -270,14 +270,14 @@ class Test(unittest.TestCase):
 
     def test_schema_results_validate_valid_xml(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED8.0.0-alpha.3.xml')
+                                   '../data/HED8.0.0-beta.4.xml')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'command_validate',
-                          'schema_file': (schema_buffer, 'HED8.0.0-alpha.3.xml'),
+                          'schema_file': (schema_buffer, 'HED8.0.0-beta.4.xml'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a valid xml has a response')

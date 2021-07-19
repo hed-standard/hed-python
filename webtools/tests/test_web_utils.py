@@ -80,31 +80,6 @@ class Test(unittest.TestCase):
             self.assertFalse(form_has_url(request, common.SCHEMA_URL, file_constants.SPREADSHEET_EXTENSIONS),
                              "Form does not URL with the wrong extension")
 
-    # def test_generate_download_file_valid(self):
-    #     from hedweb.utils.web_utils import generate_download_file
-    #     hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.1.xml')
-    #     with self.app.test_request_context():
-    #         response = generate_download_file(hed_file, 'HED.xml', msg_category='success', msg='Successful')
-    #         self.assertIsInstance(response, Response, 'generate_download_file returns a response for real file')
-    #         self.assertEqual(200, response.status_code, "Generate_download_file has status code 200 for real file")
-    #         header_content = dict(response.headers)
-    #         self.assertEqual('success', header_content['Category'], "The msg_category is success")
-    #         self.assertEqual('attachment filename=HED.xml', header_content['Content-Disposition'],
-    #                          "generate_download_file has the correct attachment file name")
-
-    # def test_generate_download_file_bad_file(self):
-    #     from hedweb.utils.web_utils import generate_download_file
-    #     from hed.errors.exceptions import HedFileError
-    #     with self.app.test_request_context():
-    #         try:
-    #             generate_download_file('badfile.xml', 'HED.xml', msg_category='success', msg='Successful')
-    #         except HedFileError:
-    #             pass
-    #         except Exception:
-    #             self.fail('generate_download_file threw the wrong exception for non-existent file')
-    #         else:
-    #             self.fail('generate_download_file should have thrown a HedFileError exception when file did not exist')
-
     def test_generate_download_file_from_text(self):
         from hedweb.web_utils import generate_download_file_from_text
         with self.app.test_request_context():
@@ -206,8 +181,8 @@ class Test(unittest.TestCase):
                                      suffix='blech', extension='.txt')
         self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
                          "Returns correct string when base_name with hyphens")
-        filename = generate_filename('HED7.1.2.xml', suffix='blech', extension='.txt')
-        self.assertEqual('HED7.1.2_blech.txt', filename, "Returns correct string when base_name has periods")
+        filename = generate_filename('HED7.2.0.xml', suffix='blech', extension='.txt')
+        self.assertEqual('HED7.2.0_blech.txt', filename, "Returns correct string when base_name has periods")
 
     def test_generate_text_response(self):
         with self.app.test_request_context():
