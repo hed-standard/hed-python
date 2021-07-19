@@ -79,7 +79,7 @@ class Test(unittest.TestCase):
             data = json.load(f)
         json_text = json.dumps(data)
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
-                     + 'hedxml/HED8.0.0-beta.1.xml'
+                     + 'hedxml-test/HED8.0.0-beta.4.xml'
         hed_schema = hedschema.load_schema(hed_url_path=schema_url)
         json_dictionary = models.ColumnDefGroup(json_string=json_text, display_name='JSON_Dictionary')
         arguments = {common.SERVICE: 'dictionary_validate', common.SCHEMA: hed_schema,
@@ -89,9 +89,9 @@ class Test(unittest.TestCase):
             self.assertFalse(response['error_type'],
                              'dictionary_validation services should not have a fatal error when file is invalid')
             results = response['results']
-            self.assertEqual('warning', results['msg_category'],
-                             "dictionary_validation services has failure on bids.json")
-            self.assertEqual('8.0.0-beta.1', results[common.SCHEMA_VERSION], 'Version 8.0.0.-beta.1 was used')
+            self.assertEqual('success', results['msg_category'],
+                             "dictionary_validation services has success on bids_events.json")
+            self.assertEqual('8.0.0-beta.4', results[common.SCHEMA_VERSION], 'Version 8.0.0.-beta.4 was used')
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml/HED7.2.0.xml'

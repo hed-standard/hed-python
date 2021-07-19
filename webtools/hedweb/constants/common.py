@@ -66,6 +66,7 @@ SCHEMA_VERSION = 'schema_version'
 SCHEMA_VERSION_LIST = 'schema_version_list'
 
 SERVICE = 'service'
+SERVICE_PARAMETERS = 'service_parameters'
 
 REQUIRED_COLUMN_INDICES = 'required_column_indices'
 SPREADSHEET = 'spreadsheet'

@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h2>HED services</h2>
+    This page gives help for services that are available as a web services. All services return a JSON structure
+    of the following form:<br>
+
+    <h3>Request parameters</h3>
+    A HED web service request
+    <p>
+    <h3>Return value:
+	service: Name of the requested service.
+	results: Results of the operation.
+	error_type: Type of error if the service failed.
+	error_msg: Explanation of the message if the service failed.
+    <blockquote>
+    <code>
+       "results": {<br>
+        "command": "The command that was executed in response to the service request.",<br>
+        "data": "The data returned by the service.",<br>
+        "schema_version": "The version of the HED schema used in the processing.",<br>
+        "msg_category": "One of success, warning, or failure depending on the result.",<br>
+        "msg": "Explanation of the result of service processing."<br>
+    }
+   </code>
+   </blockquote>
+    </p>
+
+    <h3>Request parameters</h3>
+    The request parameters are sent in JSON:
+
+    <p>The result of the service is always returned in the <code>data</code> field if the operation
+        successfully executed.
+    Error messages appear in the <code>msg</code> field.</p>
+
+    get_services: Return a list of hed services commands with descriptions.
+	Parameters: []
+dictionary_to_long: Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors.
+	Parameters: ["json_string", ["schema_string", "schema_url", "schema_version"]]
+dictionary_to_short: Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors.
+	Parameters: ["json_string", ["schema_string", "schema_url", "schema_version"]]
+dictionary_validate: Validate a BIDS JSON sidecar (in string form) and return errors.
+	Parameters: ["json_string", ["schema_string", "schema_url", "schema_version"], "check_for_warnings"]
+events_assemble: Validate a BIDS events file with JSON sidecars (passed as strings).
+	Parameters: ["events_string", ["schema_string", "schema_url", "schema_version"], "json_string", "check_for_warnings", "defs_expand"]
+events_validate: Validate a BIDS events file with JSON sidecars (passed as strings).
+	Parameters: ["events_string", ["schema_string", "schema_url", "schema_version"], "json_string", "check_for_warnings"]
+spreadsheet_validate: Validate a spreadsheet (tsv string) with HED tags in specified columns.
+	Parameters: ["spreadsheet_string", ["schema_string", "schema_url", "schema_version"], ["column_x_input", "column_x_check"], "check_for_warnings", "has_column_names"]
+strings_to_long: Convert a list of strings to long form if valid, otherwise return errors.
+	Parameters: ["string_list", ["schema_string", "schema_url", "schema_version"]]
+strings_to_short: Convert a list of strings to short form if valid, otherwise return errors.
+	Parameters: ["string_list", ["schema_string", "schema_url", "schema_version"]]
+strings_validate: Validate a list of HED strings and return errors.
+	Parameters: ["string_list", ["schema_string", "schema_url", "schema_version"], "check_for_warnings"]
+
+Meanings:
+	check_for_warnings: If true, check for warnings when validating.
+	column_x_check: If present with value 'on' indicates that column number x has HED tags
+	column_x_input: Contains the prefix appended to column x if x has HED tags.
+	defs_expand: If true, assembly expands definitions and replaces def/XXX with def-expand/XXX.
+	events_string: A BIDS events file as a string.
+	has_column_names: If true, the first row of the spreadsheet is interpreted as column names.
+	hed_columns: A list of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are used.
+	hed_strings: List of HED strings to be processed.
+	json_string: JSON sidecar as a string
+	json_strings: A list of BIDS JSON sidecars as strings.
+	schema_string: HED XML schema as a string.
+	schema_url: A URL from which a HED schema can be downloaded.
+	schema_version: Version of HED to used in processing.
+	spreadsheet_string: A spreadsheet tsv as a string.
+
+
+
+results field meanings:
+	command: The command that was executed in response to the service request.
+	data: The data returned by the service. This could be a list of errors or the processed result depending on what happened.
+	schema_version: The version of the HED schema used in the processing.
+	msg_category: One of success, warning, or failure depending on the result of processing the service.
+	msg: Explanation of the result of service processing.
+
+    <h3>[List the services]</h3>
+    Process a BIDS-style events file with optional JSON sidecar.<br>
+    <ol>
+        <li><b>Service: get_services</b><br>
+            <p><b>Example arguments:</b> <code>{'service': 'get_services'}</code></p>
+
+            <p><b>Returns:</b>A list of services</p>
+
+
+
+            <b>If no errors</b>, display a success message and return a two-column file.
+            The first column is the onset time of the event
+            and the second column is the HED annotation for that event.<br>
+            <b>If errors</b>, display a warning message and return a file with the errors.
+        </li>
+        <li><b>Command: Validate</b></br>
+            <b>If no errors</b>, display a success message.<br>
+            <b>If errors</b>, display a warning message and return a file with the errors.
+        </li>
+    </ol>
+    <h3><a href="{{ url_for('route_blueprint.render_dictionary_form') }}">[Process dictionary]</a></h3>
+    Process a single BIDS-style events JSON sidecar metadata file.<br>
+    <ol>
+        <li><b>Command: Convert to long</b><br>
+            <b>If no errors</b>, display a success message and return a JSON file with the HED tags in long form.<br>
+            <b>If errors</b>, display a warning message and return a file with the errors.
+        </li>
+        <li><b>Command: Convert to short</b><br>
+            <b>If no errors</b>, display a success message and return a JSON file with the HED tags in short form.<br>
+            <b>If errors</b>, display a warning message and return a file with the errors.
+        </li>
+        <li><b>Command: Validate</b><br>
+            <b>If no errors</b>, display a success message.<br>
+            <b>If errors</b> display a warning message and return a file with the errors.
+        </li>
+    </ol>
+    <h3><a href="{{ url_for('route_blueprint.render_spreadsheet_form') }}">[Process spreadsheet]</a></h3>
+     An alternative to the BIDS JSON format for associating local event codes with HED tags
+        is a tab-separated value (tsv) or Excel (xlsx) file. Each row in the spreadsheet corresponds
+        to the HED tags to be assigned to a local event code. Usually one column will a contain local event code,
+        and the remaining columns will contain HED tags, which are assumed to be appended to form the tag
+        string to be assigned to that event code. You may also specify a prefix be prepended to the values
+        in a particular column. This feature is particularly useful for items such as descriptions, to
+        keep them separate from the remainder of the tag string.<br>
+    <ol>
+        <li><b>Command: Convert to long</b><br>
+            <b>If no errors</b>, display a success message and return a spreadsheet file with the HED tags in long form.<br>
+            <b>If errors</b>, display a warning message and return a text file with the errors.
+        </li>
+        <li><b>Command: Convert to short</b><br>
+            <b>If no errors</b>, display a success message and return a spreadsheet file with the HED tags in short form.<br>
+            <b>If errors</b>, display a warning message and return a text file with the errors.
+        </li>
+        <li><b>Command: Validate</b><br>
+            <b>If no errors</b>, display a success message.<br>
+            <b>If errors</b> display a warning message and return a file with the errors.
+        </li>
+    </ol>
+    <h3><a href="{{ url_for('route_blueprint.render_string_form') }}">[Process string]</a></h3>
+    Enter or paste the HED string to be processed into the upper text box.<br>
+    <ol>
+        <li><b>Command: Convert to long</b><br>
+            <b>If no errors</b>, display a success message and the long form version of the HED string in the lower text box.<br>
+            <b>If errors</b>, display a warning message and return a text file with the errors.
+        </li>
+        <li><b>Command: Convert to short</b><br>
+            <b>If no errors</b>, display a success message and the short form version of the HED string in the lower text box.<br>
+            <b>If errors</b>, display a warning message and return a text file with the errors.
+        </li>
+        <li><b>Command: Validate</b><br>
+            <b>If no errors</b>, display a success message.<br>
+            <b>If errors</b> display a warning message and return a text file with the errors.
+        </li>
+    </ol>
+        <h3><a href="{{ url_for('route_blueprint.render_schema_form') }}">[Process schema]</a></h3>
+    Enter a HED schema URL or upload a schema file in either XML or mediawiki format. Conversion is
+    between the two formats.<br>
+    <ol>
+        <li><b>Command: Convert</b><br>
+            <b>If no errors</b>, display a success message and return the converted schema file.<br>
+            <b>If errors</b>, display a warning message and return a text file with the errors.
+        </li>
+        <li><b>Command: Validate</b><br>
+            <b>If no errors</b>, display a success message.<br>
+            <b>If errors</b> display a warning message and return a text file with the errors.
+        </li>
+    </ol>
+{% endblock %}

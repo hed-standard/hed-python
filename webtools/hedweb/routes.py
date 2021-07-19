@@ -263,6 +263,32 @@ def render_string_form():
     return render_template(page_constants.STRING_PAGE)
 
 
+@route_blueprint.route(route_constants.HED_COMMANDS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
+def render_commands_help_page():
+    """The help page for the commands for the online HED tools.
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the home page.
+
+    """
+    return render_template(page_constants.HED_COMMANDS_HELP_PAGE)
+
+
+@route_blueprint.route(route_constants.HED_SERVICES_HELP_ROUTE, strict_slashes=False, methods=['GET'])
+def render_services_help_page():
+    """The help page for the web services for the online HED tools.
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the services help page.
+
+    """
+    return render_template(page_constants.HED_SERVICES_HELP_PAGE)
+
+
 @route_blueprint.route(route_constants.HED_TOOLS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
 def render_help_page():
     """The site help page.

@@ -11,6 +11,8 @@ DICTIONARY_SUBMIT_ROUTE = '/dictionary_submit'
 EVENTS_ROUTE = '/events'
 EVENTS_SUBMIT_ROUTE = '/events_submit'
 
+HED_COMMANDS_HELP_ROUTE = '/hed-commands-help'
+HED_SERVICES_HELP_ROUTE = '/hed-services-help'
 HED_TOOLS_HELP_ROUTE = '/hed-tools-help'
 HED_TOOLS_HOME_ROUTE = '/'
 

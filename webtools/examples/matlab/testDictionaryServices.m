@@ -21,42 +21,48 @@ header = ["Content-Type" "application/json"; ...
 options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
 
-%% Read the JSON dictionary into a string for all examples
+%% Set up some data to use for the examples
 json_text = fileread('../data/good_dictionary.json');
+myURL = ['https://raw.githubusercontent.com/hed-standard/' ...
+         'hed-specification/master/hedxml/HED7.2.0.xml'];
+schema_text = fileread('../data/HED8.0.0-alpha.1.xml');
 
 %% Example 1: Validate valid JSON dictionary using a HED version.
-sdata1 = get_input_template();
-sdata1.service = 'dictionary_validate';
-sdata1.schema_version = '8.0.0-alpha.1';
-sdata1.json_string = json_text; 
+parameters = struct('schema_version', '8.0.0-alpha.1', ...
+                    'json_string', json_text, ...
+                    'check_for_warnings', true);
+sdata1 = struct('service', 'dictionary_validate', ...
+                'service_parameters', parameters);
 response1 = webwrite(services_url, sdata1, options);
 response1 = jsondecode(response1);
 output_report(response1, 'Example 1 output');
 
 %% Example 2: Validate invalid JSON dictionary using HED URL.
-sdata2 = get_input_template();
-sdata2.service = 'dictionary_validate';
-sdata2.schema_url = ['https://raw.githubusercontent.com/hed-standard/' ...
-    'hed-specification/master/hedxml/HED7.2.0.xml'];
-sdata2.json_string = json_text; 
+parameters = struct('schema_url', myURL, ...
+                    'json_string', json_text, ...
+                    'check_for_warnings', true);
+sdata2 = struct('service', 'dictionary_validate', ...
+                'service_parameters', parameters);
 response2 = webwrite(services_url, sdata2, options);
 response2 = jsondecode(response2);
 output_report(response2, 'Example 2 output');
 
 %% Example 3: Convert valid JSON dictionary to long uploading HED schema.
-sdata3 = get_input_template();
-sdata3.service = 'dictionary_to_long';
-sdata3.schema_string = fileread('../data/HED8.0.0-alpha.1.xml');
-sdata3.json_string = json_text; 
+parameters = struct('schema_string', schema_text, ...
+                    'json_string', json_text, ...
+                    'check_for_warnings', true);
+sdata3 = struct('service', 'dictionary_to_long', ...
+                'service_parameters', parameters);
 response3 = webwrite(services_url, sdata3, options);
 response3 = jsondecode(response3);
 output_report(response3, 'Example 3 output');
 
 %%  Example 4: Convert valid JSON dictionary to short using a HED version..
-sdata4 = get_input_template();
-sdata4.service = 'dictionary_to_short';
-sdata4.schema_version = '8.0.0-alpha.1';
-sdata4.json_string = json_text; 
+parameters = struct('schema_version', '8.0.0-alpha.1', ...
+                    'json_string', json_text, ...
+                    'check_for_warnings', true);
+sdata4 = struct('service', 'dictionary_to_short', ...
+                'service_parameters', parameters);
 response4 = webwrite(services_url, sdata4, options);
 response4 = jsondecode(response4);
 output_report(response4, 'Example 4 output');

@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
 
     def test_string_convert_to_short_invalid(self):
         from hedweb.strings import string_convert
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Red, Blue']
 
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
 
     def test_string_convert_to_short_valid(self):
         from hedweb.strings import string_convert
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Attribute/Informational/Description/Blech, Blue']
         with self.app.app_context():
@@ -88,7 +88,7 @@ class Test(unittest.TestCase):
 
     def test_string_convert_to_long(self):
         from hedweb.strings import string_convert
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Red, Blue']
 
@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
             results = string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
             self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
 
     def test_string_validate(self):
         from hedweb.strings import string_validate
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Red, Blue']
 
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
             results = string_validate(hed_schema, string_list)
             self.assertEqual('warning', results['msg_category'], "string_validate has warning if validation errors")
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = string_validate(hed_schema, string_list)

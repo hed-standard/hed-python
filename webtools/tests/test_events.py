@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
             self.assertEqual('success', results['msg_category'],
                              'events_process validate should return success if no errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = events_process(arguments)

@@ -15,10 +15,9 @@ header = ["Content-Type" "application/json"; ...
 
 options = weboptions('MediaType', 'application/json', 'Timeout', 60, ...
                      'HeaderFields', header);
-data = struct();
-data.service = 'get_services';
 
-%% Send the request and get the response 
+%% Send the request and get the response
+data = struct('service', 'get_services', 'service_parameters', '');
 response = webwrite(services_url, data, options);
 response = jsondecode(response);
 fprintf('Error report:  [%s] %s\n', response.error_type, response.error_msg);
