@@ -1,15 +1,15 @@
 import json
-from hed.util.column_definition import ColumnDef
-from hed.util.error_types import ErrorContext
-from hed.util import error_reporter
-from hed.util.exceptions import HedFileError, HedExceptions
-from hed.util.def_dict import DefDict
-from hed.util.hed_string import HedString
+from hed.models.column_definition import ColumnDef
+from hed.errors.error_types import ErrorContext
+from hed.errors import error_reporter
+from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.models.def_dict import DefDict
+from hed.models.hed_string import HedString
 
 
 class ColumnDefGroup:
     """This stores column definitions for parsing hed spreadsheets, generally loaded from a single json file."""
-    def __init__(self, json_filename=None, json_string=None):
+    def __init__(self, json_filename=None, json_string=None, display_name=None):
         """
 
         Parameters
@@ -21,6 +21,7 @@ class ColumnDefGroup:
         """
         self._json_filename = None
         self._column_settings = {}
+        self.display_name = display_name
         if json_string:
             self.add_json_string(json_string)
         if json_filename:
@@ -46,19 +47,18 @@ class ColumnDefGroup:
         Returns
         -------
         def_dicts: DefDict
-            A DefDict containing all the definitions found
-        validation_issues: [{}]
-            A list of all errors and warnings found while extracting definitions.
-
+            A DefDict containing all the definitions found.
         """
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
         new_def_dict = DefDict()
-        validation_issues = []
         for hed_string in self.hed_string_iter():
-            validation_issues += new_def_dict.check_for_definitions(HedString(hed_string), error_handler=error_handler)
+            hed_string_obj = HedString(hed_string)
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, False)
+            new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
+            error_handler.pop_error_context()
 
-        return new_def_dict, validation_issues
+        return new_def_dict
 
     def save_as_json(self, save_filename):
         """

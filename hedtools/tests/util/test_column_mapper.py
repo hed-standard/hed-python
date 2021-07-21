@@ -1,10 +1,10 @@
 import unittest
 import os
 
-from hed.util.column_mapper import ColumnMapper, ColumnType, ColumnDef
-from hed.util.hed_string import HedString
+from hed.models.column_mapper import ColumnMapper, ColumnType, ColumnDef
+from hed.models.hed_string import HedString
 from hed.schema import load_schema
-from hed.util import util_constants
+from hed.models import model_constants
 
 
 class Test(unittest.TestCase):
@@ -128,7 +128,9 @@ class Test(unittest.TestCase):
     def test_remove_prefix_if_needed(self):
         mapper = ColumnMapper()
         mapper.set_column_prefix_dict({self.add_column_number: self.required_prefix})
-        no_prefix_string = mapper.remove_prefix_if_needed(self.add_column_number, HedString(self.complex_hed_tag_required_prefix))
+        remove_prefix_func = mapper.get_prefix_remove_func(self.add_column_number)
+        test_string_obj = HedString(self.complex_hed_tag_required_prefix)
+        no_prefix_string = test_string_obj.get_as_form("org_tag", remove_prefix_func)
         self.assertEqual(str(no_prefix_string), str(self.complex_hed_tag_no_prefix))
 
     def test_subtract_1_from_dictionary_keys(self):
@@ -161,7 +163,7 @@ class Test(unittest.TestCase):
         hed_schema = load_schema(schema_file)
         prepended_hed_string = ColumnDef._prepend_prefix_to_required_tag_column_if_needed(
             HedString(self.short_tag_with_missing_prefix), self.short_tag_key)
-        prepended_hed_string.calculate_canonical_forms(hed_schema)
+        prepended_hed_string.convert_to_canonical_forms(hed_schema)
         for tag in prepended_hed_string.get_all_tags():
             self.assertEqual("Character/D", tag.short_tag)
 
@@ -185,7 +187,7 @@ class Test(unittest.TestCase):
             expected_result = expected_results[test_key]
 
             expanded_row = column_mapper.expand_row_tags([test_string])
-            prepended_hed_string = expanded_row[util_constants.ROW_HED_STRING]
+            prepended_hed_string = expanded_row[model_constants.ROW_HED_STRING]
             self.assertEqual(expected_result, str(prepended_hed_string))
 
 if __name__ == '__main__':

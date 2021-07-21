@@ -1,6 +1,6 @@
 from semantic_version import Version
 from hed.schema import hed_schema_constants as constants
-from hed.util.exceptions import HedExceptions, HedFileError
+from hed.errors.exceptions import HedExceptions, HedFileError
 
 
 def _validate_library_name(library_name):
@@ -19,6 +19,17 @@ def _validate_version_string(version_string):
         return str(e)
 
     return True
+
+
+def is_hed3_version_number(version_string):
+    try:
+        version = Version(version_string)
+        if version.major >= 8:
+            return True
+    except ValueError as e:
+        return False
+
+    return False
 
 
 attribute_validators = {

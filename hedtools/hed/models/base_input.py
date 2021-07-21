@@ -4,67 +4,73 @@ import pandas
 import copy
 import io
 
-from hed.util.def_dict import DefDict
-from hed.util.column_mapper import ColumnMapper
-from hed.util.exceptions import HedFileError, HedExceptions
-from hed.util.error_types import ErrorContext
-from hed.util.error_reporter import ErrorHandler
-from hed.util import util_constants
+from itertools import islice
+from hed.models.def_dict import DefDict
+from hed.models.column_mapper import ColumnMapper
+from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.errors.error_types import ErrorContext
+from hed.errors.error_reporter import ErrorHandler
+from hed.models import model_constants
 
 
-class BaseFileInput:
+class BaseInput:
     """Handles parsing the actual on disk hed files to a more general format."""
     TEXT_EXTENSION = ['.tsv', '.txt']
-    EXCEL_EXTENSION = ['.xls', '.xlsx']
+    EXCEL_EXTENSION = ['.xlsx']
     FILE_EXTENSION = [*TEXT_EXTENSION, *EXCEL_EXTENSION]
     STRING_INPUT = 'string'
     FILE_INPUT = 'file'
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename=None, worksheet_name=None, has_column_names=True, mapper=None,
-                 csv_string=None):
-        """Constructor for the BaseFileInput class.
+    def __init__(self, filename, file_type=None, worksheet_name=None, has_column_names=True,
+                 mapper=None, display_name=None):
+        """Constructor for the BaseInput class.
 
          Parameters
          ----------
-         filename: str or None
-             An xml/tsv file to open.
+         filename: str or file like
+             An xlsx/tsv file to open.
+         file_type: str
+            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
          worksheet_name: str
              The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
          has_column_names: bool
              True if file has column names. The validation will skip over the first line of the file. False, if
              otherwise.
          mapper: ColumnMapper
-             Pass in a built column mapper(see HedFileInput or EventFileInput for examples), or None to just
+             Pass in a built column mapper(see HedInput or EventsInput for examples), or None to just
              retrieve all columns as hed tags.
-         csv_string: str or None
-            The data to treat as this file.  eg web services passing a string.
+         display_name: str or None
+            Optional field for how this file will report errors.
          """
         if mapper is None:
             mapper = ColumnMapper()
         self._mapper = mapper
-        self._filename = filename
-        self._worksheet_name = worksheet_name
         self._has_column_names = has_column_names
+        self._display_name = display_name
+        # This is the loaded workbook if we loaded originally from an excel file.
+        self._loaded_workbook = None
+        self._worksheet_name = worksheet_name
         pandas_header = 0
         if not self._has_column_names:
             pandas_header = None
 
-        self._dataframe = None
-        if not filename and not csv_string:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Filename specified and no string data passed in", filename)
+        if not filename:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty filename passed to BaseInput.", filename)
 
-        if csv_string or self.is_text_file():
-            csv_filename_or_data = filename
-            if csv_string:
-                csv_filename_or_data = io.StringIO(csv_string)
-            self._dataframe = pandas.read_csv(csv_filename_or_data, '\t', header=pandas_header)
-        elif self.is_spreadsheet_file():
-            worksheet_to_load = self._worksheet_name
-            if worksheet_to_load is None:
-                worksheet_to_load = 0
-            self._dataframe = pandas.read_excel(filename, sheet_name=worksheet_to_load, header=pandas_header)
+        input_type = file_type
+        if file_type is None and isinstance(filename, str):
+            _, input_type = os.path.splitext(filename)
+
+        self._dataframe = None
+
+        if input_type in self.TEXT_EXTENSION:
+            self._dataframe = pandas.read_csv(filename, delimiter='\t', header=pandas_header)
+        elif input_type in self.EXCEL_EXTENSION:
+            self._loaded_workbook = openpyxl.load_workbook(filename)
+            loaded_worksheet = self.get_worksheet(self._worksheet_name)
+            self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
 
@@ -74,9 +80,63 @@ class BaseFileInput:
             self._mapper.set_column_map(columns)
 
         # Now that the file is fully initialized, gather the definitions from it.
-        self.file_def_dict, self.file_def_dict_issues = self.extract_definitions()
+        self.file_def_dict = self.extract_definitions()
         # finally add the new file dict to the mapper.
         mapper.update_definition_mapper_with_file(self.file_def_dict)
+
+    @property
+    def dataframe(self):
+        return self._dataframe
+
+    @property
+    def display_name(self):
+        return self._display_name
+
+    @property
+    def has_column_names(self):
+        return self._has_column_names
+
+    @property
+    def loaded_workbook(self):
+        return self._loaded_workbook
+
+    @property
+    def worksheet_name(self):
+        return self._worksheet_name
+
+    def _convert_to_form(self, hed_schema, tag_form, error_handler):
+        """
+        Converts all tags in a given spreadsheet to a given form
+
+        Parameters
+        ----------
+        hed_schema : HedSchema
+            The schema to use to convert tags.
+        tag_form: str
+            The form to convert the tags to.  (short_tag, long_tag, base_tag, etc)
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+
+        Returns
+        -------
+        issues_list: [{}]
+            A list of issues found during conversion
+        """
+        if error_handler is None:
+            error_handler = ErrorHandler()
+        error_list = []
+        for row_number, column_to_hed_tags_dictionary in self:
+            error_handler.push_error_context(ErrorContext.ROW, row_number)
+            for column_number in column_to_hed_tags_dictionary:
+                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                column_hed_string = column_to_hed_tags_dictionary[column_number]
+                error_list += column_hed_string.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
+                self.set_cell(row_number, column_number, column_hed_string,
+                              include_column_prefix_if_exist=False, tag_form=tag_form)
+                error_handler.pop_error_context()
+            error_handler.pop_error_context()
+
+        return error_list
 
     def convert_to_short(self, hed_schema, error_handler=None):
         """
@@ -94,20 +154,7 @@ class BaseFileInput:
         issues_list: [{}]
             A list of issues found during conversion
         """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        error_list = []
-        for row_number, column_to_hed_tags_dictionary in self:
-            error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number in column_to_hed_tags_dictionary:
-                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_short(hed_schema, error_handler=error_handler)
-                self.set_cell(row_number, column_number, column_hed_string,
-                              include_column_prefix_if_exist=False)
-                error_handler.pop_error_context()
-            error_handler.pop_error_context()
-        return error_list
+        return self._convert_to_form(hed_schema, "short_tag", error_handler)
 
     def convert_to_long(self, hed_schema, error_handler=None):
         """
@@ -125,21 +172,7 @@ class BaseFileInput:
         issues_list: [{}]
             A list of issues found during conversion
         """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        error_list = []
-        for row_number, column_to_hed_tags_dictionary in self:
-            error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number in column_to_hed_tags_dictionary:
-                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_long(hed_schema, error_handler=error_handler)
-                self.set_cell(row_number, column_number, column_hed_string,
-                              include_column_prefix_if_exist=False)
-                error_handler.pop_error_context()
-            error_handler.pop_error_context()
-
-        return error_list
+        return self._convert_to_form(hed_schema, "long_tag", error_handler)
 
     def extract_definitions(self, error_handler=None):
         """
@@ -147,8 +180,6 @@ class BaseFileInput:
 
         Parameters
         ----------
-        hed_schema : HedSchema
-            Used to know where definition tags are located in the schema
         error_handler : ErrorHandler
             The error handler to use for context, uses a default one if none.
 
@@ -156,48 +187,37 @@ class BaseFileInput:
         -------
         def_dict: DefDict
             Contains all the definitions located in the file
-        validation_issues: [{}]
-            A list of all issues found with the definitions.
         """
         if error_handler is None:
             error_handler = ErrorHandler()
         new_def_dict = DefDict()
-        validation_issues = []
         for row_number, column_to_hed_tags in self.iter_raw():
             error_handler.push_error_context(ErrorContext.ROW, row_number)
             for column_number, hed_string_obj in column_to_hed_tags.items():
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                validation_issues += new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
+                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
+                new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
+                error_handler.pop_error_context()
                 error_handler.pop_error_context()
             error_handler.pop_error_context()
 
-        return new_def_dict, validation_issues
+        return new_def_dict
 
-    def save(self, filename=None, include_formatting=False, output_processed_file=False,
-             add_suffix=None):
+    def to_excel(self, filename, output_processed_file=False):
         """
 
         Parameters
         ----------
-        filename : str or None
-            if filename is empty, use the original filename that the file was opened from.
-        include_formatting : bool
-            If it's a spreadsheet, this will attempt to reopen the file and preserve formatting lost from pandas.
+        filename : str or file like
+            Location to save this file.  Can be filename, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
-        add_suffix: str
-            if present, adds a suffix to the passed in filename(before extension)
         Returns
         -------
 
         """
         if not filename:
-            filename = self._filename
-        base_filename, extension = os.path.splitext(filename)
-        final_filename = base_filename
-        if add_suffix:
-            final_filename += add_suffix
-        final_filename += extension
+            raise ValueError("Empty file name or object passed in to BaseInput.save.")
 
         # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
         if output_processed_file:
@@ -205,34 +225,30 @@ class BaseFileInput:
         else:
             output_file = self
 
-        if output_file.is_spreadsheet_file():
-            if include_formatting:
-                # To preserve styling information, we now open this as openpyxl, copy all the data over, then save it.
-                # this is not ideal
-                old_workbook = openpyxl.load_workbook(self._filename)
-                old_worksheet = self.get_worksheet(old_workbook, worksheet_name=self._worksheet_name)
-                # excel spreadsheets are 1 based, then add another 1 for column names if present
-                adj_row_for_col_names = 1
-                if self._has_column_names:
-                    adj_row_for_col_names += 1
-                adj_for_one_based_cols = 1
-                for row_number, text_file_row in output_file._dataframe.iterrows():
-                    for column_number, column_text in enumerate(text_file_row):
-                        old_worksheet.cell(row_number + adj_row_for_col_names,
-                                           column_number + adj_for_one_based_cols).value = \
-                            output_file._dataframe.iloc[row_number, column_number]
-                old_workbook.save(final_filename)
-            else:
-                output_file._dataframe.to_excel(final_filename, header=self._has_column_names)
-        elif self.is_text_file():
-            output_file._dataframe.to_csv(final_filename, '\t', index=False, header=output_file._has_column_names)
+        if self._loaded_workbook:
+            old_worksheet = self.get_worksheet(self._worksheet_name)
+            # excel spreadsheets are 1 based, then add another 1 for column names if present
+            adj_row_for_col_names = 1
+            if self._has_column_names:
+                adj_row_for_col_names += 1
+            adj_for_one_based_cols = 1
+            for row_number, text_file_row in output_file._dataframe.iterrows():
+                for column_number, column_text in enumerate(text_file_row):
+                    old_worksheet.cell(row_number + adj_row_for_col_names,
+                                       column_number + adj_for_one_based_cols).value = \
+                        output_file._dataframe.iloc[row_number, column_number]
+            self._loaded_workbook.save(filename)
+        else:
+            output_file._dataframe.to_excel(filename, header=self._has_column_names)
 
-    def to_csv(self, output_processed_file=False):
+    def to_csv(self, filename=None, output_processed_file=False):
         """
             Returns the file as a csv string.
 
         Parameters
         ----------
+        filename : str or file like or None
+            Location to save this file.  Can be filename, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
         Returns
@@ -243,13 +259,9 @@ class BaseFileInput:
             output_file = self._get_processed_copy()
         else:
             output_file = self
-        csv_string = output_file._dataframe.to_csv(None, '\t', index=False, header=output_file._has_column_names)
-        return csv_string
-
-    # Make filename read only.
-    @property
-    def filename(self):
-        return self._filename
+        csv_string_if_filename_none = output_file._dataframe.to_csv(filename, '\t', index=False,
+                                                                    header=output_file._has_column_names)
+        return csv_string_if_filename_none
 
     def __iter__(self):
         return self.iter_dataframe()
@@ -271,7 +283,7 @@ class BaseFileInput:
         default_mapper = ColumnMapper()
         return self.iter_dataframe(default_mapper)
 
-    def iter_dataframe(self, mapper=None, return_row_dict=False, do_not_expand_labels=False):
+    def iter_dataframe(self, mapper=None, return_row_dict=False, expand_defs=True):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -282,8 +294,8 @@ class BaseFileInput:
         return_row_dict: bool
             If True, this returns the full row_dict including issues.
             If False, returns just the HedStrings for each column
-        do_not_expand_labels: bool
-            If true, this will still remove all definition/ tags, but will not expand label tags.
+        expand_defs: bool
+            If False, this will still remove all definition/ tags, but will not expand label tags.
 
         Yields
         -------
@@ -303,13 +315,14 @@ class BaseFileInput:
             if all(text_file_row.isnull()):
                 continue
 
-            row_dict = mapper.expand_row_tags(text_file_row, do_not_expand_labels)
+            row_dict = mapper.expand_row_tags(text_file_row, expand_defs)
             if return_row_dict:
                 yield row_number + start_at_one, row_dict
             else:
-                yield row_number + start_at_one, row_dict[util_constants.COLUMN_TO_HED_TAGS]
+                yield row_number + start_at_one, row_dict[model_constants.COLUMN_TO_HED_TAGS]
 
-    def set_cell(self, row_number, column_number, new_text, include_column_prefix_if_exist=False):
+    def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
+                 tag_form="short_tag"):
         """
 
         Parameters
@@ -318,25 +331,29 @@ class BaseFileInput:
             The row number of the spreadsheet to set
         column_number : int
             The column number of the spreadsheet to set
-        new_text : HedString
+        new_string_obj : HedString
             Text to enter in the given cell
         include_column_prefix_if_exist : bool
             If true and the column matches one from mapper _column_prefix_dictionary, remove the prefix
-
+        tag_form: str
+            The version of the tags we would like to use from the hed string.(short_tag, long_tag, base_tag, etc)
+            Any attribute of a HedTag that returns a string is valid.
         Returns
         -------
 
         """
-        if not include_column_prefix_if_exist:
-            new_text = self._mapper.remove_prefix_if_needed(column_number, new_text)
-
         if self._dataframe is None:
             raise ValueError("No data frame loaded")
 
+        transform_func = None
+        if not include_column_prefix_if_exist:
+            transform_func = self._mapper.get_prefix_remove_func(column_number)
+
+        new_text = new_string_obj.get_as_form(tag_form, transform_func)
         adj_row_number = 1
         if self._has_column_names:
             adj_row_number += 1
-        self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = str(new_text)
+        self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = new_text
 
     @staticmethod
     def _get_row_hed_tags_from_dict(row_dict):
@@ -356,40 +373,27 @@ class BaseFileInput:
             dictionary which associates columns with HED tags
 
         """
-        return row_dict[util_constants.ROW_HED_STRING], row_dict[util_constants.COLUMN_TO_HED_TAGS]
+        return row_dict[model_constants.ROW_HED_STRING], row_dict[model_constants.COLUMN_TO_HED_TAGS]
 
-    @staticmethod
-    def _is_extension_type(filename, allowed_exts):
-        filename, ext = os.path.splitext(filename)
-        return ext in allowed_exts
-
-    def is_spreadsheet_file(self):
-        return BaseFileInput._is_extension_type(self._filename, BaseFileInput.EXCEL_EXTENSION)
-
-    def is_text_file(self):
-        return BaseFileInput._is_extension_type(self._filename, BaseFileInput.TEXT_EXTENSION)
-
-    def is_valid_extension(self):
-        return self._is_extension_type(self._filename, BaseFileInput.FILE_EXTENSION)
-
-    @staticmethod
-    def get_worksheet(workbook, worksheet_name=None):
+    def get_worksheet(self, worksheet_name=None):
         """
             Returns the requested worksheet from the workbook by name
 
         Parameters
         ----------
-        workbook : openpyxl.workbook.Workbook
-
         worksheet_name : str
             Returns the requested worksheet by name, or the first one if no name passed in.
         Returns
         -------
         worksheet
         """
-        if not worksheet_name:
-            return workbook.worksheets[0]
-        return workbook.get_sheet_by_name(worksheet_name)
+        if worksheet_name and self._loaded_workbook:
+            # return self._loaded_workbook.get_sheet_by_name(worksheet_name)
+            return self._loaded_workbook[worksheet_name]
+        elif self._loaded_workbook:
+            return self._loaded_workbook.worksheets[0]
+        else:
+            return None
 
     def _get_processed_copy(self):
         """
@@ -397,7 +401,7 @@ class BaseFileInput:
 
         Returns
         -------
-        file_copy: BaseFileInput
+        file_copy: BaseInput
             The copy.
         """
         output_file = copy.deepcopy(self)
@@ -407,3 +411,29 @@ class BaseFileInput:
                 output_file.set_cell(row_number, column_number, new_text)
 
         return output_file
+
+    @staticmethod
+    def _get_dataframe_from_worksheet(worksheet, has_headers):
+        """
+        Creates a pandas dataframe from the given worksheet object
+
+        Parameters
+        ----------
+        worksheet : Worksheet
+            The loaded worksheet to convert
+        has_headers : bool
+            If this worksheet has column headers or not.
+
+        Returns
+        -------
+        dataframe: DataFrame
+            The converted data frame.
+        """
+        if has_headers:
+            data = worksheet.values
+            # first row is columns
+            cols = next(data)
+            data = list(data)
+            return pandas.DataFrame(data, columns=cols)
+        else:
+            return pandas.DataFrame(worksheet.values)

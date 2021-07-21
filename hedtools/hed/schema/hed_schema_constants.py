@@ -7,12 +7,18 @@ class HedKey:
     """
     # overarching category listing all tags
     AllTags = 'tags'
-    # Overarching category listing all units
+    # Overarching category listing all unit classes
+    UnitClasses = 'unitClasses'
+    # Overarching category listing all units(not divided by type)
     Units = 'units'
     # Overarching category listing all unit modifiers.
     UnitModifiers = 'unitModifiers'
+    # Overarching category listing all value classes
+    ValueClasses = "valueClasses"
     # These are the allowed attributes list, gathered from the schema on load.
     Attributes = 'attributes'
+    # These are the allowed attribute property list, gathered from the schema on load.
+    Properties = 'properties'
 
     AllowedCharacter = 'allowedCharacter'
     ExtensionAllowed = 'extensionAllowed'
@@ -24,13 +30,19 @@ class HedKey:
     Recommended = 'recommended'
     RequiredPrefix = 'required'
     RequireChild = 'requireChild'
+    TagGroup = 'tagGroup'
     TakesValue = 'takesValue'
+    TopLevelTagGroup = 'topLevelTagGroup'
     Unique = 'unique'
     UnitClass = 'unitClass'
+    UnitPrefix = 'unitPrefix'
+    ValueClass = "valueClass"
 
     BoolProperty = 'boolProperty'
     UnitClassProperty = 'unitClassProperty'
+    UnitProperty = 'unitProperty'
     UnitModifierProperty = 'unitModifierProperty'
+    ValueClassProperty = 'valueClassProperty'
 
     # Attributes found in file, but not definitions
     UnknownAttributes = 'unknownAttributes'
@@ -52,6 +64,5 @@ class HedKey:
     ShortTags = 'shortTags'
 
 
-ATTRIBUTE_PROPERTIES = [HedKey.BoolProperty, HedKey.UnitClassProperty, HedKey.UnitModifierProperty]
 VERSION_ATTRIBUTE = 'version'
 

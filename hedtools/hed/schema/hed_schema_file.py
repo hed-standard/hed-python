@@ -1,23 +1,12 @@
+import os
+
+
 from hed.schema.xml2schema import HedSchemaXMLParser
 from hed.schema.wiki2schema import HedSchemaWikiParser
-from hed.util.exceptions import HedFileError, HedExceptions
-from hed.schema import hed_schema_constants
+from hed.schema import hed_schema_constants, hed_cache
+
+from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.util import file_util
-
-
-def load_schema(hed_file_path):
-    if not hed_file_path:
-        raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file",
-                           filename=hed_file_path)
-
-    if hed_file_path.lower().endswith(".xml"):
-        hed_schema = HedSchemaXMLParser.load_xml(hed_file_path)
-        return hed_schema
-    elif hed_file_path.lower().endswith(".mediawiki"):
-        hed_schema = HedSchemaWikiParser.load_wiki(hed_file_path)
-        return hed_schema
-    else:
-        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_file_path)
 
 
 def from_string(schema_string, file_type=".xml"):
@@ -27,18 +16,40 @@ def from_string(schema_string, file_type=".xml"):
 
     if file_type.endswith(".xml"):
         hed_schema = HedSchemaXMLParser.load_xml(schema_as_string=schema_string)
-        return hed_schema
     elif file_type.endswith(".mediawiki"):
         hed_schema = HedSchemaWikiParser.load_wiki(schema_as_string=schema_string)
-        return hed_schema
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
 
+    hed_schema.update_old_hed_schema()
+    return hed_schema
+
+
+def load_schema(hed_file_path=None, hed_url_path=None):
+    if not hed_file_path and not hed_url_path:
+        raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file",
+                           filename=hed_file_path)
+
+    if hed_file_path and hed_url_path:
+        raise HedFileError(HedExceptions.BAD_PARAMETERS, "Passed both a filename and a url to load_schema",
+                           filename=hed_file_path)
+
+    if hed_url_path:
+        file_as_string = file_util.url_to_string(hed_url_path)
+        return from_string(file_as_string, file_type=os.path.splitext(hed_url_path.lower())[1])
+    elif hed_file_path.lower().endswith(".xml"):
+        hed_schema = HedSchemaXMLParser.load_xml(hed_file_path)
+    elif hed_file_path.lower().endswith(".mediawiki"):
+        hed_schema = HedSchemaWikiParser.load_wiki(hed_file_path)
+    else:
+        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_file_path)
+
+    hed_schema.update_old_hed_schema()
+    return hed_schema
 
 # todo: this could be updated to also support .mediawiki format.
 def get_hed_xml_version(hed_xml_file_path):
     """Gets the version number from a HED XML file.
-
     Parameters
     ----------
     hed_xml_file_path: str
@@ -47,23 +58,47 @@ def get_hed_xml_version(hed_xml_file_path):
     -------
     str
         The version number of the HED XML file.
-
     """
     root_node = HedSchemaXMLParser._parse_hed_xml(hed_xml_file_path)
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
-def convert_schema_to_format(hed_url=None, local_hed_file=None, check_for_issues=True,
+def load_schema_version(xml_folder=None, xml_version_number=None):
+    """
+    Gets a HedSchema object based on the hed xml file specified. If no HED file is specified then the latest
+       file will be retrieved.
+    Parameters
+    ----------
+    xml_folder: str
+        Path to a
+    xml_version_number: str
+        HED version format string. Expected format: 'X.Y.Z'
+    Returns
+    -------
+    HedSchema
+        A HedSchema object.
+    """
+    try:
+        final_hed_xml_file = hed_cache.get_hed_version_path(xml_folder, xml_version_number)
+        hed_schema = load_schema(final_hed_xml_file)
+    except HedFileError as e:
+        if e.error_type == HedExceptions.FILE_NOT_FOUND:
+            hed_cache.cache_all_hed_xml_versions()
+            final_hed_xml_file = hed_cache.get_hed_version_path(xml_folder, xml_version_number)
+            hed_schema = load_schema(final_hed_xml_file)
+        else:
+            raise e
+    return hed_schema
+
+
+def convert_schema_to_format(hed_schema, check_for_issues=True,
                              display_filename=None, save_as_mediawiki=False, save_as_legacy_xml=False):
     """
     Loads a local schema file or from a URL, then outputs a temporary file with the requested format.
-
     Parameters
     ----------
-    hed_url: str or None
-        url pointing to the .xml/mediawiki file to use
-    local_hed_file: str or None
-        filepath to local xml/mediawiki hed schema(overrides hed_url)
+    hed_schema: HedSchema
+        The schema to convert
     check_for_issues : bool
         After conversion checks for warnings like capitalization or invalid characters.
     display_filename: str
@@ -73,27 +108,21 @@ def convert_schema_to_format(hed_url=None, local_hed_file=None, check_for_issues
         If True, save as .mediawiki.  if False, save as .xml
     save_as_legacy_xml: bool
         If True(and save_as_mediawiki is False), will save using the old legacy XML format.
-
     Returns
     -------
-    output_filename: str
-        Location of output converted file, None on complete failure
+    output_string: [str]
+        The file as a list of strings
     issues_list: [{}]
         returns a list of error/warning dictionaries
     """
-    if local_hed_file is None:
-        local_hed_file = file_util.url_to_file(hed_url)
-
-    hed_schema = load_schema(local_hed_file)
-
     issue_list = []
     if check_for_issues:
         warnings = hed_schema.check_compliance(display_filename=display_filename)
         issue_list += warnings
 
     if save_as_mediawiki:
-        output_filename = hed_schema.save_as_mediawiki()
+        output_string = hed_schema.get_as_mediawiki_string()
     else:
-        output_filename = hed_schema.save_as_xml(save_as_legacy_xml)
+        output_string = hed_schema.get_as_xml_string(save_as_legacy_xml)
 
-    return output_filename, issue_list
+    return output_string, issue_list

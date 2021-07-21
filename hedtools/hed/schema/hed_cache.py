@@ -70,40 +70,14 @@ def get_all_hed_versions(local_hed_directory=None):
     return _sort_version_list(hed_versions)
 
 
-def get_local_file(hed_xml_file, get_specific_version=None):
-    """Gets the requested local file from disk.  Defaults to hed cache if not specified.
-
-    Parameters
-    ----------
-    hed_xml_file: str
-        Path to exact XML file, or directory to check for versions.  Defaults to hed_cache if None
-    get_specific_version: str
-        If not None and hed_xml_file is a directory, return this version or None.
-    Returns
-    -------
-    string
-        Path to local hed XML file to use.
-    """
-    if hed_xml_file and _check_if_specific_xml(hed_xml_file):
-        if get_specific_version is not None:
-            raise ValueError("get_or_cache_file: Cannot specify version while asking for a specific xml file.")
-        final_hed_xml_file = hed_xml_file
-    else:
-        if not hed_xml_file:
-            hed_xml_file = HED_CACHE_DIRECTORY
-        final_hed_xml_file = get_latest_hed_version_path(hed_xml_file, get_specific_version)
-
-    return final_hed_xml_file
-
-
-def cache_specific_url(hed_xml_url, get_specific_version=None, cache_folder=None):
+def cache_specific_url(hed_xml_url, xml_version_number=None, cache_folder=None):
     """Cache a file from a URL.
 
     Parameters
     ----------
     hed_xml_url: str
         Path to an exact file at a URL, or a github API url to a directory.
-    get_specific_version: str
+    xml_version_number: str
         If not None and hed_xml_url is a directory, return this version or None.
     cache_folder:
         hed cache folder: Defaults to HED_CACHE_DIRECTORY
@@ -120,7 +94,7 @@ def cache_specific_url(hed_xml_url, get_specific_version=None, cache_folder=None
 
     if _check_if_api_url(hed_xml_url):
         return _download_latest_hed_xml_version_from_url(hed_xml_url,
-                                                         get_specific_version=get_specific_version,
+                                                         xml_version_number=xml_version_number,
                                                          cache_folder=cache_folder)
 
     if not _check_if_specific_xml(hed_xml_url):
@@ -138,14 +112,14 @@ def cache_specific_url(hed_xml_url, get_specific_version=None, cache_folder=None
         return None
 
 
-def get_latest_hed_version_path(local_hed_directory=None, get_specific_version=None):
+def get_hed_version_path(local_hed_directory=None, xml_version_number=None):
     """Get the latest HED XML file path in the hed directory.
 
     Parameters
     ----------
     local_hed_directory: str
         Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
-    get_specific_version: str
+    xml_version_number: str
         If not None, return this version or None.
     Returns
     -------
@@ -156,9 +130,9 @@ def get_latest_hed_version_path(local_hed_directory=None, get_specific_version=N
         local_hed_directory = HED_CACHE_DIRECTORY
 
     hed_versions = get_all_hed_versions(local_hed_directory)
-    if get_specific_version:
-        if get_specific_version in hed_versions:
-            latest_hed_version = get_specific_version
+    if xml_version_number:
+        if xml_version_number in hed_versions:
+            latest_hed_version = xml_version_number
         else:
             return None
     else:
@@ -308,21 +282,21 @@ def _get_hed_xml_versions_from_url(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL):
     return ordered_versions
 
 
-def _download_latest_hed_xml_version_from_url(hed_base_url, get_specific_version, cache_folder):
-    latest_version, version_info = _get_latest_hed_xml_version_from_url(hed_base_url, get_specific_version)
+def _download_latest_hed_xml_version_from_url(hed_base_url, xml_version_number, cache_folder):
+    latest_version, version_info = _get_latest_hed_xml_version_from_url(hed_base_url, xml_version_number)
     if latest_version:
         cached_xml_file = _cache_hed_version(latest_version, version_info, cache_folder=cache_folder)
         return cached_xml_file
 
 
-def _get_latest_hed_xml_version_from_url(hed_base_url, get_specific_version=None):
+def _get_latest_hed_xml_version_from_url(hed_base_url, xml_version_number=None):
     hed_versions = _get_hed_xml_versions_from_url(hed_base_url)
 
     if not hed_versions:
         return None
 
-    if get_specific_version and get_specific_version in hed_versions:
-        return get_specific_version, hed_versions[get_specific_version]
+    if xml_version_number and xml_version_number in hed_versions:
+        return xml_version_number, hed_versions[xml_version_number]
 
     for version in hed_versions:
         return version, hed_versions[version]

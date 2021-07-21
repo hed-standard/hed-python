@@ -3,7 +3,7 @@ This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
 from hed.schema.hed_schema_constants import HedKey
-from hed.util.exceptions import HedFileError, HedExceptions
+from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.hed_schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema import wiki_constants
@@ -27,16 +27,23 @@ class HedSection:
     EndSchema = 5
     UnitsClasses = 6
     UnitModifiers = 7
-    Attributes = 8
-    EndHed = 9
+    ValueClasses = 8
+    Attributes = 9
+    Properties = 10
+    Epilogue = 11
+    EndHed = 12
 
 
 SectionStarts = {
+    HedSection.Prologue: wiki_constants.PROLOGUE_SECTION_ELEMENT,
     HedSection.Schema: wiki_constants.START_HED_STRING,
     HedSection.EndSchema: wiki_constants.END_SCHEMA_STRING,
     HedSection.UnitsClasses: wiki_constants.UNIT_CLASS_STRING,
     HedSection.UnitModifiers: wiki_constants.UNIT_MODIFIER_STRING,
+    HedSection.ValueClasses: wiki_constants.VALUE_CLASS_STRING,
     HedSection.Attributes: wiki_constants.ATTRIBUTE_DEFINITION_STRING,
+    HedSection.Properties: wiki_constants.ATTRIBUTE_PROPERTY_STRING,
+    HedSection.Epilogue: wiki_constants.EPILOGUE_SECTION_ELEMENT,
     HedSection.EndHed: wiki_constants.END_HED_STRING
 }
 
@@ -48,7 +55,9 @@ SectionNames = {
     HedSection.EndSchema: "EndSchema",
     HedSection.UnitsClasses: "Unit Classes",
     HedSection.UnitModifiers: "Unit Modifiers",
+    HedSection.ValueClasses: "Value Classes",
     HedSection.Attributes: "Attributes",
+    HedSection.Properties: "Properties",
     HedSection.EndHed: "EndHed"
 }
 
@@ -126,11 +135,17 @@ class HedSchemaWikiParser:
             if found_section:
                 continue
 
+            if (self._current_section != HedSection.Schema and line.startswith(wiki_constants.ROOT_TAG) and
+                    not (line.startswith(wiki_constants.OLD_SYNTAX_SECTION_NAME) and not self._schema.is_hed3_schema)):
+
+                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
+                                   f"Invalid section separator '{line.strip()}'", filename=self.filename)
+
             if line.startswith("!#"):
                 raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
                                    f"Invalid section separator '{line.strip()}'", filename=self.filename)
 
-            if self._current_section == HedSection.Prologue or self._current_section == HedSection.EndHed:
+            if self._current_section == HedSection.Prologue or self._current_section == HedSection.Epilogue:
                 if line.strip():
                     # we want to preserve all formatting in the prologue and epilogue.
                     if line.endswith("\n"):
@@ -152,45 +167,31 @@ class HedSchemaWikiParser:
         wiki_lines : iter(str)
             An opened .mediawiki file
         """
-        self._current_section = HedSection.HeaderLine
-
         parsers_pass1 = {
             HedSection.HeaderLine: self._read_header_line,
             HedSection.Prologue: self._read_prologue,
-            HedSection.Schema: self._skip_read_section,
-            HedSection.EndSchema: self._skip_read_section,
-            HedSection.UnitsClasses: self._skip_read_section,
-            HedSection.UnitModifiers: self._skip_read_section,
-            HedSection.Attributes: self._read_attributes,
-            HedSection.EndHed: self._read_epilogue,
+            HedSection.Properties: self._read_properties,
+            HedSection.Epilogue: self._read_epilogue,
         }
 
         parsers_pass2 = {
-            HedSection.HeaderLine: self._skip_read_section,
-            HedSection.Prologue: self._skip_read_section,
-            HedSection.Schema: self._read_schema,
-            HedSection.EndSchema: self._skip_read_section,
-            HedSection.UnitsClasses: self._read_unit_classes,
-            HedSection.UnitModifiers: self._read_unit_modifiers,
-            HedSection.Attributes: self._skip_read_section,
-            HedSection.EndHed: self._skip_read_section,
+            HedSection.Attributes: self._read_attributes,
         }
 
-        file_iter = self._get_line_iter(wiki_lines)
-        while self._current_section is not None:
-            # The iterator is responsible for updating the current_section variable.
-            # it will be set to None when at the end of the file.
-            parsers_pass1[self._current_section](file_iter)
+        parsers_pass3 = {
+            HedSection.Schema: self._read_schema,
+            HedSection.UnitsClasses: self._read_unit_classes,
+            HedSection.UnitModifiers: self._read_unit_modifiers,
+            HedSection.ValueClasses: self._read_value_classes,
+        }
 
+        self._run_parse_pass(parsers_pass1, wiki_lines)
+        self._schema.add_default_properties()
+
+        self._run_parse_pass(parsers_pass2, wiki_lines)
         self._schema.add_hed2_attributes()
 
-        self._found_sections = {}
-        self._current_section = HedSection.HeaderLine
-        file_iter = self._get_line_iter(wiki_lines)
-        while self._current_section is not None:
-            # The iterator is responsible for updating the current_section variable.
-            # it will be set to None when at the end of the file.
-            parsers_pass2[self._current_section](file_iter)
+        self._run_parse_pass(parsers_pass3, wiki_lines)
 
         # Validate we didn't miss any required sections.
         for section in required_sections:
@@ -202,6 +203,15 @@ class HedSchemaWikiParser:
                                    f"Required section separator '{SectionNames[section]}' not found in file",
                                    filename=self.filename)
 
+    def _run_parse_pass(self, parser_dict, wiki_lines):
+        self._found_sections = {}
+        self._current_section = HedSection.HeaderLine
+        file_iter = self._get_line_iter(wiki_lines)
+        while self._current_section is not None:
+            # The iterator is responsible for updating the current_section variable.
+            # it will be set to None when at the end of the file.
+            parser_dict.get(self._current_section, self._skip_read_section)(file_iter)
+
     def _read_header_line(self, file_iter):
         """Adds the header line
 
@@ -211,7 +221,6 @@ class HedSchemaWikiParser:
             An iterator from self._get_line_iter.
         """
         first_line = next(file_iter)
-
         # First line MUST be the HED line with full proper formatting.
         if first_line.startswith(wiki_constants.HEADER_LINE_STRING):
             hed_attributes = self._get_header_attributes(first_line[len(wiki_constants.HEADER_LINE_STRING):])
@@ -223,7 +232,13 @@ class HedSchemaWikiParser:
             raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING,
                                f"First line of file should be HED, instead found: {first_line}", filename=self.filename)
 
-        self._current_section = HedSection.Prologue
+        for line in file_iter:
+            if line is False:
+                return
+
+            raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID,
+                               f"There should be no other content in the between the HED line in the header and either the prologue or schema sections.", filename=self.filename)
+
 
     def _read_prologue(self, file_iter):
         """Adds the prologue
@@ -236,7 +251,6 @@ class HedSchemaWikiParser:
         prologue = ""
         for line in file_iter:
             if line is False:
-                self.prologue = prologue
                 self._schema.prologue = prologue
                 return
 
@@ -255,14 +269,13 @@ class HedSchemaWikiParser:
         epilogue = ""
         for line in file_iter:
             if line is False:
+                self._schema.epilogue = epilogue
                 break
 
             if epilogue:
                 epilogue += "\n"
             epilogue += line
 
-        self.epilogue = epilogue
-        self._schema.epilogue = epilogue
 
     def _read_schema(self, file_iter):
         """Adds the main schema section
@@ -320,10 +333,11 @@ class HedSchemaWikiParser:
             if level == 1:
                 current_unit_class = unit_class
                 self._schema._add_unit_class_unit(current_unit_class, None)
+                self._add_single_line(line, HedKey.UnitClasses, skip_adding_name=True)
             # This is a unit class unit
             else:
                 self._schema._add_unit_class_unit(current_unit_class, unit_class)
-            self._add_single_line(line, HedKey.Units, skip_adding_name=True)
+                self._add_single_line(line, HedKey.Units, skip_adding_name=True)
 
     def _read_unit_modifiers(self, file_iter):
         """Adds the unit modifiers section
@@ -338,6 +352,29 @@ class HedSchemaWikiParser:
                 return
 
             self._add_single_line(line, HedKey.UnitModifiers)
+
+    def _read_value_classes(self, file_iter):
+        """Adds the unit modifiers section
+
+                Parameters
+                ----------
+                file_iter: iter
+                    An iterator from self._get_line_iter.
+                """
+        for line in file_iter:
+            if line is False:
+                return
+
+            self._add_single_line(line, HedKey.ValueClasses)
+
+    def _read_properties(self, file_iter):
+        for line in file_iter:
+            if line is False:
+                return
+
+            prop_name = self._get_tag_name(line)
+            prop_desc = self._get_tag_description(line)
+            self._schema._add_property_name_to_dict(prop_name, prop_desc)
 
     def _read_attributes(self, file_iter):
         self.attributes = {}
@@ -361,13 +398,41 @@ class HedSchemaWikiParser:
         -------
         {}: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}
         """
+        if "=" not in version_line:
+            return self._get_header_attributes_old(version_line)
+
+        attr_pattern = "([^ ]+?)=\"(.*?)\""
+        attr_re = re.compile(attr_pattern)
+
+        final_attributes = {}
+
+        for match in attr_re.finditer(version_line):
+            attr_name = match.group(1)
+            attr_value = match.group(2)
+            final_attributes[attr_name] = attr_value
+
+        return final_attributes
+
+    def _get_header_attributes_old(self, version_line):
+        """Extracts all valid attributes like version from the HED line in .mediawiki format.
+
+        Parameters
+        ----------
+        version_line: string
+            The line in the wiki file that contains the version or other attributes.
+
+        Returns
+        -------
+        {}: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}
+        """
         final_attributes = {}
         attribute_pairs = version_line.split(',')
         for pair in attribute_pairs:
-            if pair.count(':') != 1:
+            divider_index = pair.find(':')
+            if divider_index == -1:
                 raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID,
                                    f"Found poorly matched key:value pair in header: {pair}", filename=self.filename)
-            key, value = pair.split(':')
+            key, value = pair[:divider_index], pair[divider_index + 1:]
             key = key.strip()
             value = value.strip()
             final_attributes[key] = value

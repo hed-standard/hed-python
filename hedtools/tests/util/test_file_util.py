@@ -5,7 +5,7 @@ from hed.util import file_util
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.default_test_url = """https://raw.githubusercontent.com/hed-standard/hed-specification/HED-restructure/hedxml/HED7.1.1.xml"""
+        cls.default_test_url = """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml"""
         cls.hed_xml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/legacy_xml/HED7.1.1.xml')
 
     def test_url_to_file(self):

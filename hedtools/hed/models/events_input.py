@@ -1,23 +1,25 @@
-from hed.util.column_mapper import ColumnMapper
-from hed.util.base_file_input import BaseFileInput
-from hed.util.column_def_group import ColumnDefGroup
-from hed.util.def_mapper import DefinitionMapper
-from hed.util import error_reporter
+from hed.models.column_mapper import ColumnMapper
+from hed.models.base_input import BaseInput
+from hed.models.column_def_group import ColumnDefGroup
+from hed.models.def_mapper import DefinitionMapper
+from hed.errors import error_reporter
 
 
-class EventFileInput(BaseFileInput):
+class EventsInput(BaseInput):
     """A class to parse bids style spreadsheets into a more general format."""
 
-    def __init__(self, filename=None, worksheet_name=None, tag_columns=None,
+    def __init__(self, filename=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  json_def_files=None, attribute_columns=None,
-                 def_dicts=None, csv_string=None):
-        """Constructor for the EventFileInput class.
+                 def_dicts=None, display_name=None):
+        """Constructor for the EventsInput class.
 
         Parameters
         ----------
-        filename: str or None
-            An xml/tsv file to open.
+         filename: str or file like
+             An xlsx/tsv file to open.
+        file_type: str
+            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
         worksheet_name: str
             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
         tag_columns: []
@@ -40,8 +42,6 @@ class EventFileInput(BaseFileInput):
             DefDict's containing all the definitions this file should use - other than the ones coming from the file
             itself.
             If this is NOT passed, the class will instead gather definitions from any passed in ColumnDefGroups
-        csv_string: str or None
-            The data to treat as this file.  eg web services passing a string.
         """
         if tag_columns is None:
             tag_columns = []
@@ -56,33 +56,41 @@ class EventFileInput(BaseFileInput):
             self.column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
         else:
             self.column_group_defs = None
-        if def_dicts is None:
-            self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs)
+        # if def_dicts is None:
+        #     self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs)
+        # else:
+        #     if not isinstance(def_dicts, list):
+        #         self.def_dicts = [def_dicts]
+        #     else:
+        #         self.def_dicts = def_dicts
+        if def_dicts and not isinstance(def_dicts, list):
+            self._def_dicts = [def_dicts]
         else:
-            if not isinstance(def_dicts, list):
-                self.def_dicts = [def_dicts]
-            else:
-                self.def_dicts = def_dicts
+            self._def_dicts = def_dicts
 
-        def_mapper = DefinitionMapper(self.def_dicts)
+        def_mapper = DefinitionMapper(self._def_dicts)
         new_mapper = ColumnMapper(json_def_files=self.column_group_defs, tag_columns=tag_columns,
                                   column_prefix_dictionary=column_prefix_dictionary,
                                   attribute_columns=attribute_columns,
                                   definition_mapper=def_mapper)
 
-        super().__init__(filename, worksheet_name, has_column_names, new_mapper,
-                                  csv_string=csv_string)
+        super().__init__(filename, file_type, worksheet_name, has_column_names, new_mapper,
+                         display_name=display_name)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
                              "This is probably not intended.")
+
+    @property
+    def def_dicts(self):
+        return self._def_dicts
 
     def validate_file_sidecars(self, hed_schema=None, error_handler=None):
         """
         Validates all column definitions and column definition hed strings.
 
         This is not an encouraged way to do this.  You should instead validate the sidecars BEFORE creating
-        an EventFileInput
+        an EventsInput
         Parameters
         ----------
         hed_schema : HedSchema, optional

@@ -1,7 +1,7 @@
-from hed.util.column_definition import ColumnDef, ColumnType
-from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_string import HedString
-from hed.util import util_constants
+from hed.models.column_definition import ColumnDef, ColumnType
+from hed.models.column_def_group import ColumnDefGroup
+from hed.models.hed_string import HedString
+from hed.models import model_constants
 import copy
 
 
@@ -184,7 +184,7 @@ class ColumnMapper:
         column_entry = self._final_column_map[column_number]
         return column_entry.expand(input_text)
 
-    def expand_row_tags(self, row_text, do_not_expand_labels=False):
+    def expand_row_tags(self, row_text, expand_defs=True):
         """
         Expands all mapped columns from a given row
 
@@ -192,8 +192,8 @@ class ColumnMapper:
         ----------
         row_text : [str]
             The text for the given row, one entry per column number.
-        do_not_expand_labels: bool
-            If true, this will still remove all definition/ tags, but will not expand label tags.
+        expand_defs: bool
+            If False, this will still remove all definition/ tags, but will not expand label tags.
 
         Returns
         -------
@@ -219,7 +219,7 @@ class ColumnMapper:
                 result_dict[attribute_name_or_error] = translated_column
                 continue
             if self._def_mapper:
-                new_issues = self._def_mapper.replace_and_remove_tags(translated_column, do_not_expand_labels)
+                new_issues = self._def_mapper.replace_and_remove_tags(translated_column, expand_defs)
                 if new_issues:
                     if column_number + 1 not in issues_dict:
                         issues_dict[column_number + 1] = []
@@ -227,41 +227,35 @@ class ColumnMapper:
 
             column_to_hed_tags_dictionary[column_number + 1] = translated_column
 
-        result_dict[util_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
+        result_dict[model_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
         if issues_dict:
-            result_dict[util_constants.COLUMN_ISSUES] = issues_dict
+            result_dict[model_constants.COLUMN_ISSUES] = issues_dict
         final_hed_string = HedString.create_from_other(column_to_hed_tags_dictionary.values())
-        result_dict[util_constants.ROW_HED_STRING] = final_hed_string
+        result_dict[model_constants.ROW_HED_STRING] = final_hed_string
 
         return result_dict
 
-    def remove_prefix_if_needed(self, column_number, input_text):
+    def get_prefix_remove_func(self, column_number):
         """
-        Remove required prefix from the given text if the specified column has a prefix.
-
-        This is used when saving text back out to a spreadsheet, so we don't save the prefixes out.
+        Returns a function that will remove the prefix for the given column.
 
         Parameters
         ----------
         column_number : int
             numbered column to use prefix check from.
-        input_text : HedString
-            Text with a possible prefix
         Returns
         -------
-        prefix_removed_text : HedString
-            The string with the prefix removed, or the same string if no prefix present.
+            A function taking a tag and string, returning a string.
         """
         column_number -= 1
         if column_number not in self._final_column_map:
-            return input_text
+            return None
 
         entry = self._final_column_map[column_number]
         if not entry.column_prefix:
-            return input_text
+            return None
 
-        final_text = entry.remove_prefix_if_needed(input_text)
-        return final_text
+        return entry.remove_prefix_if_needed
 
     def _add_column_def(self, new_column_entry):
         """

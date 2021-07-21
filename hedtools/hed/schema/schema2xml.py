@@ -31,7 +31,9 @@ class HedSchema2XML:
         self._output_units(hed_schema)
         self._output_unit_modifiers(hed_schema)
         if not self.save_as_legacy_format:
+            self._output_value_classes(hed_schema)
             self._output_attributes(hed_schema)
+            self._output_properties(hed_schema)
         self._output_footer(hed_schema)
         return self.hed_node
 
@@ -46,11 +48,14 @@ class HedSchema2XML:
             prologue_node.text = hed_schema.prologue
 
     def _output_tags(self, hed_schema):
+        schema_node = self.hed_node
+        if not self.save_as_legacy_format:
+            schema_node = SubElement(self.hed_node, xml_constants.SCHEMA_ELEMENT)
         all_tags = hed_schema.get_all_tags()
         tag_levels = {}
         for tag in all_tags:
             if "/" not in tag:
-                root_tag = self._add_node(hed_schema, self.hed_node, tag)
+                root_tag = self._add_node(hed_schema, schema_node, tag)
                 tag_levels[0] = root_tag
             else:
                 level = tag.count("/")
@@ -62,10 +67,10 @@ class HedSchema2XML:
     def _output_units(self, hed_schema):
         if not hed_schema.has_unit_classes:
             return
-        unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Units,
+        unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.UnitClasses,
                                                                                      self.save_as_legacy_format))
-        for unit_class, unit_types in hed_schema.dictionaries[HedKey.Units].items():
-            unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedKey.Units)
+        for unit_class, unit_types in hed_schema.dictionaries[HedKey.UnitClasses].items():
+            unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedKey.UnitClasses)
             if self.save_as_legacy_format:
                 unit_class_node = SubElement(unit_class_node, xml_constants.UNIT_CLASS_UNITS_ELEMENT)
 
@@ -88,11 +93,23 @@ class HedSchema2XML:
         for modifier_name in hed_schema.dictionaries[HedKey.UnitModifiers]:
             self._add_node(hed_schema, unit_modifier_node, modifier_name, HedKey.UnitModifiers)
 
+    def _output_value_classes(self, hed_schema):
+        values_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.ValueClasses,
+                                                                                           self.save_as_legacy_format))
+        for value_class in hed_schema.dictionaries[HedKey.ValueClasses]:
+            self._add_node(hed_schema, values_section_node, value_class, HedKey.ValueClasses)
+
     def _output_attributes(self, hed_schema):
         attributes_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Attributes,
                                                                                            self.save_as_legacy_format))
         for attribute_name in hed_schema.dictionaries[HedKey.Attributes]:
             self._add_node(hed_schema, attributes_section_node, attribute_name, HedKey.Attributes)
+
+    def _output_properties(self, hed_schema):
+        properties_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Properties,
+                                                                                           self.save_as_legacy_format))
+        for property_name in hed_schema.dictionaries[HedKey.Properties]:
+            self._add_node(hed_schema, properties_section_node, property_name, HedKey.Properties)
 
     def _output_footer(self, hed_schema):
         if hed_schema.epilogue:
