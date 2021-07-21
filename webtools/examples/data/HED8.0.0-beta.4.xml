@@ -96,6 +96,220 @@
             <name>extensionAllowed</name>
          </attribute>
          <node>
+            <name>Communicate</name>
+            <description>Convey knowledge of or information about something.</description>
+            <node>
+               <name>Communicate-gesturally</name>
+               <description>Communicate nonverbally using visible bodily actions, either in place of speech or together and in parallel with spoken words. Gestures include movement of the hands, face, or other parts of the body.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Move-face</value>
+                  <value>Move-upper-extremity</value>
+               </attribute>
+               <node>
+                  <name>Clap-hands</name>
+                  <description>Strike the palms of against one another resoundingly, and usually repeatedly, especially to express approval.</description>
+               </node>
+               <node>
+                  <name>Clear-throat</name>
+                  <description>Cough slightly so as to speak more clearly, attract attention, or to express hesitancy before saying something awkward.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-face</value>
+                     <value>Move-head</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Frown</name>
+                  <description>Express disapproval, displeasure, or concentration, typically by turning down the corners of the mouth.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-face</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Grimace</name>
+                  <description>Make a twisted expression, typically expressing disgust, pain, or wry amusement.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-face</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Nod-head</name>
+                  <description>Tilt head in alternating up and down arcs along the sagittal plane. It is most commonly, but not universally, used to indicate agreement, acceptance, or acknowledgement.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-head</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Pump-fist</name>
+                  <description>Raise with fist clenched in triumph or affirmation.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-upper-extremity</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Raise-eyebrows</name>
+                  <description>Move eyebrows upward.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-face</value>
+                     <value>Move-eyes</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Shake-head</name>
+                  <description>Turn head from side to side as a way of showing disagreement or refusal.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-head</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Shhh</name>
+                  <description>Place finger over lips and possibly uttering the syllable shhh to indicate the need to be quiet.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-upper-extremity</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Shrug</name>
+                  <description>Lift shoulders up towards head to indicate a lack of knowledge about a particular topic.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-upper-extremity</value>
+                     <value>Move-torso</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Smile</name>
+                  <description>Form facial features into a pleased, kind, or amused expression, typically with the corners of the mouth turned up and the front teeth exposed.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-face</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Spread-hands</name>
+                  <description>Spread hands apart to indicate ignorance.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-upper-extremity</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Thumbs-down</name>
+                  <description>Extend the thumb downward to indicate disapproval.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-upper-extremity</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Thumb-up</name>
+                  <description>Extend the thumb upward to indicate approval.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-upper-extremity</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Wave</name>
+                  <description>Raise hand and move left and right, as a greeting or sign of departure.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-upper-extremity</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Widen-eyes</name>
+                  <description>Open eyes and possibly with eyebrows lifted especially to express surprise or fear.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-face</value>
+                     <value>Move-eyes</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Wink</name>
+                  <description>Close and open one eye quickly, typically to indicate that something is a joke or a secret or as a signal of affection or greeting.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Move-face</value>
+                     <value>Move-eyes</value>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>Communicate-musically</name>
+               <description>Communicate using music.</description>
+               <node>
+                  <name>Hum</name>
+                  <description>Make a low, steady continuous sound like that of a bee. Sing with the lips closed and without uttering speech.</description>
+               </node>
+               <node>
+                  <name>Play-instrument</name>
+                  <description>Make musical sounds using an instrument.</description>
+               </node>
+               <node>
+                  <name>Sing</name>
+                  <description>Produce musical tones by means of the voice.</description>
+               </node>
+               <node>
+                  <name>Vocalize</name>
+                  <description>Utter vocal sounds.</description>
+               </node>
+               <node>
+                  <name>Whistle</name>
+                  <description>Produce a shrill clear sound by forcing breath out or air in through the puckered lips.</description>
+               </node>
+            </node>
+            <node>
+               <name>Communicate-vocally</name>
+               <description>Communicate using mouth or vocal cords.</description>
+               <node>
+                  <name>Cry</name>
+                  <description>Shed tears associated with emotions, usually sadness but also joy or frustration.</description>
+               </node>
+               <node>
+                  <name>Groan</name>
+                  <description>Make a deep inarticulate sound in response to pain or despair.</description>
+               </node>
+               <node>
+                  <name>Gulp</name>
+                  <description>Swallow quickly or in large mouthfuls, often audibly, sometimes to indicate apprehension.</description>
+               </node>
+               <node>
+                  <name>Laugh</name>
+                  <description>Make the spontaneous sounds and movements of the face and body that are the instinctive expressions of lively amusement and sometimes also of contempt or derision.</description>
+               </node>
+               <node>
+                  <name>Scream</name>
+                  <description>Make loud, vociferous cries or yells to express pain, excitement, or fear.</description>
+               </node>
+               <node>
+                  <name>Shout</name>
+                  <description>Say something very loudly.</description>
+               </node>
+               <node>
+                  <name>Sigh</name>
+                  <description>Emit a long, deep, audible breath expressing sadness, relief, tiredness, or a similar feeling.</description>
+               </node>
+               <node>
+                  <name>Speak</name>
+                  <description>Communicate using spoken language.</description>
+               </node>
+               <node>
+                  <name>Whisper</name>
+                  <description>Speak very softly using breath without vocal cords.</description>
+               </node>
+            </node>
+         </node>
+         <node>
             <name>Move</name>
             <description>Move in a specified direction or manner; change position or posture.</description>
             <node>
@@ -211,14 +425,6 @@
                         <name>Stare</name>
                         <description>Look fixedly or vacantly at someone or something with eyes wide open.</description>
                      </node>
-                     <node>
-                        <name>Wink</name>
-                        <description>Close and open one eye quickly, typically to indicate that something is a joke or a secret or as a signal of affection or greeting.</description>
-                        <attribute>
-                           <name>suggestedTag</name>
-                           <value>Communicate-gesturally</value>
-                        </attribute>
-                     </node>
                   </node>
                   <node>
                      <name>Move-face</name>
@@ -236,65 +442,29 @@
                         <description>Repeatedly grinding, tearing, and or crushing with teeth or jaws.</description>
                      </node>
                      <node>
-                        <name>Clear-throat</name>
-                        <description>Cough slightly so as to speak more clearly, attract attention, or to express hesitancy before saying something awkward.</description>
-                     </node>
-                     <node>
-                        <name>Frown</name>
-                        <description>Express disapproval, displeasure, or concentration, typically by turning down the corners of the mouth.</description>
-                     </node>
-                     <node>
-                        <name>Grimace</name>
-                        <description>Make a twisted expression, typically expressing disgust, pain, or wry amusement.</description>
-                     </node>
-                     <node>
                         <name>Gurgle</name>
                         <description>Make a hollow bubbling sound like that made by water running out of a bottle.</description>
-                     </node>
-                     <node>
-                        <name>Raise-eyebrows</name>
-                        <description>Move eyebrows upward.</description>
-                     </node>
-                     <node>
-                        <name>Smile</name>
-                        <description>Form facial features into a pleased, kind, or amused expression, typically with the corners of the mouth turned up and the front teeth exposed.</description>
                      </node>
                      <node>
                         <name>Swallow</name>
                         <description>Cause or allow something, especially food or drink to pass down the throat.</description>
                      </node>
                      <node>
-                        <name>Widen-eyes</name>
-                        <description>Open eyes and possibly with eyebrows lifted especially to express surprise or fear.</description>
-                     </node>
-                     <node>
                         <name>Yawn</name>
                         <description>Take a deep involuntary  inhalation with the mouth open often as a sign of drowsiness or boredom.</description>
                      </node>
                   </node>
-                  <node>
-                     <name>Nod-head</name>
-                     <description>Tilt head in alternating up and down arcs along the sagittal plane. It is most commonly, but not universally, used to indicate agreement, acceptance, or acknowledgement.</description>
-                  </node>
-                  <node>
-                     <name>Shake-head</name>
-                     <description>Turn head from side to side as a way of showing disagreement or refusal.</description>
-                  </node>
                </node>
                <node>
                   <name>Move-upper-extremity</name>
-                  <description>Move some part of arm, shoulder and or arm.</description>
-                  <node>
-                     <name>Clap-hands</name>
-                     <description>Strike the palms of against one another resoundingly, and usually repeatedly, especially to express approval.</description>
-                  </node>
+                  <description>Move arm, shoulder, and/or hand.</description>
                   <node>
                      <name>Drop</name>
                      <description>Let or cause to fall vertically.</description>
                   </node>
                   <node>
                      <name>Grab</name>
-                     <description>Seize suddenly or quickly; snatch; clutch.</description>
+                     <description>Seize suddenly or quickly. Snatch or clutch.</description>
                   </node>
                   <node>
                      <name>Grasp</name>
@@ -359,7 +529,7 @@
                </node>
                <node>
                   <name>Move-lower-extremity</name>
-                  <description>Move some part of leg or foot.</description>
+                  <description>Move leg and/or foot.</description>
                   <node>
                      <name>Curl-toes</name>
                      <description>Bend toes sometimes to grip.</description>
@@ -416,99 +586,27 @@
             </node>
          </node>
          <node>
-            <name>Communicate</name>
-            <description>Convey knowledge of or information about something.</description>
+            <name>Perceive</name>
+            <description>Produce an internal, conscious image through stimulating a sensory system.</description>
             <node>
-               <name>Communicate-gesturally</name>
-               <description>Communicate nonverbally using visible bodily actions, either in place of speech or together and in parallel with spoken words. Gestures include movement of the hands, face, or other parts of the body.</description>
-               <node>
-                  <name>Pump-fist</name>
-                  <description>Raise with fist clenched in triumph or affirmation.</description>
-               </node>
-               <node>
-                  <name>Spread-hands</name>
-                  <description>Spread hands apart to indicate ignorance.</description>
-               </node>
-               <node>
-                  <name>Shhh</name>
-                  <description>Place finger over lips and possibly uttering the syllable shhh to indicate the need to be quiet.</description>
-               </node>
-               <node>
-                  <name>Shrug</name>
-                  <description>Lift shoulders up towards head to indicate a lack of knowledge about a particular topic.</description>
-               </node>
-               <node>
-                  <name>Thumbs-down</name>
-                  <description>Extend the thumb downward to indicate disapproval.</description>
-               </node>
-               <node>
-                  <name>Thumb-up</name>
-                  <description>Extend the thumb upward to indicate approval.</description>
-               </node>
-               <node>
-                  <name>Wave</name>
-                  <description>Raise hand and move left and right, as a greeting or sign of departure.</description>
-               </node>
+               <name>Hear</name>
+               <description>Give attention to a sound.</description>
             </node>
             <node>
-               <name>Communicate-musically</name>
-               <description>Communicate using music.</description>
-               <node>
-                  <name>Hum</name>
-                  <description>Make a low, steady continuous sound like that of a bee. Sing with the lips closed and without uttering speech.</description>
-               </node>
-               <node>
-                  <name>Play-instrument</name>
-                  <description>Make musical sounds using an instrument.</description>
-               </node>
-               <node>
-                  <name>Sing</name>
-                  <description>Produce musical tones by means of the voice.</description>
-               </node>
-               <node>
-                  <name>Vocalize</name>
-                  <description>Utter vocal sounds.</description>
-               </node>
-               <node>
-                  <name>Whistle</name>
-                  <description>Produce a shrill clear sound by forcing breath out or air in through the puckered lips.</description>
-               </node>
+               <name>See</name>
+               <description>Direct gaze toward someone or something or in a specified direction.</description>
             </node>
             <node>
-               <name>Communicate-vocally</name>
-               <description>Communicate using mouth or vocal cords.</description>
-               <node>
-                  <name>Cry</name>
-                  <description>Shed tears associated with emotions, usually sadness but also joy or frustration.</description>
-               </node>
-               <node>
-                  <name>Groan</name>
-                  <description>Make a deep inarticulate sound in response to pain or despair.</description>
-               </node>
-               <node>
-                  <name>Gulp</name>
-                  <description>Swallow quickly or in large mouthfuls, often audibly, sometimes to indicate apprehension.</description>
-               </node>
-               <node>
-                  <name>Laugh</name>
-                  <description>Make the spontaneous sounds and movements of the face and body that are the instinctive expressions of lively amusement and sometimes also of contempt or derision.</description>
-               </node>
-               <node>
-                  <name>Scream</name>
-                  <description>Make loud, vociferous cries or yells to express pain, excitement, or fear.</description>
-               </node>
-               <node>
-                  <name>Shout</name>
-                  <description>Say something very loudly.</description>
-               </node>
-               <node>
-                  <name>Sigh</name>
-                  <description>Emit a long, deep, audible breath expressing sadness, relief, tiredness, or a similar feeling.</description>
-               </node>
-               <node>
-                  <name>Speak</name>
-                  <description>Communicate using spoken language.</description>
-               </node>
+               <name>Smell</name>
+               <description>Inhale in order to ascertain an odor or scent.</description>
+            </node>
+            <node>
+               <name>Taste</name>
+               <description>Sense a flavor in the mouth and throat on contact with a substance.</description>
+            </node>
+            <node>
+               <name>Sense-by-touch</name>
+               <description>Sense something through receptors in the skin.</description>
             </node>
          </node>
          <node>
@@ -611,26 +709,6 @@
                <description>Adaptively change behavior as the result of experience.</description>
             </node>
             <node>
-               <name>Perceive</name>
-               <description>Produce an internal, conscious image through stimulating a sensory system.</description>
-               <node>
-                  <name>Listen</name>
-                  <description>Give attention to a sound.</description>
-               </node>
-               <node>
-                  <name>Look</name>
-                  <description>Direct gaze toward someone or something or in a specified direction.</description>
-               </node>
-               <node>
-                  <name>Smell</name>
-                  <description>Inhale in order to ascertain an odor or scent.</description>
-               </node>
-               <node>
-                  <name>Taste</name>
-                  <description>Sense of flavor perceived in the mouth and throat on contact with a substance.</description>
-               </node>
-            </node>
-            <node>
                <name>Plan</name>
                <description>Think about the activities required to achieve a desired goal.</description>
             </node>
@@ -669,22 +747,6 @@
          <node>
             <name>Biological-item</name>
             <description>An entity that is biological, that is related to living organisms.</description>
-            <node>
-               <name>Organism</name>
-               <description>A living entity, more specifically a biological entity that consists of one or more cells and is capable of genomic replication (independently or not).</description>
-               <node>
-                  <name>Animal</name>
-                  <description>A living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement.</description>
-               </node>
-               <node>
-                  <name>Human</name>
-                  <description>The bipedal primate mammal Homo sapiens.</description>
-               </node>
-               <node>
-                  <name>Plant</name>
-                  <description>Any living organism that typically synthesizes its food from inorganic substances and possesses cellulose cell walls.</description>
-               </node>
-            </node>
             <node>
                <name>Anatomical-item</name>
                <description>A biological structure, system, fluid or other substance excluding single molecular entities.</description>
@@ -744,68 +806,8 @@
                      </node>
                   </node>
                   <node>
-                     <name>Upper-extremity</name>
-                     <description>For clinical purposes this term is also used to refer to the whole superior limb.</description>
-                     <node>
-                        <name>Elbow</name>
-                        <description>A type of hinge joint located between the forearm and upper arm.</description>
-                     </node>
-                     <node>
-                        <name>Forearm</name>
-                        <description>Lower part of the arm between the elbow and wrist.</description>
-                     </node>
-                     <node>
-                        <name>Hand</name>
-                        <description>The distal portion of the upper extremity. It consists of the carpus, metacarpus, and digits.</description>
-                        <node>
-                           <name>Finger</name>
-                           <description>Any of the digits of the hand.</description>
-                           <node>
-                              <name>Index-finger</name>
-                              <description>The second finger from the radial side of the hand, next to the thumb.</description>
-                           </node>
-                           <node>
-                              <name>Little-finger</name>
-                              <description>The fifth and smallest finger from the radial side of the hand.</description>
-                           </node>
-                           <node>
-                              <name>Middle-finger</name>
-                              <description>The middle or third finger from the radial side of the hand.</description>
-                           </node>
-                           <node>
-                              <name>Ring-finger</name>
-                              <description>The fourth finger from the radial side of the hand.</description>
-                           </node>
-                           <node>
-                              <name>Thumb</name>
-                              <description>The thick and short hand digit which is next to the index finger in humans.</description>
-                           </node>
-                        </node>
-                        <node>
-                           <name>Hand-palm</name>
-                           <description>The part of the inner surface of the hand that extends from the wrist to the bases of the fingers.</description>
-                        </node>
-                        <node>
-                           <name>Knuckles</name>
-                           <description>A part of a finger at a joint where the bone is near the surface, especially where the finger joins the hand.</description>
-                        </node>
-                     </node>
-                     <node>
-                        <name>Shoulder</name>
-                        <description>Joint attaching upper arm to trunk.</description>
-                     </node>
-                     <node>
-                        <name>Upper-arm</name>
-                        <description>Portion of arm between shoulder and elbow.</description>
-                     </node>
-                     <node>
-                        <name>Wrist</name>
-                        <description>A joint between the distal end of the radius and the proximal row of carpal bones.</description>
-                     </node>
-                  </node>
-                  <node>
                      <name>Lower-extremity</name>
-                     <description>For clinical purposes this term is also used to refer to the whole inferior limb.</description>
+                     <description>Refers to the whole inferior limb (leg and/or foot).</description>
                      <node>
                         <name>Ankle</name>
                         <description>A gliding joint between the distal ends of the tibia and fibula and the proximal end of the talus.</description>
@@ -863,6 +865,66 @@
                         <description>The abdominal circumference at the navel.</description>
                      </node>
                   </node>
+                  <node>
+                     <name>Upper-extremity</name>
+                     <description>Refers to the whole superior limb (shoulder, arm, elbow, wrist, hand).</description>
+                     <node>
+                        <name>Elbow</name>
+                        <description>A type of hinge joint located between the forearm and upper arm.</description>
+                     </node>
+                     <node>
+                        <name>Forearm</name>
+                        <description>Lower part of the arm between the elbow and wrist.</description>
+                     </node>
+                     <node>
+                        <name>Hand</name>
+                        <description>The distal portion of the upper extremity. It consists of the carpus, metacarpus, and digits.</description>
+                        <node>
+                           <name>Finger</name>
+                           <description>Any of the digits of the hand.</description>
+                           <node>
+                              <name>Index-finger</name>
+                              <description>The second finger from the radial side of the hand, next to the thumb.</description>
+                           </node>
+                           <node>
+                              <name>Little-finger</name>
+                              <description>The fifth and smallest finger from the radial side of the hand.</description>
+                           </node>
+                           <node>
+                              <name>Middle-finger</name>
+                              <description>The middle or third finger from the radial side of the hand.</description>
+                           </node>
+                           <node>
+                              <name>Ring-finger</name>
+                              <description>The fourth finger from the radial side of the hand.</description>
+                           </node>
+                           <node>
+                              <name>Thumb</name>
+                              <description>The thick and short hand digit which is next to the index finger in humans.</description>
+                           </node>
+                        </node>
+                        <node>
+                           <name>Hand-palm</name>
+                           <description>The part of the inner surface of the hand that extends from the wrist to the bases of the fingers.</description>
+                        </node>
+                        <node>
+                           <name>Knuckles</name>
+                           <description>A part of a finger at a joint where the bone is near the surface, especially where the finger joins the hand.</description>
+                        </node>
+                     </node>
+                     <node>
+                        <name>Shoulder</name>
+                        <description>Joint attaching upper arm to trunk.</description>
+                     </node>
+                     <node>
+                        <name>Upper-arm</name>
+                        <description>Portion of arm between shoulder and elbow.</description>
+                     </node>
+                     <node>
+                        <name>Wrist</name>
+                        <description>A joint between the distal end of the radius and the proximal row of carpal bones.</description>
+                     </node>
+                  </node>
                </node>
                <node>
                   <name>Organ</name>
@@ -871,6 +933,22 @@
                <node>
                   <name>Tissue</name>
                   <description>An anatomical structure consisting of similarly specialized cells and intercellular matrix, aggregated according to genetically determined spatial relationships, performing a specific function.</description>
+               </node>
+            </node>
+            <node>
+               <name>Organism</name>
+               <description>A living entity, more specifically a biological entity that consists of one or more cells and is capable of genomic replication (independently or not).</description>
+               <node>
+                  <name>Animal</name>
+                  <description>A living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement.</description>
+               </node>
+               <node>
+                  <name>Human</name>
+                  <description>The bipedal primate mammal Homo sapiens.</description>
+               </node>
+               <node>
+                  <name>Plant</name>
+                  <description>Any living organism that typically synthesizes its food from inorganic substances and possesses cellulose cell walls.</description>
                </node>
             </node>
          </node>
@@ -3012,7 +3090,7 @@
             </node>
             <node>
                <name>Distractor</name>
-               <description>A person or thing that distracts or a plausible but incorrect option in a multiple-choice question.</description>
+               <description>A person or thing that distracts or a plausible but incorrect option in a multiple-choice question. In pyschological studies this is sometimes referred to as a foil.</description>
             </node>
             <node>
                <name>Expected</name>
@@ -3564,10 +3642,6 @@
             <node>
                <name>Rural</name>
                <description>Of or pertaining to the country as opposed to the city.</description>
-               <node>
-                  <name>Wooden-walkway</name>
-                  <description>A path made out of wood.</description>
-               </node>
             </node>
             <node>
                <name>Terrain</name>
@@ -4319,31 +4393,31 @@
                <name>Sensory-modality</name>
                <description>Indication of which senses are affected by or used to perceive something.</description>
                <node>
-                  <name>Auditory-modality</name>
+                  <name>Auditory</name>
                   <description>Using the sense of hearing.</description>
                </node>
                <node>
-                  <name>Gustatory-modality</name>
+                  <name>Gustatory</name>
                   <description>Using the sense of taste.</description>
                </node>
                <node>
-                  <name>Olfactory-modality</name>
+                  <name>Olfactory</name>
                   <description>Using the sense of smell.</description>
                </node>
                <node>
-                  <name>Somatic-modality</name>
+                  <name>Somatic</name>
                   <description>Using the feelings in the body or of the nervous system.</description>
                </node>
                <node>
-                  <name>Tactile-modality</name>
+                  <name>Tactile</name>
                   <description>Using the sense of touch.</description>
                </node>
                <node>
-                  <name>Vestibular-modality</name>
+                  <name>Vestibular</name>
                   <description>Using the sense of balance or body position.</description>
                </node>
                <node>
-                  <name>Visual-modality</name>
+                  <name>Visual</name>
                   <description>Using the sense of sight.</description>
                </node>
             </node>
