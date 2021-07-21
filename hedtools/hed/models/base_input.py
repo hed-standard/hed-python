@@ -23,7 +23,8 @@ class BaseInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, display_name=None):
+    def __init__(self, filename, file_type=None, worksheet_name=None, has_column_names=True,
+                 mapper=None, display_name=None):
         """Constructor for the BaseInput class.
 
          Parameters
