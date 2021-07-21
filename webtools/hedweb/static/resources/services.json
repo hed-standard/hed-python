@@ -121,11 +121,11 @@
     },
     "meanings": {
         "check_for_warnings": "If true, check for warnings when validating.",
-        "column_x_check": "If present with value 'on' indicates that column number x has HED tags",
+        "column_x_check": "If present with value 'on' indicates that column number x has HED tags.",
         "column_x_input": "Contains the prefix appended to column x if x has HED tags.",
         "defs_expand": "If true, assembly expands definitions and replaces def/XXX with def-expand/XXX.",
         "events_string": "A BIDS events file as a string.",
-        "has_column_names": "If true, the first row of the spreadsheet is interpreted as column names.",
+        "has_column_names": "If true, the first row of the spreadsheet or events file is interpreted as column names.",
         "hed_columns": "A list of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are used.",
         "hed_strings": "List of HED strings to be processed.",
         "json_string": "JSON sidecar as a string",
