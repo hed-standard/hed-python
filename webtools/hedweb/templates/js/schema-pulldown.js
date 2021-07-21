@@ -17,8 +17,8 @@ $('#schema_version').on('change',function () {
 /**
  * Checks if the HED file uploaded has a valid extension.
  */
-$('#schema_file').on('change', function () {
-    let hedSchema = $('#schema_file');
+$('#schema_path').on('change', function () {
+    let hedSchema = $('#schema_path');
     let hedPath = hedSchema.val();
     let hedFile = hedSchema[0].files[0];
     if (fileHasValidExtension(hedPath, XML_FILE_EXTENSIONS)) {
@@ -71,7 +71,7 @@ function getSchemaVersions() {
  */
 function getVersionFromSchemaFile(hedXMLFile) {
     let formData = new FormData();
-    formData.append('schema_file', hedXMLFile);
+    formData.append('schema_path', hedXMLFile);
     $.ajax({
         type: 'POST',
         url: "{{ url_for('route_blueprint.schema_version_results')}}",
@@ -102,7 +102,7 @@ function getVersionFromSchemaFile(hedXMLFile) {
  * Checks to see if a HED XML file is specified when the HED drop-down is set to "Other".
  */
 function schemaSpecifiedWhenOtherIsSelected() {
-    let hedFile = $('#schema_file');
+    let hedFile = $('#schema_path');
     let hedFileIsEmpty = hedFile[0].files.length === 0;
     if ($('#schema_version').val() === OTHER_VERSION_OPTION && hedFileIsEmpty) {
         flashMessageOnScreen('Schema version is not specified.', 'error', 'schema_select_flash');

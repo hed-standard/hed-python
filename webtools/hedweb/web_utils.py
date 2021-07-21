@@ -1,46 +1,15 @@
-import os
+import io
 import json
-import pathlib
-import tempfile
+import os
 from urllib.parse import urlparse
+from flask import current_app, Response, make_response
 from werkzeug.utils import secure_filename
-from flask import current_app, Response
 
-from hed.schema.hed_schema_file import load_schema, from_string
-from hed.util import hed_cache, file_util
-from hed.util.event_file_input import EventFileInput
-from hed.util.hed_file_input import HedFileInput
-from hed.util.column_def_group import ColumnDefGroup
-from hed.util.exceptions import HedFileError
-from hed.util.file_util import get_file_extension, delete_file_if_it_exists
-from hedweb.constants import common
+from hed import schema as hedschema
+from hed.errors.exceptions import HedFileError
+from hedweb.constants import common, file_constants
 
 app_config = current_app.config
-
-
-def convert_number_str_to_list(number_str):
-    """Converts a string of integers to a list of integers, which is useful for hedweb forms.
-
-    Parameters
-    ----------
-    number_str: str
-        A string containing integers.
-
-    Returns
-    -------
-    list
-        A list containing numbers.
-    """
-    if number_str:
-        return list(map(int, number_str.split(',')))
-    return []
-
-
-def delete_file_no_exceptions(file_path):
-    try:
-        return delete_file_if_it_exists(file_path)
-    except:
-        return False
 
 
 def file_extension_is_valid(filename, accepted_file_extensions=None):
@@ -66,27 +35,7 @@ def file_extension_is_valid(filename, accepted_file_extensions=None):
         return False
 
 
-def find_all_str_indices_in_list(list_of_str, str_value):
-    """Find the indices of a string value in a list.
-
-    Parameters
-    ----------
-    list_of_str: list
-        A list containing strings.
-    str_value: string
-        A string value.
-
-    Returns
-    -------
-    list
-        A list containing all of the indices where a string value occurs in a string list.
-
-    """
-    return [index + 1 for index, value in enumerate(list_of_str) if
-            value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
-
-
-def form_has_file(request, file_field, valid_extensions):
+def form_has_file(request, file_field, valid_extensions=None):
     """Checks to see if a file name with valid extension is present in the request object.
 
     Parameters
@@ -111,7 +60,7 @@ def form_has_file(request, file_field, valid_extensions):
 
 
 def form_has_option(request, option_name, target_value):
-    """Checks if the given option has a specific value. This is used for radio buttons.
+    """Checks if the given option has a specific value. This is used for radio buttons and check boxes.
 
     Parameters
     ----------
@@ -128,12 +77,12 @@ def form_has_option(request, option_name, target_value):
         True if the target radio button has been set and false otherwise
     """
 
-    if option_name in request.values and request.values[option_name] == target_value:
+    if option_name in request.form and request.form[option_name] == target_value:
         return True
     return False
 
 
-def form_has_url(request, url_field, valid_extensions):
+def form_has_url(request, url_field, valid_extensions=None):
     """Checks to see if the url_field has a value with a valid extension.
 
     Parameters
@@ -151,12 +100,14 @@ def form_has_url(request, url_field, valid_extensions):
         True if a URL is present in request object.
 
     """
+    if url_field not in request.form:
+        return False
     parsed_url = urlparse(request.form.get(url_field))
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
 
-def generate_response_download_file_from_text(download_text, display_name=None,
-                                              header=None, msg_category='success', msg=''):
+def generate_download_file_from_text(download_text, display_name=None,
+                                     header=None, msg_category='success', msg=''):
     """Generates a download other response.
 
     Parameters
@@ -195,48 +146,24 @@ def generate_response_download_file_from_text(download_text, display_name=None,
                              'Category': msg_category, 'Message': msg})
 
 
-def generate_download_file_response(download_file, display_name=None, header=None, category='success', msg=''):
-    """Generates a download other response.
+def generate_download_spreadsheet(results,  msg_category='success', msg=''):
+    # return generate_download_test()
+    spreadsheet = results[common.SPREADSHEET]
+    display_name = results[common.OUTPUT_DISPLAY_NAME]
 
-    Parameters
-    ----------
-    download_file: str
-        Local path of the file to be downloaded into the response.
-    display_name: str
-        Name to be assigned to the file in the response
-    header: str
-        Optional header -- header for download file blob
-    category: str
-        Category of the message to be displayed ('Success', 'Error', 'Warning')
-    msg: str
-        Optional message to be displayed in the submit-flash-field
-
-    Returns
-    -------
-    response object
-        A response object containing the downloaded file.
-
-    """
-    if not display_name:
-        display_name = download_file
-
-    if not download_file:
-        raise HedFileError('FileInvalid', f"No download file given", "")
-
-    if not pathlib.Path(download_file).is_file():
-        raise HedFileError('FileDoesNotExist', f"File {download_file} not found", "")
-
-    def generate():
-        with open(download_file, 'r', encoding='utf-8') as download:
-            if header:
-                yield header
-            for line in download:
-                yield line
-            delete_file_no_exceptions(download_file)
-
-    return Response(generate(), mimetype='text/plain charset=utf-8',
-                    headers={'Content-Disposition': f"attachment filename={display_name}",
-                             'Category': category, 'Message': msg})
+    if not spreadsheet.loaded_workbook:
+        return generate_download_file_from_text(spreadsheet.to_csv(), display_name=display_name,
+                                                msg_category=msg_category, msg=msg)
+    buffer = io.BytesIO()
+    spreadsheet.to_excel(buffer)
+    buffer.seek(0)
+    response = make_response()
+    response.data = buffer.read()
+    response.headers['Content-Disposition'] = 'attachment; filename=' + display_name
+    response.headers['Category'] = msg_category
+    response.headers['Message'] = msg
+    response.mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    return response
 
 
 def generate_filename(base_name, prefix=None, suffix=None, extension=None):
@@ -269,6 +196,11 @@ def generate_filename(base_name, prefix=None, suffix=None, extension=None):
     filename = pieces[0]
     for name in pieces[1:]:
         filename = filename + '_' + name
+    # if not extension and base_name:
+    #     extension = os.path.splitext(secure_filename(base_name))[1]
+    # else:
+    #     extension = ''
+    # filename = filename + '.' + secure_filename(extension)
     if extension:
         filename = filename + '.' + secure_filename(extension)
     return filename
@@ -298,20 +230,8 @@ def generate_text_response(download_text, msg_category='success', msg=''):
     return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
 
 
-def get_events(arguments, json_dictionary=None, def_dicts=None):
-    if common.EVENTS_STRING in arguments:
-        events = EventFileInput(csv_string=arguments[common.EVENTS_STRING],
-                                json_def_files=json_dictionary, def_dicts=def_dicts)
-    elif common.EVENTS_PATH in arguments:
-        events = EventFileInput(filename=arguments[common.EVENTS_PATH],
-                                json_def_files=json_dictionary, def_dicts=def_dicts)
-    else:
-        raise HedFileError('NoEventsFile', 'No events file was provided', '')
-    return events
-
-
-def get_hed_path_from_pull_down(request):
-    """Gets the hed path from a section of form that uses a pull-down box and hed_cache
+def get_hed_schema_from_pull_down(request):
+    """Creates a HedSchema object from a section of form that uses a pull-down box and hed_cache
     Parameters
     ----------
     request: Request object
@@ -319,124 +239,26 @@ def get_hed_path_from_pull_down(request):
 
     Returns
     -------
-    tuple: str, str
-        The HED XML local path and the HED display file name
+    tuple: str
+        A HedSchema object
     """
+
     if common.SCHEMA_VERSION not in request.form:
-        hed_file_path = ''
-        schema_display_name = ''
+        raise HedFileError("NoSchemaError", "Must provide a valid schema or schema version", "")
     elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
-        hed_file_path = hed_cache.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
-        schema_display_name = os.path.basename(hed_file_path)
-    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and \
-            common.SCHEMA_PATH in request.files:
-        hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
-        schema_display_name = request.files[common.SCHEMA_PATH].filename
+        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+        hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
+    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and common.SCHEMA_PATH in request.files:
+        f = request.files[common.SCHEMA_PATH]
+        hed_schema = hedschema.from_string(f.read(file_constants.BYTE_LIMIT).decode('ascii'),
+                                           file_type=secure_filename(f.filename))
     else:
-        hed_file_path = ''
-        schema_display_name = ''
-    return hed_file_path, schema_display_name
-
-
-def get_hed_schema(arguments):
-    if common.SCHEMA_STRING in arguments:
-        schema_format = arguments.get(common.SCHEMA_FORMAT, ".xml")
-        hed_schema = from_string(arguments[common.SCHEMA_STRING], file_type=schema_format)
-    elif common.SCHEMA_PATH in arguments:
-        hed_schema = load_schema(arguments[common.SCHEMA_PATH])
-    elif common.SCHEMA_URL in arguments:
-        hed_file_path = file_util.url_to_file(arguments[common.SCHEMA_URL])
-        hed_schema = load_schema(hed_file_path)
-    elif common.SCHEMA_VERSION in arguments:
-        hed_file_path = hed_cache.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
-        hed_schema = load_schema(hed_file_path)
-    else:
-        raise HedFileError('NoHEDSchema', 'No valid HED schema was provided', '')
+        raise HedFileError("NoSchemaFile", "Must provide a valid schema for upload if other chosen", "")
     return hed_schema
 
 
-def get_json_dictionary(arguments, json_optional=False):
-    if common.JSON_STRING in arguments:
-        json_dictionary = ColumnDefGroup(json_string=arguments[common.JSON_STRING])
-    elif common.JSON_PATH in arguments:
-        json_dictionary = ColumnDefGroup(json_filename=arguments[common.JSON_PATH])
-    elif json_optional:
-        json_dictionary = None
-    else:
-        raise HedFileError('NoJSONDictionary', 'No JSON dictionary was provided', '')
-    return json_dictionary
-
-
-def get_optional_form_field(request, form_field_name, field_type=''):
-    """Gets the specified optional form field if present.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from the validation form.
-    form_field_name: string
-        The name of the optional form field.
-    field_type: str
-        Name of expected type: 'boolean' or 'string'
-
-    Returns
-    -------
-    boolean or string
-        A boolean or string value based on the form field type.
-
-    """
-    form_field_value = ''
-    if field_type == common.BOOLEAN:
-        form_field_value = False
-        if form_field_name in request.form:
-            form_field_value = True
-    elif field_type == common.STRING:
-        if form_field_name in request.form:
-            form_field_value = request.form[form_field_name]
-    return form_field_value
-
-
-def get_spreadsheet(arguments):
-    if common.SPREADSHEET_STRING in arguments:
-        spreadsheet = None
-    elif common.SPREADSHEET_PATH in arguments:
-        spreadsheet = HedFileInput(arguments.get(common.SPREADSHEET_PATH, None),
-                                   worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
-                                   tag_columns=arguments.get(common.TAG_COLUMNS, None),
-                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
-                                   column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY, None))
-    else:
-        raise HedFileError('NoSpreadsheet', 'No spreadsheet was provided', '')
-    return spreadsheet
-
-
-def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
-    """Gets the other paths of the uploaded files in the form.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from a form.
-    file_key: str
-        key name in the files dictionary of the Request object
-    valid_extensions: list of str
-        List of valid extensions
-
-    Returns
-    -------
-    tuple
-        A tuple containing the other paths. The two other paths are for the spreadsheet and a optional HED XML other.
-    """
-    uploaded_file_name = ''
-    original_file_name = ''
-    if form_has_file(request, file_key, valid_extensions):
-        uploaded_file_name = save_file_to_upload_folder(request.files[file_key])
-        original_file_name = request.files[file_key].filename
-    return uploaded_file_name, original_file_name
-
-
 def handle_error(ex, hed_info=None, title=None, return_as_str=True):
-    """Handles an error by logging and returning a dictionary or simple string
+    """Handles an error by returning a dictionary or simple string
 
     Parameters
     ----------
@@ -498,87 +320,17 @@ def handle_http_error(ex):
     else:
         message = str(ex)
     error_message = f"{error_code}: [{message}]"
-    current_app.logger.error(error_message)
     return generate_text_response('', msg_category='error', msg=error_message)
 
 
-def save_file_to_upload_folder(file_object, delete_on_close=False):
-    """Save a file_object to the upload folder.
-
-    Parameters
-    ----------
-    file_object: File object
-        A other object that points to a other that was first saved in a temporary location.
-    delete_on_close: bool
-        If true will delete after closing
-
-    Returns
-    -------
-    string
-        The path to the other that was saved to the temporary folder.
-
-    """
-
-    if file_object.filename:
-        file_extension = get_file_extension(file_object.filename)
-        temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_extension, delete=delete_on_close,
-                                                            dir=current_app.config['UPLOAD_FOLDER'])
-        for line in file_object:
-            temporary_upload_file.write(line)
-        return temporary_upload_file.name
+def package_results(results):
+    msg = results.get('msg', '')
+    msg_category = results.get('msg_category', 'success')
+    display_name = results.get('output_display_name', '')
+    if results['data']:
+        return generate_download_file_from_text(results['data'], display_name=display_name,
+                                                msg_category=msg_category, msg=msg)
+    elif not results.get('spreadsheet', None):
+        return generate_text_response("", msg=msg, msg_category=msg_category)
     else:
-        raise("UnableToUploadFile", "File could not uploaded", "UnknownFile")
-
-
-def save_file_to_upload_folder_no_exception(file_object, delete_on_close=False):
-    """Save a other to the upload folder.
-
-    Parameters
-    ----------
-    file_object: File object
-        A other object that points to a other that was first saved in a temporary location.
-    delete_on_close: bool
-        If true will delete after closing
-
-    Returns
-    -------
-    string
-        The path to the other that was saved to the temporary folder.
-
-    """
-    file_path = ''
-    try:
-        if file_object.filename:
-            file_extension = get_file_extension(file_object.filename)
-            temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_extension, delete=delete_on_close,
-                                                                dir=current_app.config['UPLOAD_FOLDER'])
-            for line in file_object:
-                temporary_upload_file.write(line)
-            file_path = temporary_upload_file.name
-    except:
-        file_path = ''
-    return file_path
-
-
-def save_text_to_upload_folder(text, filename):
-    """Saves a string in the upload folder as filename.
-
-    Parameters
-    ----------
-    text: string
-        A printable string.
-    filename: str
-        File name of the issue folder
-
-    Returns
-    -------
-    string
-        The name of the validation output other.
-
-    """
-
-    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    with open(file_path, 'w', encoding='utf-8') as text_file:
-        text_file.write(text)
-    text_file.close()
-    return file_path
+        return generate_download_spreadsheet(results, msg_category=msg_category, msg=msg)

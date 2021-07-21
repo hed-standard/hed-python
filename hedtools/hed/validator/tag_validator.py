@@ -7,9 +7,9 @@ import datetime
 import re
 import inflect
 
-from hed.util.error_types import ValidationErrors, ValidationWarnings
-from hed.util import error_reporter
-from hed.schema.hed_schema_constants import HedKey
+from hed.errors import error_reporter
+from hed.schema import HedKey
+from hed.errors.error_types import ValidationErrors
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -17,16 +17,20 @@ pluralize.defnoun("hertz", "hertz")
 
 class TagValidator:
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+'
-    DIGIT_EXPRESSION = r'^-?[\d.]+(?:e-?\d+)?$'
     DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
     INVALID_STRING_CHARS = '[]{}~'
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
-    DOUBLE_QUOTE = '"'
     COMMA = ','
     CLOCK_TIME_UNIT_CLASS = 'clockTime'
     DATE_TIME_UNIT_CLASS = 'dateTime'
     TIME_UNIT_CLASS = 'time'
+
+    DATE_TIME_VALUE_CLASS = 'dateTime'
+    NUMERIC_VALUE_CLASS = "numericClass"
+
+    DEFAULT_ALLOWED_PLACEHOLDER_CHARS = ".+-^ _"
+    TAG_ALLOWED_CHARS = "-_/"
 
     def __init__(self, hed_schema=None, check_for_warnings=False, run_semantic_validation=True,
                  allow_numbers_to_be_pound_sign=False, error_handler=None):
@@ -50,18 +54,49 @@ class TagValidator:
             error_handler = error_reporter.ErrorHandler()
         self._error_handler = error_handler
         self._hed_schema = hed_schema
+        self._check_for_warnings = check_for_warnings
+        self._run_semantic_validation = run_semantic_validation
         if hed_schema:
             self._hed_schema_dictionaries = hed_schema.dictionaries
         else:
-            self._hed_schema_dictionaries = None
-        self._check_for_warnings = check_for_warnings
-        self._run_semantic_validation = run_semantic_validation
+            self._hed_schema_dictionaries = {}
+            self._run_semantic_validation = False
         self._placeholders_allowed_in_strings = allow_numbers_to_be_pound_sign
 
-        if allow_numbers_to_be_pound_sign:
-            self._digit_expression = self.DIGIT_OR_POUND_EXPRESSION
-        else:
-            self._digit_expression = self.DIGIT_EXPRESSION
+        self.UNIT_CLASS_TYPE_DICT = {
+            self.DATE_TIME_UNIT_CLASS: self._is_date_time,
+            self.CLOCK_TIME_UNIT_CLASS: self._is_clock_face_time,
+            self.TIME_UNIT_CLASS: self._is_clock_face_time,
+        }
+
+        self.VALUE_CLASS_TYPE_DICT = {
+            self.DATE_TIME_VALUE_CLASS: self._is_date_time,
+            self.NUMERIC_VALUE_CLASS: self._validate_numeric_value_class,
+        }
+
+    # ==========================================================================
+    # Top level validator functions
+    # =========================================================================+
+    def run_hed_string_validators(self, hed_string_obj):
+        """Do the most basic high level checks of the hed string, for basic invalid characters or bad delimiters
+
+         Parameters
+         ----------
+         hed_string_obj: HedString
+            A HED string.
+         Returns
+         -------
+         []
+             The validation issues associated with a HED string.
+
+         """
+        validation_issues = []
+        validation_issues += self.check_invalid_character_issues(hed_string_obj.get_original_hed_string())
+        validation_issues += self.check_count_tag_group_parentheses(hed_string_obj.get_original_hed_string())
+        validation_issues += self.check_delimiter_issues_in_hed_string(hed_string_obj.get_original_hed_string())
+        for tag in hed_string_obj.get_all_tags():
+            validation_issues += self.check_tag_formatting(tag)
+        return validation_issues
 
     def run_individual_tag_validators(self, original_tag):
         """Runs the validators on the individual tags in a HED string.
@@ -76,74 +111,46 @@ class TagValidator:
              The validation issues associated with the top-level in the HED string.
          """
         validation_issues = []
-        validation_issues += self.check_tag_formatting(original_tag)
-        if not validation_issues:
-            if self._run_semantic_validation:
-                validation_issues += self.tag_exist_in_schema(original_tag)
-                validation_issues += self.check_if_tag_unit_class_units_are_valid(original_tag)
-                validation_issues += self.check_if_tag_requires_child(original_tag)
+        validation_issues += self.check_tag_invalid_chars(original_tag)
+        if self._run_semantic_validation:
+            validation_issues += self.check_tag_exists_in_schema(original_tag)
+            if self.is_unit_class_tag(original_tag):
+                validation_issues += self.check_tag_unit_class_units_are_valid(original_tag)
                 if self._check_for_warnings:
-                    validation_issues += self.check_if_tag_unit_class_units_exist(original_tag)
+                    validation_issues += self.check_tag_unit_class_units_exist(original_tag)
+            elif self.is_value_class_tag(original_tag):
+                validation_issues += self.check_tag_value_class_valid(original_tag)
+            elif original_tag.extension_or_value_portion:
+                validation_issues += self.check_for_invalid_extension_chars(original_tag)
+
+            validation_issues += self.check_tag_requires_child(original_tag)
         if self._check_for_warnings:
             validation_issues += self.check_capitalization(original_tag)
         return validation_issues
 
-    def run_tag_group_validators(self, tag_group):
-        """Runs the validators on the groups in a HED string.
-
-         Parameters
-         ----------
-         tag_group: TagGroup
-            a HedGroup to validate.
-         Returns
-         -------
-         []
-             The validation issues associated with the groups in a HED string.
-         """
-        validation_issues = []
-        # There are currently no checks for groups.  This placeholder left intentionally.
-        return validation_issues
-
-    def run_hed_string_validators(self, hed_string):
-        """Do the most basic high level checks of the hed string, for basic invalid characters or bad delimiters
-
-         Parameters
-         ----------
-         hed_string: str
-            A HED string.
-         Returns
-         -------
-         []
-             The validation issues associated with a HED string.
-
-         """
-        validation_issues = []
-        validation_issues += self.find_invalid_character_issues(hed_string)
-        validation_issues += self.count_tag_group_parentheses(hed_string)
-        validation_issues += self.find_delimiter_issues_in_hed_string(hed_string)
-        return validation_issues
-
-    def run_tag_level_validators(self, original_tag_list):
+    def run_tag_level_validators(self, original_tag_list, is_top_level, is_group):
         """Runs the validators on tags at each level in a HED string. This pertains to the top-level, all groups,
            and nested groups.
 
-         Parameters
-         ----------
-         original_tag_list: [HedTag]
-            A list containing the original tags.
-         Returns
-         -------
-         []
-             The validation issues associated with each level in a HED string.
-
-         """
+        Parameters
+        ----------
+        original_tag_list: [HedTag]
+           A list containing the original tags.
+        is_top_level: bool
+            If True, this group is a "top level tag group", that can contain definitions, Onset, etc tags.
+        is_group: bool
+            If true, group is contained by parenthesis
+        Returns
+        -------
+        []
+            The validation issues associated with each level in a HED string.
+        """
         validation_issues = []
-        if self._run_semantic_validation:
-            validation_issues += self.check_if_multiple_unique_tags_exist(original_tag_list)
-        validation_issues += self.check_if_duplicate_tags_exist(original_tag_list)
+        validation_issues += self.check_duplicate_tags_exist(original_tag_list)
+        validation_issues += self.check_tag_level_issue(original_tag_list, is_top_level, is_group)
         return validation_issues
 
-    def _run_tag_validators(self, tags):
+    def run_all_tags_validators(self, tags):
         """Validates the multi-tag properties in a hed string, eg required tags.
 
          Parameters
@@ -156,113 +163,37 @@ class TagValidator:
              The validation issues associated with the tags in a HED string.
          """
         validation_issues = []
-        if self._check_for_warnings and self._run_semantic_validation:
-            validation_issues += self.check_for_required_tags(tags)
+        if self._run_semantic_validation:
+            if self._check_for_warnings:
+                validation_issues += self.check_for_required_tags(tags)
+            validation_issues += self.check_multiple_unique_tags_exist(tags)
         return validation_issues
 
-    def tag_exist_in_schema(self, original_tag):
-        """Reports a validation error if the tag provided is not a valid tag or doesn't take a value.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The original tag that is used to report the error.
-        Returns
-        -------
-        []
-            A validation issues list. If no issues are found then an empty list is returned.
-        """
-        validation_issues = []
-        formatted_tag = original_tag.lower()
-        is_extension_tag = self.is_extension_allowed_tag(formatted_tag)
-        if self._hed_schema_dictionaries[HedKey.AllTags].get(formatted_tag) or \
-                self.tag_takes_value(formatted_tag):
-            return validation_issues
-
-        if not is_extension_tag:
-            validation_issues += self._error_handler.format_val_error(ValidationErrors.INVALID_TAG, tag=original_tag)
-        return validation_issues
-
-    def tag_exists_in_schema(self, formatted_tag):
-        """Checks to see if the tag is a valid HED tag.
-
-        Parameters
-        ----------
-        formatted_tag: str
-            The tag that is used to do the validation.
-        Returns
-        -------
-        bool
-            True if the tag is a valid HED tag. False, if otherwise.
-
-        """
-        return self._hed_schema_dictionaries[HedKey.AllTags].get(formatted_tag) is not None
-
-    pattern_doubleslash = re.compile(r"([ \t/]{2,}|^/|/$)")
-
-
-    def check_tag_formatting(self, original_tag):
-        validation_issues = []
-        for match in self.pattern_doubleslash.finditer(str(original_tag)):
-            validation_issues += self._error_handler.format_val_error(ValidationErrors.EXTRA_SLASHES_OR_SPACES,
-                                                                      character=match.group(),
-                                                                      index=match.start(),
-                                                                      tag=str(original_tag))
-
-        return validation_issues
-
-    def check_capitalization(self, original_tag):
-        """Reports a validation warning if the tag isn't correctly capitalized.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The original tag that is used to report the warning.
-        Returns
-        -------
-        []
-            A validation issues list. If no issues are found then an empty list is returned.
-        """
-        validation_issues = []
-        tag_names = str(original_tag).split("/")
-        # Cut off the # sign tag if it exists
-        if self.tag_takes_value(original_tag.lower()):
-            tag_names = tag_names[:-1]
-        for tag_name in tag_names:
-            correct_tag_name = tag_name.capitalize()
-            if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
-                validation_issues += self._error_handler.format_val_warning(ValidationWarnings.CAPITALIZATION,
-                                                                            tag=original_tag)
-                break
-        return validation_issues
-
-    def is_extension_allowed_tag(self, formatted_tag):
+    # ==========================================================================
+    # Basic public facing attribute getters for tags
+    # =========================================================================+
+    def is_extension_allowed_tag(self, original_tag):
         """Checks to see if the tag has the 'extensionAllowed' attribute. It will strip the tag until there are no more
         slashes to check if its ancestors have the attribute.
 
         Parameters
         ----------
-        formatted_tag: str
+        original_tag: HedTag
             The tag that is used to do the validation.
         Returns
         -------
         tag_takes_extension: bool
             True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
         """
-        tag_slash_indices = self.get_tag_slash_indices(formatted_tag)
-        for tag_slash_index in tag_slash_indices:
-            tag_substring = self.split_tag_substring_by_index(formatted_tag, tag_slash_index)
-            if self._hed_schema.tag_has_attribute(tag_substring,
-                                                  HedKey.ExtensionAllowedPropagated):
-                return True
-        return False
+        base_tag = original_tag.base_tag.lower()
+        return self._hed_schema.tag_has_attribute(base_tag, HedKey.ExtensionAllowedPropagated)
 
-    def tag_takes_value(self, formatted_tag):
+    def is_takes_value_tag(self, original_tag):
         """Checks to see if the tag has the 'takesValue' attribute.
 
         Parameters
         ----------
-        formatted_tag: str
+        original_tag: HedTag
             The tag that is used to do the validation.
         Returns
         -------
@@ -270,18 +201,14 @@ class TagValidator:
             True if the tag has the 'takesValue' attribute. False, if otherwise.
 
         """
-        if not self._hed_schema:
-            return False
-        takes_value_tag = self.replace_tag_name_with_pound(formatted_tag)
-        return self._hed_schema.tag_has_attribute(takes_value_tag,
-                                                  HedKey.TakesValue)
+        return self._value_tag_has_attribute(original_tag, HedKey.TakesValue)
 
-    def is_unit_class_tag(self, formatted_tag):
+    def is_unit_class_tag(self, original_tag):
         """Checks to see if the tag has the 'unitClass' attribute.
 
         Parameters
         ----------
-        formatted_tag: str
+        original_tag: HedTag
             The tag that is used to do the validation.
         Returns
         -------
@@ -289,219 +216,29 @@ class TagValidator:
             True if the tag has the 'unitClass' attribute. False, if otherwise.
 
         """
-        takes_value_tag = self.replace_tag_name_with_pound(formatted_tag)
-        if not self._hed_schema.has_unit_classes:
-            return False
-        return self._hed_schema.tag_has_attribute(takes_value_tag,
-                                                  HedKey.UnitClass)
+        return self._value_tag_has_attribute(original_tag, HedKey.UnitClass)
 
-    def replace_tag_name_with_pound(self, formatted_tag):
-        """Replaces the tag name with the pound sign.
+    def is_value_class_tag(self, original_tag):
+        """Checks to see if the tag has the 'valueClass' attribute.
 
         Parameters
         ----------
-        formatted_tag: str
+        original_tag: HedTag
             The tag that is used to do the validation.
         Returns
         -------
-        str
-            A tag with the a pound sign in place of it's name.
+        bool
+            True if the tag has the 'valueClass' attribute. False, if otherwise.
 
         """
-        pound_sign_tag = '#'
-        last_tag_slash_index = formatted_tag.rfind('/')
-        if last_tag_slash_index != -1:
-            pound_sign_tag = formatted_tag[:last_tag_slash_index] + '/#'
-        return pound_sign_tag
+        return self._value_tag_has_attribute(original_tag, HedKey.ValueClass)
 
-    def check_if_tag_unit_class_units_are_valid(self, original_tag):
-        """Reports a validation error if the tag provided has a unit class and the units are incorrect.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The original tag that is used to report the error.
-        Returns
-        -------
-        []
-            A validation issues list. If no issues are found then an empty list is returned.
-
-        """
-        validation_issues = []
-        formatted_tag = original_tag.lower()
-        if not self.tag_exists_in_schema(formatted_tag) and self.is_unit_class_tag(formatted_tag):
-            tag_unit_classes = self.get_tag_unit_classes(formatted_tag)
-            formatted_tag_unit_value = self.get_tag_name(formatted_tag)
-            original_tag_unit_value = self.get_tag_name(str(original_tag))
-            tag_unit_class_units = tuple(self.get_tag_unit_class_units(formatted_tag))
-            if (TagValidator.DATE_TIME_UNIT_CLASS in
-                    self._hed_schema_dictionaries[HedKey.Units]):
-                if (TagValidator.DATE_TIME_UNIT_CLASS in tag_unit_classes
-                        and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
-                    return validation_issues
-            if (TagValidator.CLOCK_TIME_UNIT_CLASS in
-                    self._hed_schema_dictionaries[HedKey.Units]):
-                if (TagValidator.CLOCK_TIME_UNIT_CLASS in tag_unit_classes
-                        and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
-                    return validation_issues
-            elif (TagValidator.TIME_UNIT_CLASS in
-                  self._hed_schema_dictionaries[HedKey.Units]):
-                if (TagValidator.TIME_UNIT_CLASS in tag_unit_classes
-                        and TagValidator.is_clock_face_time(formatted_tag_unit_value)):
-                    return validation_issues
-            if re.search(self.DIGIT_OR_POUND_EXPRESSION,
-                         self.validate_units(original_tag_unit_value,
-                                             formatted_tag_unit_value,
-                                             tag_unit_class_units)):
-                pass
-            else:
-                validation_issues += self._error_handler.format_val_error(ValidationErrors.UNIT_CLASS_INVALID_UNIT,
-                                                                          tag=original_tag,
-                                                                          unit_class_units=','.join(
-                                                                              sorted(tag_unit_class_units)))
-
-        return validation_issues
-
-    def get_valid_unit_plural(self, unit):
-        """
-        Parameters
-        ----------
-        unit: str
-            unit to generate plural forms
-        Returns
-        -------
-        [str]
-            list of plural units
-        """
-        derivative_units = [unit]
-        if self._hed_schema.has_unit_modifiers and \
-                self._hed_schema_dictionaries[HedKey.UnitSymbol].get(unit) is None:
-            derivative_units.append(pluralize.plural(unit))
-        return derivative_units
-
-    def _strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
-        """Validates and strips units from a value.
-
-        Parameters
-        ----------
-        unit_value: str
-            The value to validate.
-        unit: str
-            The unit to strip.
-        is_unit_symbol: bool
-            Whether the unit is a symbol.
-        Returns
-        -------
-        tuple
-            The found unit and the stripped value.
-        """
-        found_unit = False
-        stripped_value = ''
-
-        if str(unit_value).startswith(unit):
-            found_unit = True
-            stripped_value = str(unit_value)[len(unit):].strip()
-        elif str(unit_value).endswith(unit):
-            found_unit = True
-            stripped_value = str(unit_value)[0:-len(unit)].strip()
-
-        if found_unit and self._hed_schema.has_unit_modifiers:
-            if is_unit_symbol:
-                modifier_key = HedKey.SIUnitSymbolModifier
-            else:
-                modifier_key = HedKey.SIUnitModifier
-
-            for unit_modifier in self._hed_schema_dictionaries[modifier_key]:
-                if stripped_value.startswith(unit_modifier):
-                    stripped_value = stripped_value[len(unit_modifier):].strip()
-                elif stripped_value.endswith(unit_modifier):
-                    stripped_value = stripped_value[0:-len(unit_modifier)].strip()
-        return found_unit, stripped_value
-
-    def validate_units(self, original_tag_unit_value, formatted_tag_unit_value, tag_unit_class_units):
-        """Checks to see if the specified string has a valid unit, and removes it if so.
-
-        Parameters
-        ----------
-        original_tag_unit_value: str
-            The unformatted value of the tag
-        formatted_tag_unit_value: str
-            The formatted value of the tag
-        tag_unit_class_units: [str]
-            A list of valid units for this tag
-        Returns
-        -------
-        str
-            A tag_unit_values with the valid unit removed, if one was present.
-            Otherwise, returns tag_unit_values
-
-        """
-        tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
-        for unit in tag_unit_class_units:
-            derivative_units = self.get_valid_unit_plural(unit)
-            for derivative_unit in derivative_units:
-                if self._hed_schema.has_unit_modifiers and \
-                        self._hed_schema_dictionaries[HedKey.UnitSymbol].get(unit):
-                    found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
-                                                                                derivative_unit,
-                                                                                True)
-                else:
-                    found_unit, stripped_value = self._strip_off_units_if_valid(formatted_tag_unit_value,
-                                                                                derivative_unit,
-                                                                                False)
-                if found_unit:
-                    return stripped_value
-
-        return formatted_tag_unit_value
-
-    def check_if_tag_unit_class_units_exist(self, original_tag):
-        """Reports a validation warning if the tag provided has a unit class but no units are not specified.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The original tag that is used to report the error.
-        Returns
-        -------
-        []
-            A list validation error dicts.  Returns empty list if no issues found
-        """
-        validation_issues = []
-        formatted_tag = original_tag.lower()
-        if self.is_unit_class_tag(formatted_tag):
-            tag_unit_values = self.get_tag_name(formatted_tag)
-            if re.search(self._digit_expression, tag_unit_values):
-                default_unit = self.get_unit_class_default_unit(formatted_tag)
-                validation_issues += self._error_handler.format_val_warning(ValidationWarnings.UNIT_CLASS_DEFAULT_USED,
-                                                                            tag=original_tag,
-                                                                            default_unit=default_unit)
-        return validation_issues
-
-    def get_tag_name(self, tag):
-        """Gets the tag name from the tag path
-
-        Parameters
-        ----------
-        tag: str
-            A tag which is a path.
-        Returns
-        -------
-        str
-            The tag name.
-
-        """
-        tag_name = tag
-        tag_slash_indices = self.get_tag_slash_indices(tag)
-        if tag_slash_indices:
-            tag_name = tag[tag_slash_indices[-1] + 1:]
-        return tag_name
-
-    def get_tag_unit_classes(self, formatted_tag):
+    def get_tag_unit_classes(self, original_tag):
         """Gets the unit classes associated with a particular tag.
 
         Parameters
         ----------
-        formatted_tag: str
+        original_tag: HedTag
             The tag that is used to do the validation.
         Returns
         -------
@@ -510,19 +247,19 @@ class TagValidator:
             the tag doesn't have unit classes associated with it.
 
         """
-        unit_classes = []
-        unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
-        if self.is_unit_class_tag(formatted_tag):
-            unit_classes = self._hed_schema_dictionaries[HedKey.UnitClass][unit_class_tag]
+        unit_classes = self._value_tag_has_attribute(original_tag, HedKey.UnitClass, return_value=True)
+        if unit_classes:
             unit_classes = unit_classes.split(',')
+        else:
+            unit_classes = []
         return unit_classes
 
-    def get_tag_unit_class_units(self, formatted_tag):
+    def get_tag_unit_class_units(self, original_tag):
         """Gets the unit class units associated with a particular tag.
 
         Parameters
         ----------
-        formatted_tag: str
+        original_tag: HedTag
             The tag that is used to do the validation.
         Returns
         -------
@@ -532,25 +269,22 @@ class TagValidator:
 
         """
         units = []
-        unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
-        if self.is_unit_class_tag(formatted_tag):
-            unit_classes = self._hed_schema_dictionaries[HedKey.UnitClass][unit_class_tag]
-            unit_classes = unit_classes.split(',')
-
-            for unit_class in unit_classes:
-                try:
-                    units += (self._hed_schema_dictionaries[HedKey.Units][unit_class])
-                # Todo: What is this exception handling doing?
-                except Exception:
-                    continue
+        unit_classes = self.get_tag_unit_classes(original_tag)
+        for unit_class in unit_classes:
+            unit = self._hed_schema_dictionaries[HedKey.UnitClasses].get(unit_class)
+            if unit:
+                units += unit
         return units
 
-    def get_unit_class_default_unit(self, formatted_tag):
+    def get_tag_value_class(self, original_tag):
+        return self._value_tag_has_attribute(original_tag, HedKey.ValueClass, return_value=True)
+
+    def get_unit_class_default_unit(self, original_tag):
         """Gets the default unit class unit that is associated with the specified tag.
 
         Parameters
         ----------
-        formatted_tag: str
+        original_tag: HedTag
             The tag that is used to do the validation.
         Returns
         -------
@@ -560,23 +294,44 @@ class TagValidator:
 
         """
         default_unit = ''
-        unit_class_tag = self.replace_tag_name_with_pound(formatted_tag)
-        if self.is_unit_class_tag(formatted_tag):
-            if unit_class_tag in self._hed_schema_dictionaries[HedKey.UnitClass]:
-                unit_classes = \
-                    self._hed_schema_dictionaries[HedKey.UnitClass][unit_class_tag].split(',')
-                first_unit_class = unit_classes[0]
-                default_unit = self._hed_schema_dictionaries[HedKey.DefaultUnits][
-                    first_unit_class]
+        unit_classes = self.get_tag_unit_classes(original_tag)
+        if unit_classes:
+            first_unit_class = unit_classes[0]
+            default_unit = self._hed_schema_dictionaries[HedKey.DefaultUnits][first_unit_class]
+
         return default_unit
 
-    def check_if_tag_requires_child(self, original_tag):
-        """Reports a validation error if the tag provided has the 'requireChild' attribute.
+    # ==========================================================================
+    # Mostly internal functions to check individual types of errors
+    # =========================================================================+
+    def check_invalid_character_issues(self, hed_string):
+        """Reports an error if it finds any invalid characters as defined by TagValidator.INVALID_STRING_CHARS
 
         Parameters
         ----------
-        original_tag: HedTag
-            The original tag that is used to report the error.
+        hed_string: str
+            A hed string.
+        Returns
+        -------
+        list
+            A validation issues []. If no issues are found then an empty list is returned.
+
+        """
+        validation_issues = []
+        for index, character in enumerate(hed_string):
+            if character in TagValidator.INVALID_STRING_CHARS:
+                validation_issues += self._report_invalid_character_error(hed_string, index)
+
+        return validation_issues
+
+    def check_count_tag_group_parentheses(self, hed_string):
+        """Reports a validation error if there are an unequal number of opening or closing parentheses. This is the
+         first check before the tags are parsed.
+
+        Parameters
+        ----------
+        hed_string: str
+            A hed string.
         Returns
         -------
         []
@@ -584,138 +339,15 @@ class TagValidator:
 
         """
         validation_issues = []
-        if self._hed_schema_dictionaries[HedKey.RequireChild].get(original_tag.lower()):
-            validation_issues += self._error_handler.format_val_error(ValidationErrors.REQUIRE_CHILD,
-                                                                      tag=original_tag)
+        number_of_opening_parentheses = hed_string.count('(')
+        number_of_closing_parentheses = hed_string.count(')')
+        if number_of_opening_parentheses != number_of_closing_parentheses:
+            validation_issues += self._error_handler.format_error(ValidationErrors.HED_PARENTHESES_MISMATCH,
+                                                                  opening_parentheses_count=number_of_opening_parentheses,
+                                                                  closing_parentheses_count=number_of_closing_parentheses)
         return validation_issues
 
-    def check_for_required_tags(self, tags):
-        """Reports a validation error if the required tags aren't present.
-
-        Parameters
-        ----------
-        tags: [HedTag]
-            A list containing the tags.
-        Returns
-        -------
-        []
-            A validation issues list. If no issues are found then an empty list is returned.
-        """
-        validation_issues = []
-        required_tag_prefixes = self._hed_schema_dictionaries[HedKey.RequiredPrefix]
-        for required_tag_prefix in required_tag_prefixes:
-            capitalized_required_tag_prefix = \
-                self._hed_schema_dictionaries[HedKey.RequiredPrefix][required_tag_prefix]
-            if sum([x.lower().startswith(required_tag_prefix) for x in tags]) < 1:
-                validation_issues += self._error_handler.format_val_warning(
-                    ValidationWarnings.REQUIRED_PREFIX_MISSING,
-                    tag_prefix=capitalized_required_tag_prefix)
-        return validation_issues
-
-    def check_if_multiple_unique_tags_exist(self, original_tag_list):
-        """Reports a validation error if two or more tags start with a tag prefix that has the 'unique' attribute.
-
-        Parameters
-        ----------
-        original_tag_list: [HedTag]
-            A list containing tags that are used to report the error.
-        Returns
-        -------
-        []
-            A validation issues list. If no issues are found then an empty list is returned.
-        """
-        validation_issues = []
-        unique_tag_prefixes = self._hed_schema_dictionaries[HedKey.Unique]
-        for unique_tag_prefix in unique_tag_prefixes:
-            unique_tag_prefix_bool_mask = [x.lower().startswith(unique_tag_prefix) for x in original_tag_list]
-            if sum(unique_tag_prefix_bool_mask) > 1:
-                validation_issues += self._error_handler.format_val_error(
-                    ValidationErrors.MULTIPLE_UNIQUE,
-                    tag_prefix=self._hed_schema_dictionaries[HedKey.Unique][unique_tag_prefix])
-        return validation_issues
-
-    def tag_has_unique_prefix(self, tag):
-        """Checks to see if the tag starts with a prefix.
-
-        Parameters
-        ----------
-        tag: str
-            A tag.
-        Returns
-        -------
-        bool
-            True if the tag starts with a unique prefix. False if otherwise.
-
-        """
-        unique_tag_prefixes = self._hed_schema_dictionaries[HedKey.Unique]
-        for unique_tag_prefix in unique_tag_prefixes:
-            if tag.lower().startswith(unique_tag_prefix):
-                return True
-        return False
-
-    def check_if_duplicate_tags_exist(self, original_tag_list):
-        """Reports a validation error if two or more tags are the same.
-
-        This only tracks exact matches, it will not catch two identical  value tags with different values.
-        Parameters
-        ----------
-        original_tag_list: [HedTag]
-            A list containing tags that are used to report the error.
-        Returns
-        -------
-        []
-            A validation issues list. If no issues are found then an empty list is returned.
-
-        """
-        validation_issues = []
-        tag_set = set()
-        for tag in original_tag_list:
-            formatted_tag = tag.lower()
-            if formatted_tag in tag_set:
-                validation_issues += self._error_handler.format_val_error(ValidationErrors.DUPLICATE,
-                                                                          tag=tag)
-                continue
-            tag_set.add(formatted_tag)
-
-        return validation_issues
-
-    def get_tag_slash_indices(self, tag, slash='/'):
-        """Gets all of the indices in a tag that are slashes.
-
-        Parameters
-        ----------
-        tag: str
-            A tag.
-        slash: str
-            The slash character. By default it is a forward slash.
-        Returns
-        -------
-        []
-            A list containing the indices of the tag slashes.
-
-        """
-        return [s.start() for s in re.finditer(slash, tag)]
-
-    def split_tag_substring_by_index(self, tag, end_index):
-        """Gets a tag substring from the start until the end index.
-
-        Parameters
-        ----------
-        tag: str
-            A tag.
-        end_index: int
-            A index for the tag substring to end.
-        Returns
-        -------
-        str
-            A tag substring.
-
-        """
-        if end_index != 0:
-            return tag[:end_index]
-        return tag
-
-    def find_delimiter_issues_in_hed_string(self, hed_string):
+    def check_delimiter_issues_in_hed_string(self, hed_string):
         """Reports a validation error if there are missing commas or commas in tags that take values.
 
         Parameters
@@ -738,12 +370,10 @@ class TagValidator:
             current_tag += current_character
             if not current_character.strip():
                 continue
-            if TagValidator.character_is_delimiter(current_character):
+            if TagValidator._character_is_delimiter(current_character):
                 if current_tag.strip() == current_character:
-                    issues += self._error_handler.format_val_error(ValidationErrors.EMPTY_TAG,
-                                                                   character=current_character,
-                                                                   index=i,
-                                                                   hed_string=hed_string)
+                    issues += self._error_handler.format_error(ValidationErrors.HED_TAG_EMPTY, source_string=hed_string,
+                                                               char_index=i)
                     current_tag = ''
                     continue
                 current_tag = ''
@@ -751,111 +381,82 @@ class TagValidator:
                 if current_tag.strip() == self.OPENING_GROUP_CHARACTER:
                     current_tag = ''
                 else:
-                    issues += self._error_handler.format_val_error(ValidationErrors.COMMA_MISSING, tag=current_tag)
-            elif TagValidator.comma_is_missing_after_closing_parentheses(last_non_empty_valid_character,
-                                                                         current_character):
-                issues += self._error_handler.format_val_error(ValidationErrors.COMMA_MISSING, tag=current_tag[:-1])
+                    issues += self._error_handler.format_error(ValidationErrors.HED_COMMA_MISSING, tag=current_tag)
+            elif TagValidator._comma_is_missing_after_closing_parentheses(last_non_empty_valid_character,
+                                                                          current_character):
+                issues += self._error_handler.format_error(ValidationErrors.HED_COMMA_MISSING, tag=current_tag[:-1])
                 break
             last_non_empty_valid_character = current_character
             last_non_empty_valid_index = i
-        if TagValidator.character_is_delimiter(last_non_empty_valid_character):
-            issues += self._error_handler.format_val_error(ValidationErrors.EMPTY_TAG,
-                                                           character=last_non_empty_valid_character,
-                                                           index=last_non_empty_valid_index,
-                                                           hed_string=hed_string)
+        if TagValidator._character_is_delimiter(last_non_empty_valid_character):
+            issues += self._error_handler.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                                       char_index=last_non_empty_valid_index,
+                                                       source_string=hed_string)
         return issues
 
-    def report_invalid_character_error(self, character, index, hed_string):
-        """Reports a error that is related to an invalid character.
+    pattern_doubleslash = re.compile(r"([ \t/]{2,}|^/|/$)")
 
-        Parameters
-        ----------
-        character: str
-            The invalid character.
-        index: int
-            The index of the invalid character in the HED string.
-        hed_string: str
-            The HED string that caused the error.
-        Returns
-        -------
-        [{}]
-            A singleton list with a dictionary representing the error.
-
-        """
-        error_code = ValidationErrors.INVALID_CHARACTER
-        if character == "~":
-            error_code = ValidationErrors.TILDES_NOT_SUPPORTED
-        return self._error_handler.format_val_error(error_code, character=character,
-                                                    index=index,
-                                                    hed_string=hed_string)
-
-    @staticmethod
-    def comma_is_missing_after_closing_parentheses(last_non_empty_character, current_character):
-        """
-        Checks to see if a comma is missing after a closing parentheses in a HED string.
-
-        This is a helper function for the find_missing_commas_in_hed_string function.
-
-        Parameters
-        ----------
-        last_non_empty_character: str
-            The last non-empty string in the HED string.
-        current_character: str
-            The current character in the HED string.
-        Returns
-        -------
-        bool
-            True if a comma is missing after a closing parentheses. False, if otherwise.
-
-        """
-        return last_non_empty_character == TagValidator.CLOSING_GROUP_CHARACTER and \
-               not (TagValidator.character_is_delimiter(current_character) or
-                    current_character == TagValidator.CLOSING_GROUP_CHARACTER)
-
-    @staticmethod
-    def character_is_delimiter(character):
-        """Checks to see if the character is a delimiter. A delimiter is a commma
-
-        Parameters
-        ----------
-        character: str
-            A string character.
-        Returns
-        -------
-        bool
-            Returns true if the character is a delimiter. False, if otherwise. A delimiter is a comma
-
-        """
-        return character == TagValidator.COMMA
-
-    def find_invalid_character_issues(self, hed_string):
-        """Reports an error if it finds any invalid characters as defined by TagValidator.INVALID_STRING_CHARS
-
-        Parameters
-        ----------
-        hed_string: str
-            A hed string.
-        Returns
-        -------
-        list
-            A validation issues []. If no issues are found then an empty list is returned.
-
-        """
+    def check_tag_formatting(self, original_tag):
         validation_issues = []
-        for index, character in enumerate(hed_string):
-            if character in TagValidator.INVALID_STRING_CHARS:
-                validation_issues += self.report_invalid_character_error(character, index, hed_string)
+        for match in self.pattern_doubleslash.finditer(original_tag.org_tag):
+            validation_issues += self._error_handler.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
+                                                                  tag=original_tag,
+                                                                  index_in_tag=match.start(),
+                                                                  index_in_tag_end=match.end())
 
         return validation_issues
 
-    def count_tag_group_parentheses(self, hed_string):
-        """Reports a validation error if there are an unequal number of opening or closing parentheses. This is the
-         first check before the tags are parsed.
+    def check_tag_invalid_chars(self, original_tag):
+        """Reports a validation errors for any invalid characters in the given tag.
 
         Parameters
         ----------
-        hed_string: str
-            A hed string.
+        original_tag: HedTag
+            The original tag that is used to report the error.
+        Returns
+        -------
+        []
+            A validation issues list. If no issues are found then an empty list is returned.
+        """
+        allowed_chars = self.TAG_ALLOWED_CHARS
+        if not self._hed_schema or not self._hed_schema.is_hed3_schema:
+            allowed_chars += " "
+        return self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
+
+    def check_tag_exists_in_schema(self, original_tag):
+        """Reports a validation error if the tag provided is not a valid tag or doesn't take a value.
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The original tag that is used to report the error.
+        Returns
+        -------
+        []
+            A validation issues list. If no issues are found then an empty list is returned.
+        """
+        validation_issues = []
+        formatted_tag = original_tag.lower()
+        if self._hed_schema_dictionaries[HedKey.AllTags].get(formatted_tag) or \
+                self.is_takes_value_tag(original_tag):
+            return validation_issues
+
+        is_extension_tag = self.is_extension_allowed_tag(original_tag)
+        if not is_extension_tag:
+            validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_EXTENSION, tag=original_tag)
+        elif self._check_for_warnings:
+            validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_EXTENDED, tag=original_tag,
+                                                                  index_in_tag=len(original_tag.org_base_tag),
+                                                                  index_in_tag_end=None)
+        return validation_issues
+
+    def check_tag_unit_class_units_are_valid(self, original_tag):
+        """Reports a validation error if the tag provided has a unit class and the units are incorrect.
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The original tag that is used to report the error.
         Returns
         -------
         []
@@ -863,17 +464,326 @@ class TagValidator:
 
         """
         validation_issues = []
-        number_of_opening_parentheses = hed_string.count('(')
-        number_of_closing_parentheses = hed_string.count(')')
-        if number_of_opening_parentheses != number_of_closing_parentheses:
-            validation_issues += self._error_handler.format_val_error(
-                ValidationErrors.PARENTHESES,
-                opening_parentheses_count=number_of_opening_parentheses,
-                closing_parentheses_count=number_of_closing_parentheses)
+        if self.is_unit_class_tag(original_tag):
+            validated_unit = None
+            tag_unit_classes = self.get_tag_unit_classes(original_tag)
+            original_tag_unit_value = original_tag.extension_or_value_portion
+            formatted_tag_unit_value = original_tag_unit_value.lower()
+
+            # Check for special known types with extra validation, like clock face or dates.
+            for unit_class_type in tag_unit_classes:
+                if not self._hed_schema.has_value_classes:
+                    valid_func = self.UNIT_CLASS_TYPE_DICT.get(unit_class_type)
+                    if valid_func:
+                        if valid_func(formatted_tag_unit_value):
+                            validated_unit = unit_class_type
+                            break
+                unit_class_units = self._hed_schema_dictionaries[HedKey.UnitClasses].get(unit_class_type)
+                stripped_value = self._validate_units(original_tag_unit_value,
+                                                      formatted_tag_unit_value,
+                                                      unit_class_units)
+
+                if self._validate_value_class_portion(original_tag, stripped_value):
+                    validated_unit = unit_class_type
+                    break
+
+            tag_unit_class_units = self.get_tag_unit_class_units(original_tag)
+            if not validated_unit:
+                if tag_unit_class_units:
+                    validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_INVALID,
+                                                                          original_tag,
+                                                                          unit_class_units=tag_unit_class_units)
+            validation_issues += self._check_for_placeholder(original_tag)
         return validation_issues
 
+    def check_tag_value_class_valid(self, original_tag):
+        """Reports a validation error if the tag provided has has an invalid value portion
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The original tag that is used to report the error.
+        Returns
+        -------
+        error_list: []
+            A validation issues list. If no issues are found then an empty list is returned.
+        """
+        validation_issues = []
+        if not self._validate_value_class_portion(original_tag, original_tag.extension_or_value_portion):
+            validation_issues += self._error_handler.format_error(ValidationErrors.HED_VALUE_INVALID,
+                                                                  original_tag)
+
+        validation_issues += self._check_for_placeholder(original_tag)
+        return validation_issues
+
+    def _validate_value_class_portion(self, original_tag, portion_to_validate):
+        if not self._hed_schema.has_value_classes:
+            return self._validate_numeric_value_class(portion_to_validate)
+        if not self.is_value_class_tag(original_tag):
+            return False
+
+        value_class = self.get_tag_value_class(original_tag)
+
+        valid_func = self.VALUE_CLASS_TYPE_DICT.get(value_class)
+        if valid_func:
+            if valid_func(portion_to_validate):
+                return True
+        else:
+            return True
+
+        return False
+
+    def check_tag_requires_child(self, original_tag):
+        """Reports a validation error if the tag provided has the 'requireChild' attribute.
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The original tag that is used to report the error.
+        Returns
+        -------
+        []
+            A validation issues list. If no issues are found then an empty list is returned.
+
+        """
+        validation_issues = []
+        if self._hed_schema_dictionaries[HedKey.RequireChild].get(original_tag.lower()):
+            validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_REQUIRES_CHILD, tag=original_tag)
+        return validation_issues
+
+    def check_tag_unit_class_units_exist(self, original_tag):
+        """Reports a validation warning if the tag provided has a unit class but no units are not specified.
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The original tag that is used to report the error.
+        Returns
+        -------
+        []
+            A list validation error dicts.  Returns empty list if no issues found
+        """
+        validation_issues = []
+        if self.is_unit_class_tag(original_tag):
+            tag_unit_values = original_tag.extension_or_value_portion
+            if re.search(self.DIGIT_OR_POUND_EXPRESSION, tag_unit_values):
+                default_unit = self.get_unit_class_default_unit(original_tag)
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
+                                                                      tag=original_tag,
+                                                                      default_unit=default_unit)
+        return validation_issues
+
+    def check_for_invalid_extension_chars(self, original_tag):
+        """Reports a validation errors for any invalid characters in the given extension/value portion.
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The original tag that is used to report the error.
+        Returns
+        -------
+        []
+            A validation issues list. If no issues are found then an empty list is returned.
+        """
+        allowed_chars = self.TAG_ALLOWED_CHARS
+        allowed_chars += self.DEFAULT_ALLOWED_PLACEHOLDER_CHARS
+        if self._placeholders_allowed_in_strings:
+            allowed_chars += "#"
+        allowed_chars += " "
+        return self._check_invalid_chars(original_tag.extension_or_value_portion, allowed_chars, original_tag,
+                                         starting_index=len(original_tag.org_base_tag) + 1)
+
+    def check_capitalization(self, original_tag):
+        """Reports a validation warning if the tag isn't correctly capitalized.
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The original tag that is used to report the warning.
+        Returns
+        -------
+        []
+            A validation issues list. If no issues are found then an empty list is returned.
+        """
+        validation_issues = []
+        tag_names = str(original_tag).split("/")
+        # Cut off the # sign tag if it exists
+        if self.is_takes_value_tag(original_tag):
+            tag_names = tag_names[:-1]
+        for tag_name in tag_names:
+            correct_tag_name = tag_name.capitalize()
+            if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_STYLE_WARNING,
+                                                                      tag=original_tag)
+                break
+        return validation_issues
+
+    def check_duplicate_tags_exist(self, original_tag_list):
+        """Reports a validation error if two or more tags are the same.
+
+        This only tracks exact matches, it will not catch two identical  value tags with different values.
+        Parameters
+        ----------
+        original_tag_list: [HedTag]
+            A list containing tags that are used to report the error.
+        Returns
+        -------
+        []
+            A validation issues list. If no issues are found then an empty list is returned.
+
+        """
+        validation_issues = []
+        tag_set = set()
+        for tag in original_tag_list:
+            formatted_tag = tag.lower()
+            if formatted_tag in tag_set:
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_REPEATED, tag=tag)
+                continue
+            tag_set.add(formatted_tag)
+
+        return validation_issues
+
+    def check_tag_level_issue(self, original_tag_list, is_top_level, is_group):
+        """
+            Checks all tags in the group to verify they are correctly positioned in the hierarchy
+
+        Parameters
+        ----------
+        original_tag_list: [HedTag]
+           A list containing the original tags.
+        is_top_level: bool
+            If True, this group is a "top level tag group", that can contain definitions, Onset, etc tags.
+        is_group: bool
+            If true, group is contained by parenthesis
+        Returns
+        -------
+        []
+            The validation issues associated with each level in a HED string.
+        """
+        validation_issues = []
+        if self._run_semantic_validation:
+            top_level_tags = [tag for tag in original_tag_list if
+                              self._hed_schema.tag_has_attribute(tag.base_tag.lower(), HedKey.TopLevelTagGroup)]
+            tag_group_tags = [tag for tag in original_tag_list if
+                              self._hed_schema.tag_has_attribute(tag.base_tag.lower(), HedKey.TagGroup)]
+            for tag_group_tag in tag_group_tags:
+                if not is_group:
+                    validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_GROUP_TAG,
+                                                                          tag=tag_group_tag)
+            for top_level_tag in top_level_tags:
+                if not is_top_level:
+                    validation_issues += self._error_handler.format_error(ValidationErrors.HED_TOP_LEVEL_TAG,
+                                                                          tag=top_level_tag)
+
+            if is_top_level and len(top_level_tags) > 1:
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS,
+                                                                      tag=top_level_tags[0],
+                                                                      multiple_tags=top_level_tags[1:])
+
+        return validation_issues
+
+    def check_for_required_tags(self, tags):
+        """Reports a validation error if the required tags aren't present.
+
+        Parameters
+        ----------
+        tags: [HedTag]
+            A list containing the tags.
+        Returns
+        -------
+        []
+            A validation issues list. If no issues are found then an empty list is returned.
+        """
+        validation_issues = []
+        required_tag_prefixes = self._hed_schema_dictionaries[HedKey.RequiredPrefix]
+        for required_tag_prefix in required_tag_prefixes:
+            capitalized_required_tag_prefix = \
+                self._hed_schema_dictionaries[HedKey.RequiredPrefix][required_tag_prefix]
+            if sum([x.lower().startswith(required_tag_prefix) for x in tags]) < 1:
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING,
+                                                                      tag_prefix=capitalized_required_tag_prefix)
+        return validation_issues
+
+    def check_multiple_unique_tags_exist(self, original_tag_list):
+        """Reports a validation error if two or more tags start with a tag prefix that has the 'unique' attribute.
+
+        Parameters
+        ----------
+        original_tag_list: [HedTag]
+            A list containing tags that are used to report the error.
+        Returns
+        -------
+        []
+            A validation issues list. If no issues are found then an empty list is returned.
+        """
+        validation_issues = []
+        unique_tag_prefixes = self._hed_schema_dictionaries[HedKey.Unique]
+        for unique_tag_prefix in unique_tag_prefixes:
+            unique_tag_prefix_bool_mask = [x.lower().startswith(unique_tag_prefix) for x in original_tag_list]
+            if sum(unique_tag_prefix_bool_mask) > 1:
+                validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_NOT_UNIQUE,
+                                                                      tag_prefix=unique_tag_prefixes[unique_tag_prefix])
+        return validation_issues
+
+    # ==========================================================================
+    # Private utility functions
+    # =========================================================================+
+    def _get_valid_unit_plural(self, unit):
+        """
+        Parameters
+        ----------
+        unit: str
+            unit to generate plural forms
+        Returns
+        -------
+        [str]
+            list of plural units
+        """
+        derivative_units = [unit]
+        if self._hed_schema.has_unit_modifiers and \
+                self._hed_schema_dictionaries[HedKey.UnitSymbol].get(unit) is None:
+            derivative_units.append(pluralize.plural(unit))
+        return derivative_units
+
+    def _validate_units(self, original_tag_unit_value, formatted_tag_unit_value, tag_unit_class_units):
+        """Checks to see if the specified string has a valid unit, and removes it if so.
+
+        Parameters
+        ----------
+        original_tag_unit_value: str
+            The unformatted value of the tag
+        formatted_tag_unit_value: str
+            The formatted value of the tag
+        tag_unit_class_units: [str]
+            A list of valid units for this tag
+        Returns
+        -------
+        stripped_value: str
+            A tag_unit_values with the valid unit removed, if one was present.
+            Otherwise, returns original_tag_unit_value
+
+        """
+        tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
+        for unit in tag_unit_class_units:
+            derivative_units = self._get_valid_unit_plural(unit)
+            for derivative_unit in derivative_units:
+                if self._hed_schema.has_unit_modifiers and \
+                        self._hed_schema_dictionaries[HedKey.UnitSymbol].get(unit):
+                    found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
+                                                                                derivative_unit,
+                                                                                True)
+                else:
+                    found_unit, stripped_value = self._strip_off_units_if_valid(formatted_tag_unit_value,
+                                                                                derivative_unit,
+                                                                                False)
+
+                if found_unit:
+                    return stripped_value
+
+        return formatted_tag_unit_value
+
     @staticmethod
-    def is_clock_face_time(time_string):
+    def _is_clock_face_time(time_string):
         """Checks to see if the specified string is a valid HH:MM time string.
 
         Parameters
@@ -893,7 +803,7 @@ class TagValidator:
             return False
 
     @staticmethod
-    def is_date_time(date_time_string):
+    def _is_date_time(date_time_string):
         """Checks to see if the specified string is a valid ISO 8601 datetime string.
 
         Parameters
@@ -911,3 +821,195 @@ class TagValidator:
             return not date_time_obj.tzinfo
         except ValueError:
             return False
+
+    def _validate_numeric_value_class(self, numeric_string):
+        """Checks to see if the specified string is a valid ISO 8601 datetime string.
+
+        Parameters
+        ----------
+        numeric_string: str
+            A string that should be only a number, with no units at all.
+        Returns
+        -------
+        bool
+            True if the numeric string is valid. False, if otherwise.
+
+        """
+        if re.search(self.DIGIT_OR_POUND_EXPRESSION, numeric_string):
+            return True
+
+        return False
+    
+    def _report_invalid_character_error(self, hed_string, index):
+        """Reports a error that is related to an invalid character.
+
+        Parameters
+        ----------
+        hed_string: str
+            The HED string that caused the error.
+        index: int
+            The index of the invalid character in the HED string.
+        Returns
+        -------
+        [{}]
+            A singleton list with a dictionary representing the error.
+
+        """
+        error_type = ValidationErrors.HED_CHARACTER_INVALID
+        character = hed_string[index]
+        if character == "~":
+            error_type = ValidationErrors.HED_TILDES_UNSUPPORTED
+        return self._error_handler.format_error(error_type, char_index=index,
+                                                source_string=hed_string)
+
+    @staticmethod
+    def _comma_is_missing_after_closing_parentheses(last_non_empty_character, current_character):
+        """
+        Checks to see if a comma is missing after a closing parentheses in a HED string.
+
+        This is a helper function for the find_missing_commas_in_hed_string function.
+
+        Parameters
+        ----------
+        last_non_empty_character: str
+            The last non-empty string in the HED string.
+        current_character: str
+            The current character in the HED string.
+        Returns
+        -------
+        bool
+            True if a comma is missing after a closing parentheses. False, if otherwise.
+
+        """
+        return last_non_empty_character == TagValidator.CLOSING_GROUP_CHARACTER and \
+               not (TagValidator._character_is_delimiter(current_character)
+                    or current_character == TagValidator.CLOSING_GROUP_CHARACTER)
+
+    @staticmethod
+    def _character_is_delimiter(character):
+        """Checks to see if the character is a delimiter. A delimiter is a commma
+
+        Parameters
+        ----------
+        character: str
+            A string character.
+        Returns
+        -------
+        bool
+            Returns true if the character is a delimiter. False, if otherwise. A delimiter is a comma
+
+        """
+        return character == TagValidator.COMMA
+
+    def _strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
+        """Validates and strips units from a value.
+
+        Parameters
+        ----------
+        unit_value: str
+            The value to validate.
+        unit: str
+            The unit to strip.
+        is_unit_symbol: bool
+            Whether the unit is a symbol.
+        Returns
+        -------
+        tuple
+            The found unit and the stripped value.
+        """
+        found_unit = False
+        stripped_value = ''
+
+        should_be_prefix = self._hed_schema_dictionaries[HedKey.UnitPrefix].get(unit, False)
+        if should_be_prefix and str(unit_value).startswith(unit):
+            found_unit = True
+            stripped_value = str(unit_value)[len(unit):].strip()
+        elif not should_be_prefix and str(unit_value).endswith(unit):
+            found_unit = True
+            stripped_value = str(unit_value)[0:-len(unit)].strip()
+
+        if found_unit and self._hed_schema.has_unit_modifiers:
+            if is_unit_symbol:
+                modifier_key = HedKey.SIUnitSymbolModifier
+            else:
+                modifier_key = HedKey.SIUnitModifier
+
+            for unit_modifier in self._hed_schema_dictionaries[modifier_key]:
+                if stripped_value.startswith(unit_modifier):
+                    stripped_value = stripped_value[len(unit_modifier):].strip()
+                elif stripped_value.endswith(unit_modifier):
+                    stripped_value = stripped_value[0:-len(unit_modifier)].strip()
+        return found_unit, stripped_value
+
+    def _value_tag_has_attribute(self, original_tag, key=HedKey.ExtensionAllowedPropagated,
+                                 return_value=False):
+        """
+            Will return if original tag has the specified attribute, or False if original tag is not a takes value tag.
+
+        Parameters
+        ----------
+        original_tag : HedTag
+
+        key : str
+            A HedKey value to check for
+        return_value : bool
+            If true, returns the value of the attribute, rather than True/False
+
+        Returns
+        -------
+        attribute_name_or_value: bool or str
+            Returns the name or value of the specified attribute
+        """
+        if not original_tag.extension_or_value_portion:
+            return False
+
+        if key not in self._hed_schema_dictionaries:
+            return False
+        value_class_tag = original_tag.base_tag.lower() + "/#"
+
+        value = self._hed_schema_dictionaries[key].get(value_class_tag, False)
+        if return_value:
+            return value
+        return bool(value)
+
+    def _check_for_placeholder(self, original_tag):
+        """
+            Checks for a placeholder character in the extension/value portion of a tag, unless they are allowed.
+
+        Parameters
+        ----------
+        original_tag : HedTag
+
+        Returns
+        -------
+        error_list: [{}]
+        """
+        validation_issues = []
+        if not self._placeholders_allowed_in_strings:
+            starting_index = len(original_tag.org_base_tag) + 1
+            for i, character in enumerate(original_tag.extension_or_value_portion):
+                if character == "#":
+                    validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                          tag=original_tag,
+                                                                          index_in_tag=starting_index + i,
+                                                                          index_in_tag_end=starting_index + i + 1,
+                                                                          actual_error=ValidationErrors.HED_VALUE_INVALID)
+
+        return validation_issues
+
+
+    def _check_invalid_chars(self, check_string, allowed_chars, source_tag, starting_index=0, actual_error=None):
+        validation_issues = []
+        for i, character in enumerate(check_string):
+            if character.isalnum():
+                continue
+            if character in allowed_chars:
+                continue
+            # Todo: Remove this patch when clock times and invalid characters are more properly checked
+            if character == ":":
+                continue
+            validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                  tag=source_tag, index_in_tag=starting_index + i,
+                                                                  index_in_tag_end=starting_index + i + 1,
+                                                                  actual_error=actual_error)
+        return validation_issues

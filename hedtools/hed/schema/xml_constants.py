@@ -1,5 +1,11 @@
 from hed.schema.hed_schema_constants import HedKey
 
+# These are only currently used by the XML reader/writer, but that may change.
+XSI_SOURCE = "http://www.w3.org/2001/XMLSchema-instance"
+NO_NAMESPACE_XSD_KEY = f"{{{XSI_SOURCE}}}noNamespaceSchemaLocation"
+NS_ATTRIB = "xmlns:xsi"
+NO_LOC_ATTRIB = "xsi:noNamespaceSchemaLocation"
+
 
 NAME_ELEMENT = "name"
 DESCRIPTION_ELEMENT = "description"
@@ -14,6 +20,7 @@ ATTRIBUTE_PROPERTY_ELEMENT = "property"
 UNIT_CLASS_UNIT_ELEMENT = 'unit'
 UNIT_CLASS_UNITS_ELEMENT = "units"
 PROLOGUE_ELEMENT = "prologue"
+SCHEMA_ELEMENT = "schema"
 EPILOGUE_ELEMENT = "epilogue"
 
 TAG_DEF_ELEMENT = "node"
@@ -28,6 +35,10 @@ UNIT_MODIFIER_SECTION_ELEMENT = "unitModifierDefinitions"
 UNIT_MODIFIER_DEF_ELEMENT = "unitModifierDefinition"
 SCHEMA_ATTRIBUTES_SECTION_ELEMENT = "schemaAttributeDefinitions"
 SCHEMA_ATTRIBUTES_DEF_ELEMENT = "schemaAttributeDefinition"
+SCHEMA_PROPERTIES_SECTION_ELEMENT = "propertyDefinitions"
+SCHEMA_PROPERTIES_DEF_ELEMENT = "propertyDefinition"
+SCHEMA_VALUE_CLASSES_SECTION_ELEMENT = "valueClassDefinitions"
+SCHEMA_VALUE_CLASSES_DEF_ELEMENT = "valueClassDefinition"
 
 UNIT_CLASS_SECTION_ELEMENT_LEGACY = "unitClasses"
 UNIT_CLASS_DEF_ELEMENT_LEGACY = "unitClass"
@@ -38,15 +49,19 @@ UNIT_MODIFIER_DEF_ELEMENT_LEGACY = "unitModifier"
 def get_section_name(key_class, legacy_format=False):
     if not legacy_format:
         section_names = {
-            HedKey.Units: UNIT_CLASS_SECTION_ELEMENT,
+            HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
             HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
+            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
+            HedKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
         }
     else:
         section_names = {
-            HedKey.Units: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
+            HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
             HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT_LEGACY,
+            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
+            HedKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
         }
 
     return section_names.get(key_class, None)
@@ -56,16 +71,20 @@ def get_element_name(key_class, legacy_format=False):
     if not legacy_format:
         element_names = {
             HedKey.AllTags: TAG_DEF_ELEMENT,
-            HedKey.Units: UNIT_CLASS_DEF_ELEMENT,
+            HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
             HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
+            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
+            HedKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
         }
     else:
         element_names = {
             HedKey.AllTags: TAG_DEF_ELEMENT,
-            HedKey.Units: UNIT_CLASS_DEF_ELEMENT_LEGACY,
+            HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT_LEGACY,
             HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT_LEGACY,
+            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
             HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
+            HedKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
         }
 
     return element_names.get(key_class, (None, None))
@@ -73,7 +92,9 @@ def get_element_name(key_class, legacy_format=False):
 
 ATTRIBUTE_PROPERTY_ELEMENTS = {
     HedKey.AllTags: ATTRIBUTE_ELEMENT,
+    HedKey.UnitClasses: ATTRIBUTE_ELEMENT,
     HedKey.Units: ATTRIBUTE_ELEMENT,
     HedKey.UnitModifiers: ATTRIBUTE_ELEMENT,
+    HedKey.ValueClasses: ATTRIBUTE_ELEMENT,
     HedKey.Attributes: ATTRIBUTE_PROPERTY_ELEMENT
 }

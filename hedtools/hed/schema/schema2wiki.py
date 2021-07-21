@@ -31,7 +31,9 @@ class HedSchema2Wiki:
         self._flush_current_tag()
         self._output_units(hed_schema)
         self._output_unit_modifiers(hed_schema)
+        self._output_value_classes(hed_schema)
         self._output_attributes(hed_schema)
+        self._output_properties(hed_schema)
         self._output_footer(hed_schema)
 
         return self.output
@@ -41,6 +43,8 @@ class HedSchema2Wiki:
         self.current_tag_string = f"{wiki_constants.HEADER_LINE_STRING} {hed_attrib_string}"
         self._flush_current_tag()
         self._add_blank_line()
+        self.current_tag_string = wiki_constants.PROLOGUE_SECTION_ELEMENT
+        self._flush_current_tag()
         self.current_tag_string += hed_schema.prologue
         self._flush_current_tag()
         self._add_blank_line()
@@ -48,11 +52,12 @@ class HedSchema2Wiki:
         self._flush_current_tag()
 
     def _output_footer(self, hed_schema):
-        self._add_blank_line()
-        self.current_tag_string = wiki_constants.END_HED_STRING
+        self.current_tag_string = wiki_constants.EPILOGUE_SECTION_ELEMENT
+        self._flush_current_tag()
+        self.current_tag_string += hed_schema.epilogue
         self._flush_current_tag()
         self._add_blank_line()
-        self.current_tag_string += hed_schema.epilogue
+        self.current_tag_string = wiki_constants.END_HED_STRING
         self._flush_current_tag()
 
     def _output_tags(self, hed_schema):
@@ -83,9 +88,9 @@ class HedSchema2Wiki:
 
         self.current_tag_string += wiki_constants.UNIT_CLASS_STRING
         self._flush_current_tag()
-        for unit_name, unit_types in hed_schema.dictionaries[HedKey.Units].items():
+        for unit_name, unit_types in hed_schema.dictionaries[HedKey.UnitClasses].items():
             self.current_tag_string += f"* {unit_name}"
-            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.Units)
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.UnitClasses)
             self._flush_current_tag()
 
             for unit_type in unit_types:
@@ -99,7 +104,6 @@ class HedSchema2Wiki:
     def _output_unit_modifiers(self, hed_schema):
         if not hed_schema.has_unit_modifiers:
             return
-
         self.current_tag_string += wiki_constants.UNIT_MODIFIER_STRING
         self._flush_current_tag()
         for modifier_name in hed_schema.dictionaries[HedKey.UnitModifiers]:
@@ -108,14 +112,34 @@ class HedSchema2Wiki:
                 hed_schema, modifier_name, HedKey.UnitModifiers)
             self._flush_current_tag()
 
+    def _output_value_classes(self, hed_schema):
+        if not hed_schema.has_value_classes:
+            return
+        self._add_blank_line()
+        self.current_tag_string += wiki_constants.VALUE_CLASS_STRING
+        self._flush_current_tag()
+        for value_name in hed_schema.dictionaries[HedKey.ValueClasses]:
+            self.current_tag_string += f"* {value_name}"
+            self.current_tag_extra += self._format_props_and_desc(
+                hed_schema, value_name, HedKey.ValueClasses)
+            self._flush_current_tag()
+
     def _output_attributes(self, hed_schema):
         self._add_blank_line()
         self.current_tag_string += wiki_constants.ATTRIBUTE_DEFINITION_STRING
         self._flush_current_tag()
-        self._add_blank_line()
         for attribute_name in hed_schema.dictionaries[HedKey.Attributes]:
             self.current_tag_string += f"* {attribute_name}"
             self.current_tag_extra += self._format_props_and_desc(hed_schema, attribute_name, HedKey.Attributes)
+            self._flush_current_tag()
+
+    def _output_properties(self, hed_schema):
+        self._add_blank_line()
+        self.current_tag_string += wiki_constants.ATTRIBUTE_PROPERTY_STRING
+        self._flush_current_tag()
+        for prop_name in hed_schema.dictionaries[HedKey.Properties]:
+            self.current_tag_string += f"* {prop_name}"
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, prop_name, HedKey.Properties)
             self._flush_current_tag()
 
     def _flush_current_tag(self):
@@ -198,8 +222,8 @@ class HedSchema2Wiki:
             A string of the attributes that can be written to a .mediawiki formatted file
         """
         # Hardcode version to always be the first thing in attributes
-        attrib_values = [f"version:{hed_schema.header_attributes['version']}"]
-        attrib_values.extend([f"{attr}:{value}" for attr, value in
+        attrib_values = [f"version=\"{hed_schema.header_attributes['version']}\""]
+        attrib_values.extend([f"{attr}=\"{value}\"" for attr, value in
                               hed_schema.header_attributes.items() if attr != "version"])
-        final_attrib_string = ", ".join(attrib_values)
+        final_attrib_string = " ".join(attrib_values)
         return final_attrib_string

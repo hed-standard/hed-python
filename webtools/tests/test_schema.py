@@ -1,7 +1,9 @@
 import os
 import shutil
 import unittest
-from flask import Response
+from werkzeug.test import create_environ
+from werkzeug.wrappers import Request
+
 from hedweb.app_factory import AppFactory
 
 
@@ -23,14 +25,33 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_schema_form(self):
-        from hedweb.schema import generate_input_from_schema_form
-        self.assertRaises(TypeError, generate_input_from_schema_form, {},
+    def test_generate_input_from_schema_form_empty(self):
+        from hedweb.schema import get_input_from_schema_form
+        self.assertRaises(TypeError, get_input_from_schema_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_schema")
+
+    def test_get_input_from_schema_form_valid(self):
+        from hed.schema import HedSchema
+        from hedweb.constants import common
+        from hedweb.schema import get_input_from_schema_form
+        with self.app.test:
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/HED8.0.0-beta.4.xml')
+            with open(schema_path, 'rb') as fp:
+                environ = create_environ(data={common.SCHEMA_FILE: fp,
+                                               common.SCHEMA_UPLOAD_OPTIONS: common.SCHEMA_FILE_OPTION,
+                                               common.COMMAND_OPTION:  common.COMMAND_CONVERT})
+            request = Request(environ)
+            arguments = get_input_from_schema_form(request)
+            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+                                  "get_input_from_schema_form should have a HED schema")
+            self.assertEqual(common.COMMAND_CONVERT, arguments[common.COMMAND],
+                             "get_input_from_schema_form should have a command")
+            self.assertFalse(arguments[common.CHECK_FOR_WARNINGS],
+                            "get_input_from_schema_form should have check_for_warnings false when not given")
 
     def test_schema_process(self):
         from hedweb.schema import schema_process
-        from hed.util.exceptions import HedFileError
+        from hed.errors.exceptions import HedFileError
         arguments = {'schema_path': ''}
         try:
             a = schema_process(arguments)
@@ -43,39 +64,46 @@ class Test(unittest.TestCase):
 
     def test_schema_check(self):
         from hedweb.schema import schema_validate
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'schema_path': schema_path, 'schema_display_name': 'HED7.1.2.xml'}
+        from hed import schema as hedschema
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        display_name = 'HED7.2.0.xml'
         with self.app.app_context():
-            results = schema_validate(arguments)
-            self.assertTrue(results['data'], "HED 7.1.2 is not HED-3G compliant")
+            results = schema_validate(hed_schema, display_name)
+            self.assertTrue(results['data'], "HED 7.2.0 is not HED-3G compliant")
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'schema_path': schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml'}
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        display_name = 'HED8.0.0-beta.4.xml'
         with self.app.app_context():
-            results = schema_validate(arguments)
-            self.assertFalse(results['data'], "HED8.0.0-alpha.1 is HED-3G compliant")
+            results = schema_validate(hed_schema, display_name)
+            self.assertFalse(results['data'], "HED8.0.0-beta.4 is HED-3G compliant")
 
     def test_schema_convert(self):
         from hedweb.schema import schema_convert
-        from hed.util.exceptions import HedFileError
+        from hed import schema as hedschema
+        from hed.errors.exceptions import HedFileError
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'schema_path': schema_path, 'schema_display_name': 'HED7.1.2.xml'}
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        display_name = 'HED7.2.0.xml'
         with self.app.app_context():
-            results = schema_convert(arguments)
-            self.assertTrue(results['data'], "HED 7.1.2.xml can be converted to mediawiki")
+            results = schema_convert(hed_schema, display_name)
+            self.assertTrue(results['data'], "HED 7.2.0.xml can be converted to mediawiki")
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'schema_path': schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml'}
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        display_name = 'HED8.0.0-beta.4.xml'
         with self.app.app_context():
-            results = schema_convert(arguments)
-            self.assertTrue(results['data'], "HED 8.0.0-alpha.1.xml can be converted to mediawiki")
+            results = schema_convert(hed_schema, display_name)
+            self.assertTrue(results['data'], "HED 8.0.0-beta.4.xml can be converted to mediawiki")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HEDbad.xml')
-        arguments = {'schema_path': schema_path, 'schema_display_name': 'HEDbad.xml'}
+        display_name = 'HEDbad.xml'
         with self.app.app_context():
             try:
-                results = schema_convert(arguments)
+                hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+                results = schema_convert(hed_schema, display_name)
             except HedFileError:
                 pass
             except Exception:

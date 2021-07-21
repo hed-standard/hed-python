@@ -89,6 +89,7 @@ coverage.xml
 /venv/
 .idea
 config.py
+tests/xtemp_testing/*
 
 # Rope
 .ropeproject

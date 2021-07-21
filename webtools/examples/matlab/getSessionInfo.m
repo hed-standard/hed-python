@@ -1,5 +1,12 @@
 function [cookie, csrftoken] = getSessionInfo(csrf_url)
-
+%% Setup the session for accessing the HED webservices
+%  Parameters:
+%       csrf_url  = URL for the services
+%
+%  Returns: 
+%        cookie = a string cookie value
+%        csrftoken = a string csrf token for the session.
+%
     request = matlab.net.http.RequestMessage;
     uri = matlab.net.URI(csrf_url);
     response1 = send(request,uri);

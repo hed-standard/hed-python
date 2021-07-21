@@ -101,29 +101,37 @@ function getFilenameFromResponseHeader(xhr, default_name) {
 
 /**
  * Gets standard failure response for download
- * @param {String} download - Downloaded string response blob
  * @param {Object} xhr - Dictionary containing Response header information
+ * @param {String} status - a status text message
+ * @param {String} errorThrown - name of the error thrown
  * @param {String} display_name - Name used for the downloaded blob file
  * @param {String} flash_location - ID of the flash location element for displaying response Message
  */
-function getResponseFailure(download, xhr, display_name, flash_location) {
-    let info = xhr.getResponseHeader('Message')
-    let category =  xhr.getResponseHeader('Category')
-    if (info) {
-        flashMessageOnScreen(info, category, flash_location);
-    } else {
-        flashMessageOnScreen('Unknown processing error occurred for ' + display_name, 'error', flash_location);
+function getResponseFailure( xhr, status, errorThrown, display_name, flash_location) {
+    let info = xhr.getResponseHeader('Message');
+    let category =  xhr.getResponseHeader('Category');
+    if (!info) {
+        info = 'Unknown processing error occurred';
     }
+    info = info + '[Source: ' + display_name + ']' + '[Status:' + status + ']' + '[Error:' + errorThrown + ']';
+    flashMessageOnScreen(info, category, flash_location);
 }
 
-
+/**
+ * Downloads a response as a file if there is data.
+ * @param {String} download - The downloaded data to be turned into a file.
+ * @param {Object} xhr - http response header
+ * @param {String} display_name - Download filename to use if not included in the downloaded response.
+ * @param {String} flash_location - Name of the field in which to write messages if available.
+ */
 function getResponseSuccess(download, xhr, display_name, flash_location) {
+    let info = xhr.getResponseHeader('Message');
+    let category =  xhr.getResponseHeader('Category');
+    let contentType = xhr.getResponseHeader('Content-type');
     if (download) {
         let filename = getFilenameFromResponseHeader(xhr, display_name)
-        triggerDownloadBlob(download, filename);
+        triggerDownloadBlob(download, filename, contentType);
     }
-    let info = xhr.getResponseHeader('Message')
-    let category =  xhr.getResponseHeader('Category')
     if (info) {
         flashMessageOnScreen(info, category, flash_location);
     } else {
@@ -138,10 +146,7 @@ function getResponseSuccess(download, xhr, display_name, flash_location) {
  * @returns {boolean} - True if the string is null or its length is 0.
  */
 function isEmptyStr(str) {
-    if (str === null || str.length === 0) {
-        return true;
-    }
-    return false;
+    return (str === null || str.length === 0)
 }
 
 
@@ -173,11 +178,16 @@ function splitExt(filename) {
     return (-1 !== index) ? [filename.substring(0, index), filename.substring(index + 1)] : [filename, ''];
 }
 
+
 /**
  * Trigger the "save as" dialog for a text blob to save as a file with display name.
+ * @param {String} download_blob - Bytes to put in the file
+ * @param {String} display_name - File name to use if none provided in the downloaded content
+ * @param {String} content_type - Type of file to create
  */
-function triggerDownloadBlob(download_text_blob, display_name) {
-    const url = window.URL.createObjectURL(new Blob([download_text_blob]));
+function triggerDownloadBlob(download_blob, display_name, content_type) {
+    // const url = window.URL.createObjectURL(new Blob([download_text_blob]));
+    const url = URL.createObjectURL(new Blob([download_blob], {type:content_type}));
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', display_name);

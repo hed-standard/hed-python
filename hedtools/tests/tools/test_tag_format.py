@@ -1,53 +1,43 @@
 import unittest
 import os
 
-from hed.util.error_types import SchemaErrors
-from hed.util import error_reporter
-from hed.util.hed_string import HedString
-from hed.schema.hed_schema_file import load_schema
+from hed.errors import error_reporter
+from hed.models.hed_string import HedString
+from hed.errors.error_types import ValidationErrors
+from hed.errors.error_types import ErrorContext
+from tests.validator.test_tag_validator import TestHedBase
 
 
-class TestTagFormat(unittest.TestCase):
+class TestTagFormat(TestHedBase):
     schema_file = '../data/legacy_xml/reduced_no_dupe.xml'
-
-    @classmethod
-    def setUpClass(cls):
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_schema = load_schema(hed_xml)
-        cls.error_handler = error_reporter.ErrorHandler()
 
 
 class TestConvertTag(TestTagFormat):
-    def validator_base(self, test_strings, expected_results, expected_errors, convert_to_short=True):
+    def converter_base(self, test_strings, expected_results, expected_errors, convert_to_short=True):
         for test_key in test_strings:
             test_string_obj = HedString(test_strings[test_key])
+            error_handler = error_reporter.ErrorHandler()
+            error_handler.reset_error_context()
+            error_handler.push_error_context(ErrorContext.HED_STRING, test_string_obj, increment_depth_after=False)
+            test_issues = test_string_obj.convert_to_canonical_forms(self.hed_schema, error_handler)
             if convert_to_short:
-                test_errors = test_string_obj.convert_to_short(self.hed_schema)
+                string_result = test_string_obj.get_as_short()
             else:
-                test_errors = test_string_obj.convert_to_long(self.hed_schema)
-            expected_error = expected_errors[test_key]
+                string_result = test_string_obj.get_as_long()
+            expected_params = expected_errors[test_key]
             expected_result = expected_results[test_key]
-            self.assertEqual(str(test_string_obj), expected_result, test_strings[test_key])
-            self.assertCountEqual(test_errors, expected_error, test_strings[test_key])
 
-
-class TestConvertString(TestTagFormat):
-    def validator_base(self, test_strings, expected_results, expected_errors, convert_to_short=True):
-        for test_key in test_strings:
-            test_string_obj = HedString(test_strings[test_key])
-            if convert_to_short:
-                test_errors = test_string_obj.convert_to_short(self.hed_schema)
-            else:
-                test_errors = test_string_obj.convert_to_long(self.hed_schema)
-            expected_error = expected_errors[test_key]
-            expected_result = expected_results[test_key]
-            self.assertEqual(str(test_string_obj), expected_result, test_strings[test_key])
-            self.assertCountEqual(test_errors, expected_error, test_strings[test_key])
+            expected_issue = self.really_format_errors(error_handler, hed_string=test_string_obj, params=expected_params)
+            print(test_key)
+            print(expected_issue)
+            print(test_issues)
+            self.assertEqual(string_result, expected_result, test_strings[test_key])
+            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
 
 class TestConvertToLongTag(TestConvertTag):
     def validator(self, test_strings, expected_results, expected_errors):
-        super(TestConvertToLongTag, self).validator_base(test_strings,
+        super(TestConvertToLongTag, self).converter_base(test_strings,
                                                          expected_results, expected_errors,
                                                          convert_to_short=False)
 
@@ -77,14 +67,14 @@ class TestConvertToLongTag(TestConvertTag):
 
     def test_tag_takes_value(self):
         test_strings = {
-            'uniqueValue': 'Environmental-sound/Unique Value',
-            'multiLevel': 'Environmental-sound/Long Unique Value With/Slash Marks',
-            'partialPath': 'Sound/Environmental-sound/Unique Value',
+            'uniqueValue': 'Label/Unique Value',
+            'multiLevel': 'Label/Long Unique Value With/Slash Marks',
+            'partialPath': 'Informational/Label/Unique Value',
         }
         expected_results = {
-            'uniqueValue': 'Item/Sound/Environmental-sound/Unique Value',
-            'multiLevel': 'Item/Sound/Environmental-sound/Long Unique Value With/Slash Marks',
-            'partialPath': 'Item/Sound/Environmental-sound/Unique Value',
+            'uniqueValue': 'Attribute/Informational/Label/Unique Value',
+            'multiLevel': 'Attribute/Informational/Label/Long Unique Value With/Slash Marks',
+            'partialPath': 'Attribute/Informational/Label/Unique Value',
         }
         expected_errors = {
             'uniqueValue': [],
@@ -95,12 +85,12 @@ class TestConvertToLongTag(TestConvertTag):
 
     def test_tag_spaces_start_end(self):
         test_strings = {
-            'leadingSpace': ' Environmental-sound/Unique Value',
-            'trailingSpace': 'Environmental-sound/Unique Value ',
+            'leadingSpace': ' Label/Unique Value',
+            'trailingSpace': 'Label/Unique Value ',
         }
         expected_results = {
-            'leadingSpace': 'Item/Sound/Environmental-sound/Unique Value',
-            'trailingSpace': 'Item/Sound/Environmental-sound/Unique Value',
+            'leadingSpace': 'Attribute/Informational/Label/Unique Value',
+            'trailingSpace': 'Attribute/Informational/Label/Unique Value',
         }
         expected_errors = {
             'leadingSpace': [],
@@ -143,20 +133,20 @@ class TestConvertToLongTag(TestConvertTag):
         }
         expected_errors = {
             'validThenInvalid':
-                self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, test_strings['validThenInvalid'],
-                                                            55, 60, 'Event'),
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                                index_in_tag=55, index_in_tag_end=60, expected_parent_tag='Event'),
             'singleLevel':
-                self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, test_strings['singleLevel'],
-                                                            19, 28, 'Item/Object/Geometric'),
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                                index_in_tag=19, index_in_tag_end=28, expected_parent_tag='Item/Object/Geometric'),
             'singleLevelAlreadyLong':
-                self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                            test_strings['singleLevelAlreadyLong'],
-                                                            25, 34, 'Item/Object/Geometric'),
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                                index_in_tag=25, index_in_tag_end=34, expected_parent_tag='Item/Object/Geometric'),
             'twoLevels':
-                self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE, test_strings['twoLevels'],
-                                                            19, 28, 'Item/Object/Geometric'),
-            'partialDuplicate': self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                             test_strings['partialDuplicate'], 10, 14, 'Item'),
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                                index_in_tag=19, index_in_tag_end=28, expected_parent_tag='Item/Object/Geometric'),
+            'partialDuplicate':
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                                index_in_tag=10, index_in_tag_end=14, expected_parent_tag='Item'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -172,13 +162,13 @@ class TestConvertToLongTag(TestConvertTag):
             'validChild': 'InvalidEvent/Event',
         }
         expected_errors = {
-            'single': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   test_strings['single'], 0, 12),
-            'invalidChild': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                         test_strings['invalidChild'], 0, 12),
+            'single': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                      tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidChild': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                            tag=0, index_in_tag=0, index_in_tag_end=12),
 
-            'validChild': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                       test_strings['validChild'], 0, 12),
+            'validChild': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                          tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -201,56 +191,10 @@ class TestConvertToLongTag(TestConvertTag):
         }
         self.validator(test_strings, expected_results, expected_errors)
 
-    # Deprecated tests
-    # def test_tag_slash_at_edge(self):
-    #     test_strings = {
-    #         'leadingSingle': '/Event',
-    #         'leadingExtension': '/Event/Extension',
-    #         'leadingMultiLevel': '/Vehicle/Train',
-    #         'leadingMultiLevelExtension': '/Vehicle/Train/Maglev',
-    #         'trailingSingle': 'Event/',
-    #         'trailingExtension': 'Event/Extension/',
-    #         'trailingMultiLevel': 'Vehicle/Train/',
-    #         'trailingMultiLevelExtension': 'Vehicle/Train/Maglev/',
-    #         'bothSingle': '/Event/',
-    #         'bothExtension': '/Event/Extension/',
-    #         'bothMultiLevel': '/Vehicle/Train/',
-    #         'bothMultiLevelExtension': '/Vehicle/Train/Maglev/',
-    #     }
-    #     expected_results = {
-    #         'leadingSingle': 'Event',
-    #         'leadingExtension': 'Event/Extension',
-    #         'leadingMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
-    #         'leadingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
-    #         'trailingSingle': 'Event',
-    #         'trailingExtension': 'Event/Extension',
-    #         'trailingMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
-    #         'trailingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
-    #         'bothSingle': 'Event',
-    #         'bothExtension': 'Event/Extension',
-    #         'bothMultiLevel': 'Item/Object/Man-made/Vehicle/Train',
-    #         'bothMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev',
-    #     }
-    #     expected_errors = {
-    #         'leadingSingle': [],
-    #         'leadingExtension': [],
-    #         'leadingMultiLevel': [],
-    #         'leadingMultiLevelExtension': [],
-    #         'trailingSingle': [],
-    #         'trailingExtension': [],
-    #         'trailingMultiLevel': [],
-    #         'trailingMultiLevelExtension': [],
-    #         'bothSingle': [],
-    #         'bothExtension': [],
-    #         'bothMultiLevel': [],
-    #         'bothMultiLevelExtension': [],
-    #     }
-    #     self.validator(test_strings, expected_results, expected_errors)
-
 
 class TestConvertToShortTag(TestConvertTag):
     def validator(self, test_strings, expected_results, expected_errors):
-        super(TestConvertToShortTag, self).validator_base(test_strings,
+        super(TestConvertToShortTag, self).converter_base(test_strings,
                                                           expected_results, expected_errors, convert_to_short=True)
 
     def test_tag(self):
@@ -279,14 +223,14 @@ class TestConvertToShortTag(TestConvertTag):
 
     def test_tag_takes_value(self):
         test_strings = {
-            'uniqueValue': 'Item/Sound/Environmental-sound/Unique Value',
-            'multiLevel': 'Item/Sound/Environmental-sound/Long Unique Value With/Slash Marks',
-            'partialPath': 'Sound/Environmental-sound/Unique Value',
+            'uniqueValue': 'Attribute/Informational/Label/Unique Value',
+            'multiLevel': 'Attribute/Informational/Label/Long Unique Value With/Slash Marks',
+            'partialPath': 'Informational/Label/Unique Value',
         }
         expected_results = {
-            'uniqueValue': 'Environmental-sound/Unique Value',
-            'multiLevel': 'Environmental-sound/Long Unique Value With/Slash Marks',
-            'partialPath': 'Environmental-sound/Unique Value',
+            'uniqueValue': 'Label/Unique Value',
+            'multiLevel': 'Label/Long Unique Value With/Slash Marks',
+            'partialPath': 'Label/Unique Value',
         }
         expected_errors = {
             'uniqueValue': [],
@@ -297,39 +241,36 @@ class TestConvertToShortTag(TestConvertTag):
 
     def test_tag_takes_value_invalid(self):
         test_strings = {
-            'singleLevel': 'Item/Sound/Environmental-sound/Event',
-            'multiLevel': 'Item/Sound/Environmental-sound/Event/Sensory-event',
+            'singleLevel': 'Attribute/Informational/Label/Event',
+            'multiLevel': 'Attribute/Informational/Label/Event/Sensory-event',
             'mixed': 'Item/Sound/Event/Sensory-event/Environmental-sound',
         }
         expected_results = {
-            'singleLevel': 'Item/Sound/Environmental-sound/Event',
-            'multiLevel': 'Item/Sound/Environmental-sound/Event/Sensory-event',
+            'singleLevel': 'Attribute/Informational/Label/Event',
+            'multiLevel': 'Attribute/Informational/Label/Event/Sensory-event',
             'mixed': 'Item/Sound/Event/Sensory-event/Environmental-sound',
         }
         expected_errors = {
             'singleLevel':
-                self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                            test_strings['singleLevel'], 31, 36, 'Event')
-            ,
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, 
+                                                tag=0, index_in_tag=30, index_in_tag_end=35, expected_parent_tag='Event'),
             'multiLevel':
-                self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                            test_strings['multiLevel'], 31, 36,'Event')
-            ,
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, 
+                                                tag=0, index_in_tag=30, index_in_tag_end=35, expected_parent_tag='Event'),
             'mixed':
-                self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                            test_strings['mixed'], 11, 16, 'Event')
-            ,
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, 
+                                                tag=0, index_in_tag=11, index_in_tag_end=16, expected_parent_tag='Event'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
     def test_tag_spaces_start_end(self):
         test_strings = {
-            'leadingSpace': ' Item/Sound/Environmental-sound/Unique Value',
-            'trailingSpace': 'Item/Sound/Environmental-sound/Unique Value ',
+            'leadingSpace': ' Attribute/Informational/Label/Unique Value',
+            'trailingSpace': 'Attribute/Informational/Label/Unique Value ',
         }
         expected_results = {
-            'leadingSpace': 'Environmental-sound/Unique Value',
-            'trailingSpace': 'Environmental-sound/Unique Value',
+            'leadingSpace': 'Label/Unique Value',
+            'trailingSpace': 'Label/Unique Value',
         }
         expected_errors = {
             'leadingSpace': [],
@@ -371,19 +312,19 @@ class TestConvertToShortTag(TestConvertTag):
             'duplicate': 'Item/Object/Geometric/Item/Object/Geometric',
         }
         expected_errors = {
-            'validThenInvalid': self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                             test_strings['validThenInvalid'], 61, 66, 'Event'),
-            'singleLevel': self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                        test_strings['singleLevel'], 25, 34,
-                                                             'Item/Object/Geometric'),
+            'validThenInvalid': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, 
+                                                                tag=0, index_in_tag=61, index_in_tag_end=66, expected_parent_tag='Event'),
+            'singleLevel': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, 
+                                                           tag=0, index_in_tag=25, index_in_tag_end=34,
+                                                           expected_parent_tag='Item/Object/Geometric'),
             'singleLevelAlreadyShort':
-                self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                            test_strings['singleLevelAlreadyShort'],
-                                                            19, 28, 'Item/Object/Geometric'),
-            'twoLevels': self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                      test_strings['twoLevels'], 25, 34, 'Item/Object/Geometric'),
-            'duplicate': self.error_handler.format_schema_error(SchemaErrors.INVALID_PARENT_NODE,
-                                                                      test_strings['duplicate'], 22, 26, 'Item')
+                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, 
+                                                tag=0,
+                                                index_in_tag=19, index_in_tag_end=28, expected_parent_tag='Item/Object/Geometric'),
+            'twoLevels': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, 
+                                                         tag=0, index_in_tag=25, index_in_tag_end=34, expected_parent_tag='Item/Object/Geometric'),
+            'duplicate': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, 
+                                                         tag=0, index_in_tag=22, index_in_tag_end=26, expected_parent_tag='Item')
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -403,17 +344,17 @@ class TestConvertToShortTag(TestConvertTag):
             'invalidWithExtension': 'InvalidEvent/InvalidExtension',
         }
         expected_errors = {
-            'invalidParentWithExistingGrandchild': self.error_handler.format_schema_error(
-                SchemaErrors.NO_VALID_TAG_FOUND, test_strings['invalidParentWithExistingGrandchild'], 0, 12),
-            'invalidChildWithExistingGrandchild': self.error_handler.format_schema_error(
-                SchemaErrors.INVALID_PARENT_NODE, test_strings['invalidChildWithExistingGrandchild'], 19, 28,
-                "Item/Object/Geometric"),
-            'invalidParentWithExistingChild': self.error_handler.format_schema_error(
-                SchemaErrors.NO_VALID_TAG_FOUND, test_strings['invalidParentWithExistingChild'], 0, 12),
-            'invalidSingle': self.error_handler.format_schema_error(
-                SchemaErrors.NO_VALID_TAG_FOUND, test_strings['invalidSingle'], 0, 12),
-            'invalidWithExtension': self.error_handler.format_schema_error(
-                SchemaErrors.NO_VALID_TAG_FOUND, test_strings['invalidWithExtension'], 0, 12),
+            'invalidParentWithExistingGrandchild': self.format_error_but_not_really(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidChildWithExistingGrandchild': self.format_error_but_not_really(
+                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=28,
+                expected_parent_tag="Item/Object/Geometric"),
+            'invalidParentWithExistingChild': self.format_error_but_not_really(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidSingle': self.format_error_but_not_really(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidWithExtension': self.format_error_but_not_really(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -483,9 +424,9 @@ class TestConvertToShortTag(TestConvertTag):
     #     self.validator(test_strings, expected_results, expected_errors)
 
 
-class TestConvertHedStringToShort(TestConvertString):
+class TestConvertHedStringToShort(TestConvertTag):
     def validator(self, test_strings, expected_results, expected_errors):
-        super(TestConvertHedStringToShort, self).validator_base(test_strings, expected_results, expected_errors,
+        super(TestConvertHedStringToShort, self).converter_base(test_strings, expected_results, expected_errors,
                                                                 convert_to_short=True)
 
     def test_empty_strings(self):
@@ -496,7 +437,6 @@ class TestConvertHedStringToShort(TestConvertString):
             'emptyString': '',
         }
         expected_errors = {
-            #'emptyString': self.error_handler.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, '')
             'emptyString': []
         }
         self.validator(test_strings, expected_results, expected_errors)
@@ -555,37 +495,37 @@ class TestConvertHedStringToShort(TestConvertString):
             'doubleWithValid': double + ',Car/Minivan',
         }
         expected_errors = {
-            'single': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   test_strings['single'], 0, 12),
-            'double': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   test_strings['double'], 0, 12),
-            'both': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                           single, 0, 12)
-                     + self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                              double, 0, 12),
-            'singleWithTwoValid': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                         single, 0, 12),
-            'doubleWithValid': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                      double, 0, 12),
+            'single': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                      tag=0, index_in_tag=0, index_in_tag_end=12),
+            'double': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                      tag=0, index_in_tag=0, index_in_tag_end=12),
+            'both': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                    tag=0, index_in_tag=0, index_in_tag_end=12)
+                  + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                    tag=1, index_in_tag=0, index_in_tag_end=12),
+            'singleWithTwoValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                                  tag=1, index_in_tag=0, index_in_tag_end=12),
+            'doubleWithValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                               tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
     def test_string_spaces_start_end(self):
         test_strings = {
-            'leadingSpace': ' Item/Sound/Environmental-sound/Unique Value',
-            'trailingSpace': 'Item/Sound/Environmental-sound/Unique Value ',
-            'bothSpace': ' Item/Sound/Environmental-sound/Unique Value ',
-            'leadingSpaceTwo': ' Item/Sound/Environmental-sound/Unique Value,Event',
-            'trailingSpaceTwo': 'Event,Item/Sound/Environmental-sound/Unique Value ',
-            'bothSpaceTwo': ' Event,Item/Sound/Environmental-sound/Unique Value ',
+            'leadingSpace': ' Attribute/Informational/Label/Unique Value',
+            'trailingSpace': 'Attribute/Informational/Label/Unique Value ',
+            'bothSpace': ' Attribute/Informational/Label/Unique Value ',
+            'leadingSpaceTwo': ' Attribute/Informational/Label/Unique Value,Event',
+            'trailingSpaceTwo': 'Event,Attribute/Informational/Label/Unique Value ',
+            'bothSpaceTwo': ' Event,Attribute/Informational/Label/Unique Value ',
         }
         expected_results = {
-            'leadingSpace': 'Environmental-sound/Unique Value',
-            'trailingSpace': 'Environmental-sound/Unique Value',
-            'bothSpace': 'Environmental-sound/Unique Value',
-            'leadingSpaceTwo': 'Environmental-sound/Unique Value,Event',
-            'trailingSpaceTwo': 'Event,Environmental-sound/Unique Value',
-            'bothSpaceTwo': 'Event,Environmental-sound/Unique Value',
+            'leadingSpace': 'Label/Unique Value',
+            'trailingSpace': 'Label/Unique Value',
+            'bothSpace': 'Label/Unique Value',
+            'leadingSpaceTwo': 'Label/Unique Value,Event',
+            'trailingSpaceTwo': 'Event,Label/Unique Value',
+            'bothSpaceTwo': 'Event,Label/Unique Value',
         }
         expected_errors = {
             'leadingSpace': [],
@@ -692,9 +632,9 @@ class TestConvertHedStringToShort(TestConvertString):
     #     self.validator(test_strings, expected_results, expected_errors)
 
 
-class TestConvertHedStringToLong(TestConvertString):
+class TestConvertHedStringToLong(TestConvertTag):
     def validator(self, test_strings, expected_results, expected_errors):
-        super(TestConvertHedStringToLong, self).validator_base(test_strings, expected_results, expected_errors,
+        super(TestConvertHedStringToLong, self).converter_base(test_strings, expected_results, expected_errors,
                                                                convert_to_short=False)
 
     def test_empty_strings(self):
@@ -705,7 +645,6 @@ class TestConvertHedStringToLong(TestConvertString):
             'emptyString': '',
         }
         expected_errors = {
-            #'emptyString': self.error_handler.format_schema_error(SchemaErrors.EMPTY_TAG_FOUND, '')
             'emptyString': []
         }
         self.validator(test_strings, expected_results, expected_errors)
@@ -764,37 +703,37 @@ class TestConvertHedStringToLong(TestConvertString):
             'doubleWithValid': double + ',Item/Object/Man-made/Vehicle/Car/Minivan',
         }
         expected_errors = {
-            'single': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   test_strings['single'], 0, 12),
-            'double': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                   test_strings['double'], 0, 12),
-            'both': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                 single, 0, 12)
-                     + self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                 double, 0, 12),
-            'singleWithTwoValid': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                               single, 0, 12),
-            'doubleWithValid': self.error_handler.format_schema_error(SchemaErrors.NO_VALID_TAG_FOUND,
-                                                                            double, 0, 12),
+            'single': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                      tag=0, index_in_tag=0, index_in_tag_end=12),
+            'double': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                      tag=0, index_in_tag=0, index_in_tag_end=12),
+            'both': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                    tag=0, index_in_tag=0, index_in_tag_end=12)
+                     + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                       tag=1, index_in_tag=0, index_in_tag_end=12),
+            'singleWithTwoValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                                  tag=1, index_in_tag=0, index_in_tag_end=12),
+            'doubleWithValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, 
+                                                               tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
     def test_string_spaces_start_end(self):
         test_strings = {
-            'leadingSpace': ' Environmental-sound/Unique Value',
-            'trailingSpace': 'Environmental-sound/Unique Value ',
-            'bothSpace': ' Environmental-sound/Unique Value ',
-            'leadingSpaceTwo': ' Environmental-sound/Unique Value,Event',
-            'trailingSpaceTwo': 'Event,Environmental-sound/Unique Value ',
-            'bothSpaceTwo': ' Event,Environmental-sound/Unique Value ',
+            'leadingSpace': ' Label/Unique Value',
+            'trailingSpace': 'Label/Unique Value ',
+            'bothSpace': ' Label/Unique Value ',
+            'leadingSpaceTwo': ' Label/Unique Value,Event',
+            'trailingSpaceTwo': 'Event,Label/Unique Value ',
+            'bothSpaceTwo': ' Event,Label/Unique Value ',
         }
         expected_results = {
-            'leadingSpace': 'Item/Sound/Environmental-sound/Unique Value',
-            'trailingSpace': 'Item/Sound/Environmental-sound/Unique Value',
-            'bothSpace': 'Item/Sound/Environmental-sound/Unique Value',
-            'leadingSpaceTwo': 'Item/Sound/Environmental-sound/Unique Value,Event',
-            'trailingSpaceTwo': 'Event,Item/Sound/Environmental-sound/Unique Value',
-            'bothSpaceTwo': 'Event,Item/Sound/Environmental-sound/Unique Value',
+            'leadingSpace': 'Attribute/Informational/Label/Unique Value',
+            'trailingSpace': 'Attribute/Informational/Label/Unique Value',
+            'bothSpace': 'Attribute/Informational/Label/Unique Value',
+            'leadingSpaceTwo': 'Attribute/Informational/Label/Unique Value,Event',
+            'trailingSpaceTwo': 'Event,Attribute/Informational/Label/Unique Value',
+            'bothSpaceTwo': 'Event,Attribute/Informational/Label/Unique Value',
         }
         expected_errors = {
             'leadingSpace': [],

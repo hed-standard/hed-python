@@ -1,28 +1,14 @@
 {% macro create_column_info(show_indices) %}
 
-    <div class="form-group" id="column_names">
-        <h3>Column names:</h3>
-        <table id="column_names_table"></table>
-    </div>
     {% if show_indices in ['true'] %}
-        <div class="form-group">
-        <h3>Column indices:</h3>
-            <label class="secondary-label">Indicate specific non-prefixed tag columns (column numbers start with
-                1):</label><br>
-            <div class="textbox-group">
-                <label for="category_column">Category</label>
-                <input class='indices' type="text" name="category_column" id="category_column">
-                <label for="description_column">Description</label>
-                <input class='indices' type="text" name="description_column" id="description_column">
-                <label for="label_column">Label</label>
-                <input class='indices' type="text" name="label_column" id="label_column">
-                <label for="long_column">Long name</label>
-                <input class='indices' type="text" name="long_column" id="long_column">
-            </div>
+        <div class="form-group" id="column_prefixes">
+            <h3>Column Information (Check columns to include):</h3>
+            <table id="column_prefix_table"></table>
         </div>
-        <div class="form-group">
-            <label class="secondary-label" for="tag_columns">List columns (comma-separated) with HED strings:</label>
-            <input class="text" type="text" name="tag_columns" id="tag_columns">
+    {% else %}
+        <div class="form-group" id="column_names">
+            <h3>Column names:</h3>
+            <table id="column_names_table"></table>
         </div>
     {% endif %}
     <p class="flash" id="tag_columns_flash"></p>

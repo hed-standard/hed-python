@@ -1,53 +1,87 @@
+import os
+import io
 from flask import current_app
+from werkzeug.utils import secure_filename
+import openpyxl
+from hed import models
+from hed import schema as hedschema
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.exceptions import HedFileError
+from hed.validator.event_validator import EventValidator
+from hed.util.file_util import get_file_extension
 
-from hed.util.error_reporter import get_printable_issue_string
-from hed.util.exceptions import HedFileError
-from hed.util.hed_file_input import HedFileInput
-from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common, file_constants
-from hedweb.web_utils import convert_number_str_to_list, form_has_option,\
-    generate_filename, generate_response_download_file_from_text, generate_text_response, get_hed_schema, \
-    get_hed_path_from_pull_down, get_spreadsheet, get_uploaded_file_path_from_form, get_optional_form_field
-from hedweb.spreadsheet_utils import get_specific_tag_columns_from_form
+from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, file_extension_is_valid, \
+    generate_filename
 
 app_config = current_app.config
 
 
-def generate_input_from_spreadsheet_form(request):
-    """Gets the validation function input arguments from a request object associated with the validation form.
+def get_columns_info(request):
+    columns_file = request.files.get(common.COLUMNS_FILE, '')
+    if columns_file:
+        filename = columns_file.filename
+    else:
+        raise HedFileError('MissingSpreadsheetFile', 'An uploadable file was not provided', '')
+    worksheet = request.form.get(common.WORKSHEET_SELECTED, None)
+
+    if file_extension_is_valid(filename, file_constants.EXCEL_FILE_EXTENSIONS):
+        wb = openpyxl.load_workbook(columns_file, read_only=True)
+        worksheet_names = wb.sheetnames
+        if not worksheet_names:
+            raise HedFileError('BadExcelFile', 'Excel files must worksheets', None)
+        elif not worksheet:
+            worksheet = worksheet_names[0]
+        elif worksheet and worksheet not in worksheet_names:
+            raise HedFileError('BadWorksheetName', f'Worksheet {worksheet} not in Excel file', '')
+        headers = [c.value for c in next(wb[worksheet].iter_rows(min_row=1, max_row=1))]
+        columns_info = {common.COLUMNS_FILE: filename, common.COLUMN_NAMES: headers,
+                        common.WORKSHEET_SELECTED: worksheet, common.WORKSHEET_NAMES: worksheet_names}
+        wb.close()
+    elif file_extension_is_valid(filename, file_constants.TEXT_FILE_EXTENSIONS):
+        columns_info = {common.COLUMN_NAMES: get_text_file_first_row(io.StringIO(columns_file.read().decode("utf-8")))}
+    else:
+        raise HedFileError('BadFileExtension',
+                           f'File {filename} extension does not correspond to an Excel or tsv file', '')
+    return columns_info
+
+
+def get_input_from_spreadsheet_form(request):
+    """Gets input argument dictionary from the spreadsheet form request.
 
     Parameters
     ----------
     request: Request object
-        A Request object containing user data from the validation form.
+        A Request object containing user data from the spreadsheet form.
 
     Returns
     -------
     dictionary
-        A dictionary containing input arguments for calling the underlying validation function.
+        A dictionary containing input arguments for calling the underlying spreadsheet functions
     """
-    hed_file_path, schema_display_name = get_hed_path_from_pull_down(request)
-    uploaded_file_name, original_file_name = \
-        get_uploaded_file_path_from_form(request, common.SPREADSHEET_FILE, file_constants.SPREADSHEET_FILE_EXTENSIONS)
-
     arguments = {
-        common.SCHEMA_PATH: hed_file_path,
-        common.SCHEMA_DISPLAY_NAME: schema_display_name,
-        common.SPREADSHEET_PATH: uploaded_file_name,
-        common.SPREADSHEET_FILE: original_file_name,
-        common.TAG_COLUMNS: convert_number_str_to_list(request.form[common.TAG_COLUMNS]),
-        common.COLUMN_PREFIX_DICTIONARY: get_specific_tag_columns_from_form(request),
-        common.WORKSHEET_SELECTED: get_optional_form_field(request, common.WORKSHEET_SELECTED, common.STRING),
-        common.HAS_COLUMN_NAMES: get_optional_form_field(request, common.HAS_COLUMN_NAMES, common.BOOLEAN)
+        common.SCHEMA: get_hed_schema_from_pull_down(request),
+        common.SPREADSHEET: None,
+        common.SPREADSHEET_TYPE: file_constants.TSV_EXTENSION,
+        common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None),
+        common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
+        common.HAS_COLUMN_NAMES: form_has_option(request, common.HAS_COLUMN_NAMES, 'on'),
+        common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
     }
-    if form_has_option(request, common.COMMAND_OPTION, common.COMMAND_VALIDATE):
-        arguments[common.COMMAND_VALIDATE] = True
-    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_SHORT):
-        arguments[common.COMMAND_TO_SHORT] = True
-    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_LONG):
-        arguments[common.COMMAND_TO_LONG] = True
-    arguments[common.DEFS_EXPAND] = form_has_option(request, common.DEFS_EXPAND, 'on')
-    arguments[common.CHECK_FOR_WARNINGS] = form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
+
+    tag_columns, prefix_dict = get_prefix_dict(request.form)
+    filename = request.files[common.SPREADSHEET_FILE].filename
+    file_ext = get_file_extension(filename)
+    if file_ext in file_constants.EXCEL_FILE_EXTENSIONS:
+        arguments[common.SPREADSHEET_TYPE] = file_constants.EXCEL_EXTENSION
+    spreadsheet = models.HedInput(filename=request.files[common.SPREADSHEET_FILE],
+                                  file_type=arguments[common.SPREADSHEET_TYPE],
+                                  worksheet_name=arguments.get(common.WORKSHEET_NAME, None),
+                                  tag_columns=tag_columns,
+                                  has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
+                                  column_prefix_dictionary=prefix_dict,
+                                  display_name=filename)
+    arguments[common.SPREADSHEET] = spreadsheet
     return arguments
 
 
@@ -57,92 +91,151 @@ def spreadsheet_process(arguments):
     Parameters
     ----------
     arguments: dict
-        A dictionary with the input arguments from the dictionary form
+        A dictionary with the input arguments from the spreadsheet form.
 
     Returns
     -------
-      Response
-        Downloadable response object.
+      dict
+        A dictionary of results from spreadsheet processing in standard form.
     """
+    hed_schema = arguments.get('schema', None)
+    command = arguments.get(common.COMMAND, None)
+    if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
+        raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
+    spreadsheet = arguments.get(common.SPREADSHEET, 'None')
+    if not spreadsheet or not isinstance(spreadsheet, models.HedInput):
+        raise HedFileError('InvalidSpreadsheet', "An spreadsheet was given but could not be processed", "")
 
-    if not arguments[common.SPREADSHEET_PATH]:
-        raise HedFileError('EmptySpreadsheetFile', "Please upload a spreadsheet to process", "")
-    if arguments.get(common.COMMAND_VALIDATE, None):
-        results = spreadsheet_validate(arguments)
-    elif arguments.get(common.COMMAND_TO_SHORT, None):
-        results = spreadsheet_convert(arguments, short_to_long=False)
-    elif arguments.get(common.COMMAND_TO_LONG, None):
-        results = spreadsheet_convert(arguments)
+    if command == common.COMMAND_VALIDATE:
+        results = spreadsheet_validate(hed_schema, spreadsheet)
+    elif command == common.COMMAND_TO_SHORT:
+        results = spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_SHORT)
+    elif command == common.COMMAND_TO_LONG:
+        results = spreadsheet_convert(hed_schema, spreadsheet)
     else:
-        raise HedFileError('UnknownProcessingMethod', "Select a spreadsheet processing method", "")
-    msg = results.get('msg', '')
-    msg_category = results.get('msg_category', 'success')
-
-    if results['data']:
-        display_name = results.get('output_display_name', '')
-        return generate_response_download_file_from_text(results['data'], display_name=display_name,
-                                                         msg_category=msg_category, msg=msg)
-    else:
-        return generate_text_response("", msg=msg, msg_category=msg_category)
+        raise HedFileError('UnknownSpreadsheetProcessingMethod', f"Command {command} is missing or invalid", "")
+    return results
 
 
-def spreadsheet_convert(arguments, short_to_long=True, hed_schema=None):
-    """Converts a spreadsheet from short to long unless short_to_long is set to False, then long_to_short
+def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG):
+    """Converts a spreadsheet long to short unless unless the command is not COMMAND_TO_LONG then converts to short
 
     Parameters
     ----------
-    arguments: dict
-        Dictionary containing standard input form arguments
-    short_to_long: bool
-        If True convert the dictionary to long form, otherwise convert to short form
-    hed_schema:str or HedSchema
-        Version number or path or HedSchema object to be used
+    hed_schema:HedSchema
+        HedSchema object to be used
+    spreadsheet: HedInput
+        Previously created HedInput object
+    command: str
+        Name of the command to execute if not COMMAND_TO_LONG
 
     Returns
     -------
-    Response
-        A downloadable spreadsheet file or a file containing warnings
+    dict
+        A downloadable dictionary file or a file containing warnings
     """
-    if not hed_schema:
-        hed_schema = get_hed_schema(arguments)
+
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    return {'command': arguments.get('command', ''), 'data': '',
-            'schema_version': schema_version, 'msg_category': 'warning',
-            'msg': 'This convert command has not yet been implemented for spreadsheets'}
+    results = spreadsheet_validate(hed_schema, spreadsheet)
+    if results['data']:
+        return results
+
+    display_name = spreadsheet.display_name
+    display_ext = os.path.splitext(secure_filename(display_name))[1]
+
+    if command == common.COMMAND_TO_LONG:
+        suffix = '_to_long'
+        spreadsheet.convert_to_long(hed_schema)
+    else:
+        suffix = '_to_short'
+        spreadsheet.convert_to_short(hed_schema)
+
+    file_name = generate_filename(display_name, suffix=suffix, extension=display_ext)
+    return {common.COMMAND: command, 'data': '', common.SPREADSHEET: spreadsheet, 'output_display_name': file_name,
+            common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+            'msg': f'Spreadsheet {display_name} converted_successfully'}
 
 
-def spreadsheet_validate(arguments, hed_schema=None, spreadsheet=None):
+def spreadsheet_validate(hed_schema, spreadsheet):
     """ Validates the spreadsheet.
 
     Parameters
     ----------
-    arguments: dictionary
-        A dictionary containing the arguments for the validation function.
     hed_schema: str or HedSchema
         Version number or path or HedSchema object to be used
     spreadsheet: HedFileInput
-        Spreadsheet object
+        Spreadsheet input object to be validated
+
     Returns
     -------
-    HedValidator object
-        A HedValidator object containing the validation results.
+    dict
+         A dictionary containing results of validation in standard format
     """
-    if not hed_schema:
-        hed_schema = get_hed_schema(arguments)
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    if not spreadsheet:
-        spreadsheet = get_spreadsheet(arguments)
-    validator = HedValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
+    validator = EventValidator(hed_schema=hed_schema)
     issues = validator.validate_input(spreadsheet)
+    display_name = spreadsheet.display_name
     if issues:
-        display_name = arguments.get(common.SPREADSHEET_FILE, None)
-        issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
-
+        issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
-        return {'command': arguments.get('command', ''), 'data': issue_str, "output_display_name": file_name,
-                'schema_version': schema_version, "msg_category": "warning",
-                'msg': "Spreadsheet file had validation errors"}
+        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
+                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+                'msg': f"Spreadsheet {display_name} had validation errors"}
     else:
-        return {'command': arguments.get('command', ''), 'data': '',
-                'schema_version': schema_version, 'msg_category': 'success',
-                'msg': 'Spreadsheet file had no validation errors'}
+        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
+                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+                'msg': f'Spreadsheet {display_name} had no validation errors'}
+
+
+def get_prefix_dict(form_dict):
+    """Returns a tag prefix dictionary from a form dictionary.
+
+    Parameters
+    ----------
+   form_dict: dict
+        The dictionary returned from a form that contains a column prefix table
+    Returns
+    -------
+    dict
+        A dictionary whose keys are column numbers (starting with 1) and values are tag prefixes to prepend.
+    """
+    tag_columns = []
+    prefix_dict = {}
+    keys = form_dict.keys()
+    for key in keys:
+        if not key.startswith('column') or key.endswith('check'):
+            continue
+        pieces = key.split('_')
+        check = 'column_' + pieces[1] + '_check'
+        if form_dict.get(check, None) != 'on':
+            continue
+        if form_dict[key]:
+            prefix_dict[int(pieces[1])] = form_dict[key]
+        else:
+            tag_columns.append(int(pieces[1]))
+    return tag_columns, prefix_dict
+
+
+def get_text_file_first_row(filename, delimiter='\t'):
+    """Gets the contents of the first row of the text file.
+
+    Parameters
+    ----------
+    filename: str or file-like
+        The path to a text other.
+    delimiter: str
+
+    Returns
+    -------
+    list
+        list containing first row.
+
+    """
+
+    if isinstance(filename, str):
+        with open(filename, 'r', encoding='utf-8') as opened_text_file:
+            first_line = opened_text_file.readline()
+    else:
+        first_line = filename.readline()
+    text_file_columns = first_line.split(delimiter)
+    return text_file_columns

@@ -1,11 +1,11 @@
 import unittest
 import os
 
-from hed.util.def_mapper import DefinitionMapper
+from hed.models.def_mapper import DefinitionMapper
 from hed import schema
-from hed.util.def_dict import DefDict
-from hed.util.hed_string import HedString
-from hed.util import error_reporter
+from hed.models.def_dict import DefDict
+from hed.models.hed_string import HedString
+from hed.errors import error_reporter
 
 
 class Test(unittest.TestCase):
@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
 
         test_string = HedString(self.basic_def_string_no_paren)
         def_issues = def_mapper.replace_and_remove_tags(test_string)
-        self.assertEqual(str(test_string), "")
+        self.assertEqual(str(test_string), self.basic_def_string_no_paren)
 
         test_string = HedString(self.basic_hed_string + "," + self.basic_def_string)
         def_issues = def_mapper.replace_and_remove_tags(test_string)
@@ -74,31 +74,31 @@ class Test(unittest.TestCase):
         def_mapper = DefinitionMapper(def_dict)
 
         test_string = HedString(self.basic_def_string)
-        def_issues = def_mapper.replace_and_remove_tags(test_string, do_not_expand_labels=True)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
         self.assertEqual(str(test_string), "")
 
         test_string = HedString(self.basic_def_string_no_paren)
-        def_issues = def_mapper.replace_and_remove_tags(test_string, do_not_expand_labels=True)
-        self.assertEqual(str(test_string), "")
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
+        self.assertEqual(str(test_string), self.basic_def_string_no_paren)
 
         test_string = HedString(self.basic_hed_string + "," + self.basic_def_string)
-        def_issues = def_mapper.replace_and_remove_tags(test_string, do_not_expand_labels=True)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.basic_def_string + "," + self.basic_hed_string)
-        def_issues = def_mapper.replace_and_remove_tags(test_string, do_not_expand_labels=True)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.basic_hed_string_with_def)
-        def_issues = def_mapper.replace_and_remove_tags(test_string, do_not_expand_labels=True)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
         self.assertEqual(str(test_string), self.basic_hed_string + "," + self.label_def_string)
 
         test_string = HedString(self.basic_hed_string_with_def_first)
-        def_issues = def_mapper.replace_and_remove_tags(test_string, do_not_expand_labels=True)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
         self.assertEqual(str(test_string), self.label_def_string + "," + self.basic_hed_string)
 
         test_string = HedString(self.basic_hed_string_with_def_first_paren)
-        def_issues = def_mapper.replace_and_remove_tags(test_string, do_not_expand_labels=True)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
         self.assertEqual(str(test_string), "(" + self.label_def_string + "," + self.basic_hed_string + ")")
 
 
@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
         self.assertTrue(def_issues)
         actual_issues = []
         for issue in def_issues:
-            actual_issues += error_reporter.ErrorHandler().format_val_error(**issue)
+            actual_issues += error_reporter.ErrorHandler().format_error(**issue)
 
         def_dict = DefDict()
         def_dict.check_for_definitions(HedString(self.basic_def_string))
@@ -161,7 +161,7 @@ class Test(unittest.TestCase):
         self.assertTrue(def_issues)
         actual_issues = []
         for issue in def_issues:
-            actual_issues += error_reporter.ErrorHandler().format_val_error(**issue)
+            actual_issues += error_reporter.ErrorHandler().format_error(**issue)
 
 
     def test__check_tag_starts_with(self):
@@ -171,7 +171,7 @@ class Test(unittest.TestCase):
                      "Attribute/Informational/Definition/TempTestDef"]
 
         for tag in test_tags:
-            result = DefinitionMapper._check_tag_starts_with(tag, target_tag_name)
+            result = DefDict._check_tag_starts_with(tag, target_tag_name)
             self.assertTrue(result)
 
 if __name__ == '__main__':

@@ -11,8 +11,8 @@ ColumnDefGroup - Contains the data from a single json sidecar, can be validated 
 HedString - Main class for handling a hed string during processing and analysis
 """
 import hed
-from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_string import HedString
+from hed.models.column_def_group import ColumnDefGroup
+from hed.models.hed_string import HedString
 from hed.schema.hed_schema_file import load_schema
 
 local_hed_xml = "data/HED8.0.0-alpha.1.xml"
@@ -30,7 +30,7 @@ print(hed.get_printable_issue_string(errors))
 for column_def in json_file:
     for hed_string, position in column_def.hed_string_iter(include_position=True):
         hed_string_obj = HedString(hed_string)
-        errors = hed_string_obj.convert_to_short(hed_schema)
+        errors = hed_string_obj.convert_to_long(hed_schema)
         column_def.set_hed_string(hed_string_obj, position)
         print(f"'{hed_string_obj.get_original_hed_string()}' \nconverts to\n '{str(hed_string_obj)}'")
 

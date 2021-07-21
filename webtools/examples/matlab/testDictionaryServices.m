@@ -1,42 +1,69 @@
-%% Shows how to call hed-services to obtain a list of services
-%host = 'http://127.0.0.1:5000';
-host = 'https://hedtools.ucsd.edu/hed';
+%% Shows how to call hed-services to process a BIDS JSON dictionary.
+% 
+%  Example 1: Validate valid JSON dictionary using a HED version.
+%
+%  Example 2: Validate invalid JSON dictionary using HED URL.
+%
+%  Example 3: Convert valid JSON dictionary to long uploading HED schema.
+%
+%  Example 4: Convert valid JSON dictionary to short using a HED version.
+%
+%% Setup requires a csrf_url and services_url. Must set header and options.
+host = 'http://127.0.0.1:5000';
+%host = 'https://hedtools.ucsd.edu/hed';
 csrf_url = [host '/services']; 
 services_url = [host '/services_submit'];
-dictionary_file = '../data/good_dictionary.json';
-json_text = fileread(dictionary_file);
-
-%% Send an empty request to get the CSRF TOKEN and the session cookie
 [cookie, csrftoken] = getSessionInfo(csrf_url);
-
-%% Set the header and weboptions
 header = ["Content-Type" "application/json"; ...
-          "Accept" "application/json"; ...
-          "X-CSRFToken" csrftoken; ...
-          "Cookie" cookie];
+          "Accept" "application/json"; 
+          "X-CSRFToken" csrftoken; "Cookie" cookie];
 
-options = weboptions('MediaType', 'application/json', 'Timeout', Inf, ...
+options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
-data = struct();
-data.service = 'dictionary_validate';
-%data.service = 'dictionary_to_long';
-%data.service = 'dictionary_to_short';
-%data.schema_version = '7.1.2';
-data.schema_version = '8.0.0-alpha.1';
-data.json_string = string(json_text);
-data.display_name = 'my JSON dictionary';
-data.check_for_warnings = false;
-%data.check_for_warnings = true;
 
-%% Send the request and get the response 
-response = webwrite(services_url, data, options);
-response = jsondecode(response);
-fprintf('Error report:  [%s] %s\n', response.error_type, response.error_msg);
+%% Set up some data to use for the examples
+json_text = fileread('../data/good_dictionary.json');
+myURL = ['https://raw.githubusercontent.com/hed-standard/' ...
+         'hed-specification/master/hedxml/HED7.2.0.xml'];
+schema_text = fileread('../data/HED8.0.0-alpha.1.xml');
 
-%% Print out the results if available
-if isfield(response, 'results') && ~isempty(response.results)
-   results = response.results;
-   fprintf('[%s] status %s: %s\n', response.service, results.msg_category, results.msg);
-   fprintf('HED version: %s\n', results.schema_version);
-   fprintf('Return data:\n%s\n', results.data);
-end
+%% Example 1: Validate valid JSON dictionary using a HED version.
+parameters = struct('schema_version', '8.0.0-alpha.1', ...
+                    'json_string', json_text, ...
+                    'check_for_warnings', true);
+sdata1 = struct('service', 'dictionary_validate', ...
+                'service_parameters', parameters);
+response1 = webwrite(services_url, sdata1, options);
+response1 = jsondecode(response1);
+output_report(response1, 'Example 1 output');
+
+%% Example 2: Validate invalid JSON dictionary using HED URL.
+parameters = struct('schema_url', myURL, ...
+                    'json_string', json_text, ...
+                    'check_for_warnings', true);
+sdata2 = struct('service', 'dictionary_validate', ...
+                'service_parameters', parameters);
+response2 = webwrite(services_url, sdata2, options);
+response2 = jsondecode(response2);
+output_report(response2, 'Example 2 output');
+
+%% Example 3: Convert valid JSON dictionary to long uploading HED schema.
+parameters = struct('schema_string', schema_text, ...
+                    'json_string', json_text, ...
+                    'check_for_warnings', true);
+sdata3 = struct('service', 'dictionary_to_long', ...
+                'service_parameters', parameters);
+response3 = webwrite(services_url, sdata3, options);
+response3 = jsondecode(response3);
+output_report(response3, 'Example 3 output');
+
+%%  Example 4: Convert valid JSON dictionary to short using a HED version..
+parameters = struct('schema_version', '8.0.0-alpha.1', ...
+                    'json_string', json_text, ...
+                    'check_for_warnings', true);
+sdata4 = struct('service', 'dictionary_to_short', ...
+                'service_parameters', parameters);
+response4 = webwrite(services_url, sdata4, options);
+response4 = jsondecode(response4);
+output_report(response4, 'Example 4 output');
+ 

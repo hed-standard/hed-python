@@ -1,0 +1,5 @@
+Event code	Short label	Long name	Description in text	HED tags
+251	PerturbLeft	PerturbCarToLeft	Vehicle undergoes a perturbation to left.	Experiment-control, Experimental-stimulus, (Controller-agent, (Operate, Car, (Turn, Leftward)))
+252	PerturbRight	PerturbCarToRight	Vehicle undergoes a perturbation to right.	Experiment-control, Experimental-stimulus, (Controller-agent, (Operate, Car, (Turn, Rightward)))
+253	ResponseOnset	DriverStartsToCorrect	Subject starts to respond to perturbation by steering vehicle back to center of the lane.	Agent-action, Participant-response, Correction, ((Human-agent, Experiment-participant), (Modify, (Car, Direction)))
+254	ResponseOffset	DriverStopsCorrecting	Subject completes response to perturbation having steered the vehicle back to the center of the lane. Normally this would be tagged with temporal scope, but avoiding definitions here.	Agent-action, Participant-response, (Halt, Correction)
