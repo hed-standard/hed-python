@@ -4,7 +4,6 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
-from hed.schema import schema_compliance
 from hed.util.file_util import get_file_extension
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
@@ -139,7 +138,7 @@ def schema_validate(hed_schema, display_name):
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown')
-    issues = schema_compliance.check_compliance(hed_schema)
+    issues = hed_schema.check_compliance()
     if issues:
         issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
         file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
