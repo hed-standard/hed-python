@@ -80,7 +80,7 @@ def get_input_from_spreadsheet_form(request):
                                   tag_columns=tag_columns,
                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
                                   column_prefix_dictionary=prefix_dict,
-                                  display_name=filename)
+                                  name=filename)
     arguments[common.SPREADSHEET] = spreadsheet
     return arguments
 
@@ -140,7 +140,7 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=common.COMMAND_TO_LONG)
     if results['data']:
         return results
 
-    display_name = spreadsheet.display_name
+    display_name = spreadsheet.name
     display_ext = os.path.splitext(secure_filename(display_name))[1]
 
     if command == common.COMMAND_TO_LONG:
@@ -174,7 +174,7 @@ def spreadsheet_validate(hed_schema, spreadsheet):
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     validator = EventValidator(hed_schema=hed_schema)
     issues = validator.validate_input(spreadsheet)
-    display_name = spreadsheet.display_name
+    display_name = spreadsheet.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')

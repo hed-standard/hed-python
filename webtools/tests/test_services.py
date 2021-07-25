@@ -1,4 +1,5 @@
 import os
+import io
 import json
 import shutil
 import unittest
@@ -78,10 +79,11 @@ class Test(unittest.TestCase):
         with open(json_path) as f:
             data = json.load(f)
         json_text = json.dumps(data)
+        fb = io.StringIO(json_text)
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml-test/HED8.0.0-beta.4.xml'
         hed_schema = hedschema.load_schema(hed_url_path=schema_url)
-        json_dictionary = models.ColumnDefGroup(json_string=json_text, display_name='JSON_Dictionary')
+        json_dictionary = models.ColumnDefGroup(file=fb, name='JSON_Dictionary')
         arguments = {common.SERVICE: 'dictionary_validate', common.SCHEMA: hed_schema,
                      common.JSON_DICTIONARY: json_dictionary}
         with self.app.app_context():

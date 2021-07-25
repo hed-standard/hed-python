@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="8.0.0-beta.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0-beta.3.xsd">
+<HED xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="8.0.0-beta.4" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0-beta.3.xsd">
    <prologue>This schema is the first version that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
 </prologue>
    <schema>
@@ -392,67 +392,123 @@
                <name>Move-body-part</name>
                <description>Move one part of a body.</description>
                <node>
+                  <name>Move-eyes</name>
+                  <description>Move eyes.</description>
+                  <node>
+                     <name>Blink</name>
+                     <description>Shut and open the eyes quickly.</description>
+                  </node>
+                  <node>
+                     <name>Close-eyes</name>
+                     <description>Lower and keep eyelids in a closed position.</description>
+                  </node>
+                  <node>
+                     <name>Fixate</name>
+                     <description>Direct eyes to a specific point or target.</description>
+                  </node>
+                  <node>
+                     <name>Inhibit-blinks</name>
+                     <description>Purposely prevent blinking.</description>
+                  </node>
+                  <node>
+                     <name>Open-eyes</name>
+                     <description>Raise eyelids to expose pupil.</description>
+                  </node>
+                  <node>
+                     <name>Saccade</name>
+                     <description>Move eyes rapidly between fixation points.</description>
+                  </node>
+                  <node>
+                     <name>Stare</name>
+                     <description>Look fixedly or vacantly at someone or something with eyes wide open.</description>
+                  </node>
+               </node>
+               <node>
+                  <name>Move-face</name>
+                  <description>Move the face or jaw.</description>
+                  <node>
+                     <name>Bite</name>
+                     <description>Seize with teeth or jaws an object or organism so as to grip or break the surface covering.</description>
+                  </node>
+                  <node>
+                     <name>Burp</name>
+                     <description>Noisily release air from the stomach through the mouth; belch.</description>
+                  </node>
+                  <node>
+                     <name>Chew</name>
+                     <description>Repeatedly grinding, tearing, and or crushing with teeth or jaws.</description>
+                  </node>
+                  <node>
+                     <name>Gurgle</name>
+                     <description>Make a hollow bubbling sound like that made by water running out of a bottle.</description>
+                  </node>
+                  <node>
+                     <name>Swallow</name>
+                     <description>Cause or allow something, especially food or drink to pass down the throat.</description>
+                  </node>
+                  <node>
+                     <name>Yawn</name>
+                     <description>Take a deep involuntary  inhalation with the mouth open often as a sign of drowsiness or boredom.</description>
+                  </node>
+               </node>
+               <node>
                   <name>Move-head</name>
                   <description>Move head.</description>
+               </node>
+               <node>
+                  <name>Move-lower-extremity</name>
+                  <description>Move leg and/or foot.</description>
                   <node>
-                     <name>Move-eyes</name>
-                     <description>Move eyes.</description>
+                     <name>Curl-toes</name>
+                     <description>Bend toes sometimes to grip.</description>
+                  </node>
+                  <node>
+                     <name>Hop</name>
+                     <description>Jump on one foot.</description>
+                  </node>
+                  <node>
+                     <name>Jog</name>
+                     <description>Run at a trot to exercise.</description>
+                  </node>
+                  <node>
+                     <name>Jump</name>
+                     <description>Move off the ground or other surface through sudden muscular effort in the legs.</description>
+                  </node>
+                  <node>
+                     <name>Kick</name>
+                     <description>Strike out or flail with the foot or feet.  Strike using the leg, in unison usually with an area of the knee or lower using the foot.</description>
+                  </node>
+                  <node>
+                     <name>Pedal</name>
+                     <description>Move by working the pedals of a bicycle or other machine.</description>
+                  </node>
+                  <node>
+                     <name>Press-foot</name>
+                     <description>Move by pressing foot.</description>
+                  </node>
+                  <node>
+                     <name>Run</name>
+                     <description>Travel on foot at a fast pace.</description>
+                  </node>
+                  <node>
+                     <name>Step</name>
+                     <description>Put one leg in front of the other and shift weight onto it.</description>
                      <node>
-                        <name>Blink</name>
-                        <description>Shut and open the eyes quickly.</description>
+                        <name>Heel-strike</name>
+                        <description>Strike the ground with the heel during a step.</description>
                      </node>
                      <node>
-                        <name>Close-eyes</name>
-                        <description>Lower and keep eyelids in a closed position.</description>
-                     </node>
-                     <node>
-                        <name>Fixate</name>
-                        <description>Direct eyes to a specific point or target.</description>
-                     </node>
-                     <node>
-                        <name>Inhibit-blinks</name>
-                        <description>Purposely prevent blinking.</description>
-                     </node>
-                     <node>
-                        <name>Open-eyes</name>
-                        <description>Raise eyelids to expose pupil.</description>
-                     </node>
-                     <node>
-                        <name>Saccade</name>
-                        <description>Move eyes rapidly between fixation points.</description>
-                     </node>
-                     <node>
-                        <name>Stare</name>
-                        <description>Look fixedly or vacantly at someone or something with eyes wide open.</description>
+                        <name>Toe-off</name>
+                        <description>Push with toe as part of a stride.</description>
                      </node>
                   </node>
                   <node>
-                     <name>Move-face</name>
-                     <description>Move the face or jaw.</description>
-                     <node>
-                        <name>Bite</name>
-                        <description>Seize with teeth or jaws an object or organism so as to grip or break the surface covering.</description>
-                     </node>
-                     <node>
-                        <name>Burp</name>
-                        <description>Noisily release air from the stomach through the mouth; belch.</description>
-                     </node>
-                     <node>
-                        <name>Chew</name>
-                        <description>Repeatedly grinding, tearing, and or crushing with teeth or jaws.</description>
-                     </node>
-                     <node>
-                        <name>Gurgle</name>
-                        <description>Make a hollow bubbling sound like that made by water running out of a bottle.</description>
-                     </node>
-                     <node>
-                        <name>Swallow</name>
-                        <description>Cause or allow something, especially food or drink to pass down the throat.</description>
-                     </node>
-                     <node>
-                        <name>Yawn</name>
-                        <description>Take a deep involuntary  inhalation with the mouth open often as a sign of drowsiness or boredom.</description>
-                     </node>
+                     <name>Trot</name>
+                     <description>Run at a moderate pace, typically with short steps.</description>
+                  </node>
+                  <node>
+                     <name>Walk</name>
+                     <description>Move at a regular pace by lifting and setting down each foot in turn never having both feet off the ground at once.</description>
                   </node>
                </node>
                <node>
@@ -525,62 +581,6 @@
                   <node>
                      <name>Touch</name>
                      <description>Come into or be in contact with.</description>
-                  </node>
-               </node>
-               <node>
-                  <name>Move-lower-extremity</name>
-                  <description>Move leg and/or foot.</description>
-                  <node>
-                     <name>Curl-toes</name>
-                     <description>Bend toes sometimes to grip.</description>
-                  </node>
-                  <node>
-                     <name>Hop</name>
-                     <description>Jump on one foot.</description>
-                  </node>
-                  <node>
-                     <name>Jog</name>
-                     <description>Run at a trot to exercise.</description>
-                  </node>
-                  <node>
-                     <name>Jump</name>
-                     <description>Move off the ground or other surface through sudden muscular effort in the legs.</description>
-                  </node>
-                  <node>
-                     <name>Kick</name>
-                     <description>Strike out or flail with the foot or feet.  Strike using the leg, in unison usually with an area of the knee or lower using the foot.</description>
-                  </node>
-                  <node>
-                     <name>Pedal</name>
-                     <description>Move by working the pedals of a bicycle or other machine.</description>
-                  </node>
-                  <node>
-                     <name>Press-foot</name>
-                     <description>Move by pressing foot.</description>
-                  </node>
-                  <node>
-                     <name>Run</name>
-                     <description>Travel on foot at a fast pace.</description>
-                  </node>
-                  <node>
-                     <name>Step</name>
-                     <description>Put one leg in front of the other and shift weight onto it.</description>
-                     <node>
-                        <name>Heel-strike</name>
-                        <description>Strike the ground with the heel during a step.</description>
-                     </node>
-                     <node>
-                        <name>Toe-off</name>
-                        <description>Push with toe as part of a stride.</description>
-                     </node>
-                  </node>
-                  <node>
-                     <name>Trot</name>
-                     <description>Run at a moderate pace, typically with short steps.</description>
-                  </node>
-                  <node>
-                     <name>Walk</name>
-                     <description>Move at a regular pace by lifting and setting down each foot in turn never having both feet off the ground at once.</description>
                   </node>
                </node>
             </node>
@@ -2256,7 +2256,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>acceleration</value>
+                        <value>accelerationUnits</value>
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
@@ -2274,7 +2274,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>jerk</value>
+                        <value>jerkUnits</value>
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
@@ -2292,7 +2292,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>frequency</value>
+                        <value>frequencyUnits</value>
                      </attribute>
                   </node>
                </node>
@@ -2320,7 +2320,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>speed</value>
+                        <value>speedUnits</value>
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
@@ -2338,7 +2338,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>frequency</value>
+                        <value>frequencyUnits</value>
                      </attribute>
                   </node>
                </node>
@@ -2428,7 +2428,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>physicalLength</value>
+                        <value>physicalLengthUnits</value>
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
@@ -2463,7 +2463,7 @@
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
-                           <value>physicalLength</value>
+                           <value>physicalLengthUnits</value>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
@@ -2481,7 +2481,7 @@
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
-                           <value>physicalLength</value>
+                           <value>physicalLengthUnits</value>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
@@ -2499,7 +2499,7 @@
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
-                           <value>physicalLength</value>
+                           <value>physicalLengthUnits</value>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
@@ -2521,7 +2521,7 @@
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
-                           <value>area</value>
+                           <value>areaUnits</value>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
@@ -2539,7 +2539,7 @@
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
-                           <value>physicalLength</value>
+                           <value>physicalLengthUnits</value>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
@@ -2557,7 +2557,7 @@
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
-                           <value>physicalLength</value>
+                           <value>physicalLengthUnits</value>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
@@ -2575,7 +2575,7 @@
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
-                           <value>physicalLength</value>
+                           <value>physicalLengthUnits</value>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
@@ -2593,7 +2593,7 @@
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
-                           <value>volume</value>
+                           <value>volumeUnits</value>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
@@ -2603,7 +2603,7 @@
                   </node>
                </node>
                <node>
-                  <name>Surface-properties</name>
+                  <name>Surface-property</name>
                   <description>Property of the outer boundary of a three-dimensional object.</description>
                   <node>
                      <name>Rough</name>
@@ -2628,7 +2628,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>time</value>
+                        <value>timeUnits</value>
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
@@ -2646,7 +2646,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>time</value>
+                        <value>timeUnits</value>
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
@@ -2664,7 +2664,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>frequency</value>
+                        <value>frequencyUnits</value>
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
@@ -2700,7 +2700,7 @@
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
-                        <value>time</value>
+                        <value>timeUnits</value>
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
@@ -2715,6 +2715,69 @@
                <node>
                   <name>Time-sync</name>
                   <description>A synchronization signal whose purpose to help synchronize different signals or processes. Often used to indicate a marker inserted into the recorded data to allow post hoc synchronization of concurrently recorded data streams.</description>
+               </node>
+            </node>
+            <node>
+               <name>Variability-property</name>
+               <description>An attribute describing how something changes or varies.</description>
+               <node>
+                  <name>Abrupt</name>
+                  <description>Marked by sudden change.</description>
+               </node>
+               <node>
+                  <name>Constant</name>
+                  <description>Continually recurring or continuing without interruption. Not changing in time or space.</description>
+               </node>
+               <node>
+                  <name>Continuous</name>
+                  <description>Uninterrupted in time, sequence, substance, or extent.</description>
+               </node>
+               <node>
+                  <name>Deterministic</name>
+                  <description>No randomness is involved in the development of the future states of the element.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Random</value>
+                     <value>Stochastic</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Discrete</name>
+                  <description>Constituting a separate entities or parts.</description>
+               </node>
+               <node>
+                  <name>Flickering</name>
+                  <description>Moving irregularly or unsteadily or burning or shining fitfully or with a fluctuating light.</description>
+               </node>
+               <node>
+                  <name>Fractal</name>
+                  <description>Having extremely irregular curves or shapes for which any suitably chosen part is similar in shape to a given larger or smaller part when magnified or reduced to the same size.</description>
+               </node>
+               <node>
+                  <name>Random</name>
+                  <description>Governed by or depending on chance; lacking any definite plan or order or purpose.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Deterministic</value>
+                     <value>Stochastic</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Repetitive</name>
+                  <description>A recurring action that is often non-purposeful.</description>
+               </node>
+               <node>
+                  <name>Stochastic</name>
+                  <description>Uses  a random probability distribution or pattern that may be analysed statistically but may not be predicted precisely to determine future states.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Deterministic</value>
+                     <value>Random</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Varying</name>
+                  <description>Differing in size, amount, degree, or nature.</description>
                </node>
             </node>
          </node>
@@ -3941,6 +4004,9 @@
                <attribute>
                   <name>topLevelTagGroup</name>
                </attribute>
+               <attribute>
+                  <name>unique</name>
+               </attribute>
             </node>
             <node>
                <name>Event-stream</name>
@@ -4209,7 +4275,7 @@
                      <description>(A (Between, (B, C))) means A is in the space or interval separating B and C.</description>
                   </node>
                   <node>
-                     <name>Bilateral</name>
+                     <name>Bilateral-to</name>
                      <description>(A (Bilateral B)) means A is on both sides of B or affects both sides of B.</description>
                   </node>
                   <node>
@@ -4299,69 +4365,6 @@
                   <node>
                      <name>Waiting-for</name>
                      <description>(A Waiting-for B) means A pauses for something to happen in B.</description>
-                  </node>
-               </node>
-               <node>
-                  <name>Variability-relation</name>
-                  <description>An attribute describing how something changes or varies.</description>
-                  <node>
-                     <name>Abrupt</name>
-                     <description>Marked by sudden change.</description>
-                  </node>
-                  <node>
-                     <name>Constant</name>
-                     <description>Continually recurring or continuing without interruption. Not changing in time or space.</description>
-                  </node>
-                  <node>
-                     <name>Continuous</name>
-                     <description>Uninterrupted in time, sequence, substance, or extent.</description>
-                  </node>
-                  <node>
-                     <name>Deterministic</name>
-                     <description>No randomness is involved in the development of the future states of the element.</description>
-                     <attribute>
-                        <name>relatedTag</name>
-                        <value>Random</value>
-                        <value>Stochastic</value>
-                     </attribute>
-                  </node>
-                  <node>
-                     <name>Discrete</name>
-                     <description>Constituting a separate entities or parts.</description>
-                  </node>
-                  <node>
-                     <name>Flickering</name>
-                     <description>Moving irregularly or unsteadily or burning or shining fitfully or with a fluctuating light.</description>
-                  </node>
-                  <node>
-                     <name>Fractal</name>
-                     <description>Having extremely irregular curves or shapes for which any suitably chosen part is similar in shape to a given larger or smaller part when magnified or reduced to the same size.</description>
-                  </node>
-                  <node>
-                     <name>Random</name>
-                     <description>Governed by or depending on chance; lacking any definite plan or order or purpose.</description>
-                     <attribute>
-                        <name>relatedTag</name>
-                        <value>Deterministic</value>
-                        <value>Stochastic</value>
-                     </attribute>
-                  </node>
-                  <node>
-                     <name>Repetitive</name>
-                     <description>A recurring action that is often non-purposeful.</description>
-                  </node>
-                  <node>
-                     <name>Stochastic</name>
-                     <description>Uses  a random probability distribution or pattern that may be analysed statistically but may not be predicted precisely to determine future states.</description>
-                     <attribute>
-                        <name>relatedTag</name>
-                        <value>Deterministic</value>
-                        <value>Random</value>
-                     </attribute>
-                  </node>
-                  <node>
-                     <name>Varying</name>
-                     <description>Differing in size, amount, degree, or nature.</description>
                   </node>
                </node>
             </node>
@@ -5320,7 +5323,7 @@
    </schema>
    <unitClassDefinitions>
       <unitClassDefinition>
-         <name>acceleration</name>
+         <name>accelerationUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>m-per-s^2</value>
@@ -5336,7 +5339,7 @@
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>angle</name>
+         <name>angleUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>radian</value>
@@ -5361,7 +5364,7 @@
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>area</name>
+         <name>areaUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>m^2</value>
@@ -5375,18 +5378,9 @@
                <name>unitSymbol</name>
             </attribute>
          </unit>
-         <unit>
-            <name>px^2</name>
-            <attribute>
-               <name>unitSymbol</name>
-            </attribute>
-         </unit>
-         <unit>
-            <name>pixel^2</name>
-         </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>currency</name>
+         <name>currencyUnits</name>
          <description>Units indicating the worth of something.</description>
          <attribute>
             <name>defaultUnits</name>
@@ -5409,7 +5403,7 @@
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>frequency</name>
+         <name>frequencyUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>Hz</value>
@@ -5431,20 +5425,38 @@
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>intensity</name>
+         <name>intensityUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>dB</value>
          </attribute>
          <unit>
             <name>dB</name>
+            <description>Intensity expressed as ratio to a threshold. Often used for sound intensity.</description>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>candela</name>
+            <description>Units used to express light intensity.</description>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>cd</name>
+            <description>Units used to express light intensity.</description>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
             <attribute>
                <name>unitSymbol</name>
             </attribute>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>jerk</name>
+         <name>jerkUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>m-per-s^3</value>
@@ -5457,29 +5469,7 @@
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>luminousIntensity</name>
-         <attribute>
-            <name>defaultUnits</name>
-            <value>cd</value>
-         </attribute>
-         <unit>
-            <name>candela</name>
-            <attribute>
-               <name>SIUnit</name>
-            </attribute>
-         </unit>
-         <unit>
-            <name>cd</name>
-            <attribute>
-               <name>SIUnit</name>
-            </attribute>
-            <attribute>
-               <name>unitSymbol</name>
-            </attribute>
-         </unit>
-      </unitClassDefinition>
-      <unitClassDefinition>
-         <name>memorySize</name>
+         <name>memorySizeUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>B</value>
@@ -5501,11 +5491,17 @@
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>physicalLength</name>
+         <name>physicalLengthUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>m</value>
          </attribute>
+         <unit>
+            <name>foot</name>
+         </unit>
+         <unit>
+            <name>inch</name>
+         </unit>
          <unit>
             <name>metre</name>
             <attribute>
@@ -5522,30 +5518,11 @@
             </attribute>
          </unit>
          <unit>
-            <name>foot</name>
-         </unit>
-         <unit>
             <name>mile</name>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>pixels</name>
-         <attribute>
-            <name>defaultUnits</name>
-            <value>px</value>
-         </attribute>
-         <unit>
-            <name>pixel</name>
-         </unit>
-         <unit>
-            <name>px</name>
-            <attribute>
-               <name>unitSymbol</name>
-            </attribute>
-         </unit>
-      </unitClassDefinition>
-      <unitClassDefinition>
-         <name>speed</name>
+         <name>speedUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>m-per-s</value>
@@ -5573,7 +5550,7 @@
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>time</name>
+         <name>timeUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>s</value>
@@ -5605,7 +5582,7 @@
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
-         <name>volume</name>
+         <name>volumeUnits</name>
          <attribute>
             <name>defaultUnits</name>
             <value>m^3</value>

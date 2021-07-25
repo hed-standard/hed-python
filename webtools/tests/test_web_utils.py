@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
-                                   display_name='ExcelOneSheet.xlsx')
+                                   name='ExcelOneSheet.xlsx')
             results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for xlsx files')
@@ -128,7 +128,7 @@ class Test(unittest.TestCase):
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
-                                   display_name='ExcelOneSheet.xlsx')
+                                   name='ExcelOneSheet.xlsx')
             results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
@@ -151,7 +151,7 @@ class Test(unittest.TestCase):
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
-                                   display_name='LKTEventCodesHED3.tsv')
+                                   name='LKTEventCodesHED3.tsv')
             results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'LKTEventCodesHED3.tsv'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')

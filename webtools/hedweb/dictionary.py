@@ -1,3 +1,4 @@
+import io
 from flask import current_app
 from werkzeug.utils import secure_filename
 
@@ -29,9 +30,8 @@ def get_input_from_dictionary_form(request):
                  common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')}
     if common.JSON_FILE in request.files:
         f = request.files[common.JSON_FILE]
-        arguments[common.JSON_DICTIONARY] = \
-            models.ColumnDefGroup(json_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
-                                  display_name=secure_filename(f.filename))
+        fb = io.StringIO(f.read(file_constants.BYTE_LIMIT).decode('ascii'))
+        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(file=fb, name=secure_filename(f.filename))
     return arguments
 
 
@@ -105,7 +105,7 @@ def dictionary_convert(hed_schema, json_dictionary, command=common.COMMAND_TO_LO
             column_def.set_hed_string(converted_string, position)
 
     # issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-    display_name = json_dictionary.display_name
+    display_name = json_dictionary.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
         file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
@@ -139,15 +139,15 @@ def dictionary_validate(hed_schema, json_dictionary):
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if not json_dictionary or not isinstance(json_dictionary, models.ColumnDefGroup):
         raise HedFileError('BadDictionaryFile', "Please provide a dictionary to process", "")
-    display_name = json_dictionary.display_name
-    def_dict = json_dictionary.extract_defs()
-    issues = def_dict.get_def_issues(hed_schema)
-    if issues:
-        issue_str = get_printable_issue_string(issues, f"JSON dictionary {display_name} definition errors")
-        file_name = generate_filename(display_name, suffix='_dictionary_errors', extension='.txt')
-        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
-                common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
-                'msg': f"JSON dictionary {display_name} had definition errors"}
+    display_name = json_dictionary.name
+    # def_dict = json_dictionary.extract_defs()
+    # issues = def_dict.get_def_issues(hed_schema)
+    # if issues:
+    #     issue_str = get_printable_issue_string(issues, f"JSON dictionary {display_name} definition errors")
+    #     file_name = generate_filename(display_name, suffix='_dictionary_errors', extension='.txt')
+    #     return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
+    #             common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
+    #             'msg': f"JSON dictionary {display_name} had definition errors"}
 
     issues = json_dictionary.validate_entries(hed_schema)
     if issues:
