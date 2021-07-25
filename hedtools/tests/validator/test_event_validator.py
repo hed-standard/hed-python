@@ -56,25 +56,25 @@ class Test(unittest.TestCase):
         validation_issues = self.generic_hed_input_reader.validate_input(self.base_hed_input)
         self.assertIsInstance(validation_issues, list)
 
-        display_filename = "DummyDisplayFilename.txt"
+        name = "DummyDisplayFilename.txt"
         validation_issues = self.generic_hed_input_reader.validate_input(self.hed_file_with_errors,
-                                                                         display_filename=display_filename)
+                                                                         name=name)
         self.assertIsInstance(validation_issues, list)
-        self.assertTrue(display_filename in validation_issues[0][ErrorContext.FILE_NAME])
+        self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors(self):
-        display_filename = "DummyDisplayFilename.txt"
+        name = "DummyDisplayFilename.txt"
         validation_issues = self.generic_hed_input_reader.validate_input(self.hed_file_with_major_errors,
-                                                                         display_filename=display_filename)
+                                                                         name=name)
         self.assertIsInstance(validation_issues, list)
-        self.assertTrue(display_filename in validation_issues[0][ErrorContext.FILE_NAME])
+        self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors_columns(self):
-        display_filename = "DummyDisplayFilename.txt"
+        name = "DummyDisplayFilename.txt"
         validation_issues = self.generic_hed_input_reader2.validate_input(self.hed_file_with_major_errors_multi_column,
-                                                                         display_filename=display_filename)
+                                                                         name=name)
         self.assertIsInstance(validation_issues, list)
-        self.assertTrue(display_filename in validation_issues[0][ErrorContext.FILE_NAME])
+        self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_individual_tags_in_hed_string(self):
         validation_issues = self.generic_hed_input_reader._validate_individual_tags_in_hed_string(self.hed_string_with_invalid_tags)
@@ -124,10 +124,8 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict = column_group.extract_defs()
-        self.assertEqual(len(def_dict.get_def_issues(hed_schema=hed_schema)), 0)
-        input_file = EventsInput(events_path, json_def_files=column_group,
-                                 def_dicts=def_dict)
+        self.assertEqual(len(column_group.validate_entries(hed_schema=hed_schema)), 0)
+        input_file = EventsInput(events_path, json_def_files=column_group)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)
@@ -143,13 +141,11 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events_bad_defs.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict = column_group.extract_defs()
-        self.assertEqual(len(def_dict.get_def_issues(hed_schema=hed_schema)), 0)
-        input_file = EventsInput(events_path, json_def_files=column_group,
-                                 def_dicts=def_dict)
+        self.assertEqual(len(column_group.validate_entries()), 0)
+        input_file = EventsInput(events_path, json_def_files=column_group)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
-        self.assertEqual(len(validation_issues), 1)
+        self.assertEqual(len(validation_issues), 3)
 
         validator = EventValidator(hed_schema=hed_schema)
         validation_issues = validator.validate_input(input_file)
@@ -176,7 +172,7 @@ class Test(unittest.TestCase):
 
         hed_schema = schema.load_schema(schema_path)
 
-        input_file = EventsInput(events_path, tag_columns=[2, 3])
+        input_file = HedInput(events_path, tag_columns=[2, 3, "error"])
         validator = EventValidator(hed_schema=hed_schema)
         validation_issues = validator.validate_input(input_file)
         self.assertEqual(validation_issues[0]['char_index'], 6)

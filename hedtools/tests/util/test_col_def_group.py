@@ -5,6 +5,7 @@ from hed.models.column_def_group import ColumnDefGroup
 from hed.models.column_definition import ColumnDef
 from hed.errors.exceptions import HedFileError
 from hed import schema
+import io
 
 
 class Test(unittest.TestCase):
@@ -39,20 +40,20 @@ class Test(unittest.TestCase):
             pass
         self.assertTrue(len(json_dict._column_settings) == 0)
 
-    def test_display_filename(self):
+    def test_name(self):
         invalid_json = "invalidxmlfile.json"
-        display_filename = "PrettyDisplayName.json"
+        name = "PrettyDisplayName.json"
         try:
             json_dict = ColumnDefGroup(invalid_json)
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(display_filename in e.format_error_message(return_string_only=True,
-                                                                       display_filename=display_filename))
+            self.assertTrue(name in e.format_error_message(return_string_only=True,
+                                                                       name=name))
 
     def test_add_json_string(self):
-        with open(self.json_filename, "r") as fp:
-            input_string = fp.read()
-            json_file = ColumnDefGroup(json_string=input_string)
+        with open(self.json_filename) as file:
+            file_as_string = io.StringIO(file.read())
+            json_file = ColumnDefGroup(file_as_string)
             self.assertTrue(json_file)
 
     def test__iter__(self):
@@ -81,7 +82,7 @@ class Test(unittest.TestCase):
     #
     # def get_validation_issues(self):
     #
-    # def validate_entries(self, hed_schema=None, display_filename=None):
+    # def validate_entries(self, hed_schema=None, name=None):
     #
 
     def test_validate_column_group(self):
