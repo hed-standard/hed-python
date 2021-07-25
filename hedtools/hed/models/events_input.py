@@ -1,89 +1,90 @@
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
 from hed.models.column_def_group import ColumnDefGroup
-from hed.models.def_mapper import DefinitionMapper
-from hed.errors import error_reporter
 
 
 class EventsInput(BaseInput):
     """A class to parse bids style spreadsheets into a more general format."""
 
-    def __init__(self, filename=None, file_type=None, worksheet_name=None, tag_columns=None,
-                 has_column_names=True, column_prefix_dictionary=None,
-                 json_def_files=None, attribute_columns=None,
-                 def_dicts=None, display_name=None):
+    HED_COLUMN_NAME = "HED"
+
+    def __init__(self, filename=None, json_def_files=None, attribute_columns=None, extra_def_dicts=None,
+                 also_gather_defs_from_column_groups=True, name=None):
         """Constructor for the EventsInput class.
 
         Parameters
         ----------
          filename: str or file like
              An xlsx/tsv file to open.
-        file_type: str
-            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
-        worksheet_name: str
-            The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
-        tag_columns: []
-            A list of ints containing the columns that contain the HED tags. The default value is the 2nd column.
-        has_column_names: bool
-            True if file has column names. The validation will skip over the first line of the file. False, if
-            otherwise.
-        column_prefix_dictionary: {}
-            A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
-            prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
-            4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/
-            prepended to them, the fourth column contains tags that need Event/Label/ prepended to them,
-            and the fifth column contains tags that needs Event/Category/ prepended to them.
         json_def_files : str or [str] or ColumnDefGroup or [ColumnDefGroup]
             A list of json filenames to pull events from
         attribute_columns: str or int or [str] or [int]
             A list of column names or numbers to treat as attributes.
             Default: ["duration", "onset"]
-        def_dicts: [DefDict]
+        extra_def_dicts: [DefDict]
             DefDict's containing all the definitions this file should use - other than the ones coming from the file
-            itself.
-            If this is NOT passed, the class will instead gather definitions from any passed in ColumnDefGroups
+            itself, and from the column def groups.  These are added as as the last entries, so names will override
+            earlier ones.
+        also_gather_defs_from_column_groups: bool
+            Default to true.  If False, do NOT extract any definitions from column groups, assume they are already
+            in the def_dict list.
+        name: str
+            The name to display for this file for error purposes.
         """
-        if tag_columns is None:
-            tag_columns = []
-        if column_prefix_dictionary is None:
-            column_prefix_dictionary = {}
         if attribute_columns is None:
             attribute_columns = ["duration", "onset"]
 
-        # This stuff is mostly here to make this easier to use for development
-        # you should generally create the DefDict and ColumnDefGroup before reaching this point.
+        column_group_defs = None
         if json_def_files:
-            self.column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
+            column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
+        if extra_def_dicts and not isinstance(extra_def_dicts, list):
+            extra_def_dicts = [column_group_defs]
         else:
-            self.column_group_defs = None
-        # if def_dicts is None:
-        #     self.def_dicts = ColumnDefGroup.extract_defs_from_list(self.column_group_defs)
-        # else:
-        #     if not isinstance(def_dicts, list):
-        #         self.def_dicts = [def_dicts]
-        #     else:
-        #         self.def_dicts = def_dicts
-        if def_dicts and not isinstance(def_dicts, list):
-            self._def_dicts = [def_dicts]
-        else:
-            self._def_dicts = def_dicts
+            extra_def_dicts = column_group_defs
 
-        def_mapper = DefinitionMapper(self._def_dicts)
-        new_mapper = ColumnMapper(json_def_files=self.column_group_defs, tag_columns=tag_columns,
-                                  column_prefix_dictionary=column_prefix_dictionary,
+        new_mapper = ColumnMapper(json_def_files=column_group_defs, tag_columns=[self.HED_COLUMN_NAME],
                                   attribute_columns=attribute_columns,
-                                  definition_mapper=def_mapper)
+                                  extra_def_dicts=extra_def_dicts,
+                                  also_gather_defs_from_column_groups=also_gather_defs_from_column_groups,
+                                  strict_named_columns=False)
 
-        super().__init__(filename, file_type, worksheet_name, has_column_names, new_mapper,
-                         display_name=display_name)
+        super().__init__(filename, file_type=".tsv", worksheet_name=None, has_column_names=True, mapper=new_mapper,
+                         name=name)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
                              "This is probably not intended.")
 
-    @property
-    def def_dicts(self):
-        return self._def_dicts
+    def reset_column_defs(self, json_def_files=None, attribute_columns=None, extra_def_dicts=None,
+                          also_gather_defs_from_column_groups=True):
+        """
+            Change the sidecars in use for parsing this file.
+
+        Parameters
+        ----------
+        json_def_files : str or [str] or ColumnDefGroup or [ColumnDefGroup]
+            A list of json filenames to pull events from
+        attribute_columns: str or int or [str] or [int]
+            A list of column names or numbers to treat as attributes.
+            Default: ["duration", "onset"]
+        extra_def_dicts: [DefDict]
+            DefDict's containing all the definitions this file should use - other than the ones coming from the file
+            itself, and from the column def groups.  These are added as as the last entries, so names will override
+            earlier ones.
+        also_gather_defs_from_column_groups: bool
+            Default to true.  If False, do NOT extract any definitions from column groups, assume they are already
+            in the def_dict list.
+        Returns
+        -------
+
+        """
+        new_mapper = ColumnMapper(json_def_files=json_def_files, tag_columns=[self.HED_COLUMN_NAME],
+                                  attribute_columns=attribute_columns,
+                                  extra_def_dicts=extra_def_dicts,
+                                  also_gather_defs_from_column_groups=also_gather_defs_from_column_groups,
+                                  strict_named_columns=False)
+
+        self.reset_mapper(new_mapper)
 
     def validate_file_sidecars(self, hed_schema=None, error_handler=None):
         """
@@ -102,11 +103,4 @@ class EventsInput(BaseInput):
         validation_issues : [{}]
             A list of syntax and semantic issues found in the definitions.
         """
-        if error_handler is None:
-            error_handler = error_reporter.ErrorHandler()
-        all_validation_issues = []
-        for column_def_group in self.column_group_defs:
-            all_validation_issues += column_def_group.validate_entries(hed_schema=hed_schema,
-                                                                       error_handler=error_handler)
-
-        return all_validation_issues
+        return self._mapper.validate_column_defs(hed_schema, error_handler)

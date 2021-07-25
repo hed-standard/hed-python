@@ -119,7 +119,7 @@ class DefinitionMapper:
                                             "tag": tag}]
                         continue
                     if not expand_defs:
-                       continue
+                        continue
 
                     tag.tag = def_tag_name
 
@@ -127,6 +127,7 @@ class DefinitionMapper:
                     continue
 
         if remove_groups:
-            hed_string_obj.remove_groups(remove_groups)
+            if expand_defs:
+                hed_string_obj.remove_groups(remove_groups)
 
         return def_issues
