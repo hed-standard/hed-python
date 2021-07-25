@@ -69,29 +69,17 @@ class DefDict:
         # Definition related issues
         self._extract_def_issues = []
 
-    def get_def_issues(self, hed_schema=None):
+    def get_def_issues(self):
         """
-            Returns definition errors found during extraction, additionally will check if definition terms already
-            exist in the schema if a hed_schema is passed in.
+            Returns definition errors found during extraction
 
         Parameters
         ----------
-        hed_schema : HedSchema
-            Optional parameter to check if the definition terms were already in the schema
-
         Returns
         -------
         issues_list: [{}]
             List of DefinitionErrors found.
         """
-        if hed_schema:
-            new_issues = []
-            for def_entry in self._defs.values():
-                if def_entry.name.lower() in hed_schema.short_tag_mapping:
-                    new_issues += error_reporter.ErrorHandler.format_error_from_context(
-                        DefinitionErrors.TAG_IN_SCHEMA, def_entry.source_context, def_entry.name)
-            return self._extract_def_issues + new_issues
-
         return self._extract_def_issues
 
     def __iter__(self):
