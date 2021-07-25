@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
 
         test_string = HedString(self.basic_def_string)
         def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
-        self.assertEqual(str(test_string), "")
+        self.assertEqual(str(test_string), self.basic_def_string)
 
         test_string = HedString(self.basic_def_string_no_paren)
         def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
@@ -83,23 +83,23 @@ class Test(unittest.TestCase):
 
         test_string = HedString(self.basic_hed_string + "," + self.basic_def_string)
         def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
-        self.assertEqual(str(test_string), self.basic_hed_string)
+        self.assertEqual(str(test_string), self.basic_hed_string + "," + self.basic_def_string)
 
         test_string = HedString(self.basic_def_string + "," + self.basic_hed_string)
         def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
-        self.assertEqual(str(test_string), self.basic_hed_string)
+        self.assertEqual(str(test_string), self.basic_def_string + "," + self.basic_hed_string)
 
         test_string = HedString(self.basic_hed_string_with_def)
         def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
-        self.assertEqual(str(test_string), self.basic_hed_string + "," + self.label_def_string)
+        self.assertEqual(str(test_string), self.basic_hed_string_with_def)
 
         test_string = HedString(self.basic_hed_string_with_def_first)
         def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
-        self.assertEqual(str(test_string), self.label_def_string + "," + self.basic_hed_string)
+        self.assertEqual(str(test_string), self.basic_hed_string_with_def_first)
 
         test_string = HedString(self.basic_hed_string_with_def_first_paren)
         def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
-        self.assertEqual(str(test_string), "(" + self.label_def_string + "," + self.basic_hed_string + ")")
+        self.assertEqual(str(test_string), self.basic_hed_string_with_def_first_paren)
 
 
     def test_replace_and_remove_tags_placeholder(self):
