@@ -1,5 +1,6 @@
 from enum import Enum
 from hed.models.hed_string import HedString
+from hed.models.def_dict import DefDict
 from hed.errors.error_types import SidecarErrors, ErrorContext, ValidationErrors
 from hed.errors import error_reporter
 
@@ -25,7 +26,8 @@ class ColumnType(Enum):
 
 class ColumnDef:
     """A single column in either the ColumnMapper or ColumnDefGroup"""
-    def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None):
+    def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None,
+                 error_handler=None):
         """
         A single column entry in the column mapper.  Each column you want to retrieve data from will have one.
 
@@ -41,6 +43,8 @@ class ColumnDef:
             At a minimum, this needs "HED" in the dict for several ColumnType
         column_prefix : str
             If present, prepend the given prefix to all hed tags in the columns.  Only works on ColumnType HedTags
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
         """
         if column_type is None or column_type == ColumnType.Unknown:
             column_type = ColumnDef._detect_column_def_type(hed_dict)
@@ -52,6 +56,11 @@ class ColumnDef:
         self.column_name = name
         self.column_prefix = column_prefix
         self._hed_dict = hed_dict
+        self._def_dict = self.extract_defs(error_handler=error_handler)
+
+    @property
+    def def_dict(self):
+        return self._def_dict
 
     @property
     def hed_dict(self):
@@ -65,7 +74,7 @@ class ColumnDef:
         """
         return self._hed_dict
 
-    def hed_string_iter(self, include_position=False):
+    def hed_string_iter(self, include_position=False, also_return_bad_types=False):
         """
         Return iterator to loop over all hed strings in this column definition
 
@@ -73,7 +82,8 @@ class ColumnDef:
         ----------
         include_position : bool
             If true, this returns a tuple including a position element you can pass back in to set_hed_string
-
+        also_return_bad_types: bool
+            If true, will return invalid entries, such as lists, rather than silently skipping them.
         Yields
         -------
         hed_string : str
@@ -86,6 +96,8 @@ class ColumnDef:
         hed_strings = self._hed_dict.get("HED", None)
         if isinstance(hed_strings, dict):
             for key, value in hed_strings.items():
+                if not also_return_bad_types and not isinstance(value, str):
+                    continue
                 if include_position:
                     yield value, key
                 else:
@@ -278,7 +290,16 @@ class ColumnDef:
 
         return ColumnType.Value
 
-    def validate_column_entry(self, hed_schema=None, error_handler=None):
+    def get_def_issues(self):
+        """
+        Returns the issues found extracting definitions from this column.
+        Returns
+        -------
+
+        """
+        return self._def_dict.get_def_issues()
+
+    def validate_column_entry(self, hed_schema=None, def_mapper=None, error_handler=None):
         """
         Finds all validation issues in this column.
 
@@ -286,6 +307,8 @@ class ColumnDef:
         ----------
         hed_schema : HedSchema, optional
             The dictionary to use to validate hed_strings.  If absent, will only validate column syntax.
+        def_mapper: DefMapper
+            The definition mapper to validate def tags with.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         Returns
@@ -295,6 +318,7 @@ class ColumnDef:
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
 
+        error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, self.column_name)
         col_validation_issues = []
         if self.hed_string_iter():
             event_validator = None
@@ -304,9 +328,8 @@ class ColumnDef:
                 event_validator = EventValidator(check_for_warnings=True, run_semantic_validation=True,
                                                  hed_schema=hed_schema, error_handler=error_handler,
                                                  allow_numbers_to_be_pound_sign=True)
-            for hed_string, position in self.hed_string_iter(include_position=True):
+            for hed_string, position in self.hed_string_iter(include_position=True, also_return_bad_types=True):
                 error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
-                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string, increment_depth_after=False)
                 if not hed_string:
                     col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
                 if not isinstance(hed_string, str):
@@ -314,10 +337,15 @@ class ColumnDef:
                                                                         given_type=type(hed_string),
                                                                         expected_type="str")
                 else:
+                    hed_string_obj = HedString(hed_string)
+                    error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
+                                                     increment_depth_after=False)
+                    if def_mapper:
+                        col_validation_issues += def_mapper.replace_and_remove_tags(hed_string_obj, expand_defs=False)
                     if event_validator:
-                        col_validation_issues += event_validator.validate_input(hed_string)
-                    col_validation_issues += self._validate_pound_sign_count(hed_string, error_handler)
-                error_handler.pop_error_context()
+                        col_validation_issues += event_validator.validate_input(hed_string_obj)
+                    col_validation_issues += self._validate_pound_sign_count(hed_string_obj, error_handler)
+                    error_handler.pop_error_context()
                 error_handler.pop_error_context()
 
         if self.column_type is None:
@@ -328,6 +356,8 @@ class ColumnDef:
             if not raw_hed_dict:
                 col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
 
+        col_validation_issues += self.get_def_issues()
+        error_handler.pop_error_context()
         return col_validation_issues
 
     def _validate_pound_sign_count(self, hed_string, error_handler):
@@ -337,7 +367,7 @@ class ColumnDef:
 
         Parameters
         ----------
-        hed_string : str
+        hed_string : str or HedString
         error_handler : ErrorHandler
 
         Returns
@@ -362,3 +392,31 @@ class ColumnDef:
             return error_handler.format_error(error_type, pound_sign_count=str(hed_string).count("#"))
 
         return []
+
+    def extract_defs(self, error_handler=None):
+        """
+            Finds all definitions in the hed strings of this column def group.
+
+        Parameters
+        ----------
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        Returns
+        -------
+        def_dicts: DefDict
+            A DefDict containing all the definitions found.
+        """
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+        def_dict = DefDict()
+        for hed_string, key_name in self.hed_string_iter(include_position=True):
+            hed_string_obj = HedString(hed_string)
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, self.column_name)
+            error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, False)
+            def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
+            error_handler.pop_error_context()
+            error_handler.pop_error_context()
+            error_handler.pop_error_context()
+
+        return def_dict

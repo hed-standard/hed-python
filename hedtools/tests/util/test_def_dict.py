@@ -21,7 +21,8 @@ class TestDefBase(unittest.TestCase):
             def_dict = DefDict()
             def_dict.check_for_definitions(HedString(test_strings[test_key]))
             expected_issue = expected_issues[test_key]
-            self.assertCountEqual(def_dict.get_def_issues(hed_schema=self.hed_schema), expected_issue, HedString(test_strings[test_key]))
+            test_issues = def_dict.get_def_issues()
+            self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
 
 
 class TestDefDict(TestDefBase):
@@ -76,7 +77,8 @@ class TestDefDict(TestDefBase):
             'twoGroupTags': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1", [self.def_contents_string, self.def_contents_string2]),
             'duplicateDef': self.error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
             'duplicateDef2': self.error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
-            'defAlreadyTagInSchema': self.error_handler.format_error(DefinitionErrors.TAG_IN_SCHEMA, "Item"),
+            # This is not an error since re-used terms are checked elsewhere.
+            'defAlreadyTagInSchema': [],
             'defTooManyPlaceholders': self.error_handler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "TestDefPlaceholder",
                                                                                  expected_count=1, tag_list=["Item/TestDef1/#", "Item/TestDef2/#"]),
             'invalidPlaceholderExtension': self.error_handler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, "InvalidDef1/thispartisnotallowed"),

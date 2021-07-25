@@ -46,16 +46,16 @@ class TestHedSchema(unittest.TestCase):
             pass
         self.assertFalse(hed_schema)
 
-    def test_display_filename(self):
+    def test_name(self):
         invalid_xml_file = "invalidxmlfile.xml"
-        display_filename = "PrettyDisplayName.xml"
+        name = "PrettyDisplayName.xml"
         try:
             schema.load_schema(invalid_xml_file)
             # We should have an error before we reach here.
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(display_filename in e.format_error_message(return_string_only=True,
-                                                                       display_filename=display_filename))
+            self.assertTrue(name in e.format_error_message(return_string_only=True,
+                                                                       name=name))
 
     def test_attribute_keys(self):
         tag_dictionary_keys = ['defaultUnits', 'extensionAllowed', 'isNumeric', 'position', 'predicateType',

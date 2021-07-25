@@ -42,7 +42,6 @@ class Test(unittest.TestCase):
         # Just make sure this didn't crash for now
         self.assertTrue(True)
 
-
     def test_get_row_hed_tags(self):
         row_dict = self.generic_file_input._mapper.expand_row_tags(self.row_with_hed_tags)
         hed_string, column_to_hed_tags_dictionary = self.generic_file_input._get_row_hed_tags_from_dict(row_dict)
@@ -56,16 +55,12 @@ class Test(unittest.TestCase):
 
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         column_group = ColumnDefGroup(json_path)
-        def_dict = column_group.extract_defs()
-        self.assertEqual(len(def_dict.get_def_issues()), 0)
-        input_file = EventsInput(events_path, json_def_files=column_group,
-                                 def_dicts=def_dict)
+        self.assertEqual(len(column_group.validate_entries()), 0)
+        input_file = EventsInput(events_path, json_def_files=column_group)
 
         with open(events_path) as file:
             events_file_as_string = io.StringIO(file.read())
-        input_file_from_string = EventsInput(filename=events_file_as_string,
-                                             file_type='.tsv', json_def_files=column_group,
-                                             def_dicts=def_dict)
+        input_file_from_string = EventsInput(filename=events_file_as_string, json_def_files=column_group)
 
         for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
             self.assertEqual(row_number, row_number2)
@@ -119,6 +114,21 @@ class Test(unittest.TestCase):
         reloaded_input = HedInput(test_output_name)
 
         self.assertTrue(test_input_file._dataframe.equals(reloaded_input._dataframe))
+
+    def test_loading_and_reset_mapper(self):
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
+        column_group = ColumnDefGroup(json_path)
+        self.assertEqual(len(column_group.validate_entries()), 0)
+        input_file_1 = EventsInput(events_path, json_def_files=column_group)
+        input_file_2 = EventsInput(events_path, json_def_files=column_group)
+
+        input_file_2.reset_column_defs()
+
+        for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(expand_defs=True), input_file_2.iter_dataframe(expand_defs=True)):
+            self.assertEqual(row_number, row_number2)
+            self.assertTrue(len(column_dict) == 4)
+            self.assertTrue(len(column_dict2) == 11)
 
 
 if __name__ == '__main__':

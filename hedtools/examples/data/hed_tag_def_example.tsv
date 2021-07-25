@@ -1,0 +1,5 @@
+Event code	Short label	Description in text	HED tags
+251	PerturbLeft	Vehicle undergoes a perturbation to left.	Event/Sensory event, (Participant/Cognitive state/Awake ~ Participant/Trait/Age/15 ~ Item/Sound/Siren, Item/Object/Manmade/Vehicle, Attribute/Sensory/Visual/Color/RGB color/RGB Red/100), (Definition/ExampleFileDef, (Item/ExampleFileTag))
+252	PerturbRight	Vehicle undergoes a perturbation to right.	Sensory event, (Awake ~ Age/15 ~ Siren, Vehicle, RGB Red/100)
+253	ResponseOnset	Subject starts to respond to perturbation by steering vehicle back to center of the lane.	Event/Sensory event, (Participant/Cognitive state/Awake ~ Participant/Trait/Age/15 ~ Item/Sound/Siren, Item/Object/Manmade/Vehicle, Attribute/Sensory/Visual/Color/RGB color/RGB Red/100), def/ExampleFileDef
+254	ResponseOffset	Subject completes response to perturbation having steered the vehicle back to the center of the lane.	Event/Sensory event, (Participant/Cognitive state/Awake ~ Participant/Trait/Age/15 ~ Item/Sound/Siren, Item/Object/Manmade/Vehicle, Attribute/Sensory/Visual/Color/RGB color/RGB Red/100), def/ExampleDef

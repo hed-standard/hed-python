@@ -25,7 +25,7 @@ class HedFileError(Exception):
         self.filename = filename
 
     def format_error_message(self, include_tabbing=True, return_string_only=False,
-                             display_filename=None):
+                             name=None):
         """This takes a HedFileError exception and translates it to human readable
 
         Parameters
@@ -34,7 +34,7 @@ class HedFileError(Exception):
             Prefixes string with a tab if True
         return_string_only : bool
             If True, returns a string rather than an "error object"
-        display_filename : str or None
+        name : str or None
             Overrides the filename from the error if present.
             This is useful on the web code and similar that deals with temporary filenames.
         Returns
@@ -47,8 +47,8 @@ class HedFileError(Exception):
             error_prefix = "\t" + error_prefix
 
         error_type, message, filename = self.error_type, self.message, self.filename
-        if display_filename:
-            filename = display_filename
+        if name:
+            filename = name
         error_types = {
             HedExceptions.FILE_NOT_FOUND: f"{error_prefix}{message}.  '{filename}'",
             HedExceptions.INVALID_EXTENSION: f"{error_prefix}Invalid extension.  '{filename}'",

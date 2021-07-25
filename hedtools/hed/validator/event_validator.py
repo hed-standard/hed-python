@@ -57,7 +57,7 @@ class EventValidator:
 
         self._run_semantic_validation = run_semantic_validation
 
-    def validate_input(self, hed_input, display_filename=None):
+    def validate_input(self, hed_input, name=None):
         """
             Validates any given hed_input string, file, or list and returns a list of issues.
 
@@ -66,7 +66,7 @@ class EventValidator:
         hed_input: str or list or HedInput object
             A list of HED strings, a single HED string, or a HedInput object.
             If it is a single string or a list, validate them as hed strings.
-        display_filename: str
+        name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
         Returns
@@ -74,13 +74,13 @@ class EventValidator:
         validation_issues : [{}]
         """
         is_file = isinstance(hed_input, BaseInput)
-        if not display_filename and is_file:
-            display_filename = hed_input.display_name
+        if not name and is_file:
+            name = hed_input.name
 
         if isinstance(hed_input, list):
             validation_issues = self._validate_hed_strings(hed_input)
         elif is_file:
-            self._error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
+            self._error_handler.push_error_context(ErrorContext.FILE_NAME, name)
             validation_issues = self._validate_hed_tags_in_file(hed_input)
         else:
             validation_issues = self._validate_hed_strings([hed_input])[0]
@@ -106,7 +106,10 @@ class EventValidator:
         eeg_issues = []
         for i in range(0, len(hed_strings)):
             hed_string = hed_strings[i]
-            hed_string_obj = HedString(hed_string)
+            if isinstance(hed_string, HedString):
+                hed_string_obj = hed_string
+            else:
+                hed_string_obj = HedString(hed_string)
             self._error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
             validation_issues = self._tag_validator.run_hed_string_validators(hed_string_obj)
             if not validation_issues:
@@ -131,7 +134,7 @@ class EventValidator:
         validation_issues : [{}]
         """
         validation_issues = []
-        validation_issues += hed_input.file_def_dict.get_def_issues(hed_schema=self._hed_schema)
+        validation_issues += hed_input.file_def_dict.get_def_issues()
         for row_number, row_dict in hed_input.iter_dataframe(return_row_dict=True):
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_dict)
         return validation_issues

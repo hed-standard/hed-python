@@ -2,9 +2,7 @@ import os
 import openpyxl
 import pandas
 import copy
-import io
 
-from itertools import islice
 from hed.models.def_dict import DefDict
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -23,8 +21,7 @@ class BaseInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename, file_type=None, worksheet_name=None, has_column_names=True,
-                 mapper=None, display_name=None):
+    def __init__(self, filename, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, name=None):
         """Constructor for the BaseInput class.
 
          Parameters
@@ -33,7 +30,7 @@ class BaseInput:
              An xlsx/tsv file to open.
          file_type: str
             ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
-         worksheet_name: str
+         worksheet_name: str or None
              The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
          has_column_names: bool
              True if file has column names. The validation will skip over the first line of the file. False, if
@@ -41,14 +38,14 @@ class BaseInput:
          mapper: ColumnMapper
              Pass in a built column mapper(see HedInput or EventsInput for examples), or None to just
              retrieve all columns as hed tags.
-         display_name: str or None
+         name: str or None
             Optional field for how this file will report errors.
          """
         if mapper is None:
             mapper = ColumnMapper()
         self._mapper = mapper
         self._has_column_names = has_column_names
-        self._display_name = display_name
+        self._name = name
         # This is the loaded workbook if we loaded originally from an excel file.
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
@@ -74,23 +71,35 @@ class BaseInput:
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
 
-        # Finalize mapping information if we have columns
+        self.reset_mapper(mapper)
+
+    def reset_mapper(self, new_mapper):
+        """
+            Set the column mapper to the passed in one, allowing you to view the file differently.
+
+        Parameters
+        ----------
+        new_mapper : ColumnMapper
+        """
+        self._mapper = new_mapper
+        if not self._mapper:
+            self._mapper = ColumnMapper()
+
         if self._dataframe is not None and self._has_column_names:
             columns = self._dataframe.columns
             self._mapper.set_column_map(columns)
 
-        # Now that the file is fully initialized, gather the definitions from it.
         self.file_def_dict = self.extract_definitions()
-        # finally add the new file dict to the mapper.
-        mapper.update_definition_mapper_with_file(self.file_def_dict)
+
+        self._mapper.update_definition_mapper_with_file(self.file_def_dict)
 
     @property
     def dataframe(self):
         return self._dataframe
 
     @property
-    def display_name(self):
-        return self._display_name
+    def name(self):
+        return self._name
 
     @property
     def has_column_names(self):
@@ -280,7 +289,7 @@ class BaseInput:
         column_to_hed_tags_dictionary: dict
             A dict with keys column_number, value the cell at that position.
         """
-        default_mapper = ColumnMapper()
+        default_mapper = ColumnMapper(enable_def_mapping=False)
         return self.iter_dataframe(default_mapper)
 
     def iter_dataframe(self, mapper=None, return_row_dict=False, expand_defs=True):

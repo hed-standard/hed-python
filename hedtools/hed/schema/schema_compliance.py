@@ -5,7 +5,7 @@ ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
-def check_compliance(hed_schema, also_check_for_warnings=True, display_filename=None,
+def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
                      error_handler=None):
     """
         Checks for hed3 compliance of a schema object.
@@ -16,7 +16,7 @@ def check_compliance(hed_schema, also_check_for_warnings=True, display_filename=
         HedSchema object to check for hed3 compliance
     also_check_for_warnings : bool, default True
         If True, also checks for formatting issues like invalid characters, capitalization, etc.
-    display_filename: str
+    name: str
         If present, will use this as the filename for context, rather than using the actual filename
         Useful for temp filenames.
     error_handler : ErrorHandler or None
@@ -30,9 +30,9 @@ def check_compliance(hed_schema, also_check_for_warnings=True, display_filename=
         error_handler = error_reporter.ErrorHandler()
     issues_list = []
 
-    if not display_filename:
-        display_filename = hed_schema.filename
-    error_handler.push_error_context(ErrorContext.FILE_NAME, display_filename)
+    if not name:
+        name = hed_schema.filename
+    error_handler.push_error_context(ErrorContext.FILE_NAME, name)
 
     if hed_schema.has_duplicate_tags():
         duplicate_dict = hed_schema.find_duplicate_tags()

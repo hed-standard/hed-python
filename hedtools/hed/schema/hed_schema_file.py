@@ -92,7 +92,7 @@ def load_schema_version(xml_folder=None, xml_version_number=None):
 
 
 def convert_schema_to_format(hed_schema, check_for_issues=True,
-                             display_filename=None, save_as_mediawiki=False, save_as_legacy_xml=False):
+                             name=None, save_as_mediawiki=False, save_as_legacy_xml=False):
     """
     Loads a local schema file or from a URL, then outputs a temporary file with the requested format.
     Parameters
@@ -101,7 +101,7 @@ def convert_schema_to_format(hed_schema, check_for_issues=True,
         The schema to convert
     check_for_issues : bool
         After conversion checks for warnings like capitalization or invalid characters.
-    display_filename: str
+    name: str
         If present, will use this as the filename for context, rather than using the actual filename
         Useful for temp filenames.
     save_as_mediawiki: bool
@@ -117,7 +117,7 @@ def convert_schema_to_format(hed_schema, check_for_issues=True,
     """
     issue_list = []
     if check_for_issues:
-        warnings = hed_schema.check_compliance(display_filename=display_filename)
+        warnings = hed_schema.check_compliance(name=name)
         issue_list += warnings
 
     if save_as_mediawiki:

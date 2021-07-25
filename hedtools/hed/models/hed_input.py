@@ -6,7 +6,7 @@ class HedInput(BaseInput):
     """A class to parse basic hed style spreadsheets into a more general format."""
     def __init__(self, filename=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
-                 definition_mapper=None, csv_string=None, display_name=None):
+                 def_dicts=None, name=None):
         """Constructor for the HedInput class.
 
         Parameters
@@ -28,10 +28,8 @@ class HedInput(BaseInput):
             4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/
             prepended to them, the fourth column contains tags that need Event/Label/ prepended to them,
             and the fifth column contains tags that needs Event/Category/ prepended to them.
-        definition_mapper: DefinitionMapper
-            The definition mapper to use to remove and replace definition labels in HED data.
-        csv_string: str or None
-            The data to treat as this file.  eg web services passing a string.
+        def_dicts: [DefDict] or DefDict
+            The gathered definitions to use for this file, other than the ones that come from itself.
         """
         if tag_columns is None:
             tag_columns = [2]
@@ -39,6 +37,6 @@ class HedInput(BaseInput):
             column_prefix_dictionary = {}
 
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
-                                  definition_mapper=definition_mapper)
+                                  extra_def_dicts=def_dicts)
         super().__init__(filename, file_type, worksheet_name, has_column_names, new_mapper,
-                         display_name=display_name)
+                         name=name)
