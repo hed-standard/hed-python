@@ -108,7 +108,7 @@ class HedSchema:
     def library(self):
         return self.header_attributes.get('library')
 
-    def check_compliance(self, also_check_for_warnings=True, display_filename=None,
+    def check_compliance(self, also_check_for_warnings=True, name=None,
                          error_handler=None):
         """
             Checks for hed3 compliance of this schema.
@@ -117,7 +117,7 @@ class HedSchema:
         ----------
         also_check_for_warnings : bool, default True
             If True, also checks for formatting issues like invalid characters, capitalization, etc.
-        display_filename: str
+        name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
         error_handler : ErrorHandler or None
@@ -127,7 +127,7 @@ class HedSchema:
         issue_list : [{}]
             A list of all warnings and errors found in the file.
         """
-        return schema_compliance.check_compliance(self, also_check_for_warnings, display_filename, error_handler)
+        return schema_compliance.check_compliance(self, also_check_for_warnings, name, error_handler)
 
     def find_duplicate_tags(self):
         """Finds all tags that are not unique.
