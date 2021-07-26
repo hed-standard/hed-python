@@ -38,9 +38,7 @@ class EventsInput(BaseInput):
         if json_def_files:
             column_group_defs = ColumnDefGroup.load_multiple_json_files(json_def_files)
         if extra_def_dicts and not isinstance(extra_def_dicts, list):
-            extra_def_dicts = [column_group_defs]
-        else:
-            extra_def_dicts = column_group_defs
+            extra_def_dicts = [extra_def_dicts]
 
         new_mapper = ColumnMapper(json_def_files=column_group_defs, tag_columns=[self.HED_COLUMN_NAME],
                                   attribute_columns=attribute_columns,
