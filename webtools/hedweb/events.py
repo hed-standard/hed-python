@@ -7,8 +7,7 @@ from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
-from hedweb.constants import common, file_constants
-from hedweb.dictionary import dictionary_validate
+from hedweb.constants import common
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
@@ -34,21 +33,14 @@ def get_input_from_events_form(request):
 
     json_dictionary = None
     if common.JSON_FILE in request.files:
+        # json_string = f.read(file_constants.BYTE_LIMIT).decode('ascii')
+        # f = io.StringIO(request.files[common.JSON_FILE].read(file_constants.BYTE_LIMIT).decode('ascii'))
         f = request.files[common.JSON_FILE]
-        json_dictionary = models.ColumnDefGroup(json_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
-                                                display_name=secure_filename(f.filename))
+        json_dictionary = models.ColumnDefGroup(file=f,name=secure_filename(f.filename))
     if common.EVENTS_FILE in request.files:
         f = request.files[common.EVENTS_FILE]
-        if json_dictionary:
-            def_dicts = json_dictionary.extract_defs()
-        else:
-            def_dicts = None
-        arguments[common.EVENTS] = models.EventsInput(filename=f, file_type=".tsv",
-                                                      json_def_files=json_dictionary, def_dicts=def_dicts,
-                                                      display_name=secure_filename(f.filename))
-        # arguments[common.EVENTS] = models.EventsInput(csv_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
-        #                                               json_def_files=json_dictionary,
-        #                                               display_name=secure_filename(f.filename))
+        arguments[common.EVENTS] = \
+            models.EventsInput(filename=f, json_def_files=json_dictionary, name=secure_filename(f.filename))
     return arguments
 
 
@@ -113,7 +105,7 @@ def events_assemble(hed_schema, events, defs_expand=True):
     data = {'onset': onsets, 'HED': hed_tags}
     df = pd.DataFrame(data)
     csv_string = df.to_csv(None, sep='\t', index=False, header=True)
-    display_name = events.display_name
+    display_name = events.name
     file_name = generate_filename(display_name, suffix='_expanded', extension='.tsv')
     return {common.COMMAND: common.COMMAND_ASSEMBLE, 'data': csv_string, 'output_display_name': file_name,
             'schema_version': schema_version, 'msg_category': 'success',
@@ -136,18 +128,9 @@ def events_validate(hed_schema, events):
          A dictionary containing results of validation in standard format
     """
 
-    for json_dictionary in events.column_group_defs:
-        if json_dictionary:
-            results = dictionary_validate(hed_schema, json_dictionary)
-            if results['data']:
-                return results
-
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    display_name = events.display_name
-    def_dicts = events.def_dicts
-    issues = []
-    if def_dicts:
-        issues = def_dicts[0].get_def_issues(hed_schema)
+    display_name = events.name
+    issues = events.validate_file_sidecars(hed_schema)
     if not issues:
         validator = EventValidator(hed_schema=hed_schema)
         issues = validator.validate_input(events)

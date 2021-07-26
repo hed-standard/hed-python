@@ -45,8 +45,8 @@ def get_input_from_service_request(request):
                  common.CHECK_FOR_WARNINGS: parameters.get(common.CHECK_FOR_WARNINGS, True),
                  common.DEFS_EXPAND: parameters.get(common.DEFS_EXPAND, True)}
     if common.JSON_STRING in parameters and parameters[common.JSON_STRING]:
-        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(json_string=parameters[common.JSON_STRING],
-                                                                  display_name='JSON_Dictionary')
+        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(file=io.StringIO(parameters[common.JSON_STRING]),
+                                                                  name='JSON_Dictionary')
     if common.EVENTS_STRING in parameters and parameters[common.EVENTS_STRING]:
         if arguments[common.JSON_DICTIONARY]:
             def_dicts = arguments[common.JSON_DICTIONARY].extract_defs()
@@ -54,13 +54,13 @@ def get_input_from_service_request(request):
             def_dicts = None
         arguments[common.EVENTS] = models.EventsInput(filename=io.StringIO(parameters[common.EVENTS_STRING]),
                                                       json_def_files=arguments[common.JSON_DICTIONARY],
-                                                      def_dicts=def_dicts, file_type='.tsv', display_name='Events')
+                                                      def_dicts=def_dicts, file_type='.tsv', name='Events')
     if common.SPREADSHEET_STRING in parameters and parameters[common.SPREADSHEET_STRING]:
         tag_columns, prefix_dict = get_prefix_dict(parameters)
         arguments[common.SPREADSHEET] = \
             models.HedInput(filename=io.StringIO(parameters[common.SPREADSHEET_STRING]), file_type=".tsv",
                             tag_columns=tag_columns, has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
-                            column_prefix_dictionary=prefix_dict, display_name='spreadsheet.tsv')
+                            column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
     if common.SCHEMA_STRING in parameters and parameters[common.SCHEMA_STRING]:
         arguments[common.SCHEMA] = hedschema.from_string(parameters[common.SCHEMA_STRING])
     elif common.SCHEMA_URL in parameters and parameters[common.SCHEMA_URL]:

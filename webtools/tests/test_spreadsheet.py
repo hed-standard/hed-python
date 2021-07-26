@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
                      common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
         with self.app.app_context():
@@ -112,7 +112,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
                      common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
         arguments[common.SCHEMA] = hed_schema
@@ -135,7 +135,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         with self.app.app_context():
             results = spreadsheet_validate(hed_schema, spreadsheet)
             self.assertFalse(results['data'],
@@ -154,7 +154,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         with self.app.app_context():
             results = spreadsheet_validate(hed_schema, spreadsheet)
             self.assertFalse(results['data'],
@@ -173,7 +173,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         with self.app.app_context():
             results = spreadsheet_validate(hed_schema, spreadsheet)
             self.assertTrue(results['data'],
