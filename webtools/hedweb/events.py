@@ -7,8 +7,7 @@ from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
-from hedweb.constants import common, file_constants
-from hedweb.dictionary import dictionary_validate
+from hedweb.constants import common
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
