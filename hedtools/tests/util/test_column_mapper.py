@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from hed.models.column_mapper import ColumnMapper, ColumnType, ColumnDef
+from hed.models.column_mapper import ColumnMapper, ColumnType, ColumnMetadata
 from hed.models.hed_string import HedString
 from hed.schema import load_schema
 from hed.models import model_constants
@@ -50,43 +50,64 @@ class Test(unittest.TestCase):
 
     def test_set_tag_columns(self):
         mapper = ColumnMapper()
-        mapper.set_tag_columns(self.one_based_tag_columns, True)
+        mapper.set_tag_columns(self.one_based_tag_columns, finalize_mapping=True)
         self.assertTrue(len(mapper._final_column_map) >= 2)
+
+    def test_optional_column(self):
+        mapper = ColumnMapper()
+        mapper.set_tag_columns(tag_columns=["HED"])
+        mapper.set_column_map({1: "HED"})
+        self.assertTrue(len(mapper._final_column_map) == 1)
+
+        mapper = ColumnMapper()
+        mapper.set_tag_columns(optional_tag_columns=["HED"])
+        mapper.set_column_map({1: "HED"})
+        self.assertTrue(len(mapper._final_column_map) == 1)
+
+        mapper = ColumnMapper()
+        mapper.set_tag_columns(tag_columns=["HED"])
+        self.assertTrue(len(mapper._final_column_map) == 0)
+        self.assertTrue(len(mapper._mapper_issues) == 1)
+
+        mapper = ColumnMapper()
+        mapper.set_tag_columns(optional_tag_columns=["HED"])
+        self.assertTrue(len(mapper._final_column_map) == 0)
+        self.assertTrue(len(mapper._mapper_issues) == 0)
 
     def test_add_json_file_events(self):
         mapper = ColumnMapper()
-        mapper.add_json_file_defs(self.basic_events_json)
-        self.assertTrue(len(mapper.column_defs) >= 2)
+        mapper.add_sidecars(self.basic_events_json)
+        self.assertTrue(len(mapper.column_data) >= 2)
 
     def test__detect_event_type(self):
         mapper = ColumnMapper()
-        mapper.add_json_file_defs(self.basic_events_json)
-        self.assertTrue(mapper.column_defs[self.basic_event_name].column_type == self.basic_event_type)
+        mapper.add_sidecars(self.basic_events_json)
+        self.assertTrue(mapper.column_data[self.basic_event_name].column_type == self.basic_event_type)
 
     # def test_add_value_column(self):
     #     mapper = ColumnMapper()
     #     mapper.add_value_column(self.add_column_name, self.hed_string)
-    #     self.assertTrue(len(mapper.column_defs) >= 1)
+    #     self.assertTrue(len(mapper.column_data) >= 1)
 
     def test_add_attribute_columns(self):
         mapper = ColumnMapper()
         mapper.add_columns([self.add_column_name], ColumnType.Attribute)
-        self.assertTrue(len(mapper.column_defs) >= 1)
+        self.assertTrue(len(mapper.column_data) >= 1)
 
     # def test_add_hedtag_columns(self):
     #     mapper = ColumnMapper()
     #     mapper.add_hedtag_columns(self.add_column_name)
-    #     self.assertTrue(len(mapper.column_defs) >= 1)
+    #     self.assertTrue(len(mapper.column_data) >= 1)
     #
     # def test_add_ignore_columns(self):
     #     mapper = ColumnMapper()
     #     mapper.add_ignore_columns(self.add_column_name)
-    #     self.assertTrue(len(mapper.column_defs) >= 1)
+    #     self.assertTrue(len(mapper.column_data) >= 1)
 
     def test__add_single_event_type(self):
         mapper = ColumnMapper()
         mapper.add_columns([self.add_column_name], ColumnType.Value)
-        self.assertTrue(len(mapper.column_defs) >= 1)
+        self.assertTrue(len(mapper.column_data) >= 1)
 
     def test_set_column_map(self):
         mapper = ColumnMapper()
@@ -111,14 +132,14 @@ class Test(unittest.TestCase):
 
     def test_expand_column(self):
         mapper = ColumnMapper()
-        mapper.add_json_file_defs(self.basic_events_json)
+        mapper.add_sidecars(self.basic_events_json)
         mapper.set_column_map(self.basic_column_map)
         expanded_column = mapper._expand_column(2, "go")
         self.assertTrue(isinstance(expanded_column[0], HedString))
 
     def test_expand_row_tags(self):
         mapper = ColumnMapper()
-        mapper.add_json_file_defs(self.basic_events_json)
+        mapper.add_sidecars(self.basic_events_json)
         mapper.add_columns(self.basic_attribute_column)
         mapper.set_column_map(self.basic_column_map)
         expanded_row = mapper.expand_row_tags(self.basic_event_row)
@@ -152,7 +173,7 @@ class Test(unittest.TestCase):
         self.assertEqual(original_list_sum - new_list_sum, original_list_length)
 
     def test__prepend_prefix_to_required_tag_column_if_needed(self):
-        prepended_hed_string = ColumnDef._prepend_prefix_to_required_tag_column_if_needed(
+        prepended_hed_string = ColumnMetadata._prepend_prefix_to_required_tag_column_if_needed(
             self.category_tags, self.category_key)
         self.assertIsInstance(prepended_hed_string, HedString)
         self.assertEqual(str(prepended_hed_string), str(self.category_partipant_and_stimulus_tags))
@@ -161,7 +182,7 @@ class Test(unittest.TestCase):
     def test_add_prefix_verify_short_tag_conversion(self):
         schema_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.schema_file)
         hed_schema = load_schema(schema_file)
-        prepended_hed_string = ColumnDef._prepend_prefix_to_required_tag_column_if_needed(
+        prepended_hed_string = ColumnMetadata._prepend_prefix_to_required_tag_column_if_needed(
             HedString(self.short_tag_with_missing_prefix), self.short_tag_key)
         prepended_hed_string.convert_to_canonical_forms(hed_schema)
         for tag in prepended_hed_string.get_all_tags():
