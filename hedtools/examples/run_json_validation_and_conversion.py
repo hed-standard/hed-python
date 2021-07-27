@@ -22,7 +22,7 @@ json_filename = "data/both_types_events_errors.json"
 # Example 1
 sidecar = Sidecar(json_filename)
 # Print all the errors from the json file
-errors = json_file.validate_entries(hed_schema)
+errors = sidecar.validate_entries(hed_schema)
 print(hed.get_printable_issue_string(errors))
 
 # Example 2
