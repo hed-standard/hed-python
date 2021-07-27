@@ -4,7 +4,7 @@ import io
 
 from hed.models.hed_input import HedInput
 from hed.models.hed_string import HedString
-from hed.models.column_def_group import ColumnDefGroup
+from hed.models.sidecar import Sidecar
 from hed.models.events_input import EventsInput
 from hed.errors.exceptions import HedFileError
 
@@ -54,13 +54,13 @@ class Test(unittest.TestCase):
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
-        column_group = ColumnDefGroup(json_path)
-        self.assertEqual(len(column_group.validate_entries()), 0)
-        input_file = EventsInput(events_path, json_def_files=column_group)
+        sidecar = Sidecar(json_path)
+        self.assertEqual(len(sidecar.validate_entries()), 0)
+        input_file = EventsInput(events_path, sidecars=sidecar)
 
         with open(events_path) as file:
             events_file_as_string = io.StringIO(file.read())
-        input_file_from_string = EventsInput(filename=events_file_as_string, json_def_files=column_group)
+        input_file_from_string = EventsInput(file=events_file_as_string, sidecars=sidecar)
 
         for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
             self.assertEqual(row_number, row_number2)
@@ -118,12 +118,12 @@ class Test(unittest.TestCase):
     def test_loading_and_reset_mapper(self):
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
-        column_group = ColumnDefGroup(json_path)
-        self.assertEqual(len(column_group.validate_entries()), 0)
-        input_file_1 = EventsInput(events_path, json_def_files=column_group)
-        input_file_2 = EventsInput(events_path, json_def_files=column_group)
+        sidecar = Sidecar(json_path)
+        self.assertEqual(len(sidecar.validate_entries()), 0)
+        input_file_1 = EventsInput(events_path, sidecars=sidecar)
+        input_file_2 = EventsInput(events_path, sidecars=sidecar)
 
-        input_file_2.reset_column_defs()
+        input_file_2.reset_column_mapper()
 
         for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(expand_defs=True), input_file_2.iter_dataframe(expand_defs=True)):
             self.assertEqual(row_number, row_number2)

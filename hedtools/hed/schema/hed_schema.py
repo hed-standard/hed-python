@@ -41,7 +41,7 @@ class HedSchema:
 
         Returns
         -------
-        filename: str
+        schema: str
             The schema string
         """
         schema2wiki = HedSchema2Wiki()
@@ -59,7 +59,7 @@ class HedSchema:
 
         Returns
         -------
-        filename: str
+        schema: str
             The schema string
         """
         schema2xml = HedSchema2XML(save_as_legacy_format=save_as_legacy_format)

@@ -7,7 +7,7 @@ from hed.models.hed_input import HedInput
 from hed.errors.error_types import ErrorContext
 from hed.models.events_input import EventsInput
 from hed.validator.event_validator import EventValidator
-from hed.models.column_def_group import ColumnDefGroup
+from hed.models.sidecar import Sidecar
 from hed.models import model_constants
 from hed import schema
 
@@ -123,9 +123,9 @@ class Test(unittest.TestCase):
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
-        column_group = ColumnDefGroup(json_path)
-        self.assertEqual(len(column_group.validate_entries(hed_schema=hed_schema)), 0)
-        input_file = EventsInput(events_path, json_def_files=column_group)
+        sidecar = Sidecar(json_path)
+        self.assertEqual(len(sidecar.validate_entries(hed_schema=hed_schema)), 0)
+        input_file = EventsInput(events_path, sidecars=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)
@@ -140,9 +140,9 @@ class Test(unittest.TestCase):
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events_bad_defs.json")
-        column_group = ColumnDefGroup(json_path)
-        self.assertEqual(len(column_group.validate_entries()), 0)
-        input_file = EventsInput(events_path, json_def_files=column_group)
+        sidecar = Sidecar(json_path)
+        self.assertEqual(len(sidecar.validate_entries()), 0)
+        input_file = EventsInput(events_path, sidecars=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 3)
