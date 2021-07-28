@@ -24,8 +24,8 @@ class ColumnType(Enum):
     Attribute = "attribute"
 
 
-class ColumnDef:
-    """A single column in either the ColumnMapper or ColumnDefGroup"""
+class ColumnMetadata:
+    """A single column in either the ColumnMapper or Sidecar"""
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None,
                  error_handler=None):
         """
@@ -47,7 +47,7 @@ class ColumnDef:
             Used to report errors.  Uses a default one if none passed in.
         """
         if column_type is None or column_type == ColumnType.Unknown:
-            column_type = ColumnDef._detect_column_def_type(hed_dict)
+            column_type = ColumnMetadata._detect_column_type(hed_dict)
 
         if hed_dict is None:
             hed_dict = {}
@@ -257,7 +257,7 @@ class ColumnDef:
         return current_tag_text
 
     @staticmethod
-    def _detect_column_def_type(dict_for_entry):
+    def _detect_column_type(dict_for_entry):
         """
         Determines the ColumnType of a given json entry.
 
