@@ -5,8 +5,6 @@ ADDITIONAL_EXAMPLES_ROUTE = '/additional-examples'
 COLUMN_INFO_ROUTE = '/get_columns_info'
 
 COMMON_ERRORS_ROUTE = '/common-errors'
-DICTIONARY_ROUTE = '/dictionary'
-DICTIONARY_SUBMIT_ROUTE = '/dictionary_submit'
 
 EVENTS_ROUTE = '/events'
 EVENTS_SUBMIT_ROUTE = '/events_submit'
@@ -23,6 +21,10 @@ SCHEMA_VERSIONS_ROUTE = '/schema_versions'
 
 SERVICES_SUBMIT_ROUTE = '/services_submit'
 SERVICES_ROUTE = '/services'
+
+SIDECAR_ROUTE = '/sidecar'
+SIDECAR_SUBMIT_ROUTE = '/sidecar_submit'
+
 SPREADSHEET_ROUTE = '/spreadsheet'
 SPREADSHEET_SUBMIT_ROUTE = '/spreadsheet_submit'
 WORKSHEET_COLUMN_INFO_ROUTE = '/worksheets_info'

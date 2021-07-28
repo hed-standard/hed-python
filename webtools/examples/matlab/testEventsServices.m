@@ -21,8 +21,8 @@ header = ["Content-Type" "application/json"; ...
 options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
 
-%% Read the JSON dictionary into a string for all examples
-json_text = fileread('../data/good_dictionary.json');
+%% Read the JSON sidecar into a string for all examples
+json_text = fileread('../data/good_sidecar.json');
 events_text = fileread('../data/good_events.tsv');
 schema_text = fileread('../data/HED8.0.0-alpha.1.xml');
 myURL = ['https://raw.githubusercontent.com/hed-standard/' ...

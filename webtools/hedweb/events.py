@@ -31,26 +31,26 @@ def get_input_from_events_form(request):
                  common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
                  common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on')}
 
-    json_dictionary = None
+    json_sidecar = None
     if common.JSON_FILE in request.files:
         # json_string = f.read(file_constants.BYTE_LIMIT).decode('ascii')
         # f = io.StringIO(request.files[common.JSON_FILE].read(file_constants.BYTE_LIMIT).decode('ascii'))
         f = request.files[common.JSON_FILE]
-        json_dictionary = models.ColumnDefGroup(file=f,name=secure_filename(f.filename))
+        json_sidecar = models.Sidecar(file=f,name=secure_filename(f.filename))
     if common.EVENTS_FILE in request.files:
         f = request.files[common.EVENTS_FILE]
         arguments[common.EVENTS] = \
-            models.EventsInput(filename=f, json_def_files=json_dictionary, name=secure_filename(f.filename))
+            models.EventsInput(file=f, sidecars=json_sidecar, name=secure_filename(f.filename))
     return arguments
 
 
 def events_process(arguments):
-    """Perform the requested action for the dictionary.
+    """Perform the requested action for the events file and its sidecar
 
     Parameters
     ----------
     arguments: dict
-        A dictionary with the input arguments from the dictionary form
+        A dictionary with the input arguments from the event form
 
     Returns
     -------

@@ -24,7 +24,7 @@ def get_input_from_schema_form(request):
 
     Returns
     -------
-    dictionary
+    dict
         A dictionary containing input arguments for calling the underlying schema functions.
     """
    

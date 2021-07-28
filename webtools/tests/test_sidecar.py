@@ -29,144 +29,144 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_generate_input_from_dictionary_form_empty(self):
-        from hedweb.dictionary import get_input_from_dictionary_form
-        self.assertRaises(TypeError, get_input_from_dictionary_form, {},
+    def test_generate_input_from_sidecar_form_empty(self):
+        from hedweb.sidecar import get_input_from_sidecar_form
+        self.assertRaises(TypeError, get_input_from_sidecar_form, {},
                           "An exception should be raised if an empty request is passed")
 
-    def test_generate_input_from_dictionary_form(self):
-        from hed.models import ColumnDefGroup
+    def test_generate_input_from_sidecar_form(self):
+        from hed.models import Sidecar
         from hed.schema import HedSchema
-        from hedweb.dictionary import get_input_from_dictionary_form
+        from hedweb.sidecar import get_input_from_sidecar_form
         with self.app.test:
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
             with open(json_path, 'rb') as fp:
                 environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0-alpha.1',
                                          common.COMMAND_OPTION: common.COMMAND_TO_LONG})
             request = Request(environ)
-            arguments = get_input_from_dictionary_form(request)
-            self.assertIsInstance(arguments[common.JSON_DICTIONARY], ColumnDefGroup,
-                                  "generate_input_from_dictionary_form should have a JSON dictionary")
+            arguments = get_input_from_sidecar_form(request)
+            self.assertIsInstance(arguments[common.JSON_SIDECAR], Sidecar,
+                                  "generate_input_from_sidecar_form should have a JSON dictionary")
             self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
-                                  "generate_input_from_dictionary_form should have a HED schema")
+                                  "generate_input_from_sidecar_form should have a HED schema")
             self.assertEqual(common.COMMAND_TO_LONG, arguments[common.COMMAND],
-                             "generate_input_from_dictionary_form should have a command")
+                             "generate_input_from_sidecar_form should have a command")
             self.assertFalse(arguments[common.CHECK_FOR_WARNINGS],
-                             "generate_input_from_dictionary_form should have check for warnings false when not given")
+                             "generate_input_from_sidecar_form should have check for warnings false when not given")
 
-    def test_dictionary_process_empty_file(self):
-        from hedweb.dictionary import dictionary_process
+    def test_sidecar_process_empty_file(self):
+        from hedweb.sidecar import sidecar_process
         from hed.errors.exceptions import HedFileError
         with self.app.app_context():
             arguments = {'json_path': ''}
             try:
-                dictionary_process(arguments)
+                sidecar_process(arguments)
             except HedFileError:
                 pass
             except Exception:
-                self.fail('dictionary_process threw the wrong exception when dictionary-path was empty')
+                self.fail('sidecar_process threw the wrong exception when sidecar path was empty')
             else:
-                self.fail('dictionary_process should have thrown a HedFileError exception when json_path was empty')
+                self.fail('sidecar_process should have thrown a HedFileError exception when json_path was empty')
 
-    def test_dictionary_process(self):
-        from hedweb.dictionary import dictionary_process
+    def test_sidecar_process(self):
+        from hedweb.sidecar import sidecar_process
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        json_dictionary = models.ColumnDefGroup(file=json_path, name='bids_json')
-        arguments = {common.SCHEMA: hed_schema, common.JSON_DICTIONARY: json_dictionary,
+        json_sidecar = models.Sidecar(file=json_path, name='bids_json')
+        arguments = {common.SCHEMA: hed_schema, common.JSON_SIDECAR: json_sidecar,
                      common.JSON_DISPLAY_NAME: 'bids_json', common.COMMAND: common.COMMAND_TO_SHORT}
         with self.app.app_context():
-            results = dictionary_process(arguments)
+            results = sidecar_process(arguments)
             self.assertTrue(isinstance(results, dict),
-                            'dictionary_process to short should return a dictionary when errors')
+                            'sidecar_process to short should return a dictionary when errors')
             self.assertEqual('warning', results['msg_category'],
-                             'dictionary_process to short should give warning when JSON with errors')
+                             'sidecar_process to short should give warning when JSON with errors')
             self.assertTrue(results['data'],
-                            'dictionary_process to short should not convert using HED 7.1.2.xml')
+                            'sidecar_process to short should not convert using HED 7.1.2.xml')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        arguments = {common.SCHEMA: hed_schema, common.JSON_DICTIONARY: json_dictionary,
+        arguments = {common.SCHEMA: hed_schema, common.JSON_SIDECAR: json_sidecar,
                      common.JSON_DISPLAY_NAME: 'bids_json', common.COMMAND: common.COMMAND_TO_SHORT}
 
         with self.app.app_context():
-            results = dictionary_process(arguments)
+            results = sidecar_process(arguments)
             self.assertTrue(isinstance(results, dict),
-                            'dictionary_process to short should return a dict when no errors')
+                            'sidecar_process to short should return a dict when no errors')
             self.assertEqual('success', results['msg_category'],
-                             'dictionary_process to short should return success if converted')
+                             'sidecar_process to short should return success if converted')
 
-    def test_dictionary_convert_to_long(self):
+    def test_sidecar_convert_to_long(self):
         from hed import models
-        from hedweb.dictionary import dictionary_convert
+        from hedweb.sidecar import sidecar_convert
         from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        json_dictionary = models.ColumnDefGroup(file=json_path, name='bids_events')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_events')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         arguments = {common.SCHEMA: hed_schema,
-                     'json_dictionary': json_dictionary, common.COMMAND: common.COMMAND_TO_LONG}
+                     common.JSON_SIDECAR: json_sidecar, common.COMMAND: common.COMMAND_TO_LONG}
         with self.app.app_context():
-            results = dictionary_convert(hed_schema, json_dictionary, command=common.COMMAND_TO_LONG)
+            results = sidecar_convert(hed_schema, json_sidecar, command=common.COMMAND_TO_LONG)
             self.assertTrue(results['data'],
-                            'dictionary_convert to long results should have data key')
+                            'sidecar_convert to long results should have data key')
             self.assertEqual('warning', results['msg_category'],
-                             'dictionary_convert to long msg_category should be warning for errors')
+                             'sidecar_convert to long msg_category should be warning for errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            results = dictionary_convert(hed_schema, json_dictionary, command=common.COMMAND_TO_LONG)
+            results = sidecar_convert(hed_schema, json_sidecar, command=common.COMMAND_TO_LONG)
             self.assertTrue(results['data'],
-                            'dictionary_convert to long results should have data key')
+                            'sidecar_convert to long results should have data key')
             self.assertEqual('success', results["msg_category"],
-                             'dictionary_convert to long msg_category should be success when no errors')
+                             'sidecar_convert to long msg_category should be success when no errors')
 
-    def test_dictionary_convert_to_short(self):
+    def test_sidecar_convert_to_short(self):
         from hed import models
-        from hedweb.dictionary import dictionary_convert
+        from hedweb.sidecar import sidecar_convert
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        json_dictionary = models.ColumnDefGroup(file=json_path, name='bids_events')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_events')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            results = dictionary_convert(hed_schema, json_dictionary)
-            self.assertTrue(results['data'], 'dictionary_convert results should have data key')
+            results = sidecar_convert(hed_schema, json_sidecar)
+            self.assertTrue(results['data'], 'sidecar_convert results should have data key')
             self.assertEqual('warning', results['msg_category'],
-                             'dictionary_convert msg_category should be warning for errors')
+                             'sidecar_convert msg_category should be warning for errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
-            results = dictionary_convert(hed_schema, json_dictionary)
-            self.assertTrue(results['data'], 'dictionary_convert results should have data key')
+            results = sidecar_convert(hed_schema, json_sidecar)
+            self.assertTrue(results['data'], 'sidecar_convert results should have data key')
             self.assertEqual('success', results['msg_category'],
-                             'dictionary_convert msg_category should be success when no errors')
+                             'sidecar_convert msg_category should be success when no errors')
 
-    def test_dictionary_validate(self):
+    def test_sidecar_validate(self):
         from hed import models
-        from hedweb.dictionary import dictionary_validate
+        from hedweb.sidecar import sidecar_validate
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        json_dictionary = models.ColumnDefGroup(file=json_path, name='bids_events')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_events')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            results = dictionary_validate(hed_schema, json_dictionary)
+            results = sidecar_validate(hed_schema, json_sidecar)
             self.assertTrue(results['data'],
-                            'dictionary_validate results should have a data key when validation errors')
+                            'sidecar_validate results should have a data key when validation errors')
             self.assertEqual('warning', results['msg_category'],
-                             'dictionary_validate msg_category should be warning when errors')
+                             'sidecar_validate msg_category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            results = dictionary_validate(hed_schema, json_dictionary)
+            results = sidecar_validate(hed_schema, json_sidecar)
             self.assertFalse(results['data'],
-                             'dictionary_validate results should not have a data key when no validation errors')
+                             'sidecar_validate results should not have a data key when no validation errors')
             self.assertEqual('success', results["msg_category"],
-                             'dictionary_validate msg_category should be success when no errors')
+                             'sidecar_validate msg_category should be success when no errors')
 
 
 if __name__ == '__main__':

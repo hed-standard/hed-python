@@ -77,8 +77,8 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        json_dictionary = models.ColumnDefGroup(file=json_path, name='bids_json')
-        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary, name='bids_events')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_json')
+        events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         arguments = {common.EVENTS: events, common.COMMAND: common.COMMAND_VALIDATE, common.DEFS_EXPAND: True,
                      common.CHECK_FOR_WARNINGS: True, common.SCHEMA: hed_schema}
         with self.app.app_context():
@@ -104,8 +104,8 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        json_dictionary = models.ColumnDefGroup(file=json_path, name='bids_json')
-        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary,name='bids_events')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_json')
+        events = models.EventsInput(file=events_path, sidecars=json_sidecar,name='bids_events')
         with self.app.app_context():
             results = events_assemble(hed_schema, events, defs_expand=True)
             self.assertTrue('data' in results,
@@ -128,8 +128,8 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        json_dictionary = models.ColumnDefGroup(file=json_path, name='bids_json')
-        events = models.EventsInput(filename=events_path, json_def_files=json_dictionary, name='bids_events')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_json')
+        events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
             results = events_validate(hed_schema, events)
             self.assertTrue(results['data'],
