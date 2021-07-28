@@ -1,7 +1,7 @@
 const JSON_FILE_EXTENSIONS = ['json'];
 
 /**
- * Dictionary event handler function. Checks if the file uploaded has a valid dictionary extension.
+ * Sidecar event handler function. Checks if the file uploaded has a valid sidecar extension.
  */
 $('#json_file').on('change',function () {
     let jsonPath = $('#json_file').val();
@@ -13,12 +13,12 @@ $('#json_file').on('change',function () {
         updateFileLabel(jsonPath, '#json_display_name');
     } else {
         clearForm();
-        flashMessageOnScreen('Please upload a JSON dictionary (.json)', 'error', 'json_flash');
+        flashMessageOnScreen('Please upload a JSON sidecar (.json)', 'error', 'json_flash');
     }
 });
 
 /**
- * Clears the dictionary file label.
+ * Clears the sidecar file label.
  */
 function clearJsonFileLabel() {
     $('#json_display_name').text('');

@@ -35,10 +35,10 @@ OTHER_VERSION_OPTION = 'Other'
 
 HEDSTRING = 'hedstring'
 
-JSON_DICTIONARY = 'json_dictionary'
 JSON_DISPLAY_NAME = 'json_display_name'
 JSON_FILE = 'json_file'
 JSON_PATH = 'json_path'
+JSON_SIDECAR = 'json_sidecar'
 JSON_STRING = 'json_string'
 JSON_STRINGS = 'json_strings'
 

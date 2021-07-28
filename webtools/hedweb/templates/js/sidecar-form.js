@@ -6,7 +6,7 @@ $(function () {
 /**
  * Submits the form if the tag columns textbox is valid.
  */
-$('#dictionary_submit').on('click', function () {
+$('#sidecar_submit').on('click', function () {
     if (fileIsSpecified('#json_file', 'json_flash', 'JSON is not specified.' ) &&
         schemaSpecifiedWhenOtherIsSelected()) {
         submitForm();
@@ -17,7 +17,7 @@ $('#dictionary_submit').on('click', function () {
  * Clear the fields in the form.
  */
 function clearForm() {
-    $('#dictionary_form')[0].reset();
+    $('#sidecar_form')[0].reset();
     clearFlashMessages()
     clearJsonFileLabel();
     hideOtherSchemaVersionFileUpload()
@@ -29,7 +29,7 @@ function clearForm() {
 function clearFlashMessages() {
     clearJsonInputFlashMessages();
     clearSchemaSelectFlashMessages();
-    flashMessageOnScreen('', 'success', 'dictionary_submit_flash');
+    flashMessageOnScreen('', 'success', 'sidecar_submit_flash');
 }
 
 /**
@@ -47,25 +47,25 @@ function prepareForm() {
  * file.
  */
 function submitForm() {
-    let dictionaryForm = document.getElementById("dictionary_form");
-    let formData = new FormData(dictionaryForm);
+    let sidecarForm = document.getElementById("sidecar_form");
+    let formData = new FormData(sidecarForm);
 
-    let dictionaryFile = getJsonFileLabel();
-    let display_name = convertToResultsName(dictionaryFile, 'issues')
+    let sidecarFile = getJsonFileLabel();
+    let display_name = convertToResultsName(sidecarFile, 'issues')
     clearFlashMessages();
-    flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary_submit_flash')
+    flashMessageOnScreen('Sidecar is being validated ...', 'success', 'sidecar_submit_flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.dictionary_results')}}",
+            url: "{{url_for('route_blueprint.sidecar_results')}}",
             data: formData,
             contentType: false,
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'dictionary_submit_flash')
+                getResponseSuccess(download, xhr, display_name, 'sidecar_submit_flash')
             },
             error: function (xhr, status, errorThrown) {
-                getResponseFailure(xhr, status, errorThrown, display_name, 'dictionary_submit_flash')
+                getResponseFailure(xhr, status, errorThrown, display_name, 'sidecar_submit_flash')
             }
         }
     )

@@ -74,7 +74,7 @@ def get_input_from_spreadsheet_form(request):
     file_ext = get_file_extension(filename)
     if file_ext in file_constants.EXCEL_FILE_EXTENSIONS:
         arguments[common.SPREADSHEET_TYPE] = file_constants.EXCEL_EXTENSION
-    spreadsheet = models.HedInput(filename=request.files[common.SPREADSHEET_FILE],
+    spreadsheet = models.HedInput(file=request.files[common.SPREADSHEET_FILE],
                                   file_type=arguments[common.SPREADSHEET_TYPE],
                                   worksheet_name=arguments.get(common.WORKSHEET_NAME, None),
                                   tag_columns=tag_columns,

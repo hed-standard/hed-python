@@ -6,7 +6,7 @@ from flask import current_app
 from hed import models
 from hed import schema as hedschema
 from hedweb.constants import common
-from hedweb.dictionary import dictionary_process
+from hedweb.sidecar import sidecar_process
 from hedweb.events import events_process
 from hedweb.spreadsheet import spreadsheet_process, get_prefix_dict
 from hedweb.strings import string_process
@@ -25,7 +25,7 @@ def get_input_from_service_request(request):
 
     Returns
     -------
-    dictionary
+    dict
         A dictionary containing input arguments for calling the service request.
     """
 
@@ -37,7 +37,7 @@ def get_input_from_service_request(request):
         parameters = service_request
     arguments = {common.SERVICE: service_request.get(common.SERVICE, None),
                  common.SCHEMA: None,
-                 common.JSON_DICTIONARY: None,
+                 common.JSON_SIDECAR: None,
                  common.EVENTS: None,
                  common.SPREADSHEET: None,
                  common.HAS_COLUMN_NAMES: parameters.get(common.HAS_COLUMN_NAMES, False),
@@ -45,15 +45,15 @@ def get_input_from_service_request(request):
                  common.CHECK_FOR_WARNINGS: parameters.get(common.CHECK_FOR_WARNINGS, True),
                  common.DEFS_EXPAND: parameters.get(common.DEFS_EXPAND, True)}
     if common.JSON_STRING in parameters and parameters[common.JSON_STRING]:
-        arguments[common.JSON_DICTIONARY] = models.ColumnDefGroup(file=io.StringIO(parameters[common.JSON_STRING]),
-                                                                  name='JSON_Dictionary')
+        arguments[common.JSON_SIDECAR] = models.Sidecar(file=io.StringIO(parameters[common.JSON_STRING]),
+                                                                  name='JSON_Sidecar')
     if common.EVENTS_STRING in parameters and parameters[common.EVENTS_STRING]:
-        if arguments[common.JSON_DICTIONARY]:
-            def_dicts = arguments[common.JSON_DICTIONARY].extract_defs()
+        if arguments[common.JSON_SIDECAR]:
+            def_dicts = arguments[common.JSON_SIDECAR].extract_defs()
         else:
             def_dicts = None
-        arguments[common.EVENTS] = models.EventsInput(filename=io.StringIO(parameters[common.EVENTS_STRING]),
-                                                      json_def_files=arguments[common.JSON_DICTIONARY],
+        arguments[common.EVENTS] = models.EventsInput(file=io.StringIO(parameters[common.EVENTS_STRING]),
+                                                      sidecars=arguments[common.JSON_SIDECAR],
                                                       def_dicts=def_dicts, file_type='.tsv', name='Events')
     if common.SPREADSHEET_STRING in parameters and parameters[common.SPREADSHEET_STRING]:
         tag_columns, prefix_dict = get_prefix_dict(parameters)
@@ -95,15 +95,15 @@ def services_process(arguments):
             response["error_msg"] = "Must specify a valid service"
         elif service == 'get_services':
             response["results"] = services_list()
-        elif service == "dictionary_to_long":
+        elif service == "sidecar_to_long":
             arguments['command'] = common.COMMAND_TO_LONG
-            response["results"] = dictionary_process(arguments)
-        elif service == "dictionary_to_short":
+            response["results"] = sidecar_process(arguments)
+        elif service == "sidecar_to_short":
             arguments['command'] = common.COMMAND_TO_SHORT
-            response["results"] = dictionary_process(arguments)
-        elif service == "dictionary_validate":
+            response["results"] = sidecar_process(arguments)
+        elif service == "sidecar_validate":
             arguments['command'] = common.COMMAND_VALIDATE
-            response["results"] = dictionary_process(arguments)
+            response["results"] = sidecar_process(arguments)
         elif service == "events_assemble":
             arguments['command'] = common.COMMAND_ASSEMBLE
             response["results"] = events_process(arguments)

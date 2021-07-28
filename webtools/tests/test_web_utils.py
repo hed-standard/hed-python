@@ -102,7 +102,7 @@ class Test(unittest.TestCase):
             from hedweb.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelOneSheet.xlsx')
 
-            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
+            spreadsheet = HedInput(file=spreadsheet_path, file_type='.xlsx',
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
@@ -124,7 +124,7 @@ class Test(unittest.TestCase):
             from hedweb.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelOneSheet.xlsx')
 
-            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
+            spreadsheet = HedInput(file=spreadsheet_path, file_type='.xlsx',
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                             'data/LKTEventCodesHED3.tsv')
 
-            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.tsv',
+            spreadsheet = HedInput(file=spreadsheet_path, file_type='.tsv',
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},

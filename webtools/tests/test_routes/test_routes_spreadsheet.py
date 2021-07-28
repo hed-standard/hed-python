@@ -160,12 +160,12 @@ class Test(unittest.TestCase):
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
-                            'dictionary_submit validate should return a response object when invalid dictionary')
+                            'spreadsheet_submit validate should return a response object when invalid spreadsheet')
             self.assertEqual(200, response.status_code,
-                             'Validation of an invalid dictionary to short has a valid status code')
+                             'Validation of an invalid spreadsheet to short has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("warning", headers_dict["Category"],
-                             "Validation of an invalid dictionary to short generates a warning")
+                             "Validation of an invalid spreadsheet to short generates a warning")
             self.assertTrue(response.data,
                             "The response data for invalid validation should have error messages")
             spreadsheet_buffer.close()

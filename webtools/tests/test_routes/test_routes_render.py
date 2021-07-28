@@ -33,9 +33,9 @@ class Test(unittest.TestCase):
         self.assertEqual(response.status_code, 200, "The common-errors content page should exist")
         self.assertTrue(response.data, "The returned page should not be empty")
 
-    def test_render_dictionary_form(self):
-        response = self.app.test.get('/dictionary')
-        self.assertEqual(response.status_code, 200, "The dictionary content page should exist")
+    def test_render_sidecar_form(self):
+        response = self.app.test.get('/sidecar')
+        self.assertEqual(response.status_code, 200, "The sidecar content page should exist")
         self.assertTrue(response.data, "The returned page should not be empty")
 
     def test_render_events_form(self):
