@@ -520,7 +520,7 @@ class TagValidator:
         if not self._hed_schema.has_value_classes:
             return self._validate_numeric_value_class(portion_to_validate)
         if not self.is_value_class_tag(original_tag):
-            return False
+            return True
 
         value_class = self.get_tag_value_class(original_tag)
 
