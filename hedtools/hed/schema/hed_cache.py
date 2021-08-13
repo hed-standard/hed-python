@@ -24,6 +24,9 @@ HED_VERSION_FINAL = '^[hH][eE][dD](' + HED_VERSION_P1 + HED_VERSION_P2 + HED_VER
 HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
 DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
+DEPRECATED_URL_SUFFIX = "/deprecated"
+EXTRA_HED_CACHE_URL_SUFFIX = [DEPRECATED_URL_SUFFIX]
+
 HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../validator/hed_cache/')
 TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300
@@ -45,14 +48,15 @@ def set_cache_directory(new_cache_dir):
         HED_CACHE_DIRECTORY = new_cache_dir
 
 
-def get_all_hed_versions(local_hed_directory=None):
+def get_all_hed_versions(local_hed_directory=None, include_deprecated=False):
     """Get all the HED versions in the hed directory.
 
     Parameters
     ----------
     local_hed_directory: str
         Directory to check for versions.  Defaults to hed_cache
-
+    include_deprecated: bool
+        If True, also return any schemas found in the deprecated folder
     Returns
     -------
     string
@@ -62,7 +66,15 @@ def get_all_hed_versions(local_hed_directory=None):
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
     hed_versions = []
-    for _, _, hed_files in os.walk(local_hed_directory):
+    suffixes = [""]
+    if include_deprecated:
+        suffixes += EXTRA_HED_CACHE_URL_SUFFIX
+    for suffix in suffixes:
+        local_directory = local_hed_directory + suffix
+        try:
+            hed_files = os.listdir(local_directory)
+        except FileNotFoundError:
+            hed_files = []
         for hed_file in hed_files:
             expression_match = version_pattern.match(hed_file)
             if expression_match is not None:
@@ -112,7 +124,7 @@ def cache_specific_url(hed_xml_url, xml_version_number=None, cache_folder=None):
         return None
 
 
-def get_hed_version_path(local_hed_directory=None, xml_version_number=None):
+def get_hed_version_path(local_hed_directory=None, xml_version_number=None, include_deprecated=True):
     """Get the latest HED XML file path in the hed directory.
 
     Parameters
@@ -121,6 +133,8 @@ def get_hed_version_path(local_hed_directory=None, xml_version_number=None):
         Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
     xml_version_number: str
         If not None, return this version or None.
+    include_deprecated: bool
+        If true, will also check deprecated folder for this version number.
     Returns
     -------
     str
@@ -129,7 +143,7 @@ def get_hed_version_path(local_hed_directory=None, xml_version_number=None):
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
 
-    hed_versions = get_all_hed_versions(local_hed_directory)
+    hed_versions = get_all_hed_versions(local_hed_directory, include_deprecated=include_deprecated)
     if xml_version_number:
         if xml_version_number in hed_versions:
             latest_hed_version = xml_version_number
@@ -186,10 +200,11 @@ def cache_all_hed_xml_versions(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL, cache
     try:
         cache_lock_filename = os.path.join(cache_folder, "cache_lock.lock")
         with portalocker.Lock(cache_lock_filename, timeout=1) as cache_lock:
-            hed_versions = _get_hed_xml_versions_from_url(hed_base_url)
-
-            for version in hed_versions:
-                _cache_hed_version(version, hed_versions[version], cache_folder=cache_folder)
+            suffixes = [""] + EXTRA_HED_CACHE_URL_SUFFIX
+            for url_suffix in suffixes:
+                hed_versions = _get_hed_xml_versions_from_url(hed_base_url + url_suffix)
+                for version in hed_versions:
+                    _cache_hed_version(version, hed_versions[version], cache_folder=cache_folder + url_suffix)
 
             _write_last_cached_time(current_timestamp, cache_folder)
     except portalocker.exceptions.LockException:
@@ -254,10 +269,16 @@ def _check_if_url(hed_xml_or_url):
 
 
 def _create_xml_filename(hed_xml_version, hed_directory=None):
-    hed_xml_filename = HED_XML_PREFIX + hed_xml_version + HED_XML_EXTENSION
+    hed_xml_basename = HED_XML_PREFIX + hed_xml_version + HED_XML_EXTENSION
+    suffixes = [""] + EXTRA_HED_CACHE_URL_SUFFIX
+
     if hed_directory:
-        hed_xml_filename = os.path.join(hed_directory, hed_xml_filename)
-    return hed_xml_filename
+        for suffix in suffixes:
+            hed_xml_filename = os.path.join(hed_directory + suffix, hed_xml_basename)
+            if os.path.exists(hed_xml_filename):
+                return hed_xml_filename
+        return os.path.join(hed_directory, hed_xml_basename)
+    return hed_xml_basename
 
 
 def _sort_version_list(hed_versions):

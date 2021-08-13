@@ -15,6 +15,8 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_hed_input = 'Attribute/Temporal/Onset'
+        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../schema_cache_test/')
+        schema.cache_all_hed_xml_versions(cache_folder=cls.hed_cache_dir)
         hed_schema = schema.load_schema_version(xml_version_number='7.1.1')
         cls.generic_hed_input_reader = EventValidator(hed_schema=hed_schema)
         cls.text_file_with_extension = 'file_with_extension.txt'
