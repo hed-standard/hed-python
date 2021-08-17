@@ -341,7 +341,9 @@ class ColumnMetadata:
                     error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
                                                      increment_depth_after=False)
                     if def_mapper:
-                        col_validation_issues += def_mapper.replace_and_remove_tags(hed_string_obj, expand_defs=False)
+                        def_issues = def_mapper.replace_and_remove_tags(hed_string_obj, expand_defs=False)
+                        for issue in def_issues:
+                            col_validation_issues += error_handler.format_error(**issue)
                     if event_validator:
                         col_validation_issues += event_validator.validate_input(hed_string_obj)
                     col_validation_issues += self._validate_pound_sign_count(hed_string_obj, error_handler)
