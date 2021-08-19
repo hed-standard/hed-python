@@ -1,6 +1,5 @@
 """Allows output of HedSchema objects as .xml format"""
-
-
+import copy
 from xml.etree.ElementTree import Element, SubElement
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema import xml_constants
@@ -26,6 +25,10 @@ class HedSchema2XML:
         """
         self.hed_node = Element('HED')
 
+        # todo: this is very inefficient
+        if hed_schema._library_prefix:
+            hed_schema = copy.deepcopy(hed_schema)
+            hed_schema.set_library_prefix("")
         self._output_header(hed_schema)
         self._output_tags(hed_schema)
         self._output_units(hed_schema)
@@ -51,7 +54,7 @@ class HedSchema2XML:
         schema_node = self.hed_node
         if not self.save_as_legacy_format:
             schema_node = SubElement(self.hed_node, xml_constants.SCHEMA_ELEMENT)
-        all_tags = hed_schema.get_all_tags()
+        all_tags = hed_schema.get_all_schema_tags()
         tag_levels = {}
         for tag in all_tags:
             if "/" not in tag:

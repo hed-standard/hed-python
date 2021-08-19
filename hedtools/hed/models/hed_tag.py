@@ -35,9 +35,26 @@ class HedTag:
         # offset into _long_tag where the base_tag ends at.  The "base tag" is the long form with no extension/value.
         self._extension_index = None
 
+        self._library_prefix = self._get_library_prefix(self.org_tag)
+
         if extension_index:
             self._extension_index = extension_index
             self._long_tag = self._hed_string
+
+    def _get_library_prefix(self, org_tag):
+        first_slash = org_tag.find("/")
+        first_colon = org_tag.find(":")
+
+        if first_colon != -1:
+            if first_slash != -1 and first_colon > first_slash:
+                return ""
+
+            return org_tag[:first_colon + 1]
+        return ""
+
+    @property
+    def library_prefix(self):
+        return self._library_prefix
 
     @property
     def short_tag(self):
@@ -53,7 +70,7 @@ class HedTag:
         if self._short_tag_index is None:
             return str(self)
 
-        return self._long_tag[self._short_tag_index:]
+        return self._library_prefix + self._long_tag[self._short_tag_index:]
 
     @property
     def base_tag(self):
