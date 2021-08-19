@@ -7,14 +7,16 @@ class HedExceptions:
     INVALID_EXTENSION = 'invalidExtension'
 
     # These are actual schema issues, not that the file cannot be found or parsed
-    SCHEMA_HEADER_MISSING = 'schemaHeaderMissing',
-    SCHEMA_HEADER_INVALID = 'schemaHeaderInvalid',
-    BAD_HED_LIBRARY_NAME = 'badHedLibraryName',
-    BAD_HED_SEMANTIC_VERSION = 'BadHedSemanticVersion',
-    SCHEMA_START_MISSING = 'schemaStartMissing',
-    SCHEMA_END_INVALID = 'schemaEndMissing',
+    SCHEMA_HEADER_MISSING = 'schemaHeaderMissing'
+    SCHEMA_HEADER_INVALID = 'schemaHeaderInvalid'
+    BAD_HED_LIBRARY_NAME = 'badHedLibraryName'
+    BAD_HED_SEMANTIC_VERSION = 'BadHedSemanticVersion'
+    SCHEMA_START_MISSING = 'schemaStartMissing'
+    SCHEMA_END_INVALID = 'schemaEndMissing'
     HED_END_INVALID = 'hedEndMissing'
     INVALID_SECTION_SEPARATOR = 'invalidSectionSeparator'
+
+    SCHEMA_DUPLICATE_PREFIX = 'schemaDuplicatePrefix'
 
 
 class HedFileError(Exception):

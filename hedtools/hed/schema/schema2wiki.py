@@ -1,4 +1,5 @@
 """Allows output of HedSchema objects as .mediawiki format"""
+import copy
 
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema import wiki_constants
@@ -24,6 +25,11 @@ class HedSchema2Wiki:
             A list of strings representing the .mediawiki version of this schema.
         """
         self.output = []
+
+        # todo: this is very inefficient
+        if hed_schema._library_prefix:
+            hed_schema = copy.deepcopy(hed_schema)
+            hed_schema.set_library_prefix("")
 
         self._output_header(hed_schema)
         self._output_tags(hed_schema)
@@ -61,7 +67,7 @@ class HedSchema2Wiki:
         self._flush_current_tag()
 
     def _output_tags(self, hed_schema):
-        all_tags = hed_schema.get_all_tags()
+        all_tags = hed_schema.get_all_schema_tags()
 
         for tag in all_tags:
             if "/" not in tag:

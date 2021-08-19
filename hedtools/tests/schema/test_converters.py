@@ -24,7 +24,12 @@ class TestConverterBase(unittest.TestCase):
     @staticmethod
     def _remove_unknown_attributes(hed_schema):
         for attribute_name in hed_schema.dictionaries['unknownAttributes']:
-            del hed_schema.dictionaries[attribute_name]
+            if attribute_name in hed_schema.dictionaries:
+                del hed_schema.dictionaries[attribute_name]
+            elif attribute_name in hed_schema._tag_dictionaries:
+                del hed_schema._tag_dictionaries[attribute_name]
+            else:
+                raise ValueError("Something went wrong in the test harness")
         hed_schema.dictionaries['unknownAttributes'] = {}
 
     @staticmethod
@@ -162,3 +167,31 @@ class TestBeta3(TestConverterBase):
     wiki_file = '../data/hed_pairs/HED8.0.0-beta.3.mediawiki'
     can_compare = True
     can_legacy = False
+
+class TestHed8(TestConverterBase):
+    xml_file = '../data/hed_pairs/HED8.0.0.xml'
+    wiki_file = '../data/hed_pairs/HED8.0.0.mediawiki'
+    can_compare = True
+    can_legacy = False
+
+
+class TestConverterSavingPrefix(unittest.TestCase):
+    xml_file = '../data/hed_pairs/HED8.0.0.xml'
+
+    @classmethod
+    def setUpClass(cls):
+        cls.xml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.xml_file)
+        cls.hed_schema_xml = schema.load_schema(cls.xml_file)
+        cls.hed_schema_xml_prefix = schema.load_schema(cls.xml_file, library_prefix="tl:")
+        TestConverterBase._remove_unknown_attributes(cls.hed_schema_xml_prefix)
+        TestConverterBase._remove_unknown_attributes(cls.hed_schema_xml)
+
+
+    def test_saving_prefix(self):
+        saved_filename = self.hed_schema_xml_prefix.save_as_xml()
+        try:
+            loaded_schema = schema.load_schema(saved_filename)
+        finally:
+            os.remove(saved_filename)
+
+        self.assertEqual(loaded_schema, self.hed_schema_xml)

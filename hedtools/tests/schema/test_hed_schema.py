@@ -5,6 +5,8 @@ from hed import schema
 from hed.schema import HedKey
 from hed.errors.exceptions import HedFileError
 from hed.models.hed_string import HedString
+from hed.models import HedTag
+from tests.validator.test_tag_validator_2g import TestHed
 
 
 class TestHedSchema(unittest.TestCase):
@@ -217,7 +219,7 @@ class TestHedSchema(unittest.TestCase):
                                  'Test string: %s. Attribute: %s.' % (test_string, attribute))
 
     def test_get_all_tags(self):
-        terms = self.hed_schema.get_all_tags(True)
+        terms = self.hed_schema.get_all_schema_tags(True)
         self.assertTrue(isinstance(terms, list))
         self.assertTrue(len(terms) > 0)
 
@@ -234,7 +236,6 @@ class TestHedSchema(unittest.TestCase):
 
         desc_dict = self.hed_schema_3g.get_desc_dict()
         self.assertEqual(len(desc_dict), 262)
-
 
     def test_get_tag_description(self):
         # Test known tag
@@ -275,27 +276,130 @@ class TestHedSchema(unittest.TestCase):
         tag_props = self.hed_schema_3g.get_all_tag_attributes("Agent-property/Agent-trait")
         self.assertCountEqual(tag_props, expected_props)
 
-    def test_get_all_forms_of_tag(self):
-        tag_forms = self.hed_schema.get_all_forms_of_tag("Category")
-        expected_forms = ["event/category"]
-        self.assertCountEqual(tag_forms, expected_forms)
-
-        tag_forms = self.hed_schema_3g.get_all_forms_of_tag("Definition")
-        expected_forms = ["definition/", "informational/definition/", "attribute/informational/definition/"]
-        self.assertCountEqual(tag_forms, expected_forms)
-
-        tag_forms = self.hed_schema_3g.get_all_forms_of_tag("This/Is/Not/A/Tag")
-        expected_forms = []
-        self.assertCountEqual(tag_forms, expected_forms)
 
     def test_get_hed_xml_version(self):
         self.assertEqual(schema.get_hed_xml_version(self.hed_xml), "7.1.1")
         self.assertEqual(schema.get_hed_xml_version(self.hed_xml_3g), "8.0.0-alpha.1")
 
     def test_has_duplicate_tags(self):
-        self.assertTrue(self.hed_schema.has_duplicate_tags())
-        self.assertFalse(self.hed_schema_3g.has_duplicate_tags())
+        self.assertTrue(self.hed_schema.has_duplicate_tags)
+        self.assertFalse(self.hed_schema_3g.has_duplicate_tags)
 
     def test_short_tag_mapping(self):
         self.assertEqual(len(self.hed_schema.short_tag_mapping), 993)
         self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 1023)
+
+
+class TestSchemaUtilityFunctions(TestHed):
+    def test_correctly_determine_tag_takes_value(self):
+        value_tag1 = HedTag('attribute/direction/left/35 px', extension_index=len('attribute/direction/left'))
+        value_tag2 = HedTag('item/id/35', extension_index=len('item/id'))
+        value_tag3 = HedTag('event/duration/#', extension_index=len('event/duration'))
+        no_value_tag1 = HedTag('something', extension_index=len('something'))
+        no_value_tag2 = HedTag('attribute/color/black', extension_index=len('attribute/color/black'))
+        no_value_tag3 = HedTag('participant/#', extension_index=len('participant'))
+        value_tag1_result = self.hed_schema.is_takes_value_tag(value_tag1)
+        value_tag2_result = self.hed_schema.is_takes_value_tag(value_tag2)
+        value_tag3_result = self.hed_schema.is_takes_value_tag(value_tag3)
+        no_value_tag1_result = self.hed_schema.is_takes_value_tag(no_value_tag1)
+        no_value_tag2_result = self.hed_schema.is_takes_value_tag(no_value_tag2)
+        no_value_tag3_result = self.hed_schema.is_takes_value_tag(no_value_tag3)
+        self.assertEqual(value_tag1_result, True)
+        self.assertEqual(value_tag2_result, True)
+        self.assertEqual(value_tag3_result, True)
+        self.assertEqual(no_value_tag1_result, False)
+        self.assertEqual(no_value_tag2_result, False)
+        self.assertEqual(no_value_tag3_result, False)
+
+    def test_should_determine_default_unit(self):
+        unit_class_tag1 = HedTag('attribute/blink/duration/35 ms', extension_index=len('attribute/blink/duration'))
+        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/11 dollars', extension_index=len('participant/effect/cognitive/reward'))
+        no_unit_class_tag = HedTag('attribute/color/red/0.5', extension_index=len('attribute/color/red'))
+        no_value_tag = HedTag('attribute/color/black', extension_index=len('attribute/color/black'))
+        unit_class_tag1_result = self.hed_schema.get_unit_class_default_unit(unit_class_tag1)
+        unit_class_tag2_result = self.hed_schema.get_unit_class_default_unit(unit_class_tag2)
+        no_unit_class_tag_result = self.hed_schema.get_unit_class_default_unit(no_unit_class_tag)
+        no_value_tag_result = self.hed_schema.get_unit_class_default_unit(no_value_tag)
+        self.assertEqual(unit_class_tag1_result, 's')
+        self.assertEqual(unit_class_tag2_result, '$')
+        self.assertEqual(no_unit_class_tag_result, '')
+        self.assertEqual(no_value_tag_result, '')
+
+    def test_correctly_determine_tag_unit_classes(self):
+        unit_class_tag1 = HedTag('attribute/direction/left/35 px', extension_index=len('attribute/direction/left'))
+        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/$10.55', extension_index=len('participant/effect/cognitive/reward'))
+        unit_class_tag3 = HedTag('event/duration/#', extension_index=len('event/duration'))
+        no_unit_class_tag = HedTag('attribute/color/red/0.5', extension_index=len('attribute/color/red'))
+        unit_class_tag1_result = self.hed_schema.get_tag_unit_classes(unit_class_tag1)
+        unit_class_tag2_result = self.hed_schema.get_tag_unit_classes(unit_class_tag2)
+        unit_class_tag3_result = self.hed_schema.get_tag_unit_classes(unit_class_tag3)
+        no_unit_class_tag_result = self.hed_schema.get_tag_unit_classes(no_unit_class_tag)
+        self.assertCountEqual(unit_class_tag1_result, ['angle', 'physicalLength', 'pixels'])
+        self.assertCountEqual(unit_class_tag2_result, ['currency'])
+        self.assertCountEqual(unit_class_tag3_result, ['time'])
+        self.assertEqual(no_unit_class_tag_result, [])
+
+    def test_determine_tags_legal_units(self):
+        unit_class_tag1 = HedTag('attribute/direction/left/35 px', extension_index=len('attribute/direction/left'))
+        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/$10.55', extension_index=len('participant/effect/cognitive/reward'))
+        no_unit_class_tag = HedTag('attribute/color/red/0.5', extension_index=len('attribute/color/red'))
+        unit_class_tag1_result = self.hed_schema.get_tag_unit_class_units(unit_class_tag1)
+        unit_class_tag2_result = self.hed_schema.get_tag_unit_class_units(unit_class_tag2)
+        no_unit_class_tag_result = self.hed_schema.get_tag_unit_class_units(no_unit_class_tag)
+        self.assertCountEqual(unit_class_tag1_result, [
+            'degree',
+            'radian',
+            'rad',
+            'm',
+            'foot',
+            'metre',
+            'mile',
+            'px',
+            'pixel',
+        ])
+        self.assertCountEqual(unit_class_tag2_result, [
+            'dollar',
+            '$',
+            'point',
+            'fraction',
+        ])
+        self.assertEqual(no_unit_class_tag_result, [])
+
+    def test_strip_off_units_from_value(self):
+        dollars_string = '$25.99'
+        dollars_string_invalid = '25.99$'
+        volume_string = '100 m^3'
+        prefixed_volume_string = '100 cm^3'
+        invalid_volume_string = '200 cm'
+        currency_units = ['dollar', '$', 'point', 'fraction']
+        volume_units = ['m^3']
+        stripped_dollars_string = self.hed_schema. \
+            _get_tag_units_portion(dollars_string, dollars_string, currency_units)
+        stripped_dollars_string_invalid = self.hed_schema. \
+            _get_tag_units_portion(dollars_string_invalid, dollars_string_invalid, currency_units)
+        stripped_volume_string = self.hed_schema. \
+            _get_tag_units_portion(volume_string, volume_string, volume_units)
+        stripped_prefixed_volume_string = self.hed_schema. \
+            _get_tag_units_portion(prefixed_volume_string, prefixed_volume_string, volume_units)
+        stripped_invalid_volume_string = self.hed_schema. \
+            _get_tag_units_portion(invalid_volume_string, invalid_volume_string, volume_units)
+        self.assertEqual(stripped_dollars_string, '25.99')
+        self.assertEqual(stripped_dollars_string_invalid, None)
+        self.assertEqual(stripped_volume_string, '100')
+        self.assertEqual(stripped_prefixed_volume_string, '100')
+        self.assertEqual(stripped_invalid_volume_string, None)
+
+    def test_determine_allows_extensions(self):
+        extension_tag1 = HedTag('item/object/vehicle/boat', extension_index=len('item/object/vehicle/boat'))
+        extension_tag2 = HedTag('attribute/visual/color/red/0.5', extension_index=len('attribute/visual/color/red'))
+        no_extension_tag1 = HedTag('event/duration/22 s', extension_index=len('event/duration'))
+        no_extension_tag2 = HedTag('participant/id/45', extension_index=len('participant/id'))
+        extension_tag1_result = self.hed_schema.is_extension_allowed_tag(extension_tag1)
+        extension_tag2_result = self.hed_schema.is_extension_allowed_tag(extension_tag2)
+        no_extension_tag1_result = self.hed_schema.is_extension_allowed_tag(no_extension_tag1)
+        no_extension_tag2_result = self.hed_schema.is_extension_allowed_tag(no_extension_tag2)
+        self.assertEqual(extension_tag1_result, True)
+        self.assertEqual(extension_tag2_result, True)
+        self.assertEqual(no_extension_tag1_result, False)
+        self.assertEqual(no_extension_tag2_result, False)
+
