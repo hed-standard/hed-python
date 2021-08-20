@@ -13,19 +13,20 @@ from hed.models.hed_input import BaseInput
 from hed.models import model_constants
 
 
+# todo: make definitions fully validated in strings - right now you can't have def dicts with strings.
 class EventValidator:
-    def __init__(self, check_for_warnings=False, run_semantic_validation=True,
-                 hed_schema=None, allow_numbers_to_be_pound_sign=False, error_handler=None):
+    def __init__(self, hed_schema=None, check_for_warnings=False, run_semantic_validation=True,
+                 allow_numbers_to_be_pound_sign=False, error_handler=None):
         """Constructor for the EventValidator class.
 
         Parameters
         ----------
+        hed_schema: HedSchema
+            HedSchema object to use to use for validation
         check_for_warnings: bool
             True if the validator should check for warnings. False if the validator should only report errors.
         run_semantic_validation: bool
             True if the validator should check the HED data against a schema. False for syntax-only validation.
-        hed_schema: HedSchema
-            HedSchema object to use to use for validation
         allow_numbers_to_be_pound_sign: bool
             If true, considers # equal to a number for validation purposes.  This is so it can validate templates.
         error_handler : ErrorHandler or None
@@ -134,7 +135,7 @@ class EventValidator:
         validation_issues : [{}]
         """
         validation_issues = []
-        validation_issues += hed_input.file_def_dict.get_def_issues()
+        validation_issues += hed_input.get_def_and_mapper_issues(self._error_handler)
         for row_number, row_dict in hed_input.iter_dataframe(return_row_dict=True):
             validation_issues = self._append_validation_issues_if_found(validation_issues, row_number, row_dict)
         return validation_issues

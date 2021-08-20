@@ -20,7 +20,7 @@ class HedKey:
     # These are the allowed attribute property list, gathered from the schema on load.
     Properties = 'properties'
 
-    AllowedCharacter = 'allowedCharacter'
+    # Tag attributes
     ExtensionAllowed = 'extensionAllowed'
     # On opening, the extension allowed attribute is propagated down to child tags.
     ExtensionAllowedPropagated = 'extensionAllowedPropagated'
@@ -35,9 +35,9 @@ class HedKey:
     TopLevelTagGroup = 'topLevelTagGroup'
     Unique = 'unique'
     UnitClass = 'unitClass'
-    UnitPrefix = 'unitPrefix'
     ValueClass = "valueClass"
 
+    # All known properties
     BoolProperty = 'boolProperty'
     UnitClassProperty = 'unitClassProperty'
     UnitProperty = 'unitProperty'
@@ -51,9 +51,12 @@ class HedKey:
     UnitSymbol = 'unitSymbol'
     # Default Units for Type
     DefaultUnits = 'defaultUnits'
+    UnitPrefix = 'unitPrefix'
 
     SIUnitModifier = 'SIUnitModifier'
     SIUnitSymbolModifier = 'SIUnitSymbolModifier'
+
+    AllowedCharacter = 'allowedCharacter'
 
     # for normal tags, the key to this is the full tag name.
     # For unit modifiers and such, prefix the tag with the appropriate HedKey.
@@ -61,6 +64,7 @@ class HedKey:
     Descriptions = 'descriptions'
 
     # If this is a valid HED3 spec, this allows mapping from short to long.
+    # this is in dictionaries, not tag dictionaries.
     ShortTags = 'shortTags'
 
 

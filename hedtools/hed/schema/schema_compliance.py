@@ -34,14 +34,14 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
         name = hed_schema.filename
     error_handler.push_error_context(ErrorContext.FILE_NAME, name)
 
-    if hed_schema.has_duplicate_tags():
+    if hed_schema.has_duplicate_tags:
         duplicate_dict = hed_schema.find_duplicate_tags()
         for tag_name, long_org_tags in duplicate_dict.items():
             issues_list += error_handler.format_error(SchemaErrors.DUPLICATE_TERMS, tag_name,
                                                       duplicate_tag_list=long_org_tags)
 
     if also_check_for_warnings:
-        hed_terms = hed_schema.get_all_tags(True)
+        hed_terms = hed_schema.get_all_schema_tags(True)
         for hed_term in hed_terms:
             issues_list += validate_schema_term(hed_term, error_handler=error_handler)
 
