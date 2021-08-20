@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
         input_file = EventsInput(events_path, sidecars=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
-        self.assertEqual(len(validation_issues), 3)
+        self.assertEqual(len(validation_issues), 4)
 
         validator = EventValidator(hed_schema=hed_schema)
         validation_issues = validator.validate_input(input_file)
@@ -177,9 +177,9 @@ class Test(unittest.TestCase):
         input_file = HedInput(events_path, tag_columns=[2, 3, "error"])
         validator = EventValidator(hed_schema=hed_schema)
         validation_issues = validator.validate_input(input_file)
-        self.assertEqual(validation_issues[0]['char_index'], 6)
         self.assertEqual(validation_issues[1]['char_index'], 6)
-        self.assertEqual(len(validation_issues), 2)
+        self.assertEqual(validation_issues[2]['char_index'], 6)
+        self.assertEqual(len(validation_issues), 3)
             
 if __name__ == '__main__':
     unittest.main()

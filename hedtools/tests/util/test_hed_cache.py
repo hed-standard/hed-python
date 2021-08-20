@@ -82,7 +82,6 @@ class Test(unittest.TestCase):
         hed_cache.cache_all_hed_xml_versions(self.base_api_url, self.hed_cache_dir)
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, include_deprecated=True)
         hed_schema = schema.load_schema_version(self.hed_cache_dir, self.hed_directory_version)
-        breakHEre = 3
 
     def test_get_all_hed_versions(self):
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)

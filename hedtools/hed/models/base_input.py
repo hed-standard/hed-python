@@ -404,6 +404,26 @@ class BaseInput:
         else:
             return None
 
+    def get_def_and_mapper_issues(self, error_handler):
+        """
+            Returns formatted issues found with definitions and columns.
+        Parameters
+        ----------
+        error_handler : ErrorHandler
+            The error handler to use
+        Returns
+        -------
+        issues_list: [{}]
+            A list of definition and mapping issues.
+        """
+        issues = []
+        for issue in self.file_def_dict.get_def_issues():
+            issues.append(issue)
+
+        for issue in self._mapper._mapper_issues:
+            issues += error_handler.format_error(**issue)
+        return issues
+
     def _get_processed_copy(self):
         """
         Returns a copy of this file with processing applied(definitions replaced, columns expanded, etc)

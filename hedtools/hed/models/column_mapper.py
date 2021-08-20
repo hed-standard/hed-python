@@ -4,6 +4,7 @@ from hed.models.hed_string import HedString
 from hed.models import model_constants
 from hed.models.def_mapper import DefinitionMapper
 from hed.errors import error_reporter
+from hed.errors.error_types import ValidationErrors
 
 import copy
 
@@ -362,8 +363,8 @@ class ColumnMapper:
                 column_number = found_named_tag_columns[column_name]
                 self._final_column_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_number)
             elif column_number in self._tag_columns:
-                # todo: update this with an actual error
-                self._mapper_issues += [{'message': f"Required column '{column_number}' missing."}]
+                self._mapper_issues += [{'error_type': ValidationErrors.HED_MISSING_COLUMN,
+                                        'missing_column_name': column_number}]
 
         # Add prefixes
         for column_number, prefix in self._column_prefix_dictionary.items():

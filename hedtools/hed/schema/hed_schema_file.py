@@ -25,7 +25,7 @@ def from_string(schema_string, file_type=".xml"):
     return hed_schema
 
 
-def load_schema(hed_file_path=None, hed_url_path=None):
+def load_schema(hed_file_path=None, hed_url_path=None, library_prefix=None):
     if not hed_file_path and not hed_url_path:
         raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file",
                            filename=hed_file_path)
@@ -45,6 +45,10 @@ def load_schema(hed_file_path=None, hed_url_path=None):
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_file_path)
 
     hed_schema.update_old_hed_schema()
+
+    if library_prefix:
+        hed_schema.set_library_prefix(library_prefix=library_prefix)
+
     return hed_schema
 
 # todo: this could be updated to also support .mediawiki format.
