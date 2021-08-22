@@ -1,0 +1,11 @@
+[run]
+branch = True
+source = hedtools/*
+include = hedtools/*
+omit =
+    */setup.py
+    */external/*
+    */due.py
+    */*version.py
+[report]
+include = hedtools/*
