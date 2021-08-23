@@ -43,7 +43,7 @@ jobs:
   coverage:
     needs: [build]
     runs-on: ubuntu-latest
-    python-version: [3.7]
+    python-version: 3.7
 
     steps:
       - name: publish-coverages
