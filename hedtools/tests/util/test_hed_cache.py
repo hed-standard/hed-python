@@ -10,6 +10,8 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../schema_cache_test/')
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/legacy_xml')
+        schema.set_cache_directory(cls.hed_cache_dir)
+
         cls.default_xml_base_filename = "HED7.1.1.xml"
         cls.default_hed_xml = os.path.join(cls.hed_base_dir, cls.default_xml_base_filename)
         cls.hed_test_version = '7.1.1'
@@ -26,10 +28,6 @@ class Test(unittest.TestCase):
 
     def test_get_hed_version_path(self):
         latest_hed_version_path = hed_cache.get_hed_version_path()
-        self.assertIsInstance(latest_hed_version_path, str)
-
-    def test_get_hed_version_path_deprecated(self):
-        latest_hed_version_path = hed_cache.get_hed_version_path(xml_version_number="4.0.5")
         self.assertIsInstance(latest_hed_version_path, str)
 
     def test_get_latest_semantic_version_in_list(self):
@@ -77,6 +75,8 @@ class Test(unittest.TestCase):
         self.assertTrue("deprecated" in hed_xml_filename)
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
+        latest_hed_version_path = hed_cache.get_hed_version_path(xml_version_number="4.0.5")
+        self.assertIsInstance(latest_hed_version_path, str)
 
     def test_load_deprecated(self):
         hed_cache.cache_all_hed_xml_versions(self.base_api_url, self.hed_cache_dir)

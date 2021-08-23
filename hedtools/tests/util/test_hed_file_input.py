@@ -7,6 +7,7 @@ from hed.models.hed_string import HedString
 from hed.models.sidecar import Sidecar
 from hed.models.events_input import EventsInput
 from hed.errors.exceptions import HedFileError
+import shutil
 
 
 class Test(unittest.TestCase):
@@ -25,6 +26,13 @@ class Test(unittest.TestCase):
         cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
         cls.category_tags = 'Participant response, Stimulus'
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
+
+        cls.base_output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/tests_output/")
+        os.makedirs(cls.base_output_folder, exist_ok=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.base_output_folder)
 
     def test_all(self):
         hed_input = self.default_test_file_name
@@ -79,25 +87,22 @@ class Test(unittest.TestCase):
 
     def test_to_excel(self):
         test_input_file = self.generic_file_input
-        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/ExcelMultipleSheets_resave.xlsx")
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave.xlsx"
         test_input_file.to_excel(test_output_name)
 
         test_input_file = self.generic_file_input
-        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        "../data/ExcelMultipleSheets_resave_formatting.xlsx")
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_formatting.xlsx"
         test_input_file.to_excel(test_output_name)
 
         #Test to a file stream
         test_input_file = self.generic_file_input
-        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        "../data/ExcelMultipleSheets_fileio.xlsx")
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_fileio.xlsx"
         with open(test_output_name, "wb") as f:
             test_input_file.to_excel(f)
 
     def test_to_csv(self):
         test_input_file = self.generic_file_input
-        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        "../data/ExcelMultipleSheets_resave.csv")
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave.csv"
         test_input_file.to_csv(test_output_name)
 
         test_input_file = self.generic_file_input
@@ -106,8 +111,7 @@ class Test(unittest.TestCase):
 
     def test_loading_and_reloading(self):
         test_input_file = self.generic_file_input
-        test_output_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        "../data/ExcelMultipleSheets_test_save.xlsx")
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_test_save.xlsx"
 
         test_input_file.to_excel(test_output_name)
 
