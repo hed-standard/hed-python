@@ -41,13 +41,10 @@ jobs:
         run: |
           coverage run -m unittest discover -s ./hedtools
 
-  coverage:
-    needs: [build]
-    runs-on: ubuntu-latest
-    # python-version: 3.7
-
-    steps:
       - name: publish-coverages
         uses: paambaati/codeclimate-action@v2.7.5
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+            coverageCommand: coverage xml
+            debug: true
