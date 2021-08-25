@@ -39,28 +39,28 @@ class Test(unittest.TestCase):
                           "An exception should be raised if an empty request is passed")
         self.assertTrue(1, "Testing get_input_from_events_form")
 
-    def test_get_input_from_events_form(self):
-        from hed.models import EventsInput
-        from hed.schema import HedSchema
-        from hedweb.events import get_input_from_events_form
-        with self.app.test:
-            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
-            events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
-            with open(json_path, 'rb') as fp:
-                with open(events_path, 'rb') as fpe:
-                    environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0-alpha.1',
-                                             common.EVENTS_FILE: fpe, common.DEFS_EXPAND: 'on',
-                                             common.COMMAND_OPTION: common.COMMAND_ASSEMBLE})
-            request = Request(environ)
-            arguments = get_input_from_events_form(request)
-            self.assertIsInstance(arguments[common.EVENTS], EventsInput,
-                                  "get_input_from_events_form should have an events object")
-            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
-                                  "get_input_from_events_form should have a HED schema")
-            self.assertEqual(common.COMMAND_ASSEMBLE, arguments[common.COMMAND],
-                             "get_input_from_events_form should have a command")
-            self.assertTrue(arguments[common.DEFS_EXPAND],
-                            "get_input_from_events_form should have defs_expand true when on")
+    # def test_get_input_from_events_form(self):
+    #     from hed.models import EventsInput
+    #     from hed.schema import HedSchema
+    #     from hedweb.events import get_input_from_events_form
+    #     with self.app.test:
+    #         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
+    #         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
+    #         with open(json_path, 'rb') as fp:
+    #             with open(events_path, 'rb') as fpe:
+    #                 environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0-alpha.1',
+    #                                          common.EVENTS_FILE: fpe, common.DEFS_EXPAND: 'on',
+    #                                          common.COMMAND_OPTION: common.COMMAND_ASSEMBLE})
+    #         request = Request(environ)
+    #         arguments = get_input_from_events_form(request)
+    #         self.assertIsInstance(arguments[common.EVENTS], EventsInput,
+    #                               "get_input_from_events_form should have an events object")
+    #         self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+    #                               "get_input_from_events_form should have a HED schema")
+    #         self.assertEqual(common.COMMAND_ASSEMBLE, arguments[common.COMMAND],
+    #                          "get_input_from_events_form should have a command")
+    #         self.assertTrue(arguments[common.DEFS_EXPAND],
+    #                         "get_input_from_events_form should have defs_expand true when on")
 
     def test_events_process_empty_file(self):
         # Test for empty events_path
