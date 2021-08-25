@@ -2,6 +2,8 @@ import os
 import shutil
 import unittest
 from hedweb.app_factory import AppFactory
+import sys
+sys.path.append('hedtools')
 
 
 class Test(unittest.TestCase):

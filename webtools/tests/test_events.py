@@ -4,6 +4,8 @@ import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
 
+import sys
+sys.path.append('hedtools')
 from hed import schema as hedschema
 from hed import models
 from hed.errors.exceptions import HedFileError

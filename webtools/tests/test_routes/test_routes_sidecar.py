@@ -6,6 +6,8 @@ from flask import Response
 from werkzeug.datastructures import FileStorage
 from hedweb.app_factory import AppFactory
 from hedweb.constants import common
+import sys
+sys.path.append('hedtools')
 
 
 class Test(unittest.TestCase):

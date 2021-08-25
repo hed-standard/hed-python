@@ -5,6 +5,8 @@ from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
 
 from hedweb.app_factory import AppFactory
+import sys
+sys.path.append('hedtools')
 
 
 class Test(unittest.TestCase):

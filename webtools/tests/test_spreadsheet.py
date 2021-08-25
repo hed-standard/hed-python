@@ -3,7 +3,8 @@ import shutil
 import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
-
+import sys
+sys.path.append('hedtools')
 import hed.schema as hedschema
 from hed import models
 from hedweb.constants import common

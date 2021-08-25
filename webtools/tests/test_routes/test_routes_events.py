@@ -3,6 +3,8 @@ import os
 import shutil
 import unittest
 from flask import Response
+import sys
+sys.path.append('hedtools')
 from hedweb.app_factory import AppFactory
 from hedweb.constants import common
 

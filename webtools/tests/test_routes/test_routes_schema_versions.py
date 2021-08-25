@@ -5,6 +5,8 @@ import shutil
 import unittest
 from werkzeug.datastructures import FileStorage
 from hedweb.app_factory import AppFactory
+import sys
+sys.path.append('hedtools')
 
 
 class Test(unittest.TestCase):
