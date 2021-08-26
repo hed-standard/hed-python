@@ -1,129 +1,43 @@
 import unittest
 import os
 
-from hed.models.hed_string import HedString
-from hed.validator.event_validator import EventValidator
 from hed.errors import error_reporter
 from hed import schema
-from hed.errors.error_types import ValidationErrors, ErrorContext
+from hed.errors.error_types import ValidationErrors
+from hed.schema.hed_schema_group import HedSchemaGroup
+from hed.errors.exceptions import HedFileError
+from tests.validator.test_tag_validator import TestValidatorBase
 
 
-class TestHedBase(unittest.TestCase):
+class TestHed3(TestValidatorBase):
     schema_file = None
 
     @classmethod
     def setUpClass(cls):
-        if cls.schema_file:
-            hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-            cls.hed_schema = schema.load_schema(hed_xml)
-        elif not cls.hed_schema:
-            raise ValueError("No schema set for test case")
+        schema_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
+        hed_schema1 = schema.load_schema(hed_xml)
+        hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
+        cls.hed_schema = HedSchemaGroup([hed_schema1, hed_schema2])
+
         cls.error_handler = error_reporter.ErrorHandler()
-
-    def format_error_but_not_really(self, error_type, *args, **kwargs):
-        """
-            The parameters vary based on what type of error this is.
-
-            Note: If you want to pass a tag as a number to this function, you will need to pass tag as a keyword.
-
-        Parameters
-        ----------
-        error_type : str
-            The type of error for this.  Registered with @hed_error or @hed_tag_error.
-        args: args
-            The rest of the unnamed args
-        kwargs :
-            The other parameters to pass down to the error handling func.
-        Returns
-        -------
-        error: [{}]
-            A single error
-        """
-        _ = self.error_handler.format_error(error_type, *args, **kwargs)
-        # Save off params
-        params = [error_type, args, kwargs]
-        # return params
-        return [params]
-
-    def really_format_errors(self, error_handler, hed_string, params):
-        formatted_errors = []
-        for code, args, kwargs in params:
-            if 'tag' in kwargs and isinstance(kwargs['tag'], int):
-                tag_index = kwargs['tag']
-                if tag_index >= 1000:
-                    tag_index = tag_index - 1000
-                    source_list = hed_string.get_all_groups()
-                else:
-                    source_list = hed_string.get_all_tags()
-                if tag_index >= len(source_list):
-                    raise ValueError("Bad group or tax index in expected errors for unit tests")
-                kwargs['tag'] = source_list[tag_index]
-            formatted_errors += error_handler.format_error(code, *args, **kwargs)
-
-        return formatted_errors
-
-
-class TestValidatorBase(TestHedBase):
-    compute_forms = True
-    hed_schema = None
-
-    @classmethod
-    def setUpClass(cls):
         super().setUpClass()
-        cls.error_handler = error_reporter.ErrorHandler()
-        cls.syntactic_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                        run_semantic_validation=False, check_for_warnings=False)
-        cls.syntactic_tag_validator = cls.syntactic_hed_input_reader._tag_validator
-        cls.syntactic_warning_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                                run_semantic_validation=False, check_for_warnings=True)
-        cls.syntactic_warning_tag_validator = cls.syntactic_warning_hed_input_reader._tag_validator
-        cls.semantic_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                       run_semantic_validation=True, check_for_warnings=False)
-        cls.semantic_tag_validator = cls.semantic_hed_input_reader._tag_validator
-        cls.semantic_warning_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                               run_semantic_validation=True, check_for_warnings=True)
-        cls.semantic_warning_tag_validator = cls.semantic_warning_hed_input_reader._tag_validator
 
-    def validator_base(self, test_strings, expected_results, expected_issues, test_function, error_handler):
-        for test_key in test_strings:
-            hed_string_obj = HedString(test_strings[test_key])
-            error_handler.reset_error_context()
-            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
-            test_issues = []
-            if self.compute_forms:
-                test_issues += hed_string_obj.convert_to_canonical_forms(self.hed_schema, error_handler)
-            if not test_issues:
-                test_issues += test_function(hed_string_obj)
-            test_result = not test_issues
-            expected_params = expected_issues[test_key]
-            expected_result = expected_results[test_key]
-            expected_issue = self.really_format_errors(error_handler, hed_string=hed_string_obj,
-                                                       params=expected_params)
+    def test_invalid_load(self):
+        schema_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
+        hed_schema1 = schema.load_schema(hed_xml, library_prefix="tl:")
+        hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
 
-            # print(test_key)
-            # print(str(expected_issue))
-            # print(str(test_issues))
-            error_handler.pop_error_context()
-            self.assertEqual(test_result, expected_result, test_strings[test_key])
-            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
+        self.assertRaises(HedFileError, HedSchemaGroup, [hed_schema1, hed_schema2])
 
-    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        validator = self.syntactic_hed_input_reader
-        if check_for_warnings is True:
-            validator = self.syntactic_warning_hed_input_reader
-        self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator), validator._error_handler)
+    def test_invalid_load_prefix(self):
+        schema_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
+        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
+        hed_schema1 = schema.load_schema(hed_xml)
+        hed_schema2 = schema.load_schema(hed_xml)
 
-    def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        validator = self.semantic_hed_input_reader
-        if check_for_warnings is True:
-            validator = self.semantic_warning_hed_input_reader
-        self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator), validator._error_handler)
-
-
-class TestHed3(TestValidatorBase):
-    schema_file = "../data/hed_pairs/HED8.0.0-beta.3.xml"
+        self.assertRaises(HedFileError, HedSchemaGroup, [hed_schema1, hed_schema2])
 
 
 class IndividualHedTagsShort(TestHed3):
@@ -133,17 +47,18 @@ class IndividualHedTagsShort(TestHed3):
 
     def test_exist_in_schema(self):
         test_strings = {
-            'takesValue': 'Duration/3 ms',
-            'full': 'Animal-agent',
-            'extensionsAllowed': 'Item/Beaver',
-            'leafExtension': 'Experiment-procedure/Something',
-            'nonExtensionsAllowed': 'Event/Nonsense',
-            'invalidExtension': 'Attribute/Red',
-            'invalidExtension2': 'Attribute/Red/Extension2',
-            'usedToBeIllegalComma': 'Attribute/Informational/Label/This is a label,This/Is/A/Tag',
-            'illegalDef': 'Def/Item',
-            'illegalDefExpand': 'Def-expand/Item',
-            'illegalDefinition': 'Definition/Item',
+            'takesValue': 'tl:Duration/3 ms',
+            'full': 'tl:Animal-agent',
+            'extensionsAllowed': 'tl:Item/Beaver',
+            'leafExtension': 'tl:Experiment-procedure/Something',
+            'nonExtensionsAllowed': 'tl:Event/Nonsense',
+            'invalidExtension': 'tl:Attribute/Red',
+            'invalidExtension2': 'tl:Attribute/Red/Extension2',
+            'usedToBeIllegalComma': 'tl:Attribute/Informational/Label/This is a label,tl:This/Is/A/Tag',
+            'illegalDef': 'tl:Def/Item',
+            'illegalDefExpand': 'tl:Def-expand/Item',
+            'illegalDefinition': 'tl:Definition/Item',
+            'unknownPrefix': 'ul:Definition/Item'
         }
         expected_results = {
             'takesValue': True,
@@ -157,6 +72,7 @@ class IndividualHedTagsShort(TestHed3):
             'illegalDef': False,
             'illegalDefExpand': False,
             'illegalDefinition': False,
+            'unknownPrefix': False
         }
         expected_issues = {
             'takesValue': [],
@@ -164,30 +80,31 @@ class IndividualHedTagsShort(TestHed3):
             'extensionsAllowed': [],
             'leafExtension': self.format_error_but_not_really(ValidationErrors.INVALID_EXTENSION, tag=0),
             'nonExtensionsAllowed': self.format_error_but_not_really(ValidationErrors.INVALID_EXTENSION, tag=0),
-            'invalidExtension': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=10,
-                                                                 index_in_tag_end=13,
+            'invalidExtension': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=13,
+                                                                 index_in_tag_end=16,
                                                                  expected_parent_tag="Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red"),
-            'invalidExtension2': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=10,
-                                                                  index_in_tag_end=13,
+            'invalidExtension2': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=13,
+                                                                  index_in_tag_end=16,
                                                                   expected_parent_tag="Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red"),
             'usedToBeIllegalComma': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, tag=1,
-                                                                     index_in_tag=0, index_in_tag_end=4),
-            'illegalDef': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=4,
-                                                           index_in_tag_end=8, expected_parent_tag="Item"),
-            'illegalDefExpand': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=11,
-                                                                 index_in_tag_end=15, expected_parent_tag="Item"),
-            'illegalDefinition': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=11,
-                                                                  index_in_tag_end=15, expected_parent_tag="Item"),
+                                                                     index_in_tag=3, index_in_tag_end=7),
+            'illegalDef': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=7,
+                                                           index_in_tag_end=11, expected_parent_tag="Item"),
+            'illegalDefExpand': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=14,
+                                                                 index_in_tag_end=18, expected_parent_tag="Item"),
+            'illegalDefinition': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=14,
+                                                                  index_in_tag_end=18, expected_parent_tag="Item"),
+            'unknownPrefix': self.format_error_but_not_really(ValidationErrors.HED_UNKNOWN_PREFIX, tag=0, unknown_prefix="ul:", known_prefixes=["", "tl:"]),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_proper_capitalization(self):
         test_strings = {
-            'proper': 'Event/Sensory-event',
-            'camelCase': 'EvEnt/Something',
-            'takesValue': 'Attribute/Temporal rate/20 Hz',
-            'numeric': 'Repetition-number/20',
-            'lowercase': 'Event/something'
+            'proper': 'tl:Event/Sensory-event',
+            'camelCase': 'tl:EvEnt/Something',
+            'takesValue': 'tl:Attribute/Temporal rate/20 Hz',
+            'numeric': 'tl:Repetition-number/20',
+            'lowercase': 'tl:Event/something'
         }
         expected_results = {
             'proper': True,
@@ -207,8 +124,8 @@ class IndividualHedTagsShort(TestHed3):
 
     def test_child_required(self):
         test_strings = {
-            'hasChild': 'Experimental-stimulus',
-            'missingChild': 'Label'
+            'hasChild': 'tl:Experimental-stimulus',
+            'missingChild': 'tl:Label'
         }
         expected_results = {
             'hasChild': True,
@@ -257,20 +174,20 @@ class IndividualHedTagsShort(TestHed3):
 
     def test_correct_units(self):
         test_strings = {
-            'correctUnit': 'Duration/3 ms',
-            'correctUnitScientific': 'Duration/3.5e1 ms',
-            'correctPluralUnit': 'Duration/3 milliseconds',
-            'correctNoPluralUnit': 'Frequency/3 hertz',
-            'correctNonSymbolCapitalizedUnit': 'Duration/3 MilliSeconds',
-            'correctSymbolCapitalizedUnit': 'Frequency/3 kHz',
-            'incorrectUnit': 'Duration/3 cm',
-            'incorrectPluralUnit': 'Frequency/3 hertzs',
-            'incorrectSymbolCapitalizedUnit': 'Frequency/3 hz',
-            'incorrectSymbolCapitalizedUnitModifier': 'Frequency/3 KHz',
-            'notRequiredNumber': 'Accuracy/0.5',
-            'notRequiredScientific': 'Accuracy/5e-1',
-            'specialAllowedCharBadUnit': 'Creation-date/bad_date',
-            'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01',
+            'correctUnit': 'tl:Duration/3 ms',
+            'correctUnitScientific': 'tl:Duration/3.5e1 ms',
+            'correctPluralUnit': 'tl:Duration/3 milliseconds',
+            'correctNoPluralUnit': 'tl:Frequency/3 hertz',
+            'correctNonSymbolCapitalizedUnit': 'tl:Duration/3 MilliSeconds',
+            'correctSymbolCapitalizedUnit': 'tl:Frequency/3 kHz',
+            'incorrectUnit': 'tl:Duration/3 cm',
+            'incorrectPluralUnit': 'tl:Frequency/3 hertzs',
+            'incorrectSymbolCapitalizedUnit': 'tl:Frequency/3 hz',
+            'incorrectSymbolCapitalizedUnitModifier': 'tl:Frequency/3 KHz',
+            'notRequiredNumber': 'tl:Accuracy/0.5',
+            'notRequiredScientific': 'tl:Accuracy/5e-1',
+            'specialAllowedCharBadUnit': 'tl:Creation-date/bad_date',
+            'specialAllowedCharUnit': 'tl:Creation-date/1900-01-01T01:01:01',
             # todo: restore these when we have a currency node in the valid beta schema.
             # 'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
             # 'specialNotAllowedCharCurrency': 'Event/Currency-Test/@100'
@@ -337,21 +254,21 @@ class IndividualHedTagsShort(TestHed3):
 
     def test_extensions(self):
         test_strings = {
-            'invalidExtension': 'Experiment-control/Animal-agent',
+            'invalidExtension': 'tl:Experiment-control/Animal-agent',
         }
         expected_results = {
             'invalidExtension': False,
         }
         expected_issues = {
             'invalidExtension': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                                 index_in_tag=19, index_in_tag_end=31,
+                                                                 index_in_tag=19 + 3, index_in_tag_end=31 + 3,
                                                                  expected_parent_tag="Agent/Animal-agent"),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_invalid_placeholder_in_normal_string(self):
         test_strings = {
-            'invalidPlaceholder': 'Duration/# ms',
+            'invalidPlaceholder': 'tl:Duration/# ms',
         }
         expected_results = {
             'invalidPlaceholder': False,
@@ -359,15 +276,15 @@ class IndividualHedTagsShort(TestHed3):
         expected_issues = {
             'invalidPlaceholder': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
                                                                    tag=0,
-                                                                   index_in_tag=9, index_in_tag_end=10,
+                                                                   index_in_tag=12, index_in_tag_end=13,
                                                                    actual_error=ValidationErrors.HED_VALUE_INVALID),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_span_reporting(self):
         test_strings = {
-            'orgTagDifferent': 'Duration/23 hz',
-            'orgTagDifferent2': 'Duration/23 hz, Duration/23 hz',
+            'orgTagDifferent': 'tl:Duration/23 hz',
+            'orgTagDifferent2': 'tl:Duration/23 hz, Duration/23 hz',
         }
         expected_results = {
             'orgTagDifferent': False,
@@ -395,14 +312,14 @@ class TestTagLevels3(TestHed3):
 
     def test_no_duplicates(self):
         test_strings = {
-            'topLevelDuplicate': 'Event/Sensory-event,Event/Sensory-event',
-            'groupDuplicate': 'Item/Object/Man-made-object/VehicleTrain,(Event/Sensory-event,'
-                              'Attribute/Sensory/Visual/Color/CSS-color/Purple-color/Purple,Event/Sensory-event)',
-            'noDuplicate': 'Event/Sensory-event,'
-                           'Item/Object/Man-made-object/VehicleTrain,'
-                           'Attribute/Sensory/Visual/Color/CSS-color/Purple-color/Purple',
-            'legalDuplicate': 'Item/Object/Man-made-object/VehicleTrain,(Item/Object/Man-made-object/VehicleTrain,'
-                              'Event/Sensory-event)',
+            'topLevelDuplicate': 'tl:Event/Sensory-event,tl:Event/Sensory-event',
+            'groupDuplicate': 'tl:Item/Object/Man-made-object/VehicleTrain,(tl:Event/Sensory-event,'
+                              'tl:Attribute/Sensory/Visual/Color/CSS-color/Purple-color/Purple,tl:Event/Sensory-event)',
+            'noDuplicate': 'tl:Event/Sensory-event,'
+                           'tl:Item/Object/Man-made-object/VehicleTrain,'
+                           'tl:Attribute/Sensory/Visual/Color/CSS-color/Purple-color/Purple',
+            'legalDuplicate': 'tl:Item/Object/Man-made-object/VehicleTrain,(tl:Item/Object/Man-made-object/VehicleTrain,'
+                              'tl:Event/Sensory-event)',
         }
         expected_results = {
             'topLevelDuplicate': False,
@@ -422,8 +339,8 @@ class TestTagLevels3(TestHed3):
 
     def test_no_duplicates_semantic(self):
         test_strings = {
-            'mixedLevelDuplicates': 'Man-made-object/Vehicle/Boat, Vehicle/Boat',
-            'mixedLevelDuplicates2': 'Man-made-object/Vehicle/Boat, Boat'
+            'mixedLevelDuplicates': 'tl:Man-made-object/Vehicle/Boat, tl:Vehicle/Boat',
+            'mixedLevelDuplicates2': 'tl:Man-made-object/Vehicle/Boat, tl:Boat'
         }
         expected_results = {
             'mixedLevelDuplicates': False,
@@ -439,12 +356,12 @@ class TestTagLevels3(TestHed3):
 
     def test_topLevelTagGroup_validation(self):
         test_strings = {
-            'invalid1': 'Definition/InvalidDef',
-            'valid1': '(Definition/ValidDef)',
-            'valid2': '(Definition/ValidDef), (Definition/ValidDef2)',
-            'invalid2': '(Event, (Definition/InvalidDef2))',
-            'invalidTwoInOne': '(Definition/InvalidDef2, Definition/InvalidDef3)',
-            'invalid2TwoInOne': '(Definition/InvalidDef2, Onset)',
+            'invalid1': 'tl:Definition/InvalidDef',
+            'valid1': '(tl:Definition/ValidDef)',
+            'valid2': '(tl:Definition/ValidDef), (tl:Definition/ValidDef2)',
+            'invalid2': '(tl:Event, (tl:Definition/InvalidDef2))',
+            'invalidTwoInOne': '(tl:Definition/InvalidDef2, tl:Definition/InvalidDef3)',
+            'invalid2TwoInOne': '(tl:Definition/InvalidDef2, tl:Onset)',
         }
         expected_results = {
             'invalid1': False,
@@ -463,24 +380,24 @@ class TestTagLevels3(TestHed3):
                                                          tag=1),
             'invalidTwoInOne': self.format_error_but_not_really(ValidationErrors.HED_MULTIPLE_TOP_TAGS,
                                                                 tag=0,
-                                                                multiple_tags="Attribute/Informational/Definition/InvalidDef3".split(", ")),
+                                                                multiple_tags="tl:Attribute/Informational/Definition/InvalidDef3".split(", ")),
             'invalid2TwoInOne': self.format_error_but_not_really(ValidationErrors.HED_MULTIPLE_TOP_TAGS,
                                                                  tag=0,
-                                                                 multiple_tags="Data-property/Spatiotemporal-property/Temporal-property/Onset".split(", ")),
+                                                                 multiple_tags="tl:Data-property/Spatiotemporal-property/Temporal-property/Onset".split(", ")),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_taggroup_validation(self):
         test_strings = {
-            'invalid1': 'Def-Expand/InvalidDef',
-            'invalid2': 'Def-Expand/InvalidDef, Event, (Event)',
-            'invalid3': 'Event, (Event), Def-Expand/InvalidDef',
-            'valid1': '(Def-Expand/ValidDef)',
-            'valid2': '(Def-Expand/ValidDef), (Def-Expand/ValidDef2)',
-            'valid3': '(Event, (Def-Expand/InvalidDef2))',
+            'invalid1': 'tl:Def-Expand/InvalidDef',
+            'invalid2': 'tl:Def-Expand/InvalidDef, tl:Event, (tl:Event)',
+            'invalid3': 'tl:Event, (tl:Event), tl:Def-Expand/InvalidDef',
+            'valid1': '(tl:Def-Expand/ValidDef)',
+            'valid2': '(tl:Def-Expand/ValidDef), (tl:Def-Expand/ValidDef2)',
+            'valid3': '(tl:Event, (tl:Def-Expand/InvalidDef2))',
             # This case should possibly be flagged as invalid
-            'semivalid1': '(Def-Expand/InvalidDef2, Def-Expand/InvalidDef3)',
-            'semivalid2': '(Def-Expand/InvalidDef2, Onset)',
+            'semivalid1': '(tl:Def-Expand/InvalidDef2, tl:Def-Expand/InvalidDef3)',
+            'semivalid2': '(tl:Def-Expand/InvalidDef2, tl:Onset)',
         }
         expected_results = {
             'invalid1': False,
