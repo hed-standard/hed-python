@@ -41,7 +41,7 @@ jobs:
       - name: Test with unittest
         run: |
           coverage run -m unittest discover -s ./hedtools
-          coverage run -a -m unittest discover -s ./webtools
+          coverage run -a -m unittest discover -s ./webtools 
 
       - name: publish-coverages
         uses: paambaati/codeclimate-action@v2.7.5
