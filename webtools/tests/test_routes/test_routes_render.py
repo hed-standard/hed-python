@@ -2,6 +2,8 @@ import os
 import shutil
 import unittest
 from hedweb.app_factory import AppFactory
+import sys
+sys.path.append('hedtools')
 
 
 class Test(unittest.TestCase):
@@ -10,6 +12,8 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
+            from hed import schema as hedschema
+            hedschema.set_cache_directory(app.config['HED_CACHE_FOLDER'])
             from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
@@ -33,9 +37,9 @@ class Test(unittest.TestCase):
         self.assertEqual(response.status_code, 200, "The common-errors content page should exist")
         self.assertTrue(response.data, "The returned page should not be empty")
 
-    def test_render_dictionary_form(self):
-        response = self.app.test.get('/dictionary')
-        self.assertEqual(response.status_code, 200, "The dictionary content page should exist")
+    def test_render_sidecar_form(self):
+        response = self.app.test.get('/sidecar')
+        self.assertEqual(response.status_code, 200, "The sidecar content page should exist")
         self.assertTrue(response.data, "The returned page should not be empty")
 
     def test_render_events_form(self):

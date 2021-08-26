@@ -21,15 +21,15 @@ class BaseInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, name=None):
+    def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, name=None):
         """Constructor for the BaseInput class.
 
          Parameters
          ----------
-         filename: str or file like
+         file: str or file like
              An xlsx/tsv file to open.
          file_type: str
-            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
+            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from file if file is a str.
          worksheet_name: str or None
              The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
          has_column_names: bool
@@ -53,23 +53,23 @@ class BaseInput:
         if not self._has_column_names:
             pandas_header = None
 
-        if not filename:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty filename passed to BaseInput.", filename)
+        if not file:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
 
         input_type = file_type
-        if file_type is None and isinstance(filename, str):
-            _, input_type = os.path.splitext(filename)
+        if file_type is None and isinstance(file, str):
+            _, input_type = os.path.splitext(file)
 
         self._dataframe = None
 
         if input_type in self.TEXT_EXTENSION:
-            self._dataframe = pandas.read_csv(filename, delimiter='\t', header=pandas_header)
+            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header)
         elif input_type in self.EXCEL_EXTENSION:
-            self._loaded_workbook = openpyxl.load_workbook(filename)
+            self._loaded_workbook = openpyxl.load_workbook(file)
             loaded_worksheet = self.get_worksheet(self._worksheet_name)
             self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
         else:
-            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
+            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
 
         self.reset_mapper(mapper)
 
@@ -212,20 +212,20 @@ class BaseInput:
 
         return new_def_dict
 
-    def to_excel(self, filename, output_processed_file=False):
+    def to_excel(self, file, output_processed_file=False):
         """
 
         Parameters
         ----------
-        filename : str or file like
-            Location to save this file.  Can be filename, or stream/file like.
+        file : str or file like
+            Location to save this file.  Can be file, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
         Returns
         -------
 
         """
-        if not filename:
+        if not file:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
 
         # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
@@ -246,18 +246,18 @@ class BaseInput:
                     old_worksheet.cell(row_number + adj_row_for_col_names,
                                        column_number + adj_for_one_based_cols).value = \
                         output_file._dataframe.iloc[row_number, column_number]
-            self._loaded_workbook.save(filename)
+            self._loaded_workbook.save(file)
         else:
-            output_file._dataframe.to_excel(filename, header=self._has_column_names)
+            output_file._dataframe.to_excel(file, header=self._has_column_names)
 
-    def to_csv(self, filename=None, output_processed_file=False):
+    def to_csv(self, file=None, output_processed_file=False):
         """
             Returns the file as a csv string.
 
         Parameters
         ----------
-        filename : str or file like or None
-            Location to save this file.  Can be filename, or stream/file like.
+        file : str or file like or None
+            Location to save this file.  Can be file, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
         Returns
@@ -268,7 +268,7 @@ class BaseInput:
             output_file = self._get_processed_copy()
         else:
             output_file = self
-        csv_string_if_filename_none = output_file._dataframe.to_csv(filename, '\t', index=False,
+        csv_string_if_filename_none = output_file._dataframe.to_csv(file, '\t', index=False,
                                                                     header=output_file._has_column_names)
         return csv_string_if_filename_none
 
@@ -403,6 +403,26 @@ class BaseInput:
             return self._loaded_workbook.worksheets[0]
         else:
             return None
+
+    def get_def_and_mapper_issues(self, error_handler):
+        """
+            Returns formatted issues found with definitions and columns.
+        Parameters
+        ----------
+        error_handler : ErrorHandler
+            The error handler to use
+        Returns
+        -------
+        issues_list: [{}]
+            A list of definition and mapping issues.
+        """
+        issues = []
+        for issue in self.file_def_dict.get_def_issues():
+            issues.append(issue)
+
+        for issue in self._mapper._mapper_issues:
+            issues += error_handler.format_error(**issue)
+        return issues
 
     def _get_processed_copy(self):
         """

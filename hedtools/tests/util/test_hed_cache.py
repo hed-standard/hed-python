@@ -2,13 +2,16 @@ import unittest
 import os
 import itertools
 from hed.schema import hed_cache
+from hed import schema
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../schema_cache_test/')
-        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
+        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/legacy_xml')
+        schema.set_cache_directory(cls.hed_cache_dir)
+
         cls.default_xml_base_filename = "HED7.1.1.xml"
         cls.default_hed_xml = os.path.join(cls.hed_base_dir, cls.default_xml_base_filename)
         cls.hed_test_version = '7.1.1'
@@ -64,6 +67,21 @@ class Test(unittest.TestCase):
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
+
+    def test_cache_all_hed_xml_versions_deprecated(self):
+        hed_cache.cache_all_hed_xml_versions(self.base_api_url, self.hed_cache_dir)
+        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, include_deprecated=True)
+        hed_xml_filename = hed_cache.get_hed_version_path(self.hed_cache_dir, self.hed_directory_version)
+        self.assertTrue("deprecated" in hed_xml_filename)
+        self.assertIsInstance(cached_versions, list)
+        self.assertTrue(len(cached_versions) > 0)
+        latest_hed_version_path = hed_cache.get_hed_version_path(xml_version_number="4.0.5")
+        self.assertIsInstance(latest_hed_version_path, str)
+
+    def test_load_deprecated(self):
+        hed_cache.cache_all_hed_xml_versions(self.base_api_url, self.hed_cache_dir)
+        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, include_deprecated=True)
+        hed_schema = schema.load_schema_version(self.hed_cache_dir, self.hed_directory_version)
 
     def test_get_all_hed_versions(self):
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)

@@ -3,6 +3,8 @@ import shutil
 import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
+import sys
+sys.path.append('hedtools')
 import hed.schema as hedschema
 from hedweb.constants import common
 from hedweb.app_factory import AppFactory
@@ -14,6 +16,8 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
+            from hed import schema as hedschema
+            hedschema.set_cache_directory(app.config['HED_CACHE_FOLDER'])
             from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):

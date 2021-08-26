@@ -46,11 +46,8 @@ class ValidationErrors:
     HED_VALUE_INVALID = 'HED_VALUE_INVALID'
     # HED_VERSION_WARNING
 
-# Look into if def/ are validated in:
-#     Sidecar
-#     files
-#
-# Same two with definition/
+    HED_MISSING_COLUMN = "HED_MISSING_COLUMN"
+    HED_UNKNOWN_PREFIX = "HED_UNKNOWN_PREFIX"
 
     # Below here shows what the given error maps to
     # HED_TAG_EMPTY

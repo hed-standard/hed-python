@@ -3,7 +3,8 @@ import shutil
 import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
-
+import sys
+sys.path.append('hedtools')
 import hed.schema as hedschema
 from hed import models
 from hedweb.constants import common
@@ -17,6 +18,8 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
+            from hed import schema as hedschema
+            hedschema.set_cache_directory(app.config['HED_CACHE_FOLDER'])
             from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
@@ -89,7 +92,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
                      common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
         with self.app.app_context():
@@ -112,7 +115,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
                      common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
         arguments[common.SCHEMA] = hed_schema
@@ -135,7 +138,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         with self.app.app_context():
             results = spreadsheet_validate(hed_schema, spreadsheet)
             self.assertFalse(results['data'],
@@ -154,7 +157,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         with self.app.app_context():
             results = spreadsheet_validate(hed_schema, spreadsheet)
             self.assertFalse(results['data'],
@@ -173,7 +176,7 @@ class Test(unittest.TestCase):
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
-                                      display_name=spreadsheet_path)
+                                      name=spreadsheet_path)
         with self.app.app_context():
             results = spreadsheet_validate(hed_schema, spreadsheet)
             self.assertTrue(results['data'],

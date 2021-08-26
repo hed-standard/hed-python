@@ -1,12 +1,12 @@
 import json
-from hed.models.column_definition import ColumnDef
+from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_types import ErrorContext
 from hed.errors import error_reporter
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.models.hed_string import HedString
 
 
-class ColumnDefGroup:
+class Sidecar:
     """This stores column definitions for parsing hed spreadsheets, generally loaded from a single json file."""
     def __init__(self, file, name=None):
         """
@@ -19,19 +19,19 @@ class ColumnDefGroup:
         name: str or None
             Optional name to identify this group.  Generally a filename.
         """
-        self._column_settings = {}
+        self._column_data = {}
         self.name = name
         if file:
-            self.add_json_file_defs(file)
+            self.add_sidecar_file(file)
 
     def __iter__(self):
         """
             Creates an iterator to go over the individual column definitions
         Returns
         -------
-        column_defs: iterator
+        column_data: iterator
         """
-        return iter(self._column_settings.values())
+        return iter(self._column_data.values())
 
     def save_as_json(self, save_filename):
         """
@@ -42,7 +42,7 @@ class ColumnDefGroup:
             Path to save file
         """
         output_dict = {}
-        for entry in self._column_settings.values():
+        for entry in self._column_data.values():
             output_dict[entry.column_name] = entry.hed_dict
         with open(save_filename, "w") as fp:
             json.dump(output_dict, fp, indent=4)
@@ -56,14 +56,14 @@ class ColumnDefGroup:
             The json string representing this column definition group.
         """
         output_dict = {}
-        for entry in self._column_settings.values():
+        for entry in self._column_data.values():
             output_dict[entry.column_name] = entry.hed_dict
         return json.dumps(output_dict, indent=4)
 
-    def add_json_file_defs(self, file):
+    def add_sidecar_file(self, file):
         """
             Loads column definitions from a given json file.
-            You can load multiple files into one ColumnDefGroup, but it is discouraged.
+            You can load multiple files into one Sidecar, but it is discouraged.
 
         Parameters
         ----------
@@ -105,7 +105,7 @@ class ColumnDefGroup:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name)
 
     @staticmethod
-    def load_multiple_json_files(json_file_input_list):
+    def load_multiple_sidecars(json_file_input_list):
         """
             Utility function for easily loading multiple json files at once
             This takes a list of filenames or ColumnDefinitionGroups and returns a list of ColumnDefinitionGroups.
@@ -118,7 +118,7 @@ class ColumnDefGroup:
             A list of filenames or loaded files in any mix
         Returns
         -------
-        column_def_groups: [ColumnDefinitionGroup]
+        sidecars: [Sidecar]
             A list of all input files, loaded into column definition groups if needed.
         """
         if not isinstance(json_file_input_list, list):
@@ -127,7 +127,7 @@ class ColumnDefGroup:
         loaded_files = []
         for json_file in json_file_input_list:
             if isinstance(json_file, str):
-                json_file = ColumnDefGroup(json_file)
+                json_file = Sidecar(json_file)
             loaded_files.append(json_file)
         return loaded_files
 
@@ -150,7 +150,7 @@ class ColumnDefGroup:
         position: tuple, optional
             Indicates where hed_string was loaded from so it can be later set by the user
         """
-        for key, entry in self._column_settings.items():
+        for key, entry in self._column_data.items():
             for hed_string in entry.hed_string_iter(include_position):
                 if include_position:
                     yield hed_string[0], (key, hed_string[1])
@@ -168,7 +168,7 @@ class ColumnDefGroup:
             This should only be a value returned from hed_string_iter
         """
         column_name, position = position
-        entry = self._column_settings[column_name]
+        entry = self._column_data[column_name]
         entry.set_hed_string(new_hed_string, position)
 
     def _add_single_col_type(self, column_name, dict_for_entry, column_type=None):
@@ -184,8 +184,8 @@ class ColumnDefGroup:
         column_type : ColumnType, optional
             How it should treat this column.  This overrides auto detection from the dict_for_entry.
         """
-        column_entry = ColumnDef(column_type, column_name, dict_for_entry)
-        self._column_settings[column_name] = column_entry
+        column_entry = ColumnMetadata(column_type, column_name, dict_for_entry)
+        self._column_data[column_name] = column_entry
 
     def validate_entries(self, hed_schema=None, name=None, error_handler=None):
         """Validate the column entries, and also hed strings in the column entries if a hed_schema is passed.

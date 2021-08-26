@@ -6,6 +6,8 @@ from flask import Response
 from werkzeug.datastructures import FileStorage
 from hedweb.app_factory import AppFactory
 from hedweb.constants import common
+import sys
+sys.path.append('hedtools')
 
 
 class Test(unittest.TestCase):
@@ -14,6 +16,8 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
+            from hed import schema as hedschema
+            hedschema.set_cache_directory(app.config['HED_CACHE_FOLDER'])
             from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
@@ -160,12 +164,12 @@ class Test(unittest.TestCase):
                           common.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
-                            'dictionary_submit validate should return a response object when invalid dictionary')
+                            'spreadsheet_submit validate should return a response object when invalid spreadsheet')
             self.assertEqual(200, response.status_code,
-                             'Validation of an invalid dictionary to short has a valid status code')
+                             'Validation of an invalid spreadsheet to short has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("warning", headers_dict["Category"],
-                             "Validation of an invalid dictionary to short generates a warning")
+                             "Validation of an invalid spreadsheet to short generates a warning")
             self.assertTrue(response.data,
                             "The response data for invalid validation should have error messages")
             spreadsheet_buffer.close()

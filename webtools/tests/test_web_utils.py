@@ -4,6 +4,8 @@ import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request, Response
 from hedweb.app_factory import AppFactory
+import sys
+sys.path.append('hedtools')
 
 
 class Test(unittest.TestCase):
@@ -12,6 +14,8 @@ class Test(unittest.TestCase):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
+            from hed import schema as hedschema
+            hedschema.set_cache_directory(app.config['HED_CACHE_FOLDER'])
             from hedweb.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
@@ -102,11 +106,11 @@ class Test(unittest.TestCase):
             from hedweb.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelOneSheet.xlsx')
 
-            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
+            spreadsheet = HedInput(file=spreadsheet_path, file_type='.xlsx',
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
-                                   display_name='ExcelOneSheet.xlsx')
+                                   name='ExcelOneSheet.xlsx')
             results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for xlsx files')
@@ -124,11 +128,11 @@ class Test(unittest.TestCase):
             from hedweb.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelOneSheet.xlsx')
 
-            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.xlsx',
+            spreadsheet = HedInput(file=spreadsheet_path, file_type='.xlsx',
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
-                                   display_name='ExcelOneSheet.xlsx')
+                                   name='ExcelOneSheet.xlsx')
             results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
@@ -147,11 +151,11 @@ class Test(unittest.TestCase):
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                             'data/LKTEventCodesHED3.tsv')
 
-            spreadsheet = HedInput(filename=spreadsheet_path, file_type='.tsv',
+            spreadsheet = HedInput(file=spreadsheet_path, file_type='.tsv',
                                    tag_columns=[5], has_column_names=True,
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
-                                   display_name='LKTEventCodesHED3.tsv')
+                                   name='LKTEventCodesHED3.tsv')
             results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'LKTEventCodesHED3.tsv'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')

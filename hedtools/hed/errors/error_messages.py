@@ -110,6 +110,16 @@ def val_error_no_value(tag):
     return f"''{tag}' has an invalid value portion.", {}
 
 
+@hed_error(ValidationErrors.HED_MISSING_COLUMN)
+def val_error_missing_column(missing_column_name):
+    return f"Required column '{missing_column_name}' not specified or found in file.", {}
+
+
+@hed_tag_error(ValidationErrors.HED_UNKNOWN_PREFIX)
+def val_error_unknown_prefix(tag, unknown_prefix, known_prefixes):
+    return f"Tag '{tag} has unknown prefix '{unknown_prefix}'.  Valid prefixes: {known_prefixes}", {}
+
+
 @hed_tag_error(ValidationErrors.HED_NODE_NAME_EMPTY, has_sub_tag=True)
 def val_error_extra_slashes_spaces(tag, problem_tag):
     return f"Extra slashes or spaces '{problem_tag}' in tag '{tag}'", {}

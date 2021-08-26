@@ -1,8 +1,8 @@
 import unittest
 import os
 
-from hed.models.column_def_group import ColumnDefGroup
-from hed.models.column_definition import ColumnDef
+from hed.models.sidecar import Sidecar
+from hed.models.column_metadata import ColumnMetadata
 from hed.errors.exceptions import HedFileError
 from hed import schema
 import io
@@ -17,34 +17,34 @@ class Test(unittest.TestCase):
         cls.json_filename = os.path.join(cls.base_data_dir, "both_types_events.json")
         cls.json_def_filename = os.path.join(cls.base_data_dir, "both_types_events_with_defs.json")
         cls.json_errors_filename = os.path.join(cls.base_data_dir, "json_errors.json")
-        cls.default_sidecar = ColumnDefGroup(cls.json_filename)
-        cls.json_def_sidecar = ColumnDefGroup(cls.json_def_filename)
-        cls.errors_sidecar = ColumnDefGroup(cls.json_errors_filename)
+        cls.default_sidecar = Sidecar(cls.json_filename)
+        cls.json_def_sidecar = Sidecar(cls.json_def_filename)
+        cls.errors_sidecar = Sidecar(cls.json_errors_filename)
 
     def test_invalid_filenames(self):
         # Handle missing or invalid files.
         invalid_json = "invalidxmlfile.json"
-        self.assertRaises(HedFileError, ColumnDefGroup, invalid_json)
+        self.assertRaises(HedFileError, Sidecar, invalid_json)
 
         json_dict = None
         try:
-            json_dict = ColumnDefGroup(None)
+            json_dict = Sidecar(None)
         except HedFileError as e:
             pass
-        self.assertTrue(len(json_dict._column_settings) == 0)
+        self.assertTrue(len(json_dict._column_data) == 0)
 
         json_dict = None
         try:
-            json_dict = ColumnDefGroup("")
+            json_dict = Sidecar("")
         except HedFileError as e:
             pass
-        self.assertTrue(len(json_dict._column_settings) == 0)
+        self.assertTrue(len(json_dict._column_data) == 0)
 
     def test_name(self):
         invalid_json = "invalidxmlfile.json"
         name = "PrettyDisplayName.json"
         try:
-            json_dict = ColumnDefGroup(invalid_json)
+            json_dict = Sidecar(invalid_json)
             self.assertTrue(False)
         except HedFileError as e:
             self.assertTrue(name in e.format_error_message(return_string_only=True,
@@ -53,24 +53,24 @@ class Test(unittest.TestCase):
     def test_add_json_string(self):
         with open(self.json_filename) as file:
             file_as_string = io.StringIO(file.read())
-            json_file = ColumnDefGroup(file_as_string)
+            json_file = Sidecar(file_as_string)
             self.assertTrue(json_file)
 
     def test__iter__(self):
         columns_target = 3
         columns_count = 0
-        for column_def in self.default_sidecar:
-            self.assertIsInstance(column_def, ColumnDef)
+        for column_data in self.default_sidecar:
+            self.assertIsInstance(column_data, ColumnMetadata)
             columns_count += 1
 
         self.assertEqual(columns_target, columns_count)
 
     # def save_as_json(self, save_filename):
     #
-    # def add_json_file_defs(self, json_filename):
+    # def add_sidecars(self, json_filename):
     #
     # @staticmethod
-    # def load_multiple_json_files(json_file_input_list):
+    # def load_multiple_sidecars(json_file_input_list):
     #
     # def hed_string_iter(self, include_position=False):
     #

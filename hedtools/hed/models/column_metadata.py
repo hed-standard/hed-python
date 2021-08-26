@@ -24,8 +24,8 @@ class ColumnType(Enum):
     Attribute = "attribute"
 
 
-class ColumnDef:
-    """A single column in either the ColumnMapper or ColumnDefGroup"""
+class ColumnMetadata:
+    """A single column in either the ColumnMapper or Sidecar"""
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None,
                  error_handler=None):
         """
@@ -47,7 +47,7 @@ class ColumnDef:
             Used to report errors.  Uses a default one if none passed in.
         """
         if column_type is None or column_type == ColumnType.Unknown:
-            column_type = ColumnDef._detect_column_def_type(hed_dict)
+            column_type = ColumnMetadata._detect_column_type(hed_dict)
 
         if hed_dict is None:
             hed_dict = {}
@@ -257,7 +257,7 @@ class ColumnDef:
         return current_tag_text
 
     @staticmethod
-    def _detect_column_def_type(dict_for_entry):
+    def _detect_column_type(dict_for_entry):
         """
         Determines the ColumnType of a given json entry.
 
@@ -341,7 +341,9 @@ class ColumnDef:
                     error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
                                                      increment_depth_after=False)
                     if def_mapper:
-                        col_validation_issues += def_mapper.replace_and_remove_tags(hed_string_obj, expand_defs=False)
+                        def_issues = def_mapper.replace_and_remove_tags(hed_string_obj, expand_defs=False)
+                        for issue in def_issues:
+                            col_validation_issues += error_handler.format_error(**issue)
                     if event_validator:
                         col_validation_issues += event_validator.validate_input(hed_string_obj)
                     col_validation_issues += self._validate_pound_sign_count(hed_string_obj, error_handler)
