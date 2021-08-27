@@ -1,33 +1,17 @@
 import os
-import shutil
 import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
 
+from hedweb.tests.test_web_base import TestWebBase
 from hed import schema as hedschema
 from hed import models
 from hed.errors.exceptions import HedFileError
 from hedweb.constants import common
-from hedweb.app_factory import AppFactory
 
 
-class Test(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
-        app = AppFactory.create_app('config.TestConfig')
-        with app.app_context():
-            from hedweb.routes import route_blueprint
-            app.register_blueprint(route_blueprint)
-            if not os.path.exists(cls.upload_directory):
-                os.mkdir(cls.upload_directory)
-            app.config['UPLOAD_FOLDER'] = cls.upload_directory
-            cls.app = app
-            cls.app.test = app.test_client()
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.upload_directory)
+class Test(TestWebBase):
+    cache_schemas = True
 
     def test_get_input_from_events_form_empty(self):
         from hedweb.events import get_input_from_events_form
@@ -40,8 +24,8 @@ class Test(unittest.TestCase):
         from hed.schema import HedSchema
         from hedweb.events import get_input_from_events_form
         with self.app.test:
-            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
-            events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_alpha.json')
+            events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
             with open(json_path, 'rb') as fp:
                 with open(events_path, 'rb') as fpe:
                     environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0-alpha.1',

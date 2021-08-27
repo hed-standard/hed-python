@@ -1,30 +1,11 @@
 import os
-import shutil
 import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
+from hedweb.tests.test_web_base import TestWebBase
 
-from hedweb.app_factory import AppFactory
 
-
-class Test(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
-        app = AppFactory.create_app('config.TestConfig')
-        with app.app_context():
-            from hedweb.routes import route_blueprint
-            app.register_blueprint(route_blueprint)
-            if not os.path.exists(cls.upload_directory):
-                os.mkdir(cls.upload_directory)
-            app.config['UPLOAD_FOLDER'] = cls.upload_directory
-            cls.app = app
-            cls.app.test = app.test_client()
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.upload_directory)
-
+class Test(TestWebBase):
     def test_generate_input_from_schema_form_empty(self):
         from hedweb.schema import get_input_from_schema_form
         self.assertRaises(TypeError, get_input_from_schema_form, {},
@@ -35,7 +16,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         from hedweb.schema import get_input_from_schema_form
         with self.app.test:
-            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/HED8.0.0-beta.4.xml')
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
             with open(schema_path, 'rb') as fp:
                 environ = create_environ(data={common.SCHEMA_FILE: fp,
                                                common.SCHEMA_UPLOAD_OPTIONS: common.SCHEMA_FILE_OPTION,
