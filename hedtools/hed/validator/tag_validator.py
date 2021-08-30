@@ -26,7 +26,8 @@ class TagValidator:
     DATE_TIME_VALUE_CLASS = 'dateTime'
     NUMERIC_VALUE_CLASS = "numericClass"
 
-    DEFAULT_ALLOWED_PLACEHOLDER_CHARS = ".+-^ _"
+    # # sign is allowed by default as it is specifically checked for separately.
+    DEFAULT_ALLOWED_PLACEHOLDER_CHARS = ".+-^ _#"
     TAG_ALLOWED_CHARS = "-_/"
 
     def __init__(self, hed_schema=None, check_for_warnings=False, run_semantic_validation=True,
@@ -117,6 +118,7 @@ class TagValidator:
             elif original_tag.extension_or_value_portion:
                 validation_issues += self.check_for_invalid_extension_chars(original_tag)
 
+            validation_issues += self.check_for_placeholder(original_tag)
             validation_issues += self.check_tag_requires_child(original_tag)
         if self._check_for_warnings:
             validation_issues += self.check_capitalization(original_tag)
@@ -332,7 +334,6 @@ class TagValidator:
                     validation_issues += self._error_handler.format_error(ValidationErrors.HED_UNITS_INVALID,
                                                                           original_tag,
                                                                           unit_class_units=tag_unit_class_units)
-            validation_issues += self._check_for_placeholder(original_tag)
         return validation_issues
 
     def check_tag_value_class_valid(self, original_tag):
@@ -352,7 +353,6 @@ class TagValidator:
             validation_issues += self._error_handler.format_error(ValidationErrors.HED_VALUE_INVALID,
                                                                   original_tag)
 
-        validation_issues += self._check_for_placeholder(original_tag)
         return validation_issues
 
     def _validate_value_class_portion(self, original_tag, portion_to_validate):
@@ -375,12 +375,8 @@ class TagValidator:
 
         valid_func = self.VALUE_CLASS_TYPE_DICT.get(value_class)
         if valid_func:
-            if valid_func(portion_to_validate):
-                return True
-        else:
-            return True
-
-        return False
+            return valid_func(portion_to_validate)
+        return True
 
     def check_tag_requires_child(self, original_tag):
         """Reports a validation error if the tag provided has the 'requireChild' attribute.
@@ -436,8 +432,6 @@ class TagValidator:
         """
         allowed_chars = self.TAG_ALLOWED_CHARS
         allowed_chars += self.DEFAULT_ALLOWED_PLACEHOLDER_CHARS
-        if self._placeholders_allowed_in_strings:
-            allowed_chars += "#"
         allowed_chars += " "
         return self._check_invalid_chars(original_tag.extension_or_value_portion, allowed_chars, original_tag,
                                          starting_index=len(original_tag.org_base_tag) + 1)
@@ -695,7 +689,7 @@ class TagValidator:
         """
         return character == TagValidator.COMMA
 
-    def _check_for_placeholder(self, original_tag):
+    def check_for_placeholder(self, original_tag):
         """
             Checks for a placeholder character in the extension/value portion of a tag, unless they are allowed.
 
@@ -720,7 +714,7 @@ class TagValidator:
 
         return validation_issues
 
-    def _check_invalid_chars(self, check_string, allowed_chars, source_tag, starting_index=0, actual_error=None):
+    def _check_invalid_chars(self, check_string, allowed_chars, source_tag, starting_index=0):
         validation_issues = []
         for i, character in enumerate(check_string):
             if character.isalnum():
@@ -732,7 +726,6 @@ class TagValidator:
                 continue
             validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
                                                                   tag=source_tag, index_in_tag=starting_index + i,
-                                                                  index_in_tag_end=starting_index + i + 1,
-                                                                  actual_error=actual_error)
+                                                                  index_in_tag_end=starting_index + i + 1)
         return validation_issues
 
