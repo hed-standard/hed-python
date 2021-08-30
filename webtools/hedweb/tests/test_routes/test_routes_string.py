@@ -1,33 +1,10 @@
-import os
 import json
-import shutil
 import unittest
-from hedweb.app_factory import AppFactory
+from hedweb.tests.test_web_base import TestWebBase
 from hedweb.constants import common
-import sys
-sys.path.append('hedtools')
 
 
-class Test(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/upload')
-        app = AppFactory.create_app('config.TestConfig')
-        with app.app_context():
-            from hed import schema as hedschema
-            hedschema.set_cache_directory(app.config['HED_CACHE_FOLDER'])
-            from hedweb.routes import route_blueprint
-            app.register_blueprint(route_blueprint)
-            if not os.path.exists(cls.upload_directory):
-                os.mkdir(cls.upload_directory)
-            app.config['UPLOAD_FOLDER'] = cls.upload_directory
-            app.config['WTF_CSRF_ENABLED'] = False
-            cls.app = app
-            cls.app.test = app.test_client()
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.upload_directory)
+class Test(TestWebBase):
 
     def test_string_results_empty_data(self):
         response = self.app.test.post('/string_submit')
