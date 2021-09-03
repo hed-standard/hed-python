@@ -10,8 +10,9 @@ import tempfile
 
 
 class Config(object):
+    BASE_DIRECTORY = os.getcwd()
     # Folder the program stores hed cache, log, etc.  Make sure the program has access to this directory.
-    BASE_DIRECTORY = '/path/to/base/folder'
+    #BASE_DIRECTORY = '/path/to/base/folder'
     LOG_DIRECTORY = os.path.join(BASE_DIRECTORY, 'log')
     os.makedirs(LOG_DIRECTORY, exist_ok=True)
     LOG_FILE = os.path.join(LOG_DIRECTORY, 'error.log')
