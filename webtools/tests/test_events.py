@@ -40,11 +40,11 @@ class Test(unittest.TestCase):
         from hed.schema import HedSchema
         from hedweb.events import get_input_from_events_form
         with self.app.test:
-            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.json')
             events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
             with open(json_path, 'rb') as fp:
                 with open(events_path, 'rb') as fpe:
-                    environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                    environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0',
                                              common.EVENTS_FILE: fpe, common.DEFS_EXPAND: 'on',
                                              common.COMMAND_OPTION: common.COMMAND_ASSEMBLE})
             request = Request(environ)
@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
         from hedweb.events import events_process
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
@@ -102,7 +102,7 @@ class Test(unittest.TestCase):
         from hedweb.events import events_assemble
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar,name='bids_events')
@@ -137,7 +137,7 @@ class Test(unittest.TestCase):
             self.assertEqual('warning', results["msg_category"],
                              'events_validate msg_category should be warning when errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():

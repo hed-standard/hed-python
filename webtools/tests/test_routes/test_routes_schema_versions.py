@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
             with open(schema_path, 'r') as sc:
                 x = sc.read()
             y = io.BytesIO(bytes(x, 'utf-8'))
-            the_file = FileStorage(stream=y, filename='HED8.0.0-beta.4.xml')
+            the_file = FileStorage(stream=y, filename='HED8.0.0.xml')
             data = {'schema_path': the_file}
             response = self.app.test.post('/schema_version', content_type='multipart/form-data', data=data)
             self.assertEqual(200, response.status_code, 'The HED version list does not require data')

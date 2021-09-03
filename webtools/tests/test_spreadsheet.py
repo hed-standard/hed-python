@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
         from hedweb.spreadsheet import get_input_from_spreadsheet_form
         with self.app.test:
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/ExcelOneSheet.xlsx')
-            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/HED8.0.0-beta.4.xml')
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/HED8.0.0.xml')
             with open(spreadsheet_path, 'rb') as fp:
                 with open(schema_path, 'rb') as sp:
                     environ = create_environ(data={common.SPREADSHEET_FILE: fp,
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
     def test_spreadsheet_process_validate_invalid(self):
         from hedweb.spreadsheet import spreadsheet_process
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4: "Event/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
@@ -146,9 +146,9 @@ class Test(unittest.TestCase):
     def test_spreadsheet_validate_valid_excel1(self):
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        prefix_dict = {2: "Attribute/Informational/Label/", 4: "Attribute/Informational/Description/"}
+        prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
                                       worksheet_name='LKT 8HED3',
                                       tag_columns=[5],
@@ -167,7 +167,7 @@ class Test(unittest.TestCase):
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        prefix_dict = {2: "Attribute/Informational/Label/", 4: "Attribute/Informational/Description/"}
+        prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
                                       worksheet_name='LKT 8HED3',
                                       tag_columns=[5],

@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
         from hedweb.strings import string_convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        string_list = ['Attribute/Informational/Description/Blech, Blue']
+        string_list = ['Property/Informational-property/Description/Blech, Blue']
         with self.app.app_context():
             results = string_convert(hed_schema, string_list, common.COMMAND_TO_SHORT)
             data = results['data']

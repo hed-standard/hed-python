@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
             spreadsheet_buffer = io.BytesIO(bytes(x))
             myFile = FileStorage(stream=spreadsheet_buffer, filename='ExcelMultipleSheets.xlsx',
                                  content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
+            input_data = {common.SCHEMA_VERSION: '8.0.0',
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
                           common.WORKSHEET_NAME: 'LKT Events',
                           common.WORKSHEET_SELECTED: 'LKT Events',

@@ -6,20 +6,25 @@
 {% block content %}
     <h2>Process BIDS-style JSON sidecar</h2>
     <p>
-        <i>Upload a BIDS-style JSON events metadata file, select a HED schema, pick an action, and press Process.<br>
+        <i>Pick an action.<br/>
+            Upload a BIDS-style JSON events metadata file.<br/>
+            Select a HED schema.<br/>
+            Press Process.<br/>
         You will see a downloadable results file and/or a status message.
         </i>
     </p>
 
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="sidecar_form" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        {{ create_process_options(to_long=True,to_short=True,validate=True) }}
+
 
         <div class="form-group">
 
             {{ create_json_input() }}
             {{ create_schema_pulldown() }}
-            {{ create_process_options(to_long=True,to_short=True,validate=True) }}
 
             <div class="form-group">
                 <button id="sidecar_submit" type="button">Process</button>

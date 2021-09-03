@@ -93,7 +93,7 @@ class Test(unittest.TestCase):
             results = response['results']
             self.assertEqual('success', results['msg_category'],
                              "sidecar_validation services has success on bids_events.json")
-            self.assertEqual('8.0.0-beta.4', results[common.SCHEMA_VERSION], 'Version 8.0.0 was used')
+            self.assertEqual('8.0.0', results[common.SCHEMA_VERSION], 'Version 8.0.0 was used')
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml/HED7.2.0.xml'

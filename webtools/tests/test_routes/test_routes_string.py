@@ -35,8 +35,8 @@ class Test(unittest.TestCase):
 
     def test_string_results_to_long(self):
         with self.app.app_context():
-            test_string = 'Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red'
-            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
+            test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
+            input_data = {common.SCHEMA_VERSION: '8.0.0',
                           common.COMMAND_OPTION: 'command_to_long',
                           common.CHECK_FOR_WARNINGS: 'on',
                           common.STRING_INPUT: test_string}
@@ -66,8 +66,8 @@ class Test(unittest.TestCase):
 
     def test_string_results_to_short(self):
         with self.app.app_context():
-            test_string = 'Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red'
-            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
+            test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
+            input_data = {common.SCHEMA_VERSION: '8.0.0',
                           common.COMMAND_OPTION: 'command_to_short',
                           common.CHECK_FOR_WARNINGS: 'on',
                           common.STRING_INPUT: test_string}
@@ -98,7 +98,7 @@ class Test(unittest.TestCase):
     def test_string_results_validate(self):
         with self.app.app_context():
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
-                                          data={common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                                          data={common.SCHEMA_VERSION: '8.0.0',
                                                 common.COMMAND_OPTION: 'command_validate',
                                                 common.CHECK_FOR_WARNINGS: 'on',
                                                 common.STRING_INPUT: 'Red,Blue,Label/3'})
@@ -109,7 +109,7 @@ class Test(unittest.TestCase):
             self.assertFalse(response_dict["data"], "No data should be returned if validation successful")
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
-                                          data={common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                                          data={common.SCHEMA_VERSION: '8.0.0',
                                                 common.COMMAND_OPTION: 'command_validate',
                                                 common.CHECK_FOR_WARNINGS: 'on',
                                                 common.STRING_INPUT: 'Blob,Blue,Label/3'})

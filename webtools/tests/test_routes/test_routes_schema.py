@@ -195,7 +195,7 @@ class Test(unittest.TestCase):
             self.assertEqual("success", headers_dict["Category"],
                              "The valid xml url should convert to mediawiki successfully")
             self.assertTrue(response.data, "The converted xml url schema should not be empty")
-            self.assertEqual('attachment filename=HED8.0.0-alpha.2.mediawiki',
+            self.assertEqual('attachment filename=HED8.0.0.mediawiki',
                              headers_dict['Content-Disposition'], "Conversion of valid xml url should return mediawiki")
 
     def test_schema_results_validate_mediawiki_invalid(self):
@@ -329,7 +329,7 @@ class Test(unittest.TestCase):
 
     def test_schema_results_validate_xml_url_valid(self):
         schema_url = \
-            'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0-alpha.2.xml'
+            'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml'
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_url_option',
                           'command_option': 'command_validate',
