@@ -21,7 +21,6 @@ class TestHedSchema(unittest.TestCase):
         cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g_xml)
         cls.hed_wiki_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g)
         cls.hed_schema_3g = schema.load_schema(cls.hed_wiki_3g)
-        cls.hed_schema_dictionaries = cls.hed_schema.dictionaries
 
     def test_invalid_schema(self):
         # Handle missing or invalid files.
@@ -140,7 +139,7 @@ class TestHedSchema(unittest.TestCase):
             'volume': ['m^3'],
         }
         actual_default_units_dictionary = self.hed_schema_dictionaries[HedKey.DefaultUnits]
-        actual_all_units_dictionary = self.hed_schema_dictionaries[HedKey.UnitClasses]
+        actual_all_units_dictionary = self.hed_schema_dictionaries[HedSectionKey.UnitClasses]
         self.assertDictEqual(actual_default_units_dictionary, default_units)
         self.assertDictEqual(actual_all_units_dictionary, all_units)
 
@@ -176,7 +175,6 @@ class TestHedSchema(unittest.TestCase):
                 'recommended': False,
                 'required': False,
                 'requireChild': False,
-                'tags': True,
                 'takesValue': True,
                 'unique': False,
                 'unitClass': True,
@@ -191,7 +189,6 @@ class TestHedSchema(unittest.TestCase):
                 'recommended': False,
                 'required': False,
                 'requireChild': True,
-                'tags': True,
                 'takesValue': False,
                 'unique': False,
                 'unitClass': False,
@@ -206,7 +203,6 @@ class TestHedSchema(unittest.TestCase):
                 'recommended': False,
                 'required': False,
                 'requireChild': False,
-                'tags': True,
                 'takesValue': False,
                 'unique': False,
                 'unitClass': False,
@@ -242,7 +238,7 @@ class TestHedSchema(unittest.TestCase):
         desc = self.hed_schema.get_tag_description("Event/Category")
         self.assertEqual(desc, "This is meant to designate the reason this event was recorded")
         # Test known unit modifier
-        desc = self.hed_schema.get_tag_description("deca", HedKey.UnitModifiers)
+        desc = self.hed_schema.get_tag_description("deca", HedSectionKey.UnitModifiers)
         self.assertEqual(desc, "SI unit multiple representing 10^1")
 
         # test unknown tag.

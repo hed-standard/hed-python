@@ -135,12 +135,12 @@ def val_error_def_unmatched(tag):
     return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'", {}
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.HED_DEF_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.HED_DEF_VALUE_INVALID)
 def val_error_def_value_missing(tag):
     return f"A def tag requires a placeholder value, but was not given one.  Definition: '{tag}'", {}
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.HED_DEF_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.HED_DEF_VALUE_INVALID)
 def val_error_def_value_extra(tag):
     return f"A def tag does not take a placeholder value, but was given one.  Definition: '{tag}", {}
 

@@ -1,7 +1,7 @@
 """Allows output of HedSchema objects as .mediawiki format"""
 import copy
 
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema import wiki_constants
 
 
@@ -94,15 +94,16 @@ class HedSchema2Wiki:
 
         self.current_tag_string += wiki_constants.UNIT_CLASS_STRING
         self._flush_current_tag()
-        for unit_name, unit_types in hed_schema.dictionaries[HedKey.UnitClasses].items():
-            self.current_tag_string += f"* {unit_name}"
-            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_name, HedKey.UnitClasses)
+        for unit_class, unit_entry in hed_schema._sections[HedSectionKey.UnitClasses].all_names.items():
+            unit_types = unit_entry.value
+            self.current_tag_string += f"* {unit_class}"
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_class, HedSectionKey.UnitClasses)
             self._flush_current_tag()
 
             for unit_type in unit_types:
                 self.current_tag_string += f"** {unit_type}"
                 self.current_tag_extra += self._format_props_and_desc(
-                    hed_schema, unit_type, HedKey.Units)
+                    hed_schema, unit_type, HedSectionKey.Units)
                 self._flush_current_tag()
 
         self._add_blank_line()
@@ -112,10 +113,10 @@ class HedSchema2Wiki:
             return
         self.current_tag_string += wiki_constants.UNIT_MODIFIER_STRING
         self._flush_current_tag()
-        for modifier_name in hed_schema.dictionaries[HedKey.UnitModifiers]:
+        for modifier_name in hed_schema._sections[HedSectionKey.UnitModifiers].all_names:
             self.current_tag_string += f"* {modifier_name}"
             self.current_tag_extra += self._format_props_and_desc(
-                hed_schema, modifier_name, HedKey.UnitModifiers)
+                hed_schema, modifier_name, HedSectionKey.UnitModifiers)
             self._flush_current_tag()
 
     def _output_value_classes(self, hed_schema):
@@ -124,28 +125,28 @@ class HedSchema2Wiki:
         self._add_blank_line()
         self.current_tag_string += wiki_constants.VALUE_CLASS_STRING
         self._flush_current_tag()
-        for value_name in hed_schema.dictionaries[HedKey.ValueClasses]:
+        for value_name in hed_schema._sections[HedSectionKey.ValueClasses].all_names:
             self.current_tag_string += f"* {value_name}"
             self.current_tag_extra += self._format_props_and_desc(
-                hed_schema, value_name, HedKey.ValueClasses)
+                hed_schema, value_name, HedSectionKey.ValueClasses)
             self._flush_current_tag()
 
     def _output_attributes(self, hed_schema):
         self._add_blank_line()
         self.current_tag_string += wiki_constants.ATTRIBUTE_DEFINITION_STRING
         self._flush_current_tag()
-        for attribute_name in hed_schema.dictionaries[HedKey.Attributes]:
+        for attribute_name in hed_schema._sections[HedSectionKey.Attributes].all_names:
             self.current_tag_string += f"* {attribute_name}"
-            self.current_tag_extra += self._format_props_and_desc(hed_schema, attribute_name, HedKey.Attributes)
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, attribute_name, HedSectionKey.Attributes)
             self._flush_current_tag()
 
     def _output_properties(self, hed_schema):
         self._add_blank_line()
         self.current_tag_string += wiki_constants.ATTRIBUTE_PROPERTY_STRING
         self._flush_current_tag()
-        for prop_name in hed_schema.dictionaries[HedKey.Properties]:
+        for prop_name in hed_schema._sections[HedSectionKey.Properties].all_names:
             self.current_tag_string += f"* {prop_name}"
-            self.current_tag_extra += self._format_props_and_desc(hed_schema, prop_name, HedKey.Properties)
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, prop_name, HedSectionKey.Properties)
             self._flush_current_tag()
 
     def _flush_current_tag(self):
@@ -162,7 +163,7 @@ class HedSchema2Wiki:
         self.output.append("")
 
     # Should this be a function?
-    def _format_props_and_desc(self, hed_schema, tag_name, key_class=HedKey.AllTags):
+    def _format_props_and_desc(self, hed_schema, tag_name, key_class=HedSectionKey.AllTags):
         prop_string = ""
         tag_props = hed_schema.get_all_tag_attributes(tag_name, key_class=key_class)
         if tag_props:
