@@ -1,9 +1,7 @@
 
-class HedKey:
+class HedSectionKey:
     """
-        Used to access the hed schema dictionaries
-
-        These names should match the attribute values in the XML/wiki.
+    Used to get at a specific section in a HedSchema object.
     """
     # overarching category listing all tags
     AllTags = 'tags'
@@ -20,6 +18,13 @@ class HedKey:
     # These are the allowed attribute property list, gathered from the schema on load.
     Properties = 'properties'
 
+
+class HedKey:
+    """
+        Known property and attribute names.  These should directly match what's in the file.
+
+        These names should match the attribute values in the XML/wiki.
+    """
     # Tag attributes
     ExtensionAllowed = 'extensionAllowed'
     # On opening, the extension allowed attribute is propagated down to child tags.
@@ -44,8 +49,6 @@ class HedKey:
     UnitModifierProperty = 'unitModifierProperty'
     ValueClassProperty = 'valueClassProperty'
 
-    # Attributes found in file, but not definitions
-    UnknownAttributes = 'unknownAttributes'
 
     SIUnit = 'SIUnit'
     UnitSymbol = 'unitSymbol'
@@ -56,16 +59,8 @@ class HedKey:
     SIUnitModifier = 'SIUnitModifier'
     SIUnitSymbolModifier = 'SIUnitSymbolModifier'
 
+    # value class attributes
     AllowedCharacter = 'allowedCharacter'
-
-    # for normal tags, the key to this is the full tag name.
-    # For unit modifiers and such, prefix the tag with the appropriate HedKey.
-    # eg. dictionaries[HedKey.Descriptions][HedKey.UnitModifiers + 'm']
-    Descriptions = 'descriptions'
-
-    # If this is a valid HED3 spec, this allows mapping from short to long.
-    # this is in dictionaries, not tag dictionaries.
-    ShortTags = 'shortTags'
 
 
 VERSION_ATTRIBUTE = 'version'

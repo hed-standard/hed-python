@@ -2,9 +2,9 @@
 This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema import HedSchema
+from hed.schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema import wiki_constants
 
@@ -267,6 +267,7 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
+        self._schema._initialize_attributes(HedSectionKey.AllTags)
         parent_tags = []
         for line in lines:
             if line.startswith(wiki_constants.ROOT_TAG):
@@ -288,6 +289,8 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
+        self._schema._initialize_attributes(HedSectionKey.UnitClasses)
+        self._schema._initialize_attributes(HedSectionKey.Units)
         current_unit_class = ""
 
         for line in lines:
@@ -297,11 +300,11 @@ class HedSchemaWikiParser:
             if level == 1:
                 current_unit_class = unit_class
                 self._schema._add_unit_class_unit(current_unit_class, None)
-                self._add_single_line(line, HedKey.UnitClasses, skip_adding_name=True)
+                self._add_single_line(line, HedSectionKey.UnitClasses, skip_adding_name=True)
             # This is a unit class unit
             else:
                 self._schema._add_unit_class_unit(current_unit_class, unit_class)
-                self._add_single_line(line, HedKey.Units, skip_adding_name=True)
+                self._add_single_line(line, HedSectionKey.Units, skip_adding_name=True)
 
     def _read_unit_modifiers(self, lines):
         """Adds the unit modifiers section
@@ -311,8 +314,9 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
+        self._schema._initialize_attributes(HedSectionKey.UnitModifiers)
         for line in lines:
-            self._add_single_line(line, HedKey.UnitModifiers)
+            self._add_single_line(line, HedSectionKey.UnitModifiers)
 
     def _read_value_classes(self, lines):
         """Adds the unit modifiers section
@@ -322,24 +326,23 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
+        self._schema._initialize_attributes(HedSectionKey.ValueClasses)
         for line in lines:
-            self._add_single_line(line, HedKey.ValueClasses)
+            self._add_single_line(line, HedSectionKey.ValueClasses)
 
     def _read_properties(self, lines):
+        # self._schema._initialize_attributes(HedSectionKey.Properties)
         for line in lines:
-            prop_name = self._get_tag_name(line)
-            prop_desc = self._get_tag_description(line)
-            self._schema._add_property_name_to_dict(prop_name, prop_desc)
+            self._add_single_line(line, HedSectionKey.Properties)
         self._schema.add_default_properties()
 
     def _read_attributes(self, lines):
+        self._schema._initialize_attributes(HedSectionKey.Attributes)
         self.attributes = {}
         for line in lines:
-            attribute_name = self._get_tag_name(line)
-
-            self._schema._add_attribute_name_to_dict(attribute_name)
-            self._add_single_line(line, HedKey.Attributes)
+            self._add_single_line(line, HedSectionKey.Attributes)
         self._schema.add_hed2_attributes()
+
 
     def _get_header_attributes(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
@@ -534,7 +537,7 @@ class HedSchemaWikiParser:
                 long_tag_name = "/".join(parent_tags) + "/" + tag_name
             else:
                 long_tag_name = tag_name
-            self._add_single_line(tag_line, HedKey.AllTags, long_tag_name)
+            self._add_single_line(tag_line, HedSectionKey.AllTags, long_tag_name)
 
         return tag_name
 
@@ -547,8 +550,10 @@ class HedSchemaWikiParser:
         node_desc = self._get_tag_description(tag_line)
         node_attributes = self._get_tag_attributes(tag_line)
         if not skip_adding_name:
-            self._schema._add_tag_to_dict(node_name, key_class, node_name)
-        self._schema._add_description_to_dict(node_name, node_desc, key_class)
+            self._schema._add_tag_to_dict(node_name, key_class)
+        tag_entry = self._schema._get_entry_for_tag(node_name, key_class)
+        if node_desc:
+            tag_entry.description = node_desc
 
         for attribute_name, attribute_value in node_attributes.items():
-            self._schema._add_attribute_to_dict(node_name, attribute_name, attribute_value, key_class)
+            tag_entry.set_attribute_value(attribute_name, attribute_value)

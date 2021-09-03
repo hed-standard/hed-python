@@ -1,7 +1,7 @@
 """Allows output of HedSchema objects as .xml format"""
 import copy
 from xml.etree.ElementTree import Element, SubElement
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema import xml_constants
 
 
@@ -70,10 +70,11 @@ class HedSchema2XML:
     def _output_units(self, hed_schema):
         if not hed_schema.has_unit_classes:
             return
-        unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.UnitClasses,
+        unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.UnitClasses,
                                                                                      self.save_as_legacy_format))
-        for unit_class, unit_types in hed_schema.dictionaries[HedKey.UnitClasses].items():
-            unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedKey.UnitClasses)
+        for unit_class, unit_entry in hed_schema._sections[HedSectionKey.UnitClasses].all_names.items():
+            unit_types = unit_entry.value
+            unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedSectionKey.UnitClasses)
             if self.save_as_legacy_format:
                 unit_class_node = SubElement(unit_class_node, xml_constants.UNIT_CLASS_UNITS_ELEMENT)
 
@@ -81,38 +82,38 @@ class HedSchema2XML:
                 # These units nodes are the only "special case" from the old schema where behavior differs.
                 if self.save_as_legacy_format:
                     unit_node = SubElement(unit_class_node, xml_constants.UNIT_CLASS_UNIT_ELEMENT)
-                    attributes = hed_schema.get_all_tag_attributes(unit_class_unit, key_class=HedKey.Units)
+                    attributes = hed_schema.get_all_tag_attributes(unit_class_unit, key_class=HedSectionKey.Units)
                     HedSchema2XML._add_tag_node_attributes_old_format(unit_node, attributes)
                     unit_node.text = unit_class_unit
                 else:
-                    self._add_node(hed_schema, unit_class_node, unit_class_unit, HedKey.Units,
+                    self._add_node(hed_schema, unit_class_node, unit_class_unit, HedSectionKey.Units,
                                    sub_node_name="unit")
 
     def _output_unit_modifiers(self, hed_schema):
         if not hed_schema.has_unit_modifiers:
             return
-        unit_modifier_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.UnitModifiers,
+        unit_modifier_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.UnitModifiers,
                                                                                       self.save_as_legacy_format))
-        for modifier_name in hed_schema.dictionaries[HedKey.UnitModifiers]:
-            self._add_node(hed_schema, unit_modifier_node, modifier_name, HedKey.UnitModifiers)
+        for modifier_name in hed_schema._sections[HedSectionKey.UnitModifiers].all_names:
+            self._add_node(hed_schema, unit_modifier_node, modifier_name, HedSectionKey.UnitModifiers)
 
     def _output_value_classes(self, hed_schema):
-        values_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.ValueClasses,
+        values_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.ValueClasses,
                                                                                            self.save_as_legacy_format))
-        for value_class in hed_schema.dictionaries[HedKey.ValueClasses]:
-            self._add_node(hed_schema, values_section_node, value_class, HedKey.ValueClasses)
+        for value_class in hed_schema._sections[HedSectionKey.ValueClasses].all_names:
+            self._add_node(hed_schema, values_section_node, value_class, HedSectionKey.ValueClasses)
 
     def _output_attributes(self, hed_schema):
-        attributes_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Attributes,
+        attributes_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.Attributes,
                                                                                            self.save_as_legacy_format))
-        for attribute_name in hed_schema.dictionaries[HedKey.Attributes]:
-            self._add_node(hed_schema, attributes_section_node, attribute_name, HedKey.Attributes)
+        for attribute_name in hed_schema._sections[HedSectionKey.Attributes].all_names:
+            self._add_node(hed_schema, attributes_section_node, attribute_name, HedSectionKey.Attributes)
 
     def _output_properties(self, hed_schema):
-        properties_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedKey.Properties,
+        properties_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.Properties,
                                                                                            self.save_as_legacy_format))
-        for property_name in hed_schema.dictionaries[HedKey.Properties]:
-            self._add_node(hed_schema, properties_section_node, property_name, HedKey.Properties)
+        for property_name in hed_schema._sections[HedSectionKey.Properties].all_names:
+            self._add_node(hed_schema, properties_section_node, property_name, HedSectionKey.Properties)
 
     def _output_footer(self, hed_schema):
         if hed_schema.epilogue:
@@ -175,7 +176,7 @@ class HedSchema2XML:
             else:
                 tag_node.set(attribute, value)
 
-    def _add_node(self, hed_schema, parent_node, full_name, key_class=HedKey.AllTags, short_tag_name=None,
+    def _add_node(self, hed_schema, parent_node, full_name, key_class=HedSectionKey.AllTags, short_tag_name=None,
                   sub_node_name=None):
         """
             Creates a tag node and adds it to the parent.
@@ -189,7 +190,7 @@ class HedSchema2XML:
         full_name : str
             Long version of the tag/modifier/unit name
         key_class: str
-            The type of node we are adding.  eg HedKey.AllTags, HedKey.UnitModifiers, etc.
+            The type of node we are adding.  eg HedSectionKey.AllTags, HedSectionKey.UnitModifiers, etc.
         short_tag_name : str
             The short version of the tag if this is a tag.  Even for hed2g.
         sub_node_name: str or None

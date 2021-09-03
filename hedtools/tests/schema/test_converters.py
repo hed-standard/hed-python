@@ -3,7 +3,7 @@ import unittest
 import os
 
 from hed import schema
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 
 
 class TestConverterBase(unittest.TestCase):
@@ -23,6 +23,7 @@ class TestConverterBase(unittest.TestCase):
 
     @staticmethod
     def _remove_unknown_attributes(hed_schema):
+        return
         for attribute_name in hed_schema.dictionaries['unknownAttributes']:
             if attribute_name in hed_schema.dictionaries:
                 del hed_schema.dictionaries[attribute_name]
@@ -35,12 +36,18 @@ class TestConverterBase(unittest.TestCase):
     @staticmethod
     def _remove_units_descriptions(hed_schema, skip="posixPath"):
         # Remove units descriptions, as that is unsupported in old XML
-        desc_dict = hed_schema.dictionaries['descriptions']
-        units_removed_dict = {key: value for key, value in desc_dict.items() if
-                              not key.startswith(HedKey.UnitClasses + "_") or skip in key}
-        units_removed_dict = {key: value for key, value in units_removed_dict.items() if
-                              not key.startswith(HedKey.Units + "_") or skip in key}
-        hed_schema.dictionaries['descriptions'] = units_removed_dict
+        # desc_dict = hed_schema.dictionaries['descriptions']
+        # units_removed_dict = {key: value for key, value in desc_dict.items() if
+        #                       not key.startswith(HedSectionKey.UnitClasses + "_") or skip in key}
+        # units_removed_dict = {key: value for key, value in units_removed_dict.items() if
+        #                       not key.startswith(HedSectionKey.Units + "_") or skip in key}
+        # hed_schema.dictionaries['descriptions'] = units_removed_dict
+
+        # for tag_entry in hed_schema._sections[HedSectionKey.UnitClasses].all_names.values():
+        #     tag_entry.description = None
+
+        for tag_entry in hed_schema._sections[HedSectionKey.Units].all_names.values():
+            tag_entry.description = None
 
     def test_schema2xml(self):
         saved_filename = self.hed_schema_xml.save_as_xml()
@@ -174,6 +181,11 @@ class TestHed8(TestConverterBase):
     can_compare = True
     can_legacy = False
 
+class TestHedUnknownAttr(TestConverterBase):
+    xml_file = '../data/hed_pairs/unknown_attribute.xml'
+    wiki_file = '../data/hed_pairs/unknown_attribute.mediawiki'
+    can_compare = True
+    can_legacy = False
 
 class TestConverterSavingPrefix(unittest.TestCase):
     xml_file = '../data/hed_pairs/HED8.0.0.xml'
