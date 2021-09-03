@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed import schema
-from hed.schema import HedKey
+from hed.schema import HedKey, HedSectionKey
 from hed.errors.exceptions import HedFileError
 from hed.models.hed_string import HedString
 from hed.models import HedTag
