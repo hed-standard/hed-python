@@ -6,14 +6,17 @@
 {% block content %}
     <h2>Process a BIDS-style event file</h2>
     <p>
-        <i>Upload a BIDS-style tsv events file and an optional JSON events metadata file.<br>
-            Select a HED schema, pick an action, and press Process.<br>
+        <i> Press Process.<br/>
+            Upload a BIDS-style tsv events file and an optional JSON events metadata file.<br/>
+            Select a HED schema.<br/>
             You will see either a downloadable results file or a status message.
         </i>
     </p>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="events_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        {{ create_process_options(assemble=True,to_long=False,to_short=False,validate=True) }}
 
         <h3>Upload BIDS-style events file:</h3>
         <div class="form-group">
@@ -29,7 +32,6 @@
         {{ create_column_info('false') }}
         {{ create_json_input() }}
         {{ create_schema_pulldown() }}
-        {{ create_process_options(assemble=True,to_long=False,to_short=False,validate=True) }}
 
         <div class="form-group">
             <button id="events_submit" type="button">Process</button>

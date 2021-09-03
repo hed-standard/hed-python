@@ -22,12 +22,12 @@ options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
 
 %% Read in the schema text for the examples
-schema_text = fileread('../data/HED8.0.0-alpha.1.xml');
+schema_text = fileread('../data/HED8.0.0.xml');
 good_strings = {['Red,Blue'], ['Green'], ['White,Black']}; 
 bad_strings = {['Red,Blue,Blech'], ['Green'], ['White,Black,Binge']}; 
 
 %% Example 1: Validate valid list of strings using HED URL.
-parameters = struct('schema_version', '8.0.0-alpha.1', ...
+parameters = struct('schema_version', '8.0.0', ...
                     'string_list', '', ...
                     'check_for_warnings', true);
 parameters.string_list = good_strings;
@@ -39,7 +39,7 @@ output_report(response1, 'Example 1 output');
 
 %% Example 2: Validate a list of invalid strings. HED schema is URL.
 myURL = ['https://raw.githubusercontent.com/hed-standard/' ...
-         'hed-specification/master/hedxml/HED8.0.0-alpha.1.xml'];
+         'hed-specification/master/hedxml/HED8.0.0.xml'];
 
 parameters = struct('schema_url', myURL, ...
                     'string_list', '', ...
@@ -63,8 +63,7 @@ response3 = jsondecode(response3);
 output_report(response3, 'Example 3 output');
 
 %% Example 4: Convert valid strings to long using HED version.
-parameters = struct('schema_version', '8.0.0-alpha.1', ...
-                    'string_list', '');
+parameters = struct('schema_version', '8.0.0', 'string_list', '');
 parameters.string_list = good_strings;               
 sdata4 = struct('service', 'string_to_long', ...
                 'service_parameters', parameters);

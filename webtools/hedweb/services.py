@@ -46,19 +46,14 @@ def get_input_from_service_request(request):
                  common.DEFS_EXPAND: parameters.get(common.DEFS_EXPAND, True)}
     if common.JSON_STRING in parameters and parameters[common.JSON_STRING]:
         arguments[common.JSON_SIDECAR] = models.Sidecar(file=io.StringIO(parameters[common.JSON_STRING]),
-                                                                  name='JSON_Sidecar')
+                                                        name='JSON_Sidecar')
     if common.EVENTS_STRING in parameters and parameters[common.EVENTS_STRING]:
-        if arguments[common.JSON_SIDECAR]:
-            def_dicts = arguments[common.JSON_SIDECAR].extract_defs()
-        else:
-            def_dicts = None
         arguments[common.EVENTS] = models.EventsInput(file=io.StringIO(parameters[common.EVENTS_STRING]),
-                                                      sidecars=arguments[common.JSON_SIDECAR],
-                                                      def_dicts=def_dicts, file_type='.tsv', name='Events')
+                                                      sidecars=arguments[common.JSON_SIDECAR], name='Events')
     if common.SPREADSHEET_STRING in parameters and parameters[common.SPREADSHEET_STRING]:
         tag_columns, prefix_dict = get_prefix_dict(parameters)
         arguments[common.SPREADSHEET] = \
-            models.HedInput(filename=io.StringIO(parameters[common.SPREADSHEET_STRING]), file_type=".tsv",
+            models.HedInput(file=io.StringIO(parameters[common.SPREADSHEET_STRING]), file_type=".tsv",
                             tag_columns=tag_columns, has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
                             column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
     if common.SCHEMA_STRING in parameters and parameters[common.SCHEMA_STRING]:
@@ -142,7 +137,7 @@ def services_process(arguments):
 
 def package_spreadsheet(results):
     if results['msg_category'] == 'success' and common.SPREADSHEET in results:
-        results[common.SPREADSHEET] = results[common.SPREADSHEET].to_csv(filename=None)
+        results[common.SPREADSHEET] = results[common.SPREADSHEET].to_csv(file=None)
     elif common.SPREADSHEET in results:
         del results[common.SPREADSHEET]
     return results

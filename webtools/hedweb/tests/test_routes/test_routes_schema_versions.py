@@ -20,16 +20,16 @@ class Test(TestWebBase):
 
     def test_schema_version_results1(self):
         with self.app.app_context():
-            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-beta.4.xml')
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0.xml')
             with open(schema_path, 'r') as sc:
                 x = sc.read()
             y = io.BytesIO(bytes(x, 'utf-8'))
-            the_file = FileStorage(stream=y, filename='HED8.0.0-beta.4.xml')
+            the_file = FileStorage(stream=y, filename='HED8.0.0.xml')
             data = {'schema_path': the_file}
             response = self.app.test.post('/schema_version', content_type='multipart/form-data', data=data)
             self.assertEqual(200, response.status_code, 'The HED version list does not require data')
             response_dict = json.loads(response.data.decode('utf-8'))
-            self.assertEqual("8.0.0-beta.4", response_dict["schema_version"], "The HED version should be returned")
+            self.assertEqual("8.0.0", response_dict["schema_version"], "The HED version should be returned")
             y.close()
 
 

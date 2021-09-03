@@ -36,7 +36,7 @@ def get_input_from_events_form(request):
         # json_string = f.read(file_constants.BYTE_LIMIT).decode('ascii')
         # f = io.StringIO(request.files[common.JSON_FILE].read(file_constants.BYTE_LIMIT).decode('ascii'))
         f = request.files[common.JSON_FILE]
-        json_sidecar = models.Sidecar(file=f,name=secure_filename(f.filename))
+        json_sidecar = models.Sidecar(file=f, name=secure_filename(f.filename))
     if common.EVENTS_FILE in request.files:
         f = request.files[common.EVENTS_FILE]
         arguments[common.EVENTS] = \

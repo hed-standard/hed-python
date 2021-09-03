@@ -26,12 +26,12 @@
 <section class="page-header">
     <h1 class="project-name">Hierarchical Event Descriptor (HED) online tools</h1>
     <h2 class="project-tagline">Web-based tools for HED schema, HED tags, and event files</h2>
-    <a href="{{ url_for('route_blueprint.render_home_page') }}" class="btn">HED tools home</a>
-    <a href="{{ url_for('route_blueprint.render_events_form') }}" class="btn">Process events</a>
-    <a href="{{ url_for('route_blueprint.render_sidecar_form') }}" class="btn">Process sidecar</a>
-    <a href="{{ url_for('route_blueprint.render_spreadsheet_form') }}" class="btn">Process spreadsheet</a>
-    <a href="{{ url_for('route_blueprint.render_string_form') }}" class="btn">Process string</a>
-    <a href="{{ url_for('route_blueprint.render_schema_form') }}" class="btn">Process schema</a>
+    <a href="{{ url_for('route_blueprint.render_home_page') }}" class="btn">Home</a>
+    <a href="{{ url_for('route_blueprint.render_events_form') }}" class="btn">Events</a>
+    <a href="{{ url_for('route_blueprint.render_sidecar_form') }}" class="btn">Sidecars</a>
+    <a href="{{ url_for('route_blueprint.render_spreadsheet_form') }}" class="btn">Spreadsheets</a>
+    <a href="{{ url_for('route_blueprint.render_string_form') }}" class="btn">Strings</a>
+    <a href="{{ url_for('route_blueprint.render_schema_form') }}" class="btn">Schemas</a>
 </section>
 <section class="main-content">
     {% block content %}

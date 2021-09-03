@@ -24,9 +24,9 @@ options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
 %% Set the data used in the examples
 spreadsheet_text_HED3 = fileread('../data/LKTEventCodesHED3.tsv');
 spreadsheet_text_HED2 = fileread('../data/LKTEventCodesHED2.tsv');
-schema_text = fileread('../data/HED8.0.0-beta.4.xml');
-labelPrefix = 'Attribute/Informational/Label/';
-descPrefix = 'Attribute/Informational/Description/';
+schema_text = fileread('../data/HED8.0.0.xml');
+labelPrefix = 'Property/Informational-property/Label/';
+descPrefix = 'Property/Informational-property/Description/';
 schema_url =['https://raw.githubusercontent.com/hed-standard/' ...
              'hed-specification/master/hedxml/HED7.2.0.xml'];
          

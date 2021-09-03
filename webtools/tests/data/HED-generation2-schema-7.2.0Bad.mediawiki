@@ -1,0 +1,66 @@
+HED version: 7.2.0
+
+Changelog
+* 3/16/2021: v.7.2.0 Adopted the new format for mediawiki files.
+* 11/22/2020: v. 7.1.2 Add extensionAllowed to top-level Item subtree.
+* 7/27/2020: v. 7.1.1 Corrected extensionAllowed on several top-level and second-level items. Removed extra h:m from clockTime. Removed unitSymbol from clockTime. Added dateTime unit class.  
+* 5/9/2020:  Added the clockTime unit class
+* 4/25/2020: v. 7.1.0 Added unit modifiers and updated unit classes to support SI units.
+* 9/29/2019: v. 7.0.5: Added Visual/Rendering type/Screen/Head-mounted display. Added extensionAllowed to Sensory presentation. Added Tone and Genre under Sensory presentation/Auditory/Music.
+* 8/18/2019: v. 7.0.4: Added extensionsAllowed to Custom and removed extensionsAllowed from nodes under Attribute and Item/Object. Also replaced per-sec with per-s in units.
+* 7/8/2019: v. 7.0.3: Removed the extra Action/Turn node.
+* 5/18/2019: v. 7.0.2: Added centisecond and millisecond as valid time units.
+* 3/7/2018: v. 7.0.1: Added Paradigm/Psychomotor vigilance task.
+* 2/15/2018: v. 7.0.0: Removed parentheses from some paradigm tags (used hyphens instead)
+* 1/11/2018: v. 6.0.5: Changed unit class for a number of values from velocity to speed.
+* 8/4/2017: v. 6.0.4: Added Machine failure detection task to paradigms list.
+* 7/20/2017: v. 6.0.3: Removed Action observation paradigm since there is already Action observation task.
+* 7/17/2017: v. 6.0.2: Added Attribute/Object control/Accelerate and Attribute/Object control/Decelerate. Also added a description for extensionAllowed.
+* 7/14/2017: v. 6.0.1: Replaced Item/Natural scene/Arial with Item/Natural scene/Aerial. 
+* 7/13/2017: v. 6.0.0: Replaced XXX in Event/Category/Experimental stimulus/Instruction/XXX with Event/Category/Experimental stimulus plus (Attribute/Instruction, Action/XXX). Moved a number of instructions under Action/. Also added Rest eyes open', Rest eyes closed and Imagined emotion paradigms. Removed Action/Imagine and instead one should use Attribute/Imagined.
+* 6/22/2017: v. 5.2.3: Added clarification for Attribute/Background (stimuli to be ignored)
+* 3/22/2017: v. 5.2.2: Fixed the missing [ in Attribute/Imagined.
+* 3/16/2017: v. 5.2.1: Added Action/Interact, Action/Interact/With human, Action/Take survey, Action/Eye blink/Left base, Left zero, Left half height, Right half height, Right zero, right base.
+* 3/7/2017, v 5.1.1: Added Attribute/Blink/Duration and fixed some issues.
+* 2/16/2017, v 5.0.0: Changed Attribute/Presentation fraction to Attribute/Presentation/Fraction and added a few other attributes under Attribute/Presentation. Removed Participant/Role and and added Attribute/Role.
+* 2/9/2017, v 4.0.5: added Paradigm/ID screening tag and moved language n-back under n-back paradigm. Also moved Flickering/rate to Attribute/Temporal rate.
+* 2/2/2017, v 4.0.4: moved Height and Width from Experiment/Context/Fixed screen/ to under Attribute/
+* 1/31/2017, v 4.0.3: added Attribute/Condition.
+* 1/5/2017, v. 4.0.2: fixed description in Sentence and Paragraph
+* 12/1/2016, v. 4.0.1: added Blink action and attributes.
+* 11/10/2016, v. 4.0.0: changed "Event/Sequence group id" to "Event/Group ID". Added "Paradigm/Instructed movement", "Attribute/Response start delay" and "Attribute/Response end delay".
+* 9/19/2016: Typo in Custom tag description fixed.
+* 9/8/2016: Added Attribute/Action judgment/Indeterminate.
+* 9/6/2016: Added Attribute/Imagined
+* 9/6/2016 Added back Experiment control/Activity/Participant action.in
+* 9/1/2016: Added Eyes open/Keep,Eyes close/Keep. Added Action/Make fist Action/Curl toes. MAJOR: moved Participant action/... from Event/Category/Experiment control/Activity to under Attribute/Activity judgment/. This is a backward incompatible change.
+* 8/4/2016: Added Attribute/Participant indication tag.
+* 7/21/2016: Added Attribute/Intended effect tag. This can be used e.g. to specify an image in an RSVP experiment where it was intended to be perceived as a target (but it may not have by the subject).
+* 6/22/2016: Added Attribute/Temporal uncertainty tag along with its child nodes. Also required a child for Attribute/Presentation fraction tag.
+* 6/16/2016: Added sleep stages.
+* 5/23/2016: Added more description to Attribute/Probability, allowing text values like low and high in addition to numerical values between 0 and 1.
+* 3/31/2016: Added constant and variable delays under Participant/Effect/Cognitive/Cue.
+* 3/10/2016:  
+** Added Non-informative under Cognitive/Feedback 
+** Added Cue under Cognitive 
+* 2/25/2016:  
+** Removed /Participant/Effect/Cognitive/Oddball/Three stimuli/Target 
+** Moved Non-target from under Expected to the same level as Target, this is because in Three stimuli oddball paradigm the Non-targets are oddballs and hence not expected. 
+** Note: user are encouraged to add Expected and Oddball tags when tagging targets and non-targets 
+** Added Presentation fraction 
+
+'''Syntax'''  
+
+HED tags can only be separated by commas. Use semicolons (;) instead of commas in event descriptions since otherwise extra commas could confuse HED parsers.  
+From version 2.2, HED adheres to http://semver.org/ versioning. 
+
+!# start schema 
+
+'''Event''' 
+* Category <nowiki>{required, requireChild, predicateType=passThrough, position=1} [This is meant to designate the reason this event was recorded] </nowiki> 
+** Initial context <nowiki>[The purpose is to set the starting context for the experiment --- and if there is no initial context event---this information would be stored as a dataset tag]</nowiki> 
+** Participant response <nowiki> [The purpose of this event was to record the </nowiki> 
+
+!# end hed
+
+Note: This is the new version of the .mediawiki designed to support prologues and epilogues.
