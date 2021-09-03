@@ -273,28 +273,28 @@ class HedSchema:
 
     def __eq__(self, other):
         # Comment the following back in for easy debugging of schema that should be equal.
-        dict_keys = set(list(self.dictionaries.keys()) + list(other.dictionaries.keys()))
-        for dict_key in dict_keys:
-            if dict_key not in self.dictionaries:
-                print(f"{dict_key} dict not in self")
-                continue
-            if dict_key not in other.dictionaries:
-                print(f"{dict_key} dict not in other")
-                continue
-            dict1 = self.dictionaries[dict_key]
-            dict2 = other.dictionaries[dict_key]
-            if dict1 != dict2:
-                print(f"DICT {dict_key} NOT EQUAL")
-                key_union = set(list(dict1.keys()) + list(dict2.keys()))
-                for key in key_union:
-                    if key not in dict1:
-                        print(f"{key} not in dict1")
-                        continue
-                    if key not in dict2:
-                        print(f"{key} not in dict2")
-                        continue
-                    if dict1[key] != dict2[key]:
-                        print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
+        # dict_keys = set(list(self.dictionaries.keys()) + list(other.dictionaries.keys()))
+        # for dict_key in dict_keys:
+        #     if dict_key not in self.dictionaries:
+        #         print(f"{dict_key} dict not in self")
+        #         continue
+        #     if dict_key not in other.dictionaries:
+        #         print(f"{dict_key} dict not in other")
+        #         continue
+        #     dict1 = self.dictionaries[dict_key]
+        #     dict2 = other.dictionaries[dict_key]
+        #     if dict1 != dict2:
+        #         print(f"DICT {dict_key} NOT EQUAL")
+        #         key_union = set(list(dict1.keys()) + list(dict2.keys()))
+        #         for key in key_union:
+        #             if key not in dict1:
+        #                 print(f"{key} not in dict1")
+        #                 continue
+        #             if key not in dict2:
+        #                 print(f"{key} not in dict2")
+        #                 continue
+        #             if dict1[key] != dict2[key]:
+        #                 print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
         if self.dictionaries != other.dictionaries:
             return False
         if self.header_attributes != other.header_attributes:

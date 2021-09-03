@@ -46,6 +46,7 @@ def set_cache_directory(new_cache_dir):
     if new_cache_dir:
         global HED_CACHE_DIRECTORY
         HED_CACHE_DIRECTORY = new_cache_dir
+        os.makedirs(new_cache_dir, exist_ok=True)
 
 
 def get_all_hed_versions(local_hed_directory=None, include_deprecated=False):
