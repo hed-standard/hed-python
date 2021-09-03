@@ -39,9 +39,9 @@ class Test(unittest.TestCase):
         from hed.schema import HedSchema
         from hedweb.sidecar import get_input_from_sidecar_form
         with self.app.test:
-            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.json')
             with open(json_path, 'rb') as fp:
-                environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0-alpha.1',
+                environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0',
                                          common.COMMAND_OPTION: common.COMMAND_TO_LONG})
             request = Request(environ)
             arguments = get_input_from_sidecar_form(request)
@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
             self.assertTrue(results['data'],
                             'sidecar_process to short should not convert using HED 7.1.2.xml')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         arguments = {common.SCHEMA: hed_schema, common.JSON_SIDECAR: json_sidecar,
                      common.JSON_DISPLAY_NAME: 'bids_json', common.COMMAND: common.COMMAND_TO_SHORT}
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
             self.assertEqual('warning', results['msg_category'],
                              'sidecar_convert to long msg_category should be warning for errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = sidecar_convert(hed_schema, json_sidecar, command=common.COMMAND_TO_LONG)
@@ -136,7 +136,7 @@ class Test(unittest.TestCase):
             self.assertEqual('warning', results['msg_category'],
                              'sidecar_convert msg_category should be warning for errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
@@ -159,7 +159,7 @@ class Test(unittest.TestCase):
             self.assertEqual('warning', results['msg_category'],
                              'sidecar_validate msg_category should be warning when errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = sidecar_validate(hed_schema, json_sidecar)

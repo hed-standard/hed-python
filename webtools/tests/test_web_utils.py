@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
         from hedweb.web_utils import form_has_file
         from hedweb.constants import file_constants
         with self.app.test as _:
-            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_alpha.json')
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
             with open(json_path, 'rb') as fp:
                 environ = create_environ(data={'json_file': fp})
 
@@ -232,7 +232,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         from hedweb.web_utils import get_hed_schema_from_pull_down
         with self.app.test:
-            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+            schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
             with open(schema_path, 'rb') as fp:
                 environ = create_environ(data={common.SCHEMA_VERSION: common.OTHER_VERSION_OPTION,
                                                common.SCHEMA_PATH: fp})

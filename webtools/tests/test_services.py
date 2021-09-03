@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         from hed.schema import HedSchema
         from hedweb.services import get_input_from_service_request
         with self.app.test:
-            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events_alpha.json')
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.json')
             events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
             with open(json_path, 'rb') as fp:
                 json_string = fp.read().decode('ascii')
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
         json_text = json.dumps(data)
         fb = io.StringIO(json_text)
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
-                     + 'hedxml-test/HED8.0.0-beta.4.xml'
+                     + 'hedxml/HED8.0.0.xml'
         hed_schema = hedschema.load_schema(hed_url_path=schema_url)
         json_sidecar = models.Sidecar(file=fb, name='JSON_Sidecar')
         arguments = {common.SERVICE: 'sidecar_validate', common.SCHEMA: hed_schema,
@@ -93,7 +93,7 @@ class Test(unittest.TestCase):
             results = response['results']
             self.assertEqual('success', results['msg_category'],
                              "sidecar_validation services has success on bids_events.json")
-            self.assertEqual('8.0.0-beta.4', results[common.SCHEMA_VERSION], 'Version 8.0.0.-beta.4 was used')
+            self.assertEqual('8.0.0-beta.4', results[common.SCHEMA_VERSION], 'Version 8.0.0 was used')
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml/HED7.2.0.xml'

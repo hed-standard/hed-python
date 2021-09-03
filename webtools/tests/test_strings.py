@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
         from hed.schema import HedSchema
         from hedweb.strings import get_input_from_string_form
         with self.app.test:
-            environ = create_environ(data={common.STRING_INPUT: 'Red,Blue', common.SCHEMA_VERSION: '8.0.0-alpha.1',
+            environ = create_environ(data={common.STRING_INPUT: 'Red,Blue', common.SCHEMA_VERSION: '8.0.0',
                                            common.CHECK_FOR_WARNINGS: 'on',
                                            common.COMMAND_OPTION: common.COMMAND_VALIDATE})
             request = Request(environ)
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
 
     def test_string_convert_to_short_valid(self):
         from hedweb.strings import string_convert
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Attribute/Informational/Description/Blech, Blue']
         with self.app.app_context():
@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
             results = string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
             self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
             results = string_validate(hed_schema, string_list)
             self.assertEqual('warning', results['msg_category'], "string_validate has warning if validation errors")
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.4.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = string_validate(hed_schema, string_list)

@@ -15,6 +15,8 @@
     <form id="events_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
+        {{ create_process_options(assemble=True,to_long=False,to_short=False,validate=True) }}
+
         <h3>Upload BIDS-style events file:</h3>
         <div class="form-group">
             <label class="secondary-label" for="events_file">Events file:</label>
@@ -29,7 +31,6 @@
         {{ create_column_info('false') }}
         {{ create_json_input() }}
         {{ create_schema_pulldown() }}
-        {{ create_process_options(assemble=True,to_long=False,to_short=False,validate=True) }}
 
         <div class="form-group">
             <button id="events_submit" type="button">Process</button>

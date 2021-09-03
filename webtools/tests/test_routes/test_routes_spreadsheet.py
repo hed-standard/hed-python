@@ -36,69 +36,6 @@ class Test(unittest.TestCase):
         self.assertEqual("error", header_dict["Category"], "The header msg_category when no spreadsheet is error ")
         self.assertFalse(response.data, "The response data for empty spreadsheet request is empty")
 
-    # def test_dictionary_results_to_long_valid(self):
-    #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
-    #
-    #     with open(json_path, 'r') as sc:
-    #         x = sc.read()
-    #     json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-    #     with self.app.app_context():
-    #         input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.2',
-    #                       common.COMMAND_OPTION: common.COMMAND_TO_LONG,
-    #                       common.JSON_FILE: (json_buffer, 'bids_events.json'),
-    #                       common.CHECK_FOR_WARNINGS: 'on'}
-    #         response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-    #         self.assertTrue(isinstance(response, Response),
-    #                         'dictionary_submit should return a Response when valid to long dictionary')
-    #         self.assertEqual(200, response.status_code, 'To long of a valid dictionary has a valid status code')
-    #         headers_dict = dict(response.headers)
-    #         self.assertEqual("success", headers_dict["Category"],
-    #                          "The valid dictionary should convert to long successfully")
-    #         self.assertTrue(response.data, "The converted to long dictionary should not be empty")
-    #         json_buffer.close()
-    #
-    # def test_dictionary_results_to_long_invalid(self):
-    #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
-    #     with open(json_path, 'r') as sc:
-    #         x = sc.read()
-    #     json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-    #     with self.app.app_context():
-    #         input_data = {common.SCHEMA_VERSION: '7.2.0',
-    #                       common.COMMAND_OPTION: common.COMMAND_TO_LONG,
-    #                       common.JSON_FILE: (json_buffer, 'bids_events.json'),
-    #                       common.CHECK_FOR_WARNINGS: 'on'}
-    #
-    #         response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-    #         self.assertTrue(isinstance(response, Response),
-    #                         'dictionary_submit should return a Response when invalid to long dictionary')
-    #         self.assertEqual(200, response.status_code, 'Conversion of an invalid dictionary to long has valid status')
-    #         headers_dict = dict(response.headers)
-    #         self.assertEqual("warning", headers_dict["Category"],
-    #                          "Conversion of an invalid dictionary to long generates a warning")
-    #         self.assertTrue(response.data,
-    #                         "The response data for invalid conversion to long should have error messages")
-    #         json_buffer.close()
-    #
-    # def test_dictionary_results_to_short_valid(self):
-    #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
-    #
-    #     with open(json_path, 'r') as sc:
-    #         x = sc.read()
-    #     json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-    #     with self.app.app_context():
-    #         input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.2',
-    #                        common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
-    #                        common.JSON_FILE: (json_buffer, 'bids_events_alpha.json'),
-    #                        common.CHECK_FOR_WARNINGS: 'on'}
-    #         response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-    #         self.assertTrue(isinstance(response, Response),
-    #                         'dictionary_submit should return a Response when valid to short dictionary')
-    #         self.assertEqual(200, response.status_code, 'To short of a valid dictionary has a valid status code')
-    #         headers_dict = dict(response.headers)
-    #         self.assertEqual("success", headers_dict["Category"],
-    #                          "The valid dictionary should convert to short successfully")
-    #         self.assertTrue(response.data, "The converted to short dictionary should not be empty")
-    #         json_buffer.close()
 
     def test_spreadsheet_results_validate_valid(self):
         with self.app.app_context():
