@@ -35,18 +35,7 @@ class TestConverterBase(unittest.TestCase):
 
     @staticmethod
     def _remove_units_descriptions(hed_schema, skip="posixPath"):
-        # Remove units descriptions, as that is unsupported in old XML
-        # desc_dict = hed_schema.dictionaries['descriptions']
-        # units_removed_dict = {key: value for key, value in desc_dict.items() if
-        #                       not key.startswith(HedSectionKey.UnitClasses + "_") or skip in key}
-        # units_removed_dict = {key: value for key, value in units_removed_dict.items() if
-        #                       not key.startswith(HedSectionKey.Units + "_") or skip in key}
-        # hed_schema.dictionaries['descriptions'] = units_removed_dict
-
-        # for tag_entry in hed_schema._sections[HedSectionKey.UnitClasses].all_names.values():
-        #     tag_entry.description = None
-
-        for tag_entry in hed_schema._sections[HedSectionKey.Units].all_names.values():
+        for tag_entry in hed_schema[HedSectionKey.Units].values():
             tag_entry.description = None
 
     def test_schema2xml(self):

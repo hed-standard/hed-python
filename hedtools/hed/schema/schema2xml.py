@@ -72,7 +72,7 @@ class HedSchema2XML:
             return
         unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.UnitClasses,
                                                                                      self.save_as_legacy_format))
-        for unit_class, unit_entry in hed_schema._sections[HedSectionKey.UnitClasses].all_names.items():
+        for unit_class, unit_entry in hed_schema[HedSectionKey.UnitClasses].items():
             unit_types = unit_entry.value
             unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedSectionKey.UnitClasses)
             if self.save_as_legacy_format:
@@ -94,25 +94,25 @@ class HedSchema2XML:
             return
         unit_modifier_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.UnitModifiers,
                                                                                       self.save_as_legacy_format))
-        for modifier_name in hed_schema._sections[HedSectionKey.UnitModifiers].all_names:
+        for modifier_name in hed_schema[HedSectionKey.UnitModifiers]:
             self._add_node(hed_schema, unit_modifier_node, modifier_name, HedSectionKey.UnitModifiers)
 
     def _output_value_classes(self, hed_schema):
         values_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.ValueClasses,
                                                                                            self.save_as_legacy_format))
-        for value_class in hed_schema._sections[HedSectionKey.ValueClasses].all_names:
+        for value_class in hed_schema[HedSectionKey.ValueClasses]:
             self._add_node(hed_schema, values_section_node, value_class, HedSectionKey.ValueClasses)
 
     def _output_attributes(self, hed_schema):
         attributes_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.Attributes,
                                                                                            self.save_as_legacy_format))
-        for attribute_name in hed_schema._sections[HedSectionKey.Attributes].all_names:
+        for attribute_name in hed_schema[HedSectionKey.Attributes]:
             self._add_node(hed_schema, attributes_section_node, attribute_name, HedSectionKey.Attributes)
 
     def _output_properties(self, hed_schema):
         properties_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.Properties,
                                                                                            self.save_as_legacy_format))
-        for property_name in hed_schema._sections[HedSectionKey.Properties].all_names:
+        for property_name in hed_schema[HedSectionKey.Properties]:
             self._add_node(hed_schema, properties_section_node, property_name, HedSectionKey.Properties)
 
     def _output_footer(self, hed_schema):

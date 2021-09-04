@@ -27,8 +27,6 @@ class HedKey:
     """
     # Tag attributes
     ExtensionAllowed = 'extensionAllowed'
-    # On opening, the extension allowed attribute is propagated down to child tags.
-    ExtensionAllowedPropagated = 'extensionAllowedPropagated'
     IsNumeric = 'isNumeric'
     Position = 'position'
     PredicateType = 'predicateType'
