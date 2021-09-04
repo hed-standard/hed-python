@@ -168,7 +168,6 @@ class TestHedSchema(unittest.TestCase):
             'value': {
                 'defaultUnits': False,
                 'extensionAllowed': False,
-                'extensionAllowedPropagated': False,
                 'isNumeric': True,
                 'position': False,
                 'predicateType': False,
@@ -182,7 +181,6 @@ class TestHedSchema(unittest.TestCase):
             'valueParent': {
                 'defaultUnits': False,
                 'extensionAllowed': False,
-                'extensionAllowedPropagated': True,
                 'isNumeric': False,
                 'position': False,
                 'predicateType': False,
@@ -196,7 +194,6 @@ class TestHedSchema(unittest.TestCase):
             'allowedExtension': {
                 'defaultUnits': False,
                 'extensionAllowed': False,
-                'extensionAllowedPropagated': True,
                 'isNumeric': False,
                 'position': False,
                 'predicateType': False,
@@ -387,15 +384,15 @@ class TestSchemaUtilityFunctions(TestHed):
 
     def test_determine_allows_extensions(self):
         extension_tag1 = HedTag('item/object/vehicle/boat', extension_index=len('item/object/vehicle/boat'))
-        extension_tag2 = HedTag('attribute/visual/color/red/0.5', extension_index=len('attribute/visual/color/red'))
         no_extension_tag1 = HedTag('event/duration/22 s', extension_index=len('event/duration'))
         no_extension_tag2 = HedTag('participant/id/45', extension_index=len('participant/id'))
+        no_extension_tag3 = HedTag('attribute/visual/color/red/0.5', extension_index=len('attribute/visual/color/red'))
         extension_tag1_result = self.hed_schema.is_extension_allowed_tag(extension_tag1)
-        extension_tag2_result = self.hed_schema.is_extension_allowed_tag(extension_tag2)
         no_extension_tag1_result = self.hed_schema.is_extension_allowed_tag(no_extension_tag1)
         no_extension_tag2_result = self.hed_schema.is_extension_allowed_tag(no_extension_tag2)
+        no_extension_tag3_result = self.hed_schema.is_extension_allowed_tag(no_extension_tag3)
         self.assertEqual(extension_tag1_result, True)
-        self.assertEqual(extension_tag2_result, True)
         self.assertEqual(no_extension_tag1_result, False)
         self.assertEqual(no_extension_tag2_result, False)
+        self.assertEqual(no_extension_tag3_result, False)
 

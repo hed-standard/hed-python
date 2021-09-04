@@ -94,7 +94,7 @@ class HedSchema2Wiki:
 
         self.current_tag_string += wiki_constants.UNIT_CLASS_STRING
         self._flush_current_tag()
-        for unit_class, unit_entry in hed_schema._sections[HedSectionKey.UnitClasses].all_names.items():
+        for unit_class, unit_entry in hed_schema[HedSectionKey.UnitClasses].items():
             unit_types = unit_entry.value
             self.current_tag_string += f"* {unit_class}"
             self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_class, HedSectionKey.UnitClasses)
@@ -113,7 +113,7 @@ class HedSchema2Wiki:
             return
         self.current_tag_string += wiki_constants.UNIT_MODIFIER_STRING
         self._flush_current_tag()
-        for modifier_name in hed_schema._sections[HedSectionKey.UnitModifiers].all_names:
+        for modifier_name in hed_schema[HedSectionKey.UnitModifiers]:
             self.current_tag_string += f"* {modifier_name}"
             self.current_tag_extra += self._format_props_and_desc(
                 hed_schema, modifier_name, HedSectionKey.UnitModifiers)
@@ -125,7 +125,7 @@ class HedSchema2Wiki:
         self._add_blank_line()
         self.current_tag_string += wiki_constants.VALUE_CLASS_STRING
         self._flush_current_tag()
-        for value_name in hed_schema._sections[HedSectionKey.ValueClasses].all_names:
+        for value_name in hed_schema[HedSectionKey.ValueClasses]:
             self.current_tag_string += f"* {value_name}"
             self.current_tag_extra += self._format_props_and_desc(
                 hed_schema, value_name, HedSectionKey.ValueClasses)
@@ -135,7 +135,7 @@ class HedSchema2Wiki:
         self._add_blank_line()
         self.current_tag_string += wiki_constants.ATTRIBUTE_DEFINITION_STRING
         self._flush_current_tag()
-        for attribute_name in hed_schema._sections[HedSectionKey.Attributes].all_names:
+        for attribute_name in hed_schema[HedSectionKey.Attributes]:
             self.current_tag_string += f"* {attribute_name}"
             self.current_tag_extra += self._format_props_and_desc(hed_schema, attribute_name, HedSectionKey.Attributes)
             self._flush_current_tag()
@@ -144,7 +144,7 @@ class HedSchema2Wiki:
         self._add_blank_line()
         self.current_tag_string += wiki_constants.ATTRIBUTE_PROPERTY_STRING
         self._flush_current_tag()
-        for prop_name in hed_schema._sections[HedSectionKey.Properties].all_names:
+        for prop_name in hed_schema[HedSectionKey.Properties]:
             self.current_tag_string += f"* {prop_name}"
             self.current_tag_extra += self._format_props_and_desc(hed_schema, prop_name, HedSectionKey.Properties)
             self._flush_current_tag()

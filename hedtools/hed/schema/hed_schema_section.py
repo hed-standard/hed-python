@@ -10,7 +10,8 @@ class HedSchemaEntry:
         self.value = None
         self._section = section
         
-        # This section is largely unused
+        # This section is largely unused.  It will only be filled in when we try to add an attribute
+        # that isn't valid in this section.
         self._unknown_attributes = None
 
     def set_attribute_value(self, attribute_name, attribute_value, skip_validation=False):
@@ -18,7 +19,7 @@ class HedSchemaEntry:
             return
 
         if not skip_validation and attribute_name not in self._section.valid_attributes:
-            #raise ValueError("This is an unknown value")
+            # todo: remove this
             print(f"Unknown attribute {attribute_name}")
             if self._unknown_attributes is None:
                 self._unknown_attributes = {}
@@ -52,10 +53,29 @@ class HedSchemaSection():
         # {lower_case_name: HedSchemaEntry}
         self.all_names = {}
         self._section_key = section_key
+        # todo: use or remove this
         self.case_sensitive = False
 
         # Points to the entries in attributes
         self.valid_attributes = {}
+
+    def __iter__(self):
+        return iter(self.all_names)
+
+    def items(self):
+        return self.all_names.items()
+
+    def values(self):
+        return self.all_names.values()
+
+    def keys(self):
+        return self.all_names.keys()
+
+    def __getitem__(self, key):
+        return self.all_names[key]
+
+    def get(self, key):
+        return self.all_names.get(key)
 
     def __eq__(self, other):
         if self.all_names != other.all_names:
@@ -65,6 +85,9 @@ class HedSchemaSection():
         if self.case_sensitive != other.case_sensitive:
             return False
         return True
+
+    def __bool__(self):
+        return bool(self.all_names)
 
     def _add_to_dict(self, name):
         name_key = name
