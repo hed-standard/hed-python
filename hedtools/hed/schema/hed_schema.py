@@ -4,7 +4,9 @@ unit class attributes in a dictionary.
 
 The dictionary is a dictionary of dictionaries. The dictionary names are the list in HedKey from hed_schema_constants.
 """
-from hed.schema.hed_schema_constants import HedKey
+import copy
+
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
 from hed.errors import error_reporter
 from hed.schema.schema2xml import HedSchema2XML
@@ -12,6 +14,7 @@ from hed.schema.schema2wiki import HedSchema2Wiki
 from hed.schema import schema_compliance
 from hed.errors.error_types import ValidationErrors
 from hed.schema import schema_validation_util
+from hed.schema.hed_schema_section import HedSchemaEntry, HedSchemaSection
 
 import inflect
 pluralize = inflect.engine()
@@ -32,7 +35,6 @@ class HedSchema:
         self.no_duplicate_tags = True
         self.header_attributes = {}
         self._filename = None
-        self.dictionaries = self._create_empty_dictionaries()
         self.prologue = ""
         self.epilogue = ""
 
@@ -40,6 +42,9 @@ class HedSchema:
         self._is_hed3_schema = None
         # This is the specified library prefix - tags will be {library_prefix}:{tag_name}
         self._library_prefix = ""
+        
+        self._sections = self._create_empty_sections()
+        self.short_tag_mapping = {}
 
     # ===============================================
     # Basic schema properties
@@ -136,34 +141,11 @@ class HedSchema:
             library_prefix += ":"
 
         len_prefix = len(self._library_prefix)
-        new_tag_dicts = {}
-        dicts_to_update = self.get_tag_attribute_names()
-        bool_attribute_names = [dict_name for dict_name in dicts_to_update
-                                if dict_name in self.dictionaries[HedKey.BoolProperty]]
-        dicts_to_update += [HedKey.AllTags, HedKey.ExtensionAllowedPropagated]
-        bool_attribute_names += [HedKey.AllTags, HedKey.ExtensionAllowedPropagated]
-        for dict_name in dicts_to_update:
-            tag_dict = self.dictionaries[dict_name]
-            new_dict = {}
-            for tag_key_name, tag_key_value in tag_dict.items():
-                tag_key_name = library_prefix.lower() + tag_key_name[len_prefix:]
-                if dict_name in bool_attribute_names:
-                    tag_key_value = library_prefix + tag_key_value[len_prefix:]
-                new_dict[tag_key_name] = tag_key_value
-            new_tag_dicts[dict_name] = new_dict
 
-        for dict_name, new_dict in new_tag_dicts.items():
-            self.dictionaries[dict_name] = new_dict
-
-        # Update description dictionary
-        tag_desc_prefix = f"{HedKey.AllTags}_"
-        len_prefix += len(tag_desc_prefix)
-        new_desc_dict = {}
-        for desc_name, desc in self.dictionaries[HedKey.Descriptions].items():
-            if desc_name.startswith(tag_desc_prefix):
-                desc_name = tag_desc_prefix + library_prefix.lower() + desc_name[len_prefix:]
-            new_desc_dict[desc_name] = desc
-        self.dictionaries[HedKey.Descriptions] = new_desc_dict
+        new_section_dict = {library_prefix.lower() + tag_name[len_prefix:]: tag_entry for tag_name, tag_entry in self._sections[HedSectionKey.AllTags].all_names.items()}
+        for entry in new_section_dict.values():
+            entry.long_name = library_prefix.lower() + entry.long_name[len_prefix:]
+        self._sections[HedSectionKey.AllTags].all_names = new_section_dict
 
         self._library_prefix = library_prefix
         self.finalize_dictionaries()
@@ -202,7 +184,7 @@ class HedSchema:
             long tags sharing that short tag
         """
         duplicate_dict = {}
-        short_tag_dict = self.dictionaries[HedKey.ShortTags]
+        short_tag_dict = self.short_tag_mapping
         for tag_name in short_tag_dict:
             if isinstance(short_tag_dict[tag_name], list):
                 duplicate_dict[tag_name] = short_tag_dict[tag_name]
@@ -250,7 +232,7 @@ class HedSchema:
 
     @property
     def has_unit_classes(self):
-        return HedKey.UnitClasses in self.dictionaries
+        return bool(self._sections[HedSectionKey.UnitClasses].all_names)
 
     @property
     def is_hed3_compatible(self):
@@ -265,38 +247,13 @@ class HedSchema:
 
     @property
     def has_unit_modifiers(self):
-        return HedKey.SIUnitModifier in self.dictionaries
+        return bool(self._sections[HedSectionKey.UnitModifiers].all_names)
 
     @property
     def has_value_classes(self):
-        return bool(self.dictionaries[HedKey.ValueClasses])
+        return bool(self._sections[HedSectionKey.ValueClasses].all_names)
 
     def __eq__(self, other):
-        # Comment the following back in for easy debugging of schema that should be equal.
-        # dict_keys = set(list(self.dictionaries.keys()) + list(other.dictionaries.keys()))
-        # for dict_key in dict_keys:
-        #     if dict_key not in self.dictionaries:
-        #         print(f"{dict_key} dict not in self")
-        #         continue
-        #     if dict_key not in other.dictionaries:
-        #         print(f"{dict_key} dict not in other")
-        #         continue
-        #     dict1 = self.dictionaries[dict_key]
-        #     dict2 = other.dictionaries[dict_key]
-        #     if dict1 != dict2:
-        #         print(f"DICT {dict_key} NOT EQUAL")
-        #         key_union = set(list(dict1.keys()) + list(dict2.keys()))
-        #         for key in key_union:
-        #             if key not in dict1:
-        #                 print(f"{key} not in dict1")
-        #                 continue
-        #             if key not in dict2:
-        #                 print(f"{key} not in dict2")
-        #                 continue
-        #             if dict1[key] != dict2[key]:
-        #                 print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
-        if self.dictionaries != other.dictionaries:
-            return False
         if self.header_attributes != other.header_attributes:
             return False
         if self.no_duplicate_tags != other.no_duplicate_tags:
@@ -305,6 +262,24 @@ class HedSchema:
             return False
         if self.epilogue != other.epilogue:
             return False
+        if self._sections != other._sections:
+            for section1, section2 in zip(self._sections.values(), other._sections.values()):
+                if section1 != section2:
+                    dict1 = section1.all_names
+                    dict2 = section2.all_names
+                    if dict1 != dict2:
+                        print(f"DICT {section1._section_key} NOT EQUAL")
+                        key_union = set(list(dict1.keys()) + list(dict2.keys()))
+                        for key in key_union:
+                            if key not in dict1:
+                                print(f"{key} not in dict1")
+                                continue
+                            if key not in dict2:
+                                print(f"{key} not in dict2")
+                                continue
+                            if dict1[key] != dict2[key]:
+                                print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
+            return False
         return True
 
     def calculate_canonical_forms(self, original_tag, error_handler=None):
@@ -312,18 +287,6 @@ class HedSchema:
         This takes a hed tag(short or long form) and converts it to the long form
         Works left to right.(mostly relevant for errors)
         Note: This only does minimal validation
-
-        eg 'Event'                    - Returns ('Event', None)
-           'Sensory event'            - Returns ('Event/Sensory event', None)
-        Takes Value:
-           'Environmental sound/Unique Value'
-                                      - Returns ('Item/Sound/Environmental Sound/Unique Value', None)
-        Extension Allowed:
-            'Experiment control/demo_extension'
-                                      - Returns ('Event/Experiment Control/demo_extension/', None)
-            'Experiment control/demo_extension/second_part'
-                                      - Returns ('Event/Experiment Control/demo_extension/second_part', None)
-
 
         Parameters
         ----------
@@ -500,7 +463,7 @@ class HedSchema:
         return self._value_tag_has_attribute(original_tag, HedKey.ValueClass)
 
     def is_basic_tag(self, original_tag):
-        return self.dictionaries[HedKey.AllTags].get(original_tag.lower())
+        return bool(self._get_entry_for_tag(original_tag.lower()))
 
     def base_tag_has_attribute(self, original_tag, tag_attribute):
         """Checks to see if the tag has a specific attribute.
@@ -517,9 +480,11 @@ class HedSchema:
             True if the tag has the specified attribute. False, if otherwise.
 
         """
-        if self.dictionaries[tag_attribute].get(original_tag.base_tag.lower()):
-            return True
-        return False
+        tag_entry = self._get_entry_for_tag(original_tag.base_tag)
+        new_val = False
+        if tag_entry:
+            new_val = tag_entry.has_attribute(tag_attribute)
+        return new_val
 
     def tag_has_attribute(self, original_tag, tag_attribute):
         """Checks to see if the tag has a specific attribute.
@@ -536,8 +501,10 @@ class HedSchema:
             True if the tag has the specified attribute. False, if otherwise.
 
         """
-        if self.dictionaries[tag_attribute].get(original_tag.lower()):
-            return True
+        # todo: use schema functions here
+        tag_entry = self._sections[HedSectionKey.AllTags].all_names.get(original_tag.lower())
+        if tag_entry:
+            return tag_attribute in tag_entry.attributes
         return False
 
     # ===============================================
@@ -585,7 +552,9 @@ class HedSchema:
         unit_classes = self.get_tag_unit_classes(original_tag)
         if unit_classes:
             first_unit_class = unit_classes[0]
-            default_unit = self.dictionaries[HedKey.DefaultUnits][first_unit_class]
+            unit_class_entry = self._get_entry_for_tag(first_unit_class, HedSectionKey.UnitClasses)
+            if unit_class_entry:
+                default_unit = unit_class_entry.has_attribute(HedKey.DefaultUnits, return_value=True)
 
         return default_unit
 
@@ -606,9 +575,10 @@ class HedSchema:
         units = []
         unit_classes = self.get_tag_unit_classes(original_tag)
         for unit_class in unit_classes:
-            unit = self.dictionaries[HedKey.UnitClasses].get(unit_class)
-            if unit:
-                units += unit
+            unit_class_entry = self._get_entry_for_tag(unit_class, HedSectionKey.UnitClasses)
+            if unit_class_entry:
+                units += unit_class_entry.value
+
         return units
 
     def get_stripped_unit_value(self, original_tag):
@@ -640,12 +610,17 @@ class HedSchema:
 
         return formatted_tag_unit_value
 
-    def get_all_with_attribute(self, key):
-        return self.dictionaries[key]
-
     def get_unit_class_units(self, unit_class_type):
-        unit_class_units = self.dictionaries[HedKey.UnitClasses].get(unit_class_type)
-        return unit_class_units
+        unit_class_entry = self._get_entry_for_tag(unit_class_type, HedSectionKey.UnitClasses)
+        if not unit_class_entry:
+            return []
+
+        return unit_class_entry.value
+
+    # todo: this needs to be optimized as this is gonna be a nightmare
+    def get_all_tags_with_attribute(self, key):
+        new_val = [tag_entry.long_name for tag_entry in self._sections[HedSectionKey.AllTags].all_names.values() if tag_entry.has_attribute(key)]
+        return new_val
 
     # ===============================================
     # Semi-private creation finalizing functions
@@ -654,6 +629,9 @@ class HedSchema:
         self._is_hed3_schema = self.is_hed3_schema
         self._propagate_extension_allowed()
         self._populate_short_tag_dict()
+
+    def _initialize_attributes(self, key_class):
+        self._sections[key_class].valid_attributes = self._get_attributes_for_class(key_class)
 
     def add_hed2_attributes(self, only_add_if_none_present=True):
         """
@@ -665,17 +643,20 @@ class HedSchema:
             If True(default), will only add attributes if there is currently none.
             If False, will add any missing attributes.
         """
-        if HedKey.ValueClassProperty not in self.dictionaries:
+        if HedKey.ValueClassProperty not in self._sections[HedSectionKey.Properties].all_names:
             self._add_single_default_property(HedKey.ValueClassProperty)
 
         # !BFK! for handling old files.  If allowed character is a unit class property, ignore it entirely.
-        if HedKey.AllowedCharacter in self.dictionaries[HedKey.UnitClassProperty]:
-            del self.dictionaries[HedKey.AllowedCharacter]
-            del self.dictionaries[HedKey.UnitClassProperty][HedKey.AllowedCharacter]
-            del self.dictionaries[HedKey.Attributes][HedKey.AllowedCharacter]
-            self._add_description_to_dict(HedKey.AllowedCharacter, None, key_class=HedKey.Attributes)
+        if HedKey.AllowedCharacter in self._sections[HedSectionKey.Attributes].all_names:
+            attribute_entry = self._sections[HedSectionKey.Attributes].all_names[HedKey.AllowedCharacter]
+            if attribute_entry.has_attribute(HedKey.UnitClassProperty):
+                del self._sections[HedSectionKey.Attributes].all_names[HedKey.AllowedCharacter]
+                for section in self._sections.values():
+                    for entry in section.all_names.values():
+                        if HedKey.AllowedCharacter in entry.attributes:
+                            del entry.attributes[HedKey.AllowedCharacter]
 
-        if only_add_if_none_present and self.dictionaries[HedKey.Attributes]:
+        if only_add_if_none_present and bool(self._sections[HedSectionKey.Attributes].all_names):
             return
 
         from hed.schema import hed_2g_attributes
@@ -692,7 +673,7 @@ class HedSchema:
                 If True(default), will only add properties if there is currently none.
                 If False, will add any missing properties.
                 """
-        if only_add_if_none_present and self.dictionaries[HedKey.Properties]:
+        if only_add_if_none_present and bool(self._sections[HedSectionKey.Properties].all_names):
             return
 
         from hed.schema import hed_2g_attributes
@@ -700,28 +681,35 @@ class HedSchema:
             self._add_single_default_property(prop_name)
 
     def update_old_hed_schema(self):
-        if HedKey.UnitPrefix not in self.dictionaries:
+        if HedKey.UnitPrefix not in self._sections[HedSectionKey.Attributes].all_names:
             self._add_single_default_attribute(HedKey.UnitPrefix)
 
-        if self.dictionaries[HedKey.UnitPrefix]:
-            return
+            # todo: refactor this possibly.  Make sure new attribute is added for now
+            self.finalize_dictionaries()
 
-        self.dictionaries[HedKey.UnitPrefix]['$'] = "$"
+        if not self.get_all_tags_with_attribute(HedKey.UnitPrefix):
+            tag_entry = self._get_entry_for_tag("$", HedSectionKey.Units)
+            if tag_entry:
+                tag_entry.set_attribute_value(HedKey.UnitPrefix, True)
 
     # ===============================================
     # Getters used to write out schemas primarily.
     # ===============================================
-    def get_desc_dict(self):
+    def get_desc_iter(self):
         """
-            Helper to return HedKey.Descriptions dictionary
+            Returns an iterator over all the descriptions found in all sections.
 
         Returns
         -------
-        descriptions_dict: {str:str}
+        tag_name: str
+        description: str
         """
-        return self.dictionaries[HedKey.Descriptions]
+        for section in self._sections.values():
+            for tag_entry in section.all_names.values():
+                if tag_entry.description:
+                    yield tag_entry.long_name, tag_entry.description
 
-    def get_tag_description(self, tag_name, key_class=HedKey.AllTags):
+    def get_tag_description(self, tag_name, key_class=HedSectionKey.AllTags):
         """
             If a description exists for the given name, returns it
 
@@ -729,16 +717,16 @@ class HedSchema:
         ----------
         tag_name : str
             A hed tag name(or unit/unit modifier etc) with proper capitalization.
-        key_class: str, default HedKey.AllTags
+        key_class: str, default HedSectionKey.AllTags
             A HedKey indicating what type of description you are asking for.  (All tags, Units, Unit modifier)
 
         Returns
         -------
         description: str or None
         """
-        if key_class == HedKey.AllTags:
-            tag_name = tag_name.lower()
-        return self.dictionaries[HedKey.Descriptions].get(f"{key_class}_{tag_name}", None)
+        tag_entry = self._get_entry_for_tag(tag_name, key_class)
+        if tag_entry:
+            return tag_entry.description
 
     def get_all_schema_tags(self, return_short_form=False):
         """
@@ -750,21 +738,22 @@ class HedSchema:
             A list of all terms(short tags) from the schema.
         """
         final_list = []
-        for lower_tag, org_tag in self.dictionaries[HedKey.AllTags].items():
+        for lower_tag, tag_entry in self._sections[HedSectionKey.AllTags].all_names.items():
             if return_short_form:
-                final_list.append(org_tag.split('/')[-1])
+                final_list.append(tag_entry.long_name.split('/')[-1])
             else:
-                final_list.append(org_tag)
+                final_list.append(tag_entry.long_name)
+
         return final_list
 
     def get_tag_attribute_names(self):
-        return [key_name for key_name in self.dictionaries[HedKey.Attributes]
-                if key_name not in self.dictionaries[HedKey.UnitClassProperty]
-                and key_name not in self.dictionaries[HedKey.UnitProperty]
-                and key_name not in self.dictionaries[HedKey.UnitModifierProperty]
-                and key_name not in self.dictionaries[HedKey.ValueClassProperty]]
+        return [tag_entry.long_name for tag_entry in self._sections[HedSectionKey.Attributes].all_names.values()
+                if not tag_entry.has_attribute(HedKey.UnitClassProperty)
+                and not tag_entry.has_attribute(HedKey.UnitProperty)
+                and not tag_entry.has_attribute(HedKey.UnitModifierProperty)
+                and not tag_entry.has_attribute(HedKey.ValueClassProperty)]
 
-    def get_all_tag_attributes(self, tag_name, key_class=HedKey.AllTags, keys=None):
+    def get_all_tag_attributes(self, tag_name, key_class=HedSectionKey.AllTags):
         """
             Gathers all attributes for a given tag name.  If keys is none, gets all normal hed tag attributes.
 
@@ -774,62 +763,39 @@ class HedSchema:
             The name of the tag to check
         key_class: str
             The type of attributes we are asking for.  eg Tag, Units, Unit modifiers, or attributes.
-        keys : [str]
-            If this is filled in, use these exact keys and ignore the key_class parameter.
 
         Returns
         -------
         tag_values: {str: str}
             {key_name : attribute_value}
         """
-        if keys is None:
-            keys = self._get_attributes_for_class(key_class)
-            if keys is None:
-                raise KeyError("Invalid key_class property type")
+        tag_entry = self._get_entry_for_tag(tag_name, key_class)
         attributes = {}
-        for key in keys:
-            check_name = tag_name
-            if key in self.get_tag_attribute_names():
-                check_name = tag_name.lower()
-            source_dicts = self.dictionaries
-            if key_class == HedKey.AllTags:
-                source_dicts = self.dictionaries
-            if key not in source_dicts:
-                # Potentially raise or return an error here.
-                continue
-            if check_name in source_dicts[key]:
-                value = source_dicts[key][check_name]
-                # A tag attribute is True if the tag name and dictionary value are the same, ignoring capitalization
-                if value is True or value and check_name.lower() == value.lower():
-                    attributes[key] = True
-                else:
-                    if value is None:
-                        value = False
-                    attributes[key] = value
+        if tag_entry:
+            attributes = tag_entry.attributes
 
+        keys = self._get_attributes_for_class(key_class)
+        if keys is None:
+            raise KeyError("Invalid key_class property type")
+
+        # todo: improve this behavior
+        attributes = {key: value for key, value in attributes.items() if key in keys}
         return attributes
+
 
     # ===============================================
     # Private utility functions
     # ===============================================
-    @staticmethod
-    def _create_empty_dictionaries():
-        """
-        Initializes a dictionary with the minimum so the tools won't crash
-        """
+    def _create_empty_sections(self):
         dictionaries = {}
-
         # Add main sections
-        dictionaries[HedKey.AllTags] = {}
-        dictionaries[HedKey.UnitClasses] = {}
-        dictionaries[HedKey.Units] = {}
-        dictionaries[HedKey.UnitModifiers] = {}
-        dictionaries[HedKey.ValueClasses] = {}
-        dictionaries[HedKey.Attributes] = {}
-        dictionaries[HedKey.Properties] = {}
-
-        dictionaries[HedKey.UnknownAttributes] = {}
-        dictionaries[HedKey.Descriptions] = {}
+        dictionaries[HedSectionKey.AllTags] = HedSchemaSection(HedSectionKey.AllTags)
+        dictionaries[HedSectionKey.UnitClasses] = HedSchemaSection(HedSectionKey.UnitClasses)
+        dictionaries[HedSectionKey.Units] = HedSchemaSection(HedSectionKey.Units)
+        dictionaries[HedSectionKey.UnitModifiers] = HedSchemaSection(HedSectionKey.UnitModifiers)
+        dictionaries[HedSectionKey.ValueClasses] = HedSchemaSection(HedSectionKey.ValueClasses)
+        dictionaries[HedSectionKey.Attributes] = HedSchemaSection(HedSectionKey.Attributes)
+        dictionaries[HedSectionKey.Properties] = HedSchemaSection(HedSectionKey.Properties)
 
         return dictionaries
 
@@ -841,40 +807,20 @@ class HedSchema:
         -------
 
         """
-        allowed_extensions = self.dictionaries[HedKey.ExtensionAllowed]
-        self.dictionaries[HedKey.ExtensionAllowedPropagated] = {}
-        for long_tag in self.dictionaries[HedKey.AllTags].values():
-            lower_tag = long_tag.lower()
-            if lower_tag in allowed_extensions:
-                self.dictionaries[HedKey.ExtensionAllowedPropagated][lower_tag] = long_tag
-                continue
-
+        for lower_tag, tag_entry in self._sections[HedSectionKey.AllTags].all_names.items():
             if self.tag_has_attribute(lower_tag, HedKey.TakesValue):
                 continue
 
-            current_index = -1
-            found_slash = lower_tag.find("/", current_index + 1)
+            found_slash = len(lower_tag)
+            check_tag = lower_tag
             while found_slash != -1:
                 current_index = found_slash
-                check_tag = lower_tag[:current_index]
-                if check_tag in allowed_extensions:
-                    self.dictionaries[HedKey.ExtensionAllowedPropagated][lower_tag] = long_tag
+                check_tag = check_tag[:current_index]
+                parent_tag_entry = self._get_entry_for_tag(check_tag, HedSectionKey.AllTags)
+                if parent_tag_entry and parent_tag_entry.has_attribute(HedKey.ExtensionAllowed):
+                    tag_entry.set_attribute_value(HedKey.ExtensionAllowedPropagated, True, skip_validation=True)
                     break
-                found_slash = lower_tag.find("/", current_index + 1)
-
-    @property
-    def short_tag_mapping(self):
-        """
-        This returns the short->long tag dictionary.
-
-
-        Returns
-        -------
-        short_tag_dict: {str:str} or {str:str or list}
-            Returns the short tag mapping dictionary.  If this is hed2 and has duplicates, the values of the dict
-            may contain lists in addition to strings.
-        """
-        return self.dictionaries[HedKey.ShortTags]
+                found_slash = check_tag.rfind("/")
 
     def _populate_short_tag_dict(self):
         """
@@ -885,9 +831,10 @@ class HedSchema:
         -------
         """
         self.no_duplicate_tags = True
-        base_tag_dict = self.dictionaries[HedKey.AllTags]
+        base_tag_dict = self._sections[HedSectionKey.AllTags].all_names
         new_short_tag_dict = {}
-        for tag, unformatted_tag in base_tag_dict.items():
+        for tag, tag_entry in base_tag_dict.items():
+            unformatted_tag = tag_entry.long_name
             if self._library_prefix and unformatted_tag.startswith(self._library_prefix):
                 unformatted_tag = unformatted_tag[len(self._library_prefix):]
             split_tags = unformatted_tag.split("/")
@@ -904,7 +851,7 @@ class HedSchema:
                 if not isinstance(new_short_tag_dict[short_clean_tag], list):
                     new_short_tag_dict[short_clean_tag] = [new_short_tag_dict[short_clean_tag]]
                 new_short_tag_dict[short_clean_tag].append(new_tag_entry)
-        self.dictionaries[HedKey.ShortTags] = new_short_tag_dict
+        self.short_tag_mapping = new_short_tag_dict
 
     def _value_tag_has_attribute(self, original_tag, key=HedKey.ExtensionAllowedPropagated,
                                  return_value=False):
@@ -928,14 +875,14 @@ class HedSchema:
         if not original_tag.extension_or_value_portion:
             return False
 
-        if key not in self.dictionaries:
-            return False
         value_class_tag = original_tag.base_tag.lower() + "/#"
 
-        value = self.dictionaries[key].get(value_class_tag, False)
-        if return_value:
-            return value
-        return bool(value)
+        tag_entry = self._get_entry_for_tag(value_class_tag)
+        if not tag_entry:
+            return False
+
+        new_val = tag_entry.has_attribute(key, return_value)
+        return new_val
 
     def _get_tag_units_portion(self, original_tag_unit_value, formatted_tag_unit_value,
                                tag_unit_class_units):
@@ -958,10 +905,10 @@ class HedSchema:
         """
         tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
         for unit in tag_unit_class_units:
+            unit_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
             derivative_units = self._get_valid_unit_plural(unit)
             for derivative_unit in derivative_units:
-                if self.has_unit_modifiers and \
-                        self.dictionaries[HedKey.UnitSymbol].get(unit):
+                if unit_entry.has_attribute(HedKey.UnitSymbol):
                     found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
                                                                                 derivative_unit,
                                                                                 True)
@@ -969,10 +916,8 @@ class HedSchema:
                     found_unit, stripped_value = self._strip_off_units_if_valid(formatted_tag_unit_value,
                                                                                 derivative_unit,
                                                                                 False)
-
                 if found_unit:
                     return stripped_value
-
         return None
 
     def _strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
@@ -993,8 +938,10 @@ class HedSchema:
         """
         found_unit = False
         stripped_value = ''
-
-        should_be_prefix = self.dictionaries[HedKey.UnitPrefix].get(unit, False)
+        should_be_prefix = False
+        unit_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
+        if unit_entry:
+            should_be_prefix = unit_entry.has_attribute(HedKey.UnitPrefix)
         if should_be_prefix and str(unit_value).startswith(unit):
             found_unit = True
             stripped_value = str(unit_value)[len(unit):].strip()
@@ -1004,11 +951,14 @@ class HedSchema:
 
         if found_unit and self.has_unit_modifiers:
             if is_unit_symbol:
-                modifier_key = HedKey.SIUnitSymbolModifier
+                modifier_attribute_name = HedKey.SIUnitSymbolModifier
             else:
-                modifier_key = HedKey.SIUnitModifier
+                modifier_attribute_name = HedKey.SIUnitModifier
 
-            for unit_modifier in self.dictionaries[modifier_key]:
+            for modifier_entry in self._sections[HedSectionKey.UnitModifiers].all_names.values():
+                if not modifier_entry.has_attribute(modifier_attribute_name):
+                    continue
+                unit_modifier = modifier_entry.long_name
                 if stripped_value.startswith(unit_modifier):
                     stripped_value = stripped_value[len(unit_modifier):].strip()
                 elif stripped_value.endswith(unit_modifier):
@@ -1027,9 +977,10 @@ class HedSchema:
             list of plural units
         """
         derivative_units = [unit]
-        if self.has_unit_modifiers and \
-                self.dictionaries[HedKey.UnitSymbol].get(unit) is None:
+        tag_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
+        if tag_entry and not tag_entry.has_attribute(HedKey.UnitSymbol):
             derivative_units.append(pluralize.plural(unit))
+
         return derivative_units
 
     def _get_attributes_for_class(self, key_class):
@@ -1046,116 +997,76 @@ class HedSchema:
         attributes: [str] or {str:}
             A list of all the attributes for this section.  May return a dict where the keys are the attribute names.
         """
-        if key_class == HedKey.AllTags:
+        if key_class == HedSectionKey.AllTags:
             return self.get_tag_attribute_names()
-        attrib_classes = {
-            HedKey.Properties: None,
-            HedKey.Attributes: HedKey.Properties,
-            HedKey.UnitClasses: HedKey.UnitClassProperty,
-            HedKey.Units: HedKey.UnitProperty,
-            HedKey.UnitModifiers: HedKey.UnitModifierProperty,
-            HedKey.ValueClasses: HedKey.ValueClassProperty
-        }
-        attrib_class = attrib_classes.get(key_class, None)
-        if attrib_class is None:
-            return []
+        elif key_class == HedSectionKey.Attributes:
+            return self._sections[HedSectionKey.Properties].all_names
+        else:
 
-        return self.dictionaries[attrib_class]
+            attrib_classes = {
+                HedSectionKey.UnitClasses: HedKey.UnitClassProperty,
+                HedSectionKey.Units: HedKey.UnitProperty,
+                HedSectionKey.UnitModifiers: HedKey.UnitModifierProperty,
+                HedSectionKey.ValueClasses: HedKey.ValueClassProperty
+            }
+            attrib_class = attrib_classes.get(key_class, None)
+            if attrib_class is None:
+                return []
+
+            attributes = [attribute for attribute, entry in self._sections[HedSectionKey.Attributes].all_names.items() if entry.has_attribute(attrib_class)]
+            return attributes
 
     # ===============================================
     # Semi private functions used to create a schema in memory(usually from a source file)
     # ===============================================
-    def _add_tag_to_dict(self, long_tag_name, key_class=HedKey.AllTags, value=None):
-        if value is None:
-            value = long_tag_name
-        if key_class == HedKey.AllTags:
-            self.dictionaries[key_class][long_tag_name.lower()] = value
-        else:
-            self.dictionaries[key_class][long_tag_name] = value
+    def _get_entry_for_tag(self, long_tag_name, key_class=HedSectionKey.AllTags):
+        """
+            Returns the schema entry for this tag, if one exists.
 
-    def _add_attribute_to_dict(self, tag_name, attribute_name, new_value, key_class):
-        if not new_value:
-            return
+        Parameters
+        ----------
+        long_tag_name :
+        key_class :
 
-        if attribute_name in self.dictionaries[HedKey.BoolProperty]:
-            # This case will only happen if someone has a slightly malformed schema where they use
-            # "extensionAllowed=true" instead of just "extensionAllowed"
-            # Todo: We should probably update this to internally store true/false for simplicity.
-            if new_value is True or new_value == "true":
-                new_value = tag_name
-            # if new_value == "true":
-            #     new_value = True
-            elif new_value is False or new_value == "false":
-                return
+        Returns
+        -------
 
-        # Tags are case insensitive.
-        if key_class == HedKey.AllTags:
-            tag_name = tag_name.lower()
+        """
+        if key_class == HedSectionKey.AllTags:
+            long_tag_name = long_tag_name.lower()
+        return self._sections[key_class].all_names.get(long_tag_name)
 
-        valid_attribute_classes = self._get_attributes_for_class(key_class)
-        # This might have duplicates as it's unknown and could be in other sections.
-        if attribute_name in self.dictionaries[HedKey.UnknownAttributes] \
-                or attribute_name not in valid_attribute_classes:
-            tag_name = key_class + "_" + tag_name
-            attribute_name = "invalidAttribute_" + attribute_name
-            if key_class == HedKey.AllTags:
-                if attribute_name not in self.dictionaries:
-                    self.dictionaries[attribute_name] = {}
-                    self.dictionaries[HedKey.UnknownAttributes][attribute_name] = "true"
-            else:
-                if attribute_name not in self.dictionaries:
-                    self.dictionaries[attribute_name] = {}
-                    self.dictionaries[HedKey.UnknownAttributes][attribute_name] = "true"
-
-        self.dictionaries[attribute_name][tag_name] = new_value
+    def _add_tag_to_dict(self, long_tag_name, key_class=HedSectionKey.AllTags):
+        self._sections[key_class]._add_to_dict(long_tag_name)
 
     def _add_unit_class_unit(self, unit_class, unit_class_unit):
-        if unit_class not in self.dictionaries[HedKey.UnitClasses]:
-            self.dictionaries[HedKey.UnitClasses][unit_class] = []
+        if unit_class not in self._sections[HedSectionKey.UnitClasses].all_names:
+            self._sections[HedSectionKey.UnitClasses]._add_to_dict(unit_class)
+            unit_class_entry = self._get_entry_for_tag(unit_class, HedSectionKey.UnitClasses)
+            unit_class_entry.value = []
         if unit_class_unit is not None:
-            self.dictionaries[HedKey.UnitClasses][unit_class].append(unit_class_unit)
-        self.dictionaries[HedKey.Units][unit_class_unit] = unit_class_unit
-
-    def _add_description_to_dict(self, tag_name, desc, key_class=HedKey.AllTags):
-        if key_class == HedKey.AllTags:
-            tag_name = tag_name.lower()
-        desc_key = f"{key_class}_{tag_name}"
-        if desc:
-            self.dictionaries[HedKey.Descriptions][desc_key] = desc
-        else:
-            try:
-                del self.dictionaries[HedKey.Descriptions][desc_key]
-            except KeyError:
-                pass
-
-    def _add_attribute_name_to_dict(self, attribute_name):
-        if attribute_name in self.dictionaries[HedKey.Attributes]:
-            raise ValueError(f"Duplicate attribute {attribute_name} found in attributes section.")
-        if attribute_name in self.dictionaries:
-            raise ValueError(f"Attribute '{attribute_name}' is already reserved in dictionary and cannot be re-used.")
-        self.dictionaries[HedKey.Attributes][attribute_name] = attribute_name
-        self.dictionaries[attribute_name] = {}
-
-    def _add_property_name_to_dict(self, prop_name, prop_desc):
-        if prop_name in self.dictionaries[HedKey.Properties]:
-            raise ValueError(f"Duplicate property {prop_name} found in properties section.")
-        if prop_name in self.dictionaries:
-            raise ValueError(f"Property '{prop_name}' is already in dictionary as reserved and cannot be re-used.")
-        self.dictionaries[HedKey.Properties][prop_name] = prop_name
-        self.dictionaries[prop_name] = {}
-        self._add_description_to_dict(prop_name, prop_desc, HedKey.Properties)
+            unit_class_entry = self._get_entry_for_tag(unit_class, HedSectionKey.UnitClasses)
+            unit_class_entry.value.append(unit_class_unit)
+            self._add_tag_to_dict(unit_class_unit, HedSectionKey.Units)
 
     def _add_single_default_attribute(self, attribute_name):
         from hed.schema import hed_2g_attributes
         attribute_props, attribute_desc = hed_2g_attributes.attributes[attribute_name]
-        if attribute_name not in self.dictionaries[HedKey.Attributes]:
-            self._add_attribute_name_to_dict(attribute_name)
-        self._add_description_to_dict(attribute_name, attribute_desc, HedKey.Attributes)
+        if attribute_name not in self._sections[HedSectionKey.Attributes].all_names:
+            self._add_tag_to_dict(attribute_name, HedSectionKey.Attributes)
+        tag_entry = self._get_entry_for_tag(attribute_name, HedSectionKey.Attributes)
+        if attribute_desc:
+            tag_entry.description = attribute_desc
 
         for attribute_property_name in attribute_props:
-            self._add_attribute_to_dict(attribute_name, attribute_property_name, True, HedKey.Attributes)
+            tag_entry.set_attribute_value(attribute_property_name, True)
 
     def _add_single_default_property(self, prop_name):
         from hed.schema import hed_2g_attributes
         prop_desc = hed_2g_attributes.properties[prop_name]
-        self._add_property_name_to_dict(prop_name, prop_desc)
+        # Todo: improve this
+        if prop_name not in self._sections[HedSectionKey.Properties].all_names:
+            self._add_tag_to_dict(prop_name, HedSectionKey.Properties)
+        tag_entry = self._get_entry_for_tag(prop_name, HedSectionKey.Properties)
+        if prop_desc:
+            tag_entry.description = prop_desc
