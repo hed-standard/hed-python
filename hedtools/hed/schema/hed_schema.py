@@ -4,8 +4,6 @@ unit class attributes in a dictionary.
 
 The dictionary is a dictionary of dictionaries. The dictionary names are the list in HedKey from hed_schema_constants.
 """
-import copy
-
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
 from hed.errors import error_reporter
@@ -14,7 +12,7 @@ from hed.schema.schema2wiki import HedSchema2Wiki
 from hed.schema import schema_compliance
 from hed.errors.error_types import ValidationErrors
 from hed.schema import schema_validation_util
-from hed.schema.hed_schema_section import HedSchemaEntry, HedSchemaSection
+from hed.schema.hed_schema_section import HedSchemaSection
 
 import inflect
 pluralize = inflect.engine()
@@ -420,8 +418,10 @@ class HedSchema:
         tag_takes_extension: bool
             True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
         """
+        # Takes value tag cannot be extension allowed
         if self.is_takes_value_tag(original_tag):
             return False
+
         base_tag = original_tag.base_tag.lower()
         lower_tag = base_tag
         found_slash = len(lower_tag)
@@ -702,9 +702,6 @@ class HedSchema:
     def update_old_hed_schema(self):
         if HedKey.UnitPrefix not in self._sections[HedSectionKey.Attributes]:
             self._add_single_default_attribute(HedKey.UnitPrefix)
-
-            # todo: refactor this possibly.  Make sure new attribute is added for now
-            self.finalize_dictionaries()
 
         if not self.get_all_tags_with_attribute(HedKey.UnitPrefix):
             tag_entry = self._get_entry_for_tag("$", HedSectionKey.Units)
@@ -992,7 +989,6 @@ class HedSchema:
         elif key_class == HedSectionKey.Attributes:
             return self._sections[HedSectionKey.Properties]
         else:
-
             attrib_classes = {
                 HedSectionKey.UnitClasses: HedKey.UnitClassProperty,
                 HedSectionKey.Units: HedKey.UnitProperty,

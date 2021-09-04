@@ -108,46 +108,29 @@ class HedSchema2Wiki:
 
         self._add_blank_line()
 
-    def _output_unit_modifiers(self, hed_schema):
-        if not hed_schema.has_unit_modifiers:
+    def _output_section(self, hed_schema, key_class):
+        if not hed_schema._sections[key_class]:
             return
-        self.current_tag_string += wiki_constants.UNIT_MODIFIER_STRING
+        self._add_blank_line()
+        self.current_tag_string += wiki_constants.wiki_section_headers[key_class]
         self._flush_current_tag()
-        for modifier_name in hed_schema[HedSectionKey.UnitModifiers]:
-            self.current_tag_string += f"* {modifier_name}"
-            self.current_tag_extra += self._format_props_and_desc(
-                hed_schema, modifier_name, HedSectionKey.UnitModifiers)
+        for value_name in hed_schema[key_class]:
+            self.current_tag_string += f"* {value_name}"
+            self.current_tag_extra += self._format_props_and_desc(hed_schema, value_name, key_class)
             self._flush_current_tag()
+
+    def _output_unit_modifiers(self, hed_schema):
+        self._output_section(hed_schema, HedSectionKey.UnitModifiers)
+        return
 
     def _output_value_classes(self, hed_schema):
-        if not hed_schema.has_value_classes:
-            return
-        self._add_blank_line()
-        self.current_tag_string += wiki_constants.VALUE_CLASS_STRING
-        self._flush_current_tag()
-        for value_name in hed_schema[HedSectionKey.ValueClasses]:
-            self.current_tag_string += f"* {value_name}"
-            self.current_tag_extra += self._format_props_and_desc(
-                hed_schema, value_name, HedSectionKey.ValueClasses)
-            self._flush_current_tag()
+        self._output_section(hed_schema, HedSectionKey.ValueClasses)
 
     def _output_attributes(self, hed_schema):
-        self._add_blank_line()
-        self.current_tag_string += wiki_constants.ATTRIBUTE_DEFINITION_STRING
-        self._flush_current_tag()
-        for attribute_name in hed_schema[HedSectionKey.Attributes]:
-            self.current_tag_string += f"* {attribute_name}"
-            self.current_tag_extra += self._format_props_and_desc(hed_schema, attribute_name, HedSectionKey.Attributes)
-            self._flush_current_tag()
+        self._output_section(hed_schema, HedSectionKey.Attributes)
 
     def _output_properties(self, hed_schema):
-        self._add_blank_line()
-        self.current_tag_string += wiki_constants.ATTRIBUTE_PROPERTY_STRING
-        self._flush_current_tag()
-        for prop_name in hed_schema[HedSectionKey.Properties]:
-            self.current_tag_string += f"* {prop_name}"
-            self.current_tag_extra += self._format_props_and_desc(hed_schema, prop_name, HedSectionKey.Properties)
-            self._flush_current_tag()
+        self._output_section(hed_schema, HedSectionKey.Properties)
 
     def _flush_current_tag(self):
         if self.current_tag_string or self.current_tag_extra:
