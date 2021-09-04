@@ -269,22 +269,22 @@ class HedSchema:
         if self.epilogue != other.epilogue:
             return False
         if self._sections != other._sections:
-            for section1, section2 in zip(self._sections.values(), other._sections.values()):
-                if section1 != section2:
-                    dict1 = section1
-                    dict2 = section2
-                    if dict1 != dict2:
-                        print(f"DICT {section1._section_key} NOT EQUAL")
-                        key_union = set(list(dict1.keys()) + list(dict2.keys()))
-                        for key in key_union:
-                            if key not in dict1:
-                                print(f"{key} not in dict1")
-                                continue
-                            if key not in dict2:
-                                print(f"{key} not in dict2")
-                                continue
-                            if dict1[key] != dict2[key]:
-                                print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
+#             for section1, section2 in zip(self._sections.values(), other._sections.values()):
+#                 if section1 != section2:
+#                     dict1 = section1.all_names
+#                     dict2 = section2.all_names
+#                     if dict1 != dict2:
+#                         print(f"DICT {section1._section_key} NOT EQUAL")
+#                         key_union = set(list(dict1.keys()) + list(dict2.keys()))
+#                         for key in key_union:
+#                             if key not in dict1:
+#                                 print(f"{key} not in dict1")
+#                                 continue
+#                             if key not in dict2:
+#                                 print(f"{key} not in dict2")
+#                                 continue
+#                             if dict1[key] != dict2[key]:
+#                                 print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
             return False
         return True
 
