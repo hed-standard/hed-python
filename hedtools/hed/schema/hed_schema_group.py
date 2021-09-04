@@ -295,7 +295,7 @@ class HedSchemaGroup:
         if schema:
             return schema.get_stripped_unit_value(original_tag)
 
-    def get_all_with_attribute(self, key):
+    def get_all_tags_with_attribute(self, key):
         new_dict = {}
         for schema in self._schemas:
             new_dict.update(schema._tag_dictionaries[key])

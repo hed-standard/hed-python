@@ -1,4 +1,4 @@
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 
 # These are only currently used by the XML reader/writer, but that may change.
 XSI_SOURCE = "http://www.w3.org/2001/XMLSchema-instance"
@@ -49,19 +49,19 @@ UNIT_MODIFIER_DEF_ELEMENT_LEGACY = "unitModifier"
 def get_section_name(key_class, legacy_format=False):
     if not legacy_format:
         section_names = {
-            HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
-            HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
-            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
-            HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
-            HedKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
+            HedSectionKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
+            HedSectionKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
+            HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
+            HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
+            HedSectionKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
         }
     else:
         section_names = {
-            HedKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
-            HedKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT_LEGACY,
-            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
-            HedKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
-            HedKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
+            HedSectionKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
+            HedSectionKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT_LEGACY,
+            HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
+            HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
+            HedSectionKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
         }
 
     return section_names.get(key_class, None)
@@ -70,31 +70,32 @@ def get_section_name(key_class, legacy_format=False):
 def get_element_name(key_class, legacy_format=False):
     if not legacy_format:
         element_names = {
-            HedKey.AllTags: TAG_DEF_ELEMENT,
-            HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
-            HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
-            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
-            HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
-            HedKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
+            HedSectionKey.AllTags: TAG_DEF_ELEMENT,
+            HedSectionKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
+            HedSectionKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
+            HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
+            HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
+            HedSectionKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
         }
     else:
         element_names = {
-            HedKey.AllTags: TAG_DEF_ELEMENT,
-            HedKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT_LEGACY,
-            HedKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT_LEGACY,
-            HedKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
-            HedKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
-            HedKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
+            HedSectionKey.AllTags: TAG_DEF_ELEMENT,
+            HedSectionKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT_LEGACY,
+            HedSectionKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT_LEGACY,
+            HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
+            HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
+            HedSectionKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
         }
 
     return element_names.get(key_class, (None, None))
 
 
 ATTRIBUTE_PROPERTY_ELEMENTS = {
-    HedKey.AllTags: ATTRIBUTE_ELEMENT,
-    HedKey.UnitClasses: ATTRIBUTE_ELEMENT,
-    HedKey.Units: ATTRIBUTE_ELEMENT,
-    HedKey.UnitModifiers: ATTRIBUTE_ELEMENT,
-    HedKey.ValueClasses: ATTRIBUTE_ELEMENT,
-    HedKey.Attributes: ATTRIBUTE_PROPERTY_ELEMENT
+    HedSectionKey.AllTags: ATTRIBUTE_ELEMENT,
+    HedSectionKey.UnitClasses: ATTRIBUTE_ELEMENT,
+    HedSectionKey.Units: ATTRIBUTE_ELEMENT,
+    HedSectionKey.UnitModifiers: ATTRIBUTE_ELEMENT,
+    HedSectionKey.ValueClasses: ATTRIBUTE_ELEMENT,
+    HedSectionKey.Attributes: ATTRIBUTE_PROPERTY_ELEMENT,
+    HedSectionKey.Properties: None
 }

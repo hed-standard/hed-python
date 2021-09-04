@@ -45,7 +45,7 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
         for hed_term in hed_terms:
             issues_list += validate_schema_term(hed_term, error_handler=error_handler)
 
-        for tag_name, desc in hed_schema.get_desc_dict().items():
+        for tag_name, desc in hed_schema.get_desc_iter():
             issues_list += validate_schema_description(tag_name, desc, error_handler=error_handler)
 
     error_handler.pop_error_context()

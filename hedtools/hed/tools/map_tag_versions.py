@@ -20,7 +20,7 @@ def validate_single_tag(hed_dict, tag):
     if tag == "YYY" or tag == "XXX":
         return True
 
-    if tag not in hed_dict.dictionaries[HedKey.AllTags]:
+    if tag not in hed_dict.dictionaries[HedSectionKey.AllTags]:
         return False
     return True
 
