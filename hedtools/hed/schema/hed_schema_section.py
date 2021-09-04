@@ -14,12 +14,12 @@ class HedSchemaEntry:
         # that isn't valid in this section.
         self._unknown_attributes = None
 
-    def set_attribute_value(self, attribute_name, attribute_value, skip_validation=False):
+    def set_attribute_value(self, attribute_name, attribute_value):
         if not attribute_value:
             return
 
-        if not skip_validation and attribute_name not in self._section.valid_attributes:
-            # todo: remove this
+        if attribute_name not in self._section.valid_attributes:
+            # todo: remove this print
             print(f"Unknown attribute {attribute_name}")
             if self._unknown_attributes is None:
                 self._unknown_attributes = {}
