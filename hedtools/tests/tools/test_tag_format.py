@@ -28,9 +28,9 @@ class TestConvertTag(TestTagFormat):
             expected_result = expected_results[test_key]
 
             expected_issue = self.really_format_errors(error_handler, hed_string=test_string_obj, params=expected_params)
-            # print(test_key)
-            # print(expected_issue)
-            # print(test_issues)
+            print(test_key)
+            print(expected_issue)
+            print(test_issues)
             self.assertEqual(string_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 

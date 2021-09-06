@@ -2,7 +2,7 @@
 import copy
 
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema import wiki_constants
+from hed.schema.fileio import wiki_constants
 
 
 class HedSchema2Wiki:
@@ -89,7 +89,7 @@ class HedSchema2Wiki:
         self._add_blank_line()
 
     def _output_units(self, hed_schema):
-        if not hed_schema.has_unit_classes:
+        if not hed_schema.unit_classes:
             return
 
         self.current_tag_string += wiki_constants.UNIT_CLASS_STRING

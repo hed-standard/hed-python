@@ -360,7 +360,7 @@ class TagValidator:
             return False
 
         # Fallback code for no value classes
-        if not self._hed_schema.has_value_classes:
+        if not self._hed_schema.value_classes:
             unit_class_types = self._hed_schema.get_tag_unit_classes(original_tag)
             for unit_class_type in unit_class_types:
                 valid_func = self.UNIT_CLASS_TYPE_DICT.get(unit_class_type)

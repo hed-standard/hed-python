@@ -6,17 +6,19 @@ The dictionary is a dictionary of dictionaries. The dictionary names are the lis
 """
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
-from hed.errors import error_reporter
-from hed.schema.schema2xml import HedSchema2XML
-from hed.schema.schema2wiki import HedSchema2Wiki
+from hed.schema.fileio.schema2xml import HedSchema2XML
+from hed.schema.fileio.schema2wiki import HedSchema2Wiki
 from hed.schema import schema_compliance
-from hed.errors.error_types import ValidationErrors
 from hed.schema import schema_validation_util
 from hed.schema.hed_schema_section import HedSchemaSection
 
 import inflect
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
+
+# todo: remove
+from hed.errors import error_reporter
+from hed.errors.error_types import ValidationErrors
 
 
 class HedSchema:
@@ -30,7 +32,7 @@ class HedSchema:
         HedSchema
             A HedSchema object.
         """
-        self.no_duplicate_tags = True
+        self._has_duplicate_tags = False
         self.header_attributes = {}
         self._filename = None
         self.prologue = ""
@@ -66,7 +68,14 @@ class HedSchema:
     @property
     def library(self):
         return self.header_attributes.get('library')
-    
+
+    def schema_for_prefix(self, prefix):
+        return self
+
+    @property
+    def valid_prefixes(self):
+        return [self._library_prefix]
+
     # ===============================================
     # Creation and saving functions
     # ===============================================
@@ -232,15 +241,19 @@ class HedSchema:
         bool
             Returns True if this is a valid hed3 schema with no duplicate short tags.
         """
-        return not self.no_duplicate_tags
+        return self._has_duplicate_tags
 
     @property
-    def has_unit_classes(self):
+    def unit_classes(self):
         return self._sections[HedSectionKey.UnitClasses]
 
     @property
-    def is_hed3_compatible(self):
-        return self.no_duplicate_tags
+    def unit_modifiers(self):
+        return self._sections[HedSectionKey.UnitModifiers]
+
+    @property
+    def value_classes(self):
+        return self._sections[HedSectionKey.ValueClasses]
 
     @property
     def is_hed3_schema(self):
@@ -249,158 +262,34 @@ class HedSchema:
 
         return self.library or schema_validation_util.is_hed3_version_number(self.version)
 
-    @property
-    def has_unit_modifiers(self):
-        return self._sections[HedSectionKey.UnitModifiers]
-
-    @property
-    def has_value_classes(self):
-        return self._sections[HedSectionKey.ValueClasses]
-
     def __eq__(self, other):
         if self.header_attributes != other.header_attributes:
             return False
-        if self.no_duplicate_tags != other.no_duplicate_tags:
+        if self._has_duplicate_tags != other._has_duplicate_tags:
             return False
         if self.prologue != other.prologue:
             return False
         if self.epilogue != other.epilogue:
             return False
         if self._sections != other._sections:
-#             for section1, section2 in zip(self._sections.values(), other._sections.values()):
-#                 if section1 != section2:
-#                     dict1 = section1.all_names
-#                     dict2 = section2.all_names
-#                     if dict1 != dict2:
-#                         print(f"DICT {section1._section_key} NOT EQUAL")
-#                         key_union = set(list(dict1.keys()) + list(dict2.keys()))
-#                         for key in key_union:
-#                             if key not in dict1:
-#                                 print(f"{key} not in dict1")
-#                                 continue
-#                             if key not in dict2:
-#                                 print(f"{key} not in dict2")
-#                                 continue
-#                             if dict1[key] != dict2[key]:
-#                                 print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
+            # for section1, section2 in zip(self._sections.values(), other._sections.values()):
+            #     if section1 != section2:
+            #         dict1 = section1.all_names
+            #         dict2 = section2.all_names
+            #         if dict1 != dict2:
+            #             print(f"DICT {section1._section_key} NOT EQUAL")
+            #             key_union = set(list(dict1.keys()) + list(dict2.keys()))
+            #             for key in key_union:
+            #                 if key not in dict1:
+            #                     print(f"{key} not in dict1")
+            #                     continue
+            #                 if key not in dict2:
+            #                     print(f"{key} not in dict2")
+            #                     continue
+            #                 if dict1[key] != dict2[key]:
+            #                     print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
             return False
         return True
-
-    def calculate_canonical_forms(self, original_tag, error_handler=None):
-        """
-        This takes a hed tag(short or long form) and converts it to the long form
-        Works left to right.(mostly relevant for errors)
-        Note: This only does minimal validation
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            A single hed tag(long or short)
-        error_handler: ErrorHandler
-            The error handler to use for context.  Will create a default one if not passed.
-        Returns
-        -------
-        long_tag: str
-            The converted long tag
-        short_tag_index: int
-            The position the short tag starts at in long_tag
-        extension_index: int
-            The position the extension or value starts at in the long_tag
-        errors: list
-            a list of errors while converting
-        """
-        if error_handler is None:
-            error_handler = error_reporter.ErrorHandler()
-
-        clean_tag = original_tag.tag.lower()
-        prefix = original_tag.library_prefix
-        clean_tag = clean_tag[len(prefix):]
-        prefix_tag_adj = len(prefix)
-        split_tags = clean_tag.split("/")
-        found_unknown_extension = False
-        found_index_end = 0
-        found_index_start = 0
-        found_long_org_tag = None
-        index_in_tag_end = 0
-        # Iterate over tags left to right keeping track of current index
-        for tag in split_tags:
-            tag_len = len(tag)
-            # Skip slashes
-            if index_in_tag_end != 0:
-                index_in_tag_end += 1
-            index_start = index_in_tag_end
-            index_in_tag_end += tag_len
-
-            # If we already found an unknown tag, it's implicitly an extension.  No known tags can follow it.
-            if not found_unknown_extension:
-                if tag not in self.short_tag_mapping:
-                    found_unknown_extension = True
-                    if not found_long_org_tag:
-                        error = error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                           original_tag, index_in_tag=index_start + prefix_tag_adj,
-                                                           index_in_tag_end=index_in_tag_end + prefix_tag_adj)
-                        return str(original_tag), None, None, error
-                    continue
-
-                long_org_tags = self.short_tag_mapping[tag]
-                long_org_tag = None
-                if isinstance(long_org_tags, str):
-                    tag_string = long_org_tags.lower()
-
-                    main_hed_portion = clean_tag[:index_in_tag_end]
-                    # Verify the tag has the correct path above it.
-                    if tag_string.endswith(main_hed_portion):
-                        long_org_tag = long_org_tags
-                else:
-                    for org_tag_string in long_org_tags:
-                        tag_string = org_tag_string.lower()
-
-                        main_hed_portion = clean_tag[:index_in_tag_end]
-
-                        if tag_string.endswith(main_hed_portion):
-                            long_org_tag = org_tag_string
-                            break
-                if not long_org_tag:
-                    error = error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=original_tag,
-                                                       index_in_tag=index_start + prefix_tag_adj,
-                                                       index_in_tag_end=index_in_tag_end + prefix_tag_adj,
-                                                       expected_parent_tag=long_org_tags)
-                    return str(original_tag), None, None, error
-
-                # In hed2 compatible, make sure this is a long form of a tag or throw an invalid base tag error.
-                if not self.is_hed3_compatible:
-                    if not clean_tag.startswith(long_org_tag.lower()):
-                        error = error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                           original_tag, index_in_tag=index_start + prefix_tag_adj,
-                                                           index_in_tag_end=index_in_tag_end + prefix_tag_adj)
-                        return str(original_tag), None, None, error
-
-                found_index_start = index_start
-                found_index_end = index_in_tag_end
-                found_long_org_tag = long_org_tag
-            else:
-                # These means we found a known tag in the remainder/extension section, which is an error
-                if tag in self.short_tag_mapping:
-                    error = error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, original_tag,
-                                                       index_in_tag=index_start + prefix_tag_adj,
-                                                       index_in_tag_end=index_in_tag_end + prefix_tag_adj,
-                                                       expected_parent_tag=self.short_tag_mapping[tag])
-                    return str(original_tag), None, None, error
-
-        full_tag_string = str(original_tag)
-        # skip over the tag prefix if present
-        full_tag_string = full_tag_string[len(prefix):]
-        # Finally don't actually adjust the tag if it's hed2 style.
-        if not self.is_hed3_compatible:
-            return full_tag_string, None, found_index_end, []
-
-        remainder = full_tag_string[found_index_end:]
-        long_tag_string = found_long_org_tag + remainder
-
-        # calculate short_tag index into long tag.
-        found_index_start += (len(long_tag_string) - len(full_tag_string))
-        remainder_start_index = found_index_end + (len(long_tag_string) - len(full_tag_string))
-        return prefix + long_tag_string, found_index_start + prefix_tag_adj, remainder_start_index + prefix_tag_adj, {}
 
     # ===============================================
     # Basic tag attributes
@@ -792,7 +681,6 @@ class HedSchema:
 
         return attributes
 
-
     # ===============================================
     # Private utility functions
     # ===============================================
@@ -817,7 +705,7 @@ class HedSchema:
         Returns
         -------
         """
-        self.no_duplicate_tags = True
+        self._has_duplicate_tags = False
         base_tag_dict = self._sections[HedSectionKey.AllTags].all_names
         new_short_tag_dict = {}
         for tag, tag_entry in base_tag_dict.items():
@@ -834,7 +722,7 @@ class HedSchema:
             if short_clean_tag not in new_short_tag_dict:
                 new_short_tag_dict[short_clean_tag] = new_tag_entry
             else:
-                self.no_duplicate_tags = False
+                self._has_duplicate_tags = True
                 if not isinstance(new_short_tag_dict[short_clean_tag], list):
                     new_short_tag_dict[short_clean_tag] = [new_short_tag_dict[short_clean_tag]]
                 new_short_tag_dict[short_clean_tag].append(new_tag_entry)
@@ -871,6 +759,7 @@ class HedSchema:
         new_val = tag_entry.has_attribute(key, return_value)
         return new_val
 
+    # todo: Consider moving these into HedTag
     def _get_tag_units_portion(self, original_tag_unit_value, formatted_tag_unit_value,
                                tag_unit_class_units):
         """Checks to see if the specified string has a valid unit, and removes it if so.
@@ -936,7 +825,7 @@ class HedSchema:
             found_unit = True
             stripped_value = str(unit_value)[0:-len(unit)].strip()
 
-        if found_unit and self.has_unit_modifiers:
+        if found_unit and self.unit_modifiers:
             if is_unit_symbol:
                 modifier_attribute_name = HedKey.SIUnitSymbolModifier
             else:
@@ -1022,7 +911,7 @@ class HedSchema:
             long_tag_name = long_tag_name.lower()
         return self._sections[key_class].get(long_tag_name)
 
-    def _add_tag_to_dict(self, long_tag_name, key_class=HedSectionKey.AllTags):
+    def _add_tag_to_dict(self, long_tag_name, key_class):
         self._sections[key_class]._add_to_dict(long_tag_name)
 
     def _add_unit_class_unit(self, unit_class, unit_class_unit):

@@ -6,8 +6,7 @@ from hed.schema.hed_schema_constants import HedSectionKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema import HedSchema
 from hed.schema import schema_validation_util
-from hed.schema import wiki_constants
-
+from hed.schema.fileio import wiki_constants
 
 level_expression = r'\*+'
 attributes_expression = r'\{.*\}'

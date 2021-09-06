@@ -2,7 +2,7 @@
 import copy
 from xml.etree.ElementTree import Element, SubElement
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema import xml_constants
+from hed.schema.fileio import xml_constants
 
 
 class HedSchema2XML:
@@ -68,7 +68,7 @@ class HedSchema2XML:
                 tag_levels[level] = child_tag
 
     def _output_units(self, hed_schema):
-        if not hed_schema.has_unit_classes:
+        if not hed_schema.unit_classes:
             return
         unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.UnitClasses,
                                                                                      self.save_as_legacy_format))

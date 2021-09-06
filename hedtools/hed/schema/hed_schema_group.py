@@ -44,11 +44,11 @@ class HedSchemaGroup:
         bool
             Returns True if this is a valid hed3 schema with no duplicate short tags.
         """
-        return not all([schema.no_duplicate_tags for schema in self._schemas.values()])
+        return any([schema.has_duplicate_tags for schema in self._schemas.values()])
 
     @property
-    def has_unit_classes(self):
-        return all([schema.has_unit_classes for schema in self._schemas.values()])
+    def unit_classes(self):
+        return all([schema.unit_classes for schema in self._schemas.values()])
 
     @property
     def is_hed3_compatible(self):
@@ -60,58 +60,23 @@ class HedSchemaGroup:
         return True
 
     @property
-    def has_unit_modifiers(self):
-        return all([schema.has_unit_modifiers for schema in self._schemas.values()])
+    def unit_modifiers(self):
+        return all([schema.unit_modifiers for schema in self._schemas.values()])
 
     @property
-    def has_value_classes(self):
-        return all([schema.has_value_classes for schema in self._schemas.values()])
+    def value_classes(self):
+        return all([schema.value_classes for schema in self._schemas.values()])
 
     def __eq__(self, other):
         return self._schemas == other._schemas
 
-    def calculate_canonical_forms(self, original_tag, error_handler=None):
-        """
-        This takes a hed tag(short or long form) and converts it to the long form
-        Works left to right.(mostly relevant for errors)
-        Note: This only does minimal validation
+    def schema_for_prefix(self, prefix):
+        schema = self._schemas.get(prefix)
+        return schema
 
-        eg 'Event'                    - Returns ('Event', None)
-           'Sensory event'            - Returns ('Event/Sensory event', None)
-        Takes Value:
-           'Environmental sound/Unique Value'
-                                      - Returns ('Item/Sound/Environmental Sound/Unique Value', None)
-        Extension Allowed:
-            'Experiment control/demo_extension'
-                                      - Returns ('Event/Experiment Control/demo_extension/', None)
-            'Experiment control/demo_extension/second_part'
-                                      - Returns ('Event/Experiment Control/demo_extension/second_part', None)
-
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            A single hed tag(long or short)
-        error_handler: ErrorHandler
-            The error handler to use for conversion
-        Returns
-        -------
-        long_tag: str
-            The converted long tag
-        short_tag_index: int
-            The position the short tag starts at in long_tag
-        extension_index: int
-            The position the extension or value starts at in the long_tag
-        errors: list
-            a list of errors while converting
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.calculate_canonical_forms(original_tag, error_handler)
-
-        validation_issues = error_handler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, original_tag,
-                                                        original_tag.library_prefix, list(self._schemas.keys()))
-        return str(original_tag), None, None, validation_issues
+    @property
+    def valid_prefixes(self):
+        return self._schemas.keys()
 
     # ===============================================
     # Basic tag attributes

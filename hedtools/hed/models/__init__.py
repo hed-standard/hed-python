@@ -7,4 +7,3 @@ from hed.models.def_mapper import DefinitionMapper
 from hed.models.column_mapper import ColumnMapper
 from hed.models.hed_string import HedString
 from hed.models.hed_group import HedGroup
-from hed.models.hed_tag import HedTag

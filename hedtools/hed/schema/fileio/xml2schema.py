@@ -7,7 +7,7 @@ import xml
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.schema import HedSchema
-from hed.schema import xml_constants
+from hed.schema.fileio import xml_constants
 
 
 class HedSchemaXMLParser:

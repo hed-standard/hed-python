@@ -5,7 +5,7 @@ from hed import schema
 from hed.schema import HedKey, HedSectionKey
 from hed.errors.exceptions import HedFileError
 from hed.models.hed_string import HedString
-from hed.models import HedTag
+from hed.schema.hed_tag import HedTag
 from tests.validator.test_tag_validator_2g import TestHed
 
 
