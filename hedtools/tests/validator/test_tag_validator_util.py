@@ -2,7 +2,7 @@ import unittest
 
 from hed.validator.tag_validator import TagValidator
 from tests.validator.test_tag_validator_2g import TestHed
-from hed.models.hed_tag import HedTag
+from hed.schema.hed_tag import HedTag
 
 
 class StringUtilityFunctions(TestHed):

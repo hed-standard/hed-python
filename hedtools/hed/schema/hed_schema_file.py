@@ -1,8 +1,8 @@
 import os
 
 
-from hed.schema.xml2schema import HedSchemaXMLParser
-from hed.schema.wiki2schema import HedSchemaWikiParser
+from hed.schema.fileio.xml2schema import HedSchemaXMLParser
+from hed.schema.fileio.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -50,6 +50,7 @@ def load_schema(hed_file_path=None, hed_url_path=None, library_prefix=None):
         hed_schema.set_library_prefix(library_prefix=library_prefix)
 
     return hed_schema
+
 
 # todo: this could be updated to also support .mediawiki format.
 def get_hed_xml_version(hed_xml_file_path):

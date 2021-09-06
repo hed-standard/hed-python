@@ -37,8 +37,10 @@ class HedSchemaEntry:
             return False
         if self.attributes != other.attributes:
             # We only want to compare known attributes
-            self_attr = {key: value for key, value in self.attributes.items() if not self._unknown_attributes or key not in self._unknown_attributes}
-            other_attr = {key: value for key, value in other.attributes.items() if not other._unknown_attributes or key not in other._unknown_attributes}
+            self_attr = {key: value for key, value in self.attributes.items()
+                         if not self._unknown_attributes or key not in self._unknown_attributes}
+            other_attr = {key: value for key, value in other.attributes.items()
+                          if not other._unknown_attributes or key not in other._unknown_attributes}
             if self_attr != other_attr:
                 return False
         if self.description != other.description:
@@ -48,7 +50,7 @@ class HedSchemaEntry:
         return True
 
 
-class HedSchemaSection():
+class HedSchemaSection:
     def __init__(self, section_key):
         # {lower_case_name: HedSchemaEntry}
         self.all_names = {}
