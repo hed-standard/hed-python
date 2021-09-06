@@ -1,8 +1,8 @@
-{% macro create_process_options(assemble=False,convert=False,to_long=False,to_short=False,validate=False) %}
+{% macro create_process_options(assemble=False,extract=False,convert=False,to_long=False,to_short=False,validate=False) %}
     <h3>Pick an action: </h3>
     {% if assemble %}
     <div class="form-group">
-        <input class="radio-btn" type="radio" name="command_option" checked
+        <input class="radio-btn" type="radio" name="command_option"
                id="command_assemble" value="command_assemble"
                aria-label="Select this button to assemble" aria-checked="true">
         <label class="secondary-label">Assemble</label> &nbsp
@@ -19,6 +19,15 @@
                id="command_convert" value="command_convert"
                aria-label="Select this button to convert" aria-checked="true">
         <label class="secondary-label">Convert</label>
+    </div>
+    {% endif %}
+
+    {% if extract %}
+    <div class="form-group">
+        <input class="radio-btn" type="radio" name="command_option"
+               id="command_extract" value="command_extract"
+               aria-label="Select this button to extract" aria-checked="true">
+        <label class="secondary-label">Extract</label>
     </div>
     {% endif %}
 

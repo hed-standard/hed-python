@@ -2,8 +2,7 @@ const TEXT_FILE_EXTENSIONS = ['tsv', 'txt'];
 
 $(function () {
     prepareForm();
-});
-
+})
 
 /**
  * Events file handler function. Checks if the file uploaded has a valid spreadsheet extension.
@@ -11,20 +10,18 @@ $(function () {
 $('#events_file').on('change', function () {
     let events = $('#events_file');
     let eventsPath = events.val();
-    let eventsFile = events[0].files[0];
+
     clearFlashMessages();
-    removeColumnInfo(false);
-    if (cancelWasPressedInChromeFileUpload(eventsPath)) {
-        clearForm();
-        return;
-    }
-    updateFileLabel(eventsPath, '#events_display_name');
-    if (fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
-        setColumnsInfo(eventsFile, 'events_flash', undefined, true, false, false);
-    } else {
+    removeColumnInfo("show_columns");
+    removeColumnInfo("show_events")
+    if (cancelWasPressedInChromeFileUpload(eventsPath) || !fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
         clearForm();
         flashMessageOnScreen('Please upload a tsv file (.tsv, .txt)', 'error', 'events_flash');
+        return;
     }
+
+    updateFileLabel(eventsPath, '#events_display_name');
+    setEventsTable(events)
 });
 
 /**
@@ -45,7 +42,8 @@ function clearForm() {
     $('#events_form')[0].reset();
     $('#events_display_name').text('');
     clearFlashMessages();
-    hideColumnInfo(false);
+    // hideColumnInfo("show_columns");
+    //hideColumnInfo("show_events");
     hideOtherSchemaVersionFileUpload();
 }
 
@@ -53,7 +51,7 @@ function clearForm() {
  * Clear the flash messages that aren't related to the form submission.
  */
 function clearFlashMessages() {
-    clearColumnInfoFlashMessages();
+    //clearColumnInfoFlashMessages();
     clearSchemaSelectFlashMessages();
     clearJsonInputFlashMessages();
     flashMessageOnScreen('', 'success', 'events_flash');
@@ -68,8 +66,19 @@ function clearFlashMessages() {
 function prepareForm() {
     clearForm();
     getSchemaVersions()
-    hideColumnInfo(false);
+    //hideColumnInfo("show_columns");
+    //hideColumnInfo("show_events");
     hideOtherSchemaVersionFileUpload();
+}
+
+function setEventsTable(events) {
+    let eventsFile = events[0].files[0];
+    let checkRadio = document.querySelector('input[name="command_options"]:checked');
+    if (checkRadio.id === "command_extract") {
+        setColumnsInfo(eventsFile, 'events_flash', undefined, true, false, "show_events")
+    } else {
+        setColumnsInfo(eventsFile, 'events_flash', undefined, true, false, "show_columns")
+    }
 }
 
 /**

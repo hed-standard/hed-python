@@ -1,19 +1,22 @@
 
 function clearColumnInfoFlashMessages() {
-    flashMessageOnScreen('', 'success', 'tag_columns_flash');
+    if ($('#tag_columns_flash').length) {
+        flashMessageOnScreen('', 'success', 'tag_columns_flash')
+    }
 }
 
 /**
  * Gets information a file with columns. This information the names of the columns in the specified
- * worksheet and indices that contain HED tags.
- * @param {string} columnsFile - Name of a file with columns.
+ * sheet_name and indices that contain HED tags.
+ * @param {File} columnsFile - File object with columns.
  * @param {string} flashMessageLocation - ID name of the flash message element in which to display errors.
- * @param {string} worksheetName - Name of worksheet or undefined.
+ * @param {string} worksheetName - Name of sheet_name or undefined.
  * @param {boolean} hasColumnNames - If true has column names
- * @param {boolean} repopulateWorksheet - If true repopulate the select pull down with worksheet names.
- * @param {boolean} showIndices - Show boxes with indices.
+ * @param {boolean} repopulateWorksheet - If true repopulate the select pull down with sheet_name names.
+ * @param {string} displayType - Show boxes with indices.
  */
-function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefined, hasColumnNames=true, repopulateWorksheet=true, showIndices=true) {
+function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefined, hasColumnNames=true,
+                        repopulateWorksheet=true, displayType="show_columns") {
     let formData = new FormData();
     formData.append('columns_file', columnsFile);
     if (worksheetName !== undefined) {
@@ -27,18 +30,19 @@ function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefin
         processData: false,
         dataType: 'json',
         success: function (info) {
-            if (info['message'])
-                flashMessageOnScreen(info['message'], 'error', flashMessageLocation)
-            else {
-                if (repopulateWorksheet) {
-                    populateWorksheetDropdown(info['worksheet_names']);
-                }
-                if (hasColumnNames && !showIndices) {
-                    showColumnNames(info['column_names']);
-                }
-                if (showIndices) {
-                   showColumnPrefixes(info['column_names'], hasColumnNames);
-                }
+            if (info['message']) {
+                flashMessageOnScreen(info['message'], 'error', flashMessageLocation);
+                return;
+            }
+            if (repopulateWorksheet) {
+                populateWorksheetDropdown(info['worksheet_names']);
+            }
+            if (displayType === "show_columns") {
+                    showColumns(info, hasColumnNames);
+            } else if (displayType === "show_indices") {
+                   showIndices(info, hasColumnNames);
+            } else if (displayType === "showEvents") {
+                   showEvents(info, hasColumnNames);
             }
         },
         error: function () {
@@ -49,67 +53,106 @@ function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefin
 
 /**
  * Hides  columns section in the form.
+ * @param {string} displayType - One of show_columns, show_indices, or show_events
  */
-function hideColumnInfo(showIndices = true) {
-    if (showIndices) {
-        $('#column_prefixes').hide()
-    } else {
-        $('#column_names').hide();
-    }
+function hideColumnInfo(displayType="show_columns") {
+    if (displayType === "show_columns" && $('#show_columns').length) {
+        $('#show_columns').hide()
+    } else if (displayType === "show_indices" && $('#show_indices').length) {
+        $('#show_indices').hide()
+    } else if (displayType === "show_events" && $('#show_events').length) {
+        $('#show_events').hide()
+   }
 }
 
 
 /**
  * Clears tag column text boxes.
+ * @param {string} displayType - One of show_columns, show_indices, or show_events
  */
-function removeColumnInfo(showIndices = true) {
-    if (showIndices) {
-        $('#column_prefix_table').children().remove();
-    } else {
-        $('#column_names_table').children().remove();
+function removeColumnInfo(displayType="show_columns") {
+    if (displayType === "show_indices" && $('#show_indices_table').length) {
+        $('#show_indices_table').children().remove();
+    } else if (displayType === "show_columns" && $('#show_columns_table').length) {
+        $('#show_columns_table').children().remove();
+    } else if (displayType === "show_events" && $('#show_events_table').length) {
+        $('#show_events_table').children().remove();
     }
 }
 
 /**
  * Sets the components related to the spreadsheet columns when they are not empty.
- * @param {Array} columnNames - An array containing the spreadsheet column names.
+ * @param {Object} columnDict - An array containing the spreadsheet column names.
+ * @param {boolean} hasColumnNames - boolean indicating whether array has column names.
  */
-function showColumnNames(columnNames) {
-    $('#column_names').show();
-    let columnTable = $('#column_names_table');
-    let columnNamesRow = $('<tr/>');
-    let numberOfColumnNames = columnNames.length;
-    columnTable.empty();
-    for (let i = 0; i < numberOfColumnNames; i++) {
-        columnNamesRow.append('<td>' + columnNames[i] + '</td>');
+function showColumns(columnDict, hasColumnNames= true) {
+    if (!hasColumnNames) {
+        return;
     }
+    $('#show_columns').show();
+
+    let columnNamesRow = $('<tr/>');
+    for(const [key, val] of Object.entries(columnDict)) {
+        columnNamesRow.append('<td>' + key + '</td>');
+    }
+    let columnTable = $('#show_columns_table');
+    columnTable.empty();
     columnTable.append(columnNamesRow);
 }
 
 /**
  * Sets the components related to the spreadsheet columns when they are not empty.
- * @param {Array} columnNames - An array containing the spreadsheet column names.
- * @param {bool} hasColumnNames - A boolean indicating whether the first row represents column names
+ * @param {Object} columnDict - A dictionary with column names and number unique column values.
+ * @param {boolean} hasColumnNames - A boolean indicating whether the first row represents column names
  */
-function showColumnPrefixes(columnNames, hasColumnNames=true) {
-    $('#column_prefixes').show();
-    let columnPrefixTable = $('#column_prefix_table');
-    let columnHeader = '<table><tr><th>Has tags</th><th>Column names</th><th>Tag prefix to use (prefixes end in /)</th></tr>'
-    let numberOfColumnNames = columnNames.length;
-    columnPrefixTable.empty();
-    let contents = columnHeader;
-    for (let i = 1; i <= numberOfColumnNames; i++) {
+function showIndices(columnDict, hasColumnNames= true) {
+    $('#show_indices').show();
+    let contents = '<tr><th>Has tags</th><th>Column names</th><th>Tag prefix to use (prefixes end in /)</th></tr>'
+    for(const [key, val] of Object.entries(columnDict)) {
         let column = "column_" + i
-        let columnName = columnNames[i-1]
-        if (!hasColumnNames || columnNames[i-1] === "") {
-            columnName = column
+        let columnName = key
+        let numUnique = val.length
+        if (!hasColumnNames) {
+            columnName = "column_" + i
         }
         let checkName = column + "_check";
         let checkInput = column + "_input";
-        let row = '<tr><td><input type="checkbox" name="' + checkName + '" id="' + checkName + '" checked></td>' +
-            '<td>' + columnName + '</td>' +
-            '<td><input class="wide_text" type="text" name="' + checkInput + '" id="' + checkInput + '" size="50"></td></tr>';
+        let row = '<tr><td><input type="checkbox" name="' + checkName + '" id="' + checkName + ' checked></td>' +
+            '<td>' + columnName + '(' + numUnique + ')</td>' +
+            '<td><input class="wide_text"' + ' type="text" name="' + checkInput +
+            '" id="' + checkInput + '" size="50"></td></tr>';
         contents = contents + row;
     }
-    columnPrefixTable.append(contents + '</table>')
+    let columnTable = $('#show_indices_table');
+    columnTable.empty();
+    columnTable.append(contents)
+}
+
+/**
+ * Sets the components related to the spreadsheet columns when they are not empty.
+ * @param {Object} columnDict - An array containing the spreadsheet column names.
+ * @param {boolean} hasColumnNames - A boolean indicating whether the first row represents column names
+ */
+function showEvents(columnDict, hasColumnNames=true) {
+    $('#column_events').show();
+    let columnEventsTable = $('#column_events_table');
+    let contents = '<tr>Include?<th></th><th>Column name (unique entries)(</th><th>Categorical?</th></tr>'
+    columnEventsTable.empty();
+    let i = 1;
+    for(const [key, val] of Object.entries(columnDict)) {
+        let column = "column_" + i
+        let columnName = key
+        if (!hasColumnNames) {
+            columnName = "column_" + i
+        }
+        let useName = column + "_use";
+        let numUnique = val.length
+        let categoryName = column + "_category";
+        let row = '<tr><td><input type="checkbox" name="' + useName + '" id="' + useName + '"></td>' +
+            '<td>' + columnName + '(' + numUnique + ')' + '</td>' +
+            '<td><input type="checkbox" name="' + categoryName + '" id="' + categoryName + '"></td></tr>';
+        contents = contents + row;
+        i = i + 1;
+    }
+    columnEventsTable.append(contents + '</table>')
 }

@@ -3,6 +3,7 @@ CHECK_FOR_WARNINGS = 'check_for_warnings'
 COMMAND = 'command'
 COMMAND_ASSEMBLE = 'command_assemble'
 COMMAND_CONVERT = 'command_convert'
+COMMAND_EXTRACT = 'command_extract'
 COMMAND_OPTION = 'command_option'
 COMMAND_TO_LONG = 'command_to_long'
 COMMAND_TO_SHORT = 'command_to_short'
@@ -31,7 +32,10 @@ EVENTS_STRING = 'events_string'
 EVENTS_SUBMIT = 'events_submit'
 EVENTS_SUBMIT_FLASH = 'events_submit_flash'
 
-OTHER_VERSION_OPTION = 'Other'
+FORMAT_OPTION = 'format_option'
+FORMAT_TO_EXCEL = 'to_excel'
+FORMAT_TO_JSON = 'to_json'
+FORMAT_TO_TSV = 'to_tsv'
 
 HEDSTRING = 'hedstring'
 
@@ -42,6 +46,7 @@ JSON_SIDECAR = 'json_sidecar'
 JSON_STRING = 'json_string'
 JSON_STRINGS = 'json_strings'
 
+OTHER_VERSION_OPTION = 'Other'
 OUTPUT_DISPLAY_NAME = 'output_display_name'
 
 # Schema-specific constants

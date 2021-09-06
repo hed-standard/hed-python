@@ -1,8 +1,6 @@
 import os
-import io
 from flask import current_app
 from werkzeug.utils import secure_filename
-import openpyxl
 from hed import models
 from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
@@ -11,39 +9,38 @@ from hed.validator.event_validator import EventValidator
 from hed.util.file_util import get_file_extension
 
 from hedweb.constants import common, file_constants
-from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, file_extension_is_valid, \
-    generate_filename
+from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
 
 
-def get_columns_info(request):
-    columns_file = request.files.get(common.COLUMNS_FILE, '')
-    if columns_file:
-        filename = columns_file.filename
-    else:
-        raise HedFileError('MissingSpreadsheetFile', 'An uploadable file was not provided', '')
-    worksheet = request.form.get(common.WORKSHEET_SELECTED, None)
-
-    if file_extension_is_valid(filename, file_constants.EXCEL_FILE_EXTENSIONS):
-        wb = openpyxl.load_workbook(columns_file, read_only=True)
-        worksheet_names = wb.sheetnames
-        if not worksheet_names:
-            raise HedFileError('BadExcelFile', 'Excel files must worksheets', None)
-        elif not worksheet:
-            worksheet = worksheet_names[0]
-        elif worksheet and worksheet not in worksheet_names:
-            raise HedFileError('BadWorksheetName', f'Worksheet {worksheet} not in Excel file', '')
-        headers = [c.value for c in next(wb[worksheet].iter_rows(min_row=1, max_row=1))]
-        columns_info = {common.COLUMNS_FILE: filename, common.COLUMN_NAMES: headers,
-                        common.WORKSHEET_SELECTED: worksheet, common.WORKSHEET_NAMES: worksheet_names}
-        wb.close()
-    elif file_extension_is_valid(filename, file_constants.TEXT_FILE_EXTENSIONS):
-        columns_info = {common.COLUMN_NAMES: get_text_file_first_row(io.StringIO(columns_file.read().decode("utf-8")))}
-    else:
-        raise HedFileError('BadFileExtension',
-                           f'File {filename} extension does not correspond to an Excel or tsv file', '')
-    return columns_info
+# def get_columns_info(request):
+#     columns_file = request.files.get(common.COLUMNS_FILE, '')
+#     if columns_file:
+#         filename = columns_file.filename
+#     else:
+#         raise HedFileError('MissingSpreadsheetFile', 'An uploadable file was not provided', '')
+#     sheet_name = request.form.get(common.WORKSHEET_SELECTED, None)
+#
+#     if file_extension_is_valid(filename, file_constants.EXCEL_FILE_EXTENSIONS):
+#         wb = openpyxl.load_workbook(columns_file, read_only=True)
+#         worksheet_names = wb.sheetnames
+#         if not worksheet_names:
+#             raise HedFileError('BadExcelFile', 'Excel files must worksheets', None)
+#         elif not sheet_name:
+#             sheet_name = worksheet_names[0]
+#         elif sheet_name and sheet_name not in worksheet_names:
+#             raise HedFileError('BadWorksheetName', f'Worksheet {sheet_name} not in Excel file', '')
+#         headers = [c.value for c in next(wb[sheet_name].iter_rows(min_row=1, max_row=1))]
+#         columns_info = {common.COLUMNS_FILE: filename, common.COLUMN_NAMES: headers,
+#                         common.WORKSHEET_SELECTED: sheet_name, common.WORKSHEET_NAMES: worksheet_names}
+#         wb.close()
+#     elif file_extension_is_valid(filename, file_constants.TEXT_FILE_EXTENSIONS):
+#         columns_info = {common.COLUMN_NAMES: get_text_file_first_row(io.StringIO(columns_file.read().decode("utf-8")))}
+#     else:
+#         raise HedFileError('BadFileExtension',
+#                            f'File {filename} extension does not correspond to an Excel or tsv file', '')
+#     return columns_info
 
 
 def get_input_from_spreadsheet_form(request):

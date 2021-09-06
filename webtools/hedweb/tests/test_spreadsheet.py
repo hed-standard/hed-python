@@ -40,7 +40,7 @@ class Test(TestWebBase):
             self.assertEqual(common.COMMAND_VALIDATE, arguments[common.COMMAND],
                              "generate_input_from_spreadsheet_form should have a command")
             self.assertEqual('LKT 8HED3', arguments[common.WORKSHEET_NAME],
-                             "generate_input_from_spreadsheet_form should have a worksheet name")
+                             "generate_input_from_spreadsheet_form should have a sheet_name name")
             self.assertTrue(arguments[common.HAS_COLUMN_NAMES],
                             "generate_input_from_spreadsheet_form should have column names")
 
