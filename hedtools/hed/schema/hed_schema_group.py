@@ -4,7 +4,6 @@
 # todo: Switch various properties to this once we require python 3.8
 # from functools import cached_property
 from hed.errors.exceptions import HedExceptions, HedFileError
-from hed.errors.error_types import ValidationErrors
 
 
 class HedSchemaGroup:
@@ -29,7 +28,7 @@ class HedSchemaGroup:
         library_prefixes = [hed_schema._library_prefix for hed_schema in schema_list]
         if len(set(library_prefixes)) != len(library_prefixes):
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX, "Multiple schemas share the same tag prefix.  This is not allowed.", filename="Combined Schema")
-        self._schemas = {hed_schema._library_prefix:hed_schema for hed_schema in schema_list}
+        self._schemas = {hed_schema._library_prefix: hed_schema for hed_schema in schema_list}
 
     # ===============================================
     # General schema properties/functions
@@ -71,6 +70,21 @@ class HedSchemaGroup:
         return self._schemas == other._schemas
 
     def schema_for_prefix(self, prefix):
+        """
+            Return the specific HedSchema object for the given tag prefix.
+
+            Returns None if prefix is invalid.
+
+        Parameters
+        ----------
+        prefix : str
+            A schema library prefix to get the schema for.
+
+        Returns
+        -------
+        schema: HedSchema
+            The specific schema for this library prefix
+        """
         schema = self._schemas.get(prefix)
         return schema
 
@@ -262,6 +276,6 @@ class HedSchemaGroup:
 
     def get_all_tags_with_attribute(self, key):
         new_dict = {}
-        for schema in self._schemas:
-            new_dict.update(schema._tag_dictionaries[key])
+        for schema in self._schemas.values():
+            new_dict.update(schema.get_all_tags_with_attribute(key))
         return new_dict

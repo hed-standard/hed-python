@@ -16,10 +16,6 @@ import inflect
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
 
-# todo: remove
-from hed.errors import error_reporter
-from hed.errors.error_types import ValidationErrors
-
 
 class HedSchema:
     def __init__(self):
@@ -70,6 +66,20 @@ class HedSchema:
         return self.header_attributes.get('library')
 
     def schema_for_prefix(self, prefix):
+        """
+            Return the specific HedSchema object for the given tag prefix.
+
+            This is mostly a placeholder for HedSchemaGroup.  May be refactored out later.
+
+        Parameters
+        ----------
+        prefix : str
+            A schema library prefix to get the schema for.
+
+        Returns
+        -------
+        schema: HedSchema
+        """
         return self
 
     @property
@@ -152,7 +162,8 @@ class HedSchema:
 
         len_prefix = len(self._library_prefix)
 
-        new_section_dict = {library_prefix.lower() + tag_name[len_prefix:]: tag_entry for tag_name, tag_entry in self._sections[HedSectionKey.AllTags].items()}
+        new_section_dict = {library_prefix.lower() + tag_name[len_prefix:]: tag_entry for
+                            tag_name, tag_entry in self._sections[HedSectionKey.AllTags].items()}
         for entry in new_section_dict.values():
             entry.long_name = library_prefix.lower() + entry.long_name[len_prefix:]
         self._sections[HedSectionKey.AllTags].all_names = new_section_dict
@@ -539,6 +550,17 @@ class HedSchema:
         self._all_tags_attributes_cache = {}
 
     def _initialize_attributes(self, key_class):
+        """
+        Sets the valid attributes for the given section based on the schema.
+
+        Parameters
+        ----------
+        key_class : str
+            The section key for the section to update.
+        Returns
+        -------
+
+        """
         self._sections[key_class].valid_attributes = self._get_attributes_for_class(key_class)
 
     def add_hed2_attributes(self, only_add_if_none_present=True):
@@ -652,11 +674,11 @@ class HedSchema:
         return final_list
 
     def get_tag_attribute_names(self):
-        return [tag_entry.long_name for tag_entry in self._sections[HedSectionKey.Attributes].values()
+        return {tag_entry.long_name:tag_entry for tag_entry in self._sections[HedSectionKey.Attributes].values()
                 if not tag_entry.has_attribute(HedKey.UnitClassProperty)
                 and not tag_entry.has_attribute(HedKey.UnitProperty)
                 and not tag_entry.has_attribute(HedKey.UnitModifierProperty)
-                and not tag_entry.has_attribute(HedKey.ValueClassProperty)]
+                and not tag_entry.has_attribute(HedKey.ValueClassProperty)}
 
     def get_all_tag_attributes(self, tag_name, key_class=HedSectionKey.AllTags):
         """
@@ -687,7 +709,7 @@ class HedSchema:
     def _create_empty_sections(self):
         dictionaries = {}
         # Add main sections
-        dictionaries[HedSectionKey.AllTags] = HedSchemaSection(HedSectionKey.AllTags)
+        dictionaries[HedSectionKey.AllTags] = HedSchemaSection(HedSectionKey.AllTags, case_sensitive=False)
         dictionaries[HedSectionKey.UnitClasses] = HedSchemaSection(HedSectionKey.UnitClasses)
         dictionaries[HedSectionKey.Units] = HedSchemaSection(HedSectionKey.Units)
         dictionaries[HedSectionKey.UnitModifiers] = HedSchemaSection(HedSectionKey.UnitModifiers)
@@ -706,7 +728,7 @@ class HedSchema:
         -------
         """
         self._has_duplicate_tags = False
-        base_tag_dict = self._sections[HedSectionKey.AllTags].all_names
+        base_tag_dict = self._sections[HedSectionKey.AllTags]
         new_short_tag_dict = {}
         for tag, tag_entry in base_tag_dict.items():
             unformatted_tag = tag_entry.long_name
@@ -870,8 +892,8 @@ class HedSchema:
 
         Returns
         -------
-        attributes: [str] or {str:}
-            A list of all the attributes for this section.  May return a dict where the keys are the attribute names.
+        attributes: {str:entry} or HedSchemaSection
+            A dict of all the attributes for this section.  May be a HedSchemaSection and not actually a dict.
         """
         if key_class == HedSectionKey.AllTags:
             return self.get_tag_attribute_names()
@@ -888,7 +910,7 @@ class HedSchema:
             if attrib_class is None:
                 return []
 
-            attributes = [attribute for attribute, entry in self._sections[HedSectionKey.Attributes].items() if entry.has_attribute(attrib_class)]
+            attributes = {attribute:entry for attribute, entry in self._sections[HedSectionKey.Attributes].items() if entry.has_attribute(attrib_class)}
             return attributes
 
     # ===============================================
@@ -907,12 +929,13 @@ class HedSchema:
         -------
 
         """
-        if key_class == HedSectionKey.AllTags:
-            long_tag_name = long_tag_name.lower()
         return self._sections[key_class].get(long_tag_name)
 
     def _add_tag_to_dict(self, long_tag_name, key_class):
-        self._sections[key_class]._add_to_dict(long_tag_name)
+        section = self._sections[key_class]
+        if not section:
+            self._initialize_attributes(key_class)
+        section._add_to_dict(long_tag_name)
 
     def _add_unit_class_unit(self, unit_class, unit_class_unit):
         if unit_class not in self._sections[HedSectionKey.UnitClasses]:
@@ -939,9 +962,7 @@ class HedSchema:
     def _add_single_default_property(self, prop_name):
         from hed.schema import hed_2g_attributes
         prop_desc = hed_2g_attributes.properties[prop_name]
-        # Todo: improve this
-        if prop_name not in self._sections[HedSectionKey.Properties]:
-            self._add_tag_to_dict(prop_name, HedSectionKey.Properties)
+        self._add_tag_to_dict(prop_name, HedSectionKey.Properties)
         tag_entry = self._get_entry_for_tag(prop_name, HedSectionKey.Properties)
         if prop_desc:
             tag_entry.description = prop_desc
