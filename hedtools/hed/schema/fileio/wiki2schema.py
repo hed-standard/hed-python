@@ -266,7 +266,6 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
-        self._schema._initialize_attributes(HedSectionKey.AllTags)
         parent_tags = []
         for line in lines:
             if line.startswith(wiki_constants.ROOT_TAG):
@@ -288,8 +287,6 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
-        self._schema._initialize_attributes(HedSectionKey.UnitClasses)
-        self._schema._initialize_attributes(HedSectionKey.Units)
         current_unit_class = ""
 
         for line in lines:
@@ -313,7 +310,6 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
-        self._schema._initialize_attributes(HedSectionKey.UnitModifiers)
         for line in lines:
             self._add_single_line(line, HedSectionKey.UnitModifiers)
 
@@ -325,18 +321,15 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
-        self._schema._initialize_attributes(HedSectionKey.ValueClasses)
         for line in lines:
             self._add_single_line(line, HedSectionKey.ValueClasses)
 
     def _read_properties(self, lines):
-        # self._schema._initialize_attributes(HedSectionKey.Properties)
         for line in lines:
             self._add_single_line(line, HedSectionKey.Properties)
         self._schema.add_default_properties()
 
     def _read_attributes(self, lines):
-        self._schema._initialize_attributes(HedSectionKey.Attributes)
         self.attributes = {}
         for line in lines:
             self._add_single_line(line, HedSectionKey.Attributes)

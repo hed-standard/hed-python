@@ -229,10 +229,6 @@ class HedTag:
             checking_prefix = checking_prefix[slash_index:]
         self._tag = required_prefix + self.org_tag
 
-    def remove_prefix_if_present(self, prefix_to_remove):
-        if self.lower().startswith(prefix_to_remove.lower()):
-            self._tag = str(self)[len(prefix_to_remove):]
-
     def lower(self):
         """Convenience function, equivalent to str(self).lower()"""
         return str(self).lower()

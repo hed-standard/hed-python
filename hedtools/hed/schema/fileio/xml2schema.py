@@ -122,7 +122,6 @@ class HedSchemaXMLParser:
         Returns
         -------
         """
-        self._schema._initialize_attributes(HedSectionKey.Attributes)
         section_name = xml_constants.get_section_name(HedSectionKey.Attributes)
         attribute_section = self._get_elements_by_name(section_name)
         if attribute_section:
@@ -138,7 +137,6 @@ class HedSchemaXMLParser:
         self._schema.add_hed2_attributes()
 
     def _populate_value_class_dictionaries(self):
-        self._schema._initialize_attributes(HedSectionKey.ValueClasses)
         section_name = xml_constants.get_section_name(HedSectionKey.ValueClasses)
         value_class_section = self._get_elements_by_name(section_name)
         if not value_class_section:
@@ -147,8 +145,6 @@ class HedSchemaXMLParser:
         def_element_name = xml_constants.get_element_name(HedSectionKey.ValueClasses)
         attribute_elements = self._get_elements_by_name(def_element_name, value_class_section)
         for element in attribute_elements:
-            attribute_name = self._get_element_tag_value(element)
-            self._schema._add_tag_to_dict(attribute_name, key_class=HedSectionKey.ValueClasses)
             self._parse_node(element, HedSectionKey.ValueClasses)
 
     def _populate_tag_dictionaries(self):
@@ -163,7 +159,6 @@ class HedSchemaXMLParser:
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
-        self._schema._initialize_attributes(HedSectionKey.AllTags)
         tag_elements = self._get_elements_by_name("node")
         for tag_element in tag_elements:
             tag = self._get_tag_path_from_tag_element(tag_element)
@@ -186,9 +181,6 @@ class HedSchemaXMLParser:
             default units.
 
         """
-        self._schema._initialize_attributes(HedSectionKey.UnitClasses)
-        self._schema._initialize_attributes(HedSectionKey.Units)
-
         section_name = xml_constants.get_section_name(HedSectionKey.UnitClasses, self._legacy_style_xml)
         units_section_nodes = self._get_elements_by_name(section_name)
         if len(units_section_nodes) == 0:
@@ -199,29 +191,7 @@ class HedSchemaXMLParser:
         unit_class_elements = self._get_elements_by_name(def_element_name, units_section)
 
         if self._legacy_style_xml:
-            for unit_class_element in unit_class_elements:
-                element_name = self._get_element_tag_value(unit_class_element)
-                self._schema._add_unit_class_unit(element_name, None)
-                self._parse_node_old_format(unit_class_element, HedSectionKey.UnitClasses, skip_adding_name=True)
-                element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
-                if not element_units:
-                    # Support super legacy format where units were just comma separated on a single line.
-                    element_units = self._get_element_tag_value(unit_class_element,
-                                                                xml_constants.UNIT_CLASS_UNITS_ELEMENT)
-                    if element_units:
-                        units = element_units.split(',')
-                        units_list = [unit.lower() for unit in units]
-                        for unit in units_list:
-                            self._schema._add_unit_class_unit(element_name, unit)
-                        continue
-                    element_units = []
-
-                element_unit_names = [element.text for element in element_units]
-                for unit in element_unit_names:
-                    self._schema._add_unit_class_unit(element_name, unit)
-                for element in element_units:
-                    self._parse_node_old_format(element, HedSectionKey.Units, element_name=element.text,
-                                         skip_adding_name=True)
+            self._populate_unit_class_dictionaries_legacy(unit_class_elements)
         else:
             for unit_class_element in unit_class_elements:
                 element_name = self._get_element_tag_value(unit_class_element)
@@ -235,6 +205,31 @@ class HedSchemaXMLParser:
                 for element in element_units:
                     self._parse_node(element, HedSectionKey.Units, skip_adding_name=True)
 
+    def _populate_unit_class_dictionaries_legacy(self, unit_class_elements):
+        for unit_class_element in unit_class_elements:
+            element_name = self._get_element_tag_value(unit_class_element)
+            self._schema._add_unit_class_unit(element_name, None)
+            self._parse_node_old_format(unit_class_element, HedSectionKey.UnitClasses, skip_adding_name=True)
+            element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
+            if not element_units:
+                # Support super legacy format where units were just comma separated on a single line.
+                element_units = self._get_element_tag_value(unit_class_element,
+                                                            xml_constants.UNIT_CLASS_UNITS_ELEMENT)
+                if element_units:
+                    units = element_units.split(',')
+                    units_list = [unit.lower() for unit in units]
+                    for unit in units_list:
+                        self._schema._add_unit_class_unit(element_name, unit)
+                    continue
+                element_units = []
+
+            element_unit_names = [element.text for element in element_units]
+            for unit in element_unit_names:
+                self._schema._add_unit_class_unit(element_name, unit)
+            for element in element_units:
+                self._parse_node_old_format(element, HedSectionKey.Units, element_name=element.text,
+                                            skip_adding_name=True)
+
     def _populate_unit_modifier_dictionaries(self):
         """
         Gets all unit modifier definitions from the
@@ -243,8 +238,6 @@ class HedSchemaXMLParser:
         -------
 
         """
-        self._schema._initialize_attributes(HedSectionKey.UnitModifiers)
-
         section_name = xml_constants.get_section_name(HedSectionKey.UnitModifiers, self._legacy_style_xml)
         unit_modifier_section_nodes = self._get_elements_by_name(section_name)
         if len(unit_modifier_section_nodes) == 0:
@@ -281,7 +274,6 @@ class HedSchemaXMLParser:
         """
         return self._reformat_xsd_attrib(self._root_element.attrib)
 
-
     def _get_prologue(self):
         prologue_elements = self._get_elements_by_name(xml_constants.PROLOGUE_ELEMENT)
         if len(prologue_elements) == 1:
@@ -308,10 +300,8 @@ class HedSchemaXMLParser:
             tag_entry.description = node_desc
         for attribute_name in node_element.attrib:
             new_value = node_element.get(attribute_name)
-            # Todo: improve this check(also maybe this check should be later?
             if new_value == "true":
-                attr_entry = self._schema._get_entry_for_tag(attribute_name, HedSectionKey.Attributes)
-                if attr_entry and attr_entry.has_attribute(HedKey.BoolProperty):
+                if tag_entry.attribute_has_property(attribute_name, HedKey.BoolProperty):
                     new_value = True
             if new_value and attribute_name == xml_constants.DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE:
                 attribute_name = xml_constants.DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE

@@ -79,7 +79,6 @@ This schema is the first official release that includes an xsd and requires unit
 ***	Sit-down <nowiki>[Move from a standing to a sitting position.]</nowiki>
 ***	Sit-up <nowiki>[Move from lying down to a sitting position.]</nowiki>
 ***	Stand-up <nowiki>[Move from a sitting to a standing position.]</nowiki>
-***	Recover-balance <nowiki>[Return to a stable, upright body position.]</nowiki>
 *** Stretch <nowiki>[Straighten or extend body or a part of body to its full length, typically so as to tighten muscles or in order to reach something.]</nowiki>
 *** Shudder <nowiki>[Tremble convulsively, sometimes as a result of fear or revulsion.]</nowiki>
 *** Stumble <nowiki>[Trip or momentarily lose balance and almost fall.]</nowiki>
@@ -1113,7 +1112,6 @@ This schema is the first official release that includes an xsd and requires unit
 ** Underneath <nowiki>[(A (Underneath B)) means A is situated directly below and may be concealed by B.]</nowiki>
 ** Upper-left-of <nowiki>{relatedTag=Lower-left-of,relatedTag=Upper-right-of,relatedTag=Lower-right-of}[(A (Upper-left-of B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
 ** Upper-right-of <nowiki>{relatedTag=Lower-left-of,relatedTag=Upper-left-of,relatedTag=Lower-right-of}[(A (Upper-right-of B)) means A is situated on the upper right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
-** Underneath <nowiki>[(A (Underneath B)) means A is situated directly below and may be concealed by B.]</nowiki>
 ** Within <nowiki>[(A (Within B)) means A is on the inside of or contained in B.]</nowiki>
 * Temporal-relation <nowiki>[Any relationship which includes a temporal or time-based component.]</nowiki>
 ** After <nowiki>[(A After B) means A happens at a time subsequent to a reference time related to B.]</nowiki>
