@@ -2,12 +2,11 @@
 This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema import HedSchema
+from hed.schema import HedSchema
 from hed.schema import schema_validation_util
-from hed.schema import wiki_constants
-
+from hed.schema.fileio import wiki_constants
 
 level_expression = r'\*+'
 attributes_expression = r'\{.*\}'
@@ -20,7 +19,7 @@ square_bracket_removal_expression = r'[\[\]]'
 
 
 # these must always be in order under the current spec.
-class HedSection:
+class HedWikiSection:
     HeaderLine = 2
     Prologue = 3
     Schema = 4
@@ -35,38 +34,38 @@ class HedSection:
 
 
 SectionStarts = {
-    HedSection.Prologue: wiki_constants.PROLOGUE_SECTION_ELEMENT,
-    HedSection.Schema: wiki_constants.START_HED_STRING,
-    HedSection.EndSchema: wiki_constants.END_SCHEMA_STRING,
-    HedSection.UnitsClasses: wiki_constants.UNIT_CLASS_STRING,
-    HedSection.UnitModifiers: wiki_constants.UNIT_MODIFIER_STRING,
-    HedSection.ValueClasses: wiki_constants.VALUE_CLASS_STRING,
-    HedSection.Attributes: wiki_constants.ATTRIBUTE_DEFINITION_STRING,
-    HedSection.Properties: wiki_constants.ATTRIBUTE_PROPERTY_STRING,
-    HedSection.Epilogue: wiki_constants.EPILOGUE_SECTION_ELEMENT,
-    HedSection.EndHed: wiki_constants.END_HED_STRING
+    HedWikiSection.Prologue: wiki_constants.PROLOGUE_SECTION_ELEMENT,
+    HedWikiSection.Schema: wiki_constants.START_HED_STRING,
+    HedWikiSection.EndSchema: wiki_constants.END_SCHEMA_STRING,
+    HedWikiSection.UnitsClasses: wiki_constants.UNIT_CLASS_STRING,
+    HedWikiSection.UnitModifiers: wiki_constants.UNIT_MODIFIER_STRING,
+    HedWikiSection.ValueClasses: wiki_constants.VALUE_CLASS_STRING,
+    HedWikiSection.Attributes: wiki_constants.ATTRIBUTE_DEFINITION_STRING,
+    HedWikiSection.Properties: wiki_constants.ATTRIBUTE_PROPERTY_STRING,
+    HedWikiSection.Epilogue: wiki_constants.EPILOGUE_SECTION_ELEMENT,
+    HedWikiSection.EndHed: wiki_constants.END_HED_STRING
 }
 
 
 SectionNames = {
-    HedSection.HeaderLine: "Header",
-    HedSection.Prologue: "Prologue",
-    HedSection.Schema: "Schema",
-    HedSection.EndSchema: "EndSchema",
-    HedSection.UnitsClasses: "Unit Classes",
-    HedSection.UnitModifiers: "Unit Modifiers",
-    HedSection.ValueClasses: "Value Classes",
-    HedSection.Attributes: "Attributes",
-    HedSection.Properties: "Properties",
-    HedSection.EndHed: "EndHed"
+    HedWikiSection.HeaderLine: "Header",
+    HedWikiSection.Prologue: "Prologue",
+    HedWikiSection.Schema: "Schema",
+    HedWikiSection.EndSchema: "EndSchema",
+    HedWikiSection.UnitsClasses: "Unit Classes",
+    HedWikiSection.UnitModifiers: "Unit Modifiers",
+    HedWikiSection.ValueClasses: "Value Classes",
+    HedWikiSection.Attributes: "Attributes",
+    HedWikiSection.Properties: "Properties",
+    HedWikiSection.EndHed: "EndHed"
 }
 
 ErrorsBySection = {
-    HedSection.Schema: HedExceptions.SCHEMA_START_MISSING,
-    HedSection.EndSchema: HedExceptions.SCHEMA_END_INVALID,
-    HedSection.EndHed: HedExceptions.HED_END_INVALID
+    HedWikiSection.Schema: HedExceptions.SCHEMA_START_MISSING,
+    HedWikiSection.EndSchema: HedExceptions.SCHEMA_END_INVALID,
+    HedWikiSection.EndHed: HedExceptions.HED_END_INVALID
 }
-required_sections = [HedSection.Schema, HedSection.EndSchema, HedSection.EndHed]
+required_sections = [HedWikiSection.Schema, HedWikiSection.EndSchema, HedWikiSection.EndHed]
 
 
 class HedSchemaWikiParser:
@@ -111,17 +110,17 @@ class HedSchemaWikiParser:
 
         wiki_lines_by_section = self._split_lines_into_sections(wiki_lines)
         parse_order = {
-            HedSection.HeaderLine: self._read_header_section,
-            HedSection.Prologue: self._read_prologue,
-            HedSection.Properties: self._read_properties,
-            HedSection.Epilogue: self._read_epilogue,
+            HedWikiSection.HeaderLine: self._read_header_section,
+            HedWikiSection.Prologue: self._read_prologue,
+            HedWikiSection.Properties: self._read_properties,
+            HedWikiSection.Epilogue: self._read_epilogue,
             # Pass 2
-            HedSection.Attributes: self._read_attributes,
+            HedWikiSection.Attributes: self._read_attributes,
             # Pass3
-            HedSection.Schema: self._read_schema,
-            HedSection.UnitsClasses: self._read_unit_classes,
-            HedSection.UnitModifiers: self._read_unit_modifiers,
-            HedSection.ValueClasses: self._read_value_classes,
+            HedWikiSection.Schema: self._read_schema,
+            HedWikiSection.UnitsClasses: self._read_unit_classes,
+            HedWikiSection.UnitModifiers: self._read_unit_modifiers,
+            HedWikiSection.ValueClasses: self._read_value_classes,
         }
         self._parse_sections(wiki_lines_by_section, parse_order)
 
@@ -149,7 +148,7 @@ class HedSchemaWikiParser:
             A list of lines for each section of the schema(not including the identifying section line)
         """
         # We start having found the header and may still be in it
-        current_section = HedSection.HeaderLine
+        current_section = HedWikiSection.HeaderLine
         found_section = True
         strings_for_section = {}
         for line in wiki_lines:
@@ -177,7 +176,7 @@ class HedSchemaWikiParser:
                 found_section = False
                 continue
 
-            if (current_section != HedSection.Schema and line.startswith(wiki_constants.ROOT_TAG) and
+            if (current_section != HedWikiSection.Schema and line.startswith(wiki_constants.ROOT_TAG) and
                     not (line.startswith(wiki_constants.OLD_SYNTAX_SECTION_NAME) and not self._schema.is_hed3_schema)):
                 raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
                                    f"Invalid section separator '{line.strip()}'", filename=self.filename)
@@ -186,7 +185,7 @@ class HedSchemaWikiParser:
                 raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
                                    f"Invalid section separator '{line.strip()}'", filename=self.filename)
 
-            if current_section == HedSection.Prologue or current_section == HedSection.Epilogue:
+            if current_section == HedWikiSection.Prologue or current_section == HedWikiSection.Epilogue:
                 if line.strip():
                     # we want to preserve all formatting in the prologue and epilogue.
                     if line.endswith("\n"):
@@ -297,11 +296,11 @@ class HedSchemaWikiParser:
             if level == 1:
                 current_unit_class = unit_class
                 self._schema._add_unit_class_unit(current_unit_class, None)
-                self._add_single_line(line, HedKey.UnitClasses, skip_adding_name=True)
+                self._add_single_line(line, HedSectionKey.UnitClasses, skip_adding_name=True)
             # This is a unit class unit
             else:
                 self._schema._add_unit_class_unit(current_unit_class, unit_class)
-                self._add_single_line(line, HedKey.Units, skip_adding_name=True)
+                self._add_single_line(line, HedSectionKey.Units, skip_adding_name=True)
 
     def _read_unit_modifiers(self, lines):
         """Adds the unit modifiers section
@@ -312,7 +311,7 @@ class HedSchemaWikiParser:
             Lines for this section
         """
         for line in lines:
-            self._add_single_line(line, HedKey.UnitModifiers)
+            self._add_single_line(line, HedSectionKey.UnitModifiers)
 
     def _read_value_classes(self, lines):
         """Adds the unit modifiers section
@@ -323,23 +322,19 @@ class HedSchemaWikiParser:
             Lines for this section
         """
         for line in lines:
-            self._add_single_line(line, HedKey.ValueClasses)
+            self._add_single_line(line, HedSectionKey.ValueClasses)
 
     def _read_properties(self, lines):
         for line in lines:
-            prop_name = self._get_tag_name(line)
-            prop_desc = self._get_tag_description(line)
-            self._schema._add_property_name_to_dict(prop_name, prop_desc)
+            self._add_single_line(line, HedSectionKey.Properties)
         self._schema.add_default_properties()
 
     def _read_attributes(self, lines):
         self.attributes = {}
         for line in lines:
-            attribute_name = self._get_tag_name(line)
-
-            self._schema._add_attribute_name_to_dict(attribute_name)
-            self._add_single_line(line, HedKey.Attributes)
+            self._add_single_line(line, HedSectionKey.Attributes)
         self._schema.add_hed2_attributes()
+
 
     def _get_header_attributes(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
@@ -534,7 +529,7 @@ class HedSchemaWikiParser:
                 long_tag_name = "/".join(parent_tags) + "/" + tag_name
             else:
                 long_tag_name = tag_name
-            self._add_single_line(tag_line, HedKey.AllTags, long_tag_name)
+            self._add_single_line(tag_line, HedSectionKey.AllTags, long_tag_name)
 
         return tag_name
 
@@ -547,8 +542,10 @@ class HedSchemaWikiParser:
         node_desc = self._get_tag_description(tag_line)
         node_attributes = self._get_tag_attributes(tag_line)
         if not skip_adding_name:
-            self._schema._add_tag_to_dict(node_name, key_class, node_name)
-        self._schema._add_description_to_dict(node_name, node_desc, key_class)
+            self._schema._add_tag_to_dict(node_name, key_class)
+        tag_entry = self._schema._get_entry_for_tag(node_name, key_class)
+        if node_desc:
+            tag_entry.description = node_desc
 
         for attribute_name, attribute_value in node_attributes.items():
-            self._schema._add_attribute_to_dict(node_name, attribute_name, attribute_value, key_class)
+            tag_entry.set_attribute_value(attribute_name, attribute_value)

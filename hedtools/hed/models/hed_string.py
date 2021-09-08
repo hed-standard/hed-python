@@ -2,7 +2,7 @@
 This module is used to split tags in a HED string.
 """
 from hed.models.hed_group import HedGroup
-from hed.models.hed_tag import HedTag
+from hed.schema.hed_tag import HedTag
 
 
 class HedString(HedGroup):
@@ -261,7 +261,7 @@ class HedString(HedGroup):
         hed_tags: [HedTag]
             The string split apart into hed tags with all delimiters removed
         """
-        from hed.models.hed_tag import HedTag
+        from hed.schema.hed_tag import HedTag
         result_positions = HedString.split_hed_string(hed_string)
         return [HedTag(hed_string, span) for (is_hed_tag, span) in
                 result_positions if is_hed_tag]
