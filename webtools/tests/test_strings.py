@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
         from hedweb.strings import get_input_from_string_form
         with self.app.test:
             environ = create_environ(data={common.STRING_INPUT: 'Red,Blue', common.SCHEMA_VERSION: '8.0.0',
-                                           common.CHECK_FOR_WARNINGS: 'on',
+                                           common.CHECK_FOR_WARNINGS_VALIDATE: 'on',
                                            common.COMMAND_OPTION: common.COMMAND_VALIDATE})
             request = Request(environ)
             arguments = get_input_from_string_form(request)
@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
                                   "get_input_from_string_form should have a HED schema")
             self.assertEqual(common.COMMAND_VALIDATE, arguments[common.COMMAND],
                              "get_input_from_string_form should have a command")
-            self.assertTrue(arguments[common.CHECK_FOR_WARNINGS],
+            self.assertTrue(arguments[common.CHECK_FOR_WARNINGS_VALIDATE],
                             "get_input_from_string_form should have check_for_warnings true when on")
 
     def test_string_process(self):

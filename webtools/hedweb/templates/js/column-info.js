@@ -12,16 +12,20 @@ function clearColumnInfoFlashMessages() {
  * @param {string} flashMessageLocation - ID name of the flash message element in which to display errors.
  * @param {string} worksheetName - Name of sheet_name or undefined.
  * @param {boolean} hasColumnNames - If true has column names
- * @param {boolean} repopulateWorksheet - If true repopulate the select pull down with sheet_name names.
  * @param {string} displayType - Show boxes with indices.
+ * @returns {Array} - Array of worksheet names
  */
 function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefined, hasColumnNames=true,
-                        repopulateWorksheet=true, displayType="show_columns") {
+                        displayType="show_columns") {
     let formData = new FormData();
     formData.append('columns_file', columnsFile);
+    if (hasColumnNames) {
+        formData.append('has_column_names', 'on')
+    }
     if (worksheetName !== undefined) {
         formData.append('worksheet_selected', worksheetName)
     }
+    let worksheet_names = null;
     $.ajax({
         type: 'POST',
         url: "{{url_for('route_blueprint.columns_info_results')}}",
@@ -29,26 +33,20 @@ function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefin
         contentType: false,
         processData: false,
         dataType: 'json',
+        async: false,
         success: function (info) {
             if (info['message']) {
                 flashMessageOnScreen(info['message'], 'error', flashMessageLocation);
-                return;
-            }
-            if (repopulateWorksheet) {
-                populateWorksheetDropdown(info['worksheet_names']);
-            }
-            if (displayType === "show_columns") {
-                    showColumns(info, hasColumnNames);
-            } else if (displayType === "show_indices") {
-                   showIndices(info, hasColumnNames);
-            } else if (displayType === "showEvents") {
-                   showEvents(info, hasColumnNames);
+            } else {
+                showColumnInfo(info['column_dictionary'], hasColumnNames, displayType);
+                worksheet_names = info['worksheet_names'];
             }
         },
         error: function () {
             flashMessageOnScreen('File could not be processed.', 'error', flashMessageLocation);
         }
     });
+    return worksheet_names;
 }
 
 /**
@@ -84,15 +82,27 @@ function removeColumnInfo(displayType="show_columns") {
  * Sets the components related to the spreadsheet columns when they are not empty.
  * @param {Object} columnDict - An array containing the spreadsheet column names.
  * @param {boolean} hasColumnNames - boolean indicating whether array has column names.
+ * @param {string} displayType - string indicating type of display.
  */
-function showColumns(columnDict, hasColumnNames= true) {
-    if (!hasColumnNames) {
-        return;
+function showColumnInfo(columnDict, hasColumnNames= true, displayType="show_columns") {
+    if (hasColumnNames && displayType === "show_columns") {
+        showColumns(columnDict);
+    } else if (displayType === "show_indices") {
+        showIndices(columnDict, hasColumnNames);
+    } else if (hasColumnNames && displayType === "show_events") {
+        showEvents(columnDict);
     }
+}
+
+/**
+ * Shows the column names of the columns dictionary.
+ * @param {Object} columnDict - An array containing the file column names.
+ */
+function showColumns(columnDict) {
     $('#show_columns').show();
 
     let columnNamesRow = $('<tr/>');
-    for(const [key, val] of Object.entries(columnDict)) {
+    for(const key of Object.keys(columnDict)) {
         columnNamesRow.append('<td>' + key + '</td>');
     }
     let columnTable = $('#show_columns_table');
@@ -108,20 +118,21 @@ function showColumns(columnDict, hasColumnNames= true) {
 function showIndices(columnDict, hasColumnNames= true) {
     $('#show_indices').show();
     let contents = '<tr><th>Has tags</th><th>Column names</th><th>Tag prefix to use (prefixes end in /)</th></tr>'
-    for(const [key, val] of Object.entries(columnDict)) {
-        let column = "column_" + i
-        let columnName = key
-        let numUnique = val.length
+    let i = 1;
+    for(const key of Object.keys(columnDict)) {
+        let column = "column_" + i;
+        let columnName = key;
         if (!hasColumnNames) {
-            columnName = "column_" + i
+            columnName = "column_" + i;
         }
         let checkName = column + "_check";
         let checkInput = column + "_input";
-        let row = '<tr><td><input type="checkbox" name="' + checkName + '" id="' + checkName + ' checked></td>' +
-            '<td>' + columnName + '(' + numUnique + ')</td>' +
+        let row = '<tr><td><input type="checkbox" name="' + checkName + '" id="' + checkName + '" checked></td>' +
+            '<td>' + columnName + '</td>' +
             '<td><input class="wide_text"' + ' type="text" name="' + checkInput +
             '" id="' + checkInput + '" size="50"></td></tr>';
         contents = contents + row;
+        i = i + 1;
     }
     let columnTable = $('#show_indices_table');
     columnTable.empty();
@@ -134,23 +145,26 @@ function showIndices(columnDict, hasColumnNames= true) {
  * @param {boolean} hasColumnNames - A boolean indicating whether the first row represents column names
  */
 function showEvents(columnDict, hasColumnNames=true) {
-    $('#column_events').show();
-    let columnEventsTable = $('#column_events_table');
-    let contents = '<tr>Include?<th></th><th>Column name (unique entries)(</th><th>Categorical?</th></tr>'
+    $('#show_events').show();
+    let columnEventsTable = $('#show_events_table');
+    let contents = '<tr><th>Include?</th><th>Column name (unique entries)</th><th>Categorical?</th></tr>'
     columnEventsTable.empty();
     let i = 1;
     for(const [key, val] of Object.entries(columnDict)) {
-        let column = "column_" + i
-        let columnName = key
+        let column = "column_" + i;
+        let columnName = key;
         if (!hasColumnNames) {
-            columnName = "column_" + i
+            columnName = column;
         }
         let useName = column + "_use";
-        let numUnique = val.length
+        let numUnique = Object.keys(val).length;
         let categoryName = column + "_category";
+        let columnField = column + "_name"
         let row = '<tr><td><input type="checkbox" name="' + useName + '" id="' + useName + '"></td>' +
-            '<td>' + columnName + '(' + numUnique + ')' + '</td>' +
-            '<td><input type="checkbox" name="' + categoryName + '" id="' + categoryName + '"></td></tr>';
+            '<td>' + columnName + ' (' + numUnique + ')' + '</td>' +
+            '<td><input type="checkbox" name="' + categoryName + '" id="' + categoryName + '">' +
+                '<input type="text" hidden id="' + columnField + '" name="' + columnField +
+                '" value="' + columnName + '"</td></tr>';
         contents = contents + row;
         i = i + 1;
     }

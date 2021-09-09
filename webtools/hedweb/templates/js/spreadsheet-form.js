@@ -10,7 +10,7 @@ $('#has_column_names').on('change', function() {
     let spreadsheetFile = $('#spreadsheet_file')[0].files[0];
     let worksheetName = $('#worksheet_name option:selected').text();
     let hasColumnNames = $("#has_column_names").is(':checked')
-    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames, true, "show_indices")
+    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames, "show_indices")
 })
 
 /**
@@ -28,17 +28,14 @@ $('#spreadsheet_file').on('change', function () {
         return
     }
     updateFileLabel(spreadsheetPath, '#spreadsheet_display_name');
-    let worksheetName = undefined
+    let hasColumnNames = $("#has_column_names").is(':checked')
+    let worksheetNames = setColumnsInfo(spreadsheetFile, 'spreadsheet_flash',  undefined, hasColumnNames, "show_indices")
     if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
-        worksheetName = $('#worksheet_name option:selected').text();
-        $('#worksheet_select').show();
-    }
-    else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
+        populateWorksheetDropdown(worksheetNames);
+    } else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
         $('#worksheet_name').empty();
         $('#worksheet_select').hide();
     }
-    let hasColumnNames = $("#has_column_names").is(':checked')
-    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames, true,"show_indices")
 })
 
 /**
@@ -60,7 +57,7 @@ $('#worksheet_name').on('change', function () {
     let worksheetName = $('#worksheet_name option:selected').text();
     let hasColumnNames = $("#has_column_names").is(':checked')
     clearFlashMessages();
-    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames,false, "show_indices");
+    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames, "show_indices");
 });
 
 /**
@@ -85,12 +82,6 @@ function clearFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet_submit_flash');
 }
 
-/**
- * Hides  sheet_name select section in the form.
- */
-function hideWorksheetSelect() {
-    $('#worksheet_select').hide();
-}
 
 /**
  * Populate the Excel sheet_name select box.
@@ -98,9 +89,8 @@ function hideWorksheetSelect() {
  */
 function populateWorksheetDropdown(worksheetNames) {
     if (Array.isArray(worksheetNames) && worksheetNames.length > 0) {
-        let worksheetDropdown = $('#worksheet_name');
         $('#worksheet_select').show();
-        worksheetDropdown.empty();
+        $('#worksheet_name').empty();
         for (let i = 0; i < worksheetNames.length; i++) {
             $('#worksheet_name').append(new Option(worksheetNames[i], worksheetNames[i]) );
         }
@@ -114,13 +104,6 @@ function populateWorksheetDropdown(worksheetNames) {
 function prepareForm() {
     clearForm();
     getSchemaVersions()
-}
-
-/**
- * Show the sheet_name select section.
- */
-function showWorksheetSelect() {
-    $('#worksheet_select').show();
 }
 
 /**

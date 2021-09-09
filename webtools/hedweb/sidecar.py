@@ -27,7 +27,7 @@ def get_input_from_sidecar_form(request):
     """
     arguments = {common.SCHEMA: get_hed_schema_from_pull_down(request), common.JSON_SIDECAR: None,
                  common.COMMAND: request.form.get(common.COMMAND_OPTION, None),
-                 common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')}
+                 common.CHECK_FOR_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_FOR_WARNINGS_VALIDATE, 'on')}
     if common.JSON_FILE in request.files:
         f = request.files[common.JSON_FILE]
         fb = io.StringIO(f.read(file_constants.BYTE_LIMIT).decode('ascii'))

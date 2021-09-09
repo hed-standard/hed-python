@@ -8,8 +8,7 @@ $(function () {
  * Events file handler function. Checks if the file uploaded has a valid spreadsheet extension.
  */
 $('#events_file').on('change', function () {
-    let events = $('#events_file');
-    let eventsPath = events.val();
+    let eventsPath = $('#events_file').val();
 
     clearFlashMessages();
     removeColumnInfo("show_columns");
@@ -21,7 +20,7 @@ $('#events_file').on('change', function () {
     }
 
     updateFileLabel(eventsPath, '#events_display_name');
-    setEventsTable(events)
+    setEventsTable('#events_file')
 });
 
 /**
@@ -42,8 +41,8 @@ function clearForm() {
     $('#events_form')[0].reset();
     $('#events_display_name').text('');
     clearFlashMessages();
-    // hideColumnInfo("show_columns");
-    //hideColumnInfo("show_events");
+    hideColumnInfo("show_columns");
+    hideColumnInfo("show_events");
     hideOtherSchemaVersionFileUpload();
 }
 
@@ -51,7 +50,7 @@ function clearForm() {
  * Clear the flash messages that aren't related to the form submission.
  */
 function clearFlashMessages() {
-    //clearColumnInfoFlashMessages();
+    clearColumnInfoFlashMessages();
     clearSchemaSelectFlashMessages();
     clearJsonInputFlashMessages();
     flashMessageOnScreen('', 'success', 'events_flash');
@@ -66,18 +65,20 @@ function clearFlashMessages() {
 function prepareForm() {
     clearForm();
     getSchemaVersions()
-    //hideColumnInfo("show_columns");
-    //hideColumnInfo("show_events");
     hideOtherSchemaVersionFileUpload();
 }
 
-function setEventsTable(events) {
+/**
+ * Sets the column table for this event file
+ * @param {string} event_tag  - jquery tag pointing to the event file.
+ */
+function setEventsTable(event_tag) {
+    let events = $(event_tag);
     let eventsFile = events[0].files[0];
-    let checkRadio = document.querySelector('input[name="command_options"]:checked');
-    if (checkRadio.id === "command_extract") {
-        setColumnsInfo(eventsFile, 'events_flash', undefined, true, false, "show_events")
+    if ($("#command_extract").is(":checked")) {
+        setColumnsInfo(eventsFile, 'events_flash', undefined, true,  "show_events")
     } else {
-        setColumnsInfo(eventsFile, 'events_flash', undefined, true, false, "show_columns")
+        setColumnsInfo(eventsFile, 'events_flash', undefined, true,  "show_columns")
     }
 }
 
@@ -92,7 +93,7 @@ function submitForm() {
     let eventsFile = $('#events_file')[0].files[0].name;
     let display_name = convertToResultsName(eventsFile, prefix)
     clearFlashMessages();
-    flashMessageOnScreen('Worksheet is being validated ...', 'success',
+    flashMessageOnScreen('Event file is being processed ...', 'success',
         'events_submit_flash')
     $.ajax({
             type: 'POST',

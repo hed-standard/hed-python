@@ -1,5 +1,5 @@
-{% macro create_schema_pulldown() %}
-        <h3>Choose a HED schema version:</h3>
+{% macro create_schema_pulldown(title) %}
+        <h3>{{ title }}</h3>
         <div class="form-group">
             <label class="secondary-label" for="schema_version">HED schema version:</label>
             <select name="schema_version" id="schema_version"></select><br>

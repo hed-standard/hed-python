@@ -151,6 +151,7 @@ function submitSchemaForm() {
     ;
 }
 
+
 function updateForm() {
      let filename = getSchemaFilename();
      let isXMLFilename = fileHasValidExtension(filename, [SCHEMA_XML_EXTENSION]);

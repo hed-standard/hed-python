@@ -5,19 +5,13 @@
 {% from "process-options.html" import create_process_options %}
 {% block content %}
     <h2>Process a BIDS-style event file</h2>
-    <p>
-        <i> Press Process.<br/>
-            Upload a BIDS-style tsv events file and an optional JSON events metadata file.<br/>
-            Select a HED schema.<br/>
-            You will see either a downloadable results file or a status message.
-        </i>
-    </p>
+
     <form id="events_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options(assemble=True,extract=True,validate=True) }}
+        {{ create_process_options('1) Pick an action:',assemble=True,extract=True,validate=True) }}
 
-        <h3>Upload BIDS-style events file:</h3>
+        <h3>2) Upload BIDS-style events file:</h3>
         <div class="form-group">
             <label class="secondary-label" for="events_file">Events file:</label>
             <label class="btn-group file-browse-group">
@@ -26,11 +20,17 @@
                 <input type="file" name="events_file" id="events_file"/>
             </label>
             <p class="flash" id="events_flash"></p>
+            <input type="hidden" id="has_column_names" name="has_column_names" value="on"/>
         </div>
 
-        {{ create_json_input() }}
-        {{ create_schema_pulldown() }}
+        {{ create_column_info('show_columns') }}
+        {{ create_column_info('show_events') }}
+        <p class="flash" id="tag_columns_flash"></p>
 
+        {{ create_json_input('3) Upload BIDS-style JSON sidecar if needed:') }}
+        {{ create_schema_pulldown('4) Choose a HED schema version:') }}
+
+        <h3>5) Process</h3>
         <div class="form-group">
             <button id="events_submit" type="button">Process</button>
             <p class="flash" id="events_submit_flash"></p>

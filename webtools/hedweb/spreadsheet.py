@@ -9,38 +9,11 @@ from hed.validator.event_validator import EventValidator
 from hed.util.file_util import get_file_extension
 
 from hedweb.constants import common, file_constants
+from hedweb.columns import get_prefix_dict
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
+
 app_config = current_app.config
-
-
-# def get_columns_info(request):
-#     columns_file = request.files.get(common.COLUMNS_FILE, '')
-#     if columns_file:
-#         filename = columns_file.filename
-#     else:
-#         raise HedFileError('MissingSpreadsheetFile', 'An uploadable file was not provided', '')
-#     sheet_name = request.form.get(common.WORKSHEET_SELECTED, None)
-#
-#     if file_extension_is_valid(filename, file_constants.EXCEL_FILE_EXTENSIONS):
-#         wb = openpyxl.load_workbook(columns_file, read_only=True)
-#         worksheet_names = wb.sheetnames
-#         if not worksheet_names:
-#             raise HedFileError('BadExcelFile', 'Excel files must worksheets', None)
-#         elif not sheet_name:
-#             sheet_name = worksheet_names[0]
-#         elif sheet_name and sheet_name not in worksheet_names:
-#             raise HedFileError('BadWorksheetName', f'Worksheet {sheet_name} not in Excel file', '')
-#         headers = [c.value for c in next(wb[sheet_name].iter_rows(min_row=1, max_row=1))]
-#         columns_info = {common.COLUMNS_FILE: filename, common.COLUMN_NAMES: headers,
-#                         common.WORKSHEET_SELECTED: sheet_name, common.WORKSHEET_NAMES: worksheet_names}
-#         wb.close()
-#     elif file_extension_is_valid(filename, file_constants.TEXT_FILE_EXTENSIONS):
-#         columns_info = {common.COLUMN_NAMES: get_text_file_first_row(io.StringIO(columns_file.read().decode("utf-8")))}
-#     else:
-#         raise HedFileError('BadFileExtension',
-#                            f'File {filename} extension does not correspond to an Excel or tsv file', '')
-#     return columns_info
 
 
 def get_input_from_spreadsheet_form(request):
@@ -63,7 +36,7 @@ def get_input_from_spreadsheet_form(request):
         common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None),
         common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
         common.HAS_COLUMN_NAMES: form_has_option(request, common.HAS_COLUMN_NAMES, 'on'),
-        common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
+        common.CHECK_FOR_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_FOR_WARNINGS_VALIDATE, 'on'),
     }
 
     tag_columns, prefix_dict = get_prefix_dict(request.form)
@@ -182,57 +155,3 @@ def spreadsheet_validate(hed_schema, spreadsheet):
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
                 common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f'Spreadsheet {display_name} had no validation errors'}
-
-
-def get_prefix_dict(form_dict):
-    """Returns a tag prefix dictionary from a form dictionary.
-
-    Parameters
-    ----------
-   form_dict: dict
-        The dictionary returned from a form that contains a column prefix table
-    Returns
-    -------
-    dict
-        A dictionary whose keys are column numbers (starting with 1) and values are tag prefixes to prepend.
-    """
-    tag_columns = []
-    prefix_dict = {}
-    keys = form_dict.keys()
-    for key in keys:
-        if not key.startswith('column') or key.endswith('check'):
-            continue
-        pieces = key.split('_')
-        check = 'column_' + pieces[1] + '_check'
-        if form_dict.get(check, None) != 'on':
-            continue
-        if form_dict[key]:
-            prefix_dict[int(pieces[1])] = form_dict[key]
-        else:
-            tag_columns.append(int(pieces[1]))
-    return tag_columns, prefix_dict
-
-
-def get_text_file_first_row(filename, delimiter='\t'):
-    """Gets the contents of the first row of the text file.
-
-    Parameters
-    ----------
-    filename: str or file-like
-        The path to a text other.
-    delimiter: str
-
-    Returns
-    -------
-    list
-        list containing first row.
-
-    """
-
-    if isinstance(filename, str):
-        with open(filename, 'r', encoding='utf-8') as opened_text_file:
-            first_line = opened_text_file.readline()
-    else:
-        first_line = filename.readline()
-    text_file_columns = first_line.split(delimiter)
-    return text_file_columns

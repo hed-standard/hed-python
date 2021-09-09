@@ -91,7 +91,7 @@ class Test(unittest.TestCase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
-                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
+                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS_VALIDATE: True}
         with self.app.app_context():
             results = spreadsheet_process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
-                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
+                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS_VALIDATE: True}
         arguments[common.SCHEMA] = hed_schema
 
         with self.app.app_context():

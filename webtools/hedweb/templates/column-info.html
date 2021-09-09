@@ -1,13 +1,7 @@
 {% macro create_column_info(display_type) %}
-    <div class="form-group" id=display_type>
-    {% if display_type in ['show_indices'] %}
-        <h3>Column information (check columns to include):</h3>
-    {% elif display_type in ['show_columns'] %}
-        <h3>Column names:</h3>
-    {% elif isplay_type in ['show_events'] %}
-        <h3>Column event summary (Check columns to include):</h3>
-    {% endif %}
-        <table id=display_type+"_table"></table>
+    <div class="form-group" id="{{ display_type }}">
+    {% set table_name =  display_type + "_table" %}
+        <table id="{{ table_name }}"></table>
     </div>
-    <p class="flash" id="tag_columns_flash"></p>
+
 {% endmacro %}

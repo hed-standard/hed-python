@@ -1,53 +1,23 @@
 {% extends "layout.html" %}
 {% from "json-input.html" import create_json_input %}
 {% from "schema-pulldown.html" import create_schema_pulldown %}
+{% from "process-options.html" import create_process_options %}
 
 {% block content %}
+    <h2>Process BIDS-style JSON sidecar</h2>
 
     <form id="sidecar_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        <h2>Process BIDS-style JSON sidecar</h2>
-        <p>
-            <i>Pick an action.<br/>
-                Upload a BIDS-style JSON events metadata file.<br/>
-                Select a HED schema.<br/>
-                Press Process.<br/>
-                You will see a downloadable results file and/or a status message.
-            </i>
-        </p>
-        <h3>Pick an action: </h3>
+        {{ create_process_options('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
+        {{ create_json_input('2) Upload BIDS-style JSON sidecar:') }}
+        {{ create_schema_pulldown('3) Choose a HED schema version:') }}
 
-        <div class="form-group">
-            <input class="radio-btn" type="radio" name="command_option"
-                   id="command_to_long" value="command_to_long"
-                   aria-label="Select this button to convert to long form">
-            <label class="secondary-label">Convert to long</label>
-        </div>
-
-        <div class="form-group">
-            <input class="radio-btn" type="radio" name="command_option"
-                   id="command_to_short" value="command_to_short"
-                   aria-label="Select this button to convert to short form">
-            <label class="secondary-label">Convert to short</label>
-        </div>
-
-        <div class="form-group">
-            <input class="radio-btn" type="radio" name="command_option" checked
-                   id="command_validate" value="command_validate"
-                   aria-label="Select this button to validate" aria-checked="true">
-            <label class="secondary-label">Validate</label> &nbsp
-            (<input type="checkbox" name="check_for_warnings" id="check_for_warnings" checked>
-            <label for="expand_defs">Check for warnings)</label>
-        </div>
-        {{ create_json_input() }}
-        {{ create_schema_pulldown() }}
-
+        <h3>4) Process:</h3>
         <div class="form-group">
             <button id="sidecar_submit" type="button">Process</button>
             <p class="flash" id="sidecar_submit_flash"></p>
         </div>
-
     </form>
     <script type="module">
         {%  include 'js/form-helpers.js' %}

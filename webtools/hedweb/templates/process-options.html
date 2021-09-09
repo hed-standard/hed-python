@@ -1,23 +1,23 @@
-{% macro create_process_options(assemble=False,extract=False,convert=False,to_long=False,to_short=False,validate=False) %}
-    <h3>Pick an action: </h3>
+{% macro create_process_options(title, assemble=False,extract=False,convert=False,to_long=False,to_short=False,validate=False) %}
+    <h3>{{ title }}</h3>
     {% if assemble %}
     <div class="form-group">
         <input class="radio-btn" type="radio" name="command_option"
                id="command_assemble" value="command_assemble"
-               aria-label="Select this button to assemble" aria-checked="true">
+               aria-label="Select this button to assemble">
         <label class="secondary-label">Assemble</label> &nbsp
         (<input type="checkbox" name="defs_expand" id="defs_expand" checked>
-        <label for="expand_defs">Expand defs</label> &nbsp
-        <input type="checkbox" name="check_for_warnings" id="check_for_warnings" checked>
-        <label for="expand_defs">Check for warnings)</label>
+        <label for="defs_expand">Expand defs</label> &nbsp
+        <input type="checkbox" name="check_for_warnings_assemble" id="check_for_warnings_assemble" checked>
+        <label for="check_for_warnings_assemble">Check for warnings)</label>
     </div>
     {% endif %}
 
     {% if convert %}
     <div class="form-group">
-        <input class="radio-btn" type="radio" name="command_option" checked
+        <input class="radio-btn" type="radio" name="command_option"
                id="command_convert" value="command_convert"
-               aria-label="Select this button to convert" aria-checked="true">
+               aria-label="Select this button to convert" >
         <label class="secondary-label">Convert</label>
     </div>
     {% endif %}
@@ -26,7 +26,7 @@
     <div class="form-group">
         <input class="radio-btn" type="radio" name="command_option"
                id="command_extract" value="command_extract"
-               aria-label="Select this button to extract" aria-checked="true">
+               aria-label="Select this button to extract">
         <label class="secondary-label">Extract</label>
     </div>
     {% endif %}
@@ -55,8 +55,8 @@
                id="command_validate" value="command_validate"
                aria-label="Select this button to validate" aria-checked="true">
         <label class="secondary-label">Validate</label>  &nbsp
-        (<input type="checkbox" name="check_for_warnings" id="check_for_warnings" checked>
-        <label for="expand_defs">Check for warnings)</label>
+        (<input type="checkbox" name="check_for_warnings_validate" id="check_for_warnings_validate" checked>
+        <label for="check_for_warnings_validate">Check for warnings)</label>
     </div>
     {% endif %}
 {% endmacro %}
