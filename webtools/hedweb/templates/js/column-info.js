@@ -56,13 +56,10 @@ function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefin
  * @param {string} displayType - One of show_columns, show_indices, or show_events
  */
 function hideColumnInfo(displayType="show_columns") {
-    if (displayType === "show_columns" && $('#show_columns').length) {
-        $('#show_columns').hide()
-    } else if (displayType === "show_indices" && $('#show_indices').length) {
-        $('#show_indices').hide()
-    } else if (displayType === "show_events" && $('#show_events').length) {
-        $('#show_events').hide()
-   }
+    let display_tag = "#" + displayType;
+    if ($(display_tag).length) {
+        $(display_tag).hide()
+    }
 }
 
 
@@ -71,12 +68,9 @@ function hideColumnInfo(displayType="show_columns") {
  * @param {string} displayType - One of show_columns, show_indices, or show_events
  */
 function removeColumnInfo(displayType="show_columns") {
-    if (displayType === "show_indices" && $('#show_indices_table').length) {
-        $('#show_indices_table').children().remove();
-    } else if (displayType === "show_columns" && $('#show_columns_table').length) {
-        $('#show_columns_table').children().remove();
-    } else if (displayType === "show_events" && $('#show_events_table').length) {
-        $('#show_events_table').children().remove();
+    let table_tag = "#" + displayType + "_table";
+    if ($(table_tag).length) {
+        $(table_tag).children().remove();
     }
 }
 
@@ -102,7 +96,6 @@ function showColumnInfo(columnDict, hasColumnNames= true, displayType="show_colu
  */
 function showColumns(columnDict) {
     $('#show_columns').show();
-
     let columnNamesRow = $('<tr/>');
     for(const key of Object.keys(columnDict)) {
         columnNamesRow.append('<td>' + key + '</td>');

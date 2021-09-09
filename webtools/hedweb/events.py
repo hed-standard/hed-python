@@ -116,7 +116,7 @@ def events_assemble(hed_schema, events, defs_expand=True):
 
 
 def events_extract(hed_schema, events, columns_selected):
-    """Converts an events file from short to long unless short_to_long is set to False, then long_to_short
+    """Extracts a JSON sidecar template from a BIDS-style events file.
 
     Parameters
     ----------
