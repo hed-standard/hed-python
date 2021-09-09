@@ -17,6 +17,8 @@ function clearColumnInfoFlashMessages() {
  */
 function setColumnsInfo(columnsFile, flashMessageLocation, worksheetName=undefined, hasColumnNames=true,
                         displayType="show_columns") {
+    if (columnsFile == null)
+        return null
     let formData = new FormData();
     formData.append('columns_file', columnsFile);
     if (hasColumnNames) {

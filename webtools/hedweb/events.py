@@ -72,7 +72,7 @@ def events_process(arguments):
     elif command == common.COMMAND_ASSEMBLE:
         results = events_assemble(hed_schema, events, arguments.get(common.DEFS_EXPAND, True))
     elif command == common.COMMAND_EXTRACT:
-        results = events_extract(arguments.get(common.EVENTS, None), arguments.get(common.COLUMNS_SELECTED, None))
+        results = events_extract(hed_schema, events, arguments.get(common.COLUMNS_SELECTED, None))
     else:
         raise HedFileError('UnknownEventsProcessingMethod', f'Command {command} is missing or invalid', '')
     return results
@@ -115,11 +115,13 @@ def events_assemble(hed_schema, events, defs_expand=True):
             'schema_version': schema_version, 'msg_category': 'success', 'msg': 'Events file successfully expanded'}
 
 
-def events_extract(events, columns_selected):
+def events_extract(hed_schema, events, columns_selected):
     """Converts an events file from short to long unless short_to_long is set to False, then long_to_short
 
     Parameters
     ----------
+    hed_schema: HedSchema
+        A HEDSchema object
     events: EventInput
         An events input object
     columns_selected: dict
@@ -130,24 +132,27 @@ def events_extract(events, columns_selected):
     dict
         A dictionary pointing to extracted JSON file.
     """
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     columns_info = get_info_in_columns(events.dataframe)
     hed_dict = {}
     for key in columns_selected:
         if key not in columns_info:
-            raise HedFileError("INVALID_COLUMN_NAME", f"{key} is not a valid column name in the events file","")
+            raise HedFileError("INVALID_COLUMN_NAME", f"{key} is not a valid column name in the events file", "")
+        key_description = f"Description for {key}"
         if columns_selected[key]:
             levels = {}
             hed = {}
             for val_key in columns_info[key].keys():
-                levels[val_key] = "Level for " + val_key
-                hed[val_key] = "Description/Tags for " + val_key
-            hed_dict[key] = {"Description": "Description for " + key, "Levels": levels, "HED": hed}
+                levels[val_key] = f"Level for {val_key}"
+                hed[val_key] = f"Description/Tags for {val_key}"
+            hed_dict[key] = {"Description": key_description, "Levels": levels, "HED": hed}
         else:
-            hed_dict[key] = {"Description": "Description for " + key, "HED": "Label/#"}
+            hed_dict[key] = {"Description": key_description, "HED": "Label/#"}
     display_name = events.name
     file_name = generate_filename(display_name, suffix='_extracted', extension='.json')
-    return {common.COMMAND: common.COMMAND_EXTRACT, 'data': json.dumps(hed_dict), 'output_display_name': file_name,
-            'schema_version': 'none', 'msg_category': 'success', 'msg': 'Events extraction not implemented'}
+    return {common.COMMAND: common.COMMAND_EXTRACT, 'data': json.dumps(hed_dict, indent=4),
+            'output_display_name': file_name, 'schema_version': schema_version,
+            'msg_category': 'success', 'msg': 'Events extraction to JSON complete'}
 
 
 def events_validate(hed_schema, events):

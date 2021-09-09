@@ -4,23 +4,24 @@ $(function () {
     prepareForm();
 })
 
+
+$('#process_options').change(function(){
+    setEventsTable('#events_file')
+});
+
+
 /**
  * Events file handler function. Checks if the file uploaded has a valid spreadsheet extension.
  */
 $('#events_file').on('change', function () {
     let eventsPath = $('#events_file').val();
-
-    clearFlashMessages();
-    removeColumnInfo("show_columns");
-    removeColumnInfo("show_events")
     if (cancelWasPressedInChromeFileUpload(eventsPath) || !fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
         clearForm();
         flashMessageOnScreen('Please upload a tsv file (.tsv, .txt)', 'error', 'events_flash');
         return;
     }
-
-    updateFileLabel(eventsPath, '#events_display_name');
     setEventsTable('#events_file')
+    updateFileLabel(eventsPath, '#events_display_name');
 });
 
 /**
@@ -73,6 +74,9 @@ function prepareForm() {
  * @param {string} event_tag  - jquery tag pointing to the event file.
  */
 function setEventsTable(event_tag) {
+    clearFlashMessages();
+    removeColumnInfo("show_columns");
+    removeColumnInfo("show_events")
     let events = $(event_tag);
     let eventsFile = events[0].files[0];
     if ($("#command_extract").is(":checked")) {
