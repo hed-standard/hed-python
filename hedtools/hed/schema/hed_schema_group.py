@@ -4,7 +4,6 @@
 # todo: Switch various properties to this once we require python 3.8
 # from functools import cached_property
 from hed.errors.exceptions import HedExceptions, HedFileError
-from hed.errors.error_types import ValidationErrors
 
 
 class HedSchemaGroup:
@@ -29,7 +28,7 @@ class HedSchemaGroup:
         library_prefixes = [hed_schema._library_prefix for hed_schema in schema_list]
         if len(set(library_prefixes)) != len(library_prefixes):
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX, "Multiple schemas share the same tag prefix.  This is not allowed.", filename="Combined Schema")
-        self._schemas = {hed_schema._library_prefix:hed_schema for hed_schema in schema_list}
+        self._schemas = {hed_schema._library_prefix: hed_schema for hed_schema in schema_list}
 
     # ===============================================
     # General schema properties/functions
@@ -44,11 +43,11 @@ class HedSchemaGroup:
         bool
             Returns True if this is a valid hed3 schema with no duplicate short tags.
         """
-        return not all([schema.no_duplicate_tags for schema in self._schemas.values()])
+        return any([schema.has_duplicate_tags for schema in self._schemas.values()])
 
     @property
-    def has_unit_classes(self):
-        return all([schema.has_unit_classes for schema in self._schemas.values()])
+    def unit_classes(self):
+        return all([schema.unit_classes for schema in self._schemas.values()])
 
     @property
     def is_hed3_compatible(self):
@@ -60,58 +59,38 @@ class HedSchemaGroup:
         return True
 
     @property
-    def has_unit_modifiers(self):
-        return all([schema.has_unit_modifiers for schema in self._schemas.values()])
+    def unit_modifiers(self):
+        return all([schema.unit_modifiers for schema in self._schemas.values()])
 
     @property
-    def has_value_classes(self):
-        return all([schema.has_value_classes for schema in self._schemas.values()])
+    def value_classes(self):
+        return all([schema.value_classes for schema in self._schemas.values()])
 
     def __eq__(self, other):
         return self._schemas == other._schemas
 
-    def calculate_canonical_forms(self, original_tag, error_handler=None):
+    def schema_for_prefix(self, prefix):
         """
-        This takes a hed tag(short or long form) and converts it to the long form
-        Works left to right.(mostly relevant for errors)
-        Note: This only does minimal validation
+            Return the specific HedSchema object for the given tag prefix.
 
-        eg 'Event'                    - Returns ('Event', None)
-           'Sensory event'            - Returns ('Event/Sensory event', None)
-        Takes Value:
-           'Environmental sound/Unique Value'
-                                      - Returns ('Item/Sound/Environmental Sound/Unique Value', None)
-        Extension Allowed:
-            'Experiment control/demo_extension'
-                                      - Returns ('Event/Experiment Control/demo_extension/', None)
-            'Experiment control/demo_extension/second_part'
-                                      - Returns ('Event/Experiment Control/demo_extension/second_part', None)
-
+            Returns None if prefix is invalid.
 
         Parameters
         ----------
-        original_tag: HedTag
-            A single hed tag(long or short)
-        error_handler: ErrorHandler
-            The error handler to use for conversion
+        prefix : str
+            A schema library prefix to get the schema for.
+
         Returns
         -------
-        long_tag: str
-            The converted long tag
-        short_tag_index: int
-            The position the short tag starts at in long_tag
-        extension_index: int
-            The position the extension or value starts at in the long_tag
-        errors: list
-            a list of errors while converting
+        schema: HedSchema
+            The specific schema for this library prefix
         """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.calculate_canonical_forms(original_tag, error_handler)
+        schema = self._schemas.get(prefix)
+        return schema
 
-        validation_issues = error_handler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, original_tag,
-                                                        original_tag.library_prefix, list(self._schemas.keys()))
-        return str(original_tag), None, None, validation_issues
+    @property
+    def valid_prefixes(self):
+        return self._schemas.keys()
 
     # ===============================================
     # Basic tag attributes
@@ -295,8 +274,8 @@ class HedSchemaGroup:
         if schema:
             return schema.get_stripped_unit_value(original_tag)
 
-    def get_all_with_attribute(self, key):
+    def get_all_tags_with_attribute(self, key):
         new_dict = {}
-        for schema in self._schemas:
-            new_dict.update(schema._tag_dictionaries[key])
+        for schema in self._schemas.values():
+            new_dict.update(schema.get_all_tags_with_attribute(key))
         return new_dict

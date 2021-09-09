@@ -147,7 +147,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 -------
                 error_list: [{}]
                 """
-                from hed.models.hed_tag import HedTag
+                from hed.schema.hed_tag import HedTag
                 from hed.models.hed_group import HedGroup
                 if isinstance(tag, HedTag):
                     org_tag_text = tag.org_tag
@@ -169,7 +169,6 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
 # Import after hed_error decorators are defined.
 from hed.errors import error_messages
-
 
 class ErrorHandler:
     def __init__(self):

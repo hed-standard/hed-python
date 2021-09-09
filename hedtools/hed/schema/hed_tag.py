@@ -1,3 +1,5 @@
+from hed.errors import error_reporter
+from hed.errors.error_types import ValidationErrors
 
 
 class HedTag:
@@ -227,10 +229,6 @@ class HedTag:
             checking_prefix = checking_prefix[slash_index:]
         self._tag = required_prefix + self.org_tag
 
-    def remove_prefix_if_present(self, prefix_to_remove):
-        if self.lower().startswith(prefix_to_remove.lower()):
-            self._tag = str(self)[len(prefix_to_remove):]
-
     def lower(self):
         """Convenience function, equivalent to str(self).lower()"""
         return str(self).lower()
@@ -254,9 +252,131 @@ class HedTag:
         if not hed_schema:
             return []
 
-        long_form, short_index, remainder_index, tag_issues = hed_schema.calculate_canonical_forms(self, error_handler)
+        specific_schema = hed_schema.schema_for_prefix(self.library_prefix)
+        if not specific_schema:
+            validation_issues = error_handler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, self,
+                                                           self.library_prefix, list(hed_schema.valid_prefixes))
+            return validation_issues
+
+        long_form, short_index, remainder_index, tag_issues = self._calculate_canonical_forms(specific_schema, error_handler)
         self._long_tag = long_form
         self._short_tag_index = short_index
         self._extension_index = remainder_index
 
         return tag_issues
+    
+    def _calculate_canonical_forms(self, hed_schema, error_handler=None):
+        """
+        This takes a hed tag(short or long form) and converts it to the long form
+        Works left to right.(mostly relevant for errors)
+        Note: This only does minimal validation
+
+        Parameters
+        ----------
+        hed_schema: HedSchema
+            The hed schema to use to compute forms of this tag.
+        error_handler: ErrorHandler
+            The error handler to use for context.  Will create a default one if not passed.
+        Returns
+        -------
+        long_tag: str
+            The converted long tag
+        short_tag_index: int
+            The position the short tag starts at in long_tag
+        extension_index: int
+            The position the extension or value starts at in the long_tag
+        errors: list
+            a list of errors while converting
+        """
+        if error_handler is None:
+            error_handler = error_reporter.ErrorHandler()
+
+        clean_tag = self.tag.lower()
+        prefix = self.library_prefix
+        clean_tag = clean_tag[len(prefix):]
+        prefix_tag_adj = len(prefix)
+        split_tags = clean_tag.split("/")
+        found_unknown_extension = False
+        found_index_end = 0
+        found_index_start = 0
+        found_long_org_tag = None
+        index_in_tag_end = 0
+        # Iterate over tags left to right keeping track of current index
+        for tag in split_tags:
+            tag_len = len(tag)
+            # Skip slashes
+            if index_in_tag_end != 0:
+                index_in_tag_end += 1
+            index_start = index_in_tag_end
+            index_in_tag_end += tag_len
+
+            # If we already found an unknown tag, it's implicitly an extension.  No known tags can follow it.
+            if not found_unknown_extension:
+                if tag not in hed_schema.short_tag_mapping:
+                    found_unknown_extension = True
+                    if not found_long_org_tag:
+                        error = error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                           self, index_in_tag=index_start + prefix_tag_adj,
+                                                           index_in_tag_end=index_in_tag_end + prefix_tag_adj)
+                        return str(self), None, None, error
+                    continue
+
+                long_org_tags = hed_schema.short_tag_mapping[tag]
+                long_org_tag = None
+                if isinstance(long_org_tags, str):
+                    tag_string = long_org_tags.lower()
+
+                    main_hed_portion = clean_tag[:index_in_tag_end]
+                    # Verify the tag has the correct path above it.
+                    if tag_string.endswith(main_hed_portion):
+                        long_org_tag = long_org_tags
+                else:
+                    for org_tag_string in long_org_tags:
+                        tag_string = org_tag_string.lower()
+
+                        main_hed_portion = clean_tag[:index_in_tag_end]
+
+                        if tag_string.endswith(main_hed_portion):
+                            long_org_tag = org_tag_string
+                            break
+                if not long_org_tag:
+                    error = error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=self,
+                                                       index_in_tag=index_start + prefix_tag_adj,
+                                                       index_in_tag_end=index_in_tag_end + prefix_tag_adj,
+                                                       expected_parent_tag=long_org_tags)
+                    return str(self), None, None, error
+
+                # In hed2 compatible, make sure this is a long form of a tag or throw an invalid base tag error.
+                if hed_schema._has_duplicate_tags:
+                    if not clean_tag.startswith(long_org_tag.lower()):
+                        error = error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                           self, index_in_tag=index_start + prefix_tag_adj,
+                                                           index_in_tag_end=index_in_tag_end + prefix_tag_adj)
+                        return str(self), None, None, error
+
+                found_index_start = index_start
+                found_index_end = index_in_tag_end
+                found_long_org_tag = long_org_tag
+            else:
+                # These means we found a known tag in the remainder/extension section, which is an error
+                if tag in hed_schema.short_tag_mapping:
+                    error = error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, self,
+                                                       index_in_tag=index_start + prefix_tag_adj,
+                                                       index_in_tag_end=index_in_tag_end + prefix_tag_adj,
+                                                       expected_parent_tag=hed_schema.short_tag_mapping[tag])
+                    return str(self), None, None, error
+
+        full_tag_string = str(self)
+        # skip over the tag prefix if present
+        full_tag_string = full_tag_string[len(prefix):]
+        # Finally don't actually adjust the tag if it's hed2 style.
+        if hed_schema._has_duplicate_tags:
+            return full_tag_string, None, found_index_end, []
+
+        remainder = full_tag_string[found_index_end:]
+        long_tag_string = found_long_org_tag + remainder
+
+        # calculate short_tag index into long tag.
+        found_index_start += (len(long_tag_string) - len(full_tag_string))
+        remainder_start_index = found_index_end + (len(long_tag_string) - len(full_tag_string))
+        return prefix + long_tag_string, found_index_start + prefix_tag_adj, remainder_start_index + prefix_tag_adj, {}

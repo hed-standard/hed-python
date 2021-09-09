@@ -2674,6 +2674,10 @@
                      <node>
                         <name>Horizontally-oriented</name>
                         <description>Oriented parallel to or in the plane of the horizon.</description>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Vertically-oriented</value>
+                        </attribute>
                      </node>
                      <node>
                         <name>Leftward</name>
@@ -2720,6 +2724,10 @@
                      <node>
                         <name>Vertically-oriented</name>
                         <description>Oriented perpendicular to the plane of the horizon.</description>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Horizontally-oriented</value>
+                        </attribute>
                      </node>
                   </node>
                </node>
@@ -5587,6 +5595,8 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-right-of</value>
+                  <value>Upper-left-of</value>
+                  <value>Upper-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5594,7 +5604,9 @@
                <description>(A (Lower-right-of B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.</description>
                <attribute>
                   <name>relatedTag</name>
+                  <value>Lower-left-of</value>
                   <value>Upper-left-of</value>
+                  <value>Upper-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5655,6 +5667,8 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-left-of</value>
+                  <value>Upper-right-of</value>
+                  <value>Lower-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5663,6 +5677,8 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-left-of</value>
+                  <value>Upper-left-of</value>
+                  <value>Lower-right-of</value>
                </attribute>
             </node>
             <node>

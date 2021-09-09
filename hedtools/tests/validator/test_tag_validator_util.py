@@ -2,7 +2,7 @@ import unittest
 
 from hed.validator.tag_validator import TagValidator
 from tests.validator.test_tag_validator_2g import TestHed
-from hed.models.hed_tag import HedTag
+from hed.schema.hed_tag import HedTag
 
 
 class StringUtilityFunctions(TestHed):
@@ -75,7 +75,7 @@ class TestValidatorUtilityFunctions(TestHed):
         valid_tag2 = HedTag('item/object/person', extension_index=len('item/object/person'))
         valid_tag3 = HedTag('event/duration/#', extension_index=len('event/duration/#'))
         invalid_tag1 = HedTag('something', extension_index=len('something'))
-        invalid_tag2 = HedTag('attribute/nothing', extension_index=len('attribute/nothing'))
+        invalid_tag2 = HedTag('Participant/nothing', extension_index=len('Participant/nothing'))
         invalid_tag3 = HedTag('participant/#', extension_index=len('participant/#'))
         valid_tag1_results = self.semantic_tag_validator.check_tag_exists_in_schema(valid_tag1)
         valid_tag2_results = self.semantic_tag_validator.check_tag_exists_in_schema(valid_tag2)

@@ -360,7 +360,7 @@ class TagValidator:
             return False
 
         # Fallback code for no value classes
-        if not self._hed_schema.has_value_classes:
+        if not self._hed_schema.value_classes:
             unit_class_types = self._hed_schema.get_tag_unit_classes(original_tag)
             for unit_class_type in unit_class_types:
                 valid_func = self.UNIT_CLASS_TYPE_DICT.get(unit_class_type)
@@ -538,9 +538,9 @@ class TagValidator:
             A validation issues list. If no issues are found then an empty list is returned.
         """
         validation_issues = []
-        required_tag_prefixes = self._hed_schema.get_all_with_attribute(HedKey.RequiredPrefix)
-        for required_tag_prefix in required_tag_prefixes:
-            capitalized_required_tag_prefix = required_tag_prefixes[required_tag_prefix]
+        required_tag_prefixes = self._hed_schema.get_all_tags_with_attribute(HedKey.RequiredPrefix)
+        for capitalized_required_tag_prefix in required_tag_prefixes:
+            required_tag_prefix = capitalized_required_tag_prefix.lower()
             if sum([x.lower().startswith(required_tag_prefix) for x in tags]) < 1:
                 validation_issues += self._error_handler.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING,
                                                                       tag_prefix=capitalized_required_tag_prefix)
@@ -559,12 +559,13 @@ class TagValidator:
             A validation issues list. If no issues are found then an empty list is returned.
         """
         validation_issues = []
-        unique_tag_prefixes = self._hed_schema.get_all_with_attribute(HedKey.Unique)
-        for unique_tag_prefix in unique_tag_prefixes:
+        unique_tag_prefixes = self._hed_schema.get_all_tags_with_attribute(HedKey.Unique)
+        for capitalized_unique_tag_prefix in unique_tag_prefixes:
+            unique_tag_prefix = capitalized_unique_tag_prefix.lower()
             unique_tag_prefix_bool_mask = [x.lower().startswith(unique_tag_prefix) for x in original_tag_list]
             if sum(unique_tag_prefix_bool_mask) > 1:
                 validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_NOT_UNIQUE,
-                                                                      tag_prefix=unique_tag_prefixes[unique_tag_prefix])
+                                                                      tag_prefix=capitalized_unique_tag_prefix)
         return validation_issues
 
     # ==========================================================================
