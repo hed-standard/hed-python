@@ -41,7 +41,7 @@ class Test(TestWebBase):
                           'column_5_check': 'on',
                           'column_5_input': '',
                           common.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
-                          common.CHECK_FOR_WARNINGS: 'on'}
+                          common.CHECK_FOR_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'spreadsheet_submit should return a Response when valid dictionary')
@@ -75,7 +75,7 @@ class Test(TestWebBase):
                           'column_5_check': 'on',
                           'column_5_input': '',
                           common.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
-                          common.CHECK_FOR_WARNINGS: 'on'}
+                          common.CHECK_FOR_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'spreadsheet_submit validate should return a response object when invalid spreadsheet')

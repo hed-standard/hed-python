@@ -2,7 +2,7 @@ ROUTE_BLUEPRINT = 'route_blueprint'
 
 ADDITIONAL_EXAMPLES_ROUTE = '/additional-examples'
 
-COLUMN_INFO_ROUTE = '/get_columns_info'
+COLUMNS_INFO_ROUTE = '/get_columns_info'
 
 COMMON_ERRORS_ROUTE = '/common-errors'
 

@@ -26,7 +26,7 @@ class Test(TestWebBase):
             events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
             with open(json_path, 'rb') as fp:
                 json_string = fp.read().decode('ascii')
-            json_data = {common.JSON_STRING: json_string, common.CHECK_FOR_WARNINGS: 'on',
+            json_data = {common.JSON_STRING: json_string, common.CHECK_FOR_WARNINGS_VALIDATE: 'on',
                          common.SCHEMA_VERSION: '8.0.0-alpha.1', common.SERVICE: 'sidecar_validate'}
             environ = create_environ(json=json_data)
             request = Request(environ)
@@ -37,7 +37,7 @@ class Test(TestWebBase):
                                   "get_input_from_service_request should have a HED schema")
             self.assertEqual('sidecar_validate', arguments[common.SERVICE],
                              "get_input_from_service_request should have a service request")
-            self.assertTrue(arguments[common.CHECK_FOR_WARNINGS],
+            self.assertTrue(arguments[common.CHECK_FOR_WARNINGS_VALIDATE],
                             "get_input_from_service_request should have check_for_warnings true when on")
 
     def test_services_process_empty(self):

@@ -64,7 +64,7 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         arguments = {common.EVENTS: events, common.COMMAND: common.COMMAND_VALIDATE, common.DEFS_EXPAND: True,
-                     common.CHECK_FOR_WARNINGS: True, common.SCHEMA: hed_schema}
+                     common.CHECK_FOR_WARNINGS_VALIDATE: True, common.SCHEMA: hed_schema}
         with self.app.app_context():
             results = events_process(arguments)
             self.assertTrue(isinstance(results, dict),

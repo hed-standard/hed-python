@@ -5,25 +5,14 @@
 
 {% block content %}
     <h2>Process a spreadsheet with HED tags</h2>
-    <p>
-        <i>Pick an action.<br/>
-            Upload a spreadsheet (tsv, txt, or xlsx) and select a worksheet.<br/>
-            Check the column numbers that contain HED tags. <br/>
-            If the entries in a column should have a prefix appended to make the entry values<br/>
-            into HED tags, enter that prefix in the adjacent text box.<br/>
-            Select a HED schema.<br/>
-            Press Process.<br/>
-            You will see either a downloadable results file or a status message.<br/>
-        </i>
-    </p>
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="spreadsheet_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options(to_long=True,to_short=True,validate=True) }}
+        {{ create_process_options('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
 
-        <h3>Upload spreadsheet file (tab-separated or Excel):</h3>
+        <h3>2) Upload spreadsheet file (tab-separated or Excel):</h3>
         <div class="form-group">
             <label class="secondary-label" for="spreadsheet_file">Spreadsheet file:</label>
             <label class="btn-group file-browse-group">
@@ -46,10 +35,12 @@
                 <p class="flash" id="spreadsheet_flash"></p>
             </div>
         </div>
+        <h3>3) Select columns with tags (after upload):</h3>
+        {{ create_column_info('show_indices') }}
 
-            {{ create_column_info('true') }}
-            {{ create_schema_pulldown() }}
+        {{ create_schema_pulldown('4) Choose a HED schema version:') }}
 
+        <h3>5) Process:</h3>
         <div class="form-group">
             <button id="spreadsheet_submit" type="button">Process</button>
             <p class="flash" id="spreadsheet_submit_flash"></p>

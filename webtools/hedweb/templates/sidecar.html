@@ -5,31 +5,18 @@
 
 {% block content %}
     <h2>Process BIDS-style JSON sidecar</h2>
-    <p>
-        <i>Pick an action.<br/>
-            Upload a BIDS-style JSON events metadata file.<br/>
-            Select a HED schema.<br/>
-            Press Process.<br/>
-        You will see a downloadable results file and/or a status message.
-        </i>
-    </p>
 
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="sidecar_form" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options(to_long=True,to_short=True,validate=True) }}
+        {{ create_process_options('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
+        {{ create_json_input('2) Upload BIDS-style JSON sidecar:') }}
+        {{ create_schema_pulldown('3) Choose a HED schema version:') }}
 
-
+        <h3>4) Process:</h3>
         <div class="form-group">
-
-            {{ create_json_input() }}
-            {{ create_schema_pulldown() }}
-
-            <div class="form-group">
-                <button id="sidecar_submit" type="button">Process</button>
-                <p class="flash" id="sidecar_submit_flash"></p>
-            </div>
+            <button id="sidecar_submit" type="button">Process</button>
+            <p class="flash" id="sidecar_submit_flash"></p>
         </div>
     </form>
     <script type="module">

@@ -1,15 +1,7 @@
-{% macro create_column_info(show_indices) %}
+{% macro create_column_info(display_type) %}
+    <div class="form-group" id="{{ display_type }}">
+    {% set table_name =  display_type + "_table" %}
+        <table id="{{ table_name }}"></table>
+    </div>
 
-    {% if show_indices in ['true'] %}
-        <div class="form-group" id="column_prefixes">
-            <h3>Column Information (Check columns to include):</h3>
-            <table id="column_prefix_table"></table>
-        </div>
-    {% else %}
-        <div class="form-group" id="column_names">
-            <h3>Column names:</h3>
-            <table id="column_names_table"></table>
-        </div>
-    {% endif %}
-    <p class="flash" id="tag_columns_flash"></p>
 {% endmacro %}

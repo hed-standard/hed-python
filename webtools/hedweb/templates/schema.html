@@ -2,20 +2,14 @@
 {% from "process-options.html" import create_process_options %}
 {% block content %}
     <h2>Process HED Schema</h2>
-    <p>
-        <i>Pick an action<br/>
-            Select a HED schema source URL or upload a file.<br/>
-            Press Process.<br/>
-            You will see either a downloadable results file or a status message.
-        </i>
-    </p>
+
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/schema-form.css') }}">
     <form id="schema_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options(convert=True, validate=True) }}
+        {{ create_process_options('1) Pick an action:',convert=True, validate=True) }}
 
-        <h3>Select a schema source file (.xml/.mediawiki): </h3>
+        <h3>2) Select a schema source file (.xml/.mediawiki):</h3>
         <div class="form-group" id="schema_url_group">
             <input class="radio-btn" type="radio" name="schema_upload_options"
                    id="schema_url_option" value="schema_url_option" aria-label="Select this button for HED schema URL">
@@ -39,6 +33,7 @@
             <p class="flash" id="schema_file_flash"></p>
         </div>
 
+        <h3>3) Process:</h3>
         <div class="form-group">
             <button id="schema_submit" type="button">Process</button>
         </div>

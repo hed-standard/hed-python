@@ -40,7 +40,7 @@ class Test(TestWebBase):
             self.assertEqual(common.COMMAND_VALIDATE, arguments[common.COMMAND],
                              "generate_input_from_spreadsheet_form should have a command")
             self.assertEqual('LKT 8HED3', arguments[common.WORKSHEET_NAME],
-                             "generate_input_from_spreadsheet_form should have a worksheet name")
+                             "generate_input_from_spreadsheet_form should have a sheet_name name")
             self.assertTrue(arguments[common.HAS_COLUMN_NAMES],
                             "generate_input_from_spreadsheet_form should have column names")
 
@@ -71,7 +71,7 @@ class Test(TestWebBase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
-                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
+                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS_VALIDATE: True}
         with self.app.app_context():
             results = spreadsheet_process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -94,7 +94,7 @@ class Test(TestWebBase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
-                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS: True}
+                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS_VALIDATE: True}
         arguments[common.SCHEMA] = hed_schema
 
         with self.app.app_context():

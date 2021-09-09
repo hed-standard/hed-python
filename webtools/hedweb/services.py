@@ -42,7 +42,7 @@ def get_input_from_service_request(request):
                  common.SPREADSHEET: None,
                  common.HAS_COLUMN_NAMES: parameters.get(common.HAS_COLUMN_NAMES, False),
                  common.STRING_LIST: parameters.get(common.STRING_LIST, None),
-                 common.CHECK_FOR_WARNINGS: parameters.get(common.CHECK_FOR_WARNINGS, True),
+                 common.CHECK_FOR_WARNINGS_VALIDATE: parameters.get(common.CHECK_FOR_WARNINGS_VALIDATE, True),
                  common.DEFS_EXPAND: parameters.get(common.DEFS_EXPAND, True)}
     if common.JSON_STRING in parameters and parameters[common.JSON_STRING]:
         arguments[common.JSON_SIDECAR] = models.Sidecar(file=io.StringIO(parameters[common.JSON_STRING]),

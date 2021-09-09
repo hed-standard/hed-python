@@ -53,7 +53,7 @@ function submitForm() {
     let sidecarFile = getJsonFileLabel();
     let display_name = convertToResultsName(sidecarFile, 'issues')
     clearFlashMessages();
-    flashMessageOnScreen('Sidecar is being validated ...', 'success', 'sidecar_submit_flash')
+    flashMessageOnScreen('Sidecar is being processed ...', 'success', 'sidecar_submit_flash')
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.sidecar_results')}}",

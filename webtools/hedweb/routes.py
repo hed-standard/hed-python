@@ -9,24 +9,25 @@ from hedweb.web_utils import handle_http_error, package_results, handle_error
 from hedweb import sidecar, events, spreadsheet, services
 from hedweb.schema import get_input_from_schema_form, schema_process
 from hedweb.strings import get_input_from_string_form, string_process
-from hedweb.spreadsheet import get_columns_info
+from hedweb.columns import get_columns_request
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
 
-@route_blueprint.route(route_constants.COLUMN_INFO_ROUTE, methods=['POST'])
+@route_blueprint.route(route_constants.COLUMNS_INFO_ROUTE, methods=['POST'])
 def columns_info_results():
-    """Gets the names of the spreadsheet columns and worksheet names if any.
+    """Gets the names of the spreadsheet columns and sheet_name names if any.
 
     Returns
     -------
     string
-        A serialized JSON string containing information related to the column and worksheet information.
+        A serialized JSON string containing information related to the column and sheet_name information.
 
     """
     try:
-        columns_info = get_columns_info(request)
+        columns_info = get_columns_request(request)
+        a = json.dumps(columns_info)
         return json.dumps(columns_info)
     except Exception as ex:
         return handle_error(ex)
