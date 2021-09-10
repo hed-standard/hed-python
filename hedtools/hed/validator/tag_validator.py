@@ -31,15 +31,13 @@ class TagValidator:
     TAG_ALLOWED_CHARS = "-_/"
 
     def __init__(self, hed_schema=None, check_for_warnings=False, run_semantic_validation=True,
-                 allow_numbers_to_be_pound_sign=False, error_handler=None):
+                 allow_pound_signs_as_numbers=False, error_handler=None):
         """Constructor for the Tag_Validator class.
 
         Parameters
         ----------
         hed_schema: HedSchema
             A HedSchema object.
-        allow_numbers_to_be_pound_sign: bool
-            If true, considers # equal to a number for validation purposes.  This is so it can validate templates.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         Returns
@@ -56,7 +54,7 @@ class TagValidator:
         self._run_semantic_validation = run_semantic_validation
         if not self._hed_schema:
             self._run_semantic_validation = False
-        self._placeholders_allowed_in_strings = allow_numbers_to_be_pound_sign
+        self._allow_pound_signs_as_numbers = allow_pound_signs_as_numbers
 
         self.UNIT_CLASS_TYPE_DICT = {
             self.DATE_TIME_UNIT_CLASS: self._is_date_time,
@@ -118,7 +116,8 @@ class TagValidator:
             elif original_tag.extension_or_value_portion:
                 validation_issues += self.check_for_invalid_extension_chars(original_tag)
 
-            validation_issues += self.check_for_placeholder(original_tag)
+            if not self._allow_pound_signs_as_numbers:
+                validation_issues += self.check_for_placeholder(original_tag)
             validation_issues += self.check_tag_requires_child(original_tag)
         if self._check_for_warnings:
             validation_issues += self.check_capitalization(original_tag)
@@ -229,8 +228,7 @@ class TagValidator:
         current_tag = ''
         issues = []
 
-        for i in range(len(hed_string)):
-            current_character = hed_string[i]
+        for i, current_character in enumerate(hed_string):
             current_tag += current_character
             if not current_character.strip():
                 continue
@@ -285,6 +283,8 @@ class TagValidator:
         allowed_chars = self.TAG_ALLOWED_CHARS
         if not self._hed_schema or not self._hed_schema.is_hed3_schema:
             allowed_chars += " "
+        if self._allow_pound_signs_as_numbers:
+            allowed_chars += "#"
         return self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
 
     def check_tag_exists_in_schema(self, original_tag):
@@ -358,6 +358,9 @@ class TagValidator:
     def _validate_value_class_portion(self, original_tag, portion_to_validate):
         if portion_to_validate is None:
             return False
+
+        if portion_to_validate.lower() == "placeholder_placeholder":
+            return True
 
         # Fallback code for no value classes
         if not self._hed_schema.value_classes:
@@ -703,15 +706,14 @@ class TagValidator:
         error_list: [{}]
         """
         validation_issues = []
-        if not self._placeholders_allowed_in_strings:
-            starting_index = len(original_tag.org_base_tag) + 1
-            for i, character in enumerate(original_tag.extension_or_value_portion):
-                if character == "#":
-                    validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
-                                                                          tag=original_tag,
-                                                                          index_in_tag=starting_index + i,
-                                                                          index_in_tag_end=starting_index + i + 1,
-                                                                          actual_error=ValidationErrors.HED_VALUE_INVALID)
+        starting_index = len(original_tag.org_base_tag) + 1
+        for i, character in enumerate(original_tag.extension_or_value_portion):
+            if character == "#":
+                validation_issues += self._error_handler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                      tag=original_tag,
+                                                                      index_in_tag=starting_index + i,
+                                                                      index_in_tag_end=starting_index + i + 1,
+                                                                      actual_error=ValidationErrors.HED_VALUE_INVALID)
 
         return validation_issues
 

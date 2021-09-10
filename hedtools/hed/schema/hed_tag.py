@@ -233,6 +233,10 @@ class HedTag:
         """Convenience function, equivalent to str(self).lower()"""
         return str(self).lower()
 
+    def replace_placeholder(self, placeholder_value):
+        if "#" in self.org_tag:
+            self.tag = self.org_tag.replace("#", placeholder_value)
+
     def convert_to_canonical_forms(self, hed_schema, error_handler=None):
         """
             This updates the internal tag states from the schema, so you can convert from short to long etc

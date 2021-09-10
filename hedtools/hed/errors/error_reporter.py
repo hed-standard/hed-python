@@ -121,7 +121,8 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
                 base_message, error_vars = func(org_tag_text, problem_sub_tag, *args, **kwargs)
                 error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
-                                                         index_in_tag=index_in_tag, index_in_tag_end=index_in_tag_end, source_tag=tag)
+                                                                 index_in_tag=index_in_tag,
+                                                                 index_in_tag_end=index_in_tag_end, source_tag=tag)
 
                 return [error_object]
 
@@ -169,6 +170,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
 # Import after hed_error decorators are defined.
 from hed.errors import error_messages
+
 
 class ErrorHandler:
     def __init__(self):
@@ -289,7 +291,25 @@ class ErrorHandler:
         error: [{}]
             A single error
         """
-        return self.format_error_from_context(error_type, self.error_context, *args, actual_error=actual_error, **kwargs)
+        return self.format_error_from_context(error_type, self.error_context, *args,
+                                              actual_error=actual_error, **kwargs)
+
+    def format_error_list(self, issue_params):
+        """
+            Convert an issue params list to an issues list.  This means adding the error context primarily.
+
+        Parameters
+        ----------
+        issue_params : [{}]
+            The unformatted issues list
+        Returns
+        -------
+        issues_list: [{}]
+        """
+        formatted_issues = []
+        for issue in issue_params:
+            formatted_issues += self.format_error(**issue)
+        return formatted_issues
 
     @staticmethod
     def format_error_from_context(error_type, error_context, *args, actual_error=None, **kwargs):
@@ -337,7 +357,7 @@ class ErrorHandler:
             # Todo: Move this functionality somewhere more centralized.
             # If the tag has been modified from the original, don't try to use sub indexing.
             if source_tag and source_tag._tag:
-                 new_start, new_end = start, end
+                new_start, new_end = start, end
             else:
                 new_start = start + error_object.get('index_in_tag', 0)
                 index_in_tag_end = end

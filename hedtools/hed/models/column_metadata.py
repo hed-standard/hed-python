@@ -4,8 +4,6 @@ from hed.models.def_dict import DefDict
 from hed.errors.error_types import SidecarErrors, ErrorContext, ValidationErrors
 from hed.errors import error_reporter
 
-import re
-
 
 class ColumnType(Enum):
     """The overall column_type of a column in column mapper, eg treat it as HED tags.
@@ -290,14 +288,14 @@ class ColumnMetadata:
 
         return ColumnType.Value
 
-    def get_def_issues(self):
+    def get_definition_issues(self):
         """
         Returns the issues found extracting definitions from this column.
         Returns
         -------
 
         """
-        return self._def_dict.get_def_issues()
+        return self._def_dict.get_definition_issues()
 
     def validate_column_entry(self, hed_schema=None, def_mapper=None, error_handler=None):
         """
@@ -319,36 +317,39 @@ class ColumnMetadata:
             error_handler = error_reporter.ErrorHandler()
 
         error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, self.column_name)
+
+        event_validator = None
+        # Full Hed string validation can only be done with a hed_schema
+        if hed_schema is not None:
+            from hed.validator.event_validator import EventValidator
+            event_validator = EventValidator(check_for_warnings=True, run_semantic_validation=True,
+                                             hed_schema=hed_schema, error_handler=error_handler,
+                                             allow_pound_signs_as_numbers=True)
+
         col_validation_issues = []
-        if self.hed_string_iter():
-            event_validator = None
-            # Full Hed string validation can only be done with a hed_schema
-            if hed_schema is not None:
-                from hed.validator.event_validator import EventValidator
-                event_validator = EventValidator(check_for_warnings=True, run_semantic_validation=True,
-                                                 hed_schema=hed_schema, error_handler=error_handler,
-                                                 allow_numbers_to_be_pound_sign=True)
-            for hed_string, position in self.hed_string_iter(include_position=True, also_return_bad_types=True):
-                error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
-                if not hed_string:
-                    col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
-                if not isinstance(hed_string, str):
-                    col_validation_issues += error_handler.format_error(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                                        given_type=type(hed_string),
-                                                                        expected_type="str")
-                else:
-                    hed_string_obj = HedString(hed_string)
-                    error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
-                                                     increment_depth_after=False)
-                    if def_mapper:
-                        def_issues = def_mapper.replace_and_remove_tags(hed_string_obj, expand_defs=False)
-                        for issue in def_issues:
-                            col_validation_issues += error_handler.format_error(**issue)
-                    if event_validator:
-                        col_validation_issues += event_validator.validate_input(hed_string_obj)
-                    col_validation_issues += self._validate_pound_sign_count(hed_string_obj, error_handler)
-                    error_handler.pop_error_context()
+        for hed_string, position in self.hed_string_iter(include_position=True, also_return_bad_types=True):
+            error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
+            if not hed_string:
+                col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
+            if not isinstance(hed_string, str):
+                col_validation_issues += error_handler.format_error(SidecarErrors.WRONG_HED_DATA_TYPE,
+                                                                    given_type=type(hed_string),
+                                                                    expected_type="str")
+            else:
+                hed_string_obj = HedString(hed_string)
+                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
+                                                 increment_depth_after=False)
+                if event_validator:
+                    col_validation_issues += event_validator.validate_hed_string(hed_string_obj, def_mapper=def_mapper,
+                                                                                 check_for_definitions=False)
+                elif def_mapper:
+                    col_validation_issues += def_mapper.replace_and_remove_tags(hed_string_obj,
+                                                                                error_handler=error_handler,
+                                                                                expand_defs=False)
+                col_validation_issues += self._validate_pound_sign_count(hed_string_obj,
+                                                                         error_handler=error_handler)
                 error_handler.pop_error_context()
+            error_handler.pop_error_context()
 
         if self.column_type is None:
             col_validation_issues += error_handler.format_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
@@ -358,7 +359,7 @@ class ColumnMetadata:
             if not raw_hed_dict:
                 col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
 
-        col_validation_issues += self.get_def_issues()
+        col_validation_issues += self.get_definition_issues()
         error_handler.pop_error_context()
         return col_validation_issues
 
@@ -386,10 +387,7 @@ class ColumnMetadata:
         else:
             return []
 
-        definition_and_exp_pattern = "definition\/.*?\/#"
-        pattern = re.compile(definition_and_exp_pattern)
-        expected_pound_sign_count = len(pattern.findall(hed_string.lower())) * 2 + base_pound_sign_count
-
+        expected_pound_sign_count = base_pound_sign_count
         if str(hed_string).count("#") != expected_pound_sign_count:
             return error_handler.format_error(error_type, pound_sign_count=str(hed_string).count("#"))
 
