@@ -8,20 +8,6 @@ from hedweb.tests.test_web_base import TestWebBase
 
 
 class Test(TestWebBase):
-    def test_file_extension_is_valid(self):
-        from hedweb.web_utils import file_extension_is_valid
-        is_valid = file_extension_is_valid('abc.xml', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
-        is_valid = file_extension_is_valid('abc.XML', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if capitalized version of valid extension')
-        is_valid = file_extension_is_valid('abc.temp', ['.xml', '.txt'])
-        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
-        is_valid = file_extension_is_valid('abc')
-        self.assertTrue(is_valid, 'File names with no extension are valid when no valid extensions provided')
-        is_valid = file_extension_is_valid('abc', ['.xml', '.txt'])
-        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
-        is_valid = file_extension_is_valid('C:abc.Txt', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
 
     def test_form_has_file(self):
         from hedweb.web_utils import form_has_file

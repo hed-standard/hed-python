@@ -14,25 +14,18 @@ app_config = current_app.config
 
 def file_extension_is_valid(filename, accepted_file_extensions=None):
     """Checks the other extension against a list of accepted ones.
-
     Parameters
     ----------
     filename: string
         The name of the other.
-
     accepted_file_extensions: list
-        A list containing all of the accepted other extensions or an empty list of all are accepted
-
+        A list containing all of the accepted other extensions.
     Returns
     -------
     boolean
         True if the other has a valid other extension.
-
     """
-    if not accepted_file_extensions or os.path.splitext(filename.lower())[1] in accepted_file_extensions:
-        return True
-    else:
-        return False
+    return not accepted_file_extensions or os.path.splitext(filename.lower())[1] in accepted_file_extensions
 
 
 def form_has_file(request, file_field, valid_extensions=None):
@@ -53,6 +46,7 @@ def form_has_file(request, file_field, valid_extensions=None):
         True if a file is present in a request object.
 
     """
+
     if file_field in request.files and file_extension_is_valid(request.files[file_field].filename, valid_extensions):
         return True
     else:

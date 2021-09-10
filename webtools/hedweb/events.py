@@ -10,6 +10,7 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 from hedweb.constants import common
 from hedweb.columns import create_column_selections, get_info_in_columns
+from hedweb.tools import get_sidecar_dict
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
@@ -134,25 +135,19 @@ def events_extract(hed_schema, events, columns_selected):
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     columns_info = get_info_in_columns(events.dataframe)
-    hed_dict = {}
-    for key in columns_selected:
-        if key not in columns_info:
-            raise HedFileError("INVALID_COLUMN_NAME", f"{key} is not a valid column name in the events file", "")
-        key_description = f"Description for {key}"
-        if columns_selected[key]:
-            levels = {}
-            hed = {}
-            for val_key in columns_info[key].keys():
-                levels[val_key] = f"Level for {val_key}"
-                hed[val_key] = f"Description/Tags for {val_key}"
-            hed_dict[key] = {"Description": key_description, "Levels": levels, "HED": hed}
-        else:
-            hed_dict[key] = {"Description": key_description, "HED": "Label/#"}
+    hed_dict, issues = get_sidecar_dict(columns_info, columns_selected)
     display_name = events.name
-    file_name = generate_filename(display_name, suffix='_extracted', extension='.json')
-    return {common.COMMAND: common.COMMAND_EXTRACT, 'data': json.dumps(hed_dict, indent=4),
-            'output_display_name': file_name, 'schema_version': schema_version,
-            'msg_category': 'success', 'msg': 'Events extraction to JSON complete'}
+    if issues:
+        issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
+        file_name = generate_filename(display_name, suffix='_errors', extension='.txt')
+        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
+                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+                'msg': f"Events file {display_name} had validation errors"}
+    else:
+        file_name = generate_filename(display_name, suffix='_extracted', extension='.json')
+        return {common.COMMAND: common.COMMAND_EXTRACT, 'data': json.dumps(hed_dict, indent=4),
+                'output_display_name': file_name, 'schema_version': schema_version,
+                'msg_category': 'success', 'msg': 'Events extraction to JSON complete'}
 
 
 def events_validate(hed_schema, events):
