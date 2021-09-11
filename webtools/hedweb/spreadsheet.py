@@ -143,7 +143,7 @@ def spreadsheet_validate(hed_schema, spreadsheet):
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     validator = EventValidator(hed_schema=hed_schema)
-    issues = validator.validate_input(spreadsheet)
+    issues = validator.validate_file(spreadsheet)
     display_name = spreadsheet.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} validation errors")

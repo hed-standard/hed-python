@@ -56,25 +56,25 @@ class Test(unittest.TestCase):
         cls.hed_file_with_major_errors_multi_column = HedInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[3, 4])
 
     def test__validate_input(self):
-        validation_issues = self.generic_hed_input_reader.validate_input(self.base_hed_input)
+        validation_issues = self.generic_hed_input_reader.validate_hed_string(self.base_hed_input)
         self.assertIsInstance(validation_issues, list)
 
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.generic_hed_input_reader.validate_input(self.hed_file_with_errors,
-                                                                         name=name)
+        validation_issues = self.generic_hed_input_reader.validate_file(self.hed_file_with_errors,
+                                                                        name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors(self):
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.generic_hed_input_reader.validate_input(self.hed_file_with_major_errors,
-                                                                         name=name)
+        validation_issues = self.generic_hed_input_reader.validate_file(self.hed_file_with_major_errors,
+                                                                        name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors_columns(self):
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.generic_hed_input_reader2.validate_input(self.hed_file_with_major_errors_multi_column,
+        validation_issues = self.generic_hed_input_reader2.validate_file(self.hed_file_with_major_errors_multi_column,
                                                                          name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
@@ -113,7 +113,6 @@ class Test(unittest.TestCase):
         self.assertFalse(self.validation_issues)
         validation_issues = \
             self.generic_hed_input_reader._append_row_validation_issues_if_found(self.validation_issues,
-                                                                                 row_number,
                                                                                  self.column_to_hed_tags_dictionary,
                                                                                  HedString(""),
                                                                                  {})
@@ -127,14 +126,15 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         sidecar = Sidecar(json_path)
-        self.assertEqual(len(sidecar.validate_entries(hed_schema=hed_schema)), 0)
+        issues = sidecar.validate_entries(hed_schema=hed_schema)
+        self.assertEqual(len(issues), 0)
         input_file = EventsInput(events_path, sidecars=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
         self.assertEqual(len(validation_issues), 0)
 
         validator = EventValidator(hed_schema=hed_schema)
-        validation_issues = validator.validate_input(input_file)
+        validation_issues = validator.validate_file(input_file)
         self.assertEqual(len(validation_issues), 0)
 
     def test_complex_file_validation_invalid(self):
@@ -144,14 +144,15 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events_bad_defs.json")
         sidecar = Sidecar(json_path)
-        self.assertEqual(len(sidecar.validate_entries()), 0)
+        issues = sidecar.validate_entries()
+        self.assertEqual(len(issues), 3)
         input_file = EventsInput(events_path, sidecars=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
-        self.assertEqual(len(validation_issues), 4)
+        self.assertEqual(len(validation_issues), 3)
 
         validator = EventValidator(hed_schema=hed_schema)
-        validation_issues = validator.validate_input(input_file)
+        validation_issues = validator.validate_file(input_file)
         self.assertEqual(len(validation_issues), 42)
 
     def test_file_bad_defs_in_spreadsheet(self):
@@ -166,7 +167,7 @@ class Test(unittest.TestCase):
                                worksheet_name='LKT Events')
 
         validator = EventValidator(hed_schema=hed_schema)
-        validation_issues = validator.validate_input(loaded_file)
+        validation_issues = validator.validate_file(loaded_file)
         self.assertEqual(len(validation_issues), 2)
 
     def test_error_spans_from_file(self):
@@ -177,10 +178,30 @@ class Test(unittest.TestCase):
 
         input_file = HedInput(events_path, tag_columns=[2, 3, "error"])
         validator = EventValidator(hed_schema=hed_schema)
-        validation_issues = validator.validate_input(input_file)
+        validation_issues = validator.validate_file(input_file)
         self.assertEqual(validation_issues[1]['char_index'], 6)
         self.assertEqual(validation_issues[2]['char_index'], 6)
         self.assertEqual(len(validation_issues), 3)
-            
+
+    def test_def_mapping_single_line(self):
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.2.mediawiki')
+        hed_schema = schema.load_schema(schema_path)
+        validator = EventValidator(hed_schema=hed_schema)
+        string_with_def = '(Definition/TestDefPlaceholder/#,(Item/TestDef1/#,Item/TestDef2)), def/TestDefPlaceholder/2471'
+        issues = validator.validate_hed_string(string_with_def)
+        self.assertEqual(len(issues), 0)
+
+        hed_string_list = [string_with_def, string_with_def]
+        issues = validator.validate_strings(hed_string_list)
+        combined_issues_list = sum(issues, [])
+        self.assertEqual(len(combined_issues_list), 0)
+
+        # This produces an extra error as the definition isn't known on the second line
+        string_with_def2 = 'def/TestDefPlaceholder/2471'
+        hed_string_list = [string_with_def, string_with_def2]
+        issues = validator.validate_strings(hed_string_list)
+        combined_issues_list = sum(issues, [])
+        self.assertEqual(len(combined_issues_list), 1)
+
 if __name__ == '__main__':
     unittest.main()

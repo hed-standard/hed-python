@@ -129,7 +129,7 @@ class Test(unittest.TestCase):
 
         input_file_2.reset_column_mapper()
 
-        for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(expand_defs=True), input_file_2.iter_dataframe(expand_defs=True)):
+        for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(), input_file_2.iter_dataframe()):
             self.assertEqual(row_number, row_number2)
             self.assertTrue(len(column_dict) == 4)
             self.assertTrue(len(column_dict2) == 11)

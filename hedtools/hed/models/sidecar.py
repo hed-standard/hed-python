@@ -4,6 +4,7 @@ from hed.errors.error_types import ErrorContext
 from hed.errors import error_reporter
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.models.hed_string import HedString
+from hed.models.def_mapper import DefinitionMapper
 
 
 class Sidecar:
@@ -212,9 +213,12 @@ class Sidecar:
         if name:
             error_handler.push_error_context(ErrorContext.FILE_NAME, name, False)
 
+        def_dicts = [column_entry.def_dict for column_entry in self]
+        def_mapper = DefinitionMapper(def_dicts)
         all_validation_issues = []
         for column_entry in self:
-            all_validation_issues += column_entry.validate_column_entry(hed_schema, error_handler=error_handler)
+            all_validation_issues += column_entry.validate_column_entry(hed_schema, error_handler=error_handler,
+                                                                        def_mapper=def_mapper)
 
         if name:
             error_handler.pop_error_context()

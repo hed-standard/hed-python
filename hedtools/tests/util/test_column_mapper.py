@@ -67,12 +67,12 @@ class Test(unittest.TestCase):
         mapper = ColumnMapper()
         mapper.set_tag_columns(tag_columns=["HED"])
         self.assertTrue(len(mapper._final_column_map) == 0)
-        self.assertTrue(len(mapper._mapper_issues) == 1)
+        self.assertTrue(len(mapper._mapper_issue_params) == 1)
 
         mapper = ColumnMapper()
         mapper.set_tag_columns(optional_tag_columns=["HED"])
         self.assertTrue(len(mapper._final_column_map) == 0)
-        self.assertTrue(len(mapper._mapper_issues) == 0)
+        self.assertTrue(len(mapper._mapper_issue_params) == 0)
 
     def test_add_json_file_events(self):
         mapper = ColumnMapper()
