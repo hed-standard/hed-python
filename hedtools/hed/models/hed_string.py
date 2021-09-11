@@ -86,7 +86,7 @@ class HedString(HedGroup):
         return self.get_as_form("org_tag")
 
     @staticmethod
-    def split_hed_string_into_groups(hed_string, also_return_flat_version=False):
+    def split_hed_string_into_groups(hed_string):
         """Splits the hed_string into a tree of tag groups, tags, and delimiters.
 
         Parameters

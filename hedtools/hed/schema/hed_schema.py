@@ -576,15 +576,11 @@ class HedSchema:
         if HedKey.ValueClassProperty not in self._sections[HedSectionKey.Properties]:
             self._add_single_default_property(HedKey.ValueClassProperty)
 
-        # !BFK! for handling old files.  If allowed character is a unit class property, ignore it entirely.
+        # Allowed character used to be a unit class property - just remove it entirely if this is the case.
         if HedKey.AllowedCharacter in self._sections[HedSectionKey.Attributes]:
             attribute_entry = self._sections[HedSectionKey.Attributes][HedKey.AllowedCharacter]
             if attribute_entry.has_attribute(HedKey.UnitClassProperty):
                 del self._sections[HedSectionKey.Attributes].all_names[HedKey.AllowedCharacter]
-                for section in self._sections.values():
-                    for entry in section.values():
-                        if HedKey.AllowedCharacter in entry.attributes:
-                            del entry.attributes[HedKey.AllowedCharacter]
 
         if only_add_if_none_present and bool(self._sections[HedSectionKey.Attributes]):
             return
