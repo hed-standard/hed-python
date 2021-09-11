@@ -119,59 +119,76 @@ class DefinitionMapper:
                 self._label_tag_name not in hed_string_lower:
             return []
 
-        remove_groups = []
+        definition_groups = []
         def_issue_params = []
         # We need to check for definitions to remove in ONLY the top level groups.
         # We need to check for labels to expand in ALL groups
         for tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
             for tag in tag_group.tags():
-                tag_as_string = str(tag)
                 if is_top_level:
                     # This case should be fairly rare compared to expanding definitions.
-                    is_def_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DEFINITION_KEY)
+                    is_def_tag = DefDict._check_tag_starts_with(str(tag), DefTagNames.DEFINITION_KEY)
                     if is_def_tag:
-                        remove_groups.append(tag_group)
+                        definition_groups.append(tag_group)
                         break
 
-                is_label_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DEF_KEY)
-                if is_label_tag:
-                    placeholder = None
-                    found_slash = is_label_tag.find("/")
-                    if found_slash != -1:
-                        placeholder = is_label_tag[found_slash + 1:]
-                        is_label_tag = is_label_tag[:found_slash]
-
-                    label_tag_lower = is_label_tag.lower()
-                    def_entry = self._gathered_defs.get(label_tag_lower)
-                    if def_entry is None:
-                        def_issue_params += [{"error_type": ValidationErrors.HED_DEF_UNMATCHED,
-                                             "tag": tag}]
-                        continue
-
-                    def_tag_name, def_contents = def_entry.get_definition(tag, placeholder_value=placeholder)
-                    if def_tag_name is None:
-                        if def_entry.takes_value:
-                            def_issue_params += [{"error_type": ValidationErrors.HED_DEF_VALUE_MISSING,
-                                                 "tag": tag}]
-                        else:
-                            def_issue_params += [{"error_type": ValidationErrors.HED_DEF_VALUE_EXTRA,
-                                                 "tag": tag}]
-                        continue
-                    if not expand_defs:
-                        continue
-
+                def_tag_name, def_contents = self._get_def_expand_tag(tag, def_issue_params)
+                if def_tag_name and expand_defs:
                     tag.tag = def_tag_name
                     tag_group.replace_tag(tag, def_contents)
-                    continue
 
-        if remove_groups:
+        if definition_groups:
             if expand_defs:
-                hed_string_obj.remove_groups(remove_groups)
+                hed_string_obj.remove_groups(definition_groups)
             else:
-                for group in remove_groups:
+                for group in definition_groups:
                     group.replace_placeholder("PLACEHOLDER_PLACEHOLDER")
 
         if error_handler:
             return error_handler.format_error_list(def_issue_params)
 
         return def_issue_params
+
+    def _get_def_expand_tag(self, original_tag, def_issue_params):
+        """
+            Checks for issues with expanding a tag from def to def-expand, and returns the expanded tag.
+
+        Parameters
+        ----------
+        original_tag : HedTag
+            Source hed tag that may be a Def tag.
+        def_issue_params : [{}]
+            List of issue params to append any new issues to.
+
+        Returns
+        -------
+        def_tag_name: str
+            The def-expand tag matching this def tag, if any
+        def_contents: [HedTag or HedGroup]
+            The contents to replace the previous def-tag with.
+        """
+        tag_as_string = str(original_tag)
+        is_label_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DEF_KEY)
+        if is_label_tag:
+            placeholder = None
+            found_slash = is_label_tag.find("/")
+            if found_slash != -1:
+                placeholder = is_label_tag[found_slash + 1:]
+                is_label_tag = is_label_tag[:found_slash]
+
+            label_tag_lower = is_label_tag.lower()
+            def_entry = self._gathered_defs.get(label_tag_lower)
+            if def_entry is None:
+                def_issue_params += [{"error_type": ValidationErrors.HED_DEF_UNMATCHED,
+                                      "tag": original_tag}]
+            else:
+                def_tag_name, def_contents = def_entry.get_definition(original_tag, placeholder_value=placeholder)
+                if def_tag_name:
+                    return def_tag_name, def_contents
+                elif def_entry.takes_value:
+                    def_issue_params += [{"error_type": ValidationErrors.HED_DEF_VALUE_MISSING,
+                                          "tag": original_tag}]
+                else:
+                    def_issue_params += [{"error_type": ValidationErrors.HED_DEF_VALUE_EXTRA,
+                                          "tag": original_tag}]
+        return None, None
