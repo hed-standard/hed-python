@@ -88,7 +88,7 @@ class Test(unittest.TestCase):
     def test_validate_column_group(self):
         validation_issues = self.json_def_sidecar.validate_entries(hed_schema=self.hed_schema)
         # This has various extended warnings
-        self.assertEqual(len(validation_issues), 6)
+        self.assertEqual(len(validation_issues), 8)
 
         validation_issues = self.default_sidecar.validate_entries(hed_schema=self.hed_schema)
         self.assertEqual(len(validation_issues), 4)

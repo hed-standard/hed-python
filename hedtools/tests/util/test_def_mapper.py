@@ -24,7 +24,6 @@ class Test(unittest.TestCase):
         cls.basic_hed_string_with_def = f"{cls.basic_hed_string},{cls.label_def_string}"
         cls.basic_hed_string_with_def_first = f"{cls.label_def_string},{cls.basic_hed_string}"
         cls.basic_hed_string_with_def_first_paren = f"({cls.label_def_string},{cls.basic_hed_string})"
-
         cls.placeholder_label_def_string = f"def/TestDefPlaceholder/2471"
         cls.placeholder_def_contents = "(Item/TestDef1/#,Item/TestDef2)"
         cls.placeholder_def_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_def_contents})"
@@ -133,6 +132,37 @@ class Test(unittest.TestCase):
         test_string = HedString(self.placeholder_hed_string_with_def_first_paren)
         def_issues = def_mapper.replace_and_remove_tags(test_string)
         self.assertEqual(str(test_string), "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
+
+
+    def test_replace_and_remove_tags_placeholder_no_expand(self):
+        def_dict = DefDict()
+        def_dict.check_for_definitions(HedString(self.placeholder_def_string))
+        def_mapper = DefinitionMapper(def_dict)
+        self.placeholder_def_string_replaced = self.placeholder_def_string.replace("#", "PLACEHOLDER_PLACEHOLDER")
+        test_string = HedString(self.placeholder_def_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
+        self.assertEqual(str(test_string), self.placeholder_def_string_replaced)
+
+        test_string = HedString(self.basic_hed_string + "," + self.placeholder_def_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
+        self.assertEqual(str(test_string), self.basic_hed_string + "," + self.placeholder_def_string_replaced)
+
+        test_string = HedString(self.placeholder_def_string + "," + self.basic_hed_string)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
+        self.assertEqual(str(test_string), self.placeholder_def_string_replaced + "," + self.basic_hed_string)
+
+        test_string = HedString(self.placeholder_hed_string_with_def)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
+        self.assertEqual(str(test_string), self.placeholder_hed_string_with_def)
+
+        test_string = HedString(self.placeholder_hed_string_with_def_first)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
+        self.assertEqual(str(test_string), self.placeholder_hed_string_with_def_first)
+
+        test_string = HedString(self.placeholder_hed_string_with_def_first_paren)
+        def_issues = def_mapper.replace_and_remove_tags(test_string, expand_defs=False)
+        self.assertEqual(str(test_string), self.placeholder_hed_string_with_def_first_paren)
+
 
     def test_replace_and_remove_tags_placeholder_invalid(self):
         def_dict = DefDict()

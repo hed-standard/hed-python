@@ -21,7 +21,7 @@ class TestDefBase(unittest.TestCase):
             def_dict = DefDict()
             def_dict.check_for_definitions(HedString(test_strings[test_key]))
             expected_issue = expected_issues[test_key]
-            test_issues = def_dict.get_def_issues()
+            test_issues = def_dict.get_definition_issues()
             self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
 
 
