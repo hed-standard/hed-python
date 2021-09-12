@@ -2,7 +2,7 @@ import io
 import os
 import unittest
 from flask import Response
-from hedweb.tests.test_web_base import TestWebBase
+from tests.test_web_base import TestWebBase
 from hedweb.constants import common
 
 

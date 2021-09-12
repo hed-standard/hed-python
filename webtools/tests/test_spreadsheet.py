@@ -1,34 +1,14 @@
 import os
-import shutil
 import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
-
+from tests.test_web_base import TestWebBase
 import hed.schema as hedschema
 from hed import models
 from hedweb.constants import common
 
-from hedweb.app_factory import AppFactory
 
-
-class Test(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
-        app = AppFactory.create_app('config.TestConfig')
-        with app.app_context():
-            from hedweb.routes import route_blueprint
-            app.register_blueprint(route_blueprint)
-            if not os.path.exists(cls.upload_directory):
-                os.mkdir(cls.upload_directory)
-            app.config['UPLOAD_FOLDER'] = cls.upload_directory
-            cls.app = app
-            cls.app.test = app.test_client()
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.upload_directory)
-
+class Test(TestWebBase):
     def test_get_input_from_spreadsheet_form_empty(self):
         from hedweb.spreadsheet import get_input_from_spreadsheet_form
         self.assertRaises(TypeError, get_input_from_spreadsheet_form, {},
@@ -179,7 +159,7 @@ class Test(unittest.TestCase):
             self.assertTrue(results['data'],
                             'spreadsheet_validate results should have empty data when errors')
             self.assertEqual('warning', results['msg_category'],
-                             'spreadsheet_validate msg_category should be warning when no erros')
+                             'spreadsheet_validate msg_category should be warning when no errors')
 
 
 if __name__ == '__main__':

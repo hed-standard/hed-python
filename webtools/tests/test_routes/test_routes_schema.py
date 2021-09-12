@@ -1,7 +1,7 @@
 import io
 import os
 import unittest
-from hedweb.tests.test_web_base import TestWebBase
+from tests.test_web_base import TestWebBase
 
 
 class Test(TestWebBase):

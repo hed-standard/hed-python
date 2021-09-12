@@ -1,44 +1,13 @@
 import os
-import shutil
 import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request, Response
-from hedweb.app_factory import AppFactory
 
 
-class Test(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/upload')
-        app = AppFactory.create_app('config.TestConfig')
-        with app.app_context():
-            from hedweb.routes import route_blueprint
-            app.register_blueprint(route_blueprint)
-            if not os.path.exists(cls.upload_directory):
-                os.mkdir(cls.upload_directory)
-            app.config['UPLOAD_FOLDER'] = cls.upload_directory
-            app.config['WTF_CSRF_ENABLED'] = False
-            cls.app = app
-            cls.app.test = app.test_client()
+from tests.test_web_base import TestWebBase
 
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.upload_directory)
 
-    def test_file_extension_is_valid(self):
-        from hedweb.web_utils import file_extension_is_valid
-        is_valid = file_extension_is_valid('abc.xml', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
-        is_valid = file_extension_is_valid('abc.XML', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if capitalized version of valid extension')
-        is_valid = file_extension_is_valid('abc.temp', ['.xml', '.txt'])
-        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
-        is_valid = file_extension_is_valid('abc')
-        self.assertTrue(is_valid, 'File names with no extension are valid when no valid extensions provided')
-        is_valid = file_extension_is_valid('abc', ['.xml', '.txt'])
-        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
-        is_valid = file_extension_is_valid('C:abc.Txt', ['.xml', '.txt'])
-        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
+class Test(TestWebBase):
 
     def test_form_has_file(self):
         from hedweb.web_utils import form_has_file
