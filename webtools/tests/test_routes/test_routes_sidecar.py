@@ -2,8 +2,7 @@ import io
 import os
 import unittest
 from flask import Response
-from werkzeug.datastructures import FileStorage
-from hedweb.tests.test_web_base import TestWebBase
+from tests.test_web_base import TestWebBase
 from hedweb.constants import common
 
 
@@ -12,7 +11,7 @@ class Test(TestWebBase):
         response = self.app.test.post('/sidecar_submit')
         self.assertEqual(200, response.status_code, 'HED sidecar request succeeds even when no data')
         self.assertTrue(isinstance(response, Response),
-                        'sidcar_submit to short should return a Response when no data')
+                        'sidecar_submit to short should return a Response when no data')
         header_dict = dict(response.headers)
         self.assertEqual("error", header_dict["Category"], "The header msg_category when no sidecar is error ")
         self.assertFalse(response.data, "The response data for empty sidecar request is empty")
@@ -65,7 +64,7 @@ class Test(TestWebBase):
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            json_file = FileStorage(stream=json_buffer, filename='bids_events.json')
+
             schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0.xml')
             with open(schema_path, 'r') as sc:
                 y = sc.read()

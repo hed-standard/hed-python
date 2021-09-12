@@ -8,7 +8,7 @@ setuptools.setup(
     version="1.0.0",
     author="VisLab, Jeremy Cockfield, Ian Callanan, Kay Robbins",
     author_email="Kay.Robbins@utsa.edu",
-    description="Web interface for HED validation.",
+    description="Web interface for HED tools.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hed-standard/hed-python/hedweb/",
@@ -20,4 +20,3 @@ setuptools.setup(
     ],
     python_requires='>=3.7',
 )
-

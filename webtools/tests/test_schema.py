@@ -1,30 +1,11 @@
 import os
-import shutil
 import unittest
 from werkzeug.test import create_environ
 from werkzeug.wrappers import Request
+from tests.test_web_base import TestWebBase
 
-from hedweb.app_factory import AppFactory
 
-
-class Test(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
-        app = AppFactory.create_app('config.TestConfig')
-        with app.app_context():
-            from hedweb.routes import route_blueprint
-            app.register_blueprint(route_blueprint)
-            if not os.path.exists(cls.upload_directory):
-                os.mkdir(cls.upload_directory)
-            app.config['UPLOAD_FOLDER'] = cls.upload_directory
-            cls.app = app
-            cls.app.test = app.test_client()
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.upload_directory)
-
+class Test(TestWebBase):
     def test_generate_input_from_schema_form_empty(self):
         from hedweb.schema import get_input_from_schema_form
         self.assertRaises(TypeError, get_input_from_schema_form, {},
@@ -47,14 +28,14 @@ class Test(unittest.TestCase):
             self.assertEqual(common.COMMAND_CONVERT, arguments[common.COMMAND],
                              "get_input_from_schema_form should have a command")
             self.assertFalse(arguments[common.CHECK_FOR_WARNINGS_VALIDATE],
-                            "get_input_from_schema_form should have check_for_warnings false when not given")
+                             "get_input_from_schema_form should have check_for_warnings false when not given")
 
     def test_schema_process(self):
         from hedweb.schema import schema_process
         from hed.errors.exceptions import HedFileError
         arguments = {'schema_path': ''}
         try:
-            a = schema_process(arguments)
+            schema_process(arguments)
         except HedFileError:
             pass
         except Exception:
@@ -103,11 +84,11 @@ class Test(unittest.TestCase):
         with self.app.app_context():
             try:
                 hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-                results = schema_convert(hed_schema, display_name)
+                schema_convert(hed_schema, display_name)
             except HedFileError:
                 pass
-            except Exception:
-                self.fail('schema_convert threw Exception instead of HedFileError for invalid schema file header')
+            except Exception as ex:
+                self.fail(f"schema_convert threw {type(ex).__name__} for invalid schema file header")
             else:
                 self.fail('schema_process should throw HedFileError when the schema file header was invalid')
 

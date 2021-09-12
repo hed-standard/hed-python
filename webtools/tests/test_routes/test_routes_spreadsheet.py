@@ -2,8 +2,7 @@ import io
 import os
 import unittest
 from flask import Response
-from werkzeug.datastructures import FileStorage
-from hedweb.tests.test_web_base import TestWebBase
+from tests.test_web_base import TestWebBase
 from hedweb.constants import common
 
 
@@ -17,7 +16,6 @@ class Test(TestWebBase):
         self.assertEqual("error", header_dict["Category"], "The header msg_category when no spreadsheet is error ")
         self.assertFalse(response.data, "The response data for empty spreadsheet request is empty")
 
-
     def test_spreadsheet_results_validate_valid(self):
         with self.app.app_context():
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -25,8 +23,7 @@ class Test(TestWebBase):
             with open(spreadsheet_path, 'rb') as sc:
                 x = sc.read()
             spreadsheet_buffer = io.BytesIO(bytes(x))
-            myFile = FileStorage(stream=spreadsheet_buffer, filename='ExcelMultipleSheets.xlsx',
-                                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
             input_data = {common.SCHEMA_VERSION: '7.2.0',
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
                           common.WORKSHEET_NAME: 'LKT Events',
@@ -59,8 +56,7 @@ class Test(TestWebBase):
             with open(spreadsheet_path, 'rb') as sc:
                 x = sc.read()
             spreadsheet_buffer = io.BytesIO(bytes(x))
-            myFile = FileStorage(stream=spreadsheet_buffer, filename='ExcelMultipleSheets.xlsx',
-                                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
             input_data = {common.SCHEMA_VERSION: '8.0.0',
                           common.COMMAND_OPTION: common.COMMAND_VALIDATE,
                           common.WORKSHEET_NAME: 'LKT Events',

@@ -1,10 +1,11 @@
 import pandas
+import os
 from flask import current_app
 import openpyxl
 from hed.errors.exceptions import HedFileError
 
 from hedweb.constants import common, file_constants
-from hedweb.web_utils import form_has_file, form_has_option, file_extension_is_valid
+from hedweb.web_utils import form_has_file, form_has_option
 
 
 app_config = current_app.config
@@ -48,11 +49,12 @@ def create_columns_info(columns_file, has_column_names: True, sheet_name: None):
 
     sheet_names = None
     filename = columns_file.filename
-    if file_extension_is_valid(filename, file_constants.EXCEL_FILE_EXTENSIONS):
+    file_ext = os.path.splitext(filename.lower())[1]
+    if file_ext in file_constants.EXCEL_FILE_EXTENSIONS:
         worksheet, sheet_names = get_worksheet(columns_file, sheet_name)
         dataframe = dataframe_from_worksheet(worksheet, has_column_names)
         sheet_name = worksheet.title
-    elif file_extension_is_valid(filename, file_constants.TEXT_FILE_EXTENSIONS):
+    elif file_ext in file_constants.TEXT_FILE_EXTENSIONS:
         dataframe = pandas.read_csv(columns_file, delimiter='\t', header=header)
     else:
         raise HedFileError('BadFileExtension',
