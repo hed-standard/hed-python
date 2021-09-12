@@ -78,4 +78,4 @@ exclude_patterns:
 - "**/config_template.py"
 - "**/*.txt"
 - "**/*.html"
-- "**/*.coveragerc
+- "**/*.coveragerc"
