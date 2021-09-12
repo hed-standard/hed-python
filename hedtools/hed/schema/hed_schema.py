@@ -160,16 +160,7 @@ class HedSchema:
         if library_prefix and library_prefix[-1] != ":":
             library_prefix += ":"
 
-        len_prefix = len(self._library_prefix)
-
-        new_section_dict = {library_prefix.lower() + tag_name[len_prefix:]: tag_entry for
-                            tag_name, tag_entry in self._sections[HedSectionKey.AllTags].items()}
-        for entry in new_section_dict.values():
-            entry.long_name = library_prefix.lower() + entry.long_name[len_prefix:]
-        self._sections[HedSectionKey.AllTags].all_names = new_section_dict
-
         self._library_prefix = library_prefix
-        self.finalize_dictionaries()
 
     # ===============================================
     # Schema validation functions
@@ -576,15 +567,11 @@ class HedSchema:
         if HedKey.ValueClassProperty not in self._sections[HedSectionKey.Properties]:
             self._add_single_default_property(HedKey.ValueClassProperty)
 
-        # !BFK! for handling old files.  If allowed character is a unit class property, ignore it entirely.
+        # Allowed character used to be a unit class property - just remove it entirely if this is the case.
         if HedKey.AllowedCharacter in self._sections[HedSectionKey.Attributes]:
             attribute_entry = self._sections[HedSectionKey.Attributes][HedKey.AllowedCharacter]
             if attribute_entry.has_attribute(HedKey.UnitClassProperty):
                 del self._sections[HedSectionKey.Attributes].all_names[HedKey.AllowedCharacter]
-                for section in self._sections.values():
-                    for entry in section.values():
-                        if HedKey.AllowedCharacter in entry.attributes:
-                            del entry.attributes[HedKey.AllowedCharacter]
 
         if only_add_if_none_present and bool(self._sections[HedSectionKey.Attributes]):
             return
@@ -732,8 +719,6 @@ class HedSchema:
         new_short_tag_dict = {}
         for tag, tag_entry in base_tag_dict.items():
             unformatted_tag = tag_entry.long_name
-            if self._library_prefix and unformatted_tag.startswith(self._library_prefix):
-                unformatted_tag = unformatted_tag[len(self._library_prefix):]
             split_tags = unformatted_tag.split("/")
             short_tag = split_tags[-1]
             if short_tag == "#":
@@ -927,8 +912,13 @@ class HedSchema:
 
         Returns
         -------
-
+        tag_entry: HedSchemaEntry
+            The schema entry for the given tag.
         """
+        if self._library_prefix and key_class == HedSectionKey.AllTags:
+            long_tag_name = long_tag_name.lower()
+            if long_tag_name.startswith(self._library_prefix):
+                long_tag_name = long_tag_name[len(self._library_prefix):]
         return self._sections[key_class].get(long_tag_name)
 
     def _add_tag_to_dict(self, long_tag_name, key_class):

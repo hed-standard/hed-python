@@ -26,11 +26,6 @@ class HedSchema2Wiki:
         """
         self.output = []
 
-        # todo: this is very inefficient
-        if hed_schema._library_prefix:
-            hed_schema = copy.deepcopy(hed_schema)
-            hed_schema.set_library_prefix("")
-
         self._output_header(hed_schema)
         self._output_tags(hed_schema)
         self.current_tag_string = wiki_constants.END_SCHEMA_STRING

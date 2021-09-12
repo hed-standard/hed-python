@@ -25,10 +25,6 @@ class HedSchema2XML:
         """
         self.hed_node = Element('HED')
 
-        # todo: this is very inefficient
-        if hed_schema._library_prefix:
-            hed_schema = copy.deepcopy(hed_schema)
-            hed_schema.set_library_prefix("")
         self._output_header(hed_schema)
         self._output_tags(hed_schema)
         self._output_units(hed_schema)

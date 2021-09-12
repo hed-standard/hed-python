@@ -171,7 +171,7 @@ def events_validate(hed_schema, events):
     issues = events.validate_file_sidecars(hed_schema)
     if not issues:
         validator = EventValidator(hed_schema=hed_schema)
-        issues = validator.validate_input(events)
+        issues = validator.validate_file(events)
     if issues:
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')

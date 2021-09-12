@@ -210,8 +210,9 @@ class HedGroup:
             The constructed string
         """
         if tag_transformer:
-            result = ",".join([tag_transformer(child, child.__getattribute__(tag_attribute)) if isinstance(child, HedTag) else
-                               child.get_as_form(tag_attribute, tag_transformer) for child in self._children])
+            result = ",".join([tag_transformer(child, child.__getattribute__(tag_attribute))
+                               if isinstance(child, HedTag) else child.get_as_form(tag_attribute, tag_transformer)
+                               for child in self._children])
         else:
             result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
                                child.get_as_form(tag_attribute) for child in self._children])
@@ -261,3 +262,7 @@ class HedGroup:
 
         for group in self.get_all_groups():
             group._children = [child for child in group._children if child not in remove_groups]
+
+    def replace_placeholder(self, placeholder_value):
+        for tag in self.get_all_tags():
+            tag.replace_placeholder(placeholder_value)

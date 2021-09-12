@@ -304,8 +304,7 @@ class BaseInput:
             If True, this returns the full row_dict including issues.
             If False, returns just the HedStrings for each column
         expand_defs: bool
-            If False, this will still remove all definition/ tags, but will not expand label tags.
-
+            If True, this will fully remove all definitions found and expand all def tags to def-expand tags
         Yields
         -------
         row_number: int
@@ -324,7 +323,7 @@ class BaseInput:
             if all(text_file_row.isnull()):
                 continue
 
-            row_dict = mapper.expand_row_tags(text_file_row, expand_defs)
+            row_dict = mapper.expand_row_tags(text_file_row, expand_defs=expand_defs)
             if return_row_dict:
                 yield row_number + start_at_one, row_dict
             else:
@@ -417,11 +416,11 @@ class BaseInput:
             A list of definition and mapping issues.
         """
         issues = []
-        for issue in self.file_def_dict.get_def_issues():
+        for issue in self.file_def_dict.get_definition_issues():
             issues.append(issue)
 
-        for issue in self._mapper._mapper_issues:
-            issues += error_handler.format_error(**issue)
+        # todo: clean these internal calls up
+        issues += error_handler.format_error_list(self._mapper._mapper_issue_params)
         return issues
 
     def _get_processed_copy(self):

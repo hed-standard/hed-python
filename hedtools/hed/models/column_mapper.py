@@ -63,7 +63,7 @@ class ColumnMapper:
         self._also_gather_defs = also_gather_defs
 
         self._na_patterns = ["n/a", "nan"]
-        self._mapper_issues = []
+        self._mapper_issue_params = []
         if sidecars:
             self.add_sidecars(sidecars)
         self.add_columns(attribute_columns)
@@ -81,7 +81,7 @@ class ColumnMapper:
 
         Parameters
         ----------
-        sidecar_list : [str or Sidecar]
+        sidecars : [str or Sidecar]
             A list of filenames or loaded files in any mix
         """
         sidecars = Sidecar.load_multiple_sidecars(sidecars)
@@ -223,8 +223,7 @@ class ColumnMapper:
         row_text : [str]
             The text for the given row, one entry per column number.
         expand_defs: bool
-            If False, this will still remove all definition/ tags, but will not expand label tags.
-
+            If True, this will fully remove all definitions found and expand all def tags to def-expand tags
         Returns
         -------
         expanded_dict: {str: }
@@ -236,30 +235,26 @@ class ColumnMapper:
         """
         result_dict = {}
         column_to_hed_tags_dictionary = {}
-        issues_dict = {}
+        issue_params_dict = {}
         for column_number, cell_text in enumerate(row_text):
             translated_column, attribute_name_or_error = self._expand_column(column_number, str(cell_text))
+            issue_params_dict[column_number + 1] = []
             if translated_column is None:
                 if attribute_name_or_error:
-                    if column_number + 1 not in issues_dict:
-                        issues_dict[column_number + 1] = []
-                    issues_dict[column_number + 1] = attribute_name_or_error
+                    issue_params_dict[column_number + 1] += attribute_name_or_error
                 continue
             if attribute_name_or_error:
                 result_dict[attribute_name_or_error] = translated_column
                 continue
             if self._def_mapper:
-                new_issues = self._def_mapper.replace_and_remove_tags(translated_column, expand_defs)
-                if new_issues:
-                    if column_number + 1 not in issues_dict:
-                        issues_dict[column_number + 1] = []
-                    issues_dict[column_number + 1] += new_issues
+                new_issue_params = self._def_mapper.replace_and_remove_tags(translated_column, expand_defs=expand_defs)
+                issue_params_dict[column_number + 1] += new_issue_params
 
             column_to_hed_tags_dictionary[column_number + 1] = translated_column
 
         result_dict[model_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
-        if issues_dict:
-            result_dict[model_constants.COLUMN_ISSUES] = issues_dict
+        if issue_params_dict:
+            result_dict[model_constants.COLUMN_ISSUE_PARAMS] = issue_params_dict
         final_hed_string = HedString.create_from_other(column_to_hed_tags_dictionary.values())
         result_dict[model_constants.ROW_HED_STRING] = final_hed_string
 
@@ -336,7 +331,7 @@ class ColumnMapper:
         self._final_column_map = {}
         found_named_tag_columns = {}
         all_tag_columns = self._tag_columns + self._optional_tag_columns
-        self._mapper_issues = []
+        self._mapper_issue_params = []
         if self._column_map is not None:
             for column_number, column_name in self._column_map.items():
                 if column_name in self.column_data:
@@ -363,14 +358,14 @@ class ColumnMapper:
                 column_number = found_named_tag_columns[column_name]
                 self._final_column_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_number)
             elif column_number in self._tag_columns:
-                self._mapper_issues += [{'error_type': ValidationErrors.HED_MISSING_COLUMN,
-                                        'missing_column_name': column_number}]
+                self._mapper_issue_params += [{'error_type': ValidationErrors.HED_MISSING_COLUMN,
+                                              'missing_column_name': column_number}]
 
         # Add prefixes
         for column_number, prefix in self._column_prefix_dictionary.items():
             self._set_column_prefix(column_number, prefix)
 
-        return self._mapper_issues
+        return self._mapper_issue_params
 
     def _finalize_def_dicts(self):
         def_dicts = []

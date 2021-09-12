@@ -134,7 +134,7 @@ def string_validate(hed_schema, string_list):
 
     validation_errors = []
     for pos, string in enumerate(string_list, start=1):
-        issues = hed_validator.validate_input(string)
+        issues = hed_validator.validate_hed_string(string)
         if issues:
             validation_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
     if validation_errors:

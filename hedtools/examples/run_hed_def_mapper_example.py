@@ -37,7 +37,7 @@ if __name__ == '__main__':
                                              title="There should be no errors with the sidecar.  \""
                                              "This will likely cause other errors if there are."))
     validator = EventValidator(hed_schema=hed_schema)
-    validation_issues = validator.validate_input(input_file)
+    validation_issues = validator.validate_file(input_file)
     print(hed.get_printable_issue_string(validation_issues, "Normal hed string errors"))
 
     output_filename = hed3_tags_single_sheet + "_test_output.xlsx"
