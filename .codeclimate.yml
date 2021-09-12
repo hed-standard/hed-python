@@ -12,7 +12,7 @@ checks:
   file-lines:
     enabled: true
     config:
-      threshold: 250
+      threshold: 300
   method-complexity:
     enabled: true
     config:
@@ -24,7 +24,7 @@ checks:
   method-lines:
     enabled: true
     config:
-      threshold: 25
+      threshold: 50
   nested-control-flow:
     enabled: true
     config:
@@ -76,3 +76,6 @@ exclude_patterns:
 - "**/*.yml"
 - "**/*.yaml"
 - "**/config_template.py"
+- "**/*.txt"
+- "**/*.html"
+- "**/*.coveragerc

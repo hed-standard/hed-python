@@ -2,7 +2,6 @@ import io
 import os
 import unittest
 from flask import Response
-from werkzeug.datastructures import FileStorage
 from tests.test_web_base import TestWebBase
 from hedweb.constants import common
 
