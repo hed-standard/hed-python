@@ -5,7 +5,7 @@ import openpyxl
 from hed.errors.exceptions import HedFileError
 
 from hedweb.constants import common, file_constants
-from hedweb.web_utils import form_has_file, form_has_option, file_extension_is_valid
+from hedweb.web_utils import form_has_file, form_has_option
 
 
 app_config = current_app.config

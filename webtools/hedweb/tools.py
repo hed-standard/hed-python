@@ -25,7 +25,7 @@ def get_key_value(key, column_values, categorical=True):
         for val_key in column_values.keys():
             levels[val_key] = f"Level for {val_key}"
             hed[val_key] = f"Description/Tags for {val_key}"
-        key_value["Levels"] =  levels
+        key_value["Levels"] = levels
     else:
         hed = "Label/#"
     key_value["HED"] = hed
@@ -51,10 +51,10 @@ def get_sidecar_dict(columns_info, columns_selected):
     issues = []
     if not columns_selected:
         return hed_dict, [{'code': 'HED_EMPTY_COLUMN_SELECTION', 'severity': 1,
-                          'message': f"Must select at least one column"}]
+                          'message': "Must select at least one column"}]
     elif not columns_info:
         return hed_dict, [{'code': 'HED_NO_COLUMNS', 'severity': 1,
-                          'message': f"Must have columns to do extraction"}]
+                          'message': "Must have columns to do extraction"}]
     for key in columns_selected:
         if key not in columns_info:
             issues += [{'code': 'HED_INVALID_COLUMN_NAME', 'severity': 1,

@@ -105,7 +105,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
-        events = models.EventsInput(file=events_path, sidecars=json_sidecar,name='bids_events')
+        events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
             results = events_assemble(hed_schema, events, defs_expand=True)
             self.assertTrue('data' in results,

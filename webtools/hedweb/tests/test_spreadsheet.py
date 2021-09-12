@@ -159,7 +159,7 @@ class Test(TestWebBase):
             self.assertTrue(results['data'],
                             'spreadsheet_validate results should have empty data when errors')
             self.assertEqual('warning', results['msg_category'],
-                             'spreadsheet_validate msg_category should be warning when no erros')
+                             'spreadsheet_validate msg_category should be warning when no errors')
 
 
 if __name__ == '__main__':

@@ -127,7 +127,7 @@ def generate_download_file_from_text(download_text, display_name=None,
         display_name = 'download.txt'
 
     if not download_text:
-        raise HedFileError('EmptyDownloadText', f"No download text given", "")
+        raise HedFileError('EmptyDownloadText', "No download text given", "")
 
     def generate():
         if header:

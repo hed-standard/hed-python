@@ -28,14 +28,14 @@ class Test(TestWebBase):
             self.assertEqual(common.COMMAND_CONVERT, arguments[common.COMMAND],
                              "get_input_from_schema_form should have a command")
             self.assertFalse(arguments[common.CHECK_FOR_WARNINGS_VALIDATE],
-                            "get_input_from_schema_form should have check_for_warnings false when not given")
+                             "get_input_from_schema_form should have check_for_warnings false when not given")
 
     def test_schema_process(self):
         from hedweb.schema import schema_process
         from hed.errors.exceptions import HedFileError
         arguments = {'schema_path': ''}
         try:
-            a = schema_process(arguments)
+            schema_process(arguments)
         except HedFileError:
             pass
         except Exception:
@@ -84,11 +84,11 @@ class Test(TestWebBase):
         with self.app.app_context():
             try:
                 hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-                results = schema_convert(hed_schema, display_name)
+                schema_convert(hed_schema, display_name)
             except HedFileError:
                 pass
-            except Exception:
-                self.fail('schema_convert threw Exception instead of HedFileError for invalid schema file header')
+            except Exception as ex:
+                self.fail(f"schema_convert threw {type(ex).__name__} for invalid schema file header")
             else:
                 self.fail('schema_process should throw HedFileError when the schema file header was invalid')
 

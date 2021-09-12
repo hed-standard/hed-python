@@ -27,7 +27,6 @@ def columns_info_results():
     """
     try:
         columns_info = get_columns_request(request)
-        a = json.dumps(columns_info)
         return json.dumps(columns_info)
     except Exception as ex:
         return handle_error(ex)

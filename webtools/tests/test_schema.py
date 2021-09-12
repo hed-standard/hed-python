@@ -47,18 +47,18 @@ class Test(unittest.TestCase):
             self.assertEqual(common.COMMAND_CONVERT, arguments[common.COMMAND],
                              "get_input_from_schema_form should have a command")
             self.assertFalse(arguments[common.CHECK_FOR_WARNINGS_VALIDATE],
-                            "get_input_from_schema_form should have check_for_warnings false when not given")
+                             "get_input_from_schema_form should have check_for_warnings false when not given")
 
     def test_schema_process(self):
         from hedweb.schema import schema_process
         from hed.errors.exceptions import HedFileError
         arguments = {'schema_path': ''}
         try:
-            a = schema_process(arguments)
+            schema_process(arguments)
         except HedFileError:
             pass
-        except Exception:
-            self.fail('schema_process threw the wrong exception when schema_path was empty')
+        except Exception as ex:
+            self.fail(f"schema_process threw the wrong exception {type(ex).__name__} when schema_path was empty")
         else:
             self.fail('schema_process should have thrown a HedFileError exception when schema_path was empty')
 

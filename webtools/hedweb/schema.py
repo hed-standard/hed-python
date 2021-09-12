@@ -27,7 +27,7 @@ def get_input_from_schema_form(request):
     dict
         A dictionary containing input arguments for calling the underlying schema functions.
     """
-   
+
     if form_has_option(request, common.SCHEMA_UPLOAD_OPTIONS, common.SCHEMA_FILE_OPTION) and \
             form_has_file(request, common.SCHEMA_FILE, file_constants.SCHEMA_EXTENSIONS):
         f = request.files[common.SCHEMA_FILE]

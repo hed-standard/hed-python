@@ -1,5 +1,4 @@
 import os
-import shutil
 import unittest
 
 from werkzeug.test import create_environ
@@ -87,8 +86,7 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_events')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        arguments = {common.SCHEMA: hed_schema,
-                     common.JSON_SIDECAR: json_sidecar, common.COMMAND: common.COMMAND_TO_LONG}
+
         with self.app.app_context():
             results = sidecar_convert(hed_schema, json_sidecar, command=common.COMMAND_TO_LONG)
             self.assertTrue(results['data'],

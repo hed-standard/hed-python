@@ -41,7 +41,7 @@ class Test(TestWebBase):
         except HedFileError:
             pass
         except Exception as ex:
-            self.fail(f'string_process threw wrong exception when unexpected error')
+            self.fail(f"string_process threw wrong exception {type(ex).__name__} when unexpected error")
         else:
             self.fail('string_process should have thrown a HedFileError exception string_list is empty')
 
