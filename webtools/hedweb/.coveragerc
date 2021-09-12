@@ -1,22 +1,14 @@
 [run]
+branch = True
 omit =
-        ./hedweb/__init__.py
-        deploy_hed/*
-        examples/*
-        hedweb/constants/*
-        hedweb/app_factory.py
+        */__init__.py
+        ./deploy_hed/*
+        ./examples/*
+        ./constants/*
+        */app_factory.py
         ./venv/*
         *tests/*
 
 
 [report]
-omit =
-        ./hedweb/__init__.py
-        *__init__.py
-        deploy_hed/*
-        examples/*
-        hedweb/constants/*
-        hedweb/app_factory.py
-        ./venv/*
-        *tests*
 skip_empty = true
