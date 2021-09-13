@@ -176,6 +176,14 @@ class TestHedUnknownAttr(TestConverterBase):
     can_compare = True
     can_legacy = False
 
+
+class TestHedMultiValueClass(TestConverterBase):
+    xml_file = '../data/hed_pairs/HED8.0.0_2_value_classes.xml'
+    wiki_file = '../data/hed_pairs/HED8.0.0_2_value_classes.mediawiki'
+    can_compare = True
+    can_legacy = False
+
+
 class TestConverterSavingPrefix(unittest.TestCase):
     xml_file = '../data/hed_pairs/HED8.0.0.xml'
 
