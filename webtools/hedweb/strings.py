@@ -12,7 +12,7 @@ from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down
 app_config = current_app.config
 
 
-def get_input_from_string_form(request):
+def get_input_from_form(request):
     """Gets input arguments from a request object associated with the string form.
 
     Parameters
@@ -34,11 +34,11 @@ def get_input_from_string_form(request):
     arguments = {common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
                  common.SCHEMA: hed_schema,
                  common.STRING_LIST: string_list,
-                 common.CHECK_FOR_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_FOR_WARNINGS_VALIDATE, 'on')}
+                 common.CHECK_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'on')}
     return arguments
 
 
-def string_process(arguments):
+def process(arguments):
     """Perform the requested string processing action
 
     Parameters

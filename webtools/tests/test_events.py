@@ -64,7 +64,7 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         arguments = {common.EVENTS: events, common.COMMAND: common.COMMAND_VALIDATE, common.DEFS_EXPAND: True,
-                     common.CHECK_FOR_WARNINGS_VALIDATE: True, common.SCHEMA: hed_schema}
+                     common.CHECK_WARNINGS_VALIDATE: True, common.SCHEMA: hed_schema}
         with self.app.app_context():
             results = events_process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -83,7 +83,7 @@ class Test(TestWebBase):
             self.assertTrue(results["data"], 'events_process validate should return data when errors')
 
     def test_events_assemble(self):
-        from hedweb.events import events_assemble
+        from hedweb.events import assemble
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
@@ -91,23 +91,23 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
-            results = events_assemble(hed_schema, events, defs_expand=True)
+            results = assemble(hed_schema, events, defs_expand=True)
             self.assertTrue('data' in results,
-                            'events_assemble results should have a data key when no errors')
+                            'assemble results should have a data key when no errors')
             self.assertEqual('success', results["msg_category"],
-                             'events_assemble msg_category should be success when no errors')
+                             'assemble msg_category should be success when no errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            results = events_assemble(hed_schema, events, defs_expand=True)
+            results = assemble(hed_schema, events, defs_expand=True)
             self.assertTrue(results['data'],
-                            'events_assemble results should have a data key when errors')
+                            'assemble results should have a data key when errors')
             self.assertEqual('warning', results['msg_category'],
-                             'events_assemble msg_category should be warning when errors')
+                             'assemble msg_category should be warning when errors')
 
     def test_events_validate(self):
-        from hedweb.events import events_validate
+        from hedweb.events import validate
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
@@ -115,21 +115,21 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
-            results = events_validate(hed_schema, events)
+            results = validate(hed_schema, events)
             self.assertTrue(results['data'],
-                            'events_validate results should have a data key when validation errors')
+                            'validate results should have a data key when validation errors')
             self.assertEqual('warning', results["msg_category"],
-                             'events_validate msg_category should be warning when errors')
+                             'validate msg_category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
-            results = events_validate(hed_schema, events)
+            results = validate(hed_schema, events)
             self.assertFalse(results['data'],
-                             'events_validate results should not have a data key when no validation errors')
+                             'validate results should not have a data key when no validation errors')
             self.assertEqual('success', results['msg_category'],
-                             'events_validate msg_category should be success when no errors')
+                             'validate msg_category should be success when no errors')
 
 
 if __name__ == '__main__':

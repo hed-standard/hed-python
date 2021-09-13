@@ -10,27 +10,27 @@ from hedweb.constants import common
 
 class Test(TestWebBase):
     def test_get_input_from_string_form_empty(self):
-        from hedweb.strings import get_input_from_string_form
-        self.assertRaises(TypeError, get_input_from_string_form, {},
-                          "An exception is raised if an empty request is passed to get_input_from_string_form")
+        from hedweb.strings import get_input_from_form
+        self.assertRaises(TypeError, get_input_from_form, {},
+                          "An exception is raised if an empty request is passed to get_input_from_form")
 
     def test_get_input_from_string_form(self):
         from hed.schema import HedSchema
-        from hedweb.strings import get_input_from_string_form
+        from hedweb.strings import get_input_from_form
         with self.app.test:
             environ = create_environ(data={common.STRING_INPUT: 'Red,Blue', common.SCHEMA_VERSION: '8.0.0',
-                                           common.CHECK_FOR_WARNINGS_VALIDATE: 'on',
+                                           common.CHECK_WARNINGS_VALIDATE: 'on',
                                            common.COMMAND_OPTION: common.COMMAND_VALIDATE})
             request = Request(environ)
-            arguments = get_input_from_string_form(request)
+            arguments = get_input_from_form(request)
             self.assertIsInstance(arguments[common.STRING_LIST], list,
-                                  "get_input_from_string_form should have a string list")
+                                  "get_input_from_form should have a string list")
             self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
-                                  "get_input_from_string_form should have a HED schema")
+                                  "get_input_from_form should have a HED schema")
             self.assertEqual(common.COMMAND_VALIDATE, arguments[common.COMMAND],
-                             "get_input_from_string_form should have a command")
-            self.assertTrue(arguments[common.CHECK_FOR_WARNINGS_VALIDATE],
-                            "get_input_from_string_form should have check_for_warnings true when on")
+                             "get_input_from_form should have a command")
+            self.assertTrue(arguments[common.CHECK_WARNINGS_VALIDATE],
+                            "get_input_from_form should have check_warnings true when on")
 
     def test_string_process(self):
         from hedweb.strings import string_process
@@ -65,7 +65,8 @@ class Test(TestWebBase):
             data = results['data']
             self.assertTrue(data, 'convert string to short returns data')
             self.assertIsInstance(data, list, "convert string to short returns data in a list")
-            self.assertEqual("Description/Blech,Blue", data[0], "convert string to short returns the correct short form.")
+            self.assertEqual("Description/Blech,Blue", data[0],
+                             "convert string to short returns the correct short form.")
             self.assertEqual('success', results['msg_category'],
                              "hedstring_convert should return success if converted")
 

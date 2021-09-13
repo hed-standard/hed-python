@@ -6,16 +6,13 @@ from flask import current_app
 from hed import models
 from hed import schema as hedschema
 from hedweb.constants import common
-from hedweb.sidecar import sidecar_process
-from hedweb.events import events_process
-from hedweb.spreadsheet import spreadsheet_process, get_prefix_dict
-from hedweb.strings import string_process
-from hedweb.web_utils import handle_error
+from hedweb import events, spreadsheet, sidecar, strings, schema
+
 
 app_config = current_app.config
 
 
-def get_input_from_service_request(request):
+def get_input_from_request(request):
     """Gets a dictionary of input from a service request.
 
     Parameters
@@ -35,39 +32,50 @@ def get_input_from_service_request(request):
     parameters = service_request.get(common.SERVICE_PARAMETERS, None)
     if not parameters:
         parameters = service_request
-    arguments = {common.SERVICE: service_request.get(common.SERVICE, None),
-                 common.SCHEMA: None,
+    arguments = {
+                 common.COMMAND_TARGET: service_request.get(common.COMMAND_TARGET, None),
+                 common.COMMAND: service_request.get(common.COMMAND, None),
+                 common.SCHEMA: get_input_schema(parameters),
                  common.JSON_SIDECAR: None,
                  common.EVENTS: None,
                  common.SPREADSHEET: None,
                  common.HAS_COLUMN_NAMES: parameters.get(common.HAS_COLUMN_NAMES, False),
                  common.STRING_LIST: parameters.get(common.STRING_LIST, None),
-                 common.CHECK_FOR_WARNINGS_VALIDATE: parameters.get(common.CHECK_FOR_WARNINGS_VALIDATE, True),
+                 common.CHECK_WARNINGS_VALIDATE: parameters.get(common.CHECK_WARNINGS_VALIDATE, True),
                  common.DEFS_EXPAND: parameters.get(common.DEFS_EXPAND, True)}
-    if common.JSON_STRING in parameters and parameters[common.JSON_STRING]:
-        arguments[common.JSON_SIDECAR] = models.Sidecar(file=io.StringIO(parameters[common.JSON_STRING]),
-                                                        name='JSON_Sidecar')
-    if common.EVENTS_STRING in parameters and parameters[common.EVENTS_STRING]:
-        arguments[common.EVENTS] = models.EventsInput(file=io.StringIO(parameters[common.EVENTS_STRING]),
-                                                      sidecars=arguments[common.JSON_SIDECAR], name='Events')
-    if common.SPREADSHEET_STRING in parameters and parameters[common.SPREADSHEET_STRING]:
-        tag_columns, prefix_dict = get_prefix_dict(parameters)
-        arguments[common.SPREADSHEET] = \
-            models.HedInput(file=io.StringIO(parameters[common.SPREADSHEET_STRING]), file_type=".tsv",
-                            tag_columns=tag_columns, has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
-                            column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
-    if common.SCHEMA_STRING in parameters and parameters[common.SCHEMA_STRING]:
-        arguments[common.SCHEMA] = hedschema.from_string(parameters[common.SCHEMA_STRING])
-    elif common.SCHEMA_URL in parameters and parameters[common.SCHEMA_URL]:
-        schema_url = parameters[common.SCHEMA_URL]
-        arguments[common.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
-    elif common.SCHEMA_VERSION in parameters and parameters[common.SCHEMA_VERSION]:
-        hed_file_path = hedschema.get_path_from_hed_version(parameters[common.SCHEMA_VERSION])
-        arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=hed_file_path)
+    arguments.update(get_input_objects(parameters))
     return arguments
 
 
-def services_process(arguments):
+def get_input_objects(params):
+    args = {}
+    if common.JSON_STRING in params and params[common.JSON_STRING]:
+        args[common.JSON_SIDECAR] = models.Sidecar(file=io.StringIO(params[common.JSON_STRING]), name='JSON_Sidecar')
+    if common.EVENTS_STRING in params and params[common.EVENTS_STRING]:
+        args[common.EVENTS] = models.EventsInput(file=io.StringIO(params[common.EVENTS_STRING]),
+                                                 sidecars=args[common.JSON_SIDECAR], name='Events')
+    if common.SPREADSHEET_STRING in params and params[common.SPREADSHEET_STRING]:
+        tag_columns, prefix_dict = spreadsheet.get_prefix_dict(params)
+        args[common.SPREADSHEET] = models.HedInput(file=io.StringIO(params[common.SPREADSHEET_STRING]),
+                                                   file_type=".tsv", tag_columns=tag_columns,
+                                                   has_column_names=args.get(common.HAS_COLUMN_NAMES, None),
+                                                   column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
+    return args
+
+
+def get_input_schema(parameters):
+    if common.SCHEMA_STRING in parameters and parameters[common.SCHEMA_STRING]:
+        schema = hedschema.from_string(parameters[common.SCHEMA_STRING])
+    elif common.SCHEMA_URL in parameters and parameters[common.SCHEMA_URL]:
+        schema_url = parameters[common.SCHEMA_URL]
+        schema = hedschema.load_schema(hed_url_path=schema_url)
+    elif common.SCHEMA_VERSION in parameters and parameters[common.SCHEMA_VERSION]:
+        hed_file_path = hedschema.get_path_from_hed_version(parameters[common.SCHEMA_VERSION])
+        schema = hedschema.load_schema(hed_file_path=hed_file_path)
+    return schema
+
+
+def process(arguments):
     """
     Calls the desired service processing function and returns results
 
@@ -82,56 +90,28 @@ def services_process(arguments):
         A dictionary of results in standard response format to be jsonified.
     """
 
-    service = arguments.get('service', '')
-    response = {'service': service, 'results': '', 'error_type': '', 'error_msg': ''}
-    try:
-        if not service:
-            response["error_type"] = 'HEDServiceMissing'
-            response["error_msg"] = "Must specify a valid service"
-        elif service == 'get_services':
-            response["results"] = services_list()
-        elif service == "sidecar_to_long":
-            arguments['command'] = common.COMMAND_TO_LONG
-            response["results"] = sidecar_process(arguments)
-        elif service == "sidecar_to_short":
-            arguments['command'] = common.COMMAND_TO_SHORT
-            response["results"] = sidecar_process(arguments)
-        elif service == "sidecar_validate":
-            arguments['command'] = common.COMMAND_VALIDATE
-            response["results"] = sidecar_process(arguments)
-        elif service == "events_assemble":
-            arguments['command'] = common.COMMAND_ASSEMBLE
-            response["results"] = events_process(arguments)
-        elif service == "events_validate":
-            arguments['command'] = common.COMMAND_VALIDATE
-            response["results"] = events_process(arguments)
-        elif service == "spreadsheet_to_long":
-            arguments['command'] = common.COMMAND_TO_LONG
-            results = spreadsheet_process(arguments)
-            response["results"] = package_spreadsheet(results)
-        elif service == "spreadsheet_to_short":
-            arguments['command'] = common.COMMAND_TO_SHORT
-            results = spreadsheet_process(arguments)
-            response["results"] = package_spreadsheet(results)
-        elif service == "spreadsheet_validate":
-            arguments['command'] = common.COMMAND_VALIDATE
-            response["results"] = spreadsheet_process(arguments)
-        elif service == "string_to_long":
-            arguments['command'] = common.COMMAND_TO_LONG
-            response["results"] = string_process(arguments)
-        elif service == "string_to_short":
-            arguments['command'] = common.COMMAND_TO_SHORT
-            response["results"] = string_process(arguments)
-        elif service == "string_validate":
-            arguments['command'] = common.COMMAND_VALIDATE
-            response["results"] = string_process(arguments)
-        else:
-            response["error_type"] = 'HEDServiceNotSupported'
-            response["error_msg"] = f"{service} not supported"
-    except Exception as ex:
-        errors = handle_error(ex)
-        response['error_type'] = errors['error_type']
-        response['error_msg'] = errors['error_msg']
+    command = arguments[common.COMMAND]
+    target = arguments[common.COMMAND_TARGET]
+    response = {common.COMMAND: command, common.COMMAND_TARGET: target,
+                'results': '', 'error_type': '', 'error_msg': ''}
+
+    if not command:
+        response["error_type"] = 'HEDServiceMissing'
+        response["error_msg"] = "Must specify a valid service"
+    elif command == 'get_services':
+        response["results"] = services_list()
+    elif target == "events":
+        response["results"] = events.process(arguments)
+    elif target == "sidecar":
+        response["results"] = sidecar.process(arguments)
+    elif target == "spreadsheet":
+        results = spreadsheet.process(arguments)
+        response["results"] = package_spreadsheet(results)
+    elif target == "strings":
+        response["results"] = strings.process(arguments)
+    else:
+        response["error_type"] = 'HEDServiceNotSupported'
+        response["error_msg"] = f"{command} for {target} not supported"
     return response
 
 
@@ -156,7 +136,8 @@ def services_list():
     the_path = os.path.join(dir_path, './static/resources/services.json')
     with open(the_path) as f:
         service_info = json.load(f)
-    services = service_info['services']
+    commands = service_info['command']
+    command_targets = service_info['command_target']
     meanings = service_info['meanings']
     returns = service_info['returns']
     results = service_info['results']

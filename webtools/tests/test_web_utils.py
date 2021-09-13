@@ -29,11 +29,11 @@ class Test(TestWebBase):
         from hedweb.web_utils import form_has_option
         from hedweb.constants import common
         with self.app.test as _:
-            environ = create_environ(data={common.CHECK_FOR_WARNINGS_VALIDATE: 'on'})
+            environ = create_environ(data={common.CHECK_WARNINGS_VALIDATE: 'on'})
             request = Request(environ)
-            self.assertTrue(form_has_option(request, common.CHECK_FOR_WARNINGS_VALIDATE, 'on'),
+            self.assertTrue(form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'on'),
                             "Form has the required option when set")
-            self.assertFalse(form_has_option(request, common.CHECK_FOR_WARNINGS_VALIDATE, 'off'),
+            self.assertFalse(form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'off'),
                              "Form does not have required option when target value is wrong one")
             self.assertFalse(form_has_option(request, 'blank', 'on'),
                              "Form does not have required option when option is not in the form")

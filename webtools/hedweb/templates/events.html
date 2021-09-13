@@ -9,7 +9,7 @@
     <form id="events_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options('1) Pick an action:',assemble=True,extract_sidecar=True,validate=True) }}
+        {{ create_process_options('1) Pick an action:',assemble=True,extract=True,validate=True) }}
 
         <h3>2) Upload BIDS-style events file:</h3>
         <div class="form-group">

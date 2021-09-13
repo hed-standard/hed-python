@@ -1,5 +1,5 @@
-CHECK_FOR_WARNINGS_ASSEMBLE = 'check_for_warnings_assemble'
-CHECK_FOR_WARNINGS_VALIDATE = 'check_for_warnings_validate'
+CHECK_WARNINGS_ASSEMBLE = 'check_warnings_assemble'
+CHECK_WARNINGS_VALIDATE = 'check_warnings_validate'
 
 COLUMN_DICTIONARY = 'column_dictionary'
 COLUMN_INDICES = 'column_indices'
@@ -15,13 +15,16 @@ COLUMNS_PATH = 'columns_path'
 COLUMNS_SELECTED = 'columns_selected'
 
 COMMAND = 'command'
-COMMAND_ASSEMBLE = 'command_assemble'
-COMMAND_CONVERT = 'command_convert'
-COMMAND_EXTRACT_SIDECAR = 'command_extract_sidecar'
+COMMAND_ASSEMBLE = 'assemble'
+COMMAND_CONVERT = 'convert'
+COMMAND_EXTRACT_SIDECAR = 'extract'
+COMMAND_FROM_FLAT = 'from_flat'
 COMMAND_OPTION = 'command_option'
-COMMAND_TO_LONG = 'command_to_long'
-COMMAND_TO_SHORT = 'command_to_short'
-COMMAND_VALIDATE = 'command_validate'
+COMMAND_TARGET = 'command_target'
+COMMAND_TO_FLAT = 'to_flat'
+COMMAND_TO_LONG = 'to_long'
+COMMAND_TO_SHORT = 'to_short'
+COMMAND_VALIDATE = 'validate'
 
 DEFS_EXPAND = 'defs_expand'
 
@@ -96,7 +99,6 @@ STRING_LIST = 'string_list'
 STRING_RESULT = 'string_result'
 
 TAG_COLUMNS = 'tag_columns'
-
 WORKSHEET_NAME = 'worksheet_name'
 WORKSHEET_NAMES = 'worksheet_names'
 WORKSHEET_SELECT = 'worksheet_select'

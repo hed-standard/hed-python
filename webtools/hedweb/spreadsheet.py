@@ -16,7 +16,7 @@ from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, gen
 app_config = current_app.config
 
 
-def get_input_from_spreadsheet_form(request):
+def get_input_from_form(request):
     """Gets input argument dictionary from the spreadsheet form request.
 
     Parameters
@@ -36,7 +36,7 @@ def get_input_from_spreadsheet_form(request):
         common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None),
         common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
         common.HAS_COLUMN_NAMES: form_has_option(request, common.HAS_COLUMN_NAMES, 'on'),
-        common.CHECK_FOR_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_FOR_WARNINGS_VALIDATE, 'on'),
+        common.CHECK_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'on'),
     }
 
     tag_columns, prefix_dict = get_prefix_dict(request.form)
@@ -55,7 +55,7 @@ def get_input_from_spreadsheet_form(request):
     return arguments
 
 
-def spreadsheet_process(arguments):
+def process(arguments):
     """Perform the requested action for the spreadsheet.
 
     Parameters

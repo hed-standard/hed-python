@@ -4,39 +4,32 @@
             "Description": "Return a list of hed services commands with descriptions.",
             "Parameters": []
         },
-        "events_assemble": {
-            "Name": "events_assemble",
+        "assemble": {
+            "Name": "assemble",
             "Description": "Validate a BIDS events file with JSON sidecars (passed as strings).",
             "Parameters": [
+                "command_target",
                 "events_string",
                 [
                     "schema_string",
                     "schema_url",
                     "schema_version"
                 ],
-                "json_string",
-                "check_for_warnings",
+                ["json_string"],
+                "check_warnings",
                 "defs_expand"
             ]
         },
-        "events_validate": {
-            "Name": "events_validate",
-            "Description": "Validate a BIDS events file with JSON sidecars (passed as strings).",
+        "to_long": {
+            "Description": "Convert a target (in string form) to short form if valid, otherwise return errors.",
             "Parameters": [
-                "events_string",
+                "command_target",
                 [
-                    "schema_string",
-                    "schema_url",
-                    "schema_version"
+                    "events_string",
+                    "json_string",
+                    "spreadsheet_string",
+                    "string_list"
                 ],
-                "json_string",
-                "check_for_warnings"
-            ]
-        },
-        "sidecar_to_long": {
-            "Description": "Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors.",
-            "Parameters": [
-                "json_string",
                 [
                     "schema_string",
                     "schema_url",
@@ -44,10 +37,16 @@
                 ]
             ]
         },
-        "sidecar_to_short": {
-            "Description": "Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors.",
+        "to_short": {
+            "Description": "Convert a file (in string form) to short form if valid, otherwise return errors.",
             "Parameters": [
-                "json_string",
+                "command_target",
+                [
+                    "events_string",
+                    "json_string",
+                    "spreadsheet_string",
+                    "string_list"
+                ],
                 [
                     "schema_string",
                     "schema_url",
@@ -55,22 +54,17 @@
                 ]
             ]
         },
-        "sidecar_validate": {
-            "Description": "Validate a BIDS JSON sidecar (in string form) and return errors.",
+                "validate": {
+            "Name": "validate",
+            "Description": "Validate a file passed as strings.",
             "Parameters": [
-                "json_string",
+                "command_target",
                 [
-                    "schema_string",
-                    "schema_url",
-                    "schema_version"
+                    "events_string",
+                    "json_string",
+                    "spreadsheet_string",
+                    "string_list"
                 ],
-                "check_for_warnings"
-            ]
-        },
-        "spreadsheet_to_long": {
-            "Description": "Convert a spreadsheet (tsv string) with HED tags in specified columns to long form if valid, otherwise return errors.",
-            "Parameters": [
-                "spreadsheet_string",
                 [
                     "schema_string",
                     "schema_url",
@@ -80,94 +74,27 @@
                     "column_x_input",
                     "column_x_check"
                 ],
-                "check_for_warnings",
+                "check_warnings",
                 "has_column_names"
-            ]
-        },
-        "spreadsheet_to_short": {
-            "Description": "Convert a spreadsheet (tsv string) with HED tags in specified columns to short form if valid, otherwise return errors.",
-            "Parameters": [
-                "spreadsheet_string",
-                [
-                    "schema_string",
-                    "schema_url",
-                    "schema_version"
-                ],
-                [
-                    "column_x_input",
-                    "column_x_check"
-                ],
-                "check_for_warnings",
-                "has_column_names"
-            ]
-        },
-        "spreadsheet_validate": {
-            "Description": "Validate a spreadsheet (tsv string) with HED tags in specified columns.",
-            "Parameters": [
-                "spreadsheet_string",
-                [
-                    "schema_string",
-                    "schema_url",
-                    "schema_version"
-                ],
-                [
-                    "column_x_input",
-                    "column_x_check"
-                ],
-                "check_for_warnings",
-                "has_column_names"
-            ]
-        },
-        "strings_to_long": {
-            "Description": "Convert a list of strings to long form if valid, otherwise return errors.",
-            "Parameters": [
-                "string_list",
-                [
-                    "schema_string",
-                    "schema_url",
-                    "schema_version"
-                ]
-            ]
-        },
-        "strings_to_short": {
-            "Description": "Convert a list of strings to short form if valid, otherwise return errors.",
-            "Parameters": [
-                "string_list",
-                [
-                    "schema_string",
-                    "schema_url",
-                    "schema_version"
-                ]
-            ]
-        },
-        "strings_validate": {
-            "Description": "Validate a list of HED strings and return errors.",
-            "Parameters": [
-                "string_list",
-                [
-                    "schema_string",
-                    "schema_url",
-                    "schema_version"
-                ],
-                "check_for_warnings"
             ]
         }
     },
     "meanings": {
-        "check_for_warnings": "If true, check for warnings when validating.",
+        "check_warnings": "If true, check for warnings when validating.",
         "column_x_check": "If present with value 'on' indicates that column number x has HED tags.",
         "column_x_input": "Contains the prefix appended to column x if x has HED tags.",
+        "command_target": "",
         "defs_expand": "If true, assembly expands definitions and replaces def/XXX with def-expand/XXX.",
         "events_string": "A BIDS events file as a string.",
         "has_column_names": "If true, the first row of the spreadsheet or events file is interpreted as column names.",
-        "hed_columns": "A list of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are used.",
+        "hed_columns": "List of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are used.",
         "hed_strings": "List of HED strings to be processed.",
         "json_string": "JSON sidecar as a string",
-        "json_strings": "A list of BIDS JSON sidecars as strings.",
+        "json_strings": "List of BIDS JSON sidecars as strings.",
         "schema_string": "HED XML schema as a string.",
-        "schema_url": "A URL from which a HED schema can be downloaded.",
+        "schema_url": "URL from which a HED schema can be downloaded.",
         "schema_version": "Version of HED to used in processing.",
-        "spreadsheet_string": "A spreadsheet tsv as a string."
+        "spreadsheet_string": "Spreadsheet tsv as a string."
     },
     "returns": {
         "service": "Name of the requested service.",

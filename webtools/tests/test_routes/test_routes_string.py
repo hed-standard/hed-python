@@ -18,8 +18,8 @@ class Test(TestWebBase):
         with self.app.app_context():
             test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
             input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: 'command_to_long',
-                          common.CHECK_FOR_WARNINGS_VALIDATE: 'on',
+                          common.COMMAND_OPTION: common.COMMAND_TO_LONG,
+                          common.CHECK_WARNINGS_VALIDATE: 'on',
                           common.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
@@ -49,8 +49,8 @@ class Test(TestWebBase):
         with self.app.app_context():
             test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
             input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: 'command_to_short',
-                          common.CHECK_FOR_WARNINGS_VALIDATE: 'on',
+                          common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
+                          common.CHECK_WARNINGS_VALIDATE: 'on',
                           common.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
@@ -80,8 +80,8 @@ class Test(TestWebBase):
         with self.app.app_context():
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
                                           data={common.SCHEMA_VERSION: '8.0.0',
-                                                common.COMMAND_OPTION: 'command_validate',
-                                                common.CHECK_FOR_WARNINGS_VALIDATE: 'on',
+                                                common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+                                                common.CHECK_WARNINGS_VALIDATE: 'on',
                                                 common.STRING_INPUT: 'Red,Blue,Label/3'})
 
             self.assertEqual(200, response.status_code, 'Validation of a valid string has a response')
@@ -91,8 +91,8 @@ class Test(TestWebBase):
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
                                           data={common.SCHEMA_VERSION: '8.0.0',
-                                                common.COMMAND_OPTION: 'command_validate',
-                                                common.CHECK_FOR_WARNINGS_VALIDATE: 'on',
+                                                common.COMMAND_OPTION: common.COMMAND_VALIDATE,
+                                                common.CHECK_WARNINGS_VALIDATE: 'on',
                                                 common.STRING_INPUT: 'Blob,Blue,Label/3'})
             self.assertEqual(200, response.status_code, 'Validation of an invalid string has a response')
             response_dict = json.loads(response.data)
