@@ -40,12 +40,12 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
             issues_list += error_handler.format_error(SchemaErrors.DUPLICATE_TERMS, tag_name,
                                                       duplicate_tag_list=long_org_tags)
 
-    unknown_attributes = hed_schema.get_all_unknown_attributes()
-    if unknown_attributes:
-        for attribute_name, source_tags in unknown_attributes.items():
-            for tag in source_tags:
-                issues_list += error_handler.format_error(SchemaErrors.UNKNOWN_ATTRIBUTE, attribute_name,
-                                                          source_tag=tag)
+    # unknown_attributes = hed_schema.get_all_unknown_attributes()
+    # if unknown_attributes:
+    #     for attribute_name, source_tags in unknown_attributes.items():
+    #         for tag in source_tags:
+    #             issues_list += error_handler.format_error(SchemaErrors.UNKNOWN_ATTRIBUTE, attribute_name,
+    #                                                       source_tag=tag)
 
     if also_check_for_warnings:
         hed_terms = hed_schema.get_all_schema_tags(True)
