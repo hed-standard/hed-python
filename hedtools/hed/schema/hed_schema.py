@@ -439,8 +439,13 @@ class HedSchema:
             unit_classes = []
         return unit_classes
 
-    def get_tag_value_class(self, original_tag):
-        return self._value_tag_has_attribute(original_tag, HedKey.ValueClass, return_value=True)
+    def get_tag_value_classes(self, original_tag):
+        value_classes = self._value_tag_has_attribute(original_tag, HedKey.ValueClass, return_value=True)
+        if value_classes:
+            value_classes = value_classes.split(',')
+        else:
+            value_classes = []
+        return value_classes
 
     def get_unit_class_default_unit(self, original_tag):
         """Gets the default unit class unit that is associated with the specified tag.

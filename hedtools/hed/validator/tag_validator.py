@@ -374,12 +374,13 @@ class TagValidator:
         if not self._hed_schema.is_value_class_tag(original_tag):
             return False
 
-        value_class = self._hed_schema.get_tag_value_class(original_tag)
-
-        valid_func = self.VALUE_CLASS_TYPE_DICT.get(value_class)
-        if valid_func:
-            return valid_func(portion_to_validate)
-        return True
+        value_class_types = self._hed_schema.get_tag_value_classes(original_tag)
+        for value_class in value_class_types:
+            valid_func = self.VALUE_CLASS_TYPE_DICT.get(value_class)
+            if valid_func:
+                if valid_func(portion_to_validate):
+                    return True
+        return False
 
     def check_tag_requires_child(self, original_tag):
         """Reports a validation error if the tag provided has the 'requireChild' attribute.
