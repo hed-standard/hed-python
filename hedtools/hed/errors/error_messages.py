@@ -183,6 +183,12 @@ def schema_error_duplicate_terms(tag, duplicate_tag_list):
            f"{tag_join_delimiter.join(duplicate_tag_list)}", {}
 
 
+@hed_error(SchemaErrors.UNKNOWN_ATTRIBUTE)
+def schema_error_unknown_attribute(attribute_name, source_tag):
+    return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, " \
+           f"or was used outside of it's defined class.", {}
+
+
 @hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, default_severity=ErrorSeverity.WARNING)
 def schema_warning_invalid_chars_desc(desc_string, tag_name, problem_char, char_index):
     return f"Invalid character '{problem_char}' in desc for '{tag_name}' at position {char_index}.  '{desc_string}", {}

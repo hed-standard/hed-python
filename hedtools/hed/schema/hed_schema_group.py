@@ -213,10 +213,10 @@ class HedSchemaGroup:
         if schema:
             return schema.get_tag_unit_classes(original_tag)
 
-    def get_tag_value_class(self, original_tag):
+    def get_tag_value_classes(self, original_tag):
         schema = self._schemas.get(original_tag.library_prefix)
         if schema:
-            return schema.get_tag_value_class(original_tag)
+            return schema.get_tag_value_classes(original_tag)
 
     def get_unit_class_default_unit(self, original_tag):
         """Gets the default unit class unit that is associated with the specified tag.
