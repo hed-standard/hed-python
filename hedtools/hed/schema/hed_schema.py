@@ -660,6 +660,26 @@ class HedSchema:
 
         return final_list
 
+    def get_all_unknown_attributes(self):
+        """
+            Retrieves the current list of unknown attributes found in the schema.  This includes attributes
+            found in the wrong section.  Eg a unitClass attribute found on a Tag.
+
+        Returns
+        -------
+        attr_dict: {str: [str]}
+            {attribute_name, [long form tags/units/etc with it])
+        """
+        # todo: improve this heavily.
+        unknown_attributes = {}
+        for section in self._sections.values():
+            for entry in section.values():
+                if entry._unknown_attributes:
+                    for attribute_name in entry._unknown_attributes:
+                        unknown_attributes.setdefault(attribute_name, []).append(entry.long_name)
+
+        return unknown_attributes
+
     def get_tag_attribute_names(self):
         return {tag_entry.long_name:tag_entry for tag_entry in self._sections[HedSectionKey.Attributes].values()
                 if not tag_entry.has_attribute(HedKey.UnitClassProperty)
@@ -929,7 +949,7 @@ class HedSchema:
 
     def _add_unit_class_unit(self, unit_class, unit_class_unit):
         if unit_class not in self._sections[HedSectionKey.UnitClasses]:
-            self._sections[HedSectionKey.UnitClasses]._add_to_dict(unit_class)
+            self._add_tag_to_dict(unit_class, HedSectionKey.UnitClasses)
             unit_class_entry = self._get_entry_for_tag(unit_class, HedSectionKey.UnitClasses)
             unit_class_entry.value = []
         if unit_class_unit is not None:
