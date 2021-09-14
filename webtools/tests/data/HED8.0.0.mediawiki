@@ -570,13 +570,13 @@ This schema is the first official release that includes an xsd and requires unit
 ***** Backward <nowiki>{relatedTag=Forward}[Directed behind or to the rear.]</nowiki>
 ***** Downward <nowiki>{relatedTag=Leftward,relatedTag=Rightward,relatedTag=Upward}[Moving or leading toward a lower place or level.]</nowiki>
 ***** Forward <nowiki>{relatedTag=Backward}[At or near or directed toward the front.]</nowiki>
-***** Horizontally-oriented <nowiki>{related-Tag=Vertically-oriented}[Oriented parallel to or in the plane of the horizon.]</nowiki>
+***** Horizontally-oriented <nowiki>{relatedTag=Vertically-oriented}[Oriented parallel to or in the plane of the horizon.]</nowiki>
 ***** Leftward <nowiki>{relatedTag=Downward,relatedTag=Rightward,relatedTag=Upward}[Going toward or facing the left.]</nowiki>
 ***** Oblique <nowiki>{relatedTag=Rotated}[Slanting or inclined in direction, course, or position that is neither parallel nor perpendicular nor right-angular.]</nowiki>
 ***** Rightward <nowiki>{relatedTag=Downward,relatedTag=Leftward,relatedTag=Upward}[Going toward or situated on the right.]</nowiki>
 ***** Rotated <nowiki>[Positioned offset around an axis or center.]</nowiki>
 ***** Upward <nowiki>{relatedTag=Downward,relatedTag=Leftward,relatedTag=Rightward}[Moving, pointing, or leading to a higher place, point, or level.]</nowiki>
-***** Vertically-oriented <nowiki>{related-Tag=Horizontally-oriented}[Oriented perpendicular to the plane of the horizon.]</nowiki>
+***** Vertically-oriented <nowiki>{relatedTag=Horizontally-oriented}[Oriented perpendicular to the plane of the horizon.]</nowiki>
 *** Physical-value <nowiki>[The value of some physical property of something.] </nowiki> 
 **** Weight <nowiki>[The relative mass or the quantity of matter contained by something.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass, unitClass=weightUnits}</nowiki>
@@ -1099,8 +1099,8 @@ This schema is the first official release that includes an xsd and requires unit
 ** In-front-of <nowiki>[(A (In-front-of B)) means A is in a position just ahead or at the front part of B, potentially partially blocking B from view.]</nowiki>
 ** Left-edge-of <nowiki>{relatedTag=Bottom-edge-of,relatedTag=Right-edge-of,relatedTag=Top-edge-of}[(A (Left-edge-of B)) means A is located on the left side of B on or near the boundary of B.]</nowiki>
 ** Left-side-of <nowiki>{relatedTag=Right-side-of}[(A (Left-side-of B)) means A is located on the left side of B usually as part of B.]</nowiki>
-** Lower-left-of <nowiki>{relatedTag=Lower-right-of,RelatedTag=Upper-left-of,RelatedTag=Upper-right-of}[(A (Lower-left-of B)) means A is situated on the lower left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
-** Lower-right-of <nowiki>{relatedTag=Upper-left-of,RelatedTag=Upper-left-of,RelatedTag=Lower-right-of}[(A (Lower-right-of B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Lower-left-of <nowiki>{relatedTag=Lower-right-of,relatedTag=Upper-left-of,relatedTag=Upper-right-of}[(A (Lower-left-of B)) means A is situated on the lower left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Lower-right-of <nowiki>{relatedTag=Upper-left-of,relatedTag=Upper-left-of,relatedTag=Lower-right-of}[(A (Lower-right-of B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
 ** Outside-of <nowiki>[(A (Outside-of B)) means A is located in the space around but not including B.]</nowiki>
 ** Over <nowiki>[(A (over B)) means A above is above B so as to cover or protect or A extends over the a general area as from a from a vantage point.]</nowiki>
 ** Right-edge-of <nowiki>{relatedTag=Bottom-edge-of,relatedTag=Left-edge-of,relatedTag=Top-edge-of}[(A (Right-edge-of B)) means A is located on the right side of B on or near the boundary of B.]</nowiki>
@@ -1109,8 +1109,8 @@ This schema is the first official release that includes an xsd and requires unit
 ** To-right-of <nowiki>[(A (To-right-of B)) means A is located on or directed toward the side to the east of B when B is facing north. This term is used when A is not part of B.]</nowiki>
 ** Top-edge-of <nowiki>{relatedTag=Left-edge-of,relatedTag=Right-edge-of,relatedTag=Bottom-edge-of}[(A (Top-edge-of B)) means A is on the uppermost part or or near the boundary of B.]</nowiki>
 ** Top-of <nowiki>[(A (Top-of B)) means A is on the uppermost part, side, or surface of B.]</nowiki>
-** Upper-left-of <nowiki>{relatedTag=Lower-left-of,RelatedTag=Lower-right-of,RelatedTag=Upper-right-of}[(A (Upper-left-of B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
-** Upper-right-of <nowiki>{relatedTag=Lower-left-of,RelatedTag=Upper-left-of,RelatedTag=Lower-right-of}[(A (Upper-right-of B)) means A is situated on the upper right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Upper-left-of <nowiki>{relatedTag=Lower-left-of,relatedTag=Lower-right-of,relatedTag=Upper-right-of}[(A (Upper-left-of B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Upper-right-of <nowiki>{relatedTag=Lower-left-of,relatedTag=Upper-left-of,relatedTag=Lower-right-of}[(A (Upper-right-of B)) means A is situated on the upper right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
 ** Underneath <nowiki>[(A (Underneath B)) means A is situated directly below and may be concealed by B.]</nowiki>
 ** Within <nowiki>[(A (Within B)) means A is on the inside of or contained in B.]</nowiki>
 * Temporal-relation <nowiki>[Any relationship which includes a temporal or time-based component.]</nowiki>

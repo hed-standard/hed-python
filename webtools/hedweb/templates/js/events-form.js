@@ -79,7 +79,7 @@ function setEventsTable(event_tag) {
     removeColumnInfo("show_events")
     let events = $(event_tag);
     let eventsFile = events[0].files[0];
-    if ($("#command_extract_sidecar").is(":checked")) {
+    if ($("#extract").is(":checked")) {
         setColumnsInfo(eventsFile, 'events_flash', undefined, true,  "show_events")
     } else {
         setColumnsInfo(eventsFile, 'events_flash', undefined, true,  "show_columns")

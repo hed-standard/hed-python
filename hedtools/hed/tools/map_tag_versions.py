@@ -1,8 +1,8 @@
 import re
 import copy
-from hed.util.hed_string_util import split_hed_string, remove_slashes_and_spaces
+from hed.tools.hed_string_util import split_hed_string, remove_slashes_and_spaces
 from hed import schema
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 
 
 # Todo: Review this file once we have more stable test cases for it.

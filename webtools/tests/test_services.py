@@ -12,38 +12,38 @@ from hedweb.constants import common
 
 class Test(TestWebBase):
     def test_get_input_from_service_request_empty(self):
-        from hedweb.services import get_input_from_service_request
-        self.assertRaises(TypeError, get_input_from_service_request, {},
+        from hedweb.services import get_input_from_request
+        self.assertRaises(TypeError, get_input_from_request, {},
                           "An exception should be raised if an empty request is passed")
-        self.assertTrue(1, "Testing get_input_from_service_request")
+        self.assertTrue(1, "Testing get_input_from_request")
 
     def test_get_input_from_service_request(self):
         from hed.models.sidecar import Sidecar
         from hed.schema import HedSchema
-        from hedweb.services import get_input_from_service_request
+        from hedweb.services import get_input_from_request
         with self.app.test:
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.json')
             with open(json_path, 'rb') as fp:
                 json_string = fp.read().decode('ascii')
-            json_data = {common.JSON_STRING: json_string, common.CHECK_FOR_WARNINGS_VALIDATE: 'on',
+            json_data = {common.JSON_STRING: json_string, common.CHECK_WARNINGS_VALIDATE: 'on',
                          common.SCHEMA_VERSION: '8.0.0-alpha.1', common.SERVICE: 'sidecar_validate'}
             environ = create_environ(json=json_data)
             request = Request(environ)
-            arguments = get_input_from_service_request(request)
+            arguments = get_input_from_request(request)
             self.assertIsInstance(arguments[common.JSON_SIDECAR], Sidecar,
-                                  "get_input_from_service_request should have a sidecar object")
+                                  "get_input_from_request should have a sidecar object")
             self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
-                                  "get_input_from_service_request should have a HED schema")
+                                  "get_input_from_request should have a HED schema")
             self.assertEqual('sidecar_validate', arguments[common.SERVICE],
-                             "get_input_from_service_request should have a service request")
-            self.assertTrue(arguments[common.CHECK_FOR_WARNINGS_VALIDATE],
-                            "get_input_from_service_request should have check_for_warnings true when on")
+                             "get_input_from_request should have a service request")
+            self.assertTrue(arguments[common.CHECK_WARNINGS_VALIDATE],
+                            "get_input_from_request should have check_warnings true when on")
 
     def test_services_process_empty(self):
-        from hedweb.services import services_process
+        from hedweb.services import process
         arguments = {'service': ''}
-        response = services_process(arguments)
-        self.assertEqual(response["error_type"], "HEDServiceMissing", "services_process must have a service key")
+        response = process(arguments)
+        self.assertEqual(response["error_type"], "HEDServiceMissing", "process must have a service key")
 
     def test_services_list(self):
         from hedweb.services import services_list
@@ -53,7 +53,7 @@ class Test(TestWebBase):
             self.assertTrue(results["data"], "services_list return dictionary has a data key with non empty value")
 
     def test_process_services_sidecar(self):
-        from hedweb.services import services_process
+        from hedweb.services import process
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         with open(json_path) as f:
             data = json.load(f)
@@ -64,9 +64,10 @@ class Test(TestWebBase):
         hed_schema = hedschema.load_schema(hed_url_path=schema_url)
         json_sidecar = models.Sidecar(file=fb, name='JSON_Sidecar')
         arguments = {common.SERVICE: 'sidecar_validate', common.SCHEMA: hed_schema,
+                     common.COMMAND: 'validate', common.COMMAND_TARGET: 'sidecar',
                      common.JSON_SIDECAR: json_sidecar}
         with self.app.app_context():
-            response = services_process(arguments)
+            response = process(arguments)
             self.assertFalse(response['error_type'],
                              'sidecar_validation services should not have a fatal error when file is invalid')
             results = response['results']
@@ -78,7 +79,7 @@ class Test(TestWebBase):
                      + 'hedxml/HED7.2.0.xml'
         arguments[common.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
         with self.app.app_context():
-            response = services_process(arguments)
+            response = process(arguments)
             self.assertFalse(response['error_type'],
                              'sidecar_validation services should not have a error when file is valid')
             results = response['results']

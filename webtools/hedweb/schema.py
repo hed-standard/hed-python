@@ -14,7 +14,7 @@ from hedweb.constants import common, file_constants
 app_config = current_app.config
 
 
-def get_input_from_schema_form(request):
+def get_input_from_form(request):
     """Gets the input for schema processing from the schema form.
 
     Parameters
@@ -46,12 +46,12 @@ def get_input_from_schema_form(request):
     arguments = {common.SCHEMA: schema,
                  common.SCHEMA_DISPLAY_NAME: display_name,
                  common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
-                 common.CHECK_FOR_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_FOR_WARNINGS_VALIDATE, 'on')
+                 common.CHECK_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'on')
                  }
     return arguments
 
 
-def schema_process(arguments):
+def process(arguments):
     """Perform the requested action for the schema.
 
     Parameters
@@ -102,7 +102,7 @@ def schema_convert(hed_schema, display_name):
     if issues:
         issue_str = get_printable_issue_string(issues, f"Schema syntax errors for {display_name}")
         file_name = generate_filename(display_name, suffix='schema_errors', extension='.txt')
-        return {'command': 'command_convert', 'data': issue_str, 'output_display_name': file_name,
+        return {'command': common.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
                 'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': "Schema had syntax errors"}
 
@@ -115,7 +115,7 @@ def schema_convert(hed_schema, display_name):
         extension = '.xml'
     file_name = generate_filename(display_name,  extension=extension)
 
-    return {'command': 'command_convert', 'data': data, 'output_display_name': file_name,
+    return {'command': common.COMMAND_CONVERT, 'data': data, 'output_display_name': file_name,
             'schema_version': schema_version, 'msg_category': 'success',
             'msg': 'Schema was successfully converted'}
 
@@ -142,10 +142,10 @@ def schema_validate(hed_schema, display_name):
     if issues:
         issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
         file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
-        return {'command': 'command_validate', 'data': issue_str, 'output_display_name': file_name,
+        return {'command': common.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
                 'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': 'Schema is not HED 3G compliant'}
     else:
-        return {'command': 'command_validate', 'data': '', 'output_display_name': display_name,
+        return {'command': common.COMMAND_VALIDATE, 'data': '', 'output_display_name': display_name,
                 'schema_version': schema_version, 'msg_category': 'success',
                 'msg': 'Schema had no HED-3G validation errors'}

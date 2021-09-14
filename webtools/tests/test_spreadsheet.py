@@ -10,14 +10,14 @@ from hedweb.constants import common
 
 class Test(TestWebBase):
     def test_get_input_from_spreadsheet_form_empty(self):
-        from hedweb.spreadsheet import get_input_from_spreadsheet_form
-        self.assertRaises(TypeError, get_input_from_spreadsheet_form, {},
+        from hedweb.spreadsheet import get_input_from_form
+        self.assertRaises(TypeError, get_input_from_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_spreadsheet")
 
     def test_get_input_from_spreadsheet_form(self):
         from hed.models import HedInput
         from hed.schema import HedSchema
-        from hedweb.spreadsheet import get_input_from_spreadsheet_form
+        from hedweb.spreadsheet import get_input_from_form
         with self.app.test:
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/ExcelOneSheet.xlsx')
             schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/HED8.0.0.xml')
@@ -32,7 +32,7 @@ class Test(TestWebBase):
                                                    common.COMMAND_OPTION: common.COMMAND_VALIDATE})
 
             request = Request(environ)
-            arguments = get_input_from_spreadsheet_form(request)
+            arguments = get_input_from_form(request)
             self.assertIsInstance(arguments[common.SPREADSHEET], HedInput,
                                   "generate_input_from_spreadsheet_form should have an events object")
             self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
@@ -46,20 +46,20 @@ class Test(TestWebBase):
 
     def test_spreadsheet_process_empty_file(self):
         from hedweb.constants import common
-        from hedweb.spreadsheet import spreadsheet_process
+        from hedweb.spreadsheet import process
         from hed.errors.exceptions import HedFileError
         arguments = {common.SPREADSHEET: None}
         try:
-            spreadsheet_process(arguments)
+            process(arguments)
         except HedFileError:
             pass
         except Exception:
-            self.fail('spreadsheet_process threw the wrong exception when spreadsheet-path was empty')
+            self.fail('process threw the wrong exception when spreadsheet-path was empty')
         else:
-            self.fail('spreadsheet_process should have thrown a HedFileError exception when spreadsheet-path was empty')
+            self.fail('process should have thrown a HedFileError exception when spreadsheet-path was empty')
 
     def test_spreadsheet_process_validate_invalid(self):
-        from hedweb.spreadsheet import spreadsheet_process
+        from hedweb.spreadsheet import process
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
@@ -71,18 +71,18 @@ class Test(TestWebBase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
-                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS_VALIDATE: True}
+                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_WARNINGS_VALIDATE: True}
         with self.app.app_context():
-            results = spreadsheet_process(arguments)
+            results = process(arguments)
             self.assertTrue(isinstance(results, dict),
-                            'spreadsheet_process validate should return a dictionary when errors')
+                            'process validate should return a dictionary when errors')
             self.assertEqual('warning', results['msg_category'],
-                             'spreadsheet_process validate should give warning when spreadsheet has errors')
+                             'process validate should give warning when spreadsheet has errors')
             self.assertTrue(results['data'],
-                            'spreadsheet_process validate should return validation errors using HED 8.0.0-beta.1')
+                            'process validate should return validation errors using HED 8.0.0-beta.1')
 
     def test_spreadsheet_process_validate_valid(self):
-        from hedweb.spreadsheet import spreadsheet_process
+        from hedweb.spreadsheet import process
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
@@ -94,15 +94,15 @@ class Test(TestWebBase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
-                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_FOR_WARNINGS_VALIDATE: True}
+                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_WARNINGS_VALIDATE: True}
         arguments[common.SCHEMA] = hed_schema
 
         with self.app.app_context():
-            results = spreadsheet_process(arguments)
+            results = process(arguments)
             self.assertTrue(isinstance(results, dict),
-                            'spreadsheet_process should return a dict when no errors')
+                            'process should return a dict when no errors')
             self.assertEqual('success', results['msg_category'],
-                             'spreadsheet_process should return success if validated')
+                             'process should return success if validated')
 
     def test_spreadsheet_validate_valid_excel(self):
         from hedweb.spreadsheet import spreadsheet_validate

@@ -31,8 +31,8 @@ def get_input_from_events_form(request):
     """
     arguments = {common.SCHEMA: get_hed_schema_from_pull_down(request), common.EVENTS: None,
                  common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
-                 common.CHECK_FOR_WARNINGS_ASSEMBLE: form_has_option(request, common.CHECK_FOR_WARNINGS_ASSEMBLE, 'on'),
-                 common.CHECK_FOR_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_FOR_WARNINGS_VALIDATE, 'on'),
+                 common.CHECK_WARNINGS_ASSEMBLE: form_has_option(request, common.CHECK_WARNINGS_ASSEMBLE, 'on'),
+                 common.CHECK_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'on'),
                  common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on'),
                  common.COLUMNS_SELECTED: create_column_selections(request.form)
                  }
@@ -47,7 +47,7 @@ def get_input_from_events_form(request):
     return arguments
 
 
-def events_process(arguments):
+def process(arguments):
     """Perform the requested action for the events file and its sidecar
 
     Parameters
@@ -69,18 +69,18 @@ def events_process(arguments):
         raise HedFileError('InvalidEventsFile', "An events file was given but could not be processed", "")
 
     if command == common.COMMAND_VALIDATE:
-        results = events_validate(hed_schema, events)
+        results = validate(hed_schema, events)
     elif command == common.COMMAND_ASSEMBLE:
-        results = events_assemble(hed_schema, events, arguments.get(common.DEFS_EXPAND, True))
-    elif command == common.COMMAND_EXTRACT_SIDECAR:
-        results = events_extract(hed_schema, events, arguments.get(common.COLUMNS_SELECTED, None))
+        results = assemble(hed_schema, events, arguments.get(common.DEFS_EXPAND, True))
+    elif command == common.COMMAND_EXTRACT:
+        results = extract(hed_schema, events, arguments.get(common.COLUMNS_SELECTED, None))
     else:
         raise HedFileError('UnknownEventsProcessingMethod', f'Command {command} is missing or invalid', '')
     return results
 
 
-def events_assemble(hed_schema, events, defs_expand=True):
-    """Converts an events file from short to long unless short_to_long is set to False, then long_to_short
+def assemble(hed_schema, events, defs_expand=True):
+    """Creates a two-column event file with first column Onset and second column HED tags.
 
     Parameters
     ----------
@@ -98,7 +98,7 @@ def events_assemble(hed_schema, events, defs_expand=True):
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    results = events_validate(hed_schema, events)
+    results = validate(hed_schema, events)
     if results['data']:
         return results
 
@@ -116,7 +116,7 @@ def events_assemble(hed_schema, events, defs_expand=True):
             'schema_version': schema_version, 'msg_category': 'success', 'msg': 'Events file successfully expanded'}
 
 
-def events_extract(hed_schema, events, columns_selected):
+def extract(hed_schema, events, columns_selected):
     """Extracts a JSON sidecar template from a BIDS-style events file.
 
     Parameters
@@ -142,15 +142,15 @@ def events_extract(hed_schema, events, columns_selected):
         file_name = generate_filename(display_name, suffix='_errors', extension='.txt')
         return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
                 common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
-                'msg': f"Events file {display_name} had validation errors"}
+                'msg': f"Events file {display_name} had extraction errors"}
     else:
         file_name = generate_filename(display_name, suffix='_extracted', extension='.json')
-        return {common.COMMAND: common.COMMAND_EXTRACT_SIDECAR, 'data': json.dumps(hed_dict, indent=4),
+        return {common.COMMAND: common.COMMAND_EXTRACT, 'data': json.dumps(hed_dict, indent=4),
                 'output_display_name': file_name, 'schema_version': schema_version,
                 'msg_category': 'success', 'msg': 'Events extraction to JSON complete'}
 
 
-def events_validate(hed_schema, events):
+def validate(hed_schema, events):
     """Validates and events input object and returns the results.
 
     Parameters

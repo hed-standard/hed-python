@@ -125,7 +125,7 @@ function submitForm() {
     flashMessageOnScreen('Spreadsheet is being processed ...', 'success',
         'spreadsheet_submit_flash')
     let isExcel = fileHasValidExtension(spreadsheetFile, EXCEL_FILE_EXTENSIONS) &&
-            !$("#command_validate").prop("checked");
+            !$("#validate").prop("checked");
     $.ajax({
         type: 'POST',
         url: "{{url_for('route_blueprint.spreadsheet_results')}}",

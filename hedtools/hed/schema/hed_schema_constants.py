@@ -47,7 +47,6 @@ class HedKey:
     UnitModifierProperty = 'unitModifierProperty'
     ValueClassProperty = 'valueClassProperty'
 
-
     SIUnit = 'SIUnit'
     UnitSymbol = 'unitSymbol'
     # Default Units for Type
@@ -62,4 +61,3 @@ class HedKey:
 
 
 VERSION_ATTRIBUTE = 'version'
-

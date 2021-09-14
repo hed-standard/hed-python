@@ -6,9 +6,7 @@ from hed import schema as hedschema
 from hedweb.constants import common, page_constants
 from hedweb.constants import route_constants, file_constants
 from hedweb.web_utils import handle_http_error, package_results, handle_error
-from hedweb import sidecar, events, spreadsheet, services
-from hedweb.schema import get_input_from_schema_form, schema_process
-from hedweb.strings import get_input_from_string_form, string_process
+from hedweb import sidecar, events, spreadsheet, services, strings, schema
 from hedweb.columns import get_columns_request
 
 app_config = current_app.config
@@ -44,7 +42,7 @@ def events_results():
 
     try:
         input_arguments = events.get_input_from_events_form(request)
-        a = events.events_process(input_arguments)
+        a = events.process(input_arguments)
         return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
@@ -60,8 +58,8 @@ def schema_results():
 
     """
     try:
-        arguments = get_input_from_schema_form(request)
-        a = schema_process(arguments)
+        arguments = schema.get_input_from_form(request)
+        a = schema.process(arguments)
         return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
@@ -121,12 +119,15 @@ def services_results():
         string
         A serialized JSON string containing processed information.
     """
+    response = {}
     try:
-        arguments = services.get_input_from_service_request(request)
-        status = services.services_process(arguments)
-        a = json.dumps(status)
-        return a
+        arguments = services.get_input_from_request(request)
+        response = services.process(arguments)
+        return json.dumps(response)
     except Exception as ex:
+        errors = handle_error(ex)
+        response['error_type'] = errors['error_type']
+        response['error_msg'] = errors['error_msg']
         return handle_error(ex)
 
 
@@ -141,8 +142,8 @@ def sidecar_results():
     """
 
     try:
-        input_arguments = sidecar.get_input_from_sidecar_form(request)
-        a = sidecar.sidecar_process(input_arguments)
+        input_arguments = sidecar.get_input_from_form(request)
+        a = sidecar.process(input_arguments)
         return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
@@ -159,8 +160,8 @@ def spreadsheet_results():
     """
 
     try:
-        arguments = spreadsheet.get_input_from_spreadsheet_form(request)
-        a = spreadsheet.spreadsheet_process(arguments)
+        arguments = spreadsheet.get_input_from_form(request)
+        a = spreadsheet.process(arguments)
         response = package_results(a)
         return response
     except Exception as ex:
@@ -178,8 +179,8 @@ def string_results():
     """
 
     try:
-        input_arguments = get_input_from_string_form(request)
-        a = string_process(input_arguments)
+        input_arguments = strings.get_input_from_form(request)
+        a = strings.process(input_arguments)
         return json.dumps(a)
     except Exception as ex:
         return handle_error(ex)

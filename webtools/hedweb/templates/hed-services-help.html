@@ -50,30 +50,30 @@
                                                schema_string or schema_url or schema_version</td></tr>
             <tr><td>sidecar_validate</td><td>json_string<br>
                                                schema_string or schema_url or schema_version<br>
-                                                check_for_warnings</td></tr>
-            <tr><td>events_assemble</td>     <td>events_string<br>
+                                                check_warnings</td></tr>
+            <tr><td>assemble</td>     <td>events_string<br>
                                                json_string<br>
                                                schema_string or schema_url or schema_version<br>
                                                expand_defs<br>
-                                                check_for_warnings</td></tr>
-            <tr><td>events_validate</td>     <td>events_string<br>
+                                                check_warnings</td></tr>
+            <tr><td>validate</td>     <td>events_string<br>
                                                json_string<br>
                                                schema_string or schema_url or schema_version<br>
-                                                check_for_warnings</td></tr>
+                                                check_warnings</td></tr>
             <tr><td>spreadsheet_to_long</td><td>spreadsheet_string<br>
                                                schema_string or schema_url or schema_version</td></tr>
             <tr><td>spreadsheet_to_short</td><td>spreadsheet_string<br>
                                                schema_string or schema_url or schema_version</td></tr>
             <tr><td>spreadsheet_validate</td><td>spreadsheet_string<br>
                                                schema_string or schema_url or schema_version<br>
-                                                check_for_warnings</td></tr>
+                                                check_warnings</td></tr>
             <tr><td>strings_to_long</td><td>string_list<br>
                                                schema_string or schema_url or schema_version</td></tr>
             <tr><td>strings_to_short</td><td>string_list<br>
                                                schema_string or schema_url or schema_version</td></tr>
             <tr><td>strings_validate</td><td>string_list<br>
                                                schema_string or schema_url or schema_version<br>
-                                                check_for_warnings</td></tr>
+                                                check_warnings</td></tr>
         </table>
 
     <h3>HED service response format</h3>
@@ -101,7 +101,7 @@
     <h3>Meaning of different HED service request parameters</h3>
      <table>
     <tr><th>Service parameter</th><th>Meaning</th></tr>
-        <tr><td>check_for_warnings</td><td>If true, check for warnings when validating.</td></tr>
+        <tr><td>check_warnings</td><td>If true, check for warnings when validating.</td></tr>
         <tr><td>column_x_check</td><td>If present with value 'on' indicates that column number x has HED tags.</td></tr>
         <tr><td>column_x_input</td><td>Contains the prefix appended to column x if x has HED tags.</td></tr>
         <tr><td>defs_expand</td><td>If true, assembly expands definitions and replaces def/XXX with def-expand/XXX.</td></tr>
