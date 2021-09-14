@@ -129,7 +129,7 @@ class ColumnMapper:
         tag_columns : [str or int]
             A list of ints or strings containing the columns that contain the HED tags.
         optional_tag_columns : [str or int]
-            A list of ints or strings containing the columns that contain the HED tags, but won't be an error if missing.
+            A list of ints or strings containing the columns that contain the HED tags, but not an error if missing.
         finalize_mapping :
             If True, will re-generate the internal mapping. If False, this function has no effect until you do finalize.
         """

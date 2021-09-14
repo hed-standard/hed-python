@@ -27,7 +27,9 @@ class HedSchemaGroup:
         """
         library_prefixes = [hed_schema._library_prefix for hed_schema in schema_list]
         if len(set(library_prefixes)) != len(library_prefixes):
-            raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX, "Multiple schemas share the same tag prefix.  This is not allowed.", filename="Combined Schema")
+            raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
+                               "Multiple schemas share the same tag prefix.  This is not allowed.",
+                               filename="Combined Schema")
         self._schemas = {hed_schema._library_prefix: hed_schema for hed_schema in schema_list}
 
     # ===============================================

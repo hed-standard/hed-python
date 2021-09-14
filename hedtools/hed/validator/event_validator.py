@@ -13,7 +13,6 @@ from hed.validator.tag_validator import TagValidator
 from hed.models.hed_input import BaseInput
 from hed.models import model_constants
 from hed.models.def_mapper import DefinitionMapper
-from hed.models.def_dict import DefDict
 
 
 class EventValidator:
@@ -106,7 +105,7 @@ class EventValidator:
         validation_issues = []
         for hed_string in hed_strings:
             string_issues = self.validate_hed_string(hed_string, def_mapper,
-                                                      check_for_definitions=check_for_definitions)
+                                                     check_for_definitions=check_for_definitions)
             validation_issues.append(string_issues)
         return validation_issues
 
@@ -115,12 +114,12 @@ class EventValidator:
 
          Parameters
          ----------
-         hed_string: str or HedStringObj
+         hed_string: str or HedString
             A single hed string
-        def_mapper: DefinitionMapper
+         def_mapper: DefinitionMapper
             Any individual string is validated independently, any definitions other than those in the def_dict will
             not be used outside of that specific string.
-        check_for_definitions: bool
+         check_for_definitions: bool
             Set this to False if you have already gathered definitions from the given hed strings.
          Returns
          -------
