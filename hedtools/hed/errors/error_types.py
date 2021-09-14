@@ -79,6 +79,8 @@ class SidecarErrors:
 
 class SchemaErrors:
     DUPLICATE_TERMS = 'duplicateTerms'
+    # todo: look at what this should be called.
+    UNKNOWN_ATTRIBUTE = 'unknownAttribute'
 
 
 class SchemaWarnings:
