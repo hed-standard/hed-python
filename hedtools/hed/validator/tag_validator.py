@@ -206,12 +206,12 @@ class TagValidator:
 
         """
         validation_issues = []
-        number_of_opening_parentheses = hed_string.count('(')
-        number_of_closing_parentheses = hed_string.count(')')
-        if number_of_opening_parentheses != number_of_closing_parentheses:
+        number_open_parentheses = hed_string.count('(')
+        number_closed_parentheses = hed_string.count(')')
+        if number_open_parentheses != number_closed_parentheses:
             validation_issues += self._error_handler.format_error(ValidationErrors.HED_PARENTHESES_MISMATCH,
-                                                                  opening_parentheses_count=number_of_opening_parentheses,
-                                                                  closing_parentheses_count=number_of_closing_parentheses)
+                                                                  opening_parentheses_count=number_open_parentheses,
+                                                                  closing_parentheses_count=number_closed_parentheses)
         return validation_issues
 
     def check_delimiter_issues_in_hed_string(self, hed_string):
@@ -401,7 +401,8 @@ class TagValidator:
         """
         validation_issues = []
         if self._hed_schema.tag_has_attribute(original_tag, HedKey.RequireChild):
-            validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_REQUIRES_CHILD, tag=original_tag)
+            validation_issues += self._error_handler.format_error(ValidationErrors.HED_TAG_REQUIRES_CHILD,
+                                                                  tag=original_tag)
         return validation_issues
 
     def check_tag_unit_class_units_exist(self, original_tag):
@@ -693,8 +694,8 @@ class TagValidator:
 
         """
         return last_non_empty_character == TagValidator.CLOSING_GROUP_CHARACTER and \
-               not (TagValidator._character_is_delimiter(current_character)
-                    or current_character == TagValidator.CLOSING_GROUP_CHARACTER)
+            not (TagValidator._character_is_delimiter(current_character)
+                 or current_character == TagValidator.CLOSING_GROUP_CHARACTER)
 
     @staticmethod
     def _character_is_delimiter(character):
@@ -750,4 +751,3 @@ class TagValidator:
                                                                   tag=source_tag, index_in_tag=starting_index + i,
                                                                   index_in_tag_end=starting_index + i + 1)
         return validation_issues
-
