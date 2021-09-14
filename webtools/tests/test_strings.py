@@ -33,11 +33,11 @@ class Test(TestWebBase):
                             "get_input_from_form should have check_warnings true when on")
 
     def test_string_process(self):
-        from hedweb.strings import string_process
+        from hedweb.strings import process
         from hed.errors.exceptions import HedFileError
         arguments = {}
         try:
-            string_process(arguments)
+            process(arguments)
         except HedFileError:
             pass
         except Exception as ex:
@@ -46,22 +46,22 @@ class Test(TestWebBase):
             self.fail('string_process should have thrown a HedFileError exception string_list is empty')
 
     def test_string_convert_to_short_invalid(self):
-        from hedweb.strings import string_convert
+        from hedweb.strings import convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Red, Blue']
 
         with self.app.app_context():
-            results = string_convert(hed_schema, string_list)
+            results = convert(hed_schema, string_list)
             self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
     def test_string_convert_to_short_valid(self):
-        from hedweb.strings import string_convert
+        from hedweb.strings import convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Property/Informational-property/Description/Blech, Blue']
         with self.app.app_context():
-            results = string_convert(hed_schema, string_list, common.COMMAND_TO_SHORT)
+            results = convert(hed_schema, string_list, common.COMMAND_TO_SHORT)
             data = results['data']
             self.assertTrue(data, 'convert string to short returns data')
             self.assertIsInstance(data, list, "convert string to short returns data in a list")
@@ -71,38 +71,38 @@ class Test(TestWebBase):
                              "hedstring_convert should return success if converted")
 
     def test_string_convert_to_long(self):
-        from hedweb.strings import string_convert
+        from hedweb.strings import convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Red, Blue']
 
         with self.app.app_context():
-            results = string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
+            results = convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
             self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
-            results = string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
+            results = convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
             self.assertEqual('success', results['msg_category'],
                              "hedstring_convert should return success if converted")
 
     def test_string_validate(self):
-        from hedweb.strings import string_validate
+        from hedweb.strings import validate
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Red, Blue']
 
         with self.app.app_context():
-            results = string_validate(hed_schema, string_list)
-            self.assertEqual('warning', results['msg_category'], "string_validate has warning if validation errors")
+            results = validate(hed_schema, string_list)
+            self.assertEqual('warning', results['msg_category'], "validate has warning if validation errors")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            results = string_validate(hed_schema, string_list)
-            self.assertEqual('success', results['msg_category'], "string_validate should return success if converted")
+            results = validate(hed_schema, string_list)
+            self.assertEqual('success', results['msg_category'], "validate should return success if converted")
 
 
 if __name__ == '__main__':

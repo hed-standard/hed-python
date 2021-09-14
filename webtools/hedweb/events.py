@@ -47,7 +47,7 @@ def get_input_from_events_form(request):
     return arguments
 
 
-def events_process(arguments):
+def process(arguments):
     """Perform the requested action for the events file and its sidecar
 
     Parameters

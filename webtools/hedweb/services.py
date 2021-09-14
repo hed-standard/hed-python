@@ -6,7 +6,7 @@ from flask import current_app
 from hed import models
 from hed import schema as hedschema
 from hedweb.constants import common
-from hedweb import events, spreadsheet, sidecar, strings, schema
+from hedweb import events, spreadsheet, sidecar, strings
 
 
 app_config = current_app.config
@@ -32,17 +32,8 @@ def get_input_from_request(request):
     parameters = service_request.get(common.SERVICE_PARAMETERS, None)
     if not parameters:
         parameters = service_request
-    arguments = {
-                 common.COMMAND_TARGET: service_request.get(common.COMMAND_TARGET, None),
-                 common.COMMAND: service_request.get(common.COMMAND, None),
-                 common.SCHEMA: get_input_schema(parameters),
-                 common.JSON_SIDECAR: None,
-                 common.EVENTS: None,
-                 common.SPREADSHEET: None,
-                 common.HAS_COLUMN_NAMES: parameters.get(common.HAS_COLUMN_NAMES, False),
-                 common.STRING_LIST: parameters.get(common.STRING_LIST, None),
-                 common.CHECK_WARNINGS_VALIDATE: parameters.get(common.CHECK_WARNINGS_VALIDATE, True),
-                 common.DEFS_EXPAND: parameters.get(common.DEFS_EXPAND, True)}
+    arguments = get_service_info(parameters)
+    arguments[common.SCHEMA] = get_input_schema(parameters)
     arguments.update(get_input_objects(parameters))
     return arguments
 
@@ -60,19 +51,45 @@ def get_input_objects(params):
                                                    file_type=".tsv", tag_columns=tag_columns,
                                                    has_column_names=args.get(common.HAS_COLUMN_NAMES, None),
                                                    column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
+    if common.STRING_LIST in params and params[common.STRING_LIST]:
+        args[common.STRING_LIST] = params[common.STRING_LIST]
+
     return args
 
 
+def get_service_info(parameters):
+    service = parameters.get(common.SERVICE, '')
+    command = service
+    command_target = ''
+    pieces = service.split('_', 1)
+    if command != "get_services" and len(pieces) == 2:
+        command = pieces[1]
+        command_target = pieces[0]
+    has_column_names =  parameters.get(common.HAS_COLUMN_NAMES, '') == 'on'
+    check_warnings = parameters.get(common.CHECK_WARNINGS_VALIDATE, '') == 'on'
+    defs_expand = parameters.get(common.DEFS_EXPAND, '') == 'on'
+    return {common.SERVICE: service,
+            common.COMMAND: command,
+            common.COMMAND_TARGET: command_target,
+            common.HAS_COLUMN_NAMES: has_column_names,
+            common.CHECK_WARNINGS_VALIDATE: check_warnings,
+            common.DEFS_EXPAND: defs_expand
+            }
+
+
 def get_input_schema(parameters):
+
     if common.SCHEMA_STRING in parameters and parameters[common.SCHEMA_STRING]:
-        schema = hedschema.from_string(parameters[common.SCHEMA_STRING])
+        the_schema = hedschema.from_string(parameters[common.SCHEMA_STRING])
     elif common.SCHEMA_URL in parameters and parameters[common.SCHEMA_URL]:
         schema_url = parameters[common.SCHEMA_URL]
-        schema = hedschema.load_schema(hed_url_path=schema_url)
+        the_schema = hedschema.load_schema(hed_url_path=schema_url)
     elif common.SCHEMA_VERSION in parameters and parameters[common.SCHEMA_VERSION]:
         hed_file_path = hedschema.get_path_from_hed_version(parameters[common.SCHEMA_VERSION])
-        schema = hedschema.load_schema(hed_file_path=hed_file_path)
-    return schema
+        the_schema = hedschema.load_schema(hed_file_path=hed_file_path)
+    else:
+        the_schema = []
+    return the_schema
 
 
 def process(arguments):
@@ -90,12 +107,12 @@ def process(arguments):
         A dictionary of results in standard response format to be jsonified.
     """
 
-    command = arguments[common.COMMAND]
-    target = arguments[common.COMMAND_TARGET]
+    command = arguments.get(common.COMMAND, '')
+    target = arguments.get(common.COMMAND_TARGET, '')
     response = {common.COMMAND: command, common.COMMAND_TARGET: target,
                 'results': '', 'error_type': '', 'error_msg': ''}
 
-    if not command:
+    if not arguments.get(common.SERVICE, None):
         response["error_type"] = 'HEDServiceMissing'
         response["error_msg"] = "Must specify a valid service"
     elif command == 'get_services':
@@ -136,8 +153,7 @@ def services_list():
     the_path = os.path.join(dir_path, './static/resources/services.json')
     with open(the_path) as f:
         service_info = json.load(f)
-    commands = service_info['command']
-    command_targets = service_info['command_target']
+    services = service_info['services']
     meanings = service_info['meanings']
     returns = service_info['returns']
     results = service_info['results']

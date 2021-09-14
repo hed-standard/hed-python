@@ -42,7 +42,7 @@ def events_results():
 
     try:
         input_arguments = events.get_input_from_events_form(request)
-        a = events.events_process(input_arguments)
+        a = events.process(input_arguments)
         return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)

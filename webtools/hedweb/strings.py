@@ -59,17 +59,17 @@ def process(arguments):
     if not string_list:
         raise HedFileError('EmptyHedStringList', "Please provide a list of HED strings to be processed", "")
     if command == common.COMMAND_VALIDATE:
-        results = string_validate(hed_schema, string_list)
+        results = validate(hed_schema, string_list)
     elif command == common.COMMAND_TO_SHORT:
-        results = string_convert(hed_schema, string_list, command=common.COMMAND_TO_SHORT)
+        results = convert(hed_schema, string_list, command=common.COMMAND_TO_SHORT)
     elif command == common.COMMAND_TO_LONG:
-        results = string_convert(hed_schema, string_list)
+        results = convert(hed_schema, string_list)
     else:
         raise HedFileError('UnknownProcessingMethod', 'Select a hedstring processing method', '')
     return results
 
 
-def string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
+def convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
     """Converts a list of strings from long to short unless command is not COMMAND_TO_LONG then converts to short
 
     Parameters
@@ -88,7 +88,7 @@ def string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    results = string_validate(hed_schema, string_list)
+    results = validate(hed_schema, string_list)
     if results['data']:
         return results
     strings = []
@@ -113,7 +113,7 @@ def string_convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
                 'msg': 'Strings converted successfully'}
 
 
-def string_validate(hed_schema, string_list):
+def validate(hed_schema, string_list):
     """Validates a list of strings and returns a dictionary containing the issues or a no errors message
 
     Parameters

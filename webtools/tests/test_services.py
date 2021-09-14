@@ -26,7 +26,7 @@ class Test(TestWebBase):
             with open(json_path, 'rb') as fp:
                 json_string = fp.read().decode('ascii')
             json_data = {common.JSON_STRING: json_string, common.CHECK_WARNINGS_VALIDATE: 'on',
-                         common.SCHEMA_VERSION: '8.0.0-alpha.1', common.SERVICE: 'validate', common.TARGET:'sidecar'}
+                         common.SCHEMA_VERSION: '8.0.0-alpha.1', common.SERVICE: 'sidecar_validate'}
             environ = create_environ(json=json_data)
             request = Request(environ)
             arguments = get_input_from_request(request)
@@ -64,6 +64,7 @@ class Test(TestWebBase):
         hed_schema = hedschema.load_schema(hed_url_path=schema_url)
         json_sidecar = models.Sidecar(file=fb, name='JSON_Sidecar')
         arguments = {common.SERVICE: 'sidecar_validate', common.SCHEMA: hed_schema,
+                     common.COMMAND: 'validate', common.COMMAND_TARGET: 'sidecar',
                      common.JSON_SIDECAR: json_sidecar}
         with self.app.app_context():
             response = process(arguments)

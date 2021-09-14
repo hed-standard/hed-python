@@ -44,19 +44,19 @@ class Test(TestWebBase):
 
     def test_events_process_empty_file(self):
         # Test for empty events_path
-        from hedweb.events import events_process
+        from hedweb.events import process
         arguments = {'events_path': ''}
         try:
-            events_process(arguments)
+            process(arguments)
         except HedFileError:
             pass
         except Exception:
-            self.fail('events_process threw the wrong exception when events_path was empty')
+            self.fail('process threw the wrong exception when events_path was empty')
         else:
-            self.fail('events_process should have thrown a HedFileError exception when events_path was empty')
+            self.fail('process should have thrown a HedFileError exception when events_path was empty')
 
     def test_events_process(self):
-        from hedweb.events import events_process
+        from hedweb.events import process
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
@@ -66,21 +66,21 @@ class Test(TestWebBase):
         arguments = {common.EVENTS: events, common.COMMAND: common.COMMAND_VALIDATE, common.DEFS_EXPAND: True,
                      common.CHECK_WARNINGS_VALIDATE: True, common.SCHEMA: hed_schema}
         with self.app.app_context():
-            results = events_process(arguments)
+            results = process(arguments)
             self.assertTrue(isinstance(results, dict),
-                            'events_process validation should return a result dictionary when validation errors')
+                            'process validation should return a result dictionary when validation errors')
             self.assertEqual('success', results['msg_category'],
-                             'events_process validate should return success if no errors')
+                             'process validate should return success if no errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            results = events_process(arguments)
+            results = process(arguments)
             self.assertTrue(isinstance(results, dict),
-                            'events_process validation should return a dictionary when validation errors')
+                            'process validation should return a dictionary when validation errors')
             self.assertEqual('warning', results['msg_category'],
-                             'events_process validate should give warning when errors')
-            self.assertTrue(results["data"], 'events_process validate should return data when errors')
+                             'process validate should give warning when errors')
+            self.assertTrue(results["data"], 'process validate should return data when errors')
 
     def test_events_assemble(self):
         from hedweb.events import assemble
