@@ -1,12 +1,12 @@
 import unittest
 import os
 
-from hed.errors.error_types import ValidationErrors, ErrorContext
+from hed.errors.error_types import ValidationErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
 
 
 class TestHed3(TestValidatorBase):
-    schema_file = "../data/HED8.0.0-alpha.3_add_currency.xml"
+    schema_file = "../data/hed_pairs/HED8.0.0-beta.3.xml"
 
 
 class IndividualHedTagsShort(TestHed3):
@@ -24,6 +24,9 @@ class IndividualHedTagsShort(TestHed3):
             'invalidExtension': 'Attribute/Red',
             'invalidExtension2': 'Attribute/Red/Extension2',
             'usedToBeIllegalComma': 'Attribute/Informational/Label/This is a label,This/Is/A/Tag',
+            'illegalDef': 'Def/Item',
+            'illegalDefExpand': 'Def-expand/Item',
+            'illegalDefinition': 'Definition/Item',
         }
         expected_results = {
             'takesValue': True,
@@ -33,7 +36,10 @@ class IndividualHedTagsShort(TestHed3):
             'nonExtensionsAllowed': False,
             'invalidExtension': False,
             'invalidExtension2': False,
-            'usedToBeIllegalComma': False
+            'usedToBeIllegalComma': False,
+            'illegalDef': False,
+            'illegalDefExpand': False,
+            'illegalDefinition': False,
         }
         expected_issues = {
             'takesValue': [],
@@ -49,6 +55,12 @@ class IndividualHedTagsShort(TestHed3):
                                                                   expected_parent_tag="Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red"),
             'usedToBeIllegalComma': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, tag=1,
                                                                      index_in_tag=0, index_in_tag_end=4),
+            'illegalDef': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=4,
+                                                           index_in_tag_end=8, expected_parent_tag="Item"),
+            'illegalDefExpand': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=11,
+                                                                 index_in_tag_end=15, expected_parent_tag="Item"),
+            'illegalDefinition': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=11,
+                                                                  index_in_tag_end=15, expected_parent_tag="Item"),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -57,7 +69,7 @@ class IndividualHedTagsShort(TestHed3):
             'proper': 'Event/Sensory-event',
             'camelCase': 'EvEnt/Something',
             'takesValue': 'Attribute/Temporal rate/20 Hz',
-            'numeric': 'Repetition/20',
+            'numeric': 'Repetition-number/20',
             'lowercase': 'Event/something'
         }
         expected_results = {
@@ -138,12 +150,13 @@ class IndividualHedTagsShort(TestHed3):
             'incorrectPluralUnit': 'Frequency/3 hertzs',
             'incorrectSymbolCapitalizedUnit': 'Frequency/3 hz',
             'incorrectSymbolCapitalizedUnitModifier': 'Frequency/3 KHz',
-            'notRequiredNumber': 'Age/0.5',
-            'notRequiredScientific': 'Age/5e-1',
+            'notRequiredNumber': 'Accuracy/0.5',
+            'notRequiredScientific': 'Accuracy/5e-1',
             'specialAllowedCharBadUnit': 'Creation-date/bad_date',
             'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01',
-            'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
-            'specialNotAllowedCharCurrency': 'Event/Currency-Test/@100'
+            # todo: restore these when we have a currency node in the valid beta schema.
+            # 'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
+            # 'specialNotAllowedCharCurrency': 'Event/Currency-Test/@100'
             # Update tests - 8.0 currently has no clockTime nodes.
             # 'properTime': 'Item/2D shape/Clock face/08:30',
             # 'invalidTime': 'Item/2D shape/Clock face/54:54'
@@ -165,8 +178,8 @@ class IndividualHedTagsShort(TestHed3):
             'specialAllowedCharUnit': True,
             'properTime': True,
             'invalidTime': True,
-            'specialAllowedCharCurrency': True,
-            'specialNotAllowedCharCurrency': False,
+            # 'specialAllowedCharCurrency': True,
+            # 'specialNotAllowedCharCurrency': False,
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         legal_clock_time_units = ['hour:min', 'hour:min:sec']
@@ -192,16 +205,16 @@ class IndividualHedTagsShort(TestHed3):
                 ValidationErrors.HED_UNITS_INVALID, tag=0, unit_class_units=legal_freq_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
-            'specialAllowedCharBadUnit':  self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
-                                                                           tag=0, unit_class_units=legal_datetime_units),
+            'specialAllowedCharBadUnit':  self.format_error_but_not_really(ValidationErrors.HED_VALUE_INVALID,
+                                                                           tag=0),
             'specialAllowedCharUnit': [],
             # 'properTime': [],
             # 'invalidTime': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,  tag=0,
             #                                 unit_class_units=legal_clock_time_units)
-            'specialAllowedCharCurrency': [],
-            'specialNotAllowedCharCurrency': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
-                                                                               tag=0,
-                                                                               unit_class_units=legal_currency_units),
+            # 'specialAllowedCharCurrency': [],
+            # 'specialNotAllowedCharCurrency': self.format_error_but_not_really(ValidationErrors.HED_UNITS_INVALID,
+            #                                                                    tag=0,
+            #                                                                    unit_class_units=legal_currency_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 

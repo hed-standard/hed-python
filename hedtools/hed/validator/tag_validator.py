@@ -23,7 +23,8 @@ class TagValidator:
     DATE_TIME_UNIT_CLASS = 'dateTime'
     TIME_UNIT_CLASS = 'time'
 
-    DATE_TIME_VALUE_CLASS = 'dateTime'
+    DATE_TIME_VALUE_CLASS_OLD = 'dateTime'
+    DATE_TIME_VALUE_CLASS = 'dateTimeClass'
     NUMERIC_VALUE_CLASS = "numericClass"
     TEXT_VALUE_CLASS = "textClass"
     NAME_VALUE_CLASS = "nameClass"
@@ -65,6 +66,7 @@ class TagValidator:
         }
 
         self.VALUE_CLASS_TYPE_DICT = {
+            self.DATE_TIME_VALUE_CLASS_OLD: self._is_date_time,
             self.DATE_TIME_VALUE_CLASS: self._is_date_time,
             self.NUMERIC_VALUE_CLASS: self._validate_numeric_value_class,
             self.TEXT_VALUE_CLASS: self._validate_text_value_class,

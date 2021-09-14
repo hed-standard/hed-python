@@ -3,7 +3,7 @@ import os
 
 from hed.models.hed_string import HedString
 from hed.errors.error_types import ValidationErrors
-from tests.validator.test_tag_validator import TestValidatorBase
+from tests.validator.test_tag_validator_base import TestValidatorBase
 
 
 class TestHed(TestValidatorBase):
