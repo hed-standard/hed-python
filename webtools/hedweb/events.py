@@ -72,7 +72,7 @@ def process(arguments):
         results = validate(hed_schema, events)
     elif command == common.COMMAND_ASSEMBLE:
         results = assemble(hed_schema, events, arguments.get(common.DEFS_EXPAND, True))
-    elif command == common.COMMAND_EXTRACT_SIDECAR:
+    elif command == common.COMMAND_EXTRACT:
         results = extract(hed_schema, events, arguments.get(common.COLUMNS_SELECTED, None))
     else:
         raise HedFileError('UnknownEventsProcessingMethod', f'Command {command} is missing or invalid', '')
@@ -145,7 +145,7 @@ def extract(hed_schema, events, columns_selected):
                 'msg': f"Events file {display_name} had extraction errors"}
     else:
         file_name = generate_filename(display_name, suffix='_extracted', extension='.json')
-        return {common.COMMAND: common.COMMAND_EXTRACT_SIDECAR, 'data': json.dumps(hed_dict, indent=4),
+        return {common.COMMAND: common.COMMAND_EXTRACT, 'data': json.dumps(hed_dict, indent=4),
                 'output_display_name': file_name, 'schema_version': schema_version,
                 'msg_category': 'success', 'msg': 'Events extraction to JSON complete'}
 

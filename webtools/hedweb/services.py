@@ -29,12 +29,9 @@ def get_input_from_request(request):
     form_data = request.data
     form_string = form_data.decode()
     service_request = json.loads(form_string)
-    parameters = service_request.get(common.SERVICE_PARAMETERS, None)
-    if not parameters:
-        parameters = service_request
-    arguments = get_service_info(parameters)
-    arguments[common.SCHEMA] = get_input_schema(parameters)
-    arguments.update(get_input_objects(parameters))
+    arguments = get_service_info(service_request)
+    arguments[common.SCHEMA] = get_input_schema(service_request)
+    arguments.update(get_input_objects(service_request))
     return arguments
 
 
@@ -109,10 +106,11 @@ def process(arguments):
 
     command = arguments.get(common.COMMAND, '')
     target = arguments.get(common.COMMAND_TARGET, '')
-    response = {common.COMMAND: command, common.COMMAND_TARGET: target,
+    response = {common.SERVICE: arguments.get(common.SERVICE, ''),
+                common.COMMAND: command, common.COMMAND_TARGET: target,
                 'results': '', 'error_type': '', 'error_msg': ''}
 
-    if not arguments.get(common.SERVICE, None):
+    if not arguments.get(common.SERVICE, ''):
         response["error_type"] = 'HEDServiceMissing'
         response["error_msg"] = "Must specify a valid service"
     elif command == 'get_services':
@@ -154,7 +152,7 @@ def services_list():
     with open(the_path) as f:
         service_info = json.load(f)
     services = service_info['services']
-    meanings = service_info['meanings']
+    meanings = service_info['parameter_meanings']
     returns = service_info['returns']
     results = service_info['results']
     services_string = '\nServices:\n'
@@ -164,7 +162,7 @@ def services_list():
         next_string = f'{service}: {description}\n\tParameters: {parm_string}\n'
         services_string += next_string
 
-    meanings_string = '\nMeanings:\n'
+    meanings_string = '\nParameter meanings:\n'
     for string, meaning in meanings.items():
         meanings_string += f'\t{string}: {meaning}\n'
 
@@ -172,7 +170,7 @@ def services_list():
     for return_val, meaning in returns.items():
         returns_string += f'\t{return_val}: {meaning}\n'
 
-    results_string = '\nresults field meanings:\n'
+    results_string = '\nResults field meanings:\n'
     for result_val, meaning in results.items():
         results_string += f'\t{result_val}: {meaning}\n'
     data = services_string + meanings_string + returns_string + results_string
