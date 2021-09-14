@@ -5,7 +5,7 @@ from hed.errors import error_reporter
 from hed.models.hed_string import HedString
 from hed.errors.error_types import ValidationErrors
 from hed.errors.error_types import ErrorContext
-from tests.validator.test_tag_validator import TestHedBase
+from tests.validator.test_tag_validator_base import TestHedBase
 
 
 class TestTagFormat(TestHedBase):
