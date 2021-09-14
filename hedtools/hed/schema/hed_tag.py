@@ -154,7 +154,8 @@ class HedTag:
             New (implicitly long form) of tag to set
         """
         if self._long_tag:
-            raise ValueError("Can only edit tags before calculating canonical forms.  This could be updated to instead remove computed forms.")
+            raise ValueError("Can only edit tags before calculating canonical forms. " +
+                             "This could be updated to instead remove computed forms.")
         self._tag = new_tag_val
 
     @property
@@ -262,7 +263,8 @@ class HedTag:
                                                            self.library_prefix, list(hed_schema.valid_prefixes))
             return validation_issues
 
-        long_form, short_index, remainder_index, tag_issues = self._calculate_canonical_forms(specific_schema, error_handler)
+        long_form, short_index, remainder_index, tag_issues = \
+            self._calculate_canonical_forms(specific_schema, error_handler)
         self._long_tag = long_form
         self._short_tag_index = short_index
         self._extension_index = remainder_index

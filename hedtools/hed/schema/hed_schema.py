@@ -533,7 +533,8 @@ class HedSchema:
     def get_all_tags_with_attribute(self, key):
         if key in self._all_tags_attributes_cache:
             return self._all_tags_attributes_cache[key]
-        new_val = [tag_entry.long_name for tag_entry in self._sections[HedSectionKey.AllTags].values() if tag_entry.has_attribute(key)]
+        new_val = [tag_entry.long_name for tag_entry in self._sections[HedSectionKey.AllTags].values()
+                   if tag_entry.has_attribute(key)]
         self._all_tags_attributes_cache[key] = new_val
         return new_val
 
@@ -686,7 +687,7 @@ class HedSchema:
         return unknown_attributes
 
     def get_tag_attribute_names(self):
-        return {tag_entry.long_name:tag_entry for tag_entry in self._sections[HedSectionKey.Attributes].values()
+        return {tag_entry.long_name: tag_entry for tag_entry in self._sections[HedSectionKey.Attributes].values()
                 if not tag_entry.has_attribute(HedKey.UnitClassProperty)
                 and not tag_entry.has_attribute(HedKey.UnitProperty)
                 and not tag_entry.has_attribute(HedKey.UnitModifierProperty)
@@ -920,7 +921,8 @@ class HedSchema:
             if attrib_class is None:
                 return []
 
-            attributes = {attribute:entry for attribute, entry in self._sections[HedSectionKey.Attributes].items() if entry.has_attribute(attrib_class)}
+            attributes = {attribute: entry for attribute, entry in self._sections[HedSectionKey.Attributes].items()
+                          if entry.has_attribute(attrib_class)}
             return attributes
 
     # ===============================================
