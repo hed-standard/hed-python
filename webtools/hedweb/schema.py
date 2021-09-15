@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 from flask import current_app
 from werkzeug.utils import secure_filename
 
-from hed import schema as hedschema
+from hedtools.hed import schema as hedschema
 from hed.util.file_util import get_file_extension
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
