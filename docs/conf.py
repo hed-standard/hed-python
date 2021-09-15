@@ -33,7 +33,7 @@ release = '8.0.0'
 extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary"
+    "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
 ]
