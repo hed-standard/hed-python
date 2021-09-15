@@ -84,3 +84,4 @@ exclude_patterns:
 - "**/runserver.py"
 - "**/*.rst"
 - "**/templates/"
+- "**/conf.py"

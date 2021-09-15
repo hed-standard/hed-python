@@ -23,6 +23,9 @@ A PDF version of this document can be found `here <https://hed-python.readthedoc
    hed.rst
    hedweb.rst
 
+   hedmodules.rst
+   webmodules.rst
+
 Indices and tables
 ==================
 
