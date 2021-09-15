@@ -17,3 +17,9 @@ A PDF version of this document can be found `here <https://hed-python.readthedoc
 
    Documentation.md
    
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`   
