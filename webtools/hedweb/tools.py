@@ -1,21 +1,16 @@
 
 def get_key_value(key, column_values, categorical=True):
+    """  Creates the sidecar value dictionary for a given column name in an events.tsv file
+        :param key: Name of the column in the events file
+        :type key: str
+        :param column_values: A list of the unique values in the column if it is a categorical column otherwise ignored.
+        :type column_values: list
+        :param categorical: If true the column contains categorical values and the result will be a dictionary,
+            defaults to True
+        :return: A dictionary representing the extracted values for a given column name.
+        :rtype: dict
     """
-         Creates the sidecar value dictionary for a given column name
 
-     Parameters
-     ----------
-     key: str
-         Name of the column
-     column_values : list
-         A list of the unique values in the column if it is a categorical column otherwise ignored.
-     categorical: boolean
-         If true the column contains categorical values and the result will be a dictionary.
-     Returns
-     -------
-         dict
-         A dictionary representing the extracted values for a given column name.
-     """
     key_value = {"Description":  f"Description for {key}", "HED": ''}
     if not column_values:
         return key_value
@@ -33,20 +28,19 @@ def get_key_value(key, column_values, categorical=True):
 
 
 def get_sidecar_dict(columns_info, columns_selected):
+    """  Extracts a sidecar dictionary suitable for direct conversion to JSON sidecar.
+        :param columns_info: A dict with column names of an events file as keys and values that are dictionaries
+            of unique column entries.
+        :type columns_info: dict
+        :param columns_selected: A dict with keys that are names of columns that should be documented
+            in the JSON sidecar.
+        :type columns_selected: list
+        :return: A dictionary suitable for conversion to JSON sidecar.
+        :rtype: dict
+        :return: A list of issues if errors, otherwise empty.
+        :rtype: list
     """
-         Extracts a sidecar dictionary suitable for direct conversion to JSON sidecar.
 
-     Parameters
-     ----------
-     columns_info : dict
-         A dict with column names of an events file as keys and values that are dictionaries of unique column entries.
-     columns_selected: dict
-         A dict with keys that are names of columns that should be documented in the JSON sidecar.
-     Returns
-     -------
-         dict, list
-         A dictionary suitable for conversion to JSON sidecar.
-     """
     hed_dict = {}
     issues = []
     if not columns_selected:
