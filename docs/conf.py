@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../wedtools/hedweb/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'HED specification'
+project = 'HED python'
 copyright = '2021, HED Working Group'
 author = 'HED Working Group'
 
@@ -46,7 +46,7 @@ myst_enable_extensions = ["deflist"]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 html_static_path = ['_static']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # List of patterns, relative to source directory, that match files and
