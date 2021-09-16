@@ -19,12 +19,10 @@ A PDF version of this document can be found `here <https://hed-python.readthedoc
 
 .. autosummary::
    :toctree: _autosummary
+   :recursive:
 
-   hed.rst
-   hedweb.rst
-
-   hedmodules.rst
-   webmodules.rst
+   hedmodules
+   webmodules
 
 Indices and tables
 ==================
