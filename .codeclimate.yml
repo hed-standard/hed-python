@@ -82,3 +82,6 @@ exclude_patterns:
 - "**/*.md"
 - "**/app_factory.py"
 - "**/runserver.py"
+- "**/*.rst"
+- "**/templates/"
+- "**/conf.py"
