@@ -16,7 +16,14 @@ A PDF version of this document can be found `here <https://hed-python.readthedoc
    :caption: Resources:
 
    Documentation.md
-   
+
+.. autosummary::
+   :toctree: _autosummary
+   :recursive:
+
+   hedmodules
+   webmodules
+
 Indices and tables
 ==================
 
