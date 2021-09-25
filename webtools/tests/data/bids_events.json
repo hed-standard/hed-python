@@ -77,6 +77,7 @@
 		}
     },
     "n_repeated": {
-        "Description": "Number of trials that had to be repeated until the present trial because of invalid participant behavior (within this stage)."
+        "Description": "Number of trials that had to be repeated until the present trial because of invalid participant behavior (within this stage).",
+        "HED": "(Item-count/#, (Repeat, (Experimental-trial, Incorrect-action)))"
     }
 }

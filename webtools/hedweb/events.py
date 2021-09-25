@@ -10,7 +10,7 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 from hedweb.constants import common
 from hedweb.columns import create_column_selections, get_info_in_columns
-from hedweb.tools import get_sidecar_dict
+from hedweb.sidecar_remap import SidecarRemap
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
@@ -135,7 +135,8 @@ def extract(hed_schema, events, columns_selected):
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     columns_info = get_info_in_columns(events.dataframe)
-    hed_dict, issues = get_sidecar_dict(columns_info, columns_selected)
+    sr = SidecarRemap()
+    hed_dict, issues = sr.get_sidecar_dict(columns_info, columns_selected)
     display_name = events.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")

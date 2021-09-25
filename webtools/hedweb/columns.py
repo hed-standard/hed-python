@@ -1,7 +1,9 @@
-import pandas
-import os
 from flask import current_app
 import openpyxl
+import os
+
+
+from pandas import DataFrame, read_csv
 from hed.errors.exceptions import HedFileError
 
 from hedweb.constants import common, file_constants
@@ -55,7 +57,7 @@ def create_columns_info(columns_file, has_column_names: True, sheet_name: None):
         dataframe = dataframe_from_worksheet(worksheet, has_column_names)
         sheet_name = worksheet.title
     elif file_ext in file_constants.TEXT_FILE_EXTENSIONS:
-        dataframe = pandas.read_csv(columns_file, delimiter='\t', header=header)
+        dataframe = read_csv(columns_file, delimiter='\t', header=header)
     else:
         raise HedFileError('BadFileExtension',
                            f'File {filename} extension does not correspond to an Excel or tsv file', '')
@@ -67,13 +69,13 @@ def create_columns_info(columns_file, has_column_names: True, sheet_name: None):
 
 def dataframe_from_worksheet(worksheet, has_column_names):
     if not has_column_names:
-        data_frame = pandas.DataFrame(worksheet.values)
+        data_frame = DataFrame(worksheet.values)
     else:
         data = worksheet.values
         # first row is columns
         cols = next(data)
         data = list(data)
-        data_frame = pandas.DataFrame(data, columns=cols)
+        data_frame = DataFrame(data, columns=cols)
     return data_frame
 
 
@@ -104,7 +106,7 @@ def get_prefix_dict(form_dict):
     Returns
     -------
     dict
-        A dictionary whose keys are column numbers (starting with 1) and values are tag prefixes to prepend.
+        A dictionary whose keys names (or COLUMN_XX) and values are tag prefixes to prepend.
     """
     tag_columns = []
     prefix_dict = {}

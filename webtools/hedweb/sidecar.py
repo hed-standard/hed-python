@@ -1,4 +1,5 @@
 import io
+import json
 from flask import current_app
 from werkzeug.utils import secure_filename
 
@@ -7,6 +8,7 @@ from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hedweb.constants import common, file_constants
+from hedweb.sidecar_remap import SidecarRemap
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
@@ -55,8 +57,9 @@ def process(arguments):
     json_sidecar = arguments.get(common.JSON_SIDECAR, 'None')
     if not json_sidecar or not isinstance(json_sidecar, models.Sidecar):
         raise HedFileError('InvalidJSONFile', "Please give a valid JSON file to process", "")
-
-    if arguments[common.COMMAND] == common.COMMAND_VALIDATE:
+    if arguments[common.COMMAND] == common.COMMAND_FLATTEN:
+        results = sidecar_flatten(json_sidecar)
+    elif arguments[common.COMMAND] == common.COMMAND_VALIDATE:
         results = sidecar_validate(hed_schema, json_sidecar)
     elif arguments[common.COMMAND] == common.COMMAND_TO_SHORT:
         results = sidecar_convert(hed_schema, json_sidecar, command=common.COMMAND_TO_SHORT)
@@ -118,6 +121,33 @@ def sidecar_convert(hed_schema, json_sidecar, command=common.COMMAND_TO_LONG):
         return {common.COMMAND: command, 'data': data, 'output_display_name': file_name,
                 common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f'JSON sidecar {display_name} was successfully converted'}
+
+
+def sidecar_flatten(json_sidecar):
+    """Converts a sidecar from long to short unless unless the command is not COMMAND_TO_LONG then converts to short
+
+    Parameters
+    ----------
+    json_sidecar: Sidecar
+        Previously created Sidecar
+    command: str
+        Name of the command to execute if not COMMAND_TO_LONG
+
+    Returns
+    -------
+    dict
+        A downloadable dictionary file or a file containing warnings
+    """
+
+    json_string = json_sidecar.get_as_json_string()
+    sidecar = json.loads(json_string)
+    sr = SidecarRemap()
+    df = sr.flatten(sidecar)
+    data = df.to_csv(None, sep='\t', index=False, header=True)
+    display_name = json_sidecar.name
+    file_name = generate_filename(display_name, suffix='flattened', extension='.tsv')
+    return {common.COMMAND: common.COMMAND_FLATTEN, 'data': data, 'output_display_name': file_name,
+            'msg_category': 'success', 'msg': f'JSON sidecar {display_name} was successfully flattened'}
 
 
 def sidecar_validate(hed_schema, json_sidecar):
