@@ -1,6 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hedweb.remap_utils import extract_dataframe, separate_columns
+from hed.tools.remap_utils import extract_dataframe, separate_columns
 
 
 class RemapEvents:

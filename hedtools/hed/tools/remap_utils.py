@@ -69,10 +69,10 @@ def get_event_counts(root_dir, skip_cols=None):
     for file in file_list:
         dataframe = extract_dataframe(file)
         for col_name, col_values in dataframe.iteritems():
-            if col_name in skip_cols:
+            if skip_cols and col_name in skip_cols:
                 continue
             update_dict_counts(count_dicts, col_name, col_values)
-
+    return count_dicts
 
 def reorder_columns(data, col_order, skip_missing=True):
     """ Takes a dataframe or filename representing event file and reorders columns to desired order
@@ -124,8 +124,8 @@ def separate_columns(base_cols, target_cols):
 def update_dict_counts(count_dicts, col_name, col_values):
     values = col_values.value_counts(ascending=True)
     if col_name not in count_dicts:
-        count_dicts[col_name] = values
-    else:
-        total_values = count_dicts[col_name]
-        for name, value in values.items():
-            total_values[name] = total_values.get(name, 0) + value
+        count_dicts[col_name] = {}
+
+    total_values = count_dicts[col_name]
+    for name, value in values.items():
+        total_values[name] = total_values.get(name, 0) + value

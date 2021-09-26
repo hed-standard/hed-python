@@ -1,10 +1,9 @@
 import unittest
-from tests.test_web_base import TestWebBase
-from hedweb.remap_sidecar import RemapSidecar
+from hed.tools.remap_sidecar import RemapSidecar
 from hed.errors.exceptions import HedFileError
 
 
-class Test(TestWebBase):
+class Test(unittest.TestCase):
 
     def test_flatten(self):
         sr = RemapSidecar()

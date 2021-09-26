@@ -1,20 +1,25 @@
 import os
 import unittest
 import pandas as pd
-from tests.test_web_base import TestWebBase
 from hed.errors.exceptions import HedFileError
-from hedweb.remap_utils import extract_dataframe, reorder_columns, separate_columns
+from hed.tools.remap_utils import get_columns_info, get_file_list, extract_dataframe, reorder_columns, separate_columns
 
 
-class Test(TestWebBase):
+class Test(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
+        cls.stern_map_path = os.path.join(base_dir, "sternberg_map.tsv")
+        cls.stern_events_test_path = os.path.join(base_dir, "sternberg_events_test.tsv")
+        cls.stern_events_path = os.path.join(base_dir, "sternberg_events.tsv")
 
     def test_extract_dataframe(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_map.tsv')
-        df_new = extract_dataframe(events_path)
+        df_new = extract_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new, pd.DataFrame)
         self.assertEqual(len(df_new), 85, f"extract_dataframe should return correct number of rows")
         self.assertEqual(len(df_new.columns), 4, f"extract_dataframe should return correct number of rows")
-        df_new1 = extract_dataframe(events_path)
+        df_new1 = extract_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new1, pd.DataFrame)
         self.assertEqual(len(df_new1), 85, f"extract_dataframe should return correct number of rows")
         self.assertEqual(len(df_new1.columns), 4, f"extract_dataframe should return correct number of rows")
@@ -23,18 +28,14 @@ class Test(TestWebBase):
                             "extract_dataframe returns a new dataframe")
 
     def test_get_columns_info(self):
-        from hedweb.remap_utils import get_columns_info, extract_dataframe
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_events.tsv')
-        df = extract_dataframe(events_path)
+        df = extract_dataframe(self.stern_events_path)
         col_info = get_columns_info(df)
         self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
         self.assertEqual(len(col_info.keys()), len(df.columns),
                          "get_columns_info should return a dictionary with a key for each column")
 
     def test_get_columns_info_skip_columns(self):
-        from hedweb.remap_utils import get_columns_info, extract_dataframe
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_events.tsv')
-        df = extract_dataframe(events_path)
+        df = extract_dataframe(self.stern_events_path)
         col_info = get_columns_info(df, ['latency'])
         self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
         self.assertEqual(len(col_info.keys()), len(df.columns) - 1,
@@ -44,23 +45,29 @@ class Test(TestWebBase):
         self.assertFalse(col_info, "get_columns_info should return a dictionary with a key for each column included")
 
     def test_get_event_files(self):
-        from hedweb.remap_utils import get_file_list
-        dir_css = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../hedweb/static/css')
-        dir_web = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../hedweb')
-        test_len = len([name for name in os.listdir(dir_css) if os.path.isfile(os.path.join(dir_css, name))])
-        file_list1 = get_file_list(dir_css)
-        self.assertEqual(test_len, len(file_list1), "get_event_files should have right number of files when same dir")
-        file_list2 = get_file_list(dir_web, types=[".css"])
-        self.assertEqual(test_len, len(file_list2), "get_event_files should have right number of files")
-        file_list3 = get_file_list(dir_web, types=[".html", ".js"])
-        for item in file_list3:
-            if item.endswith(".html") or item.endswith(".js"):
+        dir_pairs = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed_pairs')
+        test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
+        file_list1 = get_file_list(dir_pairs)
+        for file in file_list1:
+            if os.path.basename(file) in test_files:
+                continue
+            raise HedFileError("FileNotFound", f"get_event_files should have found file {file}", "")
+
+        for file in test_files:
+            if os.path.join(dir_pairs, file) in file_list1:
+                continue
+            raise HedFileError("FileShouldNotBeFound", f"get_event_files should have not have found file {file}", "")
+
+    def test_get_event_files_suffix(self):
+        dir_data = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
+        file_list = get_file_list(dir_data, types=[".json", ".tsv"])
+        for item in file_list:
+            if item.endswith(".json") or item.endswith(".tsv"):
                 continue
             raise HedFileError("BadFileType", "get_event_files expected only .html or .js files", "")
 
     def test_reorder_columns(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_map.tsv')
-        df = extract_dataframe(events_path)
+        df = extract_dataframe(self.stern_map_path)
         df_new = reorder_columns(df, ['event_type', 'type'])
         self.assertEqual(len(df_new), 85, f"reorder_columns should return correct number of rows")
         self.assertEqual(len(df_new.columns), 2, f"reorder_columns should return correct number of rows")
@@ -71,9 +78,8 @@ class Test(TestWebBase):
         self.assertEqual(len(df_new1.columns), 2, f"reorder_columns should return correct number of rows")
 
     def test_reorder_columns_no_skip(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_map.tsv')
         try:
-            reorder_columns(events_path, ['event_type', 'type', 'baloney'], skip_missing=False)
+            reorder_columns(self.stern_map_path, ['event_type', 'type', 'baloney'], skip_missing=False)
         except HedFileError:
             pass
         except Exception as ex:

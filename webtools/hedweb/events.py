@@ -10,8 +10,8 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 from hedweb.constants import base_constants
 from hedweb.columns import create_column_selections
-from hedweb.remap_utils import get_columns_info
-from hedweb.remap_sidecar import RemapSidecar
+from hed.tools.remap_utils import get_columns_info
+from hed.tools.remap_sidecar import RemapSidecar
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config

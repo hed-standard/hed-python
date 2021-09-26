@@ -85,3 +85,4 @@ exclude_patterns:
 - "**/*.rst"
 - "**/templates/"
 - "**/conf.py"
+- "**/deprecated/"

@@ -2,14 +2,14 @@ import unittest
 import os
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hedweb.remap_events import RemapEvents
-from hedweb.remap_utils import extract_dataframe, reorder_columns, separate_columns
+from hed.tools.remap_events import RemapEvents
+from hed.tools.remap_utils import extract_dataframe, reorder_columns, separate_columns
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/')
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         cls.stern_map_path = os.path.join(base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(base_dir, "sternberg_events_test.tsv")
         cls.stern_test2_path = os.path.join(base_dir, "sternberg_events.tsv")
@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
         self.assertEqual(df.iloc[0]["event_type"], "n/a", "Sternberg template first key is right click")
 
     def test_make_template_with_targets(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_map.tsv')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg_map.tsv')
         event_map = RemapEvents(self.key_cols, self.target_cols)
         df = event_map.make_template(events_path, use_targets=True)
         self.assertEqual(len(df.columns), len(self.key_cols) + len(self.target_cols),
@@ -45,8 +45,7 @@ class Test(unittest.TestCase):
         self.assertEqual(df.iloc[0]["event_type"], "right_click", "Sternberg template first key is right click")
 
     def test_make_template_with_keys_unique_true(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_map.tsv')
-        df = extract_dataframe(events_path)
+        df = extract_dataframe(self.stern_map_path)
         df.iloc[0] = df.iloc[1].copy()
         event_map = RemapEvents(self.key_cols, self.target_cols)
         try:
@@ -59,8 +58,7 @@ class Test(unittest.TestCase):
             self.fail('make_template should have thrown a HedFileError exception when non unique keys')
 
     def test_make_template_with_keys_unique_false(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_map.tsv')
-        df = extract_dataframe(events_path)
+        df = extract_dataframe(self.stern_map_path)
         df.iloc[0] = df.iloc[1].copy()
         event_map = RemapEvents(self.key_cols, self.target_cols)
 
@@ -70,11 +68,10 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df_new), 84, "Sternberg template with a duplicate should have 84 keys")
 
     def test_make_template_multiple_columns(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/sternberg_map.tsv')
         target_cols = ['type']
         key_cols = ['event_type', 'purpose', 'letter']
         event_map = RemapEvents(key_cols, target_cols)
-        df = event_map.make_template(events_path)
+        df = event_map.make_template(self.stern_map_path)
         self.assertEqual(85, len(df), "The unique mapped keys should have same number of keys")
 
     def test_remap_events_constructor(self):
