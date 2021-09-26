@@ -27,26 +27,26 @@ class Test(TestWebBase):
 
     def test_form_has_option(self):
         from hedweb.web_utils import form_has_option
-        from hedweb.constants import common
+        from hedweb.constants import base_constants
         with self.app.test as _:
-            environ = create_environ(data={common.CHECK_WARNINGS_VALIDATE: 'on'})
+            environ = create_environ(data={base_constants.CHECK_WARNINGS_VALIDATE: 'on'})
             request = Request(environ)
-            self.assertTrue(form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'on'),
+            self.assertTrue(form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on'),
                             "Form has the required option when set")
-            self.assertFalse(form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'off'),
+            self.assertFalse(form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'off'),
                              "Form does not have required option when target value is wrong one")
             self.assertFalse(form_has_option(request, 'blank', 'on'),
                              "Form does not have required option when option is not in the form")
 
     def test_form_has_url(self):
         from hedweb.web_utils import form_has_url
-        from hedweb.constants import common, file_constants
+        from hedweb.constants import base_constants, file_constants
         with self.app.test as _:
-            environ = create_environ(data={common.SCHEMA_URL: 'https://www.google.com/my.json'})
+            environ = create_environ(data={base_constants.SCHEMA_URL: 'https://www.google.com/my.json'})
             request = Request(environ)
-            self.assertTrue(form_has_url(request, common.SCHEMA_URL), "Form has a URL that is specified")
+            self.assertTrue(form_has_url(request, base_constants.SCHEMA_URL), "Form has a URL that is specified")
             self.assertFalse(form_has_url(request, 'temp'), "Form does not have a field that is not specified")
-            self.assertFalse(form_has_url(request, common.SCHEMA_URL, file_constants.SPREADSHEET_EXTENSIONS),
+            self.assertFalse(form_has_url(request, base_constants.SCHEMA_URL, file_constants.SPREADSHEET_EXTENSIONS),
                              "Form does not URL with the wrong extension")
 
     def test_generate_download_file_from_text(self):
@@ -67,7 +67,7 @@ class Test(TestWebBase):
     def test_generate_download_spreadsheet_excel(self):
         with self.app.test_request_context():
             from hed.models import HedInput
-            from hedweb.constants import common
+            from hedweb.constants import base_constants
             from hedweb.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelOneSheet.xlsx')
 
@@ -76,7 +76,7 @@ class Test(TestWebBase):
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
                                    name='ExcelOneSheet.xlsx')
-            results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
+            results = {base_constants.SPREADSHEET: spreadsheet, base_constants.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for xlsx files')
             headers_dict = dict(response.headers)
@@ -89,7 +89,7 @@ class Test(TestWebBase):
     def test_generate_download_spreadsheet_excel_code(self):
         with self.app.test_request_context():
             from hed.models import HedInput
-            from hedweb.constants import common
+            from hedweb.constants import base_constants
             from hedweb.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelOneSheet.xlsx')
 
@@ -98,7 +98,7 @@ class Test(TestWebBase):
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
                                    name='ExcelOneSheet.xlsx')
-            results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
+            results = {base_constants.SPREADSHEET: spreadsheet, base_constants.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
             headers_dict = dict(response.headers)
@@ -111,7 +111,7 @@ class Test(TestWebBase):
     def test_generate_download_spreadsheet_tsv(self):
         with self.app.test_request_context():
             from hed.models import HedInput
-            from hedweb.constants import common
+            from hedweb.constants import base_constants
             from hedweb.web_utils import generate_download_spreadsheet
             spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                             'data/LKTEventCodesHED3.tsv')
@@ -121,7 +121,7 @@ class Test(TestWebBase):
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
                                    name='LKTEventCodesHED3.tsv')
-            results = {common.SPREADSHEET: spreadsheet, common.OUTPUT_DISPLAY_NAME: 'LKTEventCodesHED3.tsv'}
+            results = {base_constants.SPREADSHEET: spreadsheet, base_constants.OUTPUT_DISPLAY_NAME: 'LKTEventCodesHED3.tsv'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
             headers_dict = dict(response.headers)
@@ -187,10 +187,10 @@ class Test(TestWebBase):
 
     def test_get_hed_schema_from_pull_down_version(self):
         from hed.schema import HedSchema
-        from hedweb.constants import common
+        from hedweb.constants import base_constants
         from hedweb.web_utils import get_hed_schema_from_pull_down
         with self.app.test:
-            environ = create_environ(data={common.SCHEMA_VERSION: '8.0.0-alpha.1'})
+            environ = create_environ(data={base_constants.SCHEMA_VERSION: '8.0.0-alpha.1'})
             request = Request(environ)
             hed_schema = get_hed_schema_from_pull_down(request)
             self.assertIsInstance(hed_schema, HedSchema,
@@ -198,13 +198,13 @@ class Test(TestWebBase):
 
     def test_get_hed_schema_from_pull_down_other(self):
         from hed.schema import HedSchema
-        from hedweb.constants import common
+        from hedweb.constants import base_constants
         from hedweb.web_utils import get_hed_schema_from_pull_down
         with self.app.test:
             schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
             with open(schema_path, 'rb') as fp:
-                environ = create_environ(data={common.SCHEMA_VERSION: common.OTHER_VERSION_OPTION,
-                                               common.SCHEMA_PATH: fp})
+                environ = create_environ(data={base_constants.SCHEMA_VERSION: base_constants.OTHER_VERSION_OPTION,
+                                               base_constants.SCHEMA_PATH: fp})
             request = Request(environ)
             hed_schema = get_hed_schema_from_pull_down(request)
             self.assertIsInstance(hed_schema, HedSchema,

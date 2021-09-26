@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.errors.exceptions import HedFileError
-from hedweb.constants import common, file_constants
+from hedweb.constants import base_constants, file_constants
 
 app_config = current_app.config
 
@@ -142,8 +142,8 @@ def generate_download_file_from_text(download_text, display_name=None,
 
 def generate_download_spreadsheet(results,  msg_category='success', msg=''):
     # return generate_download_test()
-    spreadsheet = results[common.SPREADSHEET]
-    display_name = results[common.OUTPUT_DISPLAY_NAME]
+    spreadsheet = results[base_constants.SPREADSHEET]
+    display_name = results[base_constants.OUTPUT_DISPLAY_NAME]
 
     if not spreadsheet.loaded_workbook:
         return generate_download_file_from_text(spreadsheet.to_csv(), display_name=display_name,
@@ -237,13 +237,13 @@ def get_hed_schema_from_pull_down(request):
         A HedSchema object
     """
 
-    if common.SCHEMA_VERSION not in request.form:
+    if base_constants.SCHEMA_VERSION not in request.form:
         raise HedFileError("NoSchemaError", "Must provide a valid schema or schema version", "")
-    elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
-        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+    elif request.form[base_constants.SCHEMA_VERSION] != base_constants.OTHER_VERSION_OPTION:
+        hed_file_path = hedschema.get_path_from_hed_version(request.form[base_constants.SCHEMA_VERSION])
         hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
-    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and common.SCHEMA_PATH in request.files:
-        f = request.files[common.SCHEMA_PATH]
+    elif request.form[base_constants.SCHEMA_VERSION] == base_constants.OTHER_VERSION_OPTION and base_constants.SCHEMA_PATH in request.files:
+        f = request.files[base_constants.SCHEMA_PATH]
         hed_schema = hedschema.from_string(f.read(file_constants.BYTE_LIMIT).decode('ascii'),
                                            file_type=secure_filename(f.filename))
     else:

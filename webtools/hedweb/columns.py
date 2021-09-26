@@ -6,8 +6,8 @@ import os
 from pandas import DataFrame, read_csv
 from hed.errors.exceptions import HedFileError
 
-from hedweb.constants import common, file_constants
-from hedweb.remap_utils import get_info_in_columns
+from hedweb.constants import base_constants, file_constants
+from hedweb.remap_utils import get_columns_info
 from hedweb.web_utils import form_has_file, form_has_option
 
 
@@ -62,9 +62,9 @@ def create_columns_info(columns_file, has_column_names: True, sheet_name: None):
     else:
         raise HedFileError('BadFileExtension',
                            f'File {filename} extension does not correspond to an Excel or tsv file', '')
-    col_dict = get_info_in_columns(dataframe)
-    columns_info = {common.COLUMNS_FILE: filename, common.COLUMN_DICTIONARY: col_dict,
-                    common.WORKSHEET_SELECTED: sheet_name, common.WORKSHEET_NAMES: sheet_names}
+    col_dict = get_columns_info(dataframe)
+    columns_info = {base_constants.COLUMNS_FILE: filename, base_constants.COLUMN_DICTIONARY: col_dict,
+                    base_constants.WORKSHEET_SELECTED: sheet_name, base_constants.WORKSHEET_NAMES: sheet_names}
     return columns_info
 
 
@@ -81,11 +81,11 @@ def dataframe_from_worksheet(worksheet, has_column_names):
 
 
 def get_columns_request(request):
-    if not form_has_file(request, common.COLUMNS_FILE):
+    if not form_has_file(request, base_constants.COLUMNS_FILE):
         raise HedFileError('MissingFile', 'An uploadable file was not provided', None)
-    columns_file = request.files.get(common.COLUMNS_FILE, '')
+    columns_file = request.files.get(base_constants.COLUMNS_FILE, '')
     has_column_names = form_has_option(request, 'has_column_names', 'on')
-    sheet_name = request.form.get(common.WORKSHEET_SELECTED, None)
+    sheet_name = request.form.get(base_constants.WORKSHEET_SELECTED, None)
     return create_columns_info(columns_file, has_column_names, sheet_name)
 
 

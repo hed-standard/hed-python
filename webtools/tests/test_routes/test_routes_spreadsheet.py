@@ -3,7 +3,7 @@ import os
 import unittest
 from flask import Response
 from tests.test_web_base import TestWebBase
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -24,11 +24,11 @@ class Test(TestWebBase):
                 x = sc.read()
             spreadsheet_buffer = io.BytesIO(bytes(x))
 
-            input_data = {common.SCHEMA_VERSION: '7.2.0',
-                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.WORKSHEET_NAME: 'LKT Events',
-                          common.WORKSHEET_SELECTED: 'LKT Events',
-                          common.HAS_COLUMN_NAMES: 'on',
+            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                          base_constants.WORKSHEET_NAME: 'LKT Events',
+                          base_constants.WORKSHEET_SELECTED: 'LKT Events',
+                          base_constants.HAS_COLUMN_NAMES: 'on',
                           'column_1_input': '',
                           'column_2_check': 'on',
                           'column_2_input': 'Event/Label/',
@@ -37,8 +37,8 @@ class Test(TestWebBase):
                           'column_4_input': 'Event/Description/',
                           'column_5_check': 'on',
                           'column_5_input': '',
-                          common.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+                          base_constants.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'spreadsheet_submit should return a Response when valid dictionary')
@@ -57,11 +57,11 @@ class Test(TestWebBase):
                 x = sc.read()
             spreadsheet_buffer = io.BytesIO(bytes(x))
 
-            input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.WORKSHEET_NAME: 'LKT Events',
-                          common.WORKSHEET_SELECTED: 'LKT Events',
-                          common.HAS_COLUMN_NAMES: 'on',
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                          base_constants.WORKSHEET_NAME: 'LKT Events',
+                          base_constants.WORKSHEET_SELECTED: 'LKT Events',
+                          base_constants.HAS_COLUMN_NAMES: 'on',
                           'column_1_input': '',
                           'column_2_check': 'on',
                           'column_2_input': 'Event/Label/',
@@ -70,8 +70,8 @@ class Test(TestWebBase):
                           'column_4_input': 'Event/Description/',
                           'column_5_check': 'on',
                           'column_5_input': '',
-                          common.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+                          base_constants.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/spreadsheet_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'spreadsheet_submit validate should return a response object when invalid spreadsheet')

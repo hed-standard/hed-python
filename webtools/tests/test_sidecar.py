@@ -6,7 +6,7 @@ from werkzeug.wrappers import Request
 from tests.test_web_base import TestWebBase
 import hed.schema as hedschema
 from hed import models
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -22,17 +22,17 @@ class Test(TestWebBase):
         with self.app.test:
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.json')
             with open(json_path, 'rb') as fp:
-                environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0',
-                                         common.COMMAND_OPTION: common.COMMAND_TO_LONG})
+                environ = create_environ(data={base_constants.JSON_FILE: fp, base_constants.SCHEMA_VERSION: '8.0.0',
+                                         base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_LONG})
             request = Request(environ)
             arguments = get_input_from_form(request)
-            self.assertIsInstance(arguments[common.JSON_SIDECAR], Sidecar,
+            self.assertIsInstance(arguments[base_constants.JSON_SIDECAR], Sidecar,
                                   "generate_input_from_sidecar_form should have a JSON dictionary")
-            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+            self.assertIsInstance(arguments[base_constants.SCHEMA], HedSchema,
                                   "generate_input_from_sidecar_form should have a HED schema")
-            self.assertEqual(common.COMMAND_TO_LONG, arguments[common.COMMAND],
+            self.assertEqual(base_constants.COMMAND_TO_LONG, arguments[base_constants.COMMAND],
                              "generate_input_from_sidecar_form should have a command")
-            self.assertFalse(arguments[common.CHECK_WARNINGS_VALIDATE],
+            self.assertFalse(arguments[base_constants.CHECK_WARNINGS_VALIDATE],
                              "generate_input_from_sidecar_form should have check for warnings false when not given")
 
     def test_sidecar_process_empty_file(self):
@@ -55,8 +55,8 @@ class Test(TestWebBase):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
-        arguments = {common.SCHEMA: hed_schema, common.JSON_SIDECAR: json_sidecar,
-                     common.JSON_DISPLAY_NAME: 'bids_json', common.COMMAND: common.COMMAND_TO_SHORT}
+        arguments = {base_constants.SCHEMA: hed_schema, base_constants.JSON_SIDECAR: json_sidecar,
+                     base_constants.JSON_DISPLAY_NAME: 'bids_json', base_constants.COMMAND: base_constants.COMMAND_TO_SHORT}
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -68,8 +68,8 @@ class Test(TestWebBase):
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        arguments = {common.SCHEMA: hed_schema, common.JSON_SIDECAR: json_sidecar,
-                     common.JSON_DISPLAY_NAME: 'bids_json', common.COMMAND: common.COMMAND_TO_SHORT}
+        arguments = {base_constants.SCHEMA: hed_schema, base_constants.JSON_SIDECAR: json_sidecar,
+                     base_constants.JSON_DISPLAY_NAME: 'bids_json', base_constants.COMMAND: base_constants.COMMAND_TO_SHORT}
 
         with self.app.app_context():
             results = process(arguments)
@@ -81,14 +81,14 @@ class Test(TestWebBase):
     def test_sidecar_convert_to_long(self):
         from hed import models
         from hedweb.sidecar import sidecar_convert
-        from hedweb.constants import common
+        from hedweb.constants import base_constants
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         json_sidecar = models.Sidecar(file=json_path, name='bids_events')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
-            results = sidecar_convert(hed_schema, json_sidecar, command=common.COMMAND_TO_LONG)
+            results = sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_LONG)
             self.assertTrue(results['data'],
                             'sidecar_convert to long results should have data key')
             self.assertEqual('warning', results['msg_category'],
@@ -97,7 +97,7 @@ class Test(TestWebBase):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
-            results = sidecar_convert(hed_schema, json_sidecar, command=common.COMMAND_TO_LONG)
+            results = sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_LONG)
             self.assertTrue(results['data'],
                             'sidecar_convert to long results should have data key')
             self.assertEqual('success', results["msg_category"],

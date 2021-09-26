@@ -88,22 +88,6 @@ class Test(TestWebBase):
         self.assertEqual(len(df3.columns), 2, "flatten_hed dataframe should have 2 columns")
         self.assertEqual(df3.iloc[0]['keys'], '_*_a_col_*_', "flatten_hed dataframe should have right value in key")
         self.assertEqual(df3.iloc[3]['keys'], '_*_b_col_*_', "flatten_hed dataframe should have right value in key")
-        print("to here")
-
-    def test_flatten_hed_column_names(self):
-        sr = RemapSidecar()
-        # One categorical column
-        sidecar1 = {"a1_col": {"HED": {"b1": "Label/B", "c1": "Label/C"}},
-                    "a2_col": {"HED": {"b2": "Label/B", "c2": "Label/C"}},
-                    "a3_col": {"HED": {"b3": "Label/B", "c3": "Label/C"}}}
-        df1 = sr.flatten_hed(sidecar1)
-        self.assertEqual(len(df1), 9, "flatten_hed dataframe should have 1 more entry than HED entries for dictionary")
-        self.assertEqual(len(df1.columns), 2, "flatten_hed dataframe should have 2 columns")
-        self.assertEqual(df1.iloc[1]['keys'], 'b1', "flatten_hed dataframe should have right value in key")
-        df2 = sr.flatten_hed(sidecar1, ["a1_col", "a3_col"])
-        self.assertEqual(len(df2), 6, "flatten_hed dataframe should have 1 more entry than HED entries for dictionary")
-        self.assertEqual(len(df2.columns), 2, "flatten_hed dataframe should have 2 columns")
-        self.assertEqual(df2.iloc[1]['keys'], 'b1', "flatten_hed dataframe should have right value in key")
 
     def test_get_marked_key(self):
         sr = RemapSidecar()
@@ -180,7 +164,13 @@ class Test(TestWebBase):
         self.assertEqual(len(df1), 9, "When all columns are used should have all entries")
         df2 = sr.flatten_hed(sidecar1, ["a1_col", "a3_col"])
         self.assertEqual(len(df2), 6, "When some columns are used should have appropriate entries")
-        print("toHere")
+        self.assertEqual(len(df1.columns), 2, "flatten_hed dataframe should have 2 columns")
+        self.assertEqual(df1.iloc[1]['keys'], 'b1', "flatten_hed dataframe should have right value in key")
+        df2 = sr.flatten_hed(sidecar1, ["a1_col", "a3_col"])
+        self.assertEqual(len(df2), 6,
+                         "flatten_hed dataframe should have 1 more entry than HED entries for dictionary")
+        self.assertEqual(len(df2.columns), 2, "flatten_hed dataframe should have 2 columns")
+        self.assertEqual(df2.iloc[1]['keys'], 'b1', "flatten_hed dataframe should have right value in key")
 
     def test_get_key_value(self):
         dict_values = RemapSidecar.get_key_value('', [])

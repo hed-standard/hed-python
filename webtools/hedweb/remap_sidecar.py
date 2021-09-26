@@ -103,20 +103,21 @@ class RemapSidecar:
         for col_key, col_dict in sidecar.items():
             if col_key not in col_names or 'HED' not in col_dict:
                 continue
-            hed_target = col_dict['HED']
-            header = self.get_marked_key(col_key, 1)
-
-            if isinstance(hed_target, str):
-                keys.append(header)
-                values.append(hed_target)
-            else:
-                col_keys, col_values = self.flatten_col(col_key, hed_target, False)
-                keys = keys + col_keys
-                values = values +  col_values
-
+            next_keys, next_values = self.flatten_hed_value(col_key, col_dict['HED'])
+            keys = keys + next_keys
+            values = values + next_values
         data = {"keys": keys, "values": values}
         dataframe = DataFrame(data)
         return dataframe
+
+    def flatten_hed_value(self, col_key, hed_target):
+        header = self.get_marked_key(col_key, 1)
+        if isinstance(hed_target, str):
+            keys = [header]
+            values = [hed_target]
+        else:
+            keys, values = self.flatten_col(col_key, hed_target, False)
+        return keys, values
 
     def get_marked_key(self, key, marker_level):
         if marker_level == 0:
@@ -188,11 +189,10 @@ class RemapSidecar:
             unmarked_key = self.get_unmarked_key(key)
             if not unmarked_key:
                 raise HedFileError("unflatten", f"Empty or invalid flattened sidecar key {str(key)}", "")
-            elif unmarked_key == key:
+            if unmarked_key == key:
                 current_dict[key] = value
             elif value != 'n/a':
                 master_dict[unmarked_key] = {"HED": value}
-                current_key = None
                 current_dict = {}
             else:
                 current_dict = {}

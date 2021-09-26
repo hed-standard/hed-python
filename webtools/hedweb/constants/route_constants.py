@@ -4,7 +4,7 @@ ADDITIONAL_EXAMPLES_ROUTE = '/additional-examples'
 
 COLUMNS_INFO_ROUTE = '/get_columns_info'
 
-COMMON_ERRORS_ROUTE = '/common-errors'
+HED_ERRORS_ROUTE = '/hed-errors'
 
 EVENTS_ROUTE = '/events'
 EVENTS_SUBMIT_ROUTE = '/events_submit'

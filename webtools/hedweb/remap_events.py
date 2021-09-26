@@ -1,5 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
+from hedweb.remap_utils import extract_dataframe, separate_columns
 
 
 class RemapEvents:
@@ -56,7 +57,7 @@ class RemapEvents:
 
         """
 
-        df = RemapEvents.extract_dataframe(data)
+        df = extract_dataframe(data)
         if not use_targets:
             df[self.target_cols] = 'n/a'
         new_map = RemapEvents(self.key_cols, self.target_cols)
@@ -76,12 +77,12 @@ class RemapEvents:
         Returns:
             DataFrame
         """
-        df_new = RemapEvents.extract_dataframe(data)
-        present_keys, missing_keys = RemapEvents.separate_columns(df_new.columns.values.tolist(), self.key_cols)
+        df_new = extract_dataframe(data)
+        present_keys, missing_keys = separate_columns(df_new.columns.values.tolist(), self.key_cols)
         if missing_keys:
             raise HedFileError("MissingKeys", f"Events file must have key columns {str(self.key_cols)}", "")
 
-        present_targets, missing_targets = RemapEvents.separate_columns(df_new.columns.values.tolist(), self.target_cols)
+        present_targets, missing_targets = separate_columns(df_new.columns.values.tolist(), self.target_cols)
         if missing_targets:
             df_new[missing_targets] = 'n/a'
         missing_indices = []
@@ -104,12 +105,12 @@ class RemapEvents:
             keys_unique (bool):    If True, raises an exception if it encounters a key already in dictionary
 
         """
-        keys_present, keys_missing = RemapEvents.separate_columns(df.columns.values.tolist(), self.key_cols)
+        keys_present, keys_missing = separate_columns(df.columns.values.tolist(), self.key_cols)
         if keys_missing:
             raise HedFileError("MissingKeyColumn",
                                f"make_template data does not have key columns {str(keys_missing)}", "")
         key_df = df[self.key_cols]
-        targets_present, targets_missing = RemapEvents.separate_columns(df.columns.values.tolist(), self.target_cols)
+        targets_present, targets_missing = separate_columns(df.columns.values.tolist(), self.target_cols)
 
         target_df = df[targets_present]
         if targets_missing:
@@ -137,70 +138,3 @@ class RemapEvents:
             else:
                 raise HedFileError("DuplicateKeyNotAllowed",
                                    f"Key {str(key_df.iloc[index])} already in dictionary", "")
-
-    @staticmethod
-    def extract_dataframe(data):
-        """ Returns a new dataframe representing an event file or template
-
-        Args:
-            data (DataFrame or str):      DataFrame or filename representing an events file
-
-        Returns:
-            DataFrame containing with a tsv file
-
-        """
-
-        if isinstance(data, str):
-            df = pd.read_csv(data, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
-        elif isinstance(data, pd.DataFrame):
-            df = data.copy()
-        else:
-            raise HedFileError("BadDataFrame", "extract_dataframe could not extract DataFrame from data", "")
-        return df
-
-    @staticmethod
-    def reorder_columns(data, col_order, skip_missing=True):
-        """ Takes a dataframe or filename representing event file and reorders columns to desired order
-
-        Args:
-            data (DataFrame, str) :        Represents mapping
-            col_order (list):              List of column names for desired order
-            skip_missing (bool):           If true, col_order columns missing from data are skipped, otherwise error
-
-        Returns:
-            DataFrame                      A new reordered dataframe
-        """
-        df = RemapEvents.extract_dataframe(data)
-        present_cols, missing_cols = RemapEvents.separate_columns(df.columns.values.tolist(), col_order)
-        if missing_cols and not skip_missing:
-            raise HedFileError("MissingKeys", f"Events file must have columns {str(missing_cols)}", "")
-        df = df[present_cols]
-        return df
-
-    @staticmethod
-    def separate_columns(base_cols, target_cols):
-        """ Takes a list of column names and a list of target columns and returns list of present and missing targets.
-
-        Computes the set difference of target_cols and base_cols and returns a list of columns of
-        target_cols that are in df and a list of those missing.
-
-         Args:
-             base_cols (list) :        List of columns in base object
-             target_cols (list):       List of desired column names
-
-         Returns:
-             tuple (list, list):            Returns two lists one with
-         """
-
-        if not target_cols:
-            return [], []
-        elif not base_cols:
-            return [], target_cols
-        missing_cols = []
-        present_cols = []
-        for col in target_cols:
-            if col not in base_cols:
-                missing_cols.append(col)
-            else:
-                present_cols.append(col)
-        return present_cols, missing_cols
