@@ -1,20 +1,20 @@
 import unittest
 from tests.test_web_base import TestWebBase
-from hedweb.sidecar_remap import SidecarRemap
+from hedweb.remap_sidecar import RemapSidecar
 from hed.errors.exceptions import HedFileError
 
 
 class Test(TestWebBase):
 
     def test_flatten(self):
-        sr = SidecarRemap()
+        sr = RemapSidecar()
         sidecar1 = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"}, "b": "blech2"}
         df1 = sr.flatten(sidecar1)
         self.assertEqual(9, len(df1), "flatten should return a dataframe with correct number of rows")
         self.assertEqual(2, len(df1.columns), "flatten should return a dataframe with 2 columns")
 
     def test_flatten_with_array(self):
-        sr = SidecarRemap()
+        sr = RemapSidecar()
         sidecar1 = {"a": {"c": ["blech3", "blech3a"], "d": "blech4", "e": "blech5"}, "b": "blech2"}
         try:
             sr.flatten(sidecar1)
@@ -26,7 +26,7 @@ class Test(TestWebBase):
             self.fail('process should have thrown a HedFileError when array included in JSON')
 
     def test_flatten_sidecar_with_empty(self):
-        sr = SidecarRemap()
+        sr = RemapSidecar()
         # top level value is empty
         sidecar1 = {"a": {"c": "blech3", "d": "blech4", "e": "blech5"}, "b": "",
                     "af": {"c": {"af": "blech6"}, "df_new": "blech7"}}
@@ -46,7 +46,7 @@ class Test(TestWebBase):
 
     def test_flatten_col_dict(self):
         # Test 1 level of dictionary
-        sr = SidecarRemap()
+        sr = RemapSidecar()
         column_dict1 = {"a": "blech1", "b": "blech2"}
         [keys1, values1] = sr.flatten_col_dict(column_dict1)
         self.assertEqual(2, len(keys1), "flatten_col_dict should return keys for each element dictionary")
@@ -65,7 +65,7 @@ class Test(TestWebBase):
         self.assertEqual(18, len(values3), "flatten_col_dict should return values for each element + 2 for each header")
 
     def test_flatten_hed(self):
-        sr = SidecarRemap()
+        sr = RemapSidecar()
         # One categorical column
         sidecar1 = {"a_col": {"HED": {"b": "Label/B", "c": "Label/C"}}}
         df1 = sr.flatten_hed(sidecar1)
@@ -91,7 +91,7 @@ class Test(TestWebBase):
         print("to here")
 
     def test_flatten_hed_column_names(self):
-        sr = SidecarRemap()
+        sr = RemapSidecar()
         # One categorical column
         sidecar1 = {"a1_col": {"HED": {"b1": "Label/B", "c1": "Label/C"}},
                     "a2_col": {"HED": {"b2": "Label/B", "c2": "Label/C"}},
@@ -106,7 +106,7 @@ class Test(TestWebBase):
         self.assertEqual(df2.iloc[1]['keys'], 'b1', "flatten_hed dataframe should have right value in key")
 
     def test_get_marked_key(self):
-        sr = SidecarRemap()
+        sr = RemapSidecar()
         marked1 = sr.get_marked_key("a_b", 1)
         self.assertEqual(marked1, "_*_a_b_*_", "get_marked_key returns right level 1 value")
         marked2 = sr.get_marked_key("a_b", 2)
@@ -117,7 +117,7 @@ class Test(TestWebBase):
         self.assertEqual(marked4, "_*__*_", "get_marked_key returns right empty key marked value")
 
     def test_get_unmarked_key(self):
-        sr = SidecarRemap()
+        sr = RemapSidecar()
         unmarked1 = sr.get_unmarked_key("_*_a_b_*_")
         self.assertEqual(unmarked1, "a_b", "get_unmarked_key returns right level 1 value")
         marked2 = sr.get_unmarked_key("__*__a_b__*__")
@@ -129,8 +129,8 @@ class Test(TestWebBase):
         marked5 = sr.get_unmarked_key("___*__*_")
         self.assertEqual(marked5, None, "get_marked_key returns None when invalid")
 
-    def test_unflatten_sidecar(self):
-        sr = SidecarRemap()
+    def test_unflatten(self):
+        sr = RemapSidecar()
         sidecar1 = {"a": "blech1", "d": "blech4", "e": "blech5"}
         df1 = sr.flatten(sidecar1)
         unflat1 = sr.unflatten(df1)
@@ -148,15 +148,49 @@ class Test(TestWebBase):
         unflat4 = sr.unflatten(df4)
         self.assertEqual(sidecar4, unflat4, "unflatten should unflatten when sidecar has nested dictionaries")
 
+    def test_unflatten_hed(self):
+        sr = RemapSidecar()
+        sidecar1 = {"a_col": {"HED": {"b": "Label/B", "c": "Label/C"}}}
+        df1 = sr.flatten_hed(sidecar1)
+        undf1 = sr.unflatten_hed(df1)
+        self.assertEqual(len(undf1.keys()), 1, "unflatten_hed dictionary should unpack correctly")
+        self.assertTrue("a_col" in undf1.keys(), "The correct key is recovered")
+
+        # One value column
+        sidecar2 = {"a_col": {"HED": "Label/#"}}
+        df2 = sr.flatten_hed(sidecar2)
+        undf2 = sr.unflatten_hed(df2)
+        self.assertEqual(len(undf2.keys()), 1, "unflatten_hed dictionary should unpack correctly")
+        self.assertTrue("a_col" in undf2.keys(), "The correct key is recovered")
+
+        # A combination with other columns
+        sidecar3 = {"a_col": {"HED": {"b": "Label/B", "c": "Label/C"}, "d": {"a1": "b1"}},
+                    "b_col": {"HED": "Label/#"}, "c_col": {"levels": "e"}}
+        df3 = sr.flatten_hed(sidecar3)
+        undf3 = sr.unflatten_hed(df3)
+        self.assertEqual(len(undf3.keys()), 2, "unflatten_hed dictionary should unpack correctly")
+
+    def test_flatten_hed_column_names(self):
+        sr = RemapSidecar()
+        # One categorical column
+        sidecar1 = {"a1_col": {"HED": {"b1": "Label/B1", "c1": "Label/C1"}},
+                    "a2_col": {"HED": {"b2": "Label/B2", "c2": "Label/C2"}},
+                    "a3_col": {"HED": {"b3": "Label/B2", "c3": "Label/C2"}}}
+        df1 = sr.flatten_hed(sidecar1)
+        self.assertEqual(len(df1), 9, "When all columns are used should have all entries")
+        df2 = sr.flatten_hed(sidecar1, ["a1_col", "a3_col"])
+        self.assertEqual(len(df2), 6, "When some columns are used should have appropriate entries")
+        print("toHere")
+
     def test_get_key_value(self):
-        dict_values = SidecarRemap.get_key_value('', [])
+        dict_values = RemapSidecar.get_key_value('', [])
         self.assertIsInstance(dict_values, dict, "get_key_value should return dict when column_values empty")
         self.assertFalse(dict_values["HED"], "get_key_value HED key should be empty when column_values empty")
-        dict_values = SidecarRemap.get_key_value('', [], categorical=False)
+        dict_values = RemapSidecar.get_key_value('', [], categorical=False)
         self.assertIsInstance(dict_values, dict, "get_key_value should return dict when column_values empty")
         self.assertFalse(dict_values["HED"], "get_key_value HED key should be empty when column_values empty")
 
-        dict_values = SidecarRemap.get_key_value('blech', {'a': 3, 'b': 2, 'c': 1})
+        dict_values = RemapSidecar.get_key_value('blech', {'a': 3, 'b': 2, 'c': 1})
         self.assertIsInstance(dict_values, dict, "get_key_value should return dict when column_values not empty")
         self.assertTrue(dict_values["HED"], "get_key_value HED key should be empty when column_values empty")
 
@@ -164,21 +198,21 @@ class Test(TestWebBase):
         column1 = {'a': 3, 'b': 2, 'c': 1}
         column2 = {'a1': 6, 'b1': 22}
         columns_info = {'column1': column1, 'column2': column2}
-        [hed_dict, issues] = SidecarRemap.get_sidecar_dict(columns_info, {})
+        [hed_dict, issues] = RemapSidecar.get_sidecar_dict(columns_info, {})
         self.assertFalse(hed_dict, "Dictionary is empty of no columns selected")
         self.assertTrue(issues, "Issues is not empty if no columns selected")
 
-        [hed_dict, issues] = SidecarRemap.get_sidecar_dict(columns_info, {'banana': False})
+        [hed_dict, issues] = RemapSidecar.get_sidecar_dict(columns_info, {'banana': False})
         self.assertFalse(hed_dict, " get_sidecar_dict: Dictionary is empty of bad column selected")
         self.assertTrue(issues, " get_sidecar_dict: Issues is not empty if bad columns selected")
 
-        [hed_dict, issues] = SidecarRemap.get_sidecar_dict(columns_info,
+        [hed_dict, issues] = RemapSidecar.get_sidecar_dict(columns_info,
                                                            {'column1': True, 'banana': False, 'apple': True})
         self.assertTrue(hed_dict, " get_sidecar_dict: Dictionary not empty if at least one good column selected")
         self.assertTrue(issues, " get_sidecar_dict: Issues is not empty if at least one bad column selected")
         self.assertEqual(len(issues), 2, "get_sidecar_dict: Same number of issues as bad columns")
 
-        [hed_dict, issues] = SidecarRemap.get_sidecar_dict(columns_info, {'column1': True, 'column2': False})
+        [hed_dict, issues] = RemapSidecar.get_sidecar_dict(columns_info, {'column1': True, 'column2': False})
         self.assertTrue(hed_dict, "Dictionary not empty if at least one good column selected")
         self.assertFalse(issues, "Issues is empty if good data provided")
 

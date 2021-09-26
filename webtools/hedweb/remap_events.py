@@ -2,16 +2,15 @@ import pandas as pd
 from hed.errors.exceptions import HedFileError
 
 
-class EventRemap:
-    """A class to parse bids style spreadsheets into a more general format."""
+class RemapEvents:
+    """A class to handle extraction of event file column values and remap event file columns."""
 
     def __init__(self, key_cols, target_cols):
-        """ Takes a dataframe representing an event file and creates a template for remapping.
+        """ Class stores base data for doing event remapping.
 
         Args:
             key_cols (list):       List of columns to be replaced (assumed in the DataFrame)
             target_cols(list):     List of replacement columns (assumed to not be in the DataFrame)
-
 
         """
 
@@ -26,7 +25,16 @@ class EventRemap:
         self.col_map = pd.DataFrame(columns=key_cols+target_cols)
         self.map_dict = {}
 
-    def lookup_cols(self, row):
+    def _lookup_cols(self, row):
+        """ Extracts the column key from row and returns the position.
+
+        Args:
+            row (Series):          A Pandas Series corresponding to one row of a DataFrame representing events
+
+        Returns:
+            tuple has
+
+        """
         key = row[self.key_cols]
         key_hash = hash(tuple(key))
         if key_hash in self.map_dict:
@@ -48,10 +56,10 @@ class EventRemap:
 
         """
 
-        df = EventRemap.extract_dataframe(data)
+        df = RemapEvents.extract_dataframe(data)
         if not use_targets:
             df[self.target_cols] = 'n/a'
-        new_map = EventRemap(self.key_cols, self.target_cols)
+        new_map = RemapEvents(self.key_cols, self.target_cols)
         new_map.update_map(df, keys_unique)
 
         df_template = pd.DataFrame(new_map.col_map)
@@ -68,17 +76,17 @@ class EventRemap:
         Returns:
             DataFrame
         """
-        df_new = EventRemap.extract_dataframe(data)
-        present_keys, missing_keys = EventRemap.separate_columns(df_new.columns.values.tolist(), self.key_cols)
+        df_new = RemapEvents.extract_dataframe(data)
+        present_keys, missing_keys = RemapEvents.separate_columns(df_new.columns.values.tolist(), self.key_cols)
         if missing_keys:
             raise HedFileError("MissingKeys", f"Events file must have key columns {str(self.key_cols)}", "")
 
-        present_targets, missing_targets = EventRemap.separate_columns(df_new.columns.values.tolist(), self.target_cols)
+        present_targets, missing_targets = RemapEvents.separate_columns(df_new.columns.values.tolist(), self.target_cols)
         if missing_targets:
             df_new[missing_targets] = 'n/a'
         missing_indices = []
         for index, row in df_new.iterrows():
-            key, key_value = self.lookup_cols(row)
+            key, key_value = self._lookup_cols(row)
             if key_value:
                 result = self.col_map.iloc[key_value]
                 row[self.target_cols] = result[self.target_cols]
@@ -96,12 +104,12 @@ class EventRemap:
             keys_unique (bool):    If True, raises an exception if it encounters a key already in dictionary
 
         """
-        keys_present, keys_missing = EventRemap.separate_columns(df.columns.values.tolist(), self.key_cols)
+        keys_present, keys_missing = RemapEvents.separate_columns(df.columns.values.tolist(), self.key_cols)
         if keys_missing:
             raise HedFileError("MissingKeyColumn",
                                f"make_template data does not have key columns {str(keys_missing)}", "")
         key_df = df[self.key_cols]
-        targets_present, targets_missing = EventRemap.separate_columns(df.columns.values.tolist(), self.target_cols)
+        targets_present, targets_missing = RemapEvents.separate_columns(df.columns.values.tolist(), self.target_cols)
 
         target_df = df[targets_present]
         if targets_missing:
@@ -120,7 +128,7 @@ class EventRemap:
         """
         base_df = key_df.join(target_df)
         for index, row in base_df.iterrows():
-            key, key_value = self.lookup_cols(row)
+            key, key_value = self._lookup_cols(row)
             if key not in self.map_dict:
                 self.map_dict[key] = len(self.col_map)
                 self.col_map = self.col_map.append(row, ignore_index=True)
@@ -162,8 +170,8 @@ class EventRemap:
         Returns:
             DataFrame                      A new reordered dataframe
         """
-        df = EventRemap.extract_dataframe(data)
-        present_cols, missing_cols = EventRemap.separate_columns(df.columns.values.tolist(), col_order)
+        df = RemapEvents.extract_dataframe(data)
+        present_cols, missing_cols = RemapEvents.separate_columns(df.columns.values.tolist(), col_order)
         if missing_cols and not skip_missing:
             raise HedFileError("MissingKeys", f"Events file must have columns {str(missing_cols)}", "")
         df = df[present_cols]

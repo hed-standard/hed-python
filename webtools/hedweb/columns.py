@@ -7,6 +7,7 @@ from pandas import DataFrame, read_csv
 from hed.errors.exceptions import HedFileError
 
 from hedweb.constants import common, file_constants
+from hedweb.remap_utils import get_info_in_columns
 from hedweb.web_utils import form_has_file, form_has_option
 
 
@@ -86,14 +87,6 @@ def get_columns_request(request):
     has_column_names = form_has_option(request, 'has_column_names', 'on')
     sheet_name = request.form.get(common.WORKSHEET_SELECTED, None)
     return create_columns_info(columns_file, has_column_names, sheet_name)
-
-
-def get_info_in_columns(dataframe):
-    col_info = dict()
-
-    for col_name, col_values in dataframe.iteritems():
-        col_info[col_name] = col_values.value_counts(ascending=True).to_dict()
-    return col_info
 
 
 def get_prefix_dict(form_dict):

@@ -3,7 +3,7 @@ import re
 from hed.errors.exceptions import HedFileError
 
 
-class SidecarRemap:
+class RemapSidecar:
     """A class to parse bids style spreadsheets into a more general format."""
 
     def __init__(self, header_char="*"):
@@ -169,6 +169,37 @@ class SidecarRemap:
                 dict_list.append({})
         return dict_list[0]
 
+    def unflatten_hed(self, dataframe):
+        """ Takes a sidecar dictionary and returns a two-column flattened tsv version of the HED portions
+
+        Args:
+            dataframe (DataFrame): A Pandas DataFrame containing flattened sidecar.
+
+        Returns:
+            dict compatible with BIDS JSON events.
+
+        """
+
+        master_dict = {}
+        current_dict = {}
+        for index, row in dataframe.iterrows():
+            key = row['keys']
+            value = row["values"]
+            unmarked_key = self.get_unmarked_key(key)
+            if not unmarked_key:
+                raise HedFileError("unflatten", f"Empty or invalid flattened sidecar key {str(key)}", "")
+            elif unmarked_key == key:
+                current_dict[key] = value
+            elif value != 'n/a':
+                master_dict[unmarked_key] = {"HED": value}
+                current_key = None
+                current_dict = {}
+            else:
+                current_dict = {}
+                master_dict[unmarked_key] = {"HED": current_dict}
+
+        return master_dict
+
     @staticmethod
     def get_key_value(key, column_values, categorical=True):
         """  Creates the sidecar value dictionary for a given column name in an events.tsv file
@@ -225,5 +256,5 @@ class SidecarRemap:
                 issues += [{'code': 'HED_INVALID_COLUMN_NAME', 'severity': 1,
                             'message': f"{key} is not a valid column name to select"}]
             else:
-                hed_dict[key] = SidecarRemap.get_key_value(key, columns_info[key], columns_selected[key])
+                hed_dict[key] = RemapSidecar.get_key_value(key, columns_info[key], columns_selected[key])
         return hed_dict, issues
