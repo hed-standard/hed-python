@@ -2,7 +2,8 @@ import os
 import unittest
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.remap_utils import get_columns_info, get_file_list, extract_dataframe, reorder_columns, separate_columns
+from hed.tools.map_utils import get_new_dataframe, get_columns_info, get_file_list, get_key_hash, get_row_hash,\
+    make_dataframe, reorder_columns, remove_quotes, separate_columns
 
 
 class Test(unittest.TestCase):
@@ -11,31 +12,32 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
         cls.stern_map_path = os.path.join(base_dir, "sternberg_map.tsv")
-        cls.stern_events_test_path = os.path.join(base_dir, "sternberg_events_test.tsv")
-        cls.stern_events_path = os.path.join(base_dir, "sternberg_events.tsv")
+        cls.stern_events_test_path = os.path.join(base_dir, "sternberg_test_events.tsv")
+        cls.stern_events_with_quotes_path = os.path.join(base_dir, "sternberg_with_quotes_events.tsv")
+        cls.stern_events_no_quotes_path = os.path.join(base_dir, "sternberg_no_quotes_events.tsv")
 
     def test_extract_dataframe(self):
-        df_new = extract_dataframe(self.stern_map_path)
+        df_new = get_new_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new, pd.DataFrame)
-        self.assertEqual(len(df_new), 85, f"extract_dataframe should return correct number of rows")
-        self.assertEqual(len(df_new.columns), 4, f"extract_dataframe should return correct number of rows")
-        df_new1 = extract_dataframe(self.stern_map_path)
+        self.assertEqual(len(df_new), 87, f"get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new.columns), 4, f"get_new_dataframe should return correct number of rows")
+        df_new1 = get_new_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new1, pd.DataFrame)
-        self.assertEqual(len(df_new1), 85, f"extract_dataframe should return correct number of rows")
-        self.assertEqual(len(df_new1.columns), 4, f"extract_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new1), 87, f"get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new1.columns), 4, f"get_new_dataframe should return correct number of rows")
         df_new.iloc[0]['type'] = 'Pear'
         self.assertNotEqual(df_new.iloc[0]['type'], df_new1.iloc[0]['type'],
-                            "extract_dataframe returns a new dataframe")
+                            "get_new_dataframe returns a new dataframe")
 
     def test_get_columns_info(self):
-        df = extract_dataframe(self.stern_events_path)
+        df = get_new_dataframe(self.stern_events_with_quotes_path)
         col_info = get_columns_info(df)
         self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
         self.assertEqual(len(col_info.keys()), len(df.columns),
                          "get_columns_info should return a dictionary with a key for each column")
 
     def test_get_columns_info_skip_columns(self):
-        df = extract_dataframe(self.stern_events_path)
+        df = get_new_dataframe(self.stern_events_with_quotes_path)
         col_info = get_columns_info(df, ['latency'])
         self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
         self.assertEqual(len(col_info.keys()), len(df.columns) - 1,
@@ -66,15 +68,60 @@ class Test(unittest.TestCase):
                 continue
             raise HedFileError("BadFileType", "get_event_files expected only .html or .js files", "")
 
+    def test_get_event_files_prefix(self):
+        dir_data = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
+        file_list = get_file_list(dir_data, prefix='sternberg', types=[".tsv"])
+        for item in file_list:
+            filename = os.path.basename(item)
+            self.assertTrue(filename.startswith('sternberg'))
+
+    def test_get_key_hash(self):
+        test_list = ['a', 1, 'c']
+        key_hash1 = get_key_hash(test_list)
+        key_hash2 = get_key_hash(tuple(test_list))
+        self.assertEqual(key_hash1, key_hash2, "get_key_hash should return same hash for list or tuple")
+        t_hash1 = get_key_hash([])
+        self.assertTrue(t_hash1, "get_key_hash should return a hash for empty list")
+        t_hash2 = get_key_hash(())
+        self.assertTrue(t_hash2, "get_key_hash should return a hash for empty tuple")
+        self.assertEqual(t_hash1, t_hash2, "get_key_hash should return same hash for empty list and empty tuple")
+
+    def test_get_row_hash(self):
+        stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
+        key_columns = ['type', 'event_type']
+        map = {}
+        for index, row in stern_df.iterrows():
+            key = get_row_hash(row, key_columns)
+            map[key] = index
+        self.assertEqual(len(map.keys()), len(stern_df),
+                         "get_row_hash should uniquely hash all of the keys in stern map")
+
+    def test_make_dataframe(self):
+        col_dict = {"a": {"b": 10, "c": 13, "d": 4}, "e": {"n/a": 10000}}
+        df1 = make_dataframe(col_dict, "a")
+        self.assertIsInstance(df1, pd.DataFrame, "make_dataframe should create a dataframe if column in col_dict")
+        self.assertEqual(len(df1), 3, "make_dataframe should the right number of rows.")
+        df2 = make_dataframe(col_dict, "Baloney")
+        self.assertFalse(df2, "make_frame should return None if column name invalid")
+
+    def test_remove_quotes(self):
+        df1 = get_new_dataframe(self.stern_events_with_quotes_path)
+        x = df1.loc[0, 'stimulus']
+        remove_quotes(df1)
+        y = df1.loc[0, 'stimulus']
+        df2 = get_new_dataframe(self.stern_events_no_quotes_path)
+        self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'],
+                         "remove_quotes should have quotes removed ")
+
     def test_reorder_columns(self):
-        df = extract_dataframe(self.stern_map_path)
+        df = get_new_dataframe(self.stern_map_path)
         df_new = reorder_columns(df, ['event_type', 'type'])
-        self.assertEqual(len(df_new), 85, f"reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new), 87, f"reorder_columns should return correct number of rows")
         self.assertEqual(len(df_new.columns), 2, f"reorder_columns should return correct number of rows")
-        self.assertEqual(len(df), 85, f"reorder_columns should return correct number of rows")
+        self.assertEqual(len(df), 87, f"reorder_columns should return correct number of rows")
         self.assertEqual(len(df.columns), 4, f"reorder_columns should return correct number of rows")
         df_new1 = reorder_columns(df, ['event_type', 'type', 'baloney'])
-        self.assertEqual(len(df_new1), 85, f"reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new1), 87, f"reorder_columns should return correct number of rows")
         self.assertEqual(len(df_new1.columns), 2, f"reorder_columns should return correct number of rows")
 
     def test_reorder_columns_no_skip(self):
@@ -103,6 +150,7 @@ class Test(unittest.TestCase):
         present, missing = separate_columns(base_cols, ['g', 'h'])
         self.assertFalse(present, "separate_columns should have empty present when target columns do not overlap base")
         self.assertEqual(len(missing), 2, "separate_columns should have all target columns missing")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,9 +1,10 @@
 import os
 import pandas as pd
+from werkzeug.utils import secure_filename
 from hed.errors.exceptions import HedFileError
 
 
-def extract_dataframe(data):
+def get_new_dataframe(data):
     """ Returns a new dataframe representing an event file or template
 
     Args:
@@ -19,8 +20,43 @@ def extract_dataframe(data):
     elif isinstance(data, pd.DataFrame):
         df = data.copy()
     else:
-        raise HedFileError("BadDataFrame", "extract_dataframe could not extract DataFrame from data", "")
+        raise HedFileError("BadDataFrame", "get_new_dataframe could not extract DataFrame from data", "")
     return df
+
+
+def generate_filename(base_name, prefix=None, suffix=None, extension=None):
+    """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
+
+    Parameters
+    ----------
+   base_name: str
+        The name of the base, usually the name of the file that the issues were generated from
+    prefix: str
+        The prefix prepended to the front of the base_name
+    suffix: str
+        The suffix appended to the end of the base_name
+    Returns
+    -------
+    string
+        The name of the attachment other containing the issues.
+    """
+
+    pieces = []
+    if prefix:
+        pieces = pieces + [secure_filename(prefix)]
+    if base_name:
+        pieces.append(os.path.splitext(secure_filename(base_name))[0])
+    if suffix:
+        pieces = pieces + [secure_filename(suffix)]
+
+    if not pieces:
+        return ''
+    filename = pieces[0]
+    for name in pieces[1:]:
+        filename = filename + '_' + name
+    if extension:
+        filename = filename + '.' + secure_filename(extension)
+    return filename
 
 
 def get_columns_info(dataframe, skip_cols=None):
@@ -42,7 +78,7 @@ def get_columns_info(dataframe, skip_cols=None):
     return col_info
 
 
-def get_file_list(path, types=None, suffix=None):
+def get_file_list(path, prefix=None, types=None, suffix=None):
     """ Traverses a directory tree and returns a list of paths to files ending with a particular suffix.
 
     Args:
@@ -57,22 +93,76 @@ def get_file_list(path, types=None, suffix=None):
     for r, d, f in os.walk(path):
         for r_file in f:
             file_split = os.path.splitext(r_file)
-            if (types and file_split[1] not in types) or (suffix and not file_split[0].endswith(suffix)):
+            if (types and file_split[1] not in types) or (suffix and not file_split[0].endswith(suffix)) \
+                    or (prefix and not file_split[0].startswith(prefix)):
                 continue
             file_list.append(os.path.join(r, r_file))
     return file_list
 
 
-def get_event_counts(root_dir, skip_cols=None):
+def get_key_counts(root_dir, skip_cols=None):
     file_list = get_file_list(root_dir, types=[".tsv"], suffix = "_events")
     count_dicts = {}
     for file in file_list:
-        dataframe = extract_dataframe(file)
+        dataframe = get_new_dataframe(file)
         for col_name, col_values in dataframe.iteritems():
             if skip_cols and col_name in skip_cols:
                 continue
             update_dict_counts(count_dicts, col_name, col_values)
     return count_dicts
+
+
+def get_key_hash(key_tuple):
+    """ Calculates the key_hash for key_tuple. If the key_hash in map_dict, also return the key value.
+
+    Args:
+        key_tuple (tuple):       A tuple with the key values in the correct order for lookup
+
+    Returns:
+        key_hash (int)              Hash key for the tuple
+
+    """
+    x = tuple(key_tuple)
+    return hash(tuple(key_tuple))
+
+
+def get_row_hash(row, key_list):
+    columns_present, columns_missing = separate_columns(list(row.index.values), key_list)
+    if columns_missing:
+        raise HedFileError("lookup_row", f"row must have all keys, missing{str(columns_missing)}", "")
+    s = row[key_list].values
+    s1 = row[key_list]
+    s2 = tuple(s1)
+    s3 = tuple(s)
+    s4 = list(s)
+    #h = hash(s)
+    #h1 = hash(s1)
+    h2 = hash(s2)
+    h3 = hash(s3)
+    #h4 = hash(s4)
+    return get_key_hash(row[key_list])
+
+
+def make_dataframe(col_info, selected_col):
+    col_dict = col_info.get(selected_col, None)
+    if not col_dict:
+        return None
+    col_values = col_dict.keys()
+    df = pd.DataFrame(sorted(list(col_values)), columns=[selected_col])
+    return df
+
+
+def print_columns_info(columns_info, skip_cols=None):
+
+    for col_name, col_counts in columns_info.items():
+        if skip_cols and col_name in skip_cols:
+            continue
+        print(f"\n{col_name}:")
+        sorted_counts = sorted(col_counts.items())
+
+        for key, value in sorted_counts:
+            print(f"\t{key}: {value}")
+
 
 def reorder_columns(data, col_order, skip_missing=True):
     """ Takes a dataframe or filename representing event file and reorders columns to desired order
@@ -85,12 +175,21 @@ def reorder_columns(data, col_order, skip_missing=True):
     Returns:
         DataFrame                      A new reordered dataframe
     """
-    df = extract_dataframe(data)
+    df = get_new_dataframe(data)
     present_cols, missing_cols = separate_columns(df.columns.values.tolist(), col_order)
     if missing_cols and not skip_missing:
         raise HedFileError("MissingKeys", f"Events file must have columns {str(missing_cols)}", "")
     df = df[present_cols]
     return df
+
+
+def remove_quotes(df, column_list=None):
+    col_types = df.dtypes
+    for index, col in enumerate(df.columns):
+        x = col_types.iloc[index]
+        if col_types.iloc[index] in ['string', 'object']:
+            df.iloc[:, index] = df.iloc[:, index].str.replace('"', '')
+            df.iloc[:, index] = df.iloc[:, index].str.replace("'", "")
 
 
 def separate_columns(base_cols, target_cols):

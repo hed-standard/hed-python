@@ -1,3 +1,5 @@
-from hed.tools.remap_events import RemapEvents
-from hed.tools.remap_sidecar import RemapSidecar
-from hed.tools.remap_utils import extract_dataframe, get_file_list, get_event_counts
+from hed.tools.key_map import KeyMap
+from hed.tools.key_dict import KeyDict
+from hed.tools.sidecar_map import SidecarMap
+from hed.tools.map_utils import get_new_dataframe, generate_filename, get_file_list, \
+    get_key_hash, get_row_hash, get_key_counts, make_dataframe, print_columns_info, reorder_columns, separate_columns

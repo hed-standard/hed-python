@@ -3,7 +3,7 @@ import re
 from hed.errors.exceptions import HedFileError
 
 
-class RemapSidecar:
+class SidecarMap:
     """A class to parse bids style spreadsheets into a more general format."""
 
     def __init__(self, header_char="*"):
@@ -18,6 +18,11 @@ class RemapSidecar:
 
     def flatten(self, sidecar, col_names=None):
         """ Takes a sidecar dictionary and returns a two-column flattened tsv version of the HED portions
+
+        This form of flatten produces a result that is slightly different from the version produced
+        by flatten_hed in that it has a header separator after each dictionary is flattened
+        because it supports arbitrary levels of nesting rather than the maximum of two levels
+        for HED entries.
 
         Args:
             sidecar (dict):     A dictionary conforming to BIDS JSON events sidecar format.
@@ -228,16 +233,21 @@ class RemapSidecar:
         key_value["HED"] = hed
         return key_value
 
+
     @staticmethod
-    def get_sidecar_dict(columns_info, columns_selected):
+    def get_sidecar_dict(columns_info, selected_columns=None, value_columns=None):
         """  Extracts a sidecar dictionary suitable for direct conversion to JSON sidecar.
-            :param columns_info: A dict with column names of an events file as keys and values that are dictionaries
-                of unique column entries.
-            :type columns_info: dict
-            :param columns_selected: A dict with keys that are names of columns that should be documented
-                in the JSON sidecar.
-            :type columns_selected: list
-            :return: A dictionary suitable for conversion to JSON sidecar.
+
+        Args:
+            columns_info (dict): Dictionary with column names of an events file as keys and values that are dictionaries
+                                 of unique column entries.
+
+            selected_columns (list): A list of column names that should be included
+
+            value_columns (list):    A list of columns that are value columns
+
+        Returns:
+            dict suitable:return: A dictionary suitable for conversion to JSON sidecar.
             :rtype: dict
             :return: A list of issues if errors, otherwise empty.
             :rtype: list
@@ -245,16 +255,16 @@ class RemapSidecar:
 
         hed_dict = {}
         issues = []
-        if not columns_selected:
+        if not selected_columns:
             return hed_dict, [{'code': 'HED_EMPTY_COLUMN_SELECTION', 'severity': 1,
                                'message': "Must select at least one column"}]
         elif not columns_info:
             return hed_dict, [{'code': 'HED_NO_COLUMNS', 'severity': 1,
                                'message': "Must have columns to do extraction"}]
-        for key in columns_selected:
+        for key in selected_columns:
             if key not in columns_info:
                 issues += [{'code': 'HED_INVALID_COLUMN_NAME', 'severity': 1,
                             'message': f"{key} is not a valid column name to select"}]
             else:
-                hed_dict[key] = RemapSidecar.get_key_value(key, columns_info[key], columns_selected[key])
+                hed_dict[key] = SidecarMap.get_key_value(key, columns_info[key], selected_columns[key])
         return hed_dict, issues
