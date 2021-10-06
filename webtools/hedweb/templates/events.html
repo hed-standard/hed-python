@@ -4,12 +4,14 @@
 {% from "column-info.html" import create_column_info %}
 {% from "process-options.html" import create_process_options %}
 {% block content %}
-    <h2>Process a BIDS-style event file</h2>
-
+    <h2 data-toggle="collapse" data-target="#eventsinfo">Process a BIDS-style event file (Click for info)</h2>
+    <div id="eventsinfo" class="collapse">
+    The events help goes here.
+    </div>
     <form id="events_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options('1) Pick an action:',assemble=True,extract=True,remap=True,validate=True) }}
+        {{ create_process_options('1) Pick an action:',assemble=True,extract=True,validate=True) }}
 
         <h3>2) Upload BIDS-style events file:</h3>
         <div class="form-group">

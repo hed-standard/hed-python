@@ -242,7 +242,8 @@ def get_hed_schema_from_pull_down(request):
     elif request.form[base_constants.SCHEMA_VERSION] != base_constants.OTHER_VERSION_OPTION:
         hed_file_path = hedschema.get_path_from_hed_version(request.form[base_constants.SCHEMA_VERSION])
         hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
-    elif request.form[base_constants.SCHEMA_VERSION] == base_constants.OTHER_VERSION_OPTION and base_constants.SCHEMA_PATH in request.files:
+    elif request.form[base_constants.SCHEMA_VERSION] == \
+            base_constants.OTHER_VERSION_OPTION and base_constants.SCHEMA_PATH in request.files:
         f = request.files[base_constants.SCHEMA_PATH]
         hed_schema = hedschema.from_string(f.read(file_constants.BYTE_LIMIT).decode('ascii'),
                                            file_type=secure_filename(f.filename))

@@ -8,7 +8,7 @@ from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hedweb.constants import base_constants, file_constants
-from hed.tools.remap_sidecar import RemapSidecar
+from hed.tools import SidecarMap
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
@@ -29,7 +29,8 @@ def get_input_from_form(request):
     """
     arguments = {base_constants.SCHEMA: get_hed_schema_from_pull_down(request), base_constants.JSON_SIDECAR: None,
                  base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, None),
-                 base_constants.CHECK_WARNINGS_VALIDATE: form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on')}
+                 base_constants.CHECK_WARNINGS_VALIDATE:
+                     form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on')}
     if base_constants.JSON_FILE in request.files:
         f = request.files[base_constants.JSON_FILE]
         fb = io.StringIO(f.read(file_constants.BYTE_LIMIT).decode('ascii'))
@@ -139,7 +140,7 @@ def sidecar_flatten(json_sidecar):
 
     json_string = json_sidecar.get_as_json_string()
     sidecar = json.loads(json_string)
-    sr = RemapSidecar()
+    sr = SidecarMap()
     df = sr.flatten(sidecar)
     data = df.to_csv(None, sep='\t', index=False, header=True)
     display_name = json_sidecar.name
@@ -172,7 +173,8 @@ def sidecar_validate(hed_schema, json_sidecar):
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON dictionary {display_name } validation errors")
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
-        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
+        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                'data': issue_str, 'output_display_name': file_name,
                 base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': f'JSON sidecar {display_name} had validation errors'}
     else:

@@ -38,16 +38,18 @@ def get_input_from_request(request):
 def get_input_objects(params):
     args = {}
     if base_constants.JSON_STRING in params and params[base_constants.JSON_STRING]:
-        args[base_constants.JSON_SIDECAR] = models.Sidecar(file=io.StringIO(params[base_constants.JSON_STRING]), name='JSON_Sidecar')
+        args[base_constants.JSON_SIDECAR] = \
+            models.Sidecar(file=io.StringIO(params[base_constants.JSON_STRING]), name='JSON_Sidecar')
     if base_constants.EVENTS_STRING in params and params[base_constants.EVENTS_STRING]:
-        args[base_constants.EVENTS] = models.EventsInput(file=io.StringIO(params[base_constants.EVENTS_STRING]),
-                                                 sidecars=args[base_constants.JSON_SIDECAR], name='Events')
+        args[base_constants.EVENTS] = \
+            models.EventsInput(file=io.StringIO(params[base_constants.EVENTS_STRING]),
+                               sidecars=args[base_constants.JSON_SIDECAR], name='Events')
     if base_constants.SPREADSHEET_STRING in params and params[base_constants.SPREADSHEET_STRING]:
         tag_columns, prefix_dict = spreadsheet.get_prefix_dict(params)
-        args[base_constants.SPREADSHEET] = models.HedInput(file=io.StringIO(params[base_constants.SPREADSHEET_STRING]),
-                                                   file_type=".tsv", tag_columns=tag_columns,
-                                                   has_column_names=args.get(base_constants.HAS_COLUMN_NAMES, None),
-                                                   column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
+        args[base_constants.SPREADSHEET] = \
+            models.HedInput(file=io.StringIO(params[base_constants.SPREADSHEET_STRING]), file_type=".tsv",
+                            tag_columns=tag_columns, has_column_names=args.get(base_constants.HAS_COLUMN_NAMES, None),
+                            column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
     if base_constants.STRING_LIST in params and params[base_constants.STRING_LIST]:
         args[base_constants.STRING_LIST] = params[base_constants.STRING_LIST]
 
@@ -62,7 +64,7 @@ def get_service_info(parameters):
     if command != "get_services" and len(pieces) == 2:
         command = pieces[1]
         command_target = pieces[0]
-    has_column_names =  parameters.get(base_constants.HAS_COLUMN_NAMES, '') == 'on'
+    has_column_names = parameters.get(base_constants.HAS_COLUMN_NAMES, '') == 'on'
     check_warnings = parameters.get(base_constants.CHECK_WARNINGS_VALIDATE, '') == 'on'
     defs_expand = parameters.get(base_constants.DEFS_EXPAND, '') == 'on'
     return {base_constants.SERVICE: service,

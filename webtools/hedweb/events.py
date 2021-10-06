@@ -10,8 +10,8 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 from hedweb.constants import base_constants
 from hedweb.columns import create_column_selections
-from hed.tools.remap_utils import get_columns_info
-from hed.tools.remap_sidecar import RemapSidecar
+from hed.tools import get_columns_info
+from hed.tools import SidecarMap
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
@@ -32,8 +32,10 @@ def get_input_from_events_form(request):
     """
     arguments = {base_constants.SCHEMA: get_hed_schema_from_pull_down(request), base_constants.EVENTS: None,
                  base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, ''),
-                 base_constants.CHECK_WARNINGS_ASSEMBLE: form_has_option(request, base_constants.CHECK_WARNINGS_ASSEMBLE, 'on'),
-                 base_constants.CHECK_WARNINGS_VALIDATE: form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on'),
+                 base_constants.CHECK_WARNINGS_ASSEMBLE:
+                     form_has_option(request, base_constants.CHECK_WARNINGS_ASSEMBLE, 'on'),
+                 base_constants.CHECK_WARNINGS_VALIDATE:
+                     form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on'),
                  base_constants.DEFS_EXPAND: form_has_option(request, base_constants.DEFS_EXPAND, 'on'),
                  base_constants.COLUMNS_SELECTED: create_column_selections(request.form)
                  }
@@ -44,7 +46,8 @@ def get_input_from_events_form(request):
         json_sidecar = models.Sidecar(file=f, name=secure_filename(f.filename))
     if base_constants.EVENTS_FILE in request.files:
         f = request.files[base_constants.EVENTS_FILE]
-        arguments[base_constants.EVENTS] = models.EventsInput(file=f, sidecars=json_sidecar, name=secure_filename(f.filename))
+        arguments[base_constants.EVENTS] = \
+            models.EventsInput(file=f, sidecars=json_sidecar, name=secure_filename(f.filename))
     return arguments
 
 
@@ -113,7 +116,8 @@ def assemble(hed_schema, events, defs_expand=True):
     csv_string = df.to_csv(None, sep='\t', index=False, header=True)
     display_name = events.name
     file_name = generate_filename(display_name, suffix='_expanded', extension='.tsv')
-    return {base_constants.COMMAND: base_constants.COMMAND_ASSEMBLE, 'data': csv_string, 'output_display_name': file_name,
+    return {base_constants.COMMAND: base_constants.COMMAND_ASSEMBLE,
+            'data': csv_string, 'output_display_name': file_name,
             'schema_version': schema_version, 'msg_category': 'success', 'msg': 'Events file successfully expanded'}
 
 
@@ -136,13 +140,14 @@ def extract(hed_schema, events, columns_selected):
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     columns_info = get_columns_info(events.dataframe)
-    sr = RemapSidecar()
+    sr = SidecarMap()
     hed_dict, issues = sr.get_sidecar_dict(columns_info, columns_selected)
     display_name = events.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
         file_name = generate_filename(display_name, suffix='_errors', extension='.txt')
-        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
+        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                'data': issue_str, "output_display_name": file_name,
                 base_constants.SCHEMA_VERSION: schema_version, "msg_category": "warning",
                 'msg': f"Events file {display_name} had extraction errors"}
     else:
@@ -177,7 +182,8 @@ def validate(hed_schema, events):
     if issues:
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
-        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
+        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                'data': issue_str, "output_display_name": file_name,
                 base_constants.SCHEMA_VERSION: schema_version, "msg_category": "warning",
                 'msg': f"Events file {display_name} had validation errors"}
     else:
