@@ -71,7 +71,8 @@ class Test(TestWebBase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         arguments = {base_constants.SCHEMA: hed_schema, base_constants.SPREADSHEET: spreadsheet,
-                     base_constants.COMMAND: base_constants.COMMAND_VALIDATE, base_constants.CHECK_WARNINGS_VALIDATE: True}
+                     base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                     base_constants.CHECK_WARNINGS_VALIDATE: True}
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -94,7 +95,8 @@ class Test(TestWebBase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         arguments = {base_constants.SCHEMA: hed_schema, base_constants.SPREADSHEET: spreadsheet,
-                     base_constants.COMMAND: base_constants.COMMAND_VALIDATE, base_constants.CHECK_WARNINGS_VALIDATE: True}
+                     base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                     base_constants.CHECK_WARNINGS_VALIDATE: True}
         arguments[base_constants.SCHEMA] = hed_schema
 
         with self.app.app_context():

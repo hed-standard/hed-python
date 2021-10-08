@@ -76,7 +76,8 @@ class Test(TestWebBase):
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
                                    name='ExcelOneSheet.xlsx')
-            results = {base_constants.SPREADSHEET: spreadsheet, base_constants.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
+            results = {base_constants.SPREADSHEET: spreadsheet,
+                       base_constants.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for xlsx files')
             headers_dict = dict(response.headers)
@@ -98,7 +99,8 @@ class Test(TestWebBase):
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
                                    name='ExcelOneSheet.xlsx')
-            results = {base_constants.SPREADSHEET: spreadsheet, base_constants.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
+            results = {base_constants.SPREADSHEET: spreadsheet,
+                       base_constants.OUTPUT_DISPLAY_NAME: 'ExcelOneSheetA.xlsx'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
             headers_dict = dict(response.headers)
@@ -121,7 +123,8 @@ class Test(TestWebBase):
                                    column_prefix_dictionary={2: 'Attribute/Informational/Label/',
                                                              4: 'Attribute/Informational/Description/'},
                                    name='LKTEventCodesHED3.tsv')
-            results = {base_constants.SPREADSHEET: spreadsheet, base_constants.OUTPUT_DISPLAY_NAME: 'LKTEventCodesHED3.tsv'}
+            results = {base_constants.SPREADSHEET: spreadsheet,
+                       base_constants.OUTPUT_DISPLAY_NAME: 'LKTEventCodesHED3.tsv'}
             response = generate_download_spreadsheet(results, msg_category='success', msg='Successful download')
             self.assertIsInstance(response, Response, 'generate_download_spreadsheet returns a response for tsv files')
             headers_dict = dict(response.headers)

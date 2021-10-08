@@ -56,7 +56,8 @@ class Test(TestWebBase):
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         arguments = {base_constants.SCHEMA: hed_schema, base_constants.JSON_SIDECAR: json_sidecar,
-                     base_constants.JSON_DISPLAY_NAME: 'bids_json', base_constants.COMMAND: base_constants.COMMAND_TO_SHORT}
+                     base_constants.JSON_DISPLAY_NAME: 'bids_json',
+                     base_constants.COMMAND: base_constants.COMMAND_TO_SHORT}
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -69,7 +70,8 @@ class Test(TestWebBase):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         arguments = {base_constants.SCHEMA: hed_schema, base_constants.JSON_SIDECAR: json_sidecar,
-                     base_constants.JSON_DISPLAY_NAME: 'bids_json', base_constants.COMMAND: base_constants.COMMAND_TO_SHORT}
+                     base_constants.JSON_DISPLAY_NAME: 'bids_json',
+                     base_constants.COMMAND: base_constants.COMMAND_TO_SHORT}
 
         with self.app.app_context():
             results = process(arguments)

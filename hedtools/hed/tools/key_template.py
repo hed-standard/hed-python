@@ -3,7 +3,7 @@ from hed.errors.exceptions import HedFileError
 from hed.tools.map_utils import get_new_dataframe, get_key_hash, get_row_hash, remove_quotes, separate_columns
 
 
-class KeyDict:
+class KeyTemplate:
     """A class to handle keeping track of unique keys (which could be tuples."""
 
     def __init__(self, columns, name=''):
@@ -16,7 +16,7 @@ class KeyDict:
         """
 
         if not columns:
-            raise HedFileError("ColumnsEmpty", "KeyDict key columns must exist", "")
+            raise HedFileError("ColumnsEmpty", "KeyTemplate key columns must exist", "")
         self.columns = columns.copy()
         self.name = name
         self.col_map = pd.DataFrame(columns=self.columns)

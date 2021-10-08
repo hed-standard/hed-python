@@ -52,7 +52,7 @@ class SidecarMap:
             keys = keys + col_keys
             values = values + col_values
 
-        data = {"keys": keys, "values": values}
+        data = {"column": keys, "HED": values}
         dataframe = DataFrame(data)
         return dataframe
 
@@ -111,7 +111,7 @@ class SidecarMap:
             next_keys, next_values = self.flatten_hed_value(col_key, col_dict['HED'])
             keys = keys + next_keys
             values = values + next_values
-        data = {"keys": keys, "values": values}
+        data = {"column": keys, "HED": values}
         dataframe = DataFrame(data)
         return dataframe
 
@@ -158,8 +158,8 @@ class SidecarMap:
         key_list = []
 
         for index, row in dataframe.iterrows():
-            key = row['keys']
-            value = row["values"]
+            key = row['column']
+            value = row["HED"]
             unmarked_key = self.get_unmarked_key(key)
             if not unmarked_key:
                 raise HedFileError("unflatten", f"Empty or invalid flattened sidecar key {str(key)}", "")
@@ -189,8 +189,8 @@ class SidecarMap:
         master_dict = {}
         current_dict = {}
         for index, row in dataframe.iterrows():
-            key = row['keys']
-            value = row["values"]
+            key = row['column']
+            value = row["HED"]
             unmarked_key = self.get_unmarked_key(key)
             if not unmarked_key:
                 raise HedFileError("unflatten", f"Empty or invalid flattened sidecar key {str(key)}", "")

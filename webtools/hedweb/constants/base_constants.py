@@ -3,6 +3,7 @@ CHECK_WARNINGS_VALIDATE = 'check_warnings_validate'
 
 COLUMN_DICTIONARY = 'column_dictionary'
 COLUMN_INDICES = 'column_indices'
+COLUMN_LIST = 'column_list'
 COLUMN_NAMES = 'column_names'
 COLUMN_NAMES_TABLE = 'column_names_table'
 COLUMN_POSTFIX = '_column'
