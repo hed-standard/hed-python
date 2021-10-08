@@ -1,5 +1,7 @@
+import os
 import unittest
 from hed.tools.sidecar_map import SidecarMap
+from hed.tools.map_utils import get_new_dataframe
 from hed.errors.exceptions import HedFileError
 
 
@@ -45,13 +47,13 @@ class Test(unittest.TestCase):
         column_dict1 = {"a": "blech1", "b": "blech2"}
         col_keys1, col_values1 = sr.flatten_col("tell", column_dict1)
         self.assertEqual(len(col_keys1), len(column_dict1.keys()) + 2,
-                    "flatten_col simple dictionary append should have a header key and footer key")
+                         "flatten_col simple dictionary append should have a header key and footer key")
         self.assertEqual(len(col_keys1), len(col_values1),
                          "flatten_col column keys and values should be of the same length")
         self.assertEqual(col_values1[0], 'n/a', "flatten_col header key values should be n/a")
         col_keys1a, col_values1a = sr.flatten_col("tell", column_dict1, append_header=False)
         self.assertEqual(len(col_keys1a), len(column_dict1.keys()) + 1,
-                    "flatten_col simple dictionary no append should have a header key and no footer key")
+                         "flatten_col simple dictionary no append should have a header key and no footer key")
         self.assertEqual(len(col_keys1a), len(col_values1a),
                          "flatten_col column keys and values should be of the same length")
         self.assertEqual(col_values1a[0], 'n/a', "flatten_col header key values should be n/a")
@@ -83,14 +85,14 @@ class Test(unittest.TestCase):
         df1 = sr.flatten_hed(sidecar1)
         self.assertEqual(len(df1), 3, "flatten_hed dataframe should have 1 more entry than HED entries for dictionary")
         self.assertEqual(len(df1.columns), 2, "flatten_hed dataframe should have 2 columns")
-        self.assertEqual(df1.iloc[1]['keys'], 'b', "flatten_hed dataframe should have right value in key")
+        self.assertEqual(df1.iloc[1]['column'], 'b', "flatten_hed dataframe should have right value in key")
 
         # One value column
         sidecar2 = {"a_col": {"HED": "Label/#"}}
         df2 = sr.flatten_hed(sidecar2)
         self.assertEqual(len(df2), 1, "flatten_hed dataframe should have same number of entries as dictionary")
         self.assertEqual(len(df2.columns), 2, "flatten_hed dataframe should have 2 columns")
-        self.assertEqual(df2.iloc[0]['keys'], '_*_a_col_*_', "flatten_hed dataframe should have right value in key")
+        self.assertEqual(df2.iloc[0]['column'], '_*_a_col_*_', "flatten_hed dataframe should have right value in key")
 
         # A combination with other columns
         sidecar3 = {"a_col": {"HED": {"b": "Label/B", "c": "Label/C"}, "d": {"a1": "b1"}}, "b_col": {"HED": "Label/#"}}
@@ -98,8 +100,8 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df3), 4,
                          "flatten_hed dataframe should have 1 more entries than HED entries for dictionary")
         self.assertEqual(len(df3.columns), 2, "flatten_hed dataframe should have 2 columns")
-        self.assertEqual(df3.iloc[0]['keys'], '_*_a_col_*_', "flatten_hed dataframe should have right value in key")
-        self.assertEqual(df3.iloc[3]['keys'], '_*_b_col_*_', "flatten_hed dataframe should have right value in key")
+        self.assertEqual(df3.iloc[0]['column'], '_*_a_col_*_', "flatten_hed dataframe should have right value in key")
+        self.assertEqual(df3.iloc[3]['column'], '_*_b_col_*_', "flatten_hed dataframe should have right value in key")
 
     def test_get_marked_key(self):
         sr = SidecarMap()
@@ -166,6 +168,13 @@ class Test(unittest.TestCase):
         undf3 = sr.unflatten_hed(df3)
         self.assertEqual(len(undf3.keys()), 2, "unflatten_hed dictionary should unpack correctly")
 
+    def test_unflatten_hed_from_file(self):
+        sr = SidecarMap()
+        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data//sternberg_flattened.tsv")
+        df = get_new_dataframe(file_path)
+        undf3 = sr.unflatten_hed(df)
+        print("to here")
+
     def test_flatten_hed_column_names(self):
         sr = SidecarMap()
         # One categorical column
@@ -177,12 +186,12 @@ class Test(unittest.TestCase):
         df2 = sr.flatten_hed(sidecar1, ["a1_col", "a3_col"])
         self.assertEqual(len(df2), 6, "When some columns are used should have appropriate entries")
         self.assertEqual(len(df1.columns), 2, "flatten_hed dataframe should have 2 columns")
-        self.assertEqual(df1.iloc[1]['keys'], 'b1', "flatten_hed dataframe should have right value in key")
+        self.assertEqual(df1.iloc[1]['column'], 'b1', "flatten_hed dataframe should have right value in key")
         df2 = sr.flatten_hed(sidecar1, ["a1_col", "a3_col"])
         self.assertEqual(len(df2), 6,
                          "flatten_hed dataframe should have 1 more entry than HED entries for dictionary")
         self.assertEqual(len(df2.columns), 2, "flatten_hed dataframe should have 2 columns")
-        self.assertEqual(df2.iloc[1]['keys'], 'b1', "flatten_hed dataframe should have right value in key")
+        self.assertEqual(df2.iloc[1]['column'], 'b1', "flatten_hed dataframe should have right value in key")
 
     def test_get_key_value(self):
         dict_values = SidecarMap.get_key_value('', [])

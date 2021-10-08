@@ -93,8 +93,11 @@ def get_file_list(path, prefix=None, types=None, suffix=None):
     for r, d, f in os.walk(path):
         for r_file in f:
             file_split = os.path.splitext(r_file)
-            if (types and file_split[1] not in types) or (suffix and not file_split[0].endswith(suffix)) \
-                    or (prefix and not file_split[0].startswith(prefix)):
+            if types and file_split[1] not in types:
+                continue
+            elif suffix and not file_split[0].endswith(suffix):
+                continue
+            elif prefix and not file_split[0].startswith(prefix):
                 continue
             file_list.append(os.path.join(r, r_file))
     return file_list
@@ -130,16 +133,6 @@ def get_row_hash(row, key_list):
     columns_present, columns_missing = separate_columns(list(row.index.values), key_list)
     if columns_missing:
         raise HedFileError("lookup_row", f"row must have all keys, missing{str(columns_missing)}", "")
-    s = row[key_list].values
-    s1 = row[key_list]
-    s2 = tuple(s1)
-    s3 = tuple(s)
-    s4 = list(s)
-    #h = hash(s)
-    #h1 = hash(s1)
-    h2 = hash(s2)
-    h3 = hash(s3)
-    #h4 = hash(s4)
     return get_key_hash(row[key_list])
 
 
