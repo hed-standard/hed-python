@@ -1,10 +1,11 @@
-import pandas
-import os
 from flask import current_app
 import openpyxl
-from hed.errors.exceptions import HedFileError
+import os
 
-from hedweb.constants import common, file_constants
+
+from pandas import DataFrame, read_csv
+from hed.errors.exceptions import HedFileError
+from hedweb.constants import base_constants, file_constants
 from hedweb.web_utils import form_has_file, form_has_option
 
 
@@ -55,43 +56,35 @@ def create_columns_info(columns_file, has_column_names: True, sheet_name: None):
         dataframe = dataframe_from_worksheet(worksheet, has_column_names)
         sheet_name = worksheet.title
     elif file_ext in file_constants.TEXT_FILE_EXTENSIONS:
-        dataframe = pandas.read_csv(columns_file, delimiter='\t', header=header)
+        dataframe = read_csv(columns_file, delimiter='\t', header=header)
     else:
         raise HedFileError('BadFileExtension',
                            f'File {filename} extension does not correspond to an Excel or tsv file', '')
-    col_dict = get_info_in_columns(dataframe)
-    columns_info = {common.COLUMNS_FILE: filename, common.COLUMN_DICTIONARY: col_dict,
-                    common.WORKSHEET_SELECTED: sheet_name, common.WORKSHEET_NAMES: sheet_names}
+    col_list = list(dataframe.columns)
+    columns_info = {base_constants.COLUMNS_FILE: filename, base_constants.COLUMN_LIST: col_list,
+                    base_constants.WORKSHEET_SELECTED: sheet_name, base_constants.WORKSHEET_NAMES: sheet_names}
     return columns_info
 
 
 def dataframe_from_worksheet(worksheet, has_column_names):
     if not has_column_names:
-        data_frame = pandas.DataFrame(worksheet.values)
+        data_frame = DataFrame(worksheet.values)
     else:
         data = worksheet.values
         # first row is columns
         cols = next(data)
         data = list(data)
-        data_frame = pandas.DataFrame(data, columns=cols)
+        data_frame = DataFrame(data, columns=cols)
     return data_frame
 
 
 def get_columns_request(request):
-    if not form_has_file(request, common.COLUMNS_FILE):
+    if not form_has_file(request, base_constants.COLUMNS_FILE):
         raise HedFileError('MissingFile', 'An uploadable file was not provided', None)
-    columns_file = request.files.get(common.COLUMNS_FILE, '')
+    columns_file = request.files.get(base_constants.COLUMNS_FILE, '')
     has_column_names = form_has_option(request, 'has_column_names', 'on')
-    sheet_name = request.form.get(common.WORKSHEET_SELECTED, None)
+    sheet_name = request.form.get(base_constants.WORKSHEET_SELECTED, None)
     return create_columns_info(columns_file, has_column_names, sheet_name)
-
-
-def get_info_in_columns(dataframe):
-    col_info = dict()
-
-    for col_name, col_values in dataframe.iteritems():
-        col_info[col_name] = col_values.value_counts(ascending=True).to_dict()
-    return col_info
 
 
 def get_prefix_dict(form_dict):
@@ -104,7 +97,7 @@ def get_prefix_dict(form_dict):
     Returns
     -------
     dict
-        A dictionary whose keys are column numbers (starting with 1) and values are tag prefixes to prepend.
+        A dictionary whose keys names (or COLUMN_XX) and values are tag prefixes to prepend.
     """
     tag_columns = []
     prefix_dict = {}

@@ -1,4 +1,5 @@
-{% macro create_process_options(title, assemble=False,convert=False,extract=False,from_flat=False,to_flat=False,to_long=False,to_short=False,validate=False) %}
+{% macro create_process_options(title, assemble=False,convert=False,extract=False,flatten=False,
+remap=False,to_long=False,to_short=False,unflatten=False,validate=False) %}
     <h3> {{ title }} </h3>
     <div class="form-group" id="process_options">
     {% if assemble %}
@@ -31,24 +32,32 @@
         </div>
     {% endif %}
 
-    {% if from_flat %}
+    {% if flatten %}
        <div class="form-group">
         <input class="radio-btn" type="radio" name="command_option"
-               id="from_flat" value="from_flat"
-               aria-label="Select this button to convert from flat form">
-        <label class="secondary-label">Convert from flat</label>
-    </div>
-    {% endif %}
-
-    {% if to_flat %}
-       <div class="form-group">
-        <input class="radio-btn" type="radio" name="command_option"
-               id="to_flat" value="to_flat"
+               id="flatten" value="flatten"
                aria-label="Select this button to convert to flat form">
-        <label class="secondary-label">Convert to flat</label>
+        <label class="secondary-label">Flatten</label>
     </div>
     {% endif %}
 
+    {% if unflatten %}
+       <div class="form-group">
+        <input class="radio-btn" type="radio" name="command_option"
+               id="unflatten" value="unflatten"
+               aria-label="Select this button to convert from flat form">
+        <label class="secondary-label">Unflatten</label>
+    </div>
+    {% endif %}
+
+    {% if remap %}
+       <div class="form-group">
+        <input class="radio-btn" type="radio" name="command_option"
+               id="remap" value="remap"
+               aria-label="Select this button to remap event file columns ">
+        <label class="secondary-label">Remap</label>
+    </div>
+    {% endif %}
 
     {% if to_long %}
        <div class="form-group">
@@ -78,5 +87,6 @@
         <label for="check_warnings_validate">Check for warnings)</label>
     </div>
     {% endif %}
+
     </div>
 {% endmacro %}

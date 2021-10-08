@@ -5,7 +5,7 @@ from werkzeug.wrappers import Request
 from tests.test_web_base import TestWebBase
 import hed.schema as hedschema
 from hed import models
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -23,32 +23,32 @@ class Test(TestWebBase):
             schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/HED8.0.0.xml')
             with open(spreadsheet_path, 'rb') as fp:
                 with open(schema_path, 'rb') as sp:
-                    environ = create_environ(data={common.SPREADSHEET_FILE: fp,
-                                                   common.SCHEMA_VERSION: common.OTHER_VERSION_OPTION,
-                                                   common.SCHEMA_PATH: sp,
+                    environ = create_environ(data={base_constants.SPREADSHEET_FILE: fp,
+                                                   base_constants.SCHEMA_VERSION: base_constants.OTHER_VERSION_OPTION,
+                                                   base_constants.SCHEMA_PATH: sp,
                                                    'column_5_check': 'on', 'column_5_input': '',
-                                                   common.WORKSHEET_SELECTED: 'LKT 8HED3',
-                                                   common.HAS_COLUMN_NAMES: 'on',
-                                                   common.COMMAND_OPTION: common.COMMAND_VALIDATE})
+                                                   base_constants.WORKSHEET_SELECTED: 'LKT 8HED3',
+                                                   base_constants.HAS_COLUMN_NAMES: 'on',
+                                                   base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE})
 
             request = Request(environ)
             arguments = get_input_from_form(request)
-            self.assertIsInstance(arguments[common.SPREADSHEET], HedInput,
+            self.assertIsInstance(arguments[base_constants.SPREADSHEET], HedInput,
                                   "generate_input_from_spreadsheet_form should have an events object")
-            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+            self.assertIsInstance(arguments[base_constants.SCHEMA], HedSchema,
                                   "generate_input_from_spreadsheet_form should have a HED schema")
-            self.assertEqual(common.COMMAND_VALIDATE, arguments[common.COMMAND],
+            self.assertEqual(base_constants.COMMAND_VALIDATE, arguments[base_constants.COMMAND],
                              "generate_input_from_spreadsheet_form should have a command")
-            self.assertEqual('LKT 8HED3', arguments[common.WORKSHEET_NAME],
+            self.assertEqual('LKT 8HED3', arguments[base_constants.WORKSHEET_NAME],
                              "generate_input_from_spreadsheet_form should have a sheet_name name")
-            self.assertTrue(arguments[common.HAS_COLUMN_NAMES],
+            self.assertTrue(arguments[base_constants.HAS_COLUMN_NAMES],
                             "generate_input_from_spreadsheet_form should have column names")
 
     def test_spreadsheet_process_empty_file(self):
-        from hedweb.constants import common
+        from hedweb.constants import base_constants
         from hedweb.spreadsheet import process
         from hed.errors.exceptions import HedFileError
-        arguments = {common.SPREADSHEET: None}
+        arguments = {base_constants.SPREADSHEET: None}
         try:
             process(arguments)
         except HedFileError:
@@ -70,8 +70,9 @@ class Test(TestWebBase):
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
-        arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
-                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_WARNINGS_VALIDATE: True}
+        arguments = {base_constants.SCHEMA: hed_schema, base_constants.SPREADSHEET: spreadsheet,
+                     base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                     base_constants.CHECK_WARNINGS_VALIDATE: True}
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -93,9 +94,10 @@ class Test(TestWebBase):
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
-        arguments = {common.SCHEMA: hed_schema, common.SPREADSHEET: spreadsheet,
-                     common.COMMAND: common.COMMAND_VALIDATE, common.CHECK_WARNINGS_VALIDATE: True}
-        arguments[common.SCHEMA] = hed_schema
+        arguments = {base_constants.SCHEMA: hed_schema, base_constants.SPREADSHEET: spreadsheet,
+                     base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                     base_constants.CHECK_WARNINGS_VALIDATE: True}
+        arguments[base_constants.SCHEMA] = hed_schema
 
         with self.app.app_context():
             results = process(arguments)

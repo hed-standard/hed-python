@@ -7,7 +7,7 @@ from werkzeug.wrappers import Request
 from tests.test_web_base import TestWebBase
 from hed import schema as hedschema
 from hed import models
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -25,18 +25,18 @@ class Test(TestWebBase):
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.json')
             with open(json_path, 'rb') as fp:
                 json_string = fp.read().decode('ascii')
-            json_data = {common.JSON_STRING: json_string, common.CHECK_WARNINGS_VALIDATE: 'on',
-                         common.SCHEMA_VERSION: '8.0.0-alpha.1', common.SERVICE: 'sidecar_validate'}
+            json_data = {base_constants.JSON_STRING: json_string, base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                         base_constants.SCHEMA_VERSION: '8.0.0-alpha.1', base_constants.SERVICE: 'sidecar_validate'}
             environ = create_environ(json=json_data)
             request = Request(environ)
             arguments = get_input_from_request(request)
-            self.assertIsInstance(arguments[common.JSON_SIDECAR], Sidecar,
+            self.assertIsInstance(arguments[base_constants.JSON_SIDECAR], Sidecar,
                                   "get_input_from_request should have a sidecar object")
-            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+            self.assertIsInstance(arguments[base_constants.SCHEMA], HedSchema,
                                   "get_input_from_request should have a HED schema")
-            self.assertEqual('sidecar_validate', arguments[common.SERVICE],
+            self.assertEqual('sidecar_validate', arguments[base_constants.SERVICE],
                              "get_input_from_request should have a service request")
-            self.assertTrue(arguments[common.CHECK_WARNINGS_VALIDATE],
+            self.assertTrue(arguments[base_constants.CHECK_WARNINGS_VALIDATE],
                             "get_input_from_request should have check_warnings true when on")
 
     def test_services_process_empty(self):
@@ -63,9 +63,9 @@ class Test(TestWebBase):
                      + 'hedxml/HED8.0.0.xml'
         hed_schema = hedschema.load_schema(hed_url_path=schema_url)
         json_sidecar = models.Sidecar(file=fb, name='JSON_Sidecar')
-        arguments = {common.SERVICE: 'sidecar_validate', common.SCHEMA: hed_schema,
-                     common.COMMAND: 'validate', common.COMMAND_TARGET: 'sidecar',
-                     common.JSON_SIDECAR: json_sidecar}
+        arguments = {base_constants.SERVICE: 'sidecar_validate', base_constants.SCHEMA: hed_schema,
+                     base_constants.COMMAND: 'validate', base_constants.COMMAND_TARGET: 'sidecar',
+                     base_constants.JSON_SIDECAR: json_sidecar}
         with self.app.app_context():
             response = process(arguments)
             self.assertFalse(response['error_type'],
@@ -73,11 +73,11 @@ class Test(TestWebBase):
             results = response['results']
             self.assertEqual('success', results['msg_category'],
                              "sidecar_validation services has success on bids_events.json")
-            self.assertEqual('8.0.0', results[common.SCHEMA_VERSION], 'Version 8.0.0 was used')
+            self.assertEqual('8.0.0', results[base_constants.SCHEMA_VERSION], 'Version 8.0.0 was used')
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml/HED7.2.0.xml'
-        arguments[common.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
+        arguments[base_constants.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
         with self.app.app_context():
             response = process(arguments)
             self.assertFalse(response['error_type'],

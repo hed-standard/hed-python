@@ -8,9 +8,10 @@ from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
-from hedweb.constants import common
-from hedweb.columns import create_column_selections, get_info_in_columns
-from hedweb.tools import get_sidecar_dict
+from hedweb.constants import base_constants
+from hedweb.columns import create_column_selections
+from hed.tools import get_columns_info
+from hed.tools import SidecarMap
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
@@ -29,21 +30,24 @@ def get_input_from_events_form(request):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    arguments = {common.SCHEMA: get_hed_schema_from_pull_down(request), common.EVENTS: None,
-                 common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
-                 common.CHECK_WARNINGS_ASSEMBLE: form_has_option(request, common.CHECK_WARNINGS_ASSEMBLE, 'on'),
-                 common.CHECK_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'on'),
-                 common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on'),
-                 common.COLUMNS_SELECTED: create_column_selections(request.form)
+    arguments = {base_constants.SCHEMA: get_hed_schema_from_pull_down(request), base_constants.EVENTS: None,
+                 base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, ''),
+                 base_constants.CHECK_WARNINGS_ASSEMBLE:
+                     form_has_option(request, base_constants.CHECK_WARNINGS_ASSEMBLE, 'on'),
+                 base_constants.CHECK_WARNINGS_VALIDATE:
+                     form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on'),
+                 base_constants.DEFS_EXPAND: form_has_option(request, base_constants.DEFS_EXPAND, 'on'),
+                 base_constants.COLUMNS_SELECTED: create_column_selections(request.form)
                  }
 
     json_sidecar = None
-    if common.JSON_FILE in request.files:
-        f = request.files[common.JSON_FILE]
+    if base_constants.JSON_FILE in request.files:
+        f = request.files[base_constants.JSON_FILE]
         json_sidecar = models.Sidecar(file=f, name=secure_filename(f.filename))
-    if common.EVENTS_FILE in request.files:
-        f = request.files[common.EVENTS_FILE]
-        arguments[common.EVENTS] = models.EventsInput(file=f, sidecars=json_sidecar, name=secure_filename(f.filename))
+    if base_constants.EVENTS_FILE in request.files:
+        f = request.files[base_constants.EVENTS_FILE]
+        arguments[base_constants.EVENTS] = \
+            models.EventsInput(file=f, sidecars=json_sidecar, name=secure_filename(f.filename))
     return arguments
 
 
@@ -61,19 +65,19 @@ def process(arguments):
         A dictionary with the results.
     """
     hed_schema = arguments.get('schema', None)
-    command = arguments.get(common.COMMAND, None)
+    command = arguments.get(base_constants.COMMAND, None)
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema for event processing", "")
-    events = arguments.get(common.EVENTS, 'None')
+    events = arguments.get(base_constants.EVENTS, 'None')
     if not events or not isinstance(events, models.EventsInput):
         raise HedFileError('InvalidEventsFile', "An events file was given but could not be processed", "")
 
-    if command == common.COMMAND_VALIDATE:
+    if command == base_constants.COMMAND_VALIDATE:
         results = validate(hed_schema, events)
-    elif command == common.COMMAND_ASSEMBLE:
-        results = assemble(hed_schema, events, arguments.get(common.DEFS_EXPAND, True))
-    elif command == common.COMMAND_EXTRACT:
-        results = extract(hed_schema, events, arguments.get(common.COLUMNS_SELECTED, None))
+    elif command == base_constants.COMMAND_ASSEMBLE:
+        results = assemble(hed_schema, events, arguments.get(base_constants.DEFS_EXPAND, True))
+    elif command == base_constants.COMMAND_EXTRACT:
+        results = extract(hed_schema, events, arguments.get(base_constants.COLUMNS_SELECTED, None))
     else:
         raise HedFileError('UnknownEventsProcessingMethod', f'Command {command} is missing or invalid', '')
     return results
@@ -112,7 +116,8 @@ def assemble(hed_schema, events, defs_expand=True):
     csv_string = df.to_csv(None, sep='\t', index=False, header=True)
     display_name = events.name
     file_name = generate_filename(display_name, suffix='_expanded', extension='.tsv')
-    return {common.COMMAND: common.COMMAND_ASSEMBLE, 'data': csv_string, 'output_display_name': file_name,
+    return {base_constants.COMMAND: base_constants.COMMAND_ASSEMBLE,
+            'data': csv_string, 'output_display_name': file_name,
             'schema_version': schema_version, 'msg_category': 'success', 'msg': 'Events file successfully expanded'}
 
 
@@ -134,18 +139,20 @@ def extract(hed_schema, events, columns_selected):
         A dictionary pointing to extracted JSON file.
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    columns_info = get_info_in_columns(events.dataframe)
-    hed_dict, issues = get_sidecar_dict(columns_info, columns_selected)
+    columns_info = get_columns_info(events.dataframe)
+    sr = SidecarMap()
+    hed_dict, issues = sr.get_sidecar_dict(columns_info, columns_selected)
     display_name = events.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
         file_name = generate_filename(display_name, suffix='_errors', extension='.txt')
-        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
-                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                'data': issue_str, "output_display_name": file_name,
+                base_constants.SCHEMA_VERSION: schema_version, "msg_category": "warning",
                 'msg': f"Events file {display_name} had extraction errors"}
     else:
         file_name = generate_filename(display_name, suffix='_extracted', extension='.json')
-        return {common.COMMAND: common.COMMAND_EXTRACT, 'data': json.dumps(hed_dict, indent=4),
+        return {base_constants.COMMAND: base_constants.COMMAND_EXTRACT, 'data': json.dumps(hed_dict, indent=4),
                 'output_display_name': file_name, 'schema_version': schema_version,
                 'msg_category': 'success', 'msg': 'Events extraction to JSON complete'}
 
@@ -175,10 +182,11 @@ def validate(hed_schema, events):
     if issues:
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
-        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': issue_str, "output_display_name": file_name,
-                common.SCHEMA_VERSION: schema_version, "msg_category": "warning",
+        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                'data': issue_str, "output_display_name": file_name,
+                base_constants.SCHEMA_VERSION: schema_version, "msg_category": "warning",
                 'msg': f"Events file {display_name} had validation errors"}
     else:
-        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
-                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE, 'data': '',
+                base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': f"Events file {display_name} had no validation errors"}

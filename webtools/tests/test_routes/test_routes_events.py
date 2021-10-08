@@ -3,7 +3,7 @@ import os
 import unittest
 from flask import Response
 from tests.test_web_base import TestWebBase
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -29,12 +29,12 @@ class Test(TestWebBase):
         events_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
         with self.app.app_context():
-            input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: common.COMMAND_ASSEMBLE,
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_ASSEMBLE,
                           'json_file': (json_buffer, 'bids_events.json'),
                           'events_file': (events_buffer, 'bids_events.tsv'),
                           'defs_expand': 'on',
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Assembly of a valid events file has a response')
             headers_dict = dict(response.headers)
@@ -57,11 +57,11 @@ class Test(TestWebBase):
         events_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
         with self.app.app_context():
-            input_data = {common.SCHEMA_VERSION: '7.2.0',
-                          common.COMMAND_OPTION: common.COMMAND_ASSEMBLE,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.EVENTS_FILE: (events_buffer, 'bids_events.tsv'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_ASSEMBLE,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.EVENTS_FILE: (events_buffer, 'bids_events.tsv'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Assembly of invalid events files has a response')
             headers_dict = dict(response.headers)
@@ -84,11 +84,11 @@ class Test(TestWebBase):
         events_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
         with self.app.app_context():
-            input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.EVENTS_FILE: (events_buffer, 'bids_events.tsv'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.EVENTS_FILE: (events_buffer, 'bids_events.tsv'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'events_submit validate should return a Response when events valid')
@@ -113,11 +113,11 @@ class Test(TestWebBase):
         events_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
         with self.app.app_context():
-            input_data = {common.SCHEMA_VERSION: '7.2.0',
-                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.EVENTS_FILE: (events_buffer, 'events_file'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.EVENTS_FILE: (events_buffer, 'events_file'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'events_submit validate should return a Response when events invalid')

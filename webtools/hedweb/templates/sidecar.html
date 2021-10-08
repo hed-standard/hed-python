@@ -9,7 +9,7 @@
     <form id="sidecar_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options('1) Pick an action:',from_flat=True,to_flat=true,to_long=True,to_short=True,validate=True) }}
+        {{ create_process_options('1) Pick an action:',flatten=true,unflatten=True,to_long=True,to_short=True,validate=True) }}
         {{ create_json_input('2) Upload BIDS-style JSON sidecar:') }}
         {{ create_schema_pulldown('3) Choose a HED schema version:') }}
 

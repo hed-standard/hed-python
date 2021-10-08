@@ -3,7 +3,7 @@ import os
 import unittest
 from flask import Response
 from tests.test_web_base import TestWebBase
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -22,10 +22,10 @@ class Test(TestWebBase):
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: common.COMMAND_TO_LONG,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_LONG,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/sidecar_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'sidecar_submit should return a Response when valid to long sidecar')
@@ -42,10 +42,10 @@ class Test(TestWebBase):
             x = sc.read()
         json_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
-            input_data = {common.SCHEMA_VERSION: '7.2.0',
-                          common.COMMAND_OPTION: common.COMMAND_TO_LONG,
-                          common.JSON_FILE: (json_buffer, 'HED7.2.0.xml'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_LONG,
+                          base_constants.JSON_FILE: (json_buffer, 'HED7.2.0.xml'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
 
             response = self.app.test.post('/sidecar_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
@@ -69,11 +69,11 @@ class Test(TestWebBase):
             with open(schema_path, 'r') as sc:
                 y = sc.read()
             schema_buffer = io.BytesIO(bytes(y, 'utf-8'))
-            input_data = {common.SCHEMA_VERSION: 'Other',
-                          common.SCHEMA_PATH: (schema_buffer, 'HED8.0.0.xml'),
-                          common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: 'Other',
+                          base_constants.SCHEMA_PATH: (schema_buffer, 'HED8.0.0.xml'),
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_SHORT,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/sidecar_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'sidecar_submit should return a Response when valid to short sidecar')
@@ -91,10 +91,10 @@ class Test(TestWebBase):
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
 
-            input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/sidecar_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'sidecar_submit should return a Response when valid sidecar')
@@ -117,11 +117,11 @@ class Test(TestWebBase):
                 y = sc.read()
             schema_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
-            input_data = {common.SCHEMA_VERSION: 'Other',
-                          common.SCHEMA_PATH: (schema_buffer, 'HED8.0.0.xml'),
-                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: 'Other',
+                          base_constants.SCHEMA_PATH: (schema_buffer, 'HED8.0.0.xml'),
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/sidecar_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'sidecar_submit should return a Response when valid sidecar')
@@ -139,10 +139,10 @@ class Test(TestWebBase):
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
 
-            input_data = {common.SCHEMA_VERSION: '7.2.0',
-                          common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_SHORT,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/sidecar_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'sidecar_submit should return a response object when invalid to short sidecar')
@@ -160,10 +160,10 @@ class Test(TestWebBase):
             with open(json_path, 'r') as sc:
                 x = sc.read()
             json_buffer = io.BytesIO(bytes(x, 'utf-8'))
-            input_data = {common.SCHEMA_VERSION: '7.2.0',
-                          common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                          common.JSON_FILE: (json_buffer, 'bids_events.json'),
-                          common.CHECK_WARNINGS_VALIDATE: 'on'}
+            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                          base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
             response = self.app.test.post('/sidecar_submit', content_type='multipart/form-data',
                                           data=input_data)
             self.assertTrue(isinstance(response, Response),

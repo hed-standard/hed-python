@@ -5,7 +5,7 @@ from werkzeug.wrappers import Request
 
 from tests.test_web_base import TestWebBase
 import hed.schema as hedschema
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -18,18 +18,19 @@ class Test(TestWebBase):
         from hed.schema import HedSchema
         from hedweb.strings import get_input_from_form
         with self.app.test:
-            environ = create_environ(data={common.STRING_INPUT: 'Red,Blue', common.SCHEMA_VERSION: '8.0.0',
-                                           common.CHECK_WARNINGS_VALIDATE: 'on',
-                                           common.COMMAND_OPTION: common.COMMAND_VALIDATE})
+            environ = create_environ(data={base_constants.STRING_INPUT: 'Red,Blue',
+                                           base_constants.SCHEMA_VERSION: '8.0.0',
+                                           base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                                           base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE})
             request = Request(environ)
             arguments = get_input_from_form(request)
-            self.assertIsInstance(arguments[common.STRING_LIST], list,
+            self.assertIsInstance(arguments[base_constants.STRING_LIST], list,
                                   "get_input_from_form should have a string list")
-            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+            self.assertIsInstance(arguments[base_constants.SCHEMA], HedSchema,
                                   "get_input_from_form should have a HED schema")
-            self.assertEqual(common.COMMAND_VALIDATE, arguments[common.COMMAND],
+            self.assertEqual(base_constants.COMMAND_VALIDATE, arguments[base_constants.COMMAND],
                              "get_input_from_form should have a command")
-            self.assertTrue(arguments[common.CHECK_WARNINGS_VALIDATE],
+            self.assertTrue(arguments[base_constants.CHECK_WARNINGS_VALIDATE],
                             "get_input_from_form should have check_warnings true when on")
 
     def test_string_process(self):
@@ -61,7 +62,7 @@ class Test(TestWebBase):
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         string_list = ['Property/Informational-property/Description/Blech, Blue']
         with self.app.app_context():
-            results = convert(hed_schema, string_list, common.COMMAND_TO_SHORT)
+            results = convert(hed_schema, string_list, base_constants.COMMAND_TO_SHORT)
             data = results['data']
             self.assertTrue(data, 'convert string to short returns data')
             self.assertIsInstance(data, list, "convert string to short returns data in a list")
@@ -77,14 +78,14 @@ class Test(TestWebBase):
         string_list = ['Red, Blue']
 
         with self.app.app_context():
-            results = convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
+            results = convert(hed_schema, string_list, command=base_constants.COMMAND_TO_LONG)
             self.assertEqual('warning', results['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 
         with self.app.app_context():
-            results = convert(hed_schema, string_list, command=common.COMMAND_TO_LONG)
+            results = convert(hed_schema, string_list, command=base_constants.COMMAND_TO_LONG)
             self.assertEqual('success', results['msg_category'],
                              "hedstring_convert should return success if converted")
 

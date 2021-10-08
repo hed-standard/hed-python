@@ -1,4 +1,4 @@
-code	type	purpose	letter
+type	event_type	purpose	letter
 A	show_letter	target	A
 B	show_letter	target	B
 C	show_letter	target	C

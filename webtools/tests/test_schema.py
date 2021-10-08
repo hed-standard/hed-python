@@ -13,21 +13,21 @@ class Test(TestWebBase):
 
     def test_get_input_from_schema_form_valid(self):
         from hed.schema import HedSchema
-        from hedweb.constants import common
+        from hedweb.constants import base_constants
         from hedweb.schema import get_input_from_form
         with self.app.test:
             schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/HED8.0.0.xml')
             with open(schema_path, 'rb') as fp:
-                environ = create_environ(data={common.SCHEMA_FILE: fp,
-                                               common.SCHEMA_UPLOAD_OPTIONS: common.SCHEMA_FILE_OPTION,
-                                               common.COMMAND_OPTION:  common.COMMAND_CONVERT})
+                environ = create_environ(data={base_constants.SCHEMA_FILE: fp,
+                                               base_constants.SCHEMA_UPLOAD_OPTIONS: base_constants.SCHEMA_FILE_OPTION,
+                                               base_constants.COMMAND_OPTION:  base_constants.COMMAND_CONVERT})
             request = Request(environ)
             arguments = get_input_from_form(request)
-            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+            self.assertIsInstance(arguments[base_constants.SCHEMA], HedSchema,
                                   "get_input_from_form should have a HED schema")
-            self.assertEqual(common.COMMAND_CONVERT, arguments[common.COMMAND],
+            self.assertEqual(base_constants.COMMAND_CONVERT, arguments[base_constants.COMMAND],
                              "get_input_from_form should have a command")
-            self.assertFalse(arguments[common.CHECK_WARNINGS_VALIDATE],
+            self.assertFalse(arguments[base_constants.CHECK_WARNINGS_VALIDATE],
                              "get_input_from_form should have check_warnings false when not given")
 
     def test_schema_process(self):

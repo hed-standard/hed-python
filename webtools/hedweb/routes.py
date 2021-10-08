@@ -3,7 +3,7 @@ from werkzeug.utils import secure_filename
 import json
 
 from hed import schema as hedschema
-from hedweb.constants import common, page_constants
+from hedweb.constants import base_constants, page_constants
 from hedweb.constants import route_constants, file_constants
 from hedweb.web_utils import handle_http_error, package_results, handle_error
 from hedweb import sidecar, events, spreadsheet, services, strings, schema
@@ -81,11 +81,11 @@ def schema_version_results():
 
     try:
         hed_info = {}
-        if common.SCHEMA_PATH in request.files:
-            f = request.files[common.SCHEMA_PATH]
+        if base_constants.SCHEMA_PATH in request.files:
+            f = request.files[base_constants.SCHEMA_PATH]
             hed_schema = hedschema.from_string(f.stream.read(file_constants.BYTE_LIMIT).decode('ascii'),
                                                file_type=secure_filename(f.filename))
-            hed_info[common.SCHEMA_VERSION] = hed_schema.header_attributes['version']
+            hed_info[base_constants.SCHEMA_VERSION] = hed_schema.header_attributes['version']
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
@@ -104,7 +104,7 @@ def schema_versions_results():
 
     try:
         hedschema.cache_all_hed_xml_versions()
-        hed_info = {common.SCHEMA_VERSION_LIST: hedschema.get_all_hed_versions()}
+        hed_info = {base_constants.SCHEMA_VERSION_LIST: hedschema.get_all_hed_versions()}
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
@@ -212,17 +212,17 @@ def render_commands_help_page():
     return render_template(page_constants.HED_COMMANDS_HELP_PAGE)
 
 
-@route_blueprint.route(route_constants.COMMON_ERRORS_ROUTE, strict_slashes=False, methods=['GET'])
-def render_common_errors_page():
-    """The common errors page.
+@route_blueprint.route(route_constants.HED_ERRORS_ROUTE, strict_slashes=False, methods=['GET'])
+def render_hed_errors_page():
+    """The base_constants errors page.
 
     Returns
     -------
     Rendered template
-        A rendered template for a page explaining common errors.
+        A rendered template for a page explaining base_constants errors.
 
     """
-    return render_template(page_constants.COMMON_ERRORS_PAGE)
+    return render_template(page_constants.HED_ERRORS_PAGE)
 
 
 @route_blueprint.route(route_constants.EVENTS_ROUTE, strict_slashes=False, methods=['GET'])
