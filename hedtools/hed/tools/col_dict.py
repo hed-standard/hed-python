@@ -72,8 +72,10 @@ class ColumnDict:
             marker = f"{('_' * marker_level)}{self.header_char}{('_' * marker_level)}"
         return marker + key + marker
 
-    def print(self, indent="  "):
-        print(f"Summary for column dictionary {self.name}:")
+    def print(self, title=None, indent="  "):
+        if not title:
+            title = f"Summary for column dictionary {self.name}:"
+        print(title)
         sorted_keys = sorted(self.categorical_info.keys())
         print(f"{indent}Categorical columns ({len(sorted_keys)}):")
         for key in sorted_keys:
