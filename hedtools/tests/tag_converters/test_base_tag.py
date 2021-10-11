@@ -18,7 +18,7 @@ class TestBaseTagBase(unittest.TestCase):
     def tag_form_base(self, test_strings, expected_results, expected_errors):
         for test_key in test_strings:
             test_string_obj = HedString(test_strings[test_key])
-            test_errors = test_string_obj.convert_to_canonical_forms(hed_schema=self.hed_schema, error_handler=self.error_handler)
+            test_errors = test_string_obj.convert_to_canonical_forms(hed_schema=self.hed_schema)
             expected_error = expected_errors[test_key]
             expected_result = expected_results[test_key]
             for tag in test_string_obj.tags():
@@ -28,7 +28,7 @@ class TestBaseTagBase(unittest.TestCase):
     def tag_form_org_base(self, test_strings, expected_results, expected_errors):
         for test_key in test_strings:
             test_string_obj = HedString(test_strings[test_key])
-            test_errors = test_string_obj.convert_to_canonical_forms(hed_schema=self.hed_schema, error_handler=self.error_handler)
+            test_errors = test_string_obj.convert_to_canonical_forms(hed_schema=self.hed_schema)
             expected_error = expected_errors[test_key]
             expected_result = expected_results[test_key]
             for tag in test_string_obj.tags():

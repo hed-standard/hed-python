@@ -235,14 +235,25 @@ class IndividualHedTagsShort(TestHed3):
     def test_invalid_placeholder_in_normal_string(self):
         test_strings = {
             'invalidPlaceholder': 'Duration/# ms',
+            'invalidMiscPoundSign': 'Du#ation/20 ms',
+            'invalidAfterBaseTag': 'Action/Invalid#/InvalidExtension'
         }
         expected_results = {
             'invalidPlaceholder': False,
+            'invalidMiscPoundSign': False,
+            'invalidAfterBaseTag': False,
         }
         expected_issues = {
             'invalidPlaceholder': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
                                                                    tag=0,
                                                                    index_in_tag=9, index_in_tag_end=10,
+                                                                   actual_error=ValidationErrors.HED_VALUE_INVALID),
+            'invalidMiscPoundSign': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                                   tag=0,
+                                                                   index_in_tag=0, index_in_tag_end=8),
+            'invalidAfterBaseTag': self.format_error_but_not_really(ValidationErrors.INVALID_TAG_CHARACTER,
+                                                                   tag=0,
+                                                                   index_in_tag=14, index_in_tag_end=15,
                                                                    actual_error=ValidationErrors.HED_VALUE_INVALID),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
@@ -392,5 +403,30 @@ class TestTagLevels3(TestHed3):
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
 
+class FullHedString(TestHed3):
+    compute_forms = False
+
+    @staticmethod
+    def string_obj_func(validator):
+        return validator._tag_validator.run_hed_string_validators
+
+    def test_invalid_placeholders(self):
+        # We might want these to be banned later as invalid characters.
+        test_strings = {
+            'invalidPlaceholder': 'Duration/# ms',
+            'invalidMiscPoundSign': 'Du#ation/20 ms',
+        }
+        expected_results = {
+            'invalidPlaceholder': True,
+            'invalidMiscPoundSign': True,
+        }
+        expected_issues = {
+            'invalidPlaceholder': [],
+            'invalidMiscPoundSign': [],
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+
 if __name__ == '__main__':
     unittest.main()
+

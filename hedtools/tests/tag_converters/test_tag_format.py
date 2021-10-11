@@ -19,7 +19,7 @@ class TestConvertTag(TestTagFormat):
             error_handler = error_reporter.ErrorHandler()
             error_handler.reset_error_context()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string_obj, increment_depth_after=False)
-            test_issues = test_string_obj.convert_to_canonical_forms(self.hed_schema, error_handler)
+            test_issues = test_string_obj.convert_to_canonical_forms(self.hed_schema)
             if convert_to_short:
                 string_result = test_string_obj.get_as_short()
             else:

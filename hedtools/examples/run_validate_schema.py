@@ -9,7 +9,7 @@ from hed.schema.hed_schema_file import load_schema
 
 if __name__ == '__main__':
     # This old schema should produce many issues, including many duplicate terms
-    local_hed_xml = "data/HED7.1.1.xml"
+    local_hed_xml = "HED8.0.0.mediawiki"
     hed_schema = load_schema(local_hed_xml)
     issues = hed_schema.check_compliance()
     print(get_printable_issue_string(issues))
