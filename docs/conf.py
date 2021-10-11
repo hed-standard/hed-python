@@ -10,14 +10,14 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../hedtools/hed/'))
+sys.path.insert(0, os.path.abspath('../../wedtools/hedweb/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'HED specification'
+project = 'HED python'
 copyright = '2021, HED Working Group'
 author = 'HED Working Group'
 
@@ -30,17 +30,29 @@ release = '8.0.0'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["myst_parser"]
+extensions = [
+    "myst_parser",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.githubpages",
+]
+
+autosummary_generate = True
 myst_heading_anchors = 2
 myst_enable_extensions = ["deflist"]
 
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+html_static_path = ['_static']
+source_suffix = ['.rst', '.md']
+master_doc = 'index'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ['_build', '_templates']
 
 
 # -- Options for HTML output -------------------------------------------------
