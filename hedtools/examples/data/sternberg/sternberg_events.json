@@ -1,0 +1,33 @@
+{
+  "event_type": {
+    "HED": {
+      "fixation": "Label/fixation",
+      "left_click": "Label/left_click",
+      "response": "Label/response",
+      "right_click": "Label/right_click",
+      "show_cross": "Label/show_cross",
+      "show_dash": "Label/show_dash",
+      "show_letter": "Label/show_letter",
+      "sound_beep": "Label/sound_beep",
+      "sound_buzz": "Label/sound_buzz"
+    }
+  },
+  "task_role": {
+    "HED": {
+      "correct_feedback": "Label/correct_feedback",
+      "fixate": "Label/fixate",
+      "in_group": "Label/in_group",
+      "incorrect_feedback": "Label/incorrect_feedback",
+      "non_target": "Label/non_target",
+      "out_group": "Label/out_group",
+      "probe": "Label/probe",
+      "ready": "Label/ready",
+      "target": "Label/target",
+      "unknown": "Label/unknown",
+      "work_memory": "Label/work_memory"
+    }
+  },
+  "letter": {
+    "HED": "Label/letter, Label/#"
+  }
+}

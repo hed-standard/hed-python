@@ -5,7 +5,7 @@ import json
 from flask import current_app
 from hed import models
 from hed import schema as hedschema
-from hedweb.constants import common
+from hedweb.constants import base_constants
 from hedweb import events, spreadsheet, sidecar, strings
 
 
@@ -30,59 +30,61 @@ def get_input_from_request(request):
     form_string = form_data.decode()
     service_request = json.loads(form_string)
     arguments = get_service_info(service_request)
-    arguments[common.SCHEMA] = get_input_schema(service_request)
+    arguments[base_constants.SCHEMA] = get_input_schema(service_request)
     arguments.update(get_input_objects(service_request))
     return arguments
 
 
 def get_input_objects(params):
     args = {}
-    if common.JSON_STRING in params and params[common.JSON_STRING]:
-        args[common.JSON_SIDECAR] = models.Sidecar(file=io.StringIO(params[common.JSON_STRING]), name='JSON_Sidecar')
-    if common.EVENTS_STRING in params and params[common.EVENTS_STRING]:
-        args[common.EVENTS] = models.EventsInput(file=io.StringIO(params[common.EVENTS_STRING]),
-                                                 sidecars=args[common.JSON_SIDECAR], name='Events')
-    if common.SPREADSHEET_STRING in params and params[common.SPREADSHEET_STRING]:
+    if base_constants.JSON_STRING in params and params[base_constants.JSON_STRING]:
+        args[base_constants.JSON_SIDECAR] = \
+            models.Sidecar(file=io.StringIO(params[base_constants.JSON_STRING]), name='JSON_Sidecar')
+    if base_constants.EVENTS_STRING in params and params[base_constants.EVENTS_STRING]:
+        args[base_constants.EVENTS] = \
+            models.EventsInput(file=io.StringIO(params[base_constants.EVENTS_STRING]),
+                               sidecars=args[base_constants.JSON_SIDECAR], name='Events')
+    if base_constants.SPREADSHEET_STRING in params and params[base_constants.SPREADSHEET_STRING]:
         tag_columns, prefix_dict = spreadsheet.get_prefix_dict(params)
-        args[common.SPREADSHEET] = models.HedInput(file=io.StringIO(params[common.SPREADSHEET_STRING]),
-                                                   file_type=".tsv", tag_columns=tag_columns,
-                                                   has_column_names=args.get(common.HAS_COLUMN_NAMES, None),
-                                                   column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
-    if common.STRING_LIST in params and params[common.STRING_LIST]:
-        args[common.STRING_LIST] = params[common.STRING_LIST]
+        args[base_constants.SPREADSHEET] = \
+            models.HedInput(file=io.StringIO(params[base_constants.SPREADSHEET_STRING]), file_type=".tsv",
+                            tag_columns=tag_columns, has_column_names=args.get(base_constants.HAS_COLUMN_NAMES, None),
+                            column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
+    if base_constants.STRING_LIST in params and params[base_constants.STRING_LIST]:
+        args[base_constants.STRING_LIST] = params[base_constants.STRING_LIST]
 
     return args
 
 
 def get_service_info(parameters):
-    service = parameters.get(common.SERVICE, '')
+    service = parameters.get(base_constants.SERVICE, '')
     command = service
     command_target = ''
     pieces = service.split('_', 1)
     if command != "get_services" and len(pieces) == 2:
         command = pieces[1]
         command_target = pieces[0]
-    has_column_names =  parameters.get(common.HAS_COLUMN_NAMES, '') == 'on'
-    check_warnings = parameters.get(common.CHECK_WARNINGS_VALIDATE, '') == 'on'
-    defs_expand = parameters.get(common.DEFS_EXPAND, '') == 'on'
-    return {common.SERVICE: service,
-            common.COMMAND: command,
-            common.COMMAND_TARGET: command_target,
-            common.HAS_COLUMN_NAMES: has_column_names,
-            common.CHECK_WARNINGS_VALIDATE: check_warnings,
-            common.DEFS_EXPAND: defs_expand
+    has_column_names = parameters.get(base_constants.HAS_COLUMN_NAMES, '') == 'on'
+    check_warnings = parameters.get(base_constants.CHECK_WARNINGS_VALIDATE, '') == 'on'
+    defs_expand = parameters.get(base_constants.DEFS_EXPAND, '') == 'on'
+    return {base_constants.SERVICE: service,
+            base_constants.COMMAND: command,
+            base_constants.COMMAND_TARGET: command_target,
+            base_constants.HAS_COLUMN_NAMES: has_column_names,
+            base_constants.CHECK_WARNINGS_VALIDATE: check_warnings,
+            base_constants.DEFS_EXPAND: defs_expand
             }
 
 
 def get_input_schema(parameters):
 
-    if common.SCHEMA_STRING in parameters and parameters[common.SCHEMA_STRING]:
-        the_schema = hedschema.from_string(parameters[common.SCHEMA_STRING])
-    elif common.SCHEMA_URL in parameters and parameters[common.SCHEMA_URL]:
-        schema_url = parameters[common.SCHEMA_URL]
+    if base_constants.SCHEMA_STRING in parameters and parameters[base_constants.SCHEMA_STRING]:
+        the_schema = hedschema.from_string(parameters[base_constants.SCHEMA_STRING])
+    elif base_constants.SCHEMA_URL in parameters and parameters[base_constants.SCHEMA_URL]:
+        schema_url = parameters[base_constants.SCHEMA_URL]
         the_schema = hedschema.load_schema(hed_url_path=schema_url)
-    elif common.SCHEMA_VERSION in parameters and parameters[common.SCHEMA_VERSION]:
-        hed_file_path = hedschema.get_path_from_hed_version(parameters[common.SCHEMA_VERSION])
+    elif base_constants.SCHEMA_VERSION in parameters and parameters[base_constants.SCHEMA_VERSION]:
+        hed_file_path = hedschema.get_path_from_hed_version(parameters[base_constants.SCHEMA_VERSION])
         the_schema = hedschema.load_schema(hed_file_path=hed_file_path)
     else:
         the_schema = []
@@ -104,13 +106,13 @@ def process(arguments):
         A dictionary of results in standard response format to be jsonified.
     """
 
-    command = arguments.get(common.COMMAND, '')
-    target = arguments.get(common.COMMAND_TARGET, '')
-    response = {common.SERVICE: arguments.get(common.SERVICE, ''),
-                common.COMMAND: command, common.COMMAND_TARGET: target,
+    command = arguments.get(base_constants.COMMAND, '')
+    target = arguments.get(base_constants.COMMAND_TARGET, '')
+    response = {base_constants.SERVICE: arguments.get(base_constants.SERVICE, ''),
+                base_constants.COMMAND: command, base_constants.COMMAND_TARGET: target,
                 'results': '', 'error_type': '', 'error_msg': ''}
 
-    if not arguments.get(common.SERVICE, ''):
+    if not arguments.get(base_constants.SERVICE, ''):
         response["error_type"] = 'HEDServiceMissing'
         response["error_msg"] = "Must specify a valid service"
     elif command == 'get_services':
@@ -131,10 +133,10 @@ def process(arguments):
 
 
 def package_spreadsheet(results):
-    if results['msg_category'] == 'success' and common.SPREADSHEET in results:
-        results[common.SPREADSHEET] = results[common.SPREADSHEET].to_csv(file=None)
-    elif common.SPREADSHEET in results:
-        del results[common.SPREADSHEET]
+    if results['msg_category'] == 'success' and base_constants.SPREADSHEET in results:
+        results[base_constants.SPREADSHEET] = results[base_constants.SPREADSHEET].to_csv(file=None)
+    elif base_constants.SPREADSHEET in results:
+        del results[base_constants.SPREADSHEET]
     return results
 
 
@@ -174,6 +176,6 @@ def services_list():
     for result_val, meaning in results.items():
         results_string += f'\t{result_val}: {meaning}\n'
     data = services_string + meanings_string + returns_string + results_string
-    return {common.COMMAND: '', 'data': data, 'output_display_name': '',
-            common.SCHEMA_VERSION: '', 'msg_category': 'success',
+    return {base_constants.COMMAND: '', 'data': data, 'output_display_name': '',
+            base_constants.SCHEMA_VERSION: '', 'msg_category': 'success',
             'msg': "List of available services and their meanings"}

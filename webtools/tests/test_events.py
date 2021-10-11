@@ -7,7 +7,7 @@ from tests.test_web_base import TestWebBase
 from hed import schema as hedschema
 from hed import models
 from hed.errors.exceptions import HedFileError
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -28,18 +28,18 @@ class Test(TestWebBase):
             events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.tsv')
             with open(json_path, 'rb') as fp:
                 with open(events_path, 'rb') as fpe:
-                    environ = create_environ(data={common.JSON_FILE: fp, common.SCHEMA_VERSION: '8.0.0',
-                                             common.EVENTS_FILE: fpe, common.DEFS_EXPAND: 'on',
-                                             common.COMMAND_OPTION: common.COMMAND_ASSEMBLE})
+                    environ = create_environ(data={base_constants.JSON_FILE: fp, base_constants.SCHEMA_VERSION: '8.0.0',
+                                             base_constants.EVENTS_FILE: fpe, base_constants.DEFS_EXPAND: 'on',
+                                             base_constants.COMMAND_OPTION: base_constants.COMMAND_ASSEMBLE})
             request = Request(environ)
             arguments = get_input_from_events_form(request)
-            self.assertIsInstance(arguments[common.EVENTS], EventsInput,
+            self.assertIsInstance(arguments[base_constants.EVENTS], EventsInput,
                                   "get_input_from_events_form should have an events object")
-            self.assertIsInstance(arguments[common.SCHEMA], HedSchema,
+            self.assertIsInstance(arguments[base_constants.SCHEMA], HedSchema,
                                   "get_input_from_events_form should have a HED schema")
-            self.assertEqual(common.COMMAND_ASSEMBLE, arguments[common.COMMAND],
+            self.assertEqual(base_constants.COMMAND_ASSEMBLE, arguments[base_constants.COMMAND],
                              "get_input_from_events_form should have a command")
-            self.assertTrue(arguments[common.DEFS_EXPAND],
+            self.assertTrue(arguments[base_constants.DEFS_EXPAND],
                             "get_input_from_events_form should have defs_expand true when on")
 
     def test_events_process_empty_file(self):
@@ -63,8 +63,9 @@ class Test(TestWebBase):
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
-        arguments = {common.EVENTS: events, common.COMMAND: common.COMMAND_VALIDATE, common.DEFS_EXPAND: True,
-                     common.CHECK_WARNINGS_VALIDATE: True, common.SCHEMA: hed_schema}
+        arguments = {base_constants.EVENTS: events, base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                     base_constants.DEFS_EXPAND: True,
+                     base_constants.CHECK_WARNINGS_VALIDATE: True, base_constants.SCHEMA: hed_schema}
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -73,7 +74,7 @@ class Test(TestWebBase):
                              'process validate should return success if no errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
-        arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=schema_path)
+        arguments[base_constants.SCHEMA] = hedschema.load_schema(hed_file_path=schema_path)
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),

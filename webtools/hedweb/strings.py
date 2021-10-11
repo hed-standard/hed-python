@@ -6,7 +6,7 @@ from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 
-from hedweb.constants import common
+from hedweb.constants import base_constants
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down
 
 app_config = current_app.config
@@ -26,15 +26,16 @@ def get_input_from_form(request):
         A dictionary containing input arguments for calling the underlying string processing functions.
     """
     hed_schema = get_hed_schema_from_pull_down(request)
-    hed_string = request.form.get(common.STRING_INPUT, None)
+    hed_string = request.form.get(base_constants.STRING_INPUT, None)
     if hed_string:
         string_list = [hed_string]
     else:
         raise HedFileError('EmptyHedString', 'Must enter a HED string', '')
-    arguments = {common.COMMAND: request.form.get(common.COMMAND_OPTION, ''),
-                 common.SCHEMA: hed_schema,
-                 common.STRING_LIST: string_list,
-                 common.CHECK_WARNINGS_VALIDATE: form_has_option(request, common.CHECK_WARNINGS_VALIDATE, 'on')}
+    arguments = {base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, ''),
+                 base_constants.SCHEMA: hed_schema,
+                 base_constants.STRING_LIST: string_list,
+                 base_constants.CHECK_WARNINGS_VALIDATE:
+                     form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on')}
     return arguments
 
 
@@ -52,24 +53,24 @@ def process(arguments):
         A dictionary with the results in standard format.
     """
     hed_schema = arguments.get('schema', None)
-    command = arguments.get(common.COMMAND, None)
+    command = arguments.get(base_constants.COMMAND, None)
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
-    string_list = arguments.get(common.STRING_LIST, None)
+    string_list = arguments.get(base_constants.STRING_LIST, None)
     if not string_list:
         raise HedFileError('EmptyHedStringList', "Please provide a list of HED strings to be processed", "")
-    if command == common.COMMAND_VALIDATE:
+    if command == base_constants.COMMAND_VALIDATE:
         results = validate(hed_schema, string_list)
-    elif command == common.COMMAND_TO_SHORT:
-        results = convert(hed_schema, string_list, command=common.COMMAND_TO_SHORT)
-    elif command == common.COMMAND_TO_LONG:
+    elif command == base_constants.COMMAND_TO_SHORT:
+        results = convert(hed_schema, string_list, command=base_constants.COMMAND_TO_SHORT)
+    elif command == base_constants.COMMAND_TO_LONG:
         results = convert(hed_schema, string_list)
     else:
         raise HedFileError('UnknownProcessingMethod', 'Select a hedstring processing method', '')
     return results
 
 
-def convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
+def convert(hed_schema, string_list, command=base_constants.COMMAND_TO_LONG):
     """Converts a list of strings from long to short unless command is not COMMAND_TO_LONG then converts to short
 
     Parameters
@@ -95,7 +96,7 @@ def convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
     conversion_errors = []
     for pos, string in enumerate(string_list, start=1):
         hed_string_obj = models.HedString(string)
-        if command == common.COMMAND_TO_LONG:
+        if command == base_constants.COMMAND_TO_LONG:
             converted_string, issues = hed_string_obj.convert_to_long(hed_schema)
         else:
             converted_string, issues = hed_string_obj.convert_to_short(hed_schema)
@@ -104,12 +105,12 @@ def convert(hed_schema, string_list, command=common.COMMAND_TO_LONG):
         strings.append(converted_string)
 
     if conversion_errors:
-        return {common.COMMAND: command, 'data': conversion_errors, 'additional_info': string_list,
-                common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
+        return {base_constants.COMMAND: command, 'data': conversion_errors, 'additional_info': string_list,
+                base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': 'Some strings had conversion errors, results of conversion in additional_info'}
     else:
-        return {common.COMMAND: command, 'data': strings,
-                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+        return {base_constants.COMMAND: command, 'data': strings,
+                base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': 'Strings converted successfully'}
 
 
@@ -138,10 +139,10 @@ def validate(hed_schema, string_list):
         if issues:
             validation_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
     if validation_errors:
-        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': validation_errors,
-                common.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
+        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE, 'data': validation_errors,
+                base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': 'Strings had validation errors'}
     else:
-        return {common.COMMAND: common.COMMAND_VALIDATE, 'data': '',
-                common.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
+        return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE, 'data': '',
+                base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
                 'msg': 'Strings validated successfully...'}

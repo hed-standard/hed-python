@@ -130,9 +130,12 @@ class Test(unittest.TestCase):
         input_file_2.reset_column_mapper()
 
         for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(), input_file_2.iter_dataframe()):
-            self.assertEqual(row_number, row_number2)
-            self.assertTrue(len(column_dict) == 4)
-            self.assertTrue(len(column_dict2) == 11)
+            self.assertEqual(row_number, row_number2,
+                             f"EventsInput should have row {row_number} equal to {row_number2} after reset")
+            self.assertTrue(len(column_dict) == 4,
+                            f"The column dictionary for row {row_number} should have the right length")
+            self.assertTrue(len(column_dict2) == 11,
+                            f"The reset column dictionary for row {row_number2} should have the right length")
 
 
 if __name__ == '__main__':

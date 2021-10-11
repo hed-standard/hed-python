@@ -1,5 +1,5 @@
 ADDITIONAL_EXAMPLES_PAGE = 'additional-examples.html'
-COMMON_ERRORS_PAGE = 'common-errors.html'
+HED_ERRORS_PAGE = 'hed-errors.html'
 EVENTS_PAGE = 'events.html'
 HED_COMMANDS_HELP_PAGE = 'hed-commands-help.html'
 HED_SERVICES_HELP_PAGE = 'hed-services-help.html'

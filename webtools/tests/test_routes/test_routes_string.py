@@ -1,7 +1,7 @@
 import json
 import unittest
 from tests.test_web_base import TestWebBase
-from hedweb.constants import common
+from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
@@ -17,10 +17,10 @@ class Test(TestWebBase):
     def test_string_results_to_long(self):
         with self.app.app_context():
             test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
-            input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: common.COMMAND_TO_LONG,
-                          common.CHECK_WARNINGS_VALIDATE: 'on',
-                          common.STRING_INPUT: test_string}
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_LONG,
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                          base_constants.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'To long of a long string has a response')
@@ -48,10 +48,10 @@ class Test(TestWebBase):
     def test_string_results_to_short(self):
         with self.app.app_context():
             test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
-            input_data = {common.SCHEMA_VERSION: '8.0.0',
-                          common.COMMAND_OPTION: common.COMMAND_TO_SHORT,
-                          common.CHECK_WARNINGS_VALIDATE: 'on',
-                          common.STRING_INPUT: test_string}
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_SHORT,
+                          base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                          base_constants.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'To short of a long string has a response')
@@ -79,10 +79,10 @@ class Test(TestWebBase):
     def test_string_results_validate(self):
         with self.app.app_context():
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
-                                          data={common.SCHEMA_VERSION: '8.0.0',
-                                                common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                                                common.CHECK_WARNINGS_VALIDATE: 'on',
-                                                common.STRING_INPUT: 'Red,Blue,Label/3'})
+                                          data={base_constants.SCHEMA_VERSION: '8.0.0',
+                                                base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                                                base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                                                base_constants.STRING_INPUT: 'Red,Blue,Label/3'})
 
             self.assertEqual(200, response.status_code, 'Validation of a valid string has a response')
             response_dict = json.loads(response.data)
@@ -90,10 +90,10 @@ class Test(TestWebBase):
             self.assertFalse(response_dict["data"], "No data should be returned if validation successful")
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
-                                          data={common.SCHEMA_VERSION: '8.0.0',
-                                                common.COMMAND_OPTION: common.COMMAND_VALIDATE,
-                                                common.CHECK_WARNINGS_VALIDATE: 'on',
-                                                common.STRING_INPUT: 'Blob,Blue,Label/3'})
+                                          data={base_constants.SCHEMA_VERSION: '8.0.0',
+                                                base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                                                base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                                                base_constants.STRING_INPUT: 'Blob,Blue,Label/3'})
             self.assertEqual(200, response.status_code, 'Validation of an invalid string has a response')
             response_dict = json.loads(response.data)
             self.assertEqual("warning", response_dict["msg_category"],

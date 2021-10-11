@@ -8,8 +8,8 @@ class Test(TestWebBase):
         self.assertEqual(response.status_code, 200, "The additional-examples content page should exist")
         self.assertTrue(response.data, "The returned page should not be empty")
 
-    def test_render_common_errors_page(self):
-        response = self.app.test.get('/common-errors')
+    def test_render_hed_errors_page(self):
+        response = self.app.test.get('/hed-errors')
         self.assertEqual(response.status_code, 200, "The common-errors content page should exist")
         self.assertTrue(response.data, "The returned page should not be empty")
 
