@@ -2,8 +2,9 @@ import unittest
 import os
 
 from hed.models.hed_string import HedString
-from hed.validator.event_validator import EventValidator
+from hed.validator.hed_validator import HedValidator
 from hed.errors import error_reporter
+from hed.errors.error_reporter import ErrorHandler
 from hed import schema
 from hed.errors.error_types import ValidationErrors, ErrorContext
 
@@ -39,7 +40,7 @@ class TestHedBase(unittest.TestCase):
         error: [{}]
             A single error
         """
-        _ = self.error_handler.format_error(error_type, *args, **kwargs)
+        _ = ErrorHandler.format_error(error_type, *args, **kwargs)
         # Save off params
         params = [error_type, args, kwargs]
         # return params
@@ -58,7 +59,7 @@ class TestHedBase(unittest.TestCase):
                 if tag_index >= len(source_list):
                     raise ValueError("Bad group or tax index in expected errors for unit tests")
                 kwargs['tag'] = source_list[tag_index]
-            formatted_errors += error_handler.format_error(code, *args, **kwargs)
+            formatted_errors += ErrorHandler.format_error(code, *args, **kwargs)
 
         return formatted_errors
 
@@ -71,27 +72,28 @@ class TestValidatorBase(TestHedBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.error_handler = error_reporter.ErrorHandler()
-        cls.syntactic_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                        run_semantic_validation=False, check_for_warnings=False)
+        cls.syntactic_hed_input_reader = HedValidator(hed_schema=None,
+                                                      run_semantic_validation=False, check_for_warnings=False)
         cls.syntactic_tag_validator = cls.syntactic_hed_input_reader._tag_validator
-        cls.syntactic_warning_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                                run_semantic_validation=False, check_for_warnings=True)
+        cls.syntactic_warning_hed_input_reader = HedValidator(hed_schema=None,
+                                                              run_semantic_validation=False, check_for_warnings=True)
         cls.syntactic_warning_tag_validator = cls.syntactic_warning_hed_input_reader._tag_validator
-        cls.semantic_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                       run_semantic_validation=True, check_for_warnings=False)
+        cls.semantic_hed_input_reader = HedValidator(hed_schema=cls.hed_schema,
+                                                     run_semantic_validation=True, check_for_warnings=False)
         cls.semantic_tag_validator = cls.semantic_hed_input_reader._tag_validator
-        cls.semantic_warning_hed_input_reader = EventValidator(hed_schema=cls.hed_schema,
-                                                               run_semantic_validation=True, check_for_warnings=True)
+        cls.semantic_warning_hed_input_reader = HedValidator(hed_schema=cls.hed_schema,
+                                                             run_semantic_validation=True, check_for_warnings=True)
         cls.semantic_warning_tag_validator = cls.semantic_warning_hed_input_reader._tag_validator
 
-    def validator_base(self, test_strings, expected_results, expected_issues, test_function, error_handler):
+    def validator_base(self, test_strings, expected_results, expected_issues, test_function,
+                       hed_schema=None):
         for test_key in test_strings:
             hed_string_obj = HedString(test_strings[test_key])
-            error_handler.reset_error_context()
+            error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
             test_issues = []
             if self.compute_forms:
-                test_issues += hed_string_obj.convert_to_canonical_forms(self.hed_schema, error_handler)
+                test_issues += hed_string_obj.convert_to_canonical_forms(hed_schema)
             if not test_issues:
                 test_issues += test_function(hed_string_obj)
             test_result = not test_issues
@@ -112,11 +114,12 @@ class TestValidatorBase(TestHedBase):
         if check_for_warnings is True:
             validator = self.syntactic_warning_hed_input_reader
         self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator), validator._error_handler)
+                            self.string_obj_func(validator))
 
     def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         validator = self.semantic_hed_input_reader
         if check_for_warnings is True:
             validator = self.semantic_warning_hed_input_reader
         self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator), validator._error_handler)
+                            self.string_obj_func(validator),
+                            hed_schema=validator._hed_schema)

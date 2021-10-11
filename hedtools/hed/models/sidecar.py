@@ -9,6 +9,7 @@ from hed.models.def_mapper import DefinitionMapper
 
 class Sidecar:
     """This stores column definitions for parsing hed spreadsheets, generally loaded from a single json file."""
+
     def __init__(self, file, name=None):
         """
 
@@ -188,37 +189,44 @@ class Sidecar:
         column_entry = ColumnMetadata(column_type, column_name, dict_for_entry)
         self._column_data[column_name] = column_entry
 
-    def validate_entries(self, hed_schema=None, name=None, error_handler=None):
-        """Validate the column entries, and also hed strings in the column entries if a hed_schema is passed.
+    def validate_entries(self, validators=None, name=None, error_handler=None,
+                         **kwargs):
+        """Run the given validators on all columns in this sidecar
 
         Parameters
         ----------
-        hed_schema : HedSchema, optional
-            The dictionary to use to validate individual hed strings.
+
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings in this sidecar.
         name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
         Returns
         -------
         validation_issues: [{}]
             The list of validation issues found
-
         """
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
         if not name:
             name = self.name
+        if not isinstance(validators, list):
+            validators = [validators]
         if name:
             error_handler.push_error_context(ErrorContext.FILE_NAME, name, False)
 
         def_dicts = [column_entry.def_dict for column_entry in self]
         def_mapper = DefinitionMapper(def_dicts)
+        validators.append(def_mapper)
         all_validation_issues = []
-        for column_entry in self:
-            all_validation_issues += column_entry.validate_column_entry(hed_schema, error_handler=error_handler,
-                                                                        def_mapper=def_mapper)
+        for column_data in self:
+            all_validation_issues += column_data.validate_column(validators, also_validate=True,
+                                                                 error_handler=error_handler,
+                                                                 **kwargs)
 
         if name:
             error_handler.pop_error_context()

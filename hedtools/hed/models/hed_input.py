@@ -1,5 +1,6 @@
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
+from hed.models.def_mapper import DefinitionMapper
 
 
 class HedInput(BaseInput):
@@ -36,7 +37,9 @@ class HedInput(BaseInput):
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
-                                  extra_def_dicts=def_dicts)
-        super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper,
+        new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+
+        def_mapper = DefinitionMapper(def_dicts)
+
+        super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, def_mapper=def_mapper,
                          name=name)

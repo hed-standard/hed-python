@@ -4,6 +4,7 @@ import os
 from hed.models.sidecar import Sidecar
 from hed.models.column_metadata import ColumnMetadata
 from hed.errors.exceptions import HedFileError
+from hed.validator.hed_validator import HedValidator
 from hed import schema
 import io
 
@@ -86,15 +87,16 @@ class Test(unittest.TestCase):
     #
 
     def test_validate_column_group(self):
-        validation_issues = self.json_def_sidecar.validate_entries(hed_schema=self.hed_schema)
+        validator = HedValidator(hed_schema=self.hed_schema, check_for_warnings=True)
+        validation_issues = self.json_def_sidecar.validate_entries(validator)
         # This has various extended warnings
-        self.assertEqual(len(validation_issues), 8)
+        self.assertEqual(len(validation_issues), 14)
 
-        validation_issues = self.default_sidecar.validate_entries(hed_schema=self.hed_schema)
+        validation_issues = self.default_sidecar.validate_entries(validator)
         self.assertEqual(len(validation_issues), 4)
 
-        validation_issues = self.errors_sidecar.validate_entries(hed_schema=self.hed_schema)
-        self.assertEqual(len(validation_issues), 6)
+        validation_issues = self.errors_sidecar.validate_entries(validator)
+        self.assertEqual(len(validation_issues), 8)
 
 
 if __name__ == '__main__':
