@@ -51,7 +51,10 @@ def get_input_objects(params):
                             tag_columns=tag_columns, has_column_names=args.get(base_constants.HAS_COLUMN_NAMES, None),
                             column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
     if base_constants.STRING_LIST in params and params[base_constants.STRING_LIST]:
-        args[base_constants.STRING_LIST] = params[base_constants.STRING_LIST]
+        s_list = []
+        for s in params[base_constants.STRING_LIST]:
+            s_list.append(models.HedString(s))
+        args[base_constants.STRING_LIST] = s_list
 
     return args
 

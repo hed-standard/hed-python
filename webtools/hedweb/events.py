@@ -7,7 +7,7 @@ from hed import models
 from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
-from hed.validator.event_validator import EventValidator
+from hed.validator.hed_validator import HedValidator
 from hedweb.constants import base_constants
 from hedweb.columns import create_column_selections
 from hed.tools import get_columns_info
@@ -44,6 +44,7 @@ def get_input_from_events_form(request):
     if base_constants.JSON_FILE in request.files:
         f = request.files[base_constants.JSON_FILE]
         json_sidecar = models.Sidecar(file=f, name=secure_filename(f.filename))
+    arguments[base_constants.JSON_SIDECAR] = json_sidecar
     if base_constants.EVENTS_FILE in request.files:
         f = request.files[base_constants.EVENTS_FILE]
         arguments[base_constants.EVENTS] = \
@@ -68,12 +69,13 @@ def process(arguments):
     command = arguments.get(base_constants.COMMAND, None)
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema for event processing", "")
-    events = arguments.get(base_constants.EVENTS, 'None')
+    events = arguments.get(base_constants.EVENTS, None)
+    sidecar = arguments.get(base_constants.JSON_SIDECAR, None)
     if not events or not isinstance(events, models.EventsInput):
         raise HedFileError('InvalidEventsFile', "An events file was given but could not be processed", "")
 
     if command == base_constants.COMMAND_VALIDATE:
-        results = validate(hed_schema, events)
+        results = validate(hed_schema, events, sidecar)
     elif command == base_constants.COMMAND_ASSEMBLE:
         results = assemble(hed_schema, events, arguments.get(base_constants.DEFS_EXPAND, True))
     elif command == base_constants.COMMAND_EXTRACT:
@@ -157,7 +159,7 @@ def extract(hed_schema, events, columns_selected):
                 'msg_category': 'success', 'msg': 'Events extraction to JSON complete'}
 
 
-def validate(hed_schema, events):
+def validate(hed_schema, events, sidecar=None):
     """Validates and events input object and returns the results.
 
     Parameters
@@ -166,6 +168,8 @@ def validate(hed_schema, events):
         Version number or path or HedSchema object to be used
     events: EventsInput
         Events input object to be validated
+    sidecar: Sidecar
+        Representation of a BIDS JSON sidecar object
 
     Returns
     -------
@@ -175,12 +179,19 @@ def validate(hed_schema, events):
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     display_name = events.name
-    issues = events.validate_file_sidecars(hed_schema)
-    if not issues:
-        validator = EventValidator(hed_schema=hed_schema)
-        issues = validator.validate_file(events)
+    validator = HedValidator(hed_schema=hed_schema)
+    issue_str = ''
+    if sidecar:
+        issues = sidecar.validate_entries(validator)
+        issue_str = issue_str + get_printable_issue_string(issues, title="Sidecar definition errors:")
+    issues = events.validate_file_sidecars(validator)
     if issues:
-        issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
+        issue_str = issue_str + get_printable_issue_string(issues, title="Sidecar errors:")
+    issues = events.validate_file(validator)
+    if issues:
+        issue_str = issue_str + get_printable_issue_string(issues, title="Event file errors:")
+
+    if issue_str:
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
         return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
                 'data': issue_str, "output_display_name": file_name,

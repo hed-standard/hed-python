@@ -10,11 +10,13 @@ from hed.tools import get_row_hash
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        cls.stern_map_path = os.path.join(base_dir, "sternberg_map.tsv")
-        cls.stern_test1_path = os.path.join(base_dir, "sternberg_test_events.tsv")
-        cls.stern_test2_path = os.path.join(base_dir, "sternberg_with_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(base_dir, "auditory_visual_shift_events.tsv")
+        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/attention_shift')
+        cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
+        cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
+        cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
+        cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
+        cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
         cls.key_cols = ['type']
         cls.target_cols = ['event_type', 'task_role', 'letter']
         cls.count_col = ['counts']

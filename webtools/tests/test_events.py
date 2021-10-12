@@ -92,7 +92,7 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
-            results = assemble(hed_schema, events, defs_expand=True)
+            results = assemble(hed_schema, events,  defs_expand=True)
             self.assertTrue('data' in results,
                             'assemble results should have a data key when no errors')
             self.assertEqual('success', results["msg_category"],
