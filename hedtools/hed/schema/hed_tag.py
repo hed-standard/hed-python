@@ -1,11 +1,12 @@
-from hed.errors import error_reporter
 from hed.errors.error_types import ValidationErrors
+from hed.errors.error_reporter import ErrorHandler
 
 
 class HedTag:
     """
         A single HedTag in a string, keeps track of original value and positioning
     """
+
     def __init__(self, hed_string, span=None, extension_index=None):
         """
 
@@ -42,6 +43,8 @@ class HedTag:
         if extension_index:
             self._extension_index = extension_index
             self._long_tag = self._hed_string
+
+        self.is_definition = False
 
     def _get_library_prefix(self, org_tag):
         first_slash = org_tag.find("/")
@@ -91,6 +94,36 @@ class HedTag:
         return self._long_tag[:self._extension_index]
 
     @property
+    def short_base_tag(self):
+        if self._extension_index is None:
+            return str(self)
+
+        return self._long_tag[self._short_tag_index:self._extension_index]
+
+    @short_base_tag.setter
+    def short_base_tag(self, new_tag_val):
+        self._tag = None
+        self._long_tag = f"{new_tag_val}/{self.extension}"
+        self._short_tag_index = 0
+        self._extension_index = len(new_tag_val)
+
+    @property
+    def extension(self):
+        """
+            Returns the long version of the tag, without value or extension
+
+            Note: only valid after calling convert_to_canonical_forms
+        Returns
+        -------
+        base_tag: str
+            The long version of the tag, without value or extension
+        """
+        if self._extension_index is None:
+            return str(self)
+
+        return self._long_tag[self._extension_index + 1:]
+
+    @property
     def org_base_tag(self):
         """
             Returns the original version of the tag, without value or extension
@@ -116,7 +149,7 @@ class HedTag:
         if org_len == extension_len:
             return ""
 
-        return self.tag[:org_len-(extension_len + 1)]
+        return self.tag[:org_len - (extension_len + 1)]
 
     def tag_modified(self):
         return bool(self._tag)
@@ -236,9 +269,14 @@ class HedTag:
 
     def replace_placeholder(self, placeholder_value):
         if "#" in self.org_tag:
-            self.tag = self.org_tag.replace("#", placeholder_value)
+            if self._long_tag:
+                # This could possibly be more efficient
+                self._tag = self.org_tag.replace("#", placeholder_value)
+                self._long_tag = self._long_tag.replace("#", placeholder_value)
+            else:
+                self._tag = self.org_tag.replace("#", placeholder_value)
 
-    def convert_to_canonical_forms(self, hed_schema, error_handler=None):
+    def convert_to_canonical_forms(self, hed_schema):
         """
             This updates the internal tag states from the schema, so you can convert from short to long etc
 
@@ -246,8 +284,6 @@ class HedTag:
         ----------
         hed_schema : HedSchema
             The schema to use to validate this tag
-        error_handler : ErrorHandler or None
-            The error handler to generate errors with
 
         Returns
         -------
@@ -255,23 +291,60 @@ class HedTag:
             A list of issues found during conversion
         """
         if not hed_schema:
-            return []
+            return self._convert_key_tags_to_canonical_form()
 
         specific_schema = hed_schema.schema_for_prefix(self.library_prefix)
         if not specific_schema:
-            validation_issues = error_handler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, self,
-                                                           self.library_prefix, list(hed_schema.valid_prefixes))
+            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, self,
+                                                          self.library_prefix, list(hed_schema.valid_prefixes))
             return validation_issues
 
         long_form, short_index, remainder_index, tag_issues = \
-            self._calculate_canonical_forms(specific_schema, error_handler)
+            self._calculate_canonical_forms(specific_schema)
         self._long_tag = long_form
         self._short_tag_index = short_index
         self._extension_index = remainder_index
 
         return tag_issues
-    
-    def _calculate_canonical_forms(self, hed_schema, error_handler=None):
+
+    def _convert_key_tags_to_canonical_form(self):
+        # todo: eventually make this function less bad.
+        # Finds the canonical form for basic known tags such as definition and def.
+        tags_to_identify = ["def", "onset", "definition", "offset", "def-expand"]
+        for key_tag in tags_to_identify:
+            is_key_tag = self._check_tag_starts_with(str(self), key_tag)
+            if is_key_tag is not None:
+                self._long_tag = str(self)
+                self._extension_index = len(str(self)) - len(is_key_tag)
+                self._short_tag_index = self._extension_index - len(key_tag)
+
+        return []
+
+    @staticmethod
+    def _check_tag_starts_with(hed_tag, target_tag_short_name):
+        """ Check if a given tag starts with a given string, and returns the tag with the prefix removed if it does.
+
+        Parameters
+        ----------
+        hed_tag : str
+            A single input tag
+        target_tag_short_name : str
+            The string to match eg find target_tag_short_name in hed_tag
+        Returns
+        -------
+            str: the tag without the removed prefix, or None
+        """
+        hed_tag_lower = hed_tag.lower()
+        found_index = hed_tag_lower.find(target_tag_short_name)
+
+        if found_index == -1:
+            return None
+
+        if found_index == 0 or hed_tag_lower[found_index - 1] == "/":
+            return hed_tag[found_index + len(target_tag_short_name):]
+        return None
+
+    def _calculate_canonical_forms(self, hed_schema):
         """
         This takes a hed tag(short or long form) and converts it to the long form
         Works left to right.(mostly relevant for errors)
@@ -281,8 +354,6 @@ class HedTag:
         ----------
         hed_schema: HedSchema
             The hed schema to use to compute forms of this tag.
-        error_handler: ErrorHandler
-            The error handler to use for context.  Will create a default one if not passed.
         Returns
         -------
         long_tag: str
@@ -294,9 +365,6 @@ class HedTag:
         errors: list
             a list of errors while converting
         """
-        if error_handler is None:
-            error_handler = error_reporter.ErrorHandler()
-
         clean_tag = self.tag.lower()
         prefix = self.library_prefix
         clean_tag = clean_tag[len(prefix):]
@@ -321,9 +389,9 @@ class HedTag:
                 if tag not in hed_schema.short_tag_mapping:
                     found_unknown_extension = True
                     if not found_long_org_tag:
-                        error = error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                           self, index_in_tag=index_start + prefix_tag_adj,
-                                                           index_in_tag_end=index_in_tag_end + prefix_tag_adj)
+                        error = ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                          self, index_in_tag=index_start + prefix_tag_adj,
+                                                          index_in_tag_end=index_in_tag_end + prefix_tag_adj)
                         return str(self), None, None, error
                     continue
 
@@ -346,18 +414,18 @@ class HedTag:
                             long_org_tag = org_tag_string
                             break
                 if not long_org_tag:
-                    error = error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=self,
-                                                       index_in_tag=index_start + prefix_tag_adj,
-                                                       index_in_tag_end=index_in_tag_end + prefix_tag_adj,
-                                                       expected_parent_tag=long_org_tags)
+                    error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=self,
+                                                      index_in_tag=index_start + prefix_tag_adj,
+                                                      index_in_tag_end=index_in_tag_end + prefix_tag_adj,
+                                                      expected_parent_tag=long_org_tags)
                     return str(self), None, None, error
 
                 # In hed2 compatible, make sure this is a long form of a tag or throw an invalid base tag error.
                 if hed_schema._has_duplicate_tags:
                     if not clean_tag.startswith(long_org_tag.lower()):
-                        error = error_handler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                           self, index_in_tag=index_start + prefix_tag_adj,
-                                                           index_in_tag_end=index_in_tag_end + prefix_tag_adj)
+                        error = ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                          self, index_in_tag=index_start + prefix_tag_adj,
+                                                          index_in_tag_end=index_in_tag_end + prefix_tag_adj)
                         return str(self), None, None, error
 
                 found_index_start = index_start
@@ -366,10 +434,10 @@ class HedTag:
             else:
                 # These means we found a known tag in the remainder/extension section, which is an error
                 if tag in hed_schema.short_tag_mapping:
-                    error = error_handler.format_error(ValidationErrors.INVALID_PARENT_NODE, self,
-                                                       index_in_tag=index_start + prefix_tag_adj,
-                                                       index_in_tag_end=index_in_tag_end + prefix_tag_adj,
-                                                       expected_parent_tag=hed_schema.short_tag_mapping[tag])
+                    error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE, self,
+                                                      index_in_tag=index_start + prefix_tag_adj,
+                                                      index_in_tag_end=index_in_tag_end + prefix_tag_adj,
+                                                      expected_parent_tag=hed_schema.short_tag_mapping[tag])
                     return str(self), None, None, error
 
         full_tag_string = str(self)
