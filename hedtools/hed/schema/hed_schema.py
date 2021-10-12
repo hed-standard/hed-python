@@ -676,7 +676,6 @@ class HedSchema:
         attr_dict: {str: [str]}
             {attribute_name, [long form tags/units/etc with it])
         """
-        # todo: improve this heavily.
         unknown_attributes = {}
         for section in self._sections.values():
             for entry in section.values():

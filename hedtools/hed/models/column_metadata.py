@@ -3,6 +3,8 @@ from hed.models.hed_string import HedString
 from hed.models.def_dict import DefDict
 from hed.errors.error_types import SidecarErrors, ErrorContext, ValidationErrors
 from hed.errors import error_reporter
+from hed.errors.error_reporter import ErrorHandler
+from hed.models.util import translate_ops
 
 
 class ColumnType(Enum):
@@ -24,6 +26,7 @@ class ColumnType(Enum):
 
 class ColumnMetadata:
     """A single column in either the ColumnMapper or Sidecar"""
+
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None,
                  error_handler=None):
         """
@@ -54,10 +57,19 @@ class ColumnMetadata:
         self.column_name = name
         self.column_prefix = column_prefix
         self._hed_dict = hed_dict
-        self._def_dict = self.extract_defs(error_handler=error_handler)
+        self._def_removed_hed_dict = {}
+        self._def_dict = self.extract_definitions(error_handler=error_handler)
 
     @property
     def def_dict(self):
+        """
+            Returns the definition dictionary for this column
+
+        Returns
+        -------
+        def_dict: DefDict
+            Contains all the definitions located in the file
+        """
         return self._def_dict
 
     @property
@@ -147,7 +159,7 @@ class ColumnMetadata:
         if self.column_type != ColumnType.Categorical:
             return None
 
-        return self._hed_dict["HED"].get(category, None)
+        return self._def_removed_hed_dict.get(category, None)
 
     def _get_value_hed_string(self):
         """Fetches the hed_string from a given value column
@@ -160,7 +172,7 @@ class ColumnMetadata:
         if self.column_type != ColumnType.Value:
             return None
 
-        return self._hed_dict["HED"]
+        return self._def_removed_hed_dict
 
     def expand(self, input_text):
         """
@@ -187,17 +199,16 @@ class ColumnMetadata:
             if final_text:
                 return HedString(final_text), False
             else:
-                return None, [{"error_type": ValidationErrors.HED_SIDECAR_KEY_MISSING,
-                               "tag": input_text,
-                               "category_keys": list(self._hed_dict["HED"].keys())}]
+                return None, ErrorHandler.format_error(ValidationErrors.HED_SIDECAR_KEY_MISSING, invalid_key=input_text,
+                                                       category_keys=list(self._hed_dict["HED"].keys()))
         elif column_type == ColumnType.Value:
             prelim_text = self._get_value_hed_string()
             final_text = prelim_text.replace("#", input_text)
             return HedString(final_text), False
         elif column_type == ColumnType.HEDTags:
             hed_string_obj = HedString(input_text)
-            new_text = self._prepend_prefix_to_required_tag_column_if_needed(hed_string_obj, self.column_prefix)
-            return new_text, False
+            final_text = self._prepend_prefix_to_required_tag_column_if_needed(hed_string_obj, self.column_prefix)
+            return final_text, False
         elif column_type == ColumnType.Ignore:
             return None, False
         elif column_type == ColumnType.Attribute:
@@ -272,7 +283,7 @@ class ColumnMetadata:
         if not dict_for_entry or not isinstance(dict_for_entry, dict):
             return ColumnType.Attribute
 
-        minimum_required_keys = ("HED", )
+        minimum_required_keys = ("HED",)
         if not set(minimum_required_keys).issubset(dict_for_entry.keys()):
             return ColumnType.Attribute
 
@@ -291,79 +302,91 @@ class ColumnMetadata:
     def get_definition_issues(self):
         """
         Returns the issues found extracting definitions from this column.
+
         Returns
         -------
-
+        issues_list: [{}]
+            A list of issues found when parsing defintions
         """
         return self._def_dict.get_definition_issues()
 
-    def validate_column_entry(self, hed_schema=None, def_mapper=None, error_handler=None):
+    def validate_column(self, validators, also_validate, error_handler, **kwargs):
         """
-        Finds all validation issues in this column.
+            Run the given validators on this column
 
         Parameters
         ----------
-        hed_schema : HedSchema, optional
-            The dictionary to use to validate hed_strings.  If absent, will only validate column syntax.
-        def_mapper: DefMapper
-            The definition mapper to validate def tags with.
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings in the columns.
+        also_validate : bool
+            If True, will additionally check for unknown column types etc.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
         Returns
         -------
-        column_issues: [{}]
+        col_issues: [{}]
+            A list of issues found by the given validators.
         """
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
 
+        validators = validators.copy()
+        if also_validate:
+            validators.append(self._validate_pound_sign_count)
+        tag_ops = translate_ops(validators, allow_placeholders=True, error_handler=error_handler, **kwargs)
         error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, self.column_name)
+        col_validation_issues = self._run_ops(tag_ops, set_as_expanded_value=False, error_handler=error_handler)
 
-        event_validator = None
-        # Full Hed string validation can only be done with a hed_schema
-        if hed_schema is not None:
-            from hed.validator.event_validator import EventValidator
-            event_validator = EventValidator(check_for_warnings=True, run_semantic_validation=True,
-                                             hed_schema=hed_schema, error_handler=error_handler,
-                                             allow_pound_signs_as_numbers=True)
+        if also_validate:
+            val_issues = []
+            if self.column_type is None:
+                val_issues += ErrorHandler.format_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
+                                                        column_name=self.column_name)
+            elif self.column_type == ColumnType.Categorical:
+                raw_hed_dict = self._hed_dict["HED"]
+                if not raw_hed_dict:
+                    val_issues += ErrorHandler.format_error(SidecarErrors.BLANK_HED_STRING)
 
+            error_handler.add_context_to_issues(val_issues)
+            col_validation_issues += val_issues
+            col_validation_issues += self.get_definition_issues()
+        error_handler.pop_error_context()
+        return col_validation_issues
+
+    def _run_ops(self, ops, set_as_expanded_value, error_handler):
         col_validation_issues = []
-        for hed_string, position in self.hed_string_iter(include_position=True, also_return_bad_types=True):
-            error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, position)
+        for hed_string, key_name in self.hed_string_iter(include_position=True, also_return_bad_types=True):
+            new_col_issues = []
+            error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+
             if not hed_string:
-                col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
-            if not isinstance(hed_string, str):
-                col_validation_issues += error_handler.format_error(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                                    given_type=type(hed_string),
-                                                                    expected_type="str")
+                new_col_issues += ErrorHandler.format_error(SidecarErrors.BLANK_HED_STRING)
+                error_handler.add_context_to_issues(new_col_issues)
+            elif not isinstance(hed_string, str):
+                new_col_issues += ErrorHandler.format_error(SidecarErrors.WRONG_HED_DATA_TYPE,
+                                                            given_type=type(hed_string),
+                                                            expected_type="str")
+                error_handler.add_context_to_issues(new_col_issues)
             else:
                 hed_string_obj = HedString(hed_string)
                 error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
                                                  increment_depth_after=False)
-                if event_validator:
-                    col_validation_issues += event_validator.validate_hed_string(hed_string_obj, def_mapper=def_mapper,
-                                                                                 check_for_definitions=False)
-                elif def_mapper:
-                    col_validation_issues += def_mapper.replace_and_remove_tags(hed_string_obj,
-                                                                                error_handler=error_handler,
-                                                                                expand_defs=False)
-                col_validation_issues += self._validate_pound_sign_count(hed_string_obj,
-                                                                         error_handler=error_handler)
+                new_col_issues += hed_string_obj.apply_ops(ops)
+                if set_as_expanded_value:
+                    if key_name is None:
+                        self._def_removed_hed_dict = str(hed_string_obj)
+                    else:
+                        self._def_removed_hed_dict[key_name] = str(hed_string_obj)
+                error_handler.add_context_to_issues(new_col_issues)
                 error_handler.pop_error_context()
+            col_validation_issues += new_col_issues
             error_handler.pop_error_context()
 
-        if self.column_type is None:
-            col_validation_issues += error_handler.format_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
-                                                                column_name=self.column_name)
-        elif self.column_type == ColumnType.Categorical:
-            raw_hed_dict = self._hed_dict["HED"]
-            if not raw_hed_dict:
-                col_validation_issues += error_handler.format_error(SidecarErrors.BLANK_HED_STRING)
-
-        col_validation_issues += self.get_definition_issues()
-        error_handler.pop_error_context()
         return col_validation_issues
 
-    def _validate_pound_sign_count(self, hed_string, error_handler):
+    def _validate_pound_sign_count(self, hed_string):
         """Checks if a a given hed string in the column has the correct number of pound signs
 
         This normally should be either 0 or 1, but sometimes will be higher due to the presence of definition tags.
@@ -371,7 +394,6 @@ class ColumnMetadata:
         Parameters
         ----------
         hed_string : str or HedString
-        error_handler : ErrorHandler
 
         Returns
         -------
@@ -379,44 +401,45 @@ class ColumnMetadata:
             A list of the pound sign errors(always 0 or 1 item in the list)
         """
         if self.column_type == ColumnType.Value or self.column_type == ColumnType.Attribute:
-            base_pound_sign_count = 1
+            expected_pound_sign_count = 1
             error_type = SidecarErrors.INVALID_POUND_SIGNS_VALUE
         elif self.column_type == ColumnType.HEDTags or self.column_type == ColumnType.Categorical:
-            base_pound_sign_count = 0
+            expected_pound_sign_count = 0
             error_type = SidecarErrors.INVALID_POUND_SIGNS_CATEGORY
         else:
             return []
 
-        expected_pound_sign_count = base_pound_sign_count
-        if str(hed_string).count("#") != expected_pound_sign_count:
-            return error_handler.format_error(error_type, pound_sign_count=str(hed_string).count("#"))
+        # This needs to only account for the ones without definitions.
+        if hed_string.without_defs().count("#") != expected_pound_sign_count:
+            return ErrorHandler.format_error(error_type, pound_sign_count=str(hed_string).count("#"))
 
         return []
 
-    def extract_defs(self, error_handler=None):
+    def extract_definitions(self, error_handler=None):
         """
-            Finds all definitions in the hed strings of this column def group.
+        Gathers and validates all definitions found in this spreadsheet
 
         Parameters
         ----------
-        error_handler : ErrorHandler or None
-            Used to report errors.  Uses a default one if none passed in.
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+
         Returns
         -------
-        def_dicts: DefDict
-            A DefDict containing all the definitions found.
+        def_dict: DefDict
+            Contains all the definitions located in the file
         """
         if error_handler is None:
-            error_handler = error_reporter.ErrorHandler()
-        def_dict = DefDict()
-        for hed_string, key_name in self.hed_string_iter(include_position=True):
-            hed_string_obj = HedString(hed_string)
-            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, self.column_name)
-            error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
-            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, False)
-            def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
-            error_handler.pop_error_context()
-            error_handler.pop_error_context()
-            error_handler.pop_error_context()
+            error_handler = ErrorHandler()
+        new_def_dict = DefDict()
+        validators = []
 
-        return def_dict
+        validators.append(new_def_dict)
+        validators.append(HedString.remove_definitions)
+        tag_ops = translate_ops(validators, allow_placeholders=True, error_handler=error_handler)
+
+        error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, self.column_name)
+        def_issues = self._run_ops(tag_ops, set_as_expanded_value=True, error_handler=error_handler)
+        error_handler.pop_error_context()
+
+        return new_def_dict
