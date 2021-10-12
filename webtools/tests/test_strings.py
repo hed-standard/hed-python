@@ -5,6 +5,7 @@ from werkzeug.wrappers import Request
 
 from tests.test_web_base import TestWebBase
 import hed.schema as hedschema
+from hed.models.hed_string import HedString
 from hedweb.constants import base_constants
 
 
@@ -50,7 +51,7 @@ class Test(TestWebBase):
         from hedweb.strings import convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        string_list = ['Red, Blue']
+        string_list = [HedString('Red, Blue')]
 
         with self.app.app_context():
             results = convert(hed_schema, string_list)
@@ -60,7 +61,7 @@ class Test(TestWebBase):
         from hedweb.strings import convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        string_list = ['Property/Informational-property/Description/Blech, Blue']
+        string_list = [HedString('Property/Informational-property/Description/Blech, Blue')]
         with self.app.app_context():
             results = convert(hed_schema, string_list, base_constants.COMMAND_TO_SHORT)
             data = results['data']
@@ -75,7 +76,7 @@ class Test(TestWebBase):
         from hedweb.strings import convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        string_list = ['Red, Blue']
+        string_list = [HedString('Red'), HedString('Blue')]
 
         with self.app.app_context():
             results = convert(hed_schema, string_list, command=base_constants.COMMAND_TO_LONG)
@@ -93,7 +94,7 @@ class Test(TestWebBase):
         from hedweb.strings import validate
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        string_list = ['Red, Blue']
+        string_list = [HedString('Red'), HedString('Blue')]
 
         with self.app.app_context():
             results = validate(hed_schema, string_list)

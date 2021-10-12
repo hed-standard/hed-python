@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 
 from hed import models
 from hed import schema as hedschema
+from hed.validator.hed_validator import HedValidator
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hedweb.constants import base_constants, file_constants
@@ -169,7 +170,8 @@ def sidecar_validate(hed_schema, json_sidecar):
     if not json_sidecar or not isinstance(json_sidecar, models.Sidecar):
         raise HedFileError('BadSidecarFile', "Please provide a dictionary to process", "")
     display_name = json_sidecar.name
-    issues = json_sidecar.validate_entries(hed_schema)
+    validator = HedValidator(hed_schema)
+    issues = json_sidecar.validate_entries(validator)
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON dictionary {display_name } validation errors")
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')

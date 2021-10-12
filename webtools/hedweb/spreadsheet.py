@@ -5,7 +5,7 @@ from hed import models
 from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
-from hed.validator.event_validator import EventValidator
+from hed.validator.hed_validator import HedValidator
 from hed.util.file_util import get_file_extension
 
 from hedweb.constants import base_constants, file_constants
@@ -143,8 +143,8 @@ def spreadsheet_validate(hed_schema, spreadsheet):
          A dictionary containing results of validation in standard format
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    validator = EventValidator(hed_schema=hed_schema)
-    issues = validator.validate_file(spreadsheet)
+    validator = HedValidator(hed_schema=hed_schema)
+    issues = spreadsheet.validate_file(validator)
     display_name = spreadsheet.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} validation errors")

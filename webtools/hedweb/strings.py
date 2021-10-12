@@ -1,10 +1,10 @@
 from flask import current_app
 
-from hed import models
+from hed.models.hed_string import HedString
 from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
-from hed.validator.event_validator import EventValidator
+from hed.validator.hed_validator import HedValidator
 
 from hedweb.constants import base_constants
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down
@@ -28,7 +28,7 @@ def get_input_from_form(request):
     hed_schema = get_hed_schema_from_pull_down(request)
     hed_string = request.form.get(base_constants.STRING_INPUT, None)
     if hed_string:
-        string_list = [hed_string]
+        string_list = [HedString(hed_string)]
     else:
         raise HedFileError('EmptyHedString', 'Must enter a HED string', '')
     arguments = {base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, ''),
@@ -77,8 +77,8 @@ def convert(hed_schema, string_list, command=base_constants.COMMAND_TO_LONG):
     ----------
     hed_schema: HedSchema
         The HED schema to be used in processing
-    string_list: list
-        A list of string to be processed
+    string_list: list of HedString
+        A list of HedString to be processed
     command: str
         Name of the command to execute if not COMMAND_TO_LONG
 
@@ -94,8 +94,7 @@ def convert(hed_schema, string_list, command=base_constants.COMMAND_TO_LONG):
         return results
     strings = []
     conversion_errors = []
-    for pos, string in enumerate(string_list, start=1):
-        hed_string_obj = models.HedString(string)
+    for pos, hed_string_obj in enumerate(string_list, start=1):
         if command == base_constants.COMMAND_TO_LONG:
             converted_string, issues = hed_string_obj.convert_to_long(hed_schema)
         else:
@@ -131,11 +130,11 @@ def validate(hed_schema, string_list):
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    hed_validator = EventValidator(hed_schema=hed_schema)
+    hed_validator = HedValidator(hed_schema=hed_schema)
 
     validation_errors = []
-    for pos, string in enumerate(string_list, start=1):
-        issues = hed_validator.validate_hed_string(string)
+    for pos, h_string in enumerate(string_list, start=1):
+        issues = h_string.validate(hed_validator)
         if issues:
             validation_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
     if validation_errors:
