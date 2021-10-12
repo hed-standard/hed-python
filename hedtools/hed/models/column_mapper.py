@@ -2,8 +2,7 @@ from hed.models.column_metadata import ColumnMetadata, ColumnType
 from hed.models.sidecar import Sidecar
 from hed.models.hed_string import HedString
 from hed.models import model_constants
-from hed.models.def_mapper import DefinitionMapper
-from hed.errors import error_reporter
+from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 
 import copy
@@ -14,10 +13,9 @@ class ColumnMapper:
 
         Private Functions and variables column and row indexing starts at 0.
         Public functions and variables indexing starts at 1(or 2 if has column names)"""
+
     def __init__(self, sidecars=None, tag_columns=None, column_prefix_dictionary=None,
-                 attribute_columns=None, extra_def_dicts=None,
-                 also_gather_defs=True, optional_tag_columns=None,
-                 enable_def_mapping=True):
+                 attribute_columns=None, optional_tag_columns=None):
         """Constructor for ColumnMapper
 
         Parameters
@@ -35,18 +33,9 @@ class ColumnMapper:
             and the fifth column contains tags that needs Event/Category/ prepended to them.
         attribute_columns: str or int or [str] or [int]
              A list of column names or numbers to treat as attributes.
-        extra_def_dicts: [DefDict]
-            DefDict's containing all the definitions this file should use - other than the ones coming from the file
-            itself, and from the column def groups.  These are added as as the last entries, so names will override
-            earlier ones.
-        also_gather_defs: bool
-            Default to true.  If False, do NOT extract any definitions from column groups, assume they are already
-            in the def_dict list.
         optional_tag_columns: [int or str]
              A list of ints or strings containing the columns that contain the HED tags.
              If the column is otherwise unspecified, it will convert this column type to HEDTags
-        enable_def_mapping: bool
-            Default True.  If True, this will remove definitions while parsing.
         """
         # This points to column_type entries based on column names or indexes if columns have no column_name.
         self.column_data = {}
@@ -57,13 +46,9 @@ class ColumnMapper:
         self._tag_columns = []
         self._optional_tag_columns = []
         self._column_prefix_dictionary = {}
-        self._extra_def_dicts = extra_def_dicts
-        self._enable_def_mapping = enable_def_mapping
-        self._def_mapper = None
-        self._also_gather_defs = also_gather_defs
 
         self._na_patterns = ["n/a", "nan"]
-        self._mapper_issue_params = []
+        self._finalize_mapping_issues = []
         if sidecars:
             self.add_sidecars(sidecars)
         self.add_columns(attribute_columns)
@@ -73,7 +58,6 @@ class ColumnMapper:
 
         # finalize the column map based on initial settings with no header
         self._finalize_mapping()
-        self._finalize_def_dicts()
 
     def add_sidecars(self, sidecars):
         """
@@ -88,18 +72,6 @@ class ColumnMapper:
         for sidecar in sidecars:
             for column_data in sidecar:
                 self._add_column_data(column_data)
-
-    def update_definition_mapper_with_file(self, def_dict):
-        """
-        Adds label definitions gathered from the given list of inputs if this has a definition mapper.
-
-        Parameters
-        ----------
-        def_dict : DefDict
-            The gathered definitions to add to the mapper.
-        """
-        if self._def_mapper is not None:
-            self._def_mapper.add_definitions(def_dict)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
         """Adds the given columns as hed tag columns with the required prefix if it does not already exist.
@@ -141,7 +113,6 @@ class ColumnMapper:
             self._optional_tag_columns = self._subtract_1_from_list_elements(optional_tag_columns)
         if finalize_mapping:
             issues = self._finalize_mapping()
-            self._finalize_def_dicts()
             return issues
         return []
 
@@ -214,7 +185,7 @@ class ColumnMapper:
         column_entry = self._final_column_map[column_number]
         return column_entry.expand(input_text)
 
-    def expand_row_tags(self, row_text, expand_defs=True):
+    def expand_row_tags(self, row_text):
         """
         Expands all mapped columns from a given row
 
@@ -222,8 +193,6 @@ class ColumnMapper:
         ----------
         row_text : [str]
             The text for the given row, one entry per column number.
-        expand_defs: bool
-            If True, this will fully remove all definitions found and expand all def tags to def-expand tags
         Returns
         -------
         expanded_dict: {str: }
@@ -235,26 +204,24 @@ class ColumnMapper:
         """
         result_dict = {}
         column_to_hed_tags_dictionary = {}
-        issue_params_dict = {}
+        column_issues_dict = {}
         for column_number, cell_text in enumerate(row_text):
             translated_column, attribute_name_or_error = self._expand_column(column_number, str(cell_text))
-            issue_params_dict[column_number + 1] = []
             if translated_column is None:
                 if attribute_name_or_error:
-                    issue_params_dict[column_number + 1] += attribute_name_or_error
+                    if column_number + 1 not in column_issues_dict:
+                        column_issues_dict[column_number + 1] = []
+                    column_issues_dict[column_number + 1] += attribute_name_or_error
                 continue
             if attribute_name_or_error:
                 result_dict[attribute_name_or_error] = translated_column
                 continue
-            if self._def_mapper:
-                new_issue_params = self._def_mapper.replace_and_remove_tags(translated_column, expand_defs=expand_defs)
-                issue_params_dict[column_number + 1] += new_issue_params
 
             column_to_hed_tags_dictionary[column_number + 1] = translated_column
 
         result_dict[model_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
-        if issue_params_dict:
-            result_dict[model_constants.COLUMN_ISSUE_PARAMS] = issue_params_dict
+        if column_issues_dict:
+            result_dict[model_constants.COLUMN_ISSUES] = column_issues_dict
         final_hed_string = HedString.create_from_other(column_to_hed_tags_dictionary.values())
         result_dict[model_constants.ROW_HED_STRING] = final_hed_string
 
@@ -331,7 +298,7 @@ class ColumnMapper:
         self._final_column_map = {}
         found_named_tag_columns = {}
         all_tag_columns = self._tag_columns + self._optional_tag_columns
-        self._mapper_issue_params = []
+        self._finalize_mapping_issues = []
         if self._column_map is not None:
             for column_number, column_name in self._column_map.items():
                 if column_name in self.column_data:
@@ -358,48 +325,61 @@ class ColumnMapper:
                 column_number = found_named_tag_columns[column_name]
                 self._final_column_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_number)
             elif column_number in self._tag_columns:
-                self._mapper_issue_params += [{'error_type': ValidationErrors.HED_MISSING_COLUMN,
-                                              'missing_column_name': column_number}]
+                self._finalize_mapping_issues += ErrorHandler.format_error(ValidationErrors.HED_MISSING_COLUMN,
+                                                                           missing_column_name=column_number)
 
         # Add prefixes
         for column_number, prefix in self._column_prefix_dictionary.items():
             self._set_column_prefix(column_number, prefix)
 
-        return self._mapper_issue_params
+        return self._finalize_mapping_issues
 
-    def _finalize_def_dicts(self):
-        def_dicts = []
-        if self._also_gather_defs or not self._extra_def_dicts:
-            def_dicts = [entry.def_dict for entry in self.column_data.values()]
-        if self._extra_def_dicts:
-            def_dicts += self._extra_def_dicts
+    def get_def_dicts(self):
+        """
+            Return a list of all def dicts from every column description
 
-        self._def_mapper = None
-        if self._enable_def_mapping:
-            self._def_mapper = DefinitionMapper(def_dicts)
+        Returns
+        -------
+        def_dicts: [DefDict]
+            A list of def dicts, corresponding to each column entry.
+        """
+        def_dicts = [entry.def_dict for entry in self.column_data.values()]
+        return def_dicts
 
-    def validate_column_data(self, hed_schema=None, error_handler=None):
+    def get_column_mapping_issues(self):
+        """
+            Gets all the issues with finalizing column mapping.  Primarily a missing required column.
+        Returns
+        -------
+        col_mapping_issuse: [{}]
+            A list of all issues found from mapping column names to numbers.
+        """
+        return self._finalize_mapping_issues
+
+    def validate_column_data(self, validators, error_handler=None, **kwargs):
         """
         Validates all column definitions that are being used and column definition hed strings
 
         Parameters
         ----------
-        hed_schema : HedSchema, optional
-            Also semantically validates hed strings if present.
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings in the sidecars.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
         Returns
         -------
         validation_issues : [{}]
             A list of syntax and semantic issues found in the definitions.
         """
         if error_handler is None:
-            error_handler = error_reporter.ErrorHandler()
+            error_handler = ErrorHandler()
         all_validation_issues = []
         for column_data in self.column_data.values():
-            all_validation_issues += column_data.validate_column_entry(hed_schema=hed_schema,
-                                                                       error_handler=error_handler,
-                                                                       def_mapper=self._def_mapper)
+            all_validation_issues += column_data.validate_column(validators, also_validate=True,
+                                                                 error_handler=error_handler,
+                                                                 **kwargs)
 
         return all_validation_issues
 

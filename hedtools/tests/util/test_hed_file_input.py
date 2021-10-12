@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
 
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
         sidecar = Sidecar(json_path)
-        self.assertEqual(len(sidecar.validate_entries()), 0)
+        self.assertEqual(len(sidecar.validate_entries(expand_defs=True)), 0)
         input_file = EventsInput(events_path, sidecars=sidecar)
 
         with open(events_path) as file:

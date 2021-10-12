@@ -53,7 +53,6 @@ def val_error_invalid_tag_character(tag, problem_tag):
     return f"Invalid character '{problem_tag}' in {tag}", {}
 
 
-
 @hed_error(ValidationErrors.HED_TILDES_UNSUPPORTED)
 def val_error_tildes_not_supported(source_string, char_index):
     character = source_string[char_index]
@@ -125,9 +124,9 @@ def val_error_extra_slashes_spaces(tag, problem_tag):
     return f"Extra slashes or spaces '{problem_tag}' in tag '{tag}'", {}
 
 
-@hed_tag_error(ValidationErrors.HED_SIDECAR_KEY_MISSING, default_severity=ErrorSeverity.WARNING)
-def val_error_sidecar_key_missing(tag, category_keys):
-    return f"Category key '{tag}' does not exist in column.  Valid keys are: {category_keys}", {}
+@hed_error(ValidationErrors.HED_SIDECAR_KEY_MISSING, default_severity=ErrorSeverity.WARNING)
+def val_error_sidecar_key_missing(invalid_key, category_keys):
+    return f"Category key '{invalid_key}' does not exist in column.  Valid keys are: {category_keys}", {}
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED)
@@ -207,6 +206,7 @@ def schema_warning_invalid_capitalization(tag_name, problem_char, char_index):
 @hed_error(SidecarErrors.BLANK_HED_STRING)
 def sidecar_error_blank_hed_string():
     return f"No HED string found for Value or Category column.", {}
+
 
 @hed_error(SidecarErrors.WRONG_HED_DATA_TYPE)
 def sidecar_error_hed_data_type(expected_type, given_type):

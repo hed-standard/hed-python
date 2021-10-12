@@ -9,6 +9,7 @@ from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors.error_types import ErrorContext
 from hed.errors.error_reporter import ErrorHandler
 from hed.models import model_constants
+from hed.models.util import translate_ops
 
 
 class BaseInput:
@@ -21,7 +22,8 @@ class BaseInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, name=None):
+    def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, def_mapper=None,
+                 name=None):
         """Constructor for the BaseInput class.
 
          Parameters
@@ -44,11 +46,13 @@ class BaseInput:
         if mapper is None:
             mapper = ColumnMapper()
         self._mapper = mapper
+        self._def_mapper = def_mapper
         self._has_column_names = has_column_names
         self._name = name
         # This is the loaded workbook if we loaded originally from an excel file.
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
+        self.file_def_dict = None
         pandas_header = 0
         if not self._has_column_names:
             pandas_header = None
@@ -59,6 +63,8 @@ class BaseInput:
         input_type = file_type
         if file_type is None and isinstance(file, str):
             _, input_type = os.path.splitext(file)
+            if self.name is None:
+                self._name = file
 
         self._dataframe = None
 
@@ -91,7 +97,7 @@ class BaseInput:
 
         self.file_def_dict = self.extract_definitions()
 
-        self._mapper.update_definition_mapper_with_file(self.file_def_dict)
+        self.update_definition_mapper_with_file(self.file_def_dict)
 
     @property
     def dataframe(self):
@@ -139,7 +145,7 @@ class BaseInput:
             for column_number in column_to_hed_tags_dictionary:
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
+                error_list += column_hed_string.convert_to_canonical_forms(hed_schema)
                 self.set_cell(row_number, column_number, column_hed_string,
                               include_column_prefix_if_exist=False, tag_form=tag_form)
                 error_handler.pop_error_context()
@@ -182,35 +188,6 @@ class BaseInput:
             A list of issues found during conversion
         """
         return self._convert_to_form(hed_schema, "long_tag", error_handler)
-
-    def extract_definitions(self, error_handler=None):
-        """
-        Gathers and validates all definitions found in this spreadsheet
-
-        Parameters
-        ----------
-        error_handler : ErrorHandler
-            The error handler to use for context, uses a default one if none.
-
-        Returns
-        -------
-        def_dict: DefDict
-            Contains all the definitions located in the file
-        """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        new_def_dict = DefDict()
-        for row_number, column_to_hed_tags in self.iter_raw():
-            error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number, hed_string_obj in column_to_hed_tags.items():
-                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
-                new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
-                error_handler.pop_error_context()
-                error_handler.pop_error_context()
-            error_handler.pop_error_context()
-
-        return new_def_dict
 
     def to_excel(self, file, output_processed_file=False):
         """
@@ -289,10 +266,10 @@ class BaseInput:
         column_to_hed_tags_dictionary: dict
             A dict with keys column_number, value the cell at that position.
         """
-        default_mapper = ColumnMapper(enable_def_mapping=False)
+        default_mapper = ColumnMapper()
         return self.iter_dataframe(default_mapper)
 
-    def iter_dataframe(self, mapper=None, return_row_dict=False, expand_defs=True):
+    def iter_dataframe(self, mapper=None, return_row_dict=False):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -303,8 +280,6 @@ class BaseInput:
         return_row_dict: bool
             If True, this returns the full row_dict including issues.
             If False, returns just the HedStrings for each column
-        expand_defs: bool
-            If True, this will fully remove all definitions found and expand all def tags to def-expand tags
         Yields
         -------
         row_number: int
@@ -323,7 +298,7 @@ class BaseInput:
             if all(text_file_row.isnull()):
                 continue
 
-            row_dict = mapper.expand_row_tags(text_file_row, expand_defs=expand_defs)
+            row_dict = mapper.expand_row_tags(text_file_row)
             if return_row_dict:
                 yield row_number + start_at_one, row_dict
             else:
@@ -416,11 +391,12 @@ class BaseInput:
             A list of definition and mapping issues.
         """
         issues = []
-        for issue in self.file_def_dict.get_definition_issues():
-            issues.append(issue)
+        issues += self.file_def_dict.get_definition_issues()
 
-        # todo: clean these internal calls up
-        issues += error_handler.format_error_list(self._mapper._mapper_issue_params)
+        # Gather any issues from the mapper for things like missing columns.
+        mapper_issues = self._mapper.get_column_mapping_issues()
+        error_handler.add_context_to_issues(mapper_issues)
+        issues += mapper_issues
         return issues
 
     def _get_processed_copy(self):
@@ -465,3 +441,129 @@ class BaseInput:
             return pandas.DataFrame(data, columns=cols)
         else:
             return pandas.DataFrame(worksheet.values)
+
+    def _run_validators(self, validators, error_handler, run_on_raw=False, expand_defs=False, **kwargs):
+        validation_issues = []
+        if run_on_raw:
+            tag_ops = translate_ops(validators, expand_defs=expand_defs, error_handler=error_handler,
+                                    **kwargs)
+            for row_number, column_to_hed_tags_dictionary in self.iter_raw():
+                error_handler.push_error_context(ErrorContext.ROW, row_number)
+                validation_issues = self._run_column_ops(column_to_hed_tags_dictionary, tag_ops,
+                                                         [], error_handler)
+                error_handler.pop_error_context()
+        else:
+            tag_ops, string_ops = translate_ops(validators, split_tag_and_string_ops=True, expand_defs=expand_defs,
+                                                error_handler=error_handler, **kwargs)
+            for row_number, row_dict in self.iter_dataframe(return_row_dict=True):
+                error_handler.push_error_context(ErrorContext.ROW, row_number)
+                validation_issues += self._run_row_column_ops(row_dict, string_ops, tag_ops, error_handler)
+                error_handler.pop_error_context()
+
+        return validation_issues
+
+    def _run_row_column_ops(self, row_dict, row_ops, column_ops, error_handler):
+        row_hed_string = row_dict[model_constants.ROW_HED_STRING]
+        column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
+        expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
+        validation_issues = self._run_column_ops(column_to_hed_tags_dictionary, column_ops, expansion_column_issues,
+                                                 error_handler)
+        validation_issues += self._run_row_ops(row_hed_string, row_ops, error_handler)
+        return validation_issues
+
+    def _run_column_ops(self, column_to_hed_tags_dictionary, column_ops, expansion_column_isssues, error_handler):
+        validation_issues = []
+        if column_to_hed_tags_dictionary:
+            for column_number, column_hed_string in column_to_hed_tags_dictionary.items():
+                new_column_issues = []
+                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
+                                                 increment_depth_after=False)
+                if column_number in expansion_column_isssues:
+                    new_column_issues += expansion_column_isssues[column_number]
+
+                new_column_issues += column_hed_string.apply_ops(column_ops)
+                error_handler.add_context_to_issues(new_column_issues)
+                error_handler.pop_error_context()
+                error_handler.pop_error_context()
+                validation_issues += new_column_issues
+
+        return validation_issues
+
+    def _run_row_ops(self, row_hed_string, row_ops, error_handler):
+        error_handler.push_error_context(ErrorContext.HED_STRING, row_hed_string, increment_depth_after=False)
+        row_issues = row_hed_string.apply_ops(row_ops)
+        error_handler.add_context_to_issues(row_issues)
+        error_handler.pop_error_context()
+        return row_issues
+
+    def validate_file(self, validators, name=None, error_handler=None, **kwargs):
+        """Run the given validators on all columns and rows of the spreadsheet
+
+        Parameters
+        ----------
+
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings in this sidecar.
+        name: str
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
+        Returns
+        -------
+        validation_issues: [{}]
+            The list of validation issues found
+        """
+        if not name:
+            name = self.name
+        if not isinstance(validators, list):
+            validators = [validators]
+
+        if error_handler is None:
+            error_handler = ErrorHandler()
+
+        error_handler.push_error_context(ErrorContext.FILE_NAME, name)
+        validation_issues = self.get_def_and_mapper_issues(error_handler)
+        validators = validators.copy()
+        if self._def_mapper:
+            validators.append(self._def_mapper)
+        validation_issues += self._run_validators(validators, error_handler=error_handler, **kwargs)
+        error_handler.pop_error_context()
+
+        return validation_issues
+
+    def extract_definitions(self, error_handler=None):
+        """
+        Gathers and validates all definitions found in this spreadsheet
+
+        Parameters
+        ----------
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+
+        Returns
+        -------
+        def_dict: DefDict
+            Contains all the definitions located in the file
+        """
+        if error_handler is None:
+            error_handler = ErrorHandler()
+        new_def_dict = DefDict()
+        validators = [new_def_dict]
+        def_issues = self._run_validators(validators, run_on_raw=True, error_handler=error_handler)
+        return new_def_dict
+
+    def update_definition_mapper_with_file(self, def_dict):
+        """
+        Adds label definitions gathered from the given list of inputs if this has a definition mapper.
+
+        Parameters
+        ----------
+        def_dict : DefDict
+            The gathered definitions to add to the mapper.
+        """
+        if self._def_mapper is not None:
+            self._def_mapper.add_definitions(def_dict)

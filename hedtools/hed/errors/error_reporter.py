@@ -54,7 +54,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
            """
             base_message, error_vars = func(*args, **kwargs)
             error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars)
-            return [error_object]
+            return error_object
 
         _register_error_function(error_type, wrapper_func=wrapper)
         return wrapper
@@ -124,7 +124,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                                                                  index_in_tag=index_in_tag,
                                                                  index_in_tag_end=index_in_tag_end, source_tag=tag)
 
-                return [error_object]
+                return error_object
 
             _register_error_function(error_type, wrapper_func=wrapper)
             return wrapper
@@ -160,7 +160,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
                                                                  source_tag=tag)
 
-                return [error_object]
+                return error_object
 
             _register_error_function(error_type, wrapper_func=wrapper)
             return wrapper
@@ -170,12 +170,16 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
 # Import after hed_error decorators are defined.
 from hed.errors import error_messages
+# Intentional to make sure tools don't think the import is unused
+error_messages.mark_as_used = True
 
 
 class ErrorHandler:
     def __init__(self):
         # The current (ordered) dictionary of contexts.
         self.error_context = []
+        # The list of validation issues found
+        self.issue_list = []
 
     def push_error_context(self, context_type, context, increment_depth_after=True):
         """
@@ -210,7 +214,7 @@ class ErrorHandler:
         self.error_context = []
 
     def get_error_context_copy(self):
-        return copy.deepcopy(self.error_context)
+        return copy.copy(self.error_context)
 
     @staticmethod
     def _add_context_to_errors(error_object, error_context_to_add):
@@ -272,7 +276,16 @@ class ErrorHandler:
         span = hed_string._get_org_span(source_tag)
         return span
 
-    def format_error(self, error_type, *args, actual_error=None, **kwargs):
+    def format_error_with_context(self, *args, **kwargs):
+        error_object = ErrorHandler.format_error(*args, **kwargs)
+        if self is not None:
+            self._add_context_to_errors(error_object[0], self.error_context)
+            self._update_error_with_char_pos(error_object[0])
+
+        return error_object
+
+    @staticmethod
+    def format_error(error_type, *args, actual_error=None, **kwargs):
         """
             The parameters vary based on what type of error this is.
 
@@ -291,8 +304,22 @@ class ErrorHandler:
         error: [{}]
             A single error
         """
-        return self.format_error_from_context(error_type, self.error_context, *args,
-                                              actual_error=actual_error, **kwargs)
+        error_func = error_functions.get(error_type)
+        if not error_func:
+            error_object = ErrorHandler.val_error_unknown(*args, **kwargs)
+            error_object['code'] = error_type
+            return [error_object]
+
+        error_object = error_func(*args, **kwargs)
+        if actual_error:
+            error_object['code'] = actual_error
+
+        return [error_object]
+
+    def add_context_to_issues(self, issues):
+        for error_object in issues:
+            self._add_context_to_errors(error_object, self.error_context)
+            self._update_error_with_char_pos(error_object)
 
     def format_error_list(self, issue_params):
         """
