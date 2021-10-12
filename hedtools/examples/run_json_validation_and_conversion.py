@@ -21,8 +21,9 @@ json_filename = "data/both_types_events_errors.json"
 
 # Example 1
 sidecar = Sidecar(json_filename)
+validator = hed.HedValidator(hed_schema)
 # Print all the errors from the json file
-errors = sidecar.validate_entries(hed_schema)
+errors = sidecar.validate_entries(validator)
 print(hed.get_printable_issue_string(errors))
 
 # Example 2

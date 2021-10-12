@@ -1,6 +1,7 @@
 import unittest
 
 from hed.validator.tag_validator import TagValidator
+from hed.validator import tag_validator_util
 from tests.validator.test_tag_validator_2g import TestHed
 from hed.schema.hed_tag import HedTag
 
@@ -35,10 +36,10 @@ class StringUtilityFunctions(TestHed):
             'invalidString': 'not a time',
         }
         for string in valid_test_strings.values():
-            result = TagValidator._is_clock_face_time(string)
+            result = tag_validator_util.is_clock_face_time(string)
             self.assertEqual(result, True, string)
         for string in invalid_test_strings.values():
-            result = TagValidator._is_clock_face_time(string)
+            result = tag_validator_util.is_clock_face_time(string)
             self.assertEqual(result, False, string)
 
     def test_date_times(self):
@@ -62,10 +63,10 @@ class StringUtilityFunctions(TestHed):
             'invalidString': 'not a time',
         }
         for string in valid_test_strings.values():
-            result = TagValidator._is_date_time(string)
+            result = tag_validator_util.is_date_time(string)
             self.assertEqual(result, True, string)
         for string in invalid_test_strings.values():
-            result = TagValidator._is_date_time(string)
+            result = tag_validator_util.is_date_time(string)
             self.assertEqual(result, False, string)
 
 

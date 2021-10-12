@@ -3,7 +3,7 @@ Examples of creating an EventsInput to open a spreadsheet, process it, then save
 
 Classes Demonstrated:
 HedSchema - Opens a hed xml schema.  Used by other tools to check tag attributes in the schema.
-EventValidator - Validates a given input string or file
+HedValidator - Validates a given input string or file
 EventsInput - Used to open/modify/save a bids style spreadsheet, with json sidecars and definitions.
 HedFileError - Exception thrown when a file cannot be opened.(parsing error, file not found error, etc)
 Sidecar - Contains the data from a single json sidecar, can be validated using a HedSchema.
@@ -14,7 +14,7 @@ import os
 import hed
 from hed.models.events_input import EventsInput
 from hed.schema.hed_schema_file import load_schema
-from hed.validator.event_validator import EventValidator
+from hed.validator.hed_validator import HedValidator
 from hed.models.sidecar import Sidecar
 
 if __name__ == '__main__':
@@ -24,20 +24,21 @@ if __name__ == '__main__':
     hed_schema = load_schema(local_hed_file)
     prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
     json_file = "data/both_types_events_def_example.json"
+    validator = HedValidator(hed_schema=hed_schema)
     sidecar = Sidecar(json_file)
-    def_issues = sidecar.validate_entries(hed_schema=hed_schema)
+    def_issues = sidecar.validate_entries(validator)
+    #def_issues = sidecar.validate_entries(hed_schema=hed_schema)
     if def_issues:
         print(hed.get_printable_issue_string(def_issues,
                                              title="There should be no errors in the definitions from the sidecars:"))
     input_file = EventsInput(hed3_tags_single_sheet, sidecars=sidecar)
 
-    validation_issues = input_file.validate_file_sidecars(hed_schema=hed_schema)
+    validation_issues = input_file.validate_file_sidecars(validator)
     if validation_issues:
         print(hed.get_printable_issue_string(validation_issues,
                                              title="There should be no errors with the sidecar.  \""
                                              "This will likely cause other errors if there are."))
-    validator = EventValidator(hed_schema=hed_schema)
-    validation_issues = validator.validate_file(input_file)
+    validation_issues = input_file.validate_file(validator)
     print(hed.get_printable_issue_string(validation_issues, "Normal hed string errors"))
 
     output_filename = hed3_tags_single_sheet + "_test_output.xlsx"

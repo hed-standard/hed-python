@@ -17,7 +17,7 @@
         },
         "HED": {
           "cue": "",
-          "go": "Description/Onset of the go signal which is the disappearance of the cue bar, Sensory-event, (Visual, Experimental-stimulus, Instructional, Signal-go, Rectangle)",
+          "go": "Description/Onset of the go signal which is the disappearance of the cue bar, Sensory-event, (Visual, Experimental-stimulus, Instructional, Signal-go, Rectangle/#)",
           "right-raised": "Description/Subject raised right hand thereby releasing right button, (Agent-action, Experimental-participant, (Lift, (Right-side, Hand)), (Release, (Right-side, Button)))",
           "left-raised": "Description/Subject raised left hand thereby releasing left button, (Agent-action, Experimental-participant, (Lift, (Left-side, Hand)), (Release, (Left-side, Button)))",
           "left-raised-match": "Description/Computer presented image of left hand thereby matching a previously raised left hand, (Sensory-event, Visual, (Drawing, ID/left_hand.png,(Left-side, Hand)), (Feedback, (Intended-effect, Penalty)))",

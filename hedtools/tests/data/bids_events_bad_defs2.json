@@ -72,7 +72,7 @@
             "2": "Computational prediction was late so random prediction was used."
         },
 		"HED": {
-			"1.0": "Description/Computational prediction arrived on time, (Computational-agent, Predict), (Definition/Trained-on-all/#, (Experimental-condition/#)), Def/Trained-on-all",
+			"1.0": "Description/Computational prediction arrived on time, (Computational-agent, Predict), (Definition/Trained-on-all/#, (InvalidTag))",
 			"2": "Description/Computational prediction was late so random prediction was used., Time-out, (Random, Predict), Def/Unmatched"
 		}
     },

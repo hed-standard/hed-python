@@ -8,12 +8,19 @@ from hed.schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema.fileio import wiki_constants
 
+header_attr_expression = "([^ ]+?)=\"(.*?)\""
+attr_re = re.compile(header_attr_expression)
+
 level_expression = r'\*+'
+level_re = re.compile(level_expression)
 attributes_expression = r'\{.*\}'
+attributes_re = re.compile(attributes_expression)
 description_expression = r'\[.*\]'
+description_re = re.compile(description_expression)
 extend_here_line = 'extend here'
 invalid_characters_to_strip = ["&#8203;"]
-tag_name_regexp = r'([<>=#\-a-zA-Z0-9$:()\^µ]+\s*)+'
+tag_name_expression = r'([<>=#\-a-zA-Z0-9$:()\^µ]+\s*)+'
+tag_name_re = re.compile(tag_name_expression)
 no_wiki_tag = '</?nowiki>'
 square_bracket_removal_expression = r'[\[\]]'
 
@@ -351,9 +358,6 @@ class HedSchemaWikiParser:
         if "=" not in version_line:
             return self._get_header_attributes_old(version_line)
 
-        attr_pattern = "([^ ]+?)=\"(.*?)\""
-        attr_re = re.compile(attr_pattern)
-
         final_attributes = {}
 
         for match in attr_re.finditer(version_line):
@@ -403,8 +407,7 @@ class HedSchemaWikiParser:
         int
             Gets the tag level. The number of asterisks determine what level the tag is on.
         """
-        level = re.compile(level_expression)
-        match = level.search(tag_line)
+        match = level_re.search(tag_line)
         if match:
             return match.group().count('*')
         else:
@@ -443,10 +446,9 @@ class HedSchemaWikiParser:
         """
         if tag_line.find(extend_here_line) != -1:
             return ''
-        name = re.compile(tag_name_regexp)
         for invalid_chars in invalid_characters_to_strip:
             tag_line = tag_line.replace(invalid_chars, "")
-        match = name.search(tag_line)
+        match = tag_name_re.search(tag_line)
         if match:
             return match.group().strip()
         else:
@@ -466,8 +468,7 @@ class HedSchemaWikiParser:
         {}
             Dict containing the attributes
         """
-        attributes = re.compile(attributes_expression)
-        match = attributes.search(tag_line)
+        match = attributes_re.search(tag_line)
         if match:
             attributes_split = [x.strip() for x in re.sub('[{}]', '', match.group()).split(',')]
             # Filter out attributes with spaces.
@@ -501,8 +502,7 @@ class HedSchemaWikiParser:
         string
             The tag description.
         """
-        description = re.compile(description_expression)
-        match = description.search(tag_line)
+        match = description_re.search(tag_line)
         if match:
             return re.sub(square_bracket_removal_expression, '', match.group()).strip()
         else:

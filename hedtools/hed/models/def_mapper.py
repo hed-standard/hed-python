@@ -1,6 +1,8 @@
 from hed.models.hed_string import HedString
-from hed.models.def_dict import DefDict, DefTagNames
+from hed.models.def_dict import DefDict
+from hed.models.model_constants import DefTagNames
 from hed.errors.error_types import ValidationErrors
+from hed.errors.error_reporter import ErrorHandler
 
 
 class DefinitionMapper:
@@ -19,8 +21,8 @@ class DefinitionMapper:
         self._gathered_defs = {}
         # List of def names we want to be able to quickly purge.
         self._temporary_def_names = set()
-        self._def_tag_name = DefTagNames.DEFINITION_KEY.lower()
-        self._label_tag_name = DefTagNames.DEF_KEY.lower()
+        self._def_tag_name = DefTagNames.DEFINITION_KEY
+        self._label_tag_name = DefTagNames.DEF_KEY
 
         if def_dicts:
             self.add_definitions(def_dicts)
@@ -37,14 +39,13 @@ class DefinitionMapper:
             del self._gathered_defs[def_name]
         self._temporary_def_names = set()
 
-    def add_definitions_from_string_as_temp(self, hed_string_obj, error_handler):
+    def add_definitions_from_string_as_temp(self, hed_string_obj):
         """
             Checks the given string and adds any definitions found to this mapper as temp.
 
         Parameters
         ----------
         hed_string_obj : HedString
-        error_handler : ErrorHandler
 
         Returns
         -------
@@ -52,9 +53,8 @@ class DefinitionMapper:
             A list of issues related to definitions found
         """
         this_string_def_dict = DefDict()
-        this_string_def_dict.check_for_definitions(hed_string_obj, error_handler)
+        validation_issues = this_string_def_dict.check_for_definitions(hed_string_obj)
         self.add_definitions(this_string_def_dict, add_as_temp=True)
-        validation_issues = this_string_def_dict.get_definition_issues()
         return validation_issues
 
     def add_definitions(self, def_dicts, add_as_temp=False):
@@ -97,7 +97,7 @@ class DefinitionMapper:
             if add_as_temp:
                 self._temporary_def_names.add(def_tag)
 
-    def replace_and_remove_tags(self, hed_string_obj, expand_defs=True, error_handler=None):
+    def expand_def_tags(self, hed_string_obj, expand_defs=True):
         """Takes a given string and returns the hed string with all definitions removed, and all labels replaced
 
         Parameters
@@ -106,8 +106,6 @@ class DefinitionMapper:
             The hed string to modify.
         expand_defs: bool
             If True, this will fully remove all definitions found and expand all def tags to def-expand tags
-        error_handler : ErrorHandler or None
-            If one is passed, will format the issues list using it.
         Returns
         -------
         def_issues: []
@@ -115,41 +113,55 @@ class DefinitionMapper:
         """
         # First see if the word definition or dLabel is found at all.  Just move on if not.
         hed_string_lower = hed_string_obj.lower()
-        if self._def_tag_name not in hed_string_lower and \
-                self._label_tag_name not in hed_string_lower:
+        if self._label_tag_name not in hed_string_lower:
             return []
 
-        definition_groups = []
-        def_issue_params = []
-        # We need to check for definitions to remove in ONLY the top level groups.
+        def_issues = []
         # We need to check for labels to expand in ALL groups
         for tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
+            def_tags_found = []
             for tag in tag_group.tags():
-                if is_top_level:
-                    # This case should be fairly rare compared to expanding definitions.
-                    is_def_tag = DefDict._check_tag_starts_with(str(tag), DefTagNames.DEFINITION_KEY)
-                    if is_def_tag:
-                        definition_groups.append(tag_group)
-                        break
+                if tag.short_base_tag.lower() == DefTagNames.DEF_KEY:
+                    def_tags_found.append(tag)
 
-                def_tag_name, def_contents = self._get_def_expand_tag(tag, def_issue_params)
+            for def_tag in def_tags_found:
+                def_tag_name, def_contents = self._get_def_expand_tag(def_tag, def_issues)
                 if def_tag_name and expand_defs:
-                    tag.tag = def_tag_name
-                    tag_group.replace_tag(tag, def_contents)
+                    def_tag.short_base_tag = def_tag_name
+                    tag_group.replace_tag(def_tag, def_contents)
 
-        if definition_groups:
-            if expand_defs:
-                hed_string_obj.remove_groups(definition_groups)
-            else:
-                for group in definition_groups:
-                    group.replace_placeholder("PLACEHOLDER_PLACEHOLDER")
+        return def_issues
 
-        if error_handler:
-            return error_handler.format_error_list(def_issue_params)
+    def expand_and_remove_definitions(self, hed_string_obj, check_for_definitions=False, expand_defs=True):
+        """
+            Validate any def tags and remove any definitions found in the given hed string.
 
-        return def_issue_params
+        Parameters
+        ----------
+        hed_string_obj : HedString
+            The string to validate.
+        check_for_definitions : bool
+            If True, this will first check the hed string for any definitions.  This mostly applies to validate
+                hed strings individually, not as part of a file.
+        expand_defs : bool
+            If true, convert all located def tags to def-expand tags, and plug in the definitions.
 
-    def _get_def_expand_tag(self, original_tag, def_issue_params):
+        Returns
+        -------
+        def_issues: [{}]
+            The issues found with def tags.
+        """
+        def_issues = []
+        if check_for_definitions:
+            def_issues += self.add_definitions_from_string_as_temp(hed_string_obj)
+        def_issues += self.expand_def_tags(hed_string_obj, expand_defs=expand_defs)
+        def_issues += hed_string_obj.remove_definitions()
+        if check_for_definitions:
+            self.clear_temporary_definitions()
+
+        return def_issues
+
+    def _get_def_expand_tag(self, original_tag, def_issues):
         """
             Checks for issues with expanding a tag from def to def-expand, and returns the expanded tag.
 
@@ -157,8 +169,8 @@ class DefinitionMapper:
         ----------
         original_tag : HedTag
             Source hed tag that may be a Def tag.
-        def_issue_params : [{}]
-            List of issue params to append any new issues to.
+        def_issues : [{}]
+            List of issues to append any new issues to
 
         Returns
         -------
@@ -167,9 +179,8 @@ class DefinitionMapper:
         def_contents: [HedTag or HedGroup]
             The contents to replace the previous def-tag with.
         """
-        tag_as_string = str(original_tag)
-        is_label_tag = DefDict._check_tag_starts_with(tag_as_string, DefTagNames.DEF_KEY)
-        if is_label_tag:
+        if original_tag.short_base_tag.lower() == DefTagNames.DEF_KEY:
+            is_label_tag = original_tag.extension
             placeholder = None
             found_slash = is_label_tag.find("/")
             if found_slash != -1:
@@ -179,16 +190,26 @@ class DefinitionMapper:
             label_tag_lower = is_label_tag.lower()
             def_entry = self._gathered_defs.get(label_tag_lower)
             if def_entry is None:
-                def_issue_params += [{"error_type": ValidationErrors.HED_DEF_UNMATCHED,
-                                      "tag": original_tag}]
+                def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_UNMATCHED, tag=original_tag)
             else:
                 def_tag_name, def_contents = def_entry.get_definition(original_tag, placeholder_value=placeholder)
                 if def_tag_name:
-                    return def_tag_name, def_contents
+                    return DefTagNames.DEF_EXPAND_ORG_KEY, def_contents
                 elif def_entry.takes_value:
-                    def_issue_params += [{"error_type": ValidationErrors.HED_DEF_VALUE_MISSING,
-                                          "tag": original_tag}]
+                    def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_MISSING, tag=original_tag)
                 else:
-                    def_issue_params += [{"error_type": ValidationErrors.HED_DEF_VALUE_EXTRA,
-                                          "tag": original_tag}]
+                    def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_EXTRA, tag=original_tag)
         return None, None
+
+    def __get_string_ops__(self, **kwargs):
+        string_validators = []
+        expand_defs = kwargs.get("expand_defs")
+        check_for_definitions = kwargs.get("check_for_definitions")
+        from functools import partial
+        string_validators.append(partial(self.expand_and_remove_definitions,
+                                         check_for_definitions=check_for_definitions,
+                                         expand_defs=expand_defs))
+        return string_validators
+
+    def __get_tag_ops__(self, **kwargs):
+        return []

@@ -6,7 +6,7 @@ from hed import schema
 from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.errors.exceptions import HedFileError
-from tests.validator.test_tag_validator import TestValidatorBase
+from tests.validator.test_tag_validator_base import TestValidatorBase
 
 
 class TestHed3(TestValidatorBase):
