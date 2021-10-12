@@ -252,24 +252,28 @@ class BaseInput:
     def __iter__(self):
         return self.iter_dataframe()
 
-    def iter_raw(self):
+    def iter_raw(self, validators=None, **kwargs):
         """Generates an iterator that goes over every row in the file without modification.
 
            This is primarily for altering or re-saving the original file.(eg convert short tags to long)
+
+        Parameters
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings before returning
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
 
         Yields
         -------
         row_number: int
             The current row number
-        row_hed_string: HedString
-            parsed and combined hed string for the row, gathered from all specified columns
         column_to_hed_tags_dictionary: dict
             A dict with keys column_number, value the cell at that position.
         """
         default_mapper = ColumnMapper()
-        return self.iter_dataframe(default_mapper)
+        return self.iter_dataframe(default_mapper, validators, **kwargs)
 
-    def iter_dataframe(self, mapper=None, return_row_dict=False):
+    def iter_dataframe(self, mapper=None, return_row_dict=False, validators=None, expand_defs=False, **kwargs):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -280,6 +284,12 @@ class BaseInput:
         return_row_dict: bool
             If True, this returns the full row_dict including issues.
             If False, returns just the HedStrings for each column
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings before returning
+        expand_defs: bool
+            If True, this will fully remove all definitions found and expand all def tags to def-expand tags
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
         Yields
         -------
         row_number: int
@@ -290,6 +300,14 @@ class BaseInput:
         if mapper is None:
             mapper = self._mapper
 
+        tag_ops = []
+        if validators or expand_defs:
+            if not isinstance(validators, list):
+                validators = [validators]
+            if expand_defs:
+                validators.append(self._def_mapper)
+            tag_ops = translate_ops(validators, expand_defs=expand_defs, **kwargs)
+
         start_at_one = 1
         if self._has_column_names:
             start_at_one += 1
@@ -299,10 +317,14 @@ class BaseInput:
                 continue
 
             row_dict = mapper.expand_row_tags(text_file_row)
+            column_to_hed_tags = row_dict[model_constants.COLUMN_TO_HED_TAGS]
+            if tag_ops:
+                for hed_string_obj in column_to_hed_tags.values():
+                    hed_string_obj.apply_ops(tag_ops)
             if return_row_dict:
                 yield row_number + start_at_one, row_dict
             else:
-                yield row_number + start_at_one, row_dict[model_constants.COLUMN_TO_HED_TAGS]
+                yield row_number + start_at_one, column_to_hed_tags
 
     def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
                  tag_form="short_tag"):
