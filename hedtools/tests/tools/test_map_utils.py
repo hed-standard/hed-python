@@ -10,11 +10,13 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        cls.stern_map_path = os.path.join(base_dir, "sternberg_map.tsv")
-        cls.stern_events_test_path = os.path.join(base_dir, "sternberg_test_events.tsv")
-        cls.stern_events_with_quotes_path = os.path.join(base_dir, "sternberg_with_quotes_events.tsv")
-        cls.stern_events_no_quotes_path = os.path.join(base_dir, "sternberg_no_quotes_events.tsv")
+        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/attention_shift')
+        cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
+        cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
+        cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
+        cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
+        cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
 
     def test_extract_dataframe(self):
         df_new = get_new_dataframe(self.stern_map_path)
@@ -30,14 +32,14 @@ class Test(unittest.TestCase):
                             "get_new_dataframe returns a new dataframe")
 
     def test_get_columns_info(self):
-        df = get_new_dataframe(self.stern_events_with_quotes_path)
+        df = get_new_dataframe(self.stern_test2_path)
         col_info = get_columns_info(df)
         self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
         self.assertEqual(len(col_info.keys()), len(df.columns),
                          "get_columns_info should return a dictionary with a key for each column")
 
     def test_get_columns_info_skip_columns(self):
-        df = get_new_dataframe(self.stern_events_with_quotes_path)
+        df = get_new_dataframe(self.stern_test2_path)
         col_info = get_columns_info(df, ['latency'])
         self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
         self.assertEqual(len(col_info.keys()), len(df.columns) - 1,
@@ -69,7 +71,7 @@ class Test(unittest.TestCase):
             raise HedFileError("BadFileType", "get_event_files expected only .html or .js files", "")
 
     def test_get_event_files_prefix(self):
-        dir_data = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
+        dir_data = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
         file_list = get_file_list(dir_data, prefix='sternberg', types=[".tsv"])
         for item in file_list:
             filename = os.path.basename(item)
@@ -105,11 +107,11 @@ class Test(unittest.TestCase):
         self.assertFalse(df2, "make_frame should return None if column name invalid")
 
     def test_remove_quotes(self):
-        df1 = get_new_dataframe(self.stern_events_with_quotes_path)
+        df1 = get_new_dataframe(self.stern_test2_path)
         x = df1.loc[0, 'stimulus']
         remove_quotes(df1)
         y = df1.loc[0, 'stimulus']
-        df2 = get_new_dataframe(self.stern_events_no_quotes_path)
+        df2 = get_new_dataframe(self.stern_test3_path)
         self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'],
                          "remove_quotes should have quotes removed ")
 

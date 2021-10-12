@@ -170,7 +170,8 @@ class Test(unittest.TestCase):
 
     def test_unflatten_hed_from_file(self):
         sr = SidecarMap()
-        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data//sternberg_flattened.tsv")
+        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "../data/sternberg/sternberg_flattened.tsv")
         df = get_new_dataframe(file_path)
         undf3 = sr.unflatten_hed(df)
         print("to here")
