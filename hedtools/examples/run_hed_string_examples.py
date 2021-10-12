@@ -13,7 +13,8 @@ if __name__ == '__main__':
     local_hed_file = 'data/HED7.1.1.xml'   # path HED v7.1.1 stored locally
     hed_schema = schema.load_schema(local_hed_file)
     hed_validator_old = HedValidator(hed_schema)
-    hed_validator_current = HedValidator()
+    hed_schema_current = schema.load_schema_version()
+    hed_validator_current = HedValidator(hed_schema_current)
     hed_validator_no_semantic = HedValidator(run_semantic_validation=False)
     hed_string_test = "Sensory-event,Visual,Experimental-stimulus,Green,Non-target,(Letter/D, Center-of-Screen)\n\n\n"
     test_string = hed.HedString(hed_string_test)
