@@ -6,7 +6,7 @@ from flask import current_app
 from hed import models
 from hed import schema as hedschema
 from hedweb.constants import base_constants
-from hedweb import events, spreadsheet, sidecar, strings
+from hedweb import columns, events, spreadsheet, sidecar, strings
 
 
 app_config = current_app.config
@@ -31,32 +31,30 @@ def get_input_from_request(request):
     service_request = json.loads(form_string)
     arguments = get_service_info(service_request)
     arguments[base_constants.SCHEMA] = get_input_schema(service_request)
-    arguments.update(get_input_objects(service_request))
+    get_input_objects(arguments, service_request)
     return arguments
 
 
-def get_input_objects(params):
-    args = {}
+def get_input_objects(arguments, params):
     if base_constants.JSON_STRING in params and params[base_constants.JSON_STRING]:
-        args[base_constants.JSON_SIDECAR] = \
+        arguments[base_constants.JSON_SIDECAR] = \
             models.Sidecar(file=io.StringIO(params[base_constants.JSON_STRING]), name='JSON_Sidecar')
     if base_constants.EVENTS_STRING in params and params[base_constants.EVENTS_STRING]:
-        args[base_constants.EVENTS] = \
+        arguments[base_constants.EVENTS] = \
             models.EventsInput(file=io.StringIO(params[base_constants.EVENTS_STRING]),
-                               sidecars=args[base_constants.JSON_SIDECAR], name='Events')
+                               sidecars=arguments[base_constants.JSON_SIDECAR], name='Events')
     if base_constants.SPREADSHEET_STRING in params and params[base_constants.SPREADSHEET_STRING]:
         tag_columns, prefix_dict = spreadsheet.get_prefix_dict(params)
-        args[base_constants.SPREADSHEET] = \
+        arguments[base_constants.SPREADSHEET] = \
             models.HedInput(file=io.StringIO(params[base_constants.SPREADSHEET_STRING]), file_type=".tsv",
-                            tag_columns=tag_columns, has_column_names=args.get(base_constants.HAS_COLUMN_NAMES, None),
+                            tag_columns=tag_columns,
+                            has_column_names=arguments.get(base_constants.HAS_COLUMN_NAMES, None),
                             column_prefix_dictionary=prefix_dict, name='spreadsheet.tsv')
     if base_constants.STRING_LIST in params and params[base_constants.STRING_LIST]:
         s_list = []
         for s in params[base_constants.STRING_LIST]:
             s_list.append(models.HedString(s))
-        args[base_constants.STRING_LIST] = s_list
-
-    return args
+        arguments[base_constants.STRING_LIST] = s_list
 
 
 def get_service_info(parameters):
@@ -70,12 +68,15 @@ def get_service_info(parameters):
     has_column_names = parameters.get(base_constants.HAS_COLUMN_NAMES, '') == 'on'
     check_warnings = parameters.get(base_constants.CHECK_WARNINGS_VALIDATE, '') == 'on'
     defs_expand = parameters.get(base_constants.DEFS_EXPAND, '') == 'on'
+    #tag_columns, prefix_dict = columns.get_prefix_dict(parameters)
     return {base_constants.SERVICE: service,
             base_constants.COMMAND: command,
             base_constants.COMMAND_TARGET: command_target,
             base_constants.HAS_COLUMN_NAMES: has_column_names,
             base_constants.CHECK_WARNINGS_VALIDATE: check_warnings,
             base_constants.DEFS_EXPAND: defs_expand
+            # base_constants.TAG_COLUMNS: tag_columns,
+            # base_constants.COLUMN_PREFIX_DICTIONARY: prefix_dict
             }
 
 
