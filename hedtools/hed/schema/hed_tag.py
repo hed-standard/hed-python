@@ -234,6 +234,12 @@ class HedTag:
 
         return self._hed_string[self.span[0]:self.span[1]]
 
+    def _str_no_long_tag(self):
+        if self._tag:
+            return self._tag
+
+        return self._hed_string[self.span[0]:self.span[1]]
+
     def add_prefix_if_not_present(self, required_prefix):
         """Add a prefix to this tag *unless* the tag is already formatted.
 
@@ -440,7 +446,7 @@ class HedTag:
                                                       expected_parent_tag=hed_schema.short_tag_mapping[tag])
                     return str(self), None, None, error
 
-        full_tag_string = str(self)
+        full_tag_string = self._str_no_long_tag()
         # skip over the tag prefix if present
         full_tag_string = full_tag_string[len(prefix):]
         # Finally don't actually adjust the tag if it's hed2 style.

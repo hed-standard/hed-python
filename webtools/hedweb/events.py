@@ -183,7 +183,8 @@ def validate(hed_schema, events, sidecar=None):
     issue_str = ''
     if sidecar:
         issues = sidecar.validate_entries(validator)
-        issue_str = issue_str + get_printable_issue_string(issues, title="Sidecar definition errors:")
+        if issues:
+            issue_str = issue_str + get_printable_issue_string(issues, title="Sidecar definition errors:")
     issues = events.validate_file_sidecars(validator)
     if issues:
         issue_str = issue_str + get_printable_issue_string(issues, title="Sidecar errors:")
