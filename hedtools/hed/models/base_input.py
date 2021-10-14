@@ -69,7 +69,7 @@ class BaseInput:
         self._dataframe = None
 
         if input_type in self.TEXT_EXTENSION:
-            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header)
+            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header, dtype=str)
         elif input_type in self.EXCEL_EXTENSION:
             self._loaded_workbook = openpyxl.load_workbook(file)
             loaded_worksheet = self.get_worksheet(self._worksheet_name)
