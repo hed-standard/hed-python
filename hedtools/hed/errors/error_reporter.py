@@ -461,6 +461,15 @@ def get_printable_issue_string(validation_issues, title=None, severity=None, ski
     return issue_string
 
 
+def check_for_any_errors(issues_list):
+    for issue in issues_list:
+        if issue['severity'] < ErrorSeverity.WARNING:
+            return True
+
+    return False
+
+
+
 def _get_context_from_issue(val_issue, skip_filename=True):
     """
     Extract all the context values from the given issue
@@ -505,7 +514,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
     """
     tab_string = tab_count * '\t'
     if context_type == ErrorContext.HED_STRING:
-        context = str(context).replace('\n', ' ')
+        context = context.get_original_hed_string()
     error_types = {
         ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
         ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
