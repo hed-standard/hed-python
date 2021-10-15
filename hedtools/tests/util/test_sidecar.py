@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
         validator = HedValidator(hed_schema=self.hed_schema, check_for_warnings=True)
         validation_issues = self.json_def_sidecar.validate_entries(validator)
         # This has various extended warnings
-        self.assertEqual(len(validation_issues), 14)
+        self.assertEqual(len(validation_issues), 9)
 
         validation_issues = self.default_sidecar.validate_entries(validator)
         self.assertEqual(len(validation_issues), 4)

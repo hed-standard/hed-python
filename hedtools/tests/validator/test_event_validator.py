@@ -169,10 +169,10 @@ class Test(unittest.TestCase):
         validator = HedValidator(hed_schema=hed_schema)
 
         validation_issues1 = input_file.validate_file_sidecars(validator)
-        self.assertEqual(len(validation_issues1), 5)
+        self.assertEqual(len(validation_issues1), 4)
 
         validation_issues = input_file.validate_file(validator)
-        self.assertEqual(len(validation_issues), 21)
+        self.assertEqual(len(validation_issues), 42)
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),

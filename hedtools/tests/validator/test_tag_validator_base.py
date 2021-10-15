@@ -59,7 +59,8 @@ class TestHedBase(unittest.TestCase):
                 if tag_index >= len(source_list):
                     raise ValueError("Bad group or tax index in expected errors for unit tests")
                 kwargs['tag'] = source_list[tag_index]
-            formatted_errors += ErrorHandler.format_error(code, *args, **kwargs)
+            formatted_errors += error_handler.format_error_with_context(code, *args, **kwargs)
+            #formatted_errors += error_handler.format_error(code, *args, **kwargs)
 
         return formatted_errors
 
@@ -101,10 +102,12 @@ class TestValidatorBase(TestHedBase):
             expected_result = expected_results[test_key]
             expected_issue = self.really_format_errors(error_handler, hed_string=hed_string_obj,
                                                        params=expected_params)
+            error_handler.add_context_to_issues(test_issues)
 
-            # print(test_key)
-            # print(str(expected_issue))
-            # print(str(test_issues))
+            print(error_reporter.get_printable_issue_string(test_issues))
+            print(test_key)
+            print(str(expected_issue))
+            print(str(test_issues))
             error_handler.pop_error_context()
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
