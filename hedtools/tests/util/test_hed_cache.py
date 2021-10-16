@@ -23,7 +23,8 @@ class Test(unittest.TestCase):
         cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5']
         cls.hed_directory_version = '4.0.5'
 
-        cls.specific_hed_url = """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml"""
+        cls.specific_hed_url = \
+            """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml"""
         cls.base_api_url = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
 
     def test_get_hed_version_path(self):
@@ -103,6 +104,7 @@ class Test(unittest.TestCase):
         for version in invalid_versions:
             final_version = f"HED{version}.xml"
             self.assertFalse(hed_cache.version_pattern.match(final_version))
+
 
 if __name__ == '__main__':
     unittest.main()

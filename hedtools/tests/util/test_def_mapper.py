@@ -17,16 +17,16 @@ class Test(unittest.TestCase):
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
         cls.basic_def_string = f"(Definition/TestDef,{cls.def_contents_string})"
         cls.basic_def_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
-        cls.label_def_string = f"Def/TestDef"
+        cls.label_def_string = "Def/TestDef"
         cls.expanded_def_string = f"(Def-expand/TestDef,{cls.def_contents_string})"
         cls.basic_hed_string = "Item/BasicTestTag1,Item/BasicTestTag2"
         cls.basic_hed_string_with_def = f"{cls.basic_hed_string},{cls.label_def_string}"
         cls.basic_hed_string_with_def_first = f"{cls.label_def_string},{cls.basic_hed_string}"
         cls.basic_hed_string_with_def_first_paren = f"({cls.label_def_string},{cls.basic_hed_string})"
-        cls.placeholder_label_def_string = f"def/TestDefPlaceholder/2471"
+        cls.placeholder_label_def_string = "def/TestDefPlaceholder/2471"
         cls.placeholder_def_contents = "(Item/TestDef1/#,Item/TestDef2)"
         cls.placeholder_def_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_def_contents})"
-        cls.placeholder_expanded_def_string = f"(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2))"
+        cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2))"
 
         cls.placeholder_hed_string_with_def = f"{cls.basic_hed_string},{cls.placeholder_label_def_string}"
         cls.placeholder_hed_string_with_def_first = f"{cls.placeholder_label_def_string},{cls.basic_hed_string}"
@@ -102,7 +102,6 @@ class Test(unittest.TestCase):
         def_issues = test_string.validate(def_mapper, expand_defs=False)
         self.assertEqual(str(test_string), self.basic_hed_string_with_def_first_paren)
 
-
     def test_expand_def_tags_placeholder(self):
         def_dict = DefDict()
         def_string = HedString(self.placeholder_def_string)
@@ -135,8 +134,8 @@ class Test(unittest.TestCase):
 
         test_string = HedString(self.placeholder_hed_string_with_def_first_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
-        self.assertEqual(str(test_string), "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
-
+        self.assertEqual(str(test_string),
+                         "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
 
     def test_expand_def_tags_placeholder_no_expand(self):
         def_dict = DefDict()
@@ -169,7 +168,6 @@ class Test(unittest.TestCase):
         def_issues = test_string.validate(def_mapper, expand_defs=False)
         self.assertEqual(str(test_string), self.placeholder_hed_string_with_def_first_paren)
 
-
     def test_expand_def_tags_placeholder_invalid(self):
         def_dict = DefDict()
         def_string = HedString(self.placeholder_def_string)
@@ -177,7 +175,7 @@ class Test(unittest.TestCase):
         def_dict.check_for_definitions(def_string)
         def_mapper = DefinitionMapper(def_dict)
 
-        placeholder_label_def_string_no_placeholder = f"def/TestDefPlaceholder"
+        placeholder_label_def_string_no_placeholder = "def/TestDefPlaceholder"
 
         test_string = HedString(placeholder_label_def_string_no_placeholder)
         test_string.convert_to_canonical_forms(None)
@@ -191,14 +189,13 @@ class Test(unittest.TestCase):
         def_dict.check_for_definitions(def_string)
         def_mapper = DefinitionMapper(def_dict)
 
-        label_def_string_has_inavlid_placeholder = f"def/TestDef/54687"
+        label_def_string_has_inavlid_placeholder = "def/TestDef/54687"
 
         test_string = HedString(label_def_string_has_inavlid_placeholder)
         test_string.convert_to_canonical_forms(None)
         def_issues = def_mapper.expand_def_tags(test_string)
         self.assertEqual(str(test_string), label_def_string_has_inavlid_placeholder)
         self.assertTrue(def_issues)
-
 
     def test__check_tag_starts_with(self):
         target_tag_name = "definition/"
@@ -210,10 +207,6 @@ class Test(unittest.TestCase):
             result = DefDict._check_tag_starts_with(tag, target_tag_name)
             self.assertTrue(result)
 
+
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
-

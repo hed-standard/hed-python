@@ -8,7 +8,7 @@ class HedSchemaEntry:
         self.description = None
         self.value = None
         self._section = section
-        
+
         # This section is largely unused.  It will only be filled in when we try to add an attribute
         # that isn't valid in this section.
         self._unknown_attributes = None

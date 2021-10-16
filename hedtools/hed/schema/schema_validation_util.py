@@ -26,7 +26,7 @@ def is_hed3_version_number(version_string):
         version = Version(version_string)
         if version.major >= 8:
             return True
-    except ValueError as e:
+    except ValueError:
         return False
 
     return False

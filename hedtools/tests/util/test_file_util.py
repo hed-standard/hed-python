@@ -2,10 +2,12 @@ import unittest
 import os
 from hed.util import file_util
 
+
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.default_test_url = """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml"""
+        cls.default_test_url = \
+            """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml"""
         cls.hed_xml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/legacy_xml/HED7.1.1.xml')
 
     def test_url_to_file(self):
@@ -27,7 +29,6 @@ class Test(unittest.TestCase):
         some_file = "folder_that_does_not_exist/3k32j23kj.txt"
         deleted = file_util.delete_file_if_it_exists(some_file)
         self.assertFalse(deleted)
-
 
     def test_get_file_extension(self):
         expected_extension = '.xml'

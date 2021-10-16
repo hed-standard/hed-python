@@ -83,6 +83,7 @@ def get_file_list(path, prefix=None, types=None, suffix=None):
 
     Args:
         path (str):       The full path of the directory tree to be traversed (no ending slash)
+        prefix (str):     An optional prefix for the base filename
         types (list):     A list of extensions to be selected
         suffix (str):     The suffix of the paths to be extracted
 
@@ -104,7 +105,7 @@ def get_file_list(path, prefix=None, types=None, suffix=None):
 
 
 def get_key_counts(root_dir, skip_cols=None):
-    file_list = get_file_list(root_dir, types=[".tsv"], suffix = "_events")
+    file_list = get_file_list(root_dir, types=[".tsv"], suffix="_events")
     count_dicts = {}
     for file in file_list:
         dataframe = get_new_dataframe(file)
@@ -125,7 +126,7 @@ def get_key_hash(key_tuple):
         key_hash (int)              Hash key for the tuple
 
     """
-    x = tuple(key_tuple)
+
     return hash(tuple(key_tuple))
 
 
@@ -177,9 +178,15 @@ def reorder_columns(data, col_order, skip_missing=True):
 
 
 def remove_quotes(df, column_list=None):
+    """ Remove quotes from the entries of the specified columns in a dataframe or from all columns if no list provided.
+
+    Args:
+        df (Dataframe):             Dataframe to process by removing specified quotes
+        column_list (list) :        Optional list of column names for which to remove
+    """
+
     col_types = df.dtypes
     for index, col in enumerate(df.columns):
-        x = col_types.iloc[index]
         if col_types.iloc[index] in ['string', 'object']:
             df.iloc[:, index] = df.iloc[:, index].str.replace('"', '')
             df.iloc[:, index] = df.iloc[:, index].str.replace("'", "")

@@ -351,7 +351,7 @@ class ColumnMapper:
             Gets all the issues with finalizing column mapping.  Primarily a missing required column.
         Returns
         -------
-        col_mapping_issuse: [{}]
+        col_mapping_issues: [{}]
             A list of all issues found from mapping column names to numbers.
         """
         return self._finalize_mapping_issues

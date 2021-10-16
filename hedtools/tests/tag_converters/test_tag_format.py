@@ -1,5 +1,4 @@
 import unittest
-import os
 
 from hed.errors import error_reporter
 from hed.models.hed_string import HedString
@@ -25,9 +24,11 @@ class TestConvertTag(TestTagFormat):
                 string_result = test_string_obj.get_as_long()
             expected_params = expected_errors[test_key]
             expected_result = expected_results[test_key]
+
             expected_issue = self.really_format_errors(error_handler, hed_string=test_string_obj,
                                                        params=expected_params)
             error_handler.add_context_to_issues(test_issues)
+
             # print(test_key)
             # print(expected_issue)
             # print(test_issues)
@@ -326,8 +327,7 @@ class TestConvertToShortTag(TestConvertTag):
                                                             expected_parent_tag='Item/Object/Geometric'),
             'singleLevelAlreadyShort':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0,
-                                                 index_in_tag=19, index_in_tag_end=28,
+                                                 tag=0, index_in_tag=19, index_in_tag_end=28,
                                                  expected_parent_tag='Item/Object/Geometric'),
             'twoLevels': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
                                                           tag=0, index_in_tag=25, index_in_tag_end=34,
@@ -457,11 +457,19 @@ class TestConvertHedStringToShort(TestConvertTag):
             'multiLevel': 'Event/Sensory-event',
             'twoSingle': 'Event,Attribute',
             'oneExtension': 'Event/Extension',
-            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5',
-            'simpleGroup': '(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5)',
-            'groupAndTag': '(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made/Vehicle/Car',
-            'nestedGroup': '((Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors)',
-            'nestedGroup2': '(Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors,(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5))'
+            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made/Vehicle/Train,\
+            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5',
+            'simpleGroup': '(Item/Object/Man-made/Vehicle/Train,\
+            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5)',
+            'groupAndTag': '(Item/Object/Man-made/Vehicle/Train,\
+            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),\
+            Item/Object/Man-made/Vehicle/Car',
+            'nestedGroup': '((Item/Object/Man-made/Vehicle/Train,\
+            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),\
+            Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors)',
+            'nestedGroup2': '(Item/Object/Man-made/Vehicle/Car,'
+                            'Attribute/Environmental/Indoors,(Item/Object/Man-made/Vehicle/Train,\
+                            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5))'
         }
         expected_results = {
             'singleLevel': 'Event',
@@ -676,11 +684,16 @@ class TestConvertHedStringToLong(TestConvertTag):
             'multiLevel': 'Event/Sensory-event',
             'twoSingle': 'Event,Attribute',
             'oneExtension': 'Event/Extension',
-            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5',
+            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made/Vehicle/Train,' +
+            'Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5',
             'simpleGroup': '(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5)',
-            'groupAndTag': '(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made/Vehicle/Car',
-            'nestedGroup': '((Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors)',
-            'nestedGroup2': '(Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors,(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5))'
+            'groupAndTag': '(Item/Object/Man-made/Vehicle/Train,' +
+            'Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made/Vehicle/Car',
+            'nestedGroup': '((Item/Object/Man-made/Vehicle/Train,' +
+                           'Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),' +
+                           'Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors)',
+            'nestedGroup2': '(Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors,' +
+                            '(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5))'
         }
         expected_errors = {
             'singleLevel': [],
