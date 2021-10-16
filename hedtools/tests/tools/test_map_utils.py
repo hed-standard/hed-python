@@ -21,11 +21,11 @@ class Test(unittest.TestCase):
     def test_extract_dataframe(self):
         df_new = get_new_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new, pd.DataFrame)
-        self.assertEqual(len(df_new), 87, f"get_new_dataframe should return correct number of rows")
-        self.assertEqual(len(df_new.columns), 4, f"get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new), 87, "get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new.columns), 4, "get_new_dataframe should return correct number of rows")
         df_new1 = get_new_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new1, pd.DataFrame)
-        self.assertEqual(len(df_new1), 87, f"get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new1), 87, "get_new_dataframe should return correct number of rows")
         self.assertEqual(len(df_new1.columns), 4, f"get_new_dataframe should return correct number of rows")
         df_new.iloc[0]['type'] = 'Pear'
         self.assertNotEqual(df_new.iloc[0]['type'], df_new1.iloc[0]['type'],
@@ -110,18 +110,17 @@ class Test(unittest.TestCase):
         df1 = get_new_dataframe(self.stern_test2_path)
         remove_quotes(df1)
         df2 = get_new_dataframe(self.stern_test3_path)
-        self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'],
-                         "remove_quotes should have quotes removed ")
+        self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'], "remove_quotes should have quotes removed")
 
     def test_reorder_columns(self):
         df = get_new_dataframe(self.stern_map_path)
         df_new = reorder_columns(df, ['event_type', 'type'])
-        self.assertEqual(len(df_new), 87, f"reorder_columns should return correct number of rows")
-        self.assertEqual(len(df_new.columns), 2, f"reorder_columns should return correct number of rows")
-        self.assertEqual(len(df), 87, f"reorder_columns should return correct number of rows")
-        self.assertEqual(len(df.columns), 4, f"reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new), 87, "reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new.columns), 2, "reorder_columns should return correct number of rows")
+        self.assertEqual(len(df), 87, "reorder_columns should return correct number of rows")
+        self.assertEqual(len(df.columns), 4, "reorder_columns should return correct number of rows")
         df_new1 = reorder_columns(df, ['event_type', 'type', 'baloney'])
-        self.assertEqual(len(df_new1), 87, f"reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new1), 87, "reorder_columns should return correct number of rows")
         self.assertEqual(len(df_new1.columns), 2, f"reorder_columns should return correct number of rows")
 
     def test_reorder_columns_no_skip(self):

@@ -66,13 +66,13 @@ class TestDefDict(TestDefBase):
             'placeholderWrongSpot': "(Definition/InvalidDef1#)",
             'twoDefTags': f"(Definition/ValidDef1,Definition/InvalidDef2,{self.def_contents_string})",
             'twoGroupTags': f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
-            'extraOtherTags': f"(Definition/InvalidDef1, InvalidContents)",
+            'extraOtherTags': "(Definition/InvalidDef1, InvalidContents)",
             'duplicateDef': f"(Definition/Def1), (Definition/Def1, {self.def_contents_string})",
             'duplicateDef2': f"(Definition/Def1), (Definition/Def1/#, {self.placeholder_def_contents})",
-            'defAlreadyTagInSchema': f"(Definition/Item)",
+            'defAlreadyTagInSchema': "(Definition/Item)",
             'defTooManyPlaceholders': self.placeholder_invalid_def_string,
-            'invalidPlaceholder': f"(Definition/InvalidDef1/InvalidPlaceholder)",
-            'invalidPlaceholderExtension': f"(Definition/InvalidDef1/this-part-is-not-allowed/#)",
+            'invalidPlaceholder': "(Definition/InvalidDef1/InvalidPlaceholder)",
+            'invalidPlaceholderExtension': "(Definition/InvalidDef1/this-part-is-not-allowed/#)",
         }
         expected_results = {
             'noGroupTag': [],

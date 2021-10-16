@@ -27,7 +27,7 @@ class ValidationErrors:
     # HED_GENERIC_WARNING
     # HED_LIBRARY_UNMATCHED
     HED_NODE_NAME_EMPTY = 'HED_NODE_NAME_EMPTY'
-    #HED_ONSET_OFFSET_ERROR
+    # HED_ONSET_OFFSET_ERROR
     HED_PARENTHESES_MISMATCH = 'HED_PARENTHESES_MISMATCH'
     HED_PLACEHOLDER_INVALID = 'HED_PLACEHOLDER_INVALID'
     HED_REQUIRED_TAG_MISSING = 'HED_REQUIRED_TAG_MISSING'
@@ -67,6 +67,7 @@ class ValidationErrors:
 
     HED_DEF_VALUE_MISSING = "HED_DEF_VALUE_MISSING"
     HED_DEF_VALUE_EXTRA = "HED_DEF_VALUE_EXTRA"
+
 
 class SidecarErrors:
     # These are for json sidecar validation errors(sidecars can also produce most normal validation errors)

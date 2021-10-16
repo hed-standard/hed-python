@@ -233,8 +233,8 @@ class HedSchemaWikiParser:
         for line in lines:
             if line.strip():
                 raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID,
-                                   f"There should be no other content in the between the HED line in the header \
-                                   and either the prologue or schema sections.", filename=self.filename)
+                                   "There should be no other content in the between the HED line in the header" +
+                                   "and either the prologue or schema sections.", filename=self.filename)
 
     def _read_prologue(self, lines):
         """Adds the prologue
