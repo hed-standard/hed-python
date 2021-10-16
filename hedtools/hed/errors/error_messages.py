@@ -48,7 +48,8 @@ def val_error_invalid_char(source_string, char_index):
            }
 
 
-@hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True, actual_code=ValidationErrors.HED_CHARACTER_INVALID)
+@hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True,
+               actual_code=ValidationErrors.HED_CHARACTER_INVALID)
 def val_error_invalid_tag_character(tag, problem_tag):
     return f"Invalid character '{problem_tag}' in {tag}", {}
 
@@ -157,7 +158,8 @@ def val_error_tag_group_tag(tag):
 @hed_tag_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, actual_code=ValidationErrors.HED_TAG_GROUP_ERROR)
 def val_error_top_level_tags(tag, multiple_tags):
     tags_as_string = [str(tag) for tag in multiple_tags]
-    return f"Multiple top level tags found in a single group.  First one found: {str(tag)}.  Remainder:{str(tags_as_string)}", {}
+    return f"Multiple top level tags found in a single group.  First one found: {str(tag)}. " + \
+           f"Remainder:{str(tags_as_string)}", {}
 
 
 @hed_error(ValidationErrors.HED_REQUIRED_TAG_MISSING)
@@ -200,7 +202,9 @@ def schema_warning_invalid_chars_tag(tag_name, problem_char, char_index):
 
 @hed_error(SchemaWarnings.INVALID_CAPITALIZATION, default_severity=ErrorSeverity.WARNING)
 def schema_warning_invalid_capitalization(tag_name, problem_char, char_index):
-    return f"First character must be a capital letter or number.  Found character '{problem_char}' in tag '{tag_name}' at position {char_index}.", {'problem_char': problem_char}
+    return "First character must be a capital letter or number.  " + \
+           f"Found character '{problem_char}' in tag '{tag_name}' at position {char_index}.", \
+           {'problem_char': problem_char}
 
 
 @hed_error(SidecarErrors.BLANK_HED_STRING)
@@ -244,7 +248,8 @@ def def_error_wrong_group_tags(def_name, tag_list):
 @hed_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
 def def_error_wrong_placeholder_count(def_name, expected_count, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
-    return f"Incorrect number placeholder tags found in definition for {def_name}.  Expected {expected_count}, found: {tag_list_strings}", {}
+    return f"Incorrect number placeholder tags found in definition for {def_name}.  " + \
+           f"Expected {expected_count}, found: {tag_list_strings}", {}
 
 
 @hed_error(DefinitionErrors.DUPLICATE_DEFINITION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)

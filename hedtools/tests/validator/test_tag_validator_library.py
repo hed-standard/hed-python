@@ -172,7 +172,7 @@ class IndividualHedTagsShort(TestHed3):
             'timeValue': self.format_error_but_not_really(
                 ValidationErrors.HED_TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None),
             'invalidTimeValue': self.format_error_but_not_really(
-                ValidationErrors.HED_TAG_EXTENDED, tag=0,index_in_tag=10, index_in_tag_end=None),
+                ValidationErrors.HED_TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 

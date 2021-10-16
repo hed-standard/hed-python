@@ -168,7 +168,6 @@ class Test(unittest.TestCase):
         def_issues = test_string.validate(def_mapper, expand_defs=False)
         self.assertEqual(str(test_string), self.placeholder_hed_string_with_def_first_paren)
 
-
     def test_expand_def_tags_placeholder_invalid(self):
         def_dict = DefDict()
         def_string = HedString(self.placeholder_def_string)

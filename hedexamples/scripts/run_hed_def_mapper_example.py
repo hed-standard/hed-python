@@ -27,17 +27,17 @@ if __name__ == '__main__':
     validator = HedValidator(hed_schema=hed_schema)
     sidecar = Sidecar(json_file)
     def_issues = sidecar.validate_entries(validator)
-    #def_issues = sidecar.validate_entries(hed_schema=hed_schema)
+    # def_issues = sidecar.validate_entries(hed_schema=hed_schema)
     if def_issues:
         print(get_printable_issue_string(def_issues,
-                                             title="There should be no errors in the definitions from the sidecars:"))
+                                         title="There should be no errors in the definitions from the sidecars:"))
     input_file = EventsInput(hed3_tags_single_sheet, sidecars=sidecar)
 
     validation_issues = input_file.validate_file_sidecars(validator)
     if validation_issues:
         print(get_printable_issue_string(validation_issues,
-                                             title="There should be no errors with the sidecar.  \""
-                                             "This will likely cause other errors if there are."))
+                                         title="There should be no errors with the sidecar.  \""
+                                         "This will likely cause other errors if there are."))
     validation_issues = input_file.validate_file(validator)
     print(get_printable_issue_string(validation_issues, "Normal hed string errors"))
 

@@ -21,7 +21,7 @@ if __name__ == '__main__':
     test_string = HedString(hed_string_test)
     validation_issues = test_string.validate(hed_validator_old)
     print(get_printable_issue_string(validation_issues,
-                                         title='[Example 1a] hed_string_1 should have no issues with HEDv7.1.1'))
+                                     title='[Example 1a] hed_string_1 should have no issues with HEDv7.1.1'))
 
     # Example 1a: Valid HED string for HED <= v7.1.1
     hed_string_1 = 'Event/Label/ButtonPuskDeny, Event/Description/Button push to deny access to the ID holder,' \
@@ -29,12 +29,14 @@ if __name__ == '__main__':
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger)'
     test_string = HedString(hed_string_1)
     validation_issues = test_string.validate(hed_validator_old)
-    print(get_printable_issue_string(validation_issues, title='[Example 1a] hed_string_1 should have no issues with HEDv7.1.1'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 1a] hed_string_1 should have no issues with HEDv7.1.1'))
 
     # Example 1b: Try with the latest version of HED.xml
     test_string = HedString(hed_string_1)
     validation_issues = test_string.validate(hed_validator_current)
-    print(get_printable_issue_string(validation_issues, title='[Example 1b] hed_string_1 has issues with the latest HED version'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 1b] hed_string_1 has issues with the latest HED version'))
 
     # Example 2a: Invalid HED string (junk in last tag)
     hed_string_2 = 'Event/Category/Participant response,'  \
@@ -42,7 +44,8 @@ if __name__ == '__main__':
                    'dskfjkf/dskjdfkj/sdkjdsfkjdf/sdlfdjdsjklj'
     test_string = HedString(hed_string_2)
     validation_issues = test_string.validate(hed_validator_old)
-    print(get_printable_issue_string(validation_issues, title='[Example 2a] hed_string_2 has junk in the last tag'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 2a] hed_string_2 has junk in the last tag'))
 
     # Example 2b: However HED string of Example 2 has valid syntax so syntactic validation works
     test_string = HedString(hed_string_2)
@@ -57,7 +60,8 @@ if __name__ == '__main__':
                    'Participant/Efffectt/Visual, Participant/Effect/Cognitive/Target'
     test_string = HedString(hed_string_3)
     validation_issues = test_string.validate(hed_validator_current)
-    print(get_printable_issue_string(validation_issues, title='[Example 3a] hed_string_3 has missing comma so fails before Efffectt typo'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 3a] hed_string_3 has missing comma so fails before Efffectt typo'))
 
     # Example 3b: Using issue list directly - issues are returned as a list of dictionaries
     # print('[Example 3b] hed_string_3 has ', len(validation_issues), ' issues\n')
@@ -69,4 +73,5 @@ if __name__ == '__main__':
                    '(Participant ~ Action/Deny/Access ~ Item/Object/Person/IDHolder)'
     test_string = HedString(hed_string_4)
     validation_issues = test_string.validate(hed_validator_current)
-    print(get_printable_issue_string(validation_issues, title='[Example 4a] the ~ notation in hed_string_4 works in v7.1.1'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 4a] the ~ notation in hed_string_4 works in v7.1.1'))
