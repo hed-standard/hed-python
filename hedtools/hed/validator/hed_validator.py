@@ -10,7 +10,6 @@ from hed.errors.error_reporter import ErrorHandler
 
 from hed.models.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
-from hed.models.def_mapper import DefinitionMapper
 from functools import partial
 
 

@@ -38,7 +38,7 @@ class TestDefDict(TestDefBase):
     basic_hed_string_with_def = f"Item/BasicTestTag1,Item/BasicTestTag2,{label_def_string}"
 
     placeholder_def_contents = "(Item/TestDef1/#,Item/TestDef2)"
-    placehodler_def_string = f"(Definition/TestDefPlaceholder/#,{placeholder_def_contents})"
+    placeholder_def_string = f"(Definition/TestDefPlaceholder/#,{placeholder_def_contents})"
 
     def test_check_for_definitions(self):
         def_dict = DefDict()
@@ -51,7 +51,7 @@ class TestDefDict(TestDefBase):
     def test_check_for_definitions_placeholder(self):
         def_dict = DefDict()
         original_def_count = len(def_dict._defs)
-        hed_string_obj = HedString(self.placehodler_def_string)
+        hed_string_obj = HedString(self.placeholder_def_string)
         hed_string_obj.validate(def_dict)
         new_def_count = len(def_dict._defs)
         self.assertGreater(new_def_count, original_def_count)
@@ -72,25 +72,32 @@ class TestDefDict(TestDefBase):
             'defAlreadyTagInSchema': f"(Definition/Item)",
             'defTooManyPlaceholders': self.placeholder_invalid_def_string,
             'invalidPlaceholder': f"(Definition/InvalidDef1/InvalidPlaceholder)",
-            'invalidPlaceholderExtension': f"(Definition/InvalidDef1/thispartisnotallowed/#)",
+            'invalidPlaceholderExtension': f"(Definition/InvalidDef1/this-part-is-not-allowed/#)",
         }
         expected_results = {
             'noGroupTag': [],
-            'placeholderNoGroupTag': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "InvalidDef1",
-                                                                                 expected_count=1, tag_list=[]),
-            'placeholderWrongSpot': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, "InvalidDef1#"),
-            'twoDefTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS, "ValidDef1", ["Definition/InvalidDef2"]),
-            'twoGroupTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1", [self.def_contents_string, self.def_contents_string2]),
+            'placeholderNoGroupTag': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
+                                                               "InvalidDef1", expected_count=1, tag_list=[]),
+            'placeholderWrongSpot': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
+                                                              "InvalidDef1#"),
+            'twoDefTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
+                                                    "ValidDef1", ["Definition/InvalidDef2"]),
+            'twoGroupTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+                                                      "InvalidDef1",
+                                                      [self.def_contents_string, self.def_contents_string2]),
             'extraOtherTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1",
-                                                      ['InvalidContents']),
+                                                        ['InvalidContents']),
             'duplicateDef': ErrorHandler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
             'duplicateDef2': ErrorHandler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
             # This is not an error since re-used terms are checked elsewhere.
             'defAlreadyTagInSchema': [],
-            'defTooManyPlaceholders': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "TestDefPlaceholder",
-                                                                                 expected_count=1, tag_list=["Item/TestDef1/#", "Item/TestDef2/#"]),
-            'invalidPlaceholderExtension': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, "InvalidDef1/thispartisnotallowed"),
-            'invalidPlaceholder': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, "InvalidDef1/InvalidPlaceholder"),
+            'defTooManyPlaceholders': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
+                                                                "TestDefPlaceholder", expected_count=1,
+                                                                tag_list=["Item/TestDef1/#", "Item/TestDef2/#"]),
+            'invalidPlaceholderExtension': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
+                                                                     "InvalidDef1/this-part-is-not-allowed"),
+            'invalidPlaceholder': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
+                                                            "InvalidDef1/InvalidPlaceholder"),
         }
 
         self.check_def_base(test_strings, expected_results)
@@ -106,11 +113,5 @@ class TestDefDict(TestDefBase):
             self.assertTrue(result)
 
 
-
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
-

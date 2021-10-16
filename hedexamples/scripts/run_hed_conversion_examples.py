@@ -12,7 +12,7 @@ from hed.models.hed_input import HedInput
 from hed.schema.hed_schema_file import load_schema
 from hed.models.hed_string import HedString
 
-local_hed_file_no_dupe = 'data/HED8.0.0-alpha.1.xml'
+local_hed_file_no_dupe = '../data/HED8.0.0-alpha.1.xml'
 
 
 def long_to_short_file(input_file, output_filename, hed_schema, error_handler=None):
@@ -38,7 +38,7 @@ def short_to_long_string(input_string, hed_schema):
 
 
 if __name__ == '__main__':
-    example_data_path = 'data'
+    example_data_path = '../data'
     hed3_tags_single_sheet = os.path.join(example_data_path, 'hed3_tags_single_sheet.xlsx')
 
     loaded_schema = load_schema(local_hed_file_no_dupe)

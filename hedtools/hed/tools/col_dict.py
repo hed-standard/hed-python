@@ -1,6 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.map_utils import get_new_dataframe, get_key_hash, get_row_hash, remove_quotes, separate_columns
+from hed.tools.map_utils import get_new_dataframe
 
 
 class ColumnDict:
@@ -22,7 +22,7 @@ class ColumnDict:
         self.value_info = {}
         if value_cols and skip_cols and set(value_cols).intersection(skip_cols):
             raise HedFileError("ValueSkipOverlap",
-                               f"Value columns {str(value_cols)} and skip columns {str(skip_cols)} cannot overlap")
+                               f"Value columns {str(value_cols)} and skip columns {str(skip_cols)} cannot overlap", "")
         if value_cols:
             for value in value_cols:
                 self.value_info[value] = 0
@@ -94,7 +94,7 @@ class ColumnDict:
         """ Extracts the number of times each unique value appears in each column.
 
         Args:
-            dataframe (DataFrame):    The DataFrame to be analyzed
+            data (DataFrame or str):    The DataFrame to be analyzed or the full path of a tsv file.
 
         Returns:
             dict:   A dictionary with keys that are column names and values that are dictionaries of unique value counts
@@ -136,11 +136,10 @@ class ColumnDict:
         if not new_cat_cols:
             return
         val_cols = self.value_info.keys()
-        cat_keys = self.categorical_info.keys()
         for col in new_cat_cols:
             if col in val_cols:
                 raise HedFileError("CatColShouldBeValueCol",
-                             f"Categorical column [{str(col)}] is already a value column", "")
+                                   f"Categorical column [{str(col)}] is already a value column", "")
             elif col in self.skip_cols:
                 continue
             elif col not in val_cols:
@@ -153,7 +152,8 @@ class ColumnDict:
         val_cols = self.value_info.keys()
         for col in col_dict.skip_cols:
             if col in cat_cols or col in val_cols:
-                raise HedFileError("SkipColInvalid", f"Skip column [{str(col)}] is already a categorical or value column", "")
+                raise HedFileError("SkipColInvalid",
+                                   f"Skip column [{str(col)}] is already a categorical or value column", "")
             elif col not in self.skip_cols:
                 self.skip_cols.append(col)
 

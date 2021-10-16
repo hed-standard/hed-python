@@ -8,7 +8,7 @@ hed.get_printable_issue_string - method that converts the list of issues to a hu
 """
 
 from shutil import move
-import hed
+from hed.errors.error_reporter import get_printable_issue_string
 from hed import schema
 from hed.util.file_util import write_strings_to_file
 
@@ -17,7 +17,9 @@ if __name__ == '__main__':
     local_hed_file = None
     hed_schema = schema.load_schema(hed_file_path=local_hed_file, hed_url_path=hed_xml_url)
     file_strings, errors = schema.convert_schema_to_format(hed_schema, save_as_mediawiki=True)
-    hed.get_printable_issue_string(validation_issues=errors, title="Errors in HED7.1.1.xml")
+    issue_str = get_printable_issue_string(validation_issues=errors, title="Errors in HED7.1.1.xml")
+    if issue_str:
+        print(issue_str)
     if file_strings:
         mediawiki_location = write_strings_to_file(file_strings)
         move(mediawiki_location, "HED7.1.1.mediawiki")

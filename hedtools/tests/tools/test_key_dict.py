@@ -115,7 +115,7 @@ class Test(unittest.TestCase):
         t_map = KeyTemplate(self.key_cols+self.target_cols)
         t_map.update(self.stern_map_path)
         t_map.update(self.stern_map_path)
-        with mock.patch('sys.stdout', new=StringIO()) as std_out:
+        with mock.patch('sys.stdout', new=StringIO()):
             t_map.print()
             print("This should be eaten by the StringIO")
 

@@ -6,7 +6,7 @@ from hed.validator.hed_validator import HedValidator
 from hed.errors import error_reporter
 from hed.errors.error_reporter import ErrorHandler
 from hed import schema
-from hed.errors.error_types import ValidationErrors, ErrorContext
+from hed.errors.error_types import ErrorContext
 
 
 class TestHedBase(unittest.TestCase):

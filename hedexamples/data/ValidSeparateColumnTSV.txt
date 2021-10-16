@@ -1,0 +1,15 @@
+Code	Long Name	Description	Label	Category	Event Details	Attribute
+1110001	Vehicle | Moving | Forward | | | | Onset	Vehicle begins moving forward	StartVehicleMoveFwd	Environmental	(Participant/Effect/Visual, Item/Object/Vehicle ~ Attribute/Direction/Forward)	Onset
+1110002	Vehicle | Moving | Forward | | | | Offset	Vehicle stops moving forward	EndVehicleMoveFwd	Environmental	(Participant/Effect/Visual, Item/Object/Vehicle ~ Attribute/Direction/Forward)	Offset
+1120001	Vehicle | Moving | Backward | | | | Onset	Vehicle begins moving backward	StartVehicleMoveBkwd	Environmental	(Participant/Effect/Visual, Item/Object/Vehicle ~ Attribute/Direction/Backward)	Onset
+1120002	Vehicle | Moving | Backward | | | | Offset	Vehicle stops moving backward	EndVehicleMoveBkwd	Environmental	(Participant/Effect/Visual, Item/Object/Vehicle ~ Attribute/Direction/Backward)	Offset
+						
+2110000	Scenario | Trip Line Crossed | Target Event	Vehicle crosses trip line for target event	TripLineCrossTarget	Environmental	(Item/Object/Vehicle ~ Action/Cross boundary)	
+2120000	Scenario | Trip Line Crossed | Intervention Event	Vehicle crosses trip line for intervention event	TripLineCrossInterv	Environmental	(Item/Object/Vehicle ~ Action/Cross boundary)	
+4300010	Behavioral | Button Press | Attribute Selection | None | None | Left	Participant presses button to indicate target consisting of one or more simulated human entities is to the left	TgtSelectLeft	Participant response	(Participant ~ Action/Button press/Touch screen ~ Participant/Effect/Body part/Arm/Hand/Finger), (Participant/Effect/Cognitive, Attribute/Location/Reference frame/Relative to participant/Left)	
+4310000	Behavioral | Button Press | Initiate Threat Report | None | None | None	Participant presses button to initiate threat report	InitiateThreatRpt	Participant response	(Participant ~ Action/Button press/Touch screen ~ Participant/Effect/Body part/Arm/Hand/Finger)	
+4320000	Behavioral | Button Press | Send Threat Report | None | None | None	Participant presses button to send threat report	SendeThreatRpt	Participant response	(Participant ~ Action/Button press/Touch screen ~ Participant/Effect/Body part/Arm/Hand/Finger)	
+						
+4410000	Behavioral | WMI Button Press | Unknown Button	Participant presses unknown crewstation button	WMIButtonUnknown	Participant response	(Participant ~ Action/Button press/Touch screen ~ Participant/Effect/Body part/Arm/Hand/Finger)	
+4420000	Behavioral | WMI Button Press | Execute Plan Button	Participant presses execute plan button to resume autonomous control of the vehicle	WMIButtonExecute	Participant response	(Participant ~ Action/Button press/Touch screen ~ Participant/Effect/Body part/Arm/Hand/Finger)	
+4430000	Behavioral | WMI Button Press | Teleop Button	Participant presses teleop control button to begin manual control of the vehicle	WMIButtonTeleop	Participant response	(Participant ~ Action/Button press/Touch screen ~ Participant/Effect/Body part/Arm/Hand/Finger), (Participant ~ Action/Teleoperate ~ Item/Object/Vehicle)	

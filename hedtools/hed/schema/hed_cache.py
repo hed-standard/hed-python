@@ -200,7 +200,7 @@ def cache_all_hed_xml_versions(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL, cache
 
     try:
         cache_lock_filename = os.path.join(cache_folder, "cache_lock.lock")
-        with portalocker.Lock(cache_lock_filename, timeout=1) as cache_lock:
+        with portalocker.Lock(cache_lock_filename, timeout=1):
             suffixes = [""] + EXTRA_HED_CACHE_URL_SUFFIX
             for url_suffix in suffixes:
                 hed_versions = _get_hed_xml_versions_from_url(hed_base_url + url_suffix)

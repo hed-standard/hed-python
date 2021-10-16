@@ -6,7 +6,7 @@ from flask import current_app
 from hed import models
 from hed import schema as hedschema
 from hedweb.constants import base_constants
-from hedweb import columns, events, spreadsheet, sidecar, strings
+from hedweb import events, spreadsheet, sidecar, strings
 
 
 app_config = current_app.config
@@ -68,7 +68,7 @@ def get_service_info(parameters):
     has_column_names = parameters.get(base_constants.HAS_COLUMN_NAMES, '') == 'on'
     check_warnings = parameters.get(base_constants.CHECK_WARNINGS_VALIDATE, '') == 'on'
     defs_expand = parameters.get(base_constants.DEFS_EXPAND, '') == 'on'
-    #tag_columns, prefix_dict = columns.get_prefix_dict(parameters)
+
     return {base_constants.SERVICE: service,
             base_constants.COMMAND: command,
             base_constants.COMMAND_TARGET: command_target,

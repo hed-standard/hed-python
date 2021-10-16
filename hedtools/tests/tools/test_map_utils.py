@@ -91,11 +91,11 @@ class Test(unittest.TestCase):
     def test_get_row_hash(self):
         stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
         key_columns = ['type', 'event_type']
-        map = {}
+        my_map = {}
         for index, row in stern_df.iterrows():
             key = get_row_hash(row, key_columns)
-            map[key] = index
-        self.assertEqual(len(map.keys()), len(stern_df),
+            my_map[key] = index
+        self.assertEqual(len(my_map.keys()), len(stern_df),
                          "get_row_hash should uniquely hash all of the keys in stern map")
 
     def test_make_dataframe(self):
@@ -108,9 +108,7 @@ class Test(unittest.TestCase):
 
     def test_remove_quotes(self):
         df1 = get_new_dataframe(self.stern_test2_path)
-        x = df1.loc[0, 'stimulus']
         remove_quotes(df1)
-        y = df1.loc[0, 'stimulus']
         df2 = get_new_dataframe(self.stern_test3_path)
         self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'],
                          "remove_quotes should have quotes removed ")
