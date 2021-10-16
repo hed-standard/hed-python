@@ -43,7 +43,9 @@ if __name__ == '__main__':
     print(valid_tsv_file)
     input_file = HedInput(valid_tsv_file, tag_columns=[2])
     validation_issues = input_file.validate_file(hed_validator_local)
-    print(get_printable_issue_string(validation_issues, title='[Example 1b] ValidTwoColumnHED7_1_1 should have no issues with local version 7.1.1'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 1b] ValidTwoColumnHED7_1_1 should have no issues with local ' +
+                                           'version 7.1.1'))
 
     # Example 1c: Valid TSV file with specified local version of HED and no column headers
     print(valid_tsv_file_no_header)
@@ -58,7 +60,8 @@ if __name__ == '__main__':
     input_file = HedInput(valid_tsv_file_separate_cols, tag_columns=[6],
                           column_prefix_dictionary=prefixed_needed_tag_columns)
     validation_issues = input_file.validate_file(hed_validator_local)
-    print(get_printable_issue_string(validation_issues, title='[Example 1d] Valid TSV with required tags in separate columns'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 1d] Valid TSV with required tags in separate columns'))
 
     # Example 2a: CSV files are not supported (Use excel to convert)
     print(unsupported_csv_format)
@@ -86,36 +89,45 @@ if __name__ == '__main__':
                           column_prefix_dictionary=prefixed_needed_tag_columns,
                           worksheet_name='LKT Events')
     validation_issues = input_file.validate_file(hed_validator_local)
-    print(get_printable_issue_string(validation_issues, title='[Example 3a] Multiple sheet xlsl has LKT Events sheet with no issues'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 3a] Multiple sheet xlsl has LKT Events sheet with no issues'))
 
     # Example 3b: Valid XLSX file with multiple sheets - first sheet probably has no issues with default schema
     input_file = HedInput(multiple_sheet_xlsx_file, tag_columns=[4],
                           column_prefix_dictionary=prefixed_needed_tag_columns,
                           worksheet_name='LKT Events')
     validation_issues = input_file.validate_file(hed_validator_local)
-    print(get_printable_issue_string(validation_issues, title='[Example 3b] LKT Events sheet probably has with no issues with the default schema'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 3b] LKT Events sheet probably has with no issues with ' +
+                                           'the default schema'))
 
     # Example 3c: XLSX file with multiple sheets - assumes first sheet by default
     input_file = HedInput(multiple_sheet_xlsx_file, tag_columns=[4],
                           column_prefix_dictionary=prefixed_needed_tag_columns)
     validation_issues = input_file.validate_file(hed_validator_local)
-    print(get_printable_issue_string(validation_issues, title='[Example 3c] Multiple sheet xlsl has first sheet with no issues'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 3c] Multiple sheet xlsl has first sheet with no issues'))
 
     # Example 3d: XLSX file with multiple sheets - PVT sheet has several issues with 7.1.1
     input_file = HedInput(multiple_sheet_xlsx_file, tag_columns=[4],
                           column_prefix_dictionary=prefixed_needed_tag_columns,
                           worksheet_name='PVT Events')
     validation_issues = input_file.validate_file(hed_validator_local)
-    print(get_printable_issue_string(validation_issues, title='[Example 3d] Some PVT worksheet issues that are due to removal of extensionAllowed in places in 7.1.1'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 3d] Some PVT worksheet issues that are due to removal ' +
+                                           'of extensionAllowed in places in 7.1.1'))
 
     # Example 3e: Invalid XLSX sheet with 7.1.1
     input_file = HedInput(multiple_sheet_xlsx_file, tag_columns=[4], worksheet_name='DAS Events')
     validation_issues = input_file.validate_file(hed_validator_local)
-    print(get_printable_issue_string(validation_issues, title='[Example 3e] DAS Events worksheet has multiple issues with 7.1.1'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 3e] DAS Events worksheet has multiple issues with 7.1.1'))
 
     # Example 3f: Invalid XLSX sheet with 7.1.1 - also can't duplicate Label and Description in 7.1.1
     input_file = HedInput(multiple_sheet_xlsx_file, tag_columns=[4],
                           column_prefix_dictionary=prefixed_needed_tag_columns,
                           worksheet_name='DAS Events')
     validation_issues = input_file.validate_file(hed_validator_local)
-    print(get_printable_issue_string(validation_issues, title='[Example 3f] DAS worse now because of duplicate Label and Description specifications'))
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 3f] DAS worse now because of duplicate Label and ' +
+                                           'Description specifications'))

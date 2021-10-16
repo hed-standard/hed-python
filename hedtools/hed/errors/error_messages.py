@@ -179,7 +179,7 @@ def val_warning_default_units_used(tag, default_unit):
 
 @hed_error(SchemaErrors.DUPLICATE_TERMS)
 def schema_error_duplicate_terms(tag, duplicate_tag_list):
-    tag_join_delimiter = f"\n\t"
+    tag_join_delimiter = "\n\t"
     return f"Term(Short Tag) '{str(tag)}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"\
            f"{tag_join_delimiter.join(duplicate_tag_list)}", {}
 
@@ -209,7 +209,7 @@ def schema_warning_invalid_capitalization(tag_name, problem_char, char_index):
 
 @hed_error(SidecarErrors.BLANK_HED_STRING)
 def sidecar_error_blank_hed_string():
-    return f"No HED string found for Value or Category column.", {}
+    return "No HED string found for Value or Category column.", {}
 
 
 @hed_error(SidecarErrors.WRONG_HED_DATA_TYPE)
@@ -230,7 +230,7 @@ def sidecar_error_too_many_pound_signs(pound_sign_count):
 @hed_error(SidecarErrors.UNKNOWN_COLUMN_TYPE)
 def sidecar_error_unknown_column(column_name):
     return f"Could not automatically identify column '{column_name}' type from file. "\
-           f"Most likely the column definition in question needs a # sign to replace a number somewhere.", {}
+           "Most likely the column definition in question needs a # sign to replace a number somewhere.", {}
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
