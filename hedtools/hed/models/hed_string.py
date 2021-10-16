@@ -3,7 +3,7 @@ This module is used to split tags in a HED string.
 """
 from hed.models.hed_group import HedGroup
 from hed.schema.hed_tag import HedTag
-from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 from hed.errors.error_types import ErrorContext
 from hed.models.util import translate_ops
 from hed.models.model_constants import DefTagNames
@@ -315,9 +315,9 @@ class HedString(HedGroup):
         string_issues = []
         for string_validator in string_ops:
             string_issues += string_validator(self)
-            # todo: Do we want to support early out?
-            # if string_issues:
-            #     break
+            if string_issues:
+                if check_for_any_errors(string_issues):
+                    break
 
         return string_issues
 
