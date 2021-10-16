@@ -1,5 +1,4 @@
 from hed.models.hed_string import HedString
-from hed.models.hed_group import HedGroup
 import unittest
 
 from tests.validator.test_tag_validator import TestHed3
@@ -71,12 +70,12 @@ class HedTagLists(TestHedStrings):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
                      '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
         string_obj = HedString(hed_string)
-        #result = HedString.split_hed_string_into_groups(hed_string)
+        # result = HedString.split_hed_string_into_groups(hed_string)
         tags_as_strings = [str(tag) for tag in string_obj.get_direct_children()]
-        self.assertCountEqual(tags_as_strings, ['/Action/Reach/To touch',
-                                       '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',
-                                       '/Attribute/Location/Screen/Top/70 px',
-                                       '/Attribute/Location/Screen/Left/23 px'])
+        self.assertCountEqual(tags_as_strings,
+                              ['/Action/Reach/To touch',
+                               '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',
+                               '/Attribute/Location/Screen/Top/70 px', '/Attribute/Location/Screen/Left/23 px'])
 
     # Update test - verify how double quote should be handled
     # def test_double_quotes(self):
@@ -169,11 +168,10 @@ class ProcessedHedTags(TestHedStrings):
             '/Attribute/Location/Screen/Top/70 px',
             '/Attribute/Location/Screen/Left/23 px',
         ])
-        self.assertCountEqual([str(group) for group in parsed_string.get_all_groups()], [
-            '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                     '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-            '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',
-        ])
+        self.assertCountEqual([str(group) for group in parsed_string.get_all_groups()],
+                              ['/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
+                               '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
+                               '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)'])
 
 
 class TestHedStringUtil(unittest.TestCase):
@@ -203,10 +201,12 @@ class TestHedStringUtil(unittest.TestCase):
             'singleAndGroup': ['Event/Extension', ', ', '(', 'Event/Extension2', ', ', 'Event/Extension3', ')'],
             'singleAndGroupWithBlank': ['Event/Extension', ', ', '(', 'Event', ', ', ',', 'Event/Extension3', ')'],
             'manyParens': ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
-            'manyParensEndingSpace': ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ') '],
-            'manyParensOpeningSpace': [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
-            'manyParensBothSpace': [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(',
-                                       'Event', ' '],
+            'manyParensEndingSpace':
+                ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ') '],
+            'manyParensOpeningSpace':
+                [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
+            'manyParensBothSpace':
+                [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ' '],
             'manyClosingParens': ['Event/Extension', ', ', '(', 'Event/Extension2', ', ', ')', ')', '(', 'Event', ')']
         }
 

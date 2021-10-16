@@ -18,7 +18,8 @@ class Test(unittest.TestCase):
         cls.zero_based_row_column_count = 3
         cls.column_prefix_dictionary = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
         cls.category_key = 'Event/Category/'
-        cls.category_partipant_and_stimulus_tags = HedString('Event/Category/Participant response, Event/Category/Stimulus')
+        cls.category_partipant_and_stimulus_tags = \
+            HedString('Event/Category/Participant response, Event/Category/Stimulus')
         cls.category_tags = HedString('Participant response, Stimulus')
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
 
@@ -36,7 +37,8 @@ class Test(unittest.TestCase):
         cls.hed_string = "Event/Label/#"
         cls.test_column_map = ["TestColumn"]
         cls.required_prefix = "TestRequiredPrefix/"
-        cls.complex_hed_tag_required_prefix = "TestRequiredPrefix/ThisIsAHedTag, (TestRequiredPrefix/NewTag, TestRequiredPrefix/NewTag3)"
+        cls.complex_hed_tag_required_prefix = \
+            "TestRequiredPrefix/ThisIsAHedTag, (TestRequiredPrefix/NewTag, TestRequiredPrefix/NewTag3)"
         cls.complex_hed_tag_no_prefix = "ThisIsAHedTag,(NewTag,NewTag3)"
 
         cls.short_tag_key = 'Item/Language/Character/'
@@ -221,6 +223,7 @@ class Test(unittest.TestCase):
             expanded_row = column_mapper.expand_row_tags([test_string])
             prepended_hed_string = expanded_row[model_constants.ROW_HED_STRING]
             self.assertEqual(expected_result, str(prepended_hed_string))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
         t_map.update(self.stern_map_path)
         self.assertEqual(len(t_map.categorical_info.keys()), len(df.columns),
                          "ColumnDict should have all columns as categorical if no value or skip are given")
-        with mock.patch('sys.stdout', new=StringIO()) as std_out:
+        with mock.patch('sys.stdout', new=StringIO()):
             t_map.print()
             print("This should be eaten by the StringIO")
 

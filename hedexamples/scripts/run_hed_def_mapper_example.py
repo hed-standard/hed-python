@@ -11,35 +11,35 @@ DefDict - Created from a Sidecar.  Contains all label definitions to be expanded
           a HedSchema.
 """
 import os
-import hed
+from hed.errors.error_reporter import get_printable_issue_string
 from hed.models.events_input import EventsInput
 from hed.schema.hed_schema_file import load_schema
 from hed.validator.hed_validator import HedValidator
 from hed.models.sidecar import Sidecar
 
 if __name__ == '__main__':
-    local_hed_file = 'data/HED8.0.0-alpha.1.xml'
-    example_data_path = 'data'  # path to example data
+    local_hed_file = '../data/HED8.0.0-alpha.1.xml'
+    example_data_path = '../data'  # path to example data
     hed3_tags_single_sheet = os.path.join(example_data_path, 'hed_tag_def_example.tsv')
     hed_schema = load_schema(local_hed_file)
     prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
-    json_file = "data/both_types_events_def_example.json"
+    json_file = "../data/both_types_events_def_example.json"
     validator = HedValidator(hed_schema=hed_schema)
     sidecar = Sidecar(json_file)
     def_issues = sidecar.validate_entries(validator)
-    #def_issues = sidecar.validate_entries(hed_schema=hed_schema)
+    # def_issues = sidecar.validate_entries(hed_schema=hed_schema)
     if def_issues:
-        print(hed.get_printable_issue_string(def_issues,
-                                             title="There should be no errors in the definitions from the sidecars:"))
+        print(get_printable_issue_string(def_issues,
+                                         title="There should be no errors in the definitions from the sidecars:"))
     input_file = EventsInput(hed3_tags_single_sheet, sidecars=sidecar)
 
     validation_issues = input_file.validate_file_sidecars(validator)
     if validation_issues:
-        print(hed.get_printable_issue_string(validation_issues,
-                                             title="There should be no errors with the sidecar.  \""
-                                             "This will likely cause other errors if there are."))
+        print(get_printable_issue_string(validation_issues,
+                                         title="There should be no errors with the sidecar.  \""
+                                         "This will likely cause other errors if there are."))
     validation_issues = input_file.validate_file(validator)
-    print(hed.get_printable_issue_string(validation_issues, "Normal hed string errors"))
+    print(get_printable_issue_string(validation_issues, "Normal hed string errors"))
 
     output_filename = hed3_tags_single_sheet + "_test_output.xlsx"
     input_file.to_excel(output_filename, output_processed_file=False)

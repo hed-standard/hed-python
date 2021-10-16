@@ -21,12 +21,12 @@ class Test(unittest.TestCase):
     def test_extract_dataframe(self):
         df_new = get_new_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new, pd.DataFrame)
-        self.assertEqual(len(df_new), 87, f"get_new_dataframe should return correct number of rows")
-        self.assertEqual(len(df_new.columns), 4, f"get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new), 87, "get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new.columns), 4, "get_new_dataframe should return correct number of rows")
         df_new1 = get_new_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new1, pd.DataFrame)
-        self.assertEqual(len(df_new1), 87, f"get_new_dataframe should return correct number of rows")
-        self.assertEqual(len(df_new1.columns), 4, f"get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new1), 87, "get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new1.columns), 4, "get_new_dataframe should return correct number of rows")
         df_new.iloc[0]['type'] = 'Pear'
         self.assertNotEqual(df_new.iloc[0]['type'], df_new1.iloc[0]['type'],
                             "get_new_dataframe returns a new dataframe")
@@ -91,11 +91,11 @@ class Test(unittest.TestCase):
     def test_get_row_hash(self):
         stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
         key_columns = ['type', 'event_type']
-        map = {}
+        my_map = {}
         for index, row in stern_df.iterrows():
             key = get_row_hash(row, key_columns)
-            map[key] = index
-        self.assertEqual(len(map.keys()), len(stern_df),
+            my_map[key] = index
+        self.assertEqual(len(my_map.keys()), len(stern_df),
                          "get_row_hash should uniquely hash all of the keys in stern map")
 
     def test_make_dataframe(self):
@@ -108,23 +108,20 @@ class Test(unittest.TestCase):
 
     def test_remove_quotes(self):
         df1 = get_new_dataframe(self.stern_test2_path)
-        x = df1.loc[0, 'stimulus']
         remove_quotes(df1)
-        y = df1.loc[0, 'stimulus']
         df2 = get_new_dataframe(self.stern_test3_path)
-        self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'],
-                         "remove_quotes should have quotes removed ")
+        self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'], "remove_quotes should have quotes removed")
 
     def test_reorder_columns(self):
         df = get_new_dataframe(self.stern_map_path)
         df_new = reorder_columns(df, ['event_type', 'type'])
-        self.assertEqual(len(df_new), 87, f"reorder_columns should return correct number of rows")
-        self.assertEqual(len(df_new.columns), 2, f"reorder_columns should return correct number of rows")
-        self.assertEqual(len(df), 87, f"reorder_columns should return correct number of rows")
-        self.assertEqual(len(df.columns), 4, f"reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new), 87, "reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new.columns), 2, "reorder_columns should return correct number of rows")
+        self.assertEqual(len(df), 87, "reorder_columns should return correct number of rows")
+        self.assertEqual(len(df.columns), 4, "reorder_columns should return correct number of rows")
         df_new1 = reorder_columns(df, ['event_type', 'type', 'baloney'])
-        self.assertEqual(len(df_new1), 87, f"reorder_columns should return correct number of rows")
-        self.assertEqual(len(df_new1.columns), 2, f"reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new1), 87, "reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new1.columns), 2, "reorder_columns should return correct number of rows")
 
     def test_reorder_columns_no_skip(self):
         try:

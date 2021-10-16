@@ -233,9 +233,8 @@ class SidecarMap:
         key_value["HED"] = hed
         return key_value
 
-
     @staticmethod
-    def get_sidecar_dict(columns_info, selected_columns=None, value_columns=None):
+    def get_sidecar_dict(columns_info, selected_columns=None):
         """  Extracts a sidecar dictionary suitable for direct conversion to JSON sidecar.
 
         Args:
@@ -244,7 +243,6 @@ class SidecarMap:
 
             selected_columns (list): A list of column names that should be included
 
-            value_columns (list):    A list of columns that are value columns
 
         Returns:
             dict suitable:return: A dictionary suitable for conversion to JSON sidecar.

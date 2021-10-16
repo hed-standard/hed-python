@@ -22,8 +22,8 @@ class EventsInput(BaseInput):
             A list of column names or numbers to treat as attributes.
             Default: ["duration", "onset"]
         extra_def_dicts: [DefDict]
-            DefDict's containing all the definitions this file should use - other than the ones coming from the file
-            itself, and from the column def groups.  These are added as as the last entries, so names will override
+            DefDict objects containing all the definitions this file should use other than the ones coming from the file
+            itself and from the column def groups.  These are added as as the last entries, so names will override
             earlier ones.
         also_gather_defs: bool
             Default to true.  If False, do NOT extract any definitions from column groups, assume they are already

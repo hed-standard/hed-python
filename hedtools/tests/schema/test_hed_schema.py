@@ -55,8 +55,7 @@ class TestHedSchema(unittest.TestCase):
             # We should have an error before we reach here.
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(name in e.format_error_message(return_string_only=True,
-                                                                       name=name))
+            self.assertTrue(name in e.format_error_message(return_string_only=True, name=name))
 
     # def test_attribute_keys(self):
     #     tag_dictionary_keys = ['defaultUnits', 'extensionAllowed', 'isNumeric', 'position', 'predicateType',
@@ -158,10 +157,8 @@ class TestHedSchema(unittest.TestCase):
 
     def test_tag_attribute(self):
         test_strings = {
-            'value':
-                'Attribute/Location/Reference frame/Relative to participant/Azimuth/#',
-            'valueParent':
-                'Attribute/Location/Reference frame/Relative to participant/Azimuth',
+            'value': 'Attribute/Location/Reference frame/Relative to participant/Azimuth/#',
+            'valueParent': 'Attribute/Location/Reference frame/Relative to participant/Azimuth',
             'allowedExtension': 'Item/Object/Road sign',
         }
         expected_results = {
@@ -269,7 +266,6 @@ class TestHedSchema(unittest.TestCase):
         tag_props = self.hed_schema_3g.get_all_tag_attributes("Agent-property/Agent-trait")
         self.assertCountEqual(tag_props, expected_props)
 
-
     def test_get_hed_xml_version(self):
         self.assertEqual(schema.get_hed_xml_version(self.hed_xml), "7.1.1")
         self.assertEqual(schema.get_hed_xml_version(self.hed_xml_3g), "8.0.0-alpha.1")
@@ -306,7 +302,8 @@ class TestSchemaUtilityFunctions(TestHed):
 
     def test_should_determine_default_unit(self):
         unit_class_tag1 = HedTag('attribute/blink/duration/35 ms', extension_index=len('attribute/blink/duration'))
-        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/11 dollars', extension_index=len('participant/effect/cognitive/reward'))
+        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/11 dollars',
+                                 extension_index=len('participant/effect/cognitive/reward'))
         no_unit_class_tag = HedTag('attribute/color/red/0.5', extension_index=len('attribute/color/red'))
         no_value_tag = HedTag('attribute/color/black', extension_index=len('attribute/color/black'))
         unit_class_tag1_result = self.hed_schema.get_unit_class_default_unit(unit_class_tag1)
@@ -320,7 +317,8 @@ class TestSchemaUtilityFunctions(TestHed):
 
     def test_correctly_determine_tag_unit_classes(self):
         unit_class_tag1 = HedTag('attribute/direction/left/35 px', extension_index=len('attribute/direction/left'))
-        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/$10.55', extension_index=len('participant/effect/cognitive/reward'))
+        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/$10.55',
+                                 extension_index=len('participant/effect/cognitive/reward'))
         unit_class_tag3 = HedTag('event/duration/#', extension_index=len('event/duration'))
         no_unit_class_tag = HedTag('attribute/color/red/0.5', extension_index=len('attribute/color/red'))
         unit_class_tag1_result = self.hed_schema.get_tag_unit_classes(unit_class_tag1)
@@ -334,7 +332,8 @@ class TestSchemaUtilityFunctions(TestHed):
 
     def test_determine_tags_legal_units(self):
         unit_class_tag1 = HedTag('attribute/direction/left/35 px', extension_index=len('attribute/direction/left'))
-        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/$10.55', extension_index=len('participant/effect/cognitive/reward'))
+        unit_class_tag2 = HedTag('participant/effect/cognitive/reward/$10.55',
+                                 extension_index=len('participant/effect/cognitive/reward'))
         no_unit_class_tag = HedTag('attribute/color/red/0.5', extension_index=len('attribute/color/red'))
         unit_class_tag1_result = self.hed_schema.get_tag_unit_class_units(unit_class_tag1)
         unit_class_tag2_result = self.hed_schema.get_tag_unit_class_units(unit_class_tag2)
@@ -366,16 +365,16 @@ class TestSchemaUtilityFunctions(TestHed):
         invalid_volume_string = '200 cm'
         currency_units = ['dollar', '$', 'point', 'fraction']
         volume_units = ['m^3']
-        stripped_dollars_string = self.hed_schema. \
-            _get_tag_units_portion(dollars_string, dollars_string, currency_units)
-        stripped_dollars_string_invalid = self.hed_schema. \
-            _get_tag_units_portion(dollars_string_invalid, dollars_string_invalid, currency_units)
-        stripped_volume_string = self.hed_schema. \
-            _get_tag_units_portion(volume_string, volume_string, volume_units)
-        stripped_prefixed_volume_string = self.hed_schema. \
-            _get_tag_units_portion(prefixed_volume_string, prefixed_volume_string, volume_units)
-        stripped_invalid_volume_string = self.hed_schema. \
-            _get_tag_units_portion(invalid_volume_string, invalid_volume_string, volume_units)
+        stripped_dollars_string = \
+            self.hed_schema._get_tag_units_portion(dollars_string, dollars_string, currency_units)
+        stripped_dollars_string_invalid = \
+            self.hed_schema._get_tag_units_portion(dollars_string_invalid, dollars_string_invalid, currency_units)
+        stripped_volume_string = \
+            self.hed_schema._get_tag_units_portion(volume_string, volume_string, volume_units)
+        stripped_prefixed_volume_string = \
+            self.hed_schema._get_tag_units_portion(prefixed_volume_string, prefixed_volume_string, volume_units)
+        stripped_invalid_volume_string = \
+            self.hed_schema._get_tag_units_portion(invalid_volume_string, invalid_volume_string, volume_units)
         self.assertEqual(stripped_dollars_string, '25.99')
         self.assertEqual(stripped_dollars_string_invalid, None)
         self.assertEqual(stripped_volume_string, '100')
@@ -395,4 +394,3 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertEqual(no_extension_tag1_result, False)
         self.assertEqual(no_extension_tag2_result, False)
         self.assertEqual(no_extension_tag3_result, False)
-

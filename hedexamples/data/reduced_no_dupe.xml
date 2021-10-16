@@ -1,0 +1,1487 @@
+<?xml version="1.0" ?>
+<HED version="v1.6.2-reduced">
+   <node>
+      <name>Event</name>
+      <node>
+         <name>Sensory event</name>
+         <description>Something perceivable by the participant. An event meant to be an experimental stimulus should also be tagged with Attribute/Contextual/Task-related. Other events may be tagged with Attribute/Contextual/Non task-related.</description>
+      </node>
+      <node>
+         <name>Subject action</name>
+         <description>Any action engaged in by the participant. An event which is a participant response to an experimental stimulus should also be tagged with Attribute/Contextual/Task-related. Other events may be tagged with Attribute/Contextual/Non task-related.</description>
+      </node>
+      <node>
+         <name>Data feature</name>
+         <description>An event derived from the data itself, possibly inserted in a post-hoc fashion, for example an interictal spike or alpha burst.</description>
+      </node>
+      <node extensionAllowed="true">
+         <name>Experiment control</name>
+         <description>An event pertaining to the control of the experiment during its operation.</description>
+         <node>
+            <name>Instruction</name>
+            <description>Experimenter (or experimental control application) gives an instruction to the participant.</description>
+         </node>
+         <node>
+            <name>Pause</name>
+            <description>An event indicating a stop in recording. Use (Attribute/Temporal/Onset, Attribute/Temporal/Duration) or Attribute/Temporal/Onset and, in another Event, Attribute/Temporal/Offset to specify the length of the pause.</description>
+         </node>
+         <node>
+            <name>Timesync</name>
+            <description>A marker value or pattern inserted into the recorded data to allow post hoc synchronization of concurrently recorded data streams.</description>
+         </node>
+         <node>
+            <name>Procedure</name>
+            <description>An event marking the Onset or Offset of an experimental procedure, for example doing a saliva swab on the person, during the experiment. Use Attribute/Temporal/Onset and, in another Event, Attribute/Temporal/Offset to specify the start and end of the procedure. Use Attribute/ID/Index/# to designate a procedure identifier.</description>
+         </node>
+         <node extensionAllowed="true">
+            <name>Mishap</name>
+            <description>Unplanned disruptive event such as an equipment or experiment control abnormality or experimenter error.</description>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Experiment structure</name>
+         <description>An event specifying the structure of the experiment.</description>
+      </node>
+   </node>
+   <node extensionAllowed="true">
+      <name>Item</name>
+      <node extensionAllowed="true">
+         <name>Object</name>
+         <description>Physical object perceptible via Visual, Auditory, Olfactory, and/or Tactile modalities</description>
+         <node>
+            <name>Geometric</name>
+            <node>
+               <name>Pattern</name>
+            </node>
+            <node>
+               <name>2D Shape</name>
+               <node>
+                  <name>Ellipse</name>
+                  <node>
+                     <name>Circle</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Rectangle</name>
+                  <node>
+                     <name>Square</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Triangle</name>
+               </node>
+               <node>
+                  <name>Single point</name>
+               </node>
+               <node>
+                  <name>Cross</name>
+               </node>
+               <node>
+                  <name>Star</name>
+               </node>
+            </node>
+            <node>
+               <name>3D Shape</name>
+            </node>
+         </node>
+         <node>
+            <name>Manmade</name>
+            <description>A manmade object</description>
+            <node>
+               <name>Building</name>
+               <description>Whole building or building feature</description>
+               <node>
+                  <name>Room</name>
+               </node>
+               <node>
+                  <name>Roof</name>
+               </node>
+               <node>
+                  <name>Entrance</name>
+               </node>
+               <node>
+                  <name>Attic</name>
+               </node>
+               <node>
+                  <name>Basement</name>
+               </node>
+            </node>
+            <node>
+               <name>Clothing</name>
+            </node>
+            <node>
+               <name>Musical instrument</name>
+            </node>
+            <node>
+               <name>Furnishing</name>
+               <description>The instrumentalities (furniture and appliances and other movable accessories including curtains and rugs) that make a home (or other area) livable</description>
+            </node>
+            <node>
+               <name>Tool</name>
+               <description>A hand-held object of single person control</description>
+               <node>
+                  <name>Hammer</name>
+               </node>
+               <node>
+                  <name>Chainsaw</name>
+               </node>
+            </node>
+            <node>
+               <name>Vehicle</name>
+            </node>
+            <node>
+               <name>Artwork</name>
+               <description>A work of art that is primarily visual in character</description>
+               <node>
+                  <name>Drawing</name>
+                  <node>
+                     <name>Cartoon</name>
+                  </node>
+                  <node>
+                     <name>Sketch</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Painting</name>
+               </node>
+               <node>
+                  <name>Art installation</name>
+               </node>
+               <node>
+                  <name>Photograph</name>
+               </node>
+               <node>
+                  <name>Movie</name>
+               </node>
+               <node>
+                  <name>Sculpture</name>
+               </node>
+            </node>
+            <node>
+               <name>Document</name>
+               <description>A physical, written document</description>
+               <node>
+                  <name>Manuscript</name>
+               </node>
+               <node>
+                  <name>Letter</name>
+               </node>
+               <node>
+                  <name>Note</name>
+               </node>
+               <node>
+                  <name>Book</name>
+               </node>
+               <node>
+                  <name>Notebook</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Natural</name>
+            <node>
+               <name>Plant</name>
+            </node>
+            <node>
+               <name>Mineral</name>
+            </node>
+            <node>
+               <name>Terrain</name>
+               <node>
+                  <name>Field</name>
+               </node>
+               <node>
+                  <name>Hill</name>
+               </node>
+               <node>
+                  <name>Mountain</name>
+               </node>
+               <node>
+                  <name>River</name>
+               </node>
+               <node>
+                  <name>Waterfall</name>
+               </node>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Agent</name>
+         <node>
+            <name>Human</name>
+            <node>
+               <name>Body part</name>
+               <node>
+                  <name>Face</name>
+               </node>
+               <node>
+                  <name>Finger</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Animal</name>
+         </node>
+         <node>
+            <name>Robot</name>
+         </node>
+      </node>
+      <node>
+         <name>Language</name>
+         <description>Perceivable in a visual or auditory (spoken) sensory presentation</description>
+         <node>
+            <name>Diphthong</name>
+         </node>
+         <node>
+            <name>Word</name>
+         </node>
+         <node>
+            <name>Character</name>
+         </node>
+         <node>
+            <name>Phrase</name>
+         </node>
+         <node>
+            <name>Nonword</name>
+         </node>
+         <node>
+            <name>Sentence</name>
+         </node>
+         <node>
+            <name>Textblock</name>
+         </node>
+      </node>
+      <node>
+         <name>Sound</name>
+         <node>
+            <name>Tone</name>
+         </node>
+         <node>
+            <name>Siren</name>
+         </node>
+         <node>
+            <name>Music</name>
+         </node>
+         <node>
+            <name>Noise</name>
+         </node>
+         <node>
+            <name>Crowd sound</name>
+            <description>Multiple speech streams at once</description>
+         </node>
+         <node>
+            <name>Environmental sound</name>
+            <description>A background sound from the surrounding environment. For example machine operating or people walking</description>
+            <node takesValue="true">
+               <name>#</name>
+               <description>A text-description of a complex environmental sound</description>
+            </node>
+         </node>
+      </node>
+   </node>
+   <node extensionAllowed="true">
+      <name>Action</name>
+      <description>May or may not be in response to a previous Sensory presentation event.</description>
+      <node>
+         <name>Breathe</name>
+         <node>
+            <name>Inhale</name>
+            <description>A deliberate inbreath, e.g. in response to a task instruction. If incidental, group it with Attribute/Cognitive modifier/Incidental. E.g. (Action/Move/Breathe/Inhale, Attribute/Cognitive modifier/Incidental).</description>
+         </node>
+         <node>
+            <name>Exhale</name>
+            <description>A deliberate outbreath, e.g. in response to a task instruction. If incidental, group it with Attribute/Cognitive modifier/Incidental. E.g. (Action/Move/Breathe/Exhale, Attribute/Cognitive modifier/Incidental).</description>
+         </node>
+         <node>
+            <name>Hold breath</name>
+         </node>
+      </node>
+      <node>
+         <name>Move full-body</name>
+         <node>
+            <name>Flex</name>
+         </node>
+         <node>
+            <name>Jerk</name>
+            <description>When some force applied to the participant causes them to involuntarily accommodate or react to it.</description>
+         </node>
+         <node>
+            <name>Stumble</name>
+            <description>Temporary and involuntary loss of balance</description>
+         </node>
+         <node>
+            <name>Recover balance</name>
+            <description>A movement made in response to a stumble or unforeseen loss of balance</description>
+         </node>
+         <node>
+            <name>Fall down</name>
+            <description>Involuntary fall to floor or ground</description>
+         </node>
+         <node>
+            <name>Stretch</name>
+            <description>Stretching the body or body part</description>
+         </node>
+         <node>
+            <name>Bend</name>
+         </node>
+         <node>
+            <name>Dance</name>
+         </node>
+         <node>
+            <name>Shudder</name>
+         </node>
+      </node>
+      <node>
+         <name>Move head</name>
+         <node>
+            <name>Move eyes</name>
+            <node>
+               <name>Saccade</name>
+            </node>
+            <node>
+               <name>Fixate</name>
+            </node>
+            <node>
+               <name>Blink</name>
+            </node>
+            <node>
+               <name>Open eyes</name>
+               <description>Often grouped with body part doing action such as eyes or mouth.</description>
+            </node>
+            <node>
+               <name>Close eyes</name>
+               <description>Often grouped with body part doing action such as eyes or mouth.</description>
+            </node>
+         </node>
+         <node>
+            <name>Move mouth</name>
+            <node>
+               <name>Hiccup</name>
+            </node>
+            <node>
+               <name>Cough</name>
+            </node>
+            <node>
+               <name>Sneeze</name>
+            </node>
+            <node>
+               <name>Sniffle</name>
+            </node>
+            <node>
+               <name>Swallow</name>
+            </node>
+            <node>
+               <name>Clear throat</name>
+            </node>
+            <node>
+               <name>Yawn</name>
+            </node>
+            <node>
+               <name>Burp</name>
+            </node>
+         </node>
+         <node>
+            <name>Nod</name>
+         </node>
+      </node>
+      <node>
+         <name>Move arms-hands</name>
+         <node>
+            <name>Scratch</name>
+         </node>
+         <node>
+            <name>Lift</name>
+            <description>Often grouped with item being lifted.</description>
+         </node>
+         <node>
+            <name>Press</name>
+            <description>Often grouped with body part doing action and item being pressed.</description>
+         </node>
+         <node>
+            <name>Drop</name>
+            <description>For example the participant drops a handheld ball</description>
+         </node>
+         <node>
+            <name>Release</name>
+            <description>Often grouped with item being released.</description>
+         </node>
+         <node>
+            <name>Retract</name>
+            <description>Often grouped with body part doing action and item being retracted.</description>
+         </node>
+         <node>
+            <name>Tap</name>
+            <description>Often grouped with body part doing action.</description>
+         </node>
+         <node>
+            <name>Reach</name>
+            <description>Requires a spatial goal such as reaching to touch a button or to grasp something. A body stretch is not a reach.</description>
+         </node>
+         <node>
+            <name>Touch</name>
+            <description>May follow a Reach event</description>
+         </node>
+         <node>
+            <name>Grasp</name>
+            <description>Grasp an object in one or both hands</description>
+         </node>
+         <node>
+            <name>Point</name>
+            <description>Should be grouped with Item/Agent/Human/Body part/Hand/Finger tag to specify which finger was used for the action.</description>
+         </node>
+      </node>
+      <node>
+         <name>Move legs-feet</name>
+         <node>
+            <name>Step</name>
+            <node>
+               <name>Heel-strike</name>
+            </node>
+            <node>
+               <name>Toe-off</name>
+            </node>
+         </node>
+         <node>
+            <name>Run</name>
+         </node>
+         <node>
+            <name>Walk</name>
+         </node>
+         <node>
+            <name>Trot</name>
+         </node>
+         <node>
+            <name>Jog</name>
+         </node>
+         <node>
+            <name>Jump</name>
+         </node>
+         <node>
+            <name>Kick</name>
+            <description>Often grouped with body part doing action and item being kicked.</description>
+         </node>
+      </node>
+      <node>
+         <name>Communicate</name>
+         <node>
+            <name>Communicate verbally</name>
+            <node>
+               <name>Speak</name>
+               <description>Communicate using spoken language.</description>
+            </node>
+            <node>
+               <name>Groan</name>
+            </node>
+            <node>
+               <name>Laugh</name>
+            </node>
+            <node>
+               <name>Scream</name>
+            </node>
+            <node>
+               <name>Sigh</name>
+            </node>
+         </node>
+         <node>
+            <name>Gesture</name>
+            <description>Make a expressive communicative movement of hands/arms and, often, face</description>
+            <node>
+               <name>Shrug</name>
+            </node>
+            <node>
+               <name>Thumb(s) up</name>
+            </node>
+            <node>
+               <name>Pump fist</name>
+            </node>
+            <node>
+               <name>Spread hand</name>
+            </node>
+            <node>
+               <name>Wave</name>
+            </node>
+            <node>
+               <name>Index up</name>
+            </node>
+            <node>
+               <name>Shhh</name>
+            </node>
+         </node>
+         <node>
+            <name>Communicate musically</name>
+            <node>
+               <name>Hum</name>
+            </node>
+            <node>
+               <name>Whistle</name>
+            </node>
+            <node>
+               <name>Vocalize</name>
+               <description>Make a sustained vowel sound such as, Ahhh</description>
+            </node>
+            <node>
+               <name>Sing</name>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Think</name>
+         <node>
+            <name>Switch attention</name>
+         </node>
+         <node>
+            <name>Allow</name>
+            <description>Allow access to something such as allowing a car to pass</description>
+         </node>
+         <node>
+            <name>Deny</name>
+            <description>Deny access to something such as preventing someone to pass</description>
+         </node>
+         <node>
+            <name>Evade</name>
+         </node>
+         <node>
+            <name>Read</name>
+         </node>
+         <node>
+            <name>Attend</name>
+         </node>
+         <node>
+            <name>Recall</name>
+         </node>
+         <node>
+            <name>Generate</name>
+         </node>
+         <node>
+            <name>Repeat</name>
+         </node>
+         <node>
+            <name>Rest</name>
+         </node>
+         <node>
+            <name>Count</name>
+         </node>
+         <node>
+            <name>Detect</name>
+         </node>
+         <node>
+            <name>Name</name>
+         </node>
+         <node>
+            <name>Discriminate</name>
+         </node>
+         <node>
+            <name>Track</name>
+         </node>
+         <node>
+            <name>Encode</name>
+         </node>
+         <node>
+            <name>Imagine</name>
+         </node>
+      </node>
+   </node>
+   <node requireChild="true">
+      <name>Participant</name>
+      <node extensionAllowed="true" requireChild="true">
+         <name>Cognitive state</name>
+         <node>
+            <name>Awake</name>
+         </node>
+         <node>
+            <name>Drowsy</name>
+         </node>
+         <node>
+            <name>Asleep</name>
+         </node>
+         <node>
+            <name>Anesthetized</name>
+         </node>
+         <node>
+            <name>Locked-in</name>
+         </node>
+         <node>
+            <name>Comatose</name>
+         </node>
+         <node>
+            <name>Vegetative</name>
+         </node>
+         <node>
+            <name>Brain-dead</name>
+         </node>
+         <node extensionAllowed="true" requireChild="true">
+            <name>Intoxicated</name>
+            <description>Indicates a state in which participant has consumed alcohol, drugs, or other substances that may alter physical or mental state.</description>
+         </node>
+      </node>
+      <node extensionAllowed="true" requireChild="true">
+         <name>Emotional state</name>
+         <node>
+            <name>Awed</name>
+         </node>
+         <node>
+            <name>Frustrated</name>
+         </node>
+         <node>
+            <name>Joyful</name>
+         </node>
+         <node>
+            <name>Angry</name>
+         </node>
+         <node>
+            <name>Happy</name>
+         </node>
+         <node>
+            <name>Sad</name>
+         </node>
+         <node>
+            <name>Loving</name>
+         </node>
+         <node>
+            <name>Fearful</name>
+         </node>
+         <node>
+            <name>Compassionate</name>
+         </node>
+         <node>
+            <name>Empathetic</name>
+         </node>
+         <node>
+            <name>Jealous</name>
+         </node>
+         <node>
+            <name>Content</name>
+         </node>
+         <node>
+            <name>Grieving</name>
+         </node>
+         <node>
+            <name>Relieved</name>
+         </node>
+         <node>
+            <name>Excited</name>
+         </node>
+         <node>
+            <name>Disgusted</name>
+         </node>
+      </node>
+      <node requireChild="true">
+         <name>Postural state</name>
+         <node>
+            <name>Crouching</name>
+         </node>
+         <node>
+            <name>Sitting</name>
+         </node>
+         <node>
+            <name>Standing</name>
+         </node>
+         <node>
+            <name>Kneeling</name>
+         </node>
+         <node>
+            <name>Prone</name>
+         </node>
+         <node>
+            <name>Supported by chin rest</name>
+         </node>
+      </node>
+      <node extensionAllowed="true" requireChild="true">
+         <name>Trait</name>
+         <node>
+            <name>Age</name>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Sex</name>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Handedness</name>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+      </node>
+   </node>
+   <node requireChild="true">
+      <name>Attribute</name>
+      <node>
+         <name>Informational</name>
+         <node requireChild="true">
+            <name>Label</name>
+            <description>A string of 20 or fewer characters. Labels are used to define scopes or can be assigned to several events sharing the same characteristic (an event code).</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node isNumeric="true" requireChild="true">
+            <name>ID</name>
+            <description>A numeric code usually used to identify particular objects.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Description</name>
+            <description>Human-readable text description of the event.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Definition</name>
+            <description>A tag used within a tag group also containing a Label tag to indicate that the Label represents that group of tags.</description>
+         </node>
+         <node>
+            <name>Context</name>
+            <description>A tag indicating the overall environment and setup of the experiment or a portion of the experiment. This event is often inserted into a recording at the beginning of an experimental record to describe information such as whether the experiment is conducted indoors or outdoors or whether the experiment is conducted in the real-world or in a controlled laboratory setting. Tags specifying subject metadata might also be included.</description>
+         </node>
+         <node>
+            <name>Condition</name>
+            <description>An event used to indicate a shift to a new experimental or task condition, usually as the result of the change of a control variable or the participant state.</description>
+         </node>
+         <node>
+            <name>Block</name>
+            <description>An event used to indicate a particular organizational part in the experimental design or plan. Usually the Block tag is used with scoping tags as well as tags describing what the block represents to assist with downstream analysis.</description>
+         </node>
+         <node>
+            <name>Metadata</name>
+            <description>A tag used within a tag group indicate to designate information about the data such as file size or author. May also be used directly with a value.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+            <node requireChild="true">
+               <name>Creation data</name>
+               <node takesValue="true" unitClass="datetime">
+                  <name>#</name>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Subject</name>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Task</name>
+            <description>A tag used to indicate the definition of the task ideally with a linkage to the different types of events that accomplish the task as part of the description.</description>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Quantitative</name>
+         <node>
+            <name>Item count</name>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node>
+            <name>Probability</name>
+            <description>Use to specify the level of certainty about the occurrence of the event.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Fraction</name>
+            <description>Fraction of items of a particular type.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Percentage</name>
+            <description>Percentage of items of a particular type.</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Repetition</name>
+            <description>When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+         <node requireChild="true">
+            <name>Uncertainty</name>
+            <description>Use to specify the amount of uncertainty in the timing of the event or other item such as a data features. Please notice that this is different from Attribute/Probability tag which relates to the occurrence of event and can be interpretative as the integral of probability density across a distribution whose shape (temporal extent) is specified by Attribute/Temporal uncertainty</description>
+            <node takesValue="true">
+               <name>#</name>
+            </node>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Sensory</name>
+         <node>
+            <name>Auditory</name>
+            <node requireChild="true">
+               <name>Frequency</name>
+            </node>
+            <node requireChild="true">
+               <name>Volume</name>
+            </node>
+            <node>
+               <name>Ramp-up</name>
+               <description>Increasing in amplitude</description>
+            </node>
+            <node>
+               <name>Ramp-down</name>
+               <description>Decreasing in amplitude</description>
+            </node>
+            <node>
+               <name>Timbre</name>
+               <description>Sound quality</description>
+            </node>
+         </node>
+         <node>
+            <name>Olfactory</name>
+         </node>
+         <node>
+            <name>Haptic</name>
+         </node>
+         <node>
+            <name>Gustatory</name>
+         </node>
+         <node>
+            <name>Visual</name>
+            <node requireChild="true">
+               <name>Luminance</name>
+            </node>
+            <node requireChild="true">
+               <name>Color</name>
+               <node>
+                  <name>RGB color</name>
+                  <node>
+                     <name>RGB Red</name>
+                     <node isNumeric="true" takesValue="true">
+                        <name>#</name>
+                        <description>R value of RGB between 0 and 1</description>
+                     </node>
+                  </node>
+                  <node>
+                     <name>RGB Blue</name>
+                     <node isNumeric="true" takesValue="true">
+                        <name>#</name>
+                        <description>B value of RGB between 0 and 1</description>
+                     </node>
+                  </node>
+                  <node>
+                     <name>RGB Green</name>
+                     <node isNumeric="true" takesValue="true">
+                        <name>#</name>
+                        <description>G value of RGB between 0 and 1</description>
+                     </node>
+                  </node>
+               </node>
+               <node>
+                  <name>Grayscale</name>
+                  <description>Indicates gray scale</description>
+                  <node isNumeric="true" takesValue="true">
+                     <name>#</name>
+                     <description>White intensity between 0 and 1</description>
+                  </node>
+               </node>
+               <node>
+                  <name>CSS color</name>
+                  <description>One of 140 colors supported by all browsers.</description>
+                  <node>
+                     <name>Black</name>
+                     <description>Color #000000</description>
+                  </node>
+                  <node>
+                     <name>Blue</name>
+                     <description>Color #0000FF</description>
+                  </node>
+                  <node>
+                     <name>Cyan</name>
+                     <description>Color #00FFFF</description>
+                  </node>
+                  <node>
+                     <name>Green</name>
+                     <description>Color #00FF00</description>
+                  </node>
+                  <node>
+                     <name>Magenta</name>
+                     <description>Color #FF00FF</description>
+                  </node>
+                  <node>
+                     <name>Red</name>
+                     <description>Color #FF0000</description>
+                  </node>
+                  <node>
+                     <name>White</name>
+                     <description>Color #FFFFFF</description>
+                  </node>
+                  <node>
+                     <name>Yellow</name>
+                     <description>Color #FFFF00</description>
+                  </node>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Rendering</name>
+               <node>
+                  <name>Screen</name>
+               </node>
+               <node>
+                  <name>Head-mounted display</name>
+               </node>
+               <node>
+                  <name>Window</name>
+               </node>
+               <node>
+                  <name>Viewport</name>
+                  <description>Two or more views on the same scene.</description>
+               </node>
+               <node>
+                  <name>2D view</name>
+               </node>
+               <node>
+                  <name>3D view</name>
+               </node>
+            </node>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Spatial</name>
+         <node requireChild="true">
+            <name>Direction</name>
+            <description>Coordinate system is inferred from Attribute/Location. To specify a vector combine subnodes with number --- for example Attribute/Top/10, Attribute/Direction/Left/5 to create a vector with coordinates 10 and 5</description>
+         </node>
+         <node requireChild="true">
+            <name>Location</name>
+            <description>Spot or center of an area. Use Area were you are referring to something with significant extent and emphasizing its boundaries, like a city</description>
+         </node>
+         <node requireChild="true">
+            <name>Size</name>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Temporal</name>
+         <node requireChild="true">
+            <name>Duration</name>
+            <description>An offset that is implicit after duration time passed from the onset</description>
+         </node>
+         <node>
+            <name>Onset</name>
+            <description>Default</description>
+         </node>
+         <node>
+            <name>Offset</name>
+         </node>
+         <node>
+            <name>Rate</name>
+            <description>Number of occurrences in a unit of time.</description>
+         </node>
+         <node>
+            <name>Velocity</name>
+            <description>Use Attribute/Temporal/Onset or Attribute/Temporal/Offset to specify onset or offset</description>
+         </node>
+         <node>
+            <name>Acceleration</name>
+         </node>
+         <node>
+            <name>Jerk rate</name>
+            <description>Rate at which an object's acceleration changes with respect to time.</description>
+            <node isNumeric="true" takesValue="true" unitClass="jerk">
+               <name>#</name>
+            </node>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Environmental</name>
+         <node>
+            <name>Indoors</name>
+         </node>
+         <node>
+            <name>Outdoors</name>
+         </node>
+         <node>
+            <name>Real-world</name>
+         </node>
+         <node>
+            <name>Virtual-world</name>
+         </node>
+         <node>
+            <name>Augmented-reality</name>
+         </node>
+         <node>
+            <name>Motion platform</name>
+         </node>
+         <node>
+            <name>Urban</name>
+         </node>
+         <node>
+            <name>Rural</name>
+         </node>
+      </node>
+      <node extensionAllowed="true">
+         <name>Cognitive modifier</name>
+         <node>
+            <name>Imagined</name>
+            <description>This is used to identity that the (sub)event only happened in the imagination of the participant, e.g.  imagined movements in motor imagery paradigms.</description>
+         </node>
+         <node>
+            <name>Reflexive</name>
+         </node>
+         <node>
+            <name>Intentional</name>
+         </node>
+         <node>
+            <name>Incidental</name>
+         </node>
+         <node>
+            <name>Intended effect</name>
+            <description>How the stimulus is expected to effect the participants</description>
+         </node>
+         <node>
+            <name>Meaningful</name>
+         </node>
+         <node>
+            <name>Not meaningful</name>
+         </node>
+         <node>
+            <name>Newly learned meaning</name>
+         </node>
+         <node>
+            <name>Rewarding</name>
+         </node>
+         <node>
+            <name>Penalizing</name>
+         </node>
+         <node>
+            <name>Error</name>
+         </node>
+         <node>
+            <name>Threatening</name>
+         </node>
+         <node>
+            <name>Warning</name>
+            <description>As in a warning message that you are getting too close to the shoulder in a driving task</description>
+         </node>
+         <node>
+            <name>Oddball</name>
+            <description>Unexpected or infrequent</description>
+         </node>
+         <node>
+            <name>Target</name>
+            <description>Something the subject is looking for</description>
+         </node>
+         <node>
+            <name>Non-target</name>
+            <description>Make sure to tag Expected if the Non-target is frequent</description>
+         </node>
+         <node>
+            <name>Novel</name>
+            <description>Genuinely novel such as an event occurring once or so per experiment</description>
+         </node>
+         <node>
+            <name>Expected</name>
+            <description>Of low information value, for example frequent Non-targets in an RSVP paradigm</description>
+         </node>
+         <node>
+            <name>Valid</name>
+            <description>Something that is understood to be valid such as an ID matches the person being displayed and it has all the  correct information</description>
+         </node>
+         <node>
+            <name>Invalid</name>
+            <description>Something that is understood to not be valid such as like an ID with an impossible date-of-birth, or a photo not matching the person presenting it</description>
+         </node>
+         <node>
+            <name>Congruent</name>
+         </node>
+         <node>
+            <name>Feedback</name>
+         </node>
+         <node>
+            <name>Priming</name>
+            <node>
+               <name>Motoric priming</name>
+            </node>
+            <node>
+               <name>Emotional priming</name>
+            </node>
+            <node>
+               <name>Perceptual priming</name>
+            </node>
+         </node>
+         <node>
+            <name>Subliminal</name>
+            <node>
+               <name>Unmasked subliminal</name>
+            </node>
+            <node>
+               <name>Masked subliminal</name>
+            </node>
+            <node>
+               <name>Supraliminal</name>
+               <description>By default this is assumed about each stimulus</description>
+            </node>
+            <node>
+               <name>Liminal At the 75</name>
+            </node>
+         </node>
+         <node>
+            <name>Action judgment</name>
+            <description>External judgment assumed to be ground truth such as from an experiment control software or an annotator about participant actions such as answering a question, failing to answer in time, etc. Related to participant indication</description>
+            <node>
+               <name>Judged correct</name>
+            </node>
+            <node>
+               <name>Judged incorrect</name>
+               <description>Wrong choice but not time out</description>
+            </node>
+            <node>
+               <name>Indeterminate outcome</name>
+               <description>It cannot be determined that the action was correct or incorrect.</description>
+            </node>
+            <node>
+               <name>Missed</name>
+               <description>Participant failed or could not have perceived the instruction due to their eyes being off-screen or a similar reason. Not easy to deduce this but it is possible</description>
+            </node>
+            <node>
+               <name>Inappropriate</name>
+               <description>A choice that is not allowed such as moving a chess piece to a location it should not go based on game rules</description>
+            </node>
+            <node>
+               <name>Extraneous</name>
+               <description>Button presses that are not meaningful for example due to intrinsic mechanical causes after a meaningful press</description>
+            </node>
+         </node>
+         <node>
+            <name>Social interaction</name>
+            <description>Involving interactions among multiple agents such as humans or dogs or robots</description>
+            <node requireChild="true">
+               <name>Role</name>
+               <description>The role of the agent (participant, character, AI..)</description>
+               <node>
+                  <name>Leader</name>
+               </node>
+               <node>
+                  <name>Follower</name>
+               </node>
+               <node takesValue="true">
+                  <name>#</name>
+               </node>
+            </node>
+            <node requireChild="true">
+               <name>Association</name>
+               <node>
+                  <name>Associated with someone else</name>
+                  <description>Item such as a cup belonging to another person</description>
+               </node>
+               <node>
+                  <name>Associated with self</name>
+                  <description>Item such as a cup belonging to the participant</description>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Emotional</name>
+            <node>
+               <name>Arousal</name>
+               <description>Only in the context of 2D emotion representation</description>
+            </node>
+            <node>
+               <name>Positive valence</name>
+               <description>Valence by itself can be the name of an emotion such as sadness so this tag distinguishes the type of emotion</description>
+            </node>
+            <node>
+               <name>Negative valence</name>
+            </node>
+         </node>
+      </node>
+   </node>
+   <node extensionAllowed="true" requireChild="true">
+      <name>Custom</name>
+      <description>This node can be used to organize events in an alternative (parallel) hierarchy. You can define your custom tags and hierarchies without any restriction under this node. These tags will still be matched to each other as for example  /Custom/Dance/Waltz is considered a subtype of /Custom/DanceExample.</description>
+   </node>
+   <unitClasses>
+      <unitClass defaultUnits="s">
+         <name>time</name>
+         <units>
+            <unit SIUnit="true">second</unit>
+            <unit SIUnit="true" unitSymbol="true">s</unit>
+            <unit>day</unit>
+            <unit>minute</unit>
+            <unit>hour</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="YYYY-MM-DDThh:mm:ss">
+         <name>dateTime</name>
+         <units>
+            <unit>YYYY-MM-DDThh:mm:ss</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="hour:min">
+         <name>clockTime</name>
+         <units>
+            <unit>hour:min</unit>
+            <unit>hour:min:sec</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="Hz">
+         <name>frequency</name>
+         <units>
+            <unit SIUnit="true">hertz</unit>
+            <unit SIUnit="true" unitSymbol="true">Hz</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="radian">
+         <name>angle</name>
+         <units>
+            <unit SIUnit="true">radian</unit>
+            <unit SIUnit="true" unitSymbol="true">rad</unit>
+            <unit>degree</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="m">
+         <name>physicalLength</name>
+         <units>
+            <unit SIUnit="true">metre</unit>
+            <unit SIUnit="true" unitSymbol="true">m</unit>
+            <unit>foot</unit>
+            <unit>mile</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="px">
+         <name>pixels</name>
+         <units>
+            <unit>pixel</unit>
+            <unit unitSymbol="true">px</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="m^2">
+         <name>area</name>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">m^2</unit>
+            <unit unitSymbol="true">px^2</unit>
+            <unit>pixel^2</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="m^3">
+         <name>volume</name>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">m^3</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="m-per-s">
+         <name>speed</name>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">m-per-s</unit>
+            <unit unitSymbol="true">mph</unit>
+            <unit unitSymbol="true">kph</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="m-per-s^2">
+         <name>acceleration</name>
+         <units>
+            <unit SIUnit="true" unitSymbol="true">m-per-s^2</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="m-per-s^3">
+         <name>jerk</name>
+         <units>
+            <unit unitSymbol="true">m-per-s^3</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="dB">
+         <name>intensity</name>
+         <units>
+            <unit unitSymbol="true">dB</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="cd">
+         <name>luminousIntensity</name>
+         <units>
+            <unit SIUnit="true">candela</unit>
+            <unit SIUnit="true" unitSymbol="true">cd</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="B">
+         <name>memorySize</name>
+         <units>
+            <unit SIUnit="true">byte</unit>
+            <unit SIUnit="true" unitSymbol="true">B</unit>
+         </units>
+      </unitClass>
+      <unitClass defaultUnits="$">
+         <name>currency</name>
+         <units>
+            <unit>dollar</unit>
+            <unit unitSymbol="true">$</unit>
+            <unit>point</unit>
+            <unit>fraction</unit>
+         </units>
+      </unitClass>
+   </unitClasses>
+   <unitModifiers>
+      <unitModifier SIUnitModifier="true">
+         <name>deca</name>
+         <description>SI unit multiple representing 10^1</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>da</name>
+         <description>SI unit multiple representing 10^1</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>hecto</name>
+         <description>SI unit multiple representing 10^2</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>h</name>
+         <description>SI unit multiple representing 10^2</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>kilo</name>
+         <description>SI unit multiple representing 10^3</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>k</name>
+         <description>SI unit multiple representing 10^3</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>mega</name>
+         <description>SI unit multiple representing 10^6</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>M</name>
+         <description>SI unit multiple representing 10^6</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>giga</name>
+         <description>SI unit multiple representing 10^9</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>G</name>
+         <description>SI unit multiple representing 10^9</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>tera</name>
+         <description>SI unit multiple representing 10^12</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>T</name>
+         <description>SI unit multiple representing 10^12</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>peta</name>
+         <description>SI unit multiple representing 10^15</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>P</name>
+         <description>SI unit multiple representing 10^15</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>exa</name>
+         <description>SI unit multiple representing 10^18</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>E</name>
+         <description>SI unit multiple representing 10^18</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>zetta</name>
+         <description>SI unit multiple representing 10^21</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>Z</name>
+         <description>SI unit multiple representing 10^21</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>yotta</name>
+         <description>SI unit multiple representing 10^24</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>Y</name>
+         <description>SI unit multiple representing 10^24</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>deci</name>
+         <description>SI unit submultiple representing 10^-1</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>d</name>
+         <description>SI unit submultiple representing 10^-1</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>centi</name>
+         <description>SI unit submultiple representing 10^-2</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>c</name>
+         <description>SI unit submultiple representing 10^-2</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>milli</name>
+         <description>SI unit submultiple representing 10^-3</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>m</name>
+         <description>SI unit submultiple representing 10^-3</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>micro</name>
+         <description>SI unit submultiple representing 10^-6</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>u</name>
+         <description>SI unit submultiple representing 10^-6</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>nano</name>
+         <description>SI unit submultiple representing 10^-9</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>n</name>
+         <description>SI unit submultiple representing 10^-9</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>pico</name>
+         <description>SI unit submultiple representing 10^-12</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>p</name>
+         <description>SI unit submultiple representing 10^-12</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>femto</name>
+         <description>SI unit submultiple representing 10^-15</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>f</name>
+         <description>SI unit submultiple representing 10^-15</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>atto</name>
+         <description>SI unit submultiple representing 10^-18</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>a</name>
+         <description>SI unit submultiple representing 10^-18</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>zepto</name>
+         <description>SI unit submultiple representing 10^-21</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>z</name>
+         <description>SI unit submultiple representing 10^-21</description>
+      </unitModifier>
+      <unitModifier SIUnitModifier="true">
+         <name>yocto</name>
+         <description>SI unit submultiple representing 10^-24</description>
+      </unitModifier>
+      <unitModifier SIUnitSymbolModifier="true">
+         <name>y</name>
+         <description>SI unit submultiple representing 10^-24</description>
+      </unitModifier>
+   </unitModifiers>
+</HED>

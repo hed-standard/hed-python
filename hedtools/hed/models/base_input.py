@@ -493,7 +493,7 @@ class BaseInput:
         validation_issues += self._run_row_ops(row_hed_string, row_ops, error_handler)
         return validation_issues
 
-    def _run_column_ops(self, column_to_hed_tags_dictionary, column_ops, expansion_column_isssues, error_handler):
+    def _run_column_ops(self, column_to_hed_tags_dictionary, column_ops, expansion_column_issues, error_handler):
         validation_issues = []
         if column_to_hed_tags_dictionary:
             for column_number, column_hed_string in column_to_hed_tags_dictionary.items():
@@ -501,8 +501,8 @@ class BaseInput:
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
                                                  increment_depth_after=False)
-                if column_number in expansion_column_isssues:
-                    new_column_issues += expansion_column_isssues[column_number]
+                if column_number in expansion_column_issues:
+                    new_column_issues += expansion_column_issues[column_number]
 
                 new_column_issues += column_hed_string.apply_ops(column_ops)
                 error_handler.add_context_to_issues(new_column_issues)

@@ -1,5 +1,5 @@
 """Allows output of HedSchema objects as .xml format"""
-import copy
+
 from xml.etree.ElementTree import Element, SubElement
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.fileio import xml_constants

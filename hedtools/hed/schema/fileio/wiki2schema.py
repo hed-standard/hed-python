@@ -233,7 +233,8 @@ class HedSchemaWikiParser:
         for line in lines:
             if line.strip():
                 raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID,
-                                   f"There should be no other content in the between the HED line in the header and either the prologue or schema sections.", filename=self.filename)
+                                   "There should be no other content in the between the HED line in the header" +
+                                   "and either the prologue or schema sections.", filename=self.filename)
 
     def _read_prologue(self, lines):
         """Adds the prologue
@@ -341,7 +342,6 @@ class HedSchemaWikiParser:
         for line in lines:
             self._add_single_line(line, HedSectionKey.Attributes)
         self._schema.add_hed2_attributes()
-
 
     def _get_header_attributes(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
