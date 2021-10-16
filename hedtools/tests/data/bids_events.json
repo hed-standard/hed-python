@@ -36,12 +36,12 @@
     "stage": {
         "Description": "The current stage of the experiment.",
         "Levels": {
-            "1.0": "Stage 1. BCI acts randomly",
+            "1": "Stage 1. BCI acts randomly",
             "2": "Stage 2. BCI was trained on data from stage 1.",
             "3": "Stage 3. BCI was trained on data from stages 1 and 2."
         },
 		"HED": {
-            "1.0": "Description/BCI acts randomly, (Definition/Random-selection, (Experimental-condition, (Random, Predict))), Def/Random-selection",
+            "1": "Description/BCI acts randomly, (Definition/Random-selection, (Experimental-condition, (Random, Predict))), Def/Random-selection",
             "2": "Description/BCI was trained on data from stage 1., (Definition/Trained-on-random, (Experimental-condition)), Def/Trained-on-random",
             "3": "Description/BCI was trained on data from stages 1 and 2., (Definition/Trained-on-all, (Experimental-condition)), Def/Trained-on-all"
 		}
@@ -68,11 +68,11 @@
     "bci_prediction_valid": {
         "Description": "Did a prediction arrive on time (if not, a random prediction was made) in this trial.",
         "Levels": {
-            "1.0": "Computational prediction arrived on time",
+            "1": "Computational prediction arrived on time",
             "2": "Computational prediction was late so random prediction was used."
         },
 		"HED": {
-			"1.0": "Description/Computational prediction arrived on time, (Computational-agent, Predict)",
+			"1": "Description/Computational prediction arrived on time, (Computational-agent, Predict)",
 			"2": "Description/Computational prediction was late so random prediction was used., Time-out, (Random, Predict)"
 		}
     },

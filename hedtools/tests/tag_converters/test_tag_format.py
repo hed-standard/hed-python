@@ -16,7 +16,6 @@ class TestConvertTag(TestTagFormat):
         for test_key in test_strings:
             test_string_obj = HedString(test_strings[test_key])
             error_handler = error_reporter.ErrorHandler()
-            error_handler.reset_error_context()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string_obj, increment_depth_after=False)
             test_issues = test_string_obj.convert_to_canonical_forms(self.hed_schema)
             if convert_to_short:
@@ -28,6 +27,8 @@ class TestConvertTag(TestTagFormat):
 
             expected_issue = self.really_format_errors(error_handler, hed_string=test_string_obj,
                                                        params=expected_params)
+            error_handler.add_context_to_issues(test_issues)
+
             # print(test_key)
             # print(expected_issue)
             # print(test_issues)
@@ -149,8 +150,7 @@ class TestConvertToLongTag(TestConvertTag):
                                                  expected_parent_tag='Item/Object/Geometric'),
             'partialDuplicate':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=10, index_in_tag_end=14,
-                                                 expected_parent_tag='Item'),
+                                                 index_in_tag=10, index_in_tag_end=14, expected_parent_tag='Item'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -519,8 +519,8 @@ class TestConvertHedStringToShort(TestConvertTag):
                                                        tag=0, index_in_tag=0, index_in_tag_end=12),
             'both': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                      tag=0, index_in_tag=0, index_in_tag_end=12)
-            + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                               tag=1, index_in_tag=0, index_in_tag_end=12),
+                    + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                       tag=1, index_in_tag=0, index_in_tag_end=12),
             'singleWithTwoValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                                    tag=1, index_in_tag=0, index_in_tag_end=12),
             'doubleWithValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
@@ -732,8 +732,8 @@ class TestConvertHedStringToLong(TestConvertTag):
                                                        tag=0, index_in_tag=0, index_in_tag_end=12),
             'both': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                      tag=0, index_in_tag=0, index_in_tag_end=12)
-            + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                               tag=1, index_in_tag=0, index_in_tag_end=12),
+                    + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                       tag=1, index_in_tag=0, index_in_tag_end=12),
             'singleWithTwoValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                                    tag=1, index_in_tag=0, index_in_tag_end=12),
             'doubleWithValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
