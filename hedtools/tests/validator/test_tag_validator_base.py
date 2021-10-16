@@ -1,6 +1,7 @@
 import unittest
 import os
-
+from unittest import mock
+from io import StringIO
 from hed.models.hed_string import HedString
 from hed.validator.hed_validator import HedValidator
 from hed.errors import error_reporter
@@ -104,10 +105,12 @@ class TestValidatorBase(TestHedBase):
                                                        params=expected_params)
             error_handler.add_context_to_issues(test_issues)
 
-            print(error_reporter.get_printable_issue_string(test_issues))
-            print(test_key)
-            print(str(expected_issue))
-            print(str(test_issues))
+            with mock.patch('sys.stdout', new=StringIO()):
+                print("This should be eaten by the StringIO")
+                print(error_reporter.get_printable_issue_string(test_issues))
+                print(test_key)
+                print(str(expected_issue))
+                print(str(test_issues))
             error_handler.pop_error_context()
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
