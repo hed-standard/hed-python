@@ -12,7 +12,7 @@ def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
     split_tag_and_string_ops: bool
         If true, will split the operations into tag and string operations
             This is primarily for parsing spreadsheets where any given column isn't an entire hed string,
-            but you might want additional detail on which column the issue originall came from.
+            but you might want additional detail on which column the issue original came from.
     kwargs : optional list of parameters, passed to each validator
         Currently accepted values: allow_placeholders
                                    check_for_definitions

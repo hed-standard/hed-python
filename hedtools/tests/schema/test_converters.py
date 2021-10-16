@@ -85,20 +85,19 @@ class TestConverterBase(unittest.TestCase):
 
         self.assertEqual(loaded_schema, wiki_schema_copy)
 
-    def test_wikischema2legacyxml(self):
-        if self.can_legacy:
-            saved_filename = self.hed_schema_wiki.save_as_xml(save_as_legacy_format=True)
-            try:
-                loaded_schema = schema.load_schema(saved_filename)
-            finally:
-                os.remove(saved_filename)
-
-            wiki_schema_copy = copy.deepcopy(self.hed_schema_wiki)
-            self._remove_units_descriptions(wiki_schema_copy)
-            wiki_schema_copy.add_hed2_attributes(only_add_if_none_present=False)
-            self._remove_unknown_attributes(loaded_schema)
-
-            self.assertEqual(loaded_schema, wiki_schema_copy)
+    # def test_wikischema2legacyxml(self):
+    #     if self.can_legacy:
+    #         saved_filename = self.hed_schema_wiki.save_as_xml(save_as_legacy_format=True)
+    #         try:
+    #             loaded_schema = schema.load_schema(saved_filename)
+    #         finally:
+    #             os.remove(saved_filename)
+    #
+    #         wiki_schema_copy = copy.deepcopy(self.hed_schema_wiki)
+    #         self._remove_units_descriptions(wiki_schema_copy)
+    #         wiki_schema_copy.add_hed2_attributes(only_add_if_none_present=False)
+    #         self._remove_unknown_attributes(loaded_schema)
+    #         self.assertEqual(loaded_schema, wiki_schema_copy)
 
     def test_wikischema2wiki(self):
         saved_filename = self.hed_schema_wiki.save_as_mediawiki()
@@ -146,11 +145,13 @@ class TestPropertyAdded(TestConverterBase):
     can_compare = True
     can_legacy = False
 
+
 class TestPropertyAddedUsage(TestConverterBase):
     xml_file = '../data/hed_pairs/added_prop_with_usage.xml'
     wiki_file = '../data/hed_pairs/added_prop_with_usage.mediawiki'
     can_compare = True
     can_legacy = False
+
 
 class TestBeta2(TestConverterBase):
     xml_file = '../data/hed_pairs/beta.2.xml'
@@ -158,17 +159,20 @@ class TestBeta2(TestConverterBase):
     can_compare = True
     can_legacy = False
 
+
 class TestBeta3(TestConverterBase):
     xml_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
     wiki_file = '../data/hed_pairs/HED8.0.0-beta.3.mediawiki'
     can_compare = True
     can_legacy = False
 
+
 class TestHed8(TestConverterBase):
     xml_file = '../data/hed_pairs/HED8.0.0.xml'
     wiki_file = '../data/hed_pairs/HED8.0.0.mediawiki'
     can_compare = True
     can_legacy = False
+
 
 class TestHedUnknownAttr(TestConverterBase):
     xml_file = '../data/hed_pairs/unknown_attribute.xml'
@@ -194,7 +198,6 @@ class TestConverterSavingPrefix(unittest.TestCase):
         cls.hed_schema_xml_prefix = schema.load_schema(cls.xml_file, library_prefix="tl:")
         TestConverterBase._remove_unknown_attributes(cls.hed_schema_xml_prefix)
         TestConverterBase._remove_unknown_attributes(cls.hed_schema_xml)
-
 
     def test_saving_prefix(self):
         saved_filename = self.hed_schema_xml_prefix.save_as_xml()

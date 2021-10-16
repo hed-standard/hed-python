@@ -1,4 +1,0 @@
-1250	Event/Label/StartAreaE	Event/Category/Experiment control/Sequence/Block/Guard Area E, Event/Description/Start guarding Area E
-1311	Event/Label/ValidImage	Event/Category/Experimental stimulus, Event/Description/Show a valid ID to be verified, Item/Object/IDCard, Sensory presentation/Visual, Participant/Effect/Visual, Participant/Effect/Cognitive/Valid
-2120	Event/Label/ButtonDeny	Event/Description/Button push to deny access to the ID holder, Event/Category/Participant response, (Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger),  (Participant ~ Action/Deny/Access ~ Item/Object/Person/IDHolder)
-3111	Event/Label/TakeSurvey	Event/Category/Experimental stimulus/Instruction, Event/Description/Tell subject to start survey

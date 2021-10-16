@@ -30,14 +30,14 @@ class Test(unittest.TestCase):
         json_dict = None
         try:
             json_dict = Sidecar(None)
-        except HedFileError as e:
+        except HedFileError:
             pass
         self.assertTrue(len(json_dict._column_data) == 0)
 
         json_dict = None
         try:
             json_dict = Sidecar("")
-        except HedFileError as e:
+        except HedFileError:
             pass
         self.assertTrue(len(json_dict._column_data) == 0)
 
@@ -48,8 +48,7 @@ class Test(unittest.TestCase):
             json_dict = Sidecar(invalid_json)
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(name in e.format_error_message(return_string_only=True,
-                                                                       name=name))
+            self.assertTrue(name in e.format_error_message(return_string_only=True, name=name))
 
     def test_add_json_string(self):
         with open(self.json_filename) as file:

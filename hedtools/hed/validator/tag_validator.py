@@ -594,8 +594,8 @@ class TagValidator:
 
         """
         return last_non_empty_character == TagValidator.CLOSING_GROUP_CHARACTER and \
-               not (TagValidator._character_is_delimiter(current_character)
-                    or current_character == TagValidator.CLOSING_GROUP_CHARACTER)
+            not (TagValidator._character_is_delimiter(current_character)
+                 or current_character == TagValidator.CLOSING_GROUP_CHARACTER)
 
     @staticmethod
     def _character_is_delimiter(character):

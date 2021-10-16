@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
                               tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
 
         for row_number, column_to_hed_tags in file_input:
-            breakHere = 3
+            break_here = 3
 
         # Just make sure this didn't crash for now
         self.assertTrue(True)
@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
         test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_formatting.xlsx"
         test_input_file.to_excel(test_output_name)
 
-        #Test to a file stream
+        # Test to a file stream
         test_input_file = self.generic_file_input
         test_output_name = self.base_output_folder + "ExcelMultipleSheets_fileio.xlsx"
         with open(test_output_name, "wb") as f:
@@ -129,7 +129,8 @@ class Test(unittest.TestCase):
 
         input_file_2.reset_column_mapper()
 
-        for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(), input_file_2.iter_dataframe()):
+        for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(),
+                                                                          input_file_2.iter_dataframe()):
             self.assertEqual(row_number, row_number2,
                              f"EventsInput should have row {row_number} equal to {row_number2} after reset")
             self.assertTrue(len(column_dict) == 4,

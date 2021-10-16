@@ -1,7 +1,6 @@
 import unittest
 from hed.errors import error_reporter
 from hed.errors.error_types import ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings
-from hed.errors.error_reporter import ErrorHandler
 
 
 class Test(unittest.TestCase):
@@ -68,7 +67,9 @@ class Test(unittest.TestCase):
 
     def test_filter_issues_by_severity(self):
         error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION, "dummy", problem_char="#", char_index=0)
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+                                                                   "dummy", problem_char="#", char_index=0)
         self.assertTrue(len(error_list) == 2)
-        filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list, severity=ErrorSeverity.ERROR)
+        filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list,
+                                                                     severity=ErrorSeverity.ERROR)
         self.assertTrue(len(filtered_list) == 1)

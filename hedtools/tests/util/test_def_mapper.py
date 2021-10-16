@@ -102,7 +102,6 @@ class Test(unittest.TestCase):
         def_issues = test_string.validate(def_mapper, expand_defs=False)
         self.assertEqual(str(test_string), self.basic_hed_string_with_def_first_paren)
 
-
     def test_expand_def_tags_placeholder(self):
         def_dict = DefDict()
         def_string = HedString(self.placeholder_def_string)
@@ -135,8 +134,8 @@ class Test(unittest.TestCase):
 
         test_string = HedString(self.placeholder_hed_string_with_def_first_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
-        self.assertEqual(str(test_string), "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
-
+        self.assertEqual(str(test_string),
+                         "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
 
     def test_expand_def_tags_placeholder_no_expand(self):
         def_dict = DefDict()
@@ -199,7 +198,6 @@ class Test(unittest.TestCase):
         self.assertEqual(str(test_string), label_def_string_has_inavlid_placeholder)
         self.assertTrue(def_issues)
 
-
     def test__check_tag_starts_with(self):
         target_tag_name = "definition/"
 
@@ -210,10 +208,6 @@ class Test(unittest.TestCase):
             result = DefDict._check_tag_starts_with(tag, target_tag_name)
             self.assertTrue(result)
 
+
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
-

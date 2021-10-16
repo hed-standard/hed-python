@@ -2,7 +2,7 @@
 """
 
 # todo: Switch various properties to this once we require python 3.8
-# from functools import cached_property
+
 from hed.errors.exceptions import HedExceptions, HedFileError
 
 
