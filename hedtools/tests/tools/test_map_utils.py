@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         df_new1 = get_new_dataframe(self.stern_map_path)
         self.assertIsInstance(df_new1, pd.DataFrame)
         self.assertEqual(len(df_new1), 87, "get_new_dataframe should return correct number of rows")
-        self.assertEqual(len(df_new1.columns), 4, f"get_new_dataframe should return correct number of rows")
+        self.assertEqual(len(df_new1.columns), 4, "get_new_dataframe should return correct number of rows")
         df_new.iloc[0]['type'] = 'Pear'
         self.assertNotEqual(df_new.iloc[0]['type'], df_new1.iloc[0]['type'],
                             "get_new_dataframe returns a new dataframe")
@@ -121,7 +121,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df.columns), 4, "reorder_columns should return correct number of rows")
         df_new1 = reorder_columns(df, ['event_type', 'type', 'baloney'])
         self.assertEqual(len(df_new1), 87, "reorder_columns should return correct number of rows")
-        self.assertEqual(len(df_new1.columns), 2, f"reorder_columns should return correct number of rows")
+        self.assertEqual(len(df_new1.columns), 2, "reorder_columns should return correct number of rows")
 
     def test_reorder_columns_no_skip(self):
         try:

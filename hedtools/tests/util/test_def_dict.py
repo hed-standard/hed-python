@@ -32,7 +32,7 @@ class TestDefDict(TestDefBase):
     def_contents_string = "(Item/TestDef1,Item/TestDef2)"
     def_contents_string2 = "(Item/TestDef3,Item/TestDef4)"
     basic_def_string = f"(Definition/TestDef,{def_contents_string})"
-    label_def_string = f"def/TestDef"
+    label_def_string = "def/TestDef"
     expanded_def_string = f"(Def-expand/TestDef,{def_contents_string})"
     basic_hed_string = "Item/BasicTestTag1,Item/BasicTestTag2"
     basic_hed_string_with_def = f"Item/BasicTestTag1,Item/BasicTestTag2,{label_def_string}"

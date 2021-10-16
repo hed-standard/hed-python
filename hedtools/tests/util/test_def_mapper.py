@@ -17,16 +17,16 @@ class Test(unittest.TestCase):
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
         cls.basic_def_string = f"(Definition/TestDef,{cls.def_contents_string})"
         cls.basic_def_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
-        cls.label_def_string = f"Def/TestDef"
+        cls.label_def_string = "Def/TestDef"
         cls.expanded_def_string = f"(Def-expand/TestDef,{cls.def_contents_string})"
         cls.basic_hed_string = "Item/BasicTestTag1,Item/BasicTestTag2"
         cls.basic_hed_string_with_def = f"{cls.basic_hed_string},{cls.label_def_string}"
         cls.basic_hed_string_with_def_first = f"{cls.label_def_string},{cls.basic_hed_string}"
         cls.basic_hed_string_with_def_first_paren = f"({cls.label_def_string},{cls.basic_hed_string})"
-        cls.placeholder_label_def_string = f"def/TestDefPlaceholder/2471"
+        cls.placeholder_label_def_string = "def/TestDefPlaceholder/2471"
         cls.placeholder_def_contents = "(Item/TestDef1/#,Item/TestDef2)"
         cls.placeholder_def_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_def_contents})"
-        cls.placeholder_expanded_def_string = f"(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2))"
+        cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2))"
 
         cls.placeholder_hed_string_with_def = f"{cls.basic_hed_string},{cls.placeholder_label_def_string}"
         cls.placeholder_hed_string_with_def_first = f"{cls.placeholder_label_def_string},{cls.basic_hed_string}"
@@ -175,7 +175,7 @@ class Test(unittest.TestCase):
         def_dict.check_for_definitions(def_string)
         def_mapper = DefinitionMapper(def_dict)
 
-        placeholder_label_def_string_no_placeholder = f"def/TestDefPlaceholder"
+        placeholder_label_def_string_no_placeholder = "def/TestDefPlaceholder"
 
         test_string = HedString(placeholder_label_def_string_no_placeholder)
         test_string.convert_to_canonical_forms(None)
@@ -189,7 +189,7 @@ class Test(unittest.TestCase):
         def_dict.check_for_definitions(def_string)
         def_mapper = DefinitionMapper(def_dict)
 
-        label_def_string_has_inavlid_placeholder = f"def/TestDef/54687"
+        label_def_string_has_inavlid_placeholder = "def/TestDef/54687"
 
         test_string = HedString(label_def_string_has_inavlid_placeholder)
         test_string.convert_to_canonical_forms(None)

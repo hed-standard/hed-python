@@ -8,8 +8,8 @@ setuptools.setup(
     version="1.0.0",
     author="VisLab, Jeremy Cockfield, Alexander Jones, Owen Winterberg, Ian Callanan, Kay Robbins",
     author_email="Kay.Robbins@utsa.edu",
-    description="Utilities for converting among different representations of the HED (Hierarchical Event Descriptor) specification.",
-    #"Python tools used to validate strings and spreadsheets containing tags against a HED (Hierarchical Event Descriptor) schema.",
+    description="Utilities for converting among different representations of the HED " +
+                "(Hierarchical Event Descriptor) specification.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hed-standard/hed-python/hedtools/",
@@ -21,4 +21,3 @@ setuptools.setup(
     ],
     python_requires='>=3.7',
 )
-

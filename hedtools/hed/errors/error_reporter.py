@@ -402,7 +402,7 @@ class ErrorHandler:
     def filter_issues_by_severity(issues_list, severity):
         """
         Gathers all issues matching or below a given severity.
-            
+
         Parameters
         ----------
         issues_list : [{}]
