@@ -38,7 +38,7 @@ class Test(TestHedBase):
             error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(onset_mapper, expand_defs=True)
-            print(str(onset_issues))
+            # print(str(onset_issues))
             issues = self.really_format_errors(error_handler, hed_string=test_string, params=expected_params)
             error_handler.pop_error_context()
             self.assertEqual(len(onset_mapper._onsets), context)
