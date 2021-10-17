@@ -85,19 +85,19 @@ class TestConverterBase(unittest.TestCase):
 
         self.assertEqual(loaded_schema, wiki_schema_copy)
 
-    # def test_wikischema2legacyxml(self):
-    #     if self.can_legacy:
-    #         saved_filename = self.hed_schema_wiki.save_as_xml(save_as_legacy_format=True)
-    #         try:
-    #             loaded_schema = schema.load_schema(saved_filename)
-    #         finally:
-    #             os.remove(saved_filename)
-    #
-    #         wiki_schema_copy = copy.deepcopy(self.hed_schema_wiki)
-    #         self._remove_units_descriptions(wiki_schema_copy)
-    #         wiki_schema_copy.add_hed2_attributes(only_add_if_none_present=False)
-    #         self._remove_unknown_attributes(loaded_schema)
-    #         self.assertEqual(loaded_schema, wiki_schema_copy)
+    def test_wikischema2legacyxml(self):
+        if self.can_legacy:
+            saved_filename = self.hed_schema_wiki.save_as_xml(save_as_legacy_format=True)
+            try:
+                loaded_schema = schema.load_schema(saved_filename)
+            finally:
+                os.remove(saved_filename)
+
+            wiki_schema_copy = copy.deepcopy(self.hed_schema_wiki)
+            self._remove_units_descriptions(wiki_schema_copy)
+            wiki_schema_copy.add_hed2_attributes(only_add_if_none_present=False)
+            self._remove_unknown_attributes(loaded_schema)
+            self.assertEqual(loaded_schema, wiki_schema_copy)
 
     def test_wikischema2wiki(self):
         saved_filename = self.hed_schema_wiki.save_as_mediawiki()

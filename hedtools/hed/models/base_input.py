@@ -10,6 +10,7 @@ from hed.errors.error_types import ErrorContext
 from hed.errors.error_reporter import ErrorHandler
 from hed.models import model_constants
 from hed.models.util import translate_ops
+from hed.models.onset_mapper import OnsetMapper
 
 
 class BaseInput:
@@ -552,6 +553,7 @@ class BaseInput:
         validators = validators.copy()
         if self._def_mapper:
             validators.append(self._def_mapper)
+            validators.append(OnsetMapper(self._def_mapper))
         validation_issues += self._run_validators(validators, error_handler=error_handler, **kwargs)
         error_handler.pop_error_context()
 
