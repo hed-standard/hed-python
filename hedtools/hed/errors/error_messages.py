@@ -6,7 +6,7 @@ Add new errors here, or any other file imported after error_reporter.py.
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
 from hed.errors.error_types import ValidationErrors, SchemaErrors, \
-    SidecarErrors, SchemaWarnings, ErrorSeverity, DefinitionErrors
+    SidecarErrors, SchemaWarnings, ErrorSeverity, DefinitionErrors, OnsetErrors
 
 
 @hed_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
@@ -260,3 +260,37 @@ def def_error_duplicate_definition(def_name):
 @hed_error(DefinitionErrors.TAG_IN_SCHEMA, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
 def def_error_tag_already_in_schema(def_name):
     return f"Term '{def_name}' already used as term in schema and cannot be re-used as a definition.", {}
+
+
+@hed_tag_error(OnsetErrors.ONSET_DEF_UNMATCHED)
+def onset_error_def_unmatched(tag):
+    return f"The def tag in an onset/offset tag is unmatched.  Def tag: '{tag}'", {}
+
+
+@hed_tag_error(OnsetErrors.OFFSET_BEFORE_ONSET)
+def onset_error_offset_before_onset(tag):
+    return f"Offset tag '{tag}' does not have a matching onset.", {}
+
+
+@hed_tag_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND)
+def onset_no_def_found(tag):
+    return f"'{tag}' tag has no def or def-expand tag in string.", {}
+
+
+@hed_tag_error(OnsetErrors.ONSET_TOO_MANY_DEFS)
+def onset_too_many_defs(tag, tag_list):
+    tag_list_strings = [str(tag) for tag in tag_list]
+    return f"Too many def tags found in onset for {tag}.  Expected 1, also found: {tag_list_strings}", {}
+
+
+@hed_tag_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS)
+def onset_too_many_groups(tag, tag_list):
+    tag_list_strings = [str(tag) for tag in tag_list]
+    return f"An onset tag should have at most 2 sibling nodes.  Found {len(tag_list_strings)}: {tag_list_strings}", {}
+
+
+@hed_tag_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG)
+def onset_wrong_placeholder(tag, has_placeholder):
+    if has_placeholder:
+        return f"Onset/offset def tag {tag} expects a placeholder value, but does not have one.", {}
+    return f"Onset/offset def tag {tag} should not have a placeholder, but has one.", {}
