@@ -27,6 +27,9 @@ class DefinitionMapper:
         if def_dicts:
             self.add_definitions(def_dicts)
 
+    def get_def_entry(self, def_name):
+        return self._gathered_defs.get(def_name.lower())
+
     def clear_temporary_definitions(self):
         """
             Removes any previously added temporary definitions
@@ -180,7 +183,7 @@ class DefinitionMapper:
             The contents to replace the previous def-tag with.
         """
         if original_tag.short_base_tag.lower() == DefTagNames.DEF_KEY:
-            is_label_tag = original_tag.extension
+            is_label_tag = original_tag.extension_or_value_portion
             placeholder = None
             found_slash = is_label_tag.find("/")
             if found_slash != -1:
