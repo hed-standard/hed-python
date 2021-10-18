@@ -103,25 +103,9 @@ class HedTag:
     @short_base_tag.setter
     def short_base_tag(self, new_tag_val):
         self._tag = None
-        self._long_tag = f"{new_tag_val}/{self.extension}"
+        self._long_tag = f"{new_tag_val}/{self.extension_or_value_portion}"
         self._short_tag_index = 0
         self._extension_index = len(new_tag_val)
-
-    @property
-    def extension(self):
-        """
-            Returns the long version of the tag, without value or extension
-
-            Note: only valid after calling convert_to_canonical_forms
-        Returns
-        -------
-        base_tag: str
-            The long version of the tag, without value or extension
-        """
-        if self._extension_index is None:
-            return str(self)
-
-        return self._long_tag[self._extension_index + 1:]
 
     @property
     def org_base_tag(self):
