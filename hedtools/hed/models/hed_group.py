@@ -56,7 +56,7 @@ class HedGroup:
         -------
         iterator over the direct children
         """
-        return iter(self._children)
+        return self._children
 
     def get_all_tags(self):
         """
