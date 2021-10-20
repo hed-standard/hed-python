@@ -334,6 +334,56 @@ class HedTag:
             return hed_tag[found_index + len(target_tag_short_name):]
         return None
 
+    def _validate_parent_nodes(self, long_org_tags, main_hed_portion):
+        long_org_tag = None
+        if isinstance(long_org_tags, str):
+            tag_string = long_org_tags.lower()
+
+            # Verify the tag has the correct path above it.
+            if tag_string.endswith(main_hed_portion):
+                long_org_tag = long_org_tags
+        else:
+            for org_tag_string in long_org_tags:
+                tag_string = org_tag_string.lower()
+
+                if tag_string.endswith(main_hed_portion):
+                    long_org_tag = org_tag_string
+                    break
+
+        return long_org_tag
+
+    def _handle_unknown_term(self, hed_schema, term, clean_tag, state):
+        if term not in hed_schema.short_tag_mapping:
+            state["found_unknown_extension"] = True
+            if not state["found_long_org_tag"]:
+                error = ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                  self, index_in_tag=state["index_start"] + state["prefix_tag_adj"],
+                                                  index_in_tag_end=state["index_in_tag_end"] + state["prefix_tag_adj"])
+                return error
+            return None
+
+        long_org_tags = hed_schema.short_tag_mapping[term]
+        long_org_tag = self._validate_parent_nodes(long_org_tags, clean_tag[:state["index_in_tag_end"]])
+        if not long_org_tag:
+            error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=self,
+                                              index_in_tag=state["index_start"] + state["prefix_tag_adj"],
+                                              index_in_tag_end=state["index_in_tag_end"] + state["prefix_tag_adj"],
+                                              expected_parent_tag=long_org_tags)
+            return error
+
+        # In hed2 compatible, reject short tags.
+        if hed_schema._has_duplicate_tags:
+            if not clean_tag.startswith(long_org_tag.lower()):
+                error = ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                  self, index_in_tag=state["index_start"] + state["prefix_tag_adj"],
+                                                  index_in_tag_end=state["index_in_tag_end"] + state["prefix_tag_adj"])
+                return error
+
+        state["found_index_start"] = state["index_start"]
+        state["found_index_end"] = state["index_in_tag_end"]
+        state["found_long_org_tag"] = long_org_tag
+
+
     def _calculate_canonical_forms(self, hed_schema):
         """
         This takes a hed tag(short or long form) and converts it to the long form
@@ -358,76 +408,37 @@ class HedTag:
         clean_tag = self.tag.lower()
         prefix = self.library_prefix
         clean_tag = clean_tag[len(prefix):]
-        prefix_tag_adj = len(prefix)
         split_tags = clean_tag.split("/")
-        found_unknown_extension = False
-        found_index_end = 0
-        found_index_start = 0
-        found_long_org_tag = None
-        index_in_tag_end = 0
-        # Iterate over tags left to right keeping track of current index
-        for tag in split_tags:
-            tag_len = len(tag)
+        state = {}
+        state["found_unknown_extension"] = False
+        state["found_index_end"] = 0
+        state["found_index_start"] = 0
+        state["found_long_org_tag"] = ""
+        state["index_in_tag_end"] = 0
+        state["prefix_tag_adj"] = len(prefix)
+        state["index_start"] = 0
+
+        # Iterate over terms left to right keeping track of current state
+        for term in split_tags:
+            term_len = len(term)
             # Skip slashes
-            if index_in_tag_end != 0:
-                index_in_tag_end += 1
-            index_start = index_in_tag_end
-            index_in_tag_end += tag_len
+            if state["index_in_tag_end"] != 0:
+                state["index_in_tag_end"] += 1
+            state["index_start"] = state["index_in_tag_end"]
+            state["index_in_tag_end"] += term_len
 
             # If we already found an unknown tag, it's implicitly an extension.  No known tags can follow it.
-            if not found_unknown_extension:
-                if tag not in hed_schema.short_tag_mapping:
-                    found_unknown_extension = True
-                    if not found_long_org_tag:
-                        error = ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                          self, index_in_tag=index_start + prefix_tag_adj,
-                                                          index_in_tag_end=index_in_tag_end + prefix_tag_adj)
-                        return str(self), None, None, error
-                    continue
-
-                long_org_tags = hed_schema.short_tag_mapping[tag]
-                long_org_tag = None
-                if isinstance(long_org_tags, str):
-                    tag_string = long_org_tags.lower()
-
-                    main_hed_portion = clean_tag[:index_in_tag_end]
-                    # Verify the tag has the correct path above it.
-                    if tag_string.endswith(main_hed_portion):
-                        long_org_tag = long_org_tags
-                else:
-                    for org_tag_string in long_org_tags:
-                        tag_string = org_tag_string.lower()
-
-                        main_hed_portion = clean_tag[:index_in_tag_end]
-
-                        if tag_string.endswith(main_hed_portion):
-                            long_org_tag = org_tag_string
-                            break
-                if not long_org_tag:
-                    error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=self,
-                                                      index_in_tag=index_start + prefix_tag_adj,
-                                                      index_in_tag_end=index_in_tag_end + prefix_tag_adj,
-                                                      expected_parent_tag=long_org_tags)
+            if not state["found_unknown_extension"]:
+                error = self._handle_unknown_term(hed_schema, term, clean_tag, state)
+                if error:
                     return str(self), None, None, error
-
-                # In hed2 compatible, make sure this is a long form of a tag or throw an invalid base tag error.
-                if hed_schema._has_duplicate_tags:
-                    if not clean_tag.startswith(long_org_tag.lower()):
-                        error = ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                          self, index_in_tag=index_start + prefix_tag_adj,
-                                                          index_in_tag_end=index_in_tag_end + prefix_tag_adj)
-                        return str(self), None, None, error
-
-                found_index_start = index_start
-                found_index_end = index_in_tag_end
-                found_long_org_tag = long_org_tag
             else:
                 # These means we found a known tag in the remainder/extension section, which is an error
-                if tag in hed_schema.short_tag_mapping:
+                if term in hed_schema.short_tag_mapping:
                     error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE, self,
-                                                      index_in_tag=index_start + prefix_tag_adj,
-                                                      index_in_tag_end=index_in_tag_end + prefix_tag_adj,
-                                                      expected_parent_tag=hed_schema.short_tag_mapping[tag])
+                                                      index_in_tag=state["index_start"] + state["prefix_tag_adj"],
+                                                      index_in_tag_end=state["index_in_tag_end"] + state["prefix_tag_adj"],
+                                                      expected_parent_tag=hed_schema.short_tag_mapping[term])
                     return str(self), None, None, error
 
         full_tag_string = self._str_no_long_tag()
@@ -435,12 +446,12 @@ class HedTag:
         full_tag_string = full_tag_string[len(prefix):]
         # Finally don't actually adjust the tag if it's hed2 style.
         if hed_schema._has_duplicate_tags:
-            return full_tag_string, None, found_index_end, []
+            return full_tag_string, None, state["found_index_end"], []
 
-        remainder = full_tag_string[found_index_end:]
-        long_tag_string = found_long_org_tag + remainder
+        remainder = full_tag_string[state["found_index_end"]:]
+        long_tag_string = state["found_long_org_tag"] + remainder
 
         # calculate short_tag index into long tag.
-        found_index_start += (len(long_tag_string) - len(full_tag_string))
-        remainder_start_index = found_index_end + (len(long_tag_string) - len(full_tag_string))
-        return prefix + long_tag_string, found_index_start + prefix_tag_adj, remainder_start_index + prefix_tag_adj, {}
+        state["found_index_start"] += (len(long_tag_string) - len(full_tag_string))
+        remainder_start_index = state["found_index_end"] + (len(long_tag_string) - len(full_tag_string))
+        return prefix + long_tag_string, state["found_index_start"] + state["prefix_tag_adj"], remainder_start_index + state["prefix_tag_adj"], {}
