@@ -286,7 +286,7 @@ def onset_too_many_defs(tag, tag_list):
 @hed_tag_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS)
 def onset_too_many_groups(tag, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
-    return f"An onset tag should have at most 2 sibling nodes.  Found {len(tag_list_strings)}: {tag_list_strings}", {}
+    return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1.  Found {len(tag_list_strings)}: {tag_list_strings}", {}
 
 
 @hed_tag_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG)
