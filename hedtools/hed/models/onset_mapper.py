@@ -40,7 +40,11 @@ class OnsetMapper:
                                              tag_list=[tag for tag in def_tags[1:]])
 
         def_tag = def_tags[0]
-        if len(found_group.get_direct_children()) > 3:
+        children = found_group.get_direct_children()
+        max_children = 3
+        if found_onset.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
+            max_children = 2
+        if len(children) > max_children:
             return ErrorHandler.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS,
                                              def_tag,
                                              found_group.get_direct_children())
