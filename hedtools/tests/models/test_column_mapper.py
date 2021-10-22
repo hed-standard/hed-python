@@ -8,7 +8,7 @@ from hed.models import model_constants
 
 
 class Test(unittest.TestCase):
-    schema_file = '../data/legacy_xml/HED8.0.0-alpha.1.xml'
+    schema_file = '../data/hed_pairs/HED8.0.0.xml'
 
     @classmethod
     def setUpClass(cls):
@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
 
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        cls.basic_events_json = os.path.join(cls.base_data_dir, "both_types_events.json")
+        cls.basic_events_json = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
         cls.basic_event_name = "trial_type"
         cls.basic_event_type = ColumnType.Categorical
         cls.basic_attribute_column = "onset"
@@ -41,9 +41,9 @@ class Test(unittest.TestCase):
             "TestRequiredPrefix/ThisIsAHedTag, (TestRequiredPrefix/NewTag, TestRequiredPrefix/NewTag3)"
         cls.complex_hed_tag_no_prefix = "ThisIsAHedTag,(NewTag,NewTag3)"
 
-        cls.short_tag_key = 'Item/Language/Character/'
+        cls.short_tag_key = 'Item/Language-item/Character/'
         cls.short_tag_with_missing_prefix = "D"
-        cls.short_tag_partial_prefix = 'Language/Character/'
+        cls.short_tag_partial_prefix = 'Language-item/Character/'
         cls.short_tag_partial_prefix2 = 'Character/'
 
     def test_set_column_prefix_dict(self):
@@ -87,25 +87,10 @@ class Test(unittest.TestCase):
         mapper.add_sidecars(self.basic_events_json)
         self.assertTrue(mapper.column_data[self.basic_event_name].column_type == self.basic_event_type)
 
-    # def test_add_value_column(self):
-    #     mapper = ColumnMapper()
-    #     mapper.add_value_column(self.add_column_name, self.hed_string)
-    #     self.assertTrue(len(mapper.column_data) >= 1)
-
     def test_add_attribute_columns(self):
         mapper = ColumnMapper()
         mapper.add_columns([self.add_column_name], ColumnType.Attribute)
         self.assertTrue(len(mapper.column_data) >= 1)
-
-    # def test_add_hedtag_columns(self):
-    #     mapper = ColumnMapper()
-    #     mapper.add_hedtag_columns(self.add_column_name)
-    #     self.assertTrue(len(mapper.column_data) >= 1)
-    #
-    # def test_add_ignore_columns(self):
-    #     mapper = ColumnMapper()
-    #     mapper.add_ignore_columns(self.add_column_name)
-    #     self.assertTrue(len(mapper.column_data) >= 1)
 
     def test__add_single_event_type(self):
         mapper = ColumnMapper()
@@ -197,7 +182,7 @@ class Test(unittest.TestCase):
         hed_schema = load_schema(schema_file)
         prepended_hed_string = ColumnMetadata._prepend_prefix_to_required_tag_column_if_needed(
             HedString(self.short_tag_with_missing_prefix), self.short_tag_key)
-        prepended_hed_string.convert_to_canonical_forms(hed_schema)
+        issues = prepended_hed_string.convert_to_canonical_forms(hed_schema)
         for tag in prepended_hed_string.get_all_tags():
             self.assertEqual("Character/D", tag.short_tag)
 

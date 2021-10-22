@@ -80,7 +80,7 @@ class TagValidator:
              The validation issues associated with the top-level in the HED string.
          """
         validation_issues = []
-        validation_issues += self.check_tag_invalid_chars(original_tag)
+        validation_issues += self.check_tag_invalid_chars(original_tag, allow_placeholders)
         if self._run_semantic_validation:
             validation_issues += self.check_tag_exists_in_schema(original_tag)
             if self._hed_schema.is_unit_class_tag(original_tag):
@@ -256,13 +256,15 @@ class TagValidator:
 
         return validation_issues
 
-    def check_tag_invalid_chars(self, original_tag):
+    def check_tag_invalid_chars(self, original_tag, allow_placeholders):
         """Reports a validation errors for any invalid characters in the given tag.
 
         Parameters
         ----------
         original_tag: HedTag
             The original tag that is used to report the error.
+        allow_placeholders: bool
+            Allow placeholder characters(#) if True
         Returns
         -------
         []
@@ -271,7 +273,8 @@ class TagValidator:
         allowed_chars = self.TAG_ALLOWED_CHARS
         if not self._hed_schema or not self._hed_schema.is_hed3_schema:
             allowed_chars += " "
-        # allowed_chars += "#"
+        if allow_placeholders:
+            allowed_chars += "#"
         return self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
 
     def check_tag_exists_in_schema(self, original_tag):

@@ -11,7 +11,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "legacy_xml/HED8.0.0-alpha.2.xml")
+        hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.base_dict = DefDict()
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
@@ -45,26 +45,32 @@ class Test(unittest.TestCase):
 
         test_string = HedString(self.basic_def_string_no_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_def_string_no_paren)
 
         test_string = HedString(self.basic_hed_string + "," + self.basic_def_string)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.basic_def_string + "," + self.basic_hed_string)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.basic_hed_string_with_def)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string + "," + self.expanded_def_string)
 
         test_string = HedString(self.basic_hed_string_with_def_first)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.expanded_def_string + "," + self.basic_hed_string)
 
         test_string = HedString(self.basic_hed_string_with_def_first_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), "(" + self.expanded_def_string + "," + self.basic_hed_string + ")")
 
     def test_expand_def_tags_no_expand(self):
@@ -76,30 +82,37 @@ class Test(unittest.TestCase):
 
         test_string = HedString(self.basic_def_string)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), "")
 
         test_string = HedString(self.basic_def_string_no_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_def_string_no_paren)
 
         test_string = HedString(self.basic_hed_string + "," + self.basic_def_string)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.basic_def_string + "," + self.basic_hed_string)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.basic_hed_string_with_def)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string_with_def)
 
         test_string = HedString(self.basic_hed_string_with_def_first)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string_with_def_first)
 
         test_string = HedString(self.basic_hed_string_with_def_first_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string_with_def_first_paren)
 
     def test_expand_def_tags_placeholder(self):
@@ -111,29 +124,32 @@ class Test(unittest.TestCase):
 
         test_string = HedString(self.placeholder_def_string)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), "")
-
-        # result_string = def_mapper.expand_def_tags(HedString(self.basic_def_string_no_paren)
-        # self.assertEqual(str(test_string), "")
 
         test_string = HedString(self.basic_hed_string + "," + self.placeholder_def_string)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.placeholder_def_string + "," + self.basic_hed_string)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.placeholder_hed_string_with_def)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string + "," + self.placeholder_expanded_def_string)
 
         test_string = HedString(self.placeholder_hed_string_with_def_first)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.placeholder_expanded_def_string + "," + self.basic_hed_string)
 
         test_string = HedString(self.placeholder_hed_string_with_def_first_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string),
                          "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")")
 
@@ -146,26 +162,32 @@ class Test(unittest.TestCase):
         test_string = HedString(self.placeholder_def_string)
 
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), "")
 
         test_string = HedString(self.basic_hed_string + "," + self.placeholder_def_string)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.placeholder_def_string + "," + self.basic_hed_string)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
         test_string = HedString(self.placeholder_hed_string_with_def)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.placeholder_hed_string_with_def)
 
         test_string = HedString(self.placeholder_hed_string_with_def_first)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.placeholder_hed_string_with_def_first)
 
         test_string = HedString(self.placeholder_hed_string_with_def_first_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.placeholder_hed_string_with_def_first_paren)
 
     def test_expand_def_tags_placeholder_invalid(self):

@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.default_test_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                  "../data/ExcelMultipleSheets.xlsx")
+                                                  "../data/validator_tests/ExcelMultipleSheets.xlsx")
         cls.generic_file_input = HedInput(cls.default_test_file_name)
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
         cls.one_based_tag_columns = [1, 2, 3]
@@ -59,9 +59,10 @@ class Test(unittest.TestCase):
         self.assertTrue(column_to_hed_tags_dictionary)
 
     def test_file_as_string(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/validator_tests/bids_events.tsv')
 
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate_entries(expand_defs=True)), 0)
         input_file = EventsInput(events_path, sidecars=sidecar)
@@ -120,8 +121,9 @@ class Test(unittest.TestCase):
         self.assertTrue(test_input_file._dataframe.equals(reloaded_input._dataframe))
 
     def test_loading_and_reset_mapper(self):
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/bids_events.json")
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/validator_tests/bids_events.tsv')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate_entries()), 0)
         input_file_1 = EventsInput(events_path, sidecars=sidecar)

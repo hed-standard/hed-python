@@ -1,23 +1,13 @@
 import unittest
 import os
 
-from hed import schema
 from hed.models.def_dict import DefDict
-from hed.errors import error_reporter
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import DefinitionErrors
 from hed.models.hed_string import HedString
 
 
 class TestDefBase(unittest.TestCase):
-    schema_file = '../data/legacy_xml/HED8.0.0-alpha.1.xml'
-
-    @classmethod
-    def setUpClass(cls):
-        cls.error_handler = error_reporter.ErrorHandler()
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
-        cls.hed_schema = schema.load_schema(hed_xml)
-
     def check_def_base(self, test_strings, expected_issues):
         for test_key in test_strings:
             def_dict = DefDict()
