@@ -39,7 +39,7 @@ class Test(TestHedBase):
             error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(onset_mapper, expand_defs=True)
-            # print(str(onset_issues))
+            print(str(onset_issues))
             issues = self.really_format_errors(error_handler, hed_string=test_string, params=expected_params)
             error_handler.pop_error_context()
             self.assertEqual(len(onset_mapper._onsets), context)
@@ -52,8 +52,8 @@ class Test(TestHedBase):
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(validators, expand_defs=True)
             issues = self.really_format_errors(error_handler, hed_string=test_string, params=expected_params)
-            # print(str(onset_issues))
-            # print(str(issues))
+            print(str(onset_issues))
+            print(str(issues))
             error_handler.pop_error_context()
             self.assertCountEqual(onset_issues, issues)
 
@@ -149,7 +149,8 @@ class Test(TestHedBase):
             self.format_error_but_not_really(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
             self.format_error_but_not_really(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list= ['def/InvalidDef']),
             self.format_error_but_not_really(OnsetErrors.ONSET_DEF_UNMATCHED, tag=0),
-            self.format_error_but_not_really(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True)
+            self.format_error_but_not_really(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
+            self.format_error_but_not_really(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=False)
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, onset_mapper)
@@ -227,14 +228,11 @@ class Test(TestHedBase):
         hed_validator = HedValidator(hed_schema=self.hed_schema, check_for_warnings=False)
         validators = [hed_validator, def_mapper, onset_mapper]
 
-
         test_strings = [
             f"{self.placeholder_label_def_string},Onset",
             f"({self.placeholder_label_def_string},Onset, Onset)",
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
-        # count of how many onset names are in the mapper after the line is run
-
         # count of issues the line generates
         test_issues = [
             self.format_error_but_not_really(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
@@ -247,6 +245,59 @@ class Test(TestHedBase):
 
         self._test_issues_no_context(test_strings, test_issues, validators)
 
+        test_issues = [
+            self.format_error_but_not_really(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+            self.format_error_but_not_really(ValidationErrors.HED_TAG_REPEATED, tag=2)
+            + self.format_error_but_not_really(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1,
+                                               multiple_tags=['Property/Data-property/Data-marker/Temporal-marker/Onset']),
+            self.format_error_but_not_really(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1,
+                                             multiple_tags=['Property/Data-property/Data-marker/Temporal-marker/Offset']),
+        ]
+
+        # Repeat with just hed validator
+        self._test_issues_no_context(test_strings, test_issues, hed_validator)
+
+    def test_onset_multiple_or_misplaced_errors_no_validator(self):
+        def_dict = DefDict()
+        def_string = HedString(self.placeholder_definition_string)
+        def_string.validate(def_dict)
+        def_string = HedString(self.definition_string)
+        def_string.validate(def_dict)
+        def_mapper = DefinitionMapper(def_dict)
+        onset_mapper = OnsetMapper(def_mapper)
+        validators = [def_mapper, onset_mapper]
+
+        test_strings = [
+            f"{self.placeholder_label_def_string},Onset",
+            f"({self.placeholder_label_def_string},Onset, Onset)",
+            f"({self.placeholder_label_def_string},Onset, Offset)",
+            f"({self.placeholder_label_def_string},Onset, Event)",
+        ]
+        # count of issues the line generates
+        test_issues = [
+            [],
+            self.format_error_but_not_really(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=4,
+                                             def_tag="Def-expand/TestDefPlaceholder/2471"),
+            self.format_error_but_not_really(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=4,
+                                             def_tag="Def-expand/TestDefPlaceholder/2471"),
+            self.format_error_but_not_really(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=4,
+                                             def_tag="Def-expand/TestDefPlaceholder/2471"),
+        ]
+
+        self._test_issues_no_context(test_strings, test_issues, validators)
+
+        # Verify it also works without def mapping
+        test_issues = [
+            [],
+            self.format_error_but_not_really(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2,
+                                             def_tag=self.placeholder_label_def_string),
+            self.format_error_but_not_really(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2,
+                                             def_tag=self.placeholder_label_def_string),
+            self.format_error_but_not_really(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2,
+                                             def_tag=self.placeholder_label_def_string),
+        ]
+
+        self._test_issues_no_context(test_strings, test_issues, validators[1])
 
 if __name__ == '__main__':
     unittest.main()
