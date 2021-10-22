@@ -5,7 +5,7 @@ from tests.validator.test_tag_validator_base import TestValidatorBase
 
 
 class TestHed3(TestValidatorBase):
-    schema_file = "../data/HED8.0.0-alpha.3_add_currency.xml"
+    schema_file = "../data/validator_tests/HED8.0.0-alpha.3_add_currency.xml"
 
 
 class IndividualHedTagsShort(TestHed3):

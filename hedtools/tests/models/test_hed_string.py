@@ -1,10 +1,8 @@
 from hed.models.hed_string import HedString
 import unittest
 
-from tests.validator.test_tag_validator import TestHed3
 
-
-class TestHedStrings(TestHed3):
+class TestHedStrings(unittest.TestCase):
     def validator_scalar(self, test_strings, expected_results, test_function):
         for test_key in test_strings:
             test_result = test_function(test_strings[test_key])
@@ -18,7 +16,7 @@ class TestHedStrings(TestHed3):
             self.assertCountEqual(test_result, expected_result, test_strings[test_key])
 
 
-class TestHedString(TestHed3):
+class TestHedString(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         pass
@@ -59,12 +57,12 @@ class HedTagLists(TestHedStrings):
         result = HedString.split_hed_string_into_groups(hed_string)
         self.assertIsInstance(result, list)
 
-    # def test_top_level_tags(self):
-    #     hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
-    #     result = HedString.split_hed_string_into_groups(hed_string)
-    #     tags_as_strings = [str(tag) for tag in result.get_all_tags()]
-    #     self.assertCountEqual(tags_as_strings, ['Event/Category/Experimental stimulus', 'Item/Object/Vehicle/Train',
-    #                                    'Attribute/Visual/Color/Purple'])
+    def test_top_level_tags(self):
+        hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
+        result = HedString.split_hed_string_into_groups(hed_string)
+        tags_as_strings = [str(tag) for tag in result]
+        self.assertCountEqual(tags_as_strings, ['Event/Category/Experimental stimulus', 'Item/Object/Vehicle/Train',
+                                       'Attribute/Visual/Color/Purple'])
 
     def test_group_tags(self):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
@@ -77,7 +75,8 @@ class HedTagLists(TestHedStrings):
                                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',
                                '/Attribute/Location/Screen/Top/70 px', '/Attribute/Location/Screen/Left/23 px'])
 
-    # Update test - verify how double quote should be handled
+    # Potentially restore some similar behavior later if desired.
+    # We no longer automatically remove things like quotes.
     # def test_double_quotes(self):
     #     double_quote_string = 'Event/Category/Experimental stimulus,"Item/Object/Vehicle/Train",' \
     #                           'Attribute/Visual/Color/Purple '
@@ -117,46 +116,6 @@ class HedTagLists(TestHedStrings):
 
 
 class ProcessedHedTags(TestHedStrings):
-    # Update Test - These are mostly no longer relevant
-    # def test_formatted_tags(self):
-    #     formatted_hed_tag = 'event/category/experimental stimulus'
-    #     test_strings = {
-    #         'formatted': 'event/category/experimental stimulus',
-    #         'openingDoubleQuote': '"Event/Category/Experimental stimulus',
-    #         'closingDoubleQuote': 'Event/Category/Experimental stimulus"',
-    #         'openingAndClosingDoubleQuote': '"Event/Category/Experimental stimulus"',
-    #         'openingSlash': '/Event/Category/Experimental stimulus',
-    #         'closingSlash': 'Event/Category/Experimental stimulus/',
-    #         'openingAndClosingSlash': '/Event/Category/Experimental stimulus/',
-    #         'openingDoubleQuotedSlash': '"/Event/Category/Experimental stimulus',
-    #         'closingDoubleQuotedSlash': 'Event/Category/Experimental stimulus/"',
-    #         'openingSlashClosingDoubleQuote':
-    #             '/Event/Category/Experimental stimulus"',
-    #         'closingSlashOpeningDoubleQuote':
-    #             '"Event/Category/Experimental stimulus/',
-    #         'openingAndClosingDoubleQuotedSlash':
-    #             '"/Event/Category/Experimental stimulus/"',
-    #     }
-    #     expected_results = {
-    #         'formatted': formatted_hed_tag,
-    #         'openingDoubleQuote': formatted_hed_tag,
-    #         'closingDoubleQuote': formatted_hed_tag,
-    #         'openingAndClosingDoubleQuote': formatted_hed_tag,
-    #         'openingSlash': formatted_hed_tag,
-    #         'closingSlash': formatted_hed_tag,
-    #         'openingAndClosingSlash': formatted_hed_tag,
-    #         'openingDoubleQuotedSlash': formatted_hed_tag,
-    #         'closingDoubleQuotedSlash': formatted_hed_tag,
-    #         'openingSlashClosingDoubleQuote': formatted_hed_tag,
-    #         'closingSlashOpeningDoubleQuote': formatted_hed_tag,
-    #         'openingAndClosingDoubleQuotedSlash': formatted_hed_tag,
-    #     }
-    #
-    #     def test_function(string):
-    #         return HedString.format_hed_tag(string)
-    #
-    #     self.validator_scalar(test_strings, expected_results, test_function)
-
     def test_parsed_tags(self):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
                      '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
