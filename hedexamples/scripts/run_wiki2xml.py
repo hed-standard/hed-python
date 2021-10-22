@@ -7,8 +7,7 @@ schema.convert_schema_to_format - Converts hed schema from given url or filename
 hed.get_printable_issue_string - method that converts the list of issues to a human readable form.
 """
 from shutil import move
-from hed.errors.error_reporter import get_printable_issue_string
-from hed import schema
+from hed import get_printable_issue_string, schema
 from hed.util.file_util import write_strings_to_file
 
 

@@ -1,15 +1,10 @@
 import unittest
 import os
 
-from hed.models.def_mapper import DefinitionMapper
-from hed.models.onset_mapper import OnsetMapper
-from hed import schema
-from hed.models.def_dict import DefDict
-from hed.models.hed_string import HedString
-from hed.errors.error_reporter import ErrorHandler
-from hed.errors.error_types import OnsetErrors, ErrorContext, ValidationErrors
+from hed.models import DefinitionMapper, OnsetMapper, DefDict
+from hed import schema, HedString, HedValidator
+from hed.errors import ErrorHandler, OnsetErrors, ErrorContext, ValidationErrors
 from tests.validator.test_tag_validator_base import TestHedBase
-from hed import HedValidator
 
 
 class Test(TestHedBase):

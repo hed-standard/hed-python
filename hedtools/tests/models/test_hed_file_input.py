@@ -2,11 +2,7 @@ import unittest
 import os
 import io
 
-from hed.models.hed_input import HedInput
-from hed.models.hed_string import HedString
-from hed.models.sidecar import Sidecar
-from hed.models.events_input import EventsInput
-from hed.errors.exceptions import HedFileError
+from hed import HedInput, HedString, Sidecar, EventsInput, HedFileError
 import shutil
 
 

@@ -1,12 +1,11 @@
 import unittest
-from hed.errors import error_reporter
-from hed.errors.error_types import ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings
+from hed.errors import ErrorHandler, ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.error_handler = error_reporter.ErrorHandler()
+        cls.error_handler = ErrorHandler()
         pass
 
     def test_push_error_context(self):

@@ -1,9 +1,7 @@
 import unittest
 
-from hed.errors import error_reporter
-from hed.models.hed_string import HedString
-from hed.errors.error_types import ValidationErrors
-from hed.errors.error_types import ErrorContext
+from hed import HedString
+from hed.errors import ValidationErrors, ErrorContext, ErrorHandler
 from tests.validator.test_tag_validator_base import TestHedBase
 
 
@@ -15,7 +13,7 @@ class TestConvertTag(TestTagFormat):
     def converter_base(self, test_strings, expected_results, expected_errors, convert_to_short=True):
         for test_key in test_strings:
             test_string_obj = HedString(test_strings[test_key])
-            error_handler = error_reporter.ErrorHandler()
+            error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string_obj, increment_depth_after=False)
             test_issues = test_string_obj.convert_to_canonical_forms(self.hed_schema)
             if convert_to_short:

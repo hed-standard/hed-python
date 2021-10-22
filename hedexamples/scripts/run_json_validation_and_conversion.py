@@ -10,11 +10,7 @@ HedSchema - Opens a hed xml schema.  Used by other tools to check tag attributes
 Sidecar - Contains the data from a single json sidecar, can be validated using a HedSchema.
 HedString - Main class for handling a hed string during processing and analysis
 """
-from hed.errors.error_reporter import get_printable_issue_string
-from hed.models.sidecar import Sidecar
-from hed.models.hed_string import HedString
-from hed.schema.hed_schema_file import load_schema
-from hed.validator.hed_validator import HedValidator
+from hed import get_printable_issue_string, Sidecar, HedString, load_schema, HedValidator
 
 if __name__ == '__main__':
     local_hed_xml = "../data/HED8.0.0-alpha.1.xml"

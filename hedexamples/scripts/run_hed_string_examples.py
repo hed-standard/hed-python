@@ -5,10 +5,7 @@ Classes Demonstrated:
 HedValidator - Validates a given input string or file
 """
 
-from hed.errors.error_reporter import get_printable_issue_string
-from hed import schema
-from hed.models.hed_string import HedString
-from hed.validator.hed_validator import HedValidator
+from hed import schema, get_printable_issue_string, HedString, HedValidator
 
 if __name__ == '__main__':
     local_hed_file = '../data/HED7.1.1.xml'   # path HED v7.1.1 stored locally
