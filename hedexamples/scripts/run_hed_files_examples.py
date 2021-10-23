@@ -9,11 +9,7 @@ HedFileError - Exception thrown when a file cannot be opened.(parsing error, fil
 """
 
 import os
-from hed.errors.error_reporter import get_printable_issue_string
-from hed.validator.hed_validator import HedValidator
-from hed.models.hed_input import HedInput
-from hed.errors.exceptions import HedFileError
-from hed import schema
+from hed import schema, get_printable_issue_string, HedValidator, HedInput, HedFileError
 
 
 if __name__ == '__main__':

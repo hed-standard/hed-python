@@ -1,10 +1,8 @@
 import unittest
 import os
 
-from hed.models.def_mapper import DefinitionMapper
-from hed import schema
-from hed.models.def_dict import DefDict
-from hed.models.hed_string import HedString
+from hed import schema, HedString
+from hed.models import DefDict, DefinitionMapper
 
 
 class Test(unittest.TestCase):

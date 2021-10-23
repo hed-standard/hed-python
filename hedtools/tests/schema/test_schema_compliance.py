@@ -2,9 +2,7 @@ import unittest
 import os
 from hed.schema import schema_compliance
 from hed import schema
-from hed.errors import error_reporter
-from hed.errors.error_reporter import ErrorHandler
-from hed.errors.error_types import SchemaWarnings
+from hed.errors import ErrorHandler, SchemaWarnings
 
 
 class Test(unittest.TestCase):
@@ -13,7 +11,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.error_handler = error_reporter.ErrorHandler()
+        cls.error_handler = ErrorHandler()
         cls.schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
 
     def validate_term_base(self, input_text, expected_issues):

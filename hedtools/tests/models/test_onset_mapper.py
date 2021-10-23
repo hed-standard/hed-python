@@ -1,15 +1,10 @@
 import unittest
 import os
 
-from hed.models.def_mapper import DefinitionMapper
-from hed.models.onset_mapper import OnsetMapper
-from hed import schema
-from hed.models.def_dict import DefDict
-from hed.models.hed_string import HedString
-from hed.errors.error_reporter import ErrorHandler
-from hed.errors.error_types import OnsetErrors, ErrorContext, ValidationErrors
+from hed.models import DefinitionMapper, OnsetMapper, DefDict
+from hed import schema, HedString, HedValidator
+from hed.errors import ErrorHandler, OnsetErrors, ErrorContext, ValidationErrors
 from tests.validator.test_tag_validator_base import TestHedBase
-from hed import HedValidator
 
 
 class Test(TestHedBase):
@@ -39,7 +34,7 @@ class Test(TestHedBase):
             error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(onset_mapper, expand_defs=True)
-            print(str(onset_issues))
+            # print(str(onset_issues))
             issues = self.really_format_errors(error_handler, hed_string=test_string, params=expected_params)
             error_handler.pop_error_context()
             self.assertEqual(len(onset_mapper._onsets), context)
@@ -52,8 +47,8 @@ class Test(TestHedBase):
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(validators, expand_defs=True)
             issues = self.really_format_errors(error_handler, hed_string=test_string, params=expected_params)
-            print(str(onset_issues))
-            print(str(issues))
+            # print(str(onset_issues))
+            # print(str(issues))
             error_handler.pop_error_context()
             self.assertCountEqual(onset_issues, issues)
 
