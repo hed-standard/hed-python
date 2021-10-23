@@ -16,7 +16,6 @@ local_hed_file_no_dupe = '../data/HED8.0.0-alpha.1.xml'
 def long_to_short_file(input_file, output_filename, hed_schema, error_handler=None):
     error_list = input_file.convert_to_short(hed_schema, error_handler)
     input_file.to_excel(output_filename, )
-    input_file.to_csv(output_filename, )
     return input_file, error_list
 
 
