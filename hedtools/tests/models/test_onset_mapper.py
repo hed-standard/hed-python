@@ -34,7 +34,7 @@ class Test(TestHedBase):
             error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(onset_mapper, expand_defs=True)
-            # print(str(onset_issues))
+            print(str(onset_issues))
             issues = self.really_format_errors(error_handler, hed_string=test_string, params=expected_params)
             error_handler.pop_error_context()
             self.assertEqual(len(onset_mapper._onsets), context)
@@ -47,8 +47,8 @@ class Test(TestHedBase):
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(validators, expand_defs=True)
             issues = self.really_format_errors(error_handler, hed_string=test_string, params=expected_params)
-            # print(str(onset_issues))
-            # print(str(issues))
+            print(str(onset_issues))
+            print(str(issues))
             error_handler.pop_error_context()
             self.assertCountEqual(onset_issues, issues)
 
@@ -293,6 +293,45 @@ class Test(TestHedBase):
         ]
 
         self._test_issues_no_context(test_strings, test_issues, validators[1])
+
+    def test_onset_two_in_one_line(self):
+        def_dict = DefDict()
+        def_string = HedString(self.placeholder_definition_string)
+        def_string.validate(def_dict)
+        def_string = HedString(self.definition_string)
+        def_string.validate(def_dict)
+        def_mapper = DefinitionMapper(def_dict)
+        onset_mapper = OnsetMapper(def_mapper)
+
+        test_strings = [
+            f"({self.placeholder_label_def_string},Onset), ({self.placeholder_label_def_string2},Onset)",
+            f"({self.placeholder_label_def_string2},Offset)",
+            f"({self.placeholder_label_def_string},Offset)",
+            f"({self.placeholder_label_def_string},Onset)",
+            f"({self.placeholder_label_def_string},Offset), ({self.placeholder_label_def_string2},Onset)",
+            f"({self.placeholder_label_def_string},Onset), ({self.placeholder_label_def_string},Onset)",
+        ]
+        # count of how many onset names are in the mapper after the line is run
+        expected_context = [
+            2,
+            1,
+            0,
+            1,
+            1,
+            2
+        ]
+        # count of issues the line generates
+        test_issues = [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ]
+
+        self._test_issues_base(test_strings, test_issues, expected_context, onset_mapper)
+
 
 if __name__ == '__main__':
     unittest.main()
