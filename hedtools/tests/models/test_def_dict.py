@@ -1,9 +1,7 @@
 import unittest
-import os
 
 from hed.models.def_dict import DefDict
-from hed.errors.error_reporter import ErrorHandler
-from hed.errors.error_types import DefinitionErrors
+from hed.errors import ErrorHandler, DefinitionErrors
 from hed.models.hed_string import HedString
 
 

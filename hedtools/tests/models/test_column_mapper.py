@@ -2,8 +2,7 @@ import unittest
 import os
 
 from hed.models.column_mapper import ColumnMapper, ColumnType, ColumnMetadata
-from hed.models.hed_string import HedString
-from hed.schema import load_schema
+from hed import HedString, load_schema
 from hed.models import model_constants
 
 

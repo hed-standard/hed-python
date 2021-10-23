@@ -1,11 +1,8 @@
 import unittest
 import os
 
-from hed import schema
-from hed.schema import HedKey, HedSectionKey
-from hed.errors.exceptions import HedFileError
-from hed.models.hed_string import HedString
-from hed.schema.hed_tag import HedTag
+from hed import schema, HedFileError, HedString
+from hed.schema import HedKey, HedSectionKey, HedTag
 from tests.validator.test_tag_validator_2g import TestHed
 
 

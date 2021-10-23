@@ -1,12 +1,9 @@
 import unittest
 import os
-
-from hed.models.sidecar import Sidecar
-from hed.models.column_metadata import ColumnMetadata
-from hed.errors.exceptions import HedFileError
-from hed.validator.hed_validator import HedValidator
-from hed import schema
 import io
+
+from hed import Sidecar, HedFileError, HedValidator, schema
+from hed.models.column_metadata import ColumnMetadata
 
 
 class Test(unittest.TestCase):
