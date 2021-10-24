@@ -80,6 +80,8 @@ class HedSchema:
         -------
         schema: HedSchema
         """
+        if self._library_prefix != prefix:
+            return None
         return self
 
     @property
