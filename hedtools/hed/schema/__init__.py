@@ -1,4 +1,5 @@
 from .hed_schema import HedSchema
+from .hed_schema_group import HedSchemaGroup
 from .hed_schema_file import load_schema, load_schema_version, from_string, get_hed_xml_version, \
     convert_schema_to_format
 from .hed_schema_constants import HedKey, HedSectionKey
