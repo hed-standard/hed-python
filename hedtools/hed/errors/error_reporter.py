@@ -90,7 +90,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
                 Parameters
                 ----------
-                tag: HedTag or str
+                tag: HedTag
                     The hed tag object with the problem
                 index_in_tag: int,
                     The index into the tag with a problem(usually 0)

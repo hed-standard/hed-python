@@ -19,7 +19,7 @@ class TestDefBase(unittest.TestCase):
 class TestDefDict(TestDefBase):
     def_contents_string = "(Item/TestDef1,Item/TestDef2)"
     def_contents_string2 = "(Item/TestDef3,Item/TestDef4)"
-    basic_def_string = f"(Definition/TestDef,{def_contents_string})"
+    basic_definition_string = f"(Definition/TestDef,{def_contents_string})"
     label_def_string = "def/TestDef"
     expanded_def_string = f"(Def-expand/TestDef,{def_contents_string})"
     basic_hed_string = "Item/BasicTestTag1,Item/BasicTestTag2"
@@ -31,7 +31,7 @@ class TestDefDict(TestDefBase):
     def test_check_for_definitions(self):
         def_dict = DefDict()
         original_def_count = len(def_dict._defs)
-        hed_string_obj = HedString(self.basic_def_string)
+        hed_string_obj = HedString(self.basic_definition_string)
         hed_string_obj.validate(def_dict)
         new_def_count = len(def_dict._defs)
         self.assertGreater(new_def_count, original_def_count)
