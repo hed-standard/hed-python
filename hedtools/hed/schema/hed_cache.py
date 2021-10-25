@@ -11,7 +11,6 @@ import portalocker
 import time
 from hed.util.file_util import url_to_file
 
-# Todo: Update doc strings in this file
 
 # From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 HED_VERSION_P1 = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"
@@ -19,7 +18,7 @@ HED_VERSION_P2 = r"(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)" 
                  r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
 HED_VERSION_P3 = r"(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
 # Actual local hed filename re.
-HED_VERSION_FINAL = '^[hH][eE][dD](' + HED_VERSION_P1 + HED_VERSION_P2 + HED_VERSION_P3 + ')\.[xX][mM][lL]$'
+HED_VERSION_FINAL = r'^[hH][eE][dD](' + HED_VERSION_P1 + HED_VERSION_P2 + HED_VERSION_P3 + r')\.[xX][mM][lL]$'
 
 HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
