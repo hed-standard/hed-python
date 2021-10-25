@@ -216,66 +216,6 @@ class ErrorHandler:
     def get_error_context_copy(self):
         return copy.copy(self.error_context)
 
-    @staticmethod
-    def _add_context_to_errors(error_object, error_context_to_add):
-        """
-        Takes an error object and adds relevant context around it, such as row number, or column name.
-
-        Parameters
-        ----------
-        error_object : {}
-            Generated error containing at least a code and message entry.
-        error_context_to_add: []
-            Source context to use.  If none, gets it from the error handler directly at this time.
-        Returns
-        -------
-        error_object_list: [{}]
-            The passed in error with any needed context strings added to the start.
-        """
-        if error_object is None:
-            error_object = {}
-        for (context_type, context, increment_count) in error_context_to_add:
-            error_object[context_type] = (context, increment_count)
-
-        return error_object
-
-    @staticmethod
-    def _create_error_object(error_type, base_message, severity, **kwargs):
-        if severity == ErrorSeverity.ERROR:
-            error_prefix = "ERROR: "
-        else:
-            error_prefix = "WARNING: "
-        error_message = error_prefix + base_message
-        error_object = {'code': error_type,
-                        'message': error_message,
-                        'severity': severity
-                        }
-
-        for key, value in kwargs.items():
-            error_object.setdefault(key, value)
-
-        return error_object
-
-    @staticmethod
-    def _get_tag_span_to_error_object(error_object):
-        if ErrorContext.HED_STRING not in error_object:
-            return None, None
-
-        if 'char_index' in error_object:
-            char_index = error_object['char_index']
-            char_index_end = error_object.get('char_index_end', char_index + 1)
-            return char_index, char_index_end
-        elif 'source_tag' in error_object:
-            source_tag = error_object['source_tag']
-            if isinstance(source_tag, int):
-                return None, None
-        else:
-            return None, None
-
-        hed_string = error_object[ErrorContext.HED_STRING][0]
-        span = hed_string._get_org_span(source_tag)
-        return span
-
     def format_error_with_context(self, *args, **kwargs):
         error_object = ErrorHandler.format_error(*args, **kwargs)
         if self is not None:
@@ -376,6 +316,66 @@ class ErrorHandler:
         return error_object_list
 
     @staticmethod
+    def _add_context_to_errors(error_object, error_context_to_add):
+        """
+        Takes an error object and adds relevant context around it, such as row number, or column name.
+
+        Parameters
+        ----------
+        error_object : {}
+            Generated error containing at least a code and message entry.
+        error_context_to_add: []
+            Source context to use.  If none, gets it from the error handler directly at this time.
+        Returns
+        -------
+        error_object_list: [{}]
+            The passed in error with any needed context strings added to the start.
+        """
+        if error_object is None:
+            error_object = {}
+        for (context_type, context, increment_count) in error_context_to_add:
+            error_object[context_type] = (context, increment_count)
+
+        return error_object
+
+    @staticmethod
+    def _create_error_object(error_type, base_message, severity, **kwargs):
+        if severity == ErrorSeverity.ERROR:
+            error_prefix = "ERROR: "
+        else:
+            error_prefix = "WARNING: "
+        error_message = error_prefix + base_message
+        error_object = {'code': error_type,
+                        'message': error_message,
+                        'severity': severity
+                        }
+
+        for key, value in kwargs.items():
+            error_object.setdefault(key, value)
+
+        return error_object
+
+    @staticmethod
+    def _get_tag_span_to_error_object(error_object):
+        if ErrorContext.HED_STRING not in error_object:
+            return None, None
+
+        if 'char_index' in error_object:
+            char_index = error_object['char_index']
+            char_index_end = error_object.get('char_index_end', char_index + 1)
+            return char_index, char_index_end
+        elif 'source_tag' in error_object:
+            source_tag = error_object['source_tag']
+            if isinstance(source_tag, int):
+                return None, None
+        else:
+            return None, None
+
+        hed_string = error_object[ErrorContext.HED_STRING][0]
+        span = hed_string._get_org_span(source_tag)
+        return span
+
+    @staticmethod
     def _update_error_with_char_pos(error_object):
         # This part is optional as you can always generate these as needed.
         start, end = ErrorHandler._get_tag_span_to_error_object(error_object)
@@ -396,6 +396,18 @@ class ErrorHandler:
 
     @hed_error("Unknown")
     def val_error_unknown(*args, **kwargs):
+        """
+        Default error handler if no error of this type was registered.
+
+        Parameters
+        ----------
+        args : varies
+        kwargs : varies
+
+        Returns
+        -------
+        error_message, extra_error_args: str, dict
+        """
         return f"Unknown error.  Args: {str(args)}", kwargs
 
     @staticmethod

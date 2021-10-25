@@ -1,5 +1,5 @@
 from hed.models.model_constants import DefTagNames
-from hed.models.hed_group import HedTag
+from hed.models.hed_group import HedTag, HedGroup
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import OnsetErrors
 
@@ -8,6 +8,7 @@ class OnsetMapper:
     """
         Validator responsible for matching onset offset pairs up
     """
+
     def __init__(self, def_mapper):
         self._def_mapper = def_mapper
         self._onsets = {}
@@ -25,53 +26,73 @@ class OnsetMapper:
         onset_issues: [{}]
             Issues found validating onsets.  Out of order onsets, unknown def names, etc.
         """
-        found_onset, found_group = self._find_onset_tag(hed_string_obj)
+        onset_issues = []
+        for found_onset, found_group in self._find_onset_tags(hed_string_obj):
+            if not found_onset:
+                return []
 
-        if not found_onset:
-            return []
+            def_tags, def_groups = self._find_def_tags(found_group)
+            if not def_tags:
+                onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, found_onset)
+                continue
 
-        def_tags = self._find_def_tags(found_group)
-        if not def_tags:
-            return ErrorHandler.format_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, found_onset)
+            if len(def_tags) > 1:
+                onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_TOO_MANY_DEFS,
+                                                          tag=def_tags[0],
+                                                          tag_list=[tag for tag in def_tags[1:]])
+                continue
 
-        if len(def_tags) > 1:
-            return ErrorHandler.format_error(OnsetErrors.ONSET_TOO_MANY_DEFS,
-                                             tag=def_tags[0],
-                                             tag_list=[tag for tag in def_tags[1:]])
+            def_tag = def_tags[0]
+            def_group = def_groups[0]
+            children = [child for child in found_group.get_direct_children() if
+                        def_group != child and found_onset != child]
+            max_children = 1
+            if found_onset.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
+                max_children = 0
+            if len(children) > max_children:
+                onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS,
+                                                          def_tag,
+                                                          found_group.get_direct_children())
+                continue
 
-        def_tag = def_tags[0]
-        children = found_group.get_direct_children()
-        max_children = 3
-        if found_onset.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
-            max_children = 2
-        if len(children) > max_children:
-            return ErrorHandler.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS,
-                                             def_tag,
-                                             found_group.get_direct_children())
-        # At this point we have either an onset or offset tag and it's name
-        return self._handle_onset_or_offset(def_tag, found_onset)
+            if children:
+                # Make this a loop if max_children can be > 1
+                child = children[0]
+                if not isinstance(child, HedGroup):
+                    onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP,
+                                                              child,
+                                                              def_tag)
 
-    def _find_onset_tag(self, hed_string_obj):
+            # At this point we have either an onset or offset tag and it's name
+            onset_issues += self._handle_onset_or_offset(def_tag, found_onset)
+
+        return onset_issues
+
+    def _find_onset_tags(self, hed_string_obj):
         for group in hed_string_obj.groups():
             for tag in group.tags():
                 if tag.short_base_tag.lower() == DefTagNames.ONSET_KEY \
                         or tag.short_base_tag.lower() == DefTagNames.OFFSET_KEY \
                         and not tag.extension_or_value_portion:
-                    return tag, group
-        return None, None
+                    yield tag, group
+                    # only return one onset tag per group
+                    break
 
     def _find_def_tags(self, onset_group):
         def_tags = []
+        def_groups = []
         for child in onset_group.get_direct_children():
             if isinstance(child, HedTag):
                 if child.short_base_tag.lower() == DefTagNames.DEF_KEY:
                     def_tags.append(child)
+                    def_groups.append(child)
             else:
                 for tag in child.tags():
                     if tag.short_base_tag.lower() == DefTagNames.DEF_EXPAND_KEY:
                         def_tags.append(tag)
+                        def_groups.append(child)
 
-        return def_tags
+        return def_tags, def_groups
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
         is_onset = onset_offset_tag.short_base_tag.lower() == DefTagNames.ONSET_KEY

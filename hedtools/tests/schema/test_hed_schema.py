@@ -1,18 +1,15 @@
 import unittest
 import os
 
-from hed import schema
-from hed.schema import HedKey, HedSectionKey
-from hed.errors.exceptions import HedFileError
-from hed.models.hed_string import HedString
-from hed.schema.hed_tag import HedTag
+from hed import schema, HedFileError, HedString
+from hed.schema import HedKey, HedSectionKey, HedTag
 from tests.validator.test_tag_validator_2g import TestHed
 
 
 class TestHedSchema(unittest.TestCase):
     schema_file = '../data/legacy_xml/HED7.1.1.xml'
-    schema_file_3g_xml = '../data/legacy_xml/HED8.0.0-alpha.1.xml'
-    schema_file_3g = '../data/HED8.0.0-alpha.2.mediawiki'
+    schema_file_3g_xml = '../data/hed_pairs/HED8.0.0.xml'
+    schema_file_3g = '../data/hed_pairs/HED8.0.0.mediawiki'
 
     @classmethod
     def setUpClass(cls):
@@ -56,104 +53,6 @@ class TestHedSchema(unittest.TestCase):
             self.assertTrue(False)
         except HedFileError as e:
             self.assertTrue(name in e.format_error_message(return_string_only=True, name=name))
-
-    # def test_attribute_keys(self):
-    #     tag_dictionary_keys = ['defaultUnits', 'extensionAllowed', 'isNumeric', 'position', 'predicateType',
-    #                            'recommended', 'required', 'requireChild', 'tags', 'takesValue', 'unique', 'unitClass']
-    #     for key in tag_dictionary_keys:
-    #         self.assertIn(key, self.hed_schema_dictionaries, key + ' not found.')
-    #         self.assertIsInstance(self.hed_schema_dictionaries[key], dict, key + ' not a dictionary.')
-    #
-    # def test_required_tags(self):
-    #     expected_tags = ['event/category', 'event/description', 'event/label']
-    #     actual_tags_dictionary = self.hed_schema_dictionaries['required']
-    #     self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
-    #
-    # def test_positioned_tags(self):
-    #     expected_tags = ['event/category', 'event/description', 'event/label', 'event/long name']
-    #     actual_tags_dictionary = self.hed_schema_dictionaries['position']
-    #     self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
-    #
-    # def test_unique_tags(self):
-    #     expected_tags = ['event/description', 'event/label', 'event/long name']
-    #     actual_tags_dictionary = self.hed_schema_dictionaries['unique']
-    #     self.assertCountEqual(actual_tags_dictionary.keys(), expected_tags)
-    #
-    # def test_default_unit_tags(self):
-    #     default_unit_tags = {
-    #          'acceleration': 'm-per-s^2',
-    #          'angle': 'radian',
-    #          'area': 'm^2',
-    #          'clockTime': 'hour:min',
-    #          'currency': '$',
-    #          'dateTime': 'YYYY-MM-DDThh:mm:ss',
-    #          'frequency': 'Hz',
-    #          'intensity': 'dB',
-    #          'jerk': 'm-per-s^3',
-    #          'luminousIntensity': 'cd',
-    #          'memorySize': 'B',
-    #          'physicalLength': 'm',
-    #          'pixels': 'px',
-    #          'speed': 'm-per-s',
-    #          'time': 's',
-    #          'volume': 'm^3'}
-    #     actual_tags_dictionary = self.hed_schema_dictionaries['defaultUnits']
-    #     self.assertDictEqual(actual_tags_dictionary, default_unit_tags)
-    #
-    # def test_unit_classes(self):
-    #     default_units = {
-    #         'acceleration': 'm-per-s^2',
-    #         'currency': '$',
-    #         'angle': 'radian',
-    #         'frequency': 'Hz',
-    #         'intensity': 'dB',
-    #         'jerk': 'm-per-s^3',
-    #         'luminousIntensity': 'cd',
-    #         'memorySize': 'B',
-    #         'physicalLength': 'm',
-    #         'pixels': 'px',
-    #         'speed': 'm-per-s',
-    #         'time': 's',
-    #         'clockTime': 'hour:min',
-    #         'dateTime': 'YYYY-MM-DDThh:mm:ss',
-    #         'area': 'm^2',
-    #         'volume': 'm^3',
-    #     }
-    #     all_units = {
-    #         'acceleration': ['m-per-s^2'],
-    #         'currency': ['dollar', '$', 'point', 'fraction'],
-    #         'angle': ['radian', 'rad', 'degree'],
-    #         'frequency': ['hertz', 'Hz'],
-    #         'intensity': ['dB'],
-    #         'jerk': ['m-per-s^3'],
-    #         'luminousIntensity': ['candela', 'cd'],
-    #         'memorySize': ['byte', 'B'],
-    #         'physicalLength': ['metre', 'm', 'foot', 'mile'],
-    #         'pixels': ['pixel', 'px'],
-    #         'speed': ['m-per-s', 'mph', 'kph'],
-    #         'time': ['second', 's', 'day', 'minute', 'hour'],
-    #         'clockTime': ['hour:min', 'hour:min:sec'],
-    #         'dateTime': ['YYYY-MM-DDThh:mm:ss'],
-    #         'area': ['m^2', 'px^2', 'pixel^2'],
-    #         'volume': ['m^3'],
-    #     }
-    #     actual_default_units_dictionary = self.hed_schema_dictionaries[HedKey.DefaultUnits]
-    #     actual_all_units_dictionary = self.hed_schema_dictionaries[HedSectionKey.UnitClasses]
-    #     self.assertDictEqual(actual_default_units_dictionary, default_units)
-    #     self.assertDictEqual(actual_all_units_dictionary, all_units)
-    #
-    # def test_large_dictionaries(self):
-    #     expected_tag_count = {
-    #         'isNumeric': 80,
-    #         'predicateType': 20,
-    #         'recommended': 0,
-    #         'requireChild': 64,
-    #         'tags': 1116,
-    #         'takesValue': 119,
-    #         'unitClass': 63,
-    #     }
-    #     for key, number in expected_tag_count.items():
-    #         self.assertEqual(len(self.hed_schema_dictionaries[key]), number, 'Mismatch on attribute ' + key)
 
     def test_tag_attribute(self):
         test_strings = {
@@ -225,7 +124,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(len(list(desc_dict)), 385)
 
         desc_dict = self.hed_schema_3g.get_desc_iter()
-        self.assertEqual(len(list(desc_dict)), 262)
+        self.assertEqual(len(list(desc_dict)), 1117)
 
     def test_get_tag_description(self):
         # Test known tag
@@ -245,8 +144,8 @@ class TestHedSchema(unittest.TestCase):
         tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
             "takesValue": "true",
-            "isNumeric": "true",
-            "unitClass": 'jerk'
+            "valueClass": "numericClass",
+            "unitClass": 'jerkUnits'
         }
         self.assertCountEqual(tag_props, expected_props)
 
@@ -255,7 +154,7 @@ class TestHedSchema(unittest.TestCase):
         }
         self.assertCountEqual(tag_props, expected_props)
 
-        test_string = HedString("Agent-trait")
+        test_string = HedString("Statistical-value")
         test_string.convert_to_canonical_forms(self.hed_schema_3g)
         tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
@@ -263,12 +162,12 @@ class TestHedSchema(unittest.TestCase):
         }
         self.assertCountEqual(tag_props, expected_props)
         # also test long form.
-        tag_props = self.hed_schema_3g.get_all_tag_attributes("Agent-property/Agent-trait")
+        tag_props = self.hed_schema_3g.get_all_tag_attributes("Property/Data-property/Data-value/Statistical-value")
         self.assertCountEqual(tag_props, expected_props)
 
     def test_get_hed_xml_version(self):
         self.assertEqual(schema.get_hed_xml_version(self.hed_xml), "7.1.1")
-        self.assertEqual(schema.get_hed_xml_version(self.hed_xml_3g), "8.0.0-alpha.1")
+        self.assertEqual(schema.get_hed_xml_version(self.hed_xml_3g), "8.0.0")
 
     def test_has_duplicate_tags(self):
         self.assertTrue(self.hed_schema.has_duplicate_tags)
@@ -276,7 +175,7 @@ class TestHedSchema(unittest.TestCase):
 
     def test_short_tag_mapping(self):
         self.assertEqual(len(self.hed_schema.short_tag_mapping), 993)
-        self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 1023)
+        self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 1110)
 
 
 class TestSchemaUtilityFunctions(TestHed):
