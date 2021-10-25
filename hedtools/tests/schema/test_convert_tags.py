@@ -1,9 +1,7 @@
 import unittest
 
-from hed.errors import error_reporter
-from hed.models.hed_string import HedString
-from hed.errors.error_types import ValidationErrors
-from hed.errors.error_types import ErrorContext
+from hed import HedString
+from hed.errors import ValidationErrors, ErrorContext, ErrorHandler
 from tests.validator.test_tag_validator_base import TestHedBase
 
 
@@ -15,7 +13,7 @@ class TestConvertTag(TestTagFormat):
     def converter_base(self, test_strings, expected_results, expected_errors, convert_to_short=True):
         for test_key in test_strings:
             test_string_obj = HedString(test_strings[test_key])
-            error_handler = error_reporter.ErrorHandler()
+            error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string_obj, increment_depth_after=False)
             test_issues = test_string_obj.convert_to_canonical_forms(self.hed_schema)
             if convert_to_short:
@@ -554,100 +552,6 @@ class TestConvertHedStringToShort(TestConvertTag):
             'bothSpaceTwo': [],
         }
         self.validator(test_strings, expected_results, expected_errors)
-
-    # Deprecated tests
-    # def test_string_slash_start_end(self):
-    #     test_strings = {
-    #         'leadingSingle': '/Event',
-    #         'leadingMultiLevel': '/Object/Man-made/Vehicle/Train',
-    #         'trailingSingle': 'Event/',
-    #         'trailingMultiLevel': 'Object/Man-made/Vehicle/Train/',
-    #         'bothSingle': '/Event/',
-    #         'bothMultiLevel': '/Object/Man-made/Vehicle/Train/',
-    #         'twoMixedOuter': '/Event,Object/Man-made/Vehicle/Train/',
-    #         'twoMixedInner': 'Event/,/Object/Man-made/Vehicle/Train',
-    #         'twoMixedBoth': '/Event/,/Object/Man-made/Vehicle/Train/',
-    #         'twoMixedBothGroup': '(/Event/,/Object/Man-made/Vehicle/Train/)',
-    #     }
-    #     expected_event = 'Event'
-    #     expected_train = 'Train'
-    #     expected_mixed = expected_event + ',' + expected_train
-    #     expected_results = {
-    #         'leadingSingle': expected_event,
-    #         'leadingMultiLevel': expected_train,
-    #         'trailingSingle': expected_event,
-    #         'trailingMultiLevel': expected_train,
-    #         'bothSingle': expected_event,
-    #         'bothMultiLevel': expected_train,
-    #         'twoMixedOuter': expected_mixed,
-    #         'twoMixedInner': expected_mixed,
-    #         'twoMixedBoth': expected_mixed,
-    #         'twoMixedBothGroup': '(' + expected_mixed + ')',
-    #     }
-    #     expected_errors = {
-    #         'leadingSingle': [],
-    #         'leadingMultiLevel': [],
-    #         'trailingSingle': [],
-    #         'trailingMultiLevel': [],
-    #         'bothSingle': [],
-    #         'bothMultiLevel': [],
-    #         'twoMixedOuter': [],
-    #         'twoMixedInner': [],
-    #         'twoMixedBoth': [],
-    #         'twoMixedBothGroup': [],
-    #     }
-    #     self.validator(test_strings, expected_results, expected_errors)
-
-    # Deprecated tests
-    # def test_string_extra_slash_space(self):
-    #     test_strings = {
-    #         'twoLevelDoubleSlash': 'Event//Extension',
-    #         'threeLevelDoubleSlash': 'Item//Object//Geometric',
-    #         'tripleSlashes': 'Item///Object///Geometric',
-    #         'mixedSingleAndDoubleSlashes': 'Item///Object/Geometric',
-    #         'singleSlashWithSpace': 'Event/ Extension',
-    #         'doubleSlashSurroundingSpace': 'Event/ /Extension',
-    #         'doubleSlashThenSpace': 'Event// Extension',
-    #         'sosPattern': 'Event///   ///Extension',
-    #         'alternatingSlashSpace': 'Item/ / Object/ / Geometric',
-    #         'leadingDoubleSlash': '//Event/Extension',
-    #         'trailingDoubleSlash': 'Event/Extension//',
-    #         'leadingDoubleSlashWithSpace': '/ /Event/Extension',
-    #         'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
-    #     }
-    #     expected_event_extension = 'Event/Extension'
-    #     expected_geometric = 'Geometric'
-    #     expected_results = {
-    #         'twoLevelDoubleSlash': expected_event_extension,
-    #         'threeLevelDoubleSlash': expected_geometric,
-    #         'tripleSlashes': expected_geometric,
-    #         'mixedSingleAndDoubleSlashes': expected_geometric,
-    #         'singleSlashWithSpace': expected_event_extension,
-    #         'doubleSlashSurroundingSpace': expected_event_extension,
-    #         'doubleSlashThenSpace': expected_event_extension,
-    #         'sosPattern': expected_event_extension,
-    #         'alternatingSlashSpace': expected_geometric,
-    #         'leadingDoubleSlash': expected_event_extension,
-    #         'trailingDoubleSlash': expected_event_extension,
-    #         'leadingDoubleSlashWithSpace': expected_event_extension,
-    #         'trailingDoubleSlashWithSpace': expected_event_extension,
-    #     }
-    #     expected_errors = {
-    #         'twoLevelDoubleSlash': [],
-    #         'threeLevelDoubleSlash': [],
-    #         'tripleSlashes': [],
-    #         'mixedSingleAndDoubleSlashes': [],
-    #         'singleSlashWithSpace': [],
-    #         'doubleSlashSurroundingSpace': [],
-    #         'doubleSlashThenSpace': [],
-    #         'sosPattern': [],
-    #         'alternatingSlashSpace': [],
-    #         'leadingDoubleSlash': [],
-    #         'trailingDoubleSlash': [],
-    #         'leadingDoubleSlashWithSpace': [],
-    #         'trailingDoubleSlashWithSpace': [],
-    #     }
-    #     self.validator(test_strings, expected_results, expected_errors)
 
 
 class TestConvertHedStringToLong(TestConvertTag):

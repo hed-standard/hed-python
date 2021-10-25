@@ -7,15 +7,10 @@ HedValidator - Validates a given input string or file
 EventsInput - Used to open/modify/save a bids style spreadsheet, with json sidecars and definitions.
 HedFileError - Exception thrown when a file cannot be opened.(parsing error, file not found error, etc)
 Sidecar - Contains the data from a single json sidecar, can be validated using a HedSchema.
-DefDict - Created from a Sidecar.  Contains all label definitions to be expanded, can be validated using
-          a HedSchema.
 """
 import os
-from hed.errors.error_reporter import get_printable_issue_string
-from hed.models.events_input import EventsInput
-from hed.schema.hed_schema_file import load_schema
-from hed.validator.hed_validator import HedValidator
-from hed.models.sidecar import Sidecar
+from hed import EventsInput, get_printable_issue_string, load_schema, HedValidator, Sidecar
+
 
 if __name__ == '__main__':
     local_hed_file = '../data/HED8.0.0-alpha.1.xml'

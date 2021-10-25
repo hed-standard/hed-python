@@ -1,23 +1,20 @@
 import unittest
 import os
-
-from hed.models.sidecar import Sidecar
-from hed.models.column_metadata import ColumnMetadata
-from hed.errors.exceptions import HedFileError
-from hed.validator.hed_validator import HedValidator
-from hed import schema
 import io
+
+from hed import Sidecar, HedFileError, HedValidator, schema
+from hed.models.column_metadata import ColumnMetadata
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "legacy_xml/HED8.0.0-alpha.1.xml")
+        hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
-        cls.json_filename = os.path.join(cls.base_data_dir, "both_types_events.json")
-        cls.json_def_filename = os.path.join(cls.base_data_dir, "both_types_events_with_defs.json")
-        cls.json_errors_filename = os.path.join(cls.base_data_dir, "json_errors.json")
+        cls.json_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
+        cls.json_def_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_with_defs.json")
+        cls.json_errors_filename = os.path.join(cls.base_data_dir, "sidecar_tests/json_errors.json")
         cls.default_sidecar = Sidecar(cls.json_filename)
         cls.json_def_sidecar = Sidecar(cls.json_def_filename)
         cls.errors_sidecar = Sidecar(cls.json_errors_filename)
@@ -65,6 +62,7 @@ class Test(unittest.TestCase):
 
         self.assertEqual(columns_target, columns_count)
 
+    # todo: fill out these tests.
     # def save_as_json(self, save_filename):
     #
     # def add_sidecars(self, json_filename):
@@ -86,16 +84,15 @@ class Test(unittest.TestCase):
     #
 
     def test_validate_column_group(self):
-        validator = HedValidator(hed_schema=self.hed_schema, check_for_warnings=True)
+        validator = HedValidator(hed_schema=None, check_for_warnings=True)
         validation_issues = self.json_def_sidecar.validate_entries(validator)
-        # This has various extended warnings
-        self.assertEqual(len(validation_issues), 9)
+        self.assertEqual(len(validation_issues), 0)
 
         validation_issues = self.default_sidecar.validate_entries(validator)
-        self.assertEqual(len(validation_issues), 4)
+        self.assertEqual(len(validation_issues), 0)
 
         validation_issues = self.errors_sidecar.validate_entries(validator)
-        self.assertEqual(len(validation_issues), 8)
+        self.assertEqual(len(validation_issues), 15)
 
 
 if __name__ == '__main__':

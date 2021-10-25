@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed import schema
-from hed.errors.exceptions import HedFileError, HedExceptions
+from hed import HedFileError, HedExceptions
 
 
 class TestHedSchema(unittest.TestCase):
@@ -28,9 +28,8 @@ class TestHedSchema(unittest.TestCase):
         for filename, error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename
 
-            hed_schema = None
             try:
-                hed_schema = schema.load_schema(full_filename)
+                schema.load_schema(full_filename)
                 # all of these should produce exceptions.
                 self.assertFalse(True)
             except HedFileError as e:

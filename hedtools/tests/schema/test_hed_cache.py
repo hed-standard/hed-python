@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/legacy_xml')
         schema.set_cache_directory(cls.hed_cache_dir)
 
-        cls.default_xml_base_filename = "HED7.1.1.xml"
+        cls.default_xml_base_filename = "HED8.0.0.xml"
         cls.default_hed_xml = os.path.join(cls.hed_base_dir, cls.default_xml_base_filename)
         cls.hed_test_version = '7.1.1'
         cls.hed_invalid_version = '4.6.7'
@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         cls.hed_directory_version = '4.0.5'
 
         cls.specific_hed_url = \
-            """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml"""
+            """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
         cls.base_api_url = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
 
     def test_get_hed_version_path(self):
@@ -52,6 +52,7 @@ class Test(unittest.TestCase):
         self.assertTrue(hed_cache.HED_CACHE_DIRECTORY == hed_cache_dir)
         hed_cache.set_cache_directory(saved_cache_dir)
         self.assertTrue(hed_cache.HED_CACHE_DIRECTORY == saved_cache_dir)
+        os.rmdir(hed_cache_dir)
 
     def test_get_version_path_2(self):
         hed_xml_filename = hed_cache.get_hed_version_path(self.hed_base_dir, self.hed_test_version)

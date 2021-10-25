@@ -1,9 +1,8 @@
 import unittest
 import os
 
-from hed.errors import error_reporter
-from hed.models.hed_string import HedString
-from hed.schema.hed_schema_file import load_schema
+from hed import HedString, load_schema
+from hed.errors import ErrorHandler
 
 
 class TestBaseTagBase(unittest.TestCase):
@@ -13,7 +12,7 @@ class TestBaseTagBase(unittest.TestCase):
     def setUpClass(cls):
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
         cls.hed_schema = load_schema(hed_xml)
-        cls.error_handler = error_reporter.ErrorHandler()
+        cls.error_handler = ErrorHandler()
 
     def tag_form_base(self, test_strings, expected_results, expected_errors):
         for test_key in test_strings:

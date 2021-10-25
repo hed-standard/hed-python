@@ -8,9 +8,9 @@ hed.get_printable_issue_string - method that converts the list of issues to a hu
 """
 
 from shutil import move
-from hed.errors.error_reporter import get_printable_issue_string
-from hed import schema
+from hed import get_printable_issue_string, schema
 from hed.util.file_util import write_strings_to_file
+
 
 if __name__ == '__main__':
     hed_xml_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml'
