@@ -68,6 +68,21 @@ class HedString(HedGroup):
         return new_hed_string_obj
 
     def convert_to_canonical_forms(self, hed_schema):
+        """
+            Identify all tags using the given schema.  If no schema, still identify "key" tags such as definitions.
+
+            Also sets the "isDefinition" property on tags and groups.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema or None
+            The schema to use to validate/convert tags.
+
+        Returns
+        -------
+        conversion_issues: [{}]
+            A list of issues found while converting the string.
+        """
         validation_issues = []
         for tag in self.get_all_tags():
             validation_issues += tag.convert_to_canonical_forms(hed_schema)
@@ -93,6 +108,14 @@ class HedString(HedGroup):
                     tag_group.is_definition = True
 
     def remove_definitions(self):
+        """
+            Removes any definition tags and groups from this string.
+
+        Returns
+        -------
+        issues: [{}]
+            There are no possible issues, this list is always blank.
+        """
         definition_groups = []
         for tag_group in self.get_all_groups():
             if tag_group.is_definition:
@@ -104,16 +127,52 @@ class HedString(HedGroup):
         return []
 
     def convert_to_short(self, hed_schema):
+        """
+            Compute string canonical forms and return the long form and issues.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema or None
+            The schema to use to calculate forms.
+        Returns
+        -------
+        short_form: str
+            The string with all tags converted to short form
+        conversion_issues: [{}]
+            Issues found during conversion.  No issues will be found if no schema is passed.
+        """
         conversion_issues = self.convert_to_canonical_forms(hed_schema)
         short_string = self.get_as_short()
         return short_string, conversion_issues
 
     def convert_to_long(self, hed_schema):
+        """
+            Compute string canonical forms and return the long form and issues.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema or None
+            The schema to use to calculate forms.
+        Returns
+        -------
+        long_form: str
+            The string with all tags converted to long form
+        conversion_issues: [{}]
+            Issues found during conversion.  No issues will be found if no schema is passed.
+        """
         conversion_issues = self.convert_to_canonical_forms(hed_schema)
         short_string = self.get_as_long()
         return short_string, conversion_issues
 
     def convert_to_original(self):
+        """
+            Returns the original form of this string, though potentially with some extraneous spaces removed.
+
+        Returns
+        -------
+        org_string: str
+            The string with all the tags in their original form.
+        """
         return self.get_as_form("org_tag")
 
     @staticmethod

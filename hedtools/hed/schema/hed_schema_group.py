@@ -92,7 +92,15 @@ class HedSchemaGroup:
 
     @property
     def valid_prefixes(self):
-        return self._schemas.keys()
+        """
+            Gets a list of all prefixes this schema will accept.
+
+        Returns
+        -------
+        valid_prefixes: [str]
+            A list of valid tag prefixes for this schema.
+        """
+        return list(self._schemas.keys())
 
     # ===============================================
     # Basic tag attributes

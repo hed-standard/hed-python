@@ -3,6 +3,7 @@ import os
 
 from hed import schema, HedString
 from hed.models import DefDict, DefinitionMapper
+from hed import HedValidator
 
 
 class Test(unittest.TestCase):
@@ -13,8 +14,8 @@ class Test(unittest.TestCase):
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.base_dict = DefDict()
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
-        cls.basic_def_string = f"(Definition/TestDef,{cls.def_contents_string})"
-        cls.basic_def_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
+        cls.basic_definition_string = f"(Definition/TestDef,{cls.def_contents_string})"
+        cls.basic_definition_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
         cls.label_def_string = "Def/TestDef"
         cls.expanded_def_string = f"(Def-expand/TestDef,{cls.def_contents_string})"
         cls.basic_hed_string = "Item/BasicTestTag1,Item/BasicTestTag2"
@@ -32,26 +33,26 @@ class Test(unittest.TestCase):
 
     def test_expand_def_tags(self):
         def_dict = DefDict()
-        def_string = HedString(self.basic_def_string)
+        def_string = HedString(self.basic_definition_string)
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
         def_mapper = DefinitionMapper(def_dict)
 
-        test_string = HedString(self.basic_def_string)
+        test_string = HedString(self.basic_definition_string)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
         self.assertEqual(str(test_string), "")
 
-        test_string = HedString(self.basic_def_string_no_paren)
+        test_string = HedString(self.basic_definition_string_no_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
         self.assertFalse(def_issues)
-        self.assertEqual(str(test_string), self.basic_def_string_no_paren)
+        self.assertEqual(str(test_string), self.basic_definition_string_no_paren)
 
-        test_string = HedString(self.basic_hed_string + "," + self.basic_def_string)
+        test_string = HedString(self.basic_hed_string + "," + self.basic_definition_string)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
         self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
-        test_string = HedString(self.basic_def_string + "," + self.basic_hed_string)
+        test_string = HedString(self.basic_definition_string + "," + self.basic_hed_string)
         def_issues = test_string.validate(def_mapper, expand_defs=True)
         self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
@@ -71,29 +72,94 @@ class Test(unittest.TestCase):
         self.assertFalse(def_issues)
         self.assertEqual(str(test_string), "(" + self.expanded_def_string + "," + self.basic_hed_string + ")")
 
+    def test_expand_def_tags_with_validator(self):
+        def_dict = DefDict()
+        def_string = HedString(self.basic_definition_string)
+        def_string.convert_to_canonical_forms(None)
+        def_dict.check_for_definitions(def_string)
+        def_mapper = DefinitionMapper(def_dict)
+        validator = HedValidator(self.hed_schema)
+        validators = [validator, def_mapper]
+
+        test_string = HedString(self.basic_definition_string)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertEqual(test_string.get_as_short(), "")
+
+        test_string = HedString(self.basic_definition_string_no_paren)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertTrue(def_issues)
+        self.assertEqual(test_string.get_as_short(), self.basic_definition_string_no_paren)
+
+        test_string = HedString(self.basic_hed_string + "," + self.basic_definition_string)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertFalse(def_issues)
+        self.assertEqual(test_string.get_as_short(), self.basic_hed_string)
+
+        test_string = HedString(self.basic_definition_string + "," + self.basic_hed_string)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertFalse(def_issues)
+        self.assertEqual(test_string.get_as_short(), self.basic_hed_string)
+
+        test_string = HedString(self.basic_hed_string_with_def)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertFalse(def_issues)
+        self.assertEqual(test_string.get_as_short(), self.basic_hed_string + "," + self.expanded_def_string)
+
+        test_string = HedString(self.basic_hed_string_with_def_first)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertFalse(def_issues)
+        self.assertEqual(test_string.get_as_short(), self.expanded_def_string + "," + self.basic_hed_string)
+
+        test_string = HedString(self.basic_hed_string_with_def_first_paren)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertFalse(def_issues)
+        self.assertEqual(test_string.get_as_short(), "(" + self.expanded_def_string + "," + self.basic_hed_string + ")")
+
+    def test_changing_tag_then_def_mapping(self):
+        def_dict = DefDict()
+        def_string = HedString(self.basic_definition_string)
+        def_string.convert_to_canonical_forms(None)
+        def_dict.check_for_definitions(def_string)
+        def_mapper = DefinitionMapper(def_dict)
+        validator = HedValidator(self.hed_schema)
+        validators = [validator, def_mapper]
+
+        test_string = HedString(self.label_def_string)
+        tag = test_string.get_direct_children()[0]
+        tag.tag = "Organizational-property/" + str(tag)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertFalse(def_issues)
+        self.assertEqual(test_string.get_as_short(), f"{self.expanded_def_string}")
+
+        test_string = HedString(self.label_def_string)
+        tag = test_string.get_direct_children()[0]
+        tag.tag = "Organizational-property22/" + str(tag)
+        def_issues = test_string.validate(validators, expand_defs=True)
+        self.assertTrue(def_issues)
+
     def test_expand_def_tags_no_expand(self):
         def_dict = DefDict()
-        def_string = HedString(self.basic_def_string)
+        def_string = HedString(self.basic_definition_string)
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
         def_mapper = DefinitionMapper(def_dict)
 
-        test_string = HedString(self.basic_def_string)
+        test_string = HedString(self.basic_definition_string)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
         self.assertFalse(def_issues)
         self.assertEqual(str(test_string), "")
 
-        test_string = HedString(self.basic_def_string_no_paren)
+        test_string = HedString(self.basic_definition_string_no_paren)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
         self.assertFalse(def_issues)
-        self.assertEqual(str(test_string), self.basic_def_string_no_paren)
+        self.assertEqual(str(test_string), self.basic_definition_string_no_paren)
 
-        test_string = HedString(self.basic_hed_string + "," + self.basic_def_string)
+        test_string = HedString(self.basic_hed_string + "," + self.basic_definition_string)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
         self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
 
-        test_string = HedString(self.basic_def_string + "," + self.basic_hed_string)
+        test_string = HedString(self.basic_definition_string + "," + self.basic_hed_string)
         def_issues = test_string.validate(def_mapper, expand_defs=False)
         self.assertFalse(def_issues)
         self.assertEqual(str(test_string), self.basic_hed_string)
@@ -204,7 +270,7 @@ class Test(unittest.TestCase):
         self.assertTrue(def_issues)
 
         def_dict = DefDict()
-        def_string = HedString(self.basic_def_string)
+        def_string = HedString(self.basic_definition_string)
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
         def_mapper = DefinitionMapper(def_dict)

@@ -1,8 +1,5 @@
 """
-This module contains the HedSchema class which encapsulates all HED tags, tag attributes, unit classes, and
-unit class attributes in a dictionary.
-
-The dictionary is a dictionary of dictionaries. The dictionary names are the list in HedKey from hed_schema_constants.
+This module contains the HedSchema class, which contains all the tags and attributes from a given schema file.
 """
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
@@ -18,6 +15,9 @@ pluralize.defnoun("hertz", "hertz")
 
 
 class HedSchema:
+    """
+        Internal representation of a loaded hed schema xml or mediawiki file.
+    """
     def __init__(self):
         """Constructor for the HedSchema class.
 
@@ -50,19 +50,48 @@ class HedSchema:
     # ===============================================
     @property
     def filename(self):
+        """
+            Returns the filename if one is known.
+
+        Returns
+        -------
+        filename: str
+        """
         return self._filename
 
     @filename.setter
     def filename(self, value):
+        """
+            Set the filename, if one has not already been set.
+
+        Parameters
+        ----------
+        value : str
+            The source filename for this file
+        """
         if self._filename is None:
             self._filename = value
 
     @property
     def version(self):
+        """
+            Return the HED version of this schema.
+
+        Returns
+        -------
+        hed_version: str
+        """
         return self.header_attributes['version']
 
     @property
     def library(self):
+        """
+            Returns the name of this library schema if one exists.
+
+        Returns
+        -------
+        library_name: str or None
+        """
         return self.header_attributes.get('library')
 
     def schema_for_prefix(self, prefix):
@@ -86,7 +115,15 @@ class HedSchema:
 
     @property
     def valid_prefixes(self):
-        return [self._library_prefix]
+        """
+            Gets a list of all prefixes this schema will accept.  This is always length 1 if using a HedSchema.
+
+        Returns
+        -------
+        valid_prefixes: [str]
+            A list of valid tag prefixes for this schema.
+        """
+        return list(self._library_prefix)
 
     # ===============================================
     # Creation and saving functions
@@ -130,7 +167,6 @@ class HedSchema:
         ----------
         save_as_legacy_format : bool
             You should never use this.  Some information will not be saved if old format.
-
         Returns
         -------
         filename: str
@@ -142,6 +178,16 @@ class HedSchema:
         return local_xml_file
 
     def save_as_mediawiki(self):
+        """
+        Save the schema to a temporary file, returning the filename.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        filename: str
+            The newly created schema filename
+        """
         schema2wiki = HedSchema2Wiki()
         output_strings = schema2wiki.process_schema(self)
         local_wiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
@@ -249,24 +295,69 @@ class HedSchema:
 
     @property
     def unit_classes(self):
+        """
+            Returns the unit classes schema section
+
+        Returns
+        -------
+        section: HedSchemaSection
+            The unit classes section
+        """
         return self._sections[HedSectionKey.UnitClasses]
 
     @property
     def unit_modifiers(self):
+        """
+            Returns the modifiers classes schema section
+
+        Returns
+        -------
+        section: HedSchemaSection
+            The unit modifiers section
+        """
         return self._sections[HedSectionKey.UnitModifiers]
 
     @property
     def value_classes(self):
+        """
+            Returns the value classes schema section
+
+        Returns
+        -------
+        section: HedSchemaSection
+            The value classes section
+        """
         return self._sections[HedSectionKey.ValueClasses]
 
     @property
     def is_hed3_schema(self):
+        """
+            Returns true if this is a HED3 or greater versioned schema.
+
+            This is considered true if the version number is >= 8.0 or it has a library name.
+
+        Returns
+        -------
+        is_hed3: bool
+            True if this is a hed3 schema.
+        """
         if self._is_hed3_schema is not None:
             return self._is_hed3_schema
 
         return self.library or schema_validation_util.is_hed3_version_number(self.version)
 
     def __eq__(self, other):
+        """
+            Returns True if these schemas match exactly.  All attributes, tag names, etc.
+
+        Parameters
+        ----------
+        other : HedSchema
+
+        Returns
+        -------
+
+        """
         if self.header_attributes != other.header_attributes:
             return False
         if self._has_duplicate_tags != other._has_duplicate_tags:
@@ -374,6 +465,18 @@ class HedSchema:
         return self._value_tag_has_attribute(original_tag, HedKey.ValueClass)
 
     def is_basic_tag(self, original_tag):
+        """
+            Returns True if this is an exact tag, with no extension or similar.
+
+        Parameters
+        ----------
+        original_tag : HedTag
+
+        Returns
+        -------
+        is_basic_tag: bool
+            True if this tag is an exact match for one in the schema.
+        """
         return bool(self._get_entry_for_tag(original_tag.lower()))
 
     def base_tag_has_attribute(self, original_tag, tag_attribute):
@@ -442,6 +545,21 @@ class HedSchema:
         return unit_classes
 
     def get_tag_value_classes(self, original_tag):
+        """
+            Returns a list of all the value classes this tag accepts.
+
+            Returns empty list if this is not a value tag.
+
+        Parameters
+        ----------
+        original_tag : HedTag
+            The hed tag to check
+
+        Returns
+        -------
+        value_classes: [str]
+            A list of value classes this tag accepts.
+        """
         value_classes = self._value_tag_has_attribute(original_tag, HedKey.ValueClass, return_value=True)
         if value_classes:
             value_classes = value_classes.split(',')
@@ -526,6 +644,21 @@ class HedSchema:
         return formatted_tag_unit_value
 
     def get_unit_class_units(self, unit_class_type):
+        """
+            Get the list of unit class units this type will accept.
+
+            Eg 'time' returns ['second', 's', 'day', 'minute', 'hour']
+
+        Parameters
+        ----------
+        unit_class_type : str
+            The unit class type to check for.  eg. "time"
+
+        Returns
+        -------
+        unit_class_units: [str]
+            A list of each unit this type allows.
+        """
         unit_class_entry = self._get_entry_for_tag(unit_class_type, HedSectionKey.UnitClasses)
         if not unit_class_entry:
             return []
@@ -533,6 +666,21 @@ class HedSchema:
         return unit_class_entry.value
 
     def get_all_tags_with_attribute(self, key):
+        """
+            Returns a list of all tags with the given attribute.
+
+            Note: Result is cached so will be fast after first call.
+
+        Parameters
+        ----------
+        key : str
+            A tag attribute.  Eg HedKey.ExtensionAllowed
+
+        Returns
+        -------
+        tag_list: [str]
+            A list of all tags with this attribute
+        """
         if key in self._all_tags_attributes_cache:
             return self._all_tags_attributes_cache[key]
         new_val = [tag_entry.long_name for tag_entry in self._sections[HedSectionKey.AllTags].values()
@@ -544,6 +692,12 @@ class HedSchema:
     # Semi-private creation finalizing functions
     # ===============================================
     def finalize_dictionaries(self):
+        """
+            Called to finish loading.  Also needs to be called if you've altered the schema in memory.
+
+        Returns
+        -------
+        """
         self._is_hed3_schema = self.is_hed3_schema
         self._populate_short_tag_dict()
         self._all_tags_attributes_cache = {}
@@ -606,6 +760,13 @@ class HedSchema:
             self._add_single_default_property(prop_name)
 
     def update_old_hed_schema(self):
+        """
+            Updates old hed schema with now required attributes - such as $ being a unit prefix.
+
+        Returns
+        -------
+
+        """
         if HedKey.UnitPrefix not in self._sections[HedSectionKey.Attributes]:
             self._add_single_default_attribute(HedKey.UnitPrefix)
 
@@ -688,6 +849,13 @@ class HedSchema:
         return unknown_attributes
 
     def get_tag_attribute_names(self):
+        """
+            Returns a dict of all the attributes allowed to be used on tags.
+
+        Returns
+        -------
+        tag_entries: {str: HedSchemaEntry}
+        """
         return {tag_entry.long_name: tag_entry for tag_entry in self._sections[HedSectionKey.Attributes].values()
                 if not tag_entry.has_attribute(HedKey.UnitClassProperty)
                 and not tag_entry.has_attribute(HedKey.UnitProperty)
@@ -720,7 +888,8 @@ class HedSchema:
     # ===============================================
     # Private utility functions
     # ===============================================
-    def _create_empty_sections(self):
+    @staticmethod
+    def _create_empty_sections():
         dictionaries = {}
         # Add main sections
         dictionaries[HedSectionKey.AllTags] = HedSchemaSection(HedSectionKey.AllTags, case_sensitive=False)
