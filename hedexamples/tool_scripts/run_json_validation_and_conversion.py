@@ -15,7 +15,7 @@ from hed import get_printable_issue_string, Sidecar, HedString, load_schema, Hed
 if __name__ == '__main__':
     local_hed_xml = "../data/HED8.0.0-alpha.1.xml"
     hed_schema = load_schema(local_hed_xml)
-    json_filename = "../data/both_types_events_errors.json"
+    json_filename = "../data/bids_data/both_types_events_errors.json"
 
     # Example 1
     sidecar = Sidecar(json_filename)

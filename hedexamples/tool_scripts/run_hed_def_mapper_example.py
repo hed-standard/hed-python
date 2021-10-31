@@ -13,12 +13,12 @@ from hed import EventsInput, get_printable_issue_string, load_schema, HedValidat
 
 
 if __name__ == '__main__':
-    local_hed_file = '../data/HED8.0.0-alpha.1.xml'
+    local_hed_file = '../data/schema_data/HED8.0.0-alpha.1.xml'
     example_data_path = '../data'  # path to example data
     hed3_tags_single_sheet = os.path.join(example_data_path, 'hed_tag_def_example.tsv')
     hed_schema = load_schema(local_hed_file)
     prefixed_needed_tag_columns = {2: 'Event/Label/', 3: 'Event/Description/'}
-    json_file = "../data/both_types_events_def_example.json"
+    json_file = "../data/bids_data/both_types_events_def_example.json"
     validator = HedValidator(hed_schema=hed_schema)
     sidecar = Sidecar(json_file)
     def_issues = sidecar.validate_entries(validator)
