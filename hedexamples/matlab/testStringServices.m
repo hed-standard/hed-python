@@ -22,7 +22,7 @@ options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
 
 %% Read in the schema text for the examples
-schema_text = fileread('../data/HED8.0.0.xml');
+schema_text = fileread('../data/schema_data/HED8.0.0.xml');
 good_strings = {['Red,Blue'], ['Green'], ['White,Black']}; 
 bad_strings = {['Red,Blue,Blech'], ['Green'], ['White,Black,Binge']}; 
 

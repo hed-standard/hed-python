@@ -10,7 +10,7 @@ import os
 
 from hed import HedInput, load_schema, HedString
 
-local_hed_file_no_dupe = '../data/HED8.0.0-alpha.1.xml'
+local_hed_file_no_dupe = '../data/schema_data/HED8.0.0-alpha.1.xml'
 
 
 def long_to_short_file(input_file, output_filename, hed_schema, error_handler=None):

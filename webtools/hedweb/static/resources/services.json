@@ -1,35 +1,37 @@
 {
     "services": {
         "get_services": {
-            "Description": "Return a list of hed services commands with descriptions.",
+            "Description": "Return a list of hed services with descriptions.",
             "Parameters": []
         },
-        "dictionary_to_long": {
-            "Description": "Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors.",
+        "events_assemble": {
+            "Name": "events_assemble",
+            "Description": "Assemble all annotations for each event in a BIDS-style event file into a single HED string. Returned data: a file of assembled events as text or an error file as text if errors.",
             "Parameters": [
+                "events_string",
                 "json_string",
                 [
                     "schema_string",
                     "schema_url",
                     "schema_version"
-                ]
+                ],
+                "check_warnings_assemble",
+                "defs_expand"
             ]
         },
-        "dictionary_to_short": {
-            "Description": "Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors.",
+        "events_extract": {
+            "Name": "events_extract",
+            "Description": "Extract a template JSON sidecar based on the contents of the event file.  Returned data: A JSON sidecar (template) if no errors.",
             "Parameters": [
-                "json_string",
-                [
-                    "schema_string",
-                    "schema_url",
-                    "schema_version"
-                ]
+                "events_string"
             ]
         },
-        "dictionary_validate": {
-            "Description": "Validate a BIDS JSON sidecar (in string form) and return errors.",
+        "events_validate": {
+            "Name": "events_validate",
+            "Description": "Validate a BIDS-style event file and its JSON sidecar if provided. Returned data: an error file as text if errors.",
             "Parameters": [
-                "json_string",
+                "events_string",
+                 "json_string",
                 [
                     "schema_string",
                     "schema_url",
@@ -38,32 +40,37 @@
                 "check_warnings_validate"
             ]
         },
-        "events_assemble": {
-            "Name": "events_assemble",
-            "Description": "Validate a BIDS events file with JSON sidecars (passed as strings).",
+        "sidecar_to_long": {
+            "Description": "Convert a JSON sidecar with all of its HED tags expressed in long form. Returned data: a converted JSON sidecar as text or an error file as text if errors.",
             "Parameters": [
-                "events_string",
+                "json_string",
                 [
                     "schema_string",
                     "schema_url",
                     "schema_version"
-                ],
-                "json_string",
-                "check_warnings_assemble",
-                "defs_expand"
+                ]
             ]
         },
-        "events_validate": {
-            "Name": "events_validate",
-            "Description": "Validate a BIDS events file with JSON sidecars (passed as strings).",
+        "sidecar_to_short": {
+            "Description": "Convert a JSON sidecar with all of its HED tags expressed in short form. Returned data: a converted JSON sidecar as text or an error file as text if errors.",
             "Parameters": [
-                "events_string",
+                "json_string",
+                [
+                    "schema_string",
+                    "schema_url",
+                    "schema_version"
+                ]
+            ]
+        },
+        "sidecar_validate": {
+            "Description": "Validate a BIDS JSON sidecar (in string form) and return errors.",
+            "Parameters": [
+                "json_string",
                 [
                     "schema_string",
                     "schema_url",
                     "schema_version"
                 ],
-                "json_string",
                 "check_warnings_validate"
             ]
         },
@@ -120,14 +127,13 @@
         }
     },
     "parameter_meanings": {
-        "check_warnings_assemble": "If true, check for warnings when assembling HED tags.",
+        "check_warnings_assemble": "If true, check for warnings when assembling HED strings.",
         "check_warnings_validate": "If true, check for warnings when validating.",
-        "column_x_check": "If present with value 'on' indicates that column number x has HED tags.",
-        "column_x_input": "Contains the prefix appended to column x if x has HED tags.",
-        "defs_expand": "If true, assembly expands definitions and replaces def/XXX with def-expand/XXX.",
+        "column_x_check": "If present with value 'on' column x has HED tags.",
+        "column_x_input": "Contains the prefix prepended to column x if column x has HED tags.",
+        "defs_expand": "If true replaces def/XXX with def-expand/XXX grouped with the definition content.",
         "events_string": "A BIDS events file as a string.",
         "has_column_names": "If true, the first row of the spreadsheet or events file is interpreted as column names.",
-        "hed_columns": "A list of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are used.",
         "hed_strings": "List of HED strings to be processed.",
         "json_string": "JSON sidecar as a string",
         "json_strings": "A list of BIDS JSON sidecars as strings.",

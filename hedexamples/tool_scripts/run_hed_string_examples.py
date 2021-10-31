@@ -8,7 +8,7 @@ HedValidator - Validates a given input string or file
 from hed import schema, get_printable_issue_string, HedString, HedValidator
 
 if __name__ == '__main__':
-    local_hed_file = '../data/HED7.1.1.xml'   # path HED v7.1.1 stored locally
+    local_hed_file = '../data/schema_data/HED7.1.1.xml'  # path HED v7.1.1 stored locally
     hed_schema = schema.load_schema(local_hed_file)
     hed_validator_old = HedValidator(hed_schema)
     hed_schema_current = schema.load_schema_version()

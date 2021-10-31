@@ -1,5 +1,5 @@
 """
-Examples of creating a HedValidator and validating various spreadsheets using it.
+Examples of creating a HedValidator and validating various spreadsheet_data using it.
 Also contains examples of catching HedFileErrors for invalid input.
 
 Classes Demonstrated:
@@ -14,7 +14,7 @@ from hed import schema, get_printable_issue_string, HedValidator, HedInput, HedF
 
 if __name__ == '__main__':
     # Set up the file names for the tests
-    local_hed_file = '../data/HED7.1.1.xml'  # path HED v7.1.1 stored locally
+    local_hed_file = '../data/schema_data/HED7.1.1.xml'  # path HED v7.1.1 stored locally
     example_data_path = '../data'  # path to example data
     valid_tsv_file = os.path.join(example_data_path, 'ValidTwoColumnHED7_1_1.tsv')
     valid_tsv_file_no_header = os.path.join(example_data_path, 'ValidTwoColumnHED7_1_1NoHeader.tsv')
