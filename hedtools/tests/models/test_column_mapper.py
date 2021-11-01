@@ -205,7 +205,7 @@ class Test(unittest.TestCase):
             expected_result = expected_results[test_key]
 
             expanded_row = column_mapper.expand_row_tags([test_string])
-            prepended_hed_string = expanded_row[model_constants.ROW_HED_STRING]
+            prepended_hed_string = expanded_row[model_constants.COLUMN_TO_HED_TAGS][1]
             self.assertEqual(expected_result, str(prepended_hed_string))
 
 
