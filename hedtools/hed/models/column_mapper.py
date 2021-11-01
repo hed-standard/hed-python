@@ -222,8 +222,6 @@ class ColumnMapper:
         result_dict[model_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
         if column_issues_dict:
             result_dict[model_constants.COLUMN_ISSUES] = column_issues_dict
-        final_hed_string = HedString.create_from_other(column_to_hed_tags_dictionary.values())
-        result_dict[model_constants.ROW_HED_STRING] = final_hed_string
 
         return result_dict
 
