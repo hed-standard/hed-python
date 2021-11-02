@@ -3,6 +3,7 @@ import os
 import itertools
 from hed.schema import hed_cache
 from hed import schema
+import shutil
 
 
 class Test(unittest.TestCase):
@@ -26,6 +27,10 @@ class Test(unittest.TestCase):
         cls.specific_hed_url = \
             """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
         cls.base_api_url = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.hed_cache_dir)
 
     def test_get_hed_version_path(self):
         latest_hed_version_path = hed_cache.get_hed_version_path()
