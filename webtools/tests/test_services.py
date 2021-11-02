@@ -36,7 +36,7 @@ class Test(TestWebBase):
                                   "get_input_from_request should have a HED schema")
             self.assertEqual('sidecar_validate', arguments[base_constants.SERVICE],
                              "get_input_from_request should have a service request")
-            self.assertTrue(arguments[base_constants.CHECK_WARNINGS_VALIDATE],
+            self.assertTrue(arguments[base_constants.CHECK_FOR_WARNINGS],
                             "get_input_from_request should have check_warnings true when on")
 
     def test_services_process_empty(self):

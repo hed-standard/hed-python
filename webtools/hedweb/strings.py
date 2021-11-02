@@ -34,8 +34,8 @@ def get_input_from_form(request):
     arguments = {base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, ''),
                  base_constants.SCHEMA: hed_schema,
                  base_constants.STRING_LIST: string_list,
-                 base_constants.CHECK_WARNINGS_VALIDATE:
-                     form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on')}
+                 base_constants.CHECK_FOR_WARNINGS:
+                     form_has_option(request, base_constants.CHECK_FOR_WARNINGS, 'on')}
     return arguments
 
 

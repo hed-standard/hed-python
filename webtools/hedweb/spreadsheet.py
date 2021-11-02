@@ -36,7 +36,7 @@ def get_input_from_form(request):
         base_constants.WORKSHEET_NAME: request.form.get(base_constants.WORKSHEET_SELECTED, None),
         base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, ''),
         base_constants.HAS_COLUMN_NAMES: form_has_option(request, base_constants.HAS_COLUMN_NAMES, 'on'),
-        base_constants.CHECK_WARNINGS_VALIDATE: form_has_option(request, base_constants.CHECK_WARNINGS_VALIDATE, 'on'),
+        base_constants.CHECK_FOR_WARNINGS: form_has_option(request, base_constants.CHECK_FOR_WARNINGS, 'on'),
     }
 
     tag_columns, prefix_dict = get_prefix_dict(request.form)
@@ -87,7 +87,7 @@ def process(arguments):
     return results
 
 
-def spreadsheet_convert(hed_schema, spreadsheet, command=base_constants.COMMAND_TO_LONG):
+def spreadsheet_convert(hed_schema, spreadsheet, command=base_constants.COMMAND_TO_LONG, check_for_warnings=False):
     """Converts a spreadsheet long to short unless unless the command is not COMMAND_TO_LONG then converts to short
 
     Parameters
@@ -98,6 +98,9 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=base_constants.COMMAND_
         Previously created HedInput object
     command: str
         Name of the command to execute if not COMMAND_TO_LONG
+    check_for_warnings: bool
+        If True, check for war
+
 
     Returns
     -------

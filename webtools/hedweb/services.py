@@ -66,14 +66,14 @@ def get_service_info(parameters):
         command = pieces[1]
         command_target = pieces[0]
     has_column_names = parameters.get(base_constants.HAS_COLUMN_NAMES, '') == 'on'
-    check_warnings = parameters.get(base_constants.CHECK_WARNINGS_VALIDATE, '') == 'on'
     defs_expand = parameters.get(base_constants.DEFS_EXPAND, '') == 'on'
+    check_for_warnings = parameters.get(base_constants.CHECK_FOR_WARNINGS, '') == 'on'
 
     return {base_constants.SERVICE: service,
             base_constants.COMMAND: command,
             base_constants.COMMAND_TARGET: command_target,
             base_constants.HAS_COLUMN_NAMES: has_column_names,
-            base_constants.CHECK_WARNINGS_VALIDATE: check_warnings,
+            base_constants.CHECK_FOR_WARNINGS: check_for_warnings,
             base_constants.DEFS_EXPAND: defs_expand
             # base_constants.TAG_COLUMNS: tag_columns,
             # base_constants.COLUMN_PREFIX_DICTIONARY: prefix_dict

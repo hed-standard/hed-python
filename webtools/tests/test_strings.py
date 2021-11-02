@@ -31,7 +31,7 @@ class Test(TestWebBase):
                                   "get_input_from_form should have a HED schema")
             self.assertEqual(base_constants.COMMAND_VALIDATE, arguments[base_constants.COMMAND],
                              "get_input_from_form should have a command")
-            self.assertTrue(arguments[base_constants.CHECK_WARNINGS_VALIDATE],
+            self.assertTrue(arguments[base_constants.CHECK_FOR_WARNINGS],
                             "get_input_from_form should have check_warnings true when on")
 
     def test_string_process(self):

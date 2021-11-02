@@ -32,7 +32,7 @@ class Test(TestWebBase):
                                   "generate_input_from_sidecar_form should have a HED schema")
             self.assertEqual(base_constants.COMMAND_TO_LONG, arguments[base_constants.COMMAND],
                              "generate_input_from_sidecar_form should have a command")
-            self.assertFalse(arguments[base_constants.CHECK_WARNINGS_VALIDATE],
+            self.assertFalse(arguments[base_constants.CHECK_FOR_WARNINGS],
                              "generate_input_from_sidecar_form should have check for warnings false when not given")
 
     def test_sidecar_process_empty_file(self):

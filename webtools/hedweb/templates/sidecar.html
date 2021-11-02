@@ -10,10 +10,10 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         {{ create_process_options('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
-        {{ create_json_input('2) Upload BIDS-style JSON sidecar:') }}
-        {{ create_schema_pulldown('3) Choose a HED schema version:') }}
+        {{ create_json_input('3) Upload BIDS-style JSON sidecar:') }}
+        {{ create_schema_pulldown('4) Choose a HED schema version:') }}
 
-        <h3>4) Process:</h3>
+        <h3>5) Process:</h3>
         <div class="form-group">
             <button id="sidecar_submit" type="button">Process</button>
             <p class="flash" id="sidecar_submit_flash"></p>

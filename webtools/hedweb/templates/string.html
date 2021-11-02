@@ -10,21 +10,21 @@
 
         {{ create_process_options('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
 
-     <h3>2) Enter a HED string: </h3>
+     <h3>3) Enter a HED string: </h3>
         <div class="form-group">
             <textarea rows="5" cols="60" wrap="soft" maxlength="25000"
                       name="string_input" id="string_input"></textarea>
             <p class="flash" id="string_flash"></p>
         </div>
 
-        {{ create_schema_pulldown('3) Choose a HED schema version:') }}
+        {{ create_schema_pulldown('4) Choose a HED schema version:') }}
 
-        <h3>4) Process:</h3>
+        <h3>5) Process:</h3>
         <div class="form-group">
             <button id="string_submit" type="button">Process</button>
         </div>
 
-        <h3>5) View results:</h3>
+        <h3>6) View results:</h3>
         <div class="form-group">
             <textarea rows="5" cols="60" wrap="soft" maxlength="25000"
                           name="string_result" id="string_result"></textarea>
