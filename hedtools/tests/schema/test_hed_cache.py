@@ -3,6 +3,7 @@ import os
 import itertools
 from hed.schema import hed_cache
 from hed import schema
+import shutil
 
 
 class Test(unittest.TestCase):
@@ -26,6 +27,11 @@ class Test(unittest.TestCase):
         cls.specific_hed_url = \
             """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
         cls.base_api_url = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
+        hed_cache.cache_all_hed_xml_versions(cls.base_api_url, cls.hed_cache_dir)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.hed_cache_dir)
 
     def test_get_hed_version_path(self):
         latest_hed_version_path = hed_cache.get_hed_version_path()
@@ -65,13 +71,11 @@ class Test(unittest.TestCase):
         self.assertTrue(local_filename)
 
     def test_cache_all_hed_xml_versions(self):
-        hed_cache.cache_all_hed_xml_versions(self.base_api_url, self.hed_cache_dir)
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
 
     def test_cache_all_hed_xml_versions_deprecated(self):
-        hed_cache.cache_all_hed_xml_versions(self.base_api_url, self.hed_cache_dir)
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, include_deprecated=True)
         hed_xml_filename = hed_cache.get_hed_version_path(self.hed_cache_dir, self.hed_directory_version)
         self.assertTrue("deprecated" in hed_xml_filename)
@@ -81,9 +85,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(latest_hed_version_path, str)
 
     def test_load_deprecated(self):
-        hed_cache.cache_all_hed_xml_versions(self.base_api_url, self.hed_cache_dir)
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, include_deprecated=True)
         hed_schema = schema.load_schema_version(self.hed_cache_dir, self.hed_directory_version)
+        self.assertTrue(hed_schema)
 
     def test_get_all_hed_versions(self):
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)
