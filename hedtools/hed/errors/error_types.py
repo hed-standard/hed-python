@@ -80,8 +80,7 @@ class SidecarErrors:
 
 class SchemaErrors:
     DUPLICATE_TERMS = 'duplicateTerms'
-    # todo: look at what this should be called.
-    UNKNOWN_ATTRIBUTE = 'unknownAttribute'
+    UNKNOWN_ATTRIBUTE = 'HED_SCHEMA_ATTRIBUTE_INVALID'
 
 
 class SchemaWarnings:

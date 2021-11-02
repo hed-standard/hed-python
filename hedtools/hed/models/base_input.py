@@ -11,6 +11,7 @@ from hed.errors.error_reporter import ErrorHandler
 from hed.models import model_constants
 from hed.models.util import translate_ops
 from hed.models.onset_mapper import OnsetMapper
+from hed.models.hed_string import HedString
 
 
 class BaseInput:
@@ -323,6 +324,9 @@ class BaseInput:
                 for hed_string_obj in column_to_hed_tags.values():
                     hed_string_obj.apply_ops(tag_ops)
             if return_row_dict:
+                # Todo: refactor this part so it's always run after tag ops, even on the validators.
+                final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
+                row_dict[model_constants.ROW_HED_STRING] = final_hed_string
                 yield row_number + start_at_one, row_dict
             else:
                 yield row_number + start_at_one, column_to_hed_tags
@@ -360,26 +364,6 @@ class BaseInput:
         if self._has_column_names:
             adj_row_number += 1
         self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = new_text
-
-    @staticmethod
-    def _get_row_hed_tags_from_dict(row_dict):
-        """Reads in the current row of HED tags from the Excel file. The hed tag columns will be concatenated to form a
-           HED string.
-
-        Parameters
-        ----------
-        row_dict: dict
-            Contains the parsed info from a specific worksheet row.
-            the "HED" entry contains the combined hed string for a given row
-        Returns
-        -------
-        hed_string: str
-            a HED string containing the concatenated HED tag columns.
-        column_tags_dict: dict
-            dictionary which associates columns with HED tags
-
-        """
-        return row_dict[model_constants.ROW_HED_STRING], row_dict[model_constants.COLUMN_TO_HED_TAGS]
 
     def get_worksheet(self, worksheet_name=None):
         """
