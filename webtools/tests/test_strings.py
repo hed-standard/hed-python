@@ -21,7 +21,7 @@ class Test(TestWebBase):
         with self.app.test:
             environ = create_environ(data={base_constants.STRING_INPUT: 'Red,Blue',
                                            base_constants.SCHEMA_VERSION: '8.0.0',
-                                           base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                                           base_constants.CHECK_FOR_WARNINGS: 'on',
                                            base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE})
             request = Request(environ)
             arguments = get_input_from_form(request)

@@ -25,7 +25,7 @@ class Test(TestWebBase):
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), './data/bids_events.json')
             with open(json_path, 'rb') as fp:
                 json_string = fp.read().decode('ascii')
-            json_data = {base_constants.JSON_STRING: json_string, base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+            json_data = {base_constants.JSON_STRING: json_string, base_constants.CHECK_FOR_WARNINGS: 'on',
                          base_constants.SCHEMA_VERSION: '8.0.0-alpha.1', base_constants.SERVICE: 'sidecar_validate'}
             environ = create_environ(json=json_data)
             request = Request(environ)

@@ -65,7 +65,7 @@ class Test(TestWebBase):
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         arguments = {base_constants.EVENTS: events, base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
                      base_constants.DEFS_EXPAND: True,
-                     base_constants.CHECK_WARNINGS_VALIDATE: True, base_constants.SCHEMA: hed_schema}
+                     base_constants.CHECK_FOR_WARNINGS: True, base_constants.SCHEMA: hed_schema}
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),
