@@ -11,10 +11,9 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_hed_input = 'Attribute/Temporal/Onset'
-        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../schema_cache_test/')
-        schema.set_cache_directory(new_cache_dir=cls.hed_cache_dir)
-        schema.cache_all_hed_xml_versions()
-        hed_schema = schema.load_schema_version(xml_version_number='7.1.1')
+        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/legacy_xml/')
+        schema_filename = os.path.join(cls.hed_base_dir, "HED7.1.1.xml")
+        hed_schema = schema.load_schema(schema_filename)
         cls.generic_hed_input_reader = HedValidator(hed_schema=hed_schema)
         cls.text_file_with_extension = 'file_with_extension.txt'
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
