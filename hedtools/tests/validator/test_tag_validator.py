@@ -235,6 +235,22 @@ class IndividualHedTagsShort(TestHed3):
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
+    def test_extension_warning(self):
+        test_strings = {
+            'noWarning': "Condition-variable/ValidExt",
+            'warning': "Task-property/WarningExt"
+        }
+        expected_results = {
+            'noWarning': True,
+            'warning': False,
+        }
+        expected_issues = {
+            'noWarning': [],
+            'warning': self.format_error_but_not_really(ValidationErrors.HED_TAG_EXTENDED, tag=0,
+                                                                 index_in_tag=13, index_in_tag_end=None),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
     def test_invalid_placeholder_in_normal_string(self):
         test_strings = {
             'invalidPlaceholder': 'Duration/# ms',
