@@ -4,6 +4,7 @@ import io
 
 from hed import HedInput, HedString, Sidecar, EventsInput, HedFileError
 import shutil
+from hed.models import model_constants
 
 
 class Test(unittest.TestCase):
@@ -48,9 +49,9 @@ class Test(unittest.TestCase):
 
     def test_get_row_hed_tags(self):
         row_dict = self.generic_file_input._mapper.expand_row_tags(self.row_with_hed_tags)
-        hed_string, column_to_hed_tags_dictionary = self.generic_file_input._get_row_hed_tags_from_dict(row_dict)
-        self.assertIsInstance(hed_string, HedString)
-        self.assertTrue(hed_string)
+        column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
+        #self.assertIsInstance(hed_string, HedString)
+        #self.assertTrue(hed_string)
         self.assertIsInstance(column_to_hed_tags_dictionary, dict)
         self.assertTrue(column_to_hed_tags_dictionary)
 
