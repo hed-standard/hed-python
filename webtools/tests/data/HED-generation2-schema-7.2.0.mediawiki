@@ -200,599 +200,599 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 *** Pseudo-character <nowiki> [Alphabet-like but not really]</nowiki> 
 *** Letter <nowiki> [Authograph or valid letters and numbers such as A or 5]</nowiki> 
 **** <nowiki># {takesValue}</nowiki> 
-** Composite <nowiki>[Has multiple of the above on it</nowiki> 
-* Natural scene 
-** Aerial 
-*** Satellite 
-* Drawing <nowiki>[Cartoon or sketch]</nowiki> 
-** Line drawing 
-* Film clip  
-** Commercial TV 
-** Animation 
-* IAPS <nowiki>[International Affective Picture System]  </nowiki> 
-* IADS <nowiki> [International Affective Digital Sounds]</nowiki> 
-* SAM <nowiki> [The Self-Assessment Manikin]</nowiki> 
+** Composite <nowiki>[Has multiple of the above on it]</nowiki>
+* Natural scene
+** Aerial
+*** Satellite
+* Drawing <nowiki>[Cartoon or sketch]</nowiki>
+** Line drawing
+* Film clip
+** Commercial TV
+** Animation
+* IAPS <nowiki>[International Affective Picture System]  </nowiki>
+* IADS <nowiki> [International Affective Digital Sounds]</nowiki>
+* SAM <nowiki> [The Self-Assessment Manikin]</nowiki>
 
-'''Sensory presentation <nowiki>{extensionAllowed} [Object manifestation]</nowiki>''' 
+'''Sensory presentation <nowiki>{extensionAllowed} [Object manifestation]</nowiki>'''
 
-* Auditory <nowiki>[Sound]</nowiki> 
-** Nameable 
-** Cash register  
-** Ding <nowiki>[Often associated with positive valence]</nowiki> 
-** Buzz <nowiki>[Often associated with negative valence]</nowiki> 
-** Fire alarm 
-** Click 
-*** ABR <nowiki>[Auditory Brainstem Response]</nowiki> 
-** Tone 
-** Siren 
-** Music 
-*** Chord sequence 
-*** Vocal 
+* Auditory <nowiki>[Sound]</nowiki>
+** Nameable
+** Cash register
+** Ding <nowiki>[Often associated with positive valence]</nowiki>
+** Buzz <nowiki>[Often associated with negative valence]</nowiki>
+** Fire alarm
+** Click
+*** ABR <nowiki>[Auditory Brainstem Response]</nowiki>
+** Tone
+** Siren
+** Music
+*** Chord sequence
+*** Vocal
 *** Instrumental
 *** Tone
 *** Genre
-** Noise 
-*** White 
-*** Colored <nowiki>[Not white --- for example a 1/f spectrum]</nowiki> 
-** Human voice 
-** Animal voice <nowiki>{extensionAllowed}</nowiki> 
-*** Bird 
-*** Dog 
-*** Insect 
-*** Squirrel 
+** Noise
+*** White
+*** Colored <nowiki>[Not white --- for example a 1/f spectrum]</nowiki>
+** Human voice
+** Animal voice <nowiki>{extensionAllowed}</nowiki>
+*** Bird
+*** Dog
+*** Insect
+*** Squirrel
 
-** Real world <nowiki> [For example people walking or machines operating]</nowiki> 
-*** Pedestrian 
-*** Footsteps 
-**** Walking 
-**** Running 
-*** Noisemaker 
-*** Construction noise 
-*** Machine 
-*** Vehicle 
-**** Horn 
-**** Aircraft 
-***** Airplane 
-***** Helicopter 
-**** Train 
-**** Cart 
-**** Car alarm 
-**** Car 
-**** Bicycle 
-** Nonverbal vocal 
-*** Emotional 
-**** Crying 
-**** Sighing 
-*** Gulp 
-*** Gurgle 
-*** Sneeze 
-*** Cough 
-*** Yawn 
-** Nonvocal <nowiki> [A car engine or gears grinding --- anything that is not made by a human or an animal]</nowiki> 
-*** Engine 
-* Olfactory <nowiki>[Odor]</nowiki> 
-* Taste 
-* Tactile <nowiki>[Pressure]</nowiki> 
-* Visual  
-** Rendering type <nowiki>{requireChild, predicateType=passThrough}</nowiki> 
-*** Screen 
+** Real world <nowiki> [For example people walking or machines operating]</nowiki>
+*** Pedestrian
+*** Footsteps
+**** Walking
+**** Running
+*** Noisemaker
+*** Construction noise
+*** Machine
+*** Vehicle
+**** Horn
+**** Aircraft
+***** Airplane
+***** Helicopter
+**** Train
+**** Cart
+**** Car alarm
+**** Car
+**** Bicycle
+** Nonverbal vocal
+*** Emotional
+**** Crying
+**** Sighing
+*** Gulp
+*** Gurgle
+*** Sneeze
+*** Cough
+*** Yawn
+** Nonvocal <nowiki> [A car engine or gears grinding --- anything that is not made by a human or an animal]</nowiki>
+*** Engine
+* Olfactory <nowiki>[Odor]</nowiki>
+* Taste
+* Tactile <nowiki>[Pressure]</nowiki>
+* Visual
+** Rendering type <nowiki>{requireChild, predicateType=passThrough}</nowiki>
+*** Screen
 **** Head-mounted display
-**** View port <nowiki> [Two or more views on the same object --- for example one from top one from street view]</nowiki> 
-***** ID <nowiki>{predicateType=passThrough}</nowiki> 
-****** <nowiki>#  {takesValue} [A descriptive label for the viewport] </nowiki> 
-**** 2D 
-**** 3D 
-**** Movie 
-***** Video-tape 
-***** Motion-capture <nowiki>[Stick figure of motion capture of someone else]</nowiki> 
-****** Point light 
-****** Stick figure 
-****** Outline 
-***** Flickering 
-***** Steady state 
-*** Real-world 
-*** LED <nowiki>[Stimulus is turning on/off one or a few LEDs]</nowiki> 
+**** View port <nowiki> [Two or more views on the same object --- for example one from top one from street view]</nowiki>
+***** ID <nowiki>{predicateType=passThrough}</nowiki>
+****** <nowiki>#  {takesValue} [A descriptive label for the viewport] </nowiki>
+**** 2D
+**** 3D
+**** Movie
+***** Video-tape
+***** Motion-capture <nowiki>[Stick figure of motion capture of someone else]</nowiki>
+****** Point light
+****** Stick figure
+****** Outline
+***** Flickering
+***** Steady state
+*** Real-world
+*** LED <nowiki>[Stimulus is turning on/off one or a few LEDs]</nowiki>
 
-'''Attribute''' {requireChild, extensionAllowed} 
-* Onset <nowiki>[Default]</nowiki> 
+'''Attribute''' {requireChild, extensionAllowed}
+* Onset <nowiki>[Default]</nowiki>
 * Offset
 * Imagined <nowiki>[This is used to identity that the (sub)event only happened in the imagination of the participant, e.g.  imagined movements in motor imagery paradigms.]</nowiki>
 * State ID <nowiki>{requireChild} [This is used to identify a group of events that are changing the state of a variable where the onset means the offset of any other and a change in the state]</nowiki>
-** # <nowiki>{takesValue} [ID which could be a number or any string]</nowiki> 
-* Repetition <nowiki>{requireChild} [When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others]</nowiki> 
+** # <nowiki>{takesValue} [ID which could be a number or any string]</nowiki>
+* Repetition <nowiki>{requireChild} [When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others]</nowiki>
 ** <nowiki># {takesValue, isNumeric} [Number starting from 1 where 1 indicates the first occurrence and 2 indicates the second occurrence]</nowiki>
-* Temporal rate <nowiki>{predicateType=propertyOf}</nowiki> 
-** <nowiki># {takesValue, isNumeric, unitClass=frequency} [In Hz]</nowiki> 
+* Temporal rate <nowiki>{predicateType=propertyOf}</nowiki>
+** <nowiki># {takesValue, isNumeric, unitClass=frequency} [In Hz]</nowiki>
 * Condition <nowiki>{requireChild} [Specifies the value of an independent variable (number of letters, N, in an N-back task) or function of independent variables that is varied or controlled for in the experiment.  This attribute is often specified at the task level and can be associated with specification of an experimental stimulus or an experiment context (e.g. 1-back, 2-back conditions in an N-back task, or changing the target type from faces to houses in a Rapid Serial Visual Presentation, or RSVP, task.)]</nowiki>
-** # <nowiki>{takesValue} [the condition]</nowiki> 
-* Action judgment <nowiki>[External judgment (assumed to be ground truth, e.g. from an experiment control software or an annotator) about participant actions such as answering a question, failing to answer in time, etc.]</nowiki> 
-** Correct 
-** Incorrect <nowiki>[Wrong choice but not time out]</nowiki> 
-** Indeterminate <nowiki>[It cannot be determined that the action was correct or incorrect.]</nowiki> 
-** Time out 
-*** Missed <nowiki>[Participant failed or could not have perceived the instruction due to their eyes being off-screen or a similar reason. Not easy to deduce this but it is possible]</nowiki> 
+** # <nowiki>{takesValue} [the condition]</nowiki>
+* Action judgment <nowiki>[External judgment (assumed to be ground truth, e.g. from an experiment control software or an annotator) about participant actions such as answering a question, failing to answer in time, etc.]</nowiki>
+** Correct
+** Incorrect <nowiki>[Wrong choice but not time out]</nowiki>
+** Indeterminate <nowiki>[It cannot be determined that the action was correct or incorrect.]</nowiki>
+** Time out
+*** Missed <nowiki>[Participant failed or could not have perceived the instruction due to their eyes being off-screen or a similar reason. Not easy to deduce this but it is possible]</nowiki>
 ** Inappropriate <nowiki>[A choice that is not allowed such as moving a chess piece to a location it should not go based on game rules]</nowiki>
 * Response start delay <nowiki>[The time interval between this (stimulus) event and the start of the response event specified, usually by grouping with the event ID of the response start event.]</nowiki>
 ** <nowiki># {takesValue, unitClass=time}</nowiki>
 * Response end delay <nowiki>[The time interval between this (stimulus) event and the end of the response event specified, usually by grouping with the event ID of the response end event.]</nowiki>
 ** <nowiki># {takesValue, unitClass=time}</nowiki>
-* Social <nowiki>[Involving interactions among multiple agents such as humans or dogs or robots]</nowiki> 
+* Social <nowiki>[Involving interactions among multiple agents such as humans or dogs or robots]</nowiki>
 * Peak <nowiki>[Peak velocity or  acceleration or jerk]</nowiki>
-* Object side <nowiki>{requireChild} [Could be the left,  right, or both sides of a person or a vehicle]</nowiki> 
-** Reference object ID  <nowiki>{requireChild,predicateType=propertyOf}[Place object ID after this]</nowiki> 
-*** <nowiki># {takesValue}</nowiki> 
-** Right 
-** Left 
-** Front 
-** Back 
-** Top 
-** Bottom 
-** Starboard 
-** Port 
-** Passenger side <nowiki>[Side of a car]</nowiki> 
-** Driver side <nowiki>[Side of a car]</nowiki> 
-** Bow <nowiki>[Front of a ship]</nowiki> 
+* Object side <nowiki>{requireChild} [Could be the left,  right, or both sides of a person or a vehicle]</nowiki>
+** Reference object ID  <nowiki>{requireChild,predicateType=propertyOf}[Place object ID after this]</nowiki>
+*** <nowiki># {takesValue}</nowiki>
+** Right
+** Left
+** Front
+** Back
+** Top
+** Bottom
+** Starboard
+** Port
+** Passenger side <nowiki>[Side of a car]</nowiki>
+** Driver side <nowiki>[Side of a car]</nowiki>
+** Bow <nowiki>[Front of a ship]</nowiki>
 ** Stern <nowiki>[Back of the ship]</nowiki>
-* Direction <nowiki>{requireChild} [Coordinate system is inferred from Attribute/Location. To specify a vector combine subnodes with number --- for example Attribute/Top/10, Attribute/Direction/Left/5 to create a vector with coordinates 10 and 5]</nowiki> 
-** Top <nowiki> [Combine Attribute/Direction/Top and Attribute/Direction/Left to mean the upper left]</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-** Bottom 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-** Left 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-** Right  
-*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-** Angle <nowiki>[Clockwise angle in degrees from vertical]</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle} [Clockwise angle in degrees from vertical]</nowiki> 
-** North 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-** South 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-** East 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-** West 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-** Forward <nowiki> [Like a car moving forward]</nowiki> 
-** Backward <nowiki>[Like a car moving backward]</nowiki> 
-* Location {requireChild} <nowiki>[Spot or center of an area. Use Area were you are referring to something with significant extent and emphasizing its boundaries, like a city]</nowiki> 
-** <nowiki># {takesValue} [location label]</nowiki> 
-** Screen <nowiki>[Specify displacements from each subnode in pixels or degrees or meters. Specify units such as Attribute/Location/Screen/Top/12 px]</nowiki> 
-*** Center 
-**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-*** Top <nowiki>[You can combine Attribute/Location/Top and Attribute/Location/Left to designate UpperLeft and so on]</nowiki> 
-**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-*** Bottom 
-**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-*** Left 
-**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-*** Right  
-**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki> 
-*** Angle  
-**** <nowiki># {takesValue, isNumeric, unitClass=angle} [Clockwise angle in degrees from vertical]</nowiki> 
-*** Center displacement 
-**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength} [displacement from screen center, in any direction, in degrees, cm, or other lengths]</nowiki> 
-**** Horizontal 
-***** <nowiki># {takesValue, isNumeric, unitClass=angle,  unitClass=physicalLength} [Displacement from screen center in any direction]</nowiki> 
-**** Vertical 
-***** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength}[Displacement from screen center in any direction]</nowiki> 
-** Lane <nowiki>[For example a car lane]</nowiki> 
-*** Rightmost 
-*** Leftmost 
-*** Right of expected 
-*** Left of expected 
-*** Cruising  
-*** Passing <nowiki>[The lane that cars use to take over other cars]</nowiki> 
-*** Oncoming 
-** Real-world coordinates <nowiki>{requireChild}</nowiki> 
-*** Room 
-**** xyz <nowiki> {requireChild} [have a subnode, e.g. Attribute/Location/Real-world coordinates/Room/xyz/[10 50 30]]</nowiki> 
-***** <nowiki># {takesValue}</nowiki> 
-** Reference frame <nowiki>{requireChild}</nowiki> 
-*** Specified absolute reference 
-*** Relative to participant 
-**** Participant ID <nowiki>{requireChild}</nowiki> 
-***** <nowiki># {takesValue}</nowiki> 
-**** Left 
-**** Front 
-**** Right 
-**** Back 
-**** Distance <nowiki>{requireChild}</nowiki> 
-***** <nowiki># {takesValue, isNumeric, unitClass=physicalLength} [Distance is in meters by default]</nowiki> 
-***** Near 
-***** Moderate 
-***** Far 
-**** Azimuth <nowiki>{requireChild}</nowiki> 
-***** <nowiki># {takesValue, isNumeric, unitClass=angle} [Clockwise with units preferably in degrees]</nowiki> 
-**** Elevation <nowiki>{requireChild}</nowiki> 
-***** <nowiki># {takesValue, isNumeric, unitClass=angle} [Preferably in degrees]</nowiki> 
-* Object orientation <nowiki>{requireChild}</nowiki> 
-** Rotated 
-*** Degrees <nowiki>{requireChild}</nowiki> 
-**** <nowiki>#{takesValue, isNumeric, unitClass=angle}[Preferably in degrees]</nowiki> 
-* Size <nowiki>{requireChild}</nowiki> 
-** Length<nowiki>{requireChild}</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=physicalLength} [In meters or other units of length ]</nowiki> 
+* Direction <nowiki>{requireChild} [Coordinate system is inferred from Attribute/Location. To specify a vector combine subnodes with number --- for example Attribute/Top/10, Attribute/Direction/Left/5 to create a vector with coordinates 10 and 5]</nowiki>
+** Top <nowiki> [Combine Attribute/Direction/Top and Attribute/Direction/Left to mean the upper left]</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+** Bottom
+*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+** Left
+*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+** Right
+*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+** Angle <nowiki>[Clockwise angle in degrees from vertical]</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=angle} [Clockwise angle in degrees from vertical]</nowiki>
+** North
+*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+** South
+*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+** East
+*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+** West
+*** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+** Forward <nowiki> [Like a car moving forward]</nowiki>
+** Backward <nowiki>[Like a car moving backward]</nowiki>
+* Location {requireChild} <nowiki>[Spot or center of an area. Use Area were you are referring to something with significant extent and emphasizing its boundaries, like a city]</nowiki>
+** <nowiki># {takesValue} [location label]</nowiki>
+** Screen <nowiki>[Specify displacements from each subnode in pixels or degrees or meters. Specify units such as Attribute/Location/Screen/Top/12 px]</nowiki>
+*** Center
+**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+*** Top <nowiki>[You can combine Attribute/Location/Top and Attribute/Location/Left to designate UpperLeft and so on]</nowiki>
+**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+*** Bottom
+**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+*** Left
+**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+*** Right
+**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength, unitClass=pixels}</nowiki>
+*** Angle
+**** <nowiki># {takesValue, isNumeric, unitClass=angle} [Clockwise angle in degrees from vertical]</nowiki>
+*** Center displacement
+**** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength} [displacement from screen center, in any direction, in degrees, cm, or other lengths]</nowiki>
+**** Horizontal
+***** <nowiki># {takesValue, isNumeric, unitClass=angle,  unitClass=physicalLength} [Displacement from screen center in any direction]</nowiki>
+**** Vertical
+***** <nowiki># {takesValue, isNumeric, unitClass=angle, unitClass=physicalLength}[Displacement from screen center in any direction]</nowiki>
+** Lane <nowiki>[For example a car lane]</nowiki>
+*** Rightmost
+*** Leftmost
+*** Right of expected
+*** Left of expected
+*** Cruising
+*** Passing <nowiki>[The lane that cars use to take over other cars]</nowiki>
+*** Oncoming
+** Real-world coordinates <nowiki>{requireChild}</nowiki>
+*** Room
+**** xyz <nowiki> {requireChild} [have a subnode, e.g. Attribute/Location/Real-world coordinates/Room/xyz/10-50-30]</nowiki>
+***** <nowiki># {takesValue}</nowiki>
+** Reference frame <nowiki>{requireChild}</nowiki>
+*** Specified absolute reference
+*** Relative to participant
+**** Participant ID <nowiki>{requireChild}</nowiki>
+***** <nowiki># {takesValue}</nowiki>
+**** Left
+**** Front
+**** Right
+**** Back
+**** Distance <nowiki>{requireChild}</nowiki>
+***** <nowiki># {takesValue, isNumeric, unitClass=physicalLength} [Distance is in meters by default]</nowiki>
+***** Near
+***** Moderate
+***** Far
+**** Azimuth <nowiki>{requireChild}</nowiki>
+***** <nowiki># {takesValue, isNumeric, unitClass=angle} [Clockwise with units preferably in degrees]</nowiki>
+**** Elevation <nowiki>{requireChild}</nowiki>
+***** <nowiki># {takesValue, isNumeric, unitClass=angle} [Preferably in degrees]</nowiki>
+* Object orientation <nowiki>{requireChild}</nowiki>
+** Rotated
+*** Degrees <nowiki>{requireChild}</nowiki>
+**** <nowiki>#{takesValue, isNumeric, unitClass=angle}[Preferably in degrees]</nowiki>
+* Size <nowiki>{requireChild}</nowiki>
+** Length<nowiki>{requireChild}</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=physicalLength} [In meters or other units of length ]</nowiki>
 ** Width
-*** <nowiki># {takesValue, isNumeric, unitClass=physicalLength} </nowiki><nowiki>[in meters]</nowiki> 
+*** <nowiki># {takesValue, isNumeric, unitClass=physicalLength} </nowiki><nowiki>[in meters]</nowiki>
 ** Height
-*** <nowiki># {takesValue, isNumeric, unitClass=physicalLength} [Default units are meters]</nowiki> 
-** Area <nowiki>{requireChild}</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=area}</nowiki> 
-** Volume <nowiki>{requireChild}</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=volume} [In cubic-meters or other units of volume]</nowiki> 
-** Angle<nowiki>{requireChild}</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle} [In degrees or other units of angle]</nowiki> 
-* Item count <nowiki>{requireChild} [Number of items for example when there are 3 cars and they are identified as a single item]</nowiki> 
-** <nowiki># {takesValue, isNumeric} [Numeric value of number of items #]</nowiki> 
-** <nowiki><=# {takesValue, isNumeric} [Number of items less than or equal to #]</nowiki> 
-** <nowiki>>=# {takesValue, isNumeric} [Number of items  more than or equal to #]</nowiki> 
-* Auditory <nowiki></nowiki> 
-** Frequency <nowiki>{requireChild}</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=frequency} [In HZ]</nowiki> 
-** Loudness <nowiki>{requireChild}</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=intensity} [in dB]</nowiki> 
-** Ramp up <nowiki>[Increasing in amplitude]</nowiki> 
-** Ramp down <nowiki>[Decreasing in amplitude]</nowiki> 
+*** <nowiki># {takesValue, isNumeric, unitClass=physicalLength} [Default units are meters]</nowiki>
+** Area <nowiki>{requireChild}</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=area}</nowiki>
+** Volume <nowiki>{requireChild}</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=volume} [In cubic-meters or other units of volume]</nowiki>
+** Angle<nowiki>{requireChild}</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=angle} [In degrees or other units of angle]</nowiki>
+* Item count <nowiki>{requireChild} [Number of items for example when there are 3 cars and they are identified as a single item]</nowiki>
+** <nowiki># {takesValue, isNumeric} [Numeric value of number of items #]</nowiki>
+** <nowiki><=# {takesValue, isNumeric} [Number of items less than or equal to #]</nowiki>
+** <nowiki>>=# {takesValue, isNumeric} [Number of items  more than or equal to #]</nowiki>
+* Auditory <nowiki></nowiki>
+** Frequency <nowiki>{requireChild}</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=frequency} [In HZ]</nowiki>
+** Loudness <nowiki>{requireChild}</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=intensity} [in dB]</nowiki>
+** Ramp up <nowiki>[Increasing in amplitude]</nowiki>
+** Ramp down <nowiki>[Decreasing in amplitude]</nowiki>
 * Blink
-** Time shut <nowiki>{requireChild} [The amount of time the eyelid remains closed (typically measured as 90% of the blink amplitude), in seconds.]</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=time, default=s}</nowiki> 
+** Time shut <nowiki>{requireChild} [The amount of time the eyelid remains closed (typically measured as 90% of the blink amplitude), in seconds.]</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=time, default=s}</nowiki>
 ** Duration <nowiki>{requireChild} [Duration of blink, usually the half-height blink duration in seconds taken either from base or zero of EEG signal. For eye-trackers, usually denotes interval when pupil covered by eyelid.]</nowiki>
-***<nowiki># {takesValue, isNumeric, unitClass=time, default=s}</nowiki> 
-** PAVR <nowiki>{requireChild} [Amplitude-Velocity ratio, in centiseconds]</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=time, default=centiseconds}</nowiki> 
-** NAVR <nowiki>{requireChild} [Negative Amplitude-Velocity ratio, in centiseconds]</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=time, default=centiseconds}</nowiki> 
+***<nowiki># {takesValue, isNumeric, unitClass=time, default=s}</nowiki>
+** PAVR <nowiki>{requireChild} [Amplitude-Velocity ratio, in centiseconds]</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=time, default=centiseconds}</nowiki>
+** NAVR <nowiki>{requireChild} [Negative Amplitude-Velocity ratio, in centiseconds]</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=time, default=centiseconds}</nowiki>
 * Visual <nowiki></nowiki>
-** Bistable 
-** Background 
-** Foreground 
-** Up-down separated <nowiki>[Stimuli presented both at the top and the bottom of fovea]</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle} [Angle of separation in degrees by default]</nowiki> 
-** Bilateral <nowiki>[For bilateral visual field stimulus presentations]</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=angle} [Angle of separation in degrees by default] </nowiki> 
-** Motion 
-*** Down    
-**** <nowiki># {takesValue, isNumeric, unitClass=speed} [e.g. 3 degrees-per-second]</nowiki> 
-*** Up 
-**** <nowiki># {takesValue, isNumeric, unitClass=speed} [e.g. 3 degrees-per-second]</nowiki> 
-*** Horizontal 
-**** Right   
-***** <nowiki># {takesValue, isNumeric, unitClass=speed} [e.g. 3 degrees-per-second]</nowiki> 
-**** Left 
-***** <nowiki># {takesValue, isNumeric, unitClass=speed} [e.g. 3 degrees-per-second]</nowiki> 
-*** Oblique 
-**** Clock face 
-***** <nowiki>#  {takesValue, unitClass=time} [For example  4:30]</nowiki> 
-** Fixation point 
-** Luminance <nowiki>{requireChild}</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=luminousIntensity}[In candelas by default]</nowiki> 
-** Color <nowiki>{requireChild}</nowiki> 
-*** Dark 
-*** Light 
-*** Aqua <nowiki>[These are CSS 3 basic color names]</nowiki> 
-*** Black 
-*** Fuchsia  
-*** Gray 
-*** Lime  
-*** Maroon 
-*** Navy 
-*** Olive  
-*** Purple  
-*** Silver  
-*** Teal  
-*** White  
-*** Yellow 
-*** Red 
-**** <nowiki># {takesValue, isNumeric} [R value of RGB between 0 and 1]</nowiki> 
-*** Blue 
-**** <nowiki># {takesValue, isNumeric} [B value of RGB between 0 and 1]</nowiki> 
-*** Green 
-**** <nowiki># {takesValue, isNumeric} [G value of RGB between 0 and 1]</nowiki> 
-*** Hue <nowiki>{requireChild}</nowiki> 
-**** <nowiki># {takesValue, isNumeric} [H value of HSV between 0 and 1]</nowiki> 
-*** Saturation <nowiki>{requireChild}</nowiki> 
-**** <nowiki># {takesValue, isNumeric} [S value of HSV between 0 and 1]</nowiki> 
-*** Value <nowiki>{requireChild}</nowiki> 
-**** <nowiki># {takesValue, isNumeric} [V value of HSV between 0 and 1]</nowiki> 
-*** Achromatic <nowiki>[Indicates gray scale]</nowiki> 
-**** <nowiki># {takesValue, isNumeric} [White intensity between 0 and 1]</nowiki> 
-* Nonlinguistic <nowiki>[Something that conveys meaning without using words such as the iconic pictures of a man or a woman on the doors of restrooms. Another example is a deer crossing sign with just a picture of jumping deer.]</nowiki> 
-* Semantic <nowiki>[Like in priming or in congruence]</nowiki> 
-* Language 
-** Unit <nowiki>{predicateType=passThrough}</nowiki> 
-*** Phoneme 
-*** Syllable 
-*** Word 
-**** Noun 
-***** Proper <nowiki>[A proper noun that  refers to a unique entity  such as London or Jupiter]</nowiki> 
-***** Common <nowiki>[A noun that refers to a class of entities such as cities or planets or corporations  such as a Dog or a Skyscraper]</nowiki> 
-**** Verb 
-**** Adjective 
-**** Pseudoword 
-**** <nowiki># {takesValue} [Actual word]</nowiki> 
-*** Sentence 
-**** Full 
-**** Partial 
-**** <nowiki># {takesValue} [Actual sentence]</nowiki> 
-*** Paragraph 
-**** <nowiki># {takesValue} [Actual paragraph]</nowiki> 
-*** Story <nowiki>[Multiple paragraphs making a detailed account]</nowiki> 
-** Family <nowiki>{predicateType=passThrough}</nowiki> 
+** Bistable
+** Background
+** Foreground
+** Up-down separated <nowiki>[Stimuli presented both at the top and the bottom of fovea]</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=angle} [Angle of separation in degrees by default]</nowiki>
+** Bilateral <nowiki>[For bilateral visual field stimulus presentations]</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=angle} [Angle of separation in degrees by default] </nowiki>
+** Motion
+*** Down
+**** <nowiki># {takesValue, isNumeric, unitClass=speed} [e.g. 3 degrees-per-second]</nowiki>
+*** Up
+**** <nowiki># {takesValue, isNumeric, unitClass=speed} [e.g. 3 degrees-per-second]</nowiki>
+*** Horizontal
+**** Right
+***** <nowiki># {takesValue, isNumeric, unitClass=speed} [e.g. 3 degrees-per-second]</nowiki>
+**** Left
+***** <nowiki># {takesValue, isNumeric, unitClass=speed} [e.g. 3 degrees-per-second]</nowiki>
+*** Oblique
+**** Clock face
+***** <nowiki>#  {takesValue, unitClass=time} [For example  4:30]</nowiki>
+** Fixation point
+** Luminance <nowiki>{requireChild}</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=luminousIntensity}[In candelas by default]</nowiki>
+** Color <nowiki>{requireChild}</nowiki>
+*** Dark
+*** Light
+*** Aqua <nowiki>[These are CSS 3 basic color names]</nowiki>
+*** Black
+*** Fuchsia
+*** Gray
+*** Lime
+*** Maroon
+*** Navy
+*** Olive
+*** Purple
+*** Silver
+*** Teal
+*** White
+*** Yellow
+*** Red
+**** <nowiki># {takesValue, isNumeric} [R value of RGB between 0 and 1]</nowiki>
+*** Blue
+**** <nowiki># {takesValue, isNumeric} [B value of RGB between 0 and 1]</nowiki>
+*** Green
+**** <nowiki># {takesValue, isNumeric} [G value of RGB between 0 and 1]</nowiki>
+*** Hue <nowiki>{requireChild}</nowiki>
+**** <nowiki># {takesValue, isNumeric} [H value of HSV between 0 and 1]</nowiki>
+*** Saturation <nowiki>{requireChild}</nowiki>
+**** <nowiki># {takesValue, isNumeric} [S value of HSV between 0 and 1]</nowiki>
+*** Value <nowiki>{requireChild}</nowiki>
+**** <nowiki># {takesValue, isNumeric} [V value of HSV between 0 and 1]</nowiki>
+*** Achromatic <nowiki>[Indicates gray scale]</nowiki>
+**** <nowiki># {takesValue, isNumeric} [White intensity between 0 and 1]</nowiki>
+* Nonlinguistic <nowiki>[Something that conveys meaning without using words such as the iconic pictures of a man or a woman on the doors of restrooms. Another example is a deer crossing sign with just a picture of jumping deer.]</nowiki>
+* Semantic <nowiki>[Like in priming or in congruence]</nowiki>
+* Language
+** Unit <nowiki>{predicateType=passThrough}</nowiki>
+*** Phoneme
+*** Syllable
+*** Word
+**** Noun
+***** Proper <nowiki>[A proper noun that  refers to a unique entity  such as London or Jupiter]</nowiki>
+***** Common <nowiki>[A noun that refers to a class of entities such as cities or planets or corporations  such as a Dog or a Skyscraper]</nowiki>
+**** Verb
+**** Adjective
+**** Pseudoword
+**** <nowiki># {takesValue} [Actual word]</nowiki>
+*** Sentence
+**** Full
+**** Partial
+**** <nowiki># {takesValue} [Actual sentence]</nowiki>
+*** Paragraph
+**** <nowiki># {takesValue} [Actual paragraph]</nowiki>
+*** Story <nowiki>[Multiple paragraphs making a detailed account]</nowiki>
+** Family <nowiki>{predicateType=passThrough}</nowiki>
 *** Asian
-**** Chinese 
-**** Japanese 
+**** Chinese
+**** Japanese
 *** Latin
-**** English 
-**** German 
-**** French 
-* Induced <nowiki>[Such as inducing emotions or keeping someone awake or in a coma with an external intervention]</nowiki> 
-* Emotional 
-** Arousal <nowiki>[Only in the context of 2D emotion representation]</nowiki> 
-*** <nowiki># {takesValue, isNumeric} [A value between -1 and 1]</nowiki> 
-** Positive valence <nowiki> [Valence by itself can be the name of an emotion such as sadness so this tag distinguishes the type of emotion]</nowiki> 
-*** <nowiki># {takesValue, isNumeric} [Ranges from 0 to 1]</nowiki> 
-** Negative valence 
-*** <nowiki># {takesValue, isNumeric}[Ranges from 0 to 1]</nowiki> 
-* Priming 
-** Motoric 
-** Emotional 
-** Perceptual 
-* Subliminal 
-** Unmasked 
-** Masked 
-*** Forward 
-*** Backward 
-* Supraliminal <nowiki>[By default this is assumed about each stimulus]</nowiki> 
-* Liminal <nowiki>[At the 75%-25% perception threshold]</nowiki> 
-* Probability <nowiki> [Use to specify the level of certainty about the occurrence of the event. Use either numerical values as the child node or low, high, etc.]</nowiki> 
-* Temporal uncertainty <nowiki> {requireChild} [Use to specify the amount of uncertainty in the timing of the event. Please notice that this is different from Attribute/Probability tag which relates to the occurrence of event and can be interpretative as the integral of probability density across a distribution whose shape (temporal extent) is specified by Attribute/Temporal uncertainty]. </nowiki> 
-** <nowiki># {takesValue, isNumeric, unitClass=time} [implies that the temporal uncertainty is a uniform distribution with the amount of time provided, extending on both side. E.g. "0.5 s" specifies a 1-second range centered at event latency.</nowiki> 
-** Standard deviation <nowiki>{requireChild} [implies that the distribution of temporal uncertainty is Gaussian with the provided standard deviation (in seconds).]</nowiki> 
+**** English
+**** German
+**** French
+* Induced <nowiki>[Such as inducing emotions or keeping someone awake or in a coma with an external intervention]</nowiki>
+* Emotional
+** Arousal <nowiki>[Only in the context of 2D emotion representation]</nowiki>
+*** <nowiki># {takesValue, isNumeric} [A value between -1 and 1]</nowiki>
+** Positive valence <nowiki> [Valence by itself can be the name of an emotion such as sadness so this tag distinguishes the type of emotion]</nowiki>
+*** <nowiki># {takesValue, isNumeric} [Ranges from 0 to 1]</nowiki>
+** Negative valence
+*** <nowiki># {takesValue, isNumeric}[Ranges from 0 to 1]</nowiki>
+* Priming
+** Motoric
+** Emotional
+** Perceptual
+* Subliminal
+** Unmasked
+** Masked
+*** Forward
+*** Backward
+* Supraliminal <nowiki>[By default this is assumed about each stimulus]</nowiki>
+* Liminal <nowiki>[At the 75%-25% perception threshold]</nowiki>
+* Probability <nowiki> [Use to specify the level of certainty about the occurrence of the event. Use either numerical values as the child node or low, high, etc.]</nowiki>
+* Temporal uncertainty <nowiki> {requireChild} [Use to specify the amount of uncertainty in the timing of the event. Please notice that this is different from Attribute/Probability tag which relates to the occurrence of event and can be interpretative as the integral of probability density across a distribution whose shape (temporal extent) is specified by Attribute/Temporal uncertainty.]</nowiki>
+** <nowiki># {takesValue, isNumeric, unitClass=time} [implies that the temporal uncertainty is a uniform distribution with the amount of time provided, extending on both side. E.g. "0.5 s" specifies a 1-second range centered at event latency.]</nowiki>
+** Standard deviation <nowiki>{requireChild} [implies that the distribution of temporal uncertainty is Gaussian with the provided standard deviation (in seconds).]</nowiki>
 *** <nowiki># {takesValue, isNumeric, unitClass=time}</nowiki>
 * Presentation <nowiki>{requireChild}[Attributes associated with visual, auditory, tactile, etc. presentation of an stimulus]</nowiki>
-** Fraction <nowiki>{requireChild} [the fraction of presentation of an Oddball or Expected stimuli to the total number of same-class presentations, e.g. 10% of images in an RSVP being targets] </nowiki> 
+** Fraction <nowiki>{requireChild} [the fraction of presentation of an Oddball or Expected stimuli to the total number of same-class presentations, e.g. 10% of images in an RSVP being targets] </nowiki>
 *** <nowiki># {takesValue, isNumeric}</nowiki>
-** Cued <nowiki>[what is presented is cued to the presentation of something else] </nowiki> 
-** Background <nowiki>[presented in the background such as background music, background image, etc. The main factor here is that background presentations are to be ignored, e.g. ignore math question auditory stimuli.] </nowiki> 
+** Cued <nowiki>[what is presented is cued to the presentation of something else] </nowiki>
+** Background <nowiki>[presented in the background such as background music, background image, etc. The main factor here is that background presentations are to be ignored, e.g. ignore math question auditory stimuli.] </nowiki>
 * Intended effect <nowiki>[This tag is to be grouped with Participant/Effect/Cognitive to specify the intended cognitive effect (of the experimenter). This is to differentiate the resulting group with Participant/Effect which specifies the actual effect on the participant. For example, in an RSVP experiment if an image is intended to be perceived as a target, (Participant/Effect/Cognitive/Target, Attribute/Intended effect) group is added. If the image was perceived by the subject as a target (e.g. they pressed a button to indicate so), then the tag Participant/Effect/Cognitive/Target is also added: Participant/Effect/Cognitive/Target, (Participant/Effect/Cognitive/Target, Attribute/Intended effect). otherwise the Participant/Effect/Cognitive/Target tag is not included outside of the group.]</nowiki>
 * Instruction <nowiki> [This tag is placed in events of type Event/Category/Experimental stimulus/Instruction, grouped with one or more Action/ tags to replace the detailed specification XXX in Event/Category/Experimental stimulus/Instruction/XXX) in previous versions. Usage example:  Event/Category/Experimental stimulus/Instruction, (Action/Fixate, Attribute/Instruction) ]</nowiki>
 * Participant indication <nowiki> [This tag is placed in events of type Event/Category/Participant response and grouped with Participant/Effect/Cognitive/.. tags to specify the type of cognitive effect the participant has experienced. For example, in an RSVP paradigm, the subject can indicate the detection of a target with a button press. The HED string associated with this button press must include (Attribute/Participant indication, Participant/Effect/Cognitive/Target,...)]</nowiki>
-* Path <nowiki>{requireChild}</nowiki> 
-** Velocity  <nowiki>[Use Attribute/Onset or Attribute/Offset to specify onset or offset]</nowiki> 
-*** <nowiki># {takesValue, isNumeric, unitClass=speed} [Numeric value with default units of m-per-s]</nowiki> 
-** Acceleration 
-*** <nowiki># {takesValue, isNumeric, unitClass=acceleration} [Numeric value with default units of m-per-s2] </nowiki> 
-** Jerk 
-*** <nowiki># {takesValue, isNumeric, unitClass=jerk} [Numeric value with default units of m-per-s3] </nowiki> 
-** Constrained <nowiki>[For example a path cannot cross some region]</nowiki> 
-* File <nowiki>{requireChild} [File attributes]</nowiki> 
-** Name 
-** Size 
-*** <nowiki># {takesValue, isNumeric, unitClass=memorySize} [Numeric value with default units of mb]</nowiki> 
-** <nowiki># {takesValue, isNumeric}[Number of files]</nowiki> 
-* Object control <nowiki>{requireChild} [Specifies control such as for a vehicle]</nowiki> 
-** Perturb 
-** Collide 
-** Near miss <nowiki>[Almost having an accident resulting in negative consequences]</nowiki> 
-** Correct position <nowiki>[After a lane deviation or side of the walkway]</nowiki> 
-** Halt <nowiki>[Time at which speed becomes exactly zero]</nowiki> 
-** Brake 
-** Shift lane 
-** Cross <nowiki>[Crossing in front of another object such as a vehicle]</nowiki> 
-** Pass by <nowiki>[Passing by another object or the participant]</nowiki> 
+* Path <nowiki>{requireChild}</nowiki>
+** Velocity  <nowiki>[Use Attribute/Onset or Attribute/Offset to specify onset or offset]</nowiki>
+*** <nowiki># {takesValue, isNumeric, unitClass=speed} [Numeric value with default units of m-per-s]</nowiki>
+** Acceleration
+*** <nowiki># {takesValue, isNumeric, unitClass=acceleration} [Numeric value with default units of m-per-s2] </nowiki>
+** Jerk
+*** <nowiki># {takesValue, isNumeric, unitClass=jerk} [Numeric value with default units of m-per-s3] </nowiki>
+** Constrained <nowiki>[For example a path cannot cross some region]</nowiki>
+* File <nowiki>{requireChild} [File attributes]</nowiki>
+** Name
+** Size
+*** <nowiki># {takesValue, isNumeric, unitClass=memorySize} [Numeric value with default units of mb]</nowiki>
+** <nowiki># {takesValue, isNumeric}[Number of files]</nowiki>
+* Object control <nowiki>{requireChild} [Specifies control such as for a vehicle]</nowiki>
+** Perturb
+** Collide
+** Near miss <nowiki>[Almost having an accident resulting in negative consequences]</nowiki>
+** Correct position <nowiki>[After a lane deviation or side of the walkway]</nowiki>
+** Halt <nowiki>[Time at which speed becomes exactly zero]</nowiki>
+** Brake
+** Shift lane
+** Cross <nowiki>[Crossing in front of another object such as a vehicle]</nowiki>
+** Pass by <nowiki>[Passing by another object or the participant]</nowiki>
 ** Accelerate
 ** Decelerate
-* Association <nowiki>{requireChild}</nowiki> 
-** Another person <nowiki>[Item such as a cup belonging to another person]</nowiki> 
-** Same person <nowiki>[Item such as a cup belonging to the participant]</nowiki> 
+* Association <nowiki>{requireChild}</nowiki>
+** Another person <nowiki>[Item such as a cup belonging to another person]</nowiki>
+** Same person <nowiki>[Item such as a cup belonging to the participant]</nowiki>
 * Extraneous <nowiki>[Button presses that are not meaningful for example due to intrinsic mechanical causes after a meaningful press]</nowiki>
-* Role <nowiki> {requireChild} [The role of the agent (participant, character, AI..)]</nowiki> 
-** Leader 
-** Follower 
-** <nowiki># {takesValue}</nowiki> 
+* Role <nowiki> {requireChild} [The role of the agent (participant, character, AI..)]</nowiki>
+** Leader
+** Follower
+** <nowiki># {takesValue}</nowiki>
 
-'''Action'''<nowiki>{extensionAllowed}[May or may not be associated with a prior stimulus and can be extended]</nowiki> 
-* Involuntary <nowiki>[Like sneezing or tripping on something or hiccuping]</nowiki> 
-** Hiccup 
-** Cough 
-** Sneeze 
-** Stumble <nowiki>[Temporary and involuntary loss of balance]</nowiki> 
-** Fall 
-** Tether Jerk <nowiki>[When a tether attached to the subject is stuck/snagged and forces the participant to involuntary accommodate/react to it]</nowiki> 
-** Clear Throat 
-** Yawn 
-** Sniffle 
-** Burp 
+'''Action'''<nowiki>{extensionAllowed}[May or may not be associated with a prior stimulus and can be extended]</nowiki>
+* Involuntary <nowiki>[Like sneezing or tripping on something or hiccuping]</nowiki>
+** Hiccup
+** Cough
+** Sneeze
+** Stumble <nowiki>[Temporary and involuntary loss of balance]</nowiki>
+** Fall
+** Tether Jerk <nowiki>[When a tether attached to the subject is stuck/snagged and forces the participant to involuntary accommodate/react to it]</nowiki>
+** Clear Throat
+** Yawn
+** Sniffle
+** Burp
 ** Drop <nowiki>[For example something  drops from the hand of the subject]</nowiki>
 * Make fist
 ** Open and close <nowiki>[Continue to open and close the fist, for example in motor imagery paradigms.]</nowiki>
 * Curl toes
 ** Open and close <nowiki>[Continue to curl and uncurl toes, for example in motor imagery paradigms.]</nowiki>
-* Button press <nowiki>{extensionAllowed}</nowiki> 
-** Touch screen 
-** Keyboard 
-** Mouse 
-** Joystick 
-* Button hold <nowiki>[Press a button and keep it pressed]</nowiki> 
-* Button release 
-* Cross boundary 
-** Arrive 
-** Depart 
-* Speech 
-* Hum 
-* Eye saccade <nowiki> [Use Attribute/Peak for the middle of saccade and Attribute/Onset for the start of a saccade]</nowiki> 
-* Eye fixation 
+* Button press <nowiki>{extensionAllowed}</nowiki>
+** Touch screen
+** Keyboard
+** Mouse
+** Joystick
+* Button hold <nowiki>[Press a button and keep it pressed]</nowiki>
+* Button release
+* Cross boundary
+** Arrive
+** Depart
+* Speech
+* Hum
+* Eye saccade <nowiki> [Use Attribute/Peak for the middle of saccade and Attribute/Onset for the start of a saccade]</nowiki>
+* Eye fixation
 * Eye blink
 ** Left base <nowiki>[The time of the first detectable eyelid movement on closing.]</nowiki>
 ** Left zero <nowiki>[The last time at which the EEG/EOG signal crosses zero during eyelid closing.]</nowiki>
 ** Left half height <nowiki>[The time at which the EEG/EOG signal reaches half maximum height during eyelid closing.]</nowiki>
-** Max <nowiki>[The time at which the eyelid is the most closed.]</nowiki> 
+** Max <nowiki>[The time at which the eyelid is the most closed.]</nowiki>
 ** Right half height <nowiki>[The time at which the EEG/EOG signal reaches half maximum height during eyelid opening.]</nowiki>
 ** Right zero <nowiki>[The first time at which the EEG/EOG signal crosses zero during eyelid opening.]</nowiki>
 ** Right base <nowiki>[The time of the last detectable eyelid movement on opening.]</nowiki>
-* Eye close <nowiki>[Close eyes and keep closed for more than approximately 0.1 s]</nowiki> 
-** Keep <nowiki>[Keep the eye closed. If a value is provided it indicates the duration for this.]</nowiki> 
+* Eye close <nowiki>[Close eyes and keep closed for more than approximately 0.1 s]</nowiki>
+** Keep <nowiki>[Keep the eye closed. If a value is provided it indicates the duration for this.]</nowiki>
 *** # <nowiki>[the duration (by default in seconds) that they keep their eye closed.]{takesValue, isNumeric, unitClass=time}</nowiki>
 * Eye open <nowiki>[Open eyes and keep open for more than approximately 0.1 s]</nowiki>
-** Keep <nowiki>[Keep the eye open. If a value is provided it indicates the duration for this.]</nowiki> 
+** Keep <nowiki>[Keep the eye open. If a value is provided it indicates the duration for this.]</nowiki>
 *** # <nowiki>[the duration (by default in seconds) that they keep their eye open.]{takesValue, isNumeric, unitClass=time}</nowiki>
 *** With blinking <nowiki>[Default. Allow blinking during the eye-open period.]</nowiki>
 *** Without blinking <nowiki>[Without blinking during the eye-open period.]</nowiki>
-* Turn <nowiki>[Change in direction of movement or orientation. This includes both turn during movement on a path and also rotations such as head turns]</nowiki> 
-* Point 
-* Push 
-* Grab 
-* Tap <nowiki>[When there is nothing to be pressed for example like tapping a finger on a chair surface to follow a rhythm]</nowiki> 
-* Lift 
-* Reach <nowiki>[Requires a goal such as reaching to touch a button or to grab something. Stretching your body does not count as reach.]</nowiki> 
-** To Grab 
-** To Touch 
-* Course correction <nowiki>[Change the direction of a reach in the middle to adjust for a moving target.]</nowiki> 
+* Turn <nowiki>[Change in direction of movement or orientation. This includes both turn during movement on a path and also rotations such as head turns]</nowiki>
+* Point
+* Push
+* Grab
+* Tap <nowiki>[When there is nothing to be pressed for example like tapping a finger on a chair surface to follow a rhythm]</nowiki>
+* Lift
+* Reach <nowiki>[Requires a goal such as reaching to touch a button or to grab something. Stretching your body does not count as reach.]</nowiki>
+** To Grab
+** To Touch
+* Course correction <nowiki>[Change the direction of a reach in the middle to adjust for a moving target.]</nowiki>
 * Interact
 ** With human
 * Take survey
-* Stretch <nowiki>[Stretch your body such as when you wake up]</nowiki> 
-* Bend 
-* Deep breath 
-* Laugh 
-* Sigh 
-* Groan 
-* Scratch 
-* Switch attention  
-** Intramodal <nowiki>[In the same modality but with a change in details  such as changing from paying attention to red dots and instead of blue dots]</nowiki> 
-*** Visual 
-*** Auditory 
-*** Tactile 
-*** Taste  
-*** Smell 
-** Intermodal <nowiki>[Between modalities such as changing from audio to visual]</nowiki> 
-*** From modality 
-**** Visual 
-**** Auditory 
-**** Tactile 
-**** Taste  
-**** Smell 
-*** To modality 
-**** Visual 
-**** Auditory 
-**** Tactile 
-**** Taste  
-**** Smell 
-* Walk 
-** Stride <nowiki>[Use onset and offset attributes to indicate different walking stride stages]</nowiki> 
-** Faster <nowiki>[increasing the speed of walking]</nowiki> 
-** Slower <nowiki>[decreasing the speed of walking]</nowiki> 
-* Control vehicle <nowiki>[Controlling an object that you are aboard]</nowiki> 
-** Drive <nowiki>[Driving a vehicle such as a car]</nowiki> 
-*** Correct <nowiki>[Correct for a perturbation]</nowiki> 
-*** Near miss 
-*** Collide 
-** Stop <nowiki>[Brake a car]</nowiki> 
-** Pilot <nowiki>[Pilot a vehicle such as an airplane]</nowiki> 
-* Teleoperate <nowiki>[Control an object that you are not aboard]</nowiki> 
-* Allow <nowiki>[Allow access to something such as allowing a car to pass]</nowiki> 
-* Deny <nowiki> [Deny access to something such as preventing someone to pass]</nowiki> 
-* Step around 
-* Step over 
-* Step on 
-* Swallow 
-* Flex 
-* Evade 
-* Shrug 
-* Dance 
-* Open mouth 
-* Whistle 
-* Read 
+* Stretch <nowiki>[Stretch your body such as when you wake up]</nowiki>
+* Bend
+* Deep breath
+* Laugh
+* Sigh
+* Groan
+* Scratch
+* Switch attention
+** Intramodal <nowiki>[In the same modality but with a change in details  such as changing from paying attention to red dots and instead of blue dots]</nowiki>
+*** Visual
+*** Auditory
+*** Tactile
+*** Taste
+*** Smell
+** Intermodal <nowiki>[Between modalities such as changing from audio to visual]</nowiki>
+*** From modality
+**** Visual
+**** Auditory
+**** Tactile
+**** Taste
+**** Smell
+*** To modality
+**** Visual
+**** Auditory
+**** Tactile
+**** Taste
+**** Smell
+* Walk
+** Stride <nowiki>[Use onset and offset attributes to indicate different walking stride stages]</nowiki>
+** Faster <nowiki>[increasing the speed of walking]</nowiki>
+** Slower <nowiki>[decreasing the speed of walking]</nowiki>
+* Control vehicle <nowiki>[Controlling an object that you are aboard]</nowiki>
+** Drive <nowiki>[Driving a vehicle such as a car]</nowiki>
+*** Correct <nowiki>[Correct for a perturbation]</nowiki>
+*** Near miss
+*** Collide
+** Stop <nowiki>[Brake a car]</nowiki>
+** Pilot <nowiki>[Pilot a vehicle such as an airplane]</nowiki>
+* Teleoperate <nowiki>[Control an object that you are not aboard]</nowiki>
+* Allow <nowiki>[Allow access to something such as allowing a car to pass]</nowiki>
+* Deny <nowiki> [Deny access to something such as preventing someone to pass]</nowiki>
+* Step around
+* Step over
+* Step on
+* Swallow
+* Flex
+* Evade
+* Shrug
+* Dance
+* Open mouth
+* Whistle
+* Read
 * Attend
 * Recall
 * Generate
 * Repeat
-* Hold breath 
+* Hold breath
 * Breathe
-* Rest 
-* Count 
-* Move 
-** Upper torso 
-** Lower torso 
-** Whole body 
+* Rest
+* Count
+* Move
+** Upper torso
+** Lower torso
+** Whole body
 * Speak
 * Sing
 * Detect
-* Name 
-* Smile 
-* Discriminate 
+* Name
+* Smile
+* Discriminate
 * Track
-* Encode 
+* Encode
 * Eye-blink inhibit
 
-'''Participant''' <nowiki>{predicateType=passThrough}</nowiki> 
-* ID <nowiki>{requireChild, predicateType=propertyOf} [If not given assume 1]</nowiki> 
-** <nowiki># {takesValue, isNumeric} [Numeric value of an ID]</nowiki> 
-* Effect <nowiki>{extensionAllowed} [How the stimulus effects the participants]</nowiki> 
-** Cognitive 
-*** Meaningful 
-*** Not meaningful 
-*** Newly learned meaning 
-*** Reward 
-**** Low 
-**** Medium 
-**** High 
-**** <nowiki># {takesValue, isNumeric, unitClass=currency} [Monetary values in some currency such as $10, or the ratio of the reward to the maximum possible (3 of max 10 becomes 0.3), or number Points]</nowiki> 
-*** Penalty 
-**** Low 
-**** Medium 
-**** High 
-**** <nowiki># {takesValue, isNumeric, unitClass=currency} [Absolute monetary values in some currency, for example $1, or the ratio of the reward to the maximum possible (3 of max 10 becomes 0.3), or number of Points]</nowiki> 
-*** Error 
-**** Self originated 
-**** Other originated 
-***** Human 
-***** Non-human 
-**** Expected 
-**** Unexpected 
-**** Planned <nowiki>[The error feedback was given regardless of the validity of subject response as in a yoked design] </nowiki> 
-*** Threat 
-**** To self 
-**** To others 
-***** Close 
-*** Warning <nowiki>[As in a warning message that you are getting too close to the shoulder in a driving task]</nowiki> 
-*** Oddball <nowiki> [Unexpected or infrequent]</nowiki> 
-**** One stimulus <nowiki>[Only oddballs are present but no frequent stimuli exist. See http://dx.doi.org/10.1016/0167-8760(96)00030-X]</nowiki> 
-**** Two stimuli <nowiki>[There are non-targets and targets. See http://dx.doi.org/10.1016/0167-8760(96)00030-X]</nowiki> 
-**** Three stimuli <nowiki>[There are regular non-targets and targets and infrequent non-targets, see http://dx.doi.org/10.1016/0167-8760(96)00030-X]</nowiki> 
-**** Silent counting 
-**** Button pressing for target 
-**** Button pressing for all 
-*** Target <nowiki>[Something the subject is looking for]</nowiki> 
-*** Non-target <nowiki>[Make sure to tag Expected if the Non-target is frequent] </nowiki> 
-*** Novel <nowiki>[Genuinely novel such as an event occurring once or so per experiment]</nowiki> 
-*** Expected <nowiki>[Of low information value, for example frequent Non-targets in an RSVP paradigm]</nowiki> 
-**** Standard 
-**** Distractor 
-*** Valid <nowiki>[Something that is understood to be valid such as an ID matches the person being displayed and it has all the  correct information]</nowiki> 
-*** Invalid <nowiki>[Something that is understood to not be valid such as like an ID with an impossible date-of-birth, or a photo not matching the person presenting it]</nowiki> 
-*** Congruence 
-**** Congruent <nowiki>[Like in Stroop paradigm when blue colored text displays the word blue] </nowiki> 
-**** Incongruent <nowiki> [Like in Stroop paradigm whena blue colored text reading displays the word red] </nowiki> 
-**** Temporal synchrony 
-***** Synchronous <nowiki>[When a mouse click sound happens right after clicking it]</nowiki> 
-***** Asynchronous <nowiki> [When a mouse click sound happens with significant delay which give could the person a strange feeling. Or if in a movie the sound of the explosion is heard before it appears visually.] </nowiki> 
-*** Feedback 
-**** Correct <nowiki>[Confirm something went well and last action was correct]</nowiki> 
-**** Incorrect  <nowiki>[Confirm something went wrong and last action was incorrect]</nowiki> 
-**** Non-informative <nowiki>[Feedback that provides no information in regards to correct, incorrect, etc.]</nowiki> 
-**** Expected <nowiki> [Feedback was expected as in a positive feedback after a response that was expected to be correct.]</nowiki> 
-**** Unexpected <nowiki>[Feedback was unexpected as when positive feedback was received when response was expected to be incorrect.]</nowiki> 
-**** On accuracy <nowiki>[Feedback was provided by evaluating response accuracy]</nowiki> 
-**** On reaction time <nowiki>[Feedback was provided by evaluating subject reaction time]</nowiki> 
-**** To self <nowiki>[Default]</nowiki> 
-**** To other <nowiki>[Observed feedback to another person such as in a social paradigm]</nowiki> 
-**** Deterministic <nowiki>[Feedback has a fixed relationship to what happened before]</nowiki> 
-**** Stochastic <nowiki>[Feedback is non-deterministic and does not have fixed relationship with what has happened before in the experiment]</nowiki> 
-**** False feedback <nowiki>[Feedback that was not honest for example as in feedback of correct on an incorrect response or vice versa]</nowiki> 
-***** Negative <nowiki> [Negative feedback was provided when it was not deserved]</nowiki> 
-***** Positive <nowiki>[Positive feedback was provided when it was not deserved]</nowiki> 
-*** Cue <nowiki>[An indicator of a future event, e.g. a sound cue that in 2-5 seconds a perturbation in driving will occur. Use (... Participant/Effect/Cognitive/Cue ~ [hed tags for the event to follow, or main aspect of the event to follow]) syntax.]</nowiki> 
+'''Participant''' <nowiki>{predicateType=passThrough}</nowiki>
+* ID <nowiki>{requireChild, predicateType=propertyOf} [If not given assume 1]</nowiki>
+** <nowiki># {takesValue, isNumeric} [Numeric value of an ID]</nowiki>
+* Effect <nowiki>{extensionAllowed} [How the stimulus effects the participants]</nowiki>
+** Cognitive
+*** Meaningful
+*** Not meaningful
+*** Newly learned meaning
+*** Reward
+**** Low
+**** Medium
+**** High
+**** <nowiki># {takesValue, isNumeric, unitClass=currency} [Monetary values in some currency such as $10, or the ratio of the reward to the maximum possible (3 of max 10 becomes 0.3), or number Points]</nowiki>
+*** Penalty
+**** Low
+**** Medium
+**** High
+**** <nowiki># {takesValue, isNumeric, unitClass=currency} [Absolute monetary values in some currency, for example $1, or the ratio of the reward to the maximum possible (3 of max 10 becomes 0.3), or number of Points]</nowiki>
+*** Error
+**** Self originated
+**** Other originated
+***** Human
+***** Non-human
+**** Expected
+**** Unexpected
+**** Planned <nowiki>[The error feedback was given regardless of the validity of subject response as in a yoked design] </nowiki>
+*** Threat
+**** To self
+**** To others
+***** Close
+*** Warning <nowiki>[As in a warning message that you are getting too close to the shoulder in a driving task]</nowiki>
+*** Oddball <nowiki> [Unexpected or infrequent]</nowiki>
+**** One stimulus <nowiki>[Only oddballs are present but no frequent stimuli exist. See http://dx.doi.org/10.1016/0167-8760(96)00030-X]</nowiki>
+**** Two stimuli <nowiki>[There are non-targets and targets. See http://dx.doi.org/10.1016/0167-8760(96)00030-X]</nowiki>
+**** Three stimuli <nowiki>[There are regular non-targets and targets and infrequent non-targets, see http://dx.doi.org/10.1016/0167-8760(96)00030-X]</nowiki>
+**** Silent counting
+**** Button pressing for target
+**** Button pressing for all
+*** Target <nowiki>[Something the subject is looking for]</nowiki>
+*** Non-target <nowiki>[Make sure to tag Expected if the Non-target is frequent] </nowiki>
+*** Novel <nowiki>[Genuinely novel such as an event occurring once or so per experiment]</nowiki>
+*** Expected <nowiki>[Of low information value, for example frequent Non-targets in an RSVP paradigm]</nowiki>
+**** Standard
+**** Distractor
+*** Valid <nowiki>[Something that is understood to be valid such as an ID matches the person being displayed and it has all the  correct information]</nowiki>
+*** Invalid <nowiki>[Something that is understood to not be valid such as like an ID with an impossible date-of-birth, or a photo not matching the person presenting it]</nowiki>
+*** Congruence
+**** Congruent <nowiki>[Like in Stroop paradigm when blue colored text displays the word blue] </nowiki>
+**** Incongruent <nowiki> [Like in Stroop paradigm whena blue colored text reading displays the word red] </nowiki>
+**** Temporal synchrony
+***** Synchronous <nowiki>[When a mouse click sound happens right after clicking it]</nowiki>
+***** Asynchronous <nowiki> [When a mouse click sound happens with significant delay which give could the person a strange feeling. Or if in a movie the sound of the explosion is heard before it appears visually.] </nowiki>
+*** Feedback
+**** Correct <nowiki>[Confirm something went well and last action was correct]</nowiki>
+**** Incorrect  <nowiki>[Confirm something went wrong and last action was incorrect]</nowiki>
+**** Non-informative <nowiki>[Feedback that provides no information in regards to correct, incorrect, etc.]</nowiki>
+**** Expected <nowiki> [Feedback was expected as in a positive feedback after a response that was expected to be correct.]</nowiki>
+**** Unexpected <nowiki>[Feedback was unexpected as when positive feedback was received when response was expected to be incorrect.]</nowiki>
+**** On accuracy <nowiki>[Feedback was provided by evaluating response accuracy]</nowiki>
+**** On reaction time <nowiki>[Feedback was provided by evaluating subject reaction time]</nowiki>
+**** To self <nowiki>[Default]</nowiki>
+**** To other <nowiki>[Observed feedback to another person such as in a social paradigm]</nowiki>
+**** Deterministic <nowiki>[Feedback has a fixed relationship to what happened before]</nowiki>
+**** Stochastic <nowiki>[Feedback is non-deterministic and does not have fixed relationship with what has happened before in the experiment]</nowiki>
+**** False feedback <nowiki>[Feedback that was not honest for example as in feedback of correct on an incorrect response or vice versa]</nowiki>
+***** Negative <nowiki> [Negative feedback was provided when it was not deserved]</nowiki>
+***** Positive <nowiki>[Positive feedback was provided when it was not deserved]</nowiki>
+*** Cue <nowiki>[An indicator of a future event, e.g. a sound cue that in 2-5 seconds a perturbation in driving will occur. Use (... Participant/Effect/Cognitive/Cue ~ hed tags for the event to follow, or main aspect of the event to follow) syntax.]</nowiki>
 **** Constant delay <nowiki>[The cue is for an event that will happen after a constant delay.]</nowiki>
 ***** # {takesValue, isNumeric, unitClass=time} <nowiki>[The delay, e.g. in seconds.]</nowiki>
 **** Variable delay <nowiki>[The cue is for an event that will happen after a variable delay.]</nowiki>
