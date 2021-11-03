@@ -69,19 +69,20 @@ def process(arguments):
         A dictionary of results from spreadsheet processing in standard form.
     """
     hed_schema = arguments.get('schema', None)
-    command = arguments.get(base_constants.COMMAND, None)
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
     spreadsheet = arguments.get(base_constants.SPREADSHEET, 'None')
     if not spreadsheet or not isinstance(spreadsheet, models.HedInput):
         raise HedFileError('InvalidSpreadsheet', "An spreadsheet was given but could not be processed", "")
 
+    command = arguments.get(base_constants.COMMAND, None)
+    check_for_warnings = arguments.get(base_constants.CHECK_FOR_WARNINGS, False)
     if command == base_constants.COMMAND_VALIDATE:
-        results = spreadsheet_validate(hed_schema, spreadsheet)
+        results = spreadsheet_validate(hed_schema, spreadsheet, check_for_warnings=check_for_warnings)
     elif command == base_constants.COMMAND_TO_SHORT:
-        results = spreadsheet_convert(hed_schema, spreadsheet, command=base_constants.COMMAND_TO_SHORT)
+        results = spreadsheet_convert(hed_schema, spreadsheet, command, check_for_warnings=check_for_warnings)
     elif command == base_constants.COMMAND_TO_LONG:
-        results = spreadsheet_convert(hed_schema, spreadsheet)
+        results = spreadsheet_convert(hed_schema, spreadsheet, command, check_for_warnings=check_for_warnings)
     else:
         raise HedFileError('UnknownSpreadsheetProcessingMethod', f"Command {command} is missing or invalid", "")
     return results
@@ -109,7 +110,7 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=base_constants.COMMAND_
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    results = spreadsheet_validate(hed_schema, spreadsheet)
+    results = spreadsheet_validate(hed_schema, spreadsheet, check_for_warnings=check_for_warnings)
     if results['data']:
         return results
 
@@ -130,7 +131,7 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=base_constants.COMMAND_
             'msg': f'Spreadsheet {display_name} converted_successfully'}
 
 
-def spreadsheet_validate(hed_schema, spreadsheet):
+def spreadsheet_validate(hed_schema, spreadsheet, check_for_warnings=False):
     """ Validates the spreadsheet.
 
     Parameters
@@ -139,6 +140,8 @@ def spreadsheet_validate(hed_schema, spreadsheet):
         Version number or path or HedSchema object to be used
     spreadsheet: HedFileInput
         Spreadsheet input object to be validated
+    check_for_warnings: bool
+        Indicates whether validation should check for warnings as well as errors
 
     Returns
     -------
@@ -146,7 +149,7 @@ def spreadsheet_validate(hed_schema, spreadsheet):
          A dictionary containing results of validation in standard format
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    validator = HedValidator(hed_schema=hed_schema)
+    validator = HedValidator(hed_schema=hed_schema, check_for_warnings=check_for_warnings)
     issues = spreadsheet.validate_file(validator)
     display_name = spreadsheet.name
     if issues:
