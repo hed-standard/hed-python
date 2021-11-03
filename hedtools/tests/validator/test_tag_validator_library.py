@@ -14,7 +14,7 @@ class TestHed3(TestValidatorBase):
 
     @classmethod
     def setUpClass(cls):
-        schema_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
+        schema_file = '../data/hed_pairs/HED8.0.0.xml'
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml)
         hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
@@ -24,7 +24,7 @@ class TestHed3(TestValidatorBase):
         super().setUpClass()
 
     def test_invalid_load(self):
-        schema_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
+        schema_file = '../data/hed_pairs/HED8.0.0.xml'
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml, library_prefix="tl:")
         hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
@@ -32,7 +32,7 @@ class TestHed3(TestValidatorBase):
         self.assertRaises(HedFileError, HedSchemaGroup, [hed_schema1, hed_schema2])
 
     def test_invalid_load_prefix(self):
-        schema_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
+        schema_file = '../data/hed_pairs/HED8.0.0.xml'
         hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml)
         hed_schema2 = schema.load_schema(hed_xml)
@@ -52,9 +52,9 @@ class IndividualHedTagsShort(TestHed3):
             'extensionsAllowed': 'tl:Item/Beaver',
             'leafExtension': 'tl:Experiment-procedure/Something',
             'nonExtensionsAllowed': 'tl:Event/Nonsense',
-            'invalidExtension': 'tl:Attribute/Red',
-            'invalidExtension2': 'tl:Attribute/Red/Extension2',
-            'usedToBeIllegalComma': 'tl:Attribute/Informational/Label/This is a label,tl:This/Is/A/Tag',
+            'invalidExtension': 'tl:Agent/Red',
+            'invalidExtension2': 'tl:Agent/Red/Extension2',
+            'usedToBeIllegalComma': 'tl:Label/This is a label,tl:This/Is/A/Tag',
             'illegalDef': 'tl:Def/Item',
             'illegalDefExpand': 'tl:Def-expand/Item',
             'illegalDefinition': 'tl:Definition/Item',
@@ -81,11 +81,11 @@ class IndividualHedTagsShort(TestHed3):
             'leafExtension': self.format_error_but_not_really(ValidationErrors.INVALID_EXTENSION, tag=0),
             'nonExtensionsAllowed': self.format_error_but_not_really(ValidationErrors.INVALID_EXTENSION, tag=0),
             'invalidExtension': self.format_error_but_not_really(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=13, index_in_tag_end=16,
-                expected_parent_tag="Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red"),
+                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=9, index_in_tag_end=12,
+                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red"),
             'invalidExtension2': self.format_error_but_not_really(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=13, index_in_tag_end=16,
-                expected_parent_tag="Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red"),
+                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=9, index_in_tag_end=12,
+                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red"),
             'usedToBeIllegalComma': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, tag=1,
                                                                      index_in_tag=3, index_in_tag_end=7),
             'illegalDef': self.format_error_but_not_really(
@@ -188,8 +188,8 @@ class IndividualHedTagsShort(TestHed3):
             'incorrectPluralUnit': 'tl:Frequency/3 hertzs',
             'incorrectSymbolCapitalizedUnit': 'tl:Frequency/3 hz',
             'incorrectSymbolCapitalizedUnitModifier': 'tl:Frequency/3 KHz',
-            'notRequiredNumber': 'tl:Accuracy/0.5',
-            'notRequiredScientific': 'tl:Accuracy/5e-1',
+            'notRequiredNumber': 'tl:Statistical-accuracy/0.5',
+            'notRequiredScientific': 'tl:Statistical-accuracy/5e-1',
             'specialAllowedCharBadUnit': 'tl:Creation-date/bad_date',
             'specialAllowedCharUnit': 'tl:Creation-date/1900-01-01T01:01:01',
             # todo: restore these when we have a currency node in the valid beta schema.
@@ -376,10 +376,10 @@ class TestTagLevels3(TestHed3):
             'invalid2': self.format_error_but_not_really(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             'invalidTwoInOne': self.format_error_but_not_really(
                 ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="tl:Attribute/Informational/Definition/InvalidDef3".split(", ")),
+                multiple_tags="tl:Property/Organizational-property/Definition/InvalidDef3".split(", ")),
             'invalid2TwoInOne': self.format_error_but_not_really(
                 ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="tl:Data-property/Spatiotemporal-property/Temporal-property/Onset".split(", ")),
+                multiple_tags="tl:Property/Data-property/Data-marker/Temporal-marker/Onset".split(", ")),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
