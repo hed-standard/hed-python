@@ -10,6 +10,7 @@ class TestHedSchema(unittest.TestCase):
     schema_file = '../data/legacy_xml/HED7.1.1.xml'
     schema_file_3g_xml = '../data/hed_pairs/HED8.0.0.xml'
     schema_file_3g = '../data/hed_pairs/HED8.0.0.mediawiki'
+    smoke_test_dir = '../data/hed_smoke_test/'
 
     @classmethod
     def setUpClass(cls):
@@ -18,6 +19,7 @@ class TestHedSchema(unittest.TestCase):
         cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g_xml)
         cls.hed_wiki_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g)
         cls.hed_schema_3g = schema.load_schema(cls.hed_wiki_3g)
+        cls.smoke_test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.smoke_test_dir)
 
     def test_invalid_schema(self):
         # Handle missing or invalid files.
@@ -177,6 +179,12 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(len(self.hed_schema.short_tag_mapping), 993)
         self.assertEqual(len(self.hed_schema_3g.short_tag_mapping), 1110)
 
+    def test_loading_all_schemas(self):
+        files = os.listdir(self.smoke_test_dir)
+        for file in files:
+            _ = schema.load_schema(os.path.join(self.smoke_test_dir, file))
+
+        self.assertTrue(True)
 
 class TestSchemaUtilityFunctions(TestHed):
     def test_correctly_determine_tag_takes_value(self):

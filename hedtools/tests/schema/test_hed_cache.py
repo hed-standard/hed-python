@@ -110,6 +110,5 @@ class Test(unittest.TestCase):
             final_version = f"HED{version}.xml"
             self.assertFalse(hed_cache.version_pattern.match(final_version))
 
-
 if __name__ == '__main__':
     unittest.main()

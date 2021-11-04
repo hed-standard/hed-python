@@ -18,6 +18,9 @@ class HedExceptions:
     HED_END_INVALID = 'hedEndMissing'
     INVALID_SECTION_SEPARATOR = 'invalidSectionSeparator'
 
+    HED_SCHEMA_NODE_NAME_INVALID = 'HED_SCHEMA_NODE_NAME_INVALID'
+    HED_WIKI_DELIMITERS_INVALID = 'HED_WIKI_DELIMITERS_INVALID'
+
     SCHEMA_DUPLICATE_PREFIX = 'schemaDuplicatePrefix'
 
 
@@ -67,6 +70,8 @@ class HedFileError(Exception):
             HedExceptions.SCHEMA_END_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.HED_END_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.INVALID_SECTION_SEPARATOR: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.HED_SCHEMA_NODE_NAME_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.HED_WIKI_DELIMITERS_INVALID: f"{error_prefix}{self.message}.  '{filename}'"
         }
         default_error_message = f'{error_prefix}Internal Error'
         error_message = error_types.get(error_type, default_error_message)

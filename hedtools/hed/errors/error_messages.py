@@ -177,25 +177,25 @@ def val_warning_default_units_used(tag, default_unit):
     return f"No unit specified. Using '{default_unit}' as the default - '{tag}'", {}
 
 
-@hed_error(SchemaErrors.DUPLICATE_TERMS)
-def schema_error_duplicate_terms(tag, duplicate_tag_list):
+@hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE)
+def schema_error_HED_SCHEMA_DUPLICATE_NODE(tag, duplicate_tag_list):
     tag_join_delimiter = "\n\t"
     return f"Term(Short Tag) '{str(tag)}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"\
            f"{tag_join_delimiter.join(duplicate_tag_list)}", {}
 
 
-@hed_error(SchemaErrors.UNKNOWN_ATTRIBUTE)
+@hed_error(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID)
 def schema_error_unknown_attribute(attribute_name, source_tag):
     return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, " \
            f"or was used outside of it's defined class.", {}
 
 
-@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, default_severity=ErrorSeverity.WARNING)
+@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, default_severity=ErrorSeverity.WARNING, actual_code=SchemaWarnings.HED_SCHEMA_CHARACTER_INVALID)
 def schema_warning_invalid_chars_desc(desc_string, tag_name, problem_char, char_index):
     return f"Invalid character '{problem_char}' in desc for '{tag_name}' at position {char_index}.  '{desc_string}", {}
 
 
-@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, default_severity=ErrorSeverity.WARNING)
+@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, default_severity=ErrorSeverity.WARNING, actual_code=SchemaWarnings.HED_SCHEMA_CHARACTER_INVALID)
 def schema_warning_invalid_chars_tag(tag_name, problem_char, char_index):
     return f"Invalid character '{problem_char}' in tag '{tag_name}' at position {char_index}.", {}
 

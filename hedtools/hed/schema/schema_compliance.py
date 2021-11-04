@@ -38,14 +38,14 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
     if hed_schema.has_duplicate_tags:
         duplicate_dict = hed_schema.find_duplicate_tags()
         for tag_name, long_org_tags in duplicate_dict.items():
-            issues_list += ErrorHandler.format_error(SchemaErrors.DUPLICATE_TERMS, tag_name,
+            issues_list += ErrorHandler.format_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE, tag_name,
                                                      duplicate_tag_list=long_org_tags)
 
     unknown_attributes = hed_schema.get_all_unknown_attributes()
     if unknown_attributes:
         for attribute_name, source_tags in unknown_attributes.items():
             for tag in source_tags:
-                issues_list += ErrorHandler.format_error(SchemaErrors.UNKNOWN_ATTRIBUTE, attribute_name,
+                issues_list += ErrorHandler.format_error(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID, attribute_name,
                                                          source_tag=tag)
 
     if also_check_for_warnings:

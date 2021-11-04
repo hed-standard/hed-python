@@ -354,8 +354,7 @@ class HedSchemaXMLParser:
                 parent_element = self._parent_map[parent_element]
         return ancestor_tags
 
-    @staticmethod
-    def _get_element_tag_value(element, tag_name=xml_constants.NAME_ELEMENT):
+    def _get_element_tag_value(self, element, tag_name=xml_constants.NAME_ELEMENT):
         """Gets the value of the element's tag.
 
         Parameters
@@ -373,6 +372,10 @@ class HedSchemaXMLParser:
         """
         element = element.find(tag_name)
         if element is not None:
+            if element.text is None and tag_name != "units":
+                raise HedFileError(HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
+                                   f"A Schema node is empty for tag of element name: '{tag_name}'.",
+                                   self._schema.filename)
             return element.text
         return ""
 

@@ -1,0 +1,1161 @@
+HED version="8.0.0-alpha.2"
+
+!# start schema 
+
+'''Event''' 
+* Sensory-event <nowiki>{suggestedTag=Task-property/Task-role}[Something perceivable by the participant. An event meant to be an experimental stimulus should also be tagged with Task-property/Task-role/Experiment-stimulus.]</nowiki>
+* Agent-action <nowiki>[Any action engaged in by an agent. An event that is a participant response to an experiment stimulus should also be tagged with Agent-property/Agent-task-role/Participant-response.]</nowiki>
+* Data-feature <nowiki>[An event derived from the data itself or possibly inserted in a post-hoc fashion. Examples are markers for interictal spikes or alpha bursts.]</nowiki>
+* Experiment-control <nowiki>{extensionAllowed} [An event pertaining to the control of the experiment during its operation.]</nowiki>
+* Experiment-procedure <nowiki>[An event indicating an experimental procedure as in doing a saliva swab on a participant during the experiment or administering a survey.]</nowiki>  
+* Experiment-structure <nowiki>{extensionAllowed} [An event specifying the structure of the experiment.]</nowiki>
+
+
+'''Agent''' <nowiki>[Something in the experiment that takes an active role or produces an effect. The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be soething that simulates something else.]</nowiki>
+* Animal-agent <nowiki>[An animal that is present.]</nowiki>
+* Avatar-agent
+* Computational-agent
+* Controller-agent <nowiki>[An outside controller such as the experimental control software.]</nowiki> 
+* Human-agent 
+* Robotic-agent 
+
+'''Action''' <nowiki>{extensionAllowed} [May or may not be in response to a previous Sensory presentation event.]</nowiki> 
+* Move
+** Breathe
+*** Inhale <nowiki>[A deliberate in-breath in response to a task instruction or as part of a task. Group with Attribute/Cognitive modifier/Incidental if the inhalation is incidental to the task (Action/Move/Breathe/Inhale, Attribute/Cognitive modifier/Incidental).]</nowiki>
+*** Exhale <nowiki>[A deliberate out-breath in response to a task instruction or as part of a task. Group with Attribute/Cognitive modifier/Incidental: (Action/Move/Breathe/Exhale, Attribute/Cognitive modifier/Incidental).]</nowiki>
+*** Hold-breath
+** Move-full-body
+*** Bend
+*** Dance
+*** Fall-down <nowiki>[Involuntary fall to floor or ground]</nowiki>
+*** Flex
+*** Jerk <nowiki>[When some force applied to the participant causes them to involuntarily accommodate or react to it.]</nowiki>
+***	Recover-balance <nowiki>[A movement made in response to a stumble or unforeseen loss of balance]</nowiki>
+*** Stretch <nowiki>[Stretching the body or body part]</nowiki> 
+*** Shudder 
+*** Stumble <nowiki>[Temporary and involuntary loss of balance]</nowiki>
+*** Turn
+** Move-head
+*** Move-eyes
+**** Blink
+**** Close-eyes
+**** Fixate
+**** Inhibit-blinks
+**** Open-eyes 
+**** Saccade
+*** Move-mouth
+**** Burp 
+**** Clear-throat
+**** Cough 
+**** Gurgle
+**** Hiccup 
+**** Smile
+**** Sneeze 
+**** Sniffle
+**** Swallow
+**** Yawn 
+*** Nod
+*** Shake-head
+** Move-arm-hand
+*** Clap
+*** Drop <nowiki>[For example the participant drops a handheld ball]</nowiki>
+*** Grab
+*** Grasp <nowiki>[Grasp an object in one or both hands]</nowiki>
+*** Hold-down
+*** Lift <nowiki>[Often grouped with item being lifted.]</nowiki>
+*** Make-fist
+*** Point  <nowiki>[Should be grouped with Item/Agent/Human/Body part/Hand/Finger tag to specify which finger was used for the action.]</nowiki> 
+*** Press <nowiki>[Often grouped with body part doing action and item being pressed.]</nowiki>
+*** Push
+*** Reach <nowiki>[Requires a spatial goal such as reaching to touch a button or to grasp something. A body stretch is not a reach.]</nowiki> 
+*** Release <nowiki>[Often grouped with item being released.]</nowiki>
+*** Retract <nowiki>[Often grouped with body part doing action and item being retracted.]</nowiki>
+*** Scratch
+*** Snap-fingers
+*** Tap <nowiki>[Often grouped with body part doing action.]</nowiki>
+*** Touch <nowiki>[May follow a Reach event]</nowiki> 
+** Move-leg-foot
+*** Curl-toes
+*** Jog
+*** Jump
+*** Kick 
+*** Pedal
+*** Run
+*** Step
+**** Heel-strike 
+**** Toe-off
+*** Trot
+*** Walk
+* Communicate
+** Communicate-vocally
+*** Cry
+*** Groan
+*** Gulp  <nowiki>[Communicate anxiety. Use swallow if non-editorial.]</nowiki>
+***	Laugh
+*** Scream
+*** Sigh
+*** Speak <nowiki>[Communicate using spoken language.]</nowiki>
+** Gesture <nowiki>[Make a expressive communicative movement of hands/arms and, often, face]</nowiki>
+***	Index-up
+***	Pump-fist
+***	Spread-hand
+***	Shhh
+***	Shrug
+***	Thumb-up
+***	Wave
+** Communicate-musically
+*** Hum
+*** Sing
+*** Vocalize <nowiki>[Make a sustained vowel sound such as Ahhh.]</nowiki>
+*** Whistle
+* Perform <nowiki>[Carry out or accomplish an action or task or function.]</nowiki>
+** Collide
+** Halt <nowiki>[Stop action.]</nowiki>
+** Modify <nowiki>[Deliberately make a change in something.]</nowiki>
+** Operate <nowiki>[Control something else.]</nowiki>
+** Perceive
+*** Feel
+*** Listen
+*** Look
+*** Smell
+*** Taste
+** Play  <nowiki>[As a musical instrument or a game.]</nowiki>
+** Read
+** Rest 
+** Write
+* Think
+** Allow <nowiki>[Allow access to something such as allowing a car to pass]</nowiki> 
+** Attend-to
+** Count 
+** Deny <nowiki> [Deny access to something such as preventing someone to pass]</nowiki> 
+** Detect
+** Discriminate
+** Encode 
+** Evade 
+** Generate
+** Identify
+** Imagine
+** Predict
+** Recognize
+** Respond
+** Recall
+** Repeat
+** Switch-attention
+** Track
+
+'''Item''' <nowiki>{extensionAllowed}</nowiki>
+* Language <nowiki>[An  system of communication that is receivable in a sensory presentation.]</nowiki>
+** Character <nowiki>[A mark, sign or symbol used as part of language.]</nowiki>
+** Glyph <nowiki>[A symbol or pictograph.]</nowiki>
+** Nonword <nowiki>[A group of letters or speech sounds that looks or sounds like a word but that is not accepted as such by native speakers.]</nowiki>
+** Phoneme <nowiki>[A sound or a group of different sounds perceived to have the same function by speakers of the language.]</nowiki>
+** Phrase <nowiki>[A small group of words standing together as a conceptual unit.]</nowiki>
+** Sentence <nowiki>[A set of words that is complete in itself.]</nowiki>
+** Syllable <nowiki>[A unit of pronunciation having one vowel sound.]</nowiki>
+** Textblock <nowiki>[A block of text.]</nowiki>
+** Word <nowiki>[A single distinct meaningful element of a language.]</nowiki>
+* Object <nowiki> {extensionAllowed} [Physical object perceptible via Visual, Auditory, Olfactory, and/or Tactile modalities.]</nowiki>
+** Geometric
+*** Pattern
+**** Dots
+**** Led-pattern
+*** 2D-shape
+**** Clockface
+**** Cross
+**** Ellipse
+***** Circle
+**** Rectangle
+***** Square
+**** Single-point
+**** Star
+**** Triangle
+*** 3D-shape
+**** Box
+***** Cube
+**** Cone
+**** Cylinder
+**** Ellipsoid
+***** Sphere
+**** Pyradmid
+** Man-made-object <nowiki>[A manmade object]</nowiki>
+*** Media
+**** Media-clip
+***** Audio-clip
+***** Video-clip
+**** Visualization <nowiki>[A visual representation of something else -- such as using a stick-figure to represent motion capture data.]</nowiki>
+***** Animation
+***** Art-installation
+***** Braille
+***** Cutout
+***** Image <nowiki>[A still 2-D representation.]</nowiki>
+****** Cartoon
+****** Drawing
+****** Icon
+****** Painting
+****** Photograph
+***** Movie
+***** Outline-visualization
+***** Point-light-visualization
+***** Sculpture
+***** Stick-figure-visualization
+*** Building <nowiki>[Whole building or building feature]</nowiki>
+**** Room
+**** Roof
+**** Entrance
+**** Attic
+**** Basement
+*** Clothing
+*** Device
+**** Computing-device
+**** Engine
+**** IO-device
+***** Input-device
+****** Button
+****** Joystick
+****** Keyboard
+******* Keyboard-key
+******** <nowiki># {takesValue}[Value of a keyboard key.]</nowiki>
+******* Keypad-key 
+******** <nowiki># {takesValue}[Value of keypad key.]</nowiki>
+****** Microphone
+****** Mouse
+******* Mouse-button
+******* Scroll-wheel
+****** Touch-screen
+***** Network-device
+***** Output-device
+****** Display-device
+******* Head-mounted-display
+******* LED-display
+******* Screen
+******** Screen-window
+****** Auditory-device
+******* Headphones
+******* Screen-speaker
+******* Loudspeaker
+***** Recording-device
+****** EEG-recording
+****** File-recording
+****** MEG-recording
+****** Motion-capture
+****** Tape-recording
+**** Machine
+***** Noisemaker
+**** Measurement-device
+***** Clock
+****** Clock-face
+**** Robot
+**** Tool
+***	Document <nowiki>[A physical, written document]</nowiki>
+**** Manuscript
+**** Letter
+**** Note
+**** Book
+**** Notebook
+*** Furnishing <nowiki>[Furniture and appliances and other movable accessories including curtains and rugs]</nowiki>
+*** Navigational-object
+**** Path
+**** Road
+***** Lane
+**** Runway
+**** Sign
+*** Vehicle
+**** Aircraft 
+**** Bicycle
+**** Boat 
+**** Car
+**** Cart
+**** Tractor
+**** Train 
+**** Truck 
+** Natural-object <nowiki>[An object occuring naturally in contrast to a man-made object.]</nowiki>
+*** Mineral <nowiki>[An inorganic substance]</nowiki>
+*** Natural-feature <nowiki>[Some terrain occuring in the outdoors.]</nowiki>
+**** Field
+**** Hill
+**** Mountain
+**** River
+**** Waterfall
+** Food <nowiki>[Something that is usually solid and can be consumed by an organism.]</nowiki>
+** Drink <nowiki>[Something that is liquid and can be consumed by an organism.]</nowiki>
+* Organism <nowiki>[Something living or part of something living.]</nowiki>
+** Animal <nowiki>[Any multicellular or eukaryotic organism.]</nowiki>
+*** Human
+** Plant
+** Body-part
+*** Head
+**** Hair
+**** Ear
+**** Face
+***** Cheek
+***** Chin
+***** Eye
+***** Eyebrow
+***** Forehead
+***** Lip
+***** Nose
+***** Mouth
+***** Teeth
+*** Arm
+**** Elbow
+**** Hand
+***** Finger
+****** Index-finger
+****** Little-finger
+****** Middle-finger
+****** Ring-finger
+****** Thumb
+**** Wrist
+*** Leg
+**** Ankle
+**** Foot
+***** Toe
+**** Knee
+*** Torso
+**** Upper-torso
+***** Chest
+**** Lower-torso
+***** Hips
+**** Waist
+* Sound <nowiki>[Item/Sound can be used in a tag group to describe a sound created by an action Item/Sound, Action/Move/Move leg-foot/Walk, Agent/Human or an object or Item/Sound, Item/Object/Man-made/Vehicle/Car]</nowiki>
+** Environmental-sound<nowiki>[A background sound from the surrounding environment.]</nowiki>
+*** Crowd-sound <nowiki>[Multiple speech streams at once]</nowiki>
+*** Noise
+**** White-noise
+**** Colored-noise
+** Musical-sound <nowiki>[Any tone or combination of tones with characteristics such as controlled pitch and timbre that can be controlled by an agent.]</nowiki>
+*** Tone
+*** Instrument-sound
+*** Vocalized-sound
+** Named-animal-sound
+*** Bark
+*** Bleat
+*** Crow
+*** Chirp
+*** Growl
+*** Meow
+*** Moo
+*** Purr
+*** Roar
+** Named-object-sound
+*** Alarm
+*** Buzz
+*** Ka-ching <nowiki>[Cash register sound]</nowiki>
+*** Click
+*** Ding
+*** Horn
+*** Siren
+
+'''Agent-property''' 
+* Cognitive-state <nowiki>{extensionAllowed, requireChild}</nowiki>
+** Alert
+** Anesthetized 
+** Asleep
+** Attentive
+** Awake 
+** Brain-dead 
+** Comatose 
+** Drowsy 
+** Intoxicated <nowiki>[Indicates a state in which participant has consumed alcohol or drugs or other substances that may alter physical or mental state.]</nowiki> 
+** Locked-in 
+** Passive <nowiki>[Observing but not allowed to make any behavioral outputs. The resting state is not considered passive.]</nowiki>
+** Resting
+** Vegetative 
+* Emotional-state <nowiki>{extensionAllowed, requireChild}</nowiki>
+** Angry 
+** Aroused
+** Awed
+** Compassionate
+** Content
+** Disgusted 
+** Emotionally-neutral
+** Empathetic
+** Excited 
+** Fearful
+** Feeling-stress
+** Frustrated
+** Grieving
+** Happy
+** Jealous 
+** Joyful 
+** Loving
+** Relieved
+** Sad 
+* Postural-state <nowiki>[Indicates the position of an agent. Usually this position or posture is static for some length of time rather than being part of a motion.]</nowiki> 
+** Crouching
+** Kneeling
+** On-treadmill
+** Prone
+** Sitting
+** Standing
+** Supported-by-chin-rest
+* Agent-trait <nowiki>{extensionAllowed}</nowiki> 
+** Age
+*** <nowiki># {takesValue}</nowiki>
+** Gender
+** Sex
+*** Female
+*** Male
+*** Intersex 
+** Handedness
+*** <nowiki># {takesValue}</nowiki> 
+* Social-role <nowiki> [The role of the agent not particular to the task.]</nowiki>
+** Brother
+** Child
+** Father
+** Mother
+** Sister
+* Agent-task-role <nowiki> [The role of the agent in the task.]</nowiki>
+** Experimental-controller
+** Experimental-participant
+** Experimenter
+** Follower
+** Friend
+** Leader
+** Stranger
+** Student
+** Teacher
+* Association 
+** Associated-with-non-agent 
+** Associated-with-other <nowiki>[Item such as a cup belonging to another person]</nowiki> 
+** Associated-with-self <nowiki>[Item such as a cup belonging to the participant]</nowiki> 
+
+'''Data-property'''
+* Computed-property<nowiki>{extensionAllowed}[Feature computed by tool. Should be grouped with a label of the form Toolname_propertyName]</nowiki>
+** Computed-prediction
+* Data-value
+** <nowiki># {takesValue}</nowiki>
+* Observational-property <nowiki>{extensionAllowed}[Manually identified data feature. Should be grouped with a label of the form AgentID_featureName]</nowiki>
+** Expert-annotation <nowiki>{extensionAllowed}</nowiki>
+** Instrument-measurement <nowiki>{extensionAllowed}</nowiki>
+* Physical-property
+** Electrical-property
+** Magnetic-property
+** Mechanical-property
+** Organic-property
+** Thermodynamic-property
+*** Energy
+*** Pressure
+*** Temperature
+**** <nowiki># {takesValue, isNumeric}</nowiki>
+* Quantitative <nowiki>{extensionAllowed}</nowiki>
+** Angle<nowiki>[Angle assumed clockwise from vertical unless grouped with axis.]</nowiki>
+*** <nowiki># {takesValue}</nowiki>  
+** Fraction <nowiki>[Fraction of items of a particular type.]</nowiki>
+*** <nowiki># {takesValue}</nowiki> 
+** Interval 
+*** <nowiki># {takesValue}</nowiki>  
+** Item-count 
+*** <nowiki># {takesValue}</nowiki>  
+** Percentage <nowiki>[Percentage of items of a particular type.]</nowiki> 
+*** <nowiki># {takesValue}</nowiki>  
+** Ratio 
+*** <nowiki># {takesValue}</nowiki>  
+** Repetition <nowiki>[When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others]</nowiki>
+*** <nowiki># {takesValue}</nowiki> 
+* Spatiotemporal <nowiki>{extensionAllowed}</nowiki>
+** Rate-of-change
+*** Acceleration
+**** <nowiki># {takesValue, isNumeric, unitClass=acceleration}</nowiki>  
+*** Jerk-rate <nowiki>[Rate at which the acceleration of an object changes with respect to time.]</nowiki> 
+**** <nowiki># {takesValue, isNumeric, unitClass=jerk}</nowiki>
+*** Sampling-rate <nowiki>{requireChild}[Number of measurements per unit time.]</nowiki> 
+**** <nowiki># {takesValue, unitClass=frequency}</nowiki> 
+*** Refresh-rate <nowiki>{requireChild}[Number of times per second a device displays an image. Also known as the frame rate.]</nowiki> 
+**** <nowiki># {takesValue, isNumeric}</nowiki>
+*** Temporal-rate <nowiki>[Number of occurrences in a unit of time.]</nowiki>
+**** <nowiki># {takesValue, isNumeric}</nowiki> 
+*** Velocity
+**** <nowiki># {takesValue, isNumeric, unitClass=speed}</nowiki> 
+** Resolution
+*** IO-resolution 
+**** Screen-resolution <nowiki>[Number of pixels in each dimension for a digital display device.]</nowiki> 
+***** <nowiki># {takesValue} </nowiki>
+**** Printer-resolution <nowiki>[Number of dots-per-inch for a printer.]</nowiki> 
+***** <nowiki># {takesValue} </nowiki>
+*** Spatial-resolution <nowiki>[Linear spacing of a spatial measurement.]</nowiki> 
+**** <nowiki># {takesValue}</nowiki>
+*** Spectral-resolution 
+**** <nowiki># {takesValue}</nowiki> 
+*** Temporal-resolution 
+**** <nowiki># {takesValue} </nowiki>  
+** Spatial
+*** Direction
+**** <nowiki># {takesValue, isNumeric}</nowiki>
+*** Distance <nowiki>[Distance from a specified position in a specified Direction or grouped with an item from which the distance is measured.]</nowiki> 
+**** <nowiki># {takesValue, isNumeric, unitClass=physicalLength}</nowiki> 
+*** Orientation 
+**** <nowiki># {takesValue, isNumeric}</nowiki> 
+*** Position <nowiki>[Coordinates with respect a specified frame of reference or the default Screen-frame if no frame is given.] </nowiki>
+**** X-position 
+***** <nowiki># {takesValue, isNumeric, unitClass=physicalLength}</nowiki> 
+**** Y-position 
+***** <nowiki># {takesValue, isNumeric, unitClass=physicalLength}</nowiki>  
+**** Z-position 
+***** <nowiki># {takesValue, isNumeric, unitClass=physicalLength}</nowiki>   
+*** Reference-frame <nowiki>[A frame of reference used to express spatial attributes.]</nowiki>
+**** Custom-frame <nowiki>[A custom frame of reference which should be defined in terms of one of the default frames of reference or by a library.]</nowiki> 
+**** Room-frame
+**** Screen-frame <nowiki>[HED default frame of reference with origin at center of screen used to display experimental stimuli. Looking out of the screen has +X is horizontal to the right. +Y is up and +Z is out of the front of the screen.]</nowiki>
+**** Screen-facing-frame <nowiki>[HED default frame of reference with origin at the subject Nasion. +X is horizontal to the subject right. +Y is to the subject front and +Z is vertical upward.]</nowiki>
+**** World-frame
+*** Size
+**** Area 
+***** <nowiki># {takesValue, isNumeric, unitClass=area}</nowiki> 
+**** Length <nowiki>[A measurement of the size along the longest dimension.]</nowiki> 
+***** <nowiki># {takesValue, isNumeric, unitClass=physicalLength}</nowiki> 
+**** Width <nowiki>[A measurement along the shortest of two or three dimensions.]</nowiki>
+***** <nowiki># {takesValue, isNumeric, unitClass=physicalLength}</nowiki>
+**** Height <nowiki>[A measurement in a direction perpendicular to Length and Width in 3D. In 2D, it is perpendicular to both the Length and Height.]</nowiki>
+***** <nowiki># {takesValue, isNumeric, unitClass=physicalLength}</nowiki> 
+**** Volume 
+***** <nowiki># {takesValue, isNumeric, unitClass=volume}</nowiki>
+*** Surface-properties
+**** Rough
+**** Smooth
+** Temporal
+*** Delay <nowiki>[An indicator that the associated tag group represents something temporally offset from the current event. The delay value can be positive or negative and should always appear in a tag group indicating what is delayed.]</nowiki>
+**** <nowiki># {takesValue, isNumeric, unitClass=time}</nowiki> 
+*** Duration <nowiki>[Time extent of something.]</nowiki>
+**** <nowiki># {takesValue, isNumeric, unitClass=time}</nowiki> 
+*** Onset
+*** Offset
+*** Pause <nowiki>[Indicating something stopped such as a break or waiting for input.]</nowiki>    
+*** Temporal-value 
+**** <nowiki># {takesValue, isNumeric, unitClass=time}</nowiki> 
+*** Time-out
+*** Time-sync <nowiki>[Indicates a marker inserted into the recorded data to allow post hoc synchronization of concurrently recorded data streams.]</nowiki>
+* Statistical-property <nowiki>{extensionAllowed}</nowiki>
+** Accuracy 
+** Data-mean 
+** Data-median 
+** Data-minimum 
+** Data-maximum 
+** Probability <nowiki> [Use to specify the level of certainty about the occurrence of the event.]</nowiki>  
+** Statistical-precision 
+** Statistical-recall 
+** Standard-deviation 
+** Uncertainty <nowiki> [Use to specify the level of error.]</nowiki>
+
+'''Task-property'''
+* Attentional-strategy
+** Bottom-up-attention
+** Covert-attention
+** Divided-attention
+** Focused-attention
+** Orienting-attention
+** Overt-attention
+** Selective-attention
+** Sustained-attention
+** Top-down-attention
+* Task-effect-evidence
+** Computational-evidence <nowiki>[Prediction made by computer program.]</nowiki> 
+**  External-evidence <nowiki>[External judgment assumed to be ground truth such as from an experiment control software or an annotator about participant actions such as answering a question, failing to answer in time, etc. Related to participant indication]</nowiki> 
+** Intended-effect <nowiki> [How the stimulus is expected to effect the participants based on the experimental design.]</nowiki> 
+** Behavioral-evidence <nowiki>[This tag is placed in Agent-action events and grouped  with Task-related tags to specify the type of what that action means with respect to the task. For example if a button press indicates a target then Participant-indication would be grouped with Target.]</nowiki>
+* Task-role <nowiki>[The purpose with respect to the task.]</nowiki>
+** Activity <nowiki> [Something that is part of the overall task or is necessary to the overall experiment but is not directly part of a stimulus-response cycle. Examples would be taking a survey or provided providing a silva sample.]</nowiki>
+** Background-subtask <nowiki>[A part of the task which should be performed in the background.]</nowiki>
+** Experimental-stimulus <nowiki>[Part of something designed to elicit a response in the experiment.]</nowiki>
+** Failure
+** Incidental <nowiki> [Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.]</nowiki>
+** Instructional <nowiki> [Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.]</nowiki>
+** Mishap <nowiki> [Unplanned disruption such as an equipment or experiment control abnormality or experimenter error.]</nowiki>
+** Participant-response <nowiki> [Something related to a participant actions in performing the task.]</nowiki>
+** Primary-subtask <nowiki>[A part of the task which should be the primary focus of the participant.]</nowiki>
+** Warning <nowiki>[Something that should warn the participant that the parameters of the task have been or are about to be exceeded such as a warning message about getting too close to the shoulder of the road in a driving task.]</nowiki> 
+* Task-response-type <nowiki> [How the participant response should be interpreted in terms of the task specification.]</nowiki>
+** Appropriate <nowiki>{relatedTag=Inappropriate}</nowiki>
+** Correction <nowiki>{relatedTag=Successful}</nowiki>
+** Erroneous
+** Imagined <nowiki>[This is used to identity something that only happened in the imagination of the participant as in imagined movements in motor imagery paradigms.]</nowiki>
+** Inappropriate <nowiki>{relatedTag=Appropriate}</nowiki>
+** Indeterminate <nowiki>{relatedTag=Missed,relatedTag=Near-miss}</nowiki>
+** Missed <nowiki>{relatedTag=Indeterminate,relatedTag=Near-miss}</nowiki>
+** Near-miss <nowiki>{relatedTag=Indeterminate,relatedTag=Miss}</nowiki>
+** Successful <nowiki>{relatedTag=Correction}</nowiki>
+* Task-stimulus-type <nowiki> [The stimulus purpose in the task.]</nowiki>
+** Cue
+** Distractor 
+** Expected <nowiki>[Of low information value as in frequent non-targets in an RSVP paradigm.]</nowiki>
+** Extraneous
+** Feedback 
+** Meaningful
+** Newly-learned
+** Non-informative
+** Non-target <nowiki>[Make sure to tag Expected if the Non-target is frequent] </nowiki> 
+** Not-meaningful 
+** Novel <nowiki>[Genuinely novel such as an event occurring once or so per experiment]</nowiki> 
+** Oddball <nowiki> [Unexpected or infrequent]</nowiki>
+** Planned
+** Penalty
+** Priming
+** Reward
+** Signal-go
+** Signal-stop 
+** Target <nowiki>[Something the subject is looking for]</nowiki> 
+** Threat
+** Timed
+** Unexpected
+
+'''Attribute''' <nowiki>{extensionAllowed} [Subtree tree for general properties.]</nowiki>
+* Informational <nowiki>[Informational properties.]</nowiki>
+** Def <nowiki>{requireChild} [A label that specifically corresponds to a Definition name and indicates that this label represents tags in an unexpanded definition.]</nowiki>
+*** <nowiki># {takesValue}</nowiki>
+** Def-expand <nowiki> {requireChild} [A label that specifically corresponds to a Definition name and indicates that this label is in a group containing an expanded definition and should not be expanded again.]</nowiki>
+*** <nowiki># {takesValue}</nowiki>   
+** Definition <nowiki>{requireChild}[A tag used within a tag group also containing a Label tag to indicate that the Label represents that group of tags.]</nowiki> 
+*** <nowiki># {takesValue}</nowiki>
+** Description <nowiki>{requireChild} [Human-readable text description of the event.]</nowiki> 
+*** <nowiki># {takesValue}</nowiki>
+** Experimental-note
+*** <nowiki># {takesValue}</nowiki>
+** ID <nowiki>{requireChild} [An alphanumeric code usually used to identify a particular instance of an item.]</nowiki>
+*** <nowiki># {takesValue}</nowiki>
+** Label <nowiki>{requireChild} [A string of 20 or fewer characters identifying something. Labels usually refer to general classes of things while IDs refer to specific instances.]</nowiki>
+*** <nowiki># {takesValue}</nowiki>
+** Metadata <nowiki>[A tag used within a tag group indicate to designate information about the data such as file size or author.]</nowiki>
+*** CogAtlas <nowiki>[A tag used within a tag group indicate a relationship to the CognitiveAtlas terminology.]</nowiki>
+**** <nowiki># {takesValue}</nowiki>
+*** CogPo <nowiki>[A tag used within a tag group indicate a relationship to the CogPO terminology.]</nowiki>
+**** <nowiki># {takesValue}</nowiki>
+*** Creation-date 
+**** <nowiki># {takesValue, unitClass=datetime}</nowiki>
+*** Library-name 
+**** <nowiki># {takesValue}</nowiki>
+*** Path-name
+**** <nowiki># {takesValue}</nowiki> 
+*** Subject 
+**** <nowiki># {takesValue}</nowiki>
+*** Version 
+**** <nowiki># {takesValue}[Usually is a semantic version.]</nowiki> 
+** Parameter <nowiki>[As a Name:Value]</nowiki> 
+*** <nowiki># {takesValue}</nowiki>
+* Organizational
+** Collection <nowiki>[A tag designating a grouping of items such as in a set or list.]</nowiki>
+** Control-variable <nowiki>[An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.]</nowiki>
+** Event-context <nowiki>[A tag indicating the overall environment and setup of the experiment or a portion of the experiment. This event is often inserted into a recording at the beginning of an experimental record to describe information such as whether the experiment is conducted indoors or outdoors or whether the experiment is conducted in the real-world or in a controlled laboratory setting. Tags specifying subject metadata might also be included. ]</nowiki>
+** Event-stream <nowiki>[An ordered list of events  ]</nowiki> 
+** Experimental-condition <nowiki>[An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.]</nowiki>
+** Experimental-indicator <nowiki>[An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent variables.]</nowiki>
+** Experimental-intertrial <nowiki>[A tag used to indicate a part of the experiment between trials usually where nothing is happening.]</nowiki>
+** Experimental-trial <nowiki>[A tag used to indicate a particular organizational part in the experimental design often containing a stimulus-response pair or stimulus-response-feedback triad.]</nowiki>
+** Permutation <nowiki>[A tag used within a tag group also containing a Label tag to indicate that the Label represents events that are permutations of each other.]</nowiki>
+** Recording <nowiki>[Indicates an uninterrupted block of time during which data was acquired using a fixed scanning protocol or sensor positioning. Recording tags are usually have temporal scope which is the entire recording.]</nowiki>
+** Task <nowiki>[A tag used to indicate a linkage the structured activities performed as part of the experiment.]</nowiki> 
+** Time-block <nowiki>[A tag used to indicate a contiguous time block in the experiment during which something is fixed or noted.]</nowiki>
+* Relational <nowiki>{extensionAllowed}</nowiki>
+** Comparative-relation
+*** Less-than
+*** Less-than-or-equal-to
+*** Greater-than
+*** Greater-than-or-equal-to
+*** Equal-to
+*** Not-equal-to
+** Connective-relation
+*** Belongs-to <nowiki>[As in owned by]</nowiki>
+*** Connected-to
+*** Contained-in
+*** Described-by
+*** From-to
+*** Group-of
+*** Implied-by
+*** Interacts-with
+*** Member-of
+*** Part-of
+*** Performed-by
+*** Related-to
+** Ordering-relation
+*** Early-item <nowiki>[Indication that this item appears early in a sequence.]</nowiki>
+*** First-item <nowiki>[Indication that this is the first item in a sequence.]</nowiki>
+*** Next-item <nowiki>[Indication that this item appears immediately after the previous item in a sequence.]</nowiki> 
+*** Later-item <nowiki>[Indication that this item appears later in a sequence.]</nowiki>
+*** Last-item <nowiki>[Indication that this is the last item in a sequence.]</nowiki>
+** Quantitative-relation
+*** Estimated
+*** Approximated
+*** Exact
+** Spatiotemporal-relation
+*** Directional-relation
+**** Away-from
+**** Backward
+**** Closing
+**** Decreasing
+**** Downward
+**** Forward
+**** Increasing
+**** Leftward
+**** Rightward
+**** Opening
+**** Towards
+**** Upward
+*** Orientational-relation
+**** Horizontally-oriented
+**** Oblique
+**** Rotated
+**** Vertically-oriented
+*** Positional-relation <nowiki>[Should be grouped with what it is positionally related to.]</nowiki>
+**** Above
+**** Across
+**** Adjacent-to
+**** Ahead-of
+**** Around
+**** Back-of
+**** Behind
+**** Below
+**** Between <nowiki>[Should be grouped with the items between designates.]</nowiki>
+**** Bilateral <nowiki>[Used designate activities or items that occur on both sides or on top and bottom.]</nowiki>
+**** Bottom-of <nowiki>[At the bottom of something. Should be grouped with the item that it is positionally related to.]</nowiki>
+**** Boundary-of
+**** Center-of <nowiki>[At the center of something. Should be grouped with the item that it is positionally related to.]</nowiki>
+**** Close-to
+**** Edge-of
+**** Far-from
+**** Front-of
+**** Inside-of
+**** Left-of
+**** Left-side
+**** Outside-of
+**** Over
+**** Right-of
+**** Right-side
+**** Top-of
+**** Under
+*** Temporal-relation
+**** After
+**** Asynchronous-with
+**** Before
+**** During
+**** Synchronous-with
+**** Waiting-for
+*** Variability-relation
+**** Constant
+**** Continuous
+**** Deterministic
+**** Discrete
+**** Flickering <nowiki>[Irregular changes in time.]</nowiki>
+**** Fractal
+**** Random
+**** Repetitive
+**** Sudden
+**** Varying
+** Thermal-relation
+*** Cold
+*** Colder-than
+*** Hot
+*** Hotter-than
+* Categorical <nowiki>{extensionAllowed}</nowiki>
+** Categorical-class <nowiki>[Categorical values that fall into discrete classes such as true or false. The grouping is absolute in the sense that it is the same for all participants.]</nowiki>
+*** All <nowiki>{relatedTag=Some, relatedTag=None}</nowiki>
+*** Correct <nowiki>{relatedTag=Incorrect}</nowiki>
+*** Explicit <nowiki>{relatedTag=Implicit}</nowiki>
+*** False <nowiki>{relatedTag=True}</nowiki>
+*** Implicit <nowiki>{relatedTag=Explicit}</nowiki>
+*** Incorrect <nowiki>{relatedTag=Correct}</nowiki>
+*** Invalid <nowiki>{relatedTag=Valid}</nowiki>
+*** None <nowiki>{relatedTag=All, relatedTag=Some}</nowiki>
+*** Some <nowiki>{relatedTag=All, relatedTag=None}</nowiki>
+*** True <nowiki>{relatedTag=False}</nowiki>
+*** Valid <nowiki>{relatedTag=Invalid}</nowiki>
+** Categorical-judgment <nowiki>[Categorical values that are based on the judgment or perception of the participant such familiar and famous.]</nowiki>
+*** Abnormal <nowiki>{relatedTag=Normal}</nowiki>
+*** Asymmetric <nowiki>{relatedTag=Symmetric}</nowiki>
+*** Congruent <nowiki>{relatedTag=Incongruent}</nowiki>
+*** Constrained <nowiki>{relatedTag=Unconstrained}</nowiki>
+*** Disordered <nowiki>{relatedTag=Ordered}</nowiki>
+*** Familiar <nowiki>{relatedTag=Unfamiliar, relatedTag=Famous}[Something known or encountered before.]</nowiki>
+*** Famous <nowiki>{relatedTag=Familiar, relatedTag=Unfamiliar}[Something known by many people but necessarily because of direct contact.]</nowiki>
+*** Incongruent <nowiki>{relatedTag=Congruent}</nowiki>
+*** Involuntary <nowiki>{relatedTag=Voluntary}</nowiki>
+*** Masked <nowiki>[Ability to perceive influenced by presence of another stimulus]</nowiki>
+*** Normal <nowiki>{relatedTag=Abnormal}</nowiki>
+*** Ordered <nowiki>{relatedTag=Disordered}</nowiki>
+*** Symmetric <nowiki>{relatedTag=Unsymmetric}</nowiki>
+*** Unconstrained <nowiki>{relatedTag=Constrained}</nowiki>
+*** Unfamiliar <nowiki>{relatedTag=Familiar,relatedTag=Famous}[Something not known or encountered before.]</nowiki>
+*** Unmasked <nowiki>[Ability to perceive not influenced by presence of another stimulus]</nowiki>
+*** Voluntary <nowiki>{relatedTag=Involuntary}</nowiki>
+** Categorical-level <nowiki>[Categorical values based on dividing a continuous variable into levels such as high and low.]</nowiki>
+*** Deep <nowiki>{relatedTag=Shallow}</nowiki>
+*** High <nowiki>{relatedTag=Low, relatedTag=Medium}</nowiki>
+*** Liminal <nowiki>{relatedTag=Subliminal, relatedTag=Supraliminal}</nowiki>
+*** Low <nowiki>{relatedTag=High}</nowiki>
+*** Medium <nowiki>{relatedTag=Low, relatedTag=High}</nowiki>
+*** Negative <nowiki>{relatedTag=Positive}</nowiki>
+*** Positive <nowiki>{relatedTag=Negative}</nowiki>
+*** Shallow <nowiki>{relatedTag=Deep}</nowiki>
+*** Subliminal <nowiki>{relatedTag=Liminal, relatedTag=Supraliminal}</nowiki>
+*** Supraliminal <nowiki>{relatedTag=Liminal, relatedTag=Subliminal}</nowiki>
+*** Thick <nowiki>{relatedTag=Thin}</nowiki>
+*** Thin <nowiki>{relatedTag=Thick}</nowiki>
+* Descriptive <nowiki>[Indicate the type of thing.]</nowiki>
+** Abstract
+** Clinical
+** Complex
+** Composite
+** Numerical
+** Symbolic
+* Sensory <nowiki>{extensionAllowed}</nowiki>
+** Auditory
+*** Audible
+*** Frequency 
+**** <nowiki># {takesValue, isNumeric, unitClass=frequency}</nowiki>  
+*** Loudness 
+**** <nowiki># {takesValue, isNumeric}</nowiki>
+*** Monophonic <nowiki> [Consisting of one independent audio channel]</nowiki>  
+*** Ramp-up <nowiki>[Increasing in amplitude]</nowiki> 
+*** Ramp-down <nowiki>[Decreasing in amplitude]</nowiki>
+*** Silent
+*** Stereophonic <nowiki> [Consisting of more than one independent audio channel]</nowiki> 
+*** Timbre <nowiki>[Sound quality]</nowiki>  
+** Gustatory <nowiki>[Pertaining to sensations of relating to taste.]</nowiki>
+*** Bitter
+*** Salty
+*** Savory
+*** Sour
+*** Sweet
+** Tactile <nowiki>[Pertaining to sensations of relating to touch.]</nowiki>
+*** Tactile-pressure
+*** Tactile-texture
+*** Tactile-vibration
+** Olfactory <nowiki>[Pertaining to sensations of relating to smell.]</nowiki>
+** Somatic <nowiki>[Pertaining to sensations of nervous system such as pain.]</nowiki>
+*** Pain
+*** Stress
+** Vestibular
+** Visual
+*** Luminance 
+*** Color 
+**** Color-shade 
+***** Dark-shade
+***** Light-shade 
+**** HSV-color
+***** Hue 
+****** <nowiki># {takesValue, isNumeric} [Angular value between 0 and 360]</nowiki> 
+***** Saturation 
+****** <nowiki># {takesValue, isNumeric} [B value of RGB between 0 and 1]</nowiki> 
+***** HSV-value 
+****** <nowiki># {takesValue, isNumeric} [G value of RGB between 0 and 1]</nowiki> 
+**** RGB-color
+***** RGB-red 
+****** <nowiki># {takesValue, isNumeric} [R value of RGB between 0 and 1]</nowiki> 
+***** RGB-blue 
+****** <nowiki># {takesValue, isNumeric} [B value of RGB between 0 and 1]</nowiki> 
+***** RGB-green 
+****** <nowiki># {takesValue, isNumeric} [G value of RGB between 0 and 1]</nowiki> 
+**** Grayscale <nowiki>[Indicates gray scale]</nowiki> 
+***** <nowiki># {takesValue, isNumeric} [White intensity between 0 and 1]</nowiki>
+**** CSS-color <nowiki>[One of 140 colors supported by all browsers. For more details such as the color RGB or HEX values,  check:  https://www.w3schools.com/colors/colors_groups.asp]</nowiki> 
+***** Blue-color
+****** CadetBlue
+****** SteelBlue
+****** LightSteelBlue
+****** LightBlue
+****** PowderBlue
+****** LightSkyBlue
+****** SkyBlue
+****** CornflowerBlue
+****** DeepSkyBlue
+****** DodgerBlue
+****** RoyalBlue
+****** Blue
+****** MediumBlue
+****** DarkBlue
+****** Navy
+****** MidnightBlue
+***** Brown-color
+****** Cornsilk 
+****** BlanchedAlmond 
+****** Bisque 
+****** NavajoWhite 
+****** Wheat 
+****** BurlyWood 
+****** Tan 
+****** RosyBrown 
+****** SandyBrown 
+****** GoldenRod 
+****** DarkGoldenRod 
+****** Peru 
+****** Chocolate 
+****** Olive 
+****** SaddleBrown 
+****** Sienna 
+****** Brown 
+****** Maroon 
+***** Cyan-color
+****** Aqua
+****** Cyan
+****** LightCyan
+****** PaleTurquoise
+****** Aquamarine
+****** Turquoise
+****** MediumTurquoise
+****** DarkTurquoise
+***** Green-color
+****** GreenYellow
+****** Chartreuse
+****** LawnGreen
+****** Lime
+****** LimeGreen
+****** PaleGreen
+****** LightGreen
+****** MediumSpringGreen
+****** SpringGreen
+****** MediumSeaGreen
+****** SeaGreen
+****** ForestGreen
+****** Green
+****** DarkGreen
+****** YellowGreen
+****** OliveDrab
+****** DarkOliveGreen
+****** MediumAquaMarine
+****** DarkSeaGreen
+****** LightSeaGreen
+****** DarkCyan
+****** Teal
+***** Gray-color
+****** Gainsboro
+****** LightGray
+****** Silver
+****** DarkGray
+****** DimGray
+****** Gray
+****** LightSlateGray
+****** SlateGray
+****** DarkSlateGray
+****** Black
+***** Orange-color
+****** Orange
+****** DarkOrange
+****** Coral
+****** Tomato
+****** OrangeRed
+***** Pink-color
+****** Pink
+****** LightPink
+****** HotPink
+****** DeepPink
+****** PaleVioletRed
+****** MediumVioletRed
+***** Purple-color
+****** Lavender
+****** Thistle
+****** Plum
+****** Orchid
+****** Violet
+****** Fuchsia
+****** Magenta
+****** MediumOrchid
+****** DarkOrchid
+****** DarkViolet
+****** BlueViolet
+****** DarkMagenta
+****** Purple
+****** MediumPurple
+****** MediumSlateBlue
+****** SlateBlue
+****** DarkSlateBlue
+****** RebeccaPurple
+****** Indigo
+***** Red-color
+****** LightSalmon
+****** Salmon
+****** DarkSalmon
+****** LightCoral
+****** IndianRed
+****** Crimson
+****** Red
+****** FireBrick
+****** DarkRed
+***** Yellow-color
+****** Gold
+****** Yellow
+****** LightYellow
+****** LemonChiffon
+****** LightGoldenRodYellow
+****** PapayaWhip
+****** Moccasin
+****** PeachPuff
+****** PaleGoldenRod
+****** Khaki
+****** DarkKhaki
+***** White-color
+****** White
+****** Snow
+****** HoneyDew
+****** MintCream
+****** Azure
+****** AliceBlue
+****** GhostWhite
+****** WhiteSmoke
+****** SeaShell
+****** Beige
+****** OldLace
+****** FloralWhite
+****** Ivory
+****** AntiqueWhite
+****** Linen
+****** LavenderBlush
+****** MistyRose
+*** View
+**** 2D-view
+**** 3D-view
+**** Background-view
+**** Bistable-view <nowiki>[Something having two stable visual forms that have two distinguishable stable forms as in optical illusions.]</nowiki>
+**** Foreground-view
+**** Foveal-view <nowiki>[Visual presentation directly on the fovea.]</nowiki>
+**** Map-view <nowiki>[A representation of a geographical location.]</nowiki>
+***** Aerial-view <nowiki>[A representation from an overhead view such as captured by a drone.]</nowiki>
+***** Satellite-view <nowiki>[A representation as captured by technology such as a satellite.]</nowiki>
+***** Street-view <nowiki>[A panoramic view from a position on the ground.]</nowiki>
+**** Peripheral-view
+* Environmental <nowiki>{extensionAllowed}</nowiki>
+** Indoors
+** Outdoors
+** Real-world
+** Virtual-world
+** Augmented-reality
+** Motion-platform
+** Urban
+** Rural
+*** Wooden-walkway
+** Terrain
+*** Composite-terrain
+*** Dirt-terrain
+*** Grassy-terrain
+*** Gravel-terrain
+*** Leaf-covered-terrain
+*** Muddy-terrain
+*** Paved-terrain
+*** Rocky-terrain
+*** Sloped-terrain
+*** Uneven-terrain
+* Anatomical
+!# end schema 
+
+'''Unit classes''' 
+* acceleration <nowiki>{defaultUnits=m-per-s^2}</nowiki> 
+** m-per-s^2 <nowiki>{SIUnit, unitSymbol}</nowiki> 
+* angle <nowiki>{defaultUnits=radian}</nowiki> 
+** radian <nowiki>{SIUnit}</nowiki> 
+** rad <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** degree 
+* area <nowiki>{defaultUnits=m^2}</nowiki> 
+** m^2 <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** px^2 <nowiki>{unitSymbol}</nowiki> 
+** pixel^2
+* currency <nowiki>{defaultUnits=$, allowedCharacter=$}</nowiki> 
+** dollar 
+** $ <nowiki>{unitSymbol}</nowiki> 
+** point 
+* dateTime <nowiki>{defaultUnits=YYYY-MM-DDThh:mm:ss, allowedCharacter=:,allowedCharacter=-}</nowiki> 
+** YYYY-MM-DDThh:mm:ss <nowiki>[Date-times should conform to ISO8601 date-time format. Any variation on the full form is allowed.]</nowiki> 
+* frequency <nowiki>{defaultUnits=Hz}</nowiki>
+** hertz  <nowiki>{SIUnit}</nowiki>
+** Hz <nowiki>{SIUnit, unitSymbol}</nowiki> 
+* intensity <nowiki>{defaultUnits=dB}</nowiki> 
+** dB <nowiki>{unitSymbol}</nowiki> 
+* jerk <nowiki>{defaultUnits=m-per-s^3}</nowiki> 
+** m-per-s^3 <nowiki>{unitSymbol}</nowiki> 
+* luminousIntensity <nowiki>{defaultUnits=cd}</nowiki> 
+** candela <nowiki>{SIUnit}</nowiki> 
+** cd <nowiki>{SIUnit, unitSymbol}</nowiki> 
+* memorySize <nowiki>{defaultUnits=B}</nowiki> 
+** byte <nowiki>{SIUnit}</nowiki>
+** B <nowiki>{SIUnit, unitSymbol}</nowiki> 
+* posixPath <nowiki>{allowedCharacter=/,allowedCharacter=:}[Posix path specification.]</nowiki> 
+* physicalLength <nowiki>{defaultUnits=m}</nowiki> 
+** metre <nowiki>{SIUnit}</nowiki> 
+** m <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** foot 
+** mile  
+* pixels <nowiki>{defaultUnits=px}</nowiki>  
+** pixel 
+** px <nowiki>{unitSymbol}</nowiki> 
+* speed <nowiki>{defaultUnits=m-per-s}</nowiki> 
+** m-per-s <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** mph <nowiki>{unitSymbol}</nowiki> 
+** kph <nowiki>{unitSymbol}</nowiki> 
+* time <nowiki>{defaultUnits=s}</nowiki> 
+** second <nowiki>{SIUnit}</nowiki> 
+** s <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** day 
+** minute 
+** hour <nowiki>[Should be in 24-hour format.]</nowiki>
+* volume <nowiki>{defaultUnits=m^3}</nowiki> 
+** m^3 <nowiki>{SIUnit, unitSymbol}</nowiki> 
+
+
+
+'''Unit modifiers''' 
+* deca <nowiki>{SIUnitModifier} [SI unit multiple representing 10^1]</nowiki> 
+* da <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^1]</nowiki>
+* hecto <nowiki>{SIUnitModifier} [SI unit multiple representing 10^2]</nowiki> 
+* h <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^2]</nowiki>
+* kilo <nowiki>{SIUnitModifier} [SI unit multiple representing 10^3]</nowiki> 
+* k <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^3]</nowiki>
+* mega <nowiki>{SIUnitModifier} [SI unit multiple representing 10^6]</nowiki> 
+* M <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^6]</nowiki>
+* giga <nowiki>{SIUnitModifier} [SI unit multiple representing 10^9]</nowiki> 
+* G <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^9]</nowiki>
+* tera <nowiki>{SIUnitModifier} [SI unit multiple representing 10^12]</nowiki> 
+* T <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^12]</nowiki>
+* peta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^15]</nowiki> 
+* P <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^15]</nowiki> 
+* exa <nowiki>{SIUnitModifier} [SI unit multiple representing 10^18]</nowiki> 
+* E <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^18]</nowiki>
+* zetta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^21]</nowiki> 
+* Z <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^21]</nowiki>
+* yotta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^24]</nowiki> 
+* Y <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^24]</nowiki>   
+* deci <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-1]</nowiki> 
+* d <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-1]</nowiki> 
+* centi <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-2]</nowiki> 
+* c <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-2]</nowiki>
+* milli <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-3]</nowiki> 
+* m <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-3]</nowiki>
+* micro <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-6]</nowiki> 
+* u <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-6]</nowiki>
+* nano <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-9]</nowiki> 
+* n <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-9]</nowiki> 
+* pico <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-12]</nowiki> 
+* p <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-12]</nowiki>
+* femto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-15]</nowiki> 
+* f <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-15]</nowiki>
+* atto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-18]</nowiki> 
+* a <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-18]</nowiki>
+* zepto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-21]</nowiki> 
+* z <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-21]</nowiki>
+* yocto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-24]</nowiki> 
+* y <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-24]</nowiki>  
+
+'''Value classes''' <nowiki>[Specification of the rules for the values provided by users.]</nowiki>
+
+'''Schema attributes'''
+* allowedCharacter <nowiki>{unitClassProperty}[An attribute of unit classes schema value placeholders indicating a special character that is allowed in expressing the value of that placeholder.]</nowiki>
+* defaultUnits <nowiki>{unitClassProperty}[An attribute of unit classes specifying the default units for a tag.]</nowiki> 
+* extensionAllowed <nowiki>{boolProperty}[Users can add unlimited levels of child nodes under this tag.]</nowiki> 
+* isNumeric <nowiki>{boolProperty}[The tag hashtag placeholder must be replaced by a numerical value.]</nowiki>  
+* recommended  <nowiki>{boolProperty}[A HED string tagging an event is recommended to include this tag.]</nowiki> 
+* relatedTag <nowiki>[Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.]</nowiki> 
+* requireChild  <nowiki>{boolProperty}[One of its descendants must be chosen to tag an event.]</nowiki> 
+* required <nowiki>{boolProperty}[Every HED string tagging an event should include this tag.]</nowiki>
+* SIUnit  <nowiki>{boolProperty, unitClassProperty}[Designates the name of an SI unit so it can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.]</nowiki>
+* SIUnitModifier <nowiki>{boolProperty, unitModifierProperty}[SI unit modifier indicating a multiple or submultiple of a base unit.]</nowiki> 
+* SIUnitSymbolModifier <nowiki>{boolProperty, unitModifierProperty}[SI unit symbol modifier indicating a multiple or submultiple of a base unit symbol.]</nowiki>
+* suggestedTag <nowiki>[Additional HED tags suggested to be used with this tag. This attribute is used by tagging tools.]</nowiki> 
+* takesValue <nowiki>{boolProperty}[This tag will have a hashtag placeholder child in the schema which is expected to be replaced with a user-defined value.] </nowiki> 
+* unique <nowiki>{boolProperty}[Only one of this tag or its descendants can be used within a single tag group or event.]</nowiki> 
+* unitClass <nowiki>[Schema attribute specifying which unit class this value tag belongs to.]</nowiki> 
+* unitSymbol <nowiki>{boolProperty, unitClassProperty}[Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.]</nowiki> 
+
+'''Properties''' <nowiki>[Properties of the schema attributes themselves. These are used for schema handling and verification.]</nowiki>
+
+'''Epilogue'''
+This is the new format for the mediawiki schema
+
+!# end hed 
+
+
