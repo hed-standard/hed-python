@@ -116,8 +116,14 @@ class TestConverterOld(TestConverterBase):
     can_compare = False
 
 
+class TestConverterOld2(TestConverterBase):
+    xml_file = '../data/legacy_xml/HED7.1.1.xml'
+    wiki_file = '../data/legacy_xml/HED7.3.0.mediawiki'
+    can_compare = False
+
+
 class TestConverterBeta(TestConverterBase):
-    xml_file = '../data/hed_pairs/HED8.0.0-beta.1a.xml'
+    xml_file = '../data/hed_pairs/HED8.0.0-beta.1at.xml'
     wiki_file = '../data/hed_pairs/HED8.0.0-beta.1a.mediawiki'
     can_compare = True
 
@@ -132,20 +138,6 @@ class TestPropertyAdded(TestConverterBase):
 class TestPropertyAddedUsage(TestConverterBase):
     xml_file = '../data/hed_pairs/added_prop_with_usage.xml'
     wiki_file = '../data/hed_pairs/added_prop_with_usage.mediawiki'
-    can_compare = True
-    can_legacy = False
-
-
-class TestBeta2(TestConverterBase):
-    xml_file = '../data/hed_pairs/beta.2.xml'
-    wiki_file = '../data/hed_pairs/beta.2.mediawiki'
-    can_compare = True
-    can_legacy = False
-
-
-class TestBeta3(TestConverterBase):
-    xml_file = '../data/hed_pairs/HED8.0.0-beta.3.xml'
-    wiki_file = '../data/hed_pairs/HED8.0.0-beta.3.mediawiki'
     can_compare = True
     can_legacy = False
 

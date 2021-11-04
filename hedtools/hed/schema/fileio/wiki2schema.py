@@ -10,19 +10,13 @@ from hed.schema.fileio import wiki_constants
 
 header_attr_expression = "([^ ]+?)=\"(.*?)\""
 attr_re = re.compile(header_attr_expression)
-
-level_expression = r'\*+'
-level_re = re.compile(level_expression)
-attributes_expression = r'\{.*\}'
-attributes_re = re.compile(attributes_expression)
-description_expression = r'\[.*\]'
-description_re = re.compile(description_expression)
 extend_here_line = 'extend here'
 invalid_characters_to_strip = ["&#8203;"]
-tag_name_expression = r'([<>=#\-a-zA-Z0-9$:()\^µ]+\s*)+'
+tag_name_expression = r'(\*+|\'{3})(.*?)(\'{3})?\s*([\[\{]|$)+'
 tag_name_re = re.compile(tag_name_expression)
 no_wiki_tag = '</?nowiki>'
-square_bracket_removal_expression = r'[\[\]]'
+no_wiki_start_tag = '<nowiki>'
+no_wiki_end_tag = '</nowiki>'
 
 
 # these must always be in order under the current spec.
@@ -52,7 +46,6 @@ SectionStarts = {
     HedWikiSection.Epilogue: wiki_constants.EPILOGUE_SECTION_ELEMENT,
     HedWikiSection.EndHed: wiki_constants.END_HED_STRING
 }
-
 
 SectionNames = {
     HedWikiSection.HeaderLine: "Header",
@@ -278,14 +271,12 @@ class HedSchemaWikiParser:
         for line in lines:
             if line.startswith(wiki_constants.ROOT_TAG):
                 parent_tags = []
-                new_tag = self._add_tag_line(parent_tags, line)
-                parent_tags.append(new_tag)
             else:
                 level = self._get_tag_level(line)
                 if level < len(parent_tags):
                     parent_tags = parent_tags[:level]
-                new_tag = self._add_tag_line(parent_tags, line)
-                parent_tags.append(new_tag)
+            new_tag = self._add_tag_line(parent_tags, line)
+            parent_tags.append(new_tag)
 
     def _read_unit_classes(self, lines):
         """Adds the unit classes section
@@ -298,7 +289,7 @@ class HedSchemaWikiParser:
         current_unit_class = ""
 
         for line in lines:
-            unit_class = self._get_tag_name(line)
+            unit_class, _ = self._get_tag_name(line)
             level = self._get_tag_level(line)
             # This is a unit class
             if level == 1:
@@ -407,11 +398,12 @@ class HedSchemaWikiParser:
         int
             Gets the tag level. The number of asterisks determine what level the tag is on.
         """
-        match = level_re.search(tag_line)
-        if match:
-            return match.group().count('*')
-        else:
+        count = 0
+        while tag_line[count] == '*':
+            count += 1
+        if count == 0:
             return 1
+        return count
 
     @staticmethod
     def _remove_nowiki_tag_from_line(tag_line):
@@ -427,11 +419,17 @@ class HedSchemaWikiParser:
         string
             The line with the nowiki tag removed.
         """
+        index1 = tag_line.find(no_wiki_start_tag)
+        index2 = tag_line.find(no_wiki_end_tag)
+        if (index1 == -1 and index2 != -1) or \
+                (index2 == -1 and index1 != -1):
+            # todo: make this an error
+            pass
+            #raise HedFileError("addme", "addme", "addme")
         tag_line = re.sub(no_wiki_tag, '', tag_line)
         return tag_line
 
-    @staticmethod
-    def _get_tag_name(tag_line):
+    def _get_tag_name(self, tag_line):
         """Gets the tag name from the tag line.
 
         Parameters
@@ -445,32 +443,42 @@ class HedSchemaWikiParser:
             The tag name.
         """
         if tag_line.find(extend_here_line) != -1:
-            return ''
+            return '', 0
         for invalid_chars in invalid_characters_to_strip:
             tag_line = tag_line.replace(invalid_chars, "")
         match = tag_name_re.search(tag_line)
         if match:
-            return match.group().strip()
-        else:
-            return ''
+            tag_name = match.group(2).strip()
+            if tag_name:
+                return tag_name, match.regs[4][0]
+
+        raise HedFileError(HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
+                           f"Schema term is empty or the line is malformed on line '{tag_line}'.",
+                           self.filename)
 
     @staticmethod
-    def _get_tag_attributes(tag_line):
+    def _get_tag_attributes(tag_line, starting_index):
         """Gets the tag attributes from a line.
 
         Parameters
         ----------
         tag_line: string
             A tag line.
+        starting_index: int
+            The first index we can check for the brackets
 
         Returns
         -------
         {}
             Dict containing the attributes
+        int
+            The last index we found tag attributes at
         """
-        match = attributes_re.search(tag_line)
-        if match:
-            attributes_split = [x.strip() for x in re.sub('[{}]', '', match.group()).split(',')]
+        attr_string, starting_index = HedSchemaWikiParser._get_line_section(tag_line, starting_index, '{', '}')
+        if attr_string is None:
+            return None, starting_index
+        if attr_string:
+            attributes_split = [x.strip() for x in attr_string.split(',')]
             # Filter out attributes with spaces.
             attributes_split = [a for a in attributes_split if " " not in a]
 
@@ -484,29 +492,47 @@ class HedSchemaWikiParser:
                         final_attributes[split_attribute[0]] += "," + split_attribute[1]
                     else:
                         final_attributes[split_attribute[0]] = split_attribute[1]
-            return final_attributes
+            return final_attributes, starting_index
         else:
-            return {}
+            return {}, starting_index
 
     @staticmethod
-    def _get_tag_description(tag_line):
-        """Gets the tag description from a line.
+    def _get_line_section(tag_line, starting_index, start_delim='[', end_delim=']'):
+        """Gets the section of the line enclosed by the given delimiters, after starting_index
 
         Parameters
         ----------
         tag_line: string
             A tag line.
-
+        starting_index: int
+            The first index we can check for the brackets
+        start_delim: str
+            The string that starts this block
+        end_delim: str
+            The string that ends this block
         Returns
         -------
         string
             The tag description.
+        int
+            The last index we found tag attributes at
         """
-        match = description_re.search(tag_line)
-        if match:
-            return re.sub(square_bracket_removal_expression, '', match.group()).strip()
-        else:
-            return ''
+        count1 = tag_line.count(start_delim)
+        count2 = tag_line.count(end_delim)
+        if count1 != count2 or count1 > 1 or count2 > 1:
+            return None, 0
+
+        tag_line = tag_line[starting_index:]
+
+        index1 = tag_line.find(start_delim)
+        index2 = tag_line.find(end_delim)
+        if index2 < index1:
+            return None, 0
+
+        if count1 == 0:
+            return "", starting_index
+
+        return tag_line[index1 + 1: index2], index2 + starting_index
 
     def _add_tag_line(self, parent_tags, tag_line):
         """Add a tag to the dictionaries, including attributes and description.
@@ -523,7 +549,7 @@ class HedSchemaWikiParser:
         tag_name: str
             The name of the added tag
         """
-        tag_name = self._get_tag_name(tag_line)
+        tag_name, _ = self._get_tag_name(tag_line)
         if tag_name:
             if parent_tags:
                 long_tag_name = "/".join(parent_tags) + "/" + tag_name
@@ -534,18 +560,25 @@ class HedSchemaWikiParser:
         return tag_name
 
     def _add_single_line(self, tag_line, key_class, element_name=None, skip_adding_name=False):
+        node_name, index = self._get_tag_name(tag_line)
         if element_name:
             node_name = element_name
-        else:
-            node_name = self._get_tag_name(tag_line)
 
-        node_desc = self._get_tag_description(tag_line)
-        node_attributes = self._get_tag_attributes(tag_line)
+        node_attributes, index = self._get_tag_attributes(tag_line, index)
+        if node_attributes is None:
+            raise HedFileError(HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+                               f"Attributes section has mismatched delimiters on tag line '{tag_line}'", self.filename)
+
+        node_desc, _ = self._get_line_section(tag_line, index)
+        if node_desc is None:
+            raise HedFileError(HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+                               f"Attributes section has mismatched delimiters on tag line {tag_line}",
+                               self.filename)
         if not skip_adding_name:
             self._schema._add_tag_to_dict(node_name, key_class)
         tag_entry = self._schema._get_entry_for_tag(node_name, key_class)
         if node_desc:
-            tag_entry.description = node_desc
+            tag_entry.description = node_desc.strip()
 
         for attribute_name, attribute_value in node_attributes.items():
             tag_entry.set_attribute_value(attribute_name, attribute_value)
