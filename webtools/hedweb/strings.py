@@ -3,7 +3,7 @@ from flask import current_app
 # from hed.models.hed_string import HedString
 
 
-from hed.models.hed_string  import HedString
+from hed.models.hed_string import HedString
 from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
@@ -56,7 +56,7 @@ def process(arguments):
         A dictionary with the results in standard format.
     """
     hed_schema = arguments.get('schema', None)
-    if not hed_schema or not isinstance(hed_schema, hedschema.HedSchema):
+    if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
     string_list = arguments.get(base_constants.STRING_LIST, None)
     command = arguments.get(base_constants.COMMAND, None)
