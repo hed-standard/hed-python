@@ -1,34 +1,32 @@
 <?xml version="1.0" ?>
-<HED version="8.0.0-beta.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0-beta.3.xsd">
+<HED version="8.0.0-beta.1" xsd="https://github.com/hed-standard/hed-specification/raw/master/hedxsd-test/HED8.0.0-beta.1a.xsd">
    <schema>
       <node>
          <name>Event</name>
-         <description>Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.</description>
+         <description>Something that happens at a given place and time. Elements of this subtree designate the general category in which an event falls.</description>
          <attribute>
             <name>suggestedTag</name>
             <value>Task-property</value>
          </attribute>
          <node>
             <name>Sensory-event</name>
-            <description>Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.</description>
+            <description>Something perceivable by an agent. An event meant to be an experimental stimulus should also be tagged with Task-event-role/Experiment-stimulus.</description>
             <attribute>
                <name>suggestedTag</name>
                <value>Task-event-role</value>
-               <value>Attribute/Sensory</value>
             </attribute>
          </node>
          <node>
             <name>Agent-action</name>
-            <description>Any action engaged in by an agent (see the Agent subtree for agent categories). A participant response to an experiment stimulus should include the tag Agent-property/Agent-task-role/Experimental-participant.</description>
+            <description>Any action engaged in by an agent. An event that is a participant response to an experiment stimulus should also be tagged with Agent-property/Agent-task-role/Participant-response.</description>
             <attribute>
                <name>suggestedTag</name>
-               <value>Task-event-role</value>
-               <value>Agent</value>
+               <value>Task-role</value>
             </attribute>
          </node>
          <node>
             <name>Data-feature</name>
-            <description>An event marking the occurrence of a data feature such as an interictal spike or alpha burst, often added post hoc to the data record.</description>
+            <description>An event derived from the data itself or possibly inserted in a post-hoc fashion. Examples are markers for interictal spikes or alpha bursts.</description>
             <attribute>
                <name>suggestedTag</name>
                <value>Data-property</value>
@@ -36,19 +34,19 @@
          </node>
          <node>
             <name>Experiment-control</name>
-            <description>An event pertaining to the physical control of the experiment during its operation.</description>
+            <description>An event pertaining to the control of the experiment during its operation.</description>
          </node>
          <node>
             <name>Experiment-procedure</name>
-            <description>An event indicating an experimental procedure, as in performing a saliva swab during the experiment or administering a survey.</description>
+            <description>An event indicating an experimental procedure as in doing a saliva swab on a participant during the experiment or administering a survey.</description>
          </node>
          <node>
             <name>Experiment-structure</name>
-            <description>An event specifying a change-point of the structure of experiment. This event is typically used to indicate a change in experimental conditions or tasks.</description>
+            <description>An event specifying the structure of the experiment.</description>
          </node>
          <node>
             <name>Measurement-event</name>
-            <description>A discrete measure returned by an instrument.</description>
+            <description>Something that is measured or detected by an instrument such as a patch-clamp or a probe.</description>
             <attribute>
                <name>suggestedTag</name>
                <value>Data-property</value>
@@ -57,22 +55,26 @@
       </node>
       <node>
          <name>Agent</name>
-         <description>Someone or something that takes an active role or produces a specified effect.The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be something that simulates something else.</description>
+         <description>Something in the experiment that takes an active role or produces an effect. The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be something that simulates something else.</description>
          <attribute>
             <name>suggestedTag</name>
             <value>Agent-property</value>
          </attribute>
          <node>
             <name>Animal-agent</name>
-            <description>An agent living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement, as distinguished from a plant or mineral.</description>
+            <description>An animal that is present and acting to produce an effect.</description>
          </node>
          <node>
             <name>Avatar-agent</name>
-            <description>An agent associated with an icon or avatar representing another agent.</description>
+            <description>An agent associated with an icon or figure representing a particular person in venues such as video games or internet forums.</description>
+         </node>
+         <node>
+            <name>Computational-agent</name>
+            <description>An agent whose decisions about its actions can be explained in terms of computation.</description>
          </node>
          <node>
             <name>Controller-agent</name>
-            <description>An agent experiment control software or hardware.</description>
+            <description>An outside controller such as the experimental control software or hardware.</description>
          </node>
          <node>
             <name>Human-agent</name>
@@ -80,11 +82,11 @@
          </node>
          <node>
             <name>Robotic-agent</name>
-            <description>An agent mechanical device capable of performing a variety of often complex tasks on command or by being programmed in advance.</description>
+            <description>An agent that is a mechanical device capable of performing a variety of often complex tasks on command or by being programmed in advance.</description>
          </node>
          <node>
             <name>Software-agent</name>
-            <description>An agent computer program.</description>
+            <description>A computer program that acts for a user or other program in a relationship of agency.</description>
          </node>
       </node>
       <node>
@@ -95,10 +97,10 @@
          </attribute>
          <node>
             <name>Move</name>
-            <description>Move in a specified direction or manner; change position or posture.</description>
+            <description>Go in a specified direction or manner; change position.</description>
             <node>
                <name>Breathe</name>
-               <description>Inhale or exhale during respiration.</description>
+               <description>Inhale and exhale air into the body during respiration.</description>
                <node>
                   <name>Cough</name>
                   <description>Suddenly and audibly expel air from the lungs through a partially closed glottis, preceded by inhalation.</description>
@@ -129,7 +131,7 @@
                </node>
             </node>
             <node>
-               <name>Move-body</name>
+               <name>Move-full-body</name>
                <description>Move entire body.</description>
                <node>
                   <name>Bend</name>
@@ -351,10 +353,6 @@
                      <description>Bend toes sometimes to grip.</description>
                   </node>
                   <node>
-                     <name>Hop</name>
-                     <description>Jump on one foot.</description>
-                  </node>
-                  <node>
                      <name>Jog</name>
                      <description>Run at a trot to exercise.</description>
                   </node>
@@ -401,8 +399,44 @@
             <name>Communicate</name>
             <description>Convey knowledge of or information about something.</description>
             <node>
-               <name>Communicate-gesturally</name>
+               <name>Communicate-vocally</name>
+               <description>Communicate using mouth or vocal cords.</description>
+               <node>
+                  <name>Cry</name>
+                  <description>Shed tears associated with emotions, usually sadness but also joy or frustration.</description>
+               </node>
+               <node>
+                  <name>Groan</name>
+                  <description>Make a deep inarticulate sound in response to pain or despair.</description>
+               </node>
+               <node>
+                  <name>Gulp</name>
+                  <description>Swallow quickly or in large mouthfuls, often audibly, sometimes to indicate apprehension.</description>
+               </node>
+               <node>
+                  <name>Laugh</name>
+                  <description>Make the spontaneous sounds and movements of the face and body that are the instinctive expressions of lively amusement and sometimes also of contempt or derision.</description>
+               </node>
+               <node>
+                  <name>Scream</name>
+                  <description>Make loud, vociferous cries or yells to express pain, excitement, or fear.</description>
+               </node>
+               <node>
+                  <name>Sigh</name>
+                  <description>Emit a long, deep, audible breath expressing sadness, relief, tiredness, or a similar feeling.</description>
+               </node>
+               <node>
+                  <name>Speak</name>
+                  <description>Communicate using spoken language.</description>
+               </node>
+            </node>
+            <node>
+               <name>Gesture</name>
                <description>Communicate nonverbally using visible bodily actions, either in place of speech or together and in parallel with spoken words. Gestures include movement of the hands, face, or other parts of the body.</description>
+               <node>
+                  <name>Index-up</name>
+                  <description>Raise with fist clenched in triumph or affirmation.</description>
+               </node>
                <node>
                   <name>Pump-fist</name>
                   <description>Raise with fist clenched in triumph or affirmation.</description>
@@ -452,44 +486,12 @@
                   <description>Produce a shrill clear sound by forcing breath out or air in through the puckered lips.</description>
                </node>
             </node>
-            <node>
-               <name>Communicate-vocally</name>
-               <description>Communicate using mouth or vocal cords.</description>
-               <node>
-                  <name>Cry</name>
-                  <description>Shed tears associated with emotions, usually sadness but also joy or frustration.</description>
-               </node>
-               <node>
-                  <name>Groan</name>
-                  <description>Make a deep inarticulate sound in response to pain or despair.</description>
-               </node>
-               <node>
-                  <name>Gulp</name>
-                  <description>Swallow quickly or in large mouthfuls, often audibly, sometimes to indicate apprehension.</description>
-               </node>
-               <node>
-                  <name>Laugh</name>
-                  <description>Make the spontaneous sounds and movements of the face and body that are the instinctive expressions of lively amusement and sometimes also of contempt or derision.</description>
-               </node>
-               <node>
-                  <name>Scream</name>
-                  <description>Make loud, vociferous cries or yells to express pain, excitement, or fear.</description>
-               </node>
-               <node>
-                  <name>Sigh</name>
-                  <description>Emit a long, deep, audible breath expressing sadness, relief, tiredness, or a similar feeling.</description>
-               </node>
-               <node>
-                  <name>Speak</name>
-                  <description>Communicate using spoken language.</description>
-               </node>
-            </node>
          </node>
          <node>
             <name>Perform</name>
             <description>Carry out or accomplish an action, task, or function.</description>
             <node>
-               <name>Collide-with</name>
+               <name>Collide</name>
                <description>Hit with force when moving.</description>
             </node>
             <node>
@@ -719,7 +721,7 @@
                   </node>
                   <node>
                      <name>Arm</name>
-                     <description>For clinical purposes this term is also used to refer to the whole superior limb.</description>
+                     <description>The portion of the upper extremity between the shoulder and the elbow. For clinical purposes this term is also used to refer to the whole superior limb.</description>
                      <node>
                         <name>Elbow</name>
                         <description>A type of hinge joint located between the forearm and upper arm.</description>
@@ -759,7 +761,7 @@
                   </node>
                   <node>
                      <name>Leg</name>
-                     <description>For clinical purposes this term is also used to refer to the whole inferior limb.</description>
+                     <description>The portion of the lower extremity between the knee and the ankle. For clinical purposes this term is also used to refer to the whole inferior limb.</description>
                      <node>
                         <name>Ankle</name>
                         <description>A gliding joint between the distal ends of the tibia and fibula and the proximal end of the talus.</description>
@@ -1834,11 +1836,10 @@
                   <node>
                      <name>#</name>
                      <attribute>
-                        <name>takesValue</name>
+                        <name>isNumeric</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
+                        <name>takesValue</name>
                      </attribute>
                   </node>
                </node>
@@ -1856,11 +1857,10 @@
                   <node>
                      <name>#</name>
                      <attribute>
-                        <name>takesValue</name>
+                        <name>isNumeric</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
+                        <name>takesValue</name>
                      </attribute>
                   </node>
                </node>
@@ -1870,11 +1870,10 @@
                   <node>
                      <name>#</name>
                      <attribute>
-                        <name>takesValue</name>
+                        <name>isNumeric</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
+                        <name>takesValue</name>
                      </attribute>
                   </node>
                </node>
@@ -1884,11 +1883,10 @@
                   <node>
                      <name>#</name>
                      <attribute>
-                        <name>takesValue</name>
+                        <name>isNumeric</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
+                        <name>takesValue</name>
                      </attribute>
                   </node>
                </node>
@@ -1990,15 +1988,14 @@
                   <node>
                      <name>#</name>
                      <attribute>
+                        <name>isNumeric</name>
+                     </attribute>
+                     <attribute>
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
                         <value>acceleration</value>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2008,15 +2005,14 @@
                   <node>
                      <name>#</name>
                      <attribute>
+                        <name>isNumeric</name>
+                     </attribute>
+                     <attribute>
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
                         <value>jerk</value>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2040,11 +2036,10 @@
                   <node>
                      <name>#</name>
                      <attribute>
-                        <name>takesValue</name>
+                        <name>isNumeric</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
+                        <name>takesValue</name>
                      </attribute>
                   </node>
                </node>
@@ -2054,15 +2049,14 @@
                   <node>
                      <name>#</name>
                      <attribute>
+                        <name>isNumeric</name>
+                     </attribute>
+                     <attribute>
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
                         <value>speed</value>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2148,11 +2142,10 @@
                   <node>
                      <name>#</name>
                      <attribute>
-                        <name>takesValue</name>
+                        <name>isNumeric</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
+                        <name>takesValue</name>
                      </attribute>
                   </node>
                </node>
@@ -2162,15 +2155,14 @@
                   <node>
                      <name>#</name>
                      <attribute>
+                        <name>isNumeric</name>
+                     </attribute>
+                     <attribute>
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
                         <value>physicalLength</value>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2180,11 +2172,10 @@
                   <node>
                      <name>#</name>
                      <attribute>
-                        <name>takesValue</name>
+                        <name>isNumeric</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
+                        <name>takesValue</name>
                      </attribute>
                   </node>
                </node>
@@ -2197,15 +2188,14 @@
                      <node>
                         <name>#</name>
                         <attribute>
+                           <name>isNumeric</name>
+                        </attribute>
+                        <attribute>
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
                            <value>physicalLength</value>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -2215,15 +2205,14 @@
                      <node>
                         <name>#</name>
                         <attribute>
+                           <name>isNumeric</name>
+                        </attribute>
+                        <attribute>
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
                            <value>physicalLength</value>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -2233,15 +2222,14 @@
                      <node>
                         <name>#</name>
                         <attribute>
+                           <name>isNumeric</name>
+                        </attribute>
+                        <attribute>
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
                            <value>physicalLength</value>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -2255,15 +2243,14 @@
                      <node>
                         <name>#</name>
                         <attribute>
+                           <name>isNumeric</name>
+                        </attribute>
+                        <attribute>
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
                            <value>area</value>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -2273,15 +2260,14 @@
                      <node>
                         <name>#</name>
                         <attribute>
+                           <name>isNumeric</name>
+                        </attribute>
+                        <attribute>
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
                            <value>physicalLength</value>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -2291,15 +2277,14 @@
                      <node>
                         <name>#</name>
                         <attribute>
+                           <name>isNumeric</name>
+                        </attribute>
+                        <attribute>
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
                            <value>physicalLength</value>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -2309,15 +2294,14 @@
                      <node>
                         <name>#</name>
                         <attribute>
+                           <name>isNumeric</name>
+                        </attribute>
+                        <attribute>
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
                            <value>physicalLength</value>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -2327,15 +2311,14 @@
                      <node>
                         <name>#</name>
                         <attribute>
+                           <name>isNumeric</name>
+                        </attribute>
+                        <attribute>
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>unitClass</name>
                            <value>volume</value>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -2362,15 +2345,14 @@
                   <node>
                      <name>#</name>
                      <attribute>
+                        <name>isNumeric</name>
+                     </attribute>
+                     <attribute>
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
                         <value>time</value>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2380,15 +2362,14 @@
                   <node>
                      <name>#</name>
                      <attribute>
+                        <name>isNumeric</name>
+                     </attribute>
+                     <attribute>
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
                         <value>time</value>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2398,15 +2379,14 @@
                   <node>
                      <name>#</name>
                      <attribute>
+                        <name>isNumeric</name>
+                     </attribute>
+                     <attribute>
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
                         <value>frequency</value>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2431,18 +2411,21 @@
                <node>
                   <name>Time-value</name>
                   <description>A value with units of time. Usually grouped with tags identifying what the value represents.</description>
+                  <attribute>
+                     <name>unitClass</name>
+                     <value>time</value>
+                  </attribute>
                   <node>
                      <name>#</name>
+                     <attribute>
+                        <name>isNumeric</name>
+                     </attribute>
                      <attribute>
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
                         <name>unitClass</name>
                         <value>time</value>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2468,11 +2451,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2482,11 +2464,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2496,11 +2477,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2510,11 +2490,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2524,11 +2503,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2538,11 +2516,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2552,11 +2529,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2566,11 +2542,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2580,11 +2555,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2594,11 +2568,10 @@
                <node>
                   <name>#</name>
                   <attribute>
-                     <name>takesValue</name>
+                     <name>isNumeric</name>
                   </attribute>
                   <attribute>
-                     <name>valueClass</name>
-                     <value>numericClass</value>
+                     <name>takesValue</name>
                   </attribute>
                </node>
             </node>
@@ -2914,10 +2887,6 @@
                   <attribute>
                      <name>takesValue</name>
                   </attribute>
-                  <attribute>
-                     <name>valueClass</name>
-                     <value>nameClass</value>
-                  </attribute>
                </node>
             </node>
             <node>
@@ -2933,10 +2902,6 @@
                   <name>#</name>
                   <attribute>
                      <name>takesValue</name>
-                  </attribute>
-                  <attribute>
-                     <name>valueClass</name>
-                     <value>nameClass</value>
                   </attribute>
                </node>
             </node>
@@ -2954,10 +2919,6 @@
                   <attribute>
                      <name>takesValue</name>
                   </attribute>
-                  <attribute>
-                     <name>valueClass</name>
-                     <value>nameClass</value>
-                  </attribute>
                </node>
             </node>
             <node>
@@ -2971,10 +2932,6 @@
                   <attribute>
                      <name>takesValue</name>
                   </attribute>
-                  <attribute>
-                     <name>valueClass</name>
-                     <value>textClass</value>
-                  </attribute>
                </node>
             </node>
             <node>
@@ -2984,10 +2941,6 @@
                   <name>#</name>
                   <attribute>
                      <name>takesValue</name>
-                  </attribute>
-                  <attribute>
-                     <name>valueClass</name>
-                     <value>textClass</value>
                   </attribute>
                </node>
             </node>
@@ -3002,10 +2955,6 @@
                   <attribute>
                      <name>takesValue</name>
                   </attribute>
-                  <attribute>
-                     <name>valueClass</name>
-                     <value>textClass</value>
-                  </attribute>
                </node>
             </node>
             <node>
@@ -3018,10 +2967,6 @@
                   <name>#</name>
                   <attribute>
                      <name>takesValue</name>
-                  </attribute>
-                  <attribute>
-                     <name>valueClass</name>
-                     <value>nameClass</value>
                   </attribute>
                </node>
             </node>
@@ -3060,8 +3005,8 @@
                         <name>takesValue</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>dateTime</value>
+                        <name>unitClass</name>
+                        <value>datetime</value>
                      </attribute>
                   </node>
                </node>
@@ -3072,10 +3017,6 @@
                      <name>#</name>
                      <attribute>
                         <name>takesValue</name>
-                     </attribute>
-                     <attribute>
-                        <name>valueClass</name>
-                        <value>nameClass</value>
                      </attribute>
                   </node>
                </node>
@@ -3754,7 +3695,6 @@
                   <attribute>
                      <name>relatedTag</name>
                      <value>Familiar</value>
-                     <value>UnfamiliarrelatedTag</value>
                      <value>Unfamiliar</value>
                   </attribute>
                </node>
@@ -3990,11 +3930,10 @@
                   <node>
                      <name>#</name>
                      <attribute>
-                        <name>takesValue</name>
+                        <name>isNumeric</name>
                      </attribute>
                      <attribute>
-                        <name>valueClass</name>
-                        <value>numericClass</value>
+                        <name>takesValue</name>
                      </attribute>
                   </node>
                </node>
@@ -4107,11 +4046,10 @@
                            <name>#</name>
                            <description>Angular value between 0 and 360</description>
                            <attribute>
-                              <name>takesValue</name>
+                              <name>isNumeric</name>
                            </attribute>
                            <attribute>
-                              <name>valueClass</name>
-                              <value>numericClass</value>
+                              <name>takesValue</name>
                            </attribute>
                         </node>
                      </node>
@@ -4122,11 +4060,10 @@
                            <name>#</name>
                            <description>B value of RGB between 0 and 1</description>
                            <attribute>
-                              <name>takesValue</name>
+                              <name>isNumeric</name>
                            </attribute>
                            <attribute>
-                              <name>valueClass</name>
-                              <value>numericClass</value>
+                              <name>takesValue</name>
                            </attribute>
                         </node>
                      </node>
@@ -4136,11 +4073,10 @@
                         <node>
                            <name>#</name>
                            <attribute>
-                              <name>takesValue</name>
+                              <name>isNumeric</name>
                            </attribute>
                            <attribute>
-                              <name>valueClass</name>
-                              <value>numericClass</value>
+                              <name>takesValue</name>
                            </attribute>
                         </node>
                      </node>
@@ -4155,11 +4091,10 @@
                            <name>#</name>
                            <description>R value of RGB between 0 and 1</description>
                            <attribute>
-                              <name>takesValue</name>
+                              <name>isNumeric</name>
                            </attribute>
                            <attribute>
-                              <name>valueClass</name>
-                              <value>numericClass</value>
+                              <name>takesValue</name>
                            </attribute>
                         </node>
                      </node>
@@ -4170,11 +4105,10 @@
                            <name>#</name>
                            <description>B value of RGB between 0 and 1</description>
                            <attribute>
-                              <name>takesValue</name>
+                              <name>isNumeric</name>
                            </attribute>
                            <attribute>
-                              <name>valueClass</name>
-                              <value>numericClass</value>
+                              <name>takesValue</name>
                            </attribute>
                         </node>
                      </node>
@@ -4185,11 +4119,10 @@
                            <name>#</name>
                            <description>G value of RGB between 0 and 1</description>
                            <attribute>
-                              <name>takesValue</name>
+                              <name>isNumeric</name>
                            </attribute>
                            <attribute>
-                              <name>valueClass</name>
-                              <value>numericClass</value>
+                              <name>takesValue</name>
                            </attribute>
                         </node>
                      </node>
@@ -4201,11 +4134,10 @@
                         <name>#</name>
                         <description>White intensity between 0 and 1</description>
                         <attribute>
-                           <name>takesValue</name>
+                           <name>isNumeric</name>
                         </attribute>
                         <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
+                           <name>takesValue</name>
                         </attribute>
                      </node>
                   </node>
@@ -5031,7 +4963,14 @@
       </unitClassDefinition>
       <unitClassDefinition>
          <name>currency</name>
-         <description>Units indicating the worth of something.</description>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>$</value>
+         </attribute>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>$</value>
+         </attribute>
          <unit>
             <name>dollar</name>
          </unit>
@@ -5046,6 +4985,22 @@
          </unit>
          <unit>
             <name>point</name>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>dateTime</name>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>:</value>
+            <value>-</value>
+         </attribute>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>YYYY-MM-DDThh:mm:ss</value>
+         </attribute>
+         <unit>
+            <name>YYYY-MM-DDThh:mm:ss</name>
+            <description>Date-times should conform to ISO8601 date-time format. Any variation on the full form is allowed.</description>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
@@ -5139,6 +5094,15 @@
                <name>unitSymbol</name>
             </attribute>
          </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>posixPath</name>
+         <description>Posix path specification.</description>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>/</value>
+            <value>:</value>
+         </attribute>
       </unitClassDefinition>
       <unitClassDefinition>
          <name>physicalLength</name>
@@ -5543,44 +5507,12 @@
          </attribute>
       </unitModifierDefinition>
    </unitModifierDefinitions>
-   <valueClassDefinitions>
-      <valueClassDefinition>
-         <name>dateTime</name>
-         <description>Date-times should conform to ISO8601 date-time format YYYY-MM-DDThh:mm:ss. Any variation on the full form is allowed.</description>
-         <attribute>
-            <name>allowedCharacter</name>
-            <value>-</value>
-            <value>:</value>
-         </attribute>
-      </valueClassDefinition>
-      <valueClassDefinition>
-         <name>nameClass</name>
-         <description>Value class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underbar.</description>
-      </valueClassDefinition>
-      <valueClassDefinition>
-         <name>numericClass</name>
-         <description>Value must be numeric.</description>
-      </valueClassDefinition>
-      <valueClassDefinition>
-         <name>posixPath</name>
-         <description>Posix path specification.</description>
-         <attribute>
-            <name>allowedCharacter</name>
-            <value>/</value>
-            <value>:</value>
-         </attribute>
-      </valueClassDefinition>
-      <valueClassDefinition>
-         <name>textClass</name>
-         <description>Value class designating values that have the characteristics of text such as in descriptions.</description>
-      </valueClassDefinition>
-   </valueClassDefinitions>
    <schemaAttributeDefinitions>
       <schemaAttributeDefinition>
          <name>allowedCharacter</name>
-         <description>A schema attribute of value classes specifying a special character that is allowed in expressing the value of a placeholder.</description>
+         <description>A schema attribute of unit classes specifying a special character that is allowed in expressing the value of a placeholder with those units.</description>
          <property>
-            <name>valueClassProperty</name>
+            <name>unitClassProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -5593,6 +5525,13 @@
       <schemaAttributeDefinition>
          <name>extensionAllowed</name>
          <description>A schema attribute indicating that users can add unlimited levels of child nodes under this tag.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>isNumeric</name>
+         <description>A schema attribute indicating that the tag hashtag placeholder must be replaced by a numerical value.</description>
          <property>
             <name>boolProperty</name>
          </property>
@@ -5708,32 +5647,24 @@
             <name>unitProperty</name>
          </property>
       </schemaAttributeDefinition>
-      <schemaAttributeDefinition>
-         <name>valueClass</name>
-      </schemaAttributeDefinition>
    </schemaAttributeDefinitions>
    <propertyDefinitions>
-      <propertyDefinition>
-         <name>boolProperty</name>
-         <description>Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.</description>
-      </propertyDefinition>
-      <propertyDefinition>
-         <name>unitClassProperty</name>
-         <description>Indicates that the schema attribute is meant to be applied to unit classes.</description>
-      </propertyDefinition>
-      <propertyDefinition>
-         <name>unitModifierProperty</name>
-         <description>Indicates that the schema attribute is meant to be applied to unit modifier classes.</description>
-      </propertyDefinition>
-      <propertyDefinition>
-         <name>unitProperty</name>
-         <description>Indicates that the schema attribute is meant to be applied to units within a unit class.</description>
-      </propertyDefinition>
-      <propertyDefinition>
-         <name>valueClassProperty</name>
-         <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
-      </propertyDefinition>
-   </propertyDefinitions>
-   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.</epilogue>
+        <propertyDefinition>
+            <name>boolProperty</name>
+            <description>Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.</description>
+        </propertyDefinition>
+        <propertyDefinition>
+            <name>unitClassProperty</name>
+            <description>Indicates that the schema attribute is meant to be applied to unit classes.</description>
+        </propertyDefinition>
+        <propertyDefinition>
+            <name>unitModifierProperty</name>
+            <description>Indicates that the schema attribute is meant to be applied to unit modifier classes.</description>
+        </propertyDefinition>
+        <propertyDefinition>
+            <name>unitProperty</name>
+            <description>Indicates that the schema attribute is meant to be applied to units within a unit class.</description>
+        </propertyDefinition>
+    </propertyDefinitions>
+    <epilogue>This is the new format for the mediawiki schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.</epilogue>
 </HED>
-
