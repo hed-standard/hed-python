@@ -186,45 +186,6 @@ def string_results():
         return handle_error(ex)
 
 
-@route_blueprint.route(route_constants.ADDITIONAL_EXAMPLES_ROUTE, strict_slashes=False, methods=['GET'])
-def render_additional_examples_page():
-    """The site additional examples page.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the additional examples page.
-
-    """
-    return render_template(page_constants.ADDITIONAL_EXAMPLES_PAGE)
-
-
-@route_blueprint.route(route_constants.HED_COMMANDS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
-def render_commands_help_page():
-    """The help page for the commands for the online HED tools.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the home page.
-
-    """
-    return render_template(page_constants.HED_COMMANDS_HELP_PAGE)
-
-
-@route_blueprint.route(route_constants.HED_ERRORS_ROUTE, strict_slashes=False, methods=['GET'])
-def render_hed_errors_page():
-    """The base_constants errors page.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for a page explaining base_constants errors.
-
-    """
-    return render_template(page_constants.HED_ERRORS_PAGE)
-
-
 @route_blueprint.route(route_constants.EVENTS_ROUTE, strict_slashes=False, methods=['GET'])
 def render_events_form():
     """The form for BIDS event file (with JSON sidecar) processing.
@@ -236,19 +197,6 @@ def render_events_form():
 
     """
     return render_template(page_constants.EVENTS_PAGE)
-
-
-@route_blueprint.route(route_constants.HED_TOOLS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
-def render_help_page():
-    """The site help page.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the help page.
-
-    """
-    return render_template(page_constants.HED_TOOLS_HELP_PAGE)
 
 
 @route_blueprint.route(route_constants.HED_TOOLS_HOME_ROUTE, strict_slashes=False, methods=['GET'])
@@ -288,19 +236,6 @@ def render_services_form():
 
     """
     return render_template(page_constants.SERVICES_PAGE)
-
-
-@route_blueprint.route(route_constants.HED_SERVICES_HELP_ROUTE, strict_slashes=False, methods=['GET'])
-def render_services_help_page():
-    """The help page for the web services for the online HED tools.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the services help page.
-
-    """
-    return render_template(page_constants.HED_SERVICES_HELP_PAGE)
 
 
 @route_blueprint.route(route_constants.SIDECAR_ROUTE, strict_slashes=False, methods=['GET'])

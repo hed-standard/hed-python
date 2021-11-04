@@ -12,7 +12,7 @@
 
         {{ create_process_options('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
 
-        <h3>2) Upload spreadsheet file (tab-separated or Excel):</h3>
+        <h3>3) Upload spreadsheet file (tab-separated or Excel):</h3>
         <div class="form-group">
             <label class="secondary-label" for="spreadsheet_file">Spreadsheet file:</label>
             <label class="btn-group file-browse-group">
@@ -35,12 +35,12 @@
                 <p class="flash" id="spreadsheet_flash"></p>
             </div>
         </div>
-        <h3>3) Select columns with tags (after upload):</h3>
+        <h3>4) Select columns with tags (after upload):</h3>
         {{ create_column_info('show_indices') }}
 
-        {{ create_schema_pulldown('4) Choose a HED schema version:') }}
+        {{ create_schema_pulldown('5) Choose a HED schema version:') }}
 
-        <h3>5) Process:</h3>
+        <h3>6) Process:</h3>
         <div class="form-group">
             <button id="spreadsheet_submit" type="button">Process</button>
             <p class="flash" id="spreadsheet_submit_flash"></p>

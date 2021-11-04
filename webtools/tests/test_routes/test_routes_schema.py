@@ -23,7 +23,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'convert',
                           'schema_file': (schema_buffer, 'HED8.0.0Bad.mediawiki'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a invalid mediawiki has a response')
             headers_dict = dict(response.headers)
@@ -46,7 +46,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'convert',
                           'schema_file': (schema_buffer, 'HED8.0.0.mediawiki'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a valid mediawiki has a response')
             headers_dict = dict(response.headers)
@@ -59,15 +59,15 @@ class Test(TestWebBase):
 
     def test_schema_results_convert_mediawiki_gen2_invalid(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED-generation2-schema-7.2.0Bad.mediawiki')
+                                   '../data/HED7.2.0Bad.mediawiki')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'convert',
-                          'schema_file': (schema_buffer, 'HED-generation2-schema-7.2.0Bad.mediawiki'),
-                          'check_warnings_validate': 'on'}
+                          'schema_file': (schema_buffer, 'HED7.2.0Bad.mediawiki'),
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a invalid gen2 mediawiki has a response')
             headers_dict = dict(response.headers)
@@ -82,7 +82,7 @@ class Test(TestWebBase):
 
     def test_schema_results_convert_mediawiki_gen2_valid(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED-generation2-schema-7.2.0.mediawiki')
+                                   '../data/HED7.2.0.mediawiki')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
@@ -90,7 +90,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'convert',
                           'schema_file': (schema_buffer, 'HED-generation2-schema-7.2.0.mediawiki'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a valid gen2 mediawiki has a response')
             headers_dict = dict(response.headers)
@@ -112,7 +112,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'convert',
                           'schema_file': (schema_buffer, 'HED8.0.0.xml'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a valid xml has a response')
             headers_dict = dict(response.headers)
@@ -133,7 +133,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'convert',
                           'schema_file': (schema_buffer, 'HED7.2.0.xml'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a valid gen2 xml has a response')
             headers_dict = dict(response.headers)
@@ -152,7 +152,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_url_option',
                           'command_option': 'convert',
                           'schema_url': schema_url,
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Conversion of a valid xml url has a response')
             headers_dict = dict(response.headers)
@@ -169,7 +169,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_url_option',
                           'command_option': 'convert',
                           'schema_url': schema_url,
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Conversion of a valid xml url has a response')
             headers_dict = dict(response.headers)
@@ -189,7 +189,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'validate',
                           'schema_file': (schema_buffer, 'HED8.0.0Bad.mediawiki'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a invalid mediawiki has a response')
             headers_dict = dict(response.headers)
@@ -212,7 +212,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'validate',
                           'schema_file': (schema_buffer, 'HED8.0.0.mediawiki'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a valid mediawiki has a response')
             headers_dict = dict(response.headers)
@@ -225,15 +225,15 @@ class Test(TestWebBase):
 
     def test_schema_results_validate__mediawiki_gen2_valid(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED-generation2-schema-7.2.0.mediawiki')
+                                   '../data/HED7.2.0.mediawiki')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'validate',
-                          'schema_file': (schema_buffer, 'HED-generation2-schema-7.2.0.mediawiki'),
-                          'check_warnings_validate': 'on'}
+                          'schema_file': (schema_buffer, 'HED7.2.0.mediawiki'),
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a valid gen2 mediawiki has a response')
             headers_dict = dict(response.headers)
@@ -246,15 +246,15 @@ class Test(TestWebBase):
 
     def test_schema_results_validate_mediawiki_gen2_invalid(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED-generation2-schema-7.2.0Bad.mediawiki')
+                                   '../data/HED7.2.0Bad.mediawiki')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'validate',
-                          'schema_file': (schema_buffer, 'HED-generation2-schema-7.2.0Bad.mediawiki'),
-                          'check_warnings_validate': 'on'}
+                          'schema_file': (schema_buffer, 'HED7.2.0Bad.mediawiki'),
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a invalid gen2 mediawiki has a response')
             headers_dict = dict(response.headers)
@@ -277,7 +277,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'validate',
                           'schema_file': (schema_buffer, 'HED8.0.0.xml'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a valid xml has a response')
             headers_dict = dict(response.headers)
@@ -297,7 +297,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'validate',
                           'schema_file': (schema_buffer, 'HED7.2.0.xml'),
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a valid gen2 xml has a response')
             headers_dict = dict(response.headers)
@@ -315,7 +315,7 @@ class Test(TestWebBase):
             input_data = {'schema_upload_options': 'schema_url_option',
                           'command_option': 'validate',
                           'schema_url': schema_url,
-                          'check_warnings_validate': 'on'}
+                          'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a valid xml url has a response')
             headers_dict = dict(response.headers)

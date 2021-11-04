@@ -34,7 +34,7 @@ class Test(TestWebBase):
                           'json_file': (json_buffer, 'bids_events.json'),
                           'events_file': (events_buffer, 'bids_events.tsv'),
                           'defs_expand': 'on',
-                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
+                          base_constants.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Assembly of a valid events file has a response')
             headers_dict = dict(response.headers)
@@ -61,7 +61,7 @@ class Test(TestWebBase):
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_ASSEMBLE,
                           base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
                           base_constants.EVENTS_FILE: (events_buffer, 'bids_events.tsv'),
-                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
+                          base_constants.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Assembly of invalid events files has a response')
             headers_dict = dict(response.headers)
@@ -88,7 +88,7 @@ class Test(TestWebBase):
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
                           base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
                           base_constants.EVENTS_FILE: (events_buffer, 'bids_events.tsv'),
-                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
+                          base_constants.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'events_submit validate should return a Response when events valid')
@@ -117,7 +117,7 @@ class Test(TestWebBase):
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
                           base_constants.JSON_FILE: (json_buffer, 'bids_events.json'),
                           base_constants.EVENTS_FILE: (events_buffer, 'events_file'),
-                          base_constants.CHECK_WARNINGS_VALIDATE: 'on'}
+                          base_constants.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertTrue(isinstance(response, Response),
                             'events_submit validate should return a Response when events invalid')

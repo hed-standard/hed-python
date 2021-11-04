@@ -27,7 +27,7 @@ class Test(TestWebBase):
                                   "get_input_from_form should have a HED schema")
             self.assertEqual(base_constants.COMMAND_CONVERT, arguments[base_constants.COMMAND],
                              "get_input_from_form should have a command")
-            self.assertFalse(arguments[base_constants.CHECK_WARNINGS_VALIDATE],
+            self.assertFalse(arguments[base_constants.CHECK_FOR_WARNINGS],
                              "get_input_from_form should have check_warnings false when not given")
 
     def test_schema_process(self):

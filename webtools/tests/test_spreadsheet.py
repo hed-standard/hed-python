@@ -72,7 +72,7 @@ class Test(TestWebBase):
                                       name=spreadsheet_path)
         arguments = {base_constants.SCHEMA: hed_schema, base_constants.SPREADSHEET: spreadsheet,
                      base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
-                     base_constants.CHECK_WARNINGS_VALIDATE: True}
+                     base_constants.CHECK_FOR_WARNINGS: True}
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),
@@ -96,7 +96,7 @@ class Test(TestWebBase):
                                       name=spreadsheet_path)
         arguments = {base_constants.SCHEMA: hed_schema, base_constants.SPREADSHEET: spreadsheet,
                      base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
-                     base_constants.CHECK_WARNINGS_VALIDATE: True}
+                     base_constants.CHECK_FOR_WARNINGS: True}
         arguments[base_constants.SCHEMA] = hed_schema
 
         with self.app.app_context():
