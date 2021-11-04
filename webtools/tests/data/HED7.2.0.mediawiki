@@ -200,7 +200,7 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 *** Pseudo-character <nowiki> [Alphabet-like but not really]</nowiki> 
 *** Letter <nowiki> [Authograph or valid letters and numbers such as A or 5]</nowiki> 
 **** <nowiki># {takesValue}</nowiki> 
-** Composite <nowiki>[Has multiple of the above on it</nowiki> 
+** Composite <nowiki>[Has multiple of the above on it]</nowiki>
 * Natural scene 
 ** Aerial 
 *** Satellite 
@@ -385,7 +385,7 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 *** Oncoming 
 ** Real-world coordinates <nowiki>{requireChild}</nowiki> 
 *** Room 
-**** xyz <nowiki> {requireChild} [have a subnode, e.g. Attribute/Location/Real-world coordinates/Room/xyz/[10 50 30]]</nowiki> 
+**** xyz <nowiki> {requireChild} [have a subnode, e.g. Attribute/Location/Real-world coordinates/Room/xyz/10-50-30]</nowiki>
 ***** <nowiki># {takesValue}</nowiki> 
 ** Reference frame <nowiki>{requireChild}</nowiki> 
 *** Specified absolute reference 
@@ -545,8 +545,8 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 * Supraliminal <nowiki>[By default this is assumed about each stimulus]</nowiki> 
 * Liminal <nowiki>[At the 75%-25% perception threshold]</nowiki> 
 * Probability <nowiki> [Use to specify the level of certainty about the occurrence of the event. Use either numerical values as the child node or low, high, etc.]</nowiki> 
-* Temporal uncertainty <nowiki> {requireChild} [Use to specify the amount of uncertainty in the timing of the event. Please notice that this is different from Attribute/Probability tag which relates to the occurrence of event and can be interpretative as the integral of probability density across a distribution whose shape (temporal extent) is specified by Attribute/Temporal uncertainty]. </nowiki> 
-** <nowiki># {takesValue, isNumeric, unitClass=time} [implies that the temporal uncertainty is a uniform distribution with the amount of time provided, extending on both side. E.g. "0.5 s" specifies a 1-second range centered at event latency.</nowiki> 
+* Temporal uncertainty <nowiki> {requireChild} [Use to specify the amount of uncertainty in the timing of the event. Please notice that this is different from Attribute/Probability tag which relates to the occurrence of event and can be interpretative as the integral of probability density across a distribution whose shape (temporal extent) is specified by Attribute/Temporal uncertainty.]</nowiki>
+** <nowiki># {takesValue, isNumeric, unitClass=time} [implies that the temporal uncertainty is a uniform distribution with the amount of time provided, extending on both side. E.g. "0.5 s" specifies a 1-second range centered at event latency.]</nowiki>
 ** Standard deviation <nowiki>{requireChild} [implies that the distribution of temporal uncertainty is Gaussian with the provided standard deviation (in seconds).]</nowiki> 
 *** <nowiki># {takesValue, isNumeric, unitClass=time}</nowiki>
 * Presentation <nowiki>{requireChild}[Attributes associated with visual, auditory, tactile, etc. presentation of an stimulus]</nowiki>
@@ -792,7 +792,7 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 **** False feedback <nowiki>[Feedback that was not honest for example as in feedback of correct on an incorrect response or vice versa]</nowiki> 
 ***** Negative <nowiki> [Negative feedback was provided when it was not deserved]</nowiki> 
 ***** Positive <nowiki>[Positive feedback was provided when it was not deserved]</nowiki> 
-*** Cue <nowiki>[An indicator of a future event, e.g. a sound cue that in 2-5 seconds a perturbation in driving will occur. Use (... Participant/Effect/Cognitive/Cue ~ [hed tags for the event to follow, or main aspect of the event to follow]) syntax.]</nowiki> 
+*** Cue <nowiki>[An indicator of a future event, e.g. a sound cue that in 2-5 seconds a perturbation in driving will occur. Use (... Participant/Effect/Cognitive/Cue ~ hed tags for the event to follow, or main aspect of the event to follow) syntax.]</nowiki>
 **** Constant delay <nowiki>[The cue is for an event that will happen after a constant delay.]</nowiki>
 ***** # {takesValue, isNumeric, unitClass=time} <nowiki>[The delay, e.g. in seconds.]</nowiki>
 **** Variable delay <nowiki>[The cue is for an event that will happen after a variable delay.]</nowiki>

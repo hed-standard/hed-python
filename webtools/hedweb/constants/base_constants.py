@@ -1,5 +1,4 @@
-CHECK_WARNINGS_ASSEMBLE = 'check_warnings_assemble'
-CHECK_WARNINGS_VALIDATE = 'check_warnings_validate'
+CHECK_FOR_WARNINGS = 'check_warnings'
 
 COLUMN_DICTIONARY = 'column_dictionary'
 COLUMN_INDICES = 'column_indices'

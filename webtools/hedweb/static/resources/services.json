@@ -15,7 +15,7 @@
                     "schema_url",
                     "schema_version"
                 ],
-                "check_warnings_assemble",
+                "check_for_warnings",
                 "defs_expand"
             ]
         },
@@ -37,7 +37,7 @@
                     "schema_url",
                     "schema_version"
                 ],
-                "check_warnings_validate"
+                "check_for_warnings"
             ]
         },
         "sidecar_to_long": {
@@ -71,7 +71,7 @@
                     "schema_url",
                     "schema_version"
                 ],
-                "check_warnings_validate"
+                "check_for_warnings"
             ]
         },
         "spreadsheet_validate": {
@@ -87,7 +87,7 @@
                     "column_x_input",
                     "column_x_check"
                 ],
-                "check_warnings_validate",
+                "check_for_warnings",
                 "has_column_names"
             ]
         },
@@ -122,13 +122,12 @@
                     "schema_url",
                     "schema_version"
                 ],
-                "check_warnings_validate"
+                "check_for_warnings"
             ]
         }
     },
     "parameter_meanings": {
-        "check_warnings_assemble": "If true, check for warnings when assembling HED strings.",
-        "check_warnings_validate": "If true, check for warnings when validating.",
+        "check_for_warnings": "If true, check for warnings when processing HED strings.",
         "column_x_check": "If present with value 'on' column x has HED tags.",
         "column_x_input": "Contains the prefix prepended to column x if column x has HED tags.",
         "defs_expand": "If true replaces def/XXX with def-expand/XXX grouped with the definition content.",

@@ -19,7 +19,7 @@ class Test(TestWebBase):
             test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
             input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_LONG,
-                          base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                          base_constants.CHECK_FOR_WARNINGS: 'on',
                           base_constants.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
@@ -50,7 +50,7 @@ class Test(TestWebBase):
             test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
             input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_SHORT,
-                          base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                          base_constants.CHECK_FOR_WARNINGS: 'on',
                           base_constants.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
@@ -81,7 +81,7 @@ class Test(TestWebBase):
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
                                           data={base_constants.SCHEMA_VERSION: '8.0.0',
                                                 base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
-                                                base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                                                base_constants.CHECK_FOR_WARNINGS: 'on',
                                                 base_constants.STRING_INPUT: 'Red,Blue,Label/3'})
 
             self.assertEqual(200, response.status_code, 'Validation of a valid string has a response')
@@ -92,7 +92,7 @@ class Test(TestWebBase):
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
                                           data={base_constants.SCHEMA_VERSION: '8.0.0',
                                                 base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
-                                                base_constants.CHECK_WARNINGS_VALIDATE: 'on',
+                                                base_constants.CHECK_FOR_WARNINGS: 'on',
                                                 base_constants.STRING_INPUT: 'Blob,Blue,Label/3'})
             self.assertEqual(200, response.status_code, 'Validation of an invalid string has a response')
             response_dict = json.loads(response.data)
