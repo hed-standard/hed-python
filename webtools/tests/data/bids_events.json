@@ -7,7 +7,7 @@
         "Description": "Duration of the event",
         "Units": "s"
     },
-	"event-type": {
+	"event_type": {
 		"Description": "Subject presses both buttons causing cue bar to start count-down display",
 		"Levels" : {
             "cue": "Subject presses both buttons causing cue bar to start count-down display",
