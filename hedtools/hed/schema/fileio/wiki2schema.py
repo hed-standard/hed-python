@@ -71,8 +71,7 @@ required_sections = [HedWikiSection.Schema, HedWikiSection.EndSchema, HedWikiSec
 class HedSchemaWikiParser:
     def __init__(self, wiki_file_path, schema_as_string):
         self.filename = wiki_file_path
-        self.issues = []
-
+        self.warnings = []
         self._schema = HedSchema()
         self._schema.filename = wiki_file_path
 
@@ -89,6 +88,11 @@ class HedSchemaWikiParser:
         except FileNotFoundError as e:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, wiki_file_path)
 
+        if self.warnings:
+            raise HedFileError(HedExceptions.HED_SCHEMA_WIKI_WARNINGS,
+                               f"{len(self.warnings)} issues found when parsing schema.  See the .issues "
+                               f"parameter on this exception for more details.", self.filename,
+                               issues=self.warnings)
         self._schema.finalize_dictionaries()
 
     @staticmethod
@@ -207,9 +211,8 @@ class HedSchemaWikiParser:
     def _read_header_line(self, line):
         if line.startswith(wiki_constants.HEADER_LINE_STRING):
             hed_attributes = self._get_header_attributes(line[len(wiki_constants.HEADER_LINE_STRING):])
-            self.issues = schema_validation_util.validate_attributes(hed_attributes, filename=self.filename)
+            schema_validation_util.validate_attributes(hed_attributes, filename=self.filename)
             self.header_attributes = hed_attributes
-            self._schema.issues = self.issues
             self._schema.header_attributes = hed_attributes
             return
         raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING,
@@ -276,6 +279,9 @@ class HedSchemaWikiParser:
                 if level < len(parent_tags):
                     parent_tags = parent_tags[:level]
             new_tag = self._add_tag_line(parent_tags, line)
+            if new_tag is None:
+                self._add_warning(line)
+                continue
             parent_tags.append(new_tag)
 
     def _read_unit_classes(self, lines):
@@ -290,6 +296,9 @@ class HedSchemaWikiParser:
 
         for line in lines:
             unit_class, _ = self._get_tag_name(line)
+            if unit_class is None:
+                self._add_warning(line)
+                continue
             level = self._get_tag_level(line)
             # This is a unit class
             if level == 1:
@@ -405,8 +414,7 @@ class HedSchemaWikiParser:
             return 1
         return count
 
-    @staticmethod
-    def _remove_nowiki_tag_from_line(tag_line):
+    def _remove_nowiki_tag_from_line(self, tag_line):
         """Removes the nowiki tag from the  line.
 
         Parameters
@@ -423,9 +431,9 @@ class HedSchemaWikiParser:
         index2 = tag_line.find(no_wiki_end_tag)
         if (index1 == -1 and index2 != -1) or \
                 (index2 == -1 and index1 != -1):
-            # todo: make this an error
+            # todo: comment this in once the schemas are updated to have no wiki errors.
+            # self._add_warning(tag_line, "Invalid or non matching <nowiki> tags found")
             pass
-            #raise HedFileError("addme", "addme", "addme")
         tag_line = re.sub(no_wiki_tag, '', tag_line)
         return tag_line
 
@@ -452,9 +460,7 @@ class HedSchemaWikiParser:
             if tag_name:
                 return tag_name, match.regs[4][0]
 
-        raise HedFileError(HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
-                           f"Schema term is empty or the line is malformed on line '{tag_line}'.",
-                           self.filename)
+        return None, 0
 
     @staticmethod
     def _get_tag_attributes(tag_line, starting_index):
@@ -561,19 +567,21 @@ class HedSchemaWikiParser:
 
     def _add_single_line(self, tag_line, key_class, element_name=None, skip_adding_name=False):
         node_name, index = self._get_tag_name(tag_line)
+        if node_name is None:
+            self._add_warning(tag_line)
+            return
         if element_name:
             node_name = element_name
 
         node_attributes, index = self._get_tag_attributes(tag_line, index)
         if node_attributes is None:
-            raise HedFileError(HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-                               f"Attributes section has mismatched delimiters on tag line '{tag_line}'", self.filename)
+            self._add_warning(tag_line, "Attributes has mismatched delimiters")
+            return
 
         node_desc, _ = self._get_line_section(tag_line, index)
         if node_desc is None:
-            raise HedFileError(HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-                               f"Attributes section has mismatched delimiters on tag line {tag_line}",
-                               self.filename)
+            self._add_warning(tag_line, "Description has mismatched delimiters")
+            return
         if not skip_adding_name:
             self._schema._add_tag_to_dict(node_name, key_class)
         tag_entry = self._schema._get_entry_for_tag(node_name, key_class)
@@ -582,3 +590,7 @@ class HedSchemaWikiParser:
 
         for attribute_name, attribute_value in node_attributes.items():
             tag_entry.set_attribute_value(attribute_name, attribute_value)
+
+    def _add_warning(self, line, warning_message="Schema term is empty or the line is malformed"):
+        self.warnings.append((line, warning_message))
+        return

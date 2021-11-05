@@ -167,9 +167,9 @@ class Test(unittest.TestCase):
 
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = loaded_file.validate_file(validator)
-        self.assertEqual(len(validation_issues), 3)
+        self.assertEqual(len(validation_issues), 6)
 
-    def test_error_spans_from_file(self):
+    def test_error_spans_from_file_and_missing_required_column(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    '../data/hed_pairs/HED8.0.0.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -195,7 +195,6 @@ class Test(unittest.TestCase):
         test_string = HedString(string_with_def)
         issues = test_string.validate([validator, def_mapper], check_for_definitions=True)
         self.assertEqual(len(issues), 0)
-
 
 if __name__ == '__main__':
     unittest.main()
