@@ -22,7 +22,7 @@ options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
 
 %% Set up some data to use for the examples
-json_text = fileread('../data/bids_data/bids_events.json');
+json_text = fileread('../data/wakeman_henson_data/task-FacePerception_events.json');
 myURL = ['https://raw.githubusercontent.com/hed-standard/' ...
          'hed-specification/master/hedxml/HED7.2.0.xml'];
 schema_text = fileread('../data/schema_data/HED8.0.0.xml');

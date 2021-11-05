@@ -9,12 +9,12 @@ from hed import get_printable_issue_string, load_schema
 
 if __name__ == '__main__':
     # This old schema should produce many issues, including many duplicate terms
-    local_hed_xml = "../data/HED7.1.1.xml"
+    local_hed_xml = "../data/HED7.2.0.xml"
     hed_schema = load_schema(local_hed_xml)
     issues = hed_schema.check_compliance()
     print(get_printable_issue_string(issues))
 
     # this should produce fairly minimal issues.
-    local_hed_xml = "../data/HED8.0.0-alpha.1.xml"
+    local_hed_xml = "../data/HED8.0.0.xml"
     issues = hed_schema.check_compliance()
     print(get_printable_issue_string(issues))
