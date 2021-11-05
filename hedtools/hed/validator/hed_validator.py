@@ -14,15 +14,13 @@ from functools import partial
 
 
 class HedValidator:
-    def __init__(self, hed_schema=None, check_for_warnings=False, run_semantic_validation=True):
+    def __init__(self, hed_schema=None, run_semantic_validation=True):
         """Constructor for the HedValidator class.
 
         Parameters
         ----------
         hed_schema: HedSchema
             HedSchema object to use to use for validation
-        check_for_warnings: bool
-            True if the validator should check for warnings. False if the validator should only report errors.
         run_semantic_validation: bool
             True if the validator should check the HED data against a schema. False for syntax-only validation.
         Returns
@@ -35,49 +33,26 @@ class HedValidator:
         self._hed_schema = hed_schema
 
         self._tag_validator = TagValidator(hed_schema=self._hed_schema,
-                                           check_for_warnings=check_for_warnings,
                                            run_semantic_validation=run_semantic_validation)
         self._run_semantic_validation = run_semantic_validation
 
     def __get_tag_ops__(self, **kwargs):
         string_validators = []
         allow_placeholders = kwargs.get("allow_placeholders")
+        check_for_warnings = kwargs.get("check_for_warnings")
         string_validators.append(self._tag_validator.run_hed_string_validators)
         string_validators.append(
             partial(HedString.convert_to_canonical_forms, hed_schema=self._hed_schema))
         string_validators.append(partial(self._validate_individual_tags_in_hed_string,
-                                         allow_placeholders=allow_placeholders))
+                                         allow_placeholders=allow_placeholders,
+                                         check_for_warnings=check_for_warnings))
         return string_validators
 
     def __get_string_ops__(self, **kwargs):
-        string_validators = [self._validate_tags_in_hed_string,
+        check_for_warnings = kwargs.get("check_for_warnings")
+        string_validators = [partial(self._validate_tags_in_hed_string, check_for_warnings=check_for_warnings),
                              self._validate_groups_in_hed_string]
         return string_validators
-
-    # todo: possibly add an equivalent to this function somewhere.
-    # def validate_strings(self, hed_strings, def_mapper=None, check_for_definitions=True):
-    #     """
-    #         Validates any given hed_input string or list and returns a list of issues.
-    #
-    #     Parameters
-    #     ----------
-    #     hed_strings: list
-    #         A list of HED strings or a single HED string.
-    #     def_mapper: DefinitionMapper
-    #         Any individual string is validated independently, any definitions other than those in the def_mapper will
-    #         not be used outside of that specific string.
-    #     check_for_definitions: bool
-    #         Set this to False if you have already gathered definitions from the given hed strings.
-    #     Returns
-    #     -------
-    #     validation_issues : [{}]
-    #     """
-    #     validation_issues = []
-    #     for hed_string in hed_strings:
-    #         string_issues = self.validate_hed_string(hed_string, def_mapper,
-    #                                                  check_for_definitions=check_for_definitions)
-    #         validation_issues.append(string_issues)
-    #     return validation_issues
 
     def _validate_groups_in_hed_string(self, hed_string_obj):
         """Validates the tags at each level in a HED string. This pertains to the top-level, all groups, and nested
@@ -104,7 +79,7 @@ class HedValidator:
 
         return validation_issues
 
-    def _validate_tags_in_hed_string(self, hed_string_obj):
+    def _validate_tags_in_hed_string(self, hed_string_obj, check_for_warnings=False):
         """Validates the multi-tag properties in a hed string, eg required tags.
 
          Parameters
@@ -119,10 +94,11 @@ class HedValidator:
          """
         validation_issues = []
         tags = hed_string_obj.get_all_tags()
-        validation_issues += self._tag_validator.run_all_tags_validators(tags)
+        validation_issues += self._tag_validator.run_all_tags_validators(tags, check_for_warnings=check_for_warnings)
         return validation_issues
 
-    def _validate_individual_tags_in_hed_string(self, hed_string_obj, allow_placeholders=False):
+    def _validate_individual_tags_in_hed_string(self, hed_string_obj, allow_placeholders=False,
+                                                check_for_warnings=False):
         """Validates the individual tags in a HED string.
 
          Parameters
@@ -139,6 +115,7 @@ class HedValidator:
         tags = hed_string_obj.get_all_tags()
         for hed_tag in tags:
             validation_issues += \
-                self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders)
+                self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
+                                                                  check_for_warnings=check_for_warnings)
 
         return validation_issues

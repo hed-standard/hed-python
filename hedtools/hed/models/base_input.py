@@ -6,7 +6,7 @@ import copy
 from hed.models.def_dict import DefDict
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.errors.error_types import ErrorContext
+from hed.errors.error_types import ErrorContext, ErrorSeverity
 from hed.errors.error_reporter import ErrorHandler
 from hed.models import model_constants
 from hed.models.util import translate_ops
@@ -410,13 +410,15 @@ class BaseInput:
         else:
             return None
 
-    def get_def_and_mapper_issues(self, error_handler):
+    def get_def_and_mapper_issues(self, error_handler, check_for_warnings=False):
         """
             Returns formatted issues found with definitions and columns.
         Parameters
         ----------
         error_handler : ErrorHandler
             The error handler to use
+        check_for_warnings: bool
+            If True this will check for and return warnings as well
         Returns
         -------
         issues_list: [{}]
@@ -429,6 +431,8 @@ class BaseInput:
         mapper_issues = self._mapper.get_column_mapping_issues()
         error_handler.add_context_to_issues(mapper_issues)
         issues += mapper_issues
+        if not check_for_warnings:
+            issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
         return issues
 
     def _get_processed_copy(self):
@@ -495,16 +499,16 @@ class BaseInput:
             for column_number, column_hed_string in column_to_hed_tags_dictionary.items():
                 new_column_issues = []
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                if column_hed_string:
+                if column_hed_string is not None:
                     error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
                                                      increment_depth_after=False)
                 if column_number in expansion_column_issues:
                     new_column_issues += expansion_column_issues[column_number]
 
-                if column_hed_string:
+                if column_hed_string is not None:
                     new_column_issues += column_hed_string.apply_ops(column_ops)
                 error_handler.add_context_to_issues(new_column_issues)
-                if column_hed_string:
+                if column_hed_string is not None:
                     error_handler.pop_error_context()
                 error_handler.pop_error_context()
                 validation_issues += new_column_issues
@@ -518,7 +522,7 @@ class BaseInput:
         error_handler.pop_error_context()
         return row_issues
 
-    def validate_file(self, validators, name=None, error_handler=None, **kwargs):
+    def validate_file(self, validators, name=None, error_handler=None, check_for_warnings=True, **kwargs):
         """Run the given validators on all columns and rows of the spreadsheet
 
         Parameters
@@ -531,6 +535,8 @@ class BaseInput:
             Useful for temp filenames.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
+        check_for_warnings: bool
+            If True this will check for and return warnings as well
         kwargs:
             See util.translate_ops or the specific validators for additional options
         Returns
@@ -547,9 +553,9 @@ class BaseInput:
             error_handler = ErrorHandler()
 
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
-        validation_issues = self.get_def_and_mapper_issues(error_handler)
+        validation_issues = self.get_def_and_mapper_issues(error_handler, check_for_warnings)
         validators = validators.copy()
-        validation_issues += self._run_validators(validators, error_handler=error_handler, **kwargs)
+        validation_issues += self._run_validators(validators, error_handler=error_handler, check_for_warnings=check_for_warnings, **kwargs)
         error_handler.pop_error_context()
 
         return validation_issues

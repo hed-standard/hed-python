@@ -185,6 +185,10 @@ def cache_all_hed_xml_versions(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL, cache
         hed cache folder: Defaults to HED_CACHE_DIRECTORY
     Returns
     -------
+    time_since_update: float
+        -1 if cache failed
+        positive number meaning time in seconds since last update if it didn't cache
+        0 if it cached successfully this time
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
@@ -192,10 +196,9 @@ def cache_all_hed_xml_versions(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL, cache
     os.makedirs(cache_folder, exist_ok=True)
     last_timestamp = _read_last_cached_time(cache_folder)
     current_timestamp = time.time()
-    if current_timestamp - last_timestamp < CACHE_TIME_THRESHOLD:
-        print(f"Skipped caching.  Cache updated {current_timestamp - last_timestamp:02f} seconds ago."
-              f"(cache update interval: {CACHE_TIME_THRESHOLD}s)")
-        return
+    time_since_update = current_timestamp - last_timestamp
+    if time_since_update < CACHE_TIME_THRESHOLD:
+        return time_since_update
 
     try:
         cache_lock_filename = os.path.join(cache_folder, "cache_lock.lock")
@@ -208,7 +211,9 @@ def cache_all_hed_xml_versions(hed_base_url=DEFAULT_HED_LIST_VERSIONS_URL, cache
 
             _write_last_cached_time(current_timestamp, cache_folder)
     except portalocker.exceptions.LockException:
-        print("Cache currently being written to.  Skipping.")
+        return -1
+
+    return 0
 
 
 def _read_last_cached_time(cache_folder):

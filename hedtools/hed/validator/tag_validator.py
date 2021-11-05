@@ -22,7 +22,7 @@ class TagValidator:
     # Placeholder characters are checked elsewhere, but by default allowed
     TAG_ALLOWED_CHARS = "-_/"
 
-    def __init__(self, hed_schema=None, check_for_warnings=False, run_semantic_validation=True):
+    def __init__(self, hed_schema=None, run_semantic_validation=True):
         """Constructor for the Tag_Validator class.
 
         Parameters
@@ -36,7 +36,6 @@ class TagValidator:
 
         """
         self._hed_schema = hed_schema
-        self._check_for_warnings = check_for_warnings
         self._run_semantic_validation = run_semantic_validation
         if not self._hed_schema:
             self._run_semantic_validation = False
@@ -65,13 +64,15 @@ class TagValidator:
             validation_issues += self.check_tag_formatting(tag)
         return validation_issues
 
-    def run_individual_tag_validators(self, original_tag, allow_placeholders=False):
+    def run_individual_tag_validators(self, original_tag, check_for_warnings, allow_placeholders=False):
         """Runs the validators on the individual tags in a HED string.
 
          Parameters
          ----------
          original_tag: HedTag
             A original tag.
+         check_for_warnings: bool
+             If True, also check for warnings.
          allow_placeholders: bool
              Allow value class or extensions to be placeholders rather than a specific value.
          Returns
@@ -82,10 +83,10 @@ class TagValidator:
         validation_issues = []
         validation_issues += self.check_tag_invalid_chars(original_tag, allow_placeholders)
         if self._run_semantic_validation:
-            validation_issues += self.check_tag_exists_in_schema(original_tag)
+            validation_issues += self.check_tag_exists_in_schema(original_tag, check_for_warnings)
             if self._hed_schema.is_unit_class_tag(original_tag):
                 validation_issues += self.check_tag_unit_class_units_are_valid(original_tag)
-                if self._check_for_warnings:
+                if check_for_warnings:
                     validation_issues += self.check_tag_unit_class_units_exist(original_tag)
             elif self._hed_schema.is_value_class_tag(original_tag):
                 validation_issues += self.check_tag_value_class_valid(original_tag)
@@ -96,7 +97,7 @@ class TagValidator:
                 # if not self._allow_pound_signs_as_numbers:
                 validation_issues += self.check_for_placeholder(original_tag)
             validation_issues += self.check_tag_requires_child(original_tag)
-        if self._check_for_warnings:
+        if check_for_warnings:
             validation_issues += self.check_capitalization(original_tag)
         return validation_issues
 
@@ -122,21 +123,23 @@ class TagValidator:
         validation_issues += self.check_tag_level_issue(original_tag_list, is_top_level, is_group)
         return validation_issues
 
-    def run_all_tags_validators(self, tags):
+    def run_all_tags_validators(self, tags, check_for_warnings):
         """Validates the multi-tag properties in a hed string, eg required tags.
 
-         Parameters
-         ----------
-         tags: [HedTag]
-            A list containing the tags in a HED string.
-         Returns
-         -------
-         []
-             The validation issues associated with the tags in a HED string.
-         """
+        Parameters
+        ----------
+        tags: [HedTag]
+          A list containing the tags in a HED string.
+        check_for_warnings: bool
+            If True, also check for warnings.
+        Returns
+        -------
+        []
+            The validation issues associated with the tags in a HED string.
+        """
         validation_issues = []
         if self._run_semantic_validation:
-            if self._check_for_warnings:
+            if check_for_warnings:
                 validation_issues += self.check_for_required_tags(tags)
             validation_issues += self.check_multiple_unique_tags_exist(tags)
         return validation_issues
@@ -277,13 +280,15 @@ class TagValidator:
             allowed_chars += "#"
         return self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
 
-    def check_tag_exists_in_schema(self, original_tag):
+    def check_tag_exists_in_schema(self, original_tag, check_for_warnings=False):
         """Reports a validation error if the tag provided is not a valid tag or doesn't take a value.
 
         Parameters
         ----------
         original_tag: HedTag
             The original tag that is used to report the error.
+        check_for_warnings: bool
+            If True, also check for warnings.
         Returns
         -------
         []
@@ -296,7 +301,7 @@ class TagValidator:
         is_extension_tag = self._hed_schema.is_extension_allowed_tag(original_tag)
         if not is_extension_tag:
             validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_EXTENSION, tag=original_tag)
-        elif self._check_for_warnings:
+        elif check_for_warnings:
             validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_EXTENDED, tag=original_tag,
                                                            index_in_tag=len(original_tag.org_base_tag),
                                                            index_in_tag_end=None)
