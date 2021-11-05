@@ -18,18 +18,21 @@ class HedExceptions:
     HED_END_INVALID = 'hedEndMissing'
     INVALID_SECTION_SEPARATOR = 'invalidSectionSeparator'
 
+    # This issue will contain a list of lines with issues.
+    HED_SCHEMA_WIKI_WARNINGS = 'HED_SCHEMA_WIKI_WARNINGS'
     HED_SCHEMA_NODE_NAME_INVALID = 'HED_SCHEMA_NODE_NAME_INVALID'
-    HED_WIKI_DELIMITERS_INVALID = 'HED_WIKI_DELIMITERS_INVALID'
 
     SCHEMA_DUPLICATE_PREFIX = 'schemaDuplicatePrefix'
 
 
 class HedFileError(Exception):
     """Exception raised when a file cannot be parsed due to being malformed, file IO, etc."""
-    def __init__(self, error_type, message, filename):
+    def __init__(self, error_type, message, filename, issues=None):
         self.error_type = error_type
         self.message = message
         self.filename = filename
+        # only filled in when this lists multiple errors, such as the HED_SCHEMA_WIKI_WARNINGS
+        self.issues = issues
 
     def format_error_message(self, include_tabbing=True, return_string_only=False,
                              name=None):
@@ -71,7 +74,6 @@ class HedFileError(Exception):
             HedExceptions.HED_END_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.INVALID_SECTION_SEPARATOR: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.HED_SCHEMA_NODE_NAME_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
-            HedExceptions.HED_WIKI_DELIMITERS_INVALID: f"{error_prefix}{self.message}.  '{filename}'"
         }
         default_error_message = f'{error_prefix}Internal Error'
         error_message = error_types.get(error_type, default_error_message)
