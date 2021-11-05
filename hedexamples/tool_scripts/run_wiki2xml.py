@@ -7,28 +7,44 @@ schema.convert_schema_to_format - Converts hed schema from given url or filename
 hed.get_printable_issue_string - method that converts the list of issues to a human readable form.
 """
 from shutil import move
-from hed import get_printable_issue_string, schema
 from hed.util.file_util import write_strings_to_file
-
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.schema.hed_schema_file import load_schema, convert_schema_to_format
 
 if __name__ == '__main__':
+
+    # Convert an HED-2G schema from mediawiki to XML.
     hed_wiki_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master' + \
-                   '/hedwiki/HED-generation2-schema-7.3.0.mediawiki'
-    local_hed_file = None
-    hed_schema = schema.load_schema(hed_file_path=local_hed_file, hed_url_path=hed_wiki_url)
-    file_strings, errors = schema.convert_schema_to_format(hed_schema)
-    get_printable_issue_string(validation_issues=errors, title="Errors in HED-generation3-schema.mediawiki")
+                   '/hedwiki/HED7.3.0.mediawiki'
+    print("Converting HED7.3.0.mediawiki with compliance check (it is not compliant):")
+    hed_schema = load_schema(hed_url_path=hed_wiki_url)
+    file_strings, errors = convert_schema_to_format(hed_schema, save_as_legacy_xml=True)
+    if errors:
+        issue_str = get_printable_issue_string(validation_issues=errors,
+                                               title="HED7.3.0.mediawiki is not HED-3G compliant")
+        print(issue_str)
     if file_strings:
         xml_location = write_strings_to_file(file_strings)
         move(xml_location, "outputGen2.xml")
 
+    print("Converting HED7.3.0.mediawiki with no compliance check:")
+    file_strings, errors = convert_schema_to_format(hed_schema, check_for_issues=False, save_as_legacy_xml=True)
+    if errors:
+        issue_str = get_printable_issue_string(validation_issues=errors,
+                                               title="HED7.3.0.mediawiki should not have errors if no compliance check")
+        print(issue_str)
+    if file_strings:
+        xml_location = write_strings_to_file(file_strings)
+        move(xml_location, "outputGen2_no_compliance.xml")
+
+    # Convert an HED-3G schema from mediawiki to XML.
+    print("Converting HED8.0.0.mediawiki with compliance check:")
     hed_wiki_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master' + \
-                   '/hedwiki/HED-generation3-schema-8.0.0-alpha.2.mediawiki'
-    local_hed_file = None
-    hed_schema = schema.load_schema(hed_file_path=local_hed_file, hed_url_path=hed_wiki_url)
-    file_strings, errors = schema.convert_schema_to_format(hed_schema)
-    issue_str = get_printable_issue_string(validation_issues=errors, title="Errors in HED-generation3-schema.mediawiki")
-    if issue_str:
+                   '/hedwiki/HED8.0.0.mediawiki'
+    hed_schema = load_schema(hed_url_path=hed_wiki_url)
+    file_strings, errors = convert_schema_to_format(hed_schema)
+    if errors:
+        issue_str = get_printable_issue_string(validation_issues=errors, title="Errors in HED8.0.0.mediawiki")
         print(issue_str)
     if file_strings:
         xml_location = write_strings_to_file(file_strings)

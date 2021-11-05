@@ -5,71 +5,73 @@ Classes Demonstrated:
 HedValidator - Validates a given input string or file
 """
 
-import hed
-#from hed import schema, get_printable_issue_string, HedString, HedValidator
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.models.hed_string import HedString
+from hed.schema.hed_schema_file import load_schema, load_schema_version
+from hed.validator.hed_validator import HedValidator
+
 
 if __name__ == '__main__':
-    local_hed_file = '../data/schema_data/HED7.1.1.xml'  # path HED v7.1.1 stored locally
-    hed_schema = hed.load_schema(local_hed_file)
-    hed_validator_old = hed.HedValidator(hed_schema)
-    hed_schema_current = hed.schema.load_schema_version()
-    hed_validator_current = hed.HedValidator(hed_schema_current)
-    hed_validator_no_semantic = hed.HedValidator(run_semantic_validation=False)
-    hed_string_test = "Sensory-event,Visual,Experimental-stimulus,Green,Non-target,(Letter/D, Center-of-Screen)\n\n\n"
-    test_string = hed.HedString(hed_string_test)
-    validation_issues = test_string.validate(hed_validator_old)
-    print(hed.get_printable_issue_string(validation_issues,
-                                     title='[Example 1a] hed_string_1 should have no issues with HEDv7.1.1'))
+    # Create three versions of the HedValidator based on different schema
+    local_hed_file_old = '../data/schema_data/HED7.2.0.xml'  # path HED v7.2.0 stored locally
+    hed_schema_old = load_schema(local_hed_file_old)
+    hed_validator_old = HedValidator(hed_schema_old)
+    hed_schema_current = load_schema_version()
+    hed_validator_current = HedValidator(hed_schema_current)
+    hed_validator_current_warn = HedValidator(hed_schema_current, check_for_warnings=True)
+    hed_validator_no_semantic = HedValidator(run_semantic_validation=False)
 
-    # Example 1a: Valid HED string for HED <= v7.1.1
-    hed_string_1 = 'Event/Label/ButtonPuskDeny, Event/Description/Button push to deny access to the ID holder,' \
+    hed_string_1 = \
+        "Sensory-event,Visual-presentation,Experimental-stimulus,Green,Non-target," + \
+        "(Letter/D, (Center-of, Computer-screen))"
+    string_obj_1 = HedString(hed_string_1)
+    validation_issues = string_obj_1.validate(hed_validator_current)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 1] hed_string_1 should have no issues with HEDv8.0.0'))
+
+    string_1_long_obj = string_obj_1.convert_to_short(hed_schema_current)
+    validation_issues = string_obj_1.validate(hed_validator_current)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 2] hed_string_1 should validate after conversion to long'))
+
+    validation_issues = string_obj_1.validate(hed_validator_old)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 3] hed_string_1 should not validate with HEDv7.2.0'))
+
+    hed_string_2 = "Sensory-event,Visual-presentation,BlankBlank,Experimental-stimulus,Blech"
+    string_obj_2 = HedString(hed_string_2)
+    validation_issues = string_obj_2.validate(hed_validator_current)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 4] hed_string_2 has 2 invalid tags HEDv8.0.0'))
+
+    hed_string_3 = "Sensory-event,Visual-presentation,Experimental-stimulus,Red/Dog"
+    string_obj_3 = HedString(hed_string_3)
+    validation_issues = string_obj_3.validate(hed_validator_current)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 5] hed_string_3 extended tag does not flag error unless warnings'))
+
+    validation_issues = string_obj_3.validate(hed_validator_current_warn)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 6] hed_string_3 extended tag flags error with warnings'))
+
+
+    hed_string_4 = 'Event/Label/ButtonPushDeny, Event/Description/Button push to deny access to the ID holder,' \
                    'Event/Category/Participant response, ' \
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger)'
-    test_string = hed.HedString(hed_string_1)
-    validation_issues = test_string.validate(hed_validator_old)
-    print(hed.get_printable_issue_string(validation_issues,
-                                     title='[Example 1a] hed_string_1 should have no issues with HEDv7.1.1'))
+    string_obj_4 = HedString(hed_string_4)
+    validation_issues = string_obj_4.validate(hed_validator_current)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 7] hed_string_4 has issues with the latest HED version'))
 
-    # Example 1b: Try with the latest version of HED.xml
-    test_string = hed.HedString(hed_string_1)
-    validation_issues = test_string.validate(hed_validator_current)
-    print(hed.get_printable_issue_string(validation_issues,
-                                     title='[Example 1b] hed_string_1 has issues with the latest HED version'))
+    validation_issues = string_obj_4.validate(hed_validator_old)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 8] hed_string_4 has issues tildes no longer supported'))
 
-    # Example 2a: Invalid HED string (junk in last tag)
-    hed_string_2 = 'Event/Category/Participant response,'  \
-                   '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger),' \
-                   'dskfjkf/dskjdfkj/sdkjdsfkjdf/sdlfdjdsjklj'
-    test_string = hed.HedString(hed_string_2)
-    validation_issues = test_string.validate(hed_validator_old)
-    print(hed.get_printable_issue_string(validation_issues,
-                                     title='[Example 2a] hed_string_2 has junk in the last tag'))
+    hed_string_5 = 'Event,dskfjkf/dskjdfkj/sdkjdsfkjdf/sdlfdjdsjklj'
+    string_obj_5 = HedString(hed_string_5)
+    validation_issues = string_obj_5.validate(hed_validator_current)
+    print(get_printable_issue_string(validation_issues,
+                                     title='[Example 9] hed_string_5 does not validate with current HED schema'))
 
-    # Example 2b: However HED string of Example 2 has valid syntax so syntactic validation works
-    test_string = hed.HedString(hed_string_2)
-    validation_issues = test_string.validate(hed_validator_no_semantic)
-    print(hed.get_printable_issue_string(validation_issues, title='[Example 2b] hed_string_2 is syntactically correct'))
-
-    # Example 3a: Invalid HED string
-    hed_string_3 = 'Event/Description/The start of increasing the size of sector, Event/Label/Sector start, ' \
-                   'Event/Category/Experimental stimulus/Instruction/Attend, ' \
-                   '(Item/2D shape/Sector, Attribute/Visual/Color/Red) ' \
-                   '(Item/2D shape/Ellipse/Circle, Attribute/Visual/Color / Red), Sensory presentation/Visual, ' \
-                   'Participant/Efffectt/Visual, Participant/Effect/Cognitive/Target'
-    test_string = hed.HedString(hed_string_3)
-    validation_issues = test_string.validate(hed_validator_current)
-    print(hed.get_printable_issue_string(validation_issues,
-                                     title='[Example 3a] hed_string_3 has missing comma so fails before Efffectt typo'))
-
-    # Example 3b: Using issue list directly - issues are returned as a list of dictionaries
-    # print('[Example 3b] hed_string_3 has ', len(validation_issues), ' issues\n')
-
-    # Example 4a: Example using the ~ notation
-    hed_string_4 = 'Event/Label/ButtonDeny, Event/Description/Button push to deny access to the ID holder, ' \
-                   'Event/Category/Participant response, ' \
-                   '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger), ' \
-                   '(Participant ~ Action/Deny/Access ~ Item/Object/Person/IDHolder)'
-    test_string = hed.HedString(hed_string_4)
-    validation_issues = test_string.validate(hed_validator_current)
-    print(hed.get_printable_issue_string(validation_issues,
-                                     title='[Example 4a] the ~ notation in hed_string_4 works in v7.1.1'))
+    validation_issues = string_obj_5.validate(hed_validator_no_semantic)
+    print(get_printable_issue_string(validation_issues, title='[Example 10] hed_string_5 is syntactically correct'))

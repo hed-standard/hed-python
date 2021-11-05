@@ -9,7 +9,11 @@ HedFileError - Exception thrown when a file cannot be opened.(parsing error, fil
 """
 
 import os
-from hed import schema, get_printable_issue_string, HedValidator, HedInput, HedFileError
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.exceptions import HedFileError
+from hed.models.hed_input import HedInput
+from hed.validator.hed_validator import HedValidator
+from hed.schema.hed_schema_file import load_schema, load_schema_version
 
 
 if __name__ == '__main__':
@@ -22,9 +26,9 @@ if __name__ == '__main__':
     unsupported_csv_format = os.path.join(example_data_path, 'UnsupportedFormatCSV.csv')
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
 
-    hed_schema_cached = schema.load_schema_version(xml_version_number='7.1.1')
+    hed_schema_cached = load_schema_version(xml_version_number='7.1.1')
     hed_validator_old = HedValidator(hed_schema=hed_schema_cached)
-    hed_schema_local = schema.load_schema(local_hed_file)
+    hed_schema_local = load_schema(local_hed_file)
     hed_validator_local = HedValidator(hed_schema=hed_schema_local)
     hed_validator_local_warnings = HedValidator(hed_schema=hed_schema_local, check_for_warnings=True)
 

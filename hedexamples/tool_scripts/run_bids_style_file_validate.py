@@ -1,9 +1,11 @@
 import os
 
-
+from hed.errors.error_reporter import get_printable_issue_string
 from hed.models.sidecar import Sidecar
 from hed.models.events_input import EventsInput
-from hed import HedValidator, load_schema, HedSchemaGroup
+from hed.validator.hed_validator import HedValidator
+from hed.schema.hed_schema_file import load_schema
+from hed.schema.hed_schema_group import HedSchemaGroup
 
 
 def validate_bids_file():
@@ -25,8 +27,12 @@ def validate_bids_file():
     issues += input_file.validate_file(validator)
     # If you want to view the expanded version of the file, use this.
     # input_file.to_csv(events_path + "proc_output.tsv", output_processed_file=True)
-    breakHere = 3
+    return issues
 
 
 if __name__ == '__main__':
-    validate_bids_file()
+
+    validation_issues = validate_bids_file()
+    if validation_issues:
+        issues_str = get_printable_issue_string(validation_issues, "validation errors for sample bids file:")
+        print(issues_str)
