@@ -47,6 +47,7 @@ class ValidationErrors:
     # HED_VERSION_WARNING
 
     HED_MISSING_COLUMN = "HED_MISSING_COLUMN"
+    HED_UNKNOWN_COLUMN = "HED_UNKNOWN_COLUMN"
     HED_UNKNOWN_PREFIX = "HED_UNKNOWN_PREFIX"
 
     # Below here shows what the given error maps to

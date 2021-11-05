@@ -34,7 +34,6 @@ class HedSchema:
         self.prologue = ""
         self.epilogue = ""
 
-        self.issues = []
         self._is_hed3_schema = None
         # This is the specified library prefix - tags will be {library_prefix}:{tag_name}
         self._library_prefix = ""

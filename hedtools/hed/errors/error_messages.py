@@ -115,6 +115,11 @@ def val_error_missing_column(missing_column_name):
     return f"Required column '{missing_column_name}' not specified or found in file.", {}
 
 
+@hed_error(ValidationErrors.HED_UNKNOWN_COLUMN, default_severity=ErrorSeverity.WARNING)
+def val_error_extra_column(extra_column_name):
+    return f"Column named '{extra_column_name}' found in file, but not specified as a tag column or identified in sidecars.", {}
+
+
 @hed_tag_error(ValidationErrors.HED_UNKNOWN_PREFIX)
 def val_error_unknown_prefix(tag, unknown_prefix, known_prefixes):
     return f"Tag '{tag} has unknown prefix '{unknown_prefix}'.  Valid prefixes: {known_prefixes}", {}

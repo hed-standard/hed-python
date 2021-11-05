@@ -1,5 +1,5 @@
-	onset	duration	event-type	sample	stage	trial	bci_prediction	bci_prediction_valid	n_repeated	latency
-0	15.038933333333	3	cue	75195.0	1	1	right	1	2	-4.2
+	onset	duration	event_type	sample	stage	trial	bci_prediction	bci_prediction_valid	n_repeated	latency
+0	15.038933333333	3	invalidkey	75195.0	1	1	right	1	2	-4.2
 1	18.038933333333002	0	go	90195.0	1	1	right	1	2	-4.2
 2	18.1556	0	right-raised	90778.0	1	1	right	1	2	-4.2
 3	18.2236	0	right-raised-nomatch	91118.0	1	1	right	1	2	-4.2

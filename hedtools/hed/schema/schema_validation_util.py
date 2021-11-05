@@ -50,5 +50,3 @@ def validate_attributes(attrib_dict, filename):
         raise HedFileError(HedExceptions.BAD_HED_SEMANTIC_VERSION, "No version attribute found in header",
                            filename=filename)
 
-    # Placeholder for future warnings
-    return []

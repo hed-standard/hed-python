@@ -8,6 +8,9 @@ from hed.errors.error_types import ValidationErrors
 import copy
 
 
+PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
+
+
 class ColumnMapper:
     """Handles mapping columns of hed tags from a file to a usable format.
 
@@ -212,6 +215,7 @@ class ColumnMapper:
                     if column_number + 1 not in column_issues_dict:
                         column_issues_dict[column_number + 1] = []
                     column_issues_dict[column_number + 1] += attribute_name_or_error
+                    column_to_hed_tags_dictionary[column_number + 1] = translated_column
                 continue
             if attribute_name_or_error:
                 result_dict[attribute_name_or_error] = translated_column
@@ -305,6 +309,12 @@ class ColumnMapper:
                     self._final_column_map[column_number] = column_entry
                 elif column_name in all_tag_columns:
                     found_named_tag_columns[column_name] = column_number
+                elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
+                    continue
+                else:
+                    if column_number not in all_tag_columns:
+                        self._finalize_mapping_issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
+                                                                                   extra_column_name=column_name)
 
         # Add any numbered columns
         for column_name, column_entry in self.column_data.items():
@@ -330,6 +340,7 @@ class ColumnMapper:
         for column_number, prefix in self._column_prefix_dictionary.items():
             self._set_column_prefix(column_number, prefix)
 
+        # Finally check if any numbered columns don't have an entry in final columns and issue a warning.
         return self._finalize_mapping_issues
 
     def get_def_dicts(self):

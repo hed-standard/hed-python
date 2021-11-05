@@ -22,15 +22,23 @@ class TestHedSchema(unittest.TestCase):
             "HED_header_missing_version.mediawiki": HedExceptions.BAD_HED_SEMANTIC_VERSION,
             "HED_header_bad_library.mediawiki": HedExceptions.BAD_HED_LIBRARY_NAME,
             "HED_schema_out_of_order.mediawiki": HedExceptions.SCHEMA_START_MISSING,
-            "empty_node.mediawiki": HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
-            "malformed_line.mediawiki": HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
-            "malformed_line2.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line3.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line4.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line5.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+            "empty_node.mediawiki": HedExceptions.HED_SCHEMA_WIKI_WARNINGS,
+            "malformed_line.mediawiki": HedExceptions.HED_SCHEMA_WIKI_WARNINGS,
+            "malformed_line2.mediawiki": HedExceptions.HED_SCHEMA_WIKI_WARNINGS,
+            "malformed_line3.mediawiki": HedExceptions.HED_SCHEMA_WIKI_WARNINGS,
+            "malformed_line4.mediawiki": HedExceptions.HED_SCHEMA_WIKI_WARNINGS,
+            "malformed_line5.mediawiki": HedExceptions.HED_SCHEMA_WIKI_WARNINGS,
             "empty_node.xml": HedExceptions.HED_SCHEMA_NODE_NAME_INVALID
         }
 
+        cls.expected_count = {
+            "empty_node.mediawiki": 1,
+            "malformed_line.mediawiki": 1,
+            "malformed_line2.mediawiki": 1,
+            "malformed_line3.mediawiki": 1,
+            "malformed_line4.mediawiki": 1,
+            "malformed_line5.mediawiki": 1,
+        }
     def test_invalid_schema(self):
         for filename, error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename
@@ -41,4 +49,6 @@ class TestHedSchema(unittest.TestCase):
                 self.assertFalse(True)
             except HedFileError as e:
                 self.assertEqual(e.error_type, error)
+                if filename in self.expected_count:
+                    self.assertEqual(len(e.issues), self.expected_count[filename])
                 pass
