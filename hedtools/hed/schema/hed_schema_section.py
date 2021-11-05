@@ -109,8 +109,10 @@ class HedSchemaSection:
         if not self.case_sensitive:
             name_key = name.lower()
 
-        if name_key in self.all_names:
-            print(f"NotImplemented: {name_key} found twice in schema.")
+        # todo: could add this check back and improve.
+        #  This detects two FULLY identical tags, including all terms and parents.
+        # if name_key in self.all_names:
+        #     print(f"NotImplemented: {name_key} found twice in schema.")
         new_entry = HedSchemaEntry(name, self)
         self.all_names[name_key] = new_entry
 

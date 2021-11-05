@@ -270,7 +270,7 @@ class Test(TestHedBase):
         def_string.validate(def_dict)
         def_mapper = DefinitionMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
-        hed_validator = HedValidator(hed_schema=self.hed_schema, check_for_warnings=False)
+        hed_validator = HedValidator(hed_schema=self.hed_schema)
         validators = [hed_validator, def_mapper, onset_mapper]
 
         test_strings = [

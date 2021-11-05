@@ -3,6 +3,7 @@ import unittest
 from hed.models.hed_string import HedString
 from hed.errors.error_types import ValidationErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
+from functools import partial
 
 
 class TestHed(TestValidatorBase):
@@ -13,7 +14,7 @@ class FullHedString(TestHed):
     compute_forms = False
 
     @staticmethod
-    def string_obj_func(validator):
+    def string_obj_func(validator, check_for_warnings):
         return validator._tag_validator.run_hed_string_validators
 
     def test_mismatched_parentheses(self):
@@ -330,8 +331,8 @@ class FullHedString(TestHed):
 
 class IndividualHedTags(TestHed):
     @staticmethod
-    def string_obj_func(validator):
-        return validator._validate_individual_tags_in_hed_string
+    def string_obj_func(validator, check_for_warnings):
+        return partial(validator._validate_individual_tags_in_hed_string, check_for_warnings=check_for_warnings)
 
     def test_exist_in_schema(self):
         test_strings = {
@@ -552,7 +553,7 @@ class IndividualHedTags(TestHed):
 
 class HedTagLevels(TestHed):
     @staticmethod
-    def string_obj_func(validator):
+    def string_obj_func(validator, check_for_warnings):
         return validator._validate_groups_in_hed_string
 
     def test_no_duplicates(self):
@@ -596,8 +597,8 @@ class HedTagLevels(TestHed):
 
 class RequiredTags(TestHed):
     @staticmethod
-    def string_obj_func(validator):
-        return validator._validate_tags_in_hed_string
+    def string_obj_func(validator, check_for_warnings):
+        return partial(validator._validate_tags_in_hed_string, check_for_warnings=check_for_warnings)
 
     def test_includes_all_required_tags(self):
         test_strings = {
@@ -665,7 +666,7 @@ class TestHedInvalidChars(TestHed):
     compute_forms = False
 
     @staticmethod
-    def string_obj_func(validator):
+    def string_obj_func(validator, check_for_warnings):
         return validator._tag_validator.run_hed_string_validators
 
     def test_no_more_than_two_tildes(self):
@@ -723,8 +724,8 @@ class TestOldHed(TestHed):
 
 class OldIndividualHedTags(TestOldHed):
     @staticmethod
-    def string_obj_func(validator):
-        return validator._validate_individual_tags_in_hed_string
+    def string_obj_func(validator, check_for_warnings):
+        return partial(validator._validate_individual_tags_in_hed_string, check_for_warnings=check_for_warnings)
 
     def test_required_units(self):
         test_strings = {
