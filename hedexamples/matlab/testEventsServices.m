@@ -22,8 +22,8 @@ options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
                      'HeaderFields', header);
 
 %% Read the JSON sidecar into a string for all examples
-json_text = fileread('../data/bids_data/bids_events.json');
-events_text = fileread('../data/bids_data/bids_events.tsv');
+json_text = fileread('../data/wakeman_henson_data/task-FacePerception_events.json');
+events_text = fileread('../data/wakeman_henson_data/short_sub-002_task-FacePerception_run-1_events.tsv');
 schema_text = fileread('../data/schema_data/HED8.0.0.xml');
 myURL = ['https://raw.githubusercontent.com/hed-standard/' ...
          'hed-specification/master/hedxml/HED7.2.0.xml'];

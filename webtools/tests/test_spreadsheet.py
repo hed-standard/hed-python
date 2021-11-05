@@ -120,6 +120,7 @@ class Test(TestWebBase):
                                       name=spreadsheet_path)
         with self.app.app_context():
             results = spreadsheet_validate(hed_schema, spreadsheet)
+            print(results['data'])
             self.assertFalse(results['data'],
                              'spreadsheet_validate results should not have a data key when no validation errors')
             self.assertEqual('success', results["msg_category"],
@@ -138,7 +139,7 @@ class Test(TestWebBase):
                                       column_prefix_dictionary=prefix_dict,
                                       name=spreadsheet_path)
         with self.app.app_context():
-            results = spreadsheet_validate(hed_schema, spreadsheet)
+            results = spreadsheet_validate(hed_schema, spreadsheet, check_for_warnings=False)
             self.assertFalse(results['data'],
                              'spreadsheet_validate results should have empty data when no errors')
             self.assertEqual('success', results['msg_category'],
