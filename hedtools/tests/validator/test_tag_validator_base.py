@@ -72,17 +72,11 @@ class TestValidatorBase(TestHedBase):
         super().setUpClass()
         cls.error_handler = error_reporter.ErrorHandler()
         cls.syntactic_hed_input_reader = HedValidator(hed_schema=None,
-                                                      run_semantic_validation=False, check_for_warnings=False)
+                                                      run_semantic_validation=False)
         cls.syntactic_tag_validator = cls.syntactic_hed_input_reader._tag_validator
-        cls.syntactic_warning_hed_input_reader = HedValidator(hed_schema=None,
-                                                              run_semantic_validation=False, check_for_warnings=True)
-        cls.syntactic_warning_tag_validator = cls.syntactic_warning_hed_input_reader._tag_validator
         cls.semantic_hed_input_reader = HedValidator(hed_schema=cls.hed_schema,
-                                                     run_semantic_validation=True, check_for_warnings=False)
+                                                     run_semantic_validation=True)
         cls.semantic_tag_validator = cls.semantic_hed_input_reader._tag_validator
-        cls.semantic_warning_hed_input_reader = HedValidator(hed_schema=cls.hed_schema,
-                                                             run_semantic_validation=True, check_for_warnings=True)
-        cls.semantic_warning_tag_validator = cls.semantic_warning_hed_input_reader._tag_validator
 
     def validator_base(self, test_strings, expected_results, expected_issues, test_function,
                        hed_schema=None):
@@ -111,15 +105,11 @@ class TestValidatorBase(TestHedBase):
 
     def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         validator = self.syntactic_hed_input_reader
-        if check_for_warnings is True:
-            validator = self.syntactic_warning_hed_input_reader
         self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator))
+                            self.string_obj_func(validator, check_for_warnings=check_for_warnings))
 
     def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         validator = self.semantic_hed_input_reader
-        if check_for_warnings is True:
-            validator = self.semantic_warning_hed_input_reader
         self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator),
+                            self.string_obj_func(validator, check_for_warnings=check_for_warnings),
                             hed_schema=validator._hed_schema)

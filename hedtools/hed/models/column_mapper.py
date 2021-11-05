@@ -52,6 +52,7 @@ class ColumnMapper:
 
         self._na_patterns = ["n/a", "nan"]
         self._finalize_mapping_issues = []
+        self._has_sidecars = False
         if sidecars:
             self.add_sidecars(sidecars)
         self.add_columns(attribute_columns)
@@ -71,6 +72,7 @@ class ColumnMapper:
         sidecars : [str or Sidecar]
             A list of filenames or loaded files in any mix
         """
+        self._has_sidecars = True
         sidecars = Sidecar.load_multiple_sidecars(sidecars)
         for sidecar in sidecars:
             for column_data in sidecar:
@@ -311,7 +313,7 @@ class ColumnMapper:
                     found_named_tag_columns[column_name] = column_number
                 elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                     continue
-                else:
+                elif self._has_sidecars:
                     if column_number not in all_tag_columns:
                         self._finalize_mapping_issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
                                                                                    extra_column_name=column_name)

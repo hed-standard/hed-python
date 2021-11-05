@@ -84,14 +84,14 @@ class Test(unittest.TestCase):
     #
 
     def test_validate_column_group(self):
-        validator = HedValidator(hed_schema=None, check_for_warnings=True)
-        validation_issues = self.json_def_sidecar.validate_entries(validator)
+        validator = HedValidator(hed_schema=None)
+        validation_issues = self.json_def_sidecar.validate_entries(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 0)
 
-        validation_issues = self.default_sidecar.validate_entries(validator)
+        validation_issues = self.default_sidecar.validate_entries(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 0)
 
-        validation_issues = self.errors_sidecar.validate_entries(validator)
+        validation_issues = self.errors_sidecar.validate_entries(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 15)
 
 
