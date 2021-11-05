@@ -18,6 +18,7 @@ def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
                                    check_for_definitions
                                    expand_defs
                                    error_handler
+                                   check_for_warnings
     Returns
     -------
     tag_ops, string_ops: ([func], [func]) or [func]

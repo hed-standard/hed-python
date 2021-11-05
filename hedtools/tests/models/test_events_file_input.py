@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
 
         validation_issues = input_file.validate_file_sidecars(validator)
         self.assertEqual(len(validation_issues), 0)
-        validation_issues = input_file.validate_file(validator)
+        validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 1)
 
     def test_expand_column_issues(self):
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
 
         validation_issues = input_file.validate_file_sidecars(validator)
         self.assertEqual(len(validation_issues), 0)
-        validation_issues = input_file.validate_file(validator)
+        validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 1)
 
 
