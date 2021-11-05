@@ -7,6 +7,7 @@ from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.errors.exceptions import HedFileError
 from tests.validator.test_tag_validator_base import TestValidatorBase
+from functools import partial
 
 
 class TestHed3(TestValidatorBase):
@@ -42,8 +43,8 @@ class TestHed3(TestValidatorBase):
 
 class IndividualHedTagsShort(TestHed3):
     @staticmethod
-    def string_obj_func(validator):
-        return validator._validate_individual_tags_in_hed_string
+    def string_obj_func(validator, check_for_warnings):
+        return partial(validator._validate_individual_tags_in_hed_string, check_for_warnings=check_for_warnings)
 
     def test_exist_in_schema(self):
         test_strings = {
@@ -305,7 +306,7 @@ class IndividualHedTagsShort(TestHed3):
 
 class TestTagLevels3(TestHed3):
     @staticmethod
-    def string_obj_func(validator):
+    def string_obj_func(validator, check_for_warnings):
         return validator._validate_groups_in_hed_string
 
     def test_no_duplicates(self):

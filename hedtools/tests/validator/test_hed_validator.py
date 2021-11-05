@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
 
     def test__validate_input_major_errors_columns(self):
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.hed_file_with_major_errors.validate_file(self.generic_hed_input_reader, name=name)
+        validation_issues = self.hed_file_with_major_errors.validate_file(self.generic_hed_input_reader, check_for_warnings=True, name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
@@ -120,16 +120,16 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  "../data/validator_tests/bids_events_bad_defs.json")
-        validator = HedValidator(hed_schema=hed_schema, check_for_warnings=True)
+        validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
-        issues = sidecar.validate_entries(validators=validator)
+        issues = sidecar.validate_entries(validators=validator, check_for_warnings=True)
         self.assertEqual(len(issues), 4)
         input_file = EventsInput(events_path, sidecars=sidecar)
 
-        validation_issues = input_file.validate_file_sidecars(validator)
+        validation_issues = input_file.validate_file_sidecars(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 4)
 
-        validation_issues = input_file.validate_file(validator)
+        validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 42)
 
     def test_complex_file_validation_invalid_definitions_removed(self):
@@ -166,8 +166,8 @@ class Test(unittest.TestCase):
                                worksheet_name='LKT Events')
 
         validator = HedValidator(hed_schema=hed_schema)
-        validation_issues = loaded_file.validate_file(validator)
-        self.assertEqual(len(validation_issues), 6)
+        validation_issues = loaded_file.validate_file(validator, check_for_warnings=True)
+        self.assertEqual(len(validation_issues), 3)
 
     def test_error_spans_from_file_and_missing_required_column(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),

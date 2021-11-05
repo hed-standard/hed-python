@@ -74,6 +74,7 @@ class HedFileError(Exception):
             HedExceptions.HED_END_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.INVALID_SECTION_SEPARATOR: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.HED_SCHEMA_NODE_NAME_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.HED_SCHEMA_WIKI_WARNINGS: f"{error_prefix}{self.message}.  '{filename}'",
         }
         default_error_message = f'{error_prefix}Internal Error'
         error_message = error_types.get(error_type, default_error_message)
