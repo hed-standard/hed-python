@@ -54,6 +54,7 @@ class HedString(HedGroup):
         combined_hed_string_obj: HedString
             The combined hed string, containing all tags and delimiters from the list
         """
+        hed_string_obj_list = [hed_string_obj for hed_string_obj in hed_string_obj_list if hed_string_obj is not None]
         new_hed_string_obj = HedString("")
         for hed_string_obj in hed_string_obj_list:
             new_hed_string_obj._children += hed_string_obj._children
