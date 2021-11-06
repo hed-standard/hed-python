@@ -172,8 +172,8 @@ def sidecar_validate(hed_schema, json_sidecar, check_for_warnings=False):
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     display_name = json_sidecar.name
-    validator = HedValidator(hed_schema, check_for_warnings=check_for_warnings)
-    issues = json_sidecar.validate_entries(validator)
+    validator = HedValidator(hed_schema)
+    issues = json_sidecar.validate_entries(validator, check_for_warnings=check_for_warnings)
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON dictionary {display_name } validation errors")
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')

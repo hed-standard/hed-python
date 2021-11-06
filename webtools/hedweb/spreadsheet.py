@@ -149,8 +149,8 @@ def spreadsheet_validate(hed_schema, spreadsheet, check_for_warnings=False):
          A dictionary containing results of validation in standard format
     """
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    validator = HedValidator(hed_schema=hed_schema, check_for_warnings=check_for_warnings)
-    issues = spreadsheet.validate_file(validator)
+    validator = HedValidator(hed_schema=hed_schema)
+    issues = spreadsheet.validate_file(validator, check_for_warnings=check_for_warnings)
     display_name = spreadsheet.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} validation errors")

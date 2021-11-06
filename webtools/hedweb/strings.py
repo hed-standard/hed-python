@@ -138,11 +138,11 @@ def validate(hed_schema, string_list, check_for_warnings=False):
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    hed_validator = HedValidator(hed_schema=hed_schema, check_for_warnings=check_for_warnings)
+    hed_validator = HedValidator(hed_schema=hed_schema)
 
     validation_errors = []
     for pos, h_string in enumerate(string_list, start=1):
-        issues = h_string.validate(hed_validator)
+        issues = h_string.validate(hed_validator, check_for_warnings=check_for_warnings)
         if issues:
             validation_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
     if validation_errors:

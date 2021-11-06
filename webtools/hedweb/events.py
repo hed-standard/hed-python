@@ -178,13 +178,13 @@ def validate(hed_schema, events, sidecar=None, check_for_warnings=False):
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     display_name = events.name
-    validator = HedValidator(hed_schema=hed_schema, check_for_warnings=check_for_warnings)
+    validator = HedValidator(hed_schema=hed_schema)
     issue_str = ''
     if sidecar:
-        issues = sidecar.validate_entries(validator)
+        issues = sidecar.validate_entries(validator, check_for_warnings=check_for_warnings)
         if issues:
             issue_str = issue_str + get_printable_issue_string(issues, title="Sidecar definition errors:")
-    issues = events.validate_file(validator)
+    issues = events.validate_file(validator, check_for_warnings=check_for_warnings )
     if issues:
         issue_str = issue_str + get_printable_issue_string(issues, title="Event file errors:")
 
