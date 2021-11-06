@@ -33,6 +33,9 @@ class HedFileError(Exception):
         self.filename = filename
         # only filled in when this lists multiple errors, such as the HED_SCHEMA_WIKI_WARNINGS
         self.issues = issues
+        if self.issues:
+            translated_messages = [f"ERROR: {issue[1]}.\n    Source Line: {issue[0]}" for issue in issues]
+            self.message += '\n' + '\n'.join(translated_messages)
 
     def format_error_message(self, include_tabbing=True, return_string_only=False,
                              name=None):
