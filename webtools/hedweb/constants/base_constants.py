@@ -48,6 +48,8 @@ FORMAT_TO_TSV = 'to_tsv'
 HAS_COLUMN_NAMES = 'has_column_names'
 HEDSTRING = 'hedstring'
 
+ISSUE_STRING = 'issue_string'
+
 JSON_DISPLAY_NAME = 'json_display_name'
 JSON_FILE = 'json_file'
 JSON_PATH = 'json_path'
