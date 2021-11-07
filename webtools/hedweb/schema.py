@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.util.file_util import get_file_extension
-from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.error_reporter import get_exception_issue_string,get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 
 from hedweb.web_utils import form_has_file, form_has_option, form_has_url, generate_filename, handle_error
@@ -27,8 +27,8 @@ def get_schema(schema_path=None, schema_url=None, schema_string=None, schema_ver
         else:
             raise HedFileError("HedSchemaNotFound", "A HED schema could not be located", "")
     except HedFileError as ex:
-        issue_str = get_printable_issue_string(HedFileError.issues,
-                                               title=f"[Schema had syntax errors {ex.error_type}: {ex.message}]")
+        issue_str = get_exception_issue_string(ex.issues,
+                                               title=f"[{ex.error_type}] schema parsing issues:")
     except Exception as ex:
         issue_str = handle_error(ex, return_as_str=True)
     finally:
@@ -90,10 +90,11 @@ def process(arguments):
 
     hed_schema = arguments.get('schema', None)
     display_name = arguments.get('schema_display_name', 'unknown_source')
-    if arguments.get('issue_str', ''):
+    if arguments.get(base_constants.ISSUE_STRING, ''):
         file_name = generate_filename(display_name, suffix='schema_errors', extension='.txt')
         return {'command':  arguments[base_constants.COMMAND],
-                'data': arguments['issue_str'], 'output_display_name': file_name,
+                'data': arguments[base_constants.ISSUE_STRING],
+                'output_display_name': file_name,
                 'schema_version': '', 'msg_category': 'warning',
                 'msg': "Schema had syntax errors and could not load"}
     if base_constants.COMMAND not in arguments or arguments[base_constants.COMMAND] == '':
