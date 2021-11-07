@@ -1,4 +1,4 @@
-from hed.models.hed_tag import HedTag
+from hed.schema.hed_tag import HedTag
 
 
 class HedGroup:
@@ -32,6 +32,7 @@ class HedGroup:
         self._endpos = endpos
         self._include_paren = include_paren
         self._hed_string = hed_string
+        self.is_definition = False
 
     def append(self, new_tag_or_group):
         """
@@ -55,7 +56,7 @@ class HedGroup:
         -------
         iterator over the direct children
         """
-        return iter(self._children)
+        return self._children
 
     def get_all_tags(self):
         """
@@ -79,6 +80,13 @@ class HedGroup:
         return final_list
 
     def get_original_tags_and_groups(self):
+        """
+            Returns all original tags and groups.  Applies if a tag was deleted or replaced
+
+        Returns
+        -------
+
+        """
         node_list = [self]
         final_list = []
 
@@ -91,6 +99,13 @@ class HedGroup:
         return final_list
 
     def is_group(self):
+        """
+            This is a hed string contained by parenthesis.
+
+        Returns
+        -------
+
+        """
         return self._include_paren
 
     def get_all_groups(self, also_return_depth=False):
@@ -146,6 +161,14 @@ class HedGroup:
         return [group for group in self._children if isinstance(group, HedGroup)]
 
     def get_original_hed_string(self):
+        """
+            Get the original hed string with zero modification
+
+        Returns
+        -------
+        hed_string: str
+            The original string
+        """
         return self._hed_string[self._startpos:self._endpos]
 
     @property
@@ -210,8 +233,9 @@ class HedGroup:
             The constructed string
         """
         if tag_transformer:
-            result = ",".join([tag_transformer(child, child.__getattribute__(tag_attribute)) if isinstance(child, HedTag) else
-                               child.get_as_form(tag_attribute, tag_transformer) for child in self._children])
+            result = ",".join([tag_transformer(child, child.__getattribute__(tag_attribute))
+                               if isinstance(child, HedTag) else child.get_as_form(tag_attribute, tag_transformer)
+                               for child in self._children])
         else:
             result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
                                child.get_as_form(tag_attribute) for child in self._children])
@@ -261,3 +285,30 @@ class HedGroup:
 
         for group in self.get_all_groups():
             group._children = [child for child in group._children if child not in remove_groups]
+
+    def replace_placeholder(self, placeholder_value):
+        """
+            Replace any placeholders with the given value.
+
+        Parameters
+        ----------
+        placeholder_value : str
+            The placeholder value to fill in
+
+        Returns
+        -------
+        """
+        for tag in self.get_all_tags():
+            tag.replace_placeholder(placeholder_value)
+
+    def without_defs(self):
+        """
+            Return this as a string, with definitions having been removed.
+
+        Returns
+        -------
+
+        """
+        if self._include_paren:
+            return "(" + ",".join([str(child) for child in self._children if not child.is_definition]) + ")"
+        return ",".join([str(child) for child in self._children if not child.is_definition])

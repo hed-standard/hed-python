@@ -7,32 +7,25 @@ from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.errors.exceptions import HedFileError
-from hedweb.constants import common, file_constants
+from hedweb.constants import base_constants, file_constants
 
 app_config = current_app.config
 
 
 def file_extension_is_valid(filename, accepted_file_extensions=None):
     """Checks the other extension against a list of accepted ones.
-
     Parameters
     ----------
     filename: string
         The name of the other.
-
     accepted_file_extensions: list
-        A list containing all of the accepted other extensions or an empty list of all are accepted
-
+        A list containing all of the accepted other extensions.
     Returns
     -------
     boolean
         True if the other has a valid other extension.
-
     """
-    if not accepted_file_extensions or os.path.splitext(filename.lower())[1] in accepted_file_extensions:
-        return True
-    else:
-        return False
+    return not accepted_file_extensions or os.path.splitext(filename.lower())[1] in accepted_file_extensions
 
 
 def form_has_file(request, file_field, valid_extensions=None):
@@ -53,6 +46,7 @@ def form_has_file(request, file_field, valid_extensions=None):
         True if a file is present in a request object.
 
     """
+
     if file_field in request.files and file_extension_is_valid(request.files[file_field].filename, valid_extensions):
         return True
     else:
@@ -133,7 +127,7 @@ def generate_download_file_from_text(download_text, display_name=None,
         display_name = 'download.txt'
 
     if not download_text:
-        raise HedFileError('EmptyDownloadText', f"No download text given", "")
+        raise HedFileError('EmptyDownloadText', "No download text given", "")
 
     def generate():
         if header:
@@ -148,8 +142,8 @@ def generate_download_file_from_text(download_text, display_name=None,
 
 def generate_download_spreadsheet(results,  msg_category='success', msg=''):
     # return generate_download_test()
-    spreadsheet = results[common.SPREADSHEET]
-    display_name = results[common.OUTPUT_DISPLAY_NAME]
+    spreadsheet = results[base_constants.SPREADSHEET]
+    display_name = results[base_constants.OUTPUT_DISPLAY_NAME]
 
     if not spreadsheet.loaded_workbook:
         return generate_download_file_from_text(spreadsheet.to_csv(), display_name=display_name,
@@ -243,13 +237,14 @@ def get_hed_schema_from_pull_down(request):
         A HedSchema object
     """
 
-    if common.SCHEMA_VERSION not in request.form:
+    if base_constants.SCHEMA_VERSION not in request.form:
         raise HedFileError("NoSchemaError", "Must provide a valid schema or schema version", "")
-    elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
-        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+    elif request.form[base_constants.SCHEMA_VERSION] != base_constants.OTHER_VERSION_OPTION:
+        hed_file_path = hedschema.get_path_from_hed_version(request.form[base_constants.SCHEMA_VERSION])
         hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
-    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and common.SCHEMA_PATH in request.files:
-        f = request.files[common.SCHEMA_PATH]
+    elif request.form[base_constants.SCHEMA_VERSION] == \
+            base_constants.OTHER_VERSION_OPTION and base_constants.SCHEMA_PATH in request.files:
+        f = request.files[base_constants.SCHEMA_PATH]
         hed_schema = hedschema.from_string(f.read(file_constants.BYTE_LIMIT).decode('ascii'),
                                            file_type=secure_filename(f.filename))
     else:

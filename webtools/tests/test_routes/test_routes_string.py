@@ -1,29 +1,10 @@
-import os
 import json
-import shutil
 import unittest
-from hedweb.app_factory import AppFactory
-from hedweb.constants import common
+from tests.test_web_base import TestWebBase
+from hedweb.constants import base_constants
 
 
-class Test(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/upload')
-        app = AppFactory.create_app('config.TestConfig')
-        with app.app_context():
-            from hedweb.routes import route_blueprint
-            app.register_blueprint(route_blueprint)
-            if not os.path.exists(cls.upload_directory):
-                os.mkdir(cls.upload_directory)
-            app.config['UPLOAD_FOLDER'] = cls.upload_directory
-            app.config['WTF_CSRF_ENABLED'] = False
-            cls.app = app
-            cls.app.test = app.test_client()
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.upload_directory)
+class Test(TestWebBase):
 
     def test_string_results_empty_data(self):
         response = self.app.test.post('/string_submit')
@@ -35,11 +16,11 @@ class Test(unittest.TestCase):
 
     def test_string_results_to_long(self):
         with self.app.app_context():
-            test_string = 'Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red'
-            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
-                          common.COMMAND_OPTION: 'command_to_long',
-                          common.CHECK_FOR_WARNINGS: 'on',
-                          common.STRING_INPUT: test_string}
+            test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_LONG,
+                          base_constants.CHECK_FOR_WARNINGS: 'on',
+                          base_constants.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'To long of a long string has a response')
@@ -66,11 +47,11 @@ class Test(unittest.TestCase):
 
     def test_string_results_to_short(self):
         with self.app.app_context():
-            test_string = 'Attribute/Sensory/Visual/Color/CSS-color/Red-color/Red'
-            input_data = {common.SCHEMA_VERSION: '8.0.0-alpha.1',
-                          common.COMMAND_OPTION: 'command_to_short',
-                          common.CHECK_FOR_WARNINGS: 'on',
-                          common.STRING_INPUT: test_string}
+            test_string = 'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red'
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_TO_SHORT,
+                          base_constants.CHECK_FOR_WARNINGS: 'on',
+                          base_constants.STRING_INPUT: test_string}
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'To short of a long string has a response')
@@ -98,10 +79,10 @@ class Test(unittest.TestCase):
     def test_string_results_validate(self):
         with self.app.app_context():
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
-                                          data={common.SCHEMA_VERSION: '8.0.0-alpha.1',
-                                                common.COMMAND_OPTION: 'command_validate',
-                                                common.CHECK_FOR_WARNINGS: 'on',
-                                                common.STRING_INPUT: 'Red,Blue,Label/3'})
+                                          data={base_constants.SCHEMA_VERSION: '8.0.0',
+                                                base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                                                base_constants.CHECK_FOR_WARNINGS: 'on',
+                                                base_constants.STRING_INPUT: 'Red,Blue,Label/3'})
 
             self.assertEqual(200, response.status_code, 'Validation of a valid string has a response')
             response_dict = json.loads(response.data)
@@ -109,10 +90,10 @@ class Test(unittest.TestCase):
             self.assertFalse(response_dict["data"], "No data should be returned if validation successful")
 
             response = self.app.test.post('/string_submit', content_type='multipart/form-data',
-                                          data={common.SCHEMA_VERSION: '8.0.0-alpha.1',
-                                                common.COMMAND_OPTION: 'command_validate',
-                                                common.CHECK_FOR_WARNINGS: 'on',
-                                                common.STRING_INPUT: 'Blob,Blue,Label/3'})
+                                          data={base_constants.SCHEMA_VERSION: '8.0.0',
+                                                base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
+                                                base_constants.CHECK_FOR_WARNINGS: 'on',
+                                                base_constants.STRING_INPUT: 'Blob,Blue,Label/3'})
             self.assertEqual(200, response.status_code, 'Validation of an invalid string has a response')
             response_dict = json.loads(response.data)
             self.assertEqual("warning", response_dict["msg_category"],

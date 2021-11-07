@@ -1,17 +1,11 @@
 from hed.models.hed_string import HedString
 from hed.models.hed_group import HedGroup
-from hed.errors.error_types import DefinitionErrors
-from hed.errors import error_reporter
+from hed.errors.error_types import DefinitionErrors, ValidationErrors
+from hed.errors.error_reporter import ErrorHandler
+import copy
+from functools import partial
 
-
-class DefTagNames:
-    """The source names for definitions, def labels, and expanded labels"""
-    DEF_ORG_KEY = 'Def/'
-    DEF_EXPAND_ORG_KEY = 'Def-expand/'
-    DEFINITION_ORG_KEY = "Definition/"
-    DEF_KEY = DEF_ORG_KEY.lower()
-    DEF_EXPAND_KEY = DEF_EXPAND_ORG_KEY.lower()
-    DEFINITION_KEY = DEFINITION_ORG_KEY.lower()
+from hed.models.model_constants import DefTagNames
 
 
 class DefEntry:
@@ -22,7 +16,7 @@ class DefEntry:
         ----------
         name : str
             The label portion of this name(not including definition/)
-        contents_string: str
+        contents_string: HedGroup
             The contents of this definition
         takes_value : bool
             If True, expects ONE tag to have a single # sign in it.
@@ -34,21 +28,36 @@ class DefEntry:
         self.takes_value = takes_value
         self.source_context = source_context
 
-    def get_definition(self, tag, placeholder_value=None):
+    def get_definition(self, replace_tag, placeholder_value=None):
+        """
+            Returns a copy of the definition with the tag expanded and the placeholder plugged in
+
+        Parameters
+        ----------
+        replace_tag : HedTag
+            The def hed tag to replace with an expanded version
+        placeholder_value : str or None
+            If present and required, will replace any pound signs in the definition contents
+
+        Returns
+        -------
+        expanded_tag_name, def_contents: str, [HedGroup or HedTag]
+            The expanded def tag name, and the contents of this definition(including the def tag itself)
+        """
         if self.takes_value == (placeholder_value is None):
             return None, []
 
-        output_contents = [tag]
+        output_contents = [replace_tag]
         name = self.name
         if self.contents:
-            hed_string = self.contents
+            output_group = copy.deepcopy(self.contents)
             if placeholder_value:
-                hed_string = hed_string.replace("#", placeholder_value)
                 name = f"{name}/{placeholder_value}"
+                output_group.replace_placeholder(placeholder_value)
 
-            output_contents += HedString.split_hed_string_into_groups(hed_string)
+            output_contents = [replace_tag, output_group]
 
-        return f"{DefTagNames.DEF_EXPAND_ORG_KEY}{name}", output_contents
+        return f"{DefTagNames.DEF_EXPAND_ORG_KEY}/{name}", output_contents
 
 
 class DefDict:
@@ -56,6 +65,7 @@ class DefDict:
 
         A bids style file might have many of these(one for each json dict, and another for the actual file)
     """
+
     def __init__(self):
         """
         Class responsible for gathering and storing a group of definitions to be considered a single source.
@@ -69,7 +79,7 @@ class DefDict:
         # Definition related issues
         self._extract_def_issues = []
 
-    def get_def_issues(self):
+    def get_definition_issues(self):
         """
             Returns definition errors found during extraction
 
@@ -85,6 +95,13 @@ class DefDict:
     def __iter__(self):
         return iter(self._defs.items())
 
+    def __get_string_ops__(self, **kwargs):
+        error_handler = kwargs.get("error_handler")
+        return [partial(self.check_for_definitions, error_handler=error_handler)]
+
+    def __get_tag_ops__(self, **kwargs):
+        return []
+
     def check_for_definitions(self, hed_string_obj, error_handler=None):
         """
         Check a given hed string for definition tags, and add them to the dictionary if so.
@@ -93,17 +110,13 @@ class DefDict:
         ----------
         hed_string_obj : HedString
             A single hed string to gather definitions from
-        error_handler : ErrorHandler or None
-            Used to report errors.  Uses a default one if none passed in.
+        error_handler: ErrorHandler
+            Used to note where definitions are found.  Optional.
         Returns
         ----------
         """
-        if DefTagNames.DEFINITION_KEY not in hed_string_obj.lower():
-            return []
-        if error_handler is None:
-            error_handler = error_reporter.ErrorHandler()
-
-        for tag_group in hed_string_obj.groups():
+        new_def_issues = []
+        for tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
             def_tags = []
             group_tags = []
             other_tags = []
@@ -112,9 +125,8 @@ class DefDict:
                     group_tags.append(tag_or_group)
                     continue
                 else:
-                    new_def_tag = self._check_tag_starts_with(str(tag_or_group), DefTagNames.DEFINITION_KEY)
-                    if new_def_tag:
-                        def_tags.append((tag_or_group, new_def_tag))
+                    if tag_or_group.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
+                        def_tags.append(tag_or_group)
                         continue
 
                 other_tags.append(tag_or_group)
@@ -125,19 +137,32 @@ class DefDict:
                 # the word definition somewhere else in the text.
                 continue
 
-            if len(def_tags) > 1:
-                self._extract_def_issues += error_handler.format_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
-                                                                def_name=def_tags[0][1],
-                                                                tag_list=[tag[0] for tag in def_tags[1:]])
+            if not is_top_level:
+                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                         ValidationErrors.HED_TAG_GROUP_TAG,
+                                                                         tag=def_tags[0])
                 continue
-            def_tag, def_tag_name = def_tags[0]
+
+            if len(def_tags) > 1:
+                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                         DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
+                                                                         def_name=def_tags[0].extension_or_value_portion,
+                                                                         tag_list=[tag for tag in
+                                                                                   def_tags[1:]])
+                continue
+            def_tag = def_tags[0]
+            def_tag_name = def_tag.extension_or_value_portion
             if len(group_tags) > 1:
-                self._extract_def_issues += error_handler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                def_name=def_tag_name, tag_list=group_tags + other_tags)
+                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                         DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+                                                                         def_name=def_tag_name,
+                                                                         tag_list=group_tags + other_tags)
                 continue
             if len(other_tags) > 0:
-                self._extract_def_issues += error_handler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                def_name=def_tag_name, tag_list=other_tags + group_tags)
+                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                         DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+                                                                         def_name=def_tag_name,
+                                                                         tag_list=other_tags + group_tags)
                 continue
 
             group_tag = group_tags[0] if group_tags else None
@@ -148,13 +173,9 @@ class DefDict:
 
             def_tag_lower = def_tag_name.lower()
             if "/" in def_tag_lower or "#" in def_tag_lower:
-                self._extract_def_issues += error_handler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
-                                                                def_name=def_tag_name)
-                continue
-
-            if def_tag_lower in self._defs:
-                self._extract_def_issues += error_handler.format_error(DefinitionErrors.DUPLICATE_DEFINITION,
-                                                                def_name=def_tag_name)
+                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                         DefinitionErrors.INVALID_DEFINITION_EXTENSION,
+                                                                         def_name=def_tag_name)
                 continue
 
             # Verify placeholders here.
@@ -165,15 +186,28 @@ class DefDict:
                         placeholder_tags.append(tag)
 
             if (len(placeholder_tags) == 1) != def_takes_value:
-                self._extract_def_issues += \
-                    error_handler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
-                                               def_name=def_tag_name, tag_list=placeholder_tags,
-                                               expected_count=1 if def_takes_value else 0)
+                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                         DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
+                                                                         def_name=def_tag_name,
+                                                                         tag_list=placeholder_tags,
+                                                                         expected_count=1 if def_takes_value else 0)
                 continue
 
-            self._defs[def_tag_lower] = DefEntry(name=def_tag_name, contents_string=str(group_tag),
+            if error_handler:
+                context = error_handler.get_error_context_copy()
+            else:
+                context = []
+            if def_tag_lower in self._defs:
+                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                         DefinitionErrors.DUPLICATE_DEFINITION,
+                                                                         def_name=def_tag_name)
+                continue
+            self._defs[def_tag_lower] = DefEntry(name=def_tag_name, contents_string=group_tag,
                                                  takes_value=def_takes_value,
-                                                 source_context=error_handler.get_error_context_copy())
+                                                 source_context=context)
+
+        self._extract_def_issues += new_def_issues
+        return new_def_issues
 
     @staticmethod
     def _check_tag_starts_with(hed_tag, target_tag_short_name):

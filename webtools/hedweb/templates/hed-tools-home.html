@@ -6,40 +6,42 @@
         events of interest occurring in an experiment using a common structured vocabulary and standardized tools.
         The HED framework has been developed for neurological imaging data (e.g., EEG, MEG, iEEG,
         fMRI), physiological (e.g., ECG, EMG, GSR) as well as multimodal experiment (e.g., mobile brain/body imaging).
-        HED has been adopted as part of the BIDS (<a href="http://bids.neuroimaging.io">http://bids.neuroimaging.io</a>)
-        standard for brain imaging. The HED standards group maintains the HED schema and tools at
-        <a href="https://github.com/hed-standard">https://github.com/hed-standard</a>. The HED schema can be viewed
-        using the <a href="https://www.hedtags.org/display_hed_test.html?version=8.0.0-beta.4">HED viewer</a>.
+        HED has been adopted as part of the BIDS (<a href="http://bids.neuroimaging.io"><b>http://bids.neuroimaging.io</b></a>)
+        standard for brain imaging.</p>
+
+    <p>The HED standards organization maintains the HED schema and tools at HED organization repository
+        <a href="https://github.com/hed-standard"><b>https://github.com/hed-standard</b></a>. The HED schema can be viewed
+        using the <a href="https://www.hedtags.org/display_hed.html"><b>HED viewer</b></a>.
     </p>
 
     <h3>HED schema generations (3G versus 2G)</h3>
     <p>
-        HED (starting with HED schema version 8.0.0) uses a new more powerful framework for annotation, known as HED-3G
-        or HED third generation. Schema versions earlier than 8.0.0 use a less
-        powerful framework (known as HED-2G) and will be deprecated in the coming year. You should always
-        use HED schema versions HED 8.0.0 or greater for annotation.
+        HED (starting with HED schema version 8.0.0) uses a new more powerful framework for annotation,
+        known as colloquially as HED-3G or HED third generation. Schema versions earlier than 8.0.0 will be
+        deprecated in 2022. You should always use HED schema versions HED 8.0.0 or greater for annotation.
     </p>
 
     <h3>HED online tools help</h3>
     <p>
         More detailed help on using these online tools is available at:
-        <a href="{{ url_for('route_blueprint.render_commands_help_page') }}"><b>[Help pages for online tools]</b></a>
+        <a href="https://hed-specification.readthedocs.io/en/latest/Tools.html#hed-online-tools"><b>HED online tools</b></a>
     </p>
 
    <h3>HED services help</h3>
     <p>
-    The HED online tools are also available as callable web services. More detailed help on calling these
+        The HED online tools are also available as callable web services. More detailed help on calling these
         services is available at:
-        <a href="{{ url_for('route_blueprint.render_services_help_page') }}"><b>[Help pages for HED web services]</b></a>
+        <a href="https://hed-specification.readthedocs.io/en/latest/Tools.html#hed-rest-services"><b>HED REST services</b></a>
     </p>
     <p>
         Downloadable examples of calling these services from a MATLAB program can be found at:
-        <a href="https://github.com/hed-standard/hed-python/tree/master/webtools/examples"><b>[Github MATLAB examples]</b></a>
+        <a href="https://github.com/hed-standard/hed-python/tree/master/webtools/examples"><b>Github MATLAB examples</b></a>
      </p>
     <h3>Additional information</h3>
     <p>
         Additional web-based tools are under development. All code is open-source and available in the
-        <a href="https:/github.com/hed-standard/hed-python">hed-python</a> repository on Github.
-        For more information on HED, visit the <a href="https://www.hedtags.org">documentation</a> page.
+        <a href="https:/github.com/hed-standard/hed-python"><b>hed-python</b></a> repository on Github.
+        For more information on HED, visit <a href="https://www.hedtags.org"><b>https://www.hedtags.org</b></a>
+        or the <a href="https://hed-specification.readthedocs.io/en/latest/index.html"><b>HED documentation</b></a>
     </p>
 {% endblock %}

@@ -13,6 +13,7 @@
           crossorigin="anonymous">
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/layout.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     {% block head %}
     {% endblock %}
@@ -26,12 +27,18 @@
 <section class="page-header">
     <h1 class="project-name">Hierarchical Event Descriptor (HED) online tools</h1>
     <h2 class="project-tagline">Web-based tools for HED schema, HED tags, and event files</h2>
-    <a href="{{ url_for('route_blueprint.render_home_page') }}" class="btn">HED tools home</a>
-    <a href="{{ url_for('route_blueprint.render_events_form') }}" class="btn">Process events</a>
-    <a href="{{ url_for('route_blueprint.render_dictionary_form') }}" class="btn">Process dictionary</a>
-    <a href="{{ url_for('route_blueprint.render_spreadsheet_form') }}" class="btn">Process spreadsheet</a>
-    <a href="{{ url_for('route_blueprint.render_string_form') }}" class="btn">Process string</a>
-    <a href="{{ url_for('route_blueprint.render_schema_form') }}" class="btn">Process schema</a>
+    <a href="{{ url_for('route_blueprint.render_home_page') }}" class="btn"
+    data-toggle="tooltip" data-placement="bottom" title="Overview of online HED tools">Home</a>
+    <a href="{{ url_for('route_blueprint.render_events_form') }}" class="btn"
+    data-toggle="tooltip" data-placement="bottom" title="Tools for BIDS-style event files">Events</a>
+    <a href="{{ url_for('route_blueprint.render_sidecar_form') }}" class="btn"
+    data-toggle="tooltip" data-placement="bottom" title="Tools for a BIDS-style JSON sidecar">Sidecar</a>
+    <a href="{{ url_for('route_blueprint.render_spreadsheet_form') }}" class="btn"
+    data-toggle="tooltip" data-placement="bottom" title="Tools for a spreadsheet containing event codes">Spreadsheet</a>
+    <a href="{{ url_for('route_blueprint.render_string_form') }}" class="btn"
+    data-toggle="tooltip" data-placement="bottom" title="Tools for processing a HED string">String</a>
+    <a href="{{ url_for('route_blueprint.render_schema_form') }}" class="btn"
+    data-toggle="tooltip" data-placement="bottom" title="Tools for processing a HED schema file">Schema</a>
 </section>
 <section class="main-content">
     {% block content %}

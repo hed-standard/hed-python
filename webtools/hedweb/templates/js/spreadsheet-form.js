@@ -9,13 +9,9 @@ $(function () {
 $('#has_column_names').on('change', function() {
     let spreadsheetFile = $('#spreadsheet_file')[0].files[0];
     let worksheetName = $('#worksheet_name option:selected').text();
-    if ($("#has_column_names").is(':checked')) {
-            setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, true, false, true)
-        } else  {
-            setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, false, false, true)
-        }
-    }
-);
+    let hasColumnNames = $("#has_column_names").is(':checked')
+    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames, "show_indices")
+})
 
 /**
  * Spreadsheet event handler function. Checks if the file uploaded has a valid spreadsheet extension.
@@ -25,28 +21,22 @@ $('#spreadsheet_file').on('change', function () {
     let spreadsheetPath = spreadsheet.val();
     let spreadsheetFile = spreadsheet[0].files[0];
     clearFlashMessages();
-    removeColumnInfo(true)
+    removeColumnInfo("show_indices")
     if (!fileHasValidExtension(spreadsheetPath, VALID_FILE_EXTENSIONS)) {
         clearForm();
         flashMessageOnScreen('Upload a valid spreadsheet (.xlsx, .tsv, .txt)', 'error', 'spreadsheet_flash');
         return
     }
     updateFileLabel(spreadsheetPath, '#spreadsheet_display_name');
-    let worksheetName = undefined
+    let hasColumnNames = $("#has_column_names").is(':checked')
+    let worksheetNames = setColumnsInfo(spreadsheetFile, 'spreadsheet_flash',  undefined, hasColumnNames, "show_indices")
     if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
-        worksheetName = $('#worksheet_name option:selected').text();
-        $('#worksheet_select').show();
-    }
-    else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
+        populateWorksheetDropdown(worksheetNames);
+    } else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
         $('#worksheet_name').empty();
         $('#worksheet_select').hide();
     }
-    if ($("#has_column_names").is(':checked')) {
-        setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, true, true, true)
-    } else {
-        setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, false, true, true)
-    }
-});
+})
 
 /**
  * Submits the form if the tag columns textbox is valid.
@@ -59,7 +49,7 @@ $('#spreadsheet_submit').on('click', function () {
 });
 
 /**
- * Gets the information associated with the Excel worksheet that was newly selected. This information contains
+ * Gets the information associated with the Excel sheet_name that was newly selected. This information contains
  * the names of the columns and column indices that contain HED tags.
  */
 $('#worksheet_name').on('change', function () {
@@ -67,7 +57,7 @@ $('#worksheet_name').on('change', function () {
     let worksheetName = $('#worksheet_name option:selected').text();
     let hasColumnNames = $("#has_column_names").is(':checked')
     clearFlashMessages();
-    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames,false, true);
+    setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames, "show_indices");
 });
 
 /**
@@ -78,7 +68,7 @@ function clearForm() {
     $('#spreadsheet_display_name').text('');
     $('#worksheet_name').empty();
     $('#worksheet_select').hide();
-    hideColumnInfo(true);
+    hideColumnInfo("show_indices");
     hideOtherSchemaVersionFileUpload()
 }
 
@@ -92,22 +82,15 @@ function clearFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet_submit_flash');
 }
 
-/**
- * Hides  worksheet select section in the form.
- */
-function hideWorksheetSelect() {
-    $('#worksheet_select').hide();
-}
 
 /**
- * Populate the Excel worksheet select box.
- * @param {Array} worksheetNames - An array containing the Excel worksheet names.
+ * Populate the Excel sheet_name select box.
+ * @param {Array} worksheetNames - An array containing the Excel sheet_name names.
  */
 function populateWorksheetDropdown(worksheetNames) {
     if (Array.isArray(worksheetNames) && worksheetNames.length > 0) {
-        let worksheetDropdown = $('#worksheet_name');
         $('#worksheet_select').show();
-        worksheetDropdown.empty();
+        $('#worksheet_name').empty();
         for (let i = 0; i < worksheetNames.length; i++) {
             $('#worksheet_name').append(new Option(worksheetNames[i], worksheetNames[i]) );
         }
@@ -121,13 +104,6 @@ function populateWorksheetDropdown(worksheetNames) {
 function prepareForm() {
     clearForm();
     getSchemaVersions()
-}
-
-/**
- * Show the worksheet select section.
- */
-function showWorksheetSelect() {
-    $('#worksheet_select').show();
 }
 
 /**
@@ -149,7 +125,7 @@ function submitForm() {
     flashMessageOnScreen('Spreadsheet is being processed ...', 'success',
         'spreadsheet_submit_flash')
     let isExcel = fileHasValidExtension(spreadsheetFile, EXCEL_FILE_EXTENSIONS) &&
-            !$("#command_validate").prop("checked");
+            !$("#validate").prop("checked");
     $.ajax({
         type: 'POST',
         url: "{{url_for('route_blueprint.spreadsheet_results')}}",

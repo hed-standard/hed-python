@@ -26,7 +26,7 @@ def is_hed3_version_number(version_string):
         version = Version(version_string)
         if version.major >= 8:
             return True
-    except ValueError as e:
+    except ValueError:
         return False
 
     return False
@@ -50,5 +50,3 @@ def validate_attributes(attrib_dict, filename):
         raise HedFileError(HedExceptions.BAD_HED_SEMANTIC_VERSION, "No version attribute found in header",
                            filename=filename)
 
-    # Placeholder for future warnings
-    return []

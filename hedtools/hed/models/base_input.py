@@ -6,9 +6,12 @@ import copy
 from hed.models.def_dict import DefDict
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.errors.error_types import ErrorContext
+from hed.errors.error_types import ErrorContext, ErrorSeverity
 from hed.errors.error_reporter import ErrorHandler
 from hed.models import model_constants
+from hed.models.util import translate_ops
+from hed.models.onset_mapper import OnsetMapper
+from hed.models.hed_string import HedString
 
 
 class BaseInput:
@@ -21,15 +24,16 @@ class BaseInput:
     TAB_DELIMITER = '\t'
     COMMA_DELIMITER = ','
 
-    def __init__(self, filename, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, name=None):
+    def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, def_mapper=None,
+                 name=None):
         """Constructor for the BaseInput class.
 
          Parameters
          ----------
-         filename: str or file like
+         file: str or file like
              An xlsx/tsv file to open.
          file_type: str
-            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
+            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from file if file is a str.
          worksheet_name: str or None
              The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
          has_column_names: bool
@@ -44,32 +48,36 @@ class BaseInput:
         if mapper is None:
             mapper = ColumnMapper()
         self._mapper = mapper
+        self._def_mapper = def_mapper
         self._has_column_names = has_column_names
         self._name = name
         # This is the loaded workbook if we loaded originally from an excel file.
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
+        self.file_def_dict = None
         pandas_header = 0
         if not self._has_column_names:
             pandas_header = None
 
-        if not filename:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty filename passed to BaseInput.", filename)
+        if not file:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
 
         input_type = file_type
-        if file_type is None and isinstance(filename, str):
-            _, input_type = os.path.splitext(filename)
+        if file_type is None and isinstance(file, str):
+            _, input_type = os.path.splitext(file)
+            if self.name is None:
+                self._name = file
 
         self._dataframe = None
 
         if input_type in self.TEXT_EXTENSION:
-            self._dataframe = pandas.read_csv(filename, delimiter='\t', header=pandas_header)
+            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header, dtype=str)
         elif input_type in self.EXCEL_EXTENSION:
-            self._loaded_workbook = openpyxl.load_workbook(filename)
+            self._loaded_workbook = openpyxl.load_workbook(file)
             loaded_worksheet = self.get_worksheet(self._worksheet_name)
             self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
         else:
-            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", filename)
+            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
 
         self.reset_mapper(mapper)
 
@@ -91,7 +99,7 @@ class BaseInput:
 
         self.file_def_dict = self.extract_definitions()
 
-        self._mapper.update_definition_mapper_with_file(self.file_def_dict)
+        self.update_definition_mapper_with_file(self.file_def_dict)
 
     @property
     def dataframe(self):
@@ -139,7 +147,7 @@ class BaseInput:
             for column_number in column_to_hed_tags_dictionary:
                 error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_canonical_forms(hed_schema, error_handler=error_handler)
+                error_list += column_hed_string.convert_to_canonical_forms(hed_schema)
                 self.set_cell(row_number, column_number, column_hed_string,
                               include_column_prefix_if_exist=False, tag_form=tag_form)
                 error_handler.pop_error_context()
@@ -183,49 +191,20 @@ class BaseInput:
         """
         return self._convert_to_form(hed_schema, "long_tag", error_handler)
 
-    def extract_definitions(self, error_handler=None):
-        """
-        Gathers and validates all definitions found in this spreadsheet
-
-        Parameters
-        ----------
-        error_handler : ErrorHandler
-            The error handler to use for context, uses a default one if none.
-
-        Returns
-        -------
-        def_dict: DefDict
-            Contains all the definitions located in the file
-        """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        new_def_dict = DefDict()
-        for row_number, column_to_hed_tags in self.iter_raw():
-            error_handler.push_error_context(ErrorContext.ROW, row_number)
-            for column_number, hed_string_obj in column_to_hed_tags.items():
-                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
-                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
-                new_def_dict.check_for_definitions(hed_string_obj, error_handler=error_handler)
-                error_handler.pop_error_context()
-                error_handler.pop_error_context()
-            error_handler.pop_error_context()
-
-        return new_def_dict
-
-    def to_excel(self, filename, output_processed_file=False):
+    def to_excel(self, file, output_processed_file=False):
         """
 
         Parameters
         ----------
-        filename : str or file like
-            Location to save this file.  Can be filename, or stream/file like.
+        file : str or file like
+            Location to save this file.  Can be file, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
         Returns
         -------
 
         """
-        if not filename:
+        if not file:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
 
         # For now just make a copy if we want to save a formatted copy.  Could optimize this further.
@@ -246,18 +225,18 @@ class BaseInput:
                     old_worksheet.cell(row_number + adj_row_for_col_names,
                                        column_number + adj_for_one_based_cols).value = \
                         output_file._dataframe.iloc[row_number, column_number]
-            self._loaded_workbook.save(filename)
+            self._loaded_workbook.save(file)
         else:
-            output_file._dataframe.to_excel(filename, header=self._has_column_names)
+            output_file._dataframe.to_excel(file, header=self._has_column_names)
 
-    def to_csv(self, filename=None, output_processed_file=False):
+    def to_csv(self, file=None, output_processed_file=False):
         """
             Returns the file as a csv string.
 
         Parameters
         ----------
-        filename : str or file like or None
-            Location to save this file.  Can be filename, or stream/file like.
+        file : str or file like or None
+            Location to save this file.  Can be file, or stream/file like.
         output_processed_file : bool
             Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
         Returns
@@ -268,31 +247,40 @@ class BaseInput:
             output_file = self._get_processed_copy()
         else:
             output_file = self
-        csv_string_if_filename_none = output_file._dataframe.to_csv(filename, '\t', index=False,
+        csv_string_if_filename_none = output_file._dataframe.to_csv(file, '\t', index=False,
                                                                     header=output_file._has_column_names)
         return csv_string_if_filename_none
 
     def __iter__(self):
         return self.iter_dataframe()
 
-    def iter_raw(self):
+    def iter_raw(self, validators=None, error_handler=None, **kwargs):
         """Generates an iterator that goes over every row in the file without modification.
 
            This is primarily for altering or re-saving the original file.(eg convert short tags to long)
+
+        Parameters
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings before returning
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
 
         Yields
         -------
         row_number: int
             The current row number
-        row_hed_string: HedString
-            parsed and combined hed string for the row, gathered from all specified columns
         column_to_hed_tags_dictionary: dict
             A dict with keys column_number, value the cell at that position.
         """
-        default_mapper = ColumnMapper(enable_def_mapping=False)
-        return self.iter_dataframe(default_mapper)
+        if error_handler is None:
+            error_handler = ErrorHandler()
 
-    def iter_dataframe(self, mapper=None, return_row_dict=False, expand_defs=True):
+        default_mapper = ColumnMapper()
+        return self.iter_dataframe(default_mapper, validators=validators, run_string_ops_on_columns=True,
+                                   error_handler=error_handler, **kwargs)
+
+    def iter_dataframe(self, mapper=None, return_row_dict=False, validators=None, run_string_ops_on_columns=False,
+                       error_handler=None, expand_defs=False, **kwargs):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -303,9 +291,16 @@ class BaseInput:
         return_row_dict: bool
             If True, this returns the full row_dict including issues.
             If False, returns just the HedStrings for each column
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings before returning
+        run_string_ops_on_columns: bool
+            If true, run all tag and string ops on columns, rather than columns then rows.
         expand_defs: bool
-            If False, this will still remove all definition/ tags, but will not expand label tags.
-
+            If True, this will fully remove all definitions found and expand all def tags to def-expand tags
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
         Yields
         -------
         row_number: int
@@ -313,8 +308,25 @@ class BaseInput:
         row_dict: dict
             A dict containing the parsed row, including: "HED", "column_to_hed_tags", and possibly "column_issues"
         """
+        if error_handler is None:
+            error_handler = ErrorHandler()
+
         if mapper is None:
             mapper = self._mapper
+
+        tag_ops = []
+        string_ops = []
+        if validators or expand_defs:
+            if not isinstance(validators, list):
+                validators = [validators]
+            if not run_string_ops_on_columns:
+                validators.append(self._def_mapper)
+                if self._def_mapper:
+                    validators.append(OnsetMapper(self._def_mapper))
+                tag_ops, string_ops = translate_ops(validators, split_tag_and_string_ops=True, expand_defs=expand_defs,
+                                                    error_handler=error_handler, **kwargs)
+            else:
+                tag_ops = translate_ops(validators, expand_defs=expand_defs, error_handler=error_handler, **kwargs)
 
         start_at_one = 1
         if self._has_column_names:
@@ -324,11 +336,25 @@ class BaseInput:
             if all(text_file_row.isnull()):
                 continue
 
-            row_dict = mapper.expand_row_tags(text_file_row, expand_defs)
+            row_dict = mapper.expand_row_tags(text_file_row)
+            column_to_hed_tags = row_dict[model_constants.COLUMN_TO_HED_TAGS]
+            expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
+            row_issues = []
+            if tag_ops:
+                error_handler.push_error_context(ErrorContext.ROW, row_number)
+                row_issues += self._run_column_ops(column_to_hed_tags, tag_ops,
+                                                   expansion_column_issues,
+                                                   error_handler)
+                error_handler.pop_error_context()
             if return_row_dict:
+                final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
+                if string_ops:
+                    row_issues += self._run_row_ops(final_hed_string, string_ops, error_handler)
+                row_dict[model_constants.ROW_ISSUES] = row_issues
+                row_dict[model_constants.ROW_HED_STRING] = final_hed_string
                 yield row_number + start_at_one, row_dict
             else:
-                yield row_number + start_at_one, row_dict[model_constants.COLUMN_TO_HED_TAGS]
+                yield row_number + start_at_one, column_to_hed_tags
 
     def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
                  tag_form="short_tag"):
@@ -364,26 +390,6 @@ class BaseInput:
             adj_row_number += 1
         self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = new_text
 
-    @staticmethod
-    def _get_row_hed_tags_from_dict(row_dict):
-        """Reads in the current row of HED tags from the Excel file. The hed tag columns will be concatenated to form a
-           HED string.
-
-        Parameters
-        ----------
-        row_dict: dict
-            Contains the parsed info from a specific worksheet row.
-            the "HED" entry contains the combined hed string for a given row
-        Returns
-        -------
-        hed_string: str
-            a HED string containing the concatenated HED tag columns.
-        column_tags_dict: dict
-            dictionary which associates columns with HED tags
-
-        """
-        return row_dict[model_constants.ROW_HED_STRING], row_dict[model_constants.COLUMN_TO_HED_TAGS]
-
     def get_worksheet(self, worksheet_name=None):
         """
             Returns the requested worksheet from the workbook by name
@@ -403,6 +409,31 @@ class BaseInput:
             return self._loaded_workbook.worksheets[0]
         else:
             return None
+
+    def get_def_and_mapper_issues(self, error_handler, check_for_warnings=False):
+        """
+            Returns formatted issues found with definitions and columns.
+        Parameters
+        ----------
+        error_handler : ErrorHandler
+            The error handler to use
+        check_for_warnings: bool
+            If True this will check for and return warnings as well
+        Returns
+        -------
+        issues_list: [{}]
+            A list of definition and mapping issues.
+        """
+        issues = []
+        issues += self.file_def_dict.get_definition_issues()
+
+        # Gather any issues from the mapper for things like missing columns.
+        mapper_issues = self._mapper.get_column_mapping_issues()
+        error_handler.add_context_to_issues(mapper_issues)
+        issues += mapper_issues
+        if not check_for_warnings:
+            issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
+        return issues
 
     def _get_processed_copy(self):
         """
@@ -446,3 +477,118 @@ class BaseInput:
             return pandas.DataFrame(data, columns=cols)
         else:
             return pandas.DataFrame(worksheet.values)
+
+    def _run_validators(self, validators, error_handler, run_on_raw=False, expand_defs=False, **kwargs):
+        validation_issues = []
+        if run_on_raw:
+            for row_number, row_dict in self.iter_raw(return_row_dict=True, validators=validators,
+                                                      error_handler=error_handler, expand_defs=expand_defs,
+                                                      **kwargs):
+                validation_issues += row_dict[model_constants.ROW_ISSUES]
+        else:
+            for row_number, row_dict in self.iter_dataframe(return_row_dict=True, validators=validators,
+                                                            error_handler=error_handler, expand_defs=expand_defs,
+                                                            **kwargs):
+                validation_issues += row_dict[model_constants.ROW_ISSUES]
+
+        return validation_issues
+
+    def _run_column_ops(self, column_to_hed_tags_dictionary, column_ops, expansion_column_issues, error_handler):
+        validation_issues = []
+        if column_to_hed_tags_dictionary:
+            for column_number, column_hed_string in column_to_hed_tags_dictionary.items():
+                new_column_issues = []
+                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
+                if column_hed_string is not None:
+                    error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string,
+                                                     increment_depth_after=False)
+                if column_number in expansion_column_issues:
+                    new_column_issues += expansion_column_issues[column_number]
+
+                if column_hed_string is not None:
+                    new_column_issues += column_hed_string.apply_ops(column_ops)
+                error_handler.add_context_to_issues(new_column_issues)
+                if column_hed_string is not None:
+                    error_handler.pop_error_context()
+                error_handler.pop_error_context()
+                validation_issues += new_column_issues
+
+        return validation_issues
+
+    def _run_row_ops(self, row_hed_string, row_ops, error_handler):
+        error_handler.push_error_context(ErrorContext.HED_STRING, row_hed_string, increment_depth_after=False)
+        row_issues = row_hed_string.apply_ops(row_ops)
+        error_handler.add_context_to_issues(row_issues)
+        error_handler.pop_error_context()
+        return row_issues
+
+    def validate_file(self, validators, name=None, error_handler=None, check_for_warnings=True, **kwargs):
+        """Run the given validators on all columns and rows of the spreadsheet
+
+        Parameters
+        ----------
+
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings in this sidecar.
+        name: str
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        check_for_warnings: bool
+            If True this will check for and return warnings as well
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
+        Returns
+        -------
+        validation_issues: [{}]
+            The list of validation issues found
+        """
+        if not name:
+            name = self.name
+        if not isinstance(validators, list):
+            validators = [validators]
+
+        if error_handler is None:
+            error_handler = ErrorHandler()
+
+        error_handler.push_error_context(ErrorContext.FILE_NAME, name)
+        validation_issues = self.get_def_and_mapper_issues(error_handler, check_for_warnings)
+        validators = validators.copy()
+        validation_issues += self._run_validators(validators, error_handler=error_handler, check_for_warnings=check_for_warnings, **kwargs)
+        error_handler.pop_error_context()
+
+        return validation_issues
+
+    def extract_definitions(self, error_handler=None):
+        """
+        Gathers and validates all definitions found in this spreadsheet
+
+        Parameters
+        ----------
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+
+        Returns
+        -------
+        def_dict: DefDict
+            Contains all the definitions located in the file
+        """
+        if error_handler is None:
+            error_handler = ErrorHandler()
+        new_def_dict = DefDict()
+        validators = [new_def_dict]
+        _ = self._run_validators(validators, run_on_raw=True, error_handler=error_handler)
+        return new_def_dict
+
+    def update_definition_mapper_with_file(self, def_dict):
+        """
+        Adds label definitions gathered from the given list of inputs if this has a definition mapper.
+
+        Parameters
+        ----------
+        def_dict : DefDict
+            The gathered definitions to add to the mapper.
+        """
+        if self._def_mapper is not None:
+            self._def_mapper.add_definitions(def_dict)

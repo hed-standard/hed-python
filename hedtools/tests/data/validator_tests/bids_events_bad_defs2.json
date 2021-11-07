@@ -1,0 +1,82 @@
+{
+    "onset": {
+        "Description": "Onset of the go signal which is the disappearance of the cue bar",
+        "Units": "s"
+    },
+    "duration": {
+        "Description": "Duration of the event",
+        "Units": "s"
+    },
+	"event-type": {
+		"Description": "Subject presses both buttons causing cue bar to start count-down display",
+		"Levels" : {
+            "cue": "Subject presses both buttons causing cue bar to start count-down display",
+            "go": "Bar disappears cueing the subject to make a choice about which hand to raise",
+            "right-raised": "Subject releases right button and raises right hand",
+            "left-raised": "Subject releases left button and raises left hand",
+            "left-raised-match": "Subject raised left hand and computer presented image of left hand.",
+            "left-raised-nomatch": "Subject raised left hand and computer presented image of right hand.",
+            "right-raised-match": "Subject raised right hand and computer presented image of right hand.",
+            "right-raised-nomatch": "Subject raised right hand and computer presented image of left hand."
+        },
+        "HED": {
+          "cue": "Description/Subject presses both buttons causing cue bar to start count-down display, (Sensory-event, Visual, Cue, ((Rectangle, (Position, (Center-of, Screen)), (Size, Decreasing)))), (Agent-action, Experimental-participant, (Press, Hold-down, (Left-side, Button)), (Press, Hold-down, (Right-side, Button)))",
+          "go": "Description/Onset of the go signal which is the disappearance of the cue bar, Sensory-event, (Visual, Experimental-stimulus, Instructional, Signal-go, Rectangle)",
+          "right-raised": "Description/Subject raised right hand thereby releasing right button, (Agent-action, Experimental-participant, (Lift, (Right-side, Hand)), (Release, (Right-side, Button)))",
+          "left-raised": "Description/Subject raised left hand thereby releasing left button, (Agent-action, Experimental-participant, (Lift, (Left-side, Hand)), (Release, (Left-side, Button)))",
+          "left-raised-match": "Description/Computer presented image of left hand thereby matching a previously raised left hand, (Sensory-event, Visual, (Drawing, ID/left_hand.png,(Left-side, Hand)), (Feedback, (Intended-effect, Penalty)))",
+          "left-raised-nomatch": "Description/Computer presented image of left hand thereby not matching previously raised right hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png, (Left-side, Hand)), (Feedback, (Intended-effect, Reward)))",
+          "right-raised-match": "Description/Computer presented image of right hand thereby matching a previously raised right hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png,(Right-side, Hand)), (Feedback, (Intended-effect, Penalty)))",
+          "right-raised-nomatch": "Description/Computer presented image of right hand thereby not matching a previously raised left hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png, (Right-side, Hand)), (Feedback, (Intended-effect, Reward)))"
+        }
+	},
+    "sample": {
+        "Description": "The sample within the EEG data at which an event occurred"
+    },
+    "stage": {
+        "Description": "The current stage of the experiment.",
+        "Levels": {
+            "1": "Stage 1. BCI acts randomly",
+            "2": "Stage 2. BCI was trained on data from stage 1.",
+            "3": "Stage 3. BCI was trained on data from stages 1 and 2."
+        },
+		"HED": {
+            "1": "Description/BCI acts randomly, (Definition/Random-selection, (Experimental-condition, (Random, Predict))), Def/Random-selection/InvalidPlaceholder",
+            "2": "Description/BCI was trained on data from stage 1., (Definition/Trained-on-random, (Experimental-condition)), Def/Trained-on-random",
+            "3": "Description/BCI was trained on data from stages 1 and 2."
+		}
+    },
+	"trial": {
+		"Description": "The number of the trial in the experiment.",
+		"HED": "Description/The number of the trial in the experiment, (Experimental-trial, Item-count/#)"
+	},
+    "latency": {
+        "Description": "Estimated beginning of the data chunk used for the BCI prediction with respect to the true event as measured by parallel port trigger in this trial.",
+        "Units": "ms"
+    },
+    "bci_prediction": {
+        "Description": "Which hand did the BCI predict was raised in this trial.",
+        "Levels": {
+            "left": "BCI predicts participant raised left hand",
+            "right": "BCI predicts participant raised right hand"
+        },
+		"HED": {
+          "left": "Description/BCI predicts participant raised left hand, Computed-prediction, (Computational-evidence, (Left-side, Hand))",
+          "right": "Description/BCI predicts participant raised right hand, Computed-prediction, (Computational-evidence, (Right-side, Hand))"
+        }
+    },
+    "bci_prediction_valid": {
+        "Description": "Did a prediction arrive on time (if not, a random prediction was made) in this trial.",
+        "Levels": {
+            "1": "Computational prediction arrived on time",
+            "2": "Computational prediction was late so random prediction was used."
+        },
+		"HED": {
+			"1": "Description/Computational prediction arrived on time, (Computational-agent, Predict), (Definition/Trained-on-all/#, (InvalidTag))",
+			"2": "Description/Computational prediction was late so random prediction was used., Time-out, (Random, Predict), Def/Unmatched"
+		}
+    },
+    "n_repeated": {
+        "Description": "Number of trials that had to be repeated until the present trial because of invalid participant behavior (within this stage)."
+    }
+}

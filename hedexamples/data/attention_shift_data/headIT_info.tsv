@@ -1,0 +1,18 @@
+event_code	hit_name	Description
+1	hear_cue	A 200-ms word Hear that instructs subjects to attend to the auditory modality is presented. Cue is ignored in the Shift Condition Block. Cue is attended to in the Focus Condition Blocks FA and FV.
+2	look-cue	A 200-ms word Look that instructs subjects to attend to the visual modality is presented. Cue is ignored in the Shift Condition Block. Cue is attended to in the Focus Condition Blocks FA andFV.
+3	auditory_target	A 100-ms 550-Hz sine wave tone, amplitude modulated at 5-Hz, is played. Attended to during the FA blocks and unattended to during the FV blocks.
+4	visual_target	A light blue 8.4 cm2 filled square visual stimulus is presented. Attended to during the FV blocks and unattended to during the FV blocks.
+5	auditory_nontarget	A 500-Hz sine-wave tone, amplitude-modulated at 5 Hz, is played. Attended to during the FA blocks and unattended to during the FA blocks.
+6	visual_nontarget	A dark-blue 8.4 cm2 filled square visual stimulus is presented. Attended to during the FV blocks and unattended to during the FA blocks.
+7	auditory_target	During the Shift Condition Block, subject attends to the 100-ms 550-Hz sine wave tone played.
+8	visual_target	During the Shift Condition Block, subject attends to the light blue 8.4 cm2 filled square.
+9	auditory_target	During the Shift Condition Block, subject ignores to the 100-ms 550-Hz sine wave tone played.
+10	visual_target	During the Shift Condition Block, subject ignores to the light blue 8.4 cm2 filled square.
+11	auditory_nontarget	During the Shift Condition Block, subject attends to the 100-ms 500-Hz sine wave tone played.
+12	visual-nontarget	During the Shift Condition Block, subject attends to the dark blue 8.4 cm2 filled square.
+13	auditory-nontarget	During the Shift Condition Block, subject ignores to the 100-ms 500-Hz sine wave tone played.
+14	visual-nontarget	During the Shift Condition Block, subject ignores to the dark blue 8.4 cm2 filled square.
+199	calibration	Used to measure the amplitudes of EEG potentials and needs to be calibrated with the data post-experiment.
+201	button_press	The subject presses a button in response to detecting the target in the specific modality he or she is attending to.
+202	pause	Data recording was stopped for a while, and shows where data may not be continuous.

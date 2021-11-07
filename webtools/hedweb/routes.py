@@ -3,51 +3,31 @@ from werkzeug.utils import secure_filename
 import json
 
 from hed import schema as hedschema
-from hedweb.constants import common, page_constants
+from hedweb.constants import base_constants, page_constants
 from hedweb.constants import route_constants, file_constants
 from hedweb.web_utils import handle_http_error, package_results, handle_error
-from hedweb import dictionary, events, spreadsheet, services
-from hedweb.schema import get_input_from_schema_form, schema_process
-from hedweb.strings import get_input_from_string_form, string_process
-from hedweb.spreadsheet import get_columns_info
+from hedweb import sidecar, events, spreadsheet, services, strings, schema
+from hedweb.columns import get_columns_request
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
 
-@route_blueprint.route(route_constants.COLUMN_INFO_ROUTE, methods=['POST'])
+@route_blueprint.route(route_constants.COLUMNS_INFO_ROUTE, methods=['POST'])
 def columns_info_results():
-    """Gets the names of the spreadsheet columns and worksheet names if any.
+    """Gets the names of the spreadsheet columns and sheet_name names if any.
 
     Returns
     -------
     string
-        A serialized JSON string containing information related to the column and worksheet information.
+        A serialized JSON string containing information related to the column and sheet_name information.
 
     """
     try:
-        columns_info = get_columns_info(request)
+        columns_info = get_columns_request(request)
         return json.dumps(columns_info)
     except Exception as ex:
         return handle_error(ex)
-
-
-@route_blueprint.route(route_constants.DICTIONARY_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def dictionary_results():
-    """Process the JSON dictionary after form submission and return an attachment containing the output.
-
-    Returns
-    -------
-        download file
-        A text file with the validation errors.
-    """
-
-    try:
-        input_arguments = dictionary.get_input_from_dictionary_form(request)
-        a = dictionary.dictionary_process(input_arguments)
-        return package_results(a)
-    except Exception as ex:
-        return handle_http_error(ex)
 
 
 @route_blueprint.route(route_constants.EVENTS_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -62,7 +42,7 @@ def events_results():
 
     try:
         input_arguments = events.get_input_from_events_form(request)
-        a = events.events_process(input_arguments)
+        a = events.process(input_arguments)
         return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
@@ -78,8 +58,8 @@ def schema_results():
 
     """
     try:
-        arguments = get_input_from_schema_form(request)
-        a = schema_process(arguments)
+        arguments = schema.get_input_from_form(request)
+        a = schema.process(arguments)
         return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
@@ -101,11 +81,11 @@ def schema_version_results():
 
     try:
         hed_info = {}
-        if common.SCHEMA_PATH in request.files:
-            f = request.files[common.SCHEMA_PATH]
+        if base_constants.SCHEMA_PATH in request.files:
+            f = request.files[base_constants.SCHEMA_PATH]
             hed_schema = hedschema.from_string(f.stream.read(file_constants.BYTE_LIMIT).decode('ascii'),
                                                file_type=secure_filename(f.filename))
-            hed_info[common.SCHEMA_VERSION] = hed_schema.header_attributes['version']
+            hed_info[base_constants.SCHEMA_VERSION] = hed_schema.header_attributes['version']
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
@@ -124,7 +104,7 @@ def schema_versions_results():
 
     try:
         hedschema.cache_all_hed_xml_versions()
-        hed_info = {common.SCHEMA_VERSION_LIST: hedschema.get_all_hed_versions()}
+        hed_info = {base_constants.SCHEMA_VERSION_LIST: hedschema.get_all_hed_versions()}
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
@@ -139,13 +119,34 @@ def services_results():
         string
         A serialized JSON string containing processed information.
     """
+    response = {}
     try:
-        arguments = services.get_input_from_service_request(request)
-        status = services.services_process(arguments)
-        a = json.dumps(status)
-        return a
+        arguments = services.get_input_from_request(request)
+        response = services.process(arguments)
+        return json.dumps(response)
     except Exception as ex:
+        errors = handle_error(ex)
+        response['error_type'] = errors['error_type']
+        response['error_msg'] = errors['error_msg']
         return handle_error(ex)
+
+
+@route_blueprint.route(route_constants.SIDECAR_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def sidecar_results():
+    """Process the JSON sidecar after form submission and return an attachment containing the output.
+
+    Returns
+    -------
+        download file
+        A text file with the validation errors.
+    """
+
+    try:
+        input_arguments = sidecar.get_input_from_form(request)
+        a = sidecar.process(input_arguments)
+        return package_results(a)
+    except Exception as ex:
+        return handle_http_error(ex)
 
 
 @route_blueprint.route(route_constants.SPREADSHEET_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -159,8 +160,8 @@ def spreadsheet_results():
     """
 
     try:
-        arguments = spreadsheet.get_input_from_spreadsheet_form(request)
-        a = spreadsheet.spreadsheet_process(arguments)
+        arguments = spreadsheet.get_input_from_form(request)
+        a = spreadsheet.process(arguments)
         response = package_results(a)
         return response
     except Exception as ex:
@@ -178,50 +179,11 @@ def string_results():
     """
 
     try:
-        input_arguments = get_input_from_string_form(request)
-        a = string_process(input_arguments)
+        input_arguments = strings.get_input_from_form(request)
+        a = strings.process(input_arguments)
         return json.dumps(a)
     except Exception as ex:
         return handle_error(ex)
-
-
-@route_blueprint.route(route_constants.ADDITIONAL_EXAMPLES_ROUTE, strict_slashes=False, methods=['GET'])
-def render_additional_examples_page():
-    """The site additional examples page.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the additional examples page.
-
-    """
-    return render_template(page_constants.ADDITIONAL_EXAMPLES_PAGE)
-
-
-@route_blueprint.route(route_constants.COMMON_ERRORS_ROUTE, strict_slashes=False, methods=['GET'])
-def render_common_errors_page():
-    """The common errors page.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for a page explaining common errors.
-
-    """
-    return render_template(page_constants.COMMON_ERRORS_PAGE)
-
-
-@route_blueprint.route(route_constants.DICTIONARY_ROUTE, strict_slashes=False, methods=['GET'])
-def render_dictionary_form():
-    """Page with the dictionary processing form.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the dictionary form.
-
-    """
-    return render_template(page_constants.DICTIONARY_PAGE)
 
 
 @route_blueprint.route(route_constants.EVENTS_ROUTE, strict_slashes=False, methods=['GET'])
@@ -235,71 +197,6 @@ def render_events_form():
 
     """
     return render_template(page_constants.EVENTS_PAGE)
-
-
-@route_blueprint.route(route_constants.SERVICES_ROUTE, strict_slashes=False, methods=['GET'])
-def render_hed_services_form():
-    """Landing page for HED hedweb services designed to be called from programs such as MATLAB.
-
-    Returns
-    -------
-    Rendered template
-        A dummy rendered template so that the service can get a csrf token.
-
-    """
-    return render_template(page_constants.SERVICES_PAGE)
-
-
-@route_blueprint.route(route_constants.STRING_ROUTE, strict_slashes=False, methods=['GET'])
-def render_string_form():
-    """Renders a form for different hed string operations.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the hedstring form.
-
-    """
-    return render_template(page_constants.STRING_PAGE)
-
-
-@route_blueprint.route(route_constants.HED_COMMANDS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
-def render_commands_help_page():
-    """The help page for the commands for the online HED tools.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the home page.
-
-    """
-    return render_template(page_constants.HED_COMMANDS_HELP_PAGE)
-
-
-@route_blueprint.route(route_constants.HED_SERVICES_HELP_ROUTE, strict_slashes=False, methods=['GET'])
-def render_services_help_page():
-    """The help page for the web services for the online HED tools.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the services help page.
-
-    """
-    return render_template(page_constants.HED_SERVICES_HELP_PAGE)
-
-
-@route_blueprint.route(route_constants.HED_TOOLS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
-def render_help_page():
-    """The site help page.
-
-    Returns
-    -------
-    Rendered template
-        A rendered template for the help page.
-
-    """
-    return render_template(page_constants.HED_TOOLS_HELP_PAGE)
 
 
 @route_blueprint.route(route_constants.HED_TOOLS_HOME_ROUTE, strict_slashes=False, methods=['GET'])
@@ -328,6 +225,32 @@ def render_schema_form():
     return render_template(page_constants.SCHEMA_PAGE)
 
 
+@route_blueprint.route(route_constants.SERVICES_ROUTE, strict_slashes=False, methods=['GET'])
+def render_services_form():
+    """Landing page for HED hedweb services designed to be called from programs such as MATLAB.
+
+    Returns
+    -------
+    Rendered template
+        A dummy rendered template so that the service can get a csrf token.
+
+    """
+    return render_template(page_constants.SERVICES_PAGE)
+
+
+@route_blueprint.route(route_constants.SIDECAR_ROUTE, strict_slashes=False, methods=['GET'])
+def render_sidecar_form():
+    """Page with the sidecar processing form.
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the sidecar form.
+
+    """
+    return render_template(page_constants.SIDECAR_PAGE)
+
+
 @route_blueprint.route(route_constants.SPREADSHEET_ROUTE, strict_slashes=False, methods=['GET'])
 def render_spreadsheet_form():
     """Displays the spreadsheet Validation form.
@@ -339,3 +262,16 @@ def render_spreadsheet_form():
 
     """
     return render_template(page_constants.SPREADSHEET_PAGE)
+
+
+@route_blueprint.route(route_constants.STRING_ROUTE, strict_slashes=False, methods=['GET'])
+def render_string_form():
+    """Renders a form for different hed string operations.
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the hedstring form.
+
+    """
+    return render_template(page_constants.STRING_PAGE)
