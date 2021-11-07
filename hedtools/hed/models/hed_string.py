@@ -2,7 +2,11 @@
 This module is used to split tags in a HED string.
 """
 from hed.models.hed_group import HedGroup
-from hed.models.hed_tag import HedTag
+from hed.schema.hed_tag import HedTag
+from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
+from hed.errors.error_types import ErrorContext
+from hed.models.util import translate_ops
+from hed.models.model_constants import DefTagNames
 
 
 class HedString(HedGroup):
@@ -50,10 +54,11 @@ class HedString(HedGroup):
         combined_hed_string_obj: HedString
             The combined hed string, containing all tags and delimiters from the list
         """
+        hed_string_obj_list = [hed_string_obj for hed_string_obj in hed_string_obj_list if hed_string_obj is not None]
         new_hed_string_obj = HedString("")
         for hed_string_obj in hed_string_obj_list:
             new_hed_string_obj._children += hed_string_obj._children
-        new_hed_string_obj._component_strings = hed_string_obj_list
+        new_hed_string_obj._component_strings = list(hed_string_obj_list)
 
         hed_string = ",".join([hed_string_obj._hed_string for hed_string_obj in hed_string_obj_list])
         new_hed_string_obj._hed_string = hed_string
@@ -63,30 +68,116 @@ class HedString(HedGroup):
 
         return new_hed_string_obj
 
-    def convert_to_canonical_forms(self, hed_schema, error_handler=None):
-        if not hed_schema:
-            return []
+    def convert_to_canonical_forms(self, hed_schema):
+        """
+            Identify all tags using the given schema.  If no schema, still identify "key" tags such as definitions.
 
+            Also sets the "isDefinition" property on tags and groups.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema or None
+            The schema to use to validate/convert tags.
+
+        Returns
+        -------
+        conversion_issues: [{}]
+            A list of issues found while converting the string.
+        """
         validation_issues = []
         for tag in self.get_all_tags():
-            validation_issues += tag.convert_to_canonical_forms(hed_schema, error_handler)
+            validation_issues += tag.convert_to_canonical_forms(hed_schema)
+
+        self._identify_definitions()
         return validation_issues
 
-    def convert_to_short(self, hed_schema, error_handler=None):
-        conversion_issues = self.convert_to_canonical_forms(hed_schema, error_handler)
+    def _identify_definitions(self):
+        """
+            Mark any definitions found in this string.  Including groups or tags that are part of a definition.
+
+            This should possibly be removed later.
+
+        Returns
+        -------
+
+        """
+        for tag_group in self.groups():
+            for tag in tag_group.tags():
+                if tag.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
+                    for def_tag in tag_group.get_all_tags():
+                        def_tag.is_definition = True
+                    tag_group.is_definition = True
+
+    def remove_definitions(self):
+        """
+            Removes any definition tags and groups from this string.
+
+        Returns
+        -------
+        issues: [{}]
+            There are no possible issues, this list is always blank.
+        """
+        definition_groups = []
+        for tag_group in self.get_all_groups():
+            if tag_group.is_definition:
+                definition_groups.append(tag_group)
+
+        if definition_groups:
+            self.remove_groups(definition_groups)
+
+        return []
+
+    def convert_to_short(self, hed_schema):
+        """
+            Compute string canonical forms and return the long form and issues.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema or None
+            The schema to use to calculate forms.
+        Returns
+        -------
+        short_form: str
+            The string with all tags converted to short form
+        conversion_issues: [{}]
+            Issues found during conversion.  No issues will be found if no schema is passed.
+        """
+        conversion_issues = self.convert_to_canonical_forms(hed_schema)
         short_string = self.get_as_short()
         return short_string, conversion_issues
 
-    def convert_to_long(self, hed_schema, error_handler=None):
-        conversion_issues = self.convert_to_canonical_forms(hed_schema, error_handler)
+    def convert_to_long(self, hed_schema):
+        """
+            Compute string canonical forms and return the long form and issues.
+
+        Parameters
+        ----------
+        hed_schema : HedSchema or None
+            The schema to use to calculate forms.
+        Returns
+        -------
+        long_form: str
+            The string with all tags converted to long form
+        conversion_issues: [{}]
+            Issues found during conversion.  No issues will be found if no schema is passed.
+        """
+        conversion_issues = self.convert_to_canonical_forms(hed_schema)
         short_string = self.get_as_long()
         return short_string, conversion_issues
 
     def convert_to_original(self):
+        """
+            Returns the original form of this string, though potentially with some extraneous spaces removed.
+
+        Returns
+        -------
+        org_string: str
+            The string with all the tags in their original form.
+        """
         return self.get_as_form("org_tag")
 
     @staticmethod
-    def split_hed_string_into_groups(hed_string, also_return_flat_version=False):
+    def split_hed_string_into_groups(hed_string):
         """Splits the hed_string into a tree of tag groups, tags, and delimiters.
 
         Parameters
@@ -261,7 +352,59 @@ class HedString(HedGroup):
         hed_tags: [HedTag]
             The string split apart into hed tags with all delimiters removed
         """
-        from hed.models.hed_tag import HedTag
         result_positions = HedString.split_hed_string(hed_string)
         return [HedTag(hed_string, span) for (is_hed_tag, span) in
                 result_positions if is_hed_tag]
+
+    def apply_ops(self, string_ops):
+        """
+            Run the list of functions on this string and gather up issues found.
+
+            This potentially modifies the hed string object.
+
+        Parameters
+        ----------
+        string_ops : [func]
+            A list of functions that take a hed string object and return a list of issues.
+
+        Returns
+        -------
+        issues_list: [{}]
+            A list of issues found by these operations
+        """
+        string_issues = []
+        for string_validator in string_ops:
+            string_issues += string_validator(self)
+            if string_issues:
+                if check_for_any_errors(string_issues):
+                    break
+
+        return string_issues
+
+    def validate(self, validators=None, error_handler=None, **kwargs):
+        """
+            Run the given validators on this string.
+
+        Parameters
+        ----------
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings in this sidecar.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
+
+        Returns
+        -------
+
+        """
+        if error_handler is None:
+            error_handler = ErrorHandler()
+        tag_ops = translate_ops(validators, **kwargs)
+
+        error_handler.push_error_context(ErrorContext.HED_STRING, self, increment_depth_after=False)
+        issues = self.apply_ops(tag_ops)
+        error_handler.add_context_to_issues(issues)
+        error_handler.pop_error_context()
+
+        return issues

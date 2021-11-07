@@ -797,7 +797,7 @@ HED version:8.0.0-beta.1, xsd:https://github.com/hed-standard/hed-specification/
 *** Constrained <nowiki>{relatedTag=Unconstrained}[Keeping something within particular limits or bounds.]</nowiki>
 *** Disordered <nowiki>{relatedTag=Ordered}[Not neatly arranged; confused and untidy. A structural quality in which the parts of an object are non-rigid.]</nowiki>
 *** Familiar <nowiki>{relatedTag=Unfamiliar, relatedTag=Famous}[Recognized, familiar, or within the scope of knowledge.]</nowiki>
-*** Famous <nowiki>{relatedTag=Familiar,relatedTag=Unfamiliar}{relatedTag=Familiar, relatedTag=Unfamiliar}[A person who has a high degree of recognition by the general population for his or her success or accomplishments; a famous person.]</nowiki>
+*** Famous <nowiki>{relatedTag=Familiar,relatedTag=Unfamiliar}[A person who has a high degree of recognition by the general population for his or her success or accomplishments; a famous person.]</nowiki>
 *** Incongruent <nowiki>{relatedTag=Congruent}[Not in agreement or harmony.]</nowiki>
 *** Involuntary <nowiki>{relatedTag=Voluntary}[An action that is not made by choice. In the body, involuntary actions (such as blushing) occur automatically, and cannot be controlled by choice.]</nowiki>
 *** Masked <nowiki>{relatedTag=Unmasked}[Information exists but is not provided or is partially obscured due to security,  privacy, or other concerns.]</nowiki>

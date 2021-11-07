@@ -1,20 +1,21 @@
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
+from hed.models.def_mapper import DefinitionMapper
 
 
 class HedInput(BaseInput):
     """A class to parse basic hed style spreadsheets into a more general format."""
-    def __init__(self, filename=None, file_type=None, worksheet_name=None, tag_columns=None,
+    def __init__(self, file=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  def_dicts=None, name=None):
         """Constructor for the HedInput class.
 
         Parameters
         ----------
-        filename: str or file like
+        file: str or file like
              An xlsx/tsv file to open.
         file_type: str
-            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from filename if filename is a str.
+            ".xlsx" for excel, ".tsv" or ".txt" for tsv. data.  Derived from file if file is a str.
         worksheet_name: str
             The name of the Excel workbook worksheet that contains the HED tags.  Not applicable to tsv files.
         tag_columns: []
@@ -36,7 +37,9 @@ class HedInput(BaseInput):
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
-                                  extra_def_dicts=def_dicts)
-        super().__init__(filename, file_type, worksheet_name, has_column_names, new_mapper,
+        new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+
+        def_mapper = DefinitionMapper(def_dicts)
+
+        super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, def_mapper=def_mapper,
                          name=name)

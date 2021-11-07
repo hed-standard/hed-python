@@ -1,0 +1,62 @@
+{
+    "onset": {
+        "Description": "Onset of the go signal which is the disappearance of the cue bar",
+        "Units": "s"
+    },
+	"error_blank_hed_string": {
+		"Description": "Subject presses both buttons causing cue bar to start count-down display",
+		"Levels" : {
+            "cue": "Subject presses both buttons causing cue bar to start count-down display",
+            "go": "Bar disappears cueing the subject to make a choice about which hand to raise",
+            "right-raised": "Subject releases right button and raises right hand",
+            "left-raised": "Subject releases left button and raises left hand",
+            "left-raised-match": "Subject raised left hand and computer presented image of left hand.",
+            "left-raised-nomatch": "Subject raised left hand and computer presented image of right hand.",
+            "right-raised-match": "Subject raised right hand and computer presented image of right hand.",
+            "right-raised-nomatch": "Subject raised right hand and computer presented image of left hand."
+        },
+        "HED": {
+          "cue": "",
+          "go": "Description/Onset of the go signal which is the disappearance of the cue bar, Sensory-event, (Visual, Experimental-stimulus, Instructional, Rectangle/#)",
+          "right-raised": "Description/Subject raised right hand thereby releasing right button, (Agent-action, Experimental-participant, (Lift, (Right-side, Hand)), (Release, (Right-side, Button)))",
+          "left-raised": "Description/Subject raised left hand thereby releasing left button, (Agent-action, Experimental-participant, (Lift, (Left-side, Hand)), (Release, (Left-side, Button)))",
+          "left-raised-match": "Description/Computer presented image of left hand thereby matching a previously raised left hand, (Sensory-event, Visual, (Drawing, ID/left_hand.png,(Left-side, Hand)), (Feedback, (Intended-effect, Penalty)))",
+          "left-raised-nomatch": "Description/Computer presented image of left hand thereby not matching previously raised right hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png, (Left-side, Hand)), (Feedback, (Intended-effect, Reward)))",
+          "right-raised-match": "Description/Computer presented image of right hand thereby matching a previously raised right hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png,(Right-side, Hand)), (Feedback, (Intended-effect, Penalty)))",
+          "right-raised-nomatch": "Description/Computer presented image of right hand thereby not matching a previously raised left hand, (Sensory-event, Visual, (Drawing, ID/right_hand.png, (Right-side, Hand)), (Feedback, (Intended-effect, Reward)))"
+        }
+	},
+  	"error_blank_dictionary": {
+		"Description": "Subject presses both buttons causing cue bar to start count-down display",
+		"Levels" : {
+            "cue": "Subject presses both buttons causing cue bar to start count-down display",
+            "go": "Bar disappears cueing the subject to make a choice about which hand to raise",
+            "right-raised": "Subject releases right button and raises right hand",
+            "left-raised": "Subject releases left button and raises left hand",
+            "left-raised-match": "Subject raised left hand and computer presented image of left hand.",
+            "left-raised-nomatch": "Subject raised left hand and computer presented image of right hand.",
+            "right-raised-match": "Subject raised right hand and computer presented image of right hand.",
+            "right-raised-nomatch": "Subject raised right hand and computer presented image of left hand."
+        },
+        "HED": {
+        }
+	},
+	"trial": {
+		"Description": "The number of the trial in the experiment.",
+		"HED": "Description/The number of the trial in the experiment, (Experimental-trial, Item-count/#)"
+	},
+  	"errors_blank_hed_string_and_unknown_type": {
+		"Description": "The number of the trial in the experiment.",
+		"HED": ""
+	},
+    "error_trial_pass_list_as_hed": {
+        "Description": "The number of the trial in the experiment.",
+		"HED": ["this", "is", "a", "list", "#"]
+    },
+      "error_trial_pass_list_as_hed_dict": {
+        "Description": "The number of the trial in the experiment.",
+        "HED": {
+          "value_list": ["this", "is", "a", "list", "#"]
+        }
+    }
+}

@@ -1,8 +1,8 @@
 import os
 
 
-from hed.schema.xml2schema import HedSchemaXMLParser
-from hed.schema.wiki2schema import HedSchemaWikiParser
+from hed.schema.fileio.xml2schema import HedSchemaXMLParser
+from hed.schema.fileio.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -10,6 +10,21 @@ from hed.util import file_util
 
 
 def from_string(schema_string, file_type=".xml"):
+    """
+        Creates a schema from the given string as if it was loaded from the given file type.
+
+    Parameters
+    ----------
+    schema_string : str
+        An XML or mediawiki file as a single long string.
+    file_type : str
+        The extension(including the .) we should treat this string as
+
+    Returns
+    -------
+    schema: HedSchema
+        The loaded schema
+    """
     if not schema_string:
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string",
                            filename=schema_string)
@@ -25,7 +40,26 @@ def from_string(schema_string, file_type=".xml"):
     return hed_schema
 
 
-def load_schema(hed_file_path=None, hed_url_path=None):
+def load_schema(hed_file_path=None, hed_url_path=None, library_prefix=None):
+    """
+        Load a schema from the given file or URL path.  Must be one or the other
+
+        Raises HedFileError if there are any fatal issues.
+
+    Parameters
+    ----------
+    hed_file_path : str or None
+        A local filepath to open a schema from
+    hed_url_path : str or None
+        A url to open a schema from
+    library_prefix : str or None
+        The prefix all tags in this schema will accept.
+
+    Returns
+    -------
+    schema: HedSchema
+        The loaded schema
+    """
     if not hed_file_path and not hed_url_path:
         raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file",
                            filename=hed_file_path)
@@ -45,7 +79,12 @@ def load_schema(hed_file_path=None, hed_url_path=None):
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_file_path)
 
     hed_schema.update_old_hed_schema()
+
+    if library_prefix:
+        hed_schema.set_library_prefix(library_prefix=library_prefix)
+
     return hed_schema
+
 
 # todo: this could be updated to also support .mediawiki format.
 def get_hed_xml_version(hed_xml_file_path):

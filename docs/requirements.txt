@@ -1,0 +1,2 @@
+myst-parser==0.15.1
+Pygments==2.10.0

@@ -1,0 +1,35 @@
+{
+   "trial_type": {
+       "LongName": "Event category",
+       "Description": "Indicator of type of action that is expected",
+       "Levels": {
+          "go": "A red square is displayed to indicate starting",
+          "stop": "A blue square is displayed to indicate stopping"
+       },
+       "HED": {
+          "go": "Item/ItemTag1, (Definition/JsonFileDef/#, (Item/JsonDef1/#,Item/JsonDef1))",
+          "stop": "Item/ItemTag2"
+       }
+   },
+   "response_time": {
+       "LongName": "Response time after stimulus",
+       "Description": "Time from stimulus presentation until subject presses button",
+       "Units": "ms",
+       "HED": "Def/JsonFileDef/#, Action/Button press"
+   },
+   "stim_file": {
+       "LongName": "Stimulus file name",
+       "Description": "Relative path of the stimulus image file",
+       "HED": "Attribute/File/#, (Definition/JsonFileDef2/#, (Item/JsonDef2/#,Item/JsonDef2)), (Definition/JsonFileDef3/#, (Item/JsonDef3/#,InvalidTag))"
+   },
+     "takes_value_def": {
+       "LongName": "Def with a takes value tag",
+       "Description": "Relative path of the stimulus image file",
+       "HED": "Attribute/File/#, (Definition/TakesValueDef/#, (Age/#))"
+   },
+  "unit_class_def": {
+       "LongName": "Def with a value class",
+       "Description": "Relative path of the stimulus image file",
+       "HED": "Attribute/File/#, (Definition/ValueClassDef/#, (Acceleration/#))"
+   }
+}

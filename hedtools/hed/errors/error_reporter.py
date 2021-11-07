@@ -54,7 +54,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
            """
             base_message, error_vars = func(*args, **kwargs)
             error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars)
-            return [error_object]
+            return error_object
 
         _register_error_function(error_type, wrapper_func=wrapper)
         return wrapper
@@ -90,7 +90,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
                 Parameters
                 ----------
-                tag: HedTag or str
+                tag: HedTag
                     The hed tag object with the problem
                 index_in_tag: int,
                     The index into the tag with a problem(usually 0)
@@ -121,9 +121,10 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
                 base_message, error_vars = func(org_tag_text, problem_sub_tag, *args, **kwargs)
                 error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
-                                                         index_in_tag=index_in_tag, index_in_tag_end=index_in_tag_end, source_tag=tag)
+                                                                 index_in_tag=index_in_tag,
+                                                                 index_in_tag_end=index_in_tag_end, source_tag=tag)
 
-                return [error_object]
+                return error_object
 
             _register_error_function(error_type, wrapper_func=wrapper)
             return wrapper
@@ -147,7 +148,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 -------
                 error_list: [{}]
                 """
-                from hed.models.hed_tag import HedTag
+                from hed.schema.hed_tag import HedTag
                 from hed.models.hed_group import HedGroup
                 if isinstance(tag, HedTag):
                     org_tag_text = tag.org_tag
@@ -159,7 +160,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
                                                                  source_tag=tag)
 
-                return [error_object]
+                return error_object
 
             _register_error_function(error_type, wrapper_func=wrapper)
             return wrapper
@@ -169,12 +170,16 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
 # Import after hed_error decorators are defined.
 from hed.errors import error_messages
+# Intentional to make sure tools don't think the import is unused
+error_messages.mark_as_used = True
 
 
 class ErrorHandler:
     def __init__(self):
         # The current (ordered) dictionary of contexts.
         self.error_context = []
+        # The list of validation issues found
+        self.issue_list = []
 
     def push_error_context(self, context_type, context, increment_depth_after=True):
         """
@@ -209,7 +214,106 @@ class ErrorHandler:
         self.error_context = []
 
     def get_error_context_copy(self):
-        return copy.deepcopy(self.error_context)
+        return copy.copy(self.error_context)
+
+    def format_error_with_context(self, *args, **kwargs):
+        error_object = ErrorHandler.format_error(*args, **kwargs)
+        if self is not None:
+            self._add_context_to_errors(error_object[0], self.error_context)
+            self._update_error_with_char_pos(error_object[0])
+
+        return error_object
+
+    @staticmethod
+    def format_error(error_type, *args, actual_error=None, **kwargs):
+        """
+            The parameters vary based on what type of error this is.
+
+        Parameters
+        ----------
+        error_type : str
+            The type of error for this.  Registered with @hed_error or @hed_tag_error.
+        args: args
+            Any remaining non keyword args.
+        actual_error: str or None
+            The code to actually add to report out.  Useful for errors that are shared like invalid character.
+        kwargs :
+            The other parameters to pass down to the error handling func.
+        Returns
+        -------
+        error: [{}]
+            A single error
+        """
+        error_func = error_functions.get(error_type)
+        if not error_func:
+            error_object = ErrorHandler.val_error_unknown(*args, **kwargs)
+            error_object['code'] = error_type
+            return [error_object]
+
+        error_object = error_func(*args, **kwargs)
+        if actual_error:
+            error_object['code'] = actual_error
+
+        return [error_object]
+
+    def add_context_to_issues(self, issues):
+        for error_object in issues:
+            self._add_context_to_errors(error_object, self.error_context)
+            self._update_error_with_char_pos(error_object)
+
+    def format_error_list(self, issue_params):
+        """
+            Convert an issue params list to an issues list.  This means adding the error context primarily.
+
+        Parameters
+        ----------
+        issue_params : [{}]
+            The unformatted issues list
+        Returns
+        -------
+        issues_list: [{}]
+        """
+        formatted_issues = []
+        for issue in issue_params:
+            formatted_issues += self.format_error(**issue)
+        return formatted_issues
+
+    @staticmethod
+    def format_error_from_context(error_type, error_context, *args, actual_error=None, **kwargs):
+        """
+            The parameters vary based on what type of error this is.
+
+        Parameters
+        ----------
+        error_type : str
+            The type of error for this.  Registered with @hed_error or @hed_tag_error.
+        error_context: []
+            A list containing the error context to use for this error.  Generally returned from _add_context_to_errors
+        args: args
+            Any remaining non keyword args.
+        actual_error: str or None
+            The code to actually add to report out.  Useful for errors that are shared like invalid character.
+        kwargs :
+            The other parameters to pass down to the error handling func.
+        Returns
+        -------
+        error: [{}]
+            A single error
+        """
+        error_func = error_functions.get(error_type)
+        if not error_func:
+            error_object_list = ErrorHandler.val_error_unknown(*args, **kwargs)
+            error_object_list[0]['code'] = error_type
+            ErrorHandler._add_context_to_errors(error_object_list[0], error_context)
+            return error_object_list
+
+        error_object_list = error_func(*args, **kwargs)
+        if actual_error:
+            error_object_list[0]['code'] = actual_error
+
+        ErrorHandler._add_context_to_errors(error_object_list[0], error_context)
+        ErrorHandler._update_error_with_char_pos(error_object_list[0])
+        return error_object_list
 
     @staticmethod
     def _add_context_to_errors(error_object, error_context_to_add):
@@ -271,64 +375,6 @@ class ErrorHandler:
         span = hed_string._get_org_span(source_tag)
         return span
 
-    def format_error(self, error_type, *args, actual_error=None, **kwargs):
-        """
-            The parameters vary based on what type of error this is.
-
-        Parameters
-        ----------
-        error_type : str
-            The type of error for this.  Registered with @hed_error or @hed_tag_error.
-        args: args
-            Any remaining non keyword args.
-        actual_error: str or None
-            The code to actually add to report out.  Useful for errors that are shared like invalid character.
-        kwargs :
-            The other parameters to pass down to the error handling func.
-        Returns
-        -------
-        error: [{}]
-            A single error
-        """
-        return self.format_error_from_context(error_type, self.error_context, *args, actual_error=actual_error, **kwargs)
-
-    @staticmethod
-    def format_error_from_context(error_type, error_context, *args, actual_error=None, **kwargs):
-        """
-            The parameters vary based on what type of error this is.
-
-        Parameters
-        ----------
-        error_type : str
-            The type of error for this.  Registered with @hed_error or @hed_tag_error.
-        error_context: []
-            A list containing the error context to use for this error.  Generally returned from _add_context_to_errors
-        args: args
-            Any remaining non keyword args.
-        actual_error: str or None
-            The code to actually add to report out.  Useful for errors that are shared like invalid character.
-        kwargs :
-            The other parameters to pass down to the error handling func.
-        Returns
-        -------
-        error: [{}]
-            A single error
-        """
-        error_func = error_functions.get(error_type)
-        if not error_func:
-            error_object_list = ErrorHandler.val_error_unknown(*args, **kwargs)
-            error_object_list[0]['code'] = error_type
-            ErrorHandler._add_context_to_errors(error_object_list[0], error_context)
-            return error_object_list
-
-        error_object_list = error_func(*args, **kwargs)
-        if actual_error:
-            error_object_list[0]['code'] = actual_error
-
-        ErrorHandler._add_context_to_errors(error_object_list[0], error_context)
-        ErrorHandler._update_error_with_char_pos(error_object_list[0])
-        return error_object_list
-
     @staticmethod
     def _update_error_with_char_pos(error_object):
         # This part is optional as you can always generate these as needed.
@@ -338,7 +384,7 @@ class ErrorHandler:
             # Todo: Move this functionality somewhere more centralized.
             # If the tag has been modified from the original, don't try to use sub indexing.
             if source_tag and source_tag._tag:
-                 new_start, new_end = start, end
+                new_start, new_end = start, end
             else:
                 new_start = start + error_object.get('index_in_tag', 0)
                 index_in_tag_end = end
@@ -350,13 +396,25 @@ class ErrorHandler:
 
     @hed_error("Unknown")
     def val_error_unknown(*args, **kwargs):
+        """
+        Default error handler if no error of this type was registered.
+
+        Parameters
+        ----------
+        args : varies
+        kwargs : varies
+
+        Returns
+        -------
+        error_message, extra_error_args: str, dict
+        """
         return f"Unknown error.  Args: {str(args)}", kwargs
 
     @staticmethod
     def filter_issues_by_severity(issues_list, severity):
         """
         Gathers all issues matching or below a given severity.
-            
+
         Parameters
         ----------
         issues_list : [{}]
@@ -372,12 +430,36 @@ class ErrorHandler:
         return [issue for issue in issues_list if issue['severity'] <= severity]
 
 
-def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
+def get_exception_issue_string(issues, title=None):
     """Return a string with issues list flatted into single string, one per line
 
     Parameters
     ----------
-    validation_issues: []
+    issues: []
+        Issues to print
+    title: str
+        Optional title that will always show up first if present(even if there are no validation issues)
+    Returns
+    -------
+    str
+        A str containing printable version of the issues or ''.
+    """
+
+    issue_str = ''
+    if issues:
+        translated_messages = [f"ERROR: {issue[1]}.\n    Source Line: {issue[0]}" for issue in issues]
+        issue_str += '\n' + '\n'.join(translated_messages)
+    if title:
+        issue_str = title + '\n' + issue_str
+    return issue_str
+
+
+def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True):
+    """Return a string with issues list flatted into single string, one per line
+
+    Parameters
+    ----------
+    issues: []
         Issues to print
     title: str
         Optional title that will always show up first if present(even if there are no validation issues)
@@ -388,16 +470,16 @@ def get_printable_issue_string(validation_issues, title=None, severity=None, ski
     Returns
     -------
     str
-        A str containing printable version of the issues or '[]'.
+        A str containing printable version of the issues or ''.
 
     """
     last_used_error_context = []
 
     if severity is not None:
-        validation_issues = ErrorHandler.filter_issues_by_severity(validation_issues, severity)
+        issues = ErrorHandler.filter_issues_by_severity(issues, severity)
 
     issue_string = ""
-    for single_issue in validation_issues:
+    for single_issue in issues:
         single_issue_context = _get_context_from_issue(single_issue, skip_filename)
         context_string, tab_string = _get_context_string(single_issue_context, last_used_error_context)
 
@@ -413,6 +495,15 @@ def get_printable_issue_string(validation_issues, title=None, severity=None, ski
     if title:
         issue_string = title + '\n' + issue_string
     return issue_string
+
+
+def check_for_any_errors(issues_list):
+    for issue in issues_list:
+        if issue['severity'] < ErrorSeverity.WARNING:
+            return True
+
+    return False
+
 
 
 def _get_context_from_issue(val_issue, skip_filename=True):
@@ -459,7 +550,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
     """
     tab_string = tab_count * '\t'
     if context_type == ErrorContext.HED_STRING:
-        context = str(context).replace('\n', ' ')
+        context = context.get_original_hed_string()
     error_types = {
         ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
         ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
