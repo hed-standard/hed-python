@@ -430,12 +430,36 @@ class ErrorHandler:
         return [issue for issue in issues_list if issue['severity'] <= severity]
 
 
-def get_printable_issue_string(validation_issues, title=None, severity=None, skip_filename=True):
+def get_exception_issue_string(issues, title=None):
     """Return a string with issues list flatted into single string, one per line
 
     Parameters
     ----------
-    validation_issues: []
+    issues: []
+        Issues to print
+    title: str
+        Optional title that will always show up first if present(even if there are no validation issues)
+    Returns
+    -------
+    str
+        A str containing printable version of the issues or ''.
+    """
+
+    issue_str = ''
+    if issues:
+        translated_messages = [f"ERROR: {issue[1]}.\n    Source Line: {issue[0]}" for issue in issues]
+        issue_str += '\n' + '\n'.join(translated_messages)
+    if title:
+        issue_str = title + '\n' + issue_str
+    return issue_str
+
+
+def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True):
+    """Return a string with issues list flatted into single string, one per line
+
+    Parameters
+    ----------
+    issues: []
         Issues to print
     title: str
         Optional title that will always show up first if present(even if there are no validation issues)
@@ -446,16 +470,16 @@ def get_printable_issue_string(validation_issues, title=None, severity=None, ski
     Returns
     -------
     str
-        A str containing printable version of the issues or '[]'.
+        A str containing printable version of the issues or ''.
 
     """
     last_used_error_context = []
 
     if severity is not None:
-        validation_issues = ErrorHandler.filter_issues_by_severity(validation_issues, severity)
+        issues = ErrorHandler.filter_issues_by_severity(issues, severity)
 
     issue_string = ""
-    for single_issue in validation_issues:
+    for single_issue in issues:
         single_issue_context = _get_context_from_issue(single_issue, skip_filename)
         context_string, tab_string = _get_context_string(single_issue_context, last_used_error_context)
 
