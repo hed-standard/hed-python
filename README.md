@@ -3,12 +3,18 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 
 Most people will simply annotate their events by creating a spreadsheet that associates HED tags with event codes or the events themselves. If you have such a spreadsheet, you can use the HED Online Validator currently available at [https://hedtags.ucsd.edu/hed](https://hedtags.ucsd.edu/hed) to validate your spreadsheet without downloading any tools.
 
-### Python modules
+### Python subprojects
  - hedtools        contains all of the validation and translation tools for hed tags and hed schema.
  - hedweb          contains the code to deploy the validators and other HED tools as a web application running in a docker module.
+ - hedexamples	   contains examples in MATLAB scripts, Python scripts, and Jupyter notebooks.
  
-The HEDTools require python 3.7 or greater.
+The HEDTools require python 3.8 or greater.
 
-### Calling HED tools directly from a python program
 
-The `examples` directory in hedtools gives runnable examples illustrating how to call various HED tools directly from python.
+### Other links of interest
+
+HED specification documentation: [https://hed-specification.readthedocs.io/en/latest/](https://hed-specification.readthedocs.io/en/latest/)
+
+Documentation: [https://hed-python.readthedocs.io/en/latest/](https://hed-python.readthedocs.io/en/latest/)
+
+Code climate reports: [https://codeclimate.com/github/hed-standard/hed-python](https://codeclimate.com/github/hed-standard/hed-python)
