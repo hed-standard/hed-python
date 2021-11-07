@@ -3,7 +3,7 @@ coverage==6.1.1
 defusedxml==0.7.1
 et-xmlfile==1.1.0
 Flask==2.0.2
-Flask-WTF==0.15.1
+Flask-WTF==1.0.0
 inflect==5.3.0
 itsdangerous==2.0.1
 jdcal==1.4.1
@@ -18,5 +18,5 @@ pytz==2021.3
 semantic_version==2.8.5
 six==1.16.0
 Werkzeug==2.0.2
-WTForms==2.3.3
+WTForms==3.0.0
 xlrd==2.0.1
