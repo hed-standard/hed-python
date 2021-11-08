@@ -429,11 +429,10 @@ class HedSchemaWikiParser:
         """
         index1 = tag_line.find(no_wiki_start_tag)
         index2 = tag_line.find(no_wiki_end_tag)
-        if (index1 == -1 and index2 != -1) or \
-                (index2 == -1 and index1 != -1):
-            # todo: comment this in once the schemas are updated to have no wiki errors.
-            # self._add_warning(tag_line, "Invalid or non matching <nowiki> tags found")
-            pass
+        if (index1 == -1 and index2 != -1) or (index2 == -1 and index1 != -1):
+            self._add_warning(tag_line, "Invalid or non matching <nowiki> tags found")
+        elif index1 != -1 and index2 != -1 and index2 <= index1:
+            self._add_warning(tag_line, "</nowiki> appears before <nowiki> on a line")
         tag_line = re.sub(no_wiki_tag, '', tag_line)
         return tag_line
 
