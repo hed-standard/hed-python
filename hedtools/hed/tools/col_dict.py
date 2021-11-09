@@ -80,12 +80,12 @@ class ColumnDict:
         print(f"{indent}Categorical columns ({len(sorted_keys)}):")
         for key in sorted_keys:
             value_dict = self.categorical_info[key]
-            sorted_v_keys = sorted(value_dict.keys())
+            sorted_v_keys = sorted(map(str, list(value_dict.keys)))
             print(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
             for v_key in sorted_v_keys:
                 print(f"{indent * 3}{v_key}: {value_dict[v_key]}")
 
-        sorted_cols = sorted(self.value_info.keys())
+        sorted_cols = sorted(map(str, list(self.value_info)))
         print(f"{indent}Value columns ({len(sorted_cols)}):")
         for key in sorted_cols:
             print(f"{indent * 2}{key}: {self.value_info[key]}")

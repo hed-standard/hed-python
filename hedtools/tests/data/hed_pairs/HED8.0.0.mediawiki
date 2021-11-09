@@ -3,21 +3,21 @@ HED version="8.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:no
 '''Prologue'''
 This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
 
-!# start schema
+!# start schema 
 
 '''Event''' <nowiki>{suggestedTag=Task-property}[Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.]</nowiki>
 * Sensory-event <nowiki>{suggestedTag=Task-event-role, suggestedTag=Attribute/Sensory}[Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.]</nowiki>
 * Agent-action <nowiki>{suggestedTag=Task-event-role, suggestedTag=Agent}[Any action engaged in by an agent (see the Agent subtree for agent categories). A participant response to an experiment stimulus should include the tag Agent-property/Agent-task-role/Experiment-participant.]</nowiki>
 * Data-feature <nowiki>{suggestedTag=Data-property}[An event marking the occurrence of a data feature such as an interictal spike or alpha burst that is often added post hoc to the data record.]</nowiki>
 * Experiment-control <nowiki>[An event pertaining to the physical control of the experiment during its operation.]</nowiki>
-* Experiment-procedure <nowiki>[An event indicating an experimental procedure, as in performing a saliva swab during the experiment or administering a survey.]</nowiki>
+* Experiment-procedure <nowiki>[An event indicating an experimental procedure, as in performing a saliva swab during the experiment or administering a survey.]</nowiki>  
 * Experiment-structure <nowiki>[An event specifying a change-point of the structure of experiment. This event is typically used to indicate a change in experimental conditions or tasks.]</nowiki>
 * Measurement-event <nowiki>{suggestedTag=Data-property}[A discrete measure returned by an instrument.]</nowiki>
 
 '''Agent''' <nowiki>{suggestedTag=Agent-property}[Someone or something that takes an active role or produces a specified effect.The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be something that simulates something else.]</nowiki>
 * Animal-agent <nowiki>[An agent that is an animal.]</nowiki>
 * Avatar-agent <nowiki>[An agent associated with an icon or avatar representing another agent.]</nowiki>
-* Controller-agent <nowiki>[An agent experiment control software or hardware.]</nowiki>
+* Controller-agent <nowiki>[An agent experiment control software or hardware.]</nowiki> 
 * Human-agent <nowiki>[A person who takes an active role or produces a specified effect.]</nowiki>
 * Robotic-agent <nowiki>[An agent mechanical device capable of performing a variety of often complex tasks on command or by being programmed in advance.]</nowiki>
 * Software-agent <nowiki>[An agent computer program.]</nowiki>
@@ -38,7 +38,7 @@ This schema is the first official release that includes an xsd and requires unit
 ***	Shrug <nowiki>{relatedTag=Move-upper-extremity, relatedTag=Move-torso}[Lift shoulders up towards head to indicate a lack of knowledge about a particular topic.]</nowiki>
 *** Smile <nowiki>{relatedTag=Move-face}[Form facial features into a pleased, kind, or amused expression, typically with the corners of the mouth turned up and the front teeth exposed.]</nowiki>
 ***	Spread-hands <nowiki>{relatedTag=Move-upper-extremity}[Spread hands apart to indicate ignorance.]</nowiki>
-*** Thumbs-down <nowiki>{relatedTag=Move-upper-extremity}[Extend the thumb downward to indicate disapproval.]</nowiki>
+*** Thumbs-down <nowiki>{relatedTag=Move-upper-extremity}[Extend the thumb downward to indicate disapproval.]</nowiki> 
 ***	Thumb-up <nowiki>{relatedTag=Move-upper-extremity}[Extend the thumb upward to indicate approval.]</nowiki>
 ***	Wave <nowiki>{relatedTag=Move-upper-extremity}[Raise hand and move left and right, as a greeting or sign of departure.]</nowiki>
 *** Widen-eyes <nowiki>{relatedTag=Move-face, relatedTag=Move-eyes}[Open eyes and possibly with eyebrows lifted especially to express surprise or fear.]</nowiki>
@@ -79,7 +79,7 @@ This schema is the first official release that includes an xsd and requires unit
 ***	Sit-down <nowiki>[Move from a standing to a sitting position.]</nowiki>
 ***	Sit-up <nowiki>[Move from lying down to a sitting position.]</nowiki>
 ***	Stand-up <nowiki>[Move from a sitting to a standing position.]</nowiki>
-*** Stretch <nowiki>[Straighten or extend body or a part of body to its full length, typically so as to tighten muscles or in order to reach something.]</nowiki>
+*** Stretch <nowiki>[Straighten or extend body or a part of body to its full length, typically so as to tighten muscles or in order to reach something.]</nowiki> 
 *** Shudder <nowiki>[Tremble convulsively, sometimes as a result of fear or revulsion.]</nowiki>
 *** Stumble <nowiki>[Trip or momentarily lose balance and almost fall.]</nowiki>
 *** Turn <nowiki>[Change or cause to change direction.]</nowiki>
@@ -127,15 +127,15 @@ This schema is the first official release that includes an xsd and requires unit
 **** Hold-down <nowiki>[Prevent someone or something from moving by holding them firmly.]</nowiki>
 **** Lift <nowiki>[Raising something to higher position.]</nowiki>
 **** Make-fist <nowiki>[Close hand tightly with the fingers bent against the palm.]</nowiki>
-**** Point  <nowiki>[Draw attention to something by extending a finger or arm.]</nowiki>
+**** Point  <nowiki>[Draw attention to something by extending a finger or arm.]</nowiki> 
 **** Press <nowiki>{relatedTag=Push}[Apply pressure to something to flatten, shape, smooth or depress it. This action tag should be used to indicate key presses and mouse clicks.]</nowiki>
 **** Push <nowiki>{relatedTag=Press}[Apply force in order to move something away. Use Press to indicate a key press or mouse click.]</nowiki>
-**** Reach <nowiki>[Stretch out your arm in order to get or touch something.]</nowiki>
+**** Reach <nowiki>[Stretch out your arm in order to get or touch something.]</nowiki> 
 **** Release <nowiki>[Make available or set free.]</nowiki>
 **** Retract <nowiki>[Draw or pull back.]</nowiki>
 **** Scratch <nowiki>[Drag claws or nails over a surface or on skin.]</nowiki>
 **** Snap-fingers <nowiki>[Make a noise by pushing second finger hard against thumb and then releasing it suddenly so that it hits the base of the thumb.]</nowiki>
-**** Touch <nowiki>[Come into or be in contact with.]</nowiki>
+**** Touch <nowiki>[Come into or be in contact with.]</nowiki> 
 * Perceive <nowiki>[Produce an internal, conscious image through stimulating a sensory system.]</nowiki>
 ** Hear <nowiki>[Give attention to a sound.]</nowiki>
 ** See <nowiki>[Direct gaze toward someone or something or in a specified direction.]</nowiki>
@@ -155,10 +155,10 @@ This schema is the first official release that includes an xsd and requires unit
 ** Rest <nowiki>[Be inactive in order to regain strength, health, or energy.]</nowiki>
 ** Write <nowiki>[Communicate or express by means of letters or symbols written or imprinted on a surface.]</nowiki>
 * Think <nowiki>[Direct the mind toward someone or something or use the mind actively to form connected ideas.]</nowiki>
-** Allow <nowiki>[Allow access to something such as allowing a car to pass.]</nowiki>
+** Allow <nowiki>[Allow access to something such as allowing a car to pass.]</nowiki> 
 ** Attend-to <nowiki>[Focus mental experience on specific targets.]</nowiki>
 ** Count <nowiki>[Tally items either silently or aloud.]</nowiki>
-** Deny <nowiki> [Refuse to give or grant something requested or desired by someone.]</nowiki>
+** Deny <nowiki> [Refuse to give or grant something requested or desired by someone.]</nowiki> 
 ** Detect <nowiki>[Discover or identify the presence or existence of something.]</nowiki>
 ** Discriminate <nowiki>[Recognize a distinction.]</nowiki>
 ** Encode <nowiki>[Convert information or an instruction into a particular form.]</nowiki>
@@ -420,7 +420,7 @@ This schema is the first official release that includes an xsd and requires unit
 **** Brain-dead <nowiki>[Characterized by the irreversible absence of cortical and brain stem functioning.]</nowiki>
 **** Comatose <nowiki>[In a state of profound unconsciousness associated with markedly depressed cerebral activity.]</nowiki>
 **** Drowsy <nowiki>[In a state of near-sleep, a strong desire for sleep, or sleeping for unusually long periods.]</nowiki>
-**** Intoxicated <nowiki>[In a state with disturbed psychophysiological functions and responses as a result of administration or ingestion of a psychoactive substance.]</nowiki>
+**** Intoxicated <nowiki>[In a state with disturbed psychophysiological functions and responses as a result of administration or ingestion of a psychoactive substance.]</nowiki> 
 **** Locked-in <nowiki>[In a state of complete paralysis of all voluntary muscles except for the ones that control the movements of the eyes.]</nowiki>
 **** Passive <nowiki>[Not responding or initiating an action in response to a stimulus.]</nowiki>
 **** Resting <nowiki>[A state in which the agent is not exhibiting any physical exertion.]</nowiki>
@@ -453,7 +453,7 @@ This schema is the first official release that includes an xsd and requires unit
 **** Sick <nowiki>{relatedTag=Healthy}[Being in a state of ill health, bodily malfunction, or discomfort.]</nowiki>
 **** Thirsty <nowiki>{relatedTag=Hungry}[Feeling a need to drink.]</nowiki>
 **** Tired <nowiki>{relatedTag=Rested}[Feeling in need of sleep or rest.]</nowiki>
-*** Agent-postural-state <nowiki>[Pertaining to the position in which agent holds their body.]</nowiki>
+*** Agent-postural-state <nowiki>[Pertaining to the position in which agent holds their body.]</nowiki> 
 **** Crouching <nowiki>[Adopting a position where the knees are bent and the upper body is brought forward and down, sometimes to avoid detection or to defend oneself.]</nowiki>
 **** Eyes-closed <nowiki>[Keeping eyes closed with no blinking.]</nowiki>
 **** Eyes-open <nowiki>[Keeping eyes open with occasional blinking.]</nowiki>
@@ -468,7 +468,7 @@ This schema is the first official release that includes an xsd and requires unit
 *** Experiment-controller <nowiki>[An agent exerting control over some aspect of the experiment.]</nowiki>
 *** Experiment-participant <nowiki>[Someone who takes part in an activity related to an experiment.]</nowiki>
 *** Experimenter <nowiki>[Person who is the owner of the experiment and has its responsibility.]</nowiki>
-** Agent-trait <nowiki>[A genetically, environmentally, or socially determined characteristic of an agent.]</nowiki>
+** Agent-trait <nowiki>[A genetically, environmentally, or socially determined characteristic of an agent.]</nowiki> 
 *** Age <nowiki>[Length of time elapsed time since birth of the agent.]</nowiki>
 **** <nowiki># {takesValue}</nowiki>
 *** Agent-experience-level <nowiki>[Amount of skill or knowledge that the agent has as pertains to the task.]</nowiki>
@@ -493,18 +493,18 @@ This schema is the first official release that includes an xsd and requires unit
 **** Time-out <nowiki>[A cancellation or cessation that automatically occurs when a predefined interval of time has passed without a certain event occurring.]</nowiki>
 **** Time-sync <nowiki>[A synchronization signal whose purpose to help synchronize different signals or processes. Often used to indicate a marker inserted into the recorded data to allow post hoc synchronization of concurrently recorded data streams.]</nowiki>
 ** Data-resolution <nowiki>[Smallest change in a quality being measured by an sensor that causes a perceptible change.]</nowiki>
-*** Printer-resolution <nowiki>[Resolution of a printer, usually expressed as the number of dots-per-inch for a printer.]</nowiki>
+*** Printer-resolution <nowiki>[Resolution of a printer, usually expressed as the number of dots-per-inch for a printer.]</nowiki> 
 **** <nowiki># {takesValue} </nowiki>
-*** Screen-resolution <nowiki>[Resolution of a screen, usually expressed as the of pixels in a dimension for a digital display device.]</nowiki>
+*** Screen-resolution <nowiki>[Resolution of a screen, usually expressed as the of pixels in a dimension for a digital display device.]</nowiki> 
 **** <nowiki># {takesValue} </nowiki>
-*** Sensory-resolution <nowiki>[Resolution of measurements by a sensing device.]</nowiki>
+*** Sensory-resolution <nowiki>[Resolution of measurements by a sensing device.]</nowiki> 
 **** <nowiki># {takesValue} </nowiki>
-*** Spatial-resolution <nowiki>[Linear spacing of a spatial measurement.]</nowiki>
+*** Spatial-resolution <nowiki>[Linear spacing of a spatial measurement.]</nowiki> 
 **** <nowiki># {takesValue}</nowiki>
 *** Spectral-resolution <nowiki>[Measures the ability of a sensor to  resolve features in the electromagnetic spectrum.]</nowiki>
-**** <nowiki># {takesValue}</nowiki>
+**** <nowiki># {takesValue}</nowiki> 
 *** Temporal-resolution <nowiki>[Measures the ability of a sensor to  resolve features in time.]</nowiki>
-**** <nowiki># {takesValue} </nowiki>
+**** <nowiki># {takesValue} </nowiki>  
 ** Data-source-type <nowiki>[The type of place, person, or thing from which the data comes or can be obtained.]</nowiki>
 *** Computed-feature<nowiki>[A feature computed from the data by a tool. This tag should be grouped with a label of the form Toolname_propertyName.]</nowiki>
 *** Computed-prediction <nowiki>[A computed extrapolation of known data.]</nowiki>
@@ -577,91 +577,91 @@ This schema is the first official release that includes an xsd and requires unit
 ***** Rotated <nowiki>[Positioned offset around an axis or center.]</nowiki>
 ***** Upward <nowiki>{relatedTag=Downward,relatedTag=Leftward,relatedTag=Rightward}[Moving, pointing, or leading to a higher place, point, or level.]</nowiki>
 ***** Vertically-oriented <nowiki>{relatedTag=Horizontally-oriented}[Oriented perpendicular to the plane of the horizon.]</nowiki>
-*** Physical-value <nowiki>[The value of some physical property of something.] </nowiki>
+*** Physical-value <nowiki>[The value of some physical property of something.] </nowiki> 
 **** Weight <nowiki>[The relative mass or the quantity of matter contained by something.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass, unitClass=weightUnits}</nowiki>
-*** Quantitative-value <nowiki>[Something capable of being estimated or expressed with numeric values.] </nowiki>
+*** Quantitative-value <nowiki>[Something capable of being estimated or expressed with numeric values.] </nowiki> 
 **** Fraction <nowiki>[A numerical value betwee 0 and 1.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 **** Item-count <nowiki>[The integer count of something which is usually grouped with the entity it is counting. (Item-count/3, A) indicates that 3 of A have occurred up to this point.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>  
 **** Item-interval <nowiki>[An integer indicating how many items or entities have passed since the last one of these. An item interval of 0 indicates the current item.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
-**** Percentage <nowiki>[A fraction or ratio with 100 understood as the denominator.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>      
+**** Percentage <nowiki>[A fraction or ratio with 100 understood as the denominator.]</nowiki> 
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>  
 **** Ratio <nowiki>[A quotient of quantities of the same kind for different components within the same system.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 *** Statistical-value <nowiki>{extensionAllowed}[A value based on or employing the principles of statistics.]</nowiki>
 **** Data-maximum <nowiki>[The largest possible quantity or degree.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}[]</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}[]</nowiki> 
 **** Data-mean <nowiki>[The sum of a set of values divided by the number of values in the set.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 **** Data-median <nowiki>[The value which has an equal number of values greater and less than it.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 **** Data-minimum <nowiki>[The smallest possible quantity.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 **** Probability <nowiki> [A measure of the expectation of the occurrence of a particular event.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 **** Standard-deviation <nowiki>[A measure of the range of values in a set of numbers. Standard deviation is a statistic used as a measure of the dispersion or variation in a distribution, equal to the square root of the arithmetic mean of the squares of the deviations from the arithmetic mean.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 **** Statistical-accuracy <nowiki>[A measure of closeness to true value expressed as a number between 0 and 1.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 **** Statistical-precision <nowiki>[A quantitative representation of the degree of accuracy necessary for or associated with a particular action.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 **** Statistical-recall <nowiki>[Sensitivity is a measurement datum qualifying a binary classification test and is computed by substracting the false negative rate to the integral numeral 1.]</nowiki>
-***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+***** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 **** Statistical-uncertainty <nowiki> [A measure of the inherent variability of repeated observation measurements of a quantity including quantities evaluated by statistical methods and by other means.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 *** Spatiotemporal-value <nowiki>[A property relating to space and/or time.]</nowiki>
 **** Rate-of-change <nowiki>[The amount of change accumulated per unit time.]</nowiki>
 ***** Acceleration <nowiki>[Magnitude of the rate of change in either speed or direction. The direction of change should be given separately.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass, unitClass=accelerationUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=accelerationUnits}</nowiki>  
 ***** Frequency <nowiki>[Frequency is the number of occurrences of a repeating event per unit time.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits}</nowiki>
-***** Jerk-rate <nowiki>[Magnitude of the rate at which the acceleration of an object changes with respect to time. The direction of change should be given separately.]</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits}</nowiki>   
+***** Jerk-rate <nowiki>[Magnitude of the rate at which the acceleration of an object changes with respect to time. The direction of change should be given separately.]</nowiki> 
 ****** <nowiki># {takesValue, valueClass=numericClass, unitClass=jerkUnits}</nowiki>
-***** Sampling-rate <nowiki>[The number of digital samples taken or recorded per unit of time.]</nowiki>
-****** <nowiki># {takesValue, unitClass=frequencyUnits}</nowiki>
-***** Refresh-rate <nowiki>[The frequency with which the image on a computer monitor or similar electronic display screen is refreshed, usually expressed in hertz.]</nowiki>
+***** Sampling-rate <nowiki>[The number of digital samples taken or recorded per unit of time.]</nowiki> 
+****** <nowiki># {takesValue, unitClass=frequencyUnits}</nowiki> 
+***** Refresh-rate <nowiki>[The frequency with which the image on a computer monitor or similar electronic display screen is refreshed, usually expressed in hertz.]</nowiki> 
 ****** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 ***** Speed <nowiki>[A scalar measure of the rate of movement of the object expressed either as the distance travelled divided by the time taken (average speed) or the rate of change of position with respect to time at a particular point (instantaneous speed). The direction of change should be given separately.]</nowiki>
 ****** <nowiki># {takesValue, valueClass=numericClass, unitClass=speedUnits}</nowiki>
-***** Temporal-rate <nowiki>[The number of items per unit of time.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits}</nowiki>
+***** Temporal-rate <nowiki>[The number of items per unit of time.]</nowiki> 
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits}</nowiki>  
 **** Spatial-value <nowiki>[Value of an item involving space.]</nowiki>
 ***** Angle<nowiki>{unitClass=angleUnits}[The amount of inclination of one line to another or the plane of one object to another.]</nowiki>
 ****** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
-***** Distance <nowiki>[A measure of the space separating two objects or points.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>
+***** Distance <nowiki>[A measure of the space separating two objects or points.]</nowiki> 
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki> 
 ***** Position <nowiki>[A reference to the alignment of an object, a particular situation or view of a situation, or the location of an object. Coordinates with respect a specified frame of reference or the default Screen-frame if no frame is given.] </nowiki>
 ****** X-position <nowiki>[The position along the x-axis of the frame of reference.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki> 
 ****** Y-position <nowiki>[The position along the y-axis of the frame of reference.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>  
 ****** Z-position <nowiki>[The position along the z-axis of the frame of reference.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>   
 ***** Size <nowiki>[The physical magnitude of something.]</nowiki>
 ****** Area <nowiki>[The extent of a 2-dimensional surface enclosed within a boundary.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass, unitClass=areaUnits}</nowiki>
-****** Depth <nowiki>[The distance from the surface of something especially from the perspective of looking from the front.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>
-****** Length <nowiki>[The linear extent in space from one end of something to the other end, or the extent of something from beginning to end.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass, unitClass=areaUnits}</nowiki> 
+****** Depth <nowiki>[The distance from the surface of something especially from the perspective of looking from the front.]</nowiki> 
+******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki> 
+****** Length <nowiki>[The linear extent in space from one end of something to the other end, or the extent of something from beginning to end.]</nowiki> 
+******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki> 
 ****** Width <nowiki>[The extent or measurement of something from side to side.]</nowiki>
 ******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>
 ****** Height <nowiki>[The vertical measurement or distance from the base to the top of an object.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits}</nowiki> 
 ****** Volume <nowiki>[The amount of three dimensional space occupied by an object or the capacity of a space or container.]</nowiki>
 ******* <nowiki># {takesValue, valueClass=numericClass, unitClass=volumeUnits}</nowiki>
 **** Temporal-value <nowiki>[A characteristic of or relating to time or limited by time.]</nowiki>
 ***** Delay <nowiki>[Time during which some action is awaited.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki> 
 ***** Duration <nowiki>[The period of time during which something occurs or continues.]</nowiki>
 ****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 ***** Time-interval <nowiki>[The period of time separating two instances, events, or occurrences.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>     
 ***** Time-value <nowiki>[A value with units of time. Usually grouped with tags identifying what the value represents.]</nowiki>
-****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki> 
 ** Data-variability-attribute<nowiki>[An attribute describing how something changes or varies.]</nowiki>
 *** Abrupt <nowiki>[Marked by sudden change.]</nowiki>
 *** Constant <nowiki>[Continually recurring or continuing without interruption. Not changing in time or space.]</nowiki>
@@ -700,7 +700,7 @@ This schema is the first official release that includes an xsd and requires unit
 *** Sloped-terrain <nowiki>[Tracts of land arranged in a sloping  or inclined position.]</nowiki>
 *** Uneven-terrain <nowiki>[Tracts of land that are not level, smooth, or regular.]</nowiki>
 * Informational-property<nowiki>{extensionAllowed}[Something that pertains to a task.]</nowiki>
-** Description <nowiki>{requireChild} [An explanation of what the tag group it is in means. If the description is at the top-level of an event string, the description applies to the event.]</nowiki>
+** Description <nowiki>{requireChild} [An explanation of what the tag group it is in means. If the description is at the top-level of an event string, the description applies to the event.]</nowiki> 
 *** <nowiki># {takesValue, valueClass=textClass}</nowiki>
 ** ID <nowiki>{requireChild} [An alphanumeric name that identifies either a unique object or a unique class of objects. Here the object or class may be an idea, physical countable object (or class), or physical uncountable substance (or class).]</nowiki>
 *** <nowiki># {takesValue, valueClass=textClass}</nowiki>
@@ -720,16 +720,16 @@ This schema is the first official release that includes an xsd and requires unit
 *** OBO-identifier <nowiki>[The identifier of a term in some Open Biology Ontology (OBO) ontology.]</nowiki>
 **** <nowiki># {takesValue, valueClass=nameClass}</nowiki>
 *** Pathname <nowiki>[The specification of a node (file or directory) in a hierarchical file system, usually specified by listing the nodes top-down.]</nowiki>
-**** <nowiki># {takesValue}</nowiki>
+**** <nowiki># {takesValue}</nowiki> 
 *** Subject-identifier <nowiki>[A sequence of characters used to identify, name, or characterize a trial or study subject.]</nowiki>
 **** <nowiki># {takesValue}</nowiki>
 *** Version-identifier <nowiki>[An alphanumeric character string that identifies a form or variant of a type or original.]</nowiki>
-**** <nowiki># {takesValue}[Usually is a semantic version.]</nowiki>
+**** <nowiki># {takesValue}[Usually is a semantic version.]</nowiki> 
 ** Parameter <nowiki>[Something user-defined for this experiment.]</nowiki>
 *** Parameter-label <nowiki>[The name of the parameter.]</nowiki>
-**** # <nowiki>{takesValue, valueClass=labelClass}</nowiki>
+**** <nowiki># {takesValue, valueClass=labelClass}</nowiki>
 *** Parameter-value <nowiki>[The value of the parameter.]</nowiki>
-**** # <nowiki>{takesValue, valueClass=textClass}</nowiki>
+**** <nowiki># {takesValue, valueClass=textClass}</nowiki>
 * Organizational-property <nowiki>[Relating to an organization or the action of organizing something.]</nowiki>
 ** Collection <nowiki>[A tag designating a grouping of items such as in a set or list.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the collection.]</nowiki>
@@ -741,10 +741,10 @@ This schema is the first official release that includes an xsd and requires unit
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the definition.]</nowiki>
 ** Def-expand <nowiki>{requireChild, tagGroup} [A HED specific utility tag that is grouped with an expanded definition. The child value of the Def-expand is the name of the expanded definition.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}</nowiki>
-** Definition <nowiki>{requireChild, topLevelTagGroup}[A HED-specific utility tag whose child value is the name of the concept and the tag group associated with the tag is an English language explanation of a concept.]</nowiki>
+** Definition <nowiki>{requireChild, topLevelTagGroup}[A HED-specific utility tag whose child value is the name of the concept and the tag group associated with the tag is an English language explanation of a concept.]</nowiki> 
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the definition.]</nowiki>
 ** Event-context <nowiki>{topLevelTagGroup, unique}[A special HED tag inserted as part of a top-level tag group to contain information about the interrelated conditions under which the event occurs. The event context includes information about other events that are ongoing when this event happens.]</nowiki>
-** Event-stream <nowiki>[A special HED tag indicating that this event is a member of an ordered succession of events.]</nowiki>
+** Event-stream <nowiki>[A special HED tag indicating that this event is a member of an ordered succession of events.]</nowiki> 
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the event stream.]</nowiki>
 ** Experimental-intertrial <nowiki>[A tag used to indicate a part of the experiment between trials usually where nothing is happening.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Optional label for the intertrial block.]</nowiki>
@@ -767,15 +767,15 @@ This schema is the first official release that includes an xsd and requires unit
 ***** <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits}</nowiki>
 **** Sound-envelope <nowiki>[Description of how a sound changes over time.]</nowiki>
 ***** Sound-envelope-attack <nowiki>[The time taken for initial run-up of level from nil to peak usually beginning when the key on a musical instrument is pressed.]</nowiki>
-****** # {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 ***** Sound-envelope-decay <nowiki>[The time taken for the subsequent run down from the attack level to the designated sustain level.]</nowiki>
-****** # {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 ***** Sound-envelope-release <nowiki>[The time taken for the level to decay from the sustain level to zero after the key is released]</nowiki>
-****** # {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 ***** Sound-envelope-sustain <nowiki>[The time taken for the main sequence of the sound duration, until the key is released.]</nowiki>
-****** # {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 **** Timbre <nowiki>[The perceived sound quality of a singing voice or musical instrument.]</nowiki>
-***** <nowiki># {takesValue, valueClass=labelClass}</nowiki>
+***** <nowiki># {takesValue, valueClass=labelClass}</nowiki>  
 *** Gustatory-attribute <nowiki>[Pertaining to the sense of taste.]</nowiki>
 **** Bitter <nowiki>[Having a sharp, pungent taste.]</nowiki>
 **** Salty <nowiki>[Tasting of or like salt.]</nowiki>
@@ -794,7 +794,7 @@ This schema is the first official release that includes an xsd and requires unit
 *** Vestibular-attribute <nowiki>[Pertaining to the sense of balance or body position.]</nowiki>
 *** Visual-attribute <nowiki>[Pertaining to the sense of sight.]</nowiki>
 **** Color <nowiki>[The appearance of objects (or light sources) described in terms of perception of their hue and lightness (or brightness) and saturation.]</nowiki>
-***** CSS-color <nowiki>[One of 140 colors supported by all browsers. For more details such as the color RGB or HEX values,  check:  https://www.w3schools.com/colors/colors_groups.asp]</nowiki>
+***** CSS-color <nowiki>[One of 140 colors supported by all browsers. For more details such as the color RGB or HEX values,  check:  https://www.w3schools.com/colors/colors_groups.asp]</nowiki> 
 ****** Blue-color <nowiki>[CSS color group]</nowiki>
 ******* CadetBlue <nowiki>[CSS-color 0x5F9EA0]</nowiki>
 ******* SteelBlue <nowiki>[CSS-color 0x4682B4]</nowiki>
@@ -950,30 +950,30 @@ This schema is the first official release that includes an xsd and requires unit
 ***** Color-shade <nowiki>[A slight degree of difference between colors, especially with regard to how light or dark it is or as distinguished from one nearly like it.]</nowiki>
 ****** Dark-shade <nowiki>[A color tone not reflecting much light.]</nowiki>
 ****** Light-shade <nowiki>[A color tone reflecting more light.]</nowiki>
-***** Grayscale <nowiki>[Using a color map composed of shades of gray, varying from black at the weakest intensity to white at the strongest.]</nowiki>
+***** Grayscale <nowiki>[Using a color map composed of shades of gray, varying from black at the weakest intensity to white at the strongest.]</nowiki> 
 ****** <nowiki># {takesValue, valueClass=numericClass} [White intensity between 0 and 1]</nowiki>
 ***** HSV-color <nowiki>[A color representation that models how colors appear under light.]</nowiki>
 ****** Hue <nowiki>[Attribute of a visual sensation according to which an area appears to be similar to one of the perceived colors.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass} [Angular value between 0 and 360]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [Angular value between 0 and 360]</nowiki> 
 ****** Saturation <nowiki>[Colorfulness of a stimulus relative to its own brightness.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki> 
 ****** HSV-value <nowiki>[AAttribute of a visual sensation according to which an area appears to emit more or less light.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass}</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 ***** RGB-color <nowiki>[A color from the RGB schema.]</nowiki>
 ****** RGB-red <nowiki>[The red component.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass} [R value of RGB between 0 and 1]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [R value of RGB between 0 and 1]</nowiki> 
 ****** RGB-blue <nowiki>[The blue component.]</nowiki>
-******* <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki>
+******* <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki> 
 ****** RGB-green <nowiki>[The green component.]</nowiki>
 ******* <nowiki># {takesValue, valueClass=numericClass} [G value of RGB between 0 and 1]</nowiki>
 **** Luminance <nowiki>[A quality that exists by virtue of the luminous intensity per unit area projected in a given direction.]</nowiki>
-**** Opacity <nowiki>[A measure of impenetrability to light.]<nowiki>
+**** Opacity <nowiki>[A measure of impenetrability to light.]</nowiki>
 ** Sensory-presentation <nowiki>[The entity has a sensory manifestation.]</nowiki>
 *** Auditory-presentation <nowiki>[The sense of hearing is used in the presentation to the user.]</nowiki>
 **** Loudspeaker-separation <nowiki>{suggestedTag=Distance}[The distance between two loudspeakers. Grouped with the Distance tag.]</nowiki>
-**** Monophonic <nowiki> [Relating to sound transmission, recording, or reproduction involving a single transmission path.]</nowiki>
+**** Monophonic <nowiki> [Relating to sound transmission, recording, or reproduction involving a single transmission path.]</nowiki>  
 **** Silent <nowiki>[The absence of ambient audible sound or the state of having ceased to produce sounds.]</nowiki>
-**** Stereophonic <nowiki> [Relating to, or constituting sound reproduction involving the use of separated microphones and two transmission channels to achieve the sound separation of a live hearing.]</nowiki>
+**** Stereophonic <nowiki> [Relating to, or constituting sound reproduction involving the use of separated microphones and two transmission channels to achieve the sound separation of a live hearing.]</nowiki> 
 *** Gustatory-presentation <nowiki>[The sense of taste used in the presentation to the user.]</nowiki>
 *** Olfactory-presentation <nowiki>[The sense of smell used in the presentation to the user.]</nowiki>
 *** Somatic-presentation <nowiki>[The nervous system is used in the presentation to the user.]</nowiki>
@@ -1004,9 +1004,9 @@ This schema is the first official release that includes an xsd and requires unit
 *** Switched-attention <nowiki>[Having to switch attention between two or more modalities of presentation.]</nowiki>
 *** Top-down-attention <nowiki>{relatedTag=Bottom-up-attention}[Voluntary allocation of attention to certain features. Sometimes this is referred to goal-oriented attention.]</nowiki>
 ** Task-effect-evidence <nowiki>[The evidence supporting the conclusion that the event had the specified effect.]</nowiki>
-*** Computational-evidence <nowiki>[A type of evidence in which data are produced, and/or generated, and/or analyzed on a computer.]</nowiki>
-*** External-evidence <nowiki>[A phenomenon that follows and is caused by some previous phenomenon.]</nowiki>
-*** Intended-effect <nowiki>[A phenomenon that is intended to follow and be caused by some previous phenomenon.]</nowiki>
+*** Computational-evidence <nowiki>[A type of evidence in which data are produced, and/or generated, and/or analyzed on a computer.]</nowiki> 
+*** External-evidence <nowiki>[A phenomenon that follows and is caused by some previous phenomenon.]</nowiki> 
+*** Intended-effect <nowiki>[A phenomenon that is intended to follow and be caused by some previous phenomenon.]</nowiki> 
 *** Behavioral-evidence <nowiki>[An indication or conclusion based on the behavior of an agent.]</nowiki>
 ** Task-event-role <nowiki>[The purpose of an event with respect to the task.]</nowiki>
 *** Experimental-stimulus <nowiki>[Part of something designed to elicit a response in the experiment.]</nowiki>
@@ -1015,7 +1015,7 @@ This schema is the first official release that includes an xsd and requires unit
 *** Mishap <nowiki> [Unplanned disruption such as an equipment or experiment control abnormality or experimenter error.]</nowiki>
 *** Participant-response <nowiki> [Something related to a participant actions in performing the task.]</nowiki>
 *** Task-activity <nowiki> [Something that is part of the overall task or is necessary to the overall experiment but is not directly part of a stimulus-response cycle. Examples would be taking a survey or provided providing a silva sample.]</nowiki>
-*** Warning <nowiki>[Something that should warn the participant that the parameters of the task have been or are about to be exceeded such as a warning message about getting too close to the shoulder of the road in a driving task.]</nowiki>
+*** Warning <nowiki>[Something that should warn the participant that the parameters of the task have been or are about to be exceeded such as a warning message about getting too close to the shoulder of the road in a driving task.]</nowiki> 
 ** Task-action-type <nowiki>[How an agent action should be interpreted in terms of the task specification.]</nowiki>
 *** Appropriate-action <nowiki>{relatedTag=Inappropriate-action}[An action suitable or proper in the circumstances.]</nowiki>
 *** Correct-action <nowiki>{relatedTag=Incorrect-action, relatedTag=Indeterminate-action}[An action that was a correct response in the context of the task.]</nowiki>
@@ -1040,9 +1040,9 @@ This schema is the first official release that includes an xsd and requires unit
 *** Meaningful <nowiki>[Conveying significant or relevant information.]</nowiki>
 *** Newly-learned <nowiki>[Representing recently acquired information or understanding.]</nowiki>
 *** Non-informative <nowiki>[Something that is not useful in forming an opinion or judging an outcome.]</nowiki>
-*** Non-target <nowiki>{relatedTag=Target}[Something other than that done or looked for. Also tag Expected if the Non-target is frequent.] </nowiki>
+*** Non-target <nowiki>{relatedTag=Target}[Something other than that done or looked for. Also tag Expected if the Non-target is frequent.] </nowiki> 
 *** Not-meaningful <nowiki>[Not having a serious, important, or useful quality or purpose.]</nowiki>
-*** Novel <nowiki>[Having no previous example or precedent or parallel.]</nowiki>
+*** Novel <nowiki>[Having no previous example or precedent or parallel.]</nowiki> 
 *** Oddball <nowiki> {relatedTag=Unexpected, suggestedTag=Target}[Something unusual, or infrequent.]</nowiki>
 *** Planned <nowiki>{relatedTag=Unplanned}[Something that was decided on or arranged in advance.]</nowiki>
 *** Penalty <nowiki>[A disadvantage, loss, or hardship due to some action.]</nowiki>
@@ -1050,7 +1050,7 @@ This schema is the first official release that includes an xsd and requires unit
 *** Query <nowiki>[A sentence of inquiry that asks for a reply.]</nowiki>
 *** Reward <nowiki>[A positive reinforcement for a desired action, behavior or response.]</nowiki>
 *** Stop-signal <nowiki>{relatedTag=Go-signal}[An indicator that the agent should stop the current activity.]</nowiki>
-*** Target <nowiki>[Something fixed as a goal, destination, or point of examination.]</nowiki>
+*** Target <nowiki>[Something fixed as a goal, destination, or point of examination.]</nowiki> 
 *** Threat <nowiki>[An indicator that signifies hostility and predicts an increased probability of attack.]</nowiki>
 *** Timed <nowiki>[Something planned or scheduled to be done at a particular time or lasting for a specified amount of time.]</nowiki>
 *** Unexpected <nowiki>{relatedTag=Expected}[Something that is not anticipated.]</nowiki>
@@ -1100,7 +1100,7 @@ This schema is the first official release that includes an xsd and requires unit
 ** Left-edge-of <nowiki>{relatedTag=Bottom-edge-of,relatedTag=Right-edge-of,relatedTag=Top-edge-of}[(A (Left-edge-of B)) means A is located on the left side of B on or near the boundary of B.]</nowiki>
 ** Left-side-of <nowiki>{relatedTag=Right-side-of}[(A (Left-side-of B)) means A is located on the left side of B usually as part of B.]</nowiki>
 ** Lower-left-of <nowiki>{relatedTag=Lower-right-of,relatedTag=Upper-left-of,relatedTag=Upper-right-of}[(A (Lower-left-of B)) means A is situated on the lower left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
-** Lower-right-of <nowiki>{relatedTag=Lower-left-of,relatedTag=Upper-left-of,relatedTag=Upper-right-of}[(A (Lower-right-of B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Lower-right-of <nowiki>{relatedTag=Upper-left-of,relatedTag=Upper-left-of,relatedTag=Lower-right-of}[(A (Lower-right-of B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
 ** Outside-of <nowiki>[(A (Outside-of B)) means A is located in the space around but not including B.]</nowiki>
 ** Over <nowiki>[(A (over B)) means A above is above B so as to cover or protect or A extends over the a general area as from a from a vantage point.]</nowiki>
 ** Right-edge-of <nowiki>{relatedTag=Bottom-edge-of,relatedTag=Left-edge-of,relatedTag=Top-edge-of}[(A (Right-edge-of B)) means A is located on the right side of B on or near the boundary of B.]</nowiki>
@@ -1109,9 +1109,9 @@ This schema is the first official release that includes an xsd and requires unit
 ** To-right-of <nowiki>[(A (To-right-of B)) means A is located on or directed toward the side to the east of B when B is facing north. This term is used when A is not part of B.]</nowiki>
 ** Top-edge-of <nowiki>{relatedTag=Left-edge-of,relatedTag=Right-edge-of,relatedTag=Bottom-edge-of}[(A (Top-edge-of B)) means A is on the uppermost part or or near the boundary of B.]</nowiki>
 ** Top-of <nowiki>[(A (Top-of B)) means A is on the uppermost part, side, or surface of B.]</nowiki>
-** Underneath <nowiki>[(A (Underneath B)) means A is situated directly below and may be concealed by B.]</nowiki>
-** Upper-left-of <nowiki>{relatedTag=Lower-left-of,relatedTag=Upper-right-of,relatedTag=Lower-right-of}[(A (Upper-left-of B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Upper-left-of <nowiki>{relatedTag=Lower-left-of,relatedTag=Lower-right-of,relatedTag=Upper-right-of}[(A (Upper-left-of B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
 ** Upper-right-of <nowiki>{relatedTag=Lower-left-of,relatedTag=Upper-left-of,relatedTag=Lower-right-of}[(A (Upper-right-of B)) means A is situated on the upper right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Underneath <nowiki>[(A (Underneath B)) means A is situated directly below and may be concealed by B.]</nowiki>
 ** Within <nowiki>[(A (Within B)) means A is on the inside of or contained in B.]</nowiki>
 * Temporal-relation <nowiki>[Any relationship which includes a temporal or time-based component.]</nowiki>
 ** After <nowiki>[(A After B) means A happens at a time subsequent to a reference time related to B.]</nowiki>
@@ -1121,138 +1121,138 @@ This schema is the first official release that includes an xsd and requires unit
 ** Synchronous-with <nowiki>[(A Synchronous-with B) means A happens at occurs at the same time or rate as B.]</nowiki>
 ** Waiting-for <nowiki>[(A Waiting-for B) means A pauses for something to happen in B.]</nowiki>
 
-!# end schema
+!# end schema 
 
 '''Unit classes''' <nowiki>[Unit classes and the units for the nodes.]</nowiki>
-* accelerationUnits <nowiki>{defaultUnits=m-per-s^2}</nowiki>
-** m-per-s^2 <nowiki>{SIUnit, unitSymbol}</nowiki>
-* angleUnits <nowiki>{defaultUnits=radian}</nowiki>
-** radian <nowiki>{SIUnit}</nowiki>
-** rad <nowiki>{SIUnit, unitSymbol}</nowiki>
-** degree
-* areaUnits <nowiki>{defaultUnits=m^2}</nowiki>
-** m^2 <nowiki>{SIUnit, unitSymbol}</nowiki>
-* currencyUnits <nowiki>{defaultUnits=$}[Units indicating the worth of something.]</nowiki>
-** dollar
-** $ <nowiki>{unitPrefix, unitSymbol}</nowiki>
-** point
+* accelerationUnits <nowiki>{defaultUnits=m-per-s^2}</nowiki> 
+** m-per-s^2 <nowiki>{SIUnit, unitSymbol}</nowiki> 
+* angleUnits <nowiki>{defaultUnits=radian}</nowiki> 
+** radian <nowiki>{SIUnit}</nowiki> 
+** rad <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** degree 
+* areaUnits <nowiki>{defaultUnits=m^2}</nowiki> 
+** m^2 <nowiki>{SIUnit, unitSymbol}</nowiki> 
+* currencyUnits <nowiki>{defaultUnits=$}[Units indicating the worth of something.]</nowiki> 
+** dollar 
+** $ <nowiki>{unitPrefix, unitSymbol}</nowiki> 
+** point 
 * frequencyUnits <nowiki>{defaultUnits=Hz}</nowiki>
 ** hertz  <nowiki>{SIUnit}</nowiki>
-** Hz <nowiki>{SIUnit, unitSymbol}</nowiki>
-* intensityUnits <nowiki>{defaultUnits=dB}</nowiki>
+** Hz <nowiki>{SIUnit, unitSymbol}</nowiki> 
+* intensityUnits <nowiki>{defaultUnits=dB}</nowiki> 
 ** dB <nowiki>{unitSymbol}[Intensity expressed as ratio to a threshold. Often used for sound intensity.]</nowiki>
-** candela <nowiki>{SIUnit}[Units used to express light intensity.]</nowiki>
-** cd <nowiki>{SIUnit, unitSymbol}[Units used to express light intensity.]</nowiki>
-* jerkUnits <nowiki>{defaultUnits=m-per-s^3}</nowiki>
-** m-per-s^3 <nowiki>{unitSymbol}</nowiki>
-* memorySizeUnits <nowiki>{defaultUnits=B}</nowiki>
+** candela <nowiki>{SIUnit}[Units used to express light intensity.]</nowiki> 
+** cd <nowiki>{SIUnit, unitSymbol}[Units used to express light intensity.]</nowiki>  
+* jerkUnits <nowiki>{defaultUnits=m-per-s^3}</nowiki> 
+** m-per-s^3 <nowiki>{unitSymbol}</nowiki> 
+* memorySizeUnits <nowiki>{defaultUnits=B}</nowiki> 
 ** byte <nowiki>{SIUnit}</nowiki>
-** B <nowiki>{SIUnit, unitSymbol}</nowiki>
-* physicalLengthUnits <nowiki>{defaultUnits=m}</nowiki>
-** foot
+** B <nowiki>{SIUnit, unitSymbol}</nowiki> 
+* physicalLengthUnits <nowiki>{defaultUnits=m}</nowiki> 
+** foot 
 ** inch
-** metre <nowiki>{SIUnit}</nowiki>
-** m <nowiki>{SIUnit, unitSymbol}</nowiki>
-** mile
-* speedUnits <nowiki>{defaultUnits=m-per-s}</nowiki>
-** m-per-s <nowiki>{SIUnit, unitSymbol}</nowiki>
-** mph <nowiki>{unitSymbol}</nowiki>
-** kph <nowiki>{unitSymbol}</nowiki>
-* timeUnits <nowiki>{defaultUnits=s}</nowiki>
-** second <nowiki>{SIUnit}</nowiki>
-** s <nowiki>{SIUnit, unitSymbol}</nowiki>
-** day
-** minute
+** metre <nowiki>{SIUnit}</nowiki> 
+** m <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** mile  
+* speedUnits <nowiki>{defaultUnits=m-per-s}</nowiki> 
+** m-per-s <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** mph <nowiki>{unitSymbol}</nowiki> 
+** kph <nowiki>{unitSymbol}</nowiki> 
+* timeUnits <nowiki>{defaultUnits=s}</nowiki> 
+** second <nowiki>{SIUnit}</nowiki> 
+** s <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** day 
+** minute 
 ** hour <nowiki>[Should be in 24-hour format.]</nowiki>
-* volumeUnits <nowiki>{defaultUnits=m^3}</nowiki>
-** m^3 <nowiki>{SIUnit, unitSymbol}</nowiki>
+* volumeUnits <nowiki>{defaultUnits=m^3}</nowiki> 
+** m^3 <nowiki>{SIUnit, unitSymbol}</nowiki> 
 * weightUnits <nowiki>{defaultUnits=g}</nowiki>
-** g <nowiki>{SIUnit, unitSymbol}</nowiki>
-** gram <nowiki>{SIUnit}</nowiki>
+** g <nowiki>{SIUnit, unitSymbol}</nowiki> 
+** gram <nowiki>{SIUnit}</nowiki> 
 ** pound
-** lb
+** lb 
 
 
 '''Unit modifiers''' <nowiki>[Unit multiples and submultiples.]</nowiki>
-* deca <nowiki>{SIUnitModifier} [SI unit multiple representing 10^1]</nowiki>
+* deca <nowiki>{SIUnitModifier} [SI unit multiple representing 10^1]</nowiki> 
 * da <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^1]</nowiki>
-* hecto <nowiki>{SIUnitModifier} [SI unit multiple representing 10^2]</nowiki>
+* hecto <nowiki>{SIUnitModifier} [SI unit multiple representing 10^2]</nowiki> 
 * h <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^2]</nowiki>
-* kilo <nowiki>{SIUnitModifier} [SI unit multiple representing 10^3]</nowiki>
+* kilo <nowiki>{SIUnitModifier} [SI unit multiple representing 10^3]</nowiki> 
 * k <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^3]</nowiki>
-* mega <nowiki>{SIUnitModifier} [SI unit multiple representing 10^6]</nowiki>
+* mega <nowiki>{SIUnitModifier} [SI unit multiple representing 10^6]</nowiki> 
 * M <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^6]</nowiki>
-* giga <nowiki>{SIUnitModifier} [SI unit multiple representing 10^9]</nowiki>
+* giga <nowiki>{SIUnitModifier} [SI unit multiple representing 10^9]</nowiki> 
 * G <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^9]</nowiki>
-* tera <nowiki>{SIUnitModifier} [SI unit multiple representing 10^12]</nowiki>
+* tera <nowiki>{SIUnitModifier} [SI unit multiple representing 10^12]</nowiki> 
 * T <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^12]</nowiki>
-* peta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^15]</nowiki>
-* P <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^15]</nowiki>
-* exa <nowiki>{SIUnitModifier} [SI unit multiple representing 10^18]</nowiki>
+* peta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^15]</nowiki> 
+* P <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^15]</nowiki> 
+* exa <nowiki>{SIUnitModifier} [SI unit multiple representing 10^18]</nowiki> 
 * E <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^18]</nowiki>
-* zetta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^21]</nowiki>
+* zetta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^21]</nowiki> 
 * Z <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^21]</nowiki>
-* yotta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^24]</nowiki>
-* Y <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^24]</nowiki>
-* deci <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-1]</nowiki>
-* d <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-1]</nowiki>
-* centi <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-2]</nowiki>
+* yotta <nowiki>{SIUnitModifier} [SI unit multiple representing 10^24]</nowiki> 
+* Y <nowiki>{SIUnitSymbolModifier} [SI unit multiple representing 10^24]</nowiki>   
+* deci <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-1]</nowiki> 
+* d <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-1]</nowiki> 
+* centi <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-2]</nowiki> 
 * c <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-2]</nowiki>
-* milli <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-3]</nowiki>
+* milli <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-3]</nowiki> 
 * m <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-3]</nowiki>
-* micro <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-6]</nowiki>
+* micro <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-6]</nowiki> 
 * u <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-6]</nowiki>
-* nano <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-9]</nowiki>
-* n <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-9]</nowiki>
-* pico <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-12]</nowiki>
+* nano <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-9]</nowiki> 
+* n <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-9]</nowiki> 
+* pico <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-12]</nowiki> 
 * p <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-12]</nowiki>
-* femto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-15]</nowiki>
+* femto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-15]</nowiki> 
 * f <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-15]</nowiki>
-* atto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-18]</nowiki>
+* atto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-18]</nowiki> 
 * a <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-18]</nowiki>
-* zepto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-21]</nowiki>
+* zepto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-21]</nowiki> 
 * z <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-21]</nowiki>
-* yocto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-24]</nowiki>
-* y <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-24]</nowiki>
+* yocto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-24]</nowiki> 
+* y <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-24]</nowiki>  
 
 
 '''Value classes''' <nowiki>[Specification of the rules for the values provided by users.]</nowiki>
-* dateTimeClass <nowiki>{allowedCharacter=digits,allowedCharacter=T,allowedCharacter=-,allowedCharacter=:}[Date-times should conform to ISO8601 date-time format YYYY-MM-DDThh:mm:ss. Any variation on the full form is allowed.]</nowiki>
+* dateTimeClass <nowiki>{allowedCharacter=digits,allowedCharacter=T,allowedCharacter=-,allowedCharacter=:}[Date-times should conform to ISO8601 date-time format YYYY-MM-DDThh:mm:ss. Any variation on the full form is allowed.]</nowiki> 
 * nameClass <nowiki>{allowedCharacter=letters,allowedCharacter=digits,allowedCharacter=_,allowedCharacter=-}[Value class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underbar.]</nowiki>
 * numericClass <nowiki>{allowedCharacter=digits,allowedCharacter=E,allowedCharacter=e,allowedCharacter=+,allowedCharacter=-,allowedCharacter=.}[Value must be a valid numerical value.]</nowiki>
-* posixPath <nowiki>{allowedCharacter=digits,allowedCharacter=letters,allowedCharacter=/,allowedCharacter=:}[Posix path specification.]</nowiki>
+* posixPath <nowiki>{allowedCharacter=digits,allowedCharacter=letters,allowedCharacter=/,allowedCharacter=:}[Posix path specification.]</nowiki> 
 * textClass <nowiki>{allowedCharacter=letters, allowedCharacter=digits, allowedCharacter=blank, allowedCharacter=+, allowedCharacter=-, allowedCharacter=:, allowedCharacter=;, allowedCharacter=., allowedCharacter=/, allowedCharacter=(, allowedCharacter=), allowedCharacter=?, allowedCharacter=*, allowedCharacter=%, allowedCharacter=$, allowedCharacter=@}[Value class designating values that have the characteristics of text such as in descriptions.]</nowiki>
 
 
 '''Schema attributes''' <nowiki>[Allowed node, unit class or unit modifier attributes.]</nowiki>
 * allowedCharacter <nowiki>{valueClassProperty}[A schema attribute of value classes specifying a special character that is allowed in expressing the value of a placeholder. Normally the allowed characters are listed individually. However, the word letters designates the upper and lower case alphabetic characters and the word digits designates the digits 0-9. The word blank designates the blank character.]</nowiki>
-* defaultUnits <nowiki>{unitClassProperty}[A schema attribute of unit classes specifying the default units to use if the placeholder has a unit class but the substituted value has no units.]</nowiki>
+* defaultUnits <nowiki>{unitClassProperty}[A schema attribute of unit classes specifying the default units to use if the placeholder has a unit class but the substituted value has no units.]</nowiki> 
 * extensionAllowed <nowiki>{boolProperty}[A schema attribute indicating that users can add unlimited levels of child nodes under this tag. This tag is propagated to child nodes with the exception of the hashtag placeholders.]</nowiki>
-* recommended  <nowiki>{boolProperty}[A schema attribute indicating that the event-level HED string should include this tag.]</nowiki>
-* relatedTag <nowiki>[A schema attribute suggesting HED tags that are closely related to this tag. This attribute is used by tagging tools.]</nowiki>
-* requireChild  <nowiki>{boolProperty}[A schema attribute indicating that one of the node elements descendants must be included when using this tag.]</nowiki>
+* recommended  <nowiki>{boolProperty}[A schema attribute indicating that the event-level HED string should include this tag.]</nowiki> 
+* relatedTag <nowiki>[A schema attribute suggesting HED tags that are closely related to this tag. This attribute is used by tagging tools.]</nowiki> 
+* requireChild  <nowiki>{boolProperty}[A schema attribute indicating that one of the node elements descendants must be included when using this tag.]</nowiki> 
 * required <nowiki>{boolProperty}[A schema attribute indicating that every event-level HED string should include this tag.]</nowiki>
 * SIUnit  <nowiki>{boolProperty, unitProperty}[A schema attribute indicating that this unit element is an SI unit and can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.]</nowiki>
-* SIUnitModifier <nowiki>{boolProperty, unitModifierProperty}[A schema attribute indicating that this SI unit modifier represents a multiple or submultiple of a base unit rather than a unit symbol.]</nowiki>
+* SIUnitModifier <nowiki>{boolProperty, unitModifierProperty}[A schema attribute indicating that this SI unit modifier represents a multiple or submultiple of a base unit rather than a unit symbol.]</nowiki> 
 * SIUnitSymbolModifier <nowiki>{boolProperty, unitModifierProperty}[A schema attribute indicating that this SI unit modifier represents a multiple or submultiple of a unit symbol rather than a base symbol.]</nowiki>
 * suggestedTag <nowiki>[A schema attribute that indicates another tag  that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.]</nowiki>
-* tagGroup <nowiki>{boolProperty}[A schema attribute indicating the tag can only appear inside a tag group.] </nowiki>
-* takesValue <nowiki>{boolProperty}[A schema attribute indicating the tag is a hashtag placeholder that is expected to be replaced with a user-defined value.] </nowiki>
-* topLevelTagGroup <nowiki>{boolProperty}[A schema attribute indicating that this tag (or its descendants) can only appear in a top-level tag group.] </nowiki>
-* unique <nowiki>{boolProperty}[A schema attribute indicating that only one of this tag or its descendants can be used  in the event-level HED string.]</nowiki>
-* unitClass <nowiki>[A schema attribute specifying which unit class this value tag belongs to.]</nowiki>
-* unitPrefix <nowiki>{boolProperty, unitProperty}[A schema attribute applied specifically to unit elements to designate that the unit indicator is a prefix (e.g., dollar sign in the currency units).]</nowiki>
+* tagGroup <nowiki>{boolProperty}[A schema attribute indicating the tag can only appear inside a tag group.] </nowiki> 
+* takesValue <nowiki>{boolProperty}[A schema attribute indicating the tag is a hashtag placeholder that is expected to be replaced with a user-defined value.] </nowiki> 
+* topLevelTagGroup <nowiki>{boolProperty}[A schema attribute indicating that this tag (or its descendants) can only appear in a top-level tag group.] </nowiki> 
+* unique <nowiki>{boolProperty}[A schema attribute indicating that only one of this tag or its descendants can be used  in the event-level HED string.]</nowiki> 
+* unitClass <nowiki>[A schema attribute specifying which unit class this value tag belongs to.]</nowiki> 
+* unitPrefix <nowiki>{boolProperty, unitProperty}[A schema attribute applied specifically to unit elements to designate that the unit indicator is a prefix (e.g., dollar sign in the currency units).]</nowiki> 
 * unitSymbol <nowiki>{boolProperty, unitProperty}[A schema attribute indicating this tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
-* valueClass <nowiki>[A schema attribute specifying which value class this value tag belongs to.]</nowiki>
+* valueClass <nowiki>[A schema attribute specifying which value class this value tag belongs to.]</nowiki> 
 
 '''Properties''' <nowiki>[Properties of the schema attributes themselves. These are used for schema handling and verification.]</nowiki>
 * boolProperty <nowiki>[Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.]</nowiki>
 * unitClassProperty <nowiki>[Indicates that the schema attribute is meant to be applied to unit classes.]</nowiki>
 * unitModifierProperty <nowiki>[Indicates that the schema attribute is meant to be applied to unit modifier classes.]</nowiki>
-* unitProperty <nowiki>[Indicates that the schema attribute is meant to be applied to units within a unit class.]</nowiki>
+* unitProperty <nowiki>[Indicates that the schema attribute is meant to be applied to units within a unit class.]</nowiki> 
 * valueClassProperty <nowiki>[Indicates that the schema attribute is meant to be applied to value classes.]</nowiki>
 
 '''Epilogue'''
 This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
 
-!# end hed
+!# end hed 
