@@ -727,9 +727,9 @@ This schema is the first official release that includes an xsd and requires unit
 **** <nowiki># {takesValue}[Usually is a semantic version.]</nowiki> 
 ** Parameter <nowiki>[Something user-defined for this experiment.]</nowiki>
 *** Parameter-label <nowiki>[The name of the parameter.]</nowiki>
-**** # <nowiki>{takesValue, valueClass=labelClass}</nowiki>
+**** <nowiki># {takesValue, valueClass=labelClass}</nowiki>
 *** Parameter-value <nowiki>[The value of the parameter.]</nowiki>
-**** # <nowiki>{takesValue, valueClass=textClass}</nowiki>
+**** <nowiki># {takesValue, valueClass=textClass}</nowiki>
 * Organizational-property <nowiki>[Relating to an organization or the action of organizing something.]</nowiki>
 ** Collection <nowiki>[A tag designating a grouping of items such as in a set or list.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the collection.]</nowiki>
@@ -767,13 +767,13 @@ This schema is the first official release that includes an xsd and requires unit
 ***** <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits}</nowiki>
 **** Sound-envelope <nowiki>[Description of how a sound changes over time.]</nowiki>
 ***** Sound-envelope-attack <nowiki>[The time taken for initial run-up of level from nil to peak usually beginning when the key on a musical instrument is pressed.]</nowiki>
-****** # {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 ***** Sound-envelope-decay <nowiki>[The time taken for the subsequent run down from the attack level to the designated sustain level.]</nowiki>
-****** # {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 ***** Sound-envelope-release <nowiki>[The time taken for the level to decay from the sustain level to zero after the key is released]</nowiki>
-****** # {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 ***** Sound-envelope-sustain <nowiki>[The time taken for the main sequence of the sound duration, until the key is released.]</nowiki>
-****** # {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
+****** <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits}</nowiki>
 **** Timbre <nowiki>[The perceived sound quality of a singing voice or musical instrument.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=labelClass}</nowiki>  
 *** Gustatory-attribute <nowiki>[Pertaining to the sense of taste.]</nowiki>
@@ -967,7 +967,7 @@ This schema is the first official release that includes an xsd and requires unit
 ****** RGB-green <nowiki>[The green component.]</nowiki>
 ******* <nowiki># {takesValue, valueClass=numericClass} [G value of RGB between 0 and 1]</nowiki>
 **** Luminance <nowiki>[A quality that exists by virtue of the luminous intensity per unit area projected in a given direction.]</nowiki>
-**** Opacity <nowiki>[A measure of impenetrability to light.]<nowiki>
+**** Opacity <nowiki>[A measure of impenetrability to light.]</nowiki>
 ** Sensory-presentation <nowiki>[The entity has a sensory manifestation.]</nowiki>
 *** Auditory-presentation <nowiki>[The sense of hearing is used in the presentation to the user.]</nowiki>
 **** Loudspeaker-separation <nowiki>{suggestedTag=Distance}[The distance between two loudspeakers. Grouped with the Distance tag.]</nowiki>

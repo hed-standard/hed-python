@@ -7,8 +7,8 @@ from hed.schema.hed_schema_constants import HedSectionKey
 
 
 class TestConverterBase(unittest.TestCase):
-    xml_file = '../data/hed_pairs/HED8.0.0.xml'
-    wiki_file = '../data/hed_pairs/HED8.0.0.mediawiki'
+    xml_file = '../data/hed_pairs/HED8.0.0n.xml'
+    wiki_file = '../data/hed_pairs/HED8.0.0n.mediawiki'
     can_compare = True
     can_legacy = False
 
@@ -122,45 +122,32 @@ class TestConverterOld2(TestConverterBase):
     can_compare = False
 
 
-class TestConverterBeta(TestConverterBase):
-    xml_file = '../data/hed_pairs/HED8.0.0-beta.1at.xml'
-    wiki_file = '../data/hed_pairs/HED8.0.0-beta.1a.mediawiki'
-    can_compare = True
-
-
 class TestPropertyAdded(TestConverterBase):
     xml_file = '../data/hed_pairs/added_prop.xml'
-    wiki_file = '../data/hed_pairs/added_prop.mediawiki'
+    wiki_file = '../data/hed_pairs/added_propn.mediawiki'
     can_compare = True
     can_legacy = False
 
 
 class TestPropertyAddedUsage(TestConverterBase):
     xml_file = '../data/hed_pairs/added_prop_with_usage.xml'
-    wiki_file = '../data/hed_pairs/added_prop_with_usage.mediawiki'
+    wiki_file = '../data/hed_pairs/added_prop_with_usagen.mediawiki'
     can_compare = True
     can_legacy = False
 
 
-class TestHed8Alpha(TestConverterBase):
-    xml_file = '../data/legacy_xml/HED8.0.0-alpha.2.xml'
-    wiki_file = '../data/legacy_xml/HED8.0.0-alpha.2.mediawiki'
-    can_compare = True
-    can_legacy = True
-
-
-class TestHedUnknownAttr(TestConverterBase):
-    xml_file = '../data/hed_pairs/unknown_attribute.xml'
-    wiki_file = '../data/hed_pairs/unknown_attribute.mediawiki'
-    can_compare = True
-    can_legacy = False
-
-
-class TestHedMultiValueClass(TestConverterBase):
-    xml_file = '../data/hed_pairs/HED8.0.0_2_value_classes.xml'
-    wiki_file = '../data/hed_pairs/HED8.0.0_2_value_classes.mediawiki'
-    can_compare = True
-    can_legacy = False
+# class TestHedUnknownAttr(TestConverterBase):
+#     xml_file = '../data/hed_pairs/unknown_attribute.xml'
+#     wiki_file = '../data/hed_pairs/unknown_attribute.mediawiki'
+#     can_compare = True
+#     can_legacy = False
+#
+#
+# class TestHedMultiValueClass(TestConverterBase):
+#     xml_file = '../data/hed_pairs/HED8.0.0_2_value_classes.xml'
+#     wiki_file = '../data/hed_pairs/HED8.0.0_2_value_classes.mediawiki'
+#     can_compare = True
+#     can_legacy = False
 
 
 class TestConverterSavingPrefix(unittest.TestCase):
