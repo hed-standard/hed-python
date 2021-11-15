@@ -1,6 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.map_utils import get_new_dataframe
+from hed.tools.io_utils import get_new_dataframe
 
 
 class ColumnDict:
@@ -80,7 +80,7 @@ class ColumnDict:
         print(f"{indent}Categorical columns ({len(sorted_keys)}):")
         for key in sorted_keys:
             value_dict = self.categorical_info[key]
-            sorted_v_keys = sorted(map(str, list(value_dict.keys)))
+            sorted_v_keys = sorted(list(value_dict))
             print(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
             for v_key in sorted_v_keys:
                 print(f"{indent * 3}{v_key}: {value_dict[v_key]}")
@@ -106,6 +106,7 @@ class ColumnDict:
             if col_name in self.value_info.keys():
                 self.value_info[col_name] = self.value_info[col_name] + len(col_values)
             else:
+                col_values = col_values.astype(str)
                 values = col_values.value_counts(ascending=True)
                 self._update_categorical(col_name,  values)
 
@@ -142,7 +143,7 @@ class ColumnDict:
                                    f"Categorical column [{str(col)}] is already a value column", "")
             elif col in self.skip_cols:
                 continue
-            elif col not in val_cols:
+            else:
                 self._update_categorical(col, col_dict.categorical_info[col])
 
     def _update_dict_skip(self, col_dict):

@@ -1,62 +1,6 @@
-import os
-import pandas as pd
-from werkzeug.utils import secure_filename
 from hed.errors.exceptions import HedFileError
-
-
-def get_new_dataframe(data):
-    """ Returns a new dataframe representing an event file or template
-
-    Args:
-        data (DataFrame or str):      DataFrame or filename representing an events file
-
-    Returns:
-        DataFrame containing with a tsv file
-
-    """
-
-    if isinstance(data, str):
-        df = pd.read_csv(data, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
-    elif isinstance(data, pd.DataFrame):
-        df = data.copy()
-    else:
-        raise HedFileError("BadDataFrame", "get_new_dataframe could not extract DataFrame from data", "")
-    return df
-
-
-def generate_filename(base_name, prefix=None, suffix=None, extension=None):
-    """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
-
-    Parameters
-    ----------
-   base_name: str
-        The name of the base, usually the name of the file that the issues were generated from
-    prefix: str
-        The prefix prepended to the front of the base_name
-    suffix: str
-        The suffix appended to the end of the base_name
-    Returns
-    -------
-    string
-        The name of the attachment other containing the issues.
-    """
-
-    pieces = []
-    if prefix:
-        pieces = pieces + [secure_filename(prefix)]
-    if base_name:
-        pieces.append(os.path.splitext(secure_filename(base_name))[0])
-    if suffix:
-        pieces = pieces + [secure_filename(suffix)]
-
-    if not pieces:
-        return ''
-    filename = pieces[0]
-    for name in pieces[1:]:
-        filename = filename + '_' + name
-    if extension:
-        filename = filename + '.' + secure_filename(extension)
-    return filename
+from hed.tools.col_dict import ColumnDict
+from hed.tools.io_utils import get_file_list, get_new_dataframe, separate_columns
 
 
 def get_columns_info(dataframe, skip_cols=None):
@@ -76,32 +20,6 @@ def get_columns_info(dataframe, skip_cols=None):
             continue
         col_info[col_name] = col_values.value_counts(ascending=True).to_dict()
     return col_info
-
-
-def get_file_list(path, prefix=None, types=None, suffix=None):
-    """ Traverses a directory tree and returns a list of paths to files ending with a particular suffix.
-
-    Args:
-        path (str):       The full path of the directory tree to be traversed (no ending slash)
-        prefix (str):     An optional prefix for the base filename
-        types (list):     A list of extensions to be selected
-        suffix (str):     The suffix of the paths to be extracted
-
-    Returns: 
-        list:             A list of full paths
-    """
-    file_list = []
-    for r, d, f in os.walk(path):
-        for r_file in f:
-            file_split = os.path.splitext(r_file)
-            if types and file_split[1] not in types:
-                continue
-            elif suffix and not file_split[0].endswith(suffix):
-                continue
-            elif prefix and not file_split[0].startswith(prefix):
-                continue
-            file_list.append(os.path.join(r, r_file))
-    return file_list
 
 
 def get_key_counts(root_dir, skip_cols=None):
@@ -137,13 +55,26 @@ def get_row_hash(row, key_list):
     return get_key_hash(row[key_list])
 
 
-def make_dataframe(col_info, selected_col):
-    col_dict = col_info.get(selected_col, None)
-    if not col_dict:
-        return None
-    col_values = col_dict.keys()
-    df = pd.DataFrame(sorted(list(col_values)), columns=[selected_col])
-    return df
+def make_combined_dicts(file_dict, skip_cols=None):
+    """ Return a combined dictionary of column information as we
+
+    Args:
+        file_dict (dict):  Dictionary of file name keys and full path
+        skip_cols (list):  Name of the column
+
+    Returns:
+        dict:  A combined dictionary
+    """
+
+    dicts_all = ColumnDict(skip_cols=skip_cols)
+    dicts = {}
+    for key, file in file_dict.items():
+        orig_dict = ColumnDict(skip_cols=skip_cols)
+        df = get_new_dataframe(file)
+        orig_dict.update(df)
+        dicts[key] = orig_dict
+        dicts_all.update_dict(orig_dict)
+    return dicts_all, dicts
 
 
 def print_columns_info(columns_info, skip_cols=None):
@@ -156,68 +87,6 @@ def print_columns_info(columns_info, skip_cols=None):
 
         for key, value in sorted_counts:
             print(f"\t{key}: {value}")
-
-
-def reorder_columns(data, col_order, skip_missing=True):
-    """ Takes a dataframe or filename representing event file and reorders columns to desired order
-
-    Args:
-        data (DataFrame, str) :        Represents mapping
-        col_order (list):              List of column names for desired order
-        skip_missing (bool):           If true, col_order columns missing from data are skipped, otherwise error
-
-    Returns:
-        DataFrame                      A new reordered dataframe
-    """
-    df = get_new_dataframe(data)
-    present_cols, missing_cols = separate_columns(df.columns.values.tolist(), col_order)
-    if missing_cols and not skip_missing:
-        raise HedFileError("MissingKeys", f"Events file must have columns {str(missing_cols)}", "")
-    df = df[present_cols]
-    return df
-
-
-def remove_quotes(df, column_list=None):
-    """ Remove quotes from the entries of the specified columns in a dataframe or from all columns if no list provided.
-
-    Args:
-        df (Dataframe):             Dataframe to process by removing specified quotes
-        column_list (list) :        Optional list of column names for which to remove
-    """
-
-    col_types = df.dtypes
-    for index, col in enumerate(df.columns):
-        if col_types.iloc[index] in ['string', 'object']:
-            df.iloc[:, index] = df.iloc[:, index].str.replace('"', '')
-            df.iloc[:, index] = df.iloc[:, index].str.replace("'", "")
-
-
-def separate_columns(base_cols, target_cols):
-    """ Takes a list of column names and a list of target columns and returns list of present and missing targets.
-
-    Computes the set difference of target_cols and base_cols and returns a list of columns of
-    target_cols that are in df and a list of those missing.
-
-     Args:
-         base_cols (list) :        List of columns in base object
-         target_cols (list):       List of desired column names
-
-     Returns:
-         tuple (list, list):            Returns two lists one with
-     """
-
-    if not target_cols:
-        return [], []
-    elif not base_cols:
-        return [], target_cols
-    missing_cols = []
-    present_cols = []
-    for col in target_cols:
-        if col not in base_cols:
-            missing_cols.append(col)
-        else:
-            present_cols.append(col)
-    return present_cols, missing_cols
 
 
 def update_dict_counts(count_dicts, col_name, col_values):

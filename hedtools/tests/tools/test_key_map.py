@@ -2,8 +2,9 @@ import unittest
 import os
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools import KeyMap
-from hed.tools.map_utils import get_file_list, get_row_hash
+from hed.tools.key_map import KeyMap
+from hed.tools.io_utils import get_file_list
+from hed.tools.map_utils import get_row_hash
 
 
 class Test(unittest.TestCase):

@@ -1,6 +1,7 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.map_utils import get_new_dataframe, get_key_hash, get_row_hash, remove_quotes, separate_columns
+from hed.tools.map_utils import get_key_hash, get_row_hash
+from hed.tools.io_utils import get_new_dataframe, remove_quotes, separate_columns
 
 
 class KeyTemplate:
