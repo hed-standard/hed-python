@@ -5,3 +5,5 @@ from hed.tools.sidecar_map import SidecarMap
 from hed.tools.map_utils import get_columns_info, make_combined_dicts
 from hed.tools.io_utils import get_file_list, get_new_dataframe, generate_filename, make_file_dict, \
     make_info_dataframe, make_key, remove_quotes, reorder_columns, separate_columns
+from hed.tools.event_utils import add_columns, check_match, delete_columns, delete_rows_by_column, \
+    replace_values

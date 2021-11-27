@@ -82,8 +82,8 @@ class KeyTemplate:
             key_hash = get_row_hash(row, self.columns)
             self.map_dict[key_hash] = index
 
-    def print(self):
-        print(f"Counts for key [{str(self.columns)}]:")
+    def print(self, file=None):
+        print(f"Counts for key [{str(self.columns)}]:",file=file)
         for index, row in self.col_map.iterrows():
             key_hash = get_row_hash(row, self.columns)
-            print(f"{str(list(row.values))}\t{self.count_dict[key_hash]}")
+            print(f"{str(list(row.values))}\t{self.count_dict[key_hash]}", file=file)
