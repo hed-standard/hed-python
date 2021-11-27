@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
 
     def test_get_get_file_list_suffix(self):
         dir_data = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
-        file_list = get_file_list(dir_data, types=[".json", ".tsv"])
+        file_list = get_file_list(dir_data, extensions=[".json", ".tsv"])
         for item in file_list:
             if item.endswith(".json") or item.endswith(".tsv"):
                 continue
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
 
     def test_get_file_list_prefix(self):
         dir_data = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
-        file_list = get_file_list(dir_data, prefix='sternberg', types=[".tsv"])
+        file_list = get_file_list(dir_data, prefix='sternberg', extensions=[".tsv"])
         for item in file_list:
             filename = os.path.basename(item)
             self.assertTrue(filename.startswith('sternberg'))

@@ -23,7 +23,7 @@ def get_columns_info(dataframe, skip_cols=None):
 
 
 def get_key_counts(root_dir, skip_cols=None):
-    file_list = get_file_list(root_dir, types=[".tsv"], suffix="_events")
+    file_list = get_file_list(root_dir, suffix="_events", extensions=[".tsv"])
     count_dicts = {}
     for file in file_list:
         dataframe = get_new_dataframe(file)

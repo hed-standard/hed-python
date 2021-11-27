@@ -40,14 +40,39 @@ def generate_filename(base_name, prefix=None, suffix=None, extension=None):
     return filename
 
 
-def get_file_list(path, prefix=None, types=None, suffix=None):
+def get_dir_dictionary(path, prefix=None, suffix=None, extensions=None, skip_empty=True):
+    """ Traverses a directory tree and dictionary with keys that are directories.
+
+    Args:
+        path (str):             The full path of the directory tree to be traversed (no ending slash)
+        prefix (str):           An optional prefix for the base filename
+        suffix (str):           An optional suffix for the base file name
+        extensions (list):      An optional list of file extensions
+        skip_empty (bool):      Do not put entry for directories that have no files
+
+    Returns:
+        dict:             Dictionary with directories and keys and file lists values
+    """
+    dir_dict = {}
+    for r, d, f in os.walk(path):
+        file_list = []
+        for r_file in f:
+            if test_filename(r_file, prefix, suffix, extensions):
+                file_list.append(os.path.join(r, r_file))
+        if skip_empty and not file_list:
+            continue
+        dir_dict[d] = file_list
+    return dir_dict
+
+
+def get_file_list(path, prefix=None, suffix=None, extensions=None):
     """ Traverses a directory tree and returns a list of paths to files ending with a particular suffix.
 
     Args:
         path (str):       The full path of the directory tree to be traversed (no ending slash)
         prefix (str):     An optional prefix for the base filename
-        types (list):     A list of extensions to be selected
         suffix (str):     The suffix of the paths to be extracted
+        extensions (list):     A list of extensions to be selected
 
     Returns:
         list:             A list of full paths
@@ -55,14 +80,8 @@ def get_file_list(path, prefix=None, types=None, suffix=None):
     file_list = []
     for r, d, f in os.walk(path):
         for r_file in f:
-            file_split = os.path.splitext(r_file)
-            if types and file_split[1] not in types:
-                continue
-            elif suffix and not file_split[0].endswith(suffix):
-                continue
-            elif prefix and not file_split[0].startswith(prefix):
-                continue
-            file_list.append(os.path.join(r, r_file))
+            if test_filename(r_file, prefix, suffix, extensions):
+                file_list.append(os.path.join(r, r_file))
     return file_list
 
 
@@ -191,3 +210,27 @@ def separate_columns(base_cols, target_cols):
         else:
             present_cols.append(col)
     return present_cols, missing_cols
+
+
+def test_filename(file, prefix=None, suffix=None, extensions=None):
+    """ Determines whether filename has correct extension, suffix, and prefix.
+
+     Args:
+         file (str) :           Path of filename to test
+         prefix (str):          An optional prefix for the base filename
+         suffix (str):          An optional suffix for the base file name
+         extensions (list):     An optional list of file extensions
+
+     Returns:
+         tuple (list, list):            Returns two lists one with
+     """
+
+    file_split = os.path.splitext(file)
+    is_name = True
+    if extensions and file_split[1] not in extensions:
+        is_name = False
+    elif suffix and not file_split[0].endswith(suffix):
+        is_name = False
+    elif prefix and not file_split[0].startswith(prefix):
+        is_name = False
+    return is_name
