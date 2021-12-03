@@ -1,6 +1,20 @@
 import pandas as pd
 
-from hed import HedFileError
+from hed.errors.exceptions import HedFileError
+
+
+def get_key_hash(key_tuple):
+    """ Calculates the key_hash for key_tuple. If the key_hash in map_dict, also return the key value.
+
+    Args:
+        key_tuple (tuple):       A tuple with the key values in the correct order for lookup
+
+    Returns:
+        key_hash (int)              Hash key for the tuple
+
+    """
+
+    return hash(tuple(key_tuple))
 
 
 def get_new_dataframe(data):
@@ -23,6 +37,13 @@ def get_new_dataframe(data):
     return df
 
 
+def get_row_hash(row, key_list):
+    columns_present, columns_missing = separate_columns(list(row.index.values), key_list)
+    if columns_missing:
+        raise HedFileError("lookup_row", f"row must have all keys, missing{str(columns_missing)}", "")
+    return get_key_hash(row[key_list])
+
+
 def make_info_dataframe(col_info, selected_col):
     """ Return a dataframe containing the column information for the selected column
 
@@ -39,6 +60,14 @@ def make_info_dataframe(col_info, selected_col):
     col_values = col_dict.keys()
     df = pd.DataFrame(sorted(list(col_values)), columns=[selected_col])
     return df
+
+
+def make_key(key_string, indices=[0, -2], separator='_'):
+    key_value = ''
+    pieces = key_string.split(separator)
+    for index in indices:
+        key_value += pieces[index] + separator
+    return key_value[:-1]
 
 
 def remove_quotes(df):
@@ -100,32 +129,3 @@ def separate_columns(base_cols, target_cols):
         else:
             present_cols.append(col)
     return present_cols, missing_cols
-
-
-def make_key(key_string, indices=[0, -2], separator='_'):
-    key_value = ''
-    pieces = key_string.split(separator)
-    for index in indices:
-        key_value += pieces[index] + separator
-    return key_value[:-1]
-
-
-def get_key_hash(key_tuple):
-    """ Calculates the key_hash for key_tuple. If the key_hash in map_dict, also return the key value.
-
-    Args:
-        key_tuple (tuple):       A tuple with the key values in the correct order for lookup
-
-    Returns:
-        key_hash (int)              Hash key for the tuple
-
-    """
-
-    return hash(tuple(key_tuple))
-
-
-def get_row_hash(row, key_list):
-    columns_present, columns_missing = separate_columns(list(row.index.values), key_list)
-    if columns_missing:
-        raise HedFileError("lookup_row", f"row must have all keys, missing{str(columns_missing)}", "")
-    return get_key_hash(row[key_list])
