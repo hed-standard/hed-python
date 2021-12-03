@@ -8,7 +8,7 @@ from hed.schema.hed_schema_constants import HedSectionKey
 # Todo: Review this file once we have more stable test cases for it.
 
 def validate_single_tag(hed_dict, tag):
-    # Split off the variable suffix
+    # Split off the variable name_suffix
     if tag.endswith("/xxx"):
         tag = tag[:-len("/xxx")]
     elif tag.endswith("/#"):

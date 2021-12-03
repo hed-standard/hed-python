@@ -2,8 +2,10 @@ import os
 import unittest
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.map_utils import get_columns_info, get_key_hash, get_row_hash
-from hed.tools.io_utils import get_file_list, get_new_dataframe,reorder_columns, remove_quotes, separate_columns
+from hed.tools.map_utils import get_columns_info
+from hed.tools.data_utils import get_key_hash, get_row_hash
+from hed.tools.io_utils import get_file_list
+from hed.tools import get_new_dataframe, remove_quotes, reorder_columns, separate_columns
 
 
 class Test(unittest.TestCase):

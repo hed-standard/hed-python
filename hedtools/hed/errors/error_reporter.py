@@ -541,7 +541,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
     context : str
         The value of this context
     tab_count : int
-        Number of tabs to prefix each line with.
+        Number of tabs to name_prefix each line with.
 
     Returns
     -------
@@ -582,7 +582,7 @@ def _get_context_string(single_issue_context, last_used_context):
     context_string: str
         The full string of context(potentially multiline) to add before the error
     tab_string: str
-        The prefix to add to any message line with this context.
+        The name_prefix to add to any message line with this context.
     """
     context_string = ""
     tab_count = 0

@@ -25,6 +25,7 @@ class ColumnMapper:
         ----------
         sidecars : Sidecar or string or list
             A list of ColumnDefinitionGroups or filenames to gather ColumnDefinitions from.
+            Sidecars later in the list override those earlier in the list.
         tag_columns: [int or str]
              A list of ints or strings containing the columns that contain the HED tags.
              If the column is otherwise unspecified, it will convert this column type to HEDTags
@@ -79,7 +80,7 @@ class ColumnMapper:
                 self._add_column_data(column_data)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
-        """Adds the given columns as hed tag columns with the required prefix if it does not already exist.
+        """Adds the given columns as hed tag columns with the required name_prefix if it does not already exist.
 
         Parameters
         ----------
@@ -233,12 +234,12 @@ class ColumnMapper:
 
     def get_prefix_remove_func(self, column_number):
         """
-        Returns a function that will remove the prefix for the given column.
+        Returns a function that will remove the name_prefix for the given column.
 
         Parameters
         ----------
         column_number : int
-            numbered column to use prefix check from.
+            numbered column to use name_prefix check from.
         Returns
         -------
             A function taking a tag and string, returning a string.
@@ -269,16 +270,16 @@ class ColumnMapper:
 
     def _set_column_prefix(self, column_number, new_required_prefix):
         """
-        Internal function to add this as a required prefix to a column
+        Internal function to add this as a required name_prefix to a column
 
         If the column is not known to the mapper, it will be added as a HEDTags column.
 
         Parameters
         ----------
         column_number : int
-            The column number with this prefix
+            The column number with this name_prefix
         new_required_prefix : str
-            The prefix to add to the column when loading from a spreadsheet.
+            The name_prefix to add to the column when loading from a spreadsheet.
         """
         if isinstance(column_number, str):
             raise TypeError("Must pass in a column number not column_name to _set_column_prefix")

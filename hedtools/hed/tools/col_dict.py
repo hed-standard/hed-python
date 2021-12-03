@@ -1,6 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.io_utils import get_new_dataframe
+from hed.tools.data_utils import get_new_dataframe
 
 
 class ColumnDict:

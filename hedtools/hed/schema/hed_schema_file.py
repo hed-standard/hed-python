@@ -53,7 +53,7 @@ def load_schema(hed_file_path=None, hed_url_path=None, library_prefix=None):
     hed_url_path : str or None
         A url to open a schema from
     library_prefix : str or None
-        The prefix all tags in this schema will accept.
+        The name_prefix all tags in this schema will accept.
 
     Returns
     -------

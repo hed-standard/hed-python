@@ -2,7 +2,7 @@ import os
 import unittest
 import numpy as np
 from pandas import DataFrame
-from hed.tools.io_utils import get_new_dataframe
+from hed.tools import get_new_dataframe
 from hed.tools.event_utils import add_columns, check_match, delete_columns, delete_rows_by_column, \
     replace_values
 
