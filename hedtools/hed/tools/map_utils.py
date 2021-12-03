@@ -1,6 +1,6 @@
-from hed.errors.exceptions import HedFileError
 from hed.tools.col_dict import ColumnDict
-from hed.tools.io_utils import get_file_list, get_new_dataframe, separate_columns
+from hed.tools.io_utils import get_file_list
+from hed.tools.data_utils import get_new_dataframe
 
 
 def get_columns_info(dataframe, skip_cols=None):
@@ -23,7 +23,7 @@ def get_columns_info(dataframe, skip_cols=None):
 
 
 def get_key_counts(root_dir, skip_cols=None):
-    file_list = get_file_list(root_dir, suffix="_events", extensions=[".tsv"])
+    file_list = get_file_list(root_dir, name_suffix="_events", extensions=[".tsv"])
     count_dicts = {}
     for file in file_list:
         dataframe = get_new_dataframe(file)
@@ -32,27 +32,6 @@ def get_key_counts(root_dir, skip_cols=None):
                 continue
             update_dict_counts(count_dicts, col_name, col_values)
     return count_dicts
-
-
-def get_key_hash(key_tuple):
-    """ Calculates the key_hash for key_tuple. If the key_hash in map_dict, also return the key value.
-
-    Args:
-        key_tuple (tuple):       A tuple with the key values in the correct order for lookup
-
-    Returns:
-        key_hash (int)              Hash key for the tuple
-
-    """
-
-    return hash(tuple(key_tuple))
-
-
-def get_row_hash(row, key_list):
-    columns_present, columns_missing = separate_columns(list(row.index.values), key_list)
-    if columns_missing:
-        raise HedFileError("lookup_row", f"row must have all keys, missing{str(columns_missing)}", "")
-    return get_key_hash(row[key_list])
 
 
 def make_combined_dicts(file_dict, skip_cols=None):

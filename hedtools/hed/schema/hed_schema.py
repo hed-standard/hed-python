@@ -35,7 +35,7 @@ class HedSchema:
         self.epilogue = ""
 
         self._is_hed3_schema = None
-        # This is the specified library prefix - tags will be {library_prefix}:{tag_name}
+        # This is the specified library name_prefix - tags will be {library_prefix}:{tag_name}
         self._library_prefix = ""
 
         self._sections = self._create_empty_sections()
@@ -95,14 +95,14 @@ class HedSchema:
 
     def schema_for_prefix(self, prefix):
         """
-            Return the specific HedSchema object for the given tag prefix.
+            Return the specific HedSchema object for the given tag name_prefix.
 
             This is mostly a placeholder for HedSchemaGroup.  May be refactored out later.
 
         Parameters
         ----------
         prefix : str
-            A schema library prefix to get the schema for.
+            A schema library name_prefix to get the schema for.
 
         Returns
         -------
@@ -194,7 +194,7 @@ class HedSchema:
 
     def set_library_prefix(self, library_prefix):
         """
-        Updates the tags in this schema with the given prefix, removing any existing prefix.
+        Updates the tags in this schema with the given name_prefix, removing any existing name_prefix.
 
         Parameters
         ----------
@@ -760,7 +760,7 @@ class HedSchema:
 
     def update_old_hed_schema(self):
         """
-            Updates old hed schema with now required attributes - such as $ being a unit prefix.
+            Updates old hed schema with now required attributes - such as $ being a unit name_prefix.
 
         Returns
         -------

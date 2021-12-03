@@ -16,7 +16,7 @@ class HedSchemaGroup:
         """
         Create combination of multiple HedSchema objects you can use with the validator.
 
-        Note: will raise HedFileError if two schemas share the same prefix
+        Note: will raise HedFileError if two schemas share the same name_prefix
 
         Parameters
         ----------
@@ -28,7 +28,7 @@ class HedSchemaGroup:
         library_prefixes = [hed_schema._library_prefix for hed_schema in schema_list]
         if len(set(library_prefixes)) != len(library_prefixes):
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
-                               "Multiple schemas share the same tag prefix.  This is not allowed.",
+                               "Multiple schemas share the same tag name_prefix.  This is not allowed.",
                                filename="Combined Schema")
         self._schemas = {hed_schema._library_prefix: hed_schema for hed_schema in schema_list}
 
@@ -73,19 +73,19 @@ class HedSchemaGroup:
 
     def schema_for_prefix(self, prefix):
         """
-            Return the specific HedSchema object for the given tag prefix.
+            Return the specific HedSchema object for the given tag name_prefix.
 
-            Returns None if prefix is invalid.
+            Returns None if name_prefix is invalid.
 
         Parameters
         ----------
         prefix : str
-            A schema library prefix to get the schema for.
+            A schema library name_prefix to get the schema for.
 
         Returns
         -------
         schema: HedSchema
-            The specific schema for this library prefix
+            The specific schema for this library name_prefix
         """
         schema = self._schemas.get(prefix)
         return schema

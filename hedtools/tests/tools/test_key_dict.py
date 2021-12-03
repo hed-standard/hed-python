@@ -4,7 +4,7 @@ from unittest import mock
 import pandas as pd
 from hed.errors.exceptions import HedFileError
 from hed.tools.key_template import KeyTemplate
-from hed.tools.map_utils import get_row_hash
+from hed.tools.data_utils import get_row_hash
 
 
 class Test(unittest.TestCase):
