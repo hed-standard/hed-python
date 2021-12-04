@@ -142,7 +142,7 @@ class IndividualHedTagsShort(TestHed3):
             'notRequiredScientific': 'Age/5e-1',
             'specialAllowedCharBadUnit': 'Creation-date/bad_date',
             'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01',
-            'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
+            'specialAllowedCharCurrency': 'Event/Currency-Test/$ 100',
             'specialNotAllowedCharCurrency': 'Event/Currency-Test/@100'
             # Update tests - 8.0 currently has no clockTime nodes.
             # 'properTime': 'Item/2D shape/Clock face/08:30',
