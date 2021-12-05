@@ -1,6 +1,8 @@
 from hed.errors import error_reporter
 from hed.errors.error_types import SchemaWarnings, ErrorContext, SchemaErrors
 from hed.errors.error_reporter import ErrorHandler
+from hed.schema.hed_schema import HedSchema
+from hed.schema.hed_tag import HedTag
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
@@ -27,6 +29,9 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
     issue_list : [{}]
         A list of all warnings and errors found in the file.
     """
+    if not isinstance(hed_schema, HedSchema):
+        raise ValueError("To check compliance of a HedGroupSchema, call self.check_compliance on the schema itself.")
+
     if error_handler is None:
         error_handler = error_reporter.ErrorHandler()
     issues_list = []
@@ -38,15 +43,38 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
     if hed_schema.has_duplicate_tags:
         duplicate_dict = hed_schema.find_duplicate_tags()
         for tag_name, long_org_tags in duplicate_dict.items():
-            issues_list += ErrorHandler.format_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE, tag_name,
-                                                     duplicate_tag_list=long_org_tags)
+            issues_list += error_handler.format_error_with_context(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE, tag_name,
+                                                                   duplicate_tag_list=long_org_tags)
 
     unknown_attributes = hed_schema.get_all_unknown_attributes()
     if unknown_attributes:
         for attribute_name, source_tags in unknown_attributes.items():
             for tag in source_tags:
-                issues_list += ErrorHandler.format_error(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID, attribute_name,
-                                                         source_tag=tag)
+                issues_list += error_handler.format_error_with_context(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID,
+                                                                       attribute_name,
+                                                                       source_tag=tag)
+
+    schema_attribute_validators = {
+        'suggestedTag': tag_exists_check,
+        'relatedTag': tag_exists_check
+    }
+
+    # Check attributes
+    for section_key in hed_schema._sections:
+        error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, section_key)
+        for tag_entry in hed_schema[section_key].values():
+            error_handler.push_error_context(ErrorContext.SCHEMA_TAG, tag_entry.long_name)
+            for attribute_name in tag_entry.attributes:
+                validator = schema_attribute_validators.get(attribute_name)
+                if validator:
+                    error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name, False)
+                    new_issues = validator(hed_schema, tag_entry.attributes[attribute_name])
+                    error_handler.add_context_to_issues(new_issues)
+                    issues_list += new_issues
+                    error_handler.pop_error_context()
+            error_handler.pop_error_context()
+
+        error_handler.pop_error_context()
 
     if also_check_for_warnings:
         hed_terms = hed_schema.get_all_schema_tags(True)
@@ -58,6 +86,30 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
 
     error_handler.pop_error_context()
     return issues_list
+
+
+def tag_exists_check(hed_schema, possible_tags):
+    """
+        Checks if the comma separated list in possible tags are valid HedTags
+
+    Parameters
+    ----------
+    hed_schema: HedSchema
+        The schema to check if the tag exists
+    possible_tags: str
+        Comma separated list of tags.  Short long or mixed form valid.
+
+    Returns
+    -------
+    issues_list: [{}]
+    """
+    issues = []
+    split_tags = possible_tags.split(",")
+    for org_tag in split_tags:
+        tag = HedTag(org_tag)
+        issues += tag.convert_to_canonical_forms(hed_schema)
+
+    return issues
 
 
 def validate_schema_term(hed_term):

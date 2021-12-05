@@ -14,6 +14,9 @@ class ErrorContext:
     ROW = 'ec_row'
     COLUMN = 'ec_column'
     HED_STRING = 'ec_HedString'
+    SCHEMA_SECTION = 'ec_section'
+    SCHEMA_TAG = 'ec_schema_tag'
+    SCHEMA_ATTRIBUTE = 'ec_attribute'
 
 
 class ValidationErrors:

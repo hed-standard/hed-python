@@ -559,6 +559,9 @@ def _format_single_context_string(context_type, context, tab_count=0):
         ErrorContext.COLUMN: f'Issues in column {context}:',
         ErrorContext.CUSTOM_TITLE: context,
         ErrorContext.HED_STRING: f"hed string: {context}",
+        ErrorContext.SCHEMA_SECTION: f"Schema Section: {context}",
+        ErrorContext.SCHEMA_TAG: f"Source tag: {context}",
+        ErrorContext.SCHEMA_ATTRIBUTE: f"Source Attribute: {context}",
     }
     context_portion = error_types[context_type]
     context_string = f"{tab_string}{context_portion}\n"

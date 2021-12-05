@@ -118,6 +118,24 @@ class HedSchemaSection:
 
         return new_entry
 
+    def get_entries_with_attribute(self, attribute_name):
+        """
+            Returns an iterator of all entries with the given attribute
+
+            If this is called outside of schema validation, you may wish to cache this result or update
+            this function to have a cache.
+
+        Parameters
+        ----------
+        attribute_name: str
+            The name of the attribute(generally a HedKey entry)
+
+        Returns
+        -------
+        [HedSchemaEntry]
+        """
+        return [tag_entry for tag_entry in self.values() if tag_entry.has_attribute(attribute_name)]
+
     # ===============================================
     # Simple wrapper functions to make this class primarily function as a dict
     # ===============================================
