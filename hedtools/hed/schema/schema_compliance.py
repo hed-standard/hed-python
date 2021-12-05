@@ -1,5 +1,5 @@
 from hed.errors import error_reporter
-from hed.errors.error_types import SchemaWarnings, ErrorContext, SchemaErrors
+from hed.errors.error_types import SchemaWarnings, ErrorContext, SchemaErrors, ErrorSeverity
 from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_tag import HedTag
@@ -88,7 +88,7 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
     return issues_list
 
 
-def tag_exists_check(hed_schema, possible_tags):
+def tag_exists_check(hed_schema, possible_tags, force_issues_as_warnings=True):
     """
         Checks if the comma separated list in possible tags are valid HedTags
 
@@ -109,6 +109,9 @@ def tag_exists_check(hed_schema, possible_tags):
         tag = HedTag(org_tag)
         issues += tag.convert_to_canonical_forms(hed_schema)
 
+    if force_issues_as_warnings:
+        for issue in issues:
+            issue['severity'] = ErrorSeverity.WARNING
     return issues
 
 
