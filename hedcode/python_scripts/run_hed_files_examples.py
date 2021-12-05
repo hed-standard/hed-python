@@ -1,4 +1,6 @@
 """
+TODO: These examples need to be updated.
+
 Examples of creating a HedValidator and validating various spreadsheet_data using it.
 Also contains examples of catching HedFileErrors for invalid input.
 
@@ -18,11 +20,11 @@ from hed.schema.hed_schema_file import load_schema, load_schema_version
 
 if __name__ == '__main__':
     # Set up the file names for the tests
-    local_hed_file = '../data/schema_data/HED7.1.1.xml'  # path HED v7.1.1 stored locally
-    example_data_path = '../data'  # path to example data
+    local_hed_file = '../data/schema_data/HED7.2.0.xml'  # path HED v7.1.1 stored locally
+    example_data_path = '../data/spreadsheet_data'  # path to example data
     valid_tsv_file = os.path.join(example_data_path, 'ValidTwoColumnHED7_1_1.tsv')
     valid_tsv_file_no_header = os.path.join(example_data_path, 'ValidTwoColumnHED7_1_1NoHeader.tsv')
-    valid_tsv_file_separate_cols = os.path.join(example_data_path, 'ValidSeparateColumnTSV.txt')
+    valid_tsv_file_separate_cols = os.path.join(example_data_path, 'LKTEventCodesHED2.tsv')
     unsupported_csv_format = os.path.join(example_data_path, 'UnsupportedFormatCSV.csv')
     multiple_sheet_xlsx_file = os.path.join(example_data_path, 'ExcelMultipleSheets.xlsx')
 
@@ -30,12 +32,12 @@ if __name__ == '__main__':
     hed_validator_old = HedValidator(hed_schema=hed_schema_cached)
     hed_schema_local = load_schema(local_hed_file)
     hed_validator_local = HedValidator(hed_schema=hed_schema_local)
-    hed_validator_local_warnings = HedValidator(hed_schema=hed_schema_local, check_for_warnings=True)
+    hed_validator_local_warnings = HedValidator(hed_schema=hed_schema_local)
 
     # Example 1a: Valid TSV file with default version of HED
     print(valid_tsv_file)
     input_file = HedInput(valid_tsv_file, tag_columns=[2])
-    validation_issues = input_file.validate_file(hed_validator_old)
+    validation_issues = input_file.validate_file(hed_validator_old, check_for_warnings=True)
     the_title = '[Example 1a] ValidTwoColumnHED7_1_1 is probably okay with default version of HED'
     print(get_printable_issue_string(validation_issues, title=the_title))
 
@@ -56,8 +58,8 @@ if __name__ == '__main__':
 
     # Example 1d: Valid TSV with separate columns for required fields
     print(valid_tsv_file_separate_cols)
-    prefixed_needed_tag_columns = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
-    input_file = HedInput(valid_tsv_file_separate_cols, tag_columns=[6],
+    prefixed_needed_tag_columns = {4: 'Event/Description/', 2: 'Event/Label/', 3: 'Event/Long name/'}
+    input_file = HedInput(valid_tsv_file_separate_cols, tag_columns=[5],
                           column_prefix_dictionary=prefixed_needed_tag_columns)
     validation_issues = input_file.validate_file(hed_validator_local)
     print(get_printable_issue_string(validation_issues,
@@ -90,7 +92,7 @@ if __name__ == '__main__':
                           worksheet_name='LKT Events')
     validation_issues = input_file.validate_file(hed_validator_local)
     print(get_printable_issue_string(validation_issues,
-                                     title='[Example 3a] Multiple sheet xlsl has LKT Events sheet with no issues'))
+                                     title='[Example 3a] Multiple sheet xlsx has LKT Events sheet with no issues'))
 
     # Example 3b: Valid XLSX file with multiple sheets - first sheet probably has no issues with default schema
     input_file = HedInput(multiple_sheet_xlsx_file, tag_columns=[4],
@@ -106,7 +108,7 @@ if __name__ == '__main__':
                           column_prefix_dictionary=prefixed_needed_tag_columns)
     validation_issues = input_file.validate_file(hed_validator_local)
     print(get_printable_issue_string(validation_issues,
-                                     title='[Example 3c] Multiple sheet xlsl has first sheet with no issues'))
+                                     title='[Example 3c] Multiple sheet xlsx has first sheet with no issues'))
 
     # Example 3d: XLSX file with multiple sheets - PVT sheet has several issues with 7.1.1
     input_file = HedInput(multiple_sheet_xlsx_file, tag_columns=[4],

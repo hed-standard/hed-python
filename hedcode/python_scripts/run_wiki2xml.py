@@ -1,4 +1,6 @@
 """
+TODO:  Update to current version of the schema
+
 Example of converting a hed schema from .mediawiki format to .xml format.
 
 Functions Demonstrated:
@@ -20,8 +22,7 @@ if __name__ == '__main__':
     hed_schema = load_schema(hed_url_path=hed_wiki_url)
     file_strings, errors = convert_schema_to_format(hed_schema, save_as_legacy_xml=True)
     if errors:
-        issue_str = get_printable_issue_string(validation_issues=errors,
-                                               title="HED7.3.0.mediawiki is not HED-3G compliant")
+        issue_str = get_printable_issue_string(issues=errors, title="HED7.3.0.mediawiki is not HED-3G compliant")
         print(issue_str)
     if file_strings:
         xml_location = write_strings_to_file(file_strings)
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     print("Converting HED7.3.0.mediawiki with no compliance check:")
     file_strings, errors = convert_schema_to_format(hed_schema, check_for_issues=False, save_as_legacy_xml=True)
     if errors:
-        issue_str = get_printable_issue_string(validation_issues=errors,
+        issue_str = get_printable_issue_string(issues=errors,
                                                title="HED7.3.0.mediawiki should not have errors if no compliance check")
         print(issue_str)
     if file_strings:
@@ -44,7 +45,7 @@ if __name__ == '__main__':
     hed_schema = load_schema(hed_url_path=hed_wiki_url)
     file_strings, errors = convert_schema_to_format(hed_schema)
     if errors:
-        issue_str = get_printable_issue_string(validation_issues=errors, title="Errors in HED8.0.0.mediawiki")
+        issue_str = get_printable_issue_string(issues=errors, title="Errors in HED8.0.0.mediawiki")
         print(issue_str)
     if file_strings:
         xml_location = write_strings_to_file(file_strings)

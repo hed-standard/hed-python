@@ -1,4 +1,6 @@
 """
+TODO: Update to current schema examples
+
 Example 1: creating a Sidecar from a json sidecar file and validating it
 
 Example 2: how to open a json sidecar, modify it, then save it back out.
@@ -10,10 +12,15 @@ HedSchema - Opens a hed xml schema.  Used by other tools to check tag attributes
 Sidecar - Contains the data from a single json sidecar, can be validated using a HedSchema.
 HedString - Main class for handling a hed string during processing and analysis
 """
-from hed import get_printable_issue_string, Sidecar, HedString, load_schema, HedValidator
+
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.models.hed_string import HedString
+from hed.models.sidecar import Sidecar
+from hed.schema.hed_schema_file import load_schema
+from hed.validator.hed_validator import HedValidator
 
 if __name__ == '__main__':
-    local_hed_xml = "../data/HED8.0.0.xml"
+    local_hed_xml = "../data/schema_data/HED8.0.1.xml"
     hed_schema = load_schema(local_hed_xml)
     json_filename = "../data/bids_data/both_types_events_errors.json"
 

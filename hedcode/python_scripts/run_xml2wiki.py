@@ -1,4 +1,6 @@
 """
+TODO: Update to current version of the schema
+
 Example of converting a hed schema from .xml format to .mediawiki format.
 
 Functions Demonstrated:
@@ -18,7 +20,7 @@ if __name__ == '__main__':
     local_hed_file = None
     hed_schema = load_schema(hed_file_path=local_hed_file, hed_url_path=hed_xml_url)
     file_strings, errors = convert_schema_to_format(hed_schema, save_as_mediawiki=True)
-    issue_str = get_printable_issue_string(validation_issues=errors, title="Errors in HED8.0.xml:")
+    issue_str = get_printable_issue_string(issues=errors, title="Errors in HED8.0.xml:")
     if issue_str:
         print(issue_str)
     if file_strings:

@@ -1,4 +1,5 @@
 """
+TODO: Examples need to be updated to current HED version
 Examples of creating a HedValidator and validating various Hed Strings with it.
 
 Classes Demonstrated:
@@ -18,7 +19,6 @@ if __name__ == '__main__':
     hed_validator_old = HedValidator(hed_schema_old)
     hed_schema_current = load_schema_version()
     hed_validator_current = HedValidator(hed_schema_current)
-    hed_validator_current_warn = HedValidator(hed_schema_current, check_for_warnings=True)
     hed_validator_no_semantic = HedValidator(run_semantic_validation=False)
 
     hed_string_1 = \
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     print(get_printable_issue_string(validation_issues,
                                      title='[Example 5] hed_string_3 extended tag does not flag error unless warnings'))
 
-    validation_issues = string_obj_3.validate(hed_validator_current_warn)
+    validation_issues = string_obj_3.validate(hed_validator_current, check_for_warnings=True)
     print(get_printable_issue_string(validation_issues,
                                      title='[Example 6] hed_string_3 extended tag flags error with warnings'))
 
