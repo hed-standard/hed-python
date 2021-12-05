@@ -10,8 +10,8 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import base_constants
 from hedweb.columns import create_column_selections
-from hed.tools import get_columns_info
-from hed.tools import SidecarMap
+from hed.tools.map_utils import get_columns_info
+from hed.tools.sidecar_map import SidecarMap
 from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
@@ -184,7 +184,7 @@ def validate(hed_schema, events, sidecar=None, check_for_warnings=False):
         issues = sidecar.validate_entries(validator, check_for_warnings=check_for_warnings)
         if issues:
             issue_str = issue_str + get_printable_issue_string(issues, title="Sidecar definition errors:")
-    issues = events.validate_file(validator, check_for_warnings=check_for_warnings )
+    issues = events.validate_file(validator, check_for_warnings=check_for_warnings)
     if issues:
         issue_str = issue_str + get_printable_issue_string(issues, title="Event file errors:")
 

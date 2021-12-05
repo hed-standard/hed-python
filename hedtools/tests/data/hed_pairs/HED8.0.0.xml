@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <HED version="8.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd">
-   <prologue>This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.</prologue>
+   <prologue>This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
+</prologue>
    <schema>
       <node>
          <name>Event</name>
@@ -2674,10 +2675,6 @@
                      <node>
                         <name>Horizontally-oriented</name>
                         <description>Oriented parallel to or in the plane of the horizon.</description>
-                        <attribute>
-                           <name>relatedTag</name>
-                           <value>Vertically-oriented</value>
-                        </attribute>
                      </node>
                      <node>
                         <name>Leftward</name>
@@ -2724,10 +2721,6 @@
                      <node>
                         <name>Vertically-oriented</name>
                         <description>Oriented perpendicular to the plane of the horizon.</description>
-                        <attribute>
-                           <name>relatedTag</name>
-                           <value>Horizontally-oriented</value>
-                        </attribute>
                      </node>
                   </node>
                </node>
@@ -5595,8 +5588,6 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-right-of</value>
-                  <value>Upper-left-of</value>
-                  <value>Upper-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5604,9 +5595,7 @@
                <description>(A (Lower-right-of B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.</description>
                <attribute>
                   <name>relatedTag</name>
-                  <value>Lower-left-of</value>
                   <value>Upper-left-of</value>
-                  <value>Upper-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5667,8 +5656,6 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-left-of</value>
-                  <value>Upper-right-of</value>
-                  <value>Lower-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5677,8 +5664,6 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-left-of</value>
-                  <value>Upper-left-of</value>
-                  <value>Lower-right-of</value>
                </attribute>
             </node>
             <node>
@@ -6534,5 +6519,6 @@
          <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
       </propertyDefinition>
    </propertyDefinitions>
-   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.</epilogue>
+   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+</epilogue>
 </HED>

@@ -520,7 +520,7 @@ class TagValidator:
         return validation_issues
 
     def check_multiple_unique_tags_exist(self, original_tag_list):
-        """Reports a validation error if two or more tags start with a tag prefix that has the 'unique' attribute.
+        """Reports a validation error if two or more tags start with a tag name_prefix that has the 'unique' attribute.
 
         Parameters
         ----------

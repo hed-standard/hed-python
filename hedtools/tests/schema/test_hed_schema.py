@@ -186,6 +186,7 @@ class TestHedSchema(unittest.TestCase):
 
         self.assertTrue(True)
 
+
 class TestSchemaUtilityFunctions(TestHed):
     def test_correctly_determine_tag_takes_value(self):
         value_tag1 = HedTag('attribute/direction/left/35 px', extension_index=len('attribute/direction/left'))
@@ -265,26 +266,34 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertEqual(no_unit_class_tag_result, [])
 
     def test_strip_off_units_from_value(self):
-        dollars_string = '$25.99'
+        dollars_string_no_space = '$25.99'
+        dollars_string = '$ 25.99'
         dollars_string_invalid = '25.99$'
+        volume_string_no_space = '100m^3'
         volume_string = '100 m^3'
         prefixed_volume_string = '100 cm^3'
         invalid_volume_string = '200 cm'
         currency_units = ['dollar', '$', 'point', 'fraction']
         volume_units = ['m^3']
+        stripped_dollars_string_no_space = \
+            self.hed_schema._get_tag_units_portion(dollars_string_no_space, dollars_string_no_space, currency_units)
         stripped_dollars_string = \
             self.hed_schema._get_tag_units_portion(dollars_string, dollars_string, currency_units)
         stripped_dollars_string_invalid = \
             self.hed_schema._get_tag_units_portion(dollars_string_invalid, dollars_string_invalid, currency_units)
         stripped_volume_string = \
             self.hed_schema._get_tag_units_portion(volume_string, volume_string, volume_units)
+        stripped_volume_string_no_space = \
+            self.hed_schema._get_tag_units_portion(volume_string_no_space, volume_string_no_space, volume_units)
         stripped_prefixed_volume_string = \
             self.hed_schema._get_tag_units_portion(prefixed_volume_string, prefixed_volume_string, volume_units)
         stripped_invalid_volume_string = \
             self.hed_schema._get_tag_units_portion(invalid_volume_string, invalid_volume_string, volume_units)
+        self.assertEqual(stripped_dollars_string_no_space, None)
         self.assertEqual(stripped_dollars_string, '25.99')
         self.assertEqual(stripped_dollars_string_invalid, None)
         self.assertEqual(stripped_volume_string, '100')
+        self.assertEqual(stripped_volume_string_no_space, None)
         self.assertEqual(stripped_prefixed_volume_string, '100')
         self.assertEqual(stripped_invalid_volume_string, None)
 

@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.util.file_util import get_file_extension
-from hed.errors.error_reporter import get_exception_issue_string,get_printable_issue_string
+from hed.errors.error_reporter import get_exception_issue_string, get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 
 from hedweb.web_utils import form_has_file, form_has_option, form_has_url, generate_filename, handle_error

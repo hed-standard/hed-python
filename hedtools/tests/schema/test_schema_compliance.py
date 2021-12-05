@@ -8,11 +8,13 @@ from hed.errors import ErrorHandler, SchemaWarnings
 class Test(unittest.TestCase):
     # A known schema with many issues.
     schema_file = '../data/legacy_xml/HED7.1.1.xml'
+    schema_file_new = '../data/hed_pairs/HED8.0.0.mediawiki'
 
     @classmethod
     def setUpClass(cls):
         cls.error_handler = ErrorHandler()
         cls.schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
+        cls.schema_path_new = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_new)
 
     def validate_term_base(self, input_text, expected_issues):
         for text, issues in zip(input_text, expected_issues):
@@ -26,6 +28,12 @@ class Test(unittest.TestCase):
 
     def test_validate_schema(self):
         hed_schema = schema.load_schema(self.schema_path)
+        issues = hed_schema.check_compliance()
+        self.assertTrue(isinstance(issues, list))
+        self.assertTrue(len(issues) > 1)
+
+    def test_validate_schema_new(self):
+        hed_schema = schema.load_schema(self.schema_path_new)
         issues = hed_schema.check_compliance()
         self.assertTrue(isinstance(issues, list))
         self.assertTrue(len(issues) > 1)

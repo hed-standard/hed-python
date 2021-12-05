@@ -5,7 +5,7 @@ from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
 from hed.schema.fileio.schema2xml import HedSchema2XML
 from hed.schema.fileio.schema2wiki import HedSchema2Wiki
-from hed.schema import schema_compliance
+
 from hed.schema import schema_validation_util
 from hed.schema.hed_schema_section import HedSchemaSection
 
@@ -35,7 +35,7 @@ class HedSchema:
         self.epilogue = ""
 
         self._is_hed3_schema = None
-        # This is the specified library prefix - tags will be {library_prefix}:{tag_name}
+        # This is the specified library name_prefix - tags will be {library_prefix}:{tag_name}
         self._library_prefix = ""
 
         self._sections = self._create_empty_sections()
@@ -95,14 +95,14 @@ class HedSchema:
 
     def schema_for_prefix(self, prefix):
         """
-            Return the specific HedSchema object for the given tag prefix.
+            Return the specific HedSchema object for the given tag name_prefix.
 
             This is mostly a placeholder for HedSchemaGroup.  May be refactored out later.
 
         Parameters
         ----------
         prefix : str
-            A schema library prefix to get the schema for.
+            A schema library name_prefix to get the schema for.
 
         Returns
         -------
@@ -194,7 +194,7 @@ class HedSchema:
 
     def set_library_prefix(self, library_prefix):
         """
-        Updates the tags in this schema with the given prefix, removing any existing prefix.
+        Updates the tags in this schema with the given name_prefix, removing any existing name_prefix.
 
         Parameters
         ----------
@@ -231,6 +231,7 @@ class HedSchema:
         issue_list : [{}]
             A list of all warnings and errors found in the file.
         """
+        from hed.schema import schema_compliance
         return schema_compliance.check_compliance(self, also_check_for_warnings, name, error_handler)
 
     def find_duplicate_tags(self):
@@ -760,7 +761,7 @@ class HedSchema:
 
     def update_old_hed_schema(self):
         """
-            Updates old hed schema with now required attributes - such as $ being a unit prefix.
+            Updates old hed schema with now required attributes - such as $ being a unit name_prefix.
 
         Returns
         -------
@@ -984,21 +985,52 @@ class HedSchema:
         tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
         for unit in tag_unit_class_units:
             unit_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
+            valid_modifiers = self._get_modifiers_for_unit(unit)
+            is_prefix = unit_entry.has_attribute(HedKey.UnitPrefix)
             derivative_units = self._get_valid_unit_plural(unit)
             for derivative_unit in derivative_units:
                 if unit_entry.has_attribute(HedKey.UnitSymbol):
                     found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
                                                                                 derivative_unit,
-                                                                                True)
+                                                                                is_prefix=is_prefix,
+                                                                                valid_modifiers=valid_modifiers)
                 else:
                     found_unit, stripped_value = self._strip_off_units_if_valid(formatted_tag_unit_value,
                                                                                 derivative_unit,
-                                                                                False)
+                                                                                is_prefix=is_prefix,
+                                                                                valid_modifiers=valid_modifiers)
                 if found_unit:
                     return stripped_value
         return None
 
-    def _strip_off_units_if_valid(self, unit_value, unit, is_unit_symbol):
+    def _get_modifiers_for_unit(self, unit):
+        """
+            Returns the valid modifiers for the given unit
+
+        Parameters
+        ----------
+        unit: str
+            A known unit
+
+        Returns
+        -------
+        modifier_list: [HedSchemaEntry]
+
+        """
+        unit_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
+        is_si_unit = unit_entry.has_attribute(HedKey.SIUnit)
+        is_unit_symbol = unit_entry.has_attribute(HedKey.UnitSymbol)
+        if not is_si_unit:
+            return []
+        if is_unit_symbol:
+            modifier_attribute_name = HedKey.SIUnitSymbolModifier
+        else:
+            modifier_attribute_name = HedKey.SIUnitModifier
+        valid_modifiers = self.unit_modifiers.get_entries_with_attribute(modifier_attribute_name)
+        return valid_modifiers
+
+    @staticmethod
+    def _strip_off_units_if_valid(unit_value, unit, is_prefix=False, valid_modifiers=None):
         """Validates and strips units from a value.
 
         Parameters
@@ -1007,8 +1039,10 @@ class HedSchema:
             The value to validate.
         unit: str
             The unit to strip.
-        is_unit_symbol: bool
-            Whether the unit is a symbol.
+        is_prefix: bool
+            Whether the unit is a prefix.  eg "$ 10". Default suffix.
+        valid_modifiers: [HedSchemaEntry]
+            A list of modifiers this unit accepts
         Returns
         -------
         tuple
@@ -1016,31 +1050,30 @@ class HedSchema:
         """
         found_unit = False
         stripped_value = ''
-        should_be_prefix = False
-        unit_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
-        if unit_entry:
-            should_be_prefix = unit_entry.has_attribute(HedKey.UnitPrefix)
-        if should_be_prefix and str(unit_value).startswith(unit):
+        if is_prefix and unit_value.startswith(unit):
             found_unit = True
-            stripped_value = str(unit_value)[len(unit):].strip()
-        elif not should_be_prefix and str(unit_value).endswith(unit):
+            stripped_value = unit_value[len(unit):]
+        elif not is_prefix and unit_value.endswith(unit):
             found_unit = True
-            stripped_value = str(unit_value)[0:-len(unit)].strip()
+            stripped_value = unit_value[0:-len(unit)]
 
-        if found_unit and self.unit_modifiers:
-            if is_unit_symbol:
-                modifier_attribute_name = HedKey.SIUnitSymbolModifier
-            else:
-                modifier_attribute_name = HedKey.SIUnitModifier
-
-            for modifier_entry in self._sections[HedSectionKey.UnitModifiers].values():
-                if not modifier_entry.has_attribute(modifier_attribute_name):
-                    continue
+        if found_unit and valid_modifiers:
+            for modifier_entry in valid_modifiers:
                 unit_modifier = modifier_entry.long_name
-                if stripped_value.startswith(unit_modifier):
-                    stripped_value = stripped_value[len(unit_modifier):].strip()
-                elif stripped_value.endswith(unit_modifier):
-                    stripped_value = stripped_value[0:-len(unit_modifier)].strip()
+                if stripped_value.endswith(unit_modifier):
+                    stripped_value = stripped_value[0:-len(unit_modifier)]
+                    break
+
+        # Finally verify there is correctly a space between the unit and the value.
+        # This implicitly catches cases where there is an erroneous modifier on a unit.
+        if found_unit:
+            if is_prefix and stripped_value[0] == " ":
+                stripped_value = stripped_value[1:]
+            elif not is_prefix and stripped_value[-1] == " ":
+                stripped_value = stripped_value[0:-1]
+            else:
+                return False, stripped_value
+
         return found_unit, stripped_value
 
     def _get_valid_unit_plural(self, unit):
