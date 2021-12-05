@@ -175,7 +175,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(prepended_hed_string, HedString)
         self.assertEqual(str(prepended_hed_string), str(self.category_partipant_and_stimulus_tags))
 
-    # Verify reading/writing a short tag to a file column with a prefix works
+    # Verify reading/writing a short tag to a file column with a name_prefix works
     def test_add_prefix_verify_short_tag_conversion(self):
         schema_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.schema_file)
         hed_schema = load_schema(schema_file)

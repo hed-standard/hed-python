@@ -43,7 +43,7 @@ class ColumnMetadata:
             The loaded data (usually from json) for the given def
             At a minimum, this needs "HED" in the dict for several ColumnType
         column_prefix : str
-            If present, prepend the given prefix to all hed tags in the columns.  Only works on ColumnType HedTags
+            If present, prepend the given name_prefix to all hed tags in the columns.  Only works on ColumnType HedTags
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         """
@@ -177,7 +177,7 @@ class ColumnMetadata:
     def expand(self, input_text):
         """
             Expands the input_text based on the rules for this column.
-            Eg adding prefix, inserting a column hed_string from key, etc.
+            Eg adding name_prefix, inserting a column hed_string from key, etc.
 
         Parameters
         ----------
@@ -222,14 +222,14 @@ class ColumnMetadata:
         Parameters
         ----------
         required_tag_column_tags: HedString
-            A string containing HED tags associated with a required tag column that may need a tag prefix prepended to
+            A string containing HED tags associated with a required tag column that may need a tag name_prefix prepended to
             its tags.
         required_tag_prefix: str
             A string that will be added if missing to any given tag.
         Returns
         -------
         HedString
-            A comma separated string that contains the required HED tags with the tag prefix prepended to them if
+            A comma separated string that contains the required HED tags with the tag name_prefix prepended to them if
             needed.
 
         """
@@ -243,7 +243,7 @@ class ColumnMetadata:
 
     def remove_prefix_if_needed(self, original_tag, current_tag_text):
         """
-        Remove prefix from all tags in given hed string if this column has a required prefix
+        Remove name_prefix from all tags in given hed string if this column has a required name_prefix
 
         Parameters
         ----------

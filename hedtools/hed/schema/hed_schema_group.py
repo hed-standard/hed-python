@@ -16,7 +16,7 @@ class HedSchemaGroup:
         """
         Create combination of multiple HedSchema objects you can use with the validator.
 
-        Note: will raise HedFileError if two schemas share the same prefix
+        Note: will raise HedFileError if two schemas share the same name_prefix
 
         Parameters
         ----------
@@ -28,7 +28,7 @@ class HedSchemaGroup:
         library_prefixes = [hed_schema._library_prefix for hed_schema in schema_list]
         if len(set(library_prefixes)) != len(library_prefixes):
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
-                               "Multiple schemas share the same tag prefix.  This is not allowed.",
+                               "Multiple schemas share the same tag name_prefix.  This is not allowed.",
                                filename="Combined Schema")
         self._schemas = {hed_schema._library_prefix: hed_schema for hed_schema in schema_list}
 
@@ -73,19 +73,19 @@ class HedSchemaGroup:
 
     def schema_for_prefix(self, prefix):
         """
-            Return the specific HedSchema object for the given tag prefix.
+            Return the specific HedSchema object for the given tag name_prefix.
 
-            Returns None if prefix is invalid.
+            Returns None if name_prefix is invalid.
 
         Parameters
         ----------
         prefix : str
-            A schema library prefix to get the schema for.
+            A schema library name_prefix to get the schema for.
 
         Returns
         -------
         schema: HedSchema
-            The specific schema for this library prefix
+            The specific schema for this library name_prefix
         """
         schema = self._schemas.get(prefix)
         return schema
@@ -101,6 +101,30 @@ class HedSchemaGroup:
             A list of valid tag prefixes for this schema.
         """
         return list(self._schemas.keys())
+
+    def check_compliance(self, also_check_for_warnings=True, name=None,
+                         error_handler=None):
+        """
+            Checks for hed3 compliance of this schema.
+
+        Parameters
+        ----------
+        also_check_for_warnings : bool, default True
+            If True, also checks for formatting issues like invalid characters, capitalization, etc.
+        name: str
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        Returns
+        -------
+        issue_list : [{}]
+            A list of all warnings and errors found in the file.
+        """
+        issues_list = []
+        for schema in self._schemas.values():
+            issues_list += schema.check_compliance(also_check_for_warnings, name, error_handler)
+        return issues_list
 
     # ===============================================
     # Basic tag attributes

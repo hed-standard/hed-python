@@ -57,7 +57,7 @@ attributes = {
                   "A schema attribute specifying which unit class this value tag belongs to."),
     "unitPrefix": (("boolProperty", "unitProperty"),
                    "A schema attribute applied specifically to unit elements to designate that the unit indicator is "
-                   "a prefix (e.g., dollar sign in the currency units)."),
+                   "a name_prefix (e.g., dollar sign in the currency units)."),
     "unitSymbol": (("boolProperty", "unitProperty"),
                    "A schema attribute indicating this tag is an abbreviation or symbol representing a type of unit. "
                    "Unit symbols represent both the singular and the plural and thus cannot be pluralized."),

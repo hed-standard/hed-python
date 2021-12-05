@@ -10,7 +10,7 @@ NO_VERSION_INFO_STRING = "No version info found"
 
 
 def delete_file_if_it_exists(file_path):
-    """Deletes a other if it exist.
+    """Deletes a file if it exist.
 
     Parameters
     ----------
@@ -57,9 +57,10 @@ def get_version_from_xml(hed_xml_tree):
 
        Returns
        -------
-       str
-           The version of the HED schema.
+        str
+            The version of the HED schema.
 
+        TODO: This should be moved to the schema module
     """
 
     if hed_xml_tree is None:

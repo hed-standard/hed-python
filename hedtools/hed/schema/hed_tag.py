@@ -26,7 +26,7 @@ class HedTag:
         self.span = span
 
         # If this is present, use this as the org tag for most purposes.  This is generally only filled out
-        # if the tag has a prefix added, or is an expanded def.
+        # if the tag has a name_prefix added, or is an expanded def.
         self._tag = None
 
         # The long form of the tag, if generated.
@@ -123,7 +123,7 @@ class HedTag:
         """
             Returns the original version of the tag, without value or extension
 
-            Warning: This could be empty if the original tag had a prefix prepended.
+            Warning: This could be empty if the original tag had a name_prefix prepended.
                 eg a column where "Label/" is prepended, thus the column value has zero base portion.
 
             Note: only valid after calling convert_to_canonical_forms
@@ -150,7 +150,7 @@ class HedTag:
         """
             Returns true if this tag has been modified from it's original form.
 
-            Modifications can include adding a column prefix.
+            Modifications can include adding a column name_prefix.
 
         Returns
         -------
@@ -262,23 +262,23 @@ class HedTag:
         return self._hed_string[self.span[0]:self.span[1]]
 
     def add_prefix_if_not_present(self, required_prefix):
-        """Add a prefix to this tag *unless* the tag is already formatted.
+        """Add a name_prefix to this tag *unless* the tag is already formatted.
 
-        This means we verify the tag does not have the required prefix, or any partial prefix
+        This means we verify the tag does not have the required name_prefix, or any partial name_prefix
 
         Ex:
         RequiredPrefix: KnownTag1/KnownTag2
         Case 1: KnownTag1/KnownTag2/ColumnValue
-            Will not be changed, has prefix already
+            Will not be changed, has name_prefix already
         Case 2: KnownTag2/ColumnValue
-            Will not be changed, has partial prefix already
+            Will not be changed, has partial name_prefix already
         Case 3: ColumnValue
             Prefix will be added.
 
         Parameters
         ----------
         required_prefix : str
-            The full prefix to add if not present
+            The full name_prefix to add if not present
         """
         checking_prefix = required_prefix
         while checking_prefix:
@@ -357,7 +357,7 @@ class HedTag:
 
     @staticmethod
     def _check_tag_starts_with(hed_tag, target_tag_short_name):
-        """ Check if a given tag starts with a given string, and returns the tag with the prefix removed if it does.
+        """ Check if a given tag starts with a given string, and returns the tag with the name_prefix removed if it does.
 
         Parameters
         ----------
@@ -367,7 +367,7 @@ class HedTag:
             The string to match eg find target_tag_short_name in hed_tag
         Returns
         -------
-            str: the tag without the removed prefix, or None
+            str: the tag without the removed name_prefix, or None
         """
         hed_tag_lower = hed_tag.lower()
         found_index = hed_tag_lower.find(target_tag_short_name)
@@ -481,7 +481,7 @@ class HedTag:
                     return str(self), None, None, error
 
         full_tag_string = self._str_no_long_tag()
-        # skip over the tag prefix if present
+        # skip over the tag name_prefix if present
         full_tag_string = full_tag_string[len(prefix):]
         # Finally don't actually adjust the tag if it's hed2 style.
         if hed_schema.has_duplicate_tags:
