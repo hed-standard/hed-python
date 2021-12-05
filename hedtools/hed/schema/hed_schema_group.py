@@ -102,6 +102,30 @@ class HedSchemaGroup:
         """
         return list(self._schemas.keys())
 
+    def check_compliance(self, also_check_for_warnings=True, name=None,
+                         error_handler=None):
+        """
+            Checks for hed3 compliance of this schema.
+
+        Parameters
+        ----------
+        also_check_for_warnings : bool, default True
+            If True, also checks for formatting issues like invalid characters, capitalization, etc.
+        name: str
+            If present, will use this as the filename for context, rather than using the actual filename
+            Useful for temp filenames.
+        error_handler : ErrorHandler or None
+            Used to report errors.  Uses a default one if none passed in.
+        Returns
+        -------
+        issue_list : [{}]
+            A list of all warnings and errors found in the file.
+        """
+        issues_list = []
+        for schema in self._schemas.values():
+            issues_list += schema.check_compliance(also_check_for_warnings, name, error_handler)
+        return issues_list
+
     # ===============================================
     # Basic tag attributes
     # ===============================================
