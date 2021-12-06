@@ -62,12 +62,7 @@ def make_info_dataframe(col_info, selected_col):
     return df
 
 
-def make_key(key_string, indices=[0, -2], separator='_'):
-    key_value = ''
-    pieces = key_string.split(separator)
-    for index in indices:
-        key_value += pieces[index] + separator
-    return key_value[:-1]
+
 
 
 def remove_quotes(df):

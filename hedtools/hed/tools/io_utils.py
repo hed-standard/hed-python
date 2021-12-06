@@ -1,6 +1,5 @@
 import os
 from werkzeug.utils import secure_filename
-from hed.tools.data_utils import make_key
 
 
 def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None):
@@ -129,6 +128,14 @@ def make_file_dict(file_list, indices=(0, -2), separator='_'):
         key = make_key(base, indices=indices, separator=separator)
         file_dict[key] = the_file
     return file_dict
+
+
+def make_key(key_string, indices=(0, -2), separator='_'):
+    key_value = ''
+    pieces = key_string.split(separator)
+    for index in list(indices):
+        key_value += pieces[index] + separator
+    return key_value[:-1]
 
 
 def parse_bids_filename(file_path):
