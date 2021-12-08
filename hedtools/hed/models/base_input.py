@@ -529,7 +529,7 @@ class BaseInput:
         ----------
 
         validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in this sidecar.
+            A validator or list of validators to apply.
         name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
