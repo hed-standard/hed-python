@@ -503,7 +503,6 @@ def check_for_any_errors(issues_list):
     return False
 
 
-
 def _get_context_from_issue(val_issue, skip_filename=True):
     """
     Extract all the context values from the given issue

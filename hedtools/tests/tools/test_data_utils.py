@@ -2,8 +2,8 @@ import os
 import unittest
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools import get_key_hash, get_row_hash
-from hed.tools import get_new_dataframe, make_info_dataframe, remove_quotes, reorder_columns, separate_columns
+from hed.tools.data_utils import get_key_hash, get_new_dataframe, get_row_hash, \
+    make_info_dataframe, remove_quotes, reorder_columns, separate_columns
 
 
 class Test(unittest.TestCase):
