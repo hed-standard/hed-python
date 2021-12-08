@@ -2,7 +2,7 @@ import os
 import unittest
 import numpy as np
 from pandas import DataFrame
-from hed.tools import get_new_dataframe
+from hed.tools.data_utils import get_new_dataframe
 from hed.tools.event_utils import add_columns, check_match, delete_columns, delete_rows_by_column, \
     replace_values
 
@@ -29,9 +29,9 @@ class Test(unittest.TestCase):
 
     def test_check_match(self):
         data1 = {'Name': ['n/a', '', 'tom', 'alice', 0, 1],
-                'Age': [np.nan, 10, '', 'n/a', '0', '10']}
+                 'Age': [np.nan, 10, '', 'n/a', '0', '10']}
         data2 = {'Blame': ['n/a', '', 'tom', 'alice', 0, 1],
-                'Rage': [np.nan, 10, '', 'n/a', '0', '10']}
+                 'Rage': [np.nan, 10, '', 'n/a', '0', '10']}
         df1 = DataFrame(data1)
         df2 = DataFrame(data2)
         errors = check_match(df1['Name'], df2['Blame'])
@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         errors = check_match(df1['Age'], df2['Rage'], numeric=True)
         self.assertFalse(errors, "There should not be errors if the items are compared as strings")
         data3 = {'Blame': ['n/a', '', 'tom', 'alice', 0, 1],
-                'Rage': [np.nan, 10, '', '1', '0', 30]}
+                 'Rage': [np.nan, 10, '', '1', '0', 30]}
         df3 = DataFrame(data3)
         errors = check_match(df1['Age'], df3['Rage'], numeric=True)
         self.assertTrue(errors, "There should be errors")

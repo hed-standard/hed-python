@@ -49,10 +49,12 @@ class IndividualHedTagsShort(TestHed3):
             'nonExtensionsAllowed': self.format_error_but_not_really(ValidationErrors.INVALID_EXTENSION, tag=0),
             'invalidExtension': self.format_error_but_not_really(
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=6, index_in_tag_end=9,
-                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red"),
+                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute" +
+                                    "/Color/CSS-color/Red-color/Red"),
             'invalidExtension2': self.format_error_but_not_really(
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=6, index_in_tag_end=9,
-                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red"),
+                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute" +
+                                    "/Color/CSS-color/Red-color/Red"),
             'usedToBeIllegalComma': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, tag=1,
                                                                      index_in_tag=0, index_in_tag_end=4),
             'illegalDef': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=4,
@@ -250,7 +252,7 @@ class IndividualHedTagsShort(TestHed3):
         expected_issues = {
             'noWarning': [],
             'warning': self.format_error_but_not_really(ValidationErrors.HED_TAG_EXTENDED, tag=0,
-                                                                 index_in_tag=13, index_in_tag_end=None),
+                                                        index_in_tag=13, index_in_tag_end=None),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 

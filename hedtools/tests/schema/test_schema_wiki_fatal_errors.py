@@ -3,7 +3,7 @@ import os
 
 from hed import schema
 from hed import HedFileError, HedExceptions
-from hed.errors.error_reporter import get_exception_issue_string
+
 
 class TestHedSchema(unittest.TestCase):
     base_schema_dir = '../data/invalid_wiki_schemas/'
