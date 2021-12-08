@@ -39,5 +39,6 @@ class Test(TestWebBase):
         self.assertEqual(response.status_code, 200, "The root hed home page should exist")
         self.assertTrue(response.data, "The returned page should not be empty")
 
+
 if __name__ == '__main__':
     unittest.main()

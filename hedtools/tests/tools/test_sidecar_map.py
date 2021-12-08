@@ -1,7 +1,7 @@
 import os
 import unittest
 from hed.tools.sidecar_map import SidecarMap
-from hed.tools import get_new_dataframe
+from hed.tools.data_utils import get_new_dataframe
 from hed.errors.exceptions import HedFileError
 
 

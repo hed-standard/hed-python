@@ -1,12 +1,10 @@
 import sys
-import os
-import subprocess
 
 
 def main(filepath):
     with open(filepath) as f:
         lines = f.readlines()
-    print(f"The contents:\ {str(lines)}")
+    print(f"The contents:\n {str(lines)}")
 
 
 if __name__ == '__main__':

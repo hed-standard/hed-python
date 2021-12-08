@@ -53,7 +53,7 @@ def get_input_from_form(request):
             form_has_file(request, base_constants.SCHEMA_FILE, file_constants.SCHEMA_EXTENSIONS):
         f = request.files[base_constants.SCHEMA_FILE]
         schema, issue_str = get_schema(schema_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
-                                         file_type=secure_filename(f.filename))
+                                       file_type=secure_filename(f.filename))
         display_name = secure_filename(f.filename)
     elif form_has_option(request, base_constants.SCHEMA_UPLOAD_OPTIONS, base_constants.SCHEMA_URL_OPTION) and \
             form_has_url(request, base_constants.SCHEMA_URL, file_constants.SCHEMA_EXTENSIONS):

@@ -1,11 +1,9 @@
 import os
 import unittest
 import pandas as pd
-from hed.errors.exceptions import HedFileError
 from hed.tools.map_utils import get_columns_info
 from hed.tools.data_utils import get_key_hash, get_row_hash
-from hed.tools.io_utils import get_file_list
-from hed.tools import get_new_dataframe, remove_quotes, reorder_columns, separate_columns
+from hed.tools.data_utils import get_new_dataframe
 
 
 class Test(unittest.TestCase):
@@ -19,7 +17,6 @@ class Test(unittest.TestCase):
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
         cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
-
 
     def test_get_columns_info(self):
         df = get_new_dataframe(self.stern_test2_path)
@@ -58,7 +55,6 @@ class Test(unittest.TestCase):
             my_map[key] = index
         self.assertEqual(len(my_map.keys()), len(stern_df),
                          "get_row_hash should uniquely hash all of the keys in stern map")
-
 
 
 if __name__ == '__main__':
