@@ -2,7 +2,7 @@ import unittest
 import os
 import io
 
-from hed import HedInput, HedString, Sidecar, EventsInput, HedFileError
+from hed import HedInput, Sidecar, EventsInput, HedFileError
 import shutil
 from hed.models import model_constants
 
@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
         cls.zero_based_tag_columns_less_than_row_column_count = [0, 1, 2]
         cls.column_prefix_dictionary = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
         cls.category_key = 'Event/Category/'
-        cls.category_partipant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
+        cls.category_participant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
         cls.category_tags = 'Participant response, Stimulus'
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
 
@@ -50,8 +50,8 @@ class Test(unittest.TestCase):
     def test_get_row_hed_tags(self):
         row_dict = self.generic_file_input._mapper.expand_row_tags(self.row_with_hed_tags)
         column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
-        #self.assertIsInstance(hed_string, HedString)
-        #self.assertTrue(hed_string)
+        # self.assertIsInstance(hed_string, HedString)
+        # self.assertTrue(hed_string)
         self.assertIsInstance(column_to_hed_tags_dictionary, dict)
         self.assertTrue(column_to_hed_tags_dictionary)
 

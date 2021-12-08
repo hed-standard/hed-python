@@ -54,7 +54,6 @@ if __name__ == '__main__':
     print(get_printable_issue_string(validation_issues,
                                      title='[Example 6] hed_string_3 extended tag flags error with warnings'))
 
-
     hed_string_4 = 'Event/Label/ButtonPushDeny, Event/Description/Button push to deny access to the ID holder,' \
                    'Event/Category/Participant response, ' \
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger)'

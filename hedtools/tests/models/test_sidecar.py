@@ -16,7 +16,8 @@ class Test(unittest.TestCase):
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.json_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
         cls.json_def_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_with_defs.json")
-        cls.json_without_definitions_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_without_definitions.json")
+        cls.json_without_definitions_filename = \
+            os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_without_definitions.json")
         cls.json_errors_filename = os.path.join(cls.base_data_dir, "sidecar_tests/json_errors.json")
         cls.default_sidecar = Sidecar(cls.json_filename)
         cls.json_def_sidecar = Sidecar(cls.json_def_filename)

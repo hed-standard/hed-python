@@ -275,12 +275,12 @@ class Test(unittest.TestCase):
         def_dict.check_for_definitions(def_string)
         def_mapper = DefinitionMapper(def_dict)
 
-        label_def_string_has_inavlid_placeholder = "def/TestDef/54687"
+        label_def_string_has_invalid_placeholder = "def/TestDef/54687"
 
-        test_string = HedString(label_def_string_has_inavlid_placeholder)
+        test_string = HedString(label_def_string_has_invalid_placeholder)
         test_string.convert_to_canonical_forms(None)
         def_issues = def_mapper.expand_def_tags(test_string)
-        self.assertEqual(str(test_string), label_def_string_has_inavlid_placeholder)
+        self.assertEqual(str(test_string), label_def_string_has_invalid_placeholder)
         self.assertTrue(def_issues)
 
     def test__check_tag_starts_with(self):
