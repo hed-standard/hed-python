@@ -4,6 +4,8 @@ import io
 
 from hed import Sidecar, HedFileError, HedValidator, schema
 from hed.models.column_metadata import ColumnMetadata
+from hed import HedString
+from hed.models import DefDict
 
 
 class Test(unittest.TestCase):
@@ -14,10 +16,12 @@ class Test(unittest.TestCase):
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.json_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
         cls.json_def_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_with_defs.json")
+        cls.json_without_definitions_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_without_definitions.json")
         cls.json_errors_filename = os.path.join(cls.base_data_dir, "sidecar_tests/json_errors.json")
         cls.default_sidecar = Sidecar(cls.json_filename)
         cls.json_def_sidecar = Sidecar(cls.json_def_filename)
         cls.errors_sidecar = Sidecar(cls.json_errors_filename)
+        cls.json_without_definitions_sidecar = Sidecar(cls.json_without_definitions_filename)
 
     def test_invalid_filenames(self):
         # Handle missing or invalid files.
@@ -93,6 +97,17 @@ class Test(unittest.TestCase):
 
         validation_issues = self.errors_sidecar.validate_entries(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 15)
+
+        validation_issues = self.json_without_definitions_sidecar.validate_entries(validator, check_for_warnings=True)
+        self.assertEqual(len(validation_issues), 1)
+
+        hed_string = HedString("(Definition/JsonFileDef/#, (Item/JsonDef1/#,Item/JsonDef1))")
+        extra_def_dict = DefDict()
+        hed_string.validate(extra_def_dict)
+
+        validation_issues = self.json_without_definitions_sidecar.validate_entries(validator, check_for_warnings=True,
+                                                                                   extra_def_dicts=extra_def_dict)
+        self.assertEqual(len(validation_issues), 0)
 
 
 if __name__ == '__main__':

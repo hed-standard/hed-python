@@ -178,8 +178,6 @@ class ErrorHandler:
     def __init__(self):
         # The current (ordered) dictionary of contexts.
         self.error_context = []
-        # The list of validation issues found
-        self.issue_list = []
 
     def push_error_context(self, context_type, context, increment_depth_after=True):
         """
