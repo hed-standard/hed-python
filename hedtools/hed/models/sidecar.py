@@ -189,8 +189,8 @@ class Sidecar:
         column_entry = ColumnMetadata(column_type, column_name, dict_for_entry)
         self._column_data[column_name] = column_entry
 
-    def validate_entries(self, validators=None, name=None, error_handler=None,
-                         **kwargs):
+    def validate_entries(self, validators=None, name=None, extra_def_dicts=None,
+                         error_handler=None, **kwargs):
         """Run the given validators on all columns in this sidecar
 
         Parameters
@@ -201,6 +201,8 @@ class Sidecar:
         name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
+        extra_def_dicts: [DefDict] or DefDict or None
+            If present, also use these in addition to the sidecars def dicts.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:
@@ -220,6 +222,10 @@ class Sidecar:
             error_handler.push_error_context(ErrorContext.FILE_NAME, name, False)
 
         def_dicts = [column_entry.def_dict for column_entry in self]
+        if extra_def_dicts:
+            if not isinstance(extra_def_dicts, list):
+                extra_def_dicts = [extra_def_dicts]
+            def_dicts += extra_def_dicts
         def_mapper = DefinitionMapper(def_dicts)
         validators.append(def_mapper)
         all_validation_issues = []
