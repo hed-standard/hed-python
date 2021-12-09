@@ -12,8 +12,12 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../hedtools/hed/'))
-sys.path.insert(0, os.path.abspath('../../wedtools/hedweb/'))
+import sphinx_rtd_theme
+
+sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../hedcode'))
+sys.path.insert(0, os.path.abspath('../hedtools'))
+sys.path.insert(0, os.path.abspath('../webtools'))
 
 # -- Project information -----------------------------------------------------
 
@@ -22,8 +26,9 @@ copyright = '2021, HED Working Group'
 author = 'HED Working Group'
 
 # The full version, including alpha/beta/rc tags
-release = '8.0.0'
+release = '0.0.1'
 
+currentdir = os.path.abspath(os.path.dirname(__file__))
 
 # -- General configuration ---------------------------------------------------
 
@@ -34,11 +39,18 @@ extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.coverage",
+    "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
+    "sphinx.ext.napoleon",
+    "numpydoc"
 ]
 
 autosummary_generate = True
+autodoc_default_flags = ['members', 'inherited-members']
 myst_heading_anchors = 2
 myst_enable_extensions = ["deflist"]
 
@@ -52,7 +64,7 @@ master_doc = 'index'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', '_templates']
+exclude_patterns = ['_build', '_templates', 'Thumbs.db', '.DS_Store']
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -60,6 +72,10 @@ exclude_patterns = ['_build', '_templates']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
+
+html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
 html_theme_options = {
     'analytics_id': 'UA-XXXXXXX-1',  # Provided by Google in your dashboard
     'analytics_anonymize_ip': False,
