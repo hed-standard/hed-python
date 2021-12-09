@@ -30,6 +30,8 @@ jobs:
           pip install coverage
           if [ -f hedtools/requirements.txt ]; then pip install -r hedtools/requirements.txt; fi
           if [ -f webtools/requirements.txt ]; then pip install -r webtools/requirements.txt; fi
+          if [ -f docs/requirements.txt ]; then pip install -r docs/requirements.txt; fi
+          if [ -f hedcode/requirements.txt ]; then pip install -r hedcode/requirements.txt; fi
 
       - name: Lint with flake8
         run: |
