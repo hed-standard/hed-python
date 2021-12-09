@@ -186,6 +186,7 @@ class TestHedSchema(unittest.TestCase):
 
         self.assertTrue(True)
 
+
 class TestSchemaUtilityFunctions(TestHed):
     def test_correctly_determine_tag_takes_value(self):
         value_tag1 = HedTag('attribute/direction/left/35 px', extension_index=len('attribute/direction/left'))

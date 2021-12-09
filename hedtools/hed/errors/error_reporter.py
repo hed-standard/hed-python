@@ -178,8 +178,6 @@ class ErrorHandler:
     def __init__(self):
         # The current (ordered) dictionary of contexts.
         self.error_context = []
-        # The list of validation issues found
-        self.issue_list = []
 
     def push_error_context(self, context_type, context, increment_depth_after=True):
         """
@@ -505,7 +503,6 @@ def check_for_any_errors(issues_list):
     return False
 
 
-
 def _get_context_from_issue(val_issue, skip_filename=True):
     """
     Extract all the context values from the given issue
@@ -541,7 +538,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
     context : str
         The value of this context
     tab_count : int
-        Number of tabs to prefix each line with.
+        Number of tabs to name_prefix each line with.
 
     Returns
     -------
@@ -585,7 +582,7 @@ def _get_context_string(single_issue_context, last_used_context):
     context_string: str
         The full string of context(potentially multiline) to add before the error
     tab_string: str
-        The prefix to add to any message line with this context.
+        The name_prefix to add to any message line with this context.
     """
     context_string = ""
     tab_count = 0

@@ -11,7 +11,7 @@ class Test(TestHedBase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0.mediawiki")
+        hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0t.mediawiki")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.placeholder_label_def_string = f"def/TestDefPlaceholder/2471"
         cls.placeholder_def_contents = "(Item/TestDef1/#,Item/TestDef2)"
@@ -90,13 +90,15 @@ class Test(TestHedBase):
             [],
             [],
             self.format_error_but_not_really(OnsetErrors.OFFSET_BEFORE_ONSET, tag=0),
-            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0, tag_list=['def/TestDefPlaceholder/2471', 'Onset', '(Event)', '(Event)']),
+            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+                                             tag_list=['def/TestDefPlaceholder/2471', 'Onset', '(Event)', '(Event)']),
             [],
             self.format_error_but_not_really(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error_but_not_really(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list= ['def/InvalidDef']),
+            self.format_error_but_not_really(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=['def/InvalidDef']),
             self.format_error_but_not_really(OnsetErrors.ONSET_DEF_UNMATCHED, tag=0),
             self.format_error_but_not_really(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
-            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0, tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
+            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+                                             tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, [onset_mapper])
@@ -139,13 +141,17 @@ class Test(TestHedBase):
             [],
             [],
             self.format_error_but_not_really(OnsetErrors.OFFSET_BEFORE_ONSET, tag=0),
-            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0, tag_list=[self.placeholder_label_def_string, 'Onset', '(Event)', '(Event)']),
+            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+                                             tag_list=[self.placeholder_label_def_string,
+                                                       'Onset', '(Event)', '(Event)']),
             [],
             self.format_error_but_not_really(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error_but_not_really(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list= ['def/TestDefPlaceholder/2']),
+            self.format_error_but_not_really(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0,
+                                             tag_list=['def/TestDefPlaceholder/2']),
             self.format_error_but_not_really(ValidationErrors.HED_DEF_UNMATCHED, tag=0),
             self.format_error_but_not_really(ValidationErrors.HED_DEF_VALUE_MISSING, tag=0),
-            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0, tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
+            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+                                             tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, validators, expand_defs=False)
@@ -189,10 +195,12 @@ class Test(TestHedBase):
             [],
             [],
             self.format_error_but_not_really(OnsetErrors.OFFSET_BEFORE_ONSET, tag=0),
-            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0, tag_list=[self.placeholder_expanded_def_string, 'Onset', '(Event)', '(Event)']),
+            self.format_error_but_not_really(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+                                             tag_list=[self.placeholder_expanded_def_string,
+                                                       'Onset', '(Event)', '(Event)']),
             [],
             self.format_error_but_not_really(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error_but_not_really(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list= ['def/InvalidDef']),
+            self.format_error_but_not_really(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=['def/InvalidDef']),
             self.format_error_but_not_really(OnsetErrors.ONSET_DEF_UNMATCHED, tag=0),
             self.format_error_but_not_really(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
             self.format_error_but_not_really(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=False)
@@ -200,7 +208,7 @@ class Test(TestHedBase):
 
         self._test_issues_base(test_strings, test_issues, expected_context, [onset_mapper])
 
-    def test_test_interleving_onset_offset(self):
+    def test_test_interleaving_onset_offset(self):
         def_dict = DefDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
@@ -279,13 +287,15 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
         # count of issues the line generates
+        onset_list = ['Property/Data-property/Data-marker/Temporal-marker/Onset']
+        offset_list = ['Property/Data-property/Data-marker/Temporal-marker/Offset']
         test_issues = [
             self.format_error_but_not_really(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             self.format_error_but_not_really(ValidationErrors.HED_TAG_REPEATED, tag=2)
             + self.format_error_but_not_really(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1,
-                                               multiple_tags=['Property/Data-property/Data-marker/Temporal-marker/Onset']),
+                                               multiple_tags=onset_list),
             self.format_error_but_not_really(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1,
-                                             multiple_tags=['Property/Data-property/Data-marker/Temporal-marker/Offset']),
+                                             multiple_tags=offset_list),
         ]
 
         self._test_issues_no_context(test_strings, test_issues, validators)
@@ -294,9 +304,9 @@ class Test(TestHedBase):
             self.format_error_but_not_really(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             self.format_error_but_not_really(ValidationErrors.HED_TAG_REPEATED, tag=2)
             + self.format_error_but_not_really(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1,
-                                               multiple_tags=['Property/Data-property/Data-marker/Temporal-marker/Onset']),
+                                               multiple_tags=onset_list),
             self.format_error_but_not_really(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1,
-                                             multiple_tags=['Property/Data-property/Data-marker/Temporal-marker/Offset']),
+                                             multiple_tags=offset_list),
         ]
 
         # Repeat with just hed validator
@@ -385,8 +395,3 @@ class Test(TestHedBase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
-

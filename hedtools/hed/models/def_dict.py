@@ -211,7 +211,7 @@ class DefDict:
 
     @staticmethod
     def _check_tag_starts_with(hed_tag, target_tag_short_name):
-        """ Check if a given tag starts with a given string, and returns the tag with the prefix removed if it does.
+        """ Check if a given tag starts with a given string, and returns the tag with the name_prefix removed if it does.
 
         Parameters
         ----------
@@ -221,7 +221,7 @@ class DefDict:
             The string to match eg find target_tag_short_name in hed_tag
         Returns
         -------
-            str: the tag without the removed prefix, or None
+            str: the tag without the removed name_prefix, or None
         """
         hed_tag_lower = hed_tag.lower()
         found_index = hed_tag_lower.find(target_tag_short_name)

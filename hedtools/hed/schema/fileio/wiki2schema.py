@@ -134,9 +134,8 @@ class HedSchemaWikiParser:
                 error_code = HedExceptions.INVALID_SECTION_SEPARATOR
                 if section in ErrorsBySection:
                     error_code = ErrorsBySection[section]
-                raise HedFileError(error_code,
-                                   f"Required section separator '{SectionNames[section]}' not found in file",
-                                   filename=self.filename)
+                msg = f"Required section separator '{SectionNames[section]}' not found in file"
+                raise HedFileError(error_code, msg, filename=self.filename, issues=[msg])
 
     def _split_lines_into_sections(self, wiki_lines):
         """
@@ -159,8 +158,9 @@ class HedSchemaWikiParser:
             for key, section_string in SectionStarts.items():
                 if line.startswith(section_string):
                     if key in strings_for_section:
+                        msg = f"Found section {SectionNames[key]} twice"
                         raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
-                                           f"Found section {SectionNames[key]} twice", filename=self.filename)
+                                           msg, filename=self.filename, issues=[msg])
 
                     if current_section < key:
                         current_section = key
@@ -170,10 +170,8 @@ class HedSchemaWikiParser:
                         error_code = HedExceptions.INVALID_SECTION_SEPARATOR
                         if key in ErrorsBySection:
                             error_code = ErrorsBySection[key]
-
-                        raise HedFileError(error_code,
-                                           f"Found section {SectionNames[key]} out of order in file",
-                                           filename=self.filename)
+                        msg = f"Found section {SectionNames[key]} out of order in file"
+                        raise HedFileError(error_code, msg, filename=self.filename, issues=[msg])
 
             if found_section:
                 strings_for_section[current_section] = []
@@ -182,12 +180,12 @@ class HedSchemaWikiParser:
 
             if (current_section != HedWikiSection.Schema and line.startswith(wiki_constants.ROOT_TAG) and
                     not (line.startswith(wiki_constants.OLD_SYNTAX_SECTION_NAME) and not self._schema.is_hed3_schema)):
-                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
-                                   f"Invalid section separator '{line.strip()}'", filename=self.filename)
+                msg = f"Invalid section separator '{line.strip()}'"
+                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR, msg, filename=self.filename, issues=[msg])
 
             if line.startswith("!#"):
-                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
-                                   f"Invalid section separator '{line.strip()}'", filename=self.filename)
+                msg = f"Invalid section separator '{line.strip()}'"
+                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR, msg, filename=self.filename, issues=[msg])
 
             if current_section == HedWikiSection.Prologue or current_section == HedWikiSection.Epilogue:
                 if line.strip():
@@ -215,8 +213,8 @@ class HedSchemaWikiParser:
             self.header_attributes = hed_attributes
             self._schema.header_attributes = hed_attributes
             return
-        raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING,
-                           f"First line of file should be HED, instead found: {line}", filename=self.filename)
+        msg = f"First line of file should be HED, instead found: {line}"
+        raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING, msg, filename=self.filename, issues=[msg])
 
     def _read_header_section(self, lines):
         """Ensures the header has no content other than the initial line.
@@ -228,9 +226,8 @@ class HedSchemaWikiParser:
         """
         for line in lines:
             if line.strip():
-                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID,
-                                   "There should be no other content in the between the HED line in the header" +
-                                   "and either the prologue or schema sections.", filename=self.filename)
+                msg = f"Extra content [{line}] HED line and other sections"
+                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg,  filename=self.filename, issues=[msg])
 
     def _read_prologue(self, lines):
         """Adds the prologue
@@ -384,8 +381,8 @@ class HedSchemaWikiParser:
         for pair in attribute_pairs:
             divider_index = pair.find(':')
             if divider_index == -1:
-                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID,
-                                   f"Found poorly matched key:value pair in header: {pair}", filename=self.filename)
+                msg = f"Found poorly matched key:value pair in header: {pair}"
+                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.filename, issues=[msg])
             key, value = pair[:divider_index], pair[divider_index + 1:]
             key = key.strip()
             value = value.strip()
@@ -429,11 +426,10 @@ class HedSchemaWikiParser:
         """
         index1 = tag_line.find(no_wiki_start_tag)
         index2 = tag_line.find(no_wiki_end_tag)
-        if (index1 == -1 and index2 != -1) or \
-                (index2 == -1 and index1 != -1):
-            # todo: comment this in once the schemas are updated to have no wiki errors.
-            # self._add_warning(tag_line, "Invalid or non matching <nowiki> tags found")
-            pass
+        if (index1 == -1 and index2 != -1) or (index2 == -1 and index1 != -1):
+            self._add_warning(tag_line, "Invalid or non matching <nowiki> tags found")
+        elif index1 != -1 and index2 != -1 and index2 <= index1:
+            self._add_warning(tag_line, "</nowiki> appears before <nowiki> on a line")
         tag_line = re.sub(no_wiki_tag, '', tag_line)
         return tag_line
 
