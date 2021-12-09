@@ -83,10 +83,12 @@ class IndividualHedTagsShort(TestHed3):
             'nonExtensionsAllowed': self.format_error_but_not_really(ValidationErrors.INVALID_EXTENSION, tag=0),
             'invalidExtension': self.format_error_but_not_really(
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=9, index_in_tag_end=12,
-                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red"),
+                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute" +
+                                    "/Color/CSS-color/Red-color/Red"),
             'invalidExtension2': self.format_error_but_not_really(
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=9, index_in_tag_end=12,
-                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/Red-color/Red"),
+                expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute" +
+                                    "/Color/CSS-color/Red-color/Red"),
             'usedToBeIllegalComma': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND, tag=1,
                                                                      index_in_tag=3, index_in_tag_end=7),
             'illegalDef': self.format_error_but_not_really(

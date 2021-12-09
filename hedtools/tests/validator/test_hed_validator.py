@@ -69,7 +69,8 @@ class Test(unittest.TestCase):
 
     def test__validate_input_major_errors_columns(self):
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.hed_file_with_major_errors.validate_file(self.generic_hed_input_reader, check_for_warnings=True, name=name)
+        validation_issues = self.hed_file_with_major_errors.validate_file(self.generic_hed_input_reader,
+                                                                          check_for_warnings=True, name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
@@ -90,7 +91,6 @@ class Test(unittest.TestCase):
             self.generic_hed_input_reader._validate_tags_in_hed_string(self.hed_string_with_multiple_unique_tags)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(validation_issues)
-
 
     def test_complex_file_validation(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -160,7 +160,8 @@ class Test(unittest.TestCase):
                                    '../data/validator_tests/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = schema.load_schema(schema_path)
 
-        prefixed_needed_tag_columns = {2: 'Property/Informational-property/Label/', 3: 'Property/Informational-property/Description/'}
+        prefixed_needed_tag_columns = {2: 'Property/Informational-property/Label/',
+                                       3: 'Property/Informational-property/Description/'}
         loaded_file = HedInput(events_path, tag_columns=[4],
                                column_prefix_dictionary=prefixed_needed_tag_columns,
                                worksheet_name='LKT Events')
@@ -195,6 +196,7 @@ class Test(unittest.TestCase):
         test_string = HedString(string_with_def)
         issues = test_string.validate([validator, def_mapper], check_for_definitions=True)
         self.assertEqual(len(issues), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -369,7 +369,7 @@ class BaseInput:
         new_string_obj : HedString
             Text to enter in the given cell
         include_column_prefix_if_exist : bool
-            If true and the column matches one from mapper _column_prefix_dictionary, remove the prefix
+            If true and the column matches one from mapper _column_prefix_dictionary, remove the name_prefix
         tag_form: str
             The version of the tags we would like to use from the hed string.(short_tag, long_tag, base_tag, etc)
             Any attribute of a HedTag that returns a string is valid.
@@ -529,7 +529,7 @@ class BaseInput:
         ----------
 
         validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in this sidecar.
+            A validator or list of validators to apply.
         name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.

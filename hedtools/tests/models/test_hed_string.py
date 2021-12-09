@@ -62,7 +62,7 @@ class HedTagLists(TestHedStrings):
         result = HedString.split_hed_string_into_groups(hed_string)
         tags_as_strings = [str(tag) for tag in result]
         self.assertCountEqual(tags_as_strings, ['Event/Category/Experimental stimulus', 'Item/Object/Vehicle/Train',
-                                       'Attribute/Visual/Color/Purple'])
+                                                'Attribute/Visual/Color/Purple'])
 
     def test_group_tags(self):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \

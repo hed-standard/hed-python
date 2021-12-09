@@ -1,6 +1,5 @@
 import unittest
 import os
-from io import StringIO
 from hed.models.hed_string import HedString
 from hed.validator.hed_validator import HedValidator
 from hed.errors import error_reporter

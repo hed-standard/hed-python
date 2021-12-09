@@ -34,11 +34,13 @@ class TestHedSchema(unittest.TestCase):
         cls.expected_count = {
             "empty_node.mediawiki": 1,
             "malformed_line.mediawiki": 1,
-            "malformed_line2.mediawiki": 1,
-            "malformed_line3.mediawiki": 1,
+            "malformed_line2.mediawiki": 2,
+            "malformed_line3.mediawiki": 2,
             "malformed_line4.mediawiki": 1,
             "malformed_line5.mediawiki": 1,
+            'HED_schema_no_start.mediawiki': 1
         }
+
     def test_invalid_schema(self):
         for filename, error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename

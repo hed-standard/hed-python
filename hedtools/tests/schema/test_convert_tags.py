@@ -517,8 +517,8 @@ class TestConvertHedStringToShort(TestConvertTag):
                                                        tag=0, index_in_tag=0, index_in_tag_end=12),
             'both': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                      tag=0, index_in_tag=0, index_in_tag_end=12)
-                    + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                       tag=1, index_in_tag=0, index_in_tag_end=12),
+            + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                               tag=1, index_in_tag=0, index_in_tag_end=12),
             'singleWithTwoValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                                    tag=1, index_in_tag=0, index_in_tag_end=12),
             'doubleWithValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
@@ -636,8 +636,8 @@ class TestConvertHedStringToLong(TestConvertTag):
                                                        tag=0, index_in_tag=0, index_in_tag_end=12),
             'both': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                      tag=0, index_in_tag=0, index_in_tag_end=12)
-                    + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                       tag=1, index_in_tag=0, index_in_tag_end=12),
+            + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
+                                               tag=1, index_in_tag=0, index_in_tag_end=12),
             'singleWithTwoValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                                    tag=1, index_in_tag=0, index_in_tag_end=12),
             'doubleWithValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,

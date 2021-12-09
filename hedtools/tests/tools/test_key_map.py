@@ -2,8 +2,9 @@ import unittest
 import os
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools import KeyMap
-from hed.tools.map_utils import get_file_list, get_row_hash
+from hed.tools.key_map import KeyMap
+from hed.tools.io_utils import get_file_list
+from hed.tools.data_utils import get_row_hash
 
 
 class Test(unittest.TestCase):
@@ -94,7 +95,8 @@ class Test(unittest.TestCase):
         target_cols = ['event_type', 'task_role', 'letter']
         key_map = KeyMap(key_cols, target_cols, 'my_name')
         key_map.update(self.stern_map_path)
-        event_file_list = get_file_list(self.data_dir, types=[".tsv"], prefix='sternberg', suffix="_events")
+        event_file_list = get_file_list(self.data_dir, name_prefix='sternberg',
+                                        name_suffix="_events", extensions=[".tsv"])
         for file in event_file_list:
             df_new, missing = key_map.remap(file)
             self.assertFalse(missing)

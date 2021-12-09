@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="hedtools",
     version="0.0.1",
-    author="VisLab, Jeremy Cockfield, Alexander Jones, Owen Winterberg, Ian Callanan, Kay Robbins",
+    author="VisLab, Ian Callanan, Jeremy Cockfield, Alexander Jones, Owen Winterberg, Kay Robbins",
     author_email="Kay.Robbins@utsa.edu",
     description="Utilities for converting among different representations of the HED " +
                 "(Hierarchical Event Descriptor) specification.",

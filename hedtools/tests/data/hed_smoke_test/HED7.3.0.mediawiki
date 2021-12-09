@@ -298,13 +298,13 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 * Offset
 * Imagined <nowiki>[This is used to identity that the (sub)event only happened in the imagination of the participant, e.g.  imagined movements in motor imagery paradigms.]</nowiki>
 * State ID <nowiki>{requireChild} [This is used to identify a group of events that are changing the state of a variable where the onset means the offset of any other and a change in the state]</nowiki>
-** # <nowiki>{takesValue} [ID which could be a number or any string]</nowiki> 
+** <nowiki># {takesValue} [ID which could be a number or any string]</nowiki>
 * Repetition <nowiki>{requireChild} [When the same type of event such as a fixation on the exact same object happens multiple times and it might be necessary to distinguish the first look vs. others]</nowiki> 
 ** <nowiki># {takesValue, isNumeric} [Number starting from 1 where 1 indicates the first occurrence and 2 indicates the second occurrence]</nowiki>
 * Temporal rate <nowiki>{predicateType=propertyOf}</nowiki> 
 ** <nowiki># {takesValue, isNumeric, unitClass=frequency} [In Hz]</nowiki> 
 * Condition <nowiki>{requireChild} [Specifies the value of an independent variable (number of letters, N, in an N-back task) or function of independent variables that is varied or controlled for in the experiment.  This attribute is often specified at the task level and can be associated with specification of an experimental stimulus or an experiment context (e.g. 1-back, 2-back conditions in an N-back task, or changing the target type from faces to houses in a Rapid Serial Visual Presentation, or RSVP, task.)]</nowiki>
-** # <nowiki>{takesValue} [the condition]</nowiki> 
+** <nowiki># {takesValue} [the condition]</nowiki>
 * Action judgment <nowiki>[External judgment (assumed to be ground truth, e.g. from an experiment control software or an annotator) about participant actions such as answering a question, failing to answer in time, etc.]</nowiki> 
 ** Correct 
 ** Incorrect <nowiki>[Wrong choice but not time out]</nowiki> 
@@ -632,10 +632,10 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 ** Right base <nowiki>[The time of the last detectable eyelid movement on opening.]</nowiki>
 * Eye close <nowiki>[Close eyes and keep closed for more than approximately 0.1 s]</nowiki> 
 ** Keep <nowiki>[Keep the eye closed. If a value is provided it indicates the duration for this.]</nowiki> 
-*** # <nowiki>[The time that eyes are kept closed.]{takesValue, isNumeric, unitClass=time}</nowiki>
+*** <nowiki># [The time that eyes are kept closed.]{takesValue, isNumeric, unitClass=time}</nowiki>
 * Eye open <nowiki>[Open eyes and keep open for more than approximately 0.1 s]</nowiki>
 ** Keep <nowiki>[Keep the eye open. If a value is provided it indicates the duration for this.]</nowiki> 
-*** # <nowiki>[the duration (by default in seconds) that they keep their eye open.]{takesValue, isNumeric, unitClass=time}</nowiki>
+*** <nowiki># [the duration (by default in seconds) that they keep their eye open.]{takesValue, isNumeric, unitClass=time}</nowiki>
 *** With blinking <nowiki>[Default. Allow blinking during the eye-open period.]</nowiki>
 *** Without blinking <nowiki>[Without blinking during the eye-open period.]</nowiki>
 * Turn <nowiki>[Change in direction of movement or orientation. This includes both turn during movement on a path and also rotations such as head turns]</nowiki> 
@@ -794,9 +794,9 @@ From version 2.2, HED adheres to http://semver.org/ versioning.
 ***** Positive <nowiki>[Positive feedback was provided when it was not deserved.]</nowiki> 
 *** Cue <nowiki>[An indicator of a future event such as a sound cue that in 2-5 seconds a perturbation in driving will occur.]</nowiki> 
 **** Constant delay <nowiki>[The cue is for an event that will happen after a constant delay.]</nowiki>
-***** # {takesValue, isNumeric, unitClass=time} <nowiki>[The delay value.]</nowiki>
+***** <nowiki># {takesValue, isNumeric, unitClass=time} [The delay value.]</nowiki>
 **** Variable delay <nowiki>[The cue is for an event that will happen after a variable delay.]</nowiki>
-***** # {takesValue} <nowiki>[The interval of the variable delay.]</nowiki>
+***** <nowiki># {takesValue} [The interval of the variable delay.]</nowiki>
 ** Visual 
 *** Foveal 
 *** Peripheral     

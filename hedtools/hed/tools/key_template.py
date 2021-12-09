@@ -1,6 +1,7 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.map_utils import get_new_dataframe, get_key_hash, get_row_hash, remove_quotes, separate_columns
+from hed.tools.data_utils import get_key_hash, get_row_hash
+from hed.tools.data_utils import get_new_dataframe, remove_quotes, separate_columns
 
 
 class KeyTemplate:
@@ -81,8 +82,8 @@ class KeyTemplate:
             key_hash = get_row_hash(row, self.columns)
             self.map_dict[key_hash] = index
 
-    def print(self):
-        print(f"Counts for key [{str(self.columns)}]:")
+    def print(self, file=None):
+        print(f"Counts for key [{str(self.columns)}]:",file=file)
         for index, row in self.col_map.iterrows():
             key_hash = get_row_hash(row, self.columns)
-            print(f"{str(list(row.values))}\t{self.count_dict[key_hash]}")
+            print(f"{str(list(row.values))}\t{self.count_dict[key_hash]}", file=file)
