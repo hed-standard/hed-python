@@ -1,4 +1,4 @@
-Instructions for HED docker deployment
+### Instructions for HED docker deployment
 These instructions are for setting up the HED online tools on a Ubuntu 20 server running Apache 2 and Docker.
 
 Table of contents
@@ -18,7 +18,7 @@ Instructions for HED docker deployment	1
 1.2.3 Add docker repository to APT sources	3
 1.2.4 Set up docker through Apache	3
 1.2.5  Create a hedbasic.conf text file	3
-1.2.6 Set apache’s configuration for HED docker	4
+1.2.6 Set apache?s configuration for HED docker	4
 1.2.7 Conversion from windows to linux files	4
 2. Deploying hed docker web	5
 2.1 Check Docker status	5
@@ -54,8 +54,8 @@ Check applications (should have Apache, Apache Full, Apache Secure, CUPS, OpenSS
 		sudo ufw app list
 
 Check ports (should have ports 80, 443/tcp):
-             sudo ufw app info “Apache Full”
-		 sudo ufw allow in “Apache full”
+             sudo ufw app info ?Apache Full?
+		 sudo ufw allow in ?Apache full?
 
 Check that /etc/apache2/apache2.conf is properly set up.  You need to make sure that the following is uncommented:
 
@@ -142,14 +142,14 @@ sudo apt-get install containerd.io
         		ProxyPass /hed http://127.0.0.1:33000/hed
         		ProxyPassReverse /hed http://127.0.0.1:33000/hed 
 </VirtualHost>
-1.2.6 Set apache’s configuration for HED docker
+1.2.6 Set apache?s configuration for HED docker
 sudo cp hedbasic.conf /etc/apache2/sites-enabled/
 sudo cp hedbasic.conf /etc/apache2/sites-available/
 sudo service apache2 restart
 
 You should also delete 000-default.conf from sites-enabled and sites-available. If you get an error trying to start apache try:
 sudo systemctl status apache2.service
-If the error is on that it isn’t recognizing the Proxy command then do:
+If the error is on that it isn?t recognizing the Proxy command then do:
 sudo a2enmod proxy
 sudo a2enmod proxy_http
 sudo a2enmod proxy_balancer
