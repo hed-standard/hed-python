@@ -555,7 +555,8 @@ class BaseInput:
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
         validation_issues = self.get_def_and_mapper_issues(error_handler, check_for_warnings)
         validators = validators.copy()
-        validation_issues += self._run_validators(validators, error_handler=error_handler, check_for_warnings=check_for_warnings, **kwargs)
+        validation_issues += self._run_validators(validators, error_handler=error_handler,
+                                                  check_for_warnings=check_for_warnings, **kwargs)
         error_handler.pop_error_context()
 
         return validation_issues

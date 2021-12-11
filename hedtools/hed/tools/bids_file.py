@@ -13,8 +13,8 @@ class BIDSFile:
         self.entities = entity_dict
         self.sidecars = []
 
-    def is_parent(self, obj):
-        """ Returns true if this is a parent of obj.
+    def is_sidecar_for(self, obj):
+        """ Returns true if this is a sidecar for obj.
 
          Args:
              obj (BIDSFile):       A BIDSFile object to check
@@ -22,10 +22,12 @@ class BIDSFile:
          Returns:
              bool:   True if this is a BIDS parent of obj and False otherwise
          """
-        common_path = os.path.commonpath([obj.file_path, self.file_path])
-        if common_path != os.path.dirname(self.file_path):
+        if self.ext != ".json":
             return False
         elif obj.suffix != self.suffix:
+            return False
+        common_path = os.path.commonpath([obj.file_path, self.file_path])
+        if common_path != os.path.dirname(self.file_path):
             return False
         for key, item in self.entities.items():
             if key not in obj.entities or obj.entities[key] != item:
