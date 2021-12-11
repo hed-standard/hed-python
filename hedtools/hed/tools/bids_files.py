@@ -26,9 +26,9 @@ class BIDSFiles:
         self.dir_dict = get_dir_dictionary(self.root_path, name_suffix=self.suffix, extensions=['.json'])
 
         for bids_obj in self.json_files.values():
-            bids_obj.set_sidecars(self._set_sidecars_from_path(bids_obj))
+            bids_obj.set_sidecars(self._get_sidecars_from_path(bids_obj))
         for bids_obj in self.data_files.values():
-            bids_obj.set_sidecars(self._set_sidecars_from_path(bids_obj))
+            bids_obj.set_sidecars(self._get_sidecars_from_path(bids_obj))
 
     def get_file_dict(self, extensions=['.json']):
         files = get_file_list(self.root_path, name_suffix='_'+self.suffix, extensions=extensions)
@@ -42,11 +42,11 @@ class BIDSFiles:
             return None
         for sidecar in sidecars:
             sidecar_obj = self.json_files[sidecar]
-            if sidecar_obj.is_parent(obj):
+            if sidecar_obj.is_sidecar_for(obj):
                 return sidecar
         return None
 
-    def _set_sidecars_from_path(self, obj):
+    def _get_sidecars_from_path(self, obj):
         sidecar_list = []
         current_path = ''
         for comp in get_path_components(obj.file_path, self.root_path):
