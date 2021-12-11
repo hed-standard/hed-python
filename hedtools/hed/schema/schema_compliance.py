@@ -98,6 +98,8 @@ def tag_exists_check(hed_schema, possible_tags, force_issues_as_warnings=True):
         The schema to check if the tag exists
     possible_tags: str
         Comma separated list of tags.  Short long or mixed form valid.
+    force_issues_as_warnings: bool
+        If True sets all of the severity levels to warning
 
     Returns
     -------

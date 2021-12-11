@@ -138,25 +138,25 @@ class DefDict:
                 continue
 
             if not is_top_level:
-                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                                                                         ValidationErrors.HED_TAG_GROUP_TAG,
-                                                                         tag=def_tags[0])
+                new_def_issues +=\
+                    ErrorHandler.format_error_with_context(error_handler,
+                                                           ValidationErrors.HED_TAG_GROUP_TAG, tag=def_tags[0])
                 continue
 
             if len(def_tags) > 1:
-                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                                                                         DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
-                                                                         def_name=def_tags[0].extension_or_value_portion,
-                                                                         tag_list=[tag for tag in
-                                                                                   def_tags[1:]])
+                new_def_issues += \
+                    ErrorHandler.format_error_with_context(error_handler,
+                                                           DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
+                                                           def_name=def_tags[0].extension_or_value_portion,
+                                                           tag_list=[tag for tag in def_tags[1:]])
                 continue
             def_tag = def_tags[0]
             def_tag_name = def_tag.extension_or_value_portion
             if len(group_tags) > 1:
-                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                                                                         DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                         def_name=def_tag_name,
-                                                                         tag_list=group_tags + other_tags)
+                new_def_issues += \
+                    ErrorHandler.format_error_with_context(error_handler,
+                                                           DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+                                                           def_name=def_tag_name, tag_list=group_tags + other_tags)
                 continue
             if len(other_tags) > 0:
                 new_def_issues += ErrorHandler.format_error_with_context(error_handler,

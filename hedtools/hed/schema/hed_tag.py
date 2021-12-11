@@ -357,7 +357,7 @@ class HedTag:
 
     @staticmethod
     def _check_tag_starts_with(hed_tag, target_tag_short_name):
-        """ Check if a given tag starts with a given string, and returns the tag with the name_prefix removed if it does.
+        """ Check if a given tag starts with a given string, and returns the tag with name_prefix removed if it does.
 
         Parameters
         ----------
@@ -494,9 +494,7 @@ class HedTag:
         state["found_index_start"] += (len(long_tag_string) - len(full_tag_string))
         remainder_start_index = state["found_index_end"] + (len(long_tag_string) - len(full_tag_string))
         return prefix + long_tag_string, \
-               state["found_index_start"] + state["prefix_tag_adj"], \
-               remainder_start_index + state["prefix_tag_adj"], \
-               {}
+            state["found_index_start"] + state["prefix_tag_adj"], remainder_start_index + state["prefix_tag_adj"], {}
 
     def _get_library_prefix(self, org_tag):
         first_slash = org_tag.find("/")
