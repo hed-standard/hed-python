@@ -63,7 +63,8 @@ class BidsFiles:
         issues = []
         for json_obj in self.json_files.values():
             print(json_obj.file_path)
-            new_issues = json_obj.my_contents.validate_entries(validators=None, extra_def_dicts=json_obj.my_sidecars,
+
+            new_issues = json_obj.my_contents.validate_entries(validators=validators, extra_def_dicts=json_obj.my_sidecars,
                                                                check_for_warnings=check_for_warnings)
             issues += json_obj.my_contents.validate_entries(validators=None, extra_def_dicts=json_obj.my_sidecars,
                                                             check_for_warnings=check_for_warnings)
