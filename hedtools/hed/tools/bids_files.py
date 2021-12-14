@@ -82,8 +82,8 @@ class BidsFiles:
 
 
 if __name__ == '__main__':
-    path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_inheritance'
-    # path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
+    # path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_inheritance'
+    path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
     bids = BidsFiles(path)
 
     for file_obj in bids.json_files.values():
