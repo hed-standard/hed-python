@@ -45,6 +45,13 @@ class Test(unittest.TestCase):
             filename = os.path.basename(item)
             self.assertTrue(filename.startswith('sternberg'))
 
+    def test_get_file_list_case(self):
+        dir_data = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
+        file_list = get_file_list(dir_data, name_prefix='STERNBerg', extensions=[".Tsv"])
+        for item in file_list:
+            filename = os.path.basename(item)
+            self.assertTrue(filename.startswith('sternberg'))
+
     def test_get_path_components(self):
         base_path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
         file_path1 = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s/sub-01/ses-1/eeg/temp_events.tsv'
