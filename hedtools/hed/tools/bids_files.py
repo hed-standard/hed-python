@@ -77,7 +77,8 @@ class BidsFiles:
                     event_obj.my_contents = my_contents
             new_issues = my_contents.validate_file(validators=None, check_for_warnings=check_for_warnings)
             print(f"{event_obj.file_path} ")
-            issues += my_contents.validate_file(validators=None, check_for_warnings=check_for_warnings)
+            if new_issues:
+                issues += my_contents.validate_file(validators=None, check_for_warnings=check_for_warnings)
         return issues
 
 
