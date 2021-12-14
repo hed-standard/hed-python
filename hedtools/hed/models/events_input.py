@@ -79,7 +79,7 @@ class EventsInput(BaseInput):
 
     def reset_column_mapper(self, sidecars=None, attribute_columns=None):
         """
-            Change the sidecars and settings in use for parsing this file.
+            Change the my_sidecars and settings in use for parsing this file.
 
         Parameters
         ----------
@@ -102,13 +102,13 @@ class EventsInput(BaseInput):
         """
         Validates all column definitions and column definition hed strings.
 
-        This is not an encouraged way to do this.  You should instead validate the sidecars BEFORE creating the
+        This is not an encouraged way to do this.  You should instead validate the my_sidecars BEFORE creating the
         EventsInput object.
 
         Parameters
         ----------
         validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in the sidecars.
+            A validator or list of validators to apply to the hed strings in the my_sidecars.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:
