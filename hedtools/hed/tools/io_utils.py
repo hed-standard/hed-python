@@ -155,6 +155,8 @@ def parse_bids_filename(file_path):
 def test_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
     """ Determines whether test_file has correct extension, name_suffix, and name_prefix.
 
+    Everything is converted to lower case prior to testing so this test should be case insensitive.
+
      Args:
          test_file (str) :           Path of filename to test
          name_prefix (str):          An optional name_prefix for the base filename
@@ -165,13 +167,13 @@ def test_filename(test_file, name_prefix=None, name_suffix=None, extensions=None
          tuple (list, list):            Returns two lists one with
      """
 
-    file_split = os.path.splitext(test_file)
+    file_split = os.path.splitext(test_file.lower())
     is_name = True
-    if extensions and file_split[1] not in extensions:
+    if extensions and file_split[1] not in [x.lower() for x in extensions]:
         is_name = False
-    elif name_suffix and not file_split[0].endswith(name_suffix):
+    elif name_suffix and not file_split[0].endswith(name_suffix.lower()):
         is_name = False
-    elif name_prefix and not file_split[0].startswith(name_prefix):
+    elif name_prefix and not file_split[0].startswith(name_prefix.lower()):
         is_name = False
     return is_name
 

@@ -74,7 +74,7 @@ class ValidationErrors:
 
 
 class SidecarErrors:
-    # These are for json sidecar validation errors(sidecars can also produce most normal validation errors)
+    # These are for json sidecar validation errors(my_sidecars can also produce most normal validation errors)
     BLANK_HED_STRING = 'blankValueString'
     WRONG_HED_DATA_TYPE = 'wrongHedDataType'
     INVALID_POUND_SIGNS_VALUE = 'invalidNumberPoundSigns'

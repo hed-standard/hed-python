@@ -375,7 +375,7 @@ class ColumnMapper:
         Parameters
         ----------
         validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in the sidecars.
+            A validator or list of validators to apply to the hed strings in the my_sidecars.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:
