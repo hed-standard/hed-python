@@ -20,7 +20,6 @@ class BidsFiles:
         self.dir_dict = get_dir_dictionary(self.root_path, name_suffix='events', extensions=['.json'])
 
         for bids_obj in self.json_files.values():
-            x = self._get_sidecars_from_path(bids_obj)
             bids_obj.set_sidecars(self._get_sidecars_from_path(bids_obj))
         for bids_obj in self.event_files.values():
             bids_obj.set_sidecars(self._get_sidecars_from_path(bids_obj))
@@ -63,8 +62,12 @@ class BidsFiles:
         issues = []
         for json_obj in self.json_files.values():
             print(json_obj.file_path)
-
-            new_issues = json_obj.my_contents.validate_entries(validators=validators, extra_def_dicts=json_obj.my_sidecars,
+            extra_defs = []
+            for sidecar_obj in json_obj.my_sidecars:
+                print(sidecar_obj)
+                def_dicts = [column_entry.def_dict for column_entry in sidecar_obj]
+                extra_defs = extra_defs + def_dicts
+            new_issues = json_obj.my_contents.validate_entries(validators=validators, extra_def_dicts=extra_defs,
                                                                check_for_warnings=check_for_warnings)
             issues += json_obj.my_contents.validate_entries(validators=None, extra_def_dicts=json_obj.my_sidecars,
                                                             check_for_warnings=check_for_warnings)
@@ -84,8 +87,8 @@ class BidsFiles:
 
 
 if __name__ == '__main__':
-    # path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_inheritance'
-    path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
+    path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_inheritance'
+    # path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
     bids = BidsFiles(path)
 
     for file_obj in bids.json_files.values():
@@ -100,5 +103,5 @@ if __name__ == '__main__':
                     'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
     validator = HedValidator(hed_schema=hed_schema)
     validation_issues = bids.validate(validators=[validator], check_for_warnings=False)
-    issue_str = get_printable_issue_string(validation_issues, f"To here:")
+    issue_str = get_printable_issue_string(validation_issues, skip_filename=False)
     print(f"Issues: {issue_str}")
