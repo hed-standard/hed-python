@@ -349,7 +349,9 @@ class BaseInput:
             if return_row_dict:
                 final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
                 if string_ops:
+                    error_handler.push_error_context(ErrorContext.ROW, row_number)
                     row_issues += self._run_row_ops(final_hed_string, string_ops, error_handler)
+                    error_handler.pop_error_context()
                 row_dict[model_constants.ROW_ISSUES] = row_issues
                 row_dict[model_constants.ROW_HED_STRING] = final_hed_string
                 yield row_number + start_at_one, row_dict
