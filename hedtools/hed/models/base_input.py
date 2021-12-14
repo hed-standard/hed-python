@@ -63,8 +63,9 @@ class BaseInput:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
 
         input_type = file_type
-        if file_type is None and isinstance(file, str):
-            _, input_type = os.path.splitext(file)
+        if isinstance(file, str):
+            if file_type is None:
+                _, input_type = os.path.splitext(file)
             if self.name is None:
                 self._name = file
 
