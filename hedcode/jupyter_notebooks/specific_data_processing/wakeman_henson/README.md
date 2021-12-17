@@ -1,13 +1,10 @@
-## Processing summary for Attention Shift
-
-The scripts assume that an `_events_temp.tsv` file has been extracted from the EEG.set files for each `_events.tsv` file.  
+## Summary of processing changes for Wakeman-Henson
 
 Order of script execution:
 
-
-| Script                              | Description  |
+| Script                              | Output | Description  |
 | ----------------------------------- | ------------ |
-| [as_preliminary_summary](#preliminary-summary-and-manual-editing)  | Summarize event file contents |
+| [wh_fix_initial_events](#preliminary-summary-and-manual-editing)  | _temp1 | Fix setup and initial face events |
 | [sternberg_preliminary_restructure](#preliminary-restructuring) | Add and remove columns and events. Convert as necessary and fill empty slots with 'n/a' |
 | [sternberg_secondary_summary](#summarize-and-recheck-events) | Resummarize events and do additional checks. |
 | [sternberg_remap](#remap-columns)   | Perform the orthogonal remapping of the columns and adjust specifics. |
@@ -15,7 +12,8 @@ Order of script execution:
 | [sternberg_final_summary](#final-summary) | Perform final summary and recheck. |
 | sternberg_final_extract(#final-extract) | Extract spreadsheet of values for HED tagging |
 
-### Manual editing
+### Preliminary summary and manual editing
+
 
 1. `sub-022_run-1` and `sub-022_run-2` each had an event at the end of the
 file with value `empty`. These have been removed manually in `_events.tsv` and
@@ -29,7 +27,7 @@ These were removed as well as a beginning boundary event.
  4. The EEG versions `sub-023_run-1`, `sub-023_run-2`, `sub-023_run-3`,
 `sub-023_run-4`, and `sub-023_run-5` had the following extra 'n/a' columns: `event_code`, `cond_code`, and `sample_offset` which were removed.
 
-### Initial restructuring
+### Preliminary restructuring
 
 #### BIDS events restructuring
 
@@ -52,8 +50,11 @@ Create `_events_temp3.tsv` files restructured as follows:
  4. The `type` column has some empty slots which are replaced with 'n/a'.
  5. Remove boundary events from beginning of files.
 
+### Summarize and recheck events
 
-### Sternberg remapping of columns
+This script resummarizes the data. The script also compare the values from
+
+### Remap columns
 Create `_events_temp4.tsv` from `_events_temp2.tsv` files as follows:
 1. Run remapping of `value` to `event_type`, `task_role`, and `letter`.
 2. Set the `trial` column based on the `ready` value in the `task_role`.
@@ -67,7 +68,11 @@ Create `_events_temp4.tsv` from `_events_temp2.tsv` files as follows:
   6. `bad_trial` if number of events in the trial is not 14 or 13. (Also check that if 13,
 it is the feedback event that is missing.
 
-### Summary of issues
+### Final copy
+
+Copy all of the event files to an info directory for uploading.
+
+### Final summary
 
 The following trials do not have a feedback events:
 
@@ -93,3 +98,7 @@ key clicks.
 | 14      | 3   | 22         | 
 | 17      | 3   | 3,5        |
 | 22      | 6   | 6          |
+
+### Final extract
+
+Extract a spreadsheet with unique event values in preparation for tagging. 
