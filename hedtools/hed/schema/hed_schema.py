@@ -41,9 +41,6 @@ class HedSchema:
         self._sections = self._create_empty_sections()
         self.short_tag_mapping = {}
 
-        # Caches results when you search for all tags with an attribute.
-        self._all_tags_attributes_cache = {}
-
     # ===============================================
     # Basic schema properties
     # ===============================================
@@ -389,24 +386,22 @@ class HedSchema:
     # ===============================================
     # Basic tag attributes
     # ===============================================
-    def is_extension_allowed_tag(self, original_tag):
-        """Checks to see if the tag has the 'extensionAllowed' attribute. It will strip the tag until there are no more
-        slashes to check if its ancestors have the attribute.
+    def any_parent_has_attribute(self, original_tag, attribute):
+        """Checks to see if the tag (or any of it's parents) have the given attribute.
 
+            This could be fairly easily cached if it's a performance issue.
         Parameters
         ----------
         original_tag: HedTag
             The tag that is used to do the validation.
+        attribute: str
+            The name of the attribute to check for.
         Returns
         -------
-        tag_takes_extension: bool
-            True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
+        tag_has_attribute: bool
+            True if the tag has the given attribute. False, if otherwise.
         """
-        # Takes value tag cannot be extension allowed
-        if self.is_takes_value_tag(original_tag):
-            return False
-
-        base_tag = original_tag.base_tag.lower()
+        base_tag = original_tag.lower()
         lower_tag = base_tag
         found_slash = len(lower_tag)
         check_tag = lower_tag
@@ -414,70 +409,10 @@ class HedSchema:
             current_index = found_slash
             check_tag = check_tag[:current_index]
             parent_tag_entry = self._get_entry_for_tag(check_tag, HedSectionKey.AllTags)
-            if parent_tag_entry and parent_tag_entry.has_attribute(HedKey.ExtensionAllowed):
+            if parent_tag_entry and parent_tag_entry.has_attribute(attribute):
                 return True
             found_slash = check_tag.rfind("/")
         return False
-
-    def is_takes_value_tag(self, original_tag):
-        """Checks to see if the tag has the 'takesValue' attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        bool
-            True if the tag has the 'takesValue' attribute. False, if otherwise.
-
-        """
-        return self._value_tag_has_attribute(original_tag, HedKey.TakesValue)
-
-    def is_unit_class_tag(self, original_tag):
-        """Checks to see if the tag has the 'unitClass' attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        bool
-            True if the tag has the 'unitClass' attribute. False, if otherwise.
-
-        """
-        return self._value_tag_has_attribute(original_tag, HedKey.UnitClass)
-
-    def is_value_class_tag(self, original_tag):
-        """Checks to see if the tag has the 'valueClass' attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        bool
-            True if the tag has the 'valueClass' attribute. False, if otherwise.
-
-        """
-        return self._value_tag_has_attribute(original_tag, HedKey.ValueClass)
-
-    def is_basic_tag(self, original_tag):
-        """
-            Returns True if this is an exact tag, with no extension or similar.
-
-        Parameters
-        ----------
-        original_tag : HedTag
-
-        Returns
-        -------
-        is_basic_tag: bool
-            True if this tag is an exact match for one in the schema.
-        """
-        return bool(self._get_entry_for_tag(original_tag.lower()))
 
     def base_tag_has_attribute(self, original_tag, tag_attribute):
         """Checks to see if the tag has a specific attribute.
@@ -500,73 +435,9 @@ class HedSchema:
             new_val = tag_entry.has_attribute(tag_attribute)
         return new_val
 
-    def tag_has_attribute(self, original_tag, tag_attribute):
-        """Checks to see if the tag has a specific attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            A tag.
-        tag_attribute: str
-            A tag attribute.
-        Returns
-        -------
-        bool
-            True if the tag has the specified attribute. False, if otherwise.
-
-        """
-        tag_entry = self._get_entry_for_tag(original_tag, HedSectionKey.AllTags)
-        if tag_entry:
-            return tag_attribute in tag_entry.attributes
-        return False
-
     # ===============================================
     # More complex tag attributes/combinations of tags etc.
     # ===============================================
-    def get_tag_unit_classes(self, original_tag):
-        """Gets the unit classes associated with a particular tag.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        []
-            A list containing the unit classes associated with a particular tag. A empty list will be returned if
-            the tag doesn't have unit classes associated with it.
-
-        """
-        unit_classes = self._value_tag_has_attribute(original_tag, HedKey.UnitClass, return_value=True)
-        if unit_classes:
-            unit_classes = unit_classes.split(',')
-        else:
-            unit_classes = []
-        return unit_classes
-
-    def get_tag_value_classes(self, original_tag):
-        """
-            Returns a list of all the value classes this tag accepts.
-
-            Returns empty list if this is not a value tag.
-
-        Parameters
-        ----------
-        original_tag : HedTag
-            The hed tag to check
-
-        Returns
-        -------
-        value_classes: [str]
-            A list of value classes this tag accepts.
-        """
-        value_classes = self._value_tag_has_attribute(original_tag, HedKey.ValueClass, return_value=True)
-        if value_classes:
-            value_classes = value_classes.split(',')
-        else:
-            value_classes = []
-        return value_classes
-
     def get_unit_class_default_unit(self, original_tag):
         """Gets the default unit class unit that is associated with the specified tag.
 
@@ -582,7 +453,7 @@ class HedSchema:
 
         """
         default_unit = ''
-        unit_classes = self.get_tag_unit_classes(original_tag)
+        unit_classes = original_tag.get_tag_unit_classes()
         if unit_classes:
             first_unit_class = unit_classes[0]
             unit_class_entry = self._get_entry_for_tag(first_unit_class, HedSectionKey.UnitClasses)
@@ -590,58 +461,6 @@ class HedSchema:
                 default_unit = unit_class_entry.has_attribute(HedKey.DefaultUnits, return_value=True)
 
         return default_unit
-
-    def get_tag_unit_class_units(self, original_tag):
-        """Gets the unit class units associated with a particular tag.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag to get units for
-        Returns
-        -------
-        []
-            A list containing the unit class units associated with a particular tag. A empty list will be returned if
-            the tag doesn't have unit class units associated with it.
-
-        """
-        units = []
-        unit_classes = self.get_tag_unit_classes(original_tag)
-        for unit_class in unit_classes:
-            unit_class_entry = self._get_entry_for_tag(unit_class, HedSectionKey.UnitClasses)
-            if unit_class_entry:
-                units += unit_class_entry.value
-
-        return units
-
-    def get_stripped_unit_value(self, original_tag):
-        """
-        Returns the extension portion of the tag if it exists, without the units.
-
-        eg 'Duration/3 ms' will return '3'
-
-        Parameters
-        ----------
-        original_tag : HedTag
-            The hed tag you want the units portion for.
-
-        Returns
-        -------
-        stripped_unit_value: str
-            The extension portion with the units removed.
-        """
-        tag_unit_classes = self.get_tag_unit_classes(original_tag)
-        original_tag_unit_value = original_tag.extension_or_value_portion
-        formatted_tag_unit_value = original_tag_unit_value.lower()
-
-        for unit_class_type in tag_unit_classes:
-            unit_class_units = self.get_unit_class_units(unit_class_type)
-            stripped_value = self._get_tag_units_portion(original_tag_unit_value, formatted_tag_unit_value,
-                                                         unit_class_units)
-            if stripped_value:
-                return stripped_value
-
-        return formatted_tag_unit_value
 
     def get_unit_class_units(self, unit_class_type):
         """
@@ -665,7 +484,7 @@ class HedSchema:
 
         return unit_class_entry.value
 
-    def get_all_tags_with_attribute(self, key):
+    def get_all_tags_with_attribute(self, key, section_key=HedSectionKey.AllTags):
         """
             Returns a list of all tags with the given attribute.
 
@@ -681,12 +500,7 @@ class HedSchema:
         tag_list: [str]
             A list of all tags with this attribute
         """
-        if key in self._all_tags_attributes_cache:
-            return self._all_tags_attributes_cache[key]
-        new_val = [tag_entry.long_name for tag_entry in self._sections[HedSectionKey.AllTags].values()
-                   if tag_entry.has_attribute(key)]
-        self._all_tags_attributes_cache[key] = new_val
-        return new_val
+        return self._sections[section_key].get_entries_with_attribute(key, return_name_only=True)
 
     # ===============================================
     # Semi-private creation finalizing functions
@@ -700,7 +514,6 @@ class HedSchema:
         """
         self._is_hed3_schema = self.is_hed3_schema
         self._populate_short_tag_dict()
-        self._all_tags_attributes_cache = {}
 
     def _initialize_attributes(self, key_class):
         """
@@ -963,47 +776,7 @@ class HedSchema:
         return new_val
 
     # todo: Consider moving these into HedTag
-    def _get_tag_units_portion(self, original_tag_unit_value, formatted_tag_unit_value,
-                               tag_unit_class_units):
-        """Checks to see if the specified string has a valid unit, and removes it if so.
-
-        Parameters
-        ----------
-        original_tag_unit_value: str
-            The unformatted value of the tag
-        formatted_tag_unit_value: str
-            The formatted value of the tag
-        tag_unit_class_units: [str]
-            A list of valid units for this tag
-        Returns
-        -------
-        stripped_value: str
-            A tag_unit_values with the valid unit removed, if one was present.
-            Otherwise, returns original_tag_unit_value
-
-        """
-        tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
-        for unit in tag_unit_class_units:
-            unit_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
-            valid_modifiers = self._get_modifiers_for_unit(unit)
-            is_prefix = unit_entry.has_attribute(HedKey.UnitPrefix)
-            derivative_units = self._get_valid_unit_plural(unit)
-            for derivative_unit in derivative_units:
-                if unit_entry.has_attribute(HedKey.UnitSymbol):
-                    found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
-                                                                                derivative_unit,
-                                                                                is_prefix=is_prefix,
-                                                                                valid_modifiers=valid_modifiers)
-                else:
-                    found_unit, stripped_value = self._strip_off_units_if_valid(formatted_tag_unit_value,
-                                                                                derivative_unit,
-                                                                                is_prefix=is_prefix,
-                                                                                valid_modifiers=valid_modifiers)
-                if found_unit:
-                    return stripped_value
-        return None
-
-    def _get_modifiers_for_unit(self, unit):
+    def get_modifiers_for_unit(self, unit):
         """
             Returns the valid modifiers for the given unit
 
@@ -1018,6 +791,8 @@ class HedSchema:
 
         """
         unit_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
+        if unit_entry is None:
+            return []
         is_si_unit = unit_entry.has_attribute(HedKey.SIUnit)
         is_unit_symbol = unit_entry.has_attribute(HedKey.UnitSymbol)
         if not is_si_unit:
@@ -1078,6 +853,8 @@ class HedSchema:
 
     def _get_valid_unit_plural(self, unit):
         """
+        # This should be cached.
+
         Parameters
         ----------
         unit: str
@@ -1148,6 +925,7 @@ class HedSchema:
             long_tag_name = long_tag_name.lower()
             if long_tag_name.startswith(self._library_prefix):
                 long_tag_name = long_tag_name[len(self._library_prefix):]
+
         return self._sections[key_class].get(long_tag_name)
 
     def _add_tag_to_dict(self, long_tag_name, key_class):

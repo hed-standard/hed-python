@@ -129,129 +129,10 @@ class HedSchemaGroup:
     # ===============================================
     # Basic tag attributes
     # ===============================================
-    def is_extension_allowed_tag(self, original_tag):
-        """Checks to see if the tag has the 'extensionAllowed' attribute. It will strip the tag until there are no more
-        slashes to check if its ancestors have the attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        tag_takes_extension: bool
-            True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.is_extension_allowed_tag(original_tag)
-
-    def is_takes_value_tag(self, original_tag):
-        """Checks to see if the tag has the 'takesValue' attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        bool
-            True if the tag has the 'takesValue' attribute. False, if otherwise.
-
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.is_takes_value_tag(original_tag)
-
-    def is_unit_class_tag(self, original_tag):
-        """Checks to see if the tag has the 'unitClass' attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        bool
-            True if the tag has the 'unitClass' attribute. False, if otherwise.
-
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.is_unit_class_tag(original_tag)
-
-    def is_value_class_tag(self, original_tag):
-        """Checks to see if the tag has the 'valueClass' attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        bool
-            True if the tag has the 'valueClass' attribute. False, if otherwise.
-
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.is_value_class_tag(original_tag)
-
-    def is_basic_tag(self, original_tag):
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.is_basic_tag(original_tag)
-
-    def base_tag_has_attribute(self, original_tag, tag_attribute):
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.base_tag_has_attribute(original_tag, tag_attribute)
-
-    def tag_has_attribute(self, original_tag, tag_attribute):
-        """Checks to see if the tag has a specific attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            A tag.
-        tag_attribute: str
-            A tag attribute.
-        Returns
-        -------
-        bool
-            True if the tag has the specified attribute. False, if otherwise.
-
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.tag_has_attribute(original_tag, tag_attribute)
 
     # ===============================================
     # More complex tag attributes/combinations of tags etc.
     # ===============================================
-    def get_tag_unit_classes(self, original_tag):
-        """Gets the unit classes associated with a particular tag.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        []
-            A list containing the unit classes associated with a particular tag. A empty list will be returned if
-            the tag doesn't have unit classes associated with it.
-
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.get_tag_unit_classes(original_tag)
-
-    def get_tag_value_classes(self, original_tag):
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.get_tag_value_classes(original_tag)
-
     def get_unit_class_default_unit(self, original_tag):
         """Gets the default unit class unit that is associated with the specified tag.
 
@@ -287,26 +168,6 @@ class HedSchemaGroup:
         schema = self._schemas.get(original_tag.library_prefix)
         if schema:
             return schema.get_tag_unit_class_units(original_tag)
-
-    def get_stripped_unit_value(self, original_tag):
-        """
-        Returns the extension portion of the tag if it exists, without the units.
-
-        eg 'Duration/3 ms' will return '3'
-
-        Parameters
-        ----------
-        original_tag : HedTag
-            The hed tag you want the units portion for.
-
-        Returns
-        -------
-        stripped_unit_value: str
-            The extension portion with the units removed.
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.get_stripped_unit_value(original_tag)
 
     def get_all_tags_with_attribute(self, key):
         all_tags = set()
