@@ -1,8 +1,9 @@
 ## Processing summary for Attention Shift
 
-Order of script execution:
+The scripts assume that an `_events_temp.tsv` file has been extracted from the EEG.set files for each `_events.tsv` file.  
 
 Order of script execution:
+
 
 | Script                              | Description  |
 | ----------------------------------- | ------------ |

@@ -14,18 +14,17 @@ from functools import partial
 
 
 class BidsValidator:
-    def __init__(self, hed_schema=None, run_semantic_validation=True):
+    def __init__(self, hed_schema=None):
         """Constructor for the BidsValidator class.
 
         Parameters
         ----------
         hed_schema: HedSchema
             HedSchema object to use to use for validation
-        run_semantic_validation: bool
-            True if the validator should check the HED data against a schema. False for syntax-only validation.
+
         Returns
         -------
-        HedValidator object
+        BidsValidator object
             A HedValidator object.
 
         """
@@ -33,7 +32,7 @@ class BidsValidator:
         self._hed_schema = hed_schema
 
 
-    def validate_dataset(self, validators, name=None, error_handler=None, check_for_warnings=True, **kwargs):
+    def validate_events(self, bids_validators, error_handler=None, check_for_warnings=True, **kwargs):
         """Run the given validators on a BIDS dataset
          Parameters
          ----------
@@ -70,28 +69,3 @@ class BidsValidator:
 
         return validation_issues
 
-
-    def get_def_and_mapper_issues(self, error_handler, check_for_warnings=False):
-        """
-            Returns formatted issues found with definitions and columns.
-        Parameters
-        ----------
-        error_handler : ErrorHandler
-            The error handler to use
-        check_for_warnings: bool
-            If True this will check for and return warnings as well
-        Returns
-        -------
-        issues_list: [{}]
-            A list of definition and mapping issues.
-        """
-        issues = []
-        issues += self.file_def_dict.get_definition_issues()
-
-        # Gather any issues from the mapper for things like missing columns.
-        mapper_issues = self._mapper.get_column_mapping_issues()
-        error_handler.add_context_to_issues(mapper_issues)
-        issues += mapper_issues
-        if not check_for_warnings:
-            issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-        return issues
