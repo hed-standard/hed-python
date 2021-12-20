@@ -89,6 +89,7 @@ class BidsEventsFiles:
 if __name__ == '__main__':
     path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_inheritance'
     # path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
+    path = 'G:\WH_working3'
     bids = BidsEventsFiles(path)
 
     for file_obj in bids.sidecar_dict.values():
