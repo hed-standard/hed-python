@@ -1,6 +1,5 @@
 import os
 from hed.models.sidecar import Sidecar
-from hed.models.events_input import EventsInput
 from hed.tools.io_utils import get_file_list, parse_bids_filename
 
 
@@ -51,15 +50,15 @@ class BidsJsonFile(BidsFile):
     """Represents a bids file."""
 
     def __init__(self, file_path):
-        super().__init__(file_path)
-        self.my_contents = Sidecar(file_path, name=file_path)
+        super().__init__(os.path.abspath(file_path))
+        self.my_contents = Sidecar(file_path, name=os.path.abspath(file_path))
 
 
 class BidsEventFile(BidsFile):
     """Represents a bids file."""
 
     def __init__(self, file_path):
-        super().__init__(file_path)
+        super().__init__(os.path.abspath(file_path))
         self.my_contents = None
 
 
