@@ -17,3 +17,4 @@ value	event_type	face_type	rep_status
 102	setup_right_sym	n/a	n/a
 256	left_press	n/a	n/a
 4096	right_press	n/a	n/a
+4352	double_press	n/a	n/a
