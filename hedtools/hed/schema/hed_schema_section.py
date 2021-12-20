@@ -6,8 +6,10 @@ class HedSchemaEntry:
         # key: property/attribute name, value = property value.  Will often be a bool
         self.attributes = {}
         self.description = None
-        self.value = None
         self._section = section
+
+        # this is currently used exclusively for unit class units.
+        self.value = None
 
         # This section is largely unused.  It will only be filled in when we try to add an attribute
         # that isn't valid in this section.
@@ -89,8 +91,6 @@ class HedSchemaEntry:
                 return False
         if self.description != other.description:
             return False
-        if self.value != other.value:
-            return False
         return True
 
 
@@ -103,6 +103,7 @@ class HedSchemaSection:
 
         # Points to the entries in attributes
         self.valid_attributes = {}
+        self._attribute_cache = {}
 
     def _add_to_dict(self, name):
         name_key = name
@@ -118,7 +119,7 @@ class HedSchemaSection:
 
         return new_entry
 
-    def get_entries_with_attribute(self, attribute_name):
+    def get_entries_with_attribute(self, attribute_name, return_name_only=False):
         """
             Returns an iterator of all entries with the given attribute
 
@@ -132,9 +133,16 @@ class HedSchemaSection:
 
         Returns
         -------
-        [HedSchemaEntry]
+        [HedSchemaEntry] or [str]
         """
-        return [tag_entry for tag_entry in self.values() if tag_entry.has_attribute(attribute_name)]
+        if attribute_name not in self._attribute_cache:
+            new_val = [tag_entry for tag_entry in self.values() if tag_entry.has_attribute(attribute_name)]
+            self._attribute_cache[attribute_name] = new_val
+
+        cache_val = self._attribute_cache[attribute_name]
+        if return_name_only:
+            return [tag_entry.long_name for tag_entry in cache_val]
+        return cache_val
 
     # ===============================================
     # Simple wrapper functions to make this class primarily function as a dict

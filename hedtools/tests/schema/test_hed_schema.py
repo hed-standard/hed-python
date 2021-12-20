@@ -105,10 +105,11 @@ class TestHedSchema(unittest.TestCase):
         }
         for key, test_string in test_strings.items():
             expected_dict = expected_results[key]
+            tag = HedTag(test_string)
+            tag.convert_to_canonical_forms(self.hed_schema)
             for attribute, expected_value in expected_dict.items():
-                self.assertEqual(self.hed_schema.tag_has_attribute(test_string, attribute), expected_value,
+                self.assertEqual(tag.has_attribute(attribute), expected_value,
                                  'Test string: %s. Attribute: %s.' % (test_string, attribute))
-
     def test_get_all_tags(self):
         terms = self.hed_schema.get_all_schema_tags(True)
         self.assertTrue(isinstance(terms, list))
@@ -195,12 +196,18 @@ class TestSchemaUtilityFunctions(TestHed):
         no_value_tag1 = HedTag('something', extension_index=len('something'))
         no_value_tag2 = HedTag('attribute/color/black', extension_index=len('attribute/color/black'))
         no_value_tag3 = HedTag('participant/#', extension_index=len('participant'))
-        value_tag1_result = self.hed_schema.is_takes_value_tag(value_tag1)
-        value_tag2_result = self.hed_schema.is_takes_value_tag(value_tag2)
-        value_tag3_result = self.hed_schema.is_takes_value_tag(value_tag3)
-        no_value_tag1_result = self.hed_schema.is_takes_value_tag(no_value_tag1)
-        no_value_tag2_result = self.hed_schema.is_takes_value_tag(no_value_tag2)
-        no_value_tag3_result = self.hed_schema.is_takes_value_tag(no_value_tag3)
+        value_tag1.convert_to_canonical_forms(self.hed_schema)
+        value_tag1_result = value_tag1.is_takes_value_tag()
+        value_tag2.convert_to_canonical_forms(self.hed_schema)
+        value_tag2_result = value_tag2.is_takes_value_tag()
+        value_tag3.convert_to_canonical_forms(self.hed_schema)
+        value_tag3_result = value_tag3.is_takes_value_tag()
+        no_value_tag1.convert_to_canonical_forms(self.hed_schema)
+        no_value_tag1_result = no_value_tag1.is_takes_value_tag()
+        no_value_tag2.convert_to_canonical_forms(self.hed_schema)
+        no_value_tag2_result = no_value_tag2.is_takes_value_tag()
+        no_value_tag3.convert_to_canonical_forms(self.hed_schema)
+        no_value_tag3_result = no_value_tag3.is_takes_value_tag()
         self.assertEqual(value_tag1_result, True)
         self.assertEqual(value_tag2_result, True)
         self.assertEqual(value_tag3_result, True)
@@ -298,13 +305,17 @@ class TestSchemaUtilityFunctions(TestHed):
         self.assertEqual(stripped_invalid_volume_string, None)
 
     def test_determine_allows_extensions(self):
-        extension_tag1 = HedTag('item/object/vehicle/boat', extension_index=len('item/object/vehicle/boat'))
-        no_extension_tag1 = HedTag('event/duration/22 s', extension_index=len('event/duration'))
-        no_extension_tag2 = HedTag('participant/id/45', extension_index=len('participant/id'))
-        no_extension_tag3 = HedTag('attribute/visual/color/red/0.5', extension_index=len('attribute/visual/color/red'))
+        extension_tag1 = HedTag('item/object/vehicle/boat')
+        no_extension_tag1 = HedTag('event/duration/22 s')
+        no_extension_tag2 = HedTag('participant/id/45')
+        no_extension_tag3 = HedTag('attribute/visual/color/red/0.5')
+        extension_tag1.convert_to_canonical_forms(self.hed_schema)
         extension_tag1_result = self.hed_schema.is_extension_allowed_tag(extension_tag1)
+        no_extension_tag1.convert_to_canonical_forms(self.hed_schema)
         no_extension_tag1_result = self.hed_schema.is_extension_allowed_tag(no_extension_tag1)
+        no_extension_tag2.convert_to_canonical_forms(self.hed_schema)
         no_extension_tag2_result = self.hed_schema.is_extension_allowed_tag(no_extension_tag2)
+        no_extension_tag3.convert_to_canonical_forms(self.hed_schema)
         no_extension_tag3_result = self.hed_schema.is_extension_allowed_tag(no_extension_tag3)
         self.assertEqual(extension_tag1_result, True)
         self.assertEqual(no_extension_tag1_result, False)

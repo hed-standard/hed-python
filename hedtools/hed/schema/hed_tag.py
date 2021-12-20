@@ -1,5 +1,6 @@
 from hed.errors.error_types import ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 
 
 class HedTag:
@@ -39,6 +40,10 @@ class HedTag:
         self._extension_index = None
 
         self._library_prefix = self._get_library_prefix(self.org_tag)
+
+        # This is the schema this tag was converted to.
+        self._schema = None
+        self._schema_entry = None
 
         if extension_index:
             self._extension_index = extension_index
@@ -340,6 +345,17 @@ class HedTag:
         self._short_tag_index = short_index
         self._extension_index = remainder_index
 
+        if remainder_index is not None:
+            self._schema = specific_schema
+            if self.extension_or_value_portion:
+                self._schema_entry = self._schema._get_entry_for_tag(self.base_tag.lower() + "/#")
+            if self._schema_entry is None:
+                self._schema_entry = self._schema._get_entry_for_tag(self.base_tag.lower())
+            # if self._schema_entry is None:
+            #     breakHEre = 3
+            # if self.is_extension_allowed_tag():
+            #     breakHEre = 3
+
         return tag_issues
 
     def _convert_key_tags_to_canonical_form(self):
@@ -506,3 +522,179 @@ class HedTag:
 
             return org_tag[:first_colon + 1]
         return ""
+
+    def get_stripped_unit_value(self):
+        """
+        Returns the extension portion of the tag if it exists, without the units.
+
+        eg 'Duration/3 ms' will return '3'
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        stripped_unit_value: str
+            The extension portion with the units removed.
+        """
+        if self._schema is None:
+            return None
+
+        tag_unit_classes = self.get_tag_unit_classes()
+        original_tag_unit_value = self.extension_or_value_portion
+
+        for unit_class_type in tag_unit_classes:
+            unit_class_units = self._schema.get_unit_class_units(unit_class_type)
+            stripped_value = self._get_tag_units_portion(original_tag_unit_value, unit_class_units)
+            if stripped_value:
+                return stripped_value
+
+        return original_tag_unit_value
+
+    def _get_tag_units_portion(self, original_tag_unit_value, tag_unit_class_units):
+        """Checks to see if the specified string has a valid unit, and removes it if so.
+
+        Parameters
+        ----------
+        original_tag_unit_value: str
+            The original value of the tag
+        tag_unit_class_units: [str]
+            A list of valid units for this tag
+        Returns
+        -------
+        stripped_value: str
+            A tag_unit_values with the valid unit removed, if one was present.
+            Otherwise, returns original_tag_unit_value
+
+        """
+        tag_unit_class_units = sorted(tag_unit_class_units, key=len, reverse=True)
+        for unit in tag_unit_class_units:
+            unit_entry = self._schema._get_entry_for_tag(unit, HedSectionKey.Units)
+            valid_modifiers = self._schema.get_modifiers_for_unit(unit)
+            is_prefix = unit_entry.has_attribute(HedKey.UnitPrefix)
+            #This block is messy still.  Maybe pluralize should be baked into strip off units?  How do we *actually* match the unit...?
+            derivative_units = self._schema._get_valid_unit_plural(unit)
+
+            for derivative_unit in derivative_units:
+                if unit_entry.has_attribute(HedKey.UnitSymbol):
+                    found_unit, stripped_value = self._schema._strip_off_units_if_valid(original_tag_unit_value,
+                                                                                derivative_unit,
+                                                                                is_prefix=is_prefix,
+                                                                                valid_modifiers=valid_modifiers)
+                else:
+                    found_unit, stripped_value = self._schema._strip_off_units_if_valid(original_tag_unit_value.lower(),
+                                                                                derivative_unit,
+                                                                                is_prefix=is_prefix,
+                                                                                valid_modifiers=valid_modifiers)
+                if found_unit:
+                    return stripped_value
+        return None
+
+    def get_tag_unit_classes(self):
+        """Gets the unit classes associated with a particular tag.
+
+        Parameters
+        ----------
+        original_tag: HedTag
+            The tag that is used to do the validation.
+        Returns
+        -------
+        []
+            A list containing the unit classes associated with a particular tag. A empty list will be returned if
+            the tag doesn't have unit classes associated with it.
+
+        """
+        if self._schema_entry:
+            unit_classes = self._schema_entry.has_attribute(HedKey.UnitClass, return_value=True)
+            if unit_classes:
+                unit_classes = unit_classes.split(',')
+                return unit_classes
+        return []
+
+    def get_tag_value_classes(self):
+        """
+            Returns a list of all the value classes this tag accepts.
+
+            Returns empty list if this is not a value tag.
+
+        Parameters
+        ----------
+        original_tag : HedTag
+            The hed tag to check
+
+        Returns
+        -------
+        value_classes: [str]
+            A list of value classes this tag accepts.
+        """
+        if self._schema_entry:
+            unit_classes = self._schema_entry.has_attribute(HedKey.ValueClass, return_value=True)
+            if unit_classes:
+                unit_classes = unit_classes.split(',')
+                return unit_classes
+        return []
+
+    def is_takes_value_tag(self):
+        if self._schema_entry:
+            return self._schema_entry.has_attribute(HedKey.TakesValue)
+        return False
+
+    def is_unit_class_tag(self):
+        if self._schema_entry:
+            return self._schema_entry.has_attribute(HedKey.UnitClass)
+        return False
+
+    def is_value_class_tag(self):
+        if self._schema_entry:
+            return self._schema_entry.has_attribute(HedKey.ValueClass)
+        return False
+
+    def is_basic_tag(self):
+        return bool(self._schema_entry and not self.extension_or_value_portion)
+
+    def base_tag_has_attribute(self, attribute):
+        if self._schema_entry:
+            if self.extension_or_value_portion:
+                return self._schema.base_tag_has_attribute(self, attribute)
+            return self._schema_entry.has_attribute(attribute)
+
+    def has_attribute(self, attribute):
+        if self._schema_entry:
+            return self._schema_entry.has_attribute(attribute)
+        return False
+
+    def is_extension_allowed_tag(self):
+        """Checks to see if the tag has the 'extensionAllowed' attribute. It will strip the tag until there are no more
+        slashes to check if its ancestors have the attribute.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        tag_takes_extension: bool
+            True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
+        """
+        if self.is_takes_value_tag():
+            return False
+
+        if self._schema:
+            return self._schema.any_parent_has_attribute(self, HedKey.ExtensionAllowed)
+
+    def get_tag_unit_class_units(self):
+        """Gets the unit class units associated with a particular tag.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        []
+            A list containing the unit class units associated with a particular tag. An empty list will be returned if
+            the tag doesn't have unit class units associated with it.
+
+        """
+        units = []
+        unit_classes = self.get_tag_unit_classes()
+        for unit_class in unit_classes:
+            units += self._schema.get_unit_class_units(unit_class)
+
+        return units
