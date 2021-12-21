@@ -394,7 +394,7 @@ class TagValidator:
         if original_tag.is_unit_class_tag():
             tag_unit_values = original_tag.extension_or_value_portion
             if tag_validator_util.validate_numeric_value_class(tag_unit_values):
-                default_unit = self._hed_schema.get_unit_class_default_unit(original_tag)
+                default_unit = original_tag.get_unit_class_default_unit()
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
                                                                tag=original_tag,
                                                                default_unit=default_unit)

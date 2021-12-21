@@ -123,6 +123,9 @@ class HedTag:
         self._long_tag = f"{long_part}{new_tag_val}/{self.extension_or_value_portion}"
         self._extension_index = self._short_tag_index + len(new_tag_val)
 
+        if self._schema:
+            self._update_schema_entry()
+
     @property
     def org_base_tag(self):
         """
@@ -347,27 +350,21 @@ class HedTag:
 
         if remainder_index is not None:
             self._schema = specific_schema
-            if self.extension_or_value_portion:
-                self._schema_entry = self._schema._get_entry_for_tag(self.base_tag.lower() + "/#")
-            if self._schema_entry is None:
-                self._schema_entry = self._schema._get_entry_for_tag(self.base_tag.lower())
-            # if self._schema_entry is None:
-            #     breakHEre = 3
-            # if self.is_extension_allowed_tag():
-            #     breakHEre = 3
+            self._update_schema_entry()
 
         return tag_issues
 
     def _convert_key_tags_to_canonical_form(self):
         # todo: eventually make this function less bad.
         # Finds the canonical form for basic known tags such as definition and def.
-        tags_to_identify = ["def", "onset", "definition", "offset", "def-expand"]
+        tags_to_identify = ["onset", "definition", "offset", "def-expand", "def"]
         for key_tag in tags_to_identify:
             is_key_tag = self._check_tag_starts_with(str(self), key_tag)
             if is_key_tag is not None:
                 self._long_tag = str(self)
                 self._extension_index = len(str(self)) - len(is_key_tag)
                 self._short_tag_index = self._extension_index - len(key_tag)
+                break
 
         return []
 
@@ -458,7 +455,7 @@ class HedTag:
         short_tag_index: int
             The position the short tag starts at in long_tag
         extension_index: int
-            The position the extension or value starts at in the long_tag
+            The position the extension or value starts at in the long_tag.  This will be None if this is an invalid tag.
         errors: list
             a list of errors while converting
         """
@@ -572,17 +569,17 @@ class HedTag:
             unit_entry = self._schema._get_entry_for_tag(unit, HedSectionKey.Units)
             valid_modifiers = self._schema.get_modifiers_for_unit(unit)
             is_prefix = unit_entry.has_attribute(HedKey.UnitPrefix)
-            #This block is messy still.  Maybe pluralize should be baked into strip off units?  How do we *actually* match the unit...?
+            # todo: This block is messy still.  Maybe pluralize should be baked into strip off units?
             derivative_units = self._schema._get_valid_unit_plural(unit)
 
             for derivative_unit in derivative_units:
                 if unit_entry.has_attribute(HedKey.UnitSymbol):
-                    found_unit, stripped_value = self._schema._strip_off_units_if_valid(original_tag_unit_value,
+                    found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value,
                                                                                 derivative_unit,
                                                                                 is_prefix=is_prefix,
                                                                                 valid_modifiers=valid_modifiers)
                 else:
-                    found_unit, stripped_value = self._schema._strip_off_units_if_valid(original_tag_unit_value.lower(),
+                    found_unit, stripped_value = self._strip_off_units_if_valid(original_tag_unit_value.lower(),
                                                                                 derivative_unit,
                                                                                 is_prefix=is_prefix,
                                                                                 valid_modifiers=valid_modifiers)
@@ -595,8 +592,6 @@ class HedTag:
 
         Parameters
         ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
         Returns
         -------
         []
@@ -619,9 +614,6 @@ class HedTag:
 
         Parameters
         ----------
-        original_tag : HedTag
-            The hed tag to check
-
         Returns
         -------
         value_classes: [str]
@@ -652,12 +644,6 @@ class HedTag:
     def is_basic_tag(self):
         return bool(self._schema_entry and not self.extension_or_value_portion)
 
-    def base_tag_has_attribute(self, attribute):
-        if self._schema_entry:
-            if self.extension_or_value_portion:
-                return self._schema.base_tag_has_attribute(self, attribute)
-            return self._schema_entry.has_attribute(attribute)
-
     def has_attribute(self, attribute):
         if self._schema_entry:
             return self._schema_entry.has_attribute(attribute)
@@ -677,8 +663,8 @@ class HedTag:
         if self.is_takes_value_tag():
             return False
 
-        if self._schema:
-            return self._schema.any_parent_has_attribute(self, HedKey.ExtensionAllowed)
+        if self._schema_entry:
+            return self._schema_entry.any_parent_has_attribute(HedKey.ExtensionAllowed)
 
     def get_tag_unit_class_units(self):
         """Gets the unit class units associated with a particular tag.
@@ -698,3 +684,118 @@ class HedTag:
             units += self._schema.get_unit_class_units(unit_class)
 
         return units
+
+    def get_unit_class_default_unit(self):
+        """Gets the default unit class unit for this tag
+
+        Parameters
+        ----------
+        Returns
+        -------
+        str
+            The default unit class unit associated with the specific tag. If the tag doesn't have a unit class then an
+            empty string is returned.
+
+        """
+        default_unit = ''
+        unit_classes = self.get_tag_unit_classes()
+        if unit_classes:
+            first_unit_class = unit_classes[0]
+            unit_class_entry = self._schema._get_entry_for_tag(first_unit_class, HedSectionKey.UnitClasses)
+            if unit_class_entry:
+                default_unit = unit_class_entry.has_attribute(HedKey.DefaultUnits, return_value=True)
+
+        return default_unit
+
+    def base_tag_has_attribute(self, tag_attribute):
+        """Checks to see if the tag has a specific attribute.
+
+        Parameters
+        ----------
+        tag_attribute: str
+            A tag attribute.
+        Returns
+        -------
+        bool
+            True if the tag has the specified attribute. False, if otherwise.
+
+        """
+        if not self._schema_entry:
+            return False
+
+        # todo: fix this to remove internal ref
+        base_entry = self._schema_entry
+        if self.is_takes_value_tag():
+            base_entry = base_entry._parent_entry
+
+        return base_entry.has_attribute(tag_attribute)
+
+    def any_parent_has_attribute(self, attribute):
+        """Checks to see if the tag (or any of it's parents) have the given attribute.
+
+        Parameters
+        ----------
+        attribute: str
+            The name of the attribute to check for.
+        Returns
+        -------
+        tag_has_attribute: bool
+            True if the tag has the given attribute. False, if otherwise.
+        """
+        if self._schema_entry:
+            return self._schema_entry.any_parent_has_attribute(attribute=attribute)
+
+    @staticmethod
+    def _strip_off_units_if_valid(unit_value, unit, is_prefix=False, valid_modifiers=None):
+        """Validates and strips units from a value.
+
+        Parameters
+        ----------
+        unit_value: str
+            The value to validate.
+        unit: str
+            The unit to strip.
+        is_prefix: bool
+            Whether the unit is a prefix.  eg "$ 10". Default suffix.
+        valid_modifiers: [HedSchemaEntry]
+            A list of modifiers this unit accepts
+        Returns
+        -------
+        tuple
+            The found unit and the stripped value.
+        """
+        found_unit = False
+        stripped_value = ''
+        if is_prefix and unit_value.startswith(unit):
+            found_unit = True
+            stripped_value = unit_value[len(unit):]
+        elif not is_prefix and unit_value.endswith(unit):
+            found_unit = True
+            stripped_value = unit_value[0:-len(unit)]
+
+        if found_unit and valid_modifiers:
+            for modifier_entry in valid_modifiers:
+                unit_modifier = modifier_entry.long_name
+                if stripped_value.endswith(unit_modifier):
+                    stripped_value = stripped_value[0:-len(unit_modifier)]
+                    break
+
+        # Finally verify there is correctly a space between the unit and the value.
+        # This implicitly catches cases where there is an erroneous modifier on a unit.
+        if found_unit:
+            if is_prefix and stripped_value[0] == " ":
+                stripped_value = stripped_value[1:]
+            elif not is_prefix and stripped_value[-1] == " ":
+                stripped_value = stripped_value[0:-1]
+            else:
+                return False, stripped_value
+
+        return found_unit, stripped_value
+
+    def _update_schema_entry(self):
+        new_entry = None
+        if self.extension_or_value_portion:
+            new_entry = self._schema._get_entry_for_tag(self.base_tag.lower() + "/#")
+        if new_entry is None:
+            new_entry = self._schema._get_entry_for_tag(self.base_tag.lower())
+        self._schema_entry = new_entry
