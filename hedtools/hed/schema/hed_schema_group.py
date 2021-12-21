@@ -126,49 +126,6 @@ class HedSchemaGroup:
             issues_list += schema.check_compliance(also_check_for_warnings, name, error_handler)
         return issues_list
 
-    # ===============================================
-    # Basic tag attributes
-    # ===============================================
-
-    # ===============================================
-    # More complex tag attributes/combinations of tags etc.
-    # ===============================================
-    def get_unit_class_default_unit(self, original_tag):
-        """Gets the default unit class unit that is associated with the specified tag.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        str
-            The default unit class unit associated with the specific tag. If the tag doesn't have a unit class then an
-            empty string is returned.
-
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.get_unit_class_default_unit(original_tag)
-
-    def get_tag_unit_class_units(self, original_tag):
-        """Gets the unit class units associated with a particular tag.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        []
-            A list containing the unit class units associated with a particular tag. A empty list will be returned if
-            the tag doesn't have unit class units associated with it.
-
-        """
-        schema = self._schemas.get(original_tag.library_prefix)
-        if schema:
-            return schema.get_tag_unit_class_units(original_tag)
-
     def get_all_tags_with_attribute(self, key):
         all_tags = set()
         for schema in self._schemas.values():

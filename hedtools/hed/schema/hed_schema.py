@@ -383,85 +383,6 @@ class HedSchema:
             return False
         return True
 
-    # ===============================================
-    # Basic tag attributes
-    # ===============================================
-    def any_parent_has_attribute(self, original_tag, attribute):
-        """Checks to see if the tag (or any of it's parents) have the given attribute.
-
-            This could be fairly easily cached if it's a performance issue.
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        attribute: str
-            The name of the attribute to check for.
-        Returns
-        -------
-        tag_has_attribute: bool
-            True if the tag has the given attribute. False, if otherwise.
-        """
-        base_tag = original_tag.lower()
-        lower_tag = base_tag
-        found_slash = len(lower_tag)
-        check_tag = lower_tag
-        while found_slash != -1:
-            current_index = found_slash
-            check_tag = check_tag[:current_index]
-            parent_tag_entry = self._get_entry_for_tag(check_tag, HedSectionKey.AllTags)
-            if parent_tag_entry and parent_tag_entry.has_attribute(attribute):
-                return True
-            found_slash = check_tag.rfind("/")
-        return False
-
-    def base_tag_has_attribute(self, original_tag, tag_attribute):
-        """Checks to see if the tag has a specific attribute.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            A tag.
-        tag_attribute: str
-            A tag attribute.
-        Returns
-        -------
-        bool
-            True if the tag has the specified attribute. False, if otherwise.
-
-        """
-        tag_entry = self._get_entry_for_tag(original_tag.base_tag)
-        new_val = False
-        if tag_entry:
-            new_val = tag_entry.has_attribute(tag_attribute)
-        return new_val
-
-    # ===============================================
-    # More complex tag attributes/combinations of tags etc.
-    # ===============================================
-    def get_unit_class_default_unit(self, original_tag):
-        """Gets the default unit class unit that is associated with the specified tag.
-
-        Parameters
-        ----------
-        original_tag: HedTag
-            The tag that is used to do the validation.
-        Returns
-        -------
-        str
-            The default unit class unit associated with the specific tag. If the tag doesn't have a unit class then an
-            empty string is returned.
-
-        """
-        default_unit = ''
-        unit_classes = original_tag.get_tag_unit_classes()
-        if unit_classes:
-            first_unit_class = unit_classes[0]
-            unit_class_entry = self._get_entry_for_tag(first_unit_class, HedSectionKey.UnitClasses)
-            if unit_class_entry:
-                default_unit = unit_class_entry.has_attribute(HedKey.DefaultUnits, return_value=True)
-
-        return default_unit
-
     def get_unit_class_units(self, unit_class_type):
         """
             Get the list of unit class units this type will accept.
@@ -744,38 +665,6 @@ class HedSchema:
                 new_short_tag_dict[short_clean_tag].append(new_tag_entry)
         self.short_tag_mapping = new_short_tag_dict
 
-    def _value_tag_has_attribute(self, original_tag, key,
-                                 return_value=False):
-        """
-            Will return if original tag has the specified attribute, or False if original tag is not a takes value tag.
-
-        Parameters
-        ----------
-        original_tag : HedTag
-
-        key : str
-            A HedKey value to check for
-        return_value : bool
-            If true, returns the value of the attribute, rather than True/False
-
-        Returns
-        -------
-        attribute_name_or_value: bool or str
-            Returns the name or value of the specified attribute
-        """
-        if not original_tag.extension_or_value_portion:
-            return False
-
-        value_class_tag = original_tag.base_tag.lower() + "/#"
-
-        tag_entry = self._get_entry_for_tag(value_class_tag)
-        if not tag_entry:
-            return False
-
-        new_val = tag_entry.has_attribute(key, return_value)
-        return new_val
-
-    # todo: Consider moving these into HedTag
     def get_modifiers_for_unit(self, unit):
         """
             Returns the valid modifiers for the given unit
@@ -803,53 +692,6 @@ class HedSchema:
             modifier_attribute_name = HedKey.SIUnitModifier
         valid_modifiers = self.unit_modifiers.get_entries_with_attribute(modifier_attribute_name)
         return valid_modifiers
-
-    @staticmethod
-    def _strip_off_units_if_valid(unit_value, unit, is_prefix=False, valid_modifiers=None):
-        """Validates and strips units from a value.
-
-        Parameters
-        ----------
-        unit_value: str
-            The value to validate.
-        unit: str
-            The unit to strip.
-        is_prefix: bool
-            Whether the unit is a prefix.  eg "$ 10". Default suffix.
-        valid_modifiers: [HedSchemaEntry]
-            A list of modifiers this unit accepts
-        Returns
-        -------
-        tuple
-            The found unit and the stripped value.
-        """
-        found_unit = False
-        stripped_value = ''
-        if is_prefix and unit_value.startswith(unit):
-            found_unit = True
-            stripped_value = unit_value[len(unit):]
-        elif not is_prefix and unit_value.endswith(unit):
-            found_unit = True
-            stripped_value = unit_value[0:-len(unit)]
-
-        if found_unit and valid_modifiers:
-            for modifier_entry in valid_modifiers:
-                unit_modifier = modifier_entry.long_name
-                if stripped_value.endswith(unit_modifier):
-                    stripped_value = stripped_value[0:-len(unit_modifier)]
-                    break
-
-        # Finally verify there is correctly a space between the unit and the value.
-        # This implicitly catches cases where there is an erroneous modifier on a unit.
-        if found_unit:
-            if is_prefix and stripped_value[0] == " ":
-                stripped_value = stripped_value[1:]
-            elif not is_prefix and stripped_value[-1] == " ":
-                stripped_value = stripped_value[0:-1]
-            else:
-                return False, stripped_value
-
-        return found_unit, stripped_value
 
     def _get_valid_unit_plural(self, unit):
         """
