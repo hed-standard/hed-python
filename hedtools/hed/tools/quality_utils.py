@@ -1,0 +1,2 @@
+def compare():
+    print("hello")
