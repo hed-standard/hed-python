@@ -31,5 +31,6 @@ class Test(unittest.TestCase):
         other5 = BidsFile('/d/base/sub-01/ses-test/func/temp/sub-01_ses-test_task-overt_run-2_bold.json')
         self.assertFalse(other5.is_sidecar_for(bids), "is_a_parent returns false for child even if entities match")
 
+
 if __name__ == '__main__':
     unittest.main()

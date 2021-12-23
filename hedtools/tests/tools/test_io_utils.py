@@ -56,7 +56,8 @@ class Test(unittest.TestCase):
         base_path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
         file_path1 = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s/sub-01/ses-1/eeg/temp_events.tsv'
         comps1 = get_path_components(file_path1, base_path)
-        self.assertEqual(comps1[0], os.path.abspath(base_path), "get_path_components base_path is is the first component")
+        self.assertEqual(comps1[0], os.path.abspath(base_path),
+                         "get_path_components base_path is is the first component")
         self.assertEqual(len(comps1), 4, "get_path_components has correct number of components")
         comps2 = get_path_components(base_path, base_path)
         self.assertEqual(comps2[0], os.path.abspath(base_path), "get_path_components base_path is its own base_path")
@@ -98,6 +99,7 @@ class Test(unittest.TestCase):
         self.assertEqual(ext2, '', "parse_bids_filename should return empty extension when only name")
         self.assertIsInstance(entity_dict2, dict, "parse_bids_filename should return entities as a dictionary")
         self.assertEqual(len(entity_dict2), 0, "parse_bids_filename should return empty dictionary when no entities")
+
 
 if __name__ == '__main__':
     unittest.main()
