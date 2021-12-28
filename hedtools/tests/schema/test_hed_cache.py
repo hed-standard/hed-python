@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/legacy_xml')
         schema.set_cache_directory(cls.hed_cache_dir)
 
-        cls.default_xml_base_filename = "HED8.0.0.xml"
+        cls.default_xml_base_filename = "HED8.0.0t.xml"
         cls.default_hed_xml = os.path.join(cls.hed_base_dir, cls.default_xml_base_filename)
         cls.hed_test_version = '7.1.1'
         cls.hed_invalid_version = '4.6.7'

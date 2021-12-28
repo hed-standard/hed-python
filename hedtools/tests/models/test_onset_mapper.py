@@ -11,7 +11,7 @@ class Test(TestHedBase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0t.mediawiki")
+        hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0.mediawiki")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.placeholder_label_def_string = f"def/TestDefPlaceholder/2471"
         cls.placeholder_def_contents = "(Item/TestDef1/#,Item/TestDef2)"
