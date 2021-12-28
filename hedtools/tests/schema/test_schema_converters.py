@@ -50,15 +50,26 @@ class TestConverterBase(unittest.TestCase):
 
             self.assertEqual(string_schema, self.hed_schema_xml)
 
+    # def test_schema_as_string_wiki(self):
+    #     with open(self.wiki_file) as file:
+    #         hed_schema_as_string = "".join([line for line in file])
+    #         with open("/tmp/test_string_saving.mediawiki", "w") as f:
+    #             f.write(hed_schema_as_string)
+    #
+    #         string_schema = schema.from_string(hed_schema_as_string, file_type=".mediawiki")
+    #
+    #         self.assertEqual(string_schema, self.hed_schema_wiki)
+
     def test_schema_as_string_wiki(self):
+        import tempfile
         with open(self.wiki_file) as file:
             hed_schema_as_string = "".join([line for line in file])
-            with open("/tmp/test_string_saving.mediawiki", "w") as f:
-                f.write(hed_schema_as_string)
+        temp = tempfile.TemporaryFile(mode="w")
+        temp.write(hed_schema_as_string)
+        temp.close()
 
-            string_schema = schema.from_string(hed_schema_as_string, file_type=".mediawiki")
-
-            self.assertEqual(string_schema, self.hed_schema_wiki)
+        string_schema = schema.from_string(hed_schema_as_string, file_type=".mediawiki")
+        self.assertEqual(string_schema, self.hed_schema_wiki)
 
     def test_wikischema2xml(self):
         saved_filename = self.hed_schema_wiki.save_as_xml()

@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <HED xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="8.0.1" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd">
    <prologue>This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
+
 </prologue>
    <schema>
       <node>
@@ -3106,14 +3107,14 @@
                      <node>
                         <name>Angle</name>
                         <description>The amount of inclination of one line to another or the plane of one object to another.</description>
-                        <attribute>
-                           <name>unitClass</name>
-                           <value>angleUnits</value>
-                        </attribute>
                         <node>
                            <name>#</name>
                            <attribute>
                               <name>takesValue</name>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>angleUnits</value>
                            </attribute>
                            <attribute>
                               <name>valueClass</name>
@@ -5150,7 +5151,7 @@
                </node>
                <node>
                   <name>Incidental</name>
-                  <description>Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.</description>
+                  <description>A sensory or other type of event that is unrelated to the task or experiment.</description>
                </node>
                <node>
                   <name>Instructional</name>
@@ -6536,5 +6537,6 @@
       </propertyDefinition>
    </propertyDefinitions>
    <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+
 </epilogue>
 </HED>

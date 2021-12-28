@@ -1,0 +1,29 @@
+cond_code	event_code	event_type	attention_status	task_role
+1	1	hear_cue	n/a	cue_auditory
+1	2	look_cue	n/a	cue_visual
+1	3	high_tone	attended	target
+1	4	light_square	unattended	target
+1	5	low_tone	attended	nontarget
+1	6	dark_square	unattended	nontarget
+2	1	hear_cue	unattended	cue_auditory
+2	2	look_cue	attended	cue_visual
+2	3	high_tone	attended	target
+2	4	light_square	unattended	target
+2	5	low_tone	attended	nontarget
+2	6	dark_square	unattended	nontarget
+3	1	hear_cue	attended	cue_auditory
+3	2	look_cue	attended	cue_visual
+3	7	high_tone	attended	target
+3	8	light_square	attended	target
+3	9	high_tone	unattended	target
+3	10	light_square	unattended	target
+3	11	low_tone	attended	nontarget
+3	12	dark_square	attended	nontarget
+3	13	low_tone	unattended	nontarget
+3	14	dark_square	unattended	nontarget
+1	201	button_press	n/a	indicate_target
+2	201	button_press	n/a	indicate_target
+3	201	button_press	n/a	indicate_target
+1	202	pause	n/a	
+2	202	pause	n/a	
+3	202	pause	n/a	
