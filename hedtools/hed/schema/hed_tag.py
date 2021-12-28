@@ -456,7 +456,7 @@ class HedTag:
         is_unit_class_tag: bool
         """
         if self._schema_entry:
-            return self._schema_entry.has_attribute(HedKey.UnitClass)
+            return bool(self._schema_entry.unit_classes)
         return False
 
     def is_value_class_tag(self):
@@ -468,7 +468,7 @@ class HedTag:
         is_value_class_tag: bool
         """
         if self._schema_entry:
-            return self._schema_entry.has_attribute(HedKey.ValueClass)
+            return bool(self._schema_entry.value_classes)
         return False
 
     def is_basic_tag(self):

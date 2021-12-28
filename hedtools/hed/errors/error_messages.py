@@ -212,6 +212,12 @@ def schema_warning_invalid_capitalization(tag_name, problem_char, char_index):
            {'problem_char': problem_char}
 
 
+@hed_error(SchemaWarnings.NON_PLACEHOLDER_HAS_CLASS, default_severity=ErrorSeverity.WARNING)
+def schema_warning_non_placeholder_class(tag_name, invalid_attribute_name):
+    return "Only placeholder nodes('#') can have a unit or value class." + \
+           f"Found {invalid_attribute_name} on {tag_name}", {}
+
+
 @hed_error(SidecarErrors.BLANK_HED_STRING)
 def sidecar_error_blank_hed_string():
     return "No HED string found for Value or Category column.", {}
