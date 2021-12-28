@@ -1,5 +1,6 @@
 from hed.errors.error_types import ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
+from hed.schema.hed_schema_constants import HedKey
 
 
 class HedTag:
@@ -7,7 +8,7 @@ class HedTag:
         A single HedTag in a string, keeps track of original value and positioning
     """
 
-    def __init__(self, hed_string, span=None, extension_index=None):
+    def __init__(self, hed_string, span=None, hed_schema=None):
         """
 
         Parameters
@@ -16,8 +17,9 @@ class HedTag:
             Source hed string for this tag
         span : (int, int)
             The start and end indexes of the tag in the hed_string.
-        extension_index: int or None
-            Only used to initialize a HedTag easily by a user.  Index the extension/value portion of the tag starts.
+        hed_schema: HedSchema or None
+            A convenience parameter that will calculate canonical forms on creation.
+            You will not be able to get issues out, so this is mostly discouraged outside test code or similar.
         """
         self._hed_string = hed_string
         if span is None:
@@ -40,14 +42,25 @@ class HedTag:
 
         self._library_prefix = self._get_library_prefix(self.org_tag)
 
-        if extension_index:
-            self._extension_index = extension_index
-            self._long_tag = self._hed_string
+        # This is the schema this tag was converted to.
+        self._schema = None
+        self._schema_entry = None
+
+        if hed_schema:
+            self.convert_to_canonical_forms(hed_schema)
 
         self.is_definition = False
 
     @property
     def library_prefix(self):
+        """
+            Returns the library prefix for this tag if one exists.
+
+        Returns
+        -------
+        prefix: str
+            The library prefix, including the colon.
+        """
         return self._library_prefix
 
     @property
@@ -87,7 +100,7 @@ class HedTag:
         """
             Returns just the short non-extension portion of a tag.
 
-            eg ParentNodes/Def/DefName would return just "Def"
+            e.g. ParentNodes/Def/DefName would return just "Def"
 
         Returns
         -------
@@ -117,6 +130,9 @@ class HedTag:
         long_part = self._long_tag[:self._short_tag_index]
         self._long_tag = f"{long_part}{new_tag_val}/{self.extension_or_value_portion}"
         self._extension_index = self._short_tag_index + len(new_tag_val)
+
+        if self._schema:
+            self._update_schema_entry()
 
     @property
     def org_base_tag(self):
@@ -148,7 +164,7 @@ class HedTag:
 
     def tag_modified(self):
         """
-            Returns true if this tag has been modified from it's original form.
+            Returns true if this tag has been modified from its original form.
 
             Modifications can include adding a column name_prefix.
 
@@ -245,7 +261,7 @@ class HedTag:
         Returns
         -------
         str
-            Return the original tag if we haven't set a new tag.(eg short to long)
+            Return the original tag if we haven't set a new tag.(e.g. short to long)
         """
         if self._long_tag:
             return self._long_tag
@@ -313,7 +329,7 @@ class HedTag:
 
     def convert_to_canonical_forms(self, hed_schema):
         """
-            This updates the internal tag states from the schema, so you can convert from short to long etc
+            This updates the internal tag states from the schema, and sets the schema entry.
 
         Parameters
         ----------
@@ -340,18 +356,258 @@ class HedTag:
         self._short_tag_index = short_index
         self._extension_index = remainder_index
 
+        if remainder_index is not None:
+            self._schema = specific_schema
+            self._update_schema_entry()
+
         return tag_issues
+
+    def get_stripped_unit_value(self):
+        """
+        Returns the extension portion of the tag if it exists, without the units.
+
+        eg 'Duration/3 ms' will return '3'
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        stripped_unit_value: str
+            The extension portion with the units removed.
+        """
+        tag_unit_classes = self.unit_classes
+        stripped_value = self._get_tag_units_portion(tag_unit_classes)
+        if stripped_value:
+            return stripped_value
+
+        return self.extension_or_value_portion
+
+    @property
+    def unit_classes(self):
+        """
+            Returns a dict of all the unit classes this tag accepts.
+
+            Returns empty dict if this is not a unit class tag.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        unit_classes: {str: HedSchemaEntry}
+            A dict of unit classes this tag accepts.
+        """
+        if self._schema_entry:
+            return self._schema_entry.unit_classes
+        return {}
+
+    @property
+    def value_classes(self):
+        """
+            Returns a dict of all the value classes this tag accepts.
+
+            Returns empty dict if this is not a value tag.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        value_classes: {str: HedSchemaEntry}
+            A dict of value classes this tag accepts.
+        """
+        if self._schema_entry:
+            return self._schema_entry.value_classes
+        return {}
+
+    @property
+    def attributes(self):
+        """
+            Returns a dict of all the attributes this tag has.
+
+            Returns empty dict if this is not a value tag.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        attributes: {str: HedSchemaEntry}
+            A dict of attributes this tag has.
+        """
+        if self._schema_entry:
+            return self._schema_entry.attributes
+        return {}
+
+    def is_takes_value_tag(self):
+        """
+            Returns true if this is a takes value tag
+        Returns
+        -------
+        is_value_tag: bool
+        """
+        if self._schema_entry:
+            return self._schema_entry.has_attribute(HedKey.TakesValue)
+        return False
+
+    def is_unit_class_tag(self):
+        """
+            Returns true if this is a unit class tag
+        Returns
+        -------
+        is_unit_class_tag: bool
+        """
+        if self._schema_entry:
+            return self._schema_entry.has_attribute(HedKey.UnitClass)
+        return False
+
+    def is_value_class_tag(self):
+        """
+            Returns true if this is a value class tag
+
+        Returns
+        -------
+        is_value_class_tag: bool
+        """
+        if self._schema_entry:
+            return self._schema_entry.has_attribute(HedKey.ValueClass)
+        return False
+
+    def is_basic_tag(self):
+        """
+            Returns true if this is a known tag with no extension or value.
+
+        Returns
+        -------
+        is_basic_tag: bool
+        """
+        return bool(self._schema_entry and not self.extension_or_value_portion)
+
+    def has_attribute(self, attribute):
+        """
+            Returns true if this is an attribute this tag has.
+
+        Returns
+        -------
+        has_attribute: bool
+        """
+        if self._schema_entry:
+            return self._schema_entry.has_attribute(attribute)
+        return False
+
+    def is_extension_allowed_tag(self):
+        """Checks to see if the tag has the 'extensionAllowed' attribute. It will strip the tag until there are no more
+        slashes to check if its ancestors have the attribute.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        tag_takes_extension: bool
+            True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
+        """
+        if self.is_takes_value_tag():
+            return False
+
+        if self._schema_entry:
+            return self._schema_entry.any_parent_has_attribute(HedKey.ExtensionAllowed)
+
+    def get_tag_unit_class_units(self):
+        """Gets the unit class units associated with a particular tag.
+
+        Parameters
+        ----------
+        Returns
+        -------
+        []
+            A list containing the unit class units associated with a particular tag. An empty list will be returned if
+            the tag doesn't have unit class units associated with it.
+
+        """
+        units = []
+        unit_classes = self.unit_classes
+        for unit_class_entry in unit_classes.values():
+            units += unit_class_entry.unit_class_units.keys()
+
+        return units
+
+    def get_unit_class_default_unit(self):
+        """Gets the default unit class unit for this tag
+
+        Parameters
+        ----------
+        Returns
+        -------
+        str
+            The default unit class unit associated with the specific tag. If the tag doesn't have a unit class then an
+            empty string is returned.
+
+        """
+        default_unit = ''
+        unit_classes = self.unit_classes.values()
+        if unit_classes:
+            first_unit_class_entry = list(unit_classes)[0]
+            default_unit = first_unit_class_entry.has_attribute(HedKey.DefaultUnits, return_value=True)
+
+        return default_unit
+
+    def base_tag_has_attribute(self, tag_attribute):
+        """Checks to see if the tag has a specific attribute.
+
+        Parameters
+        ----------
+        tag_attribute: str
+            A tag attribute.
+        Returns
+        -------
+        bool
+            True if the tag has the specified attribute. False, if otherwise.
+
+        """
+        if not self._schema_entry:
+            return False
+
+        return self._schema_entry.base_tag_has_attribute(tag_attribute)
+
+    def any_parent_has_attribute(self, attribute):
+        """Checks to see if the tag (or any of its parents) have the given attribute.
+
+        Parameters
+        ----------
+        attribute: str
+            The name of the attribute to check for.
+        Returns
+        -------
+        tag_has_attribute: bool
+            True if the tag has the given attribute. False, if otherwise.
+        """
+        if self._schema_entry:
+            return self._schema_entry.any_parent_has_attribute(attribute=attribute)
+
+    def _update_schema_entry(self):
+        """
+            Sets the _schema_entry pointer based off the current schema.
+
+        Returns
+        -------
+
+        """
+        new_entry = None
+        if self.extension_or_value_portion:
+            new_entry = self._schema._get_entry_for_tag(self.base_tag.lower() + "/#")
+        if new_entry is None:
+            new_entry = self._schema._get_entry_for_tag(self.base_tag.lower())
+        self._schema_entry = new_entry
 
     def _convert_key_tags_to_canonical_form(self):
         # todo: eventually make this function less bad.
         # Finds the canonical form for basic known tags such as definition and def.
-        tags_to_identify = ["def", "onset", "definition", "offset", "def-expand"]
+        tags_to_identify = ["onset", "definition", "offset", "def-expand", "def"]
         for key_tag in tags_to_identify:
             is_key_tag = self._check_tag_starts_with(str(self), key_tag)
             if is_key_tag is not None:
                 self._long_tag = str(self)
                 self._extension_index = len(str(self)) - len(is_key_tag)
                 self._short_tag_index = self._extension_index - len(key_tag)
+                break
 
         return []
 
@@ -364,7 +620,7 @@ class HedTag:
         hed_tag : str
             A single input tag
         target_tag_short_name : str
-            The string to match eg find target_tag_short_name in hed_tag
+            The string to match e.g. find target_tag_short_name in hed_tag
         Returns
         -------
             str: the tag without the removed name_prefix, or None
@@ -442,7 +698,7 @@ class HedTag:
         short_tag_index: int
             The position the short tag starts at in long_tag
         extension_index: int
-            The position the extension or value starts at in the long_tag
+            The position the extension or value starts at in the long_tag.  This will be None if this is an invalid tag.
         errors: list
             a list of errors while converting
         """
@@ -483,7 +739,7 @@ class HedTag:
         full_tag_string = self._str_no_long_tag()
         # skip over the tag name_prefix if present
         full_tag_string = full_tag_string[len(prefix):]
-        # Finally don't actually adjust the tag if it's hed2 style.
+        # don't actually adjust the tag if it's hed2 style.
         if hed_schema.has_duplicate_tags:
             return full_tag_string, None, state["found_index_end"], []
 
@@ -506,3 +762,45 @@ class HedTag:
 
             return org_tag[:first_colon + 1]
         return ""
+
+    def _get_tag_units_portion(self, tag_unit_classes):
+        """Checks to see if the specified string has a valid unit, and removes it if so.
+
+        Parameters
+        ----------
+        tag_unit_classes: [UnitClassEntry]
+            A list of valid unit class entries for this tag
+        Returns
+        -------
+        stripped_value: str
+            A tag_unit_values with the valid unit removed, if one was present.
+            Otherwise, returns None
+
+        """
+        value, _, units = self.extension_or_value_portion.rpartition(" ")
+        if not units:
+            return None
+
+        for unit_class_entry in tag_unit_classes.values():
+            all_valid_unit_permutations = unit_class_entry.derivative_units
+
+            possible_match = self._find_modifier_unit_entry(units, all_valid_unit_permutations)
+            if possible_match and not possible_match.has_attribute(HedKey.UnitPrefix):
+                return value
+
+            # Repeat the above, but as a prefix
+            possible_match = self._find_modifier_unit_entry(value, all_valid_unit_permutations)
+            if possible_match and possible_match.has_attribute(HedKey.UnitPrefix):
+                return units
+
+        return None
+
+    @staticmethod
+    def _find_modifier_unit_entry(units, all_valid_unit_permutations):
+        possible_match = all_valid_unit_permutations.get(units)
+        if not possible_match or not possible_match.has_attribute(HedKey.UnitSymbol):
+            possible_match = all_valid_unit_permutations.get(units.lower())
+            if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
+                possible_match = None
+
+        return possible_match

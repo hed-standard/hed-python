@@ -134,8 +134,7 @@ class DefDict:
             # to here
             # Now validate to see if we have a definition.  We want 1 definition, and the other parts are optional.
             if not def_tags:
-                # If we don't have at least one valid definition tag, just move on.  This is probably a tag with
-                # the word definition somewhere else in the text.
+                # If we don't have at least one valid definition tag, just move on.
                 continue
 
             if not is_top_level:
