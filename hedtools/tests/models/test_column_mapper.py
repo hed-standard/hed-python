@@ -7,7 +7,7 @@ from hed.models import model_constants
 
 
 class Test(unittest.TestCase):
-    schema_file = '../data/hed_pairs/HED8.0.0.xml'
+    schema_file = '../data/hed_pairs/HED8.0.0t.xml'
 
     @classmethod
     def setUpClass(cls):

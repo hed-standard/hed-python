@@ -19,8 +19,8 @@ from hed.schema.hed_schema_file import load_schema
 if __name__ == '__main__':
     # Setup the files
     local_hed_file = '../data/schema_data/HED8.0.0.xml'
-    data_path = '../data/wakeman_henson_data'  # path to example data
-    events_file = os.path.join(data_path, 'sub-002_task-FacePerception_run-1_events.tsv')
+    data_path = '../data/'  # path to example data
+    events_file = os.path.join(data_path, 'sub-003_task-FacePerception_run-2_events.tsv')
     json_file = os.path.join(data_path, 'task-FacePerception_events.json')
 
     # Load the schema for the examples
