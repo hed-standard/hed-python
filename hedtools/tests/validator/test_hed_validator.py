@@ -155,7 +155,7 @@ class Test(unittest.TestCase):
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/hed_pairs/HED8.0.0.xml')
+                                   '../data/hed_pairs/HED8.0.0t.xml')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    '../data/validator_tests/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = schema.load_schema(schema_path)

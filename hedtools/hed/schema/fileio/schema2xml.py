@@ -12,7 +12,7 @@ class HedSchema2XML:
 
     def process_schema(self, hed_schema):
         """
-        Takes a HedSchema object and returns a an XML tree version.
+        Takes a HedSchema object and returns an XML tree version.
 
         Parameters
         ----------
@@ -68,8 +68,8 @@ class HedSchema2XML:
             return
         unit_section_node = SubElement(self.hed_node, xml_constants.get_section_name(HedSectionKey.UnitClasses,
                                                                                      self.save_as_legacy_format))
-        for unit_class, unit_entry in hed_schema[HedSectionKey.UnitClasses].items():
-            unit_types = unit_entry.value
+        for unit_class, unit_class_entry in hed_schema[HedSectionKey.UnitClasses].items():
+            unit_types = unit_class_entry.unit_class_units
             unit_class_node = self._add_node(hed_schema, unit_section_node, unit_class, HedSectionKey.UnitClasses)
             if self.save_as_legacy_format:
                 unit_class_node = SubElement(unit_class_node, xml_constants.UNIT_CLASS_UNITS_ELEMENT)
@@ -181,7 +181,7 @@ class HedSchema2XML:
         full_name : str
             Long version of the tag/modifier/unit name
         key_class: str
-            The type of node we are adding.  eg HedSectionKey.AllTags, HedSectionKey.UnitModifiers, etc.
+            The type of node we are adding.  e.g. HedSectionKey.AllTags, HedSectionKey.UnitModifiers, etc.
         short_tag_name : str
             The short version of the tag if this is a tag.  Even for hed2g.
         sub_node_name: str or None

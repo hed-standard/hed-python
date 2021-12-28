@@ -1,97 +1,16 @@
+from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
+from hed.schema.hed_schema_constants import HedSectionKey
 
 
-class HedSchemaEntry:
-    def __init__(self, long_name, section):
-        self.long_name = long_name
-        # key: property/attribute name, value = property value.  Will often be a bool
-        self.attributes = {}
-        self.description = None
-        self.value = None
-        self._section = section
-
-        # This section is largely unused.  It will only be filled in when we try to add an attribute
-        # that isn't valid in this section.
-        self._unknown_attributes = None
-
-    def set_attribute_value(self, attribute_name, attribute_value):
-        """
-            Add the given attribute to this entry and set its value
-
-            If this is not a valid attribute name, it will be also added as an unknown attribute.
-
-        Parameters
-        ----------
-        attribute_name : str
-        attribute_value : bool or str
-
-        Returns
-        -------
-
-        """
-        if not attribute_value:
-            return
-
-        if attribute_name not in self._section.valid_attributes:
-            # print(f"Unknown attribute {attribute_name}")
-            if self._unknown_attributes is None:
-                self._unknown_attributes = {}
-            self._unknown_attributes[attribute_name] = attribute_value
-        self.attributes[attribute_name] = attribute_value
-
-    def has_attribute(self, attribute_name, return_value=False):
-        """
-        Returns if this entry has this attribute.  This does not guarantee it's a valid attribute for this entry.
-
-        Parameters
-        ----------
-        attribute_name : str
-            The attribute to check for
-        return_value : bool
-            Return the value of the attribute, rather than simply if it is present
-
-        Returns
-        -------
-
-        """
-        if return_value:
-            return self.attributes.get(attribute_name, None)
-        else:
-            return attribute_name in self.attributes
-
-    def attribute_has_property(self, attribute_name, property_name):
-        """
-            If this is a valid attribute for this section, retrieve if it has the given property
-
-        Parameters
-        ----------
-        attribute_name : str
-            Attribute name to check for property_name
-        property_name : str
-        Returns
-        -------
-        has_property: bool
-            Returns if it has the property
-        """
-        attr_entry = self._section.valid_attributes.get(attribute_name)
-        if attr_entry and attr_entry.has_attribute(property_name):
-            return True
-
-    def __eq__(self, other):
-        if self.long_name != other.long_name:
-            return False
-        if self.attributes != other.attributes:
-            # We only want to compare known attributes
-            self_attr = {key: value for key, value in self.attributes.items()
-                         if not self._unknown_attributes or key not in self._unknown_attributes}
-            other_attr = {key: value for key, value in other.attributes.items()
-                          if not other._unknown_attributes or key not in other._unknown_attributes}
-            if self_attr != other_attr:
-                return False
-        if self.description != other.description:
-            return False
-        if self.value != other.value:
-            return False
-        return True
+entries_by_section = {
+    HedSectionKey.Properties: HedSchemaEntry,
+    HedSectionKey.Attributes: HedSchemaEntry,
+    HedSectionKey.UnitModifiers: HedSchemaEntry,
+    HedSectionKey.Units: UnitEntry,
+    HedSectionKey.UnitClasses: UnitClassEntry,
+    HedSectionKey.ValueClasses: HedSchemaEntry,
+    HedSectionKey.AllTags: HedTagEntry,
+}
 
 
 class HedSchemaSection:
@@ -103,6 +22,9 @@ class HedSchemaSection:
 
         # Points to the entries in attributes
         self.valid_attributes = {}
+        self._attribute_cache = {}
+
+        self._section_entry = entries_by_section.get(section_key)
 
     def _add_to_dict(self, name):
         name_key = name
@@ -113,12 +35,12 @@ class HedSchemaSection:
         #  This detects two FULLY identical tags, including all terms and parents.
         # if name_key in self.all_names:
         #     print(f"NotImplemented: {name_key} found twice in schema.")
-        new_entry = HedSchemaEntry(name, self)
+        new_entry = self._section_entry(name, self)
         self.all_names[name_key] = new_entry
 
         return new_entry
 
-    def get_entries_with_attribute(self, attribute_name):
+    def get_entries_with_attribute(self, attribute_name, return_name_only=False):
         """
             Returns an iterator of all entries with the given attribute
 
@@ -132,9 +54,16 @@ class HedSchemaSection:
 
         Returns
         -------
-        [HedSchemaEntry]
+        [HedSchemaEntry] or [str]
         """
-        return [tag_entry for tag_entry in self.values() if tag_entry.has_attribute(attribute_name)]
+        if attribute_name not in self._attribute_cache:
+            new_val = [tag_entry for tag_entry in self.values() if tag_entry.has_attribute(attribute_name)]
+            self._attribute_cache[attribute_name] = new_val
+
+        cache_val = self._attribute_cache[attribute_name]
+        if return_name_only:
+            return [tag_entry.long_name for tag_entry in cache_val]
+        return cache_val
 
     # ===============================================
     # Simple wrapper functions to make this class primarily function as a dict

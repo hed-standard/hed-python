@@ -27,7 +27,9 @@ class HedSchemaXMLParser:
 
         self._schema.prologue = self._get_prologue()
         self._schema.epilogue = self._get_epilogue()
-        self._populate_dictionaries()
+        self._populate_unit_modifier_dictionaries()
+        self._populate_unit_class_dictionaries()
+        self._populate_tag_dictionaries()
         self._schema.finalize_dictionaries()
 
     @staticmethod
@@ -37,7 +39,7 @@ class HedSchemaXMLParser:
 
     @staticmethod
     def _parse_hed_xml(hed_xml_file_path, schema_as_string=None):
-        """Parses a XML file and returns the root element.
+        """Parses an XML file and returns the root element.
 
         Parameters
         ----------
@@ -69,24 +71,6 @@ class HedSchemaXMLParser:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), hed_xml_file_path)
 
         return root
-
-    def _populate_dictionaries(self):
-        """Populates a dictionary of dictionaries that contains all of the tags, tag attributes, unit class units,
-           and unit class attributes.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        {}
-            A dictionary of dictionaries that contains all of the tags, tag attributes, unit class units, and unit class
-            attributes.
-
-        """
-        self._populate_tag_dictionaries()
-        self._populate_unit_class_dictionaries()
-        self._populate_unit_modifier_dictionaries()
 
     def _populate_property_dictionaries(self):
         """Populates a dictionary of dictionaries associated with properties
@@ -168,7 +152,7 @@ class HedSchemaXMLParser:
                 self._parse_node(tag_element, HedSectionKey.AllTags, tag)
 
     def _populate_unit_class_dictionaries(self):
-        """Populates a dictionary of dictionaries associated with all of the unit classes, unit class units, and unit
+        """Populates a dictionary of dictionaries associated with all the unit classes, unit class units, and unit
            class default units.
 
         Parameters
@@ -177,7 +161,7 @@ class HedSchemaXMLParser:
         Returns
         -------
         {}
-            A dictionary of dictionaries associated with all of the unit classes, unit class units, and unit class
+            A dictionary of dictionaries associated with all the unit classes, unit class units, and unit class
             default units.
 
         """
@@ -195,20 +179,19 @@ class HedSchemaXMLParser:
         else:
             for unit_class_element in unit_class_elements:
                 element_name = self._get_element_tag_value(unit_class_element)
-                self._schema._add_unit_class_unit(element_name, None)
+                self._schema._add_unit_class(element_name)
                 self._parse_node(unit_class_element, HedSectionKey.UnitClasses, skip_adding_name=True)
                 element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
                 element_unit_names = [self._get_element_tag_value(element) for element in element_units]
 
-                for unit in element_unit_names:
+                for unit, element in zip(element_unit_names, element_units):
                     self._schema._add_unit_class_unit(element_name, unit)
-                for element in element_units:
                     self._parse_node(element, HedSectionKey.Units, skip_adding_name=True)
 
     def _populate_unit_class_dictionaries_legacy(self, unit_class_elements):
         for unit_class_element in unit_class_elements:
             element_name = self._get_element_tag_value(unit_class_element)
-            self._schema._add_unit_class_unit(element_name, None)
+            self._schema._add_unit_class(element_name)
             self._parse_node_old_format(unit_class_element, HedSectionKey.UnitClasses, skip_adding_name=True)
             element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
             if not element_units:
@@ -224,9 +207,8 @@ class HedSchemaXMLParser:
                 element_units = []
 
             element_unit_names = [element.text for element in element_units]
-            for unit in element_unit_names:
+            for unit, element in zip(element_unit_names, element_units):
                 self._schema._add_unit_class_unit(element_name, unit)
-            for element in element_units:
                 self._parse_node_old_format(element, HedSectionKey.Units, element_name=element.text,
                                             skip_adding_name=True)
 
@@ -341,7 +323,7 @@ class HedSchemaXMLParser:
         Returns
         -------
         []
-            A list containing all of the ancestor tag names of a given tag.
+            A list containing all the ancestor tag names of a given tag.
 
         """
         ancestor_tags = []
