@@ -1,4 +1,16 @@
-from hed.schema.hed_schema_entry import HedSchemaEntry
+from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
+from hed.schema.hed_schema_constants import HedSectionKey
+
+
+entries_by_section = {
+    HedSectionKey.Properties: HedSchemaEntry,
+    HedSectionKey.Attributes: HedSchemaEntry,
+    HedSectionKey.UnitModifiers: HedSchemaEntry,
+    HedSectionKey.Units: UnitEntry,
+    HedSectionKey.UnitClasses: UnitClassEntry,
+    HedSectionKey.ValueClasses: HedSchemaEntry,
+    HedSectionKey.AllTags: HedTagEntry,
+}
 
 
 class HedSchemaSection:
@@ -12,6 +24,8 @@ class HedSchemaSection:
         self.valid_attributes = {}
         self._attribute_cache = {}
 
+        self._section_entry = entries_by_section.get(section_key)
+
     def _add_to_dict(self, name):
         name_key = name
         if not self.case_sensitive:
@@ -21,12 +35,7 @@ class HedSchemaSection:
         #  This detects two FULLY identical tags, including all terms and parents.
         # if name_key in self.all_names:
         #     print(f"NotImplemented: {name_key} found twice in schema.")
-        parent_name, _, child_name = name_key.rpartition("/")
-        parent_entry = None
-        if parent_name:
-            parent_entry = self.all_names.get(parent_name)
-            breakHere = 3
-        new_entry = HedSchemaEntry(name, self, parent_entry)
+        new_entry = self._section_entry(name, self)
         self.all_names[name_key] = new_entry
 
         return new_entry

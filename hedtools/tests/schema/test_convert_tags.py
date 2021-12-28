@@ -8,7 +8,6 @@ from tests.validator.test_tag_validator_base import TestHedBase
 class TestTagFormat(TestHedBase):
     schema_file = '../data/legacy_xml/reduced_no_dupe.xml'
 
-
 class TestConvertTag(TestTagFormat):
     def converter_base(self, test_strings, expected_results, expected_errors, convert_to_short=True):
         for test_key in test_strings:

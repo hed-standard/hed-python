@@ -2674,6 +2674,10 @@
                      <node>
                         <name>Horizontally-oriented</name>
                         <description>Oriented parallel to or in the plane of the horizon.</description>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Vertically-oriented</value>
+                        </attribute>
                      </node>
                      <node>
                         <name>Leftward</name>
@@ -2720,6 +2724,10 @@
                      <node>
                         <name>Vertically-oriented</name>
                         <description>Oriented perpendicular to the plane of the horizon.</description>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Horizontally-oriented</value>
+                        </attribute>
                      </node>
                   </node>
                </node>
@@ -2735,12 +2743,12 @@
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
-                           <name>unitClass</name>
-                           <value>weightUnits</value>
-                        </attribute>
-                        <attribute>
                            <name>valueClass</name>
                            <value>numericClass</value>
+                        </attribute>
+                        <attribute>
+                           <name>unitClass</name>
+                           <value>weightUnits</value>
                         </attribute>
                      </node>
                   </node>
@@ -2981,12 +2989,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>accelerationUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>accelerationUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -2999,12 +3007,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>frequencyUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>frequencyUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3017,12 +3025,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>jerkUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>jerkUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3063,12 +3071,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>speedUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>speedUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3081,12 +3089,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>frequencyUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>frequencyUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3121,12 +3129,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>physicalLengthUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>physicalLengthUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3142,12 +3150,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3160,12 +3168,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3178,12 +3186,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3200,12 +3208,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>areaUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>areaUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3218,12 +3226,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3236,12 +3244,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3254,12 +3262,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3272,12 +3280,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3290,12 +3298,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>volumeUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>volumeUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3313,12 +3321,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3331,12 +3339,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3349,12 +3357,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3367,12 +3375,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -4024,12 +4032,12 @@
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
-                           <name>unitClass</name>
-                           <value>frequencyUnits</value>
-                        </attribute>
-                        <attribute>
                            <name>valueClass</name>
                            <value>numericClass</value>
+                        </attribute>
+                        <attribute>
+                           <name>unitClass</name>
+                           <value>frequencyUnits</value>
                         </attribute>
                      </node>
                   </node>
@@ -4045,12 +4053,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -4063,12 +4071,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -4081,12 +4089,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -4099,12 +4107,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -5587,6 +5595,8 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-right-of</value>
+                  <value>Upper-left-of</value>
+                  <value>Upper-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5595,6 +5605,8 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Upper-left-of</value>
+                  <value>Upper-left-of</value>
+                  <value>Lower-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5646,15 +5658,13 @@
                <description>(A (Top-of B)) means A is on the uppermost part, side, or surface of B.</description>
             </node>
             <node>
-               <name>Underneath</name>
-               <description>(A (Underneath B)) means A is situated directly below and may be concealed by B.</description>
-            </node>
-            <node>
                <name>Upper-left-of</name>
                <description>(A (Upper-left-of B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.</description>
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-left-of</value>
+                  <value>Lower-right-of</value>
+                  <value>Upper-right-of</value>
                </attribute>
             </node>
             <node>
@@ -5663,7 +5673,13 @@
                <attribute>
                   <name>relatedTag</name>
                   <value>Lower-left-of</value>
+                  <value>Upper-left-of</value>
+                  <value>Lower-right-of</value>
                </attribute>
+            </node>
+            <node>
+               <name>Underneath</name>
+               <description>(A (Underneath B)) means A is situated directly below and may be concealed by B.</description>
             </node>
             <node>
                <name>Within</name>

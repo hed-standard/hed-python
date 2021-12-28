@@ -806,16 +806,6 @@
          <name>valueClass</name>
          <description>A schema attribute specifying which value class this value tag belongs to.</description>
       </schemaAttributeDefinition>
-      <schemaAttributeDefinition>
-         <name>testingNewAttribute</name>
-         <description>Seeing if this does anything functional at all.</description>
-         <property>
-            <name>boolProperty</name>
-         </property>
-         <property>
-            <name>testingNewProperty</name>
-         </property>
-      </schemaAttributeDefinition>
    </schemaAttributeDefinitions>
    <propertyDefinitions>
       <propertyDefinition>
@@ -838,10 +828,7 @@
          <name>valueClassProperty</name>
          <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
       </propertyDefinition>
-      <propertyDefinition>
-         <name>testingNewProperty</name>
-         <description>New Test Property</description>
-      </propertyDefinition>
    </propertyDefinitions>
-   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.</epilogue>
+   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+</epilogue>
 </HED>

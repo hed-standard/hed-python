@@ -9,15 +9,12 @@ from hed.schema.fileio.schema2wiki import HedSchema2Wiki
 from hed.schema import schema_validation_util
 from hed.schema.hed_schema_section import HedSchemaSection
 
-import inflect
-pluralize = inflect.engine()
-pluralize.defnoun("hertz", "hertz")
-
 
 class HedSchema:
     """
         Internal representation of a loaded hed schema xml or mediawiki file.
     """
+
     def __init__(self):
         """Constructor for the HedSchema class.
 
@@ -139,7 +136,7 @@ class HedSchema:
 
     def get_as_xml_string(self, save_as_legacy_format=False):
         """
-        Return the schema to an xml string
+        Return the schema to an XML string
 
         Parameters
         ----------
@@ -379,7 +376,8 @@ class HedSchema:
             #                     print(f"{key} not in dict2")
             #                     continue
             #                 if dict1[key] != dict2[key]:
-            #                     print(f"{key} doesn't match.  '{dict1[key]}' vs '{dict2[key]}'")
+            #                     print(
+            #                         f"{key} doesn't match.  '{str(dict1[key].long_name)}' vs '{str(dict2[key].long_name)}'")
             return False
         return True
 
@@ -392,18 +390,17 @@ class HedSchema:
         Parameters
         ----------
         unit_class_type : str
-            The unit class type to check for.  eg. "time"
+            The unit class type to check for.  e.g. "time"
 
         Returns
         -------
-        unit_class_units: [str]
+        unit_class_units: [UnitEntry]
             A list of each unit this type allows.
         """
         unit_class_entry = self._get_entry_for_tag(unit_class_type, HedSectionKey.UnitClasses)
-        if not unit_class_entry:
-            return []
-
-        return unit_class_entry.value
+        if unit_class_entry:
+            return unit_class_entry.unit_class_units
+        return []
 
     def get_all_tags_with_attribute(self, key, section_key=HedSectionKey.AllTags):
         """
@@ -415,6 +412,8 @@ class HedSchema:
         ----------
         key : str
             A tag attribute.  Eg HedKey.ExtensionAllowed
+        section_key: str
+            The HedSectionKey for teh section to retrieve from.
 
         Returns
         -------
@@ -435,6 +434,12 @@ class HedSchema:
         """
         self._is_hed3_schema = self.is_hed3_schema
         self._populate_short_tag_dict()
+        self._update_all_entries()
+
+    def _update_all_entries(self):
+        for section in self._sections.values():
+            for entry in section.values():
+                entry.finalize_entry(self)
 
     def _initialize_attributes(self, key_class):
         """
@@ -571,7 +576,7 @@ class HedSchema:
         Returns
         -------
         attr_dict: {str: [str]}
-            {attribute_name, [long form tags/units/etc with it])
+            {attribute_name: [long form tags/units/etc with it]}
         """
         unknown_attributes = {}
         for section in self._sections.values():
@@ -605,7 +610,7 @@ class HedSchema:
         tag_name : str
             The name of the tag to check
         key_class: str
-            The type of attributes we are asking for.  eg Tag, Units, Unit modifiers, or attributes.
+            The type of attributes we are asking for.  e.g. Tag, Units, Unit modifiers, or attributes.
 
         Returns
         -------
@@ -626,13 +631,13 @@ class HedSchema:
     def _create_empty_sections():
         dictionaries = {}
         # Add main sections
-        dictionaries[HedSectionKey.AllTags] = HedSchemaSection(HedSectionKey.AllTags, case_sensitive=False)
-        dictionaries[HedSectionKey.UnitClasses] = HedSchemaSection(HedSectionKey.UnitClasses)
-        dictionaries[HedSectionKey.Units] = HedSchemaSection(HedSectionKey.Units)
-        dictionaries[HedSectionKey.UnitModifiers] = HedSchemaSection(HedSectionKey.UnitModifiers)
-        dictionaries[HedSectionKey.ValueClasses] = HedSchemaSection(HedSectionKey.ValueClasses)
-        dictionaries[HedSectionKey.Attributes] = HedSchemaSection(HedSectionKey.Attributes)
         dictionaries[HedSectionKey.Properties] = HedSchemaSection(HedSectionKey.Properties)
+        dictionaries[HedSectionKey.Attributes] = HedSchemaSection(HedSectionKey.Attributes)
+        dictionaries[HedSectionKey.UnitModifiers] = HedSchemaSection(HedSectionKey.UnitModifiers)
+        dictionaries[HedSectionKey.Units] = HedSchemaSection(HedSectionKey.Units)
+        dictionaries[HedSectionKey.UnitClasses] = HedSchemaSection(HedSectionKey.UnitClasses)
+        dictionaries[HedSectionKey.ValueClasses] = HedSchemaSection(HedSectionKey.ValueClasses)
+        dictionaries[HedSectionKey.AllTags] = HedSchemaSection(HedSectionKey.AllTags, case_sensitive=False)
 
         return dictionaries
 
@@ -669,6 +674,8 @@ class HedSchema:
         """
             Returns the valid modifiers for the given unit
 
+            This is a lower level one that doesn't rely on the Unit entries being fully setup.
+
         Parameters
         ----------
         unit: str
@@ -693,25 +700,24 @@ class HedSchema:
         valid_modifiers = self.unit_modifiers.get_entries_with_attribute(modifier_attribute_name)
         return valid_modifiers
 
-    def _get_valid_unit_plural(self, unit):
+    def get_units_for_unit_class(self, unit_class):
         """
-        # This should be cached.
+            Gets all the unit entries for the given unit class name
+
+            This is a lower level one that doesn't rely on the UnitClass entries being fully setup.
 
         Parameters
         ----------
-        unit: str
-            unit to generate plural forms
+        unit_class: str
+            A known unit class
+
         Returns
         -------
-        [str]
-            list of plural units
+        unit_dict: {str: UnitEntry}
+            A dict of all units the given unit class accepts.
         """
-        derivative_units = [unit]
-        tag_entry = self._get_entry_for_tag(unit, HedSectionKey.Units)
-        if tag_entry and not tag_entry.has_attribute(HedKey.UnitSymbol):
-            derivative_units.append(pluralize.plural(unit))
-
-        return derivative_units
+        return {unit_entry.long_name: unit_entry for unit_entry in self._sections[HedSectionKey.Units].values()
+                if unit_entry.unit_class_name == unit_class}
 
     def _get_attributes_for_class(self, key_class):
         """
@@ -774,17 +780,15 @@ class HedSchema:
         section = self._sections[key_class]
         if not section:
             self._initialize_attributes(key_class)
-        section._add_to_dict(long_tag_name)
+        return section._add_to_dict(long_tag_name)
+
+    def _add_unit_class(self, unit_class):
+        self._add_tag_to_dict(unit_class, HedSectionKey.UnitClasses)
 
     def _add_unit_class_unit(self, unit_class, unit_class_unit):
-        if unit_class not in self._sections[HedSectionKey.UnitClasses]:
-            self._add_tag_to_dict(unit_class, HedSectionKey.UnitClasses)
-            unit_class_entry = self._get_entry_for_tag(unit_class, HedSectionKey.UnitClasses)
-            unit_class_entry.value = []
-        if unit_class_unit is not None:
-            unit_class_entry = self._get_entry_for_tag(unit_class, HedSectionKey.UnitClasses)
-            unit_class_entry.value.append(unit_class_unit)
-            self._add_tag_to_dict(unit_class_unit, HedSectionKey.Units)
+        unit_class_unit_entry = self._add_tag_to_dict(unit_class_unit, HedSectionKey.Units)
+        unit_class_unit_entry.unit_class_name = unit_class
+        return unit_class_unit_entry
 
     def _add_single_default_attribute(self, attribute_name):
         from hed.schema import hed_2g_attributes

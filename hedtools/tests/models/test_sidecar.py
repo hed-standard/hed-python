@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0.xml")
+        hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0t.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.json_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
         cls.json_def_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_with_defs.json")
