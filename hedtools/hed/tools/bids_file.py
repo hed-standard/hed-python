@@ -1,5 +1,5 @@
 import os
-from hed.models.sidecar import Sidecar
+
 from hed.tools.io_utils import get_file_list, parse_bids_filename
 
 
@@ -46,26 +46,9 @@ class BidsFile:
         return my_str
 
 
-class BidsJsonFile(BidsFile):
-    """Represents a bids file."""
-
-    def __init__(self, file_path):
-        super().__init__(os.path.abspath(file_path))
-        self.my_contents = Sidecar(file_path, name=os.path.abspath(file_path))
-
-
-class BidsEventFile(BidsFile):
-    """Represents a bids file."""
-
-    def __init__(self, file_path):
-        super().__init__(os.path.abspath(file_path))
-        self.my_contents = None
-
-
 if __name__ == '__main__':
     path = 'D:\\Research\\HED\\hed-examples\\datasets\\eeg_ds003654s'
     files = get_file_list(path, name_prefix=None, name_suffix="events", extensions=None)
     for file in files:
         bids = BidsFile(file)
-        print(bids)
-        break
+        print(str(bids))
