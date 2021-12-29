@@ -56,7 +56,9 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
 
     schema_attribute_validators = {
         'suggestedTag': tag_exists_check,
-        'relatedTag': tag_exists_check
+        'relatedTag': tag_exists_check,
+        'unitClass': tag_is_placeholder_check,
+        'valueClass': tag_is_placeholder_check,
     }
 
     # Check attributes
@@ -68,7 +70,7 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
                 validator = schema_attribute_validators.get(attribute_name)
                 if validator:
                     error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name, False)
-                    new_issues = validator(hed_schema, tag_entry.attributes[attribute_name])
+                    new_issues = validator(hed_schema, tag_entry, tag_entry.attributes[attribute_name])
                     error_handler.add_context_to_issues(new_issues)
                     issues_list += new_issues
                     error_handler.pop_error_context()
@@ -88,7 +90,7 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
     return issues_list
 
 
-def tag_exists_check(hed_schema, possible_tags, force_issues_as_warnings=True):
+def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
     """
         Checks if the comma separated list in possible tags are valid HedTags
 
@@ -96,6 +98,39 @@ def tag_exists_check(hed_schema, possible_tags, force_issues_as_warnings=True):
     ----------
     hed_schema: HedSchema
         The schema to check if the tag exists
+    tag_entry: HedSchemaEntry
+        The schema entry for this tag.
+    possible_tags: str
+        Comma separated list of tags.  Short long or mixed form valid.
+    force_issues_as_warnings: bool
+        If True sets all of the severity levels to warning
+
+    Returns
+    -------
+    issues_list: [{}]
+    """
+    issues = []
+    if not tag_entry.long_name.endswith("/#"):
+        issues += ErrorHandler.format_error(SchemaWarnings.NON_PLACEHOLDER_HAS_CLASS, tag_entry.long_name,
+                                            possible_tags)
+
+    if force_issues_as_warnings:
+        for issue in issues:
+            issue['severity'] = ErrorSeverity.WARNING
+
+    return issues
+
+
+def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
+    """
+        Checks if the comma separated list in possible tags are valid HedTags
+
+    Parameters
+    ----------
+    hed_schema: HedSchema
+        The schema to check if the tag exists
+    tag_entry: HedSchemaEntry
+        The schema entry for this tag.
     possible_tags: str
         Comma separated list of tags.  Short long or mixed form valid.
     force_issues_as_warnings: bool

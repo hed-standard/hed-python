@@ -554,8 +554,8 @@ class TagValidator:
                 return True
             return tag_validator_util.validate_numeric_value_class(portion_to_validate)
         if not original_tag.is_value_class_tag():
-            return False
-
+            return True
+        
         value_class_types = original_tag.value_classes
         return self.validate_value_class_type(portion_to_validate, value_class_types)
 

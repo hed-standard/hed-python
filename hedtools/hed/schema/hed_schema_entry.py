@@ -237,16 +237,18 @@ class HedTagEntry(HedSchemaEntry):
             parent_tag = schema._get_entry_for_tag(parent_name)
         self._parent_tag = parent_tag
 
-        if HedKey.UnitClass in self.attributes:
-            self.unit_classes = {}
-            for unit_class_name in self.attributes[HedKey.UnitClass].split(","):
-                entry = schema._get_entry_for_tag(unit_class_name, HedSectionKey.UnitClasses)
-                if entry:
-                    self.unit_classes[unit_class_name] = entry
+        # We only allow unit or value classes on # nodes, it should be flagged as a warning otherwise.
+        if child_name == "#":
+            if HedKey.UnitClass in self.attributes:
+                self.unit_classes = {}
+                for unit_class_name in self.attributes[HedKey.UnitClass].split(","):
+                    entry = schema._get_entry_for_tag(unit_class_name, HedSectionKey.UnitClasses)
+                    if entry:
+                        self.unit_classes[unit_class_name] = entry
 
-        if HedKey.ValueClass in self.attributes:
-            self.value_classes = {}
-            for value_class_name in self.attributes[HedKey.ValueClass].split(","):
-                entry = schema._get_entry_for_tag(value_class_name, HedSectionKey.ValueClasses)
-                if entry:
-                    self.value_classes[value_class_name] = entry
+            if HedKey.ValueClass in self.attributes:
+                self.value_classes = {}
+                for value_class_name in self.attributes[HedKey.ValueClass].split(","):
+                    entry = schema._get_entry_for_tag(value_class_name, HedSectionKey.ValueClasses)
+                    if entry:
+                        self.value_classes[value_class_name] = entry
