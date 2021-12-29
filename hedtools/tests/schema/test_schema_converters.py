@@ -50,23 +50,9 @@ class TestConverterBase(unittest.TestCase):
 
             self.assertEqual(string_schema, self.hed_schema_xml)
 
-    # def test_schema_as_string_wiki(self):
-    #     with open(self.wiki_file) as file:
-    #         hed_schema_as_string = "".join([line for line in file])
-    #         with open("/tmp/test_string_saving.mediawiki", "w") as f:
-    #             f.write(hed_schema_as_string)
-    #
-    #         string_schema = schema.from_string(hed_schema_as_string, file_type=".mediawiki")
-    #
-    #         self.assertEqual(string_schema, self.hed_schema_wiki)
-
     def test_schema_as_string_wiki(self):
-        import tempfile
         with open(self.wiki_file) as file:
             hed_schema_as_string = "".join([line for line in file])
-        temp = tempfile.TemporaryFile(mode="w")
-        temp.write(hed_schema_as_string)
-        temp.close()
 
         string_schema = schema.from_string(hed_schema_as_string, file_type=".mediawiki")
         self.assertEqual(string_schema, self.hed_schema_wiki)
@@ -163,28 +149,28 @@ class TestHedMultiValueClass(TestConverterBase):
     can_legacy = False
 
 
-class TestPrologue_issues1(TestConverterBase):
+class TestPrologueIssues1(TestConverterBase):
     xml_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_end.xml'
     wiki_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_end.mediawiki'
     can_compare = True
     can_legacy = False
 
 
-class TestPrologue_issues2(TestConverterBase):
+class TestPrologueIssues2(TestConverterBase):
     xml_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_middle.xml'
     wiki_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_middle.mediawiki'
     can_compare = True
     can_legacy = False
 
 
-class TestPrologue_issues3(TestConverterBase):
+class TestPrologueIssues3(TestConverterBase):
     xml_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_start.xml'
     wiki_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_start.mediawiki'
     can_compare = True
     can_legacy = False
 
 
-class TestPrologue_issues4(TestConverterBase):
+class TestPrologueIssues4(TestConverterBase):
     xml_file = '../data/hed_pairs/prologue_tests/test_no_blank_line.xml'
     wiki_file = '../data/hed_pairs/prologue_tests/test_no_blank_line.mediawiki'
     can_compare = True
