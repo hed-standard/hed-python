@@ -6,7 +6,7 @@ file3 = 'G:\AttentionShift\AttentionShiftWorking1\sub-004\eeg\sub-004_task-Audit
 % key = 'sub-036';
 % file1 = 'G:\AttentionShift\AttentionShiftWorking1\sourcedata\sub-036\eeg\sub-036_task-AuditoryVisualShift_run-01_eeg.set'; 
 % file2 = 'G:\AttentionShift\AttentionShiftWorking1\sourcedata\sub-036\eeg\sub-036_task-AuditoryVisualShift_run-02_eeg.set';
-% file3 = 'G:\AttentionShift\AttentionShiftWorking1\sub-004\eeg\sub-036_task-AuditoryVisualShift_run-01_eeg.set';
+% file3 = 'G:\AttentionShift\AttentionShiftWorking1\sub-036\eeg\sub-036_task-AuditoryVisualShift_run-01_eeg.set';
 
 EEG1 = pop_loadset(file1);
 EEG2 = pop_loadset(file2);
