@@ -17,13 +17,13 @@ class Test(unittest.TestCase):
         cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
 
     def test_get_file_list_files(self):
-        dir_pairs = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed_pairs')
+        dir_pairs = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed_pairs/prologue_tests')
         test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
         file_list1 = get_file_list(dir_pairs)
         for file in file_list1:
             if os.path.basename(file) in test_files:
                 continue
-            raise HedFileError("FileNotFound", f"get_event_files should have found file {file}", "")
+            raise HedFileError("FileNotFound", f"get_file_list should have found file {file}", "")
 
         for file in test_files:
             if os.path.join(dir_pairs, file) in file_list1:
