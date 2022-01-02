@@ -26,7 +26,7 @@ class BidsEventFiles:
         files = get_file_list(self.root_path, name_suffix='_events', extensions=['.json'])
         file_dict = {}
         for file in files:
-            file_dict[os.path.abspath(file)] = BidsSidecarFile(os.path.abspath(file))
+            file_dict[os.path.abspath(file)] = BidsSidecarFile(os.path.abspath(file), set_contents=True)
         return file_dict
 
     def _get_sidecar_dir_dict(self):
@@ -62,17 +62,17 @@ class BidsEventFiles:
         issues = []
         for json_obj in self.sidecar_dict.values():
             extra_defs = []
-            for sidecar_obj in json_obj.my_sidecars:
+            for sidecar_obj in json_obj.sidecars:
                 def_dicts = [column_entry.def_dict for column_entry in sidecar_obj]
                 extra_defs = extra_defs + def_dicts
-            issues += json_obj.my_contents.validate_entries(validators=validators, extra_def_dicts=extra_defs,
-                                                            check_for_warnings=check_for_warnings)
+            issues += json_obj.contents.validate_entries(validators=validators, extra_def_dicts=extra_defs,
+                                                         check_for_warnings=check_for_warnings)
         if issues:
             return issues
         for event_obj in self.event_files_dict.values():
             my_contents = event_obj.my_contents
             if not my_contents:
-                my_contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.my_sidecars)
+                my_contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecars)
                 if keep_events:
                     event_obj.my_contents = my_contents
             issues += my_contents.validate_file(validators=validators, check_for_warnings=check_for_warnings)
