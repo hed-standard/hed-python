@@ -10,7 +10,7 @@ from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hedweb.constants import base_constants, file_constants
 from hed.tools.sidecar_map import SidecarMap
-from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
+from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
 
