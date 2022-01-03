@@ -7,6 +7,7 @@ the get_validation_issues() function.
 
 from hed.errors.error_types import ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import ErrorContext
 
 from hed.models.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
@@ -32,11 +33,11 @@ class BidsValidator:
         self._hed_schema = hed_schema
 
 
-    def validate_events(self, bids_validators, error_handler=None, check_for_warnings=True, **kwargs):
+    def validate_events(self, bids_validators, name=None, error_handler=None, check_for_warnings=True, **kwargs):
         """Run the given validators on a BIDS dataset
          Parameters
          ----------
-         validators : [func or validator like] or func or validator like
+         bids_validators : [func or validator like] or func or validator like
              A validator or list of validators to apply to the hed strings in this sidecar.
          name: str
              If present, will use this as the filename for context, rather than using the actual filename
@@ -54,8 +55,8 @@ class BidsValidator:
          """
         if not name:
             name = self.name
-        if not isinstance(validators, list):
-            validators = [validators]
+        if not isinstance(bids_validators, list):
+            validators = [bids_validators]
 
         if error_handler is None:
             error_handler = ErrorHandler()
