@@ -8,7 +8,8 @@ class BidsSidecarFile(BidsFile):
 
     def __init__(self, file_path, set_contents=False):
         super().__init__(os.path.abspath(file_path))
-        self.contents = self.reset_contents(set_contents)
+        self.contents = None
+        self.reset_contents(set_contents)
 
     def reset_contents(self, set_contents=False):
         if set_contents:
