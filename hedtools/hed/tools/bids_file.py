@@ -1,5 +1,6 @@
 import os
-from hed.tools.io_util import get_file_list, parse_bids_filename
+from hed.tools.bids_util import parse_bids_filename
+from hed.tools.io_util import get_file_list
 
 
 class BidsFile:

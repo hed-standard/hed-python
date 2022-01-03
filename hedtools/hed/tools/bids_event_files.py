@@ -12,17 +12,29 @@ class BidsEventFiles:
     """Represents the event files and their sidecars in a BIDS dataset."""
 
     def __init__(self, root_path):
-        self.root_path = root_path
+        self.root_path = os.path.abspath(root_path)
+        self.sidecar_dict = {}  # Dict uses os.path.abspath(file) as key
+        self.event_files_dict = {}
+        self.sidecar_dir_dict = {}
         self.sidecar_dict = self._get_sidecar_dict()  # Dict uses os.path.abspath(file) as key
         self.event_files_dict = self._get_event_file_dict()
         self.sidecar_dir_dict = self._get_sidecar_dir_dict()
 
         for bids_obj in self.sidecar_dict.values():
-            bids_obj.set_sidecars(self._get_sidecars_from_path(bids_obj))
+            bids_obj.set_sidecars(self.get_sidecars_from_path(bids_obj))
         for bids_obj in self.event_files_dict.values():
-            bids_obj.set_sidecars(self._get_sidecars_from_path(bids_obj))
+            bids_obj.set_sidecars(self.get_sidecars_from_path(bids_obj))
+
+    def _get_event_file_dict(self):
+        """ Get a dictionary of BidsEventFile objects with underlying EventInput objects not set"""
+        files = get_file_list(self.root_path, name_suffix='_events', extensions=['.tsv'])
+        file_dict = {}
+        for file in files:
+            file_dict[os.path.abspath(file)] = BidsEventFile(file, set_contents=False)
+        return file_dict
 
     def _get_sidecar_dict(self):
+        """ Get a dictionary of BidsSidecarFile objects with underlying Sidecar objects set"""
         files = get_file_list(self.root_path, name_suffix='_events', extensions=['.json'])
         file_dict = {}
         for file in files:
@@ -40,14 +52,7 @@ class BidsEventFiles:
             sidecar_dir_dict[os.path.abspath(this_dir)] = new_dir_list
         return sidecar_dir_dict
 
-    def _get_event_file_dict(self):
-        files = get_file_list(self.root_path, name_suffix='_events', extensions=['.tsv'])
-        file_dict = {}
-        for file in files:
-            file_dict[os.path.abspath(file)] = BidsEventFile(file)
-        return file_dict
-
-    def _get_sidecars_from_path(self, obj):
+    def get_sidecars_from_path(self, obj):
         sidecar_list = []
         current_path = ''
         for comp in get_path_components(obj.file_path, self.root_path):
@@ -70,12 +75,12 @@ class BidsEventFiles:
         if issues:
             return issues
         for event_obj in self.event_files_dict.values():
-            my_contents = event_obj.my_contents
-            if not my_contents:
-                my_contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecars)
+            contents = event_obj.contents
+            if not contents:
+                contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecars)
                 if keep_events:
-                    event_obj.my_contents = my_contents
-            issues += my_contents.validate_file(validators=validators, check_for_warnings=check_for_warnings)
+                    event_obj.my_contents = contents
+            issues += contents.validate_file(validators=validators, check_for_warnings=check_for_warnings)
         return issues
 
 
