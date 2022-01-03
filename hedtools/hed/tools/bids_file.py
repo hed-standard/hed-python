@@ -1,5 +1,4 @@
 import os
-
 from hed.tools.io_utils import get_file_list, parse_bids_filename
 
 

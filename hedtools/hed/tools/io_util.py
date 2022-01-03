@@ -138,18 +138,6 @@ def make_key(key_string, indices=(0, -2), separator='_'):
     return key_value[:-1]
 
 
-def parse_bids_filename(file_path):
-    filename = os.path.splitext(os.path.basename(file_path))
-    ext = filename[1].lower()
-    basename = filename[0].lower()
-    entity_pieces = basename.split('_')
-    suffix = entity_pieces[-1]
-    entity_dict = {}
-    entity_pieces = entity_pieces[:-1]
-    for entity in entity_pieces:
-        pieces = entity.split('-')
-        entity_dict[pieces[0]] = pieces[1]
-    return suffix, ext, entity_dict
 
 
 def test_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):

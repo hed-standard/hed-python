@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from pandas import DataFrame, read_csv
 from hed.errors.exceptions import HedFileError
-from hed.tools.data_utils import add_columns, check_match, delete_columns, delete_rows_by_column, \
+from hed.tools.data_util import add_columns, check_match, delete_columns, delete_rows_by_column, \
     get_key_hash, get_new_dataframe, get_row_hash, \
     make_info_dataframe, remove_quotes, reorder_columns, replace_values, separate_columns
 
