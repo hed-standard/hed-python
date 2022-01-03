@@ -4,7 +4,7 @@ from hed.schema.hed_schema_file import load_schema
 from hed.tools.bids_event_file import BidsEventFile
 from hed.tools.bids_sidecar_file import BidsSidecarFile
 from hed.models.events_input import EventsInput
-from hed.tools.io_utils import get_dir_dictionary, get_file_list, get_path_components
+from hed.tools.io_util import get_dir_dictionary, get_file_list, get_path_components
 from hed.validator.hed_validator import HedValidator
 
 

@@ -138,8 +138,6 @@ def make_key(key_string, indices=(0, -2), separator='_'):
     return key_value[:-1]
 
 
-
-
 def test_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
     """ Determines whether test_file has correct extension, name_suffix, and name_prefix.
 
