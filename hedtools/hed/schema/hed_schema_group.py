@@ -4,6 +4,8 @@
 # todo: Switch various properties to this once we require python 3.8
 
 from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.errors import ErrorHandler, ValidationErrors
+from hed.schema.hed_schema_constants import HedSectionKey
 
 
 class HedSchemaGroup:
@@ -131,3 +133,57 @@ class HedSchemaGroup:
         for schema in self._schemas.values():
             all_tags.update(schema.get_all_tags_with_attribute(key))
         return all_tags
+
+    # todo: maybe tweak this API so you don't have to pass in library prefix?
+    def get_entry_for_tag(self, name, key_class=HedSectionKey.AllTags, library_prefix=""):
+        """
+            Returns the schema entry for this tag, if one exists.
+
+        Parameters
+        ----------
+        name : str
+            Any form of basic tag(or other section entry) to look up.  This will not handle extensions or similar.
+        key_class : HedSectionKey
+
+        Returns
+        -------
+        tag_entry: HedSchemaEntry
+            The schema entry for the given tag.
+        """
+        specific_schema = self.schema_for_prefix(library_prefix)
+        if not specific_schema:
+            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, name,
+                                                          library_prefix, self.valid_prefixes)
+            return None, None, validation_issues
+
+        return specific_schema.get_entry_for_tag(name, key_class, library_prefix)
+
+    def find_tag_entry(self, tag, library_prefix=""):
+        """
+        This takes a source tag and finds the schema entry for it.
+
+        Works right to left.(mostly relevant for errors)
+
+        Parameters
+        ----------
+        tag : str or HedTag
+            Any form of tag to look up.  Can have an extension, value, etc.
+        library_prefix: str
+            The prefix the library, if any.
+
+        Returns
+        -------
+        tag_entry: HedTagEntry
+            The located tag entry for this tag.
+        remainder: str
+            The remainder of the tag that isn't part of the base tag.
+        errors: list
+            a list of errors while converting
+        """
+        specific_schema = self.schema_for_prefix(library_prefix)
+        if not specific_schema:
+            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, tag,
+                                                          library_prefix, self.valid_prefixes)
+            return None, None, validation_issues
+
+        return specific_schema.find_tag_entry(tag, library_prefix)
