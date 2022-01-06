@@ -247,21 +247,21 @@ class HedTagEntry(HedSchemaEntry):
         parent_name, _, child_name = self.name.rpartition("/")
         parent_tag = None
         if parent_name:
-            parent_tag = schema.get_entry_for_tag(parent_name)
+            parent_tag = schema.get_tag_entry(parent_name)
         self._parent_tag = parent_tag
-        self.takes_value_child_entry = schema.get_entry_for_tag(self.name + "/#")
+        self.takes_value_child_entry = schema.get_tag_entry(self.name + "/#")
 
         if self.name.endswith("/#"):
             if HedKey.UnitClass in self.attributes:
                 self.unit_classes = {}
                 for unit_class_name in self.attributes[HedKey.UnitClass].split(","):
-                    entry = schema.get_entry_for_tag(unit_class_name, HedSectionKey.UnitClasses)
+                    entry = schema.get_tag_entry(unit_class_name, HedSectionKey.UnitClasses)
                     if entry:
                         self.unit_classes[unit_class_name] = entry
 
             if HedKey.ValueClass in self.attributes:
                 self.value_classes = {}
                 for value_class_name in self.attributes[HedKey.ValueClass].split(","):
-                    entry = schema.get_entry_for_tag(value_class_name, HedSectionKey.ValueClasses)
+                    entry = schema.get_tag_entry(value_class_name, HedSectionKey.ValueClasses)
                     if entry:
                         self.value_classes[value_class_name] = entry

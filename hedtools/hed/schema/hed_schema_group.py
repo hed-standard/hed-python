@@ -135,7 +135,7 @@ class HedSchemaGroup:
         return all_tags
 
     # todo: maybe tweak this API so you don't have to pass in library prefix?
-    def get_entry_for_tag(self, name, key_class=HedSectionKey.AllTags, library_prefix=""):
+    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, library_prefix=""):
         """
             Returns the schema entry for this tag, if one exists.
 
@@ -156,7 +156,7 @@ class HedSchemaGroup:
                                                           library_prefix, self.valid_prefixes)
             return None, None, validation_issues
 
-        return specific_schema.get_entry_for_tag(name, key_class, library_prefix)
+        return specific_schema.get_tag_entry(name, key_class, library_prefix)
 
     def find_tag_entry(self, tag, library_prefix=""):
         """
