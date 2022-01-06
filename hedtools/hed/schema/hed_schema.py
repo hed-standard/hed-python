@@ -376,7 +376,7 @@ class HedSchema:
         unit_class_units: [UnitEntry]
             A list of each unit this type allows.
         """
-        unit_class_entry = self.get_entry_for_tag(unit_class_type, HedSectionKey.UnitClasses)
+        unit_class_entry = self.get_tag_entry(unit_class_type, HedSectionKey.UnitClasses)
         if unit_class_entry:
             return unit_class_entry.unit_class_units
         return []
@@ -401,7 +401,7 @@ class HedSchema:
         """
         return self._sections[section_key].get_entries_with_attribute(key, return_name_only=True)
 
-    def get_entry_for_tag(self, name, key_class=HedSectionKey.AllTags, library_prefix=""):
+    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, library_prefix=""):
         """
             Returns the schema entry for this tag, if one exists.
 
@@ -460,10 +460,10 @@ class HedSchema:
             working_tag = working_tag[:-2]
             remainder = "/#"
         while True:
-            tag_entry = self.get_entry_for_tag(working_tag)
+            tag_entry = self.get_tag_entry(working_tag)
             parent_name, _, child_name = working_tag.rpartition("/")
             if tag_entry is None:
-                if self.get_entry_for_tag(child_name):
+                if self.get_tag_entry(child_name):
                     error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE,
                                                       tag,
                                                       index_in_tag=len(parent_name) + 1 + prefix_tag_adj,
@@ -561,7 +561,7 @@ class HedSchema:
         -------
         description: str or None
         """
-        tag_entry = self.get_entry_for_tag(tag_name, key_class)
+        tag_entry = self.get_tag_entry(tag_name, key_class)
         if tag_entry:
             return tag_entry.description
 
@@ -631,7 +631,7 @@ class HedSchema:
         tag_values: {str: str}
             {key_name : attribute_value}
         """
-        tag_entry = self.get_entry_for_tag(tag_name, key_class)
+        tag_entry = self.get_tag_entry(tag_name, key_class)
         attributes = {}
         if tag_entry:
             attributes = tag_entry.attributes
@@ -671,7 +671,7 @@ class HedSchema:
         modifier_list: [HedSchemaEntry]
 
         """
-        unit_entry = self.get_entry_for_tag(unit, HedSectionKey.Units)
+        unit_entry = self.get_tag_entry(unit, HedSectionKey.Units)
         if unit_entry is None:
             return []
         is_si_unit = unit_entry.has_attribute(HedKey.SIUnit)

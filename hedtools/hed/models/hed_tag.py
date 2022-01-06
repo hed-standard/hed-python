@@ -602,9 +602,9 @@ class HedTag:
         """
         new_entry = None
         if self.extension_or_value_portion:
-            new_entry = self._schema.get_entry_for_tag(self.base_tag.lower() + "/#")
+            new_entry = self._schema.get_tag_entry(self.base_tag.lower() + "/#")
         if new_entry is None:
-            new_entry = self._schema.get_entry_for_tag(self.base_tag.lower())
+            new_entry = self._schema.get_tag_entry(self.base_tag.lower())
         self._schema_entry = new_entry
 
     def _convert_key_tags_to_canonical_form(self):

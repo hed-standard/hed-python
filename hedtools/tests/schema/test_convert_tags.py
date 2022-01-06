@@ -26,9 +26,9 @@ class TestConvertTag(TestTagFormat):
                                                        params=expected_params)
             error_handler.add_context_to_issues(test_issues)
 
-            print(test_key)
-            print(expected_issue)
-            print(test_issues)
+            # print(test_key)
+            # print(expected_issue)
+            # print(test_issues)
             self.assertEqual(string_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
