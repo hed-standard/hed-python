@@ -7,3 +7,4 @@ from .def_mapper import DefinitionMapper
 from .column_mapper import ColumnMapper
 from .hed_string import HedString
 from .onset_mapper import OnsetMapper
+from .hed_tag import HedTag

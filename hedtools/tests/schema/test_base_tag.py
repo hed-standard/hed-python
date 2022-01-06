@@ -6,7 +6,7 @@ from hed.errors import ErrorHandler
 
 
 class TestBaseTagBase(unittest.TestCase):
-    schema_file = '../data/legacy_xml/reduced_no_dupe.xml'
+    schema_file = '../data/hed_pairs/HED8.0.0t.xml'
 
     @classmethod
     def setUpClass(cls):
@@ -40,16 +40,16 @@ class TestOrgBaseTag(TestBaseTagBase):
         test_strings = {
             'singleLevel': 'Event',
             'twoLevel': 'Sensory-event',
-            'alreadyLong': 'Item/Object/Geometric',
-            'partialLong': 'Object/Geometric',
-            'fullShort': 'Geometric',
+            'alreadyLong': 'Item/Object/Geometric-object',
+            'partialLong': 'Object/Geometric-object',
+            'fullShort': 'Geometric-object',
         }
         expected_results = {
             'singleLevel': 'Event',
             'twoLevel': 'Sensory-event',
-            'alreadyLong': 'Item/Object/Geometric',
-            'partialLong': 'Object/Geometric',
-            'fullShort': 'Geometric',
+            'alreadyLong': 'Item/Object/Geometric-object',
+            'partialLong': 'Object/Geometric-object',
+            'fullShort': 'Geometric-object',
         }
         expected_errors = {
             'singleLevel': [],
@@ -64,12 +64,12 @@ class TestOrgBaseTag(TestBaseTagBase):
         test_strings = {
             'uniqueValue': 'Label/Unique Value',
             'multiLevel': 'Label/Long Unique Value With/Slash Marks',
-            'partialPath': 'Informational/Label/Unique Value',
+            'partialPath': 'Informational-property/Label/Unique Value',
         }
         expected_results = {
             'uniqueValue': 'Label',
             'multiLevel': 'Label',
-            'partialPath': 'Informational/Label',
+            'partialPath': 'Informational-property/Label',
         }
         expected_errors = {
             'uniqueValue': [],
@@ -102,16 +102,16 @@ class TestBaseTag(TestBaseTagBase):
         test_strings = {
             'singleLevel': 'Event',
             'twoLevel': 'Sensory-event',
-            'alreadyLong': 'Item/Object/Geometric',
-            'partialLong': 'Object/Geometric',
-            'fullShort': 'Geometric',
+            'alreadyLong': 'Item/Object/Geometric-object',
+            'partialLong': 'Object/Geometric-object',
+            'fullShort': 'Geometric-object',
         }
         expected_results = {
             'singleLevel': 'Event',
             'twoLevel': 'Event/Sensory-event',
-            'alreadyLong': 'Item/Object/Geometric',
-            'partialLong': 'Item/Object/Geometric',
-            'fullShort': 'Item/Object/Geometric',
+            'alreadyLong': 'Item/Object/Geometric-object',
+            'partialLong': 'Item/Object/Geometric-object',
+            'fullShort': 'Item/Object/Geometric-object',
         }
         expected_errors = {
             'singleLevel': [],
@@ -126,12 +126,12 @@ class TestBaseTag(TestBaseTagBase):
         test_strings = {
             'uniqueValue': 'Label/Unique Value',
             'multiLevel': 'Label/Long Unique Value With/Slash Marks',
-            'partialPath': 'Informational/Label/Unique Value',
+            'partialPath': 'Informational-property/Label/Unique Value',
         }
         expected_results = {
-            'uniqueValue': 'Attribute/Informational/Label',
-            'multiLevel': 'Attribute/Informational/Label',
-            'partialPath': 'Attribute/Informational/Label',
+            'uniqueValue': 'Property/Informational-property/Label',
+            'multiLevel': 'Property/Informational-property/Label',
+            'partialPath': 'Property/Informational-property/Label',
         }
         expected_errors = {
             'uniqueValue': [],
@@ -149,7 +149,7 @@ class TestBaseTag(TestBaseTagBase):
         expected_results = {
             'singleLevel': 'Event/Experiment-control',
             'multiLevel': 'Event/Experiment-control',
-            'partialPath': 'Item/Object/Man-made/Vehicle/Boat',
+            'partialPath': 'Item/Object/Man-made-object/Vehicle/Boat',
         }
         expected_errors = {
             'singleLevel': [],

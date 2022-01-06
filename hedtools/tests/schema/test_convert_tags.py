@@ -6,7 +6,7 @@ from tests.validator.test_tag_validator_base import TestHedBase
 
 
 class TestTagFormat(TestHedBase):
-    schema_file = '../data/legacy_xml/reduced_no_dupe.xml'
+    schema_file = '../data/hed_pairs/HED8.0.0t.xml'
 
 class TestConvertTag(TestTagFormat):
     def converter_base(self, test_strings, expected_results, expected_errors, convert_to_short=True):
@@ -26,9 +26,9 @@ class TestConvertTag(TestTagFormat):
                                                        params=expected_params)
             error_handler.add_context_to_issues(test_issues)
 
-            # print(test_key)
-            # print(expected_issue)
-            # print(test_issues)
+            print(test_key)
+            print(expected_issue)
+            print(test_issues)
             self.assertEqual(string_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
@@ -43,16 +43,16 @@ class TestConvertToLongTag(TestConvertTag):
         test_strings = {
             'singleLevel': 'Event',
             'twoLevel': 'Sensory-event',
-            'alreadyLong': 'Item/Object/Geometric',
-            'partialLong': 'Object/Geometric',
-            'fullShort': 'Geometric',
+            'alreadyLong': 'Item/Object/Geometric-object',
+            'partialLong': 'Object/Geometric-object',
+            'fullShort': 'Geometric-object',
         }
         expected_results = {
             'singleLevel': 'Event',
             'twoLevel': 'Event/Sensory-event',
-            'alreadyLong': 'Item/Object/Geometric',
-            'partialLong': 'Item/Object/Geometric',
-            'fullShort': 'Item/Object/Geometric',
+            'alreadyLong': 'Item/Object/Geometric-object',
+            'partialLong': 'Item/Object/Geometric-object',
+            'fullShort': 'Item/Object/Geometric-object',
         }
         expected_errors = {
             'singleLevel': [],
@@ -67,12 +67,12 @@ class TestConvertToLongTag(TestConvertTag):
         test_strings = {
             'uniqueValue': 'Label/Unique Value',
             'multiLevel': 'Label/Long Unique Value With/Slash Marks',
-            'partialPath': 'Informational/Label/Unique Value',
+            'partialPath': 'Informational-property/Label/Unique Value',
         }
         expected_results = {
-            'uniqueValue': 'Attribute/Informational/Label/Unique Value',
-            'multiLevel': 'Attribute/Informational/Label/Long Unique Value With/Slash Marks',
-            'partialPath': 'Attribute/Informational/Label/Unique Value',
+            'uniqueValue': 'Property/Informational-property/Label/Unique Value',
+            'multiLevel': 'Property/Informational-property/Label/Long Unique Value With/Slash Marks',
+            'partialPath': 'Property/Informational-property/Label/Unique Value',
         }
         expected_errors = {
             'uniqueValue': [],
@@ -87,8 +87,8 @@ class TestConvertToLongTag(TestConvertTag):
             'trailingSpace': 'Label/Unique Value ',
         }
         expected_results = {
-            'leadingSpace': 'Attribute/Informational/Label/Unique Value',
-            'trailingSpace': 'Attribute/Informational/Label/Unique Value',
+            'leadingSpace': 'Property/Informational-property/Label/Unique Value',
+            'trailingSpace': 'Property/Informational-property/Label/Unique Value',
         }
         expected_errors = {
             'leadingSpace': [],
@@ -105,7 +105,7 @@ class TestConvertToLongTag(TestConvertTag):
         expected_results = {
             'singleLevel': 'Event/Experiment-control/extended lvl1',
             'multiLevel': 'Event/Experiment-control/extended lvl1/Extension2',
-            'partialPath': 'Item/Object/Man-made/Vehicle/Boat/Yacht',
+            'partialPath': 'Item/Object/Man-made-object/Vehicle/Boat/Yacht',
         }
         expected_errors = {
             'singleLevel': [],
@@ -117,17 +117,17 @@ class TestConvertToLongTag(TestConvertTag):
     def test_tag_invalid_extension(self):
         test_strings = {
             'validThenInvalid': 'Experiment-control/valid extension followed by invalid/Event',
-            'singleLevel': 'Experiment-control/Geometric',
-            'singleLevelAlreadyLong': 'Event/Experiment-control/Geometric',
-            'twoLevels': 'Experiment-control/Geometric/Event',
-            'partialDuplicate': 'Geometric/Item/Object/Geometric',
+            'singleLevel': 'Experiment-control/Geometric-object',
+            'singleLevelAlreadyLong': 'Event/Experiment-control/Geometric-object',
+            'twoLevels': 'Experiment-control/Geometric-object/Event',
+            'partialDuplicate': 'Geometric-object/Item/Object/Geometric-object',
         }
         expected_results = {
             'validThenInvalid': 'Experiment-control/valid extension followed by invalid/Event',
-            'singleLevel': 'Experiment-control/Geometric',
-            'singleLevelAlreadyLong': 'Event/Experiment-control/Geometric',
-            'twoLevels': 'Experiment-control/Geometric/Event',
-            'partialDuplicate': 'Geometric/Item/Object/Geometric',
+            'singleLevel': 'Experiment-control/Geometric-object',
+            'singleLevelAlreadyLong': 'Event/Experiment-control/Geometric-object',
+            'twoLevels': 'Experiment-control/Geometric-object/Event',
+            'partialDuplicate': 'Geometric-object/Item/Object/Geometric-object',
         }
         expected_errors = {
             'validThenInvalid':
@@ -135,19 +135,27 @@ class TestConvertToLongTag(TestConvertTag):
                                                  index_in_tag=55, index_in_tag_end=60, expected_parent_tag='Event'),
             'singleLevel':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=19, index_in_tag_end=28,
-                                                 expected_parent_tag='Item/Object/Geometric'),
+                                                 index_in_tag=19, index_in_tag_end=35,
+                                                 expected_parent_tag='Item/Object/Geometric-object'),
             'singleLevelAlreadyLong':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=25, index_in_tag_end=34,
-                                                 expected_parent_tag='Item/Object/Geometric'),
+                                                 index_in_tag=25, index_in_tag_end=41,
+                                                 expected_parent_tag='Item/Object/Geometric-object'),
+            # old errors if we're doing left to right
+            # 'twoLevels':
+            #     self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+            #                                      index_in_tag=19, index_in_tag_end=35,
+            #                                      expected_parent_tag='Item/Object/Geometric-object'),
+            # 'partialDuplicate':
+            #     self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+            #                                      index_in_tag=10, index_in_tag_end=14, expected_parent_tag='Item'),
             'twoLevels':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=19, index_in_tag_end=28,
-                                                 expected_parent_tag='Item/Object/Geometric'),
+                                                 index_in_tag=36, index_in_tag_end=41,
+                                                 expected_parent_tag='Event'),
             'partialDuplicate':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=10, index_in_tag_end=14, expected_parent_tag='Item'),
+                                                 index_in_tag=29, index_in_tag_end=45, expected_parent_tag='Item/Object/Geometric-object'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -168,8 +176,9 @@ class TestConvertToLongTag(TestConvertTag):
             'invalidChild': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
                                                              tag=0, index_in_tag=0, index_in_tag_end=12),
 
-            'validChild': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                           tag=0, index_in_tag=0, index_in_tag_end=12),
+            'validChild': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
+                                                           tag=0, index_in_tag=13, index_in_tag_end=18,
+                                                           expected_parent_tag="Event"),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -181,8 +190,8 @@ class TestConvertToLongTag(TestConvertTag):
             'invalidExtension': 'Agent-action/Good/Time',
         }
         expected_results = {
-            'validTakesValue': 'Attribute/Agent-related/Trait/Age/15',
-            'cascadeExtension': 'Attribute/Agent-related/Emotional-state/Awed/Cascade Extension',
+            'validTakesValue': 'Property/Agent-property/Agent-trait/Age/15',
+            'cascadeExtension': 'Property/Agent-property/Agent-state/Agent-emotional-state/Awed/Cascade Extension',
             'invalidExtension': 'Event/Agent-action/Good/Time',
         }
         expected_errors = {
@@ -202,16 +211,16 @@ class TestConvertToShortTag(TestConvertTag):
         test_strings = {
             'singleLevel': 'Event',
             'twoLevel': 'Event/Sensory-event',
-            'fullLong': 'Item/Object/Geometric',
-            'partialShort': 'Object/Geometric',
-            'alreadyShort': 'Geometric',
+            'fullLong': 'Item/Object/Geometric-object',
+            'partialShort': 'Object/Geometric-object',
+            'alreadyShort': 'Geometric-object',
         }
         expected_results = {
             'singleLevel': 'Event',
             'twoLevel': 'Sensory-event',
-            'fullLong': 'Geometric',
-            'partialShort': 'Geometric',
-            'alreadyShort': 'Geometric',
+            'fullLong': 'Geometric-object',
+            'partialShort': 'Geometric-object',
+            'alreadyShort': 'Geometric-object',
         }
         expected_errors = {
             'singleLevel': [],
@@ -224,53 +233,60 @@ class TestConvertToShortTag(TestConvertTag):
 
     def test_tag_takes_value(self):
         test_strings = {
-            'uniqueValue': 'Attribute/Informational/Label/Unique Value',
-            'multiLevel': 'Attribute/Informational/Label/Long Unique Value With/Slash Marks',
-            'partialPath': 'Informational/Label/Unique Value',
+            'uniqueValue': 'Property/Informational-property/Label/Unique Value',
+            'multiLevel': 'Property/Informational-property/Label/Long Unique Value With/Slash Marks',
+            'partialPath': 'Informational-property/Label/Unique Value',
+            'placeholder': 'Informational-property/Label/#',
+            # Todo: This should maybe be disallowed, but for now just make sure it works as expected
+            'placeholderAfterValue': 'Informational-property/Label/UniqueValue/#',
         }
         expected_results = {
             'uniqueValue': 'Label/Unique Value',
             'multiLevel': 'Label/Long Unique Value With/Slash Marks',
             'partialPath': 'Label/Unique Value',
+            'placeholder': 'Label/#',
+            'placeholderAfterValue': 'Label/UniqueValue/#',
         }
         expected_errors = {
             'uniqueValue': [],
             'multiLevel': [],
             'partialPath': [],
+            'placeholder': [],
+            'placeholderAfterValue': []
         }
         self.validator(test_strings, expected_results, expected_errors)
 
     def test_tag_takes_value_invalid(self):
         test_strings = {
-            'singleLevel': 'Attribute/Informational/Label/Event',
-            'multiLevel': 'Attribute/Informational/Label/Event/Sensory-event',
+            'singleLevel': 'Property/Informational-property/Label/Event',
+            'multiLevel': 'Property/Informational-property/Label/Event/Sensory-event',
             'mixed': 'Item/Sound/Event/Sensory-event/Environmental-sound',
         }
         expected_results = {
-            'singleLevel': 'Attribute/Informational/Label/Event',
-            'multiLevel': 'Attribute/Informational/Label/Event/Sensory-event',
+            'singleLevel': 'Property/Informational-property/Label/Event',
+            'multiLevel': 'Property/Informational-property/Label/Event/Sensory-event',
             'mixed': 'Item/Sound/Event/Sensory-event/Environmental-sound',
         }
         expected_errors = {
             'singleLevel':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0, index_in_tag=30, index_in_tag_end=35,
+                                                 tag=0, index_in_tag=38, index_in_tag_end=43,
                                                  expected_parent_tag='Event'),
             'multiLevel':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0, index_in_tag=30, index_in_tag_end=35,
-                                                 expected_parent_tag='Event'),
+                                                 tag=0, index_in_tag=44, index_in_tag_end=57,
+                                                 expected_parent_tag='Event/Sensory-event'),
             'mixed':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0, index_in_tag=11, index_in_tag_end=16,
-                                                 expected_parent_tag='Event'),
+                                                 tag=0, index_in_tag=31, index_in_tag_end=50,
+                                                 expected_parent_tag='Item/Sound/Environmental-sound'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
     def test_tag_spaces_start_end(self):
         test_strings = {
-            'leadingSpace': ' Attribute/Informational/Label/Unique Value',
-            'trailingSpace': 'Attribute/Informational/Label/Unique Value ',
+            'leadingSpace': ' Property/Informational-property/Label/Unique Value',
+            'trailingSpace': 'Property/Informational-property/Label/Unique Value ',
         }
         expected_results = {
             'leadingSpace': 'Label/Unique Value',
@@ -286,7 +302,7 @@ class TestConvertToShortTag(TestConvertTag):
         test_strings = {
             'singleLevel': 'Event/Experiment-control/extended lvl1',
             'multiLevel': 'Event/Experiment-control/extended lvl1/Extension2',
-            'partialPath': 'Object/Man-made/Vehicle/Boat/Yacht',
+            'partialPath': 'Object/Man-made-object/Vehicle/Boat/Yacht',
         }
         expected_results = {
             'singleLevel': 'Experiment-control/extended lvl1',
@@ -303,73 +319,87 @@ class TestConvertToShortTag(TestConvertTag):
     def test_tag_invalid_extension(self):
         test_strings = {
             'validThenInvalid': 'Event/Experiment-control/valid extension followed by invalid/Event',
-            'singleLevel': 'Event/Experiment-control/Geometric',
-            'singleLevelAlreadyShort': 'Experiment-control/Geometric',
-            'twoLevels': 'Event/Experiment-control/Geometric/Event',
-            'duplicate': 'Item/Object/Geometric/Item/Object/Geometric',
+            'singleLevel': 'Event/Experiment-control/Geometric-object',
+            'singleLevelAlreadyShort': 'Experiment-control/Geometric-object',
+            'twoLevels': 'Event/Experiment-control/Geometric-object/Event',
+            'duplicate': 'Item/Object/Geometric-object/Item/Object/Geometric-object',
         }
         expected_results = {
             'validThenInvalid': 'Event/Experiment-control/valid extension followed by invalid/Event',
-            'singleLevel': 'Event/Experiment-control/Geometric',
-            'singleLevelAlreadyShort': 'Experiment-control/Geometric',
-            'twoLevels': 'Event/Experiment-control/Geometric/Event',
-            'duplicate': 'Item/Object/Geometric/Item/Object/Geometric',
+            'singleLevel': 'Event/Experiment-control/Geometric-object',
+            'singleLevelAlreadyShort': 'Experiment-control/Geometric-object',
+            'twoLevels': 'Event/Experiment-control/Geometric-object/Event',
+            'duplicate': 'Item/Object/Geometric-object/Item/Object/Geometric-object',
         }
         expected_errors = {
             'validThenInvalid': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
                                                                  tag=0, index_in_tag=61, index_in_tag_end=66,
                                                                  expected_parent_tag='Event'),
             'singleLevel': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                            tag=0, index_in_tag=25, index_in_tag_end=34,
-                                                            expected_parent_tag='Item/Object/Geometric'),
+                                                            tag=0, index_in_tag=25, index_in_tag_end=41,
+                                                            expected_parent_tag='Item/Object/Geometric-object'),
             'singleLevelAlreadyShort':
                 self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0, index_in_tag=19, index_in_tag_end=28,
-                                                 expected_parent_tag='Item/Object/Geometric'),
+                                                 tag=0, index_in_tag=19, index_in_tag_end=35,
+                                                 expected_parent_tag='Item/Object/Geometric-object'),
             'twoLevels': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                          tag=0, index_in_tag=25, index_in_tag_end=34,
-                                                          expected_parent_tag='Item/Object/Geometric'),
+                                                          tag=0, index_in_tag=42, index_in_tag_end=47,
+                                                          expected_parent_tag='Event'),
             'duplicate': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                          tag=0, index_in_tag=22, index_in_tag_end=26,
-                                                          expected_parent_tag='Item')
+                                                          tag=0, index_in_tag=41, index_in_tag_end=57,
+                                                          expected_parent_tag='Item/Object/Geometric-object')
         }
         self.validator(test_strings, expected_results, expected_errors)
 
     def test_tag_invalid(self):
         test_strings = {
-            'invalidParentWithExistingGrandchild': 'InvalidEvent/Experiment-control/Geometric',
-            'invalidChildWithExistingGrandchild': 'Event/InvalidEvent/Geometric',
-            'invalidParentWithExistingChild': 'InvalidEvent/Geometric',
+            'invalidParentWithExistingGrandchild': 'InvalidEvent/Experiment-control/Geometric-object',
+            'invalidChildWithExistingGrandchild': 'Event/InvalidEvent/Geometric-object',
+            'invalidParentWithExistingChild': 'InvalidEvent/Geometric-object',
             'invalidSingle': 'InvalidEvent',
             'invalidWithExtension': 'InvalidEvent/InvalidExtension',
         }
         expected_results = {
-            'invalidParentWithExistingGrandchild': 'InvalidEvent/Experiment-control/Geometric',
-            'invalidChildWithExistingGrandchild': 'Event/InvalidEvent/Geometric',
-            'invalidParentWithExistingChild': 'InvalidEvent/Geometric',
+            'invalidParentWithExistingGrandchild': 'InvalidEvent/Experiment-control/Geometric-object',
+            'invalidChildWithExistingGrandchild': 'Event/InvalidEvent/Geometric-object',
+            'invalidParentWithExistingChild': 'InvalidEvent/Geometric-object',
             'invalidSingle': 'InvalidEvent',
             'invalidWithExtension': 'InvalidEvent/InvalidExtension',
         }
         expected_errors = {
             'invalidParentWithExistingGrandchild': self.format_error_but_not_really(
-                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=32, index_in_tag_end=48,
+                expected_parent_tag="Item/Object/Geometric-object"),
             'invalidChildWithExistingGrandchild': self.format_error_but_not_really(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=28,
-                expected_parent_tag="Item/Object/Geometric"),
+                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=35,
+                expected_parent_tag="Item/Object/Geometric-object"),
             'invalidParentWithExistingChild': self.format_error_but_not_really(
-                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=13, index_in_tag_end=29,
+                expected_parent_tag="Item/Object/Geometric-object"),
             'invalidSingle': self.format_error_but_not_really(
                 ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
             'invalidWithExtension': self.format_error_but_not_really(
                 ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            # Old errors if we go back to left to right processing.
+            # 'invalidParentWithExistingGrandchild': self.format_error_but_not_really(
+            #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            # 'invalidChildWithExistingGrandchild': self.format_error_but_not_really(
+            #     ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=28,
+            #     expected_parent_tag="Item/Object/Geometric-object"),
+            # 'invalidParentWithExistingChild': self.format_error_but_not_really(
+            #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            # 'invalidSingle': self.format_error_but_not_really(
+            #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            # 'invalidWithExtension': self.format_error_but_not_really(
+            #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
     def test_tag_extension_cascade(self):
         """Note we now assume all nodes are extension allowed."""
         test_strings = {
-            'validTakesValue': 'Attribute/Agent-related/Trait/Age/15',
-            'cascadeExtension': 'Attribute/Agent-related/Emotional-state/Awed/Cascade Extension',
+            'validTakesValue': 'Property/Agent-property/Agent-trait/Age/15',
+            'cascadeExtension': 'Property/Agent-property/Agent-state/Agent-emotional-state/Awed/Cascade Extension',
             'invalidExtension': 'Event/Agent-action/Good/Time',
         }
         expected_results = {
@@ -389,16 +419,16 @@ class TestConvertToShortTag(TestConvertTag):
     #     test_strings = {
     #         'leadingSingle': '/Event',
     #         'leadingExtension': '/Event/Extension',
-    #         'leadingMultiLevel': '/Item/Object/Man-made/Vehicle/Train',
-    #         'leadingMultiLevelExtension': '/Item/Object/Man-made/Vehicle/Train/Maglev',
+    #         'leadingMultiLevel': '/Item/Object/Man-made-object/Vehicle/Train',
+    #         'leadingMultiLevelExtension': '/Item/Object/Man-made-object/Vehicle/Train/Maglev',
     #         'trailingSingle': 'Event/',
     #         'trailingExtension': 'Event/Extension/',
-    #         'trailingMultiLevel': 'Item/Object/Man-made/Vehicle/Train/',
-    #         'trailingMultiLevelExtension': 'Item/Object/Man-made/Vehicle/Train/Maglev/',
+    #         'trailingMultiLevel': 'Item/Object/Man-made-object/Vehicle/Train/',
+    #         'trailingMultiLevelExtension': 'Item/Object/Man-made-object/Vehicle/Train/Maglev/',
     #         'bothSingle': '/Event/',
     #         'bothExtension': '/Event/Extension/',
-    #         'bothMultiLevel': '/Item/Object/Man-made/Vehicle/Train/',
-    #         'bothMultiLevelExtension': '/Item/Object/Man-made/Vehicle/Train/Maglev/',
+    #         'bothMultiLevel': '/Item/Object/Man-made-object/Vehicle/Train/',
+    #         'bothMultiLevelExtension': '/Item/Object/Man-made-object/Vehicle/Train/Maglev/',
     #     }
     #     expected_results = {
     #         'leadingSingle': 'Event',
@@ -452,26 +482,26 @@ class TestConvertHedStringToShort(TestConvertTag):
         test_strings = {
             'singleLevel': 'Event',
             'multiLevel': 'Event/Sensory-event',
-            'twoSingle': 'Event,Attribute',
+            'twoSingle': 'Event,Property',
             'oneExtension': 'Event/Extension',
-            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made/Vehicle/Train,\
-            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5',
-            'simpleGroup': '(Item/Object/Man-made/Vehicle/Train,\
-            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5)',
-            'groupAndTag': '(Item/Object/Man-made/Vehicle/Train,\
-            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),\
-            Item/Object/Man-made/Vehicle/Car',
-            'nestedGroup': '((Item/Object/Man-made/Vehicle/Train,\
-            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),\
-            Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors)',
-            'nestedGroup2': '(Item/Object/Man-made/Vehicle/Car,'
-                            'Attribute/Environmental/Indoors,(Item/Object/Man-made/Vehicle/Train,\
-                            Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5))'
+            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made-object/Vehicle/Train,\
+            Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5',
+            'simpleGroup': '(Item/Object/Man-made-object/Vehicle/Train,\
+            Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5)',
+            'groupAndTag': '(Item/Object/Man-made-object/Vehicle/Train,\
+            Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5),\
+            Item/Object/Man-made-object/Vehicle/Car',
+            'nestedGroup': '((Item/Object/Man-made-object/Vehicle/Train,\
+            Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5),\
+            Item/Object/Man-made-object/Vehicle/Car,Property/Environmental-property/Indoors)',
+            'nestedGroup2': '(Item/Object/Man-made-object/Vehicle/Car,'
+                            'Property/Environmental-property/Indoors,(Item/Object/Man-made-object/Vehicle/Train,\
+                            Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5))'
         }
         expected_results = {
             'singleLevel': 'Event',
             'multiLevel': 'Sensory-event',
-            'twoSingle': 'Event,Attribute',
+            'twoSingle': 'Event,Property',
             'oneExtension': 'Event/Extension',
             'threeMulti': 'Sensory-event,Train,RGB-red/0.5',
             'simpleGroup': '(Train,RGB-red/0.5)',
@@ -499,14 +529,14 @@ class TestConvertHedStringToShort(TestConvertTag):
             'single': single,
             'double': double,
             'both': single + ',' + double,
-            'singleWithTwoValid': 'Attribute,' + single + ',Event',
-            'doubleWithValid': double + ',Item/Object/Man-made/Vehicle/Car/Minivan',
+            'singleWithTwoValid': 'Property,' + single + ',Event',
+            'doubleWithValid': double + ',Item/Object/Man-made-object/Vehicle/Car/Minivan',
         }
         expected_results = {
             'single': single,
             'double': double,
             'both': single + ',' + double,
-            'singleWithTwoValid': 'Attribute,' + single + ',Event',
+            'singleWithTwoValid': 'Property,' + single + ',Event',
             'doubleWithValid': double + ',Car/Minivan',
         }
         expected_errors = {
@@ -527,12 +557,12 @@ class TestConvertHedStringToShort(TestConvertTag):
 
     def test_string_spaces_start_end(self):
         test_strings = {
-            'leadingSpace': ' Attribute/Informational/Label/Unique Value',
-            'trailingSpace': 'Attribute/Informational/Label/Unique Value ',
-            'bothSpace': ' Attribute/Informational/Label/Unique Value ',
-            'leadingSpaceTwo': ' Attribute/Informational/Label/Unique Value,Event',
-            'trailingSpaceTwo': 'Event,Attribute/Informational/Label/Unique Value ',
-            'bothSpaceTwo': ' Event,Attribute/Informational/Label/Unique Value ',
+            'leadingSpace': ' Property/Informational-property/Label/Unique Value',
+            'trailingSpace': 'Property/Informational-property/Label/Unique Value ',
+            'bothSpace': ' Property/Informational-property/Label/Unique Value ',
+            'leadingSpaceTwo': ' Property/Informational-property/Label/Unique Value,Event',
+            'trailingSpaceTwo': 'Event,Property/Informational-property/Label/Unique Value ',
+            'bothSpaceTwo': ' Event,Property/Informational-property/Label/Unique Value ',
         }
         expected_results = {
             'leadingSpace': 'Label/Unique Value',
@@ -574,7 +604,7 @@ class TestConvertHedStringToLong(TestConvertTag):
         test_strings = {
             'singleLevel': 'Event',
             'multiLevel': 'Sensory-event',
-            'twoSingle': 'Event,Attribute',
+            'twoSingle': 'Event,Property',
             'oneExtension': 'Event/Extension',
             'threeMulti': 'Sensory-event,Train,RGB-red/0.5',
             'simpleGroup': '(Train,RGB-red/0.5)',
@@ -585,18 +615,13 @@ class TestConvertHedStringToLong(TestConvertTag):
         expected_results = {
             'singleLevel': 'Event',
             'multiLevel': 'Event/Sensory-event',
-            'twoSingle': 'Event,Attribute',
+            'twoSingle': 'Event,Property',
             'oneExtension': 'Event/Extension',
-            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made/Vehicle/Train,' +
-            'Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5',
-            'simpleGroup': '(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5)',
-            'groupAndTag': '(Item/Object/Man-made/Vehicle/Train,' +
-            'Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made/Vehicle/Car',
-            'nestedGroup': '((Item/Object/Man-made/Vehicle/Train,' +
-                           'Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5),' +
-                           'Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors)',
-            'nestedGroup2': '(Item/Object/Man-made/Vehicle/Car,Attribute/Environmental/Indoors,' +
-                            '(Item/Object/Man-made/Vehicle/Train,Attribute/Sensory/Visual/Color/RGB-color/RGB-red/0.5))'
+            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5',
+            'simpleGroup': '(Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5)',
+            'groupAndTag': '(Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made-object/Vehicle/Car',
+            'nestedGroup': '((Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made-object/Vehicle/Car,Property/Environmental-property/Indoors)',
+            'nestedGroup2': '(Item/Object/Man-made-object/Vehicle/Car,Property/Environmental-property/Indoors,(Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5))'
         }
         expected_errors = {
             'singleLevel': [],
@@ -618,15 +643,15 @@ class TestConvertHedStringToLong(TestConvertTag):
             'single': single,
             'double': double,
             'both': single + ',' + double,
-            'singleWithTwoValid': 'Attribute,' + single + ',Event',
+            'singleWithTwoValid': 'Property,' + single + ',Event',
             'doubleWithValid': double + ',Car/Minivan',
         }
         expected_results = {
             'single': single,
             'double': double,
             'both': single + ',' + double,
-            'singleWithTwoValid': 'Attribute,' + single + ',Event',
-            'doubleWithValid': double + ',Item/Object/Man-made/Vehicle/Car/Minivan',
+            'singleWithTwoValid': 'Property,' + single + ',Event',
+            'doubleWithValid': double + ',Item/Object/Man-made-object/Vehicle/Car/Minivan',
         }
         expected_errors = {
             'single': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
@@ -654,12 +679,12 @@ class TestConvertHedStringToLong(TestConvertTag):
             'bothSpaceTwo': ' Event,Label/Unique Value ',
         }
         expected_results = {
-            'leadingSpace': 'Attribute/Informational/Label/Unique Value',
-            'trailingSpace': 'Attribute/Informational/Label/Unique Value',
-            'bothSpace': 'Attribute/Informational/Label/Unique Value',
-            'leadingSpaceTwo': 'Attribute/Informational/Label/Unique Value,Event',
-            'trailingSpaceTwo': 'Event,Attribute/Informational/Label/Unique Value',
-            'bothSpaceTwo': 'Event,Attribute/Informational/Label/Unique Value',
+            'leadingSpace': 'Property/Informational-property/Label/Unique Value',
+            'trailingSpace': 'Property/Informational-property/Label/Unique Value',
+            'bothSpace': 'Property/Informational-property/Label/Unique Value',
+            'leadingSpaceTwo': 'Property/Informational-property/Label/Unique Value,Event',
+            'trailingSpaceTwo': 'Event,Property/Informational-property/Label/Unique Value',
+            'bothSpaceTwo': 'Event,Property/Informational-property/Label/Unique Value',
         }
         expected_errors = {
             'leadingSpace': [],
@@ -686,7 +711,7 @@ class TestConvertHedStringToLong(TestConvertTag):
     #         'twoMixedBothGroup': '(/Event/,/Vehicle/Train/)',
     #     }
     #     expected_event = 'Event'
-    #     expected_train = 'Item/Object/Man-made/Vehicle/Train'
+    #     expected_train = 'Item/Object/Man-made-object/Vehicle/Train'
     #     expected_mixed = expected_event + ',' + expected_train
     #     expected_results = {
     #         'leadingSingle': expected_event,
@@ -731,7 +756,7 @@ class TestConvertHedStringToLong(TestConvertTag):
     #         'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
     #     }
     #     expected_event_extension = 'Event/Extension'
-    #     expected_tanker = 'Item/Object/Man-made/Vehicle/Boat/Tanker'
+    #     expected_tanker = 'Item/Object/Man-made-object/Vehicle/Boat/Tanker'
     #     expected_results = {
     #         'twoLevelDoubleSlash': expected_event_extension,
     #         'threeLevelDoubleSlash': expected_tanker,
