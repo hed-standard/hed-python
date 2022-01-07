@@ -34,5 +34,6 @@ class Test(unittest.TestCase):
         self.assertTrue(str(test_summary).startswith('Scrambled-face-cond'), 'HedGroupSummary has a string method')
         print(f"{str(test_summary)}")
 
+
 if __name__ == '__main__':
     unittest.main()
