@@ -25,18 +25,23 @@ class HedSchemaSection:
         self._attribute_cache = {}
 
         self._section_entry = entries_by_section.get(section_key)
+        self.duplicate_names = {}
+        self.all_entries = []
 
     def _add_to_dict(self, name):
         name_key = name
         if not self.case_sensitive:
             name_key = name.lower()
 
-        # todo: could add this check back and improve.
-        #  This detects two FULLY identical tags, including all terms and parents.
-        # if name_key in self.all_names:
-        #     print(f"NotImplemented: {name_key} found twice in schema.")
         new_entry = self._section_entry(name, self)
-        self.all_names[name_key] = new_entry
+        if name_key in self.all_names:
+            if name_key not in self.duplicate_names:
+                self.duplicate_names[name_key] = [self.all_names[name_key]]
+            self.duplicate_names[name_key].append(new_entry)
+        else:
+            self.all_names[name_key] = new_entry
+
+        self.all_entries.append(new_entry)
 
         return new_entry
 
@@ -51,7 +56,8 @@ class HedSchemaSection:
         ----------
         attribute_name: str
             The name of the attribute(generally a HedKey entry)
-
+        return_name_only: bool
+            If true, return the name as a string rather than the tag entry.
         Returns
         -------
         [HedSchemaEntry] or [str]
@@ -62,7 +68,7 @@ class HedSchemaSection:
 
         cache_val = self._attribute_cache[attribute_name]
         if return_name_only:
-            return [tag_entry.long_name for tag_entry in cache_val]
+            return [tag_entry.name for tag_entry in cache_val]
         return cache_val
 
     # ===============================================
@@ -70,6 +76,9 @@ class HedSchemaSection:
     # ===============================================
     def __iter__(self):
         return iter(self.all_names)
+
+    def __len__(self):
+        return len(self.all_names)
 
     def items(self):
         return self.all_names.items()
@@ -97,7 +106,62 @@ class HedSchemaSection:
             return False
         if self.case_sensitive != other.case_sensitive:
             return False
+        if self.duplicate_names != other.duplicate_names:
+            return False
         return True
 
     def __bool__(self):
         return bool(self.all_names)
+
+
+class HedSchemaTagSection(HedSchemaSection):
+    def __init__(self, *args, case_sensitive=False, **kwargs):
+        super().__init__(*args, **kwargs, case_sensitive=case_sensitive)
+        # This dict contains all forms of all tags.  The .all_names variable has ONLY the long forms.
+        self.long_form_tags = {}
+
+    def _add_to_dict(self, name):
+        name_key = name
+        tag_forms = []
+        while name_key:
+            tag_forms.append(name_key)
+            slash_index = name_key.find("/")
+            if slash_index == -1:
+                name_key = None
+            else:
+                name_key = name_key[slash_index + 1:]
+
+        # We can't add value tags by themselves
+        if tag_forms[-1] == "#":
+            tag_forms = tag_forms[:-1]
+        new_entry = super()._add_to_dict(name)
+
+        # remove the /# if present, but only from the entry, not from the lookups
+        # This lets us easily use source_tag + remainder instead of having to strip off the /# later.
+        short_name = tag_forms[-1]
+        long_tag_name = name
+        if long_tag_name.endswith("/#"):
+            long_tag_name = long_tag_name[:-2]
+            short_name = short_name[:-2]
+        new_entry.long_tag_name = long_tag_name
+        new_entry.short_tag_name = short_name
+
+        for tag_key in tag_forms:
+            self.long_form_tags[tag_key.lower()] = new_entry
+
+        return new_entry
+
+    def get(self, key):
+        if not self.case_sensitive:
+            key = key.lower()
+        return self.long_form_tags.get(key)
+
+    def __getitem__(self, key):
+        if not self.case_sensitive:
+            key = key.lower()
+        return self.long_form_tags[key]
+
+    def __contains__(self, key):
+        if not self.case_sensitive:
+            key = key.lower()
+        return key in self.long_form_tags

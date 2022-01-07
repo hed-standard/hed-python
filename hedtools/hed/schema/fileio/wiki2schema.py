@@ -118,13 +118,13 @@ class HedSchemaWikiParser:
         parse_order = {
             HedWikiSection.HeaderLine: self._read_header_section,
             HedWikiSection.Prologue: self._read_prologue,
-            HedWikiSection.Properties: self._read_properties,
             HedWikiSection.Epilogue: self._read_epilogue,
+            HedWikiSection.Properties: self._read_properties,
             HedWikiSection.Attributes: self._read_attributes,
             HedWikiSection.UnitModifiers: self._read_unit_modifiers,
             HedWikiSection.UnitsClasses: self._read_unit_classes,
-            HedWikiSection.Schema: self._read_schema,
             HedWikiSection.ValueClasses: self._read_value_classes,
+            HedWikiSection.Schema: self._read_schema,
         }
         self._parse_sections(wiki_lines_by_section, parse_order)
 
@@ -272,6 +272,9 @@ class HedSchemaWikiParser:
                 level = self._get_tag_level(line)
                 if level < len(parent_tags):
                     parent_tags = parent_tags[:level]
+                elif level > len(parent_tags):
+                    self._add_warning(line, "Line has too many *'s at the front.  You cannot skip a level.")
+                    continue
             new_tag_name = self._add_tag_line(parent_tags, line)
             if not new_tag_name:
                 if new_tag_name != "":
@@ -288,8 +291,7 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
-        current_unit_class = ""
-
+        unit_class_entry = None
         for line in lines:
             unit_class_unit, _ = self._get_tag_name(line)
             if unit_class_unit is None:
@@ -298,13 +300,11 @@ class HedSchemaWikiParser:
             level = self._get_tag_level(line)
             # This is a unit class
             if level == 1:
-                current_unit_class = unit_class_unit
-                self._schema._add_unit_class(current_unit_class)
-                self._add_single_line(line, HedSectionKey.UnitClasses, skip_adding_name=True)
+                unit_class_entry = self._add_single_line(line, HedSectionKey.UnitClasses)
             # This is a unit class unit
             else:
-                self._schema._add_unit_class_unit(current_unit_class, unit_class_unit)
-                self._add_single_line(line, HedSectionKey.Units, skip_adding_name=True)
+                unit_class_unit_entry = self._add_single_line(line, HedSectionKey.Units)
+                unit_class_entry.add_unit(unit_class_unit_entry)
 
     def _read_unit_modifiers(self, lines):
         """Adds the unit modifiers section
@@ -331,13 +331,11 @@ class HedSchemaWikiParser:
     def _read_properties(self, lines):
         for line in lines:
             self._add_single_line(line, HedSectionKey.Properties)
-        self._schema.add_default_properties()
 
     def _read_attributes(self, lines):
         self.attributes = {}
         for line in lines:
             self._add_single_line(line, HedSectionKey.Attributes)
-        self._schema.add_hed2_attributes()
 
     def _get_header_attributes(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
@@ -560,7 +558,7 @@ class HedSchemaWikiParser:
 
         return tag_name
 
-    def _add_single_line(self, tag_line, key_class, element_name=None, skip_adding_name=False):
+    def _add_single_line(self, tag_line, key_class, element_name=None):
         node_name, index = self._get_tag_name(tag_line)
         if node_name is None:
             self._add_warning(tag_line)
@@ -577,14 +575,15 @@ class HedSchemaWikiParser:
         if node_desc is None:
             self._add_warning(tag_line, "Description has mismatched delimiters")
             return
-        if not skip_adding_name:
-            self._schema._add_tag_to_dict(node_name, key_class)
-        tag_entry = self._schema._get_entry_for_tag(node_name, key_class)
+
+        tag_entry = self._schema._add_tag_to_dict(node_name, key_class)
         if node_desc:
             tag_entry.description = node_desc.strip()
 
         for attribute_name, attribute_value in node_attributes.items():
             tag_entry.set_attribute_value(attribute_name, attribute_value)
+
+        return tag_entry
 
     def _add_warning(self, line, warning_message="Schema term is empty or the line is malformed"):
         self.warnings.append((line, warning_message))

@@ -15,14 +15,14 @@ This schema is the first official release that includes an xsd and requires unit
 * Measurement-event <nowiki>{suggestedTag=Data-property}[A discrete measure returned by an instrument.]</nowiki>
 
 '''Agent''' <nowiki>{suggestedTag=Agent-property}[Someone or something that takes an active role or produces a specified effect.The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be something that simulates something else.]</nowiki>
-* Animal-agent <nowiki>[An agent that is an animal.]</nowiki>
+* Animal-agent <nowiki>{required}[An agent that is an animal.]</nowiki>
 * Avatar-agent <nowiki>[An agent associated with an icon or avatar representing another agent.]</nowiki>
 * Controller-agent <nowiki>[An agent experiment control software or hardware.]</nowiki> 
 * Human-agent <nowiki>[A person who takes an active role or produces a specified effect.]</nowiki>
 * Robotic-agent <nowiki>[An agent mechanical device capable of performing a variety of often complex tasks on command or by being programmed in advance.]</nowiki>
 * Software-agent <nowiki>[An agent computer program.]</nowiki>
 
-'''Action''' <nowiki>{extensionAllowed}[Do something.]</nowiki>
+'''Action''' <nowiki>{required, extensionAllowed}[Do something.]</nowiki>
 * Communicate <nowiki>[Convey knowledge of or information about something.]</nowiki>
 ** Communicate-gesturally <nowiki>{relatedTag=Move-face, relatedTag=Move-upper-extremity}[Communicate nonverbally using visible bodily actions, either in place of speech or together and in parallel with spoken words. Gestures include movement of the hands, face, or other parts of the body.]</nowiki>
 *** Clap-hands <nowiki>[Strike the palms of against one another resoundingly, and usually repeatedly, especially to express approval.]</nowiki>
@@ -178,6 +178,8 @@ This schema is the first official release that includes an xsd and requires unit
 ** Track <nowiki>[Follow a person, animal, or object through space or time.]</nowiki>
 
 '''Item''' <nowiki>{extensionAllowed}[An independently existing thing (living or nonliving).]</nowiki>
+* Currency-test
+** # <nowiki>{takesValue, unitClass=currencyUnits, valueClass=numericClass}</nowiki>
 * Biological-item <nowiki>[An entity that is biological, that is related to living organisms.]</nowiki>
 ** Anatomical-item <nowiki>[A biological structure, system, fluid or other substance excluding single molecular entities.]</nowiki>
 *** Body-part <nowiki>[Any part of an organism.]</nowiki>
@@ -1134,7 +1136,7 @@ This schema is the first official release that includes an xsd and requires unit
 ** m^2 <nowiki>{SIUnit, unitSymbol}</nowiki> 
 * currencyUnits <nowiki>{defaultUnits=$}[Units indicating the worth of something.]</nowiki> 
 ** dollar 
-** $ <nowiki>{unitPrefix, unitSymbol}</nowiki> 
+** $ <nowiki>{unitPrefix, unitSymbol}</nowiki>
 ** point 
 * frequencyUnits <nowiki>{defaultUnits=Hz}</nowiki>
 ** hertz  <nowiki>{SIUnit}</nowiki>
