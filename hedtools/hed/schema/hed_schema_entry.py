@@ -11,8 +11,8 @@ class HedSchemaEntry:
     """
         A single entry in the HedSchema, containing its attributes/properties/etc.
     """
-    def __init__(self, long_name, section):
-        self.long_name = long_name
+    def __init__(self, name, section):
+        self.name = name
         # key: property/attribute name, value = property value.  Will often be a bool
         self.attributes = {}
         self.description = None
@@ -100,7 +100,7 @@ class HedSchemaEntry:
             return True
 
     def __eq__(self, other):
-        if self.long_name != other.long_name:
+        if self.name != other.name:
             return False
         if self.attributes != other.attributes:
             # We only want to compare known attributes
@@ -121,8 +121,14 @@ class UnitClassEntry(HedSchemaEntry):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._units = []
         self.unit_class_units = []
         self.derivative_units = []
+        self.unit_class_entry = None
+
+    def add_unit(self, unit_entry):
+        """Called to add the given unit entry to this unit class"""
+        self._units.append(unit_entry)
 
     def finalize_entry(self, schema):
         """
@@ -136,7 +142,7 @@ class UnitClassEntry(HedSchemaEntry):
         -------
         """
         derivative_units = {}
-        self.unit_class_units = schema.get_units_for_unit_class(self.long_name)
+        self.unit_class_units = {unit_entry.name: unit_entry for unit_entry in self._units}
         for unit_name, unit_entry in self.unit_class_units.items():
             new_derivative_units = [unit_name]
             if not unit_entry.has_attribute(HedKey.UnitSymbol):
@@ -145,7 +151,7 @@ class UnitClassEntry(HedSchemaEntry):
             for derived_unit in new_derivative_units:
                 derivative_units[derived_unit] = unit_entry
                 for modifier in unit_entry.unit_modifiers:
-                    derivative_units[modifier.long_name + derived_unit] = unit_entry
+                    derivative_units[modifier.name + derived_unit] = unit_entry
         self.derivative_units = derivative_units
 
 
@@ -169,7 +175,7 @@ class UnitEntry(HedSchemaEntry):
         Returns
         -------
         """
-        self.unit_modifiers = schema.get_modifiers_for_unit(self.long_name)
+        self.unit_modifiers = schema.get_modifiers_for_unit(self.name)
 
 
 class HedTagEntry(HedSchemaEntry):
@@ -180,11 +186,17 @@ class HedTagEntry(HedSchemaEntry):
         super().__init__(*args, **kwargs)
         self.unit_classes = {}
         self.value_classes = {}
+        # These always have any /# stripped off the end, so they can easily be used with normal code.
+        self.long_tag_name = None
+        self.short_tag_name = None
+        # this is the child takes value tag, if one exists
+        self.takes_value_child_entry = None
         self._parent_tag = None
 
     def any_parent_has_attribute(self, attribute):
         """Checks to see if the tag (or any of its parents) have the given attribute.
 
+            This is mostly used to check extension allowed.  Could be cached.
         Parameters
         ----------
         attribute: str
@@ -231,24 +243,25 @@ class HedTagEntry(HedSchemaEntry):
         Returns
         -------
         """
-        parent_name, _, child_name = self.long_name.rpartition("/")
+        # Set the parent and child pointers.  Child is just for "takes value"
+        parent_name, _, child_name = self.name.rpartition("/")
         parent_tag = None
         if parent_name:
-            parent_tag = schema._get_entry_for_tag(parent_name)
+            parent_tag = schema.get_tag_entry(parent_name)
         self._parent_tag = parent_tag
+        self.takes_value_child_entry = schema.get_tag_entry(self.name + "/#")
 
-        # We only allow unit or value classes on # nodes, it should be flagged as a warning otherwise.
-        if child_name == "#":
+        if self.name.endswith("/#"):
             if HedKey.UnitClass in self.attributes:
                 self.unit_classes = {}
                 for unit_class_name in self.attributes[HedKey.UnitClass].split(","):
-                    entry = schema._get_entry_for_tag(unit_class_name, HedSectionKey.UnitClasses)
+                    entry = schema.get_tag_entry(unit_class_name, HedSectionKey.UnitClasses)
                     if entry:
                         self.unit_classes[unit_class_name] = entry
 
             if HedKey.ValueClass in self.attributes:
                 self.value_classes = {}
                 for value_class_name in self.attributes[HedKey.ValueClass].split(","):
-                    entry = schema._get_entry_for_tag(value_class_name, HedSectionKey.ValueClasses)
+                    entry = schema.get_tag_entry(value_class_name, HedSectionKey.ValueClasses)
                     if entry:
                         self.value_classes[value_class_name] = entry

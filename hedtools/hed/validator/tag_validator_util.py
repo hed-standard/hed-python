@@ -2,36 +2,12 @@ import datetime
 import re
 
 
-CLOCK_TIME_UNIT_CLASS = 'clockTime'
-DATE_TIME_UNIT_CLASS = 'dateTime'
-TIME_UNIT_CLASS = 'time'
-
 DATE_TIME_VALUE_CLASS = 'dateTimeClass'
 NUMERIC_VALUE_CLASS = "numericClass"
 TEXT_VALUE_CLASS = "textClass"
 NAME_VALUE_CLASS = "nameClass"
 
 DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
-
-
-def is_clock_face_time(time_string):
-    """Checks to see if the specified string is a valid HH:MM time string.
-
-    Parameters
-    ----------
-    time_string: str
-        A time string.
-    Returns
-    -------
-    bool
-        True if the time string is valid. False, if otherwise.
-
-    """
-    try:
-        time_obj = datetime.time.fromisoformat(time_string)
-        return not time_obj.tzinfo and not time_obj.microsecond
-    except ValueError:
-        return False
 
 
 def is_date_time(date_time_string):
@@ -86,3 +62,24 @@ def validate_text_value_class(text_string):
 
     """
     return True
+
+
+def is_clock_face_time(time_string):
+    """Checks to see if the specified string is a valid HH:MM time string.
+
+    This is deprecated and has no expected use going forward.
+    Parameters
+    ----------
+    time_string: str
+        A time string.
+    Returns
+    -------
+    bool
+        True if the time string is valid. False, if otherwise.
+
+    """
+    try:
+        time_obj = datetime.time.fromisoformat(time_string)
+        return not time_obj.tzinfo and not time_obj.microsecond
+    except ValueError:
+        return False

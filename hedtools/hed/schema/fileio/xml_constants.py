@@ -1,4 +1,4 @@
-from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey
 
 # These are only currently used by the XML reader/writer, but that may change.
 XSI_SOURCE = "http://www.w3.org/2001/XMLSchema-instance"
@@ -13,8 +13,6 @@ VALUE_ELEMENT = "value"
 
 # These should mostly match the HedKey values
 # These are repeated here for clarification primarily
-DEFAULT_UNITS_FOR_TYPE_ATTRIBUTE = HedKey.DefaultUnits
-DEFAULT_UNIT_FOR_OLD_UNIT_CLASS_ATTRIBUTE = 'default'
 ATTRIBUTE_ELEMENT = "attribute"
 ATTRIBUTE_PROPERTY_ELEMENT = "property"
 UNIT_CLASS_UNIT_ELEMENT = 'unit'
@@ -28,7 +26,6 @@ TAG_DEF_ELEMENT = "node"
 TRUE_ATTRIBUTE = "true"
 
 
-# Sections that vary in legacy xml
 UNIT_CLASS_SECTION_ELEMENT = "unitClassDefinitions"
 UNIT_CLASS_DEF_ELEMENT = "unitClassDefinition"
 UNIT_MODIFIER_SECTION_ELEMENT = "unitModifierDefinitions"
@@ -40,54 +37,24 @@ SCHEMA_PROPERTIES_DEF_ELEMENT = "propertyDefinition"
 SCHEMA_VALUE_CLASSES_SECTION_ELEMENT = "valueClassDefinitions"
 SCHEMA_VALUE_CLASSES_DEF_ELEMENT = "valueClassDefinition"
 
-UNIT_CLASS_SECTION_ELEMENT_LEGACY = "unitClasses"
-UNIT_CLASS_DEF_ELEMENT_LEGACY = "unitClass"
-UNIT_MODIFIER_SECTION_ELEMENT_LEGACY = "unitModifiers"
-UNIT_MODIFIER_DEF_ELEMENT_LEGACY = "unitModifier"
+
+SECTION_NAMES = {
+    HedSectionKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
+    HedSectionKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
+    HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
+    HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
+    HedSectionKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
+}
 
 
-def get_section_name(key_class, legacy_format=False):
-    if not legacy_format:
-        section_names = {
-            HedSectionKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
-            HedSectionKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
-            HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
-            HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
-            HedSectionKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
-        }
-    else:
-        section_names = {
-            HedSectionKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT_LEGACY,
-            HedSectionKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT_LEGACY,
-            HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
-            HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_SECTION_ELEMENT,
-            HedSectionKey.Properties: SCHEMA_PROPERTIES_SECTION_ELEMENT,
-        }
-
-    return section_names.get(key_class, None)
-
-
-def get_element_name(key_class, legacy_format=False):
-    if not legacy_format:
-        element_names = {
-            HedSectionKey.AllTags: TAG_DEF_ELEMENT,
-            HedSectionKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
-            HedSectionKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
-            HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
-            HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
-            HedSectionKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
-        }
-    else:
-        element_names = {
-            HedSectionKey.AllTags: TAG_DEF_ELEMENT,
-            HedSectionKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT_LEGACY,
-            HedSectionKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT_LEGACY,
-            HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
-            HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
-            HedSectionKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
-        }
-
-    return element_names.get(key_class, (None, None))
+ELEMENT_NAMES = {
+    HedSectionKey.AllTags: TAG_DEF_ELEMENT,
+    HedSectionKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
+    HedSectionKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
+    HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
+    HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
+    HedSectionKey.Properties: SCHEMA_PROPERTIES_DEF_ELEMENT,
+}
 
 
 ATTRIBUTE_PROPERTY_ELEMENTS = {
