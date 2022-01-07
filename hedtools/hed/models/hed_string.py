@@ -2,7 +2,7 @@
 This module is used to split tags in a HED string.
 """
 from hed.models.hed_group import HedGroup
-from hed.schema.hed_tag import HedTag
+from hed.models.hed_tag import HedTag
 from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 from hed.errors.error_types import ErrorContext
 from hed.models.util import translate_ops
@@ -358,7 +358,7 @@ class HedString(HedGroup):
 
     def apply_ops(self, string_ops):
         """
-            Run the list of functions on this string and gather up issues found.
+            Run the list of functions on this string and gather issues found.
 
             This potentially modifies the hed string object.
 

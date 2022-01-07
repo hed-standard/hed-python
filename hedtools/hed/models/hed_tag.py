@@ -1,5 +1,3 @@
-from hed.errors.error_types import ValidationErrors
-from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema_constants import HedKey
 
 
@@ -283,7 +281,7 @@ class HedTag:
         This means we verify the tag does not have the required name_prefix, or any partial name_prefix
 
         Ex:
-        RequiredPrefix: KnownTag1/KnownTag2
+        Required: KnownTag1/KnownTag2
         Case 1: KnownTag1/KnownTag2/ColumnValue
             Will not be changed, has name_prefix already
         Case 2: KnownTag2/ColumnValue
@@ -344,21 +342,18 @@ class HedTag:
         if not hed_schema:
             return self._convert_key_tags_to_canonical_form()
 
-        specific_schema = hed_schema.schema_for_prefix(self.library_prefix)
-        if not specific_schema:
-            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, self,
-                                                          self.library_prefix, hed_schema.valid_prefixes)
-            return validation_issues
-
-        long_form, short_index, remainder_index, tag_issues = \
-            self._calculate_canonical_forms(specific_schema)
-        self._long_tag = long_form
-        self._short_tag_index = short_index
-        self._extension_index = remainder_index
-
-        if remainder_index is not None:
-            self._schema = specific_schema
-            self._update_schema_entry()
+        tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.library_prefix)
+        self._schema_entry = tag_entry
+        self._schema = hed_schema
+        # todo: now that we always have a schema entry, have these get values from those instead.
+        if self._schema_entry:
+            tag_name = tag_entry.long_tag_name
+            self._long_tag = self.library_prefix + tag_name + remainder
+            self._short_tag_index = len(self.library_prefix) \
+                                    + len(tag_entry.long_tag_name) - len(tag_entry.short_tag_name)
+            self._extension_index = len(self.library_prefix) + len(tag_name)
+        else:
+            self._long_tag = remainder
 
         return tag_issues
 
@@ -375,13 +370,15 @@ class HedTag:
         -------
         stripped_unit_value: str
             The extension portion with the units removed.
+        unit: str or None
+            None if no valid unit found.
         """
         tag_unit_classes = self.unit_classes
-        stripped_value = self._get_tag_units_portion(tag_unit_classes)
+        stripped_value, unit = self._get_tag_units_portion(tag_unit_classes)
         if stripped_value:
-            return stripped_value
+            return stripped_value, unit
 
-        return self.extension_or_value_portion
+        return self.extension_or_value_portion, None
 
     @property
     def unit_classes(self):
@@ -436,6 +433,18 @@ class HedTag:
         if self._schema_entry:
             return self._schema_entry.attributes
         return {}
+
+    def tag_exists_in_schema(self):
+        """
+            Gets the schema entry for this tag.
+
+            Note: This does NOT assure this is a valid tag.
+        Returns
+        -------
+        tag_exists: bool
+            Returns true if this tag exists
+        """
+        return bool(self._schema_entry)
 
     def is_takes_value_tag(self):
         """
@@ -509,6 +518,7 @@ class HedTag:
 
         if self._schema_entry:
             return self._schema_entry.any_parent_has_attribute(HedKey.ExtensionAllowed)
+        return False
 
     def get_tag_unit_class_units(self):
         """Gets the unit class units associated with a particular tag.
@@ -592,14 +602,21 @@ class HedTag:
         """
         new_entry = None
         if self.extension_or_value_portion:
-            new_entry = self._schema._get_entry_for_tag(self.base_tag.lower() + "/#")
+            new_entry = self._schema.get_tag_entry(self.base_tag.lower() + "/#")
         if new_entry is None:
-            new_entry = self._schema._get_entry_for_tag(self.base_tag.lower())
+            new_entry = self._schema.get_tag_entry(self.base_tag.lower())
         self._schema_entry = new_entry
 
     def _convert_key_tags_to_canonical_form(self):
-        # todo: eventually make this function less bad.
-        # Finds the canonical form for basic known tags such as definition and def.
+        """
+            Finds the canonical form for basic known tags such as definition and def.
+
+            todo: This should have default HedTagEntries to point to eventually
+        Returns
+        -------
+        issues_list: [{}]
+            Always empty.
+        """
         tags_to_identify = ["onset", "definition", "offset", "def-expand", "def"]
         for key_tag in tags_to_identify:
             is_key_tag = self._check_tag_starts_with(str(self), key_tag)
@@ -635,123 +652,6 @@ class HedTag:
             return hed_tag[found_index + len(target_tag_short_name):]
         return None
 
-    def _validate_parent_nodes(self, long_org_tags, main_hed_portion):
-        long_org_tag = None
-        if isinstance(long_org_tags, str):
-            tag_string = long_org_tags.lower()
-
-            # Verify the tag has the correct path above it.
-            if tag_string.endswith(main_hed_portion):
-                long_org_tag = long_org_tags
-        else:
-            for org_tag_string in long_org_tags:
-                tag_string = org_tag_string.lower()
-
-                if tag_string.endswith(main_hed_portion):
-                    long_org_tag = org_tag_string
-                    break
-
-        return long_org_tag
-
-    def _format_state_error(self, error_code, state, **kwargs):
-        return ErrorHandler.format_error(error_code, self,
-                                         index_in_tag=state["index_start"] + state["prefix_tag_adj"],
-                                         index_in_tag_end=state["index_in_tag_end"] + state["prefix_tag_adj"],
-                                         **kwargs)
-
-    def _handle_unknown_term(self, hed_schema, term, clean_tag, state):
-        if term not in hed_schema.short_tag_mapping:
-            state["found_unknown_extension"] = True
-            if not state["found_long_org_tag"]:
-                return self._format_state_error(ValidationErrors.NO_VALID_TAG_FOUND, state)
-            return None
-
-        long_org_tags = hed_schema.short_tag_mapping[term]
-        long_org_tag = self._validate_parent_nodes(long_org_tags, clean_tag[:state["index_in_tag_end"]])
-        if not long_org_tag:
-            return self._format_state_error(ValidationErrors.INVALID_PARENT_NODE, state,
-                                            expected_parent_tag=long_org_tags)
-
-        # In hed2 compatible, reject short tags.
-        if hed_schema.has_duplicate_tags:
-            if not clean_tag.startswith(long_org_tag.lower()):
-                return self._format_state_error(ValidationErrors.NO_VALID_TAG_FOUND, state)
-
-        state["found_index_start"] = state["index_start"]
-        state["found_index_end"] = state["index_in_tag_end"]
-        state["found_long_org_tag"] = long_org_tag
-
-    def _calculate_canonical_forms(self, hed_schema):
-        """
-        This takes a hed tag(short or long form) and converts it to the long form
-        Works left to right.(mostly relevant for errors)
-        Note: This only does minimal validation
-
-        Parameters
-        ----------
-        hed_schema: HedSchema
-            The hed schema to use to compute forms of this tag.
-        Returns
-        -------
-        long_tag: str
-            The converted long tag
-        short_tag_index: int
-            The position the short tag starts at in long_tag
-        extension_index: int
-            The position the extension or value starts at in the long_tag.  This will be None if this is an invalid tag.
-        errors: list
-            a list of errors while converting
-        """
-        clean_tag = self.tag.lower()
-        prefix = self.library_prefix
-        clean_tag = clean_tag[len(prefix):]
-        split_tags = clean_tag.split("/")
-        state = {}
-        state["found_unknown_extension"] = False
-        state["found_index_end"] = 0
-        state["found_index_start"] = 0
-        state["found_long_org_tag"] = ""
-        state["index_in_tag_end"] = 0
-        state["prefix_tag_adj"] = len(prefix)
-        state["index_start"] = 0
-
-        # Iterate over terms left to right keeping track of current state
-        for term in split_tags:
-            term_len = len(term)
-            # Skip slashes
-            if state["index_in_tag_end"] != 0:
-                state["index_in_tag_end"] += 1
-            state["index_start"] = state["index_in_tag_end"]
-            state["index_in_tag_end"] += term_len
-
-            # If we already found an unknown tag, it's implicitly an extension.  No known tags can follow it.
-            if not state["found_unknown_extension"]:
-                error = self._handle_unknown_term(hed_schema, term, clean_tag, state)
-                if error:
-                    return str(self), None, None, error
-            else:
-                # These means we found a known tag in the remainder/extension section, which is an error
-                if term in hed_schema.short_tag_mapping:
-                    error = self._format_state_error(ValidationErrors.INVALID_PARENT_NODE, state,
-                                                     expected_parent_tag=hed_schema.short_tag_mapping[term])
-                    return str(self), None, None, error
-
-        full_tag_string = self._str_no_long_tag()
-        # skip over the tag name_prefix if present
-        full_tag_string = full_tag_string[len(prefix):]
-        # don't actually adjust the tag if it's hed2 style.
-        if hed_schema.has_duplicate_tags:
-            return full_tag_string, None, state["found_index_end"], []
-
-        remainder = full_tag_string[state["found_index_end"]:]
-        long_tag_string = state["found_long_org_tag"] + remainder
-
-        # calculate short_tag index into long tag.
-        state["found_index_start"] += (len(long_tag_string) - len(full_tag_string))
-        remainder_start_index = state["found_index_end"] + (len(long_tag_string) - len(full_tag_string))
-        return prefix + long_tag_string, \
-            state["found_index_start"] + state["prefix_tag_adj"], remainder_start_index + state["prefix_tag_adj"], {}
-
     def _get_library_prefix(self, org_tag):
         first_slash = org_tag.find("/")
         first_colon = org_tag.find(":")
@@ -779,21 +679,21 @@ class HedTag:
         """
         value, _, units = self.extension_or_value_portion.rpartition(" ")
         if not units:
-            return None
+            return None, None
 
         for unit_class_entry in tag_unit_classes.values():
             all_valid_unit_permutations = unit_class_entry.derivative_units
 
             possible_match = self._find_modifier_unit_entry(units, all_valid_unit_permutations)
             if possible_match and not possible_match.has_attribute(HedKey.UnitPrefix):
-                return value
+                return value, units
 
             # Repeat the above, but as a prefix
             possible_match = self._find_modifier_unit_entry(value, all_valid_unit_permutations)
             if possible_match and possible_match.has_attribute(HedKey.UnitPrefix):
-                return units
+                return units, value
 
-        return None
+        return None, None
 
     @staticmethod
     def _find_modifier_unit_entry(units, all_valid_unit_permutations):

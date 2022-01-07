@@ -1,4 +1,4 @@
-from hed.schema.hed_tag import HedTag
+from hed.models.hed_tag import HedTag
 
 
 class HedGroup:
