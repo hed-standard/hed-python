@@ -193,7 +193,7 @@ class Test(TestWebBase):
         from hedweb.constants import base_constants
         from hedweb.web_util import get_hed_schema_from_pull_down
         with self.app.test:
-            environ = create_environ(data={base_constants.SCHEMA_VERSION: '8.0.0-alpha.1'})
+            environ = create_environ(data={base_constants.SCHEMA_VERSION: '8.0.0'})
             request = Request(environ)
             hed_schema = get_hed_schema_from_pull_down(request)
             self.assertIsInstance(hed_schema, HedSchema,

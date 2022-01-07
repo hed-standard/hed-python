@@ -55,7 +55,25 @@ class Test(TestWebBase):
         else:
             self.fail('process should have thrown a HedFileError exception when events_path was empty')
 
-    def test_events_process(self):
+    def test_events_process_invalid(self):
+        from hedweb.events import process
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_bad.json')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        json_sidecar = models.Sidecar(file=json_path, name='bids_events_bad')
+        events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
+        arguments = {base_constants.EVENTS: events, base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
+                     base_constants.DEFS_EXPAND: True,
+                     base_constants.CHECK_FOR_WARNINGS: True, base_constants.SCHEMA: hed_schema}
+        with self.app.app_context():
+            results = process(arguments)
+            self.assertTrue(isinstance(results, dict),
+                            'process validation should return a result dictionary when validation errors')
+            self.assertEqual('warning', results['msg_category'],
+                             'process validate should return warning when errors')
+
+    def test_events_process_valid(self):
         from hedweb.events import process
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
@@ -69,21 +87,28 @@ class Test(TestWebBase):
         with self.app.app_context():
             results = process(arguments)
             self.assertTrue(isinstance(results, dict),
-                            'process validation should return a result dictionary when validation errors')
-            self.assertEqual('success', results['msg_category'],
-                             'process validate should return success if no errors')
-
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
-        arguments[base_constants.SCHEMA] = hedschema.load_schema(hed_file_path=schema_path)
-        with self.app.app_context():
-            results = process(arguments)
-            self.assertTrue(isinstance(results, dict),
                             'process validation should return a dictionary when validation errors')
-            self.assertEqual('warning', results['msg_category'],
-                             'process validate should give warning when errors')
-            self.assertTrue(results["data"], 'process validate should return data when errors')
+            self.assertEqual('success', results['msg_category'],
+                             'process validate should give success when no errors')
+            self.assertFalse(results["data"], 'process not return data no no errors')
 
-    def test_events_assemble(self):
+    def test_events_assemble_invalid(self):
+        from hedweb.events import assemble
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_bad.tsv')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_bad.json')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_events_bad')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+
+        events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
+        with self.app.app_context():
+            results = assemble(hed_schema, events,  defs_expand=True)
+            self.assertTrue('data' in results,
+                            'assemble results should have a data key when no errors')
+            self.assertEqual('warning', results["msg_category"],
+                             'assemble msg_category should be warning when errors')
+
+    def test_events_assemble_invalid(self):
         from hedweb.events import assemble
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
@@ -92,28 +117,19 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
-            results = assemble(hed_schema, events,  defs_expand=True)
-            self.assertTrue('data' in results,
-                            'assemble results should have a data key when no errors')
-            self.assertEqual('success', results["msg_category"],
-                             'assemble msg_category should be success when no errors')
-
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        with self.app.app_context():
             results = assemble(hed_schema, events, defs_expand=True)
             self.assertTrue(results['data'],
-                            'assemble results should have a data key when errors')
-            self.assertEqual('warning', results['msg_category'],
-                             'assemble msg_category should be warning when errors')
+                            'assemble results should have a data key when no errors')
+            self.assertEqual('success', results['msg_category'],
+                             'assemble msg_category should be success when no errors')
 
-    def test_events_validate(self):
+    def test_events_validate_invalid(self):
         from hedweb.events import validate
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_bad.json')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        json_sidecar = models.Sidecar(file=json_path, name='bids_json')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_events_bad')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
             results = validate(hed_schema, events)
@@ -122,6 +138,12 @@ class Test(TestWebBase):
             self.assertEqual('warning', results["msg_category"],
                              'validate msg_category should be warning when errors')
 
+    def test_events_validate_valid(self):
+        from hedweb.events import validate
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
+        json_sidecar = models.Sidecar(file=json_path, name='bids_events')
+        events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
 

@@ -79,27 +79,6 @@ class Test(TestWebBase):
                              "Validation of valid xml should not return a file")
             schema_buffer.close()
 
-    def test_schema_results_convert_xml_gen2_valid(self):
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED7.2.0.xml')
-        with open(schema_path, 'r') as sc:
-            x = sc.read()
-        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
-        with self.app.app_context():
-            input_data = {'schema_upload_options': 'schema_file_option',
-                          'command_option': 'convert',
-                          'schema_file': (schema_buffer, 'HED7.2.0.xml'),
-                          'check_for_warnings': 'on'}
-            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Convert of a valid gen2 xml has a response')
-            headers_dict = dict(response.headers)
-            self.assertEqual("success", headers_dict["Category"],
-                             "The valid gen2 xml should convert to mediawiki successfully")
-            self.assertTrue(response.data, "The converted gen2 schema should not be empty")
-            self.assertEqual('attachment filename=HED7.2.0.mediawiki',
-                             headers_dict['Content-Disposition'],
-                             "Conversion of valid gen2 xml should return mediawiki")
-            schema_buffer.close()
-
     def test_schema_results_convert_xml_url_valid(self):
         schema_url = \
             'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml'
@@ -197,26 +176,6 @@ class Test(TestWebBase):
             self.assertFalse(response.data, "The validated schema data should be empty")
             self.assertEqual(None, headers_dict.get('Content-Disposition', None),
                              "Validation of valid xml should return any response data")
-            schema_buffer.close()
-
-    def test_schema_results_validate_xml_gen2_valid(self):
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED7.2.0.xml')
-        with open(schema_path, 'r') as sc:
-            x = sc.read()
-        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
-        with self.app.app_context():
-            input_data = {'schema_upload_options': 'schema_file_option',
-                          'command_option': 'validate',
-                          'schema_file': (schema_buffer, 'HED7.2.0.xml'),
-                          'check_for_warnings': 'on'}
-            response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Validation of a valid gen2 xml has a response')
-            headers_dict = dict(response.headers)
-            self.assertEqual("warning", headers_dict["Category"],
-                             "The valid gen2 xml should still have compliance errors")
-            self.assertTrue(response.data, "The validated gen2 schema should not be empty")
-            self.assertTrue(headers_dict['Content-Disposition'],
-                            "Validation of valid gen2 xml should return validation error file")
             schema_buffer.close()
 
     def test_schema_results_validate_xml_url_invalid(self):

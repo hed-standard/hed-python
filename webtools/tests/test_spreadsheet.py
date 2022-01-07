@@ -85,11 +85,11 @@ class Test(TestWebBase):
     def test_spreadsheet_process_validate_valid(self):
         from hedweb.spreadsheet import process
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4: "Event/Description/"}
+        prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
-                                      worksheet_name='LKT Events',
+                                      worksheet_name='LKT 8HED3A',
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
@@ -109,11 +109,11 @@ class Test(TestWebBase):
     def test_spreadsheet_validate_valid_excel(self):
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
-        prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4: "Event/Description/"}
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
+        prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         spreadsheet = models.HedInput(spreadsheet_path,
-                                      worksheet_name='LKT Events',
+                                      worksheet_name='LKT 8HED3A',
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
@@ -148,11 +148,11 @@ class Test(TestWebBase):
     def test_spreadsheet_validate_invalid_excel(self):
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
         prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
-                                      worksheet_name='LKT 8HED3',
+                                      worksheet_name='LKT Events',
                                       tag_columns=[5],
                                       has_column_names=True,
                                       column_prefix_dictionary=prefix_dict,
