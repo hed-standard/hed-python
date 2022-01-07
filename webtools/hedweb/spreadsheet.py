@@ -10,7 +10,7 @@ from hed.util.file_util import get_file_extension
 
 from hedweb.constants import base_constants, file_constants
 from hedweb.columns import get_prefix_dict
-from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
+from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 
 app_config = current_app.config

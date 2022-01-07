@@ -46,12 +46,12 @@ class Test(TestWebBase):
     def test_schema_check(self):
         from hedweb.schema import schema_validate
         from hed import schema as hedschema
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        display_name = 'HED7.2.0.xml'
+        display_name = 'HED8.0.0.xml'
         with self.app.app_context():
             results = schema_validate(hed_schema, display_name)
-            self.assertTrue(results['data'], "HED 7.2.0 is not HED-3G compliant")
+            self.assertTrue(results['data'], "HED 8.0.0 is not fully HED-3G compliant")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.1.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)
@@ -64,13 +64,6 @@ class Test(TestWebBase):
         from hedweb.schema import schema_convert
         from hed import schema as hedschema
         from hed.errors.exceptions import HedFileError
-
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.2.0.xml')
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        display_name = 'HED7.2.0.xml'
-        with self.app.app_context():
-            results = schema_convert(hed_schema, display_name)
-            self.assertTrue(results['data'], "HED 7.2.0.xml can be converted to mediawiki")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         hed_schema = hedschema.load_schema(hed_file_path=schema_path)

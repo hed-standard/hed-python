@@ -120,7 +120,7 @@ class Sidecar:
             A list of filenames or loaded files in any mix
         Returns
         -------
-        my_sidecars: [Sidecar]
+        sidecars: [Sidecar]
             A list of all input files, loaded into column definition groups if needed.
         """
         if not isinstance(json_file_input_list, list):
@@ -202,7 +202,7 @@ class Sidecar:
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
         extra_def_dicts: [DefDict] or DefDict or None
-            If present, also use these in addition to the my_sidecars def dicts.
+            If present, also use these in addition to the sidecars def dicts.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:

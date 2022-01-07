@@ -6,7 +6,7 @@ import os
 from pandas import DataFrame, read_csv
 from hed.errors.exceptions import HedFileError
 from hedweb.constants import base_constants, file_constants
-from hedweb.web_utils import form_has_file, form_has_option
+from hedweb.web_util import form_has_file, form_has_option
 
 
 app_config = current_app.config

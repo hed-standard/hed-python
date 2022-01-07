@@ -15,7 +15,8 @@ CONTAINER_PORT=80
 
 DEPLOY_DIR="hed-python/webtools/deploy_hed"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
-CONFIG_FILE="${ROOT_DIR}/config.py"
+BASE_CONFIG_FILE="${ROOT_DIR}/base_config.py"
+CONFIG_FILE="${CODE_DEPLOY_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
 WEB_CODE_DIR="hed-python/webtools/hedweb"
 VALIDATOR_CODE_DIR="hed-python/hedtools/hed"
@@ -23,17 +24,22 @@ VALIDATOR_CODE_DIR="hed-python/hedtools/hed"
 ##### Functions
 
 clone_github_repo(){
-echo Cloning repo ...
+echo "Cloning repo ${GIT_REPO_URL} using ${GIT_REPO_BRANCH} branch"
 git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
 }
 
 create_web_directory()
 {
 echo Creating hedweb directory...
+echo "Make ${CODE_DEPLOY_DIR}"
 mkdir "${CODE_DEPLOY_DIR}"
-cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
-cp ${WSGI_FILE} "${CODE_DEPLOY_DIR}"
+echo "Copy ${BASE_CONFIG_FILE} to ${CONFIG_FILE}"
+cp "${BASE_CONFIG_FILE}" "${CONFIG_FILE}"
+echo "Copy ${WSGI_FILE} to ${CODE_DEPLOY_DIR}"
+cp "${WSGI_FILE}" "${CODE_DEPLOY_DIR}"
+echo "Copy ${WEB_CODE_DIR} directory to ${CODE_DEPLOY_DIR}"
 cp -r "${WEB_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+echo "Copy ${VALIDATOR_CODE_DIR} directory to ${CODE_DEPLOY_DIR}"
 cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 }
 
@@ -45,25 +51,25 @@ cd "${DEPLOY_DIR}" || error_exit "Cannot access $DEPLOY_DIR"
 
 build_new_container()
 {
-echo Building new container...
+echo "Building new container ${IMAGE_NAME} ..."
 docker build -t $IMAGE_NAME .
 }
 
 delete_old_container()
 {
-echo Deleting old container...
+echo "Deleting old container ${CONTAINER_NAME} ..."
 docker rm -f $CONTAINER_NAME
 }
 
 run_new_container()
 {
-echo Running new container...
+echo "Running new container $CONTAINER_NAME ..."
 docker run --restart=always --name $CONTAINER_NAME -d -p 127.0.0.1:$HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
 }
 
 cleanup_directory()
 {
-echo Cleaning up directory...
+echo "Cleaning up directory ${GIT_DIR} ..."
 rm -rf "${GIT_DIR}"
 cd "${ROOT_DIR}" || error_exit "Cannot clean up directories"
 }
@@ -78,7 +84,6 @@ output_paths()
 {
 echo "The relevant deployment information is:"
 echo "Root directory: ${ROOT_DIR}"
-echo "Docker image name: $IMAGE_NAME"
 echo "Docker image name: ${IMAGE_NAME}"
 echo "Docker container name: ${CONTAINER_NAME}"
 echo "Git repo: ${GIT_REPO_URL}"
@@ -104,7 +109,7 @@ else
 echo Branch specified... Using "$1" branch
 GIT_REPO_BRANCH="$1"
 fi
-clone_github_repo || error_exit "Cannot clone repo $GIT_REPO_URL branch $GIT_REPO_BRANCH"
+clone_github_repo || error_exit "Cannot clone repo ${GIT_REPO_URL} branch ${GIT_REPO_BRANCH}"
 create_web_directory
 switch_to_web_directory
 build_new_container
