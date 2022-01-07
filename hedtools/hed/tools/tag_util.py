@@ -45,7 +45,7 @@ if __name__ == '__main__':
             for name, entry in defs.items():
                 x = entry.contents
                 y = HedGroupSummary(x, hed_schema, name=name)
-                w = y.get_json(with_values=True,as_json=False)
+                w = y.to_json(with_values=True, as_json=False)
                 print(w)
 
         #         y = x.get_all_tags()

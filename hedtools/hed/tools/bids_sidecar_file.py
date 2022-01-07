@@ -8,10 +8,6 @@ class BidsSidecarFile(BidsFile):
 
     def __init__(self, file_path, set_contents=False):
         super().__init__(os.path.abspath(file_path))
-        self.contents = None
-        self.reset_contents(set_contents)
-
-    def reset_contents(self, set_contents=False):
         if set_contents:
             self.contents = Sidecar(self.file_path, name=os.path.abspath(self.file_path))
         else:
@@ -40,7 +36,7 @@ class BidsSidecarFile(BidsFile):
 
     @staticmethod
     def get_sidecar(obj, sidecars):
-        """ Return a single SideCar relevant to this object from list of sidecars """
+        """ Return a single SideCar relevant to obj from list of sidecars """
         if not sidecars:
             return None
         for sidecar in sidecars:

@@ -16,32 +16,30 @@ class BidsEventFiles:
         self.sidecar_dict = {}  # Dict uses os.path.abspath(file) as key
         self.event_files_dict = {}
         self.sidecar_dir_dict = {}
-        self.sidecar_dict = self._get_sidecar_dict()  # Dict uses os.path.abspath(file) as key
-        self.event_files_dict = self._get_event_file_dict()
-        self.sidecar_dir_dict = self._get_sidecar_dir_dict()
+        self._set_sidecar_dict()  # Dict uses os.path.abspath(file) as key
+        self._set_event_file_dict()
+        self._set_sidecar_dir_dict()
 
-        for bids_obj in self.sidecar_dict.values():
-            bids_obj.set_sidecars(self.get_sidecars_from_path(bids_obj))
         for bids_obj in self.event_files_dict.values():
             bids_obj.set_sidecars(self.get_sidecars_from_path(bids_obj))
 
-    def _get_event_file_dict(self):
+    def _set_event_file_dict(self):
         """ Get a dictionary of BidsEventFile objects with underlying EventInput objects not set"""
         files = get_file_list(self.root_path, name_suffix='_events', extensions=['.tsv'])
         file_dict = {}
         for file in files:
-            file_dict[os.path.abspath(file)] = BidsEventFile(file, set_contents=False)
-        return file_dict
+            file_dict[os.path.abspath(file)] = BidsEventFile(file)
+        self.event_files_dict = file_dict
 
-    def _get_sidecar_dict(self):
+    def _set_sidecar_dict(self):
         """ Get a dictionary of BidsSidecarFile objects with underlying Sidecar objects set"""
         files = get_file_list(self.root_path, name_suffix='_events', extensions=['.json'])
         file_dict = {}
         for file in files:
             file_dict[os.path.abspath(file)] = BidsSidecarFile(os.path.abspath(file), set_contents=True)
-        return file_dict
+        self.sidecar_dict = file_dict
 
-    def _get_sidecar_dir_dict(self):
+    def _set_sidecar_dir_dict(self):
         """ Set the dictionary with direct pointers to sidecars rather than paths"""
         dir_dict = get_dir_dictionary(self.root_path, name_suffix='events', extensions=['.json'])
         sidecar_dir_dict = {}
@@ -50,7 +48,7 @@ class BidsEventFiles:
             for s_file in dir_list:
                 new_dir_list.append(self.sidecar_dict[os.path.abspath(s_file)])
             sidecar_dir_dict[os.path.abspath(this_dir)] = new_dir_list
-        return sidecar_dir_dict
+        self.sidecar_dir_dict = sidecar_dir_dict
 
     def get_sidecars_from_path(self, obj):
         sidecar_list = []
@@ -67,11 +65,7 @@ class BidsEventFiles:
         issues = []
         for json_obj in self.sidecar_dict.values():
             extra_defs = []
-            for sidecar_obj in json_obj.sidecars:
-                def_dicts = [column_entry.def_dict for column_entry in sidecar_obj]
-                extra_defs = extra_defs + def_dicts
-            issues += json_obj.contents.validate_entries(validators=validators, extra_def_dicts=extra_defs,
-                                                         check_for_warnings=check_for_warnings)
+            issues += json_obj.contents.validate_entries(validators=validators, check_for_warnings=check_for_warnings)
         if issues:
             return issues
         for event_obj in self.event_files_dict.values():
