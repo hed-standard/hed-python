@@ -12,17 +12,10 @@ class BidsFile:
         self.suffix = suffix
         self.ext = ext
         self.entities = entity_dict
-        self.sidecars = []
-
-    def set_sidecars(self, sidecars):
-        self.sidecars = sidecars
 
     def __str__(self):
-        my_str = self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
-                 " entities=" + str(self.entities)
-        if self.sidecars:
-            my_str = my_str + "\n\tsidecars=" + str(self.sidecars)
-        return my_str
+        return self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
+               " entities=" + str(self.entities)
 
 
 if __name__ == '__main__':
