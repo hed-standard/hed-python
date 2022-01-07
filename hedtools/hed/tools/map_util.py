@@ -1,6 +1,6 @@
 from hed.tools.col_dict import ColumnDict
-from hed.tools.io_utils import get_file_list
-from hed.tools.data_utils import get_new_dataframe
+from hed.tools.io_util import get_file_list
+from hed.tools.data_util import get_new_dataframe
 
 
 def get_columns_info(dataframe, skip_cols=None):

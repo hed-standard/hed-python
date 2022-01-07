@@ -8,7 +8,7 @@ def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
     Parameters
     ----------
     validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in the my_sidecars.
+            A validator or list of validators to apply to the hed strings in the sidecars.
     split_tag_and_string_ops: bool
         If true, will split the operations into tag and string operations
             This is primarily for parsing spreadsheets where any given column isn't an entire hed string,

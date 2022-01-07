@@ -1,9 +1,8 @@
 import os
 import unittest
 import pandas as pd
-from hed.tools.map_utils import get_columns_info
-from hed.tools.data_utils import get_key_hash, get_row_hash
-from hed.tools.data_utils import get_new_dataframe
+from hed.tools.map_util import get_columns_info
+from hed.tools.data_util import get_key_hash, get_new_dataframe, get_row_hash
 
 
 class Test(unittest.TestCase):
