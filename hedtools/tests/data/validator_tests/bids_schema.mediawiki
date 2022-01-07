@@ -1165,8 +1165,6 @@ HED version: 8.0.0-alpha.2
 
 
 '''Schema attributes'''
-
-
 * allowedCharacter <nowiki>{unitClassProperty}[An attribute of unit classes schema value placeholders indicating a special character that is allowed in expressing the value of that placeholder.]</nowiki>
 * defaultUnits <nowiki>{unitClassProperty}[An attribute of unit classes specifying the default units for a tag.]</nowiki>
 * extensionAllowed <nowiki>{boolProperty}[Users can add unlimited levels of child nodes under this tag.]</nowiki>
