@@ -63,10 +63,8 @@ def process(arguments):
     check_for_warnings = arguments.get(base_constants.CHECK_FOR_WARNINGS, False)
     if command == base_constants.COMMAND_VALIDATE:
         results = sidecar_validate(hed_schema, json_sidecar, check_for_warnings=check_for_warnings)
-    elif command == base_constants.COMMAND_TO_SHORT:
+    elif command == base_constants.COMMAND_TO_SHORT or command == base_constants.COMMAND_TO_LONG:
         results = sidecar_convert(hed_schema, json_sidecar, command=command, check_for_warnings=check_for_warnings)
-    elif command == base_constants.COMMAND_TO_LONG:
-        results = sidecar_convert(hed_schema, json_sidecar, check_for_warnings=check_for_warnings)
     else:
         raise HedFileError('UnknownProcessingMethod', f'Command {command} is missing or invalid', '')
     return results
