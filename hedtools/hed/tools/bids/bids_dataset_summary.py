@@ -1,5 +1,5 @@
 
-from hed.tools.bids_event_files import BidsEventFiles
+from hed.tools.bids.bids_event_files import BidsEventFiles
 
 class BidsDatasetSummary():
 

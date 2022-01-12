@@ -1,5 +1,5 @@
 import unittest
-from hed.tools.bids_file import BidsFile
+from hed.tools.bids.bids_file import BidsFile
 
 
 class Test(unittest.TestCase):
