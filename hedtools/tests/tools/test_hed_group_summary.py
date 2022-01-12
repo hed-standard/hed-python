@@ -1,3 +1,4 @@
+import os
 import unittest
 import json
 from hed.models.sidecar import Sidecar
@@ -15,24 +16,23 @@ class Test(unittest.TestCase):
     def test_hed_group_summary_constructor(self):
         hed_url_path = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml'
         hed_schema = load_schema(hed_url_path=hed_url_path)
-        the_path = '../data/bids/task-FacePerception_events.json'
-        sidecar = Sidecar(the_path)
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids/task-FacePerception_events.json')
+        sidecar = Sidecar(path)
         x = sidecar._column_data['hed_def_conds'].def_dict._defs
         y = x['scrambled-face-cond']
         test_summary = HedGroupSummary(y.contents, hed_schema, name=y.name, keep_all_values=True)
-        self.assertEqual(test_summary.name, 'scrambled-face-cond', 'HedGroupSummary has the right name')
+        self.assertEqual(test_summary.name, 'Scrambled-face-cond', 'HedGroupSummary has the right name')
         self.assertEqual(len(test_summary.tag_dict), 5, 'HedGroupSummary has the right number of tags')
 
     def test_hed_group_summary_str(self):
         hed_url_path = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml'
         hed_schema = load_schema(hed_url_path=hed_url_path)
-        the_path = '../data/bids/task-FacePerception_events.json'
-        sidecar = Sidecar(the_path)
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids/task-FacePerception_events.json')
+        sidecar = Sidecar(path)
         x = sidecar._column_data['hed_def_conds'].def_dict._defs
         y = x['scrambled-face-cond']
         test_summary = HedGroupSummary(y.contents, hed_schema, name=y.name, keep_all_values=True)
         self.assertTrue(str(test_summary).startswith('Scrambled-face-cond'), 'HedGroupSummary has a string method')
-        print(f"{str(test_summary)}")
 
 
 if __name__ == '__main__':

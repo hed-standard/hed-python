@@ -1,6 +1,6 @@
 import os
 from hed.models.sidecar import Sidecar
-from hed.tools.bids_file import BidsFile
+from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsSidecarFile(BidsFile):

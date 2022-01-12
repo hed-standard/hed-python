@@ -1,7 +1,5 @@
-import pprint
 from hed.schema.hed_schema_file import load_schema_version
-from hed.models.hed_string import HedString
-from hed.tools.bids_event_files import BidsEventFiles
+from hed.tools.bids.bids_event_files import BidsEventFiles
 from hed.tools.hed_group_summary import HedGroupSummary
 
 
