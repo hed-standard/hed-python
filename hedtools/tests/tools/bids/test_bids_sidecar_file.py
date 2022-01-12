@@ -1,7 +1,7 @@
 import unittest
 from hed.models.sidecar import Sidecar
-from hed.tools.bids_file import BidsFile
-from hed.tools.bids_sidecar_file import BidsSidecarFile
+from hed.tools.bids.bids_file import BidsFile
+from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
 
 class Test(unittest.TestCase):
@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
         self.assertEqual(bids.ext, '.json', "BidsFile should have correct ext")
         self.assertEqual(len(bids.entities), 4, "BidsFile should have right number of entities")
         self.assertFalse(bids.contents)
-        the_path = '../data/bids/task-FacePerception_events.json'
+        the_path = '../../data/bids/task-FacePerception_events.json'
         bids = BidsSidecarFile(the_path, set_contents=True)
         self.assertEqual(bids.suffix, 'events', "BidsFile should have correct name_suffix")
         self.assertEqual(bids.ext, '.json', "BidsFile should have correct ext")
