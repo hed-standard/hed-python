@@ -1,5 +1,7 @@
+import os
 import unittest
 from hed.models.sidecar import Sidecar
+from hed.tools.bids.bids_event_file import BidsEventFile
 from hed.tools.bids.bids_file import BidsFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
@@ -8,23 +10,29 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.temp = ""
+        cls.event_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                      '../../data/bids/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
+        cls.sidecar_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        '../../data/bids/task-FacePerception_events.json')
 
-    def test_bids_sidecar_file_constructor(self):
-        the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
-        bids = BidsSidecarFile(the_path, set_contents=False)
-        self.assertEqual(bids.suffix, 'bold', "BidsFile should have correct name_suffix")
-        self.assertEqual(bids.ext, '.json', "BidsFile should have correct ext")
-        self.assertEqual(len(bids.entities), 4, "BidsFile should have right number of entities")
-        self.assertFalse(bids.contents)
-        the_path = '../../data/bids/task-FacePerception_events.json'
-        bids = BidsSidecarFile(the_path, set_contents=True)
-        self.assertEqual(bids.suffix, 'events', "BidsFile should have correct name_suffix")
-        self.assertEqual(bids.ext, '.json', "BidsFile should have correct ext")
-        self.assertEqual(len(bids.entities), 1, "BidsFile should have right number of entities")
-        self.assertIsInstance(bids.contents, Sidecar, "BidsSidecarFile should contain a Sidecar")
+    def test_constructor(self):
+        sidecar1 = BidsSidecarFile(Test.sidecar_path, set_contents=False)
+        self.assertEqual(sidecar1.suffix, 'events', "BidsSidecarFile should have correct name_suffix")
+        self.assertEqual(sidecar1.ext, '.json', "BidsSidecarFile should have correct ext")
+        self.assertEqual(len(sidecar1.entities), 1, "BidsSidecarFile should have right number of entities")
+        self.assertFalse(sidecar1.contents)
+
+        sidecar2 = BidsSidecarFile(Test.sidecar_path, set_contents=True)
+        self.assertEqual(sidecar2.suffix, 'events', "BidsSidecarFile should have correct name_suffix")
+        self.assertEqual(sidecar2.ext, '.json', "BidsSidecarFile should have correct ext")
+        self.assertEqual(len(sidecar2.entities), 1, "BidsSidecarFile should have right number of entities")
+        self.assertIsInstance(sidecar2.contents, Sidecar, "BidsSidecarFile should contain a Sidecar")
 
     def test_is_sidecar_for(self):
+        sidecar1 = BidsSidecarFile(Test.sidecar_path)
+        events1 = BidsEventFile(Test.event_path)
+        self.assertTrue(sidecar1.is_sidecar_for(events1))
+
         the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.nfti'
         bids = BidsFile(the_path)
         other = BidsSidecarFile('/d/base/task-overt_run-2_bold.json')

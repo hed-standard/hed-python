@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
         cls.event_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                       '../../data/bids/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
         cls.sidecar_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        '../../data/bids/task-FacePerception_events.tsv')
+                                        '../../data/bids/task-FacePerception_events.json')
 
     def test_constructor(self):
         events = BidsEventFile(Test.event_path)

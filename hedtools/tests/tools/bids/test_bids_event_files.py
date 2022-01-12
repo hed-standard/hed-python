@@ -1,32 +1,40 @@
+import os
 import unittest
-from hed.tools.bids.bids_file import BidsFile
+from hed.schema.hed_schema_file import load_schema
+from hed.tools.bids.bids_event_files import BidsEventFiles
+from hed.validator.hed_validator import HedValidator
 
 
 class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.temp = ""
+        cls.root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids')
+        cls.event_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                      '../../data/bids/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
+        cls.sidecar_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        '../../data/bids/task-FacePerception_events.tsv')
 
-    def test_bids_file_constructor(self):
-        the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
-        bids = BidsFile(the_path)
-        self.assertEqual(bids.suffix, 'bold', "BidsFile should have correct name_suffix")
-        self.assertEqual(bids.ext, '.json', "BidsFile should have correct ext")
-        self.assertEqual(len(bids.entities), 4, "BidsFile should have right number of entities")
+    def test_constructor(self):
+        events = BidsEventFiles(Test.root_path)
+        self.assertIsInstance(events, BidsEventFiles, "BidsEventFiles should create an BidsEventFiles instance")
+        self.assertIsInstance(events.events_dict, dict, "BidsEventFiles should have an event files dictionary")
+        self.assertEqual(len(events.events_dict), 2, "BidsEventFiles event files dictionary should have 2 entries")
+        self.assertIsInstance(events.sidecar_dict, dict, "BidsEventFiles should have sidecar files dictionary")
+        self.assertEqual(len(events.sidecar_dict), 1, "BidsEventFiles event files dictionary should have 1 entry")
+        self.assertIsInstance(events.sidecar_dir_dict, dict, "BidsEventFiles should have sidecar directory dictionary")
 
-        the_path = '/d/base/task-overt_bold.json'
-        bids = BidsFile(the_path)
-        self.assertEqual(bids.suffix, 'bold', "BidsFile should have correct name_suffix")
-        self.assertEqual(bids.ext, '.json', "BidsFile should have correct ext")
-        self.assertEqual(len(bids.entities), 1, "BidsFile should have right number of entities")
-
-    def test_bids_file_str(self):
-        the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
-        bids = BidsFile(the_path)
-        my_str = str(bids)
-        self.assertIsInstance(my_str, str, "BidsFile __str__ method should return a string")
-        self.assertGreater(len(my_str), 0, "BidsFile __str__ method returns a non-empty string")
+    def test_validator(self):
+        events = BidsEventFiles(Test.root_path)
+        hed_schema = load_schema(
+            hed_url_path='https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
+        validator = HedValidator(hed_schema=hed_schema)
+        validation_issues = events.validate(validators=[validator], check_for_warnings=False)
+        self.assertFalse(validation_issues, "BidsEventFiles should have no validation errors")
+        validation_issues = events.validate(validators=[validator], check_for_warnings=True)
+        self.assertTrue(validation_issues, "BidsEventFiles should have validation warnings")
+        self.assertEqual(len(validation_issues), 2,
+                         "BidsEventFiles should have 2 validation warnings for missing columns")
 
 
 if __name__ == '__main__':

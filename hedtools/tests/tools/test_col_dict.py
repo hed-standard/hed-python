@@ -4,7 +4,7 @@ from unittest import mock
 import pandas as pd
 from hed.errors.exceptions import HedFileError
 from hed.tools.col_dict import ColumnDict
-from hed.tools.data_utils import get_new_dataframe
+from hed.tools.data_util import get_new_dataframe
 
 
 class Test(unittest.TestCase):
