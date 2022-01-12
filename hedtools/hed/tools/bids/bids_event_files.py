@@ -1,8 +1,8 @@
 import os
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_file import load_schema
-from hed.tools.bids_event_file import BidsEventFile
-from hed.tools.bids_sidecar_file import BidsSidecarFile
+from hed.tools.bids.bids_event_file import BidsEventFile
+from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.models.events_input import EventsInput
 from hed.tools.io_util import get_dir_dictionary, get_file_list, get_path_components
 from hed.validator.hed_validator import HedValidator
@@ -14,13 +14,13 @@ class BidsEventFiles:
     def __init__(self, root_path):
         self.root_path = os.path.abspath(root_path)
         self.sidecar_dict = {}  # Dict uses os.path.abspath(file) as key
-        self.event_files_dict = {}
+        self.events_dict = {}
         self.sidecar_dir_dict = {}
         self._set_sidecar_dict()  # Dict uses os.path.abspath(file) as key
         self._set_event_file_dict()
         self._set_sidecar_dir_dict()
 
-        for bids_obj in self.event_files_dict.values():
+        for bids_obj in self.events_dict.values():
             bids_obj.set_sidecars(self.get_sidecars_from_path(bids_obj))
 
     def _set_event_file_dict(self):
@@ -29,7 +29,7 @@ class BidsEventFiles:
         file_dict = {}
         for file in files:
             file_dict[os.path.abspath(file)] = BidsEventFile(file)
-        self.event_files_dict = file_dict
+        self.events_dict = file_dict
 
     def _set_sidecar_dict(self):
         """ Get a dictionary of BidsSidecarFile objects with underlying Sidecar objects set"""
@@ -68,7 +68,7 @@ class BidsEventFiles:
             issues += json_obj.contents.validate_entries(validators=validators, check_for_warnings=check_for_warnings)
         if issues:
             return issues
-        for event_obj in self.event_files_dict.values():
+        for event_obj in self.events_dict.values():
             contents = event_obj.contents
             if not contents:
                 contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecars)
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     for file_obj in bids.sidecar_dict.values():
         print(file_obj)
 
-    for file_obj in bids.event_files_dict.values():
+    for file_obj in bids.events_dict.values():
         print(file_obj)
 
     print("Now validating.....")

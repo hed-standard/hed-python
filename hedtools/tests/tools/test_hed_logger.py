@@ -34,11 +34,9 @@ class Test(unittest.TestCase):
 
     def test_print_log(self):
         status = HedLogger()
-        status.add("baloney", "Test message 1", also_print=True)
-        status.add("baloney", "Test message 2", also_print=True)
         with mock.patch('sys.stdout', new=StringIO()) as fake_out:
-            status.add("baloney", "Test message 3", also_print=True)
-            status.add("baloney", "Test message 4", also_print=True)
+            status.add("baloney", "Test message 1", also_print=True)
+            status.add("baloney", "Test message 2", also_print=True)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import os
-from bids_file import BidsFile
 from hed.models.events_input import EventsInput
+from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsEventFile(BidsFile):
@@ -19,7 +19,12 @@ class BidsEventFile(BidsFile):
                                     name=os.path.abspath(self.file_path))
 
     def set_sidecars(self, sidecars):
-        self.sidecars = sidecars
+        if sidecars is None:
+            self.sidecars = []
+        elif not isinstance(sidecars, list):
+            self.sidecars = [sidecars]
+        else:
+            self.sidecars = sidecars
 
     def __str__(self):
         my_str = super().__str__()
