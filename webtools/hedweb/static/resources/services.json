@@ -6,7 +6,7 @@
         },
         "events_assemble": {
             "Name": "events_assemble",
-            "Description": "Assemble all annotations for each event in a BIDS-style event file into a single HED string. Returned data: a file of assembled events as text or an error file as text if errors.",
+            "Description": "Assemble annotations for each event. Returns: text of assembled events or error list.",
             "Parameters": [
                 "events_string",
                 "json_string",
@@ -16,7 +16,7 @@
                     "schema_version"
                 ],
                 "check_for_warnings",
-                "defs_expand"
+                "expand_defs"
             ]
         },
         "events_extract": {
@@ -28,7 +28,7 @@
         },
         "events_validate": {
             "Name": "events_validate",
-            "Description": "Validate a BIDS-style event file and its JSON sidecar if provided. Returned data: an error file as text if errors.",
+            "Description": "Validate a BIDS-style event file and JSON sidecar if provided. Returned data: an error file as text if errors.",
             "Parameters": [
                 "events_string",
                  "json_string",
@@ -130,8 +130,8 @@
         "check_for_warnings": "If true, check for warnings when processing HED strings.",
         "column_x_check": "If present with value 'on' column x has HED tags.",
         "column_x_input": "Contains the prefix prepended to column x if column x has HED tags.",
-        "defs_expand": "If true replaces def/XXX with def-expand/XXX grouped with the definition content.",
         "events_string": "A BIDS events file as a string.",
+        "expand_defs": "If true replaces def/XXX with def-expand/XXX grouped with the definition content.",
         "has_column_names": "If true, the first row of the spreadsheet or events file is interpreted as column names.",
         "hed_strings": "List of HED strings to be processed.",
         "json_string": "JSON sidecar as a string",
@@ -150,7 +150,7 @@
     "results": {
         "command": "The command that was executed in response to the service request.",
         "command_target": "The type of data on which the command was executed.",
-        "data": "The data returned by the service. This could be a list of errors or the processed result depending on what happened.",
+        "data": "The data returned by the service, either processed result or a list of errors.",
         "schema_version": "The version of the HED schema used in the processing.",
         "msg_category": "One of success, warning, or failure depending on the result of processing the service.",
         "msg": "Explanation of the result of service processing."
