@@ -29,7 +29,7 @@ class Test(TestWebBase):
             with open(json_path, 'rb') as fp:
                 with open(events_path, 'rb') as fpe:
                     environ = create_environ(data={base_constants.JSON_FILE: fp, base_constants.SCHEMA_VERSION: '8.0.0',
-                                             base_constants.EVENTS_FILE: fpe, base_constants.DEFS_EXPAND: 'on',
+                                             base_constants.EVENTS_FILE: fpe, base_constants.EXPAND_DEFS: 'on',
                                              base_constants.COMMAND_OPTION: base_constants.COMMAND_ASSEMBLE})
             request = Request(environ)
             arguments = get_input_from_events_form(request)
@@ -39,8 +39,8 @@ class Test(TestWebBase):
                                   "get_input_from_events_form should have a HED schema")
             self.assertEqual(base_constants.COMMAND_ASSEMBLE, arguments[base_constants.COMMAND],
                              "get_input_from_events_form should have a command")
-            self.assertTrue(arguments[base_constants.DEFS_EXPAND],
-                            "get_input_from_events_form should have defs_expand true when on")
+            self.assertTrue(arguments[base_constants.EXPAND_DEFS],
+                            "get_input_from_events_form should have expand_defs true when on")
 
     def test_events_process_empty_file(self):
         # Test for empty events_path
@@ -50,8 +50,8 @@ class Test(TestWebBase):
             process(arguments)
         except HedFileError:
             pass
-        except Exception:
-            self.fail('process threw the wrong exception when events_path was empty')
+        except Exception as ex:
+            self.fail(f'process threw the wrong exception {str(ex)} when events_path was empty')
         else:
             self.fail('process should have thrown a HedFileError exception when events_path was empty')
 
@@ -64,7 +64,7 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_events_bad')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         arguments = {base_constants.EVENTS: events, base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
-                     base_constants.DEFS_EXPAND: True,
+                     base_constants.EXPAND_DEFS: True,
                      base_constants.CHECK_FOR_WARNINGS: True, base_constants.SCHEMA: hed_schema}
         with self.app.app_context():
             results = process(arguments)
@@ -82,7 +82,7 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         arguments = {base_constants.EVENTS: events, base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
-                     base_constants.DEFS_EXPAND: True,
+                     base_constants.EXPAND_DEFS: True,
                      base_constants.CHECK_FOR_WARNINGS: True, base_constants.SCHEMA: hed_schema}
         with self.app.app_context():
             results = process(arguments)
@@ -94,7 +94,7 @@ class Test(TestWebBase):
 
     def test_events_assemble_invalid(self):
         from hedweb.events import assemble
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_bad.tsv')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events_bad.json')
         json_sidecar = models.Sidecar(file=json_path, name='bids_events_bad')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
@@ -102,13 +102,13 @@ class Test(TestWebBase):
 
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
-            results = assemble(hed_schema, events,  defs_expand=True)
+            results = assemble(hed_schema, events,  expand_defs=True)
             self.assertTrue('data' in results,
                             'assemble results should have a data key when no errors')
             self.assertEqual('warning', results["msg_category"],
                              'assemble msg_category should be warning when errors')
 
-    def test_events_assemble_invalid(self):
+    def test_events_assemble_valid(self):
         from hedweb.events import assemble
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
@@ -117,7 +117,7 @@ class Test(TestWebBase):
         json_sidecar = models.Sidecar(file=json_path, name='bids_json')
         events = models.EventsInput(file=events_path, sidecars=json_sidecar, name='bids_events')
         with self.app.app_context():
-            results = assemble(hed_schema, events, defs_expand=True)
+            results = assemble(hed_schema, events, expand_defs=True)
             self.assertTrue(results['data'],
                             'assemble results should have a data key when no errors')
             self.assertEqual('success', results['msg_category'],

@@ -33,7 +33,7 @@ class Test(TestWebBase):
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_ASSEMBLE,
                           'json_file': (json_buffer, 'bids_events.json'),
                           'events_file': (events_buffer, 'bids_events.tsv'),
-                          'defs_expand': 'on',
+                          'expand_defs': 'on',
                           base_constants.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Assembly of a valid events file has a response')

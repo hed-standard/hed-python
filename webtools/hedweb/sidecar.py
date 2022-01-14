@@ -32,7 +32,10 @@ def get_input_from_form(request):
     arguments = {base_constants.SCHEMA: get_hed_schema_from_pull_down(request), base_constants.JSON_SIDECAR: None,
                  base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, None),
                  base_constants.CHECK_FOR_WARNINGS:
-                     form_has_option(request, base_constants.CHECK_FOR_WARNINGS, 'on')}
+                     form_has_option(request, base_constants.CHECK_FOR_WARNINGS, 'on'),
+                 base_constants.EXPAND_DEFS:
+                     form_has_option(request, base_constants.EXPAND_DEFS, 'on')
+                 }
     if base_constants.JSON_FILE in request.files:
         f = request.files[base_constants.JSON_FILE]
         fb = io.StringIO(f.read(file_constants.BYTE_LIMIT).decode('ascii'))
@@ -64,13 +67,13 @@ def process(arguments):
     if command == base_constants.COMMAND_VALIDATE:
         results = sidecar_validate(hed_schema, json_sidecar, check_for_warnings=check_for_warnings)
     elif command == base_constants.COMMAND_TO_SHORT or command == base_constants.COMMAND_TO_LONG:
-        results = sidecar_convert(hed_schema, json_sidecar, command=command, check_for_warnings=check_for_warnings)
+        results = sidecar_convert(hed_schema, json_sidecar, command=command, expand_defs=True)
     else:
         raise HedFileError('UnknownProcessingMethod', f'Command {command} is missing or invalid', '')
     return results
 
 
-def sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_SHORT, check_for_warnings=False):
+def sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_SHORT, expand_defs=False):
     """Converts a sidecar from long to short or short to long
 
     Parameters
@@ -81,8 +84,8 @@ def sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_
         Previously created Sidecar
     command: str
         Name of the command to execute (default to short if unrecognized)
-    check_for_warnings: bool
-        Indicates whether validation should check for warnings as well as errors
+    expand_defs: bool
+        Indicates whether to expand definitions when converting
 
     Returns
     -------
@@ -91,7 +94,7 @@ def sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_
     """
 
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    results = sidecar_validate(hed_schema, json_sidecar, check_for_warnings=check_for_warnings)
+    results = sidecar_validate(hed_schema, json_sidecar, check_for_warnings=False)
     if results['data']:
         return results
     if command == base_constants.COMMAND_TO_LONG:
@@ -99,15 +102,14 @@ def sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_
     else:
         suffix = '_to_short'
     issues = []
-    for column_def in json_sidecar:
-        for hed_string, position in column_def.hed_string_iter(include_position=True):
-            hed_string_obj = models.HedString(hed_string)
-            if command == base_constants.COMMAND_TO_LONG:
-                converted_string, errors = hed_string_obj.convert_to_long(hed_schema)
-            else:
-                converted_string, errors = hed_string_obj.convert_to_short(hed_schema)
-            issues = issues + errors
-            column_def.set_hed_string(converted_string, position)
+    for hed_string, position in json_sidecar.hed_string_iter(include_position=True):
+        hed_string_obj = models.HedString(hed_string)
+        if command == base_constants.COMMAND_TO_LONG:
+            converted_string, errors = hed_string_obj.convert_to_long(hed_schema)
+        else:
+            converted_string, errors = hed_string_obj.convert_to_short(hed_schema)
+        issues = issues + errors
+        json_sidecar.set_hed_string(converted_string, position)
 
     # issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
     display_name = json_sidecar.name
