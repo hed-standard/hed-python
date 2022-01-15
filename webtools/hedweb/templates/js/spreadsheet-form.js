@@ -6,12 +6,22 @@ $(function () {
     prepareForm();
 });
 
+/**
+ * Adjust the column names if the has_column_names check box changes state.
+ */
 $('#has_column_names').on('change', function() {
     let spreadsheetFile = $('#spreadsheet_file')[0].files[0];
     let worksheetName = $('#worksheet_name option:selected').text();
     let hasColumnNames = $("#has_column_names").is(':checked')
     setColumnsInfo(spreadsheetFile, 'spreadsheet_flash', worksheetName, hasColumnNames, "show_indices")
 })
+
+/**
+ * Set the options according to the action specified.
+ */
+$('#process_actions').change(function(){
+    setOptions();
+});
 
 /**
  * Spreadsheet event handler function. Checks if the file uploaded has a valid spreadsheet extension.
@@ -68,6 +78,7 @@ function clearForm() {
     $('#spreadsheet_display_name').text('');
     $('#worksheet_name').empty();
     $('#worksheet_select').hide();
+    setOptions();
     hideColumnInfo("show_indices");
     hideOtherSchemaVersionFileUpload()
 }
@@ -104,6 +115,22 @@ function populateWorksheetDropdown(worksheetNames) {
 function prepareForm() {
     clearForm();
     getSchemaVersions()
+}
+
+/**
+ * Set the options for the events depending on the action
+ */
+function setOptions() {
+    if ($("#validate").is(":checked")) {
+        hideOption("expand_defs");
+        showOption("check_for_warnings");
+    } else if ($("#to_long").is(":checked")) {
+        hideOption("check_for_warnings");
+        showOption("expand_defs");
+    } else if ($("#to_short").is(":checked")) {
+        hideOption("check_for_warnings");
+        showOption("expand_defs");
+    }
 }
 
 /**
