@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
         cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
 
-    def test_parse_bids_filename(self):
+    def test_parse_bids_filename_full(self):
         the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
         suffix, ext, entity_dict = parse_bids_filename(the_path)
         self.assertEqual(suffix, 'bold', "parse_bids_filename should correctly parse name_suffix for full path")
@@ -47,6 +47,35 @@ class Test(unittest.TestCase):
         self.assertEqual(ext2, '', "parse_bids_filename should return empty extension when only name")
         self.assertIsInstance(entity_dict2, dict, "parse_bids_filename should return entities as a dictionary")
         self.assertEqual(len(entity_dict2), 0, "parse_bids_filename should return empty dictionary when no entities")
+
+    def test_parse_bids_filename_unmatched(self):
+        path1 = 'dataset_description.json'
+        suffix1, ext1, entity_dict1, unmatched1 = parse_bids_filename(path1)
+        self.assertEqual(suffix1, '', "parse_bids_filename should correctly parse name_suffix for name")
+        self.assertEqual(ext1, '.json', "parse_bids_filename should return empty extension when only name")
+        self.assertIsInstance(entity_dict1, dict, "parse_bids_filename should return entities as a dictionary")
+        self.assertEqual(len(entity_dict1), 0, "parse_bids_filename should handle names with no entities")
+        self.assertEqual(unmatched1, "dataset_description",
+                         "parse_bids_filename a name with no entities should be unmatched")
+
+        path2 = 'participants.json'
+        suffix2, ext2, entity_dict2, unmatched2 = parse_bids_filename(path2)
+        self.assertEqual(suffix2, '', "parse_bids_filename should correctly parse name_suffix for name")
+        self.assertEqual(ext2, '.json', "parse_bids_filename should return empty extension when only name")
+        self.assertIsInstance(entity_dict2, dict, "parse_bids_filename should return entities as a dictionary")
+        self.assertEqual(len(entity_dict2), 0, "parse_bids_filename should handle names with no entities")
+        self.assertEqual(unmatched1, "participants",
+                         "parse_bids_filename a name with no entities or suffix should be unmatched")
+
+    def test_parse_bids_filename_invalid(self):
+        path1 = 'task_sub-01_description.json'
+        suffix1, ext1, entity_dict1, unmatched1 = parse_bids_filename(path1)
+        self.assertEqual(suffix1, 'description', "parse_bids_filename should correctly parse name_suffix for name")
+        self.assertEqual(ext1, '.json', "parse_bids_filename should return empty extension when only name")
+        self.assertIsInstance(entity_dict1, dict, "parse_bids_filename should return entities as a dictionary")
+        self.assertEqual(len(entity_dict1), 1, "parse_bids_filename should handle names with no entities")
+        self.assertEqual(unmatched1, "dataset_description",
+                         "parse_bids_filename a name with no entities should be unmatched")
 
 
 if __name__ == '__main__':
