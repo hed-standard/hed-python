@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "process-options.html" import create_process_options %}
+{% from "actions.html" import create_options %}
 {% block content %}
     <h2>Process HED Schema</h2>
 
@@ -7,7 +7,7 @@
     <form id="schema_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options('1) Pick an action:',convert=True, validate=True) }}
+        {{ create_options('1) Pick an action:',convert=True, validate=True) }}
 
         <h3>2) Select a schema source file (.xml/.mediawiki):</h3>
         <div class="form-group" id="schema_url_group">
@@ -43,6 +43,7 @@
     </form>
     <script type="module">
         {%  include 'js/form-helpers.js' %}
+        {%  include 'js/options.js' %}
         {%  include 'js/schema-form.js' %}
     </script>
 

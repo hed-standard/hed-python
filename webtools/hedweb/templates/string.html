@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% from "schema-pulldown.html" import create_schema_pulldown %}
-{% from "process-options.html" import create_process_options %}
+{% from "actions.html" import create_actions %}
 
 {% block content %}
     <h2>HED string quick checks</h2>
@@ -8,7 +8,7 @@
     <form id="string_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
+        {{ create_actions('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
 
      <h3>3) Enter a HED string: </h3>
         <div class="form-group">
@@ -36,6 +36,7 @@
     </form>
     <script type="module">
         {%  include 'js/form-helpers.js' %}
+        {%  include 'js/options.js' %}
         {%  include 'js/schema-pulldown.js' %}
         {%  include 'js/string-form.js' %}
     </script>
