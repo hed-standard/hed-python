@@ -4,7 +4,14 @@ $(function () {
 });
 
 /**
- * Submits the form if the tag columns textbox is valid.
+ * Set the options according to the action specified.
+ */
+$('#process_actions').change(function(){
+    setOptions();
+});
+
+/**
+ * Submit the form on click if schema and json file specified.
  */
 $('#sidecar_submit').on('click', function () {
     if (fileIsSpecified('#json_file', 'json_flash', 'JSON is not specified.' ) &&
@@ -18,6 +25,7 @@ $('#sidecar_submit').on('click', function () {
  */
 function clearForm() {
     $('#sidecar_form')[0].reset();
+    setOptions();
     clearFlashMessages()
     clearJsonFileLabel();
     hideOtherSchemaVersionFileUpload()
@@ -40,6 +48,22 @@ function prepareForm() {
     clearForm();
     getSchemaVersions()
     hideOtherSchemaVersionFileUpload();
+}
+
+/**
+ * Set the options for the events depending on the action
+ */
+function setOptions() {
+    if ($("#validate").is(":checked")) {
+        hideOption("expand_defs");
+        showOption("check_for_warnings");
+    } else if ($("#to_long").is(":checked")) {
+        hideOption("check_for_warnings");
+        showOption("expand_defs");
+    } else if ($("#to_short").is(":checked")) {
+        hideOption("check_for_warnings");
+        showOption("expand_defs");
+    }
 }
 
 /**

@@ -89,7 +89,7 @@ function setEventsTable(event_tag) {
 }
 
 /**
- * Sets the options for this
+ * Set the options for the events depending on the action
  */
 function setOptions() {
     if ($("#validate").is(":checked")) {
