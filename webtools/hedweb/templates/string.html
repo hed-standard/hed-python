@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% from "schema-pulldown.html" import create_schema_pulldown %}
 {% from "actions.html" import create_actions %}
+{% from "options.html" import create_options %}
 
 {% block content %}
     <h2>HED string quick checks</h2>
@@ -9,6 +10,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         {{ create_actions('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
+        {{ create_options('2) Check applicable options (if any):',check_for_warnings=True,expand_defs=True) }}
 
      <h3>3) Enter a HED string: </h3>
         <div class="form-group">

@@ -38,8 +38,9 @@ $('#spreadsheet_file').on('change', function () {
         return
     }
     updateFileLabel(spreadsheetPath, '#spreadsheet_display_name');
-    let hasColumnNames = $("#has_column_names").is(':checked')
-    let worksheetNames = setColumnsInfo(spreadsheetFile, 'spreadsheet_flash',  undefined, hasColumnNames, "show_indices")
+    let hasColumnNames = $("#has_column_names").is(':checked');
+    let worksheetNames = setColumnsInfo(spreadsheetFile, 'spreadsheet_flash',
+        undefined, hasColumnNames, "show_indices");
     if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
         populateWorksheetDropdown(worksheetNames);
     } else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {

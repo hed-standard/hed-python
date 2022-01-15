@@ -1,9 +1,16 @@
 const SCHEMA_XML_EXTENSION = 'xml';
 const SCHEMA_MEDIAWIKI_EXTENSION = 'mediawiki';
-const DEFAULT_XML_URL = "https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml";
+const DEFAULT_XML_URL = "https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml";
 
 $(function () {
     prepareForm();
+});
+
+/**
+ * Set the options according to the action specified.
+ */
+$('#process_actions').change(function(){
+    setOptions();
 });
 
 /**
@@ -51,6 +58,7 @@ function clearForm() {
     $('#schema_form')[0].reset();
     $('#schema_url_option').prop('checked', false);
     $('#schema_file_option').prop('checked', false);
+    setOptions();
 }
 
 /**
@@ -122,6 +130,17 @@ function prepareForm() {
     $('#schema_url').val(DEFAULT_XML_URL);
 }
 
+
+/**
+ * Set the options for the events depending on the action
+ */
+function setOptions() {
+    if ($("#validate").is(":checked")) {
+        showOption("check_for_warnings");
+    } else {
+        hideOption("check_for_warnings");
+    }
+}
 
 /**
  * Submit the form and return the conversion results as an attachment

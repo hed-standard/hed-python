@@ -3,6 +3,8 @@
 {% from "json-input.html" import create_json_input %}
 {% from "column-info.html" import create_column_info %}
 {% from "actions.html" import create_actions %}
+{% from "options.html" import create_options %}
+
 {% block content %}
     <h2 data-toggle="collapse" data-target="#eventsinfo">Process a BIDS-style event file (Click for info)</h2>
     <div id="eventsinfo" class="collapse">
@@ -12,6 +14,8 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         {{ create_actions('1) Pick an action:',assemble=True,extract=True,validate=True) }}
+
+        {{ create_options('2) Check applicable options (if any):',check_for_warnings=True,expand_defs=True) }}
 
         <h3>3) Upload BIDS-style events file:</h3>
         <div class="form-group">

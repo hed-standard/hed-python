@@ -2,6 +2,7 @@
 {% from "json-input.html" import create_json_input %}
 {% from "schema-pulldown.html" import create_schema_pulldown %}
 {% from "actions.html" import create_actions %}
+{% from "options.html" import create_options %}
 
 {% block content %}
     <h2>Process BIDS-style JSON sidecar</h2>
@@ -10,6 +11,9 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         {{ create_actions('1) Pick an action:',to_long=True,to_short=True,validate=True) }}
+        {{ create_options('2) Check applicable options (if any):',check_for_warnings=True,expand_defs=True) }}
+
+
         {{ create_json_input('3) Upload BIDS-style JSON sidecar:') }}
         {{ create_schema_pulldown('4) Choose a HED schema version:') }}
 
