@@ -5,7 +5,8 @@ $(function () {
 })
 
 
-$('#process_options').change(function(){
+$('#process_actions').change(function(){
+    setOptions();
     setEventsTable('#events_file')
 });
 
@@ -41,6 +42,7 @@ $('#events_submit').on('click', function () {
 function clearForm() {
     $('#events_form')[0].reset();
     $('#events_display_name').text('');
+    setOptions();
     clearFlashMessages();
     hideColumnInfo("show_columns");
     hideColumnInfo("show_events");
@@ -83,6 +85,22 @@ function setEventsTable(event_tag) {
         setColumnsInfo(eventsFile, 'events_flash', undefined, true,  "show_events")
     } else {
         setColumnsInfo(eventsFile, 'events_flash', undefined, true,  "show_columns")
+    }
+}
+
+/**
+ * Set the options for the events depending on the action
+ */
+function setOptions() {
+    if ($("#validate").is(":checked")) {
+        hideOption("expand_defs");
+        showOption("check_for_warnings");
+    } else if ($("#assemble").is(":checked")) {
+        hideOption("check_for_warnings");
+        showOption("expand_defs");
+    } else if ($("#extract").is(":checked")) {
+        hideOption("check_for_warnings");
+        hideOption("expand_defs");
     }
 }
 

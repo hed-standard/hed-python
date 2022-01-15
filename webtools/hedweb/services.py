@@ -164,7 +164,8 @@ def services_list():
     for service, info in services.items():
         description = info['Description']
         parm_string = json.dumps(info['Parameters'])
-        next_string = f'{service}: {description}\n\tParameters: {parm_string}\n'
+        return_string = info['Returns']
+        next_string = f'{service}:\n\tDescription: {description}\n\tParameters: {parm_string}\n\tReturns: {return_string}\n'
         services_string += next_string
 
     meanings_string = '\nParameter meanings:\n'

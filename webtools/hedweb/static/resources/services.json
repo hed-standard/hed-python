@@ -1,8 +1,9 @@
 {
     "services": {
         "get_services": {
-            "Description": "Return a list of hed services with descriptions.",
-            "Parameters": []
+            "Description": "Get a list of the available HED services.",
+            "Parameters": [],
+            "Returns": "A list of the current HED services with descriptions."
         },
         "events_assemble": {
             "Name": "events_assemble",
@@ -17,18 +18,20 @@
                 ],
                 "check_for_warnings",
                 "expand_defs"
-            ]
+            ],
+            "Returns": "A string containing the text of assembled events file or a list of errors."
         },
         "events_extract": {
             "Name": "events_extract",
-            "Description": "Extract a template JSON sidecar based on the contents of the event file.  Returned data: A JSON sidecar (template) if no errors.",
+            "Description": "Extract a template JSON sidecar based on the contents of the event file.",
             "Parameters": [
                 "events_string"
-            ]
+            ],
+            "Returns": "A JSON sidecar (template) in string form or a list of errors."
         },
         "events_validate": {
             "Name": "events_validate",
-            "Description": "Validate a BIDS-style event file and JSON sidecar if provided. Returned data: an error file as text if errors.",
+            "Description": "Validate a BIDS-style event file and JSON sidecar if provided. ",
             "Parameters": [
                 "events_string",
                  "json_string",
@@ -38,10 +41,11 @@
                     "schema_version"
                 ],
                 "check_for_warnings"
-            ]
+            ],
+            "Returns": "An error file as text if errors."
         },
         "sidecar_to_long": {
-            "Description": "Convert a JSON sidecar with all of its HED tags expressed in long form. Returned data: a converted JSON sidecar as text or an error file as text if errors.",
+            "Description": "Convert a JSON sidecar with all of its HED tags expressed in long form.",
             "Parameters": [
                 "json_string",
                 [
@@ -49,10 +53,11 @@
                     "schema_url",
                     "schema_version"
                 ]
-            ]
+            ],
+            "Returns": "A converted JSON sidecar as text or a list of errors."
         },
         "sidecar_to_short": {
-            "Description": "Convert a JSON sidecar with all of its HED tags expressed in short form. Returned data: a converted JSON sidecar as text or an error file as text if errors.",
+            "Description": "Convert a JSON sidecar with all of its HED tags expressed in short form.",
             "Parameters": [
                 "json_string",
                 [
@@ -60,7 +65,8 @@
                     "schema_url",
                     "schema_version"
                 ]
-            ]
+            ],
+            "Returns":  "A converted JSON sidecar as text or a list of errors."
         },
         "sidecar_validate": {
             "Description": "Validate a BIDS JSON sidecar (in string form) and return errors.",
@@ -72,7 +78,8 @@
                     "schema_version"
                 ],
                 "check_for_warnings"
-            ]
+            ],
+            "Returns":  "A list of errors if any."
         },
         "spreadsheet_validate": {
             "Description": "Validate a spreadsheet (tsv string) with HED tags in specified columns.",
@@ -89,7 +96,8 @@
                 ],
                 "check_for_warnings",
                 "has_column_names"
-            ]
+            ],
+            "Returns":  "A list of errors if any."
         },
         "strings_to_long": {
             "Description": "Convert a list of strings to long form if valid, otherwise return errors.",
@@ -100,10 +108,11 @@
                     "schema_url",
                     "schema_version"
                 ]
-            ]
+            ],
+            "Returns": "The string converted to short form or a list of errors if any."
         },
         "strings_to_short": {
-            "Description": "Convert a list of strings to short form if valid, otherwise return errors.",
+            "Description": "Convert a list of strings to short form.",
             "Parameters": [
                 "string_list",
                 [
@@ -111,7 +120,8 @@
                     "schema_url",
                     "schema_version"
                 ]
-            ]
+            ],
+            "Returns": "The string converted to short form or a list of errors if any."
         },
         "strings_validate": {
             "Description": "Validate a list of HED strings and return errors.",
@@ -123,7 +133,8 @@
                     "schema_version"
                 ],
                 "check_for_warnings"
-            ]
+            ],
+            "Returns": "A list of errors if any."
         }
     },
     "parameter_meanings": {

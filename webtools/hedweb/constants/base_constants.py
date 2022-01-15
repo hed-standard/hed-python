@@ -39,7 +39,7 @@ EVENTS_STRING = 'events_string'
 EVENTS_SUBMIT = 'events_submit'
 EVENTS_SUBMIT_FLASH = 'events_submit_flash'
 
-EXPAND_DEFS = 'defs_expand'
+EXPAND_DEFS = 'expand_defs'
 
 FORMAT_OPTION = 'format_option'
 FORMAT_TO_EXCEL = 'to_excel'

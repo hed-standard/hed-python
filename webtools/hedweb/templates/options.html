@@ -1,0 +1,19 @@
+{% macro create_options(title,check_for_warnings=False,expand_defs=False) %}
+
+    <h3>{{ title }}</h3>
+    <div class="form-group" id="options">
+        {% if check_for_warnings %}
+            <div class="form-group" id="check_for_warnings_option">
+                <input type="checkbox" name="check_for_warnings" id="check_for_warnings">
+                <label for="check_for_warnings">Check for warnings</label>
+            </div>
+        {% endif %}
+
+        {% if expand_defs %}
+            <div class="form-group" id="expand_defs_option">
+                <input type="checkbox" name="expand_defs" id="expand_defs">
+                <label for="expand_defs">Expand defs</label>
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}

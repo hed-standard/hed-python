@@ -138,7 +138,7 @@ def sidecar_results():
     Returns
     -------
         download file
-        A text file with the validation errors.
+        A text file with the validation errors or a converted sidecar.
     """
 
     try:

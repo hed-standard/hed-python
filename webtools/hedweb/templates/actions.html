@@ -1,6 +1,5 @@
-{% macro create_process_options(title, assemble=False,convert=False,extract=False,flatten=False,
-remap=False,to_long=False,to_short=False,unflatten=False,validate=False,
-options=True, otitle='2) Check applicable options:') %}
+{% macro create_actions(title,assemble=False,convert=False,extract=False,flatten=False,
+remap=False,to_long=False,to_short=False,unflatten=False,validate=False) %}
     <h3> {{ title }} </h3>
     <div class="form-group" id="process_actions">
         {% if assemble %}
@@ -82,18 +81,5 @@ options=True, otitle='2) Check applicable options:') %}
                 <label class="secondary-label">Validate</label>
             </div>
         {% endif %}
-
-        {% if options %}
-            <div class="form-group" id="process_options">
-                <h3>{{ otitle }}</h3>
-                <div class="form-group">
-                    <input type="checkbox" name="expand_defs" id="expand_defs" checked>
-                    <label for="expand_defs">Expand defs</label> &nbsp
-                    <input type="checkbox" name="check_for_warnings" id="check_for_warnings" checked>
-                    <label for="check_for_warnings">Check for warnings</label>
-                </div>
-            </div>
-        {% endif %}
-
     </div>
 {% endmacro %}

@@ -4,6 +4,13 @@ $(function () {
 });
 
 /**
+ * Set the options according to the action specified.
+ */
+$('#process_actions').change(function(){
+    setOptions();
+});
+
+/**
  * Submits the form for tag comparison if we have a valid file.
  */
 $('#string_submit').on('click', function () {
@@ -20,6 +27,7 @@ $('#string_submit').on('click', function () {
 function clearForm() {
     $('#string_form')[0].reset();
     clearFormFlashMessages();
+    setOptions();
     hideOtherSchemaVersionFileUpload()
 }
 
@@ -33,6 +41,32 @@ function clearFormFlashMessages() {
 }
 
 /**
+ * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
+ * components will be hidden and populated.
+ */
+function prepareForm() {
+    clearForm();
+    getSchemaVersions()
+    hideOtherSchemaVersionFileUpload()
+}
+
+/**
+ * Set the options for the events depending on the action
+ */
+function setOptions() {
+    if ($("#validate").is(":checked")) {
+        hideOption("expand_defs");
+        showOption("check_for_warnings");
+    } else if ($("#to_long").is(":checked")) {
+        hideOption("check_for_warnings");
+        showOption("expand_defs");
+    } else if ($("#to_short").is(":checked")) {
+        hideOption("check_for_warnings");
+        showOption("expand_defs");
+    }
+}
+
+/**
  * Checks to see if a hedstring has been specified.
  */
 function stringIsSpecified() {
@@ -42,16 +76,6 @@ function stringIsSpecified() {
         return false;
     }*/
     return true;
-}
-
-/**
- * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
- * components will be hidden and populated.
- */
-function prepareForm() {
-    clearForm();
-    getSchemaVersions()
-    hideOtherSchemaVersionFileUpload()
 }
 
 /**
