@@ -27,13 +27,13 @@ class Test(TestWebBase):
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Convert of a invalid mediawiki has a response')
             headers_dict = dict(response.headers)
-            self.assertEqual("warning", headers_dict["Category"],
-                             "The invalid mediawiki should not convert to xml successfully")
-            self.assertTrue(response.data, "The response data for invalid mediawiki conversion should not be empty")
+            self.assertEqual("error", headers_dict["Category"],
+                             "An mediawiki schema that does not load cannot be converted.")
+            self.assertFalse(response.data, "The response data for invalid mediawiki conversion should not be empty")
             self.assertTrue(headers_dict['Message'],
                             "The error message for invalid mediawiki conversion should not be empty")
-            self.assertNotEqual(None, headers_dict.get('Content-Disposition', None),
-                                "A file should be returned for invalid mediawiki conversion")
+            self.assertEqual(headers_dict.get('Content-Length'), '0',
+                             "A file should not be returned for invalid mediawiki conversion")
             schema_buffer.close()
 
     def test_schema_results_convert_mediawiki_valid(self):
@@ -127,13 +127,13 @@ class Test(TestWebBase):
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a invalid mediawiki has a response')
             headers_dict = dict(response.headers)
-            self.assertEqual("warning", headers_dict["Category"],
-                             "The invalid mediawiki should return validation errors successfully")
-            self.assertTrue(response.data, "The response data for invalid mediawiki validation should be empty")
+            self.assertEqual("error", headers_dict["Category"],
+                             "A schema that cannot be loaded should return an error")
+            self.assertFalse(response.data, "The response data for invalid mediawiki validation should be empty")
             self.assertTrue(headers_dict['Message'],
                             "The error message for invalid mediawiki conversion should not be empty")
-            self.assertNotEqual(None, headers_dict.get('Content-Disposition', None),
-                                "A file should be returned for invalid mediawiki validation")
+            self.assertEqual(headers_dict.get('Content-Length'), '0',
+                             "A file should be not be returned if mediawiki cannot load.")
             schema_buffer.close()
 
     def test_schema_results_validate_mediawiki_valid(self):
