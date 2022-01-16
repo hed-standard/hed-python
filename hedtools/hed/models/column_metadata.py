@@ -222,8 +222,8 @@ class ColumnMetadata:
         Parameters
         ----------
         required_tag_column_tags: HedString
-            A string containing HED tags associated with a required tag column that may need a tag name_prefix prepended to
-            its tags.
+            A string containing HED tags associated with a required tag column that may need a tag
+            name_prefix prepended to its tags.
         required_tag_prefix: str
             A string that will be added if missing to any given tag.
         Returns

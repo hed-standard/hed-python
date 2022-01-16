@@ -117,6 +117,7 @@ class DefDict:
         """
         new_def_issues = []
         for tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
+            # def_tags, group_tags, other_tags = extract_tags_from_group(tag_group)
             def_tags = []
             group_tags = []
             other_tags = []
@@ -130,33 +131,32 @@ class DefDict:
                         continue
 
                 other_tags.append(tag_or_group)
-
+            # to here
             # Now validate to see if we have a definition.  We want 1 definition, and the other parts are optional.
             if not def_tags:
-                # If we don't have at least one valid definition tag, just move on.  This is probably a tag with
-                # the word definition somewhere else in the text.
+                # If we don't have at least one valid definition tag, just move on.
                 continue
 
             if not is_top_level:
-                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                                                                         ValidationErrors.HED_TAG_GROUP_TAG,
-                                                                         tag=def_tags[0])
+                new_def_issues +=\
+                    ErrorHandler.format_error_with_context(error_handler,
+                                                           ValidationErrors.HED_TAG_GROUP_TAG, tag=def_tags[0])
                 continue
 
             if len(def_tags) > 1:
-                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                                                                         DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
-                                                                         def_name=def_tags[0].extension_or_value_portion,
-                                                                         tag_list=[tag for tag in
-                                                                                   def_tags[1:]])
+                new_def_issues += \
+                    ErrorHandler.format_error_with_context(error_handler,
+                                                           DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
+                                                           def_name=def_tags[0].extension_or_value_portion,
+                                                           tag_list=[tag for tag in def_tags[1:]])
                 continue
             def_tag = def_tags[0]
             def_tag_name = def_tag.extension_or_value_portion
             if len(group_tags) > 1:
-                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                                                                         DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                         def_name=def_tag_name,
-                                                                         tag_list=group_tags + other_tags)
+                new_def_issues += \
+                    ErrorHandler.format_error_with_context(error_handler,
+                                                           DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+                                                           def_name=def_tag_name, tag_list=group_tags + other_tags)
                 continue
             if len(other_tags) > 0:
                 new_def_issues += ErrorHandler.format_error_with_context(error_handler,
@@ -232,3 +232,17 @@ class DefDict:
         if found_index == 0 or hed_tag_lower[found_index - 1] == "/":
             return hed_tag[found_index + len(target_tag_short_name):]
         return None
+
+
+def extract_tags_from_group(tag_group):
+    def_tags = []
+    group_tags = []
+    other_tags = []
+    for tag_or_group in tag_group.get_direct_children():
+        if isinstance(tag_or_group, HedGroup):
+            group_tags.append(tag_or_group)
+        elif tag_or_group.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
+            def_tags.append(tag_or_group)
+        else:
+            other_tags.append(tag_or_group)
+    return def_tags, group_tags, other_tags

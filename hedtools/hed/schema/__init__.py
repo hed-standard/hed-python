@@ -5,4 +5,3 @@ from .hed_schema_file import load_schema, load_schema_version, from_string, get_
 from .hed_schema_constants import HedKey, HedSectionKey
 from .hed_cache import cache_all_hed_xml_versions, get_all_hed_versions, \
     get_path_from_hed_version, set_cache_directory
-from .hed_tag import HedTag

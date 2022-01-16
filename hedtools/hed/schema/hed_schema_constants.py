@@ -27,11 +27,8 @@ class HedKey:
     """
     # Tag attributes
     ExtensionAllowed = 'extensionAllowed'
-    IsNumeric = 'isNumeric'
-    Position = 'position'
-    PredicateType = 'predicateType'
     Recommended = 'recommended'
-    RequiredPrefix = 'required'
+    Required = 'required'
     RequireChild = 'requireChild'
     TagGroup = 'tagGroup'
     TakesValue = 'takesValue'
@@ -39,6 +36,8 @@ class HedKey:
     Unique = 'unique'
     UnitClass = 'unitClass'
     ValueClass = "valueClass"
+    RelatedTag = "relatedTag"
+    SuggestedTag = "suggestedTag"
 
     # All known properties
     BoolProperty = 'boolProperty'

@@ -83,7 +83,9 @@ class HedSchemaWikiParser:
                 with open(wiki_file_path, 'r', encoding='utf-8', errors='replace') as wiki_file:
                     wiki_lines = wiki_file.readlines()
             else:
-                wiki_lines = schema_as_string.split("\n")
+                # Split this into lines, but keep linebreaks.
+                wiki_lines = [line + "\n" for line in schema_as_string.split("\n")]
+
             self._read_wiki(wiki_lines)
         except FileNotFoundError as e:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, wiki_file_path)
@@ -116,15 +118,13 @@ class HedSchemaWikiParser:
         parse_order = {
             HedWikiSection.HeaderLine: self._read_header_section,
             HedWikiSection.Prologue: self._read_prologue,
-            HedWikiSection.Properties: self._read_properties,
             HedWikiSection.Epilogue: self._read_epilogue,
-            # Pass 2
+            HedWikiSection.Properties: self._read_properties,
             HedWikiSection.Attributes: self._read_attributes,
-            # Pass3
-            HedWikiSection.Schema: self._read_schema,
-            HedWikiSection.UnitsClasses: self._read_unit_classes,
             HedWikiSection.UnitModifiers: self._read_unit_modifiers,
+            HedWikiSection.UnitsClasses: self._read_unit_classes,
             HedWikiSection.ValueClasses: self._read_value_classes,
+            HedWikiSection.Schema: self._read_schema,
         }
         self._parse_sections(wiki_lines_by_section, parse_order)
 
@@ -188,11 +188,7 @@ class HedSchemaWikiParser:
                 raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR, msg, filename=self.filename, issues=[msg])
 
             if current_section == HedWikiSection.Prologue or current_section == HedWikiSection.Epilogue:
-                if line.strip():
-                    # we want to preserve all formatting in the prologue and epilogue.
-                    if line.endswith("\n"):
-                        line = line[:-1]
-                    strings_for_section[current_section].append(line)
+                strings_for_section[current_section].append(line)
             else:
                 line = self._remove_nowiki_tag_from_line(line.strip())
                 if line:
@@ -229,6 +225,17 @@ class HedSchemaWikiParser:
                 msg = f"Extra content [{line}] HED line and other sections"
                 raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg,  filename=self.filename, issues=[msg])
 
+    def _read_text_block(self, lines):
+        text = ""
+        for line in lines:
+            text += line
+        # We expect one blank line(plus the normal line break).  Any more should be preserved
+        if text.endswith("\n\n"):
+            text = text[:-2]
+        elif text.endswith("\n"):
+            text = text[:-1]
+        return text
+
     def _read_prologue(self, lines):
         """Adds the prologue
 
@@ -237,12 +244,7 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
-        prologue = ""
-        for line in lines:
-            if prologue:
-                prologue += "\n"
-            prologue += line
-        self._schema.prologue = prologue
+        self._schema.prologue = self._read_text_block(lines)
 
     def _read_epilogue(self, lines):
         """Adds the epilogue
@@ -252,12 +254,7 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
-        epilogue = ""
-        for line in lines:
-            if epilogue:
-                epilogue += "\n"
-            epilogue += line
-        self._schema.epilogue = epilogue
+        self._schema.epilogue = self._read_text_block(lines)
 
     def _read_schema(self, lines):
         """Adds the main schema section
@@ -275,11 +272,16 @@ class HedSchemaWikiParser:
                 level = self._get_tag_level(line)
                 if level < len(parent_tags):
                     parent_tags = parent_tags[:level]
-            new_tag = self._add_tag_line(parent_tags, line)
-            if new_tag is None:
-                self._add_warning(line)
+                elif level > len(parent_tags):
+                    self._add_warning(line, "Line has too many *'s at the front.  You cannot skip a level.")
+                    continue
+            new_tag_name = self._add_tag_line(parent_tags, line)
+            if not new_tag_name:
+                if new_tag_name != "":
+                    self._add_warning(line)
                 continue
-            parent_tags.append(new_tag)
+
+            parent_tags.append(new_tag_name)
 
     def _read_unit_classes(self, lines):
         """Adds the unit classes section
@@ -289,23 +291,20 @@ class HedSchemaWikiParser:
         lines: [str]
             Lines for this section
         """
-        current_unit_class = ""
-
+        unit_class_entry = None
         for line in lines:
-            unit_class, _ = self._get_tag_name(line)
-            if unit_class is None:
+            unit_class_unit, _ = self._get_tag_name(line)
+            if unit_class_unit is None:
                 self._add_warning(line)
                 continue
             level = self._get_tag_level(line)
             # This is a unit class
             if level == 1:
-                current_unit_class = unit_class
-                self._schema._add_unit_class_unit(current_unit_class, None)
-                self._add_single_line(line, HedSectionKey.UnitClasses, skip_adding_name=True)
+                unit_class_entry = self._add_single_line(line, HedSectionKey.UnitClasses)
             # This is a unit class unit
             else:
-                self._schema._add_unit_class_unit(current_unit_class, unit_class)
-                self._add_single_line(line, HedSectionKey.Units, skip_adding_name=True)
+                unit_class_unit_entry = self._add_single_line(line, HedSectionKey.Units)
+                unit_class_entry.add_unit(unit_class_unit_entry)
 
     def _read_unit_modifiers(self, lines):
         """Adds the unit modifiers section
@@ -332,13 +331,11 @@ class HedSchemaWikiParser:
     def _read_properties(self, lines):
         for line in lines:
             self._add_single_line(line, HedSectionKey.Properties)
-        self._schema.add_default_properties()
 
     def _read_attributes(self, lines):
         self.attributes = {}
         for line in lines:
             self._add_single_line(line, HedSectionKey.Attributes)
-        self._schema.add_hed2_attributes()
 
     def _get_header_attributes(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
@@ -548,8 +545,8 @@ class HedSchemaWikiParser:
 
         Returns
         -------
-        tag_name: str
-            The name of the added tag
+        tag_entry: HedSchemaEntry
+            The entry for the added tag
         """
         tag_name, _ = self._get_tag_name(tag_line)
         if tag_name:
@@ -561,7 +558,7 @@ class HedSchemaWikiParser:
 
         return tag_name
 
-    def _add_single_line(self, tag_line, key_class, element_name=None, skip_adding_name=False):
+    def _add_single_line(self, tag_line, key_class, element_name=None):
         node_name, index = self._get_tag_name(tag_line)
         if node_name is None:
             self._add_warning(tag_line)
@@ -578,14 +575,15 @@ class HedSchemaWikiParser:
         if node_desc is None:
             self._add_warning(tag_line, "Description has mismatched delimiters")
             return
-        if not skip_adding_name:
-            self._schema._add_tag_to_dict(node_name, key_class)
-        tag_entry = self._schema._get_entry_for_tag(node_name, key_class)
+
+        tag_entry = self._schema._add_tag_to_dict(node_name, key_class)
         if node_desc:
             tag_entry.description = node_desc.strip()
 
         for attribute_name, attribute_value in node_attributes.items():
             tag_entry.set_attribute_value(attribute_name, attribute_value)
+
+        return tag_entry
 
     def _add_warning(self, line, warning_message="Schema term is empty or the line is malformed"):
         self.warnings.append((line, warning_message))

@@ -63,8 +63,9 @@ class BaseInput:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
 
         input_type = file_type
-        if file_type is None and isinstance(file, str):
-            _, input_type = os.path.splitext(file)
+        if isinstance(file, str):
+            if file_type is None:
+                _, input_type = os.path.splitext(file)
             if self.name is None:
                 self._name = file
 
@@ -349,7 +350,9 @@ class BaseInput:
             if return_row_dict:
                 final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
                 if string_ops:
+                    error_handler.push_error_context(ErrorContext.ROW, row_number)
                     row_issues += self._run_row_ops(final_hed_string, string_ops, error_handler)
+                    error_handler.pop_error_context()
                 row_dict[model_constants.ROW_ISSUES] = row_issues
                 row_dict[model_constants.ROW_HED_STRING] = final_hed_string
                 yield row_number + start_at_one, row_dict
@@ -555,7 +558,8 @@ class BaseInput:
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
         validation_issues = self.get_def_and_mapper_issues(error_handler, check_for_warnings)
         validators = validators.copy()
-        validation_issues += self._run_validators(validators, error_handler=error_handler, check_for_warnings=check_for_warnings, **kwargs)
+        validation_issues += self._run_validators(validators, error_handler=error_handler,
+                                                  check_for_warnings=check_for_warnings, **kwargs)
         error_handler.pop_error_context()
 
         return validation_issues

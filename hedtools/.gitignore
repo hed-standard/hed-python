@@ -65,7 +65,9 @@ var/
 .idea/
 venv/
 ./config.py
+build/
 
+hed/validator/hed_cache/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -87,7 +89,7 @@ coverage.xml
 .pydevproject
 
 # pycharm
-/venv/
+venv/
 .idea
 
 # Rope

@@ -2,19 +2,10 @@ import unittest
 
 
 from hed.validator import tag_validator_util
-from tests.validator.test_tag_validator_2g import TestHed
-from hed.schema.hed_tag import HedTag
+from tests.validator.test_tag_validator import TestHed
 
 
 class StringUtilityFunctions(TestHed):
-    # def test_replace_tag_values_with_pound(self):
-    #     slash_string = 'Event/Duration/4 ms'
-    #     no_slash_string = 'something'
-    #     replaced_slash_string = self.syntactic_tag_validator.replace_tag_name_with_pound(slash_string)
-    #     replaced_no_slash_string = self.syntactic_tag_validator.replace_tag_name_with_pound(no_slash_string)
-    #     self.assertEqual(replaced_slash_string, 'Event/Duration/#')
-    #     self.assertEqual(replaced_no_slash_string, '#')
-
     def test_clock_face_times(self):
         valid_test_strings = {
             'validPM': '23:52',
@@ -69,27 +60,6 @@ class StringUtilityFunctions(TestHed):
             result = tag_validator_util.is_date_time(string)
             self.assertEqual(result, False, string)
 
-
-class TestValidatorUtilityFunctions(TestHed):
-    def test_if_tag_exists(self):
-        valid_tag1 = HedTag('attribute/direction/left', extension_index=len('attribute/direction/left'))
-        valid_tag2 = HedTag('item/object/person', extension_index=len('item/object/person'))
-        valid_tag3 = HedTag('event/duration/#', extension_index=len('event/duration/#'))
-        invalid_tag1 = HedTag('something', extension_index=len('something'))
-        invalid_tag2 = HedTag('Participant/nothing', extension_index=len('Participant/nothing'))
-        invalid_tag3 = HedTag('participant/#', extension_index=len('participant/#'))
-        valid_tag1_results = self.semantic_tag_validator.check_tag_exists_in_schema(valid_tag1)
-        valid_tag2_results = self.semantic_tag_validator.check_tag_exists_in_schema(valid_tag2)
-        valid_tag3_results = self.semantic_tag_validator.check_tag_exists_in_schema(valid_tag3)
-        invalid_tag1_results = self.semantic_tag_validator.check_tag_exists_in_schema(invalid_tag1)
-        invalid_tag2_results = self.semantic_tag_validator.check_tag_exists_in_schema(invalid_tag2)
-        invalid_tag3_results = self.semantic_tag_validator.check_tag_exists_in_schema(invalid_tag3)
-        self.assertEqual(not valid_tag1_results, True)
-        self.assertEqual(not valid_tag2_results, True)
-        self.assertEqual(not valid_tag3_results, True)
-        self.assertEqual(not invalid_tag1_results, False)
-        self.assertEqual(not invalid_tag2_results, False)
-        self.assertEqual(not invalid_tag3_results, False)
 
 
 if __name__ == '__main__':

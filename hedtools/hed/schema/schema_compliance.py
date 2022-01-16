@@ -1,8 +1,7 @@
 from hed.errors import error_reporter
-from hed.errors.error_types import SchemaWarnings, ErrorContext, SchemaErrors, ErrorSeverity
+from hed.errors.error_types import SchemaWarnings, ErrorContext, SchemaErrors, ErrorSeverity, ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
-from hed.schema.hed_schema import HedSchema
-from hed.schema.hed_tag import HedTag
+from hed.schema.hed_schema import HedSchema, HedKey
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
@@ -40,12 +39,6 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
         name = hed_schema.filename
     error_handler.push_error_context(ErrorContext.FILE_NAME, name)
 
-    if hed_schema.has_duplicate_tags:
-        duplicate_dict = hed_schema.find_duplicate_tags()
-        for tag_name, long_org_tags in duplicate_dict.items():
-            issues_list += error_handler.format_error_with_context(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE, tag_name,
-                                                                   duplicate_tag_list=long_org_tags)
-
     unknown_attributes = hed_schema.get_all_unknown_attributes()
     if unknown_attributes:
         for attribute_name, source_tags in unknown_attributes.items():
@@ -55,24 +48,34 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
                                                                        source_tag=tag)
 
     schema_attribute_validators = {
-        'suggestedTag': tag_exists_check,
-        'relatedTag': tag_exists_check
+        HedKey.SuggestedTag: tag_exists_check,
+        HedKey.RelatedTag: tag_exists_check,
+        HedKey.UnitClass: tag_is_placeholder_check,
+        HedKey.ValueClass: tag_is_placeholder_check,
     }
 
     # Check attributes
     for section_key in hed_schema._sections:
         error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, section_key)
+        # Check attributes
         for tag_entry in hed_schema[section_key].values():
-            error_handler.push_error_context(ErrorContext.SCHEMA_TAG, tag_entry.long_name)
+            error_handler.push_error_context(ErrorContext.SCHEMA_TAG, tag_entry.name)
             for attribute_name in tag_entry.attributes:
                 validator = schema_attribute_validators.get(attribute_name)
                 if validator:
                     error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name, False)
-                    new_issues = validator(hed_schema, tag_entry.attributes[attribute_name])
+                    new_issues = validator(hed_schema, tag_entry, tag_entry.attributes[attribute_name])
                     error_handler.add_context_to_issues(new_issues)
                     issues_list += new_issues
                     error_handler.pop_error_context()
             error_handler.pop_error_context()
+
+        # Check duplicate names
+        for name, duplicate_entries in hed_schema[section_key].duplicate_names.items():
+            issues_list += error_handler.format_error_with_context(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE, name,
+                                                                   duplicate_tag_list=[entry.name for entry in
+                                                                                       duplicate_entries],
+                                                                   section=section_key)
 
         error_handler.pop_error_context()
 
@@ -88,7 +91,7 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
     return issues_list
 
 
-def tag_exists_check(hed_schema, possible_tags, force_issues_as_warnings=True):
+def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
     """
         Checks if the comma separated list in possible tags are valid HedTags
 
@@ -96,8 +99,43 @@ def tag_exists_check(hed_schema, possible_tags, force_issues_as_warnings=True):
     ----------
     hed_schema: HedSchema
         The schema to check if the tag exists
+    tag_entry: HedSchemaEntry
+        The schema entry for this tag.
     possible_tags: str
         Comma separated list of tags.  Short long or mixed form valid.
+    force_issues_as_warnings: bool
+        If True sets all the severity levels to warning
+
+    Returns
+    -------
+    issues_list: [{}]
+    """
+    issues = []
+    if not tag_entry.name.endswith("/#"):
+        issues += ErrorHandler.format_error(SchemaWarnings.NON_PLACEHOLDER_HAS_CLASS, tag_entry.name,
+                                            possible_tags)
+
+    if force_issues_as_warnings:
+        for issue in issues:
+            issue['severity'] = ErrorSeverity.WARNING
+
+    return issues
+
+
+def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
+    """
+        Checks if the comma separated list in possible tags are valid HedTags
+
+    Parameters
+    ----------
+    hed_schema: HedSchema
+        The schema to check if the tag exists
+    tag_entry: HedSchemaEntry
+        The schema entry for this tag.
+    possible_tags: str
+        Comma separated list of tags.  Short long or mixed form valid.
+    force_issues_as_warnings: bool
+        If True sets all the severity levels to warning
 
     Returns
     -------
@@ -106,8 +144,11 @@ def tag_exists_check(hed_schema, possible_tags, force_issues_as_warnings=True):
     issues = []
     split_tags = possible_tags.split(",")
     for org_tag in split_tags:
-        tag = HedTag(org_tag)
-        issues += tag.convert_to_canonical_forms(hed_schema)
+        if org_tag not in hed_schema.all_tags:
+            issues += ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                org_tag,
+                                                index_in_tag=0,
+                                                index_in_tag_end=len(org_tag))
 
     if force_issues_as_warnings:
         for issue in issues:
@@ -129,6 +170,7 @@ def validate_schema_term(hed_term):
         A list of all formatting issues found in the term
     """
     issues_list = []
+    # Any # terms will have already been validated as the previous entry.
     if hed_term == "#":
         return issues_list
 
