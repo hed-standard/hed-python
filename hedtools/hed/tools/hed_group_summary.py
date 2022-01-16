@@ -29,7 +29,7 @@ class HedGroupSummary():
             return ''
         str_desc = ''
         for item in self.tag_dict['Description']:
-            str_desc +=  item.extension_or_value_portion + ' '
+            str_desc += item.extension_or_value_portion + ' '
         return str_desc
 
     def is_top_level(self, short_base_tag):
@@ -52,9 +52,9 @@ class HedGroupSummary():
                 if not value_list:
                     continue
                 elif len(value_list) == 1:
-                    tag_values[tag.short_base_tag] = value_list[0]
+                    tag_values[key] = value_list[0]
                 else:
-                    tag_values[tag.short_base_tag] = value_list
+                    tag_values[key] = value_list
             if tag_values:
                 json_dict["Tags with values:"] = tag_values
         if as_json:
