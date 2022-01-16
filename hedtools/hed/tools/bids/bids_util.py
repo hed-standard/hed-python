@@ -15,22 +15,23 @@ def parse_bids_filename(file_path):
 
     """
 
-    suffix = ''
-    entities = {}
-    unmatched=''
+
     filename = os.path.splitext(os.path.basename(file_path))
     ext = filename[1].lower()
-    basename = filename[0].lower()
+    basename = filename[0]
+    if '-' not in basename:
+        return basename, ext, {}, []
     entity_pieces = basename.split('_')
-    if len(entity_pieces) < 2 or '-' not in basename:
-        return suffix, ext, entities, basename
+    if len(entity_pieces) < 2:
+        return '', ext, {}, [basename]
     suffix = entity_pieces[-1]
-
+    entities = {}
+    unmatched = []
     entity_pieces = entity_pieces[:-1]
     for entity in reversed(list(enumerate(entity_pieces))):
-        pieces = entity.split('-')
+        pieces = entity[1].split('-')
         if len(pieces) != 2:
-            unmatched.append(entity)
+            unmatched.append(entity[1])
         else:
             entities[pieces[0]] = pieces[1]
     return suffix, ext, entities, unmatched
