@@ -24,17 +24,17 @@ class Test(TestWebBase):
                 x = sc.read()
             spreadsheet_buffer = io.BytesIO(bytes(x))
 
-            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
-                          base_constants.WORKSHEET_NAME: 'LKT Events',
-                          base_constants.WORKSHEET_SELECTED: 'LKT Events',
+                          base_constants.WORKSHEET_NAME: 'LKT 8HED3',
+                          base_constants.WORKSHEET_SELECTED: 'LKT 8HED3',
                           base_constants.HAS_COLUMN_NAMES: 'on',
                           'column_1_input': '',
                           'column_2_check': 'on',
-                          'column_2_input': 'Event/Label/',
+                          'column_2_input': 'Property/Informational-property/Label/',
                           'column_3_input': '',
                           'column_4_check': 'on',
-                          'column_4_input': 'Event/Description/',
+                          'column_4_input': 'Property/Informational-property/Description/',
                           'column_5_check': 'on',
                           'column_5_input': '',
                           base_constants.SPREADSHEET_FILE: (spreadsheet_buffer, 'ExcelMultipleSheets.xlsx'),

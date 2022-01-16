@@ -10,9 +10,9 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import base_constants
 from hedweb.columns import create_column_selections
-from hed.tools.map_utils import get_columns_info
+from hed.tools.map_util import get_columns_info
 from hed.tools.sidecar_map import SidecarMap
-from hedweb.web_utils import form_has_option, get_hed_schema_from_pull_down, generate_filename
+from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down, generate_filename
 
 app_config = current_app.config
 
@@ -34,7 +34,7 @@ def get_input_from_events_form(request):
     arguments = {base_constants.SCHEMA: get_hed_schema_from_pull_down(request), base_constants.EVENTS: None,
                  base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, ''),
                  base_constants.CHECK_FOR_WARNINGS: form_has_option(request, base_constants.CHECK_FOR_WARNINGS, 'on'),
-                 base_constants.DEFS_EXPAND: form_has_option(request, base_constants.DEFS_EXPAND, 'on'),
+                 base_constants.EXPAND_DEFS: form_has_option(request, base_constants.EXPAND_DEFS, 'on'),
                  base_constants.COLUMNS_SELECTED: create_column_selections(request.form)
                  }
 
@@ -75,8 +75,7 @@ def process(arguments):
     if command == base_constants.COMMAND_VALIDATE:
         results = validate(hed_schema, events, sidecar, arguments.get(base_constants.CHECK_FOR_WARNINGS, False))
     elif command == base_constants.COMMAND_ASSEMBLE:
-        results = assemble(hed_schema, events, arguments.get(base_constants.DEFS_EXPAND, False),
-                           arguments.get(base_constants.CHECK_FOR_WARNINGS, False))
+        results = assemble(hed_schema, events, arguments.get(base_constants.EXPAND_DEFS, False))
     elif command == base_constants.COMMAND_EXTRACT:
         results = extract(events, arguments.get(base_constants.COLUMNS_SELECTED, None))
     else:
@@ -84,7 +83,7 @@ def process(arguments):
     return results
 
 
-def assemble(hed_schema, events, defs_expand=True, check_for_warnings=False):
+def assemble(hed_schema, events, expand_defs=True):
     """Creates a two-column event file with first column Onset and second column HED tags.
 
     Parameters
@@ -93,10 +92,8 @@ def assemble(hed_schema, events, defs_expand=True, check_for_warnings=False):
         A HED schema
     events: model.EventsInput
         An events input object
-    defs_expand: bool
+    expand_defs: bool
         True if definitions should be expanded during assembly
-    check_for_warnings: bool
-        True if warnings should be checked for
     Returns
     -------
     dict
@@ -110,7 +107,7 @@ def assemble(hed_schema, events, defs_expand=True, check_for_warnings=False):
 
     hed_tags = []
     onsets = []
-    for row_number, row_dict in events.iter_dataframe(return_row_dict=True, expand_defs=defs_expand):
+    for row_number, row_dict in events.iter_dataframe(return_row_dict=True, expand_defs=expand_defs):
         hed_tags.append(str(row_dict.get("HED", "")))
         onsets.append(row_dict.get("onset", "n/a"))
     data = {'onset': onsets, 'HED': hed_tags}

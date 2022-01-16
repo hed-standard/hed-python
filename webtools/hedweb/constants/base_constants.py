@@ -27,7 +27,6 @@ COMMAND_TO_SHORT = 'to_short'
 COMMAND_UNFLATTEN = 'unflatten'
 COMMAND_VALIDATE = 'validate'
 
-DEFS_EXPAND = 'defs_expand'
 
 DOWNLOAD_FILE = 'download_file'
 
@@ -39,6 +38,8 @@ EVENTS_PATH = 'events_path'
 EVENTS_STRING = 'events_string'
 EVENTS_SUBMIT = 'events_submit'
 EVENTS_SUBMIT_FLASH = 'events_submit_flash'
+
+EXPAND_DEFS = 'expand_defs'
 
 FORMAT_OPTION = 'format_option'
 FORMAT_TO_EXCEL = 'to_excel'

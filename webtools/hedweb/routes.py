@@ -5,7 +5,7 @@ import json
 from hed import schema as hedschema
 from hedweb.constants import base_constants, page_constants
 from hedweb.constants import route_constants, file_constants
-from hedweb.web_utils import handle_http_error, package_results, handle_error
+from hedweb.web_util import handle_http_error, package_results, handle_error
 from hedweb import sidecar, events, spreadsheet, services, strings, schema
 from hedweb.columns import get_columns_request
 
@@ -138,7 +138,7 @@ def sidecar_results():
     Returns
     -------
         download file
-        A text file with the validation errors.
+        A text file with the validation errors or a converted sidecar.
     """
 
     try:

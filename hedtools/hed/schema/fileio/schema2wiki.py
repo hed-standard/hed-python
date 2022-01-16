@@ -12,7 +12,7 @@ class HedSchema2Wiki:
 
     def process_schema(self, hed_schema):
         """
-        Takes a HedSchema object and returns a list of strings representing it's .mediawiki version.
+        Takes a HedSchema object and returns a list of strings representing its .mediawiki version.
 
         Parameters
         ----------
@@ -88,8 +88,9 @@ class HedSchema2Wiki:
 
         self.current_tag_string += wiki_constants.UNIT_CLASS_STRING
         self._flush_current_tag()
-        for unit_class, unit_entry in hed_schema[HedSectionKey.UnitClasses].items():
-            unit_types = unit_entry.value
+        for unit_class_entry in hed_schema.unit_classes.all_names.values():
+            unit_class = unit_class_entry.name
+            unit_types = unit_class_entry.unit_class_units
             self.current_tag_string += f"* {unit_class}"
             self.current_tag_extra += self._format_props_and_desc(hed_schema, unit_class, HedSectionKey.UnitClasses)
             self._flush_current_tag()
@@ -103,7 +104,7 @@ class HedSchema2Wiki:
         self._add_blank_line()
 
     def _output_section(self, hed_schema, key_class):
-        if not hed_schema._sections[key_class]:
+        if not hed_schema[key_class]:
             return
         self._add_blank_line()
         self.current_tag_string += wiki_constants.wiki_section_headers[key_class]

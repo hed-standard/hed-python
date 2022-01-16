@@ -8,31 +8,42 @@ from hed.util.file_util import get_file_extension
 from hed.errors.error_reporter import get_exception_issue_string, get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 
-from hedweb.web_utils import form_has_file, form_has_option, form_has_url, generate_filename, handle_error
+from hedweb.web_util import form_has_file, form_has_option, form_has_url, generate_filename, handle_error
 from hedweb.constants import base_constants, file_constants
 
 app_config = current_app.config
 
 
-def get_schema(schema_path=None, schema_url=None, schema_string=None, schema_version=None, file_type=".xml"):
-    hed_schema = []
-    issue_str = ''
-    try:
-        if schema_path:
-            hed_schema = hedschema.load_schema(hed_file_path=schema_path)
-        elif schema_url:
-            hed_schema = hedschema.load_schema(hed_url_path=schema_url)
-        elif schema_string:
-            hed_schema = hedschema.from_string(schema_string, file_type=file_type)
-        else:
-            raise HedFileError("HedSchemaNotFound", "A HED schema could not be located", "")
-    except HedFileError as ex:
-        issue_str = get_exception_issue_string(ex.issues,
-                                               title=f"[{ex.error_type}] schema parsing issues:")
-    except Exception as ex:
-        issue_str = handle_error(ex, return_as_str=True)
-    finally:
-        return hed_schema, issue_str
+def get_schema(schema_path=None, schema_url=None, schema_string=None, file_type=".xml"):
+    """Return a schema object.
+
+    Parameters
+    ----------
+    schema_path: str
+        A string representing a path to a schema
+    schema_url: str
+        A string representing a URL of a schema
+    schema_url: str
+        A string representing a URL of a schema
+    file_type: str
+        A string representing the file extension including the .
+
+    Returns
+    -------
+    HedSchema
+        The HedSchema object that as loaded.
+    """
+
+    if schema_path:
+        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+    elif schema_url:
+        hed_schema = hedschema.load_schema(hed_url_path=schema_url)
+    elif schema_string:
+        hed_schema = hedschema.from_string(schema_string, file_type=file_type)
+    else:
+        raise HedFileError("HedSchemaNotFound", "A HED schema could not be located", "")
+
+    return hed_schema
 
 
 def get_input_from_form(request):
@@ -52,13 +63,13 @@ def get_input_from_form(request):
     if form_has_option(request, base_constants.SCHEMA_UPLOAD_OPTIONS, base_constants.SCHEMA_FILE_OPTION) and \
             form_has_file(request, base_constants.SCHEMA_FILE, file_constants.SCHEMA_EXTENSIONS):
         f = request.files[base_constants.SCHEMA_FILE]
-        schema, issue_str = get_schema(schema_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
-                                       file_type=secure_filename(f.filename))
+        schema = get_schema(schema_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
+                            file_type=secure_filename(f.filename))
         display_name = secure_filename(f.filename)
     elif form_has_option(request, base_constants.SCHEMA_UPLOAD_OPTIONS, base_constants.SCHEMA_URL_OPTION) and \
             form_has_url(request, base_constants.SCHEMA_URL, file_constants.SCHEMA_EXTENSIONS):
         schema_url = request.values[base_constants.SCHEMA_URL]
-        schema, issue_str = get_schema(schema_url=schema_url)
+        schema = get_schema(schema_url=schema_url)
         url_parsed = urlparse(schema_url)
         display_name = basename(url_parsed.path)
     else:
@@ -68,8 +79,7 @@ def get_input_from_form(request):
                  base_constants.SCHEMA_DISPLAY_NAME: display_name,
                  base_constants.COMMAND: request.form.get(base_constants.COMMAND_OPTION, ''),
                  base_constants.CHECK_FOR_WARNINGS:
-                     form_has_option(request, base_constants.CHECK_FOR_WARNINGS, 'on'),
-                 base_constants.ISSUE_STRING: issue_str
+                     form_has_option(request, base_constants.CHECK_FOR_WARNINGS, 'on')
                  }
     return arguments
 
@@ -90,13 +100,6 @@ def process(arguments):
 
     hed_schema = arguments.get('schema', None)
     display_name = arguments.get('schema_display_name', 'unknown_source')
-    if arguments.get(base_constants.ISSUE_STRING, ''):
-        file_name = generate_filename(display_name, suffix='schema_errors', extension='.txt')
-        return {'command':  arguments[base_constants.COMMAND],
-                'data': arguments[base_constants.ISSUE_STRING],
-                'output_display_name': file_name,
-                'schema_version': '', 'msg_category': 'warning',
-                'msg': "Schema had syntax errors and could not load"}
     if base_constants.COMMAND not in arguments or arguments[base_constants.COMMAND] == '':
         raise HedFileError('MissingCommand', 'Command is missing', '')
     elif arguments[base_constants.COMMAND] == base_constants.COMMAND_VALIDATE:

@@ -93,6 +93,7 @@ class SchemaWarnings:
     # The actual reported error for the above two
     HED_SCHEMA_CHARACTER_INVALID = "HED_SCHEMA_CHARACTER_INVALID"
     INVALID_CAPITALIZATION = 'invalidCaps'
+    NON_PLACEHOLDER_HAS_CLASS = 'NON_PLACEHOLDER_HAS_CLASS'
 
 
 # These are all HED_DEFINITION_INVALID errors

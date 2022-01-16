@@ -65,7 +65,7 @@ def get_service_info(parameters):
         command = pieces[1]
         command_target = pieces[0]
     has_column_names = parameters.get(base_constants.HAS_COLUMN_NAMES, '') == 'on'
-    defs_expand = parameters.get(base_constants.DEFS_EXPAND, '') == 'on'
+    expand_defs = parameters.get(base_constants.EXPAND_DEFS, '') == 'on'
     check_for_warnings = parameters.get(base_constants.CHECK_FOR_WARNINGS, '') == 'on'
 
     return {base_constants.SERVICE: service,
@@ -73,7 +73,7 @@ def get_service_info(parameters):
             base_constants.COMMAND_TARGET: command_target,
             base_constants.HAS_COLUMN_NAMES: has_column_names,
             base_constants.CHECK_FOR_WARNINGS: check_for_warnings,
-            base_constants.DEFS_EXPAND: defs_expand
+            base_constants.EXPAND_DEFS: expand_defs
             # base_constants.TAG_COLUMNS: tag_columns,
             # base_constants.COLUMN_PREFIX_DICTIONARY: prefix_dict
             }
@@ -164,7 +164,8 @@ def services_list():
     for service, info in services.items():
         description = info['Description']
         parm_string = json.dumps(info['Parameters'])
-        next_string = f'{service}: {description}\n\tParameters: {parm_string}\n'
+        return_string = info['Returns']
+        next_string = f'{service}:\n\tDescription: {description}\n\tParameters: {parm_string}\n\tReturns: {return_string}\n'
         services_string += next_string
 
     meanings_string = '\nParameter meanings:\n'

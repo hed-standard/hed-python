@@ -10,35 +10,12 @@ from hed.models import DefinitionMapper
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_hed_input = 'Attribute/Temporal/Onset'
-        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/legacy_xml/')
-        schema_filename = os.path.join(cls.hed_base_dir, "HED7.1.1.xml")
+        cls.base_hed_input = 'Event'
+        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed_pairs/')
+        schema_filename = os.path.join(cls.hed_base_dir, "HED8.0.0t.xml")
         hed_schema = schema.load_schema(schema_filename)
         cls.generic_hed_input_reader = HedValidator(hed_schema=hed_schema)
-        cls.text_file_with_extension = 'file_with_extension.txt'
-        cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
-        cls.float_value = 1.1
-        cls.one_based_tag_columns = [1, 2, 3]
-        cls.zero_based_tag_columns = [0, 1, 2, 3, 4]
-        cls.zero_based_row_column_count = 3
-        cls.zero_based_tag_columns_less_than_row_column_count = [0, 1, 2]
-        cls.comma_separated_string_with_double_quotes = 'a,b,c,"d,e,f"'
-        cls.comma_delimited_list_with_double_quotes = ['a', 'b', 'c', "d,e,f"]
-        cls.comma_delimiter = ','
-        cls.category_key = 'Category'
-        cls.hed_string_with_multiple_unique_tags = \
-            HedString('event/label/this is a label,event/label/this is another label')
-        cls.hed_string_with_invalid_tags = HedString('this/is/not/a/valid/tag1,this/is/not/a/valid/tag2')
-        cls.hed_string_with_no_required_tags = HedString('no/required/tags1,no/required/tags')
-        cls.attribute_onset_tag = 'Attribute/Onset'
-        cls.category_participant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
-        cls.category_tags = 'Participant response, Stimulus'
         cls.validation_issues = []
-        cls.column_to_hed_tags_dictionary = {}
-        cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
-        cls.row_hed_tag_columns = [1, 2]
-        cls.original_and_formatted_tag = [('Event/Label/Test', 'event/label/test'),
-                                          ('Event/Description/Test', 'event/description/test')]
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/validator_tests/')
         cls.hed_filepath_with_errors = os.path.join(cls.hed_base_dir, "ExcelMultipleSheets.xlsx")
         cls.hed_file_with_errors = HedInput(cls.hed_filepath_with_errors)
@@ -73,24 +50,6 @@ class Test(unittest.TestCase):
                                                                           check_for_warnings=True, name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
-
-    def test__validate_individual_tags_in_hed_string(self):
-        validation_issues = \
-            self.generic_hed_input_reader._validate_individual_tags_in_hed_string(self.hed_string_with_invalid_tags)
-        self.assertIsInstance(validation_issues, list)
-        self.assertTrue(validation_issues)
-
-    def test__validate_top_levels_in_hed_string(self):
-        validation_issues = \
-            self.generic_hed_input_reader._validate_tags_in_hed_string(self.hed_string_with_no_required_tags)
-        self.assertIsInstance(validation_issues, list)
-        self.assertFalse(validation_issues)
-
-    def test__validate_tag_levels_in_hed_string(self):
-        validation_issues = \
-            self.generic_hed_input_reader._validate_tags_in_hed_string(self.hed_string_with_multiple_unique_tags)
-        self.assertIsInstance(validation_issues, list)
-        self.assertTrue(validation_issues)
 
     def test_complex_file_validation(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -155,7 +114,7 @@ class Test(unittest.TestCase):
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/hed_pairs/HED8.0.0.xml')
+                                   '../data/hed_pairs/HED8.0.0t.xml')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    '../data/validator_tests/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = schema.load_schema(schema_path)

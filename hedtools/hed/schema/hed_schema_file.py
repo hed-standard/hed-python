@@ -36,7 +36,6 @@ def from_string(schema_string, file_type=".xml"):
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
 
-    hed_schema.update_old_hed_schema()
     return hed_schema
 
 
@@ -77,8 +76,6 @@ def load_schema(hed_file_path=None, hed_url_path=None, library_prefix=None):
         hed_schema = HedSchemaWikiParser.load_wiki(hed_file_path)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_file_path)
-
-    hed_schema.update_old_hed_schema()
 
     if library_prefix:
         hed_schema.set_library_prefix(library_prefix=library_prefix)
@@ -131,7 +128,7 @@ def load_schema_version(xml_folder=None, xml_version_number=None):
 
 
 def convert_schema_to_format(hed_schema, check_for_issues=True,
-                             name=None, save_as_mediawiki=False, save_as_legacy_xml=False):
+                             name=None, save_as_mediawiki=False):
     """
     Loads a local schema file or from a URL, then outputs a temporary file with the requested format.
     Parameters
@@ -145,8 +142,6 @@ def convert_schema_to_format(hed_schema, check_for_issues=True,
         Useful for temp filenames.
     save_as_mediawiki: bool
         If True, save as .mediawiki.  if False, save as .xml
-    save_as_legacy_xml: bool
-        If True(and save_as_mediawiki is False), will save using the old legacy XML format.
     Returns
     -------
     output_string: [str]
@@ -162,6 +157,6 @@ def convert_schema_to_format(hed_schema, check_for_issues=True,
     if save_as_mediawiki:
         output_string = hed_schema.get_as_mediawiki_string()
     else:
-        output_string = hed_schema.get_as_xml_string(save_as_legacy_xml)
+        output_string = hed_schema.get_as_xml_string()
 
     return output_string, issue_list

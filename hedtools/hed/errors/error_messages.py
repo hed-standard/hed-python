@@ -183,9 +183,9 @@ def val_warning_default_units_used(tag, default_unit):
 
 
 @hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE)
-def schema_error_HED_SCHEMA_DUPLICATE_NODE(tag, duplicate_tag_list):
+def schema_error_HED_SCHEMA_DUPLICATE_NODE(tag, duplicate_tag_list, section):
     tag_join_delimiter = "\n\t"
-    return f"Term(Short Tag) '{str(tag)}' used {len(duplicate_tag_list)} places in schema as: {tag_join_delimiter}"\
+    return f"Duplicate term '{str(tag)}' used {len(duplicate_tag_list)} places in '{section}' section schema as: {tag_join_delimiter}"\
            f"{tag_join_delimiter.join(duplicate_tag_list)}", {}
 
 
@@ -210,6 +210,12 @@ def schema_warning_invalid_capitalization(tag_name, problem_char, char_index):
     return "First character must be a capital letter or number.  " + \
            f"Found character '{problem_char}' in tag '{tag_name}' at position {char_index}.", \
            {'problem_char': problem_char}
+
+
+@hed_error(SchemaWarnings.NON_PLACEHOLDER_HAS_CLASS, default_severity=ErrorSeverity.WARNING)
+def schema_warning_non_placeholder_class(tag_name, invalid_attribute_name):
+    return "Only placeholder nodes('#') can have a unit or value class." + \
+           f"Found {invalid_attribute_name} on {tag_name}", {}
 
 
 @hed_error(SidecarErrors.BLANK_HED_STRING)

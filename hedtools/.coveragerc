@@ -2,11 +2,7 @@
 branch = True
 omit =
         */__init__.py
-        */deploy_hed/*
-        */examples/*
-        */hedweb/constants/*
-        */app_factory.py
-        */venv/site-packages/*
+        */venv/*
         */tests/*
 
 

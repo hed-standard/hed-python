@@ -40,6 +40,9 @@ class TagValidator:
         if not self._hed_schema:
             self._run_semantic_validation = False
 
+        # Dict contains all the value portion validators for value class.  e.g. "is this a number?"
+        self._value_unit_validators = self._register_default_value_validators()
+
     # ==========================================================================
     # Top level validator functions
     # =========================================================================+
@@ -84,17 +87,14 @@ class TagValidator:
         validation_issues += self.check_tag_invalid_chars(original_tag, allow_placeholders)
         if self._run_semantic_validation:
             validation_issues += self.check_tag_exists_in_schema(original_tag, check_for_warnings)
-            if self._hed_schema.is_unit_class_tag(original_tag):
-                validation_issues += self.check_tag_unit_class_units_are_valid(original_tag)
-                if check_for_warnings:
-                    validation_issues += self.check_tag_unit_class_units_exist(original_tag)
-            elif self._hed_schema.is_value_class_tag(original_tag):
+            if original_tag.is_unit_class_tag():
+                validation_issues += self.check_tag_unit_class_units_are_valid(original_tag, check_for_warnings)
+            elif original_tag.is_value_class_tag():
                 validation_issues += self.check_tag_value_class_valid(original_tag)
             elif original_tag.extension_or_value_portion:
                 validation_issues += self.check_for_invalid_extension_chars(original_tag)
 
             if not allow_placeholders:
-                # if not self._allow_pound_signs_as_numbers:
                 validation_issues += self.check_for_placeholder(original_tag)
             validation_issues += self.check_tag_requires_child(original_tag)
         if check_for_warnings:
@@ -124,7 +124,7 @@ class TagValidator:
         return validation_issues
 
     def run_all_tags_validators(self, tags, check_for_warnings):
-        """Validates the multi-tag properties in a hed string, eg required tags.
+        """Validates the multi-tag properties in a hed string, e.g. required tags.
 
         Parameters
         ----------
@@ -295,10 +295,10 @@ class TagValidator:
             A validation issues list. If no issues are found then an empty list is returned.
         """
         validation_issues = []
-        if self._hed_schema.is_basic_tag(original_tag) or self._hed_schema.is_takes_value_tag(original_tag):
+        if original_tag.is_basic_tag() or original_tag.is_takes_value_tag():
             return validation_issues
 
-        is_extension_tag = self._hed_schema.is_extension_allowed_tag(original_tag)
+        is_extension_tag = original_tag.is_extension_allowed_tag()
         if not is_extension_tag:
             validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_EXTENSION, tag=original_tag)
         elif check_for_warnings:
@@ -307,7 +307,7 @@ class TagValidator:
                                                            index_in_tag_end=None)
         return validation_issues
 
-    def check_tag_unit_class_units_are_valid(self, original_tag):
+    def check_tag_unit_class_units_are_valid(self, original_tag, check_for_warnings):
         """Reports a validation error if the tag provided has a unit class and the units are incorrect.
 
         Parameters
@@ -321,18 +321,27 @@ class TagValidator:
 
         """
         validation_issues = []
-        if self._hed_schema.is_unit_class_tag(original_tag):
-            stripped_value = self._hed_schema.get_stripped_unit_value(original_tag)
-            if not self._validate_value_class_portion(original_tag, stripped_value):
-                tag_unit_class_units = self._hed_schema.get_tag_unit_class_units(original_tag)
-                if tag_unit_class_units:
-                    validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                                                   original_tag,
-                                                                   unit_class_units=tag_unit_class_units)
+        if original_tag.is_unit_class_tag():
+            stripped_value, unit = original_tag.get_stripped_unit_value()
+            if not unit:
+                if self._validate_value_class_portion(original_tag, stripped_value):
+                    if check_for_warnings:
+                        # only suggest a unit is missing if this is a valid number
+                        if tag_validator_util.validate_numeric_value_class(stripped_value):
+                            default_unit = original_tag.get_unit_class_default_unit()
+                            validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
+                                                                           tag=original_tag,
+                                                                           default_unit=default_unit)
+                else:
+                    tag_unit_class_units = original_tag.get_tag_unit_class_units()
+                    if tag_unit_class_units:
+                        validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_INVALID,
+                                                                       original_tag,
+                                                                       unit_class_units=tag_unit_class_units)
         return validation_issues
 
     def check_tag_value_class_valid(self, original_tag):
-        """Reports a validation error if the tag provided has has an invalid value portion
+        """Reports a validation error if the tag provided has an invalid value portion
 
         Parameters
         ----------
@@ -364,7 +373,7 @@ class TagValidator:
 
         """
         validation_issues = []
-        if self._hed_schema.tag_has_attribute(original_tag, HedKey.RequireChild):
+        if original_tag.has_attribute(HedKey.RequireChild):
             validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_REQUIRES_CHILD,
                                                            tag=original_tag)
         return validation_issues
@@ -382,10 +391,10 @@ class TagValidator:
             A list validation error dicts.  Returns empty list if no issues found
         """
         validation_issues = []
-        if self._hed_schema.is_unit_class_tag(original_tag):
+        if original_tag.is_unit_class_tag():
             tag_unit_values = original_tag.extension_or_value_portion
             if tag_validator_util.validate_numeric_value_class(tag_unit_values):
-                default_unit = self._hed_schema.get_unit_class_default_unit(original_tag)
+                default_unit = original_tag.get_unit_class_default_unit()
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
                                                                tag=original_tag,
                                                                default_unit=default_unit)
@@ -422,10 +431,7 @@ class TagValidator:
             A validation issues list. If no issues are found then an empty list is returned.
         """
         validation_issues = []
-        tag_names = str(original_tag).split("/")
-        # Cut off the # sign tag if it exists
-        if self._hed_schema and self._hed_schema.is_takes_value_tag(original_tag):
-            tag_names = tag_names[:-1]
+        tag_names = original_tag.org_base_tag.split("/")
         for tag_name in tag_names:
             correct_tag_name = tag_name.capitalize()
             if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
@@ -479,9 +485,9 @@ class TagValidator:
         validation_issues = []
         if self._run_semantic_validation:
             top_level_tags = [tag for tag in original_tag_list if
-                              self._hed_schema.base_tag_has_attribute(tag, HedKey.TopLevelTagGroup)]
+                              tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)]
             tag_group_tags = [tag for tag in original_tag_list if
-                              self._hed_schema.base_tag_has_attribute(tag, HedKey.TagGroup)]
+                              tag.base_tag_has_attribute(HedKey.TagGroup)]
             for tag_group_tag in tag_group_tags:
                 if not is_group:
                     validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_GROUP_TAG,
@@ -511,7 +517,7 @@ class TagValidator:
             A validation issues list. If no issues are found then an empty list is returned.
         """
         validation_issues = []
-        required_tag_prefixes = self._hed_schema.get_all_tags_with_attribute(HedKey.RequiredPrefix)
+        required_tag_prefixes = self._hed_schema.get_all_tags_with_attribute(HedKey.Required)
         for capitalized_required_tag_prefix in required_tag_prefixes:
             required_tag_prefix = capitalized_required_tag_prefix.lower()
             if sum([x.lower().startswith(required_tag_prefix) for x in tags]) < 1:
@@ -547,21 +553,12 @@ class TagValidator:
     def _validate_value_class_portion(self, original_tag, portion_to_validate):
         if portion_to_validate is None:
             return False
-
-        # Fallback code for no value classes
-        if not self._hed_schema.value_classes:
-            unit_class_types = self._hed_schema.get_tag_unit_classes(original_tag)
-            if tag_validator_util.validate_value_class_type(portion_to_validate, unit_class_types):
-                return True
-            return tag_validator_util.validate_numeric_value_class(portion_to_validate)
-        if not self._hed_schema.is_value_class_tag(original_tag):
-            return False
-
-        value_class_types = self._hed_schema.get_tag_value_classes(original_tag)
-        return tag_validator_util.validate_value_class_type(portion_to_validate, value_class_types)
+        
+        value_class_types = original_tag.value_classes
+        return self.validate_value_class_type(portion_to_validate, value_class_types)
 
     def _report_invalid_character_error(self, hed_string, index):
-        """Reports a error that is related to an invalid character.
+        """Reports an error that is related to an invalid character.
 
         Parameters
         ----------
@@ -660,3 +657,36 @@ class TagValidator:
                                                            tag=source_tag, index_in_tag=starting_index + i,
                                                            index_in_tag_end=starting_index + i + 1)
         return validation_issues
+
+    @staticmethod
+    def _register_default_value_validators():
+        validator_dict = {
+            tag_validator_util.DATE_TIME_VALUE_CLASS: tag_validator_util.is_date_time,
+            tag_validator_util.NUMERIC_VALUE_CLASS: tag_validator_util.validate_numeric_value_class,
+            tag_validator_util.TEXT_VALUE_CLASS: tag_validator_util.validate_text_value_class,
+            tag_validator_util.NAME_VALUE_CLASS: tag_validator_util.validate_text_value_class
+        }
+
+        return validator_dict
+
+    def validate_value_class_type(self, unit_or_value_class_portion, valid_types):
+        """
+            Invokes the validator functions for the given types, seeing if any are valid.
+
+        Parameters
+        ----------
+        unit_or_value_class_portion : str
+            The value portion to validate
+        valid_types : [str]
+            The names of value class or unit class types.  e.g. dateTime or dateTimeClass
+        Returns
+        -------
+        type_valid: bool
+            Returns true if this passed one of the valid_types validators.
+        """
+        for unit_class_type in valid_types:
+            valid_func = self._value_unit_validators.get(unit_class_type)
+            if valid_func:
+                if valid_func(unit_or_value_class_portion):
+                    return True
+        return False

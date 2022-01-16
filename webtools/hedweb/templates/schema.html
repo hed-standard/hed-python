@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
-{% from "process-options.html" import create_process_options %}
+{% from "actions.html" import create_actions %}
+{% from "options.html" import create_options %}
 {% block content %}
     <h2>Process HED Schema</h2>
 
@@ -7,9 +8,10 @@
     <form id="schema_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {{ create_process_options('1) Pick an action:',convert=True, validate=True) }}
+        {{ create_actions('1) Pick an action:',convert=True, validate=True) }}
+        {{ create_options('2) Check applicable options (if any):',check_for_warnings=True) }}
 
-        <h3>2) Select a schema source file (.xml/.mediawiki):</h3>
+        <h3>3) Select a schema source file (.xml/.mediawiki):</h3>
         <div class="form-group" id="schema_url_group">
             <input class="radio-btn" type="radio" name="schema_upload_options"
                    id="schema_url_option" value="schema_url_option" aria-label="Select this button for HED schema URL">
@@ -32,8 +34,7 @@
             </label>
             <p class="flash" id="schema_file_flash"></p>
         </div>
-
-        <h3>3) Process:</h3>
+        <h3>4) Process:</h3>
         <div class="form-group">
             <button id="schema_submit" type="button">Process</button>
         </div>
@@ -43,6 +44,7 @@
     </form>
     <script type="module">
         {%  include 'js/form-helpers.js' %}
+        {%  include 'js/options.js' %}
         {%  include 'js/schema-form.js' %}
     </script>
 
