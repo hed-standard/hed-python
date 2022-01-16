@@ -35,6 +35,7 @@ class Test(unittest.TestCase):
     def test_print_log(self):
         status = HedLogger()
         with mock.patch('sys.stdout', new=StringIO()) as fake_out:
+            self.assertIsInstance(fake_out, StringIO, "Mock creates a StringIO")
             status.add("baloney", "Test message 1", also_print=True)
             status.add("baloney", "Test message 2", also_print=True)
 

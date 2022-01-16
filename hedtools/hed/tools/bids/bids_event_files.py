@@ -64,7 +64,6 @@ class BidsEventFiles:
     def validate(self, validators, check_for_warnings=True, keep_events=False):
         issues = []
         for json_obj in self.sidecar_dict.values():
-            extra_defs = []
             issues += json_obj.contents.validate_entries(validators=validators, check_for_warnings=check_for_warnings)
         if issues:
             return issues

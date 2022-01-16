@@ -23,7 +23,6 @@ class Test(unittest.TestCase):
         self.assertEqual(bids2.ext, '.json', "BidsFile should have a .json extension")
         self.assertEqual(len(bids2.entities), 1, "BidsFile should have right number of entities")
 
-
     def test_bids_file_str(self):
         bids = BidsFile(Test.sidecar_path)
         my_str = str(bids)
