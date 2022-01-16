@@ -5,10 +5,10 @@ from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.util.file_util import get_file_extension
-from hed.errors.error_reporter import get_exception_issue_string, get_printable_issue_string
+from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 
-from hedweb.web_util import form_has_file, form_has_option, form_has_url, generate_filename, handle_error
+from hedweb.web_util import form_has_file, form_has_option, form_has_url, generate_filename
 from hedweb.constants import base_constants, file_constants
 
 app_config = current_app.config
@@ -23,7 +23,7 @@ def get_schema(schema_path=None, schema_url=None, schema_string=None, file_type=
         A string representing a path to a schema
     schema_url: str
         A string representing a URL of a schema
-    schema_url: str
+    schema_string: str
         A string representing a URL of a schema
     file_type: str
         A string representing the file extension including the .

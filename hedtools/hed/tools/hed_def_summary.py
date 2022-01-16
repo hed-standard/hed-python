@@ -30,7 +30,7 @@ class HedDefSummary():
 
     def get_condition_variables(self):
         cond_variables = {}
-        print("Help")
+        return cond_variables
 
 
 if __name__ == '__main__':

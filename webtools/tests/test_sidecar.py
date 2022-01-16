@@ -68,7 +68,7 @@ class Test(TestWebBase):
             self.assertTrue(results['data'],
                             'process to short should not convert using HED 8.0.0.xml')
 
-    def test_sidecar_process_invalid(self):
+    def test_sidecar_process_valid(self):
         from hedweb.sidecar import process
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         json_sidecar = models.Sidecar(file=json_path, name='bids_events')

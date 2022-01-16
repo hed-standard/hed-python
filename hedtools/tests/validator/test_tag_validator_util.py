@@ -61,6 +61,5 @@ class StringUtilityFunctions(TestHed):
             self.assertEqual(result, False, string)
 
 
-
 if __name__ == '__main__':
     unittest.main()
