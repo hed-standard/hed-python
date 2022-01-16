@@ -292,10 +292,11 @@ class IndividualHedTagsShort(TestHed):
         expected_issues = {
             'orgTagDifferent': self.format_error(ValidationErrors.HED_UNITS_INVALID,
                                                  tag=0, unit_class_units=tag_unit_class_units),
-            'orgTagDifferent2': self.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                                  tag=0, unit_class_units=tag_unit_class_units)
-                                + self.format_error(ValidationErrors.HED_UNITS_INVALID, tag=1,
-                                                    unit_class_units=tag_unit_class_units),
+            'orgTagDifferent2':
+                self.format_error(ValidationErrors.HED_UNITS_INVALID,
+                                  tag=0, unit_class_units=tag_unit_class_units)
+                + self.format_error(ValidationErrors.HED_UNITS_INVALID, tag=1,
+                                    unit_class_units=tag_unit_class_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -574,42 +575,33 @@ class FullHedString(TestHed):
             'extraClosingParen': self.format_error(ValidationErrors.HED_PARENTHESES_MISMATCH,
                                                    opening_parentheses_count=1,
                                                    closing_parentheses_count=2),
-            'multipleExtraOpeningDelimiters': self.format_error(ValidationErrors.HED_TAG_EMPTY,
-                                                                source_string=test_strings[
-                                                                    'multipleExtraOpeningDelimiters'],
-                                                                char_index=0)
-                                              + self.format_error(ValidationErrors.HED_TAG_EMPTY,
-                                                                  source_string=test_strings[
-                                                                      'multipleExtraOpeningDelimiters'],
-                                                                  char_index=1)
-                                              + self.format_error(ValidationErrors.HED_TAG_EMPTY,
-                                                                  source_string=test_strings[
-                                                                      'multipleExtraOpeningDelimiters'],
-                                                                  char_index=2),
-            'multipleExtraClosingDelimiters': self.format_error(
-                ValidationErrors.HED_TAG_EMPTY,
-                source_string=test_strings['multipleExtraClosingDelimiters'],
-                char_index=len(test_strings['multipleExtraClosingDelimiters']) - 1)
-                    + self.format_error(ValidationErrors.HED_TAG_EMPTY,
-                                        source_string=test_strings['multipleExtraClosingDelimiters'],
-                                        char_index=len(test_strings['multipleExtraClosingDelimiters']) - 2)
-                    + self.format_error(ValidationErrors.HED_TAG_EMPTY,
-                                        source_string=test_strings['multipleExtraClosingDelimiters'],
-                                        char_index=len(test_strings['multipleExtraClosingDelimiters']) - 3)
-                    + self.format_error(ValidationErrors.HED_TAG_EMPTY,
-                                        source_string=test_strings['multipleExtraClosingDelimiters'],
-                                        char_index=len(test_strings['multipleExtraClosingDelimiters']) - 4),
-            'multipleExtraMiddleDelimiters': self.format_error(
-                ValidationErrors.HED_TAG_EMPTY,
-                source_string=test_strings['multipleExtraMiddleDelimiters'], char_index=22)
-                                             + self.format_error(ValidationErrors.HED_TAG_EMPTY,
-                                                                 source_string=test_strings[
-                                                                     'multipleExtraMiddleDelimiters'],
-                                                                 char_index=121)
-                                             + self.format_error(ValidationErrors.HED_TAG_EMPTY,
-                                                                 source_string=test_strings[
-                                                                     'multipleExtraMiddleDelimiters'],
-                                                                 char_index=122),
+            'multipleExtraOpeningDelimiters':
+                self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                  source_string=test_strings['multipleExtraOpeningDelimiters'], char_index=0)
+                + self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                    source_string=test_strings['multipleExtraOpeningDelimiters'],  char_index=1)
+                + self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                    source_string=test_strings['multipleExtraOpeningDelimiters'], char_index=2),
+            'multipleExtraClosingDelimiters':
+                self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                  source_string=test_strings['multipleExtraClosingDelimiters'],
+                                  char_index=len(test_strings['multipleExtraClosingDelimiters']) - 1)
+                + self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                    source_string=test_strings['multipleExtraClosingDelimiters'],
+                                    char_index=len(test_strings['multipleExtraClosingDelimiters']) - 2)
+                + self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                    source_string=test_strings['multipleExtraClosingDelimiters'],
+                                    char_index=len(test_strings['multipleExtraClosingDelimiters']) - 3)
+                + self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                    source_string=test_strings['multipleExtraClosingDelimiters'],
+                                    char_index=len(test_strings['multipleExtraClosingDelimiters']) - 4),
+            'multipleExtraMiddleDelimiters':
+                self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                  source_string=test_strings['multipleExtraMiddleDelimiters'], char_index=22)
+                + self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                    source_string=test_strings['multipleExtraMiddleDelimiters'], char_index=121)
+                + self.format_error(ValidationErrors.HED_TAG_EMPTY,
+                                    source_string=test_strings['multipleExtraMiddleDelimiters'], char_index=122),
             'valid': [],
             'validNestedParentheses': [],
             'validNestedParentheses2': [],
@@ -685,17 +677,16 @@ class FullHedString(TestHed):
         }
         expected_errors = {
             'twoLevelDoubleSlash': self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
-                                                     index_in_tag=5,
-                                                     index_in_tag_end=7, tag=0),
-            'threeLevelDoubleSlash': self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
-                                                       index_in_tag=7,
-                                                       index_in_tag_end=9, tag=0)
-                                     + self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
-                                                         index_in_tag=13, index_in_tag_end=15, tag=0),
-            'tripleSlashes': self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY, index_in_tag=7,
-                                               index_in_tag_end=10, tag=0)
-                             + self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
-                                                 index_in_tag=14, index_in_tag_end=17, tag=0),
+                                                     index_in_tag=5, index_in_tag_end=7, tag=0),
+            'threeLevelDoubleSlash':
+                self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
+                                  index_in_tag=7, index_in_tag_end=9, tag=0)
+                + self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
+                                    index_in_tag=13, index_in_tag_end=15, tag=0),
+            'tripleSlashes':
+                self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY, index_in_tag=7, index_in_tag_end=10, tag=0)
+                + self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
+                                    index_in_tag=14, index_in_tag_end=17, tag=0),
             'mixedSingleAndDoubleSlashes': self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
                                                              index_in_tag=7, index_in_tag_end=9, tag=0),
             'singleSlashWithSpace': self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
@@ -706,11 +697,10 @@ class FullHedString(TestHed):
                                                       index_in_tag=5, index_in_tag_end=8, tag=0),
             'sosPattern': self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY, index_in_tag=5,
                                             index_in_tag_end=14, tag=0),
-            'alternatingSlashSpace': self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
-                                                       index_in_tag=7,
-                                                       index_in_tag_end=11, tag=0)
-                                     + self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
-                                                         index_in_tag=15, index_in_tag_end=19, tag=0),
+            'alternatingSlashSpace':
+                self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY, index_in_tag=7, index_in_tag_end=11, tag=0)
+                + self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
+                                    index_in_tag=15, index_in_tag_end=19, tag=0),
             'leadingDoubleSlash': self.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
                                                     index_in_tag=0,
                                                     index_in_tag_end=2, tag=0),
@@ -749,18 +739,18 @@ class FullHedString(TestHed):
             'oneTildeGroup': self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
                                                source_string=test_strings['oneTildeGroup'],
                                                char_index=56),
-            'twoTildeGroup': self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
-                                               source_string=test_strings['twoTildeGroup'],
-                                               char_index=49)
-                             + self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
-                                                 source_string=test_strings['twoTildeGroup'], char_index=77),
-            'invalidTildeGroup': self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
-                                                   source_string=test_strings['invalidTildeGroup'],
-                                                   char_index=49)
-                                 + self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
-                                                     source_string=test_strings['invalidTildeGroup'], char_index=77)
-                                 + self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
-                                                     source_string=test_strings['invalidTildeGroup'], char_index=147)
+            'twoTildeGroup':
+                self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
+                                  source_string=test_strings['twoTildeGroup'], char_index=49)
+                + self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
+                                    source_string=test_strings['twoTildeGroup'], char_index=77),
+            'invalidTildeGroup':
+                self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
+                                  source_string=test_strings['invalidTildeGroup'], char_index=49)
+                + self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
+                                    source_string=test_strings['invalidTildeGroup'], char_index=77)
+                + self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
+                                    source_string=test_strings['invalidTildeGroup'], char_index=147)
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 
@@ -793,8 +783,9 @@ class RequiredTags(TestHed):
                                               tag_prefix='Agent/Animal-agent'),
             'missingAction': self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Action'),
             'inSubGroup': [],
-            'missingAll': self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Action') +
-                          self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Agent/Animal-agent'),
+            'missingAll':
+                self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Action')
+                + self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Agent/Animal-agent'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
