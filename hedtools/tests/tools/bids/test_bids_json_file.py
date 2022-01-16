@@ -8,7 +8,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        '../../data/bids/dataset_description.json')
+                                     '../../data/bids/dataset_description.json')
 
     def test_constructor(self):
         json1 = BidsJsonFile(Test.json_path, set_contents=False)

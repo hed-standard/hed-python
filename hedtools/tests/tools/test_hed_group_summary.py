@@ -1,6 +1,5 @@
 import os
 import unittest
-import json
 from hed.models.sidecar import Sidecar
 from hed.schema.hed_schema_file import load_schema
 
