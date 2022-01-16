@@ -22,8 +22,8 @@ class TestConvertTag(TestTagFormat):
             expected_params = expected_errors[test_key]
             expected_result = expected_results[test_key]
 
-            expected_issue = self.really_format_errors(error_handler, hed_string=test_string_obj,
-                                                       params=expected_params)
+            expected_issue = self.format_errors_fully(error_handler, hed_string=test_string_obj,
+                                                      params=expected_params)
             error_handler.add_context_to_issues(test_issues)
 
             # print(test_key)
@@ -131,31 +131,31 @@ class TestConvertToLongTag(TestConvertTag):
         }
         expected_errors = {
             'validThenInvalid':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=55, index_in_tag_end=60, expected_parent_tag='Event'),
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                  index_in_tag=55, index_in_tag_end=60, expected_parent_tag='Event'),
             'singleLevel':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=19, index_in_tag_end=35,
-                                                 expected_parent_tag='Item/Object/Geometric-object'),
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                  index_in_tag=19, index_in_tag_end=35,
+                                  expected_parent_tag='Item/Object/Geometric-object'),
             'singleLevelAlreadyLong':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=25, index_in_tag_end=41,
-                                                 expected_parent_tag='Item/Object/Geometric-object'),
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                  index_in_tag=25, index_in_tag_end=41,
+                                  expected_parent_tag='Item/Object/Geometric-object'),
             # old errors if we're doing left to right
             # 'twoLevels':
-            #     self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+            #     self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
             #                                      index_in_tag=19, index_in_tag_end=35,
             #                                      expected_parent_tag='Item/Object/Geometric-object'),
             # 'partialDuplicate':
-            #     self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+            #     self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
             #                                      index_in_tag=10, index_in_tag_end=14, expected_parent_tag='Item'),
             'twoLevels':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=36, index_in_tag_end=41,
-                                                 expected_parent_tag='Event'),
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                  index_in_tag=36, index_in_tag_end=41,
+                                  expected_parent_tag='Event'),
             'partialDuplicate':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=29, index_in_tag_end=45, expected_parent_tag='Item/Object/Geometric-object'),
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
+                                  index_in_tag=29, index_in_tag_end=45, expected_parent_tag='Item/Object/Geometric-object'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -171,14 +171,14 @@ class TestConvertToLongTag(TestConvertTag):
             'validChild': 'InvalidEvent/Event',
         }
         expected_errors = {
-            'single': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                       tag=0, index_in_tag=0, index_in_tag_end=12),
-            'invalidChild': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                             tag=0, index_in_tag=0, index_in_tag_end=12),
+            'single': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                        tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidChild': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                              tag=0, index_in_tag=0, index_in_tag_end=12),
 
-            'validChild': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                           tag=0, index_in_tag=13, index_in_tag_end=18,
-                                                           expected_parent_tag="Event"),
+            'validChild': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                            tag=0, index_in_tag=13, index_in_tag_end=18,
+                                            expected_parent_tag="Event"),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -269,17 +269,17 @@ class TestConvertToShortTag(TestConvertTag):
         }
         expected_errors = {
             'singleLevel':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0, index_in_tag=38, index_in_tag_end=43,
-                                                 expected_parent_tag='Event'),
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                  tag=0, index_in_tag=38, index_in_tag_end=43,
+                                  expected_parent_tag='Event'),
             'multiLevel':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0, index_in_tag=44, index_in_tag_end=57,
-                                                 expected_parent_tag='Event/Sensory-event'),
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                  tag=0, index_in_tag=44, index_in_tag_end=57,
+                                  expected_parent_tag='Event/Sensory-event'),
             'mixed':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0, index_in_tag=31, index_in_tag_end=50,
-                                                 expected_parent_tag='Item/Sound/Environmental-sound'),
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                  tag=0, index_in_tag=31, index_in_tag_end=50,
+                                  expected_parent_tag='Item/Sound/Environmental-sound'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -332,22 +332,22 @@ class TestConvertToShortTag(TestConvertTag):
             'duplicate': 'Item/Object/Geometric-object/Item/Object/Geometric-object',
         }
         expected_errors = {
-            'validThenInvalid': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                                 tag=0, index_in_tag=61, index_in_tag_end=66,
-                                                                 expected_parent_tag='Event'),
-            'singleLevel': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                            tag=0, index_in_tag=25, index_in_tag_end=41,
-                                                            expected_parent_tag='Item/Object/Geometric-object'),
+            'validThenInvalid': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                                  tag=0, index_in_tag=61, index_in_tag_end=66,
+                                                  expected_parent_tag='Event'),
+            'singleLevel': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                             tag=0, index_in_tag=25, index_in_tag_end=41,
+                                             expected_parent_tag='Item/Object/Geometric-object'),
             'singleLevelAlreadyShort':
-                self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                 tag=0, index_in_tag=19, index_in_tag_end=35,
-                                                 expected_parent_tag='Item/Object/Geometric-object'),
-            'twoLevels': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                          tag=0, index_in_tag=42, index_in_tag_end=47,
-                                                          expected_parent_tag='Event'),
-            'duplicate': self.format_error_but_not_really(ValidationErrors.INVALID_PARENT_NODE,
-                                                          tag=0, index_in_tag=41, index_in_tag_end=57,
-                                                          expected_parent_tag='Item/Object/Geometric-object')
+                self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                  tag=0, index_in_tag=19, index_in_tag_end=35,
+                                  expected_parent_tag='Item/Object/Geometric-object'),
+            'twoLevels': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                           tag=0, index_in_tag=42, index_in_tag_end=47,
+                                           expected_parent_tag='Event'),
+            'duplicate': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                           tag=0, index_in_tag=41, index_in_tag_end=57,
+                                           expected_parent_tag='Item/Object/Geometric-object')
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -367,30 +367,30 @@ class TestConvertToShortTag(TestConvertTag):
             'invalidWithExtension': 'InvalidEvent/InvalidExtension',
         }
         expected_errors = {
-            'invalidParentWithExistingGrandchild': self.format_error_but_not_really(
+            'invalidParentWithExistingGrandchild': self.format_error(
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=32, index_in_tag_end=48,
                 expected_parent_tag="Item/Object/Geometric-object"),
-            'invalidChildWithExistingGrandchild': self.format_error_but_not_really(
+            'invalidChildWithExistingGrandchild': self.format_error(
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=35,
                 expected_parent_tag="Item/Object/Geometric-object"),
-            'invalidParentWithExistingChild': self.format_error_but_not_really(
+            'invalidParentWithExistingChild': self.format_error(
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=13, index_in_tag_end=29,
                 expected_parent_tag="Item/Object/Geometric-object"),
-            'invalidSingle': self.format_error_but_not_really(
+            'invalidSingle': self.format_error(
                 ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            'invalidWithExtension': self.format_error_but_not_really(
+            'invalidWithExtension': self.format_error(
                 ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
             # Old errors if we go back to left to right processing.
-            # 'invalidParentWithExistingGrandchild': self.format_error_but_not_really(
+            # 'invalidParentWithExistingGrandchild': self.format_error(
             #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            # 'invalidChildWithExistingGrandchild': self.format_error_but_not_really(
+            # 'invalidChildWithExistingGrandchild': self.format_error(
             #     ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=28,
             #     expected_parent_tag="Item/Object/Geometric-object"),
-            # 'invalidParentWithExistingChild': self.format_error_but_not_really(
+            # 'invalidParentWithExistingChild': self.format_error(
             #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            # 'invalidSingle': self.format_error_but_not_really(
+            # 'invalidSingle': self.format_error(
             #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            # 'invalidWithExtension': self.format_error_but_not_really(
+            # 'invalidWithExtension': self.format_error(
             #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
@@ -540,18 +540,18 @@ class TestConvertHedStringToShort(TestConvertTag):
             'doubleWithValid': double + ',Car/Minivan',
         }
         expected_errors = {
-            'single': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                       tag=0, index_in_tag=0, index_in_tag_end=12),
-            'double': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                       tag=0, index_in_tag=0, index_in_tag_end=12),
-            'both': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                     tag=0, index_in_tag=0, index_in_tag_end=12)
-            + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                               tag=1, index_in_tag=0, index_in_tag_end=12),
-            'singleWithTwoValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                                   tag=1, index_in_tag=0, index_in_tag_end=12),
-            'doubleWithValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                                tag=0, index_in_tag=0, index_in_tag_end=12),
+            'single': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                        tag=0, index_in_tag=0, index_in_tag_end=12),
+            'double': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                        tag=0, index_in_tag=0, index_in_tag_end=12),
+            'both': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                      tag=0, index_in_tag=0, index_in_tag_end=12)
+            + self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                tag=1, index_in_tag=0, index_in_tag_end=12),
+            'singleWithTwoValid': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                    tag=1, index_in_tag=0, index_in_tag_end=12),
+            'doubleWithValid': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                 tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -654,18 +654,18 @@ class TestConvertHedStringToLong(TestConvertTag):
             'doubleWithValid': double + ',Item/Object/Man-made-object/Vehicle/Car/Minivan',
         }
         expected_errors = {
-            'single': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                       tag=0, index_in_tag=0, index_in_tag_end=12),
-            'double': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                       tag=0, index_in_tag=0, index_in_tag_end=12),
-            'both': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                     tag=0, index_in_tag=0, index_in_tag_end=12)
-            + self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                               tag=1, index_in_tag=0, index_in_tag_end=12),
-            'singleWithTwoValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                                   tag=1, index_in_tag=0, index_in_tag_end=12),
-            'doubleWithValid': self.format_error_but_not_really(ValidationErrors.NO_VALID_TAG_FOUND,
-                                                                tag=0, index_in_tag=0, index_in_tag_end=12),
+            'single': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                        tag=0, index_in_tag=0, index_in_tag_end=12),
+            'double': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                        tag=0, index_in_tag=0, index_in_tag_end=12),
+            'both': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                      tag=0, index_in_tag=0, index_in_tag_end=12)
+            + self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                tag=1, index_in_tag=0, index_in_tag_end=12),
+            'singleWithTwoValid': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                    tag=1, index_in_tag=0, index_in_tag_end=12),
+            'doubleWithValid': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                                 tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 

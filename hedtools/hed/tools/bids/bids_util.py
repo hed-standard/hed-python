@@ -15,7 +15,6 @@ def parse_bids_filename(file_path):
 
     """
 
-
     filename = os.path.splitext(os.path.basename(file_path))
     ext = filename[1].lower()
     basename = filename[0]

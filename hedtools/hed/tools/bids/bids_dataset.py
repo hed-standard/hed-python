@@ -16,7 +16,6 @@ class BidsDataset:
         with open(os.path.join(self.root_path, "dataset_description.json"), "r") as fp:
             self.dataset_description = json.load(fp)
         self.participants = get_new_dataframe(os.path.join(self.root_path, "participants.tsv"))
-        y = self._schema_from_description()
         self.hed_schema = HedSchemaGroup(self._schema_from_description())
         self.event_files = BidsEventFiles(root_path)
 
@@ -34,7 +33,7 @@ class BidsDataset:
             for key, library in hed['libraries'].items():
                 url = LIBRARY_URL_BASE + library + '.xml'
                 x = load_schema(hed_url_path=url, library_prefix=key)
-                x.set_library_prefix(key)  #TODO: temporary work around
+                x.set_library_prefix(key)  # TODO: temporary work around
                 hed_list.append(x)
         return hed_list
 
