@@ -1,8 +1,8 @@
 import os
 
 
-from hed.schema.fileio.xml2schema import HedSchemaXMLParser
-from hed.schema.fileio.wiki2schema import HedSchemaWikiParser
+from hed.schema.io.xml2schema import HedSchemaXMLParser
+from hed.schema.io.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -39,18 +39,16 @@ def from_string(schema_string, file_type=".xml"):
     return hed_schema
 
 
-def load_schema(hed_file_path=None, hed_url_path=None, library_prefix=None):
+def load_schema(hed_path=None, library_prefix=None):
     """
-        Load a schema from the given file or URL path.  Must be one or the other
+        Load a schema from the given file or URL path.
 
         Raises HedFileError if there are any fatal issues.
 
     Parameters
     ----------
-    hed_file_path : str or None
-        A local filepath to open a schema from
-    hed_url_path : str or None
-        A url to open a schema from
+    hed_path : str or None
+        A filepath or url to open a schema from
     library_prefix : str or None
         The name_prefix all tags in this schema will accept.
 
@@ -59,23 +57,21 @@ def load_schema(hed_file_path=None, hed_url_path=None, library_prefix=None):
     schema: HedSchema
         The loaded schema
     """
-    if not hed_file_path and not hed_url_path:
+    if not hed_path:
         raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file",
-                           filename=hed_file_path)
+                           filename=hed_path)
 
-    if hed_file_path and hed_url_path:
-        raise HedFileError(HedExceptions.BAD_PARAMETERS, "Passed both a filename and a url to load_schema",
-                           filename=hed_file_path)
+    is_url = hed_cache._check_if_url(hed_path)
 
-    if hed_url_path:
-        file_as_string = file_util.url_to_string(hed_url_path)
-        return from_string(file_as_string, file_type=os.path.splitext(hed_url_path.lower())[1])
-    elif hed_file_path.lower().endswith(".xml"):
-        hed_schema = HedSchemaXMLParser.load_xml(hed_file_path)
-    elif hed_file_path.lower().endswith(".mediawiki"):
-        hed_schema = HedSchemaWikiParser.load_wiki(hed_file_path)
+    if is_url:
+        file_as_string = file_util.url_to_string(hed_path)
+        return from_string(file_as_string, file_type=os.path.splitext(hed_path.lower())[1])
+    elif hed_path.lower().endswith(".xml"):
+        hed_schema = HedSchemaXMLParser.load_xml(hed_path)
+    elif hed_path.lower().endswith(".mediawiki"):
+        hed_schema = HedSchemaWikiParser.load_wiki(hed_path)
     else:
-        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_file_path)
+        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
     if library_prefix:
         hed_schema.set_library_prefix(library_prefix=library_prefix)
@@ -125,38 +121,3 @@ def load_schema_version(xml_folder=None, xml_version_number=None):
         else:
             raise e
     return hed_schema
-
-
-def convert_schema_to_format(hed_schema, check_for_issues=True,
-                             name=None, save_as_mediawiki=False):
-    """
-    Loads a local schema file or from a URL, then outputs a temporary file with the requested format.
-    Parameters
-    ----------
-    hed_schema: HedSchema
-        The schema to convert
-    check_for_issues : bool
-        After conversion checks for warnings like capitalization or invalid characters.
-    name: str
-        If present, will use this as the filename for context, rather than using the actual filename
-        Useful for temp filenames.
-    save_as_mediawiki: bool
-        If True, save as .mediawiki.  if False, save as .xml
-    Returns
-    -------
-    output_string: [str]
-        The file as a list of strings
-    issues_list: [{}]
-        returns a list of error/warning dictionaries
-    """
-    issue_list = []
-    if check_for_issues:
-        warnings = hed_schema.check_compliance(name=name)
-        issue_list += warnings
-
-    if save_as_mediawiki:
-        output_string = hed_schema.get_as_mediawiki_string()
-    else:
-        output_string = hed_schema.get_as_xml_string()
-
-    return output_string, issue_list
