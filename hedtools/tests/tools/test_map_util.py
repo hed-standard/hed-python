@@ -66,7 +66,6 @@ class Test(unittest.TestCase):
         self.assertEqual(len(dicts2), 2, "make_combined_dicts should return correct number of file names")
         self.assertEqual(len(dicts_all2.categorical_info), 7,
                          "make_combined_dicts should return right number of entries")
-        print("to here")
 
     def test_update_dict_counts(self):
         files_bids = get_file_list(self.bids_dir, extensions=[".tsv"], name_suffix="_events")
