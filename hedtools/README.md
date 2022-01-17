@@ -48,3 +48,12 @@ For the HED schema please visit: <https://github.com/hed-standard/hed-specificat
 
 ### Dependencies
 * [Python 3](https://www.python.org/downloads/)
+
+
+### Running coverage locally
+1. Install coverage in your virtual environment:
+```pip install coverage```
+2. Run coverage as a module in the virtual environment:
+```python -m coverage run -m unittest```
+3. Run the report:
+```coverage report -m```
