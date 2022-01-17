@@ -1,4 +1,5 @@
 from functools import partial
+from hed.schema import HedSchema, HedSchemaGroup
 
 
 def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
@@ -7,7 +8,7 @@ def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
 
     Parameters
     ----------
-    validators : [func or validator like] or func or validator like
+    validators : [func or validator like or HedSchema] or func or validator like or HedSchema
             A validator or list of validators to apply to the hed strings in the sidecars.
     split_tag_and_string_ops: bool
         If true, will split the operations into tag and string operations
@@ -27,18 +28,23 @@ def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
     if not isinstance(validators, list):
         validators = [validators]
 
+    from hed.models.hed_string import HedString
+
     tag_ops = []
     string_ops = []
     for validator in validators:
         if validator:
-            try:
-                tag_ops += validator.__get_tag_ops__(**kwargs)
-                string_ops += validator.__get_string_ops__(**kwargs)
-            except AttributeError:
-                string_ops.append(validator)
+            # Handle the special case of a hed schema.
+            if isinstance(validator, (HedSchema, HedSchemaGroup)):
+                tag_ops.append(partial(HedString.convert_to_canonical_forms, hed_schema=validator))
+            else:
+                try:
+                    tag_ops += validator.__get_tag_ops__(**kwargs)
+                    string_ops += validator.__get_string_ops__(**kwargs)
+                except AttributeError:
+                    string_ops.append(validator)
 
     # Make sure the first column operation is a convert to forms, if we don't have one.
-    from hed.models.hed_string import HedString
     found_convert_form = False
     for func in tag_ops:
         if func == HedString.convert_to_canonical_forms:

@@ -2,7 +2,7 @@
 
 from xml.etree.ElementTree import Element, SubElement
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema.fileio import xml_constants
+from hed.schema.io import xml_constants
 
 
 class HedSchema2XML:

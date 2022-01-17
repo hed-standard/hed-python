@@ -3,8 +3,8 @@ This module contains the HedSchema class, which contains all the tags and attrib
 """
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
-from hed.schema.fileio.schema2xml import HedSchema2XML
-from hed.schema.fileio.schema2wiki import HedSchema2Wiki
+from hed.schema.io.schema2xml import HedSchema2XML
+from hed.schema.io.schema2wiki import HedSchema2Wiki
 
 from hed.schema import schema_validation_util
 from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection

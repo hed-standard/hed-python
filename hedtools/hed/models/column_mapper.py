@@ -389,7 +389,7 @@ class ColumnMapper:
             error_handler = ErrorHandler()
         all_validation_issues = []
         for column_data in self.column_data.values():
-            all_validation_issues += column_data.validate_column(validators, also_validate=True,
+            all_validation_issues += column_data.validate_column(validators,
                                                                  error_handler=error_handler,
                                                                  **kwargs)
 
