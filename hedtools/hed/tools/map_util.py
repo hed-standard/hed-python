@@ -1,3 +1,4 @@
+
 from hed.tools.col_dict import ColumnDict
 from hed.tools.io_util import get_file_list
 from hed.tools.data_util import get_new_dataframe
@@ -56,19 +57,20 @@ def make_combined_dicts(file_dict, skip_cols=None):
     return dicts_all, dicts
 
 
-def print_columns_info(columns_info, skip_cols=None):
-
-    for col_name, col_counts in columns_info.items():
-        if skip_cols and col_name in skip_cols:
-            continue
-        print(f"\n{col_name}:")
-        sorted_counts = sorted(col_counts.items())
-
-        for key, value in sorted_counts:
-            print(f"\t{key}: {value}")
+# def print_columns_info(columns_info, skip_cols=None):
+#
+#     for col_name, col_counts in columns_info.items():
+#         if skip_cols and col_name in skip_cols:
+#             continue
+#         print(f"\n{col_name}:")
+#         sorted_counts = sorted(col_counts.items())
+#
+#         for key, value in sorted_counts:
+#             print(f"\t{key}: {value}")
 
 
 def update_dict_counts(count_dicts, col_name, col_values):
+    """ Update the counts in a dictionary based on the column values in a """
     values = col_values.value_counts(ascending=True)
     if col_name not in count_dicts:
         count_dicts[col_name] = {}

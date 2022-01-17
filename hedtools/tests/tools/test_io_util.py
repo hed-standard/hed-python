@@ -1,5 +1,6 @@
 import os
 import unittest
+from werkzeug.utils import secure_filename
 from hed.errors.exceptions import HedFileError
 from hed.tools.io_util import get_file_list, get_path_components
 
