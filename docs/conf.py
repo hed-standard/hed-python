@@ -15,14 +15,13 @@ import sys
 import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../'))
-sys.path.insert(0, os.path.abspath('../hedcode'))
 sys.path.insert(0, os.path.abspath('../hedtools'))
 sys.path.insert(0, os.path.abspath('../webtools'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'HED python'
-copyright = '2021, HED Working Group'
+copyright = '2022, HED Working Group'
 author = 'HED Working Group'
 
 # The full version, including alpha/beta/rc tags

@@ -24,8 +24,6 @@ Note:  this is a work in progress.
    :toctree: _autosummary
    :recursive:
 
-   hedmodules
-   webmodules
 
 Indices and tables
 ==================

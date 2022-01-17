@@ -2,12 +2,12 @@ API Reference
 ==============
 
 .. _base_ref:
-.. currentmodule:: hed
+
 
 :mod:`hed.models`: Class models
 ------------------------------------------
 
-.. autosummary:: hed.models
+.. autosummary:: hedtools.hed.models
    :toctree: generated/
 
    hed.models.base_input.BaseInput
@@ -18,7 +18,7 @@ API Reference
    hed.models.def_dict.DefDict
    hed.models.def_mapper.DefinitionMapper
 
-.. currentmodule:: hed
+.. currentmodule:: hedtools
 
 .. _calibration_ref:
 
