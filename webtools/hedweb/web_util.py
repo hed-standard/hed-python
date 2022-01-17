@@ -160,46 +160,6 @@ def generate_download_spreadsheet(results,  msg_category='success', msg=''):
     return response
 
 
-def generate_filename(base_name, prefix=None, suffix=None, extension=None):
-    """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
-
-    Parameters
-    ----------
-   base_name: str
-        The name of the base, usually the name of the file that the issues were generated from
-    prefix: str
-        The prefix prepended to the front of the base_name
-    suffix: str
-        The suffix appended to the end of the base_name
-    Returns
-    -------
-    string
-        The name of the attachment other containing the issues.
-    """
-
-    pieces = []
-    if prefix:
-        pieces = pieces + [secure_filename(prefix)]
-    if base_name:
-        pieces.append(os.path.splitext(secure_filename(base_name))[0])
-    if suffix:
-        pieces = pieces + [secure_filename(suffix)]
-
-    if not pieces:
-        return ''
-    filename = pieces[0]
-    for name in pieces[1:]:
-        filename = filename + '_' + name
-    # if not extension and base_name:
-    #     extension = os.path.splitext(secure_filename(base_name))[1]
-    # else:
-    #     extension = ''
-    # filename = filename + '.' + secure_filename(extension)
-    if extension:
-        filename = filename + '.' + secure_filename(extension)
-    return filename
-
-
 def generate_text_response(download_text, msg_category='success', msg=''):
     """Generates a download other response.
 

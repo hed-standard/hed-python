@@ -20,6 +20,16 @@ Note:  this is a work in progress.
    api.rst
    changes.rst
 
+Trying stuff
+==================
+.. automodule:: hedtools.hed.tools.models
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+More stuff
+==================
 .. autosummary::
    :toctree: _autosummary
    :recursive:

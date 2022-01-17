@@ -5,12 +5,13 @@ from hed import models
 from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
+from hed.tools.io_util import generate_filename
 from hed.validator.hed_validator import HedValidator
 from hed.util.file_util import get_file_extension
 
 from hedweb.constants import base_constants, file_constants
 from hedweb.columns import get_prefix_dict
-from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down, generate_filename
+from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down
 
 
 app_config = current_app.config
@@ -124,7 +125,7 @@ def spreadsheet_convert(hed_schema, spreadsheet, command=base_constants.COMMAND_
         suffix = '_to_short'
         spreadsheet.convert_to_short(hed_schema)
 
-    file_name = generate_filename(display_name, suffix=suffix, extension=display_ext)
+    file_name = generate_filename(display_name, name_suffix=suffix, extension=display_ext)
     return {base_constants.COMMAND: command, 'data': '',
             base_constants.SPREADSHEET: spreadsheet, 'output_display_name': file_name,
             base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'success',
@@ -154,7 +155,7 @@ def spreadsheet_validate(hed_schema, spreadsheet, check_for_warnings=False):
     display_name = spreadsheet.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"Spreadsheet {display_name} validation errors")
-        file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
+        file_name = generate_filename(display_name, name_suffix='_validation_errors', extension='.txt')
         return {base_constants.COMMAND: base_constants.COMMAND_VALIDATE,
                 'data': issue_str, "output_display_name": file_name,
                 base_constants.SCHEMA_VERSION: schema_version, "msg_category": "warning",

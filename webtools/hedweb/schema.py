@@ -7,8 +7,8 @@ from hed import schema as hedschema
 from hed.util.file_util import get_file_extension
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
-
-from hedweb.web_util import form_has_file, form_has_option, form_has_url, generate_filename
+from hed.tools.io_util import generate_filename
+from hedweb.web_util import form_has_file, form_has_option, form_has_url
 from hedweb.constants import base_constants, file_constants
 
 app_config = current_app.config
@@ -164,7 +164,7 @@ def schema_validate(hed_schema, display_name):
     issues = hed_schema.check_compliance()
     if issues:
         issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
-        file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
+        file_name = generate_filename(display_name, name_suffix='schema_3G_compliance_errors', extension='.txt')
         return {'command': base_constants.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
                 'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': 'Schema is not HED 3G compliant'}

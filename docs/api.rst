@@ -8,7 +8,7 @@ API Reference
 ------------------------------------------
 
 .. autosummary:: hedtools.hed.models
-   :toctree: generated/
+   :toctree:
 
    hed.models.base_input.BaseInput
    hed.models.column_mapper.ColumnMapper
