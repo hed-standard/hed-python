@@ -1,10 +1,9 @@
 import json
 from hed.models.sidecar import Sidecar
-from hed.schema.hed_schema_file import load_schema
+from hed.schema import load_schema
 
 
 class HedGroupSummary():
-
     def __init__(self, hed_group, hed_schema, name=None, keep_all_values=False):
         self.name = name
         self.hed_group = hed_group
@@ -69,8 +68,7 @@ class HedGroupSummary():
 if __name__ == '__main__':
     the_path = '../../tests/data/bids/task-FacePerception_events.json'
     sidecar = Sidecar(the_path)
-    hed_schema = load_schema(
-            hed_url_path='https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
+    hed_schema = load_schema('https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
     def_dicts = [column_entry.def_dict for column_entry in sidecar]
     group_list = []
     for def_dict in def_dicts:

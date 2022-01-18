@@ -12,6 +12,7 @@ from hed.models import model_constants
 from hed.models.util import translate_ops
 from hed.models.onset_mapper import OnsetMapper
 from hed.models.hed_string import HedString
+from hed.models.def_mapper import DefinitionMapper
 
 
 class BaseInput:
@@ -315,19 +316,8 @@ class BaseInput:
         if mapper is None:
             mapper = self._mapper
 
-        tag_ops = []
-        string_ops = []
-        if validators or expand_defs:
-            if not isinstance(validators, list):
-                validators = [validators]
-            if not run_string_ops_on_columns:
-                validators.append(self._def_mapper)
-                if self._def_mapper:
-                    validators.append(OnsetMapper(self._def_mapper))
-                tag_ops, string_ops = translate_ops(validators, split_tag_and_string_ops=True, expand_defs=expand_defs,
-                                                    error_handler=error_handler, **kwargs)
-            else:
-                tag_ops = translate_ops(validators, expand_defs=expand_defs, error_handler=error_handler, **kwargs)
+        tag_ops, string_ops = self._translate_ops(validators, run_string_ops_on_columns=run_string_ops_on_columns,
+                                                  expand_defs=expand_defs, error_handler=error_handler, **kwargs)
 
         start_at_one = 1
         if self._has_column_names:
@@ -340,24 +330,22 @@ class BaseInput:
             row_dict = mapper.expand_row_tags(text_file_row)
             column_to_hed_tags = row_dict[model_constants.COLUMN_TO_HED_TAGS]
             expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
+            error_handler.push_error_context(ErrorContext.ROW, row_number)
             row_issues = []
             if tag_ops:
-                error_handler.push_error_context(ErrorContext.ROW, row_number)
                 row_issues += self._run_column_ops(column_to_hed_tags, tag_ops,
                                                    expansion_column_issues,
                                                    error_handler)
-                error_handler.pop_error_context()
             if return_row_dict:
                 final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
                 if string_ops:
-                    error_handler.push_error_context(ErrorContext.ROW, row_number)
                     row_issues += self._run_row_ops(final_hed_string, string_ops, error_handler)
-                    error_handler.pop_error_context()
                 row_dict[model_constants.ROW_ISSUES] = row_issues
                 row_dict[model_constants.ROW_HED_STRING] = final_hed_string
                 yield row_number + start_at_one, row_dict
             else:
                 yield row_number + start_at_one, column_to_hed_tags
+            error_handler.pop_error_context()
 
     def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
                  tag_form="short_tag"):
@@ -451,7 +439,7 @@ class BaseInput:
         for row_number, column_to_hed_tags_dictionary in self:
             for column_number in column_to_hed_tags_dictionary:
                 new_text = column_to_hed_tags_dictionary[column_number]
-                output_file.set_cell(row_number, column_number, new_text)
+                output_file.set_cell(row_number, column_number, new_text, tag_form="short_tag")
 
         return output_file
 
@@ -557,7 +545,6 @@ class BaseInput:
 
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
         validation_issues = self.get_def_and_mapper_issues(error_handler, check_for_warnings)
-        validators = validators.copy()
         validation_issues += self._run_validators(validators, error_handler=error_handler,
                                                   check_for_warnings=check_for_warnings, **kwargs)
         error_handler.pop_error_context()
@@ -596,3 +583,26 @@ class BaseInput:
         """
         if self._def_mapper is not None:
             self._def_mapper.add_definitions(def_dict)
+
+    def _translate_ops(self, validators, run_string_ops_on_columns, expand_defs, **kwargs):
+        tag_ops = []
+        string_ops = []
+        if validators or expand_defs:
+            if not isinstance(validators, list):
+                validators = [validators]
+            validators = validators.copy()
+            if not run_string_ops_on_columns:
+                self._add_def_onset_mapper(validators)
+                tag_ops, string_ops = translate_ops(validators, split_tag_and_string_ops=True, expand_defs=expand_defs,
+                                                    **kwargs)
+            else:
+                tag_ops = translate_ops(validators, expand_defs=expand_defs, **kwargs)
+
+        return tag_ops, string_ops
+
+    def _add_def_onset_mapper(self, validators):
+        if not any(isinstance(validator, DefinitionMapper) for validator in validators):
+            if self._def_mapper:
+                validators.append(self._def_mapper)
+                validators.append(OnsetMapper(self._def_mapper))
+        return validators
