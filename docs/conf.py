@@ -13,6 +13,7 @@
 import os
 import sys
 import sphinx_rtd_theme
+from datetime import date
 
 sys.path.insert(0, os.path.abspath('../'))
 
@@ -26,9 +27,6 @@ author = 'HED Working Group'
 release = '0.0.1'
 
 currentdir = os.path.abspath(os.path.dirname(__file__))
-source_dirs = [
-    os.path.abspath("../hedtools/"),
-]
 
 
 # -- General configuration ---------------------------------------------------
