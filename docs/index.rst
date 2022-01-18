@@ -17,21 +17,7 @@ Note:  this is a work in progress.
    :maxdepth: 2
    :caption: Resources:
 
-api
-
-Trying stuff
-==================
-.. automodule:: hedtools.hed.tools.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-More stuff
-==================
-.. autosummary::
-   :toctree: _autosummary
-   :recursive:
+    api.rst
 
 
 Indices and tables
