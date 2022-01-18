@@ -4,7 +4,7 @@ from hed.tools.io_util import get_file_list
 
 
 class BidsFile:
-    """Represents a bids file."""
+    """Represents a bids_old file."""
 
     def __init__(self, file_path):
         self.file_path = os.path.abspath(file_path)

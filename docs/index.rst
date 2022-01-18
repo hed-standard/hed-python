@@ -17,6 +17,8 @@ Note:  this is a work in progress.
    :maxdepth: 2
    :caption: Resources:
 
+api
+
 Trying stuff
 ==================
 .. automodule:: hedtools.hed.tools.models
@@ -39,6 +41,3 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-
-   api.rst
-   changes.rst

@@ -63,14 +63,14 @@ class DefEntry:
 class DefDict:
     """Class responsible for gathering and storing a group of definitions to be considered a single source.
 
-        A bids style file might have many of these(one for each json dict, and another for the actual file)
+        A bids_old style file might have many of these(one for each json dict, and another for the actual file)
     """
 
     def __init__(self):
         """
         Class responsible for gathering and storing a group of definitions to be considered a single source.
 
-        A bids style file might have many of these(one for each json dict, and another for the actual file)
+        A bids_old style file might have many of these(one for each json dict, and another for the actual file)
         Parameters
         ----------
         """
