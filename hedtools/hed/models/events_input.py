@@ -5,7 +5,7 @@ from hed.models.def_mapper import DefinitionMapper
 
 
 class EventsInput(BaseInput):
-    """A class to parse bids style spreadsheets into a more general format."""
+    """A class to parse bids_old style spreadsheets into a more general format."""
     HED_COLUMN_NAME = "HED"
 
     def __init__(self, file=None, sidecars=None, attribute_columns=None, extra_def_dicts=None,
@@ -47,7 +47,7 @@ class EventsInput(BaseInput):
                          def_mapper=def_mapper, name=name)
 
         if not self._has_column_names:
-            raise ValueError("You are attempting to open a bids style file with no column headers provided.\n"
+            raise ValueError("You are attempting to open a bids_old style file with no column headers provided.\n"
                              "This is probably not intended.")
 
     def create_def_mapper(self, column_mapper, extra_def_dicts=None):

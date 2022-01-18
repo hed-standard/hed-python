@@ -27,7 +27,10 @@ author = 'HED Working Group'
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
 
-currentdir = os.path.abspath(os.path.dirname(__file__))
+source_dirs = [
+    os.path.abspath("../hedtools/"),
+]
+
 
 # -- General configuration ---------------------------------------------------
 

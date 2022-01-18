@@ -4,21 +4,21 @@ API Reference
 .. _base_ref:
 
 
-:mod:`hedtools.hed.models`: Class models
+:mod:`hed.models`: Class models
 ------------------------------------------
 
-.. autosummary:: hedtools.hed.models
+.. autosummary:: hed.models
    :toctree:
 
-   hedtools.hed.models.base_input.BaseInput
-   hedtools.hed.models.column_mapper.ColumnMapper
-   hedtools.hed.models.column_metadata.ColumnMetadata
-   hedtools.hed.models.column_metadata.ColumnType
-   hedtools.hed.models.def_dict.DefEntry
-   hedtools.hed.models.def_dict.DefDict
-   hedtools.hed.models.def_mapper.DefinitionMapper
+   hed.models.base_input.BaseInput
+   hed.models.column_mapper.ColumnMapper
+   hed.models.column_metadata.ColumnMetadata
+   hed.models.column_metadata.ColumnType
+   hed.models.def_dict.DefEntry
+   hed.models.def_dict.DefDict
+   hed.models.def_mapper.DefinitionMapper
 
-.. currentmodule:: hedtools
+.. currentmodule:: hed
 
 .. _calibration_ref:
 

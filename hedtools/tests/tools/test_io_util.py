@@ -8,7 +8,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids')
+        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_old')
         stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
         att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")

@@ -34,7 +34,7 @@ class HedDefSummary():
 
 
 if __name__ == '__main__':
-    the_path = '../../tests/data/bids/task-FacePerception_events.json'
+    the_path = '../../tests/data/bids_old/task-FacePerception_events.json'
     sidecar = Sidecar(the_path)
     hed_schema = load_schema(
             hed_url_path='https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')

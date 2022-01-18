@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids')
+        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids/eeg_ds003654s_hed')
         stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
         att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
@@ -57,13 +57,13 @@ class Test(unittest.TestCase):
         dicts_all1, dicts1 = make_combined_dicts(file_dict)
         self.assertTrue(isinstance(dicts_all1, ColumnDict), "make_combined_dicts should return a ColumnDict")
         self.assertTrue(isinstance(dicts1, dict), "make_combined_dicts should also return a dictionary of file names")
-        self.assertEqual(len(dicts1), 2, "make_combined_dicts should return correct number of file names")
+        self.assertEqual(len(dicts1), 6, "make_combined_dicts should return correct number of file names")
         self.assertEqual(len(dicts_all1.categorical_info), 10,
                          "make_combined_dicts should return right number of entries")
         dicts_all2, dicts2 = make_combined_dicts(file_dict, skip_cols=["onset", "duration", "sample"])
         self.assertTrue(isinstance(dicts_all2, ColumnDict), "make_combined_dicts should return a ColumnDict")
         self.assertTrue(isinstance(dicts2, dict), "make_combined_dicts should also return a dictionary of file names")
-        self.assertEqual(len(dicts2), 2, "make_combined_dicts should return correct number of file names")
+        self.assertEqual(len(dicts2), 6, "make_combined_dicts should return correct number of file names")
         self.assertEqual(len(dicts_all2.categorical_info), 7,
                          "make_combined_dicts should return right number of entries")
 

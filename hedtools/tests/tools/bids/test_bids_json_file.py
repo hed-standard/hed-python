@@ -8,7 +8,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                     '../../data/bids/dataset_description.json')
+                                     '../../data/bids_old/dataset_description.json')
 
     def test_constructor(self):
         json1 = BidsJsonFile(Test.json_path, set_contents=False)
@@ -29,19 +29,19 @@ class Test(unittest.TestCase):
     #     self.assertTrue(sidecar1.is_sidecar_for(events1))
     #
     #     the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.nfti'
-    #     bids = BidsFile(the_path)
+    #     bids_old = BidsFile(the_path)
     #     other = BidsSidecarFile('/d/base/task-overt_run-2_bold.json')
-    #     self.assertTrue(other.is_sidecar_for(bids), "is_a_parent returns true if parent at top level")
+    #     self.assertTrue(other.is_sidecar_for(bids_old), "is_a_parent returns true if parent at top level")
     #     other1 = BidsSidecarFile('/d/base1/task-overt_run-2_bold.json')
-    #     self.assertFalse(other1.is_sidecar_for(bids), "is_a_parent returns false if directories don't match")
+    #     self.assertFalse(other1.is_sidecar_for(bids_old), "is_a_parent returns false if directories don't match")
     #     other2 = BidsSidecarFile('/d/base/task-overt_run-3_bold.json')
-    #     self.assertFalse(other2.is_sidecar_for(bids), "is_a_parent returns false if entities don't match")
+    #     self.assertFalse(other2.is_sidecar_for(bids_old), "is_a_parent returns false if entities don't match")
     #     other3 = BidsSidecarFile('/d/base/sub-01/sub-01_task-overt_bold.json')
-    #     self.assertTrue(other3.is_sidecar_for(bids), "is_a_parent returns true if entities  match")
+    #     self.assertTrue(other3.is_sidecar_for(bids_old), "is_a_parent returns true if entities  match")
     #     other4 = BidsSidecarFile('/d/base/sub-01/sub-01_task-overt_events.json')
-    #     self.assertFalse(other4.is_sidecar_for(bids), "is_a_parent returns false if suffixes don't match")
+    #     self.assertFalse(other4.is_sidecar_for(bids_old), "is_a_parent returns false if suffixes don't match")
     #     other5 = BidsSidecarFile('/d/base/sub-01/ses-test/func/temp/sub-01_ses-test_task-overt_run-2_bold.json')
-    #     self.assertFalse(other5.is_sidecar_for(bids), "is_a_parent returns false for child even if entities match")
+    #     self.assertFalse(other5.is_sidecar_for(bids_old), "is_a_parent returns false for child even if entities match")
 
 
 if __name__ == '__main__':
