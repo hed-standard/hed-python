@@ -11,7 +11,7 @@ def get_columns_info(dataframe, skip_cols=None):
         dataframe (DataFrame):    The DataFrame to be analyzed
         skip_cols(list):          List of names of columns to be skipped in the extraction
 
-    Returns: 
+    Returns:
         dict:   A dictionary with keys that are column names and values that are dictionaries of unique value counts
     """
     col_info = dict()

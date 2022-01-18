@@ -134,7 +134,6 @@ class Test(TestWebBase):
             self.assertTrue(headers_dict['Content-Disposition'].startswith('attachment filename='),
                             "generate_download_spreadsheet tsv should be downloaded as an attachment")
 
-
     def test_generate_text_response(self):
         with self.app.test_request_context():
             from hedweb.web_util import generate_text_response

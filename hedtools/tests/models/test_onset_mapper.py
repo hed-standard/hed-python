@@ -68,8 +68,8 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string}, Onset, (Event))",
             "(Onset)",
             f"({self.placeholder_label_def_string}, def/InvalidDef, Onset, (Event))",
-            f"(def/TestDefInvalid, Onset)",
-            f"(def/TestDefPlaceholder, Onset)",
+            "(def/TestDefInvalid, Onset)",
+            "(def/TestDefPlaceholder, Onset)",
             f"({self.placeholder_label_def_string}, Offset, (Event))"
         ]
         # count of how many onset names are in the mapper after the line is run
@@ -172,9 +172,9 @@ class Test(TestHedBase):
             f"({self.placeholder_expanded_def_string}, Onset, (Event))",
             "(Onset)",
             f"({self.placeholder_expanded_def_string}, def/InvalidDef, Onset, (Event))",
-            f"(def/TestDefInvalid, Onset)",
-            f"(def/TestDefPlaceholder, Onset)",
-            f"(def/TestDefNormal/InvalidPlaceholder, Onset)"
+            "(def/TestDefInvalid, Onset)",
+            "(def/TestDefPlaceholder, Onset)",
+            "(def/TestDefNormal/InvalidPlaceholder, Onset)"
         ]
         # count of how many onset names are in the mapper after the line is run
         expected_context = [
@@ -218,7 +218,7 @@ class Test(TestHedBase):
         test_strings = [
             f"({self.placeholder_label_def_string},Onset)",
             f"({self.placeholder_label_def_string2},Onset)",
-            f"Event",
+            "Event",
             f"({self.placeholder_label_def_string},Offset)",
             f"({self.placeholder_label_def_string},Offset)",
             f"({self.label_def_string}, Onset)",
