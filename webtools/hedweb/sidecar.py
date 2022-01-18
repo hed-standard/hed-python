@@ -65,10 +65,11 @@ def process(arguments):
         raise HedFileError('InvalidJSONFile', "Please give a valid JSON file to process", "")
     command = arguments.get(base_constants.COMMAND, None)
     check_for_warnings = arguments.get(base_constants.CHECK_FOR_WARNINGS, False)
+    expand_defs = arguments.get(base_constants.EXPAND_DEFS, False)
     if command == base_constants.COMMAND_VALIDATE:
         results = sidecar_validate(hed_schema, json_sidecar, check_for_warnings=check_for_warnings)
     elif command == base_constants.COMMAND_TO_SHORT or command == base_constants.COMMAND_TO_LONG:
-        results = sidecar_convert(hed_schema, json_sidecar, command=command, expand_defs=True)
+        results = sidecar_convert(hed_schema, json_sidecar, command=command, expand_defs=expand_defs)
     else:
         raise HedFileError('UnknownProcessingMethod', f'Command {command} is missing or invalid', '')
     return results
