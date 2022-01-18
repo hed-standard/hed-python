@@ -1,7 +1,7 @@
 """Allows output of HedSchema objects as .mediawiki format"""
 
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema.fileio import wiki_constants
+from hed.schema.io import wiki_constants
 
 
 class HedSchema2Wiki:
