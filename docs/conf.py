@@ -15,18 +15,17 @@ import sys
 import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../'))
-sys.path.insert(0, os.path.abspath('../hedtools'))
-sys.path.insert(0, os.path.abspath('../webtools'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'HED python'
-copyright = '2022, HED Working Group'
+copyright = '2017-{}, HED Working Group'.format(date.today().year)
 author = 'HED Working Group'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
 
+currentdir = os.path.abspath(os.path.dirname(__file__))
 source_dirs = [
     os.path.abspath("../hedtools/"),
 ]
@@ -48,19 +47,21 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
-    "numpydoc",
     "sphinx.ext.extlinks"
+    "numpydoc",
+
 ]
 
 autosummary_generate = True
 autodoc_default_flags = ['members', 'inherited-members']
+add_module_names = False
+
 myst_heading_anchors = 2
 myst_enable_extensions = ["deflist"]
 
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-html_static_path = ['_static']
 source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
@@ -75,7 +76,7 @@ exclude_patterns = ['_build', '_templates', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-
+pygments_style = 'sphinx'
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
@@ -98,4 +99,4 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+html_static_path = ['_static']
