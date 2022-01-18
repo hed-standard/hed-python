@@ -314,6 +314,8 @@ class TagValidator:
         ----------
         original_tag: HedTag
             The original tag that is used to report the error.
+        check_for_warnings: bool
+            Indicates whether to check for warnings.
         Returns
         -------
         []
@@ -553,7 +555,7 @@ class TagValidator:
     def _validate_value_class_portion(self, original_tag, portion_to_validate):
         if portion_to_validate is None:
             return False
-        
+
         value_class_types = original_tag.value_classes
         return self.validate_value_class_type(portion_to_validate, value_class_types)
 
