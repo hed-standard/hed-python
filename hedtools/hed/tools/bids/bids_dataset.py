@@ -1,15 +1,17 @@
 import os
 import json
-from hed.tools.data_util import get_new_dataframe
-from hed.schema.hed_schema_file import load_schema, load_schema_version
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
+from hed.tools.data_util import get_new_dataframe
 from hed.tools.bids.bids_event_files import BidsEventFiles
+from hed.validator import HedValidator
 
 LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/hedxml/HED_"
 
 
 class BidsDataset:
-    """Represents a bids dataset."""
+    """Represents a bids_old dataset."""
 
     def __init__(self, root_path):
         self.root_path = os.path.abspath(root_path)
@@ -18,6 +20,11 @@ class BidsDataset:
         self.participants = get_new_dataframe(os.path.join(self.root_path, "participants.tsv"))
         self.hed_schema = HedSchemaGroup(self._schema_from_description())
         self.event_files = BidsEventFiles(root_path)
+
+    def validate(self, check_for_warnings=True):
+        validator = HedValidator(hed_schema=self.hed_schema)
+        issues = self.event_files.validate(validators=[validator], check_for_warnings=check_for_warnings)
+        return issues
 
     def _schema_from_description(self):
         hed = self.dataset_description.get("HEDVersion", None)
@@ -32,12 +39,19 @@ class BidsDataset:
         if 'libraries' in hed:
             for key, library in hed['libraries'].items():
                 url = LIBRARY_URL_BASE + library + '.xml'
-                x = load_schema(hed_url_path=url, library_prefix=key)
+                x = load_schema(url, library_prefix=key)
                 x.set_library_prefix(key)  # TODO: temporary work around
                 hed_list.append(x)
         return hed_list
 
 
 if __name__ == '__main__':
-    path = 'D:\\Research\\HED\\hed-examples\\datasets\\eeg_ds003654s_hed_library'
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        '../../../tests/data/bids/eeg_ds003654s_hed_library')
     bids = BidsDataset(path)
+    issue_list = bids.validate()
+    if issue_list:
+        issue_str = get_printable_issue_string(issue_list, "HED_library")
+    else:
+        issue_str = "No issues"
+    print(issue_str)
