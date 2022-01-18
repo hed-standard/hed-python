@@ -134,7 +134,7 @@ class Sidecar:
             loaded_files.append(json_file)
         return loaded_files
 
-    def hed_string_iter(self, validators=None, error_handler=None, expand_defs=False, allow_placeholder=True,
+    def hed_string_iter(self, validators=None, error_handler=None, expand_defs=False, allow_placeholders=True,
                         extra_def_dicts=None, **kwargs):
         """
         Return iterator to loop over all hed strings in all column definitions
@@ -150,7 +150,7 @@ class Sidecar:
             The error handler to use for context, uses a default one if none.
         expand_defs: bool
             If True, expand all def tags located in the strings.
-        allow_placeholder: bool
+        allow_placeholders: bool
             If False, placeholders will be marked as validation warnings.
         extra_def_dicts: [DefDict] or DefDict or None
             Extra dicts to add to the list
@@ -179,7 +179,7 @@ class Sidecar:
             for (hed_string_obj, position, issues) in entry.hed_string_iter(validators=validators,
                                                                             error_handler=error_handler,
                                                                             expand_defs=expand_defs,
-                                                                            allow_placeholder=allow_placeholder,
+                                                                            allow_placeholders=allow_placeholders,
                                                                             **kwargs):
                 yield hed_string_obj, (column_name, position), issues
 
