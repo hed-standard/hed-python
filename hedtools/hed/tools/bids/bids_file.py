@@ -4,11 +4,11 @@ from hed.tools.io_util import get_file_list
 
 
 class BidsFile:
-    """Represents a bids file."""
+    """Represents a bids_old file."""
 
     def __init__(self, file_path):
         self.file_path = os.path.abspath(file_path)
-        suffix, ext, entity_dict = parse_bids_filename(self.file_path)
+        suffix, ext, entity_dict, unmatched = parse_bids_filename(self.file_path)
         self.suffix = suffix
         self.ext = ext
         self.entities = entity_dict

@@ -4,7 +4,7 @@ from hed.errors.exceptions import HedFileError
 
 
 class SidecarMap:
-    """A class to parse bids style spreadsheets into a more general format."""
+    """A class to parse bids_old style spreadsheets into a more general format."""
 
     def __init__(self, header_char="*"):
         """ Takes representing an event file and creates a template for remapping.

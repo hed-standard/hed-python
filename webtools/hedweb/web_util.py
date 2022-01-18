@@ -160,46 +160,6 @@ def generate_download_spreadsheet(results,  msg_category='success', msg=''):
     return response
 
 
-def generate_filename(base_name, prefix=None, suffix=None, extension=None):
-    """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
-
-    Parameters
-    ----------
-   base_name: str
-        The name of the base, usually the name of the file that the issues were generated from
-    prefix: str
-        The prefix prepended to the front of the base_name
-    suffix: str
-        The suffix appended to the end of the base_name
-    Returns
-    -------
-    string
-        The name of the attachment other containing the issues.
-    """
-
-    pieces = []
-    if prefix:
-        pieces = pieces + [secure_filename(prefix)]
-    if base_name:
-        pieces.append(os.path.splitext(secure_filename(base_name))[0])
-    if suffix:
-        pieces = pieces + [secure_filename(suffix)]
-
-    if not pieces:
-        return ''
-    filename = pieces[0]
-    for name in pieces[1:]:
-        filename = filename + '_' + name
-    # if not extension and base_name:
-    #     extension = os.path.splitext(secure_filename(base_name))[1]
-    # else:
-    #     extension = ''
-    # filename = filename + '.' + secure_filename(extension)
-    if extension:
-        filename = filename + '.' + secure_filename(extension)
-    return filename
-
-
 def generate_text_response(download_text, msg_category='success', msg=''):
     """Generates a download other response.
 
@@ -241,7 +201,7 @@ def get_hed_schema_from_pull_down(request):
         raise HedFileError("NoSchemaError", "Must provide a valid schema or schema version", "")
     elif request.form[base_constants.SCHEMA_VERSION] != base_constants.OTHER_VERSION_OPTION:
         hed_file_path = hedschema.get_path_from_hed_version(request.form[base_constants.SCHEMA_VERSION])
-        hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
+        hed_schema = hedschema.load_schema(hed_file_path)
     elif request.form[base_constants.SCHEMA_VERSION] == \
             base_constants.OTHER_VERSION_OPTION and base_constants.SCHEMA_PATH in request.files:
         f = request.files[base_constants.SCHEMA_PATH]

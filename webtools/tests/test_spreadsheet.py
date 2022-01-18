@@ -62,7 +62,7 @@ class Test(TestWebBase):
         from hedweb.spreadsheet import process
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        hed_schema = hedschema.load_schema(schema_path)
         prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4: "Event/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
                                       worksheet_name='LKT Events',
@@ -86,7 +86,7 @@ class Test(TestWebBase):
         from hedweb.spreadsheet import process
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        hed_schema = hedschema.load_schema(schema_path)
         prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
                                       worksheet_name='LKT 8HED3A',
@@ -111,7 +111,7 @@ class Test(TestWebBase):
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
         prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        hed_schema = hedschema.load_schema(schema_path)
         spreadsheet = models.HedInput(spreadsheet_path,
                                       worksheet_name='LKT 8HED3A',
                                       tag_columns=[5],
@@ -130,7 +130,7 @@ class Test(TestWebBase):
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.1.xml')
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        hed_schema = hedschema.load_schema(schema_path)
         prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
                                       worksheet_name='LKT 8HED3',
@@ -149,7 +149,7 @@ class Test(TestWebBase):
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0.xml')
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        hed_schema = hedschema.load_schema(schema_path)
         prefix_dict = {2: "Property/Informational-property/Label/", 4: "Property/Informational-property/Description/"}
         spreadsheet = models.HedInput(spreadsheet_path,
                                       worksheet_name='LKT Events',

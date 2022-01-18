@@ -1,10 +1,9 @@
 import json
 from hed.models.sidecar import Sidecar
-from hed.schema.hed_schema_file import load_schema
+from hed.schema import load_schema
 
 
 class HedGroupSummary():
-
     def __init__(self, hed_group, hed_schema, name=None, keep_all_values=False):
         self.name = name
         self.hed_group = hed_group
@@ -29,7 +28,7 @@ class HedGroupSummary():
             return ''
         str_desc = ''
         for item in self.tag_dict['Description']:
-            str_desc +=  item.extension_or_value_portion + ' '
+            str_desc += item.extension_or_value_portion + ' '
         return str_desc
 
     def is_top_level(self, short_base_tag):
@@ -52,9 +51,9 @@ class HedGroupSummary():
                 if not value_list:
                     continue
                 elif len(value_list) == 1:
-                    tag_values[tag.short_base_tag] = value_list[0]
+                    tag_values[key] = value_list[0]
                 else:
-                    tag_values[tag.short_base_tag] = value_list
+                    tag_values[key] = value_list
             if tag_values:
                 json_dict["Tags with values:"] = tag_values
         if as_json:
@@ -67,10 +66,9 @@ class HedGroupSummary():
 
 
 if __name__ == '__main__':
-    the_path = '../../tests/data/bids/task-FacePerception_events.json'
+    the_path = '../../tests/data/bids/eeg_ds003654s_hed/task-FacePerception_events.json'
     sidecar = Sidecar(the_path)
-    hed_schema = load_schema(
-            hed_url_path='https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
+    hed_schema = load_schema('https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
     def_dicts = [column_entry.def_dict for column_entry in sidecar]
     group_list = []
     for def_dict in def_dicts:

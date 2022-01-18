@@ -134,28 +134,6 @@ class Test(TestWebBase):
             self.assertTrue(headers_dict['Content-Disposition'].startswith('attachment filename='),
                             "generate_download_spreadsheet tsv should be downloaded as an attachment")
 
-    def test_generate_filename(self):
-        from hedweb.web_util import generate_filename
-        filename = generate_filename(None, prefix=None, suffix=None, extension=None)
-        self.assertEqual('', filename, "Return empty when all arguments are none")
-        filename = generate_filename(None, prefix=None, suffix=None, extension='.txt')
-        self.assertEqual('', filename, "Return empty when base_name, prefix, and suffix are None, but extension is not")
-        filename = generate_filename('c:/temp.json', prefix=None, suffix=None, extension='.txt')
-        self.assertEqual('c_temp.txt', filename,
-                         "Returns stripped base_name + extension when prefix, and suffix are None")
-        filename = generate_filename('temp.json', prefix='prefix', suffix='suffix', extension='.txt')
-        self.assertEqual('prefix_temp_suffix.txt', filename,
-                         "Return stripped base_name + extension when prefix, and suffix are None")
-        filename = generate_filename(None, prefix='prefix', suffix='suffix', extension='.txt')
-        self.assertEqual('prefix_suffix.txt', filename,
-                         "Returns correct string when no base_name")
-        filename = generate_filename('event-strategy-v3_task-matchingpennies_events.json',
-                                     suffix='blech', extension='.txt')
-        self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
-                         "Returns correct string when base_name with hyphens")
-        filename = generate_filename('HED7.2.0.xml', suffix='blech', extension='.txt')
-        self.assertEqual('HED7.2.0_blech.txt', filename, "Returns correct string when base_name has periods")
-
     def test_generate_text_response(self):
         with self.app.test_request_context():
             from hedweb.web_util import generate_text_response

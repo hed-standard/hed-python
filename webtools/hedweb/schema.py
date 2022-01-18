@@ -5,10 +5,10 @@ from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.util.file_util import get_file_extension
-from hed.errors.error_reporter import get_exception_issue_string, get_printable_issue_string
+from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
-
-from hedweb.web_util import form_has_file, form_has_option, form_has_url, generate_filename, handle_error
+from hed.tools.io_util import generate_filename
+from hedweb.web_util import form_has_file, form_has_option, form_has_url
 from hedweb.constants import base_constants, file_constants
 
 app_config = current_app.config
@@ -23,7 +23,7 @@ def get_schema(schema_path=None, schema_url=None, schema_string=None, file_type=
         A string representing a path to a schema
     schema_url: str
         A string representing a URL of a schema
-    schema_url: str
+    schema_string: str
         A string representing a URL of a schema
     file_type: str
         A string representing the file extension including the .
@@ -35,9 +35,9 @@ def get_schema(schema_path=None, schema_url=None, schema_string=None, file_type=
     """
 
     if schema_path:
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        hed_schema = hedschema.load_schema(schema_path)
     elif schema_url:
-        hed_schema = hedschema.load_schema(hed_url_path=schema_url)
+        hed_schema = hedschema.load_schema(schema_url)
     elif schema_string:
         hed_schema = hedschema.from_string(schema_string, file_type=file_type)
     else:
@@ -164,7 +164,7 @@ def schema_validate(hed_schema, display_name):
     issues = hed_schema.check_compliance()
     if issues:
         issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
-        file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
+        file_name = generate_filename(display_name, name_suffix='schema_3G_compliance_errors', extension='.txt')
         return {'command': base_constants.COMMAND_VALIDATE, 'data': issue_str, 'output_display_name': file_name,
                 'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': 'Schema is not HED 3G compliant'}

@@ -1,6 +1,6 @@
 import os
 from hed.errors.error_reporter import get_printable_issue_string
-from hed.schema.hed_schema_file import load_schema
+from hed.schema.hed_schema_io import load_schema
 from hed.tools.bids.bids_event_file import BidsEventFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.models.events_input import EventsInput
@@ -64,7 +64,6 @@ class BidsEventFiles:
     def validate(self, validators, check_for_warnings=True, keep_events=False):
         issues = []
         for json_obj in self.sidecar_dict.values():
-            extra_defs = []
             issues += json_obj.contents.validate_entries(validators=validators, check_for_warnings=check_for_warnings)
         if issues:
             return issues
@@ -79,9 +78,8 @@ class BidsEventFiles:
 
 
 if __name__ == '__main__':
-    # path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_inheritance'
-    path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
-    # path = 'G:\\WH_working3'
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        '../../../tests/data/bids/eeg_ds003654s_hed')
     bids = BidsEventFiles(path)
 
     for file_obj in bids.sidecar_dict.values():
@@ -91,8 +89,8 @@ if __name__ == '__main__':
         print(file_obj)
 
     print("Now validating.....")
-    hed_schema = load_schema(
-            hed_url_path='https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
+    hed_schema = \
+        load_schema('https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
     validator = HedValidator(hed_schema=hed_schema)
     validation_issues = bids.validate(validators=[validator], check_for_warnings=False)
     issue_str = get_printable_issue_string(validation_issues, skip_filename=False)

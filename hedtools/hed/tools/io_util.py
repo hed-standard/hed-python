@@ -21,24 +21,24 @@ def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=N
 
     pieces = []
     if name_prefix:
-        pieces = pieces + [secure_filename(name_prefix)]
+        pieces = pieces + [name_prefix]
     if base_name:
-        pieces.append(os.path.splitext(secure_filename(base_name))[0])
+        pieces.append(os.path.splitext(base_name)[0])
     if name_suffix:
-        pieces = pieces + [secure_filename(name_suffix)]
+        pieces = pieces + [name_suffix]
 
     if not pieces:
         return ''
     filename = pieces[0]
     for name in pieces[1:]:
-        filename = filename + '_' + name
+        filename = filename + name
     if extension:
-        filename = filename + '.' + secure_filename(extension)
-    return filename
+        filename = filename + extension
+    return secure_filename(filename)
 
 
 def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True):
-    """ Traverses a directory tree and dictionary with keys that are directories.
+    """ Traverses a directory tree and creates dictionary with keys that are directories.
 
     Args:
         dir_path (str):               Full path of the directory tree to be traversed (no ending slash)

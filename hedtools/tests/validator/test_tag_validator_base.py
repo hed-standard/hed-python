@@ -19,7 +19,7 @@ class TestHedBase(unittest.TestCase):
             raise ValueError("No schema set for test case")
         cls.error_handler = error_reporter.ErrorHandler()
 
-    def format_error_but_not_really(self, error_type, *args, **kwargs):
+    def format_error(self, error_type, *args, **kwargs):
         """
             The parameters vary based on what type of error this is.
 
@@ -44,7 +44,7 @@ class TestHedBase(unittest.TestCase):
         # return params
         return [params]
 
-    def really_format_errors(self, error_handler, hed_string, params):
+    def format_errors_fully(self, error_handler, hed_string, params):
         formatted_errors = []
         for code, args, kwargs in params:
             if 'tag' in kwargs and isinstance(kwargs['tag'], int):
@@ -91,8 +91,8 @@ class TestValidatorBase(TestHedBase):
             test_result = not test_issues
             expected_params = expected_issues[test_key]
             expected_result = expected_results[test_key]
-            expected_issue = self.really_format_errors(error_handler, hed_string=hed_string_obj,
-                                                       params=expected_params)
+            expected_issue = self.format_errors_fully(error_handler, hed_string=hed_string_obj,
+                                                      params=expected_params)
             error_handler.add_context_to_issues(test_issues)
 
             # print(test_key)

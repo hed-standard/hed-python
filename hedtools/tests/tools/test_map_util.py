@@ -1,14 +1,16 @@
 import os
 import unittest
-import pandas as pd
-from hed.tools.map_util import get_columns_info
-from hed.tools.data_util import get_key_hash, get_new_dataframe, get_row_hash
+from hed.tools.col_dict import ColumnDict
+from hed.tools.io_util import get_file_list, make_file_dict
+from hed.tools.map_util import get_columns_info, get_key_counts, make_combined_dicts, update_dict_counts
+from hed.tools.data_util import get_new_dataframe
 
 
 class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids/eeg_ds003654s_hed')
         stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
         att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
@@ -34,26 +36,47 @@ class Test(unittest.TestCase):
         self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
         self.assertFalse(col_info, "get_columns_info should return a dictionary with a key for each column included")
 
-    def test_get_key_hash(self):
-        test_list = ['a', 1, 'c']
-        key_hash1 = get_key_hash(test_list)
-        key_hash2 = get_key_hash(tuple(test_list))
-        self.assertEqual(key_hash1, key_hash2, "get_key_hash should return same hash for list or tuple")
-        t_hash1 = get_key_hash([])
-        self.assertTrue(t_hash1, "get_key_hash should return a hash for empty list")
-        t_hash2 = get_key_hash(())
-        self.assertTrue(t_hash2, "get_key_hash should return a hash for empty tuple")
-        self.assertEqual(t_hash1, t_hash2, "get_key_hash should return same hash for empty list and empty tuple")
+    def test_get_key_counts(self):
+        key_counts1 = get_key_counts(self.bids_dir)
+        self.assertIsInstance(key_counts1, dict, "get_columns_info should return a dictionary")
+        self.assertEqual(len(key_counts1), 10, "get_key_counts should have key for each column if non skipped")
+        self.assertTrue('event_type' in key_counts1, "The dictionary has an event_type key")
+        self.assertEqual(len(key_counts1['event_type']), 8, "get_key_counts has right number of entries for event_type")
+        self.assertTrue('onset' in key_counts1, "get_key_counts dictionary has onset if not skipped")
 
-    def test_get_row_hash(self):
-        stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
-        key_columns = ['type', 'event_type']
-        my_map = {}
-        for index, row in stern_df.iterrows():
-            key = get_row_hash(row, key_columns)
-            my_map[key] = index
-        self.assertEqual(len(my_map.keys()), len(stern_df),
-                         "get_row_hash should uniquely hash all of the keys in stern map")
+        key_counts2 = get_key_counts(self.bids_dir, skip_cols=["onset", "duration", "sample"])
+        self.assertIsInstance(key_counts2, dict, "get_columns_info should return a dictionary")
+        self.assertEqual(len(key_counts2), 7, "get_key_counts should have key for each column if non skipped")
+        self.assertTrue('event_type' in key_counts2, "The dictionary has an event_type key")
+        self.assertEqual(len(key_counts2['event_type']), 8, "get_key_counts has right number of entries for event_type")
+        self.assertTrue('onset' not in key_counts2, "get_key_counts dictionary does not have onset if skipped")
+
+    def test_make_combined_dicts(self):
+        files_bids = get_file_list(self.bids_dir, extensions=[".tsv"], name_suffix="_events")
+        file_dict = make_file_dict(files_bids)
+        dicts_all1, dicts1 = make_combined_dicts(file_dict)
+        self.assertTrue(isinstance(dicts_all1, ColumnDict), "make_combined_dicts should return a ColumnDict")
+        self.assertTrue(isinstance(dicts1, dict), "make_combined_dicts should also return a dictionary of file names")
+        self.assertEqual(len(dicts1), 6, "make_combined_dicts should return correct number of file names")
+        self.assertEqual(len(dicts_all1.categorical_info), 10,
+                         "make_combined_dicts should return right number of entries")
+        dicts_all2, dicts2 = make_combined_dicts(file_dict, skip_cols=["onset", "duration", "sample"])
+        self.assertTrue(isinstance(dicts_all2, ColumnDict), "make_combined_dicts should return a ColumnDict")
+        self.assertTrue(isinstance(dicts2, dict), "make_combined_dicts should also return a dictionary of file names")
+        self.assertEqual(len(dicts2), 6, "make_combined_dicts should return correct number of file names")
+        self.assertEqual(len(dicts_all2.categorical_info), 7,
+                         "make_combined_dicts should return right number of entries")
+
+    def test_update_dict_counts(self):
+        file_name = os.path.join(self.bids_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
+        file_name = os.path.abspath(file_name)
+        dataframe = get_new_dataframe(file_name)
+        count_dicts = {}
+        update_dict_counts(count_dicts, "onset", dataframe["onset"])
+        self.assertTrue("onset" in count_dicts, "update_dict_counts updates a column counts")
+        self.assertEqual(len(count_dicts["onset"]), 551, "update_dict_counts has the right number of counts")
+        update_dict_counts(count_dicts, "onset", dataframe["onset"])
+        self.assertEqual(len(count_dicts["onset"]), 551, "update_dict_counts has the right number of counts")
 
 
 if __name__ == '__main__':
