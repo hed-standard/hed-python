@@ -2,6 +2,7 @@ import json
 from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_types import ErrorContext
 from hed.errors import error_reporter
+from hed.errors import ErrorHandler
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.models.hed_string import HedString
 from hed.models.def_mapper import DefinitionMapper
@@ -17,7 +18,7 @@ class Sidecar:
         ----------
         file: str or FileLike
             If a string, this is a filename.
-            Otherwise it will be parsed as a file-like.
+            Otherwise, it will be parsed as a file-like.
         name: str or None
             Optional name to identify this group.  Generally a filename.
         """
@@ -71,7 +72,7 @@ class Sidecar:
         ----------
         file: str or FileLike
             If a string, this is a filename.
-            Otherwise it will be parsed as a file-like.
+            Otherwise, it will be parsed as a file-like.
         """
         if isinstance(file, str):
             try:
@@ -133,31 +134,56 @@ class Sidecar:
             loaded_files.append(json_file)
         return loaded_files
 
-    def hed_string_iter(self, include_position=False):
+    def hed_string_iter(self, validators=None, error_handler=None, expand_defs=False, allow_placeholders=True,
+                        extra_def_dicts=None, **kwargs):
         """
         Return iterator to loop over all hed strings in all column definitions
 
-        Returns a tuple of (string, position) if include_position is true.
+        Returns a tuple of (string, position)
         Pass position to set_hed_string to change one.
 
         Parameters
         ----------
-        include_position : bool
-            If true, this returns a tuple including a position element you can pass back in to set_hed_string
+        validators : [func or validator like] or func or validator like
+            A validator or list of validators to apply to the hed strings before returning
+        error_handler : ErrorHandler
+            The error handler to use for context, uses a default one if none.
+        expand_defs: bool
+            If True, expand all def tags located in the strings.
+        allow_placeholders: bool
+            If False, placeholders will be marked as validation warnings.
+        extra_def_dicts: [DefDict] or DefDict or None
+            Extra dicts to add to the list
+        kwargs:
+            See util.translate_ops or the specific validators for additional options
 
         Yields
         -------
-        hed_string : str
-            hed_string at a given column and key position
-        position: tuple, optional
+        hed_string : HedString
+            HedString at a given column and key position
+        position: tuple
             Indicates where hed_string was loaded from so it can be later set by the user
+        issues: []
+            A list of issues found performing ops.
         """
-        for key, entry in self._column_data.items():
-            for hed_string in entry.hed_string_iter(include_position):
-                if include_position:
-                    yield hed_string[0], (key, hed_string[1])
-                else:
-                    yield hed_string
+        if error_handler is None:
+            error_handler = ErrorHandler()
+        if expand_defs:
+            validators = self._add_definition_mapper(validators, extra_def_dicts)
+        else:
+            if not isinstance(validators, list):
+                validators = [validators]
+            validators = validators.copy()
+        for column_name, entry in self._column_data.items():
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
+            for (hed_string_obj, position, issues) in entry.hed_string_iter(validators=validators,
+                                                                            error_handler=error_handler,
+                                                                            expand_defs=expand_defs,
+                                                                            allow_placeholders=allow_placeholders,
+                                                                            **kwargs):
+                yield hed_string_obj, (column_name, position), issues
+
+            error_handler.pop_error_context()
 
     def set_hed_string(self, new_hed_string, position):
         """Set a hed string in a provided column/category key/etc
@@ -173,6 +199,16 @@ class Sidecar:
         entry = self._column_data[column_name]
         entry.set_hed_string(new_hed_string, position)
 
+    def _add_definition_mapper(self, validators, extra_def_dicts=None):
+        if not isinstance(validators, list):
+            validators = [validators]
+        validators = validators.copy()
+        if not any(isinstance(validator, DefinitionMapper) for validator in validators):
+            def_dicts = self.get_def_dicts(extra_def_dicts)
+            def_mapper = DefinitionMapper(def_dicts)
+            validators.append(def_mapper)
+        return validators
+
     def _add_single_col_type(self, column_name, dict_for_entry, column_type=None):
         """
         Creates a single column definition with the given parameters.
@@ -184,10 +220,30 @@ class Sidecar:
         dict_for_entry : dict
             The loaded dictionary for a given column entry.  Generally needs the "HED" key if nothing else.
         column_type : ColumnType, optional
-            How it should treat this column.  This overrides auto detection from the dict_for_entry.
+            How it should treat this column.  This overrides auto-detection from the dict_for_entry.
         """
         column_entry = ColumnMetadata(column_type, column_name, dict_for_entry)
         self._column_data[column_name] = column_entry
+
+    def get_def_dicts(self, extra_def_dicts=None):
+        """
+            Returns a list of def dicts for each column in this sidecar.
+
+        Parameters
+        ----------
+        extra_def_dicts: [DefDict] or DefDict or None
+            Extra dicts to add to the list
+        Returns
+        -------
+        def_dicts: [DefDict]
+            A list of def dicts for each column plus any found in extra_def_dicts.
+        """
+        def_dicts = [column_entry.def_dict for column_entry in self]
+        if extra_def_dicts:
+            if not isinstance(extra_def_dicts, list):
+                extra_def_dicts = [extra_def_dicts]
+            def_dicts += extra_def_dicts
+        return def_dicts
 
     def validate_entries(self, validators=None, name=None, extra_def_dicts=None,
                          error_handler=None, **kwargs):
@@ -216,24 +272,16 @@ class Sidecar:
             error_handler = error_reporter.ErrorHandler()
         if not name:
             name = self.name
-        if not isinstance(validators, list):
-            validators = [validators]
         if name:
             error_handler.push_error_context(ErrorContext.FILE_NAME, name, False)
 
-        def_dicts = [column_entry.def_dict for column_entry in self]
-        if extra_def_dicts:
-            if not isinstance(extra_def_dicts, list):
-                extra_def_dicts = [extra_def_dicts]
-            def_dicts += extra_def_dicts
-        def_mapper = DefinitionMapper(def_dicts)
-        validators.append(def_mapper)
+        validators = self._add_definition_mapper(validators, extra_def_dicts)
+
         all_validation_issues = []
         for column_data in self:
-            all_validation_issues += column_data.validate_column(validators, also_validate=True,
+            all_validation_issues += column_data.validate_column(validators,
                                                                  error_handler=error_handler,
                                                                  **kwargs)
-
         if name:
             error_handler.pop_error_context()
         return all_validation_issues

@@ -10,7 +10,7 @@ from hed.models.sidecar import Sidecar
 
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.schema.hed_schema_file import load_schema, load_schema_version
+from hed.schema.hed_schema_io import load_schema, load_schema_version
 
 # from hed.tools.data_utils import get_new_dataframe, make_info_dataframe, remove_quotes, reorder_columns, \
 #     separate_columns, make_key, get_key_hash, get_row_hash

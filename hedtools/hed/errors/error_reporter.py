@@ -109,7 +109,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 try:
                     tag_as_string = tag.tag
                 except AttributeError:
-                    tag_as_string = "PlaceholderYouShouldNotSee2"
+                    tag_as_string = str(tag)
 
                 if index_in_tag_end is None:
                     index_in_tag_end = len(tag_as_string)
@@ -117,7 +117,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 try:
                     org_tag_text = tag.org_tag
                 except AttributeError:
-                    org_tag_text = "PlaceholderYouShouldNotSee"
+                    org_tag_text = str(tag)
 
                 base_message, error_vars = func(org_tag_text, problem_sub_tag, *args, **kwargs)
                 error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
@@ -155,7 +155,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 elif isinstance(tag, HedGroup):
                     org_tag_text = tag.get_original_hed_string()
                 else:
-                    org_tag_text = "PlaceholderYouShouldNotSee"
+                    org_tag_text = str(tag)
                 base_message, error_vars = func(org_tag_text, *args, **kwargs)
                 error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
                                                                  source_tag=tag)

@@ -17,19 +17,13 @@ Note:  this is a work in progress.
    :maxdepth: 2
    :caption: Resources:
 
-   api.rst
-   changes.rst
+    api.rst
 
-.. autosummary::
-   :toctree: _autosummary
-   :recursive:
-
-   hedmodules
-   webmodules
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`   
+* :ref:`search`
+
