@@ -85,10 +85,10 @@ def get_input_schema(parameters):
         the_schema = hedschema.from_string(parameters[base_constants.SCHEMA_STRING])
     elif base_constants.SCHEMA_URL in parameters and parameters[base_constants.SCHEMA_URL]:
         schema_url = parameters[base_constants.SCHEMA_URL]
-        the_schema = hedschema.load_schema(hed_url_path=schema_url)
+        the_schema = hedschema.load_schema(schema_url)
     elif base_constants.SCHEMA_VERSION in parameters and parameters[base_constants.SCHEMA_VERSION]:
         hed_file_path = hedschema.get_path_from_hed_version(parameters[base_constants.SCHEMA_VERSION])
-        the_schema = hedschema.load_schema(hed_file_path=hed_file_path)
+        the_schema = hedschema.load_schema(hed_file_path)
     else:
         the_schema = []
     return the_schema

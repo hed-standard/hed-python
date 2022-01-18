@@ -99,29 +99,28 @@ def sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_
     if results['data']:
         return results
     if command == base_constants.COMMAND_TO_LONG:
-        suffix = '_to_long'
+        tag_form = 'long_tag'
     else:
-        suffix = '_to_short'
+        tag_form = 'short_tag'
     issues = []
-    for hed_string, position in json_sidecar.hed_string_iter(include_position=True):
-        hed_string_obj = models.HedString(hed_string)
-        if command == base_constants.COMMAND_TO_LONG:
-            converted_string, errors = hed_string_obj.convert_to_long(hed_schema)
-        else:
-            converted_string, errors = hed_string_obj.convert_to_short(hed_schema)
-        issues = issues + errors
-        json_sidecar.set_hed_string(converted_string, position)
+    validator = HedValidator(hed_schema)
+    for hed_string_obj, position_info, issue_items in json_sidecar.hed_string_iter(validators=validator,
+                                                                                   expand_defs=expand_defs,
+                                                                                   allow_placeholder=True):
+        converted_string = hed_string_obj.get_as_form(tag_form)
+        issues = issues + issue_items
+        json_sidecar.set_hed_string(converted_string, position_info)
 
     # issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
     display_name = json_sidecar.name
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
-        file_name = generate_filename(display_name, name_suffix=f"{suffix}_conversion_errors", extension='.txt')
+        file_name = generate_filename(display_name, name_suffix=f"_{tag_form}_conversion_errors", extension='.txt')
         return {base_constants.COMMAND: command, 'data': issue_str, 'output_display_name': file_name,
                 base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'warning',
                 'msg': f'JSON file {display_name} had validation errors'}
     else:
-        file_name = generate_filename(display_name, name_suffix=suffix, extension='.json')
+        file_name = generate_filename(display_name, name_suffix=f"_{tag_form}", extension='.json')
         data = json_sidecar.get_as_json_string()
         return {base_constants.COMMAND: command, 'data': data, 'output_display_name': file_name,
                 base_constants.SCHEMA_VERSION: schema_version, 'msg_category': 'success',

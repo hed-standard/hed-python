@@ -98,7 +98,7 @@ class ColumnMetadata:
             See util.translate_ops or the specific validators for additional options
         Yields
         -------
-        hed_string : str
+        hed_string : HedString
             hed_string at a given column and key position
         position: str
             Indicates where hed_string was loaded from so it can be later set by the user
