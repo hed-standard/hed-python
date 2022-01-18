@@ -68,8 +68,9 @@ class Test(unittest.TestCase):
                          "make_combined_dicts should return right number of entries")
 
     def test_update_dict_counts(self):
-        files_bids = get_file_list(self.bids_dir, extensions=[".tsv"], name_suffix="_events")
-        dataframe = get_new_dataframe(files_bids[0])
+        file_name = os.path.join(self.bids_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
+        file_name = os.path.abspath(file_name)
+        dataframe = get_new_dataframe(file_name)
         count_dicts = {}
         update_dict_counts(count_dicts, "onset", dataframe["onset"])
         self.assertTrue("onset" in count_dicts, "update_dict_counts updates a column counts")
