@@ -61,7 +61,7 @@ class Test(TestWebBase):
         fb = io.StringIO(json_text)
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml/HED8.0.0.xml'
-        hed_schema = hedschema.load_schema(hed_url_path=schema_url)
+        hed_schema = hedschema.load_schema(schema_url)
         json_sidecar = models.Sidecar(file=fb, name='JSON_Sidecar')
         arguments = {base_constants.SERVICE: 'sidecar_validate', base_constants.SCHEMA: hed_schema,
                      base_constants.COMMAND: 'validate', base_constants.COMMAND_TARGET: 'sidecar',
@@ -77,7 +77,7 @@ class Test(TestWebBase):
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml/HED7.2.0.xml'
-        arguments[base_constants.SCHEMA] = hedschema.load_schema(hed_url_path=schema_url)
+        arguments[base_constants.SCHEMA] = hedschema.load_schema(schema_url)
         with self.app.app_context():
             response = process(arguments)
             self.assertFalse(response['error_type'],

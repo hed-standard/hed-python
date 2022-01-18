@@ -35,9 +35,9 @@ def get_schema(schema_path=None, schema_url=None, schema_string=None, file_type=
     """
 
     if schema_path:
-        hed_schema = hedschema.load_schema(hed_file_path=schema_path)
+        hed_schema = hedschema.load_schema(schema_path)
     elif schema_url:
-        hed_schema = hedschema.load_schema(hed_url_path=schema_url)
+        hed_schema = hedschema.load_schema(schema_url)
     elif schema_string:
         hed_schema = hedschema.from_string(schema_string, file_type=file_type)
     else:

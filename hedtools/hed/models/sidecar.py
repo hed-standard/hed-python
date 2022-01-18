@@ -159,8 +159,8 @@ class Sidecar:
 
         Yields
         -------
-        hed_string : str
-            hed_string at a given column and key position
+        hed_string : HedString
+            HedString at a given column and key position
         position: tuple
             Indicates where hed_string was loaded from so it can be later set by the user
         issues: []
