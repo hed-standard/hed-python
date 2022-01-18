@@ -118,7 +118,8 @@ class TestHedSchema(unittest.TestCase):
     def test_get_tag_description(self):
         # Test known tag
         desc = self.hed_schema_3g.get_tag_description("Event/Sensory-event")
-        self.assertEqual(desc, "Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.")
+        self.assertEqual(desc, "Something perceivable by the participant. An event meant to be an experimental"
+                               " stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.")
         # Test known unit modifier
         desc = self.hed_schema_3g.get_tag_description("deca", HedSectionKey.UnitModifiers)
         self.assertEqual(desc, "SI unit multiple representing 10^1")
@@ -162,4 +163,3 @@ class TestHedSchema(unittest.TestCase):
 
     def test_short_tag_mapping(self):
         self.assertEqual(len(self.hed_schema_3g.all_tags.keys()), 1110)
-

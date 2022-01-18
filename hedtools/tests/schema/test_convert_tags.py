@@ -8,6 +8,7 @@ from tests.validator.test_tag_validator_base import TestHedBase
 class TestTagFormat(TestHedBase):
     schema_file = '../data/hed_pairs/HED8.0.0t.xml'
 
+
 class TestConvertTag(TestTagFormat):
     def converter_base(self, test_strings, expected_results, expected_errors, convert_to_short=True):
         for test_key in test_strings:
@@ -155,7 +156,8 @@ class TestConvertToLongTag(TestConvertTag):
                                   expected_parent_tag='Event'),
             'partialDuplicate':
                 self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                  index_in_tag=29, index_in_tag_end=45, expected_parent_tag='Item/Object/Geometric-object'),
+                                  index_in_tag=29, index_in_tag_end=45,
+                                  expected_parent_tag='Item/Object/Geometric-object')
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -617,11 +619,19 @@ class TestConvertHedStringToLong(TestConvertTag):
             'multiLevel': 'Event/Sensory-event',
             'twoSingle': 'Event,Property',
             'oneExtension': 'Event/Extension',
-            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5',
-            'simpleGroup': '(Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5)',
-            'groupAndTag': '(Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made-object/Vehicle/Car',
-            'nestedGroup': '((Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5),Item/Object/Man-made-object/Vehicle/Car,Property/Environmental-property/Indoors)',
-            'nestedGroup2': '(Item/Object/Man-made-object/Vehicle/Car,Property/Environmental-property/Indoors,(Item/Object/Man-made-object/Vehicle/Train,Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5))'
+            'threeMulti': 'Event/Sensory-event,Item/Object/Man-made-object/Vehicle/Train,'
+                          'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5',
+            'simpleGroup': '(Item/Object/Man-made-object/Vehicle/Train,'
+                           'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5)',
+            'groupAndTag': '(Item/Object/Man-made-object/Vehicle/Train,'
+                           'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5),'
+                           'Item/Object/Man-made-object/Vehicle/Car',
+            'nestedGroup': '((Item/Object/Man-made-object/Vehicle/Train,'
+                           'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5),'
+                           'Item/Object/Man-made-object/Vehicle/Car,Property/Environmental-property/Indoors)',
+            'nestedGroup2': '(Item/Object/Man-made-object/Vehicle/Car,Property/Environmental-property/Indoors,'
+                            '(Item/Object/Man-made-object/Vehicle/Train,'
+                            'Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/RGB-color/RGB-red/0.5))'
         }
         expected_errors = {
             'singleLevel': [],
