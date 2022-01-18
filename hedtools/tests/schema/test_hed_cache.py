@@ -5,6 +5,7 @@ from hed.schema import hed_cache
 from hed import schema
 import shutil
 
+
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

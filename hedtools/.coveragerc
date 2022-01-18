@@ -4,6 +4,10 @@ omit =
         */__init__.py
         */venv/*
         */tests/*
+        **/tests/
+        **/test/
+        */test*
+        **/*__init__.py
 
 
 [report]

@@ -117,7 +117,8 @@ def val_error_missing_column(missing_column_name):
 
 @hed_error(ValidationErrors.HED_UNKNOWN_COLUMN, default_severity=ErrorSeverity.WARNING)
 def val_error_extra_column(extra_column_name):
-    return f"Column named '{extra_column_name}' found in file, but not specified as a tag column or identified in sidecars.", {}
+    return f"Column named '{extra_column_name}' found in file, but not specified as a tag column " + \
+        "or identified in sidecars.", {}
 
 
 @hed_tag_error(ValidationErrors.HED_UNKNOWN_PREFIX)
@@ -185,8 +186,8 @@ def val_warning_default_units_used(tag, default_unit):
 @hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE)
 def schema_error_HED_SCHEMA_DUPLICATE_NODE(tag, duplicate_tag_list, section):
     tag_join_delimiter = "\n\t"
-    return f"Duplicate term '{str(tag)}' used {len(duplicate_tag_list)} places in '{section}' section schema as: {tag_join_delimiter}"\
-           f"{tag_join_delimiter.join(duplicate_tag_list)}", {}
+    return f"Duplicate term '{str(tag)}' used {len(duplicate_tag_list)} places in '{section}' section schema as: " + \
+           f"{tag_join_delimiter} {tag_join_delimiter.join(duplicate_tag_list)}", {}
 
 
 @hed_error(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID)
@@ -195,12 +196,14 @@ def schema_error_unknown_attribute(attribute_name, source_tag):
            f"or was used outside of it's defined class.", {}
 
 
-@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, default_severity=ErrorSeverity.WARNING, actual_code=SchemaWarnings.HED_SCHEMA_CHARACTER_INVALID)
+@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, default_severity=ErrorSeverity.WARNING,
+           actual_code=SchemaWarnings.HED_SCHEMA_CHARACTER_INVALID)
 def schema_warning_invalid_chars_desc(desc_string, tag_name, problem_char, char_index):
     return f"Invalid character '{problem_char}' in desc for '{tag_name}' at position {char_index}.  '{desc_string}", {}
 
 
-@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, default_severity=ErrorSeverity.WARNING, actual_code=SchemaWarnings.HED_SCHEMA_CHARACTER_INVALID)
+@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, default_severity=ErrorSeverity.WARNING,
+           actual_code=SchemaWarnings.HED_SCHEMA_CHARACTER_INVALID)
 def schema_warning_invalid_chars_tag(tag_name, problem_char, char_index):
     return f"Invalid character '{problem_char}' in tag '{tag_name}' at position {char_index}.", {}
 
@@ -296,13 +299,15 @@ def onset_too_many_defs(tag, tag_list):
 
 @hed_tag_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.HED_ONSET_OFFSET_ERROR)
 def onset_too_many_groups(tag, tag_list):
-    tag_list_strings = [str(tag) for tag in tag_list]
-    return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1.  Found {len(tag_list_strings)}: {tag_list_strings}", {}
+    tag_list_strings = [str(a_tag) for a_tag in tag_list]
+    return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. " +\
+           f"Found {len(tag_list_strings)}: {tag_list_strings}", {}
 
 
 @hed_tag_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.HED_ONSET_OFFSET_ERROR)
 def onset_wrong_type_tag(tag, def_tag):
-    return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be in a single group together.", {}
+    return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " + \
+           f"in a single group together.", {}
 
 
 @hed_tag_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, actual_code=ValidationErrors.HED_ONSET_OFFSET_ERROR)

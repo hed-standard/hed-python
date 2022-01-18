@@ -8,7 +8,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids_old')
+        cls.root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids/eeg_ds003654s_hed')
 
     def test_bids_constructor(self):
         bids = BidsDataset(Test.root_path)
@@ -26,7 +26,6 @@ class Test(unittest.TestCase):
         self.assertTrue(issues, "It should return issues when check_for_warnings is explicitly set to True")
         issues = bids.validate(check_for_warnings=False)
         self.assertFalse(issues, "It should return no issues when check_for_warnings is explicitly set to False")
-        print("to here")
 
 
 if __name__ == '__main__':
