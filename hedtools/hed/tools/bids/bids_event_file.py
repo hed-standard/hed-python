@@ -1,13 +1,13 @@
 import os
 from hed.models.events_input import EventsInput
-from hed.tools.bids.bids_file import BidsFile
+from hed.tools.bids.bids_tsv_file import BidsTsvFile
 
 
-class BidsEventFile(BidsFile):
+class BidsEventFile(BidsTsvFile):
     """Represents a bids_old file."""
 
     def __init__(self, file_path):
-        super().__init__(os.path.abspath(file_path))
+        super().__init__(os.path.abspath(file_path), set_contents=False)
         self.contents = None
         self.sidecars = None
 
