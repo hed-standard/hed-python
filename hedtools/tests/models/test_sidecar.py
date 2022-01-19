@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
     #
     # def get_validation_issues(self):
     #
-    # def validate_entries(self, hed_schema=None, name=None):
+    # def validate_entries(self, schemas=None, name=None):
     #
 
     def test_validate_column_group(self):
