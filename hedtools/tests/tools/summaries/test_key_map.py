@@ -2,17 +2,17 @@ import unittest
 import os
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.key_map import KeyMap
-from hed.tools.io_util import get_file_list
-from hed.tools.data_util import get_row_hash
+from hed.tools.summaries.key_map import KeyMap
+from hed.util.io_util import get_file_list
+from hed.util.data_util import get_row_hash
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
-        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/attention_shift')
+        cls.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/')
+        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")

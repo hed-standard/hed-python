@@ -30,7 +30,6 @@ class Test(unittest.TestCase):
         self.assertTrue(str(json_file1), "BidsJsonFile should have a string representation")
         json_file2 = BidsJsonFile(Test.description_path, set_contents=True)
         self.assertTrue(str(json_file2), "BidsJsonFile should have a string representation")
-        print(str(json_file2))
         self.assertGreater(len(str(json_file2)), len(str(json_file1)),
                            "BidsJsonFile with contents should have a longer string representation than without")
 
