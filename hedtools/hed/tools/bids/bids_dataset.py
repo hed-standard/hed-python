@@ -1,9 +1,8 @@
 import os
 import json
-from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.tools.data_util import get_new_dataframe
+from hed.util.data_util import get_new_dataframe
 from hed.tools.bids.bids_event_files import BidsEventFiles
 from hed.validator import HedValidator
 

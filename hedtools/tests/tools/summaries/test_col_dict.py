@@ -3,15 +3,15 @@ import os
 from unittest import mock
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.col_dict import ColumnDict
-from hed.tools.data_util import get_new_dataframe
+from hed.tools.summaries.col_dict import ColumnDict
+from hed.util.data_util import get_new_dataframe
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/attention_shift')
+        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")

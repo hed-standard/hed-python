@@ -1,18 +1,18 @@
 import os
 import unittest
-from hed.tools.col_dict import ColumnDict
-from hed.tools.io_util import get_file_list, make_file_dict
-from hed.tools.map_util import get_columns_info, get_key_counts, make_combined_dicts, update_dict_counts
-from hed.tools.data_util import get_new_dataframe
+from hed.tools.summaries.col_dict import ColumnDict
+from hed.util.io_util import get_file_list, make_file_dict
+from hed.tools.summaries.map_summary import get_columns_info, get_key_counts, make_combined_dicts, update_dict_counts
+from hed.util.data_util import get_new_dataframe
 
 
 class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids/eeg_ds003654s_hed')
-        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/attention_shift')
+        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")

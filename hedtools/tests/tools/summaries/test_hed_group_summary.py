@@ -3,7 +3,7 @@ import unittest
 from hed.models.sidecar import Sidecar
 from hed.schema import load_schema
 
-from hed.tools.hed_group_summary import HedGroupSummary
+from hed.tools.summaries.hed_group_summary import HedGroupSummary
 
 
 class Test(unittest.TestCase):
@@ -11,7 +11,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bids_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                     '../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
+                                     '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_hed_group_summary_constructor(self):
         hed_url_path = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml'
