@@ -8,9 +8,20 @@ class BidsJsonFile(BidsFile):
 
     def __init__(self, file_path, set_contents=False):
         super().__init__(os.path.abspath(file_path))
+        self.contents = None
         if set_contents:
+            self.set_contents()
 
-            with open(self.file_path, 'r') as f:
-                self.contents = json.load(f)
+    def clear_contents(self):
+        self.contents = None
+
+    def set_contents(self):
+        with open(self.file_path, 'r') as f:
+            self.contents = json.load(f)
+
+    def __str__(self):
+        """ Returns a string summary of the tsv file."""
+        if isinstance(self.contents, dict):
+            return super().__str__() + f"\n\tKeys: [{str(list(self.contents.keys()))}\n\t"
         else:
-            self.contents = None
+            return super().__str__()

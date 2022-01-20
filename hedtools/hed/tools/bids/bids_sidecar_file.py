@@ -1,17 +1,16 @@
 import os
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_file import BidsFile
+from hed.tools.bids.bids_json_file import BidsJsonFile
 
 
-class BidsSidecarFile(BidsFile):
+class BidsSidecarFile(BidsJsonFile):
     """Represents a bids_old file."""
 
     def __init__(self, file_path, set_contents=False):
-        super().__init__(os.path.abspath(file_path))
+        super().__init__(os.path.abspath(file_path), set_contents=False)
         if set_contents:
-            self.contents = Sidecar(self.file_path, name=os.path.abspath(self.file_path))
-        else:
-            self.contents = None
+            self.set_contents()
 
     def is_sidecar_for(self, obj):
         """ Returns true if this is a sidecar for obj.
@@ -33,6 +32,9 @@ class BidsSidecarFile(BidsFile):
             if key not in obj.entities or obj.entities[key] != item:
                 return False
         return True
+
+    def set_contents(self):
+        self.contents = Sidecar(self.file_path, name=os.path.abspath(self.file_path))
 
     @staticmethod
     def get_sidecar(obj, sidecars):
