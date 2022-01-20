@@ -2,7 +2,7 @@
 import os
 from pandas import DataFrame
 from hed.tools.bids.bids_file import BidsFile
-from hed.tools.data_util import get_new_dataframe
+from hed.util.data_util import get_new_dataframe
 
 
 class BidsTsvFile(BidsFile):
