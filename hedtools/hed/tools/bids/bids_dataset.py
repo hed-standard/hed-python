@@ -1,10 +1,12 @@
 import os
 import json
+from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.util.data_util import get_new_dataframe
 from hed.tools.bids.bids_event_files import BidsEventFiles
 from hed.validator import HedValidator
+
 
 LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/hedxml/HED_"
 
@@ -63,11 +65,11 @@ if __name__ == '__main__':
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../../tests/data/bids/eeg_ds003654s_hed_library')
     bids = BidsDataset(path)
-    # issue_list = bids.validate()
-    # if issue_list:
-    #     issue_str = get_printable_issue_string(issue_list, "HED_library")
-    # else:
-    #     issue_str = "No issues"
-    # print(issue_str)
+    issue_list = bids.validate()
+    if issue_list:
+        issue_str = get_printable_issue_string(issue_list, "HED_library")
+    else:
+        issue_str = "No issues"
+    print(issue_str)
     summary1 = bids.get_summary()
     print(json.dumps(summary1, indent=4))
