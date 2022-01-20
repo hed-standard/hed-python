@@ -25,7 +25,7 @@ class HedLogger:
         else:
             return []
 
-    def print_log(self, filename=None):
+    def print_log(self):
         for key, item in self.log.items():
             print(f"{key}")
             if item:

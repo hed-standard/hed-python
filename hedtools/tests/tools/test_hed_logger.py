@@ -34,10 +34,22 @@ class Test(unittest.TestCase):
 
     def test_print_log(self):
         status = HedLogger()
-        with mock.patch('sys.stdout', new=StringIO()) as fake_out:
-            self.assertIsInstance(fake_out, StringIO, "Mock creates a StringIO")
+        with mock.patch('sys.stdout', new=StringIO()) as fake_out1:
+            self.assertIsInstance(fake_out1, StringIO, "Mock creates a StringIO")
             status.add("baloney", "Test message 1", also_print=True)
             status.add("baloney", "Test message 2", also_print=True)
+            stuff1 = fake_out1.getvalue()
+            self.assertGreater(len(stuff1), 0, "HedLogger should print messages if also_print is True")
+            self.assertEqual(stuff1.count('\n'), 2,
+                             "HedLogger should output right number of lines if also_print is True")
+
+        with mock.patch('sys.stdout', new=StringIO()) as fake_out2:
+            self.assertIsInstance(fake_out2, StringIO, "Mock creates a StringIO")
+            status.print_log()
+            stuff2 = fake_out2.getvalue()
+            self.assertGreater(len(stuff2), 0, "HedLogger should print messages if also_print is True")
+            self.assertEqual(stuff2.count('\n'), 3,
+                             "HedLogger should output right number of lines if also_print is True")
 
 
 if __name__ == '__main__':
