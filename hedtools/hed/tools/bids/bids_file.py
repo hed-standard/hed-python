@@ -1,10 +1,9 @@
 import os
-from hed.tools.bids.bids_util import parse_bids_filename
-from hed.tools.io_util import get_file_list
+from hed.util.io_util import parse_bids_filename
 
 
 class BidsFile:
-    """Represents a bids_old file."""
+    """Represents a bids file name but not contents."""
 
     def __init__(self, file_path):
         self.file_path = os.path.abspath(file_path)
@@ -17,10 +16,3 @@ class BidsFile:
         return self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
                " entities=" + str(self.entities)
 
-
-if __name__ == '__main__':
-    path = 'D:\\Research\\HED\\hed-examples\\datasets\\eeg_ds003654s'
-    files = get_file_list(path, name_prefix=None, name_suffix="events", extensions=None)
-    for file in files:
-        bids = BidsFile(file)
-        print(str(bids))

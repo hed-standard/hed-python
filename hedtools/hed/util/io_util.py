@@ -2,6 +2,32 @@ import os
 from werkzeug.utils import secure_filename
 
 
+def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
+    """ Determines whether test_file has correct extension, name_suffix, and name_prefix.
+
+    Everything is converted to lower case prior to testing so this test should be case insensitive.
+
+     Args:
+         test_file (str) :           Path of filename to test
+         name_prefix (str):          An optional name_prefix for the base filename
+         name_suffix (str):          An optional name_suffix for the base file name
+         extensions (list):     An optional list of file extensions
+
+     Returns:
+         tuple (list, list):            Returns two lists one with
+     """
+
+    file_split = os.path.splitext(test_file.lower())
+    is_name = True
+    if extensions and file_split[1] not in [x.lower() for x in extensions]:
+        is_name = False
+    elif name_suffix and not file_split[0].endswith(name_suffix.lower()):
+        is_name = False
+    elif name_prefix and not file_split[0].startswith(name_prefix.lower()):
+        is_name = False
+    return is_name
+
+
 def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None):
     """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
 
@@ -54,7 +80,7 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
     for r, d, f in os.walk(dir_path):
         file_list = []
         for r_file in f:
-            if test_filename(r_file, name_prefix, name_suffix, extensions):
+            if check_filename(r_file, name_prefix, name_suffix, extensions):
                 file_list.append(os.path.abspath(os.path.join(r, r_file)))
         if skip_empty and not file_list:
             continue
@@ -77,7 +103,7 @@ def get_file_list(dir_path, name_prefix=None, name_suffix=None, extensions=None)
     file_list = []
     for r, d, f in os.walk(dir_path):
         for r_file in f:
-            if test_filename(r_file, name_prefix, name_suffix, extensions):
+            if check_filename(r_file, name_prefix, name_suffix, extensions):
                 file_list.append(os.path.join(r, r_file))
     return file_list
 
@@ -138,34 +164,43 @@ def make_key(key_string, indices=(0, -2), separator='_'):
     return key_value[:-1]
 
 
-def test_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
-    """ Determines whether test_file has correct extension, name_suffix, and name_prefix.
-
-    Everything is converted to lower case prior to testing so this test should be case insensitive.
-
-     Args:
-         test_file (str) :           Path of filename to test
-         name_prefix (str):          An optional name_prefix for the base filename
-         name_suffix (str):          An optional name_suffix for the base file name
-         extensions (list):     An optional list of file extensions
-
-     Returns:
-         tuple (list, list):            Returns two lists one with
-     """
-
-    file_split = os.path.splitext(test_file.lower())
-    is_name = True
-    if extensions and file_split[1] not in [x.lower() for x in extensions]:
-        is_name = False
-    elif name_suffix and not file_split[0].endswith(name_suffix.lower()):
-        is_name = False
-    elif name_prefix and not file_split[0].startswith(name_prefix.lower()):
-        is_name = False
-    return is_name
-
-
 if __name__ == '__main__':
     path = 'D:\\Research\\HED\\hed-examples\\datasets\\eeg_ds003654s'
     files = get_file_list(path, name_prefix=None, name_suffix="events", extensions=None)
     for file in files:
         get_path_components(file, path)
+
+
+def parse_bids_filename(file_path):
+    """ Split a filename into its BIDS suffix, extension, and entities
+
+        Args:
+            file_path (str)     Path to be parsed
+
+        Returns:
+            suffix (str)        BIDS suffix name
+            ext (str)           File extension (including the .)
+            entities (dict)     Dictionary with key-value pair being (entity type, entity value)
+            unmatched (list)    List of unmatched pieces of the filename
+
+    """
+
+    filename = os.path.splitext(os.path.basename(file_path))
+    ext = filename[1].lower()
+    basename = filename[0]
+    if '-' not in basename:
+        return basename, ext, {}, []
+    entity_pieces = basename.split('_')
+    if len(entity_pieces) < 2:
+        return '', ext, {}, [basename]
+    suffix = entity_pieces[-1]
+    entities = {}
+    unmatched = []
+    entity_pieces = entity_pieces[:-1]
+    for entity in reversed(list(enumerate(entity_pieces))):
+        pieces = entity[1].split('-')
+        if len(pieces) != 2:
+            unmatched.append(entity[1])
+        else:
+            entities[pieces[0]] = pieces[1]
+    return suffix, ext, entities, unmatched
