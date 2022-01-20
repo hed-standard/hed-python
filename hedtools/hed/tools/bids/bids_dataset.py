@@ -8,7 +8,7 @@ from hed.tools.bids.bids_event_files import BidsEventFiles
 from hed.validator import HedValidator
 
 
-LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/hedxml/HED_"
+LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/hedxml/"
 
 
 class BidsDataset:
@@ -39,7 +39,8 @@ class BidsDataset:
             hed_list.append(load_schema_version(xml_version_number=hed['base']))
         if 'libraries' in hed:
             for key, library in hed['libraries'].items():
-                url = LIBRARY_URL_BASE + library + '.xml'
+                library_pieces = library.split('_')
+                url = LIBRARY_URL_BASE + library_pieces[0] + '/HED_' + library + '.xml'
                 x = load_schema(url, library_prefix=key)
                 x.set_library_prefix(key)  # TODO: temporary work around
                 hed_list.append(x)
@@ -51,7 +52,6 @@ class BidsDataset:
 
     def get_schema_versions(self):
         version_list = []
-        x = self.schemas
         for prefix, schema in self.schemas._schemas.items():
             name = schema.version
             if schema.library:
