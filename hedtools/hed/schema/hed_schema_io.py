@@ -9,7 +9,7 @@ from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.util import file_util
 
 
-def from_string(schema_string, file_type=".xml"):
+def from_string(schema_string, file_type=".xml", library_prefix=None):
     """
         Creates a schema from the given string as if it was loaded from the given file type.
 
@@ -19,7 +19,8 @@ def from_string(schema_string, file_type=".xml"):
         An XML or mediawiki file as a single long string.
     file_type : str
         The extension(including the .) we should treat this string as
-
+    library_prefix : str or None
+        The name_prefix all tags in this schema will accept.
     Returns
     -------
     schema: HedSchema
@@ -35,6 +36,9 @@ def from_string(schema_string, file_type=".xml"):
         hed_schema = HedSchemaWikiParser.load_wiki(schema_as_string=schema_string)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
+
+    if library_prefix:
+        hed_schema.set_library_prefix(library_prefix=library_prefix)
 
     return hed_schema
 
@@ -95,29 +99,38 @@ def get_hed_xml_version(hed_xml_file_path):
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
-def load_schema_version(xml_folder=None, xml_version_number=None):
+def load_schema_version(xml_folder=None, xml_version_number=None, library_name=None,
+                        library_prefix=None):
     """
     Gets a HedSchema object based on the hed xml file specified. If no HED file is specified then the latest
        file will be retrieved.
     Parameters
     ----------
     xml_folder: str
-        Path to a
+        Path to a folder containing schemas
     xml_version_number: str
         HED version format string. Expected format: 'X.Y.Z'
+    library_name: str or None, optional
+        The schema library name.  HED_(LIBRARY_NAME)_(version).xml
+    library_prefix : str or None
+        The name_prefix all tags in this schema will accept.
     Returns
     -------
     HedSchema
         A HedSchema object.
     """
     try:
-        final_hed_xml_file = hed_cache.get_hed_version_path(xml_folder, xml_version_number)
+        final_hed_xml_file = hed_cache.get_hed_version_path(xml_version_number, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file)
     except HedFileError as e:
         if e.error_type == HedExceptions.FILE_NOT_FOUND:
             hed_cache.cache_all_hed_xml_versions()
-            final_hed_xml_file = hed_cache.get_hed_version_path(xml_folder, xml_version_number)
+            final_hed_xml_file = hed_cache.get_hed_version_path(xml_version_number, library_name, xml_folder)
             hed_schema = load_schema(final_hed_xml_file)
         else:
             raise e
+        
+    if library_prefix:
+        hed_schema.set_library_prefix(library_prefix=library_prefix)
+
     return hed_schema
