@@ -10,8 +10,8 @@ from hed.errors.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import base_constants
 from hedweb.columns import create_column_selections
-from hed.tools.io_util import generate_filename
-from hed.tools.map_util import get_columns_info
+from hed.util.io_util import generate_filename
+from hed.tools.summaries.map_summary import get_columns_info
 from hed.tools.sidecar_map import SidecarMap
 from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down
 

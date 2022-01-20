@@ -5,7 +5,7 @@ from hed import models
 from hed import schema as hedschema
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
-from hed.tools.io_util import generate_filename
+from hed.util.io_util import generate_filename
 from hed.validator.hed_validator import HedValidator
 from hed.util.file_util import get_file_extension
 

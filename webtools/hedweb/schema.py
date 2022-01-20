@@ -7,7 +7,7 @@ from hed import schema as hedschema
 from hed.util.file_util import get_file_extension
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
-from hed.tools.io_util import generate_filename
+from hed.util.io_util import generate_filename
 from hedweb.web_util import form_has_file, form_has_option, form_has_url
 from hedweb.constants import base_constants, file_constants
 

@@ -25,9 +25,12 @@ class Test(unittest.TestCase):
 
     def test_bids_file_str(self):
         bids = BidsFile(Test.sidecar_path)
-        my_str = str(bids)
-        self.assertIsInstance(my_str, str, "BidsFile __str__ method should return a string")
-        self.assertGreater(len(my_str), 0, "BidsFile __str__ method returns a non-empty string")
+        my_str1 = str(bids)
+        self.assertIsInstance(my_str1, str, "BidsFile convert to string should return a string")
+        self.assertGreater(len(my_str1), 0, "BidsFile convert to string should return a non-empty string")
+        my_str2 = bids.__str__()
+        self.assertIsInstance(my_str2, str, "BidsFile __str__ method should return a string")
+        self.assertGreater(len(my_str2), 0, "BidsFile __str__ method should return a non-empty string")
 
 
 if __name__ == '__main__':

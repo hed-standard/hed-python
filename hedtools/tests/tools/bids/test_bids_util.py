@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.tools.bids.bids_util import parse_bids_filename
+from hed.util.io_util import parse_bids_filename
 
 
 class Test(unittest.TestCase):
