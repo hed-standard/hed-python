@@ -10,7 +10,7 @@ from hed.schema.hed_schema_constants import HedSectionKey
 
 class HedSchemaGroup:
     """
-        This class handles combining multiple HedSchema objects for validation.
+        This class handles combining multiple HedSchema objects for validation and analysis.
 
         You cannot save/load/etc the combined schema object directly.
     """
