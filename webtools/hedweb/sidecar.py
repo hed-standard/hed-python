@@ -8,6 +8,7 @@ from hed import schema as hedschema
 from hed.validator.hed_validator import HedValidator
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
+from hed.models.hed_string import HedString
 from hedweb.constants import base_constants, file_constants
 from hed.util.io_util import generate_filename
 from hed.tools.sidecar_map import SidecarMap
@@ -104,7 +105,8 @@ def sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_
     else:
         tag_form = 'short_tag'
     issues = []
-    for hed_string_obj, position_info, issue_items in json_sidecar.hed_string_iter(validators=hed_schema,
+    ops = hed_schema
+    for hed_string_obj, position_info, issue_items in json_sidecar.hed_string_iter(validators=ops,
                                                                                    expand_defs=expand_defs):
         converted_string = hed_string_obj.get_as_form(tag_form)
         issues = issues + issue_items
