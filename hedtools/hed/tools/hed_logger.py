@@ -1,6 +1,11 @@
 
-class HedLogger:
+""" HedLogger class. """
 
+
+class HedLogger:
+    """ Class to log status messages organized by key
+
+    """
     def __init__(self):
         self.log = {}
 
@@ -20,7 +25,7 @@ class HedLogger:
         else:
             return []
 
-    def print_log(self, filename=None):
+    def print_log(self):
         for key, item in self.log.items():
             print(f"{key}")
             if item:

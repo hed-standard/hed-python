@@ -1,6 +1,6 @@
-from hed.schema.hed_schema_file import load_schema_version
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.bids.bids_event_files import BidsEventFiles
-from hed.tools.hed_group_summary import HedGroupSummary
+from hed.tools.summaries.hed_group_summary import HedGroupSummary
 
 
 def extract_definitions(bids):
@@ -11,9 +11,9 @@ def extract_definitions(bids):
 #     hed_version = "8.0.0"
 #     hed_str = "Sensory-event, Visual-presentation, Condition-variable/Blah, ((Square, Red)," + \
 #               "(Center-of, Computer-screen))"
-#     hed_schema = load_schema_version(xml_version_number=hed_version)
+#     schemas = load_schema_version(xml_version_number=hed_version)
 #     obj = HedString(hed_str)
-#     obj.convert_to_canonical_forms(hed_schema)
+#     obj.convert_to_canonical_forms(schemas)
 #     a = obj.get_all_groups()
 #     print("Tag groups:")
 #     for group in a:
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
         #         y = x.get_all_tags()
         #         for tag in y:
-        #             tag.convert_to_canonical_forms(hed_schema)
+        #             tag.convert_to_canonical_forms(schemas)
         #             print(f"{tag.short_base_tag}: {tag.extension_or_value_portion}")
         #         print("to here")
         # print(f"{sidecar}")
