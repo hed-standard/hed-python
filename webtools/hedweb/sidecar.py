@@ -106,7 +106,6 @@ def sidecar_convert(hed_schema, json_sidecar, command=base_constants.COMMAND_TO_
         tag_form = 'short_tag'
     issues = []
     ops = hed_schema
-    ops.append(HedString.remove_definitions)
     for hed_string_obj, position_info, issue_items in json_sidecar.hed_string_iter(validators=ops,
                                                                                    expand_defs=expand_defs):
         converted_string = hed_string_obj.get_as_form(tag_form)
