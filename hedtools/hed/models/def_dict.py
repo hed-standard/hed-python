@@ -9,14 +9,14 @@ from hed.models.model_constants import DefTagNames
 
 
 class DefEntry:
-    def __init__(self, name, contents_string, takes_value, source_context):
+    def __init__(self, name, contents, takes_value, source_context):
         """Contains info for a single definition tag
 
         Parameters
         ----------
         name : str
             The label portion of this name(not including definition/)
-        contents_string: HedGroup
+        contents: HedGroup
             The contents of this definition
         takes_value : bool
             If True, expects ONE tag to have a single # sign in it.
@@ -24,7 +24,9 @@ class DefEntry:
             Info about where this definition was declared.
         """
         self.name = name
-        self.contents = contents_string
+        self.contents = contents
+        if contents:
+            contents.cascade_mutable(False)
         self.takes_value = takes_value
         self.source_context = source_context
 
@@ -50,10 +52,15 @@ class DefEntry:
         output_contents = [replace_tag]
         name = self.name
         if self.contents:
-            output_group = copy.deepcopy(self.contents)
+            output_group = self.contents
             if placeholder_value:
+                placeholder_tag = output_group.find_placeholder_tag()
+                if not placeholder_tag:
+                    raise ValueError("Internal error related to placeholders in definition mapping")
+                output_group = copy.copy(self.contents)
+                placeholder_tag = output_group.make_tag_mutable(placeholder_tag)
                 name = f"{name}/{placeholder_value}"
-                output_group.replace_placeholder(placeholder_value)
+                placeholder_tag.replace_placeholder(placeholder_value)
 
             output_contents = [replace_tag, output_group]
 
@@ -117,21 +124,8 @@ class DefDict:
         """
         new_def_issues = []
         for tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
-            # def_tags, group_tags, other_tags = extract_tags_from_group(tag_group)
-            def_tags = []
-            group_tags = []
-            other_tags = []
-            for tag_or_group in tag_group.get_direct_children():
-                if isinstance(tag_or_group, HedGroup):
-                    group_tags.append(tag_or_group)
-                    continue
-                else:
-                    if tag_or_group.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
-                        def_tags.append(tag_or_group)
-                        continue
+            def_tags, group_tags, other_tags = self._extract_tags_from_group(tag_group)
 
-                other_tags.append(tag_or_group)
-            # to here
             # Now validate to see if we have a definition.  We want 1 definition, and the other parts are optional.
             if not def_tags:
                 # If we don't have at least one valid definition tag, just move on.
@@ -202,7 +196,7 @@ class DefDict:
                                                                          DefinitionErrors.DUPLICATE_DEFINITION,
                                                                          def_name=def_tag_name)
                 continue
-            self._defs[def_tag_lower] = DefEntry(name=def_tag_name, contents_string=group_tag,
+            self._defs[def_tag_lower] = DefEntry(name=def_tag_name, contents=group_tag,
                                                  takes_value=def_takes_value,
                                                  source_context=context)
 
@@ -210,8 +204,22 @@ class DefDict:
         return new_def_issues
 
     @staticmethod
+    def _extract_tags_from_group(tag_group):
+        def_tags = []
+        group_tags = []
+        other_tags = []
+        for tag_or_group in tag_group.get_direct_children():
+            if isinstance(tag_or_group, HedGroup):
+                group_tags.append(tag_or_group)
+            elif tag_or_group.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
+                def_tags.append(tag_or_group)
+            else:
+                other_tags.append(tag_or_group)
+        return def_tags, group_tags, other_tags
+
+    @staticmethod
     def _check_tag_starts_with(hed_tag, target_tag_short_name):
-        """ Check if a given tag starts with a given string, and returns the tag with the name_prefix removed if it does.
+        """ Check if a given tag starts with a given string, returns the tag with the name_prefix removed if it does.
 
         Parameters
         ----------
@@ -232,17 +240,3 @@ class DefDict:
         if found_index == 0 or hed_tag_lower[found_index - 1] == "/":
             return hed_tag[found_index + len(target_tag_short_name):]
         return None
-
-
-def extract_tags_from_group(tag_group):
-    def_tags = []
-    group_tags = []
-    other_tags = []
-    for tag_or_group in tag_group.get_direct_children():
-        if isinstance(tag_or_group, HedGroup):
-            group_tags.append(tag_or_group)
-        elif tag_or_group.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
-            def_tags.append(tag_or_group)
-        else:
-            other_tags.append(tag_or_group)
-    return def_tags, group_tags, other_tags
