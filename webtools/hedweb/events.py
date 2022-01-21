@@ -108,7 +108,8 @@ def assemble(hed_schema, events, expand_defs=True):
 
     hed_tags = []
     onsets = []
-    for row_number, row_dict in events.iter_dataframe(return_row_dict=True, expand_defs=expand_defs):
+    for row_number, row_dict in events.iter_dataframe(return_row_dict=True, expand_defs=expand_defs,
+                                                      remove_definitions=True):
         hed_tags.append(str(row_dict.get("HED", "")))
         onsets.append(row_dict.get("onset", "n/a"))
     data = {'onset': onsets, 'HED': hed_tags}
