@@ -282,7 +282,7 @@ class BaseInput:
                                    error_handler=error_handler, **kwargs)
 
     def iter_dataframe(self, mapper=None, return_row_dict=False, validators=None, run_string_ops_on_columns=False,
-                       error_handler=None, expand_defs=False, **kwargs):
+                       error_handler=None, expand_defs=False, remove_definitions=True, **kwargs):
         """
         Generates a list of parsed rows based on the given column mapper.
 
@@ -301,6 +301,8 @@ class BaseInput:
             If true, run all tag and string ops on columns, rather than columns then rows.
         expand_defs: bool
             If True, this will fully remove all definitions found and expand all def tags to def-expand tags
+        remove_definitions: bool
+            If true, this will remove all definition tags found.
         kwargs:
             See util.translate_ops or the specific validators for additional options
         Yields
@@ -317,7 +319,8 @@ class BaseInput:
             mapper = self._mapper
 
         tag_ops, string_ops = self._translate_ops(validators, run_string_ops_on_columns=run_string_ops_on_columns,
-                                                  expand_defs=expand_defs, error_handler=error_handler, **kwargs)
+                                                  expand_defs=expand_defs, remove_definitions=remove_definitions,
+                                                  error_handler=error_handler, **kwargs)
 
         start_at_one = 1
         if self._has_column_names:
@@ -584,10 +587,10 @@ class BaseInput:
         if self._def_mapper is not None:
             self._def_mapper.add_definitions(def_dict)
 
-    def _translate_ops(self, validators, run_string_ops_on_columns, expand_defs, **kwargs):
+    def _translate_ops(self, validators, run_string_ops_on_columns, expand_defs, remove_definitions, **kwargs):
         tag_ops = []
         string_ops = []
-        if validators or expand_defs:
+        if validators or expand_defs or remove_definitions:
             if not isinstance(validators, list):
                 validators = [validators]
             validators = validators.copy()
