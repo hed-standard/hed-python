@@ -61,6 +61,7 @@ JSON_STRINGS = 'json_strings'
 OTHER_VERSION_OPTION = 'Other'
 OUTPUT_DISPLAY_NAME = 'output_display_name'
 
+REMOVE_DEFS = 'remove_defs'
 REQUIRED_COLUMN_INDICES = 'required_column_indices'
 
 # Schema-specific constants
