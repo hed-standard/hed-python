@@ -135,7 +135,7 @@ class DefinitionMapper:
 
         return def_issues
 
-    def expand_and_remove_definitions(self, hed_string_obj, check_for_definitions=False, expand_defs=True):
+    def expand_and_remove_definitions(self, hed_string_obj, check_for_definitions=False, expand_defs=True, remove_definitions=True):
         """
             Validate any def tags and remove any definitions found in the given hed string.
 
@@ -148,7 +148,8 @@ class DefinitionMapper:
                 hed strings individually, not as part of a file.
         expand_defs : bool
             If true, convert all located def tags to def-expand tags, and plug in the definitions.
-
+        remove_definitions: bool
+            If true, this will remove all definition tags found.
         Returns
         -------
         def_issues: [{}]
@@ -158,7 +159,8 @@ class DefinitionMapper:
         if check_for_definitions:
             def_issues += self.add_definitions_from_string_as_temp(hed_string_obj)
         def_issues += self.expand_def_tags(hed_string_obj, expand_defs=expand_defs)
-        def_issues += hed_string_obj.remove_definitions()
+        if remove_definitions:
+            def_issues += hed_string_obj.remove_definitions()
         if check_for_definitions:
             self.clear_temporary_definitions()
 
@@ -207,11 +209,13 @@ class DefinitionMapper:
     def __get_string_ops__(self, **kwargs):
         string_validators = []
         expand_defs = kwargs.get("expand_defs")
+        remove_definitions = kwargs.get("remove_definitions")
         check_for_definitions = kwargs.get("check_for_definitions")
         from functools import partial
         string_validators.append(partial(self.expand_and_remove_definitions,
                                          check_for_definitions=check_for_definitions,
-                                         expand_defs=expand_defs))
+                                         expand_defs=expand_defs,
+                                         remove_definitions=remove_definitions))
         return string_validators
 
     def __get_tag_ops__(self, **kwargs):

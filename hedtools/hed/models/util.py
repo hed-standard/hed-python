@@ -2,6 +2,16 @@ from functools import partial
 from hed.schema import HedSchema, HedSchemaGroup
 
 
+default_arguments = {
+    'allow_placeholders': False,
+    'check_for_definitions': False,
+    'expand_defs': False,
+    'error_handler': None,
+    'check_for_warnings': False,
+    'remove_definitions': True
+}
+
+
 def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
     """
         Takes a list of validators and/or functions and returns a list of functions to apply to a hed string object
@@ -20,6 +30,7 @@ def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
                                    expand_defs
                                    error_handler
                                    check_for_warnings
+                                   remove_definitions
     Returns
     -------
     tag_ops, string_ops: ([func], [func]) or [func]
@@ -30,6 +41,9 @@ def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
 
     from hed.models.hed_string import HedString
 
+    settings = default_arguments.copy()
+    settings.update(kwargs)
+
     tag_ops = []
     string_ops = []
     for validator in validators:
@@ -39,8 +53,8 @@ def translate_ops(validators, split_tag_and_string_ops=False, **kwargs):
                 tag_ops.append(partial(HedString.convert_to_canonical_forms, hed_schema=validator))
             else:
                 try:
-                    tag_ops += validator.__get_tag_ops__(**kwargs)
-                    string_ops += validator.__get_string_ops__(**kwargs)
+                    tag_ops += validator.__get_tag_ops__(**settings)
+                    string_ops += validator.__get_string_ops__(**settings)
                 except AttributeError:
                     string_ops.append(validator)
 

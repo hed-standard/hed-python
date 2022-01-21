@@ -23,8 +23,7 @@ class Test(unittest.TestCase):
 
         cls.specific_hed_url = \
             """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
-        cls.base_api_url = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
-        hed_cache.cache_all_hed_xml_versions(cls.base_api_url, cls.hed_cache_dir)
+        hed_cache.cache_all_hed_xml_versions(cache_folder=cls.hed_cache_dir)
 
     @classmethod
     def tearDownClass(cls):
@@ -57,13 +56,18 @@ class Test(unittest.TestCase):
         local_filename = hed_cache.cache_specific_url(self.specific_hed_url, None, self.hed_cache_dir)
         self.assertTrue(local_filename)
 
-    def test_cache_all_hed_xml_versions(self):
-        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)
-        self.assertIsInstance(cached_versions, list)
+    def test_get_all_hed_versions_all(self):
+        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, get_all_libraries=True)
+        self.assertIsInstance(cached_versions, dict)
         self.assertTrue(len(cached_versions) > 0)
 
     def test_get_all_hed_versions(self):
         cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)
+        self.assertIsInstance(cached_versions, list)
+        self.assertTrue(len(cached_versions) > 0)
+
+    def test_get_all_hed_versions_library(self):
+        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, library_name="score")
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
 
