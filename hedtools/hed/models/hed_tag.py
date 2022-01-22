@@ -48,6 +48,7 @@ class HedTag:
             self.convert_to_canonical_forms(hed_schema)
 
         self.is_definition = False
+        self.mutable = True  # If False, this tag is potentially referenced in other places and should not be altered
 
     @property
     def library_prefix(self):
@@ -125,6 +126,8 @@ class HedTag:
         -------
 
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable tag")
         long_part = self._long_tag[:self._short_tag_index]
         self._long_tag = f"{long_part}{new_tag_val}/{self.extension_or_value_portion}"
         self._extension_index = self._short_tag_index + len(new_tag_val)
@@ -205,6 +208,9 @@ class HedTag:
         new_tag_val : str
             New (implicitly long form) of tag to set
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable tag")
+
         if self._long_tag:
             raise ValueError("Can only edit tags before calculating canonical forms. " +
                              "This could be updated to instead remove computed forms.")
@@ -294,6 +300,9 @@ class HedTag:
         required_prefix : str
             The full name_prefix to add if not present
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable tag")
+
         checking_prefix = required_prefix
         while checking_prefix:
             if self.lower().startswith(checking_prefix.lower()):
@@ -317,6 +326,9 @@ class HedTag:
         placeholder_value : str
             Value to replace placeholder with.
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable tag")
+
         if "#" in self.org_tag:
             if self._long_tag:
                 # This could possibly be more efficient
