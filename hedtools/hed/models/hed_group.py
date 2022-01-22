@@ -1,4 +1,5 @@
 from hed.models.hed_tag import HedTag
+import copy
 
 
 class HedGroup:
@@ -33,6 +34,7 @@ class HedGroup:
         self._include_paren = include_paren
         self._hed_string = hed_string
         self.is_definition = False
+        self.mutable = True  # If False, this group is potentially referenced in other places and should not be altered
 
     def append(self, new_tag_or_group):
         """
@@ -43,10 +45,10 @@ class HedGroup:
         new_tag_or_group : HedTag or HedGroup
             The new object to add
         """
-        self._children.append(new_tag_or_group)
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable group")
 
-    def __bool__(self):
-        return bool(self._children)
+        self._children.append(new_tag_or_group)
 
     def get_direct_children(self):
         """
@@ -257,6 +259,9 @@ class HedGroup:
         new_contents : HedTag or HedGroup or [HedTag or HedGroup]
             What to replace the tag with.
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable group")
+
         if self._original_children is self._children:
             self._original_children = self._children.copy()
         new_object = new_contents
@@ -265,6 +270,23 @@ class HedGroup:
 
         replace_index = self._children.index(tag)
         self._children[replace_index] = new_object
+
+    def find_placeholder_tag(self):
+        """
+            If a placeholder tag is present, this will return it.
+
+            Assumes a valid HedString with no erroneous "#" characters.
+
+        Returns
+        -------
+        found_tag: HedTag or None
+            The placeholder tag if found.
+        """
+        for tag in self.get_all_tags():
+            if "#" in tag.org_tag:
+                return tag
+
+        return None
 
     def remove_groups(self, remove_groups):
         """
@@ -275,6 +297,9 @@ class HedGroup:
         remove_groups : [HedGroup or HedTag]
             A list of groups or tags to remove
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable group")
+
         if self._original_children is self._children:
             self._original_children = self._children.copy()
 
@@ -285,21 +310,6 @@ class HedGroup:
 
         for group in self.get_all_groups():
             group._children = [child for child in group._children if child not in remove_groups]
-
-    def replace_placeholder(self, placeholder_value):
-        """
-            Replace any placeholders with the given value.
-
-        Parameters
-        ----------
-        placeholder_value : str
-            The placeholder value to fill in
-
-        Returns
-        -------
-        """
-        for tag in self.get_all_tags():
-            tag.replace_placeholder(placeholder_value)
 
     def without_defs(self):
         """
@@ -312,3 +322,65 @@ class HedGroup:
         if self._include_paren:
             return "(" + ",".join([str(child) for child in self._children if not child.is_definition]) + ")"
         return ",".join([str(child) for child in self._children if not child.is_definition])
+
+    def __copy__(self):
+        """
+            Return a shallow copy with a new _children list, rather than the same list
+
+            Also mark the copy as mutable.
+
+        Returns
+        -------
+
+        """
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__)
+        result._children = self._children.copy()
+        result.mutable = True
+        return result
+
+    def __bool__(self):
+        return bool(self._children)
+
+    def cascade_mutable(self, value):
+        """
+            Sets the mutable property for all child tags and groups.
+
+        Parameters
+        ----------
+        value: bool
+            If they should be mutable
+
+        Returns
+        -------
+        """
+        for child in self._children:
+            if isinstance(child, HedTag):
+                child.mutable = value
+            else:
+                child.cascade_mutable(value)
+
+    def make_tag_mutable(self, tag):
+        """
+            Replace the given tag in the group with a tag you can alter.
+
+        Parameters
+        ----------
+        tag: HedTag
+            The tag you want to make mutable
+
+        Returns
+        -------
+        mutable_tag: HedTag
+            A mutable new copy of the tag, or the old mutable one.
+        """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable group")
+
+        if not tag.mutable:
+            tag_copy = copy.copy(tag)
+            tag_copy.mutable = True
+            self.replace_tag(tag, tag_copy)
+            return tag_copy
+        return tag
