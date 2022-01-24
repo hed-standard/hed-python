@@ -6,6 +6,7 @@ import copy
 from functools import partial
 
 from hed.models.model_constants import DefTagNames
+from hed.models.hed_ops import HedOps
 
 
 class DefEntry:
@@ -64,10 +65,12 @@ class DefEntry:
 
             output_contents = [replace_tag, output_group]
 
+        output_contents = HedGroup(replace_tag._hed_string,
+                                   startpos=replace_tag.span[0], endpos=replace_tag.span[1], contents=output_contents)
         return f"{DefTagNames.DEF_EXPAND_ORG_KEY}/{name}", output_contents
 
 
-class DefDict:
+class DefDict(HedOps):
     """Class responsible for gathering and storing a group of definitions to be considered a single source.
 
         A bids_old style file might have many of these(one for each json dict, and another for the actual file)
@@ -81,6 +84,7 @@ class DefDict:
         Parameters
         ----------
         """
+        super().__init__()
         self._defs = {}
 
         # Definition related issues
@@ -102,11 +106,11 @@ class DefDict:
     def __iter__(self):
         return iter(self._defs.items())
 
-    def __get_string_ops__(self, **kwargs):
+    def __get_string_funcs__(self, **kwargs):
         error_handler = kwargs.get("error_handler")
         return [partial(self.check_for_definitions, error_handler=error_handler)]
 
-    def __get_tag_ops__(self, **kwargs):
+    def __get_tag_funcs__(self, **kwargs):
         return []
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
@@ -216,27 +220,3 @@ class DefDict:
             else:
                 other_tags.append(tag_or_group)
         return def_tags, group_tags, other_tags
-
-    @staticmethod
-    def _check_tag_starts_with(hed_tag, target_tag_short_name):
-        """ Check if a given tag starts with a given string, returns the tag with the name_prefix removed if it does.
-
-        Parameters
-        ----------
-        hed_tag : str
-            A single input tag
-        target_tag_short_name : str
-            The string to match eg find target_tag_short_name in hed_tag
-        Returns
-        -------
-            str: the tag without the removed name_prefix, or None
-        """
-        hed_tag_lower = hed_tag.lower()
-        found_index = hed_tag_lower.find(target_tag_short_name)
-
-        if found_index == -1:
-            return None
-
-        if found_index == 0 or hed_tag_lower[found_index - 1] == "/":
-            return hed_tag[found_index + len(target_tag_short_name):]
-        return None
