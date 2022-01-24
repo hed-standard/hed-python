@@ -29,7 +29,7 @@ class Sidecar:
 
     def __iter__(self):
         """
-            Creates an iterator to go over the individual column definitions
+            Creates an iterator to go over the individual column metadata
         Returns
         -------
         column_data: iterator
