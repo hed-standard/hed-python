@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
                                  "../data/validator_tests/bids_events_bad_defs.json")
         validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
-        issues = sidecar.validate_entries(validators=validator, check_for_warnings=True)
+        issues = sidecar.validate_entries(hed_ops=validator, check_for_warnings=True)
         self.assertEqual(len(issues), 4)
         input_file = EventsInput(events_path, sidecars=sidecar)
 
