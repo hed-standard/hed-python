@@ -19,13 +19,13 @@ class Test(unittest.TestCase):
                     f"(Definition/Famous-face-cond, (Condition-variable/Face-type, (Image, (Face, Famous))," \
                     f"Description/A face that should be recognized by the participants))"]
 
-        sidecar1 = BidsSidecarFile(Test.sidecar_path1, set_contents=False)
+        sidecar1 = BidsSidecarFile(Test.test_json, set_contents=False)
         self.assertEqual(sidecar1.suffix, 'events', "BidsSidecarFile should have correct name_suffix")
         self.assertEqual(sidecar1.ext, '.json', "BidsSidecarFile should have correct ext")
         self.assertEqual(len(sidecar1.entities), 1, "BidsSidecarFile should have right number of entities")
         self.assertFalse(sidecar1.contents)
 
-        sidecar2 = BidsSidecarFile(Test.sidecar_path1, set_contents=True)
+        sidecar2 = BidsSidecarFile(Test.test_json, set_contents=True)
         self.assertEqual(sidecar2.suffix, 'events', "BidsSidecarFile should have correct name_suffix")
         self.assertEqual(sidecar2.ext, '.json', "BidsSidecarFile should have correct ext")
         self.assertEqual(len(sidecar2.entities), 1, "BidsSidecarFile should have right number of entities")
