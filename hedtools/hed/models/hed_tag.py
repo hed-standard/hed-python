@@ -50,6 +50,20 @@ class HedTag:
         self.is_definition = False
         self.mutable = True  # If False, this tag is potentially referenced in other places and should not be altered
 
+    def __eq__(self, other):
+        if self is other:
+            return True
+
+        if not isinstance(other, HedTag):
+            return False
+
+        if self.short_tag.lower() == other.short_tag.lower():
+            return True
+
+        if self.org_tag.lower() == other.org_tag.lower():
+            return True
+        return False
+
     @property
     def library_prefix(self):
         """

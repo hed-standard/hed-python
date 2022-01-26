@@ -5,7 +5,7 @@ from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
 from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 from hed.errors.error_types import ErrorContext
-from hed.models.util import translate_ops
+from hed.models.hed_ops import translate_ops
 from hed.models.model_constants import DefTagNames
 
 
@@ -253,10 +253,10 @@ class HedString(HedGroup):
         found_string = None
         string_start_index = 0
         if not self._component_strings:
-            if tag_or_group in self.get_original_tags_and_groups():
+            if self.check_if_in_original_tags_and_groups(tag_or_group):
                 return tag_or_group.span
         for string in strings_list:
-            if tag_or_group in string.get_original_tags_and_groups():
+            if string.check_if_in_original_tags_and_groups(tag_or_group):
                 found_string = string
                 break
             # Add 1 for comma
@@ -356,7 +356,7 @@ class HedString(HedGroup):
         return [HedTag(hed_string, span) for (is_hed_tag, span) in
                 result_positions if is_hed_tag]
 
-    def apply_ops(self, string_ops):
+    def apply_ops(self, string_funcs):
         """
             Run the list of functions on this string and gather issues found.
 
@@ -364,7 +364,7 @@ class HedString(HedGroup):
 
         Parameters
         ----------
-        string_ops : [func]
+        string_funcs : [func]
             A list of functions that take a hed string object and return a list of issues.
 
         Returns
@@ -373,26 +373,26 @@ class HedString(HedGroup):
             A list of issues found by these operations
         """
         string_issues = []
-        for string_validator in string_ops:
-            string_issues += string_validator(self)
+        for string_func in string_funcs:
+            string_issues += string_func(self)
             if string_issues:
                 if check_for_any_errors(string_issues):
                     break
 
         return string_issues
 
-    def validate(self, validators=None, error_handler=None, **kwargs):
+    def validate(self, hed_ops=None, error_handler=None, **kwargs):
         """
-            Run the given validators on this string.
+            Run the given hed_ops on this string.
 
         Parameters
         ----------
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in this sidecar.
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings in this sidecar.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
 
         Returns
         -------
@@ -400,10 +400,10 @@ class HedString(HedGroup):
         """
         if error_handler is None:
             error_handler = ErrorHandler()
-        tag_ops = translate_ops(validators, **kwargs)
+        tag_funcs = translate_ops(hed_ops, **kwargs)
 
         error_handler.push_error_context(ErrorContext.HED_STRING, self, increment_depth_after=False)
-        issues = self.apply_ops(tag_ops)
+        issues = self.apply_ops(tag_funcs)
         error_handler.add_context_to_issues(issues)
         error_handler.pop_error_context()
 
