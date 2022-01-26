@@ -64,7 +64,7 @@ class BidsEventFiles:
     def validate(self, validators, check_for_warnings=True, keep_events=False):
         issues = []
         for json_obj in self.sidecar_dict.values():
-            issues += json_obj.contents.validate_entries(validators=validators, check_for_warnings=check_for_warnings)
+            issues += json_obj.contents.validate_entries(hed_ops=validators, check_for_warnings=check_for_warnings)
         if issues:
             return issues
         for event_obj in self.events_dict.values():
@@ -73,7 +73,7 @@ class BidsEventFiles:
                 contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecars)
                 if keep_events:
                     event_obj.my_contents = contents
-            issues += contents.validate_file(validators=validators, check_for_warnings=check_for_warnings)
+            issues += contents.validate_file(hed_ops=validators, check_for_warnings=check_for_warnings)
         return issues
 
 

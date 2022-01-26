@@ -3,7 +3,7 @@ import unittest
 from hed.models.sidecar import Sidecar
 from hed.schema import load_schema
 
-from hed.tools.summaries.hed_group_summary import HedGroupSummary
+from hed.tools.summaries.group_summary import HedGroupSummary
 
 
 class Test(unittest.TestCase):
