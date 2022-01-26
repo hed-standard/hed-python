@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
                          "DefinitionEntry constructor dictionary should not have a tag dictionary until set")
 
     def test_set_tag_dict(self):
-        schema = load_schema_version(xml_version_number="8.0.0")
+        schema = load_schema_version(xml_version="8.0.0")
         def_str1 = f"(Task,Experiment-participant,(See,Face),(Discriminate,(Face, Symmetrical))," \
             f"(Press,Keyboard-key),Description/Evaluate degree of image symmetry and respond with key" \
             f"press evaluation.)"

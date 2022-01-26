@@ -17,7 +17,7 @@ class DefinitionEntry:
         Parameters
         ----------
         name : str
-            The label portion of this name(not including definition/)
+            The label portion of this name (not including Definition/)
         contents: HedGroup or None
             The contents of this definition
         """
@@ -45,7 +45,7 @@ class DefinitionEntry:
 #         groups = hed_string_obj.groups()
 #         tags_no_def = hed_string_obj.tags()
 #         for group in groups:
-#             def_entry = extract_def(group)
+#             def_entry = extract_anchored_group(group)
 #             if def_entry:
 #                 self.definitions[def_entry.name] = def_entry
 #             else:
@@ -66,7 +66,7 @@ def separate_defs(definition_dict, hed_string_obj):
     groups = hed_string_obj.groups()
     tags_no_def = hed_string_obj.tags()
     for group in groups:
-        def_entry = extract_def(group)
+        def_entry = extract_anchored_group(group)
         if def_entry:
             definition_dict[def_entry.name] = def_entry
         else:
@@ -74,15 +74,15 @@ def separate_defs(definition_dict, hed_string_obj):
     return tags_no_def
 
 
-def extract_def(group):
+def extract_anchored_group(group, anchor_name=DefTagNames.DEFINITION_KEY):
     tags = group.tags()
     if len(tags) != 1:
         return None
 
-    index = tags[0].short_tag.lower().find(DefTagNames.DEFINITION_KEY)
+    index = tags[0].short_tag.lower().find(anchor_name)
     if index == -1:
         return None
-    tag_name = tags[0].short_tag[(index + len(DefTagNames.DEFINITION_KEY) + 1):]
+    tag_name = tags[0].short_tag[(index + len(anchor_name) + 1):]
     groups = group.groups()
     return DefinitionEntry(tag_name, groups[0])
 
