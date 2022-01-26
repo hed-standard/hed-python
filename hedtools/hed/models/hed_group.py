@@ -1,4 +1,5 @@
 from hed.models.hed_tag import HedTag
+from hed.models.model_constants import DefTagNames
 import copy
 
 
@@ -427,3 +428,17 @@ class HedGroup:
             self.replace_tag(tag, tag_copy)
             return tag_copy
         return tag
+
+    @staticmethod
+    def extract_tags_from_group(tag_group):
+        def_tags = []
+        group_tags = []
+        other_tags = []
+        for tag_or_group in tag_group.get_direct_children():
+            if isinstance(tag_or_group, HedGroup):
+                group_tags.append(tag_or_group)
+            elif tag_or_group.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
+                def_tags.append(tag_or_group)
+            else:
+                other_tags.append(tag_or_group)
+        return def_tags, group_tags, other_tags

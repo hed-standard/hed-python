@@ -1,7 +1,7 @@
-from hed.tools.summaries.hed_group_summary import HedGroupSummary
+from hed.tools.summaries.group_summary import HedGroupSummary
 from hed.models.sidecar import Sidecar
 from hed.models.def_dict import DefDict
-from hed.schema.hed_schema_file import load_schema
+from hed.schema.hed_schema_io import load_schema
 
 
 class HedDefSummary():

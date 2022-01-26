@@ -30,13 +30,13 @@ class BidsDataset:
     def _schema_from_description(self):
         hed = self.dataset_description.get("HEDVersion", None)
         if isinstance(hed, str):
-            return [load_schema_version(xml_version_number=hed)]
+            return [load_schema_version(xml_version=hed)]
         elif not isinstance(hed, dict):
             return []
 
         hed_list = []
         if 'base' in hed:
-            hed_list.append(load_schema_version(xml_version_number=hed['base']))
+            hed_list.append(load_schema_version(xml_version=hed['base']))
         if 'libraries' in hed:
             for key, library in hed['libraries'].items():
                 library_pieces = library.split('_')
