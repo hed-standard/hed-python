@@ -98,7 +98,7 @@ class EventsInput(BaseInput):
         self._def_mapper = self.create_def_mapper(new_mapper, self._extra_def_dicts)
         self.reset_mapper(new_mapper)
 
-    def validate_file_sidecars(self, validators=None, error_handler=None, **kwargs):
+    def validate_file_sidecars(self, hed_ops=None, error_handler=None, **kwargs):
         """
         Validates all column definitions and column definition hed strings.
 
@@ -107,18 +107,18 @@ class EventsInput(BaseInput):
 
         Parameters
         ----------
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in the sidecars.
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings in the sidecars.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
         Returns
         -------
         validation_issues : [{}]
             A list of syntax and semantic issues found in the definitions.
         """
-        if not isinstance(validators, list):
-            validators = [validators]
-        validators.append(self._def_mapper)
-        return self._mapper.validate_column_data(validators, error_handler=error_handler, **kwargs)
+        if not isinstance(hed_ops, list):
+            hed_ops = [hed_ops]
+        hed_ops.append(self._def_mapper)
+        return self._mapper.validate_column_data(hed_ops, error_handler=error_handler, **kwargs)

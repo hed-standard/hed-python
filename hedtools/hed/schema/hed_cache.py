@@ -94,14 +94,14 @@ def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_li
     return []
 
 
-def cache_specific_url(hed_xml_url, xml_version_number=None, library_name=None, cache_folder=None):
+def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_folder=None):
     """Cache a file from a URL.
 
     Parameters
     ----------
     hed_xml_url: str
         Path to an exact file at a URL, or a GitHub API url to a directory.
-    xml_version_number: str
+    xml_version: str
         If not None and hed_xml_url is a directory, return this version or None.
     library_name: str or None, optional
         The schema library name
@@ -120,7 +120,7 @@ def cache_specific_url(hed_xml_url, xml_version_number=None, library_name=None, 
 
     if _check_if_api_url(hed_xml_url):
         return _download_latest_hed_xml_version_from_url(hed_xml_url,
-                                                         xml_version_number=xml_version_number,
+                                                         xml_version=xml_version,
                                                          library_name=library_name,
                                                          cache_folder=cache_folder)
 
@@ -139,14 +139,14 @@ def cache_specific_url(hed_xml_url, xml_version_number=None, library_name=None, 
         return None
 
 
-def get_hed_version_path(xml_version_number=None, library_name=None, local_hed_directory=None):
+def get_hed_version_path(xml_version=None, library_name=None, local_hed_directory=None):
     """Get the latest HED XML file path in the hed directory.
 
     Parameters
     ----------
     library_name: str or None, optional
         The schema library name
-    xml_version_number: str
+    xml_version: str
         If not None, return this version or None.
     local_hed_directory: str
         Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
@@ -159,9 +159,9 @@ def get_hed_version_path(xml_version_number=None, library_name=None, local_hed_d
         local_hed_directory = HED_CACHE_DIRECTORY
 
     hed_versions = get_all_hed_versions(local_hed_directory, library_name)
-    if xml_version_number:
-        if xml_version_number in hed_versions:
-            latest_hed_version = xml_version_number
+    if xml_version:
+        if xml_version in hed_versions:
+            latest_hed_version = xml_version
         else:
             return None
     else:
@@ -354,21 +354,21 @@ def _merge_in_versions(all_hed_versions, sub_folder_versions):
         all_hed_versions[lib_name].update(sub_folder_versions[lib_name])
 
 
-def _download_latest_hed_xml_version_from_url(hed_base_url, xml_version_number, library_name, cache_folder):
-    latest_version, version_info = _get_latest_hed_xml_version_from_url(hed_base_url, xml_version_number, library_name)
+def _download_latest_hed_xml_version_from_url(hed_base_url, xml_version, library_name, cache_folder):
+    latest_version, version_info = _get_latest_hed_xml_version_from_url(hed_base_url, xml_version, library_name)
     if latest_version:
         cached_xml_file = _cache_hed_version(latest_version, library_name, version_info, cache_folder=cache_folder)
         return cached_xml_file
 
 
-def _get_latest_hed_xml_version_from_url(hed_base_url, library_name=None, xml_version_number=None):
+def _get_latest_hed_xml_version_from_url(hed_base_url, library_name=None, xml_version=None):
     hed_versions = _get_hed_xml_versions_from_url(hed_base_url, library_name=library_name)
 
     if not hed_versions:
         return None
 
-    if xml_version_number and xml_version_number in hed_versions:
-        return xml_version_number, hed_versions[xml_version_number]
+    if xml_version and xml_version in hed_versions:
+        return xml_version, hed_versions[xml_version]
 
     for version in hed_versions:
         return version, hed_versions[version]
