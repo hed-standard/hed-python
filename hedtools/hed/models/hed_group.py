@@ -37,6 +37,19 @@ class HedGroup:
         self.is_definition = False
         self.mutable = True  # If False, this group is potentially referenced in other places and should not be altered
 
+    def __eq__(self, other):
+        if self is other:
+            return True
+
+        if not isinstance(other, HedGroup):
+            return False
+
+        if self._children != other._children:
+            return False
+        if self._include_paren != other._include_paren:
+            return False
+        return True
+
     def append(self, new_tag_or_group):
         """
         Add a tag or group to this group.
@@ -82,7 +95,7 @@ class HedGroup:
                 final_list.append(current_group_or_tag)
         return final_list
 
-    def get_original_tags_and_groups(self):
+    def check_if_in_original_tags_and_groups(self, tag_or_group):
         """
             Returns all original tags and groups.  Applies if a tag was deleted or replaced
 
@@ -99,6 +112,12 @@ class HedGroup:
             if isinstance(current_group_or_tag, HedGroup):
                 node_list = current_group_or_tag._original_children + node_list
             final_list.append(current_group_or_tag)
+
+        for val in final_list:
+            if tag_or_group is val:
+                return True
+
+        return False
         return final_list
 
     def is_group(self):
@@ -138,8 +157,15 @@ class HedGroup:
         if also_return_depth:
             top_groups = self.groups()
 
-            final_list = [(group, group in top_groups) for group in final_list]
+            final_list = [(group, self._check_in_group(group, top_groups)) for group in final_list]
         return final_list
+
+    @staticmethod
+    def _check_in_group(group, group_list):
+        for val in group_list:
+            if val is group:
+                return True
+        return False
 
     def tags(self):
         """
@@ -250,12 +276,12 @@ class HedGroup:
         """Convenience function, equivalent to str(self).lower()"""
         return str(self).lower()
 
-    def replace_tag(self, tag, new_contents):
+    def replace_tag(self, tag_or_group, new_contents):
         """ Replaces an existing tag in the group with a new tag, list, or group
 
         Parameters
         ----------
-        tag : HedTag
+        tag_or_group : HedTag or HedGroup
             The tag to replace.  It must exist or this will raise an error.
         new_contents : HedTag or HedGroup or [HedTag or HedGroup]
             What to replace the tag with.
@@ -265,12 +291,13 @@ class HedGroup:
 
         if self._original_children is self._children:
             self._original_children = self._children.copy()
-        new_object = new_contents
-        if isinstance(new_contents, list):
-            new_object = HedGroup(tag._hed_string, startpos=tag.span[0], endpos=tag.span[1], contents=new_contents)
 
-        replace_index = self._children.index(tag)
-        self._children[replace_index] = new_object
+        replace_index = -1
+        for i, child in enumerate(self._children):
+            if tag_or_group is child:
+                replace_index = i
+                break
+        self._children[replace_index] = new_contents
 
     def find_placeholder_tag(self):
         """
@@ -304,13 +331,29 @@ class HedGroup:
         if self._original_children is self._children:
             self._original_children = self._children.copy()
 
-        if self in remove_groups:
-            self._children = []
-            self._hed_string = ""
-            return
+        for val in remove_groups:
+            if val is self:
+                self._children = []
+                self._hed_string = ""
+                return
+        # if self in remove_groups:
+        #     self._children = []
+        #     self._hed_string = ""
+        #     return
 
         for group in self.get_all_groups():
-            group._children = [child for child in group._children if child not in remove_groups]
+            new_children = []
+            for child in group._children:
+                skip_child = False
+                for remove_child in remove_groups:
+                    if child is remove_child:
+                        skip_child = True
+                        break
+                if skip_child:
+                    continue
+                new_children.append(child)
+            group._children = new_children
+            #group._children = [child for child in group._children if child not in remove_groups]
 
     def without_defs(self):
         """

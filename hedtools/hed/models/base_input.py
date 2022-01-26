@@ -9,7 +9,7 @@ from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors.error_types import ErrorContext, ErrorSeverity
 from hed.errors.error_reporter import ErrorHandler
 from hed.models import model_constants
-from hed.models.util import translate_ops
+from hed.models.hed_ops import translate_ops
 from hed.models.onset_mapper import OnsetMapper
 from hed.models.hed_string import HedString
 from hed.models.def_mapper import DefinitionMapper
@@ -256,16 +256,16 @@ class BaseInput:
     def __iter__(self):
         return self.iter_dataframe()
 
-    def iter_raw(self, validators=None, error_handler=None, **kwargs):
+    def iter_raw(self, hed_ops=None, error_handler=None, **kwargs):
         """Generates an iterator that goes over every row in the file without modification.
 
            This is primarily for altering or re-saving the original file.(eg convert short tags to long)
 
         Parameters
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings before returning
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings before returning
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
 
         Yields
         -------
@@ -278,10 +278,10 @@ class BaseInput:
             error_handler = ErrorHandler()
 
         default_mapper = ColumnMapper()
-        return self.iter_dataframe(default_mapper, validators=validators, run_string_ops_on_columns=True,
+        return self.iter_dataframe(default_mapper, hed_ops=hed_ops, run_string_ops_on_columns=True,
                                    error_handler=error_handler, **kwargs)
 
-    def iter_dataframe(self, mapper=None, return_row_dict=False, validators=None, run_string_ops_on_columns=False,
+    def iter_dataframe(self, mapper=None, return_row_dict=False, hed_ops=None, run_string_ops_on_columns=False,
                        error_handler=None, expand_defs=False, remove_definitions=True, **kwargs):
         """
         Generates a list of parsed rows based on the given column mapper.
@@ -295,16 +295,16 @@ class BaseInput:
             If False, returns just the HedStrings for each column
         error_handler : ErrorHandler
             The error handler to use for context, uses a default one if none.
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings before returning
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings before returning
         run_string_ops_on_columns: bool
             If true, run all tag and string ops on columns, rather than columns then rows.
         expand_defs: bool
-            If True, this will fully remove all definitions found and expand all def tags to def-expand tags
+            If True, this will expand def tags into def-expand groups
         remove_definitions: bool
             If true, this will remove all definition tags found.
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
         Yields
         -------
         row_number: int
@@ -318,7 +318,7 @@ class BaseInput:
         if mapper is None:
             mapper = self._mapper
 
-        tag_ops, string_ops = self._translate_ops(validators, run_string_ops_on_columns=run_string_ops_on_columns,
+        tag_funcs, string_funcs = self._translate_ops(hed_ops, run_string_ops_on_columns=run_string_ops_on_columns,
                                                   expand_defs=expand_defs, remove_definitions=remove_definitions,
                                                   error_handler=error_handler, **kwargs)
 
@@ -335,14 +335,14 @@ class BaseInput:
             expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
             error_handler.push_error_context(ErrorContext.ROW, row_number)
             row_issues = []
-            if tag_ops:
-                row_issues += self._run_column_ops(column_to_hed_tags, tag_ops,
+            if tag_funcs:
+                row_issues += self._run_column_ops(column_to_hed_tags, tag_funcs,
                                                    expansion_column_issues,
                                                    error_handler)
             if return_row_dict:
                 final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
-                if string_ops:
-                    row_issues += self._run_row_ops(final_hed_string, string_ops, error_handler)
+                if string_funcs:
+                    row_issues += self._run_row_ops(final_hed_string, string_funcs, error_handler)
                 row_dict[model_constants.ROW_ISSUES] = row_issues
                 row_dict[model_constants.ROW_HED_STRING] = final_hed_string
                 yield row_number + start_at_one, row_dict
@@ -472,15 +472,15 @@ class BaseInput:
         else:
             return pandas.DataFrame(worksheet.values)
 
-    def _run_validators(self, validators, error_handler, run_on_raw=False, expand_defs=False, **kwargs):
+    def _run_validators(self, hed_ops, error_handler, run_on_raw=False, expand_defs=False, **kwargs):
         validation_issues = []
         if run_on_raw:
-            for row_number, row_dict in self.iter_raw(return_row_dict=True, validators=validators,
+            for row_number, row_dict in self.iter_raw(return_row_dict=True, hed_ops=hed_ops,
                                                       error_handler=error_handler, expand_defs=expand_defs,
                                                       **kwargs):
                 validation_issues += row_dict[model_constants.ROW_ISSUES]
         else:
-            for row_number, row_dict in self.iter_dataframe(return_row_dict=True, validators=validators,
+            for row_number, row_dict in self.iter_dataframe(return_row_dict=True, hed_ops=hed_ops,
                                                             error_handler=error_handler, expand_defs=expand_defs,
                                                             **kwargs):
                 validation_issues += row_dict[model_constants.ROW_ISSUES]
@@ -516,14 +516,14 @@ class BaseInput:
         error_handler.pop_error_context()
         return row_issues
 
-    def validate_file(self, validators, name=None, error_handler=None, check_for_warnings=True, **kwargs):
-        """Run the given validators on all columns and rows of the spreadsheet
+    def validate_file(self, hed_ops, name=None, error_handler=None, check_for_warnings=True, **kwargs):
+        """Run the given hed_ops on all columns and rows of the spreadsheet
 
         Parameters
         ----------
 
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply.
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply.
         name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
@@ -532,7 +532,7 @@ class BaseInput:
         check_for_warnings: bool
             If True this will check for and return warnings as well
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
         Returns
         -------
         validation_issues: [{}]
@@ -540,15 +540,15 @@ class BaseInput:
         """
         if not name:
             name = self.name
-        if not isinstance(validators, list):
-            validators = [validators]
+        if not isinstance(hed_ops, list):
+            hed_ops = [hed_ops]
 
         if error_handler is None:
             error_handler = ErrorHandler()
 
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
         validation_issues = self.get_def_and_mapper_issues(error_handler, check_for_warnings)
-        validation_issues += self._run_validators(validators, error_handler=error_handler,
+        validation_issues += self._run_validators(hed_ops, error_handler=error_handler,
                                                   check_for_warnings=check_for_warnings, **kwargs)
         error_handler.pop_error_context()
 
@@ -571,8 +571,8 @@ class BaseInput:
         if error_handler is None:
             error_handler = ErrorHandler()
         new_def_dict = DefDict()
-        validators = [new_def_dict]
-        _ = self._run_validators(validators, run_on_raw=True, error_handler=error_handler)
+        hed_ops = [new_def_dict]
+        _ = self._run_validators(hed_ops, run_on_raw=True, error_handler=error_handler)
         return new_def_dict
 
     def update_definition_mapper_with_file(self, def_dict):
@@ -587,25 +587,25 @@ class BaseInput:
         if self._def_mapper is not None:
             self._def_mapper.add_definitions(def_dict)
 
-    def _translate_ops(self, validators, run_string_ops_on_columns, expand_defs, remove_definitions, **kwargs):
-        tag_ops = []
-        string_ops = []
-        if validators or expand_defs or remove_definitions:
-            if not isinstance(validators, list):
-                validators = [validators]
-            validators = validators.copy()
+    def _translate_ops(self, hed_ops, run_string_ops_on_columns, expand_defs, remove_definitions, **kwargs):
+        tag_funcs = []
+        string_funcs = []
+        if hed_ops or expand_defs or remove_definitions:
+            if not isinstance(hed_ops, list):
+                hed_ops = [hed_ops]
+            hed_ops = hed_ops.copy()
             if not run_string_ops_on_columns:
-                self._add_def_onset_mapper(validators)
-                tag_ops, string_ops = translate_ops(validators, split_tag_and_string_ops=True, expand_defs=expand_defs,
+                self._add_def_onset_mapper(hed_ops)
+                tag_funcs, string_funcs = translate_ops(hed_ops, split_tag_and_string_ops=True, expand_defs=expand_defs,
                                                     **kwargs)
             else:
-                tag_ops = translate_ops(validators, expand_defs=expand_defs, **kwargs)
+                tag_funcs = translate_ops(hed_ops, expand_defs=expand_defs, **kwargs)
 
-        return tag_ops, string_ops
+        return tag_funcs, string_funcs
 
-    def _add_def_onset_mapper(self, validators):
-        if not any(isinstance(validator, DefinitionMapper) for validator in validators):
+    def _add_def_onset_mapper(self, hed_ops):
+        if not any(isinstance(hed_op, DefinitionMapper) for hed_op in hed_ops):
             if self._def_mapper:
-                validators.append(self._def_mapper)
-                validators.append(OnsetMapper(self._def_mapper))
-        return validators
+                hed_ops.append(self._def_mapper)
+                hed_ops.append(OnsetMapper(self._def_mapper))
+        return hed_ops

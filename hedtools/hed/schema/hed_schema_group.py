@@ -1,7 +1,7 @@
 """
 """
 
-# todo: Switch various properties to this once we require python 3.8
+# todo: Switch various properties to this cached_property once we require python 3.8
 
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.errors import ErrorHandler, ValidationErrors
@@ -16,7 +16,7 @@ class HedSchemaGroup:
     """
     def __init__(self, schema_list):
         """
-        Create combination of multiple HedSchema objects you can use with the validator.
+        Create combination of multiple HedSchema objects you can use with the hed tags.
 
         Note: will raise HedFileError if two schemas share the same name_prefix
 

@@ -28,25 +28,25 @@ class Test(TestHedBase):
         cls.placeholder_definition_string2 = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_def_contents2})"
         cls.placeholder_expanded_def_string2 = "(Def-expand/TestDefPlaceholder/123,(Item/TestDef1/123,Item/TestDef2))"
 
-    def _test_issues_base(self, test_strings, test_issues, test_context, validators, expand_defs=True):
+    def _test_issues_base(self, test_strings, test_issues, test_context, hed_ops, expand_defs=True):
         for string, expected_params, context in zip(test_strings, test_issues, test_context):
             test_string = HedString(string)
             error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
-            onset_issues = test_string.validate(validators, expand_defs=expand_defs)
+            onset_issues = test_string.validate(hed_ops, expand_defs=expand_defs)
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
             # print(str(onset_issues))
             # print(str(issues))
             error_handler.pop_error_context()
-            self.assertEqual(len(validators[-1]._onsets), context)
+            self.assertEqual(len(hed_ops[-1]._onsets), context)
             self.assertCountEqual(onset_issues, issues)
 
-    def _test_issues_no_context(self, test_strings, test_issues, validators):
+    def _test_issues_no_context(self, test_strings, test_issues, hed_ops):
         for string, expected_params in zip(test_strings, test_issues):
             test_string = HedString(string)
             error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
-            onset_issues = test_string.validate(validators, expand_defs=True)
+            onset_issues = test_string.validate(hed_ops, expand_defs=True)
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
             # print(str(onset_issues))
             # print(str(issues))
@@ -109,7 +109,7 @@ class Test(TestHedBase):
         def_string.validate(def_dict)
         def_mapper = DefinitionMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
-        validators = [def_mapper, onset_mapper]
+        hed_ops = [def_mapper, onset_mapper]
 
         test_strings = [
             f"({self.placeholder_label_def_string},Onset)",
@@ -153,7 +153,7 @@ class Test(TestHedBase):
                               tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
         ]
 
-        self._test_issues_base(test_strings, test_issues, expected_context, validators, expand_defs=False)
+        self._test_issues_base(test_strings, test_issues, expected_context, hed_ops, expand_defs=False)
 
     def test_basic_onset_errors_expanded(self):
         def_dict = DefDict()
@@ -277,7 +277,7 @@ class Test(TestHedBase):
         def_mapper = DefinitionMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
         hed_validator = HedValidator(hed_schema=self.hed_schema)
-        validators = [hed_validator, def_mapper, onset_mapper]
+        hed_ops = [hed_validator, def_mapper, onset_mapper]
 
         test_strings = [
             f"{self.placeholder_label_def_string},Onset",
@@ -296,7 +296,7 @@ class Test(TestHedBase):
                               multiple_tags=offset_list),
         ]
 
-        self._test_issues_no_context(test_strings, test_issues, validators)
+        self._test_issues_no_context(test_strings, test_issues, hed_ops)
 
         test_issues = [
             self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
@@ -318,7 +318,7 @@ class Test(TestHedBase):
         def_string.validate(def_dict)
         def_mapper = DefinitionMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
-        validators = [def_mapper, onset_mapper]
+        hed_ops = [def_mapper, onset_mapper]
 
         test_strings = [
             f"{self.placeholder_label_def_string},Onset",
@@ -337,7 +337,7 @@ class Test(TestHedBase):
                               def_tag="Def-expand/TestDefPlaceholder/2471"),
         ]
 
-        self._test_issues_no_context(test_strings, test_issues, validators)
+        self._test_issues_no_context(test_strings, test_issues, hed_ops)
 
         # Verify it also works without def mapping
         test_issues = [
@@ -350,7 +350,7 @@ class Test(TestHedBase):
                               def_tag=self.placeholder_label_def_string),
         ]
 
-        self._test_issues_no_context(test_strings, test_issues, [validators[1]])
+        self._test_issues_no_context(test_strings, test_issues, [hed_ops[1]])
 
     def test_onset_two_in_one_line(self):
         def_dict = DefDict()

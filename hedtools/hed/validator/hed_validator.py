@@ -1,6 +1,6 @@
 """
 This module contains the HedValidator class which is used to validate the tags in a HED string or a file. The file
-types include .tsv, .txt,, and .xlsx. To get the validation issues after creating a HedValidator class call
+types include .tsv, .txt, and .xlsx. To get the validation issues after creating a HedValidator class call
 the get_validation_issues() function.
 
 """
@@ -11,9 +11,10 @@ from hed.errors.error_reporter import ErrorHandler
 from hed.models.hed_string import HedString
 from hed.validator.tag_validator import TagValidator
 from functools import partial
+from hed.models.hed_ops import HedOps
 
 
-class HedValidator:
+class HedValidator(HedOps):
     def __init__(self, hed_schema=None, run_semantic_validation=True):
         """Constructor for the HedValidator class.
 
@@ -29,6 +30,7 @@ class HedValidator:
             A HedValidator object.
 
         """
+        super().__init__()
         self._tag_validator = None
         self._hed_schema = hed_schema
 
@@ -36,23 +38,23 @@ class HedValidator:
                                            run_semantic_validation=run_semantic_validation)
         self._run_semantic_validation = run_semantic_validation
 
-    def __get_tag_ops__(self, **kwargs):
-        string_validators = []
+    def __get_tag_funcs__(self, **kwargs):
+        string_funcs = []
         allow_placeholders = kwargs.get("allow_placeholders")
         check_for_warnings = kwargs.get("check_for_warnings")
-        string_validators.append(self._tag_validator.run_hed_string_validators)
-        string_validators.append(
+        string_funcs.append(self._tag_validator.run_hed_string_validators)
+        string_funcs.append(
             partial(HedString.convert_to_canonical_forms, hed_schema=self._hed_schema))
-        string_validators.append(partial(self._validate_individual_tags_in_hed_string,
-                                         allow_placeholders=allow_placeholders,
-                                         check_for_warnings=check_for_warnings))
-        return string_validators
+        string_funcs.append(partial(self._validate_individual_tags_in_hed_string,
+                                    allow_placeholders=allow_placeholders,
+                                    check_for_warnings=check_for_warnings))
+        return string_funcs
 
-    def __get_string_ops__(self, **kwargs):
+    def __get_string_funcs__(self, **kwargs):
         check_for_warnings = kwargs.get("check_for_warnings")
-        string_validators = [partial(self._validate_tags_in_hed_string, check_for_warnings=check_for_warnings),
-                             self._validate_groups_in_hed_string]
-        return string_validators
+        string_funcs = [partial(self._validate_tags_in_hed_string, check_for_warnings=check_for_warnings),
+                        self._validate_groups_in_hed_string]
+        return string_funcs
 
     def _validate_groups_in_hed_string(self, hed_string_obj):
         """Validates the tags at each level in a HED string. This pertains to the top-level, all groups, and nested
