@@ -29,32 +29,49 @@ class DefinitionEntry:
         self.tag_dict = tag_list_to_dict([self.group], hed_schema)
 
 
-class DefinitionSummary():
+# class DefinitionSummary():
+#
+#     def __init__(self):
+#         """ Construct a summary of the definitions in the dataset
+#
+#         """
+#
+#         self.definitions = {}
+#
+#     def __str__(self):
+#         return "Has summary"
+#
+#     def separate_defs(self, hed_string_obj):
+#         groups = hed_string_obj.groups()
+#         tags_no_def = hed_string_obj.tags()
+#         for group in groups:
+#             def_entry = extract_def(group)
+#             if def_entry:
+#                 self.definitions[def_entry.name] = def_entry
+#             else:
+#                 tags_no_def.append(group)
+#         return tags_no_def
+#
+#     def set_tag_dictionaries(self, hed_schema):
+#         for entry in self.definitions.values():
+#             entry.set_tag_dict(hed_schema)
 
-    def __init__(self):
-        """ Construct a summary of the definitions in the dataset
 
-        """
+def set_definition_dictionaries(tag_dict, hed_schema):
+    for entry in tag_dict.values():
+        entry.set_tag_dict(hed_schema)
 
-        self.definitions = {}
 
-    def __str__(self):
-        return "Has summary"
-
-    def extract_defs(self, hed_string_obj):
-        groups = hed_string_obj.groups()
-        tags_no_def = hed_string_obj.tags()
-        for group in groups:
-            def_entry = extract_def(group)
-            if def_entry:
-                self.definitions[def_entry.name] = def_entry
-            else:
-                tags_no_def.append(group)
-        return tags_no_def
-
-    def set_tag_dictionaries(self, hed_schema):
-        for entry in self.definitions.values():
-            entry.set_tag_dict(hed_schema)
+def separate_defs(definition_dict, hed_string_obj):
+    groups = hed_string_obj.groups()
+    tags_no_def = hed_string_obj.tags()
+    for group in groups:
+        def_entry = extract_def(group)
+        if def_entry:
+            definition_dict[def_entry.name] = def_entry
+        else:
+            tags_no_def.append(group)
+    return tags_no_def
 
 
 def extract_def(group):
@@ -65,7 +82,7 @@ def extract_def(group):
     index = tags[0].short_tag.lower().find(DefTagNames.DEFINITION_KEY)
     if index == -1:
         return None
-    tag_name = tags[0].short_tag[(index+len(DefTagNames.DEFINITION_KEY) + 1):]
+    tag_name = tags[0].short_tag[(index + len(DefTagNames.DEFINITION_KEY) + 1):]
     groups = group.groups()
     return DefinitionEntry(tag_name, groups[0])
 
@@ -75,19 +92,36 @@ if __name__ == '__main__':
     sidecar = Sidecar(the_path)
     schema = \
         load_schema('https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
-    def_sum = DefinitionSummary()
+    # def_sum = DefinitionSummary()
+    # tag_dict = {}
+    # no_defs_list = []
+    # the_list = []
+    # for column in sidecar:
+    #     for hed, key in column._hed_iter():
+    #         the_list.append(hed)
+    #         no_defs_list += def_sum.separate_defs(hed)
+
+    # def_sum = DefinitionSummary()
     tag_dict = {}
     no_defs_list = []
-    the_list = []
+    def_dict = {}
     for column in sidecar:
         for hed, key in column._hed_iter():
-            the_list.append(hed)
-            no_defs_list += def_sum.extract_defs(hed)
+            no_defs_list += separate_defs(def_dict, hed)
 
+    set_definition_dictionaries(def_dict, schema)
     tag_dict = tag_list_to_dict(no_defs_list, schema)
-    def_sum.set_tag_dictionaries(schema)
+
+    hed_list = []
+    for column in sidecar:
+        for hed, key in column._hed_iter():
+            hed_list.append(hed)
+
+    only_dict = tag_list_to_dict(hed_list, schema)
+    print(only_dict.keys())
+
     # for hed_string_obj, column_info, issues in sidecar.hed_string_iter():
-    #     leftovers = def_sum.extract_defs(hed_string_obj)
+    #     leftovers = def_sum.separate_defs(hed_string_obj)
     #     column_name = column_info[0]
     #     tag_dict[column_name] = leftovers
     #     if issues:

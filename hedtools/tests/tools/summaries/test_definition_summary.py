@@ -10,10 +10,15 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.sidecar_path1 = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        cls.test_json = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                          '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_constructor(self):
+        test_strs = ["(Face, Item-interval/#)",
+                    "Agent-action, Indeterminate-action, (Press, Keyboard-key)",
+                    f"(Definition/Famous-face-cond, (Condition-variable/Face-type, (Image, (Face, Famous))," \
+                    f"Description/A face that should be recognized by the participants))"]
+
         sidecar1 = BidsSidecarFile(Test.sidecar_path1, set_contents=False)
         self.assertEqual(sidecar1.suffix, 'events', "BidsSidecarFile should have correct name_suffix")
         self.assertEqual(sidecar1.ext, '.json', "BidsSidecarFile should have correct ext")
