@@ -151,3 +151,14 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertEqual(no_extension_tag1_result, False)
         self.assertEqual(no_extension_tag2_result, False)
         self.assertEqual(no_extension_tag3_result, False)
+
+
+    def test__check_tag_starts_with(self):
+        target_tag_name = "definition/"
+
+        test_tags = ["Definition/TempTestDef", "Informational/Definition/TempTestDef",
+                     "Attribute/Informational/Definition/TempTestDef"]
+
+        for tag in test_tags:
+            result = HedTag._check_tag_starts_with(tag, target_tag_name)
+            self.assertTrue(result)

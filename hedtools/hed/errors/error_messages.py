@@ -140,6 +140,9 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
 def val_error_def_unmatched(tag):
     return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'", {}
 
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_BAD)
+def val_error_bad_def_expand(tag, actual_def, found_def):
+    return f"A data-recording’s Def-expand tag does not match the given definition.  Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}", {}
 
 @hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.HED_DEF_VALUE_INVALID)
 def val_error_def_value_missing(tag):

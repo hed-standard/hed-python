@@ -134,7 +134,7 @@ class Sidecar:
             loaded_files.append(json_file)
         return loaded_files
 
-    def hed_string_iter(self, validators=None, error_handler=None, expand_defs=False, remove_definitions=False,
+    def hed_string_iter(self, hed_ops=None, error_handler=None, expand_defs=False, remove_definitions=False,
                         allow_placeholders=True, extra_def_dicts=None, **kwargs):
         """
         Return iterator to loop over all hed strings in all column definitions
@@ -144,8 +144,8 @@ class Sidecar:
 
         Parameters
         ----------
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings before returning
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings before returning
         error_handler : ErrorHandler
             The error handler to use for context, uses a default one if none.
         expand_defs: bool
@@ -157,7 +157,7 @@ class Sidecar:
         extra_def_dicts: [DefDict] or DefDict or None
             Extra dicts to add to the list
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
 
         Yields
         -------
@@ -171,14 +171,14 @@ class Sidecar:
         if error_handler is None:
             error_handler = ErrorHandler()
         if expand_defs or remove_definitions:
-            validators = self._add_definition_mapper(validators, extra_def_dicts)
+            hed_ops = self._add_definition_mapper(hed_ops, extra_def_dicts)
         else:
-            if not isinstance(validators, list):
-                validators = [validators]
-            validators = validators.copy()
+            if not isinstance(hed_ops, list):
+                hed_ops = [hed_ops]
+            hed_ops = hed_ops.copy()
         for column_name, entry in self._column_data.items():
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
-            for (hed_string_obj, position, issues) in entry.hed_string_iter(validators=validators,
+            for (hed_string_obj, position, issues) in entry.hed_string_iter(hed_ops=hed_ops,
                                                                             error_handler=error_handler,
                                                                             expand_defs=expand_defs,
                                                                             allow_placeholders=allow_placeholders,
@@ -202,15 +202,15 @@ class Sidecar:
         entry = self._column_data[column_name]
         entry.set_hed_string(new_hed_string, position)
 
-    def _add_definition_mapper(self, validators, extra_def_dicts=None):
-        if not isinstance(validators, list):
-            validators = [validators]
-        validators = validators.copy()
-        if not any(isinstance(validator, DefinitionMapper) for validator in validators):
+    def _add_definition_mapper(self, hed_ops, extra_def_dicts=None):
+        if not isinstance(hed_ops, list):
+            hed_ops = [hed_ops]
+        hed_ops = hed_ops.copy()
+        if not any(isinstance(hed_op, DefinitionMapper) for hed_op in hed_ops):
             def_dicts = self.get_def_dicts(extra_def_dicts)
             def_mapper = DefinitionMapper(def_dicts)
-            validators.append(def_mapper)
-        return validators
+            hed_ops.append(def_mapper)
+        return hed_ops
 
     def _add_single_col_type(self, column_name, dict_for_entry, column_type=None):
         """
@@ -248,15 +248,15 @@ class Sidecar:
             def_dicts += extra_def_dicts
         return def_dicts
 
-    def validate_entries(self, validators=None, name=None, extra_def_dicts=None,
+    def validate_entries(self, hed_ops=None, name=None, extra_def_dicts=None,
                          error_handler=None, **kwargs):
-        """Run the given validators on all columns in this sidecar
+        """Run the given hed_ops on all columns in this sidecar
 
         Parameters
         ----------
 
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in this sidecar.
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings in this sidecar.
         name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
@@ -265,7 +265,7 @@ class Sidecar:
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
         Returns
         -------
         validation_issues: [{}]
@@ -278,11 +278,11 @@ class Sidecar:
         if name:
             error_handler.push_error_context(ErrorContext.FILE_NAME, name, False)
 
-        validators = self._add_definition_mapper(validators, extra_def_dicts)
+        hed_ops = self._add_definition_mapper(hed_ops, extra_def_dicts)
 
         all_validation_issues = []
         for column_data in self:
-            all_validation_issues += column_data.validate_column(validators,
+            all_validation_issues += column_data.validate_column(hed_ops,
                                                                  error_handler=error_handler,
                                                                  **kwargs)
         if name:

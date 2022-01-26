@@ -2,14 +2,16 @@ from hed.models.model_constants import DefTagNames
 from hed.models.hed_group import HedTag, HedGroup
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import OnsetErrors
+from hed.models.hed_ops import HedOps
 
 
-class OnsetMapper:
+class OnsetMapper(HedOps):
     """
         Validator responsible for matching onset offset pairs up
     """
 
     def __init__(self, def_mapper):
+        super().__init__()
         self._def_mapper = def_mapper
         self._onsets = {}
 
@@ -45,7 +47,7 @@ class OnsetMapper:
             def_tag = def_tags[0]
             def_group = def_groups[0]
             children = [child for child in found_group.get_direct_children() if
-                        def_group != child and found_onset != child]
+                        def_group is not child and found_onset is not child]
             max_children = 1
             if found_onset.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
                 max_children = 0
@@ -121,10 +123,10 @@ class OnsetMapper:
 
         return []
 
-    def __get_string_ops__(self, **kwargs):
-        string_validators = []
-        string_validators.append(self.check_for_onset_offset)
-        return string_validators
+    def __get_string_funcs__(self, **kwargs):
+        string_funcs = []
+        string_funcs.append(self.check_for_onset_offset)
+        return string_funcs
 
-    def __get_tag_ops__(self, **kwargs):
+    def __get_tag_funcs__(self, **kwargs):
         return []

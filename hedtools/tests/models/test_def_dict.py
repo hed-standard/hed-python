@@ -90,16 +90,6 @@ class TestDefDict(TestDefBase):
 
         self.check_def_base(test_strings, expected_results)
 
-    def test__check_tag_starts_with(self):
-        target_tag_name = "definition/"
-
-        test_tags = ["Definition/TempTestDef", "Informational/Definition/TempTestDef",
-                     "Attribute/Informational/Definition/TempTestDef"]
-
-        for tag in test_tags:
-            result = DefDict._check_tag_starts_with(tag, target_tag_name)
-            self.assertTrue(result)
-
 
 if __name__ == '__main__':
     unittest.main()
