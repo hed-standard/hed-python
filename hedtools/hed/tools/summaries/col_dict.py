@@ -30,6 +30,8 @@ class ColumnDict:
             self.skip_cols = skip_cols.copy()
         else:
             self.skip_cols = []
+        self.total_files = 0
+        self.total_events = 0
 
     def get_flattened(self):
         columns = ['column', 'HED']
@@ -90,6 +92,24 @@ class ColumnDict:
         for key in sorted_cols:
             print(f"{indent * 2}{key}: {self.value_info[key]}")
 
+    def tojson(self, max= indent=4):
+        if not title:
+            title = f"Summary for column dictionary {self.name}:"
+        print(title)
+        sorted_keys = sorted(self.categorical_info.keys())
+        print(f"{indent}Categorical columns ({len(sorted_keys)}):")
+        for key in sorted_keys:
+            value_dict = self.categorical_info[key]
+            sorted_v_keys = sorted(list(value_dict))
+            print(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
+            for v_key in sorted_v_keys:
+                print(f"{indent * 3}{v_key}: {value_dict[v_key]}")
+
+        sorted_cols = sorted(map(str, list(self.value_info)))
+        print(f"{indent}Value columns ({len(sorted_cols)}):")
+        for key in sorted_cols:
+            print(f"{indent * 2}{key}: {self.value_info[key]}")
+
     def update(self, data):
         """ Extracts the number of times each unique value appears in each column.
 
@@ -100,6 +120,8 @@ class ColumnDict:
             dict:   A dictionary with keys that are column names and values that are dictionaries of unique value counts
         """
         df = get_new_dataframe(data)
+        self.total_files = self.total_files + 1
+        self.total_events = self.total_events + len(df.index)
         for col_name, col_values in df.iteritems():
             if self.skip_cols and col_name in self.skip_cols:
                 continue
