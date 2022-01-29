@@ -1,0 +1,36 @@
+﻿hed.models.column\_metadata.ColumnMetadata
+==========================================
+
+.. currentmodule:: hed.models.column_metadata
+
+.. autoclass:: ColumnMetadata
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ColumnMetadata.__init__
+      ~ColumnMetadata.expand
+      ~ColumnMetadata.extract_definitions
+      ~ColumnMetadata.get_definition_issues
+      ~ColumnMetadata.hed_string_iter
+      ~ColumnMetadata.remove_prefix_if_needed
+      ~ColumnMetadata.set_hed_string
+      ~ColumnMetadata.validate_column
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ColumnMetadata.def_dict
+      ~ColumnMetadata.hed_dict
+   
+   
