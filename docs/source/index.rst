@@ -10,7 +10,6 @@ Note:  this is a work in progress.
    :caption: Contents:
 
    01_Introduction.md
-   02_Terminology.md
  
 
 .. toctree::
