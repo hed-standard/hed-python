@@ -21,7 +21,8 @@ class Test(unittest.TestCase):
         cls.str_with_def = f"(Definition/First-show-cond, ((Condition-variable/Repetition-type," \
                            f" (Item-count/1, Face), Item-interval/0), " \
                            f"Description/Factor level indicating the first display of this face.))"
-        json_path = "../../data/summaries/tag_summary_template.json5"
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "../../data/summaries/tag_summary_template.json5")
         with open(json_path) as fp:
             cls.rules = json.load(fp)
 
