@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         cls.placeholder_hed_string_with_def_first_paren = f"({cls.placeholder_label_def_string},{cls.basic_hed_string})"
 
         cls.valid_definition_strings = {
-            'str1': False,
+            'str_no_defs': False,
             'str2': True,
             'str3': False,
             'str4': False,
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
             'str7': False,
         }
         cls.mark_all_as_valid_strings = {
-            'str1': False,
+            'str_no_defs': False,
             'str2': False,
             'str3': False,
             'str4': False,
@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
 
     def test_expand_def_tags(self):
         basic_def_strings = {
-            'str1': self.basic_definition_string,
+            'str_no_defs': self.basic_definition_string,
             'str2': self.basic_definition_string_no_paren,
             'str3': self.basic_hed_string + "," + self.basic_definition_string,
             'str4': self.basic_definition_string + "," + self.basic_hed_string,
@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
             'str7': self.basic_hed_string_with_def_first_paren,
         }
         expanded_def_strings = {
-            'str1': "",
+            'str_no_defs': "",
             'str2': self.basic_definition_string_no_paren,
             'str3': self.basic_hed_string,
             'str4': self.basic_hed_string,
@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
             'str7': "(" + self.expanded_def_string + "," + self.basic_hed_string + ")"
         }
         expanded_def_strings_with_definition = {
-            'str1': self.basic_definition_string,
+            'str_no_defs': self.basic_definition_string,
             'str2': self.basic_definition_string_no_paren,
             'str3': self.basic_hed_string + "," + self.basic_definition_string,
             'str4': self.basic_definition_string + "," + self.basic_hed_string,
@@ -141,7 +141,7 @@ class Test(unittest.TestCase):
 
     def test_expand_def_tags_placeholder(self):
         basic_def_strings = {
-            'str1': self.placeholder_definition_string,
+            'str_no_defs': self.placeholder_definition_string,
             'str2': self.placeholder_definition_string_no_paren,
             'str3': self.basic_hed_string + "," + self.placeholder_definition_string,
             'str4': self.placeholder_definition_string + "," + self.basic_hed_string,
@@ -150,7 +150,7 @@ class Test(unittest.TestCase):
             'str7': self.placeholder_hed_string_with_def_first_paren,
         }
         expanded_def_strings = {
-            'str1': "",
+            'str_no_defs': "",
             'str2': self.placeholder_definition_string_no_paren,
             'str3': self.basic_hed_string,
             'str4': self.basic_hed_string,
@@ -159,7 +159,7 @@ class Test(unittest.TestCase):
             'str7': "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")",
         }
         expanded_def_strings_with_definition = {
-            'str1': self.placeholder_definition_string,
+            'str_no_defs': self.placeholder_definition_string,
             'str2': self.placeholder_definition_string_no_paren,
             'str3': self.basic_hed_string + "," + self.placeholder_definition_string,
             'str4': self.placeholder_definition_string + "," + self.basic_hed_string,

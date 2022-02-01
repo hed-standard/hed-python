@@ -1,8 +1,9 @@
 import os
 from hed.errors.error_reporter import get_printable_issue_string
-from hed.schema.hed_schema_io import load_schema
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.bids.bids_event_file import BidsEventFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
+from hed.tools.summaries.col_dict import ColumnDict
 from hed.models.events_input import EventsInput
 from hed.util.io_util import get_dir_dictionary, get_file_list, get_path_components
 from hed.validator.hed_validator import HedValidator
@@ -61,6 +62,12 @@ class BidsEventFiles:
                 sidecar_list.append(sidecar)
         return sidecar_list
 
+    def summarize(self, value_cols=None, skip_cols=None):
+        col_info = ColumnDict(value_cols=None, skip_cols=None)
+        for event_obj in self.events_dict.values():
+            col_info.update(event_obj.file_path)
+        return col_info
+
     def validate(self, validators, check_for_warnings=True, keep_events=False):
         issues = []
         for json_obj in self.sidecar_dict.values():
@@ -88,10 +95,12 @@ if __name__ == '__main__':
     for file_obj in bids.events_dict.values():
         print(file_obj)
 
-    print("Now validating.....")
-    hed_schema = \
-        load_schema('https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
-    validator = HedValidator(hed_schema=hed_schema)
-    validation_issues = bids.validate(validators=[validator], check_for_warnings=False)
-    issue_str = get_printable_issue_string(validation_issues, skip_filename=False)
-    print(f"Issues: {issue_str}")
+    hed_schema = load_schema_version(xml_version="8.0.0")
+    # print("Now validating.....")
+    # validator = HedValidator(hed_schema=hed_schema)
+    # validation_issues = bids.validate(validators=[validator], check_for_warnings=False)
+    # issue_str = get_printable_issue_string(validation_issues, skip_filename=False)
+    # print(f"Issues: {issue_str}")
+
+    col_info = bids.summarize()
+    col_info.print()
