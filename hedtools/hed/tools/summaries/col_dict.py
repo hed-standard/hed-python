@@ -92,23 +92,23 @@ class ColumnDict:
         for key in sorted_cols:
             print(f"{indent * 2}{key}: {self.value_info[key]}")
 
-    def tojson(self, max= indent=4):
-        if not title:
-            title = f"Summary for column dictionary {self.name}:"
-        print(title)
-        sorted_keys = sorted(self.categorical_info.keys())
-        print(f"{indent}Categorical columns ({len(sorted_keys)}):")
-        for key in sorted_keys:
-            value_dict = self.categorical_info[key]
-            sorted_v_keys = sorted(list(value_dict))
-            print(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
-            for v_key in sorted_v_keys:
-                print(f"{indent * 3}{v_key}: {value_dict[v_key]}")
-
-        sorted_cols = sorted(map(str, list(self.value_info)))
-        print(f"{indent}Value columns ({len(sorted_cols)}):")
-        for key in sorted_cols:
-            print(f"{indent * 2}{key}: {self.value_info[key]}")
+    # def tojson(self, max= indent=4):
+    #     if not title:
+    #         title = f"Summary for column dictionary {self.name}:"
+    #     print(title)
+    #     sorted_keys = sorted(self.categorical_info.keys())
+    #     print(f"{indent}Categorical columns ({len(sorted_keys)}):")
+    #     for key in sorted_keys:
+    #         value_dict = self.categorical_info[key]
+    #         sorted_v_keys = sorted(list(value_dict))
+    #         print(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
+    #         for v_key in sorted_v_keys:
+    #             print(f"{indent * 3}{v_key}: {value_dict[v_key]}")
+    #
+    #     sorted_cols = sorted(map(str, list(self.value_info)))
+    #     print(f"{indent}Value columns ({len(sorted_cols)}):")
+    #     for key in sorted_cols:
+    #         print(f"{indent * 2}{key}: {self.value_info[key]}")
 
     def update(self, data):
         """ Extracts the number of times each unique value appears in each column.
