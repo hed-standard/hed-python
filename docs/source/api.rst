@@ -4,8 +4,8 @@ API Reference
 .. _base_ref:
 
 
-:mod:`hed.models`: Class models
-------------------------------------------
+hed.models: HED tag classes
+---------------------------
 
 .. autosummary:: hed.models
    :toctree: generated/
@@ -22,14 +22,23 @@ API Reference
 .. _calibration_ref:
 
 
-:mod:`hed.schema`: Specification of HED schema
-------------------------------------------------------------
+hed.schema: HED schema classes
+------------------------------
 
 .. autosummary:: hed.schema
    :toctree: generated/
 
    hed.schema.hed_schema.HedSchema
-
+   hed.schema.hed_schema_entry.HedSchemaEntry
+   hed.schema.hed_schema_entry.UnitClassEntry
+   hed.schema.hed_schema_entry.UnitEntry
+   hed.schema.hed_schema_entry.HedTagEntry
+   hed.schema.hed_schema_group.HedSchemaGroup
+   hed.schema.hed_schema_section.HedSchemaSection
+   hed.schema.hed_schema_io
+   hed.schema.schema_compliance
+   hed.schema.schema_validation_util
+   hed.schema.hed_cache.HedCache
 .. currentmodule:: 
 
 .. _calibration_ref:

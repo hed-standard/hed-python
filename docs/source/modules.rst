@@ -5,4 +5,3 @@ hedtools
    :maxdepth: 4
 
    hed
-   setup
