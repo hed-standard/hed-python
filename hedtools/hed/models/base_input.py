@@ -263,13 +263,14 @@ class BaseInput:
            This is primarily for altering or re-saving the original file.(eg convert short tags to long)
 
         Parameters
+        ----------
         hed_ops : [func or HedOps] or func or HedOps
             A list of HedOps of funcs to apply to the hed strings before returning
         kwargs:
             See models.hed_ops.translate_ops or the specific hed_ops for additional options
 
         Yields
-        -------
+        ------
         row_number: int
             The current row number
         column_to_hed_tags_dictionary: dict

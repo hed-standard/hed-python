@@ -1,5 +1,5 @@
-HED PythonAPI Reference
-==============
+HED Python API Reference
+========================
 
 .. _base_ref:
 
@@ -25,7 +25,7 @@ HED tag classes
    hed.models.Sidecar
    hed.models.hed_ops
 
-.. currentmodule::
+.. currentmodule:: hed
 
 .. _calibration_ref:
 
@@ -48,7 +48,7 @@ HED schema handling
    hed.schema.schema_compliance
    hed.schema.schema_validation_util
 
-.. currentmodule:: 
+.. currentmodule:: hed
 
 HED tools
 ---------
@@ -62,18 +62,17 @@ HED tools
    hed.tools.BidsFile
    hed.tools.BidsJsonFile
    hed.tools.BidsSidecarFile
-   hed.tools.bids_util
    hed.tools.ColumnDict
    hed.tools.DatasetSummary
    hed.tools.KeyMap
    hed.tools.KeyTemplate
    hed.tools.SummaryEntry
    hed.tools.TagSummary
-   hed.tools.map_summary
-   hed.tools.summary_util
+   hed.tools.summaries.map_summary
+   hed.tools.summaries.summary_util
 
 
-.. currentmodule::
+.. currentmodule:: hed
 
 
 HED utilities
@@ -87,11 +86,11 @@ HED utilities
    hed.util.io_util
 
 
-.. currentmodule::
+.. currentmodule:: hed
 
 
 HED validation
----------------
+--------------
 
 .. autosummary:: hed.validator
    :toctree: generated/
@@ -99,3 +98,7 @@ HED validation
    hed.validator.HedValidator
    hed.validator.TagValidator
    hed.validator.tag_validator_util
+
+.. currentmodule:: hed
+
+.. _calibration_ref:
