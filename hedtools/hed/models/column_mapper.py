@@ -12,10 +12,10 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class ColumnMapper:
-    """Handles mapping columns of hed tags from a file to a usable format.
+    """Container class for mapping columns in event files into HED tags.
 
         Private Functions and variables column and row indexing starts at 0.
-        Public functions and variables indexing starts at 1(or 2 if has column names)"""
+        Public functions and variables indexing starts at 1 (or 2 if has column names)"""
 
     def __init__(self, sidecars=None, tag_columns=None, column_prefix_dictionary=None,
                  attribute_columns=None, optional_tag_columns=None):

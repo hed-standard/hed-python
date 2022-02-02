@@ -5,7 +5,8 @@ from hed.models.def_mapper import DefinitionMapper
 
 
 class EventsInput(BaseInput):
-    """A class to parse bids_old style spreadsheets into a more general format."""
+    """ Represents a BIDS tsv file."""
+
     HED_COLUMN_NAME = "HED"
 
     def __init__(self, file=None, sidecars=None, attribute_columns=None, extra_def_dicts=None,

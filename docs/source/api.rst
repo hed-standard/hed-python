@@ -1,45 +1,101 @@
-API Reference
+HED PythonAPI Reference
 ==============
 
 .. _base_ref:
 
 
-hed.models: HED tag classes
----------------------------
+HED tag classes
+----------------
 
 .. autosummary:: hed.models
    :toctree: generated/
 
-   hed.models.base_input.BaseInput
-   hed.models.column_mapper.ColumnMapper
-   hed.models.column_metadata.ColumnMetadata
-   hed.models.def_dict.DefEntry
-   hed.models.def_dict.DefDict
-   hed.models.def_mapper.DefinitionMapper
+   hed.models.BaseInput
+   hed.models.ColumnMapper
+   hed.models.ColumnMetadata
+   hed.models.DefDict
+   hed.models.DefEntry
+   hed.models.DefinitionMapper
+   hed.models.EventsInput
+   hed.models.HedGroup
+   hed.models.HedInput
+   hed.models.HedString
+   hed.models.HedTag
+   hed.models.OnsetMapper
+   hed.models.Sidecar
+   hed.models.hed_ops
 
 .. currentmodule::
 
 .. _calibration_ref:
 
 
-hed.schema: HED schema classes
-------------------------------
+HED schema handling
+--------------------
 
 .. autosummary:: hed.schema
    :toctree: generated/
 
-   hed.schema.hed_schema.HedSchema
-   hed.schema.hed_schema_entry.HedSchemaEntry
-   hed.schema.hed_schema_entry.UnitClassEntry
-   hed.schema.hed_schema_entry.UnitEntry
-   hed.schema.hed_schema_entry.HedTagEntry
-   hed.schema.hed_schema_group.HedSchemaGroup
-   hed.schema.hed_schema_section.HedSchemaSection
+   hed.schema.HedSchema
+   hed.schema.HedSchemaEntry
+   hed.schema.UnitClassEntry
+   hed.schema.UnitEntry
+   hed.schema.HedTagEntry
+   hed.schema.HedSchemaGroup
+   hed.schema.HedSchemaSection
+   hed.schema.hed_cache
    hed.schema.hed_schema_io
    hed.schema.schema_compliance
    hed.schema.schema_validation_util
-   hed.schema.hed_cache.HedCache
+
 .. currentmodule:: 
 
-.. _calibration_ref:
+HED tools
+---------
 
+.. autosummary:: hed.tools
+   :toctree: generated/
+
+   hed.tools.BidsDataset
+   hed.tools.BidsEventFile
+   hed.tools.BidsEventFiles
+   hed.tools.BidsFile
+   hed.tools.BidsJsonFile
+   hed.tools.BidsSidecarFile
+   hed.tools.bids_util
+   hed.tools.ColumnDict
+   hed.tools.DatasetSummary
+   hed.tools.KeyMap
+   hed.tools.KeyTemplate
+   hed.tools.SummaryEntry
+   hed.tools.TagSummary
+   hed.tools.map_summary
+   hed.tools.summary_util
+
+
+.. currentmodule::
+
+
+HED utilities
+-------------
+
+.. autosummary:: hed.util
+   :toctree: generated/
+
+   hed.util.data_util
+   hed.util.file_util
+   hed.util.io_util
+
+
+.. currentmodule::
+
+
+HED validation
+---------------
+
+.. autosummary:: hed.validator
+   :toctree: generated/
+
+   hed.validator.HedValidator
+   hed.validator.TagValidator
+   hed.validator.tag_validator_util

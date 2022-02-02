@@ -8,8 +8,10 @@ from hed.models.hed_ops import HedOps
 
 
 class DefinitionMapper(HedOps):
-    """Class responsible for gathering/removing definitions from hed strings,
-        and also replacing labels in hed strings with the gathered definitions."""
+    """Class for handling definitions in hed strings.
+
+       The class is responsible for gather and removing defintions.
+       The class also replaces labels in hed strings with the gathered definitions."""
 
     def __init__(self, def_dicts=None):
         """

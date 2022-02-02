@@ -1,6 +1,4 @@
-"""
-This module contains the HedSchema class, which contains all the tags and attributes from a given schema file.
-"""
+""" Represents a HED schema file in a format suitable for use in analysis."""
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
 from hed.schema.io.schema2xml import HedSchema2XML
@@ -14,7 +12,7 @@ from hed.errors.error_types import ValidationErrors
 
 class HedSchema:
     """
-        Internal representation of a loaded hed schema xml or mediawiki file.
+        Data structure for a loaded hed schema xml or mediawiki file.
     """
 
     def __init__(self):

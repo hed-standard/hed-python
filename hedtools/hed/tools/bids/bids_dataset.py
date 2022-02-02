@@ -12,7 +12,7 @@ LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-li
 
 
 class BidsDataset:
-    """Represents a bids_old dataset."""
+    """Represents the metadata for a BIDS dataset."""
 
     def __init__(self, root_path):
         self.root_path = os.path.abspath(root_path)

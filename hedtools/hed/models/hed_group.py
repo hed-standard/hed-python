@@ -4,9 +4,8 @@ import copy
 
 
 class HedGroup:
-    """
-        A single HedGroup in a string, containing HedTags and HedGroups
-    """
+    """ Represents a single parenthesized hed string. """
+
     def __init__(self, hed_string="", startpos=None, endpos=None, include_paren=True,
                  contents=None):
         """

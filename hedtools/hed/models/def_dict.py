@@ -10,6 +10,8 @@ from hed.models.hed_ops import HedOps
 
 
 class DefEntry:
+    """Represents a single definition tag"""
+
     def __init__(self, name, contents, takes_value, source_context):
         """Contains info for a single definition tag
 

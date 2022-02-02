@@ -5,7 +5,7 @@ from hed.tools.bids.bids_json_file import BidsJsonFile
 
 
 class BidsSidecarFile(BidsJsonFile):
-    """Represents a bids_old file."""
+    """ Represents a BIDS JSON sidecar file."""
 
     def __init__(self, file_path, set_contents=False):
         super().__init__(os.path.abspath(file_path), set_contents=False)

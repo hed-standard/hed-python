@@ -1,3 +1,4 @@
+"""Utilities used in HED validation using a HED schema."""
 from semantic_version import Version
 from hed.schema import hed_schema_constants as constants
 from hed.errors.exceptions import HedExceptions, HedFileError

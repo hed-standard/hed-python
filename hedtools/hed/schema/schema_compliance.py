@@ -1,3 +1,5 @@
+""" Utilities for checking that a HED schema is correct. """
+
 from hed.errors import error_reporter
 from hed.errors.error_types import SchemaWarnings, ErrorContext, SchemaErrors, ErrorSeverity, ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
@@ -5,6 +7,7 @@ from hed.schema.hed_schema import HedSchema, HedKey
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
+
 
 
 def check_compliance(hed_schema, also_check_for_warnings=True, name=None,

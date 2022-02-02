@@ -14,6 +14,7 @@ entries_by_section = {
 
 
 class HedSchemaSection:
+    """A container class holding the HED schema entries in one section of the schema. """
     def __init__(self, section_key, case_sensitive=True):
         # {lower_case_name: HedSchemaEntry}
         self.all_names = {}

@@ -4,7 +4,7 @@ from hed.util.data_util import get_new_dataframe
 
 
 class ColumnDict:
-    """A class to column info"""
+    """Summarizes the contents of a spreadsheet. """
 
     def __init__(self, value_cols=None, skip_cols=None, name='', header_char='*'):
         """ .

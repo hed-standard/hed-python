@@ -1,12 +1,13 @@
-""" BidsDatasetSummary: Holds a summary of BIDS dataset """
+
 
 from hed.tools.bids.bids_dataset import BidsDataset
 
 
-class BidsDatasetSummary:
+class DatasetSummary:
+    """ Summarizes a BIDS dataset. """
 
     def __init__(self, dataset):
-        """ Construct a summary of a BidsDataset
+        """
 
         Parameters:
             dataset: BidsDataset or str

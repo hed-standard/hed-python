@@ -1,3 +1,4 @@
+"""Infrastructure for caching HED schema from remote repositories."""
 import os
 import urllib.request
 
@@ -10,6 +11,7 @@ import portalocker
 import time
 from hed.util.file_util import url_to_file
 
+"""Infrastructure for caching HED schema from remote repositories."""
 
 # From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 HED_VERSION_P1 = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"

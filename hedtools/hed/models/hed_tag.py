@@ -2,8 +2,10 @@ from hed.schema.hed_schema_constants import HedKey
 
 
 class HedTag:
-    """
-        A single HedTag in a string, keeps track of original value and positioning
+    """ Represents a single HED tag.
+
+     HedTag is a smart class in that it keeps track of its original value and positioning
+     as well as pointers to the relevant HED schema information, if relevant.
     """
 
     def __init__(self, hed_string, span=None, hed_schema=None):

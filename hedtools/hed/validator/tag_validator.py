@@ -11,6 +11,8 @@ from hed.validator import tag_validator_util
 
 
 class TagValidator:
+    """ Validation for individual HED tags. """
+
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+'
     INVALID_STRING_CHARS = '[]{}~'
     OPENING_GROUP_CHARACTER = '('

@@ -1,4 +1,4 @@
-
+""" Utilities for extracting counts of items in columns. """
 from hed.tools.summaries.col_dict import ColumnDict
 from hed.util.io_util import get_file_list
 from hed.util.data_util import get_new_dataframe

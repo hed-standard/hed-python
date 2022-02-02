@@ -16,7 +16,8 @@ from hed.models.def_mapper import DefinitionMapper
 
 
 class BaseInput:
-    """Handles parsing the actual on disk hed files to a more general format."""
+    """Represents a spreadsheet file."""
+
     TEXT_EXTENSION = ['.tsv', '.txt']
     EXCEL_EXTENSION = ['.xlsx']
     FILE_EXTENSION = [*TEXT_EXTENSION, *EXCEL_EXTENSION]

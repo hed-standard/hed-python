@@ -25,7 +25,7 @@ class ColumnType(Enum):
 
 
 class ColumnMetadata:
-    """A single column in either the ColumnMapper or Sidecar"""
+    """Represents a single column in a ColumnMapper or Sidecar."""
 
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None,
                  error_handler=None):

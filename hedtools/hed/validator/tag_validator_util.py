@@ -1,3 +1,4 @@
+""" Utitlities to support HED validation. """
 import datetime
 import re
 
