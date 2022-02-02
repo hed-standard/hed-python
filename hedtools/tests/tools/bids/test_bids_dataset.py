@@ -67,6 +67,7 @@ class Test(unittest.TestCase):
         self.assertTrue("hed_schema_versions" in summary1, "BidsDataset summary has a hed_schema_versions key")
         self.assertIsInstance(summary1["hed_schema_versions"], list,
                               "BidsDataset summary hed_schema_versions is a list")
+        self.assertTrue("dataset" in summary1)
         self.assertEqual(len(summary1["hed_schema_versions"]), 1,
                          "BidsDataset summary hed_schema_versions entry has one schema")
         bids2 = BidsDataset(Test.library_path)
@@ -78,6 +79,7 @@ class Test(unittest.TestCase):
                               "BidsDataset with libraries hed_schema_versions in summary is a list")
         self.assertEqual(len(summary2["hed_schema_versions"]), 3,
                          "BidsDataset with libraries summary hed_schema_versions list has 3 schemas")
+        self.assertTrue("dataset" in summary2)
 
 
 if __name__ == '__main__':
