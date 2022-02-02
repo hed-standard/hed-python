@@ -30,6 +30,9 @@ class DefEntry:
             contents.cascade_mutable(False)
         self.takes_value = takes_value
         self.source_context = source_context
+        self.tag_dict = {}
+        if contents:
+            add_group_to_dict_new(contents, self.tag_dict)
 
     def get_definition(self, replace_tag, placeholder_value=None):
         """
@@ -89,6 +92,17 @@ class DefDict(HedOps):
 
         # Definition related issues
         self._extract_def_issues = []
+
+    @property
+    def defs(self):
+        """
+            Provides direct access to internal dictionary.  Alter at your own risk.
+
+        Returns
+        -------
+        def_dict: {str: DefEntry}
+        """
+        return self._defs
 
     def get_definition_issues(self):
         """
@@ -220,3 +234,29 @@ class DefDict(HedOps):
             else:
                 other_tags.append(tag_or_group)
         return def_tags, group_tags, other_tags
+
+
+def add_group_to_dict_new(group, tag_dict=None):
+    """
+
+        Note: Expects tags to have forms calculated already.
+
+    Parameters:
+        group: HedGroup
+            contents to add to the tag dict
+        tag_dict: {}
+            Output dictionary
+
+    Returns: dict
+        Dictionary of tags with a list of values
+    """
+    if tag_dict is None:
+        tag_dict = {}
+    for tag in group.get_all_tags():
+        short_base_tag = tag.short_base_tag
+        value = tag.extension_or_value_portion
+        value_dict = tag_dict.get(short_base_tag, {})
+        if value:
+            value_dict[value] = ''
+        tag_dict[short_base_tag] = value_dict
+    return tag_dict

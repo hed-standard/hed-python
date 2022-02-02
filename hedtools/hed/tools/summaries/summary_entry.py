@@ -95,9 +95,21 @@ class SummaryEntry:
 
 
 if __name__ == '__main__':
+    from hed.models import DefDict
+    from hed.models.def_dict import add_group_to_dict_new
     the_path = '../../../tests/data/bids/eeg_ds003654s_hed/task-FacePerception_events.json'
     sidecar = Sidecar(the_path)
     schema = load_schema_version(xml_version='8.0.0')
+
+    # ======= NEW ========
+    tag_dict_new = {}
+    tag_dict_with_defs = {}
+    def_dict_new = DefDict()
+    for hed_string_obj, _, _ in sidecar.hed_string_iter([schema, def_dict_new]):
+        add_group_to_dict_new(hed_string_obj, tag_dict_with_defs)
+        hed_string_obj.remove_definitions()
+        add_group_to_dict_new(hed_string_obj, tag_dict_new)
+    # END NEW
 
     tag_dict = {}
     no_defs_list = []
@@ -117,6 +129,12 @@ if __name__ == '__main__':
     only_dict = {}
     add_tag_list_to_dict(hed_list, only_dict )
     print(only_dict.keys())
+
+    # Todo: remove this block
+    if tag_dict_with_defs != only_dict:
+        raise ValueError("def dict!")
+    if tag_dict_new != tag_dict:
+        raise ValueError("tag dict!")
 
     json_path = "../../../tests/data/summaries/tag_summary_template.json5"
     with open(json_path) as fp:
