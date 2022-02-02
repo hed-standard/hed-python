@@ -6,18 +6,18 @@ A PDF version of this document can be found `here <https://hed-python.readthedoc
 Note:  this is a work in progress.
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 2
    :caption: Contents:
 
    01_Introduction.md
-   02_Terminology.md
+   api.rst
  
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Resources:
 
-    api.rst
+    .. include:: api.rst
 
 
 Indices and tables
