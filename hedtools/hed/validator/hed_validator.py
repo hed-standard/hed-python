@@ -15,6 +15,7 @@ from hed.models.hed_ops import HedOps
 
 
 class HedValidator(HedOps):
+    """ Top level validation of HED strings. """
     def __init__(self, hed_schema=None, run_semantic_validation=True):
         """Constructor for the HedValidator class.
 

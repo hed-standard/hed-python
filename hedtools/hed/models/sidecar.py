@@ -9,7 +9,7 @@ from hed.models.def_mapper import DefinitionMapper
 
 
 class Sidecar:
-    """This stores column definitions for parsing hed spreadsheets, generally loaded from a single json file."""
+    """Contents of a single JSON file with definition dictionaries."""
 
     def __init__(self, file, name=None):
         """

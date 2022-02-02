@@ -14,7 +14,7 @@ DEFAULT_BREAKOUT_LIST = [
 
 
 class TagSummary:
-
+    """ Holds a HED tag summary for a BIDS dataset. """
     def __init__(self, dataset, breakout_list=None):
         self.dataset = dataset
         self.all_tags_dict = {}

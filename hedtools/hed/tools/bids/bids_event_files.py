@@ -10,7 +10,7 @@ from hed.validator.hed_validator import HedValidator
 
 
 class BidsEventFiles:
-    """ Represents the event files and their sidecars in a BIDS dataset."""
+    """ Container for the event files and sidecars in a BIDS dataset."""
 
     def __init__(self, root_path):
         self.root_path = os.path.abspath(root_path)

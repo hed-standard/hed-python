@@ -1,3 +1,4 @@
+""" Utilities for loading and outputting HED schemas."""
 import os
 
 
@@ -7,6 +8,7 @@ from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.util import file_util
+
 
 
 def from_string(schema_string, file_type=".xml", library_prefix=None):

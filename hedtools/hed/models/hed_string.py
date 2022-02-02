@@ -10,6 +10,8 @@ from hed.models.model_constants import DefTagNames
 
 
 class HedString(HedGroup):
+    """Represents a hed string."""
+
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
 

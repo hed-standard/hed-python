@@ -1,5 +1,7 @@
+"""Infrastructure for processing lists of HED operations."""
 from functools import partial
 from hed.schema import HedSchema, HedSchemaGroup
+
 
 
 # These are the defaults if you pass in nothing.  Most built in routes will have other default values.

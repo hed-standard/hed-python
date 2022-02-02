@@ -1,4 +1,3 @@
-""" SidecarSummary: Holds a summary of Json Sidecar """
 import json
 from hed.models.hed_group import HedGroup
 from hed.models.model_constants import DefTagNames
@@ -8,6 +7,8 @@ from hed.tools.summaries.summary_util import add_tag_list_to_dict, breakout_tags
 
 
 class SummaryEntry:
+    """ Holds the summary of a group such as a HED definition. """
+
     def __init__(self, name, contents, anchor_name=None):
         """Contains info for a HedGroup
 

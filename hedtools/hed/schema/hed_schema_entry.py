@@ -8,8 +8,10 @@ pluralize.defnoun("hertz", "hertz")
 
 
 class HedSchemaEntry:
-    """
-        A single entry in the HedSchema, containing its attributes/properties/etc.
+    """ Represents a single node in a HedSchema.
+
+        The structure contains all of the node information including attributes
+        and properties.
     """
     def __init__(self, name, section):
         self.name = name

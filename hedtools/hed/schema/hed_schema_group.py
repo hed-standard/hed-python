@@ -9,9 +9,9 @@ from hed.schema.hed_schema_constants import HedSectionKey
 
 
 class HedSchemaGroup:
-    """
-        This class handles combining multiple HedSchema objects for validation and analysis.
+    """ A container class for multiple HedSchema objects.
 
+        The container class is useful when library schemas are included.
         You cannot save/load/etc the combined schema object directly.
     """
     def __init__(self, schema_list):

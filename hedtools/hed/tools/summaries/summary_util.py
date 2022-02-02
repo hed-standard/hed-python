@@ -1,3 +1,4 @@
+""" Utilities used in computing dataset summaries. """
 from hed.models.hed_tag import HedTag
 
 

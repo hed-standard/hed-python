@@ -15,6 +15,7 @@ import sys
 import sphinx_rtd_theme
 from datetime import date
 
+sys.path.insert(0, os.path.abspath('../../webtools'))
 sys.path.insert(0, os.path.abspath('../../hedtools'))
 for path in sys.path:
     print(path)
