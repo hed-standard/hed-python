@@ -1,7 +1,9 @@
+"""Utilities for generating and handling file names."""
+
 import os
 from werkzeug.utils import secure_filename
 
-"""Utilities for generating and handling file names."""
+
 
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
     """ Determines whether test_file has correct extension, name_suffix, and name_prefix.

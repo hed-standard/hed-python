@@ -1,8 +1,9 @@
+"""Data handling utilities involving dataframes."""
+
 import pandas as pd
 import numpy as np
 from hed.errors.exceptions import HedFileError
 
-"""Data handling utilities involving dataframes."""
 
 def add_columns(df, column_list, value='n/a'):
     """ Add specified columns to df if df they are not already there

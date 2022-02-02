@@ -160,7 +160,7 @@ class Sidecar:
             See models.hed_ops.translate_ops or the specific hed_ops for additional options
 
         Yields
-        -------
+        ------
         hed_string : HedString
             HedString at a given column and key position
         position: tuple
