@@ -28,18 +28,10 @@ hed.tools.summaries.definition\_summary module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.summaries.group\_summary module
------------------------------------------
+hed.tools.summaries.key\_dict module
+-----------------------------------
 
-.. automodule:: hed.tools.summaries.group_summary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-hed.tools.summaries.hed\_def\_summary module
---------------------------------------------
-
-.. automodule:: hed.tools.summaries.hed_def_summary
+.. automodule:: hed.tools.summaries.key_dict
    :members:
    :undoc-members:
    :show-inheritance:
@@ -53,7 +45,7 @@ hed.tools.summaries.key\_map module
    :show-inheritance:
 
 hed.tools.summaries.key\_template module
-----------------------------------------
+-----------------------------------
 
 .. automodule:: hed.tools.summaries.key_template
    :members:
@@ -68,10 +60,10 @@ hed.tools.summaries.map\_summary module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.summaries.sidecar\_summary module
+hed.tools.summaries.summary\_entry module
 -------------------------------------------
 
-.. automodule:: hed.tools.summaries.sidecar_summary
+.. automodule:: hed.tools.summaries.summary_entry
    :members:
    :undoc-members:
    :show-inheritance:
@@ -99,3 +91,4 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
+>>>>>>> ac21f54ddf06e1fc673f54249d11e84b4ad617fe

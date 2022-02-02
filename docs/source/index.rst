@@ -11,7 +11,7 @@ Note:  this is a work in progress.
 
    01_Introduction.md
    api.rst
- 
+
 
 .. toctree::
    :maxdepth: 1

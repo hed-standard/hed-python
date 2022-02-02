@@ -47,7 +47,8 @@ class BidsDataset:
         return hed_list
 
     def get_summary(self):
-        summary = {"hed_schema_versions": self.get_schema_versions()}
+        summary = {"dataset": self.dataset_description['Name'],
+                   "hed_schema_versions": self.get_schema_versions()}
         return summary
 
     def get_schema_versions(self):

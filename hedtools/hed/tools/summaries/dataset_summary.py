@@ -9,8 +9,10 @@ class BidsDatasetSummary:
         """ Construct a summary of a BidsDataset
 
         Parameters:
-            dataset: BidsDataset
+            dataset: BidsDataset or str
             The dataset to be summarized.
 
         """
+        if isinstance(dataset, str):
+            dataset = BidsDataset(dataset)
         self.dataset = dataset
