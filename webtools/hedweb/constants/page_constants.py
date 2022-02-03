@@ -1,7 +1,0 @@
-EVENTS_PAGE = 'events.html'
-HED_TOOLS_HOME_PAGE = 'hed-tools-home.html'
-SCHEMA_PAGE = 'schema.html'
-SIDECAR_PAGE = 'sidecar.html'
-SPREADSHEET_PAGE = 'spreadsheet.html'
-STRING_PAGE = 'string.html'
-SERVICES_PAGE = 'services.html'
