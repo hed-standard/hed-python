@@ -5,14 +5,13 @@ import pandas as pd
 
 from hed import models
 from hed import schema as hedschema
-from hed.errors.error_reporter import get_printable_issue_string
-from hed.errors.exceptions import HedFileError
-from hed.validator.hed_validator import HedValidator
+from hed.errors import get_printable_issue_string, HedFileError
+from hed.validator import HedValidator
 from hedweb.constants import base_constants
 from hedweb.columns import create_column_selections
-from hed.util.io_util import generate_filename
-from hed.tools.summaries.map_summary import get_columns_info
-from hed.tools.sidecar_map import SidecarMap
+from hed.util import generate_filename
+from hed.tools import get_columns_info
+from hed.tools import SidecarMap
 from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down
 
 app_config = current_app.config

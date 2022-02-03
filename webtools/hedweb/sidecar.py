@@ -3,15 +3,14 @@ import json
 from flask import current_app
 from werkzeug.utils import secure_filename
 
-from hed import models
 from hed import schema as hedschema
-from hed.validator.hed_validator import HedValidator
-from hed.errors.error_reporter import get_printable_issue_string
-from hed.errors.exceptions import HedFileError
-from hed.models.hed_string import HedString
+from hed.validator import HedValidator
+from hed.errors import HedFileError, get_printable_issue_string
+
+from hed.models import Sidecar
+from hed.tools import SidecarMap
+from hed.util import generate_filename
 from hedweb.constants import base_constants, file_constants
-from hed.util.io_util import generate_filename
-from hed.tools.sidecar_map import SidecarMap
 from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down
 
 app_config = current_app.config
@@ -41,7 +40,7 @@ def get_input_from_form(request):
     if base_constants.JSON_FILE in request.files:
         f = request.files[base_constants.JSON_FILE]
         fb = io.StringIO(f.read(file_constants.BYTE_LIMIT).decode('ascii'))
-        arguments[base_constants.JSON_SIDECAR] = models.Sidecar(file=fb, name=secure_filename(f.filename))
+        arguments[base_constants.JSON_SIDECAR] = Sidecar(file=fb, name=secure_filename(f.filename))
     return arguments
 
 
@@ -62,7 +61,7 @@ def process(arguments):
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
     json_sidecar = arguments.get(base_constants.JSON_SIDECAR, 'None')
-    if not json_sidecar or not isinstance(json_sidecar, models.Sidecar):
+    if not json_sidecar or not isinstance(json_sidecar, Sidecar):
         raise HedFileError('InvalidJSONFile', "Please give a valid JSON file to process", "")
     command = arguments.get(base_constants.COMMAND, None)
     check_for_warnings = arguments.get(base_constants.CHECK_FOR_WARNINGS, False)

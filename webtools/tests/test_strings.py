@@ -5,7 +5,7 @@ from werkzeug.wrappers import Request
 
 from tests.test_web_base import TestWebBase
 import hed.schema as hedschema
-from hed.models.hed_string import HedString
+from hed.models import HedString
 from hedweb.constants import base_constants
 
 

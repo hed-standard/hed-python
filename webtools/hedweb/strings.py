@@ -5,9 +5,8 @@ from flask import current_app
 
 from hed.models.hed_string import HedString
 from hed import schema as hedschema
-from hed.errors.error_reporter import get_printable_issue_string
-from hed.errors.exceptions import HedFileError
-from hed.validator.hed_validator import HedValidator
+from hed.errors import get_printable_issue_string, HedFileError
+from hed.validator import HedValidator
 
 from hedweb.constants import base_constants
 from hedweb.web_util import form_has_option, get_hed_schema_from_pull_down

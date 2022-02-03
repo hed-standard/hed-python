@@ -1,13 +1,11 @@
 import os
 from flask import current_app
 from werkzeug.utils import secure_filename
-from hed import models
 from hed import schema as hedschema
-from hed.errors.error_reporter import get_printable_issue_string
-from hed.errors.exceptions import HedFileError
-from hed.util.io_util import generate_filename
-from hed.validator.hed_validator import HedValidator
-from hed.util.file_util import get_file_extension
+from hed.errors import get_printable_issue_string, HedFileError
+from hed.models import HedInput
+from hed.util import generate_filename, get_file_extension
+from hed.validator import HedValidator
 
 from hedweb.constants import base_constants, file_constants
 from hedweb.columns import get_prefix_dict
@@ -45,13 +43,13 @@ def get_input_from_form(request):
     file_ext = get_file_extension(filename)
     if file_ext in file_constants.EXCEL_FILE_EXTENSIONS:
         arguments[base_constants.SPREADSHEET_TYPE] = file_constants.EXCEL_EXTENSION
-    spreadsheet = models.HedInput(file=request.files[base_constants.SPREADSHEET_FILE],
-                                  file_type=arguments[base_constants.SPREADSHEET_TYPE],
-                                  worksheet_name=arguments.get(base_constants.WORKSHEET_NAME, None),
-                                  tag_columns=tag_columns,
-                                  has_column_names=arguments.get(base_constants.HAS_COLUMN_NAMES, None),
-                                  column_prefix_dictionary=prefix_dict,
-                                  name=filename)
+    spreadsheet = HedInput(file=request.files[base_constants.SPREADSHEET_FILE],
+                           file_type=arguments[base_constants.SPREADSHEET_TYPE],
+                           worksheet_name=arguments.get(base_constants.WORKSHEET_NAME, None),
+                           tag_columns=tag_columns,
+                           has_column_names=arguments.get(base_constants.HAS_COLUMN_NAMES, None),
+                           column_prefix_dictionary=prefix_dict,
+                           name=filename)
     arguments[base_constants.SPREADSHEET] = spreadsheet
     return arguments
 
@@ -73,7 +71,7 @@ def process(arguments):
     if not hed_schema or not isinstance(hed_schema, hedschema.hed_schema.HedSchema):
         raise HedFileError('BadHedSchema', "Please provide a valid HedSchema", "")
     spreadsheet = arguments.get(base_constants.SPREADSHEET, 'None')
-    if not spreadsheet or not isinstance(spreadsheet, models.HedInput):
+    if not spreadsheet or not isinstance(spreadsheet, HedInput):
         raise HedFileError('InvalidSpreadsheet', "An spreadsheet was given but could not be processed", "")
 
     command = arguments.get(base_constants.COMMAND, None)
