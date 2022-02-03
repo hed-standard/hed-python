@@ -4,7 +4,7 @@ import os
 
 
 from pandas import DataFrame, read_csv
-from hed.errors.exceptions import HedFileError
+from hed.errors import HedFileError
 from hedweb.constants import base_constants, file_constants
 from hedweb.web_util import form_has_file, form_has_option
 

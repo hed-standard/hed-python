@@ -12,6 +12,9 @@ from .summaries.col_dict import ColumnDict
 from .summaries.dataset_summary import DatasetSummary
 from .summaries.key_map import KeyMap
 from .summaries.key_template import KeyTemplate
+from .summaries.map_summary import get_columns_info
 from .summaries.summary_entry import SummaryEntry
 from .summaries.tag_summary import TagSummary
+
+from .sidecar_map import SidecarMap
 
