@@ -5,7 +5,7 @@ from hed.util.data_util import get_new_dataframe, remove_quotes, separate_column
 
 
 class KeyMap:
-    """A class to handle extraction of unique column values and to remap columns."""
+    """ Extracts unique column values for remapping columns."""
 
     def __init__(self, key_cols, target_cols=None, name=''):
         """ Class stores base data for doing event remapping.

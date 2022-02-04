@@ -1,6 +1,6 @@
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.bids.bids_event_files import BidsEventFiles
-from hed.tools.summaries.hed_group_summary import HedGroupSummary
+from hed.tools.summaries.group_summary import HedGroupSummary
 
 
 def extract_definitions(bids):

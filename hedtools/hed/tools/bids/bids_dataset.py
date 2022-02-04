@@ -12,7 +12,7 @@ LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-li
 
 
 class BidsDataset:
-    """Represents a bids_old dataset."""
+    """Represents the metadata for a BIDS dataset."""
 
     def __init__(self, root_path):
         self.root_path = os.path.abspath(root_path)
@@ -30,13 +30,13 @@ class BidsDataset:
     def _schema_from_description(self):
         hed = self.dataset_description.get("HEDVersion", None)
         if isinstance(hed, str):
-            return [load_schema_version(xml_version_number=hed)]
+            return [load_schema_version(xml_version=hed)]
         elif not isinstance(hed, dict):
             return []
 
         hed_list = []
         if 'base' in hed:
-            hed_list.append(load_schema_version(xml_version_number=hed['base']))
+            hed_list.append(load_schema_version(xml_version=hed['base']))
         if 'libraries' in hed:
             for key, library in hed['libraries'].items():
                 library_pieces = library.split('_')
@@ -47,7 +47,8 @@ class BidsDataset:
         return hed_list
 
     def get_summary(self):
-        summary = {"hed_schema_versions": self.get_schema_versions()}
+        summary = {"dataset": self.dataset_description['Name'],
+                   "hed_schema_versions": self.get_schema_versions()}
         return summary
 
     def get_schema_versions(self):

@@ -1,3 +1,4 @@
+""" Utilities for loading and outputting HED schemas."""
 import os
 
 
@@ -7,6 +8,7 @@ from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.util import file_util
+
 
 
 def from_string(schema_string, file_type=".xml", library_prefix=None):
@@ -99,7 +101,7 @@ def get_hed_xml_version(hed_xml_file_path):
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
-def load_schema_version(xml_folder=None, xml_version_number=None, library_name=None,
+def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
                         library_prefix=None):
     """
     Gets a HedSchema object based on the hed xml file specified. If no HED file is specified then the latest
@@ -108,7 +110,7 @@ def load_schema_version(xml_folder=None, xml_version_number=None, library_name=N
     ----------
     xml_folder: str
         Path to a folder containing schemas
-    xml_version_number: str
+    xml_version: str
         HED version format string. Expected format: 'X.Y.Z'
     library_name: str or None, optional
         The schema library name.  HED_(LIBRARY_NAME)_(version).xml
@@ -120,12 +122,12 @@ def load_schema_version(xml_folder=None, xml_version_number=None, library_name=N
         A HedSchema object.
     """
     try:
-        final_hed_xml_file = hed_cache.get_hed_version_path(xml_version_number, library_name, xml_folder)
+        final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file)
     except HedFileError as e:
         if e.error_type == HedExceptions.FILE_NOT_FOUND:
             hed_cache.cache_all_hed_xml_versions()
-            final_hed_xml_file = hed_cache.get_hed_version_path(xml_version_number, library_name, xml_folder)
+            final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
             hed_schema = load_schema(final_hed_xml_file)
         else:
             raise e

@@ -1,0 +1,7 @@
+{
+  "Tag-categories": [
+    "Sensory-event", "Agent-action", "Event", "Action", "Task-event-role", "Task-action-type",
+    "Task-stimulus-role", "Agent-task-role", "Item", "Sensory-presentation", "Organizational-property",
+    "Informational-property", "Sensory-property", "Property", "Relation"
+  ]
+}

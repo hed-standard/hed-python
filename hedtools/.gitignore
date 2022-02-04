@@ -68,6 +68,8 @@ venv/
 build/
 
 hed/validator/hed_cache/
+tests/schema_cache_test/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt

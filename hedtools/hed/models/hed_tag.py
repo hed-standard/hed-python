@@ -2,8 +2,10 @@ from hed.schema.hed_schema_constants import HedKey
 
 
 class HedTag:
-    """
-        A single HedTag in a string, keeps track of original value and positioning
+    """ Represents a single HED tag.
+
+     HedTag is a smart class in that it keeps track of its original value and positioning
+     as well as pointers to the relevant HED schema information, if relevant.
     """
 
     def __init__(self, hed_string, span=None, hed_schema=None):
@@ -48,6 +50,21 @@ class HedTag:
             self.convert_to_canonical_forms(hed_schema)
 
         self.is_definition = False
+        self.mutable = True  # If False, this tag is potentially referenced in other places and should not be altered
+
+    def __eq__(self, other):
+        if self is other:
+            return True
+
+        if not isinstance(other, HedTag):
+            return False
+
+        if self.short_tag.lower() == other.short_tag.lower():
+            return True
+
+        if self.org_tag.lower() == other.org_tag.lower():
+            return True
+        return False
 
     @property
     def library_prefix(self):
@@ -125,6 +142,8 @@ class HedTag:
         -------
 
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable tag")
         long_part = self._long_tag[:self._short_tag_index]
         self._long_tag = f"{long_part}{new_tag_val}/{self.extension_or_value_portion}"
         self._extension_index = self._short_tag_index + len(new_tag_val)
@@ -205,6 +224,9 @@ class HedTag:
         new_tag_val : str
             New (implicitly long form) of tag to set
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable tag")
+
         if self._long_tag:
             raise ValueError("Can only edit tags before calculating canonical forms. " +
                              "This could be updated to instead remove computed forms.")
@@ -294,6 +316,9 @@ class HedTag:
         required_prefix : str
             The full name_prefix to add if not present
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable tag")
+
         checking_prefix = required_prefix
         while checking_prefix:
             if self.lower().startswith(checking_prefix.lower()):
@@ -317,6 +342,9 @@ class HedTag:
         placeholder_value : str
             Value to replace placeholder with.
         """
+        if not self.mutable:
+            raise ValueError("Trying to alter immutable tag")
+
         if "#" in self.org_tag:
             if self._long_tag:
                 # This could possibly be more efficient

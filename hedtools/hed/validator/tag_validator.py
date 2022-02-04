@@ -11,6 +11,8 @@ from hed.validator import tag_validator_util
 
 
 class TagValidator:
+    """ Validation for individual HED tags. """
+
     CAMEL_CASE_EXPRESSION = r'([A-Z-]+\s*[a-z-]*)+'
     INVALID_STRING_CHARS = '[]{}~'
     OPENING_GROUP_CHARACTER = '('
@@ -68,7 +70,7 @@ class TagValidator:
         return validation_issues
 
     def run_individual_tag_validators(self, original_tag, check_for_warnings, allow_placeholders=False):
-        """Runs the validators on the individual tags in a HED string.
+        """Runs the hed_ops on the individual tags in a HED string.
 
          Parameters
          ----------
@@ -102,7 +104,7 @@ class TagValidator:
         return validation_issues
 
     def run_tag_level_validators(self, original_tag_list, is_top_level, is_group):
-        """Runs the validators on tags at each level in a HED string. This pertains to the top-level, all groups,
+        """Runs the hed_ops on tags at each level in a HED string. This pertains to the top-level, all groups,
            and nested groups.
 
         Parameters

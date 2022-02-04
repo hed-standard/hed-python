@@ -4,7 +4,7 @@ from hed.tools.bids.bids_tsv_file import BidsTsvFile
 
 
 class BidsEventFile(BidsTsvFile):
-    """Represents a bids_old file."""
+    """Represents a BIDS event file including its associated sidecars."""
 
     def __init__(self, file_path):
         super().__init__(os.path.abspath(file_path), set_contents=False)
