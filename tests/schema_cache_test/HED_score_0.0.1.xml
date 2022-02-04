@@ -1,0 +1,3217 @@
+<?xml version="1.0" ?>
+<HED library="score" version="0.0.1">
+   <prologue>This schema is Hierarchical Event Descriptors (HED) Library Schema implementation for Standardized Computer-based Organized Reporting of EEG: SCORE based on the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
+Data sharing using standard definitions enables applications of automated tools to optimize analyses, reduce errors, and ultimately to advance the understanding of the human brain.
+This implementation of SCORE in an open-source, machine-readable format using HED to enables its use in machine analysis and mega-analysis.
+Reference:
+[1] Beniczky, Sandor, et al. &quot;Standardized computer based organized reporting of EEG: SCORE.&quot; Epilepsia 54.6 (2013)
+[2] Beniczky, Sandor, et al. &quot;Standardized computer based organized reporting of EEG: SCORE second version.&quot; Clinical Neurophysiology 128.11 (2017)</prologue>
+   <schema>
+      <node>
+         <name>Modulators</name>
+         <description>External stimuli / interventions or changes in the alertness level (sleep) that modify: the background activity, or how often a graphoelement is occurring, or change other features of the graphoelement (like intra-burst frequency).</description>
+         <node>
+            <name>Intermittent-photic-stimulation</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Hyperventilation</name>
+            <node>
+               <name>Quality-of-hyperventilation</name>
+               <node>
+                  <name>Refused</name>
+               </node>
+               <node>
+                  <name>Poor-effort</name>
+               </node>
+               <node>
+                  <name>Good-effort</name>
+               </node>
+               <node>
+                  <name>Excellent-effort</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Sleep-deprivation</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Sleep-following-sleep-deprivation</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Natural-sleep</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Induced-sleep</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Drowsiness</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Awakening</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Medication-administered-during-recording</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Medication-withdrawal-or-reduction-during-recording</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Manual-eye-closure</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Manual-eye-opening</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Auditory-stimulation</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Nociceptive-stimulation</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Physical-effort</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Cognitive-tasks</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Other-modulators-and-procedures</name>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Background-activity</name>
+         <description>An EEG activity representing the setting in which a given normal or abnormal pattern appears and from which such pattern is distinguished.</description>
+         <node>
+            <name>Posterior-dominant-rhythm</name>
+            <description>Rhythmic activity occurring during wakefulness over the posterior regions of the head, generally with maximum amplitudes over the occipital areas. Amplitude varies. Best seen with eyes closed and during physical relaxation and relative mental inactivity. Blocked or attenuated by attention, especially visual, and mental effort. In adults this is the alpha rhythm, and the frequency is 8 to 13 Hz. However the frequency can be higher or lower than this range (often a supra or sub harmonic of alpha frequency) and is called alpha variant rhythm (fast and slow alpha variant rhythm). In children, the normal range of the frequency of the posterior dominant rhythm is age-dependant.</description>
+         </node>
+         <node>
+            <name>Mu-rhythm</name>
+            <description>EEG rhythm at 7-11 Hz composed of arch-shaped waves occurring over the central or centro-parietal regions of the scalp during wakefulness. Amplitudes varies but is mostly below 50 microV. Blocked or attenuated most clearly by contralateral movement, thought of movement, readiness to move or tactile stimulation.</description>
+         </node>
+         <node>
+            <name>Other-organized-rhythms</name>
+            <description>EEG activity that consisting of waves of approximately constant period, which is considered as part of the background (ongoing) activity, but does not fulfil the criteria of the posterior dominant rhythm.</description>
+         </node>
+         <node>
+            <name>Special-features</name>
+            <description>Special Features.</description>
+            <node>
+               <name>Continuous-background-activity</name>
+            </node>
+            <node>
+               <name>Nearly-continuous-background-activity</name>
+            </node>
+            <node>
+               <name>Discontinuous-background-activity</name>
+            </node>
+            <node>
+               <name>Background-Burst-suppression</name>
+               <description>EEG pattern consisting of bursts (activity appearing and disappearing abruptly) interrupted by periods of low amplitude (below 20 microV) and which occurs simultaneously over all head regions.</description>
+            </node>
+            <node>
+               <name>Background-sBurst-attenuation</name>
+            </node>
+            <node>
+               <name>Suppression</name>
+               <description>Periods showing activity under 10 microV (referential montage) and interrupting the background (ongoing) activity.</description>
+            </node>
+            <node>
+               <name>Electrocerebral-inactivity</name>
+               <description>Absence of any ongoing cortical electric activities; in all leads EEG is isoelectric or only contains artefacts. Sensitivity has to be increased up to 2 microV/mm; recording time: at least 30 minutes.</description>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Sleep-drowsiness</name>
+         <description>The features of the ongoing activity during sleep are scored here. If abnormal graphoelements appear, disappear or change their morphology during sleep, that is not scored here but at the entry corresponding to that graphooelement (as a modulator).</description>
+         <node>
+            <name>Sleep-architecture</name>
+            <description>Only to be scored if whole-night sleep is part of the recording. It is a global descriptor of the structure and pattern of sleep: estimation of the amount of time spent in REM and NREM sleep, sleep duration, NREM-REM cycle. Used with Findings-attributes tags</description>
+         </node>
+         <node>
+            <name>Sleep-stage-reached</name>
+            <description>For normal sleep patterns the sleep stages reached during the recording can be specified</description>
+            <node>
+               <name>N1</name>
+               <description>Sleep stage 1</description>
+            </node>
+            <node>
+               <name>N2</name>
+               <description>Sleep stage 2</description>
+            </node>
+            <node>
+               <name>N3</name>
+               <description>Sleep stage 3</description>
+            </node>
+            <node>
+               <name>REM</name>
+               <description>Rapid eye movement</description>
+            </node>
+         </node>
+         <node>
+            <name>Sleep-spindles</name>
+            <description>Burst at 11-15 Hz but mostly at 12-14 Hz generally diffuse but of higher voltage over the central regions of the head, occurring during sleep. Amplitude varies but is mostly below 50 microV in the adult. Used with Findings-attributes tags</description>
+         </node>
+         <node>
+            <name>Vertex-waves</name>
+            <description>Sharp potential, maximal at the vertex, negative relative to other areas, apparently occurring spontaneously during sleep or in response to a sensory stimulus during sleep or wakefulness. May be single or repetitive. Amplitude varies but rarely exceeds 250 microV. Abbreviation: V wave. Synonym: vertex sharp wave. Used with Findings-attributes tags</description>
+         </node>
+         <node>
+            <name>K-complexes</name>
+            <description>A burst of somewhat variable appearance, consisting most commonly of a high voltage negative slow wave followed by a smaller positive slow wave frequently associated with a sleep spindle. Duration greater than 0.5 s. Amplitude is generally maximal in the frontal vertex. K complexes occur during nonREM sleep, apparently spontaneously, or in response to sudden sensory / auditory stimuli, and are not specific for any individual sensory modality.  Used with Findings-attributes tags</description>
+         </node>
+         <node>
+            <name>Saw-tooth-waves</name>
+            <description>Used with Findings-attributes tags</description>
+         </node>
+         <node>
+            <name>POSTS</name>
+            <description>Positive occipital sharp transients of sleep. Sharp transient maximal over the occipital regions, positive relative to other areas, apparently occurring spontaneously during sleep. May be single or repetitive. Amplitude varies but is generally bellow 50 microV. Used with Findings-attributes tags</description>
+         </node>
+         <node>
+            <name>Hypnagogic-hypersynchrony</name>
+            <description>Bursts of bilateral, synchronous delta or theta activity of large amplitude, occasionally with superimposed faster components, occurring during falling asleep or during awakening, in children.  Used with Findings-attributes tags</description>
+         </node>
+         <node>
+            <name>Non-reactive-sleep</name>
+            <description>EEG activity consisting of normal sleep graphoelemts, but which cannot be interrupted by external stimuli/ the patient cannot be waken. Used with Findings-attributes tags</description>
+         </node>
+      </node>
+      <node>
+         <name>Interictal-findings</name>
+         <description>EEG patterns / transients that are distinguished form the background activity, considered abnormal, but are not recorded during ictal period (seizure) or postictal period; the presence of interictal findings does not necessarily imply that the patient has epilepsy.</description>
+         <node>
+            <name>Epileptiform-interictal-activity</name>
+         </node>
+         <node>
+            <name>Abnormal-interictal-rhythmic-activity</name>
+         </node>
+         <node>
+            <name>Special-patterns</name>
+            <node>
+               <name>PDs</name>
+               <description>Periodic discharges not further specified (PDs).</description>
+            </node>
+            <node>
+               <name>Extreme-delta-brush</name>
+            </node>
+            <node>
+               <name>Burst-suppression</name>
+            </node>
+            <node>
+               <name>Burst-attenuation</name>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Episodes</name>
+         <description>Clinical episodes or electrographic seizures.</description>
+         <node>
+            <name>Epileptic-seizure</name>
+            <node>
+               <name>Focal-onset</name>
+               <node>
+                  <name>Aware</name>
+               </node>
+               <node>
+                  <name>Impaired-awareness</name>
+               </node>
+               <node>
+                  <name>Awareness-unknown</name>
+               </node>
+               <node>
+                  <name>Focal-to-bilateral-tonic-clonic</name>
+               </node>
+            </node>
+            <node>
+               <name>Generalized-onset</name>
+            </node>
+            <node>
+               <name>Unknown-onset</name>
+            </node>
+            <node>
+               <name>Unclassified</name>
+            </node>
+         </node>
+         <node>
+            <name>Subtle-seizure</name>
+            <description>Seizure type frequent in neonates, sometimes referred to as motor automatisms; they may include random and roving eye movements, sucking, chewing motions, tongue protrusion, rowing or swimming or boxing movements of the arms, pedaling and bycicling movements of the lower limbs; apneic seizures are relatively common. Although some subtle seizures are associated with rhythmic ictal EEG discharges , and are clearly epileptic, ictal EEG often does not show typical epileptic activity</description>
+         </node>
+         <node>
+            <name>Electrographic-seizure</name>
+            <description>Referred usually to non convulsive status. Ictal EEG: rhythmic discharge or spike and wave pattern with definite evolution in frequency, location, or morphology lasting at least 10 s; evolution in amplitude alone did not qualify</description>
+         </node>
+         <node>
+            <name>PNES</name>
+            <description>Psychogenic nonepileptic seizure</description>
+         </node>
+         <node>
+            <name>Sleep-related-episodes</name>
+            <node>
+               <name>Arousal</name>
+               <description>Normal</description>
+            </node>
+            <node>
+               <name>Benign-sleep-myoclonus</name>
+               <description>A distinctive disorder of sleep characterized by a) neonatal onset, b) rhythmic myoclonic jerks only during sleep and c) abrupt and consistent cessation with arousal, d) absence of concomitant electrographic changes suggestive of seizures, and e) good outcome.</description>
+            </node>
+            <node>
+               <name>Confusional-awakening</name>
+               <description>Episodes of non epileptic nature included in NREM parasomnias, characterized by sudden arousal and complex behavior but without full alertness, usually lasting a few minutes and occurring almost in all children at least occasionally. Amnesia of the episode is the rule.</description>
+            </node>
+            <node>
+               <name>Sleep-PLMS</name>
+               <description>Periodic limb movement in sleep. Episodes characterized by brief (0.5- to 5.0-second) lower-extremity movements during sleep, which typically occur at 20- to 40-second intervals, most commonly during the first 3 hours of sleep. The affected individual is usually not aware of the movements or of the transient partial arousals.</description>
+            </node>
+            <node>
+               <name>RBD</name>
+               <description>REM sleep behavioral disorder. Episodes characterized by: a) presence of REM sleep without atonia (RSWA) on polysomnography (PSG); b) presence of at least 1 of the following conditions - (1) Sleep-related behaviors, by history, that have been injurious, potentially injurious, or disruptive (example: dream enactment behavior); (2) abnormal REM sleep behavior documented during PSG monitoring; (3) absence of epileptiform activity on electroencephalogram (EEG) during REM sleep (unless RBD can be clearly distinguished from any concurrent REM sleep-related seizure disorder); (4) sleep disorder not better explained by another sleep disorder, a medical or neurologic disorder, a mental disorder, medication use, or a substance use disorder.</description>
+            </node>
+            <node>
+               <name>Sleep-walking</name>
+               <description>Episodes characterized by ambulation during sleep; the patient is difficult to arouse during an episode, and is usually amnesic following the episode. Episodes usually occur in the first third of the night during slow wave sleep. Polysomnographic recordings demonstrate 2 abnormalities during the first sleep cycle: frequent, brief, nonbehavioral EEG-defined arousals prior to the somnambulistic episode and abnormally low gamma (0.75-2.0 Hz) EEG power on spectral analysis, correlating with high-voltage (hypersynchronic gamma) waves lasting 10 to 15 s occurring just prior to the movement. This is followed by stage I NREM sleep, and there is no evidence of complete awakening.</description>
+            </node>
+         </node>
+         <node>
+            <name>Pediatric-episodes</name>
+            <node>
+               <name>Hyperekplexia</name>
+               <description>Disorder characterized by exaggerated startle response and hypertonicity that may occur during the first year of life and in severe cases during the neonatal period. Children usually present with marked irritability and recurrent startles in response to handling and sounds. Severely affected infants can have severe jerks and stiffening, sometimes with breathholding spells.</description>
+            </node>
+            <node>
+               <name>Jactatio-capitis-nocturna</name>
+               <description>Relatively common in normal children at the time of going to bed, especially during the first year of life, the rhythmic head movements persist during sleep. Usually, these phenomena disappear before 3 years of age.</description>
+            </node>
+            <node>
+               <name>Pavor-nocturnus</name>
+               <description>Nocturnal episodes characterized by age of onset of less than five years (mean age 18 months, with peak prevalence at five to seven years), appearance of signs of panic two hours after falling asleep with crying, screams, a fearful expression, inability to recognize other people including parents (for a duration of 5-15 minutes), amnesia upon awakening. Pavor nocturnus occurs in patients almost every night for months or years (but the frequency is highly variable and may be as low as once a month) and is likely to disappear spontaneously at the age of six to eight years.</description>
+            </node>
+            <node>
+               <name>Stereotypical-behavior</name>
+               <description>Repetitive motor behavior in children, typically rhythmic and persistent; usually not paroxysmal and rarely suggest epilepsy. They include headbanging, head-rolling, jactatio capitis nocturna, body rocking, buccal or lingual movements, hand flapping and related mannerisms, repetitive hand-waving (to self-induce photosensitive seizures).</description>
+            </node>
+         </node>
+         <node>
+            <name>Paroxysmal-motor-event</name>
+            <description>Paroxysmal phenomena during neonatal or childhood periods characterized by recurrent motor or behavioural signs or symptoms that must be distinguishes from epileptic disorders.</description>
+         </node>
+         <node>
+            <name>Syncope</name>
+            <description>Episode with loss of consciousness and muscle tone that is abrupt in onset, of short duration and followed by rapid recovery; it occurs in response to transient impairment of cerebral perfusion. Typical prodromal symptoms often herald onset of syncope and postictal symptoms are minimal. Syncopal convulsions resulting from cerebral anoxia are common but are not a form of epilepsy, nor are there any accompanying EEG ictal discharges.</description>
+         </node>
+         <node>
+            <name>Cataplexy</name>
+            <description>A sudden decrement in muscle tone and loss of deep tendon reflexes, leading to muscle weakness, paralysis, or postural collapse. Cataplexy usually is precipitated by an outburst of emotional expression-notably laughter, anger, or startle. It is one of the tetrad of symptoms of narcolepsy. During cataplexy, respiration and voluntary eye movements are not compromised. Consciousness is preserved.</description>
+         </node>
+         <node>
+            <name>Other-episodes</name>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Physiologic-patterns</name>
+         <description>EEG graphoelements or rhythms that are considered normal. They only should be scored if the physician considers that they have a specific clinical significance for the recording.</description>
+         <node>
+            <name>Rhythmic-activity-patterns</name>
+            <description>Not further specified</description>
+         </node>
+         <node>
+            <name>Slow-alpha-variant-rhythm</name>
+            <description>Characteristic rhythms mostly at 4-5 Hz, recorded most prominently over the posterior regions of the head. Generally alternate, or are intermixed, with alpha rhythm to which they often are harmonically related. Amplitude varies but is frequently close to 50 micro V. Blocked or attenuated by attention, especially visual, and mental effort. Comment: slow alpha variant rhythms should be distinguished from posterior slow waves characteristic of children and adolescents and occasionally seen in young adults.</description>
+         </node>
+         <node>
+            <name>Fast-alpha-variant-rhythm</name>
+            <description>Characteristic rhythm at 14-20 Hz, detected most prominently over the posterior regions of the head. May alternate or be intermixed with alpha rhythm. Blocked or attenuated by attention, especially visual, and mental effort.</description>
+         </node>
+         <node>
+            <name>Ciganek-rhythm</name>
+         </node>
+         <node>
+            <name>Lambda-wave</name>
+            <description>Diphasic sharp transient occurring over occipital regions of the head of waking subjects during visual exploration. The main component is positive relative to other areas. Timelocked to saccadic eye movement. Amplitude varies but is generally below 50 micro V.</description>
+         </node>
+         <node>
+            <name>Posterior-slow-waves-youth</name>
+            <description>Waves in the delta and theta range, of variable form, lasting 0.35 to 0.5 s or longer without any consistent periodicity, found in the range of 6-12 years (occasionally seen in young adults). Alpha waves are almost always intermingled or superimposed. Reactive similar to alpha activity.</description>
+         </node>
+         <node>
+            <name>Diffuse-slowing-hyperventilation</name>
+            <description>Diffuse slowing induced by hyperventilation. Bilateral, diffuse slowing during hyperventilation. Recorded in 70 precent of normal children (3-5 years) and less then 10 precent of adults. Usually appear in the posterior regions and spread forward in younger age group, whereas they tend to appear in the frontal regions and spread backward in the older age group.</description>
+         </node>
+         <node>
+            <name>Photic-driving</name>
+            <description>Physiologic response consisting of rhythmic activity elicited over the posterior regions of the head by repetitive photic stimulation at frequencies of about 5-30 Hz. Comments: term should be limited to activity time-locked to the stimulus and of frequency identical or harmonically related to the stimulus frequency. Photic driving should be distinguished from the visual evoked potentials elicited by isolated flashes of light or flashes repeated at very low frequency.</description>
+         </node>
+         <node>
+            <name>Photomyogenic-response</name>
+            <description>A response to intermittent photic stimulation characterized by the appearance in the record of brief, repetitive muscular artifacts (spikes) over the anterior regions of the head. These often increase gradually in amplitude as stimuli are continued and cease promptly when the stimulus is withdrawn. Comment: this response is frequently associated with flutter of the eyelids and vertical oscillations of the eyeballs and sometimes with discrete jerking mostly involving the musculature of the face and head. (Preferred to synonym: photomyoclonic response).</description>
+         </node>
+         <node>
+            <name>Arousal-pattern</name>
+            <description>Arousal pattern in children. Prolonged, marked high voltage 4-6/s activity in all leads with some intermixed slower frequencies, in children.</description>
+         </node>
+         <node>
+            <name>Sleep-spindles-patterns</name>
+            <description>Burst at 11-15 Hz but mostly at 12-14 Hz generally diffuse but of higher voltage over the central regions of the head, occurring during sleep. Amplitude varies but is mostly below 50 micro V in the adult.</description>
+         </node>
+         <node>
+            <name>Vertex-wave</name>
+            <description>Vertex sharp transient. Sharp potential, maximal at the vertex, negative relative to other areas, apparently occurring spontaneously during sleep or in response to a sensory stimulus during sleep or wakefulness. May be single or repetitive. Amplitude varies but rarely exceeds 250 micro V. Abbreviation: V wave. Synonym: vertex sharp wave.</description>
+         </node>
+         <node>
+            <name>K-complex</name>
+            <description>A burst of somewhat variable appearance, consisting most commonly of a high voltage negative slow wave followed by a smaller positive slow wave frequently associated with a sleep spindle. Duration greater than 0.5 s. Amplitude is generally maximal in the frontal vertex. K complexes occur during non-REM sleep, apparently spontaneously, or in response to sudden sensory / auditory stimuli, and are not specific for any individual sensory modality.</description>
+         </node>
+         <node>
+            <name>POSTS-pattern</name>
+            <description>Positive occipital sharp transient of sleep. Sharp transient maximal over the occipital regions, positive relative to other areas, apparently occurring spontaneously during sleep. May be single or repetitive. Amplitude varies but is generally bellow 50 micro V.</description>
+         </node>
+         <node>
+            <name>Frontal-arousal-rhythm</name>
+            <description>Prolonged (up to 20s) rhythmical sharp or spiky activity over the frontal areas (maximum over the frontal midline) seen at arousal from sleep in children with minimal cerebral dysfunction.</description>
+         </node>
+         <node>
+            <name>Other-physiologic-patterns</name>
+         </node>
+      </node>
+      <node>
+         <name>Uncertain-significant-patterns</name>
+         <description>EEG graphoelements or rhythms that resemble abnormal patterns but that are not necessarily associated with a pathology, and the physician does not consider them abnormal in the context of the scored recording (like normal variants and patterns).</description>
+         <node>
+            <name>Sharp-transient-pattern</name>
+         </node>
+         <node>
+            <name>Wicket-spikes</name>
+            <description>Spike-like monophasic negative single waves or trains of waves occurring over the temporal regions during drowsiness that have an arcuate or mu-like appearance. These are mainly seen in older individuals and represent a benign variant that is of little clinical significance.</description>
+         </node>
+         <node>
+            <name>Small-sharp-spikes</name>
+            <description>Benign Epileptiform Transients of Sleep (BETS). Small sharp spikes (SSS) of very short duration and low amplitude, often followed by a small theta wave, occurring in the temporal regions during drowsiness and light sleep. They occur on one or both sides (often asynchronously). The main negative and positive components are of about equally spiky character. Rarely seen in children, they are seen most often in adults and the elderly. Two thirds of the patients have a history of epileptic seizures.</description>
+         </node>
+         <node>
+            <name>Fourteen-six-Hz-positive-burst</name>
+            <description>Burst of arch-shaped waves at 13-17 Hz and/or 5-7-Hz but most commonly at 14 and or 6 Hz seen generally over the posterior temporal and adjacent areas of one or both sides of the head during sleep. The sharp peaks of its component waves are positive with respect to other regions. Amplitude varies but is generally below 75  micro V. Comments: (1) best demonstrated by referential recording using contralateral earlobe or other remote, reference electrodes. (2) This pattern has no established clinical significance.</description>
+         </node>
+         <node>
+            <name>Six-Hz-spike-slow-wave</name>
+            <description>Spike and slow wave complexes at 4-7Hz, but mostly at 6 Hz occurring generally in brief bursts bilaterally and synchronously, symmetrically or asymmetrically, and either confined to or of larger amplitude over the posterior or anterior regions of the head. The spike has a strong positive component. Amplitude varies but is generally smaller than that of spike-andslow-wave complexes repeating at slower rates. Comment: this pattern should be distinguished from epileptiform discharges. Synonym: wave and spike phantom.</description>
+         </node>
+         <node>
+            <name>Rudimentary-spike-wave-complex</name>
+            <description>Synonym: Pseudo petit mal discharge. Paroxysmal discharge that consists of generalized or nearly generalized high voltage 3 to 4/sec waves with poorly developed spike in the positive trough between the slow waves, occurring in drowsiness only. It is found only in infancy and early childhood when marked hypnagogic rhythmical theta activity is paramount in the drowsy state.</description>
+         </node>
+         <node>
+            <name>Slow-fused-transient</name>
+            <description>A posterior slow-wave preceded by a sharp-contoured potential that blends together with the ensuing slow wave, in children.</description>
+         </node>
+         <node>
+            <name>Needle-like-occipital-spikes-blind</name>
+            <description>Spike discharges of a particularly fast and needle-like character develop over the occipital region in most congenitally blind children. Completely disappear during childhood or adolescence.</description>
+         </node>
+         <node>
+            <name>SREDA</name>
+            <description>Subclinical rhythmic EEG discharge of adults. A rhythmic pattern seen in the adult age group, mainly in the waking state or drowsiness. Itconsists of a mixture of frequencies, often predominant in the theta range. The onset may be fairly abrupt with widespread sharp rhythmical theta and occasionally with delta activity. As to the spatial distribution, a maximum of this discharge is usually found over the centroparietal region and especially over the vertex. It may resemble a seizure discharge but is not accompanied by any clinical signs or symptoms.</description>
+         </node>
+         <node>
+            <name>RTTD</name>
+            <description>Rhythmic temporal theta burst of drowsiness. Characteristic burst of 4-7 Hz waves frequently notched by faster waves, occurring over the temporal regions of the head during drowsiness. Synonym: psychomotor variant pattern. Comment: this is a pattern of drowsiness that is of no clinical significance.</description>
+         </node>
+         <node>
+            <name>Temporal-slowing-elderly</name>
+            <description>Focal theta and/or delta activity over the temporal regions, especially the left, in persons over the age of 60. Amplitudes are low/ similar to the background activity. Comment: focal temporal theta was found in 20 precent of people between the ages of 40-59 years, and 40 precent of people between 60 and 79 years. One third of people older than 60 years had focal temporal delta activity.</description>
+         </node>
+         <node>
+            <name>Breach-rhythm</name>
+            <description>Rhythmical activity recorded over cranial bone defects. Usually it is in the 6 to 11/sec range, does not respond to movements.</description>
+         </node>
+         <node>
+            <name>Other-uncertain-significant-patterns</name>
+         </node>
+      </node>
+      <node>
+         <name>EEG-artifacts</name>
+         <description>When relevant for the clinical interpretation, artifacts can be scored by specifying the type and the location.</description>
+         <node>
+            <name>Biological-artifacts</name>
+            <description>Used with Findings-property/ tags</description>
+            <node>
+               <name>Eye-blinks</name>
+               <description>Fp1/Fp2 become electropositive with eye closure because the cornea is positively charged causing a negative deflection in Fp1/Fp2. If the eye blink is unilateral, consider prosthetic eye. If it is in F8 rather than Fp2 then the electrodes are plugged in wrong.</description>
+            </node>
+            <node>
+               <name>Eye-movements-horizontal</name>
+               <description>There is an upward deflection in the Fp2-F8 derivation, when the eyes move to the right side. In this case F8 becomes more positive and therefore. When the eyes move to the left, F7 becomes more positive and there is an upward deflection in the Fp1-F7 derivation.</description>
+            </node>
+            <node>
+               <name>Eye-movements-vertical</name>
+               <description>The EEG shows positive potentials (50-100 micro V) with bifrontal distribution, maximum at Fp1 and Fp2, when the eyeball rotated upward. The downward rotation of the eyeball was associated with the negative deflection. The time course of the deflections was similar to the time course of the eyeball movement.</description>
+            </node>
+            <node>
+               <name>Slow-eye-movements</name>
+               <description>Slow, rolling eye-movements, seen during drowsiness.</description>
+            </node>
+            <node>
+               <name>Chewing-artifact</name>
+            </node>
+            <node>
+               <name>Sucking-artifact</name>
+            </node>
+            <node>
+               <name>Glossokinetic-artifact</name>
+               <description>The tongue functions as a dipole, with the tip negative with respect to the base. The artifact produced by the tongue has a broad potential field that drops from frontal to occipital areas, although it is less steep than that produced by eye movement artifacts. The amplitude of the potentials is greater inferiorly than in parasagittal regions; the frequency is variable but usually in the delta range. Chewing and sucking can produce similar artifacts.</description>
+            </node>
+            <node>
+               <name>Rocking-patting-artifact</name>
+               <description>Quasi-rhythmical artefacts in recordings from infants caused by rocking/ patting.</description>
+            </node>
+            <node>
+               <name>Movement-artifact</name>
+               <description>Large amplitude artifact, with irregular morphology (usually resembling a slow-wave or a wave with complex morphology) seen in one or several channels, due to movement. If the causing movement is repetitive, the artifact might resemble a rhythmic EEG activity.</description>
+            </node>
+            <node>
+               <name>Respiration-artifact</name>
+               <description>Respiration can produce 2 kinds of artifacts. One type is in the form of slow and rhythmic activity, synchronous with the body movements of respiration and mechanically affecting the impedance of (usually) one electrode. The other type can be slow or sharp waves that occur synchronously with inhalation or exhalation and involve those electrodes on which the patient is lying.</description>
+            </node>
+            <node>
+               <name>Pulse-artifact</name>
+               <description>Occurs when an EEG electrode is placed over a pulsating vessel. The pulsation can cause slow waves that may simulate EEG activity. A direct relationship exists between ECG and the pulse waves (200-300 millisecond delay after ECG equals QRS complex).</description>
+            </node>
+            <node>
+               <name>ECG-artifact</name>
+               <description>Far-field potential generated in the heart. The voltage and apparent surface of the artifact vary from derivation to derivation and, consequently, from montage to montage. The artifact is observed best in referential montages using earlobe electrodes A1 and A2. ECG artifact is recognized easily by its rhythmicity/regularity and coincidence with the ECG tracing.</description>
+            </node>
+            <node>
+               <name>Sweat-artifact</name>
+               <description>Is a low amplitude undulating waveform that is usually greater than 2 seconds and may appear to be an unstable baseline.</description>
+            </node>
+            <node>
+               <name>EMG-artifact</name>
+               <description>Myogenic potentials are the most common artifacts. Frontalis and temporalis muscles (ex..: clenching of jaw muscles) are common causes. Generally, the potentials generated in the muscles are of shorter duration than those generated in the brain. The frequency components are usually beyond 30-50 Hz, and the bursts are arrhythmic.</description>
+            </node>
+         </node>
+         <node>
+            <name>Non-biological-artifacts</name>
+            <description>Used with Findings-property/ tags</description>
+            <node>
+               <name>Power-supply-artifact</name>
+               <description>50-60 Hz artifact. Monomorphic waveform due to 50 or 60 Hz A/C power supply.</description>
+            </node>
+            <node>
+               <name>Induction-artifact</name>
+               <description>Artefacts (usually of high frequency) induced by nearby equipment (like in the intensive care unit).</description>
+            </node>
+            <node>
+               <name>Artificial-ventilation-artifact</name>
+            </node>
+            <node>
+               <name>Electrode-pops</name>
+               <description>Are brief discharges with a very steep upslope and shallow fall that occur in all leads which include that electrode.</description>
+            </node>
+            <node>
+               <name>Salt-bridge-artifact</name>
+               <description>Typically occurs in 1 channel which may appear isoelectric. Only seen in bipolar montage.</description>
+            </node>
+         </node>
+         <node>
+            <name>Other-artifacts</name>
+            <description>Used with Findings-property/ tags</description>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Polygraphic-channels</name>
+         <description>Changes observed in polygraphic channels can be scored: EOG, Respiration, ECG, EMG, other polygraphic channel (+ free text), and their significance logged (normal, abnormal, no definite abnormality).</description>
+         <node>
+            <name>EOG</name>
+            <description>electrooculography</description>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Respiration</name>
+            <node>
+               <name>Oxygen-saturation</name>
+               <node>
+                  <name>#</name>
+                  <attribute>
+                     <name>takesValue</name>
+                  </attribute>
+                  <attribute>
+                     <name>valueClass</name>
+                     <value>numericClass</value>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>Respiration-features</name>
+               <node>
+                  <name>Apnoe</name>
+                  <description>Add duration and comments in free text</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Hypopnea</name>
+                  <description>Add duration and comments in free text</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Apnea-hypopnea-index</name>
+                  <description>events/h. Used with Findings-attributes tags</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Periodic-respiration</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Tachypnea</name>
+                  <description>cycles per min. Used with Findings-attributes tags</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Other-respiration-features</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>ECG</name>
+            <description>electrocardiography</description>
+            <node>
+               <name>QT-period</name>
+               <node>
+                  <name>#</name>
+                  <description>free text</description>
+                  <attribute>
+                     <name>takesValue</name>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>ECG-features</name>
+               <node>
+                  <name>Sinus-rhythm</name>
+                  <description>Normal rhythm. Used with Findings-attributes tags</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Arrhythmia</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Asystolia</name>
+                  <description>duration: range in seconds. Used with Findings-attributes tags</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Bradycardia</name>
+                  <description>beats/min: range. Used with Findings-attributes tags</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Extrasystole</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Ventricular-premature-depolarization</name>
+                  <description>Used with Findings-attributes tags</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Tachycardia</name>
+                  <description>beats/min: range. Used with Findings-attributes tags</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Other-ECG-features</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>EMG</name>
+            <description>electromyography</description>
+            <node>
+               <name>Muscle-side</name>
+               <node>
+                  <name>Left-muscle</name>
+               </node>
+               <node>
+                  <name>Right-muscle</name>
+               </node>
+               <node>
+                  <name>Bilateral-muscle</name>
+               </node>
+            </node>
+            <node>
+               <name>Muscle-Name</name>
+               <node>
+                  <name>#</name>
+                  <description>free text</description>
+                  <attribute>
+                     <name>takesValue</name>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>EMG-features</name>
+               <node>
+                  <name>Myoclonus-rhythmic</name>
+                  <description>Used with Findings-attributes tags</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Myoclonus-arrhythmic</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Myoclonus-synchronous</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Myoclonus-asynchronous</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>PLMS</name>
+                  <description>Periodic limb movements in sleep</description>
+               </node>
+               <node>
+                  <name>Spasm</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Tonic-contraction</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Asymmetric-activation-left-first</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Asymmetric-activation-right-first</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Other-EMG-features</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Other-channels</name>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Findings-attributes</name>
+         <description>Subtree tree for general properties</description>
+         <node>
+            <name>Not-possible-to-determine</name>
+            <description>Not possible to determine</description>
+         </node>
+         <node>
+            <name>No-definite-abnormality</name>
+         </node>
+         <node>
+            <name>Yes</name>
+         </node>
+         <node>
+            <name>No</name>
+         </node>
+         <node>
+            <name>Frequency</name>
+            <description>Hz Values (numbers) typed in.</description>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+               <attribute>
+                  <name>valueClass</name>
+                  <value>numericClass</value>
+               </attribute>
+               <attribute>
+                  <name>unitClass</name>
+                  <value>frequencyUnits</value>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Amplitude</name>
+            <description>microV Values (numbers) typed in.</description>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+               <attribute>
+                  <name>valueClass</name>
+                  <value>numericClass</value>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Duration</name>
+            <description>An offset that is implicit after duration time passed from the onset.</description>
+            <node>
+               <name>#</name>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+               <attribute>
+                  <name>valueClass</name>
+                  <value>numericClass</value>
+               </attribute>
+               <attribute>
+                  <name>unitClass</name>
+                  <value>timeUnits</value>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Significance</name>
+            <description>Used with Findings-attributes tags</description>
+         </node>
+         <node>
+            <name>Asymmetry</name>
+            <node>
+               <name>LowerLeft</name>
+               <description>Lower on the left side.</description>
+            </node>
+            <node>
+               <name>LowerRight</name>
+               <description>Lower on the right side.</description>
+            </node>
+         </node>
+         <node>
+            <name>Increased</name>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Decreased</name>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Stopped-by</name>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Triggered-by</name>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+         <node>
+            <name>Unmodified</name>
+            <node>
+               <name>#</name>
+               <description>free text</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Findings-property</name>
+         <description>Descriptive elements. Similar to main HED /Property Something that pertains to a thing. A characteristic of some entity. A quality or feature regarded as a characteristic or inherent part of someone or something. HED attributes are adjectives or adverbs.</description>
+         <node>
+            <name>Morphology-property</name>
+            <node>
+               <name>Delta-activity</name>
+               <description>EEG rhythm in the delta (under 4 Hz) range that does not belong to the posterior dominant rhythm (scored under other organised rhythms). Used with Amplitude tag</description>
+            </node>
+            <node>
+               <name>Theta-activity</name>
+               <description>EEG rhythm in the theta (4-8 Hz) range that does not belong to the posterior dominant rhythm (scored under other organised rhythms). Used with Amplitude tag</description>
+            </node>
+            <node>
+               <name>Alpha-activity</name>
+               <description>EEG rhythm in the alpha range (8-13 Hz) which is considered part of the background (ongoing) activity but does not fulfil the criteria of the posterior dominant rhythm (alpha rhythm). Used with Amplitude tag</description>
+            </node>
+            <node>
+               <name>Beta-activity</name>
+               <description>EEG rhythm between 14 and 40 Hz, which is considered part of the background (ongoing) activity but does not fulfil the criteria of the posterior dominant rhythm. Most characteristically: a rhythm from 14 to 40 Hz recorded over the fronto-central regions of the head during wakefulness. Amplitude of the beta rhythm varies but is mostly below 30 microV. Other beta rhythms are most prominent in other locations or are diffuse. Used with Amplitude tag</description>
+            </node>
+            <node>
+               <name>Gamma-activity</name>
+            </node>
+            <node>
+               <name>Spike</name>
+               <description>A transient, clearly distinguished from background activity, with pointed peak at a conventional paper speed or time scale and duration from 20 to under 70 ms, i.e. 1/50-1/15 s approximately. Main component is generally negative relative to other areas. Amplitude varies.</description>
+            </node>
+            <node>
+               <name>Spike-and-slow-wave</name>
+               <description>A pattern consisting of a spike followed by a slow wave.</description>
+            </node>
+            <node>
+               <name>Runs-of-rapid-spikes</name>
+               <description>Bursts of spike discharges at a rate from 10 to 25/sec (in most cases somewhat irregular). The bursts last more than 2 seconds (usually 2 to 10 seconds) and it is typically seen in sleep. Synonyms: rhythmic spikes, generalized paroxysmal fast activity, fast paroxysmal rhythms, grand mal discharge, fast beta activity</description>
+            </node>
+            <node>
+               <name>Polyspikes</name>
+               <description>Two or more consecutive spikes.</description>
+            </node>
+            <node>
+               <name>Polyspike-and-slow-wave</name>
+               <description>Two or more consecutive spikes associated with one or more slow waves.</description>
+            </node>
+            <node>
+               <name>Sharp-wave</name>
+               <description>A transient clearly distinguished from background activity, with pointed peak at a conventional paper speed or time scale, and duration of 70-200 ms, i.e. over 1/4-1/5 s approximately. Main component is generally negative relative to other areas. Amplitude varies.</description>
+            </node>
+            <node>
+               <name>Sharp-and-slow-wave</name>
+               <description>A sequence of a sharp wave and a slow wave.</description>
+            </node>
+            <node>
+               <name>Slow-sharp-wave</name>
+               <description>A transient that bears all the characteristics of a sharp-wave, but exceeds 200 ms. Synonym: blunted sharp wave.</description>
+            </node>
+            <node>
+               <name>Hypsarrhythmia-classic</name>
+            </node>
+            <node>
+               <name>Hypsarrhythmia-modified</name>
+            </node>
+            <node>
+               <name>Fast-spike-activity</name>
+               <description>A burst consisting of a sequence of spikes. Duration greater than 1 s. Frequency at least in the alpha range.</description>
+            </node>
+            <node>
+               <name>Low-voltage-fast-activity</name>
+               <description>Refers to the fast, and often recruiting activity which can be recorded at the onset of an ictal discharge, particularly in invasive EEG recording of a seizure.</description>
+            </node>
+            <node>
+               <name>Polysharp-waves</name>
+               <description>A sequence of two or more sharp-waves.</description>
+            </node>
+            <node>
+               <name>Polymorphic-delta</name>
+               <description>EEG activity consisting of waves in the delta range (over 250 ms duration for each wave) but of different morphology.</description>
+            </node>
+            <node>
+               <name>FIRDA</name>
+               <description>Frontal intermittent rhythmic delta activity. Fairly regular or approximately sinusoidal waves, mostly occurring in bursts at 1.5-2.5 Hz over the frontal areas of one or both sides of the head. Comment: most commonly associated with unspecified encephalopathy, in adults.</description>
+            </node>
+            <node>
+               <name>OIRDA</name>
+               <description>Occipital intermittent rhythmic delta activity. Fairly regular or approximately sinusoidal waves, mostly occurring in bursts at 2-3 Hz over the occipital or posterior head regions of one or both sides of the head. Frequently blocked or attenuated by opening the eyes. Comment: most commonly associated with unspecified encephalopathy, in children</description>
+            </node>
+            <node>
+               <name>TIRDA</name>
+               <description>Temporal intermittent rhythmic delta activity. Fairly regular or approximately sinusoidal waves, mostly occurring in bursts at over the temporal areas of one side of the head. Comment: most commonly associated with temporal lobe epilepsy.</description>
+            </node>
+            <node>
+               <name>PDs-property</name>
+               <node>
+                  <name>Superimposed-activity</name>
+                  <node>
+                     <name>Fast-activity</name>
+                  </node>
+                  <node>
+                     <name>Rhythmic-activity</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Sharpness</name>
+                  <node>
+                     <name>Spiky</name>
+                  </node>
+                  <node>
+                     <name>Sharp</name>
+                  </node>
+                  <node>
+                     <name>Sharply-contoured</name>
+                  </node>
+                  <node>
+                     <name>Blunt</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Number-of-phases</name>
+                  <node>
+                     <name>1-phase</name>
+                  </node>
+                  <node>
+                     <name>2-phases</name>
+                  </node>
+                  <node>
+                     <name>3-phases</name>
+                  </node>
+                  <node>
+                     <name>Greater-than-3</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Triphasic-morphology</name>
+               </node>
+               <node>
+                  <name>Absolute-amplitude</name>
+                  <node>
+                     <name>Very-low</name>
+                     <description>lower than 20 microV)</description>
+                  </node>
+                  <node>
+                     <name>Low</name>
+                     <description>20 to 49 microV</description>
+                  </node>
+                  <node>
+                     <name>Medium</name>
+                     <description>50 to 199 microV</description>
+                  </node>
+                  <node>
+                     <name>High</name>
+                     <description>greater than 200 microV</description>
+                  </node>
+               </node>
+               <node>
+                  <name>Relative-amplitude</name>
+                  <node>
+                     <name>Less-than-equal-2</name>
+                  </node>
+                  <node>
+                     <name>Greater-than-2</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Polarity</name>
+                  <node>
+                     <name>Positive</name>
+                  </node>
+                  <node>
+                     <name>Negative</name>
+                  </node>
+                  <node>
+                     <name>Unclear</name>
+                  </node>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Source-analysis</name>
+            <description>How the current in the brain reaches the electrode sensors.</description>
+            <node>
+               <name>Brain-region-laterality</name>
+               <description>Uses Location-property/Laterality tags</description>
+            </node>
+            <node>
+               <name>Brain-region-SA</name>
+            </node>
+         </node>
+         <node>
+            <name>Location-property</name>
+            <node>
+               <name>Laterality</name>
+               <node>
+                  <name>Left</name>
+               </node>
+               <node>
+                  <name>Left-greater-right</name>
+               </node>
+               <node>
+                  <name>Right</name>
+               </node>
+               <node>
+                  <name>Right-greater-left</name>
+               </node>
+               <node>
+                  <name>Midline</name>
+               </node>
+               <node>
+                  <name>Diffuse-asynchronous</name>
+               </node>
+            </node>
+            <node>
+               <name>Region</name>
+               <node>
+                  <name>Frontal</name>
+               </node>
+               <node>
+                  <name>Temporal</name>
+               </node>
+               <node>
+                  <name>Central</name>
+               </node>
+               <node>
+                  <name>Parietal</name>
+               </node>
+               <node>
+                  <name>Occipital</name>
+               </node>
+            </node>
+            <node>
+               <name>Body-part</name>
+               <node>
+                  <name>Eyelid</name>
+               </node>
+               <node>
+                  <name>Face</name>
+               </node>
+               <node>
+                  <name>Arm</name>
+               </node>
+               <node>
+                  <name>Leg</name>
+               </node>
+               <node>
+                  <name>Trunk</name>
+               </node>
+               <node>
+                  <name>Visceral</name>
+               </node>
+               <node>
+                  <name>Hemi</name>
+               </node>
+            </node>
+            <node>
+               <name>Centricity</name>
+               <node>
+                  <name>Axial</name>
+               </node>
+               <node>
+                  <name>Proximal-limb</name>
+               </node>
+               <node>
+                  <name>Distal-limb</name>
+               </node>
+            </node>
+            <node>
+               <name>Sensors</name>
+               <description>lists all corresponding sensors (electrodes/channels in montage)</description>
+               <node>
+                  <name>#</name>
+                  <attribute>
+                     <name>takesValue</name>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>Propagation</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Multifocal</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+         </node>
+         <node>
+            <name>Modulators-property</name>
+            <description>For each described graphoelement, the influence of the modulators can be scored. Only modulators present in the recording are scored.</description>
+            <node>
+               <name>Reactivity</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Eye-closure-sensitivity</name>
+               <description>Eye closure sensitivity. Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Eye-opening-passive</name>
+               <description>Passive eye opening. Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Medication-effect-EEG</name>
+               <description>Medications effect on EEG. Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Medication-reduction-effect-EEG</name>
+               <description>Medications reduction or withdrawl effect on EEG. Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Auditive-stimuli-effect</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Nociceptive-stimuli-effect</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Physical-effort-effect</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Cognitive-tasks-effect</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Other-modulators-effect-EEG</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Facilitating-factors</name>
+               <description>Facilitating factors are defined as transient and sporadic endogenous or exogenous elements capable of augmenting seizure incidence (increasing the likelihood of seizure occurrence).</description>
+               <node>
+                  <name>Alcohol</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Awake</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Catamenial</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Fever</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Sleep</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Sleep-deprived</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Other</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Provocative-factors</name>
+               <description>Provocative factors are defined as transient and sporadic endogenous or exogenous elements capable of evoking/triggering seizures immediately following the exposure to it.</description>
+               <node>
+                  <name>Hyperventilation-provoked</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Reflex-provoked</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Medication-effect-clinical</name>
+               <description>Medications clinical effect. Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Medication-reduction-effect-clinical</name>
+               <description>Medications reduction or withdrawal clinical effect. Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Other-modulators-effect-clinical</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>IPS-effect</name>
+               <node>
+                  <name>Posterior-stimulus-dependent-response</name>
+               </node>
+               <node>
+                  <name>Posterior-stimulus-independent-response-limited</name>
+                  <description>limited to the stimulus-train</description>
+               </node>
+               <node>
+                  <name>Posterior-stimulus-independent-response-self-sustained</name>
+               </node>
+               <node>
+                  <name>Generalized-photoparoxysmal-response-limited</name>
+                  <description>limited to the stimulus-train</description>
+               </node>
+               <node>
+                  <name>Generalized-photoparoxysmal-response-self-sustained</name>
+               </node>
+               <node>
+                  <name>Activation-of-pre-existing-epileptogenic-area</name>
+               </node>
+            </node>
+            <node>
+               <name>Modulators-effect</name>
+               <description>Tags for describing the influence of the modulators</description>
+               <node>
+                  <name>Continuous-during-NRS</name>
+                  <description>Continuous during non-rapid-eye-movement-sleep (NRS)</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Only-during</name>
+                  <node>
+                     <name>#</name>
+                     <description>Only during Sleep/Awakening/Hyperventilation/Physical effort/Cognitive task. Free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Change-of-patterns</name>
+                  <description>Change of patterns during sleep/awakening</description>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Time-related-features-property</name>
+            <description>Important to estimate how often an interictal abnormality is seen in the recording.</description>
+            <node>
+               <name>Appearance-mode</name>
+               <description>Describes how the non-ictal EEG pattern/graphoelement is distributed through the recording</description>
+               <node>
+                  <name>Random</name>
+                  <description>Occurrence of the the non-ictal EEG pattern / graphoelement without any rhytmicity / periodicity</description>
+               </node>
+               <node>
+                  <name>Periodic</name>
+                  <description>Non-ictal EEG pattern / graphoelement occurring at an approximately regular rate / interval (generally of 1 to several seconds).</description>
+               </node>
+               <node>
+                  <name>Variable</name>
+                  <description>Occurrence of non-ictal EEG pattern / graphoelements, that is sometimes rhythmic or periodic, other times random, throughout the recording</description>
+               </node>
+            </node>
+            <node>
+               <name>Discharge-pattern</name>
+               <description>Describes the organization of the EEG signal within the discharge (distinguish between single and repetitive discharges)</description>
+               <node>
+                  <name>Single-discharge</name>
+                  <description>Applies to the intra-burst pattern: a graphoelement that is not repetitive; before and after the graphoelement one can distinguish the background activity. Used with Findings-attributes tags</description>
+               </node>
+               <node>
+                  <name>Rhythmic-trains-or-bursts</name>
+                  <description>Applies to the intra-burst pattern: a non-ictal graphoelement that repeats itself without returning to the background activity between them. The graphoelements within this repetition occur at approximately constant period. Used with Findings-attributes tags</description>
+               </node>
+               <node>
+                  <name>Arhythmic-trains-or-bursts</name>
+                  <description>Applies to the intra-burst pattern: a non-ictal graphoelement that repeats itself without returning to the background activity between them. The graphoelements within this repetition occur at inconstant period. Used with Findings-attributes tags</description>
+               </node>
+               <node>
+                  <name>Fragmented</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Extent</name>
+               <description>percentage of occurrence during the recording (background activity)</description>
+               <node>
+                  <name>#</name>
+                  <attribute>
+                     <name>takesValue</name>
+                  </attribute>
+                  <attribute>
+                     <name>valueClass</name>
+                     <value>numericClass</value>
+                  </attribute>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>PDR-property</name>
+            <node>
+               <name>PDR-amplitude-range</name>
+               <description>Used with Findings-attributes tags</description>
+               <node>
+                  <name>Low-range</name>
+                  <description>Low (less than 20 microV)</description>
+               </node>
+               <node>
+                  <name>Medium-range</name>
+                  <description>Medium (between 20 and 70 microV)</description>
+               </node>
+               <node>
+                  <name>High-range</name>
+                  <description>High ( more than 70 microV)</description>
+               </node>
+            </node>
+            <node>
+               <name>PDR-Amplitude-asymmetry</name>
+               <description>A difference in amplitude between the homologous area on opposite sides of the head that consistently exceeds 50 percent. Used with Asymmetry tags</description>
+            </node>
+            <node>
+               <name>PDR-Frequency-asymmetry</name>
+               <description>Used with Asymmetry tags</description>
+            </node>
+            <node>
+               <name>PDR-Eye-opening</name>
+               <description>Change (disappearance or measurable decrease in amplitude) of a posterior dominant rhythm following eye-opening. Eye closure has the opposite effect. Used with Findings-attributes tags</description>
+               <node>
+                  <name>ReducedLeft</name>
+                  <description>Reduced left side reactivity</description>
+               </node>
+               <node>
+                  <name>ReducedRigth</name>
+                  <description>Reduced right side reactivity</description>
+               </node>
+               <node>
+                  <name>ReducedBoth</name>
+                  <description>Reduced reactivity on both sides</description>
+               </node>
+            </node>
+            <node>
+               <name>PDR-Organization</name>
+               <description>Used with Findings-attributes tags</description>
+               <node>
+                  <name>PoorlyOrganized</name>
+                  <description>Poorly organized</description>
+               </node>
+               <node>
+                  <name>Disorganized</name>
+                  <description>Disorganized</description>
+               </node>
+               <node>
+                  <name>MarkedlyDisorganized</name>
+                  <description>Markedly disorganized</description>
+               </node>
+            </node>
+            <node>
+               <name>PDR-Caveat</name>
+               <description>Used with Findings-attributes tags</description>
+               <node>
+                  <name>Only-open-eyes-during-the-recording</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Sleep-deprived-caveat</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Drowsy</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Only-following-hyperventilation</name>
+               </node>
+            </node>
+            <node>
+               <name>Absence-of-PDR</name>
+               <node>
+                  <name>Artifacts</name>
+               </node>
+               <node>
+                  <name>Extreme-low-voltage</name>
+               </node>
+               <node>
+                  <name>Eye-closure-could-not-be-achieved</name>
+               </node>
+               <node>
+                  <name>Lack-of-awake-period</name>
+               </node>
+               <node>
+                  <name>Lack-of-compliance</name>
+               </node>
+               <node>
+                  <name>Other-causes</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Incidence</name>
+            <description>how often it occurs/time-epoch</description>
+            <node>
+               <name>Only-once</name>
+            </node>
+            <node>
+               <name>Rare-incidence</name>
+               <description>less than 1/h</description>
+            </node>
+            <node>
+               <name>Uncommon</name>
+               <description>1/5 min to 1/h</description>
+            </node>
+            <node>
+               <name>Occasional-incidence</name>
+               <description>1/min to 1/5min</description>
+            </node>
+            <node>
+               <name>Frequent-incidence</name>
+               <description>1/10 s to 1/min</description>
+            </node>
+            <node>
+               <name>Abundant-incidence</name>
+               <description>greater than 1/10 s)</description>
+            </node>
+         </node>
+         <node>
+            <name>Prevalence</name>
+            <description>the percentage of the recording covered by the train/burst</description>
+            <node>
+               <name>Rare</name>
+               <description>Less than 1 percents</description>
+            </node>
+            <node>
+               <name>Occasional</name>
+               <description>1 to 9 percents</description>
+            </node>
+            <node>
+               <name>Frequent</name>
+               <description>10 to 49 percents</description>
+            </node>
+            <node>
+               <name>Abundant</name>
+               <description>50 to 89 percents</description>
+            </node>
+            <node>
+               <name>Continuous</name>
+               <description>Greater than 90 percents</description>
+            </node>
+         </node>
+         <node>
+            <name>Episode-property</name>
+            <node>
+               <name>Epileptic-seizure-classification</name>
+               <description>Epileptic seizures are named using the current ILAE seizure classification (Fisher et al., 2017, Beniczky et al., 2017).</description>
+               <node>
+                  <name>Motor-onset</name>
+                  <node>
+                     <name>Myoclonic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Negative-myoclonic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Clonic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Tonic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Atonic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Myoclonic-Atonic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Myoclonic-tonoc-clonic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Tonic-clonic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Automatism-seizure</name>
+                  </node>
+                  <node>
+                     <name>Hyperkinetic-seizure</name>
+                  </node>
+                  <node>
+                     <name>Epileptic-spasm-episode</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Nonmotor-onset</name>
+                  <node>
+                     <name>Behavior-arrest-seizure</name>
+                  </node>
+                  <node>
+                     <name>Sensory-seizure</name>
+                  </node>
+                  <node>
+                     <name>Emotional-seizure</name>
+                  </node>
+                  <node>
+                     <name>Cognitive-seizure</name>
+                  </node>
+                  <node>
+                     <name>Autonomic-seizure</name>
+                  </node>
+               </node>
+               <node>
+                  <name>Absence</name>
+                  <node>
+                     <name>Typical-absence-seizure</name>
+                  </node>
+                  <node>
+                     <name>Atypical-absence-seizure</name>
+                  </node>
+                  <node>
+                     <name>Myoclonic-absence-seizure</name>
+                  </node>
+                  <node>
+                     <name>Eyelid-myoclonia-seizure</name>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Episode-phase</name>
+               <description>The electroclinical findings (i.e., the seizure semiology and the ictal EEG) are divided in three phases: onset, propagation, and postictal.</description>
+               <node>
+                  <name>Initial</name>
+               </node>
+               <node>
+                  <name>Subsequent</name>
+               </node>
+               <node>
+                  <name>Postictal</name>
+               </node>
+            </node>
+            <node>
+               <name>Seizure-semiology</name>
+               <node>
+                  <name>Motor-manifestation</name>
+                  <node>
+                     <name>Elementary-motor</name>
+                     <node>
+                        <name>Tonic</name>
+                        <description>A sustained increase in muscle contraction lasting a few seconds to minutes.</description>
+                     </node>
+                     <node>
+                        <name>Dystonic</name>
+                        <description>Sustained contractions of both agonist and antagonist muscles producing athetoid or twisting movements, which, when prolonged, may produce abnormal postures.</description>
+                     </node>
+                     <node>
+                        <name>Epileptic-spasm</name>
+                        <description>A sudden flexion, extension, or mixed extension flexion of predominantly proximal and truncal muscles that is usually more sustained than a myoclonic movement but not so sustained as a tonic seizure (i.e., about 1 s). Limited forms may occur: grimacing, head nodding. Frequent occurrence in clusters.</description>
+                     </node>
+                     <node>
+                        <name>Postural</name>
+                        <description>Adoption of a posture that may be bilaterally symmetric or asymmetric (as in a fencing posture)</description>
+                     </node>
+                     <node>
+                        <name>Versive</name>
+                        <description>A sustained, forced conjugate ocular, cephalic, and/or truncal rotation or lateral deviation from the midline</description>
+                     </node>
+                     <node>
+                        <name>Clonic</name>
+                        <description>Myoclonus that is regularly repetitive, involves the same muscle groups, at a frequency of about 2 to 3 c/s, and is prolonged. Synonym: rhythmic myoclonus</description>
+                     </node>
+                     <node>
+                        <name>Myoclonic</name>
+                        <description>Characterized by myoclonus. MYOCLONUS : sudden, brief (lower than 100 ms) involuntary single or multiple contraction(s) of muscles(s) or muscle groups of variable topography (axial, proximal limb, distal)</description>
+                     </node>
+                     <node>
+                        <name>Jacksonian-march</name>
+                        <description>Term indicating spread of clonic movements through contiguous body parts unilaterally</description>
+                     </node>
+                     <node>
+                        <name>Negative-myoclonus</name>
+                        <description>Characterized by negative myoclonus. NEGATIVE MYOCLONUS: interruption of tonic muscular activity for lower than 500 ms without evidence of preceding myoclonia.</description>
+                     </node>
+                     <node>
+                        <name>Tonic-clonic</name>
+                        <description>A sequence consisting of a tonic followed by a clonic phase. Variants such as clonic-tonic-clonic may be seen. Asymmetry of limb posture during the tonic phase of a GTC: one arm is rigidly extended at the elbow (often with the fist clenched tightly and flexed at the wrist), whereas the opposite arm is flexed at the elbow.</description>
+                        <node>
+                           <name>Without-figure-of-four</name>
+                        </node>
+                        <node>
+                           <name>With-figure-of-four-extension-left-elbow</name>
+                        </node>
+                        <node>
+                           <name>With-figure-of-four-extension-right-elbow</name>
+                        </node>
+                     </node>
+                     <node>
+                        <name>Astatic</name>
+                        <description>Loss of erect posture that results from an atonic, myoclonic, or tonic mechanism. Synonym: drop attack.</description>
+                     </node>
+                     <node>
+                        <name>Atonic</name>
+                        <description>Sudden loss or diminution of muscle tone without apparent preceding myoclonic or tonic event lasting greator or equal to 1 to 2 s, involving head, trunk, jaw, or limb musculature.</description>
+                     </node>
+                     <node>
+                        <name>Eye-blinking</name>
+                     </node>
+                     <node>
+                        <name>Other-elementary-motor</name>
+                        <node>
+                           <name>#</name>
+                           <description>free text</description>
+                           <attribute>
+                              <name>takesValue</name>
+                           </attribute>
+                        </node>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Automatisms</name>
+                     <node>
+                        <name>Mimetic</name>
+                        <description>Facial expression suggesting an emotional state, often fear.</description>
+                     </node>
+                     <node>
+                        <name>Oroalimentary</name>
+                        <description>Lip smacking, lip pursing, chewing, licking, tooth grinding, or swallowing.</description>
+                     </node>
+                     <node>
+                        <name>Dacrystic</name>
+                        <description>Bursts of crying.</description>
+                     </node>
+                     <node>
+                        <name>Dyspraxic</name>
+                        <description>Inability to perform learned movements spontaneously or on command or imitation despite intact relevant motor and sensory systems and adequate comprehension and cooperation</description>
+                     </node>
+                     <node>
+                        <name>Manual</name>
+                        <description>1. Indicates principally distal components, bilateral or unilateral. 2. Fumbling, tapping, manipulating movements.</description>
+                     </node>
+                     <node>
+                        <name>Gestural</name>
+                        <description>Semipurposive, asynchronous hand movements. Often unilateral.</description>
+                     </node>
+                     <node>
+                        <name>Pedal</name>
+                        <description>1. Indicates principally distal components, bilateral or unilateral. 2. Fumbling, tapping, manipulating movements.</description>
+                     </node>
+                     <node>
+                        <name>Hypermotor</name>
+                        <description>1. Involves predominantly proximal limb or axial muscles producing irregular sequential ballistic movements, such as pedaling, pelvic thrusting, thrashing, rocking movements. 2. Increase in rate of ongoing movements or inappropriately rapid performance of a movement.</description>
+                     </node>
+                     <node>
+                        <name>Hypokinetic</name>
+                        <description>A decrease in amplitude and/or rate or arrest of ongoing motor activity.</description>
+                     </node>
+                     <node>
+                        <name>Gelastic</name>
+                        <description>Bursts of laughter or giggling, usually without an appropriate affective tone.</description>
+                     </node>
+                     <node>
+                        <name>Other-Automatism</name>
+                        <node>
+                           <name>#</name>
+                           <description>free text</description>
+                           <attribute>
+                              <name>takesValue</name>
+                           </attribute>
+                        </node>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Motor-behavioral-arrest</name>
+                     <description>Interruption of ongoing motor activity or of ongoing behaviours with fixed gaze, without movement of the head or trunk (oro-alimentary and hand automatisms may continue)</description>
+                  </node>
+               </node>
+               <node>
+                  <name>Non-motor-manifestation</name>
+                  <node>
+                     <name>Sensory</name>
+                     <node>
+                        <name>Headache</name>
+                        <description>Headache occurring in close temporal proximity to the seizure or as the sole seizure manifestation</description>
+                     </node>
+                     <node>
+                        <name>Visual</name>
+                        <description>Flashing or flickering lights, spots, simple patterns, scotomata, or amaurosis.</description>
+                     </node>
+                     <node>
+                        <name>Auditory</name>
+                        <description>Buzzing, drumming sounds or single tones.</description>
+                     </node>
+                     <node>
+                        <name>Olfactory</name>
+                     </node>
+                     <node>
+                        <name>Gustatory</name>
+                        <description>Taste sensations including acidic, bitter, salty, sweet, or metallic.</description>
+                     </node>
+                     <node>
+                        <name>Epigastric</name>
+                        <description>Abdominal discomfort including nausea, emptiness, tightness, churning, butterflies, malaise, pain, and hunger; sensation may rise to chest or throat. Some phenomena may reflect ictal autonomic dysfunction.</description>
+                     </node>
+                     <node>
+                        <name>Somatosensory</name>
+                        <description>Tingling, numbness, electric-shock sensation, sense of movement or desire to move.</description>
+                     </node>
+                     <node>
+                        <name>Painful</name>
+                        <description>Peripheral (lateralized/bilateral), cephalic, abdominal</description>
+                     </node>
+                     <node>
+                        <name>Autonomic-sensation</name>
+                        <description>A sensation consistent with involvement of the autonomic nervous system, including cardiovascular, gastrointestinal,  sudomotor, vasomotor, and thermoregulatory functions. (Thus autonomic aura; cf. autonomic events  3.0).</description>
+                     </node>
+                     <node>
+                        <name>Other-sensory</name>
+                        <node>
+                           <name>#</name>
+                           <description>free text</description>
+                           <attribute>
+                              <name>takesValue</name>
+                           </attribute>
+                        </node>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Experiential</name>
+                     <node>
+                        <name>Affective-emotional</name>
+                        <description>Components include fear, depression, joy, and (rarely) anger.</description>
+                     </node>
+                     <node>
+                        <name>Hallucinatory</name>
+                        <description>Composite perceptions without corresponding external stimuli involving visual, auditory, somatosensory, olfactory, and/or gustatory phenomena. Example: hearing  and seeing  people talking.</description>
+                     </node>
+                     <node>
+                        <name>Illusory</name>
+                        <description>An alteration of actual percepts involving the visual, auditory, somatosensory, olfactory, or gustatory systems.</description>
+                     </node>
+                     <node>
+                        <name>Mnemonic</name>
+                        <description>Components that reflect ictal dysmnesia such as feelings of familiarity (deja-vu) and unfamiliarity (jamais-vu).</description>
+                        <node>
+                           <name>Deja-vu</name>
+                        </node>
+                        <node>
+                           <name>Jamais-vu</name>
+                        </node>
+                     </node>
+                     <node>
+                        <name>Other-experiential</name>
+                        <node>
+                           <name>#</name>
+                           <description>free text</description>
+                           <attribute>
+                              <name>takesValue</name>
+                           </attribute>
+                        </node>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Dyscognitive</name>
+                     <description>The term describes events in which (1) disturbance of cognition is the predominant or most apparent feature, and (2a) two or more of the following components are involved, or (2b) involvement of such components remains undetermined. Otherwise, use the more specific term (e.g., mnemonic experiential seizure  or hallucinatory experiential seizure). Components of cognition: ++ perception: symbolic conception of sensory information ++ attention: appropriate selection of a principal perception or task ++ emotion: appropriate affective significance of a perception ++ memory: ability to store and retrieve percepts or concepts ++ executive function: anticipation, selection, monitoring of consequences, and initiation of motor activity including praxis, speech</description>
+                  </node>
+                  <node>
+                     <name>Language-related</name>
+                     <node>
+                        <name>Vocalization</name>
+                     </node>
+                     <node>
+                        <name>Verbalization</name>
+                     </node>
+                     <node>
+                        <name>Dysphasia</name>
+                     </node>
+                     <node>
+                        <name>Aphasia</name>
+                     </node>
+                     <node>
+                        <name>Other-language-related</name>
+                        <node>
+                           <name>#</name>
+                           <description>free text</description>
+                           <attribute>
+                              <name>takesValue</name>
+                           </attribute>
+                        </node>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Autonomic</name>
+                     <node>
+                        <name>Pupillary</name>
+                        <description>Mydriasis, miosis (either bilateral or unilateral)</description>
+                     </node>
+                     <node>
+                        <name>Hypersalivation</name>
+                        <description>Increase in production of saliva leading to uncontrollable drooling</description>
+                     </node>
+                     <node>
+                        <name>Respiratory-apnoeic</name>
+                        <description>subjective shortness of breath, hyperventilation, stridor, coughing, choking, apnea, oxygen desaturation, neurogenic pulmonary edema</description>
+                     </node>
+                     <node>
+                        <name>Cardiovascular</name>
+                        <description>Modifications of heart rate (tachycardia, bradycardia), cardiac arrhythmias (such as sinus arrhythmia, sinus arrest, supraventricular tachycardia, atrial premature depolarizations, ventricular premature depolarizations, atrio-ventricular block, bundle branch block, atrioventricular nodal escape rhythm, asystole)</description>
+                     </node>
+                     <node>
+                        <name>Gastrointestinal</name>
+                        <description>Nausea, eructation, vomiting, retching, abdominal sensations, abdominal pain, flatulence, spitting, diarrhoea</description>
+                     </node>
+                     <node>
+                        <name>Urinary-incontinence</name>
+                        <description>urinary urge (intense urinary urge at the beginning of seizures), urinary incontinence, ictal urination (rare symptom of partial seizures without loss of consciousness)</description>
+                     </node>
+                     <node>
+                        <name>Genital</name>
+                        <description>Sexual auras (erotic thoughts and feelings, sexual arousal and orgasm). Genital auras (unpleasant, sometimes painful, frightening or emotionally neutral somatosensory sensations in the genitals that can be accompanied by ictal orgasm). Sexual automatisms (hypermotor movements consisting of writhing, thrusting, rhythmic movements of the pelvis, arms and legs, sometimes associated with picking and rhythmic manipulation of the groin or genitalia, exhibitionism and masturbation)</description>
+                     </node>
+                     <node>
+                        <name>Vasomotor</name>
+                        <description>Flushing or pallor (may be accompanied by feelings of warmth, cold and pain)</description>
+                     </node>
+                     <node>
+                        <name>Sudomotor</name>
+                        <description>Sweating and piloerection ( may be accompanied by feelings of warmth, cold and pain)</description>
+                     </node>
+                     <node>
+                        <name>Thermoregulatory</name>
+                        <description>Hyperthermia, fever</description>
+                     </node>
+                     <node>
+                        <name>Other-autonomic</name>
+                        <node>
+                           <name>#</name>
+                           <description>free text</description>
+                           <attribute>
+                              <name>takesValue</name>
+                           </attribute>
+                        </node>
+                     </node>
+                  </node>
+               </node>
+               <node>
+                  <name>Other-manifestation</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Ictal-EEG</name>
+               <node>
+                  <name>Obscured-by-artifacts</name>
+               </node>
+               <node>
+                  <name>Ictal-EEG-activity</name>
+               </node>
+            </node>
+         </node>
+         <node>
+            <name>Time-context-property</name>
+            <node>
+               <name>Consciousness</name>
+               <description>Used with Findings-attributes tags</description>
+               <node>
+                  <name>Not-tested</name>
+               </node>
+               <node>
+                  <name>Affected</name>
+               </node>
+               <node>
+                  <name>Mildly-affected</name>
+               </node>
+               <node>
+                  <name>Not-affected</name>
+               </node>
+            </node>
+            <node>
+               <name>Episode-awareness</name>
+               <description>Used with Findings-attributes tags</description>
+            </node>
+            <node>
+               <name>Start-relationship</name>
+               <node>
+                  <name>Clinical-start-followed-EEG</name>
+                  <node>
+                     <name>#</name>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
+                     </attribute>
+                     <attribute>
+                        <name>unitClass</name>
+                        <value>timeUnits</value>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>EEG-start-followed-clinical</name>
+                  <node>
+                     <name>#</name>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
+                     </attribute>
+                     <attribute>
+                        <name>unitClass</name>
+                        <value>timeUnits</value>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Simultaneous</name>
+               </node>
+            </node>
+            <node>
+               <name>Event-count</name>
+               <description>Event per recording</description>
+               <node>
+                  <name>#</name>
+                  <attribute>
+                     <name>takesValue</name>
+                  </attribute>
+                  <attribute>
+                     <name>valueClass</name>
+                     <value>numericClass</value>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>State-start</name>
+               <description>State at the start of the episode</description>
+               <node>
+                  <name>From-sleep</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>From-awake</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+            <node>
+               <name>Postictal-phase</name>
+               <node>
+                  <name>#</name>
+                  <attribute>
+                     <name>takesValue</name>
+                  </attribute>
+                  <attribute>
+                     <name>valueClass</name>
+                     <value>numericClass</value>
+                  </attribute>
+                  <attribute>
+                     <name>unitClass</name>
+                     <value>timeUnits</value>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>Prodome</name>
+               <description>Prodrome is a preictal phenomenon, and it is defined as a subjective or objective clinical alteration (e.g., ill-localized sensation or agitation) that heralds the onset of an epileptic seizure but does not form part of it (Blume et al., 2001). Therefore, prodrome should be distinguished from aura (which is an ictal phenomenon).</description>
+               <node>
+                  <name>#</name>
+                  <description>free text</description>
+                  <attribute>
+                     <name>takesValue</name>
+                  </attribute>
+               </node>
+            </node>
+            <node>
+               <name>Tongue-biting</name>
+            </node>
+            <node>
+               <name>Seizure-dynamics</name>
+               <node>
+                  <name>Evolution-morphology</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Evolution-frequency</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+               <node>
+                  <name>Evolution-location</name>
+                  <node>
+                     <name>#</name>
+                     <description>free text</description>
+                     <attribute>
+                        <name>takesValue</name>
+                     </attribute>
+                  </node>
+               </node>
+            </node>
+         </node>
+      </node>
+   </schema>
+   <unitClassDefinitions>
+      <unitClassDefinition>
+         <name>accelerationUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>m-per-s^2</value>
+         </attribute>
+         <unit>
+            <name>m-per-s^2</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>angleUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>radian</value>
+         </attribute>
+         <unit>
+            <name>radian</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>rad</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>degree</name>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>areaUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>m^2</value>
+         </attribute>
+         <unit>
+            <name>m^2</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>currencyUnits</name>
+         <description>Units indicating the worth of something.</description>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>$</value>
+         </attribute>
+         <unit>
+            <name>dollar</name>
+         </unit>
+         <unit>
+            <name>$</name>
+            <attribute>
+               <name>unitPrefix</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>point</name>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>frequencyUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>Hz</value>
+         </attribute>
+         <unit>
+            <name>hertz</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>Hz</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>intensityUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>dB</value>
+         </attribute>
+         <unit>
+            <name>dB</name>
+            <description>Intensity expressed as ratio to a threshold. Often used for sound intensity.</description>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>candela</name>
+            <description>Units used to express light intensity.</description>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>cd</name>
+            <description>Units used to express light intensity.</description>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>jerkUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>m-per-s^3</value>
+         </attribute>
+         <unit>
+            <name>m-per-s^3</name>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>memorySizeUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>B</value>
+         </attribute>
+         <unit>
+            <name>byte</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>B</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>physicalLengthUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>m</value>
+         </attribute>
+         <unit>
+            <name>foot</name>
+         </unit>
+         <unit>
+            <name>inch</name>
+         </unit>
+         <unit>
+            <name>metre</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>m</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>mile</name>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>speedUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>m-per-s</value>
+         </attribute>
+         <unit>
+            <name>m-per-s</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>mph</name>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>kph</name>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>timeUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>s</value>
+         </attribute>
+         <unit>
+            <name>second</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>s</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>day</name>
+         </unit>
+         <unit>
+            <name>minute</name>
+         </unit>
+         <unit>
+            <name>hour</name>
+            <description>Should be in 24-hour format.</description>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>volumeUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>m^3</value>
+         </attribute>
+         <unit>
+            <name>m^3</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>weightUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>g</value>
+         </attribute>
+         <unit>
+            <name>g</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>gram</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+         </unit>
+         <unit>
+            <name>pound</name>
+         </unit>
+         <unit>
+            <name>lb</name>
+         </unit>
+      </unitClassDefinition>
+   </unitClassDefinitions>
+   <unitModifierDefinitions>
+      <unitModifierDefinition>
+         <name>deca</name>
+         <description>SI unit multiple representing 10^1</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>da</name>
+         <description>SI unit multiple representing 10^1</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>hecto</name>
+         <description>SI unit multiple representing 10^2</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>h</name>
+         <description>SI unit multiple representing 10^2</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>kilo</name>
+         <description>SI unit multiple representing 10^3</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>k</name>
+         <description>SI unit multiple representing 10^3</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>mega</name>
+         <description>SI unit multiple representing 10^6</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>M</name>
+         <description>SI unit multiple representing 10^6</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>giga</name>
+         <description>SI unit multiple representing 10^9</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>G</name>
+         <description>SI unit multiple representing 10^9</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>tera</name>
+         <description>SI unit multiple representing 10^12</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>T</name>
+         <description>SI unit multiple representing 10^12</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>peta</name>
+         <description>SI unit multiple representing 10^15</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>P</name>
+         <description>SI unit multiple representing 10^15</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>exa</name>
+         <description>SI unit multiple representing 10^18</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>E</name>
+         <description>SI unit multiple representing 10^18</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>zetta</name>
+         <description>SI unit multiple representing 10^21</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>Z</name>
+         <description>SI unit multiple representing 10^21</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>yotta</name>
+         <description>SI unit multiple representing 10^24</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>Y</name>
+         <description>SI unit multiple representing 10^24</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>deci</name>
+         <description>SI unit submultiple representing 10^-1</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>d</name>
+         <description>SI unit submultiple representing 10^-1</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>centi</name>
+         <description>SI unit submultiple representing 10^-2</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>c</name>
+         <description>SI unit submultiple representing 10^-2</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>milli</name>
+         <description>SI unit submultiple representing 10^-3</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>m</name>
+         <description>SI unit submultiple representing 10^-3</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>micro</name>
+         <description>SI unit submultiple representing 10^-6</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>u</name>
+         <description>SI unit submultiple representing 10^-6</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>nano</name>
+         <description>SI unit submultiple representing 10^-9</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>n</name>
+         <description>SI unit submultiple representing 10^-9</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>pico</name>
+         <description>SI unit submultiple representing 10^-12</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>p</name>
+         <description>SI unit submultiple representing 10^-12</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>femto</name>
+         <description>SI unit submultiple representing 10^-15</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>f</name>
+         <description>SI unit submultiple representing 10^-15</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>atto</name>
+         <description>SI unit submultiple representing 10^-18</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>a</name>
+         <description>SI unit submultiple representing 10^-18</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>zepto</name>
+         <description>SI unit submultiple representing 10^-21</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>z</name>
+         <description>SI unit submultiple representing 10^-21</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>yocto</name>
+         <description>SI unit submultiple representing 10^-24</description>
+         <attribute>
+            <name>SIUnitModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+      <unitModifierDefinition>
+         <name>y</name>
+         <description>SI unit submultiple representing 10^-24</description>
+         <attribute>
+            <name>SIUnitSymbolModifier</name>
+         </attribute>
+      </unitModifierDefinition>
+   </unitModifierDefinitions>
+   <valueClassDefinitions>
+      <valueClassDefinition>
+         <name>dateTimeClass</name>
+         <description>Date-times should conform to ISO8601 date-time format YYYY-MM-DDThh:mm:ss. Any variation on the full form is allowed.</description>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>digits</value>
+            <value>T</value>
+            <value>-</value>
+            <value>:</value>
+         </attribute>
+      </valueClassDefinition>
+      <valueClassDefinition>
+         <name>nameClass</name>
+         <description>Value class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underbar.</description>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>letters</value>
+            <value>digits</value>
+            <value>_</value>
+            <value>-</value>
+         </attribute>
+      </valueClassDefinition>
+      <valueClassDefinition>
+         <name>numericClass</name>
+         <description>Value must be a valid numerical value.</description>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>digits</value>
+            <value>E</value>
+            <value>e</value>
+            <value>+</value>
+            <value>-</value>
+            <value>.</value>
+         </attribute>
+      </valueClassDefinition>
+      <valueClassDefinition>
+         <name>posixPath</name>
+         <description>Posix path specification.</description>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>digits</value>
+            <value>letters</value>
+            <value>/</value>
+            <value>:</value>
+         </attribute>
+      </valueClassDefinition>
+      <valueClassDefinition>
+         <name>textClass</name>
+         <description>Value class designating values that have the characteristics of text such as in descriptions.</description>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>letters</value>
+            <value>digits</value>
+            <value>blank</value>
+            <value>+</value>
+            <value>-</value>
+            <value>:</value>
+            <value>;</value>
+            <value>.</value>
+            <value>/</value>
+            <value>(</value>
+            <value>)</value>
+            <value>?</value>
+            <value>*</value>
+            <value>%</value>
+            <value>$</value>
+            <value>@</value>
+         </attribute>
+      </valueClassDefinition>
+   </valueClassDefinitions>
+   <schemaAttributeDefinitions>
+      <schemaAttributeDefinition>
+         <name>allowedCharacter</name>
+         <description>A schema attribute of value classes specifying a special character that is allowed in expressing the value of a placeholder. Normally the allowed characters are listed individually. However, the word letters designates the upper and lower case alphabetic characters and the word digits designates the digits 0-9. The word blank designates the blank character.</description>
+         <property>
+            <name>valueClassProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>defaultUnits</name>
+         <description>A schema attribute of unit classes specifying the default units to use if the placeholder has a unit class but the substituted value has no units.</description>
+         <property>
+            <name>unitClassProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>extensionAllowed</name>
+         <description>A schema attribute indicating that users can add unlimited levels of child nodes under this tag. This tag is propagated to child nodes with the exception of the hashtag placeholders.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>recommended</name>
+         <description>A schema attribute indicating that the event-level HED string should include this tag.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>relatedTag</name>
+         <description>A schema attribute suggesting HED tags that are closely related to this tag. This attribute is used by tagging tools.</description>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>requireChild</name>
+         <description>A schema attribute indicating that one of the node elements descendants must be included when using this tag.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>required</name>
+         <description>A schema attribute indicating that every event-level HED string should include this tag.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>SIUnit</name>
+         <description>A schema attribute indicating that this unit element is an SI unit and can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+         <property>
+            <name>unitProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>SIUnitModifier</name>
+         <description>A schema attribute indicating that this SI unit modifier represents a multiple or submultiple of a base unit rather than a unit symbol.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+         <property>
+            <name>unitModifierProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>SIUnitSymbolModifier</name>
+         <description>A schema attribute indicating that this SI unit modifier represents a multiple or submultiple of a unit symbol rather than a base symbol.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+         <property>
+            <name>unitModifierProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>suggestedTag</name>
+         <description>A schema attribute that indicates another tag  that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.</description>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>tagGroup</name>
+         <description>A schema attribute indicating the tag can only appear inside a tag group.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>takesValue</name>
+         <description>A schema attribute indicating the tag is a hashtag placeholder that is expected to be replaced with a user-defined value.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>topLevelTagGroup</name>
+         <description>A schema attribute indicating that this tag (or its descendants) can only appear in a top-level tag group.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>unique</name>
+         <description>A schema attribute indicating that only one of this tag or its descendants can be used  in the event-level HED string.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>unitClass</name>
+         <description>A schema attribute specifying which unit class this value tag belongs to.</description>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>unitPrefix</name>
+         <description>A schema attribute applied specifically to unit elements to designate that the unit indicator is a prefix (e.g., dollar sign in the currency units).</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+         <property>
+            <name>unitProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>unitSymbol</name>
+         <description>A schema attribute indicating this tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+         <property>
+            <name>unitProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>valueClass</name>
+         <description>A schema attribute specifying which value class this value tag belongs to.</description>
+      </schemaAttributeDefinition>
+   </schemaAttributeDefinitions>
+   <propertyDefinitions>
+      <propertyDefinition>
+         <name>boolProperty</name>
+         <description>Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>unitClassProperty</name>
+         <description>Indicates that the schema attribute is meant to be applied to unit classes.</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>unitModifierProperty</name>
+         <description>Indicates that the schema attribute is meant to be applied to unit modifier classes.</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>unitProperty</name>
+         <description>Indicates that the schema attribute is meant to be applied to units within a unit class.</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>valueClassProperty</name>
+         <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
+      </propertyDefinition>
+   </propertyDefinitions>
+   <epilogue>TPA, November 2021</epilogue>
+</HED>
