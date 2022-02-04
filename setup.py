@@ -12,7 +12,7 @@ setuptools.setup(
                 "(Hierarchical Event Descriptor) specification.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/hed-standard/hed-python/hedtools/",
+    url="https://github.com/hed-standard/hed-python/",
     packages=setuptools.find_namespace_packages(include=["hed.*"]),
     classifiers=[
         "Programming Language :: Python :: 3",
