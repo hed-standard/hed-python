@@ -28,8 +28,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8
           pip install coverage
-          if [ -f hedtools/requirements.txt ]; then pip install -r hedtools/requirements.txt; fi
-          if [ -f docs/requirements.txt ]; then pip install -r docs/requirements.txt; fi
+          pip install -r requirements.txt
+          pip install -r docs/requirements.txt
 
       - name: Lint with flake8
         run: |
@@ -38,7 +38,7 @@ jobs:
 
       - name: Test with unittest
         run: |
-          coverage run -m unittest discover -s ./hedtools
+          coverage run -m unittest discover -s
 
       - name: publish-coverages
         uses: paambaati/codeclimate-action@v2.7.5
