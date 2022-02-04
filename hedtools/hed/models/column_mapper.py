@@ -12,10 +12,10 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class ColumnMapper:
-    """Handles mapping columns of hed tags from a file to a usable format.
+    """Container class for mapping columns in event files into HED tags.
 
         Private Functions and variables column and row indexing starts at 0.
-        Public functions and variables indexing starts at 1(or 2 if has column names)"""
+        Public functions and variables indexing starts at 1 (or 2 if has column names)"""
 
     def __init__(self, sidecars=None, tag_columns=None, column_prefix_dictionary=None,
                  attribute_columns=None, optional_tag_columns=None):
@@ -368,18 +368,18 @@ class ColumnMapper:
         """
         return self._finalize_mapping_issues
 
-    def validate_column_data(self, validators, error_handler=None, **kwargs):
+    def validate_column_data(self, hed_ops, error_handler=None, **kwargs):
         """
         Validates all column definitions that are being used and column definition hed strings
 
         Parameters
         ----------
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in the sidecars.
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings in the sidecars.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
         Returns
         -------
         validation_issues : [{}]
@@ -389,7 +389,7 @@ class ColumnMapper:
             error_handler = ErrorHandler()
         all_validation_issues = []
         for column_data in self.column_data.values():
-            all_validation_issues += column_data.validate_column(validators,
+            all_validation_issues += column_data.validate_column(hed_ops,
                                                                  error_handler=error_handler,
                                                                  **kwargs)
 

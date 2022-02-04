@@ -4,7 +4,7 @@ from hed.models.def_dict import DefDict
 from hed.errors.error_types import SidecarErrors, ErrorContext, ValidationErrors
 from hed.errors import error_reporter
 from hed.errors.error_reporter import ErrorHandler
-from hed.models.util import translate_ops
+from hed.models.hed_ops import translate_ops
 
 
 class ColumnType(Enum):
@@ -25,7 +25,7 @@ class ColumnType(Enum):
 
 
 class ColumnMetadata:
-    """A single column in either the ColumnMapper or Sidecar"""
+    """Represents a single column in a ColumnMapper or Sidecar."""
 
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None,
                  error_handler=None):
@@ -84,18 +84,18 @@ class ColumnMetadata:
         """
         return self._hed_dict
 
-    def hed_string_iter(self, validators=None, error_handler=None, **kwargs):
+    def hed_string_iter(self, hed_ops=None, error_handler=None, **kwargs):
         """
         Return iterator to loop over all hed strings in this column definition
 
         Parameters
         ----------
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings before returning
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings before returning
         error_handler : ErrorHandler
             The error handler to use for context, uses a default one if none.
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
         Yields
         -------
         hed_string : HedString
@@ -103,7 +103,7 @@ class ColumnMetadata:
         position: str
             Indicates where hed_string was loaded from so it can be later set by the user
         issues: [{}]
-            List of issues found applying validators
+            List of issues found applying hed_ops
         """
         if error_handler is None:
             error_handler = ErrorHandler()
@@ -111,9 +111,9 @@ class ColumnMetadata:
         if not isinstance(self._hed_dict, dict):
             return
 
-        tag_ops = []
-        if validators:
-            tag_ops = translate_ops(validators, error_handler=error_handler, **kwargs)
+        tag_funcs = []
+        if hed_ops:
+            tag_funcs = translate_ops(hed_ops, error_handler=error_handler, **kwargs)
 
         for hed_string_obj, key_name in self._hed_iter():
             new_col_issues = []
@@ -125,8 +125,8 @@ class ColumnMetadata:
             else:
                 error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
                                                  increment_depth_after=False)
-                if tag_ops:
-                    new_col_issues += hed_string_obj.apply_ops(tag_ops)
+                if tag_funcs:
+                    new_col_issues += hed_string_obj.apply_ops(tag_funcs)
 
                 error_handler.add_context_to_issues(new_col_issues)
                 yield hed_string_obj, key_name, new_col_issues
@@ -361,33 +361,33 @@ class ColumnMetadata:
         """
         return self._def_dict.get_definition_issues()
 
-    def validate_column(self, validators, error_handler, **kwargs):
+    def validate_column(self, hed_ops, error_handler, **kwargs):
         """
-            Run the given validators on this column
+            Run the given hed_ops on this column
 
         Parameters
         ----------
-        validators : [func or validator like] or func or validator like
-            A validator or list of validators to apply to the hed strings in the columns.
+        hed_ops : [func or HedOps] or func or HedOps
+            A list of HedOps of funcs to apply to the hed strings in the columns.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.
         kwargs:
-            See util.translate_ops or the specific validators for additional options
+            See models.hed_ops.translate_ops or the specific hed_ops for additional options
         Returns
         -------
         col_issues: [{}]
-            A list of issues found by the given validators.
+            A list of issues found by the given hed_ops.
         """
         if error_handler is None:
             error_handler = error_reporter.ErrorHandler()
 
-        if not isinstance(validators, list):
-            validators = [validators]
-        validators = validators.copy()
-        validators.append(self._validate_pound_sign_count)
+        if not isinstance(hed_ops, list):
+            hed_ops = [hed_ops]
+        hed_ops = hed_ops.copy()
+        hed_ops.append(self._validate_pound_sign_count)
         error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, self.column_name)
 
-        col_validation_issues = self._run_ops(validators, allow_placeholders=True,
+        col_validation_issues = self._run_ops(hed_ops, allow_placeholders=True,
                                               error_handler=error_handler, **kwargs)
         col_validation_issues += self._validate_column_structure(error_handler)
         col_validation_issues += self.get_definition_issues()
@@ -429,9 +429,9 @@ class ColumnMetadata:
 
         return val_issues
 
-    def _run_ops(self, validators, error_handler, **kwargs):
+    def _run_ops(self, hed_ops, error_handler, **kwargs):
         col_validation_issues = []
-        for _, _, col_issues in self.hed_string_iter(validators, error_handler=error_handler, **kwargs):
+        for _, _, col_issues in self.hed_string_iter(hed_ops, error_handler=error_handler, **kwargs):
             col_validation_issues += col_issues
 
         return col_validation_issues
@@ -482,12 +482,12 @@ class ColumnMetadata:
         if error_handler is None:
             error_handler = ErrorHandler()
         new_def_dict = DefDict()
-        validators = []
-        validators.append(new_def_dict)
-        validators.append(HedString.remove_definitions)
+        hed_ops = []
+        hed_ops.append(new_def_dict)
+        hed_ops.append(HedString.remove_definitions)
 
         all_issues = []
-        for hed_string, key_name, issues in self.hed_string_iter(validators=validators, allow_placeholders=True,
+        for hed_string, key_name, issues in self.hed_string_iter(hed_ops=hed_ops, allow_placeholders=True,
                                                                  error_handler=error_handler):
             self.set_hed_string(hed_string, key_name, set_def_removed=True)
             all_issues += issues

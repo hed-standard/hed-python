@@ -8,8 +8,10 @@ pluralize.defnoun("hertz", "hertz")
 
 
 class HedSchemaEntry:
-    """
-        A single entry in the HedSchema, containing its attributes/properties/etc.
+    """ Represents a single node in a HedSchema.
+
+        The structure contains all of the node information including attributes
+        and properties.
     """
     def __init__(self, name, section):
         self.name = name
@@ -189,8 +191,7 @@ class HedTagEntry(HedSchemaEntry):
         # These always have any /# stripped off the end, so they can easily be used with normal code.
         self.long_tag_name = None
         self.short_tag_name = None
-        # this is the child takes value tag, if one exists
-        self.takes_value_child_entry = None
+        self.takes_value_child_entry = None # this is a child takes value tag, if one exists
         self._parent_tag = None
 
     def any_parent_has_attribute(self, attribute):

@@ -1,3 +1,5 @@
+"""Data handling utilities involving dataframes."""
+
 import pandas as pd
 import numpy as np
 from hed.errors.exceptions import HedFileError

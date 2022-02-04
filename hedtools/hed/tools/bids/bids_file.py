@@ -3,7 +3,7 @@ from hed.util.io_util import parse_bids_filename
 
 
 class BidsFile:
-    """Represents a bids file name but not contents."""
+    """Represents the entity and file names for a BIDs file."""
 
     def __init__(self, file_path):
         self.file_path = os.path.abspath(file_path)

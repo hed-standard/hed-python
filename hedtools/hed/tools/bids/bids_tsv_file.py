@@ -6,17 +6,18 @@ from hed.util.data_util import get_new_dataframe
 
 
 class BidsTsvFile(BidsFile):
-    """Represents a bids tsv file with contents that are a dataframe.
+    """ Represents a BIDS TSV file, possibly without its contents. """
 
-    Parameters
-    ----------
-    file_path: str
-        The full path to the file
-    set_contents: bool
-        If true then the file contents are read into a dataframe.
-
-  """
     def __init__(self, file_path, set_contents=False):
+        """
+            Parameters
+            ----------
+            file_path: str
+                The full path to the file
+            set_contents: bool
+                If true then the file contents are read into a dataframe.
+
+        """
         super().__init__(os.path.abspath(file_path))
         self.contents = None
         if set_contents:

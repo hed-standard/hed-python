@@ -4,7 +4,8 @@ from hed.models.def_mapper import DefinitionMapper
 
 
 class HedInput(BaseInput):
-    """A class to parse basic hed style spreadsheets into a more general format."""
+    """ Represents a spreadsheet of HED tags."""
+
     def __init__(self, file=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  def_dicts=None, name=None):

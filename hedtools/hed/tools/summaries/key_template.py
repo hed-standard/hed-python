@@ -4,7 +4,7 @@ from hed.util.data_util import get_key_hash, get_new_dataframe, get_row_hash, re
 
 
 class KeyTemplate:
-    """A class to handle keeping track of unique keys (which could be tuples."""
+    """Keeps track of unique key combinations (which could be tuples)."""
 
     def __init__(self, columns, name=''):
         """ Class stores base data for doing event remapping.
