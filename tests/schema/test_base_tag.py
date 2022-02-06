@@ -1,7 +1,8 @@
 import unittest
 import os
 
-from hed import HedString, load_schema
+from hed.models import HedString
+from hed.schema import load_schema
 from hed.errors import ErrorHandler
 
 

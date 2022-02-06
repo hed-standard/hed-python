@@ -1,9 +1,9 @@
 import unittest
 import os
 
-from hed import schema, HedString
-from hed.models import DefDict, DefinitionMapper
-from hed import HedValidator
+from hed import schema
+from hed.models import DefDict, DefinitionMapper, HedString
+from hed.validator import HedValidator
 
 
 class Test(unittest.TestCase):

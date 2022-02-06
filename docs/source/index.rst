@@ -1,7 +1,9 @@
 Welcome to HED Python Tools documentation!
 =============================================
 
-A PDF version of this document can be found `here <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
+.. sidebar:: **Downloads**
+
+   `HED tools <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
 
 Note:  this is a work in progress.
 
@@ -10,17 +12,13 @@ Note:  this is a work in progress.
    :caption: Contents:
 
    Overview.md
-
    user_guide.rst
-   api.rst
-
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Resources:
+   :maxdepth: 2
+   :caption: HED Python API:
 
-    .. include:: api.rst
-
+   api.rst
 
 Indices and tables
 ==================

@@ -1,4 +1,4 @@
-HED Python API Reference
+HED API reference
 ========================
 
 .. _base_ref:
