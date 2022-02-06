@@ -15,17 +15,16 @@ import sys
 import sphinx_rtd_theme
 from datetime import date
 
-sys.path.insert(0, os.path.abspath('../../webtools'))
-sys.path.insert(0, os.path.abspath('../../hedtools'))
-for path in sys.path:
-    print(path)
-# -- Project information -----------------------------------------------------
 
-project = 'HED python'
+sys.path.insert(0, os.path.abspath('../../'))
+
+# -- Project information -----------------------------------------------------
+project = 'HED Python'
 copyright = '2017-{}, HED Working Group'.format(date.today().year)
 author = 'HED Working Group'
 
 # The full version, including alpha/beta/rc tags
+version = '0.0.1'
 release = '0.0.1'
 
 currentdir = os.path.abspath(os.path.dirname(__file__))
@@ -48,7 +47,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.extlinks",
-    "numpydoc",
+    "numpydoc"
 ]
 
 autosummary_generate = True
@@ -84,10 +83,10 @@ html_theme_options = {
     'analytics_anonymize_ip': False,
     'logo_only': False,
     'display_version': True,
-    'prev_next_buttons_location': 'bottom',
+    'prev_next_buttons_location': 'top',
     'style_external_links': False,
     'vcs_pageview_mode': '',
-    'style_nav_header_background': 'white',
+    'style_nav_header_background': 'LightSlateGray',
     # Toc options
     'collapse_navigation': True,
     'sticky_navigation': True,

@@ -1,6 +1,6 @@
 import unittest
 
-from hed import HedString
+from hed.models import HedString
 from hed.errors import ValidationErrors, ErrorContext, ErrorHandler
 from tests.validator.test_tag_validator_base import TestHedBase
 

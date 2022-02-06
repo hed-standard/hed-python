@@ -1,5 +1,5 @@
-hedtools
-========
+hed-python
+==========
 
 .. toctree::
    :maxdepth: 4

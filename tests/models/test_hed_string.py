@@ -1,4 +1,4 @@
-from hed import HedString
+from hed.models import HedString
 import unittest
 
 
