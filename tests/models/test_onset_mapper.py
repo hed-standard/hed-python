@@ -1,9 +1,11 @@
 import unittest
 import os
 
-from hed.models import DefinitionMapper, OnsetMapper, DefDict
-from hed import schema, HedString, HedValidator
 from hed.errors import ErrorHandler, OnsetErrors, ErrorContext, ValidationErrors
+from hed.models import DefinitionMapper, HedString, OnsetMapper, DefDict
+from hed import schema
+from hed.validator import HedValidator
+
 from tests.validator.test_tag_validator_base import TestHedBase
 
 

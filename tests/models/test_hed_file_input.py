@@ -2,9 +2,9 @@ import unittest
 import os
 import io
 
-from hed import HedInput, Sidecar, EventsInput, HedFileError
+from hed.errors import HedFileError
+from hed.models import EventsInput, HedInput, model_constants, Sidecar
 import shutil
-from hed.models import model_constants
 
 
 class Test(unittest.TestCase):

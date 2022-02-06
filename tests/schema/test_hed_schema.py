@@ -1,8 +1,9 @@
 import unittest
 import os
 
-from hed import schema, HedFileError, HedString, HedTag
-from hed.schema import HedKey, HedSectionKey
+from hed.errors import HedFileError
+from hed.models import HedString, HedTag
+from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema
 
 
 class TestHedSchema(unittest.TestCase):
@@ -13,15 +14,15 @@ class TestHedSchema(unittest.TestCase):
     def setUpClass(cls):
         cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g_xml)
         cls.hed_wiki_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g)
-        cls.hed_schema_3g_wiki = schema.load_schema(cls.hed_wiki_3g)
-        cls.hed_schema_3g = schema.load_schema(cls.hed_xml_3g)
+        cls.hed_schema_3g_wiki = load_schema(cls.hed_wiki_3g)
+        cls.hed_schema_3g = load_schema(cls.hed_xml_3g)
 
     def test_invalid_schema(self):
         # Handle missing or invalid files.
         invalid_xml_file = "invalidxmlfile.xml"
         hed_schema = None
         try:
-            hed_schema = schema.load_schema(invalid_xml_file)
+            hed_schema = load_schema(invalid_xml_file)
         except HedFileError:
             pass
 
@@ -29,14 +30,14 @@ class TestHedSchema(unittest.TestCase):
 
         hed_schema = None
         try:
-            hed_schema = schema.load_schema(None)
+            hed_schema = load_schema(None)
         except HedFileError:
             pass
         self.assertFalse(hed_schema)
 
         hed_schema = None
         try:
-            hed_schema = schema.load_schema("")
+            hed_schema = load_schema("")
         except HedFileError:
             pass
         self.assertFalse(hed_schema)
@@ -45,7 +46,7 @@ class TestHedSchema(unittest.TestCase):
         invalid_xml_file = "invalidxmlfile.xml"
         name = "PrettyDisplayName.xml"
         try:
-            schema.load_schema(invalid_xml_file)
+            load_schema(invalid_xml_file)
             # We should have an error before we reach here.
             self.assertTrue(False)
         except HedFileError as e:
@@ -156,7 +157,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertCountEqual(tag_props, expected_props)
 
     def test_get_hed_xml_version(self):
-        self.assertEqual(schema.get_hed_xml_version(self.hed_xml_3g), "8.0.0")
+        self.assertEqual(get_hed_xml_version(self.hed_xml_3g), "8.0.0")
 
     def test_has_duplicate_tags(self):
         self.assertFalse(self.hed_schema_3g.has_duplicate_tags)

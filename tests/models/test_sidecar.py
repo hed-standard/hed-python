@@ -2,9 +2,10 @@ import unittest
 import os
 import io
 
-from hed import Sidecar, HedFileError, HedValidator, schema
-from hed.models.column_metadata import ColumnMetadata
-from hed import HedString
+from hed.errors import HedFileError
+from hed.models import ColumnMetadata, HedString, Sidecar
+from hed.validator import HedValidator
+from hed import schema
 from hed.models import DefDict
 
 

@@ -17,4 +17,4 @@ from .summaries.summary_entry import SummaryEntry
 from .summaries.tag_summary import TagSummary
 
 from .sidecar_map import SidecarMap
-
+from .hed_logger import HedLogger

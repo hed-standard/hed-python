@@ -29,14 +29,6 @@ hed.tools.sidecar\_map module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.tag\_util module
---------------------------
-
-.. automodule:: hed.tools.tag_util
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

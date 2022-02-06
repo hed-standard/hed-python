@@ -1,10 +1,10 @@
 import unittest
 import os
-
-from hed import Sidecar, EventsInput
 import shutil
+
+from hed.models import Sidecar, EventsInput
 from hed import schema
-from hed import HedValidator
+from hed.validator import HedValidator
 
 
 class Test(unittest.TestCase):

@@ -16,19 +16,19 @@ import sphinx_rtd_theme
 from datetime import date
 
 
-sys.path.insert(0, os.path.abspath('../../hedtools'))
-for path in sys.path:
-    print(path)
+sys.path.insert(0, os.path.abspath('../../'))
+
 # -- Project information -----------------------------------------------------
 
-project = 'HED python'
-copyright = '2017-{}, HED Working Group'.format(date.today().year)
-author = 'HED Working Group'
+project='HED Python'
+copyright='2017-{}, HED Working Group'.format(date.today().year)
+author='HED Working Group'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+version='0.0.1'
+release='0.0.1'
 
-currentdir = os.path.abspath(os.path.dirname(__file__))
+currentdir=os.path.abspath(os.path.dirname(__file__))
 
 
 # -- General configuration ---------------------------------------------------
@@ -82,9 +82,9 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_theme_options = {
     'analytics_id': 'UA-XXXXXXX-1',  # Provided by Google in your dashboard
     'analytics_anonymize_ip': False,
-    'logo_only': False,
+    'logo_only': True,
     'display_version': True,
-    'prev_next_buttons_location': 'bottom',
+    'prev_next_buttons_location': 'top',
     'style_external_links': False,
     'vcs_pageview_mode': '',
     'style_nav_header_background': 'white',

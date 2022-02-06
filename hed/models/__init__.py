@@ -2,7 +2,7 @@
 
 from .base_input import BaseInput
 from .column_mapper import ColumnMapper
-from .column_metadata import ColumnMetadata
+from .column_metadata import ColumnMetadata, ColumnType
 from .def_dict import DefDict, DefEntry
 from .def_mapper import DefinitionMapper
 from .events_input import EventsInput

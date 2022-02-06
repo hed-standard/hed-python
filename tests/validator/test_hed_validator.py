@@ -1,10 +1,11 @@
 import unittest
 import os
 
-from hed import HedString, HedInput, EventsInput, HedValidator, Sidecar
+#from hed import
 from hed.errors import ErrorContext
 from hed import schema
-from hed.models import DefinitionMapper
+from hed.models import DefinitionMapper, HedString, HedInput, EventsInput, Sidecar
+from hed.validator import HedValidator
 
 
 class Test(unittest.TestCase):
