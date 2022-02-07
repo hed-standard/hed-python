@@ -5,7 +5,7 @@ Welcome to HED Python Tools documentation!
 
    `HED tools <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
 
-Note:  this is a work in progress.
+Note:  this is a work in progress. More information is coming.
 
 .. toctree::
    :maxdepth: 2
