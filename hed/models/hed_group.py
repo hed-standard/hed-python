@@ -33,8 +33,8 @@ class HedGroup:
         self._endpos = endpos
         self._include_paren = include_paren
         self._hed_string = hed_string
-        self.is_definition = False
         self.mutable = True  # If False, this group is potentially referenced in other places and should not be altered
+
 
     def __eq__(self, other):
         if self is other:
@@ -117,7 +117,6 @@ class HedGroup:
                 return True
 
         return False
-        return final_list
 
     def is_group(self):
         """
@@ -317,12 +316,12 @@ class HedGroup:
 
     def remove_groups(self, remove_groups):
         """
-        Takes a list of HedGroups, and removes any that exist from this HedString.
+        Takes a list of groups or tags, and removes any that exist from this HedString.
 
         Parameters
         ----------
         remove_groups : [HedGroup or HedTag]
-            A list of groups or tags to remove
+            A list of groups or tags to remove.  Can include self, which just clears out this hed string.
         """
         if not self.mutable:
             raise ValueError("Trying to alter immutable group")
@@ -330,41 +329,13 @@ class HedGroup:
         if self._original_children is self._children:
             self._original_children = self._children.copy()
 
-        for val in remove_groups:
-            if val is self:
-                self._children = []
-                self._hed_string = ""
-                return
-        # if self in remove_groups:
-        #     self._children = []
-        #     self._hed_string = ""
-        #     return
+        if self in remove_groups:
+            self._children = []
+            self._hed_string = ""
+            return
 
         for group in self.get_all_groups():
-            new_children = []
-            for child in group._children:
-                skip_child = False
-                for remove_child in remove_groups:
-                    if child is remove_child:
-                        skip_child = True
-                        break
-                if skip_child:
-                    continue
-                new_children.append(child)
-            group._children = new_children
-            #group._children = [child for child in group._children if child not in remove_groups]
-
-    def without_defs(self):
-        """
-            Return this as a string, with definitions having been removed.
-
-        Returns
-        -------
-
-        """
-        if self._include_paren:
-            return "(" + ",".join([str(child) for child in self._children if not child.is_definition]) + ")"
-        return ",".join([str(child) for child in self._children if not child.is_definition])
+            group._children = [child for child in group._children if child not in remove_groups]
 
     def __copy__(self):
         """
@@ -428,16 +399,80 @@ class HedGroup:
             return tag_copy
         return tag
 
-    @staticmethod
-    def extract_tags_from_group(tag_group):
+    def find_tags(self, anchors, recursive=False, include_groups=2):
+        """
+            Find tags given anchors.
+
+        Args:
+            anchors: container
+                A container of short_base_tags to locate
+            recursive: bool
+                If true, also check sub groups.
+            include_groups: 0, 1 or 2
+                If 0: Return only tags
+                If 1: return only groups
+                If 2 or any other value: return both
+                
+        returns:
+        list:
+        tag: HedTag
+            The located tag
+        group: HedGroup
+            The group the located tag is in
+        """
+        found_tags = []
+        if recursive:
+            groups = self.get_all_groups()
+        else:
+            groups = (self, )
+
+        for sub_group in groups:
+            for tag in sub_group.tags():
+                if tag.short_base_tag.lower() in anchors:
+                    found_tags.append((tag, sub_group))
+                    
+        if include_groups == 0 or include_groups == 1:
+            return [tag[include_groups] for tag in found_tags]
+        return found_tags
+
+    def find_def_tags(self, recursive=False, include_groups=3):
+        """
+            Find any def and def-expand tags in the group.
+
+        Args:
+            recursive: bool
+                If true, also check sub groups.
+            include_groups: int, 0, 1, 2, 3
+                If 0: Return only def and def expand tags
+                If 1: Return only def tags and def-expand groups
+                If 2: Return only groups containing defs, or def-expand groups
+                If 3 or any other value: Return all 3 as a tuple.
+        Returns:
+        list:
+        def_tag: HedTag
+            The located def tag
+        def_expand_group: HedGroup or None
+            If this is a def-expand rather than def tag, this will be the entire def-expand group.
+        group: HedGroup
+            The group the def tag or def expand group is in.
+        """
+        from hed.models.def_dict import DefTagNames
+        if recursive:
+            groups = self.get_all_groups()
+        else:
+            groups = (self, )
+
         def_tags = []
-        group_tags = []
-        other_tags = []
-        for tag_or_group in tag_group.get_direct_children():
-            if isinstance(tag_or_group, HedGroup):
-                group_tags.append(tag_or_group)
-            elif tag_or_group.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
-                def_tags.append(tag_or_group)
-            else:
-                other_tags.append(tag_or_group)
-        return def_tags, group_tags, other_tags
+        for group in groups:
+            for child in group.get_direct_children():
+                if isinstance(child, HedTag):
+                    if child.short_base_tag.lower() == DefTagNames.DEF_KEY:
+                        def_tags.append((child, child, group))
+                else:
+                    for tag in child.tags():
+                        if tag.short_base_tag.lower() == DefTagNames.DEF_EXPAND_KEY:
+                            def_tags.append((tag, child, group))
+
+        if include_groups == 0 or include_groups == 1 or include_groups == 2:
+            return [tag[include_groups] for tag in def_tags]
+        return def_tags

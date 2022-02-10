@@ -266,6 +266,8 @@ class BaseInput:
         ----------
         hed_ops : [func or HedOps] or func or HedOps
             A list of HedOps of funcs to apply to the hed strings before returning
+        error_handler: ErrorHandler
+            The error handler to use for context, uses a default one if none.
         kwargs:
             See models.hed_ops.translate_ops or the specific hed_ops for additional options
 
@@ -321,16 +323,16 @@ class BaseInput:
             mapper = self._mapper
 
         tag_funcs, string_funcs = self._translate_ops(hed_ops, run_string_ops_on_columns=run_string_ops_on_columns,
-                                                  expand_defs=expand_defs, remove_definitions=remove_definitions,
-                                                  error_handler=error_handler, **kwargs)
+                                                      expand_defs=expand_defs, remove_definitions=remove_definitions,
+                                                      error_handler=error_handler, **kwargs)
 
         start_at_one = 1
         if self._has_column_names:
             start_at_one += 1
-        for row_number, text_file_row in self._dataframe.iterrows():
-            # Skip any blank lines.
-            if all(text_file_row.isnull()):
-                continue
+
+        # Iter tuples is ~ 25% faster compared to iterrows in our use case
+        for row_number, text_file_row in enumerate(self._dataframe.itertuples(index=False)):
+            # todo: Double check if we need a check here for blank lines to avoid crashing.
 
             row_dict = mapper.expand_row_tags(text_file_row)
             column_to_hed_tags = row_dict[model_constants.COLUMN_TO_HED_TAGS]
@@ -363,7 +365,7 @@ class BaseInput:
         column_number : int
             The column number of the spreadsheet to set
         new_string_obj : HedString
-            Text to enter in the given cell
+            Text to put in the given cell
         include_column_prefix_if_exist : bool
             If true and the column matches one from mapper _column_prefix_dictionary, remove the name_prefix
         tag_form: str
@@ -502,7 +504,7 @@ class BaseInput:
                     new_column_issues += expansion_column_issues[column_number]
 
                 if column_hed_string is not None:
-                    new_column_issues += column_hed_string.apply_ops(column_ops)
+                    new_column_issues += column_hed_string.apply_funcs(column_ops)
                 error_handler.add_context_to_issues(new_column_issues)
                 if column_hed_string is not None:
                     error_handler.pop_error_context()
@@ -513,7 +515,7 @@ class BaseInput:
 
     def _run_row_ops(self, row_hed_string, row_ops, error_handler):
         error_handler.push_error_context(ErrorContext.HED_STRING, row_hed_string, increment_depth_after=False)
-        row_issues = row_hed_string.apply_ops(row_ops)
+        row_issues = row_hed_string.apply_funcs(row_ops)
         error_handler.add_context_to_issues(row_issues)
         error_handler.pop_error_context()
         return row_issues
@@ -599,7 +601,7 @@ class BaseInput:
             if not run_string_ops_on_columns:
                 self._add_def_onset_mapper(hed_ops)
                 tag_funcs, string_funcs = translate_ops(hed_ops, split_tag_and_string_ops=True, expand_defs=expand_defs,
-                                                    **kwargs)
+                                                        **kwargs)
             else:
                 tag_funcs = translate_ops(hed_ops, expand_defs=expand_defs, **kwargs)
 

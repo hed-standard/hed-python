@@ -5,6 +5,9 @@ from hed.models.model_constants import DefTagNames
 from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.summaries.summary_entry import SummaryEntry
 from hed.tools.summaries.summary_util import add_tag_list_to_dict, breakout_tags
+from hed.models.def_dict import add_group_to_dict
+from hed.models import DefDict
+
 
 DEFAULT_BREAKOUT_LIST = [
     "Sensory-event", "Agent-action", "Event", "Action", "Task-event-role", "Task-action-type",
@@ -18,7 +21,6 @@ class TagSummary:
     def __init__(self, dataset, breakout_list=None):
         self.dataset = dataset
         self.all_tags_dict = {}
-        self.all_defs_dict = {}
         self._set_all_tags()
         self.breakout_list = breakout_list
         if not breakout_list:
@@ -28,21 +30,15 @@ class TagSummary:
         self.cond_dict = SummaryEntry.extract_summary_info(self.all_defs_dict, 'Condition-variable')
 
     def _set_all_tags(self):
-        self.all_tags_dict = {}
-        self.all_defs_dict = {}
         schema = self.dataset.schemas
+        def_dict = DefDict()
+        self.all_defs_dict = def_dict.defs
         for bids_sidecar in self.dataset.event_files.sidecar_dict.values():
             sidecar = bids_sidecar.contents
-            tag_list = []
-            for column in sidecar:
-                for hed, key in column._hed_iter():
-                    hed.convert_to_canonical_forms(schema)
-                    tag_list.append(hed)
-                    SummaryEntry.separate_anchored_groups(hed, self.all_defs_dict, DefTagNames.DEFINITION_KEY)
-            add_tag_list_to_dict(tag_list, self.all_tags_dict, hed_schema=schema)
+            for hed_string_obj, _, _ in sidecar.hed_string_iter([schema, def_dict]):
+                add_group_to_dict(hed_string_obj, self.all_tags_dict)
 
     def get_design_matrices(self):
-
         cond_dict = self.cond_dict
         design_dict = {}
         other_list = []

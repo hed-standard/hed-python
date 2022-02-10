@@ -13,6 +13,8 @@ class TestDefBase(unittest.TestCase):
             hed_string_obj.convert_to_canonical_forms(None)
             test_issues = def_dict.check_for_definitions(hed_string_obj)
             expected_issue = expected_issues[test_key]
+            # print(test_issues)
+            # print(expected_issue)
             self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
 
 
@@ -68,7 +70,7 @@ class TestDefDict(TestDefBase):
                                                                "InvalidDef1", expected_count=1, tag_list=[]),
             'placeholderWrongSpot': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
                                                               "InvalidDef1#"),
-            'twoDefTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
+            'twoDefTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
                                                     "ValidDef1", ["Definition/InvalidDef2"]),
             'twoGroupTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
                                                       "InvalidDef1",

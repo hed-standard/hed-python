@@ -1,6 +1,6 @@
 from hed.models.hed_string import HedString
 from hed.models.hed_group import HedGroup
-from hed.errors.error_types import DefinitionErrors, ValidationErrors
+from hed.errors.error_types import DefinitionErrors
 from hed.errors.error_reporter import ErrorHandler
 import copy
 from functools import partial
@@ -32,6 +32,9 @@ class DefEntry:
             contents.cascade_mutable(False)
         self.takes_value = takes_value
         self.source_context = source_context
+        self.tag_dict = {}
+        if contents:
+            add_group_to_dict(contents, self.tag_dict)
 
     def get_definition(self, replace_tag, placeholder_value=None):
         """
@@ -105,6 +108,16 @@ class DefDict(HedOps):
         """
         return self._extract_def_issues
 
+    @property
+    def defs(self):
+        """
+            Provides direct access to internal dictionary.  Alter at your own risk.
+        Returns
+        -------
+        def_dict: {str: DefEntry}
+        """
+        return self._defs
+
     def __iter__(self):
         return iter(self._defs.items())
 
@@ -129,44 +142,27 @@ class DefDict(HedOps):
         ----------
         """
         new_def_issues = []
-        for tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
-            def_tags, group_tags, other_tags = self._extract_tags_from_group(tag_group)
+        for definition_tag, group in hed_string_obj.find_top_level_tags(anchors={DefTagNames.DEFINITION_KEY}):
+            def_tag_name = definition_tag.extension_or_value_portion
 
-            # Now validate to see if we have a definition.  We want 1 definition, and the other parts are optional.
-            if not def_tags:
-                # If we don't have at least one valid definition tag, just move on.
-                continue
-
-            if not is_top_level:
-                new_def_issues +=\
-                    ErrorHandler.format_error_with_context(error_handler,
-                                                           ValidationErrors.HED_TAG_GROUP_TAG, tag=def_tags[0])
-                continue
-
-            if len(def_tags) > 1:
-                new_def_issues += \
-                    ErrorHandler.format_error_with_context(error_handler,
-                                                           DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS,
-                                                           def_name=def_tags[0].extension_or_value_portion,
-                                                           tag_list=[tag for tag in def_tags[1:]])
-                continue
-            def_tag = def_tags[0]
-            def_tag_name = def_tag.extension_or_value_portion
-            if len(group_tags) > 1:
+            # initial validation
+            groups = group.groups()
+            if len(groups) > 1:
                 new_def_issues += \
                     ErrorHandler.format_error_with_context(error_handler,
                                                            DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                           def_name=def_tag_name, tag_list=group_tags + other_tags)
+                                                           def_name=def_tag_name, tag_list=groups)
                 continue
-            if len(other_tags) > 0:
+            if len(group.tags()) != 1:
                 new_def_issues += ErrorHandler.format_error_with_context(error_handler,
                                                                          DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
                                                                          def_name=def_tag_name,
-                                                                         tag_list=other_tags + group_tags)
+                                                                         tag_list=[tag for tag in group.tags() if tag is not definition_tag])
                 continue
 
-            group_tag = group_tags[0] if group_tags else None
+            group_tag = groups[0] if groups else None
 
+            # final validation
             def_takes_value = def_tag_name.lower().endswith("/#")
             if def_takes_value:
                 def_tag_name = def_tag_name[:-len("/#")]
@@ -178,7 +174,7 @@ class DefDict(HedOps):
                                                                          def_name=def_tag_name)
                 continue
 
-            # Verify placeholders here.
+            # # Verify placeholders here.
             placeholder_tags = []
             if group_tag:
                 for tag in group_tag.get_all_tags():
@@ -209,16 +205,26 @@ class DefDict(HedOps):
         self._extract_def_issues += new_def_issues
         return new_def_issues
 
-    @staticmethod
-    def _extract_tags_from_group(tag_group):
-        def_tags = []
-        group_tags = []
-        other_tags = []
-        for tag_or_group in tag_group.get_direct_children():
-            if isinstance(tag_or_group, HedGroup):
-                group_tags.append(tag_or_group)
-            elif tag_or_group.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
-                def_tags.append(tag_or_group)
-            else:
-                other_tags.append(tag_or_group)
-        return def_tags, group_tags, other_tags
+
+# This may be moved later
+def add_group_to_dict(group, tag_dict=None):
+    """
+        Note: Expects tags to have forms calculated already.
+    Parameters:
+        group: HedGroup
+            contents to add to the tag dict
+        tag_dict: {}
+            Output dictionary
+    Returns: dict
+        Dictionary of tags with a list of values
+    """
+    if tag_dict is None:
+        tag_dict = {}
+    for tag in group.get_all_tags():
+        short_base_tag = tag.short_base_tag
+        value = tag.extension_or_value_portion
+        value_dict = tag_dict.get(short_base_tag, {})
+        if value:
+            value_dict[value] = ''
+        tag_dict[short_base_tag] = value_dict
+    return tag_dict

@@ -68,11 +68,11 @@ class Test(unittest.TestCase):
         hed_ops.append(def_mapper)
 
         for key in test_strings:
-            string, result, invalid = test_strings[key], result_strings[key], valid_strings[key]
+            string, expected_result, invalid = test_strings[key], result_strings[key], valid_strings[key]
             test_string = HedString(string)
             def_issues = test_string.validate(hed_ops, expand_defs=expand_defs, shrink_defs=shrink_defs, remove_definitions=remove_definitions)
             self.assertEqual(invalid, bool(def_issues))
-            self.assertEqual(test_string.get_as_short(), result)
+            self.assertEqual(test_string.get_as_short(), expected_result)
 
     def test_expand_def_tags(self):
         basic_def_strings = {

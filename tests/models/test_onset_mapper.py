@@ -9,6 +9,7 @@ from hed.validator import HedValidator
 from tests.validator.test_tag_validator_base import TestHedBase
 
 
+# Todo: Add test case for Onset/Value and Offset/Value.  Make sure they bomb.
 class Test(TestHedBase):
     @classmethod
     def setUpClass(cls):
@@ -50,8 +51,8 @@ class Test(TestHedBase):
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(hed_ops, expand_defs=True)
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
-            # print(str(onset_issues))
-            # print(str(issues))
+            print(str(onset_issues))
+            print(str(issues))
             error_handler.pop_error_context()
             self.assertCountEqual(onset_issues, issues)
 

@@ -52,6 +52,12 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
+    def test__validate_input_major_errors_multi_column(self):
+        validation_issues = self.hed_file_with_major_errors_multi_column.validate_file(self.generic_hed_input_reader,
+                                                                          check_for_warnings=True)
+        self.assertIsInstance(validation_issues, list)
+        self.assertEqual(len(validation_issues), 2)
+
     def test_complex_file_validation(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')

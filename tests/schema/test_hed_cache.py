@@ -10,6 +10,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../schema_cache_test/')
+        cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
         schema.set_cache_directory(cls.hed_cache_dir)
 
         cls.default_xml_base_filename = "HED8.0.0t.xml"
@@ -28,6 +29,7 @@ class Test(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.hed_cache_dir)
+        schema.set_cache_directory(cls.saved_cache_folder)
 
     def test_get_hed_version_path(self):
         latest_hed_version_path = hed_cache.get_hed_version_path()

@@ -250,12 +250,6 @@ def sidecar_error_unknown_column(column_name):
            "Most likely the column definition in question needs a # sign to replace a number somewhere.", {}
 
 
-@hed_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
-def def_error_wrong_def_tags(def_name, tag_list):
-    tag_list_strings = [str(tag) for tag in tag_list]
-    return f"Too many def tags found in definition for {def_name}.  Expected 1, also found: {tag_list_strings}", {}
-
-
 @hed_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
 def def_error_wrong_group_tags(def_name, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]

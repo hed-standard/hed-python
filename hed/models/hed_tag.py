@@ -49,7 +49,6 @@ class HedTag:
         if hed_schema:
             self.convert_to_canonical_forms(hed_schema)
 
-        self.is_definition = False
         self.mutable = True  # If False, this tag is potentially referenced in other places and should not be altered
 
     def __eq__(self, other):

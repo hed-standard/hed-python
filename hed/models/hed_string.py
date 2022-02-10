@@ -90,25 +90,7 @@ class HedString(HedGroup):
         for tag in self.get_all_tags():
             validation_issues += tag.convert_to_canonical_forms(hed_schema)
 
-        self._identify_definitions()
         return validation_issues
-
-    def _identify_definitions(self):
-        """
-            Mark any definitions found in this string.  Including groups or tags that are part of a definition.
-
-            This should possibly be removed later.
-
-        Returns
-        -------
-
-        """
-        for tag_group in self.groups():
-            for tag in tag_group.tags():
-                if tag.short_base_tag.lower() == DefTagNames.DEFINITION_KEY:
-                    for def_tag in tag_group.get_all_tags():
-                        def_tag.is_definition = True
-                    tag_group.is_definition = True
 
     def remove_definitions(self):
         """
@@ -119,11 +101,7 @@ class HedString(HedGroup):
         issues: [{}]
             There are no possible issues, this list is always blank.
         """
-        definition_groups = []
-        for tag_group in self.get_all_groups():
-            if tag_group.is_definition:
-                definition_groups.append(tag_group)
-
+        definition_groups = self.find_top_level_tags({DefTagNames.DEFINITION_KEY}, include_groups=1)
         if definition_groups:
             self.remove_groups(definition_groups)
 
@@ -358,7 +336,7 @@ class HedString(HedGroup):
         return [HedTag(hed_string, span) for (is_hed_tag, span) in
                 result_positions if is_hed_tag]
 
-    def apply_ops(self, string_funcs):
+    def apply_funcs(self, string_funcs):
         """
             Run the list of functions on this string and gather issues found.
 
@@ -405,8 +383,39 @@ class HedString(HedGroup):
         tag_funcs = translate_ops(hed_ops, **kwargs)
 
         error_handler.push_error_context(ErrorContext.HED_STRING, self, increment_depth_after=False)
-        issues = self.apply_ops(tag_funcs)
+        issues = self.apply_funcs(tag_funcs)
         error_handler.add_context_to_issues(issues)
         error_handler.pop_error_context()
 
         return issues
+
+    def find_top_level_tags(self, anchors, include_groups=2):
+        """
+            Find top level groups containing the given anchor tags.
+
+            Max of 1 tag located her top level group.
+        Args:
+            anchors: container
+                A list/set/etc of short_base_tags to find groups by.
+            include_groups: 0, 1 or 2
+                If 0: Return only tags
+                If 1: return only groups
+                If 2 or any other value: return both
+        Returns:
+        list:
+        tag: HedTag
+            The located tag
+        group: HedGroup
+            The group the located tag is in
+        """
+        top_level_tags = []
+        for group in self.groups():
+            for tag in group.tags():
+                if tag.short_base_tag.lower() in anchors:
+                    top_level_tags.append((tag, group))
+                    # Only capture a max of 1 per group.  These are implicitly unique.
+                    break
+
+        if include_groups == 0 or include_groups == 1:
+            return [tag[include_groups] for tag in top_level_tags]
+        return top_level_tags

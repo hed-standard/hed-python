@@ -22,7 +22,7 @@ class HedValidator(HedOps):
         Parameters
         ----------
         hed_schema: HedSchema
-            HedSchema object to use to use for validation
+            HedSchema object to use for validation
         run_semantic_validation: bool
             True if the validator should check the HED data against a schema. False for syntax-only validation.
         Returns
@@ -114,11 +114,16 @@ class HedValidator(HedOps):
              The issues associated with the individual tags in the HED string.
 
          """
+        from hed.models.def_dict import DefTagNames
         validation_issues = []
-        tags = hed_string_obj.get_all_tags()
-        for hed_tag in tags:
-            validation_issues += \
-                self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
-                                                                  check_for_warnings=check_for_warnings)
+        def_groups = hed_string_obj.find_top_level_tags(anchors={DefTagNames.DEFINITION_KEY}, include_groups=1)
+        all_def_groups = [group for sub_group in def_groups for group in sub_group.get_all_groups()]
+        for group in hed_string_obj.get_all_groups():
+            is_definition = group in all_def_groups
+            for hed_tag in group.tags():
+                validation_issues += \
+                    self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
+                                                                      check_for_warnings=check_for_warnings,
+                                                                      is_definition=is_definition)
 
         return validation_issues

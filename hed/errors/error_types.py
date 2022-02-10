@@ -99,7 +99,6 @@ class SchemaWarnings:
 
 # These are all HED_DEFINITION_INVALID errors
 class DefinitionErrors:
-    WRONG_NUMBER_DEFINITION_TAGS = 'wrongNumberDefTags'
     WRONG_NUMBER_GROUP_TAGS = 'wrongNumberGroupTags'
     WRONG_NUMBER_PLACEHOLDER_TAGS = 'wrongNumberPlaceholderTags'
     DUPLICATE_DEFINITION = 'duplicateDefinition'

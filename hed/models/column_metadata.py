@@ -5,6 +5,7 @@ from hed.errors.error_types import SidecarErrors, ErrorContext, ValidationErrors
 from hed.errors import error_reporter
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.hed_ops import translate_ops
+import copy
 
 
 class ColumnType(Enum):
@@ -126,7 +127,7 @@ class ColumnMetadata:
                 error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
                                                  increment_depth_after=False)
                 if tag_funcs:
-                    new_col_issues += hed_string_obj.apply_ops(tag_funcs)
+                    new_col_issues += hed_string_obj.apply_funcs(tag_funcs)
 
                 error_handler.add_context_to_issues(new_col_issues)
                 yield hed_string_obj, key_name, new_col_issues
@@ -459,9 +460,12 @@ class ColumnMetadata:
         else:
             return []
 
-        # This needs to only account for the ones without definitions.
-        if hed_string.without_defs().count("#") != expected_pound_sign_count:
-            return ErrorHandler.format_error(error_type, pound_sign_count=str(hed_string).count("#"))
+        # Make a copy without definitions to check placeholder count.
+        hed_string_copy = copy.copy(hed_string)
+        hed_string_copy.remove_definitions()
+
+        if hed_string_copy.lower().count("#") != expected_pound_sign_count:
+            return ErrorHandler.format_error(error_type, pound_sign_count=str(hed_string_copy).count("#"))
 
         return []
 

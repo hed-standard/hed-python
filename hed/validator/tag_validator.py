@@ -69,7 +69,8 @@ class TagValidator:
             validation_issues += self.check_tag_formatting(tag)
         return validation_issues
 
-    def run_individual_tag_validators(self, original_tag, check_for_warnings, allow_placeholders=False):
+    def run_individual_tag_validators(self, original_tag, check_for_warnings, allow_placeholders=False,
+                                      is_definition=False):
         """Runs the hed_ops on the individual tags in a HED string.
 
          Parameters
@@ -80,6 +81,8 @@ class TagValidator:
              If True, also check for warnings.
          allow_placeholders: bool
              Allow value class or extensions to be placeholders rather than a specific value.
+         is_definition: bool
+            This tag is part of a Definition, not a normal line.
          Returns
          -------
          []
@@ -97,7 +100,7 @@ class TagValidator:
                 validation_issues += self.check_for_invalid_extension_chars(original_tag)
 
             if not allow_placeholders:
-                validation_issues += self.check_for_placeholder(original_tag)
+                validation_issues += self.check_for_placeholder(original_tag, is_definition)
             validation_issues += self.check_tag_requires_child(original_tag)
         if check_for_warnings:
             validation_issues += self.check_capitalization(original_tag)
@@ -622,20 +625,22 @@ class TagValidator:
         """
         return character == TagValidator.COMMA
 
-    def check_for_placeholder(self, original_tag):
+    def check_for_placeholder(self, original_tag, is_definition=False):
         """
             Checks for a placeholder character in the extension/value portion of a tag, unless they are allowed.
 
         Parameters
         ----------
         original_tag : HedTag
+        is_definition: bool
+            If True, placeholders are allowed.
 
         Returns
         -------
         error_list: [{}]
         """
         validation_issues = []
-        if not original_tag.is_definition:
+        if not is_definition:
             starting_index = len(original_tag.org_base_tag) + 1
             for i, character in enumerate(original_tag.extension_or_value_portion):
                 if character == "#":
