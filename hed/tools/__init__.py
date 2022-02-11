@@ -1,5 +1,6 @@
 """ HED tools for analysis and summarization. """
 
+from .bids.bids_annotation import generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
 from .bids.bids_dataset import BidsDataset
 from .bids.bids_event_file import BidsEventFile
 from .bids.bids_event_files import BidsEventFiles

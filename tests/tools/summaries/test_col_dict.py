@@ -12,11 +12,15 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/sternberg')
         att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/attention_shift')
+        bids_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
         cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
+        cls.wh_events_path = \
+            os.path.abspath(os.path.join(bids_base_dir,
+                            'eeg_ds003654s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
 
     def test_constructor(self):
         dict1 = ColumnDict()
@@ -27,17 +31,28 @@ class Test(unittest.TestCase):
         self.assertIsInstance(dict2, ColumnDict, "ColumnDict: multiple values are okay in constructor")
         self.assertEqual(len(dict2.value_info.keys()), 3, "ColumnDict should have keys for each value column")
 
-    def test_get_flattened(self):
-        t_map = ColumnDict()
-        t_map.update(self.stern_map_path)
-        df1 = t_map.get_flattened()
-        self.assertEqual(len(df1), 137, "Flattening should produce same number of items whether or not value used")
-        self.assertEqual(len(df1.columns), 2, "A flattened map should have 2 columns")
-        t_map2 = ColumnDict(value_cols=['letter'], skip_cols=['type'])
-        t_map2.update(self.stern_map_path)
-        df2 = t_map2.get_flattened()
-        self.assertGreater(len(df1), len(df2), "Flattening of few columns produces smaller flattened array")
-        self.assertEqual(len(df2.columns), 2, "Flattening should produce 2 columns when value and skip columns")
+    def test_get_number_unique_values(self):
+        dict1 = ColumnDict()
+        wh_df = pd.read_csv(self.wh_events_path, delimiter='\t', header=0)
+        dict1.update(wh_df)
+        self.assertEqual(len(dict1.value_info.keys()), 0, "ColumnDict value_info should be empty if no value columns")
+        self.assertEqual(len(dict1.categorical_info.keys()), len(wh_df.columns),
+                         "ColumnDict categorical_info should have all the columns if no restrictions")
+        count_dict = dict1.get_number_unique_values()
+        self.assertEqual(len(count_dict), 10, "get_number_unique_values should have the correct number of entries")
+        self.assertEqual(count_dict['onset'], 551, "get_number_unique_values should have the right number of unique")
+
+    # def test_get_flattened(self):
+    #     t_map = ColumnDict()
+    #     t_map.update(self.stern_map_path)
+    #     df1 = t_map.get_flattened()
+    #     self.assertEqual(len(df1), 137, "Flattening should produce same number of items whether or not value used")
+    #     self.assertEqual(len(df1.columns), 2, "A flattened map should have 2 columns")
+    #     t_map2 = ColumnDict(value_cols=['letter'], skip_cols=['type'])
+    #     t_map2.update(self.stern_map_path)
+    #     df2 = t_map2.get_flattened()
+    #     self.assertGreater(len(df1), len(df2), "Flattening of few columns produces smaller flattened array")
+    #     self.assertEqual(len(df2.columns), 2, "Flattening should produce 2 columns when value and skip columns")
 
     def test_print(self):
         from io import StringIO
