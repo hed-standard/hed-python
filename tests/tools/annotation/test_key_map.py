@@ -2,7 +2,7 @@ import unittest
 import os
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.summaries.key_map import KeyMap
+from hed.tools.annotation.key_map import KeyMap
 from hed.util.io_util import get_file_list
 from hed.util.data_util import get_row_hash
 

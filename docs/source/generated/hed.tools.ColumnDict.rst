@@ -14,10 +14,8 @@
    .. autosummary::
    
       ~ColumnDict.__init__
-      ~ColumnDict.flatten_categorical
-      ~ColumnDict.flatten_values
-      ~ColumnDict.get_flattened
-      ~ColumnDict.get_marked_key
+      ~ColumnDict.extract_sidecar_template
+      ~ColumnDict.get_number_unique_values
       ~ColumnDict.print
       ~ColumnDict.update
       ~ColumnDict.update_dict

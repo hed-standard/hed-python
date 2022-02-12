@@ -1,6 +1,5 @@
 """ Utilities to facilitate annotation of events in BIDS. """
 from pandas import DataFrame
-from hed.errors.exceptions import HedFileError
 
 
 def df_to_hed(dataframe):
@@ -25,6 +24,22 @@ def df_to_hed(dataframe):
         _update_dict(hed_dict[name], row)
 
     return hed_dict
+
+
+def extract_tag(tag_string, tag):
+    search_tag = tag.lower()
+    pieces = tag_string.split(',')
+    remainder = ''
+    extracted = []
+    separator = ''
+    for piece in pieces:
+        ind = piece.lower().find(search_tag)
+        if ind==-1:
+            remainder = remainder + separator + piece
+            separator = ','
+        else:
+            extracted.append(piece[(ind + len(tag)):])
+    return remainder, extracted
 
 
 def generate_sidecar_entry(column_name, column_values):
@@ -90,33 +105,33 @@ def generate_sidecar_entry(column_name, column_values):
 #     return hed_dict, issues
 
 
-def hed_to_df(sidecar, col_names=None):
+def hed_to_df(sidecar_dict, col_names=None, level_desc=True):
     """ Returns a four-column dataframe version of the HED portions of a JSON sidecar.
 
     Args:
-        sidecar (dict):     A dictionary conforming to BIDS JSON events sidecar format.
+        sidecar_dict (dict):     A dictionary conforming to BIDS JSON events sidecar format.
         col_names (list):   A list of the cols to include in the flattened side car.
+        level_desc (bool):  If True, the contents of the Levels is used as description if available.
 
     Returns:
         dataframe containing four columns representing HED portion of sidecar.
 
     """
 
-    if not isinstance(sidecar, dict):
-        raise HedFileError("BadSidecar", f"flatten sidecar must have a sidecar dictionary not [{str(sidecar)}]", "")
     if not col_names:
-        col_names = sidecar.keys()
+        col_names = sidecar_dict.keys()
     column_name = []
     column_value = []
     column_description = []
     hed_tags = []
 
-    for col_key, col_dict in sidecar.items():
-
-        if col_key not in col_names or not isinstance(col_dict, dict) or 'HED' not in col_dict:
+    for col_key, col_dict in sidecar_dict.items():
+        if col_key not in col_names or not isinstance(col_dict, dict):
             continue
-        hed_dict = col_dict['HED']
-        keys, values, descriptions, tags = _flatten_col(col_key, hed_dict)
+        elif 'Levels' in col_dict or 'HED' in col_dict and isinstance(col_dict['HED'], dict):
+            keys, values, descriptions, tags = _flatten_cat_col(col_key, col_dict, level_desc=level_desc)
+        else:
+            keys, values, descriptions, tags = _flatten_val_col(col_key, col_dict)
         column_name = column_name + keys
         column_value = column_value + values
         column_description = column_description + descriptions
@@ -154,20 +169,35 @@ def _extract_tag(description, tag):
     else:
         return f"{tag},Description/{description}"
 
-
-def _flatten_col(col_key, hed_dict):
-    if isinstance(hed_dict, str):
-        return [col_key], ['n/a'], ['n/a'], [hed_dict]
+def _flatten_cat_col(col_key, col_dict, level_desc=True):
     keys = []
     values = []
     descriptions = []
     tags = []
-    for col_value, col_str in hed_dict.items():
+    level_dict = {}
+    hed_dict = col_dict.get('HED', {})
+    if level_desc:
+        level_dict = col_dict.get('Levels', {})
+    for col_value, entry_value in hed_dict.items():
         keys.append(col_key)
         values.append(col_value)
-        descriptions.append('n/a')
-        tags.append(col_str)
+        if col_value in level_dict:
+            descriptions.append(level_dict[col_value])
+        else:
+            descriptions.append('n/a')
+        tags.append(entry_value)
     return keys, values, descriptions, tags
+
+
+def _flatten_val_col(col_key, col_dict):
+    key = col_key
+    value = 'n/a'
+    description = 'n/a'
+    if 'HED' in col_dict:
+        tags = col_dict['HED']
+    else:
+        tags = 'n/a'
+    return [key], [value], [description], [tags]
 
 
 def _update_dict(row_dict, row):
@@ -199,7 +229,7 @@ if __name__ == '__main__':
     #
     # event_files = get_file_list(bids_root_path, extensions=[".tsv"], name_suffix="_events")
     # column_to_skip = ["onset", "duration", "sample", "stim_file", "trial"]
-    # col_dict = ColumnDict(skip_cols=column_to_skip, name=bids_root_path)
+    # col_dict = ColumnSummary(skip_cols=column_to_skip, name=bids_root_path)
     # for file in event_files:
     #     col_dict.update(file)
     # col_dict.print()
