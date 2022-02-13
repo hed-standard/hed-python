@@ -4,14 +4,6 @@ hed.tools.bids package
 Submodules
 ----------
 
-hed.tools.bids.bids\_annotation module
---------------------------------------
-
-.. automodule:: hed.tools.bids.bids_annotation
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 hed.tools.bids.bids\_dataset module
 -----------------------------------
 

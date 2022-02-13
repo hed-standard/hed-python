@@ -7,8 +7,8 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   hed.tools.annotation
    hed.tools.bids
-   hed.tools.summaries
 
 Submodules
 ----------

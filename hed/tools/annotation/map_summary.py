@@ -70,7 +70,9 @@ def make_combined_dicts(file_dict, skip_cols=None):
 
 
 def update_dict_counts(count_dicts, col_name, col_values):
-    """ Update the counts in a dictionary based on the column values in a """
+    """ Update the counts in a dictionary based on the column values in a dictionary.
+
+    """
     values = col_values.value_counts(ascending=True)
     if col_name not in count_dicts:
         count_dicts[col_name] = {}
