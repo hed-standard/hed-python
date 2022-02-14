@@ -1,9 +1,9 @@
 from hed.errors.exceptions import HedFileError
 from hed.util.data_util import get_new_dataframe
-from hed.tools.bids.bids_annotation import generate_sidecar_entry
+from hed.tools.annotation.annotation_util import generate_sidecar_entry
 
 
-class ColumnDict:
+class ColumnSummary:
     """Summarizes the contents of a spreadsheet. """
 
     def __init__(self, value_cols=None, skip_cols=None, name='', header_char='*'):

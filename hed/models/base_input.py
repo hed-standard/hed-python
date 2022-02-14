@@ -409,6 +409,7 @@ class BaseInput:
     def get_def_and_mapper_issues(self, error_handler, check_for_warnings=False):
         """
             Returns formatted issues found with definitions and columns.
+
         Parameters
         ----------
         error_handler : ErrorHandler

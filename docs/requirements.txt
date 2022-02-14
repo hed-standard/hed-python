@@ -1,4 +1,4 @@
-myst-parser==0.16.1
+myst-parser==0.17.0
 Pygments==2.11.2
 numpydoc==1.2
 

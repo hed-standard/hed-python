@@ -1,5 +1,5 @@
 """ Utilities for extracting counts of items in columns. """
-from hed.tools.summaries.col_dict import ColumnDict
+from hed.tools.annotation.column_summary import ColumnSummary
 from hed.util.io_util import get_file_list
 from hed.util.data_util import get_new_dataframe
 
@@ -46,10 +46,10 @@ def make_combined_dicts(file_dict, skip_cols=None):
         dict:  A combined dictionary
     """
 
-    dicts_all = ColumnDict(skip_cols=skip_cols)
+    dicts_all = ColumnSummary(skip_cols=skip_cols)
     dicts = {}
     for key, file in file_dict.items():
-        orig_dict = ColumnDict(skip_cols=skip_cols)
+        orig_dict = ColumnSummary(skip_cols=skip_cols)
         df = get_new_dataframe(file)
         orig_dict.update(df)
         dicts[key] = orig_dict
@@ -70,7 +70,9 @@ def make_combined_dicts(file_dict, skip_cols=None):
 
 
 def update_dict_counts(count_dicts, col_name, col_values):
-    """ Update the counts in a dictionary based on the column values in a """
+    """ Update the counts in a dictionary based on the column values in a dictionary.
+
+    """
     values = col_values.value_counts(ascending=True)
     if col_name not in count_dicts:
         count_dicts[col_name] = {}

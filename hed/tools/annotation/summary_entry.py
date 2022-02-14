@@ -3,7 +3,7 @@ from hed.models.hed_group import HedGroup
 from hed.models.model_constants import DefTagNames
 from hed.models.sidecar import Sidecar
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.summaries.summary_util import add_tag_list_to_dict, breakout_tags, extract_dict_values
+from hed.tools.annotation.summary_util import add_tag_list_to_dict, breakout_tags, extract_dict_values
 
 
 class SummaryEntry:
