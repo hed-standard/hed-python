@@ -46,8 +46,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
-    "sphinx.ext.extlinks",
-    "numpydoc"
+    "sphinx.ext.extlinks"
 ]
 
 autosummary_generate = True

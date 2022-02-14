@@ -87,11 +87,13 @@ def hed_to_df(sidecar_dict, col_names=None):
     """ Returns a four-column dataframe version of the HED portions of a JSON sidecar.
 
     Args:
-        sidecar_dict (dict):     A dictionary conforming to BIDS JSON events sidecar format.
-        col_names (list):   A list of the cols to include in the flattened side car.
+        sidecar_dict (dict):  A dictionary conforming to BIDS JSON events sidecar format.
+        col_names (list):     A list of the cols to include in the flattened side car.
 
     Returns:
-        dataframe containing four columns representing HED portion of sidecar.
+        DataFrame:   Four-column spreadsheet representing HED portion of sidecar.
+
+    The returned DataFrame has columns: column_name, column_value, description, and hed.
 
     """
 
