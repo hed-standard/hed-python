@@ -18,5 +18,4 @@ from .annotation.map_summary import get_columns_info
 from .annotation.summary_entry import SummaryEntry
 from .annotation.tag_summary import TagSummary
 
-from .sidecar_map import SidecarMap
 from .hed_logger import HedLogger

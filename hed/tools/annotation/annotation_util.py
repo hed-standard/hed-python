@@ -76,8 +76,8 @@ def generate_sidecar_entry(column_name, column_values=None):
         for column_value in column_values:
             if column_value == "n/a":
                 continue
-            levels[column_value] = f"Level for {column_value}"
-            hed[column_value] = f"Description/Tags for {column_value}"
+            levels[column_value] = f"Description for {column_value}"
+            hed[column_value] = f"Label/{column_value}"
         sidecar_entry["Levels"] = levels
         sidecar_entry["HED"] = hed
     return sidecar_entry
