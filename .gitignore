@@ -117,3 +117,6 @@ Thumbs.db
 
 # Folder config file
 Desktop.ini
+
+# Project specific
+schema_cache_test/

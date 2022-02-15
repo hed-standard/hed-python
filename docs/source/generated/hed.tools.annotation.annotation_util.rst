@@ -13,6 +13,7 @@
 
    .. autosummary::
    
+      check_df_columns
       df_to_hed
       extract_tag
       generate_sidecar_entry

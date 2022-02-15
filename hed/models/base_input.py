@@ -74,7 +74,8 @@ class BaseInput:
         self._dataframe = None
 
         if input_type in self.TEXT_EXTENSION:
-            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header, dtype=str)
+            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
+                                              dtype=str, keep_default_na=False, na_values=None)
         elif input_type in self.EXCEL_EXTENSION:
             self._loaded_workbook = openpyxl.load_workbook(file)
             loaded_worksheet = self.get_worksheet(self._worksheet_name)
@@ -471,9 +472,9 @@ class BaseInput:
             # first row is columns
             cols = next(data)
             data = list(data)
-            return pandas.DataFrame(data, columns=cols)
+            return pandas.DataFrame(data, columns=cols, dtype=str)
         else:
-            return pandas.DataFrame(worksheet.values)
+            return pandas.DataFrame(worksheet.values, dtype=str)
 
     def _run_validators(self, hed_ops, error_handler, run_on_raw=False, expand_defs=False, **kwargs):
         validation_issues = []

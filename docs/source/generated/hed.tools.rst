@@ -21,14 +21,6 @@ hed.tools.hed\_logger module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.sidecar\_map module
------------------------------
-
-.. automodule:: hed.tools.sidecar_map
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
