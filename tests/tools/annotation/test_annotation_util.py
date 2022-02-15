@@ -6,6 +6,7 @@ from hed.tools import df_to_hed, extract_tag, generate_sidecar_entry, hed_to_df,
 from hed.tools.annotation.annotation_util import _flatten_cat_col, _flatten_val_col
 
 
+# noinspection PyBroadException
 class Test(unittest.TestCase):
 
     @classmethod
@@ -13,15 +14,15 @@ class Test(unittest.TestCase):
         json_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                  '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json'))
         cls.sidecar1a = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
-                        "b": {"HED": "Purple"}}
+                         "b": {"HED": "Purple"}}
         cls.sidecar1b = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
-                        "b": {"HED": "Purple", "Description": "Its a color."}}
+                         "b": {"HED": "Purple", "Description": "Its a color."}}
         cls.sidecar1c = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
                          "b": {"HED": "Purple, Description/New purple", "Description": "Its a color."}}
         cls.sidecar2a = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
-                        "b": {"HED": {"b2": "Purple", "b3": "Red"}}}
+                         "b": {"HED": {"b2": "Purple", "b3": "Red"}}}
         cls.sidecar2b = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
-                        "b": {"HED": {"b2": "Purple", "b3": "Red"}}}
+                         "b": {"HED": {"b2": "Purple", "b3": "Red"}}}
         cls.sidecar2c = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
                          "b": {"HED": {"b2": "Purple,Description/Bad purple", "b3": "Red"},
                                "Levels": {"b2": "Its purple.", "b3": "Its red."}}}
@@ -37,6 +38,22 @@ class Test(unittest.TestCase):
         hed2 = df_to_hed(df2)
         self.assertIsInstance(hed2, dict, "df_to_hed should produce a dictionary")
         self.assertEqual(len(hed2), 1, "df_to_hed ")
+
+    def test_df_to_dict_columns_missing(self):
+        df2a = hed_to_df(self.sidecar2a, col_names=None)
+        df2b = hed_to_df(self.sidecar2b, col_names=None)
+        df2c = hed_to_df(self.sidecar2c, col_names=None)
+        hed2a = df_to_hed(df2a)
+        self.assertIsInstance(hed2a, dict)
+        # TODO: test of missing columns
+
+    def test_df_to_dict_col_names(self):
+        df2a = hed_to_df(self.sidecar2a, col_names=None)
+        df2b = hed_to_df(self.sidecar2b, col_names=None)
+        df2c = hed_to_df(self.sidecar2c, col_names=None)
+        hed2a = df_to_hed(df2a)
+        self.assertIsInstance(hed2a, dict)
+        # TODO: test of col_names
 
     def test_extract_tag(self):
         str1 = "Bear, Description, Junk"
@@ -86,13 +103,30 @@ class Test(unittest.TestCase):
         self.assertIsInstance(df2a, DataFrame)
         self.assertEqual(len(df2a), 2)
 
-    def test_merge_hed_dict(self):
+    def test_merge_hed_dict_cat_col(self):
+        df2a = hed_to_df(self.sidecar2a, col_names=None)
+        df2b = hed_to_df(self.sidecar2b, col_names=None)
+        df2c = hed_to_df(self.sidecar2c, col_names=None)
+        hed2a = df_to_hed(df2a)
+        self.assertIsInstance(hed2a, dict)
+        # TODO: test of categorical columns not yet written
+
+    def test_merge_hed_dict_value_col(self):
         df1a = hed_to_df(self.sidecar1a, col_names=None)
+        df1b = hed_to_df(self.sidecar1b, col_names=None)
         hed1a = df_to_hed(df1a)
+        hed1b = df_to_hed(df1b)
         self.assertEqual(len(df1a), 1, "merge_hed_dict should have the right length before merge")
         self.assertEqual(len(self.sidecar1a), 2, "merge_hed_dict should have the right length before merge")
         merge_hed_dict(self.sidecar1a, hed1a)
         self.assertEqual(len(self.sidecar1a), 2, "merge_hed_dict should have the right length after merge")
+        self.assertIsInstance(self.sidecar1a['b']['HED'], str, "merge_hed_dict preserve a value key")
+        self.assertNotIn('Description', self.sidecar1a['b'], "merge_hed_dict should not have description when n/a")
+        merge_hed_dict(self.sidecar1b, hed1a)
+        self.assertIsInstance(self.sidecar1b['b']['HED'], str, "merge_hed_dict preserve a value key")
+        self.assertIn('Description', self.sidecar1b['b'], "merge_hed_dict should not have description when n/a")
+        merge_hed_dict(self.sidecar1b, hed1b)
+        self.assertIn('Description', self.sidecar1b['b'], "merge_hed_dict should not have description when n/a")
 
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]
@@ -139,7 +173,6 @@ class Test(unittest.TestCase):
         col1 = self.sidecar2c["a"]
         col2 = self.sidecar2c["b"]
         self.assertTrue(col1)
-
 
 
 if __name__ == '__main__':

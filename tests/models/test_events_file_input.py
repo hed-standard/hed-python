@@ -6,6 +6,8 @@ from hed.models import Sidecar, EventsInput
 from hed import schema
 from hed.validator import HedValidator
 
+# TODO: Add tests about correct handling of 'n/a'
+
 
 class Test(unittest.TestCase):
     @classmethod

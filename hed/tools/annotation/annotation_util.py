@@ -1,5 +1,23 @@
 """ Utilities to facilitate annotation of events in BIDS. """
 from pandas import DataFrame
+from hed.errors import HedFileError
+
+
+def check_df_columns(df, required_cols=['column_name', 'column_value', 'description', 'HED']):
+    """ Return a list of the specified columns that are missing from a dataframe.
+    Args:
+        df (DataFrame):        Spreadsheet to check the columns of.
+        required_cols (list):  List of column names that must be present
+
+    Returns:
+        list:   List of column names that are missing
+
+    """
+    missing_cols = []
+    for col in required_cols:
+        if col not in df.columns:
+            missing_cols.append(col)
+    return missing_cols
 
 
 def df_to_hed(dataframe, description_tag=True):
@@ -15,7 +33,9 @@ def df_to_hed(dataframe, description_tag=True):
     The DataFrame must have the columns with names: column_name, column_value,
         description, and HED.
     """
-
+    missing_cols = check_df_columns(dataframe)
+    if missing_cols:
+        raise HedFileError("RequiredColumnsMissing", f"Columns {str(missing_cols)} are missing from dataframe")
     hed_dict = {}
     for index, row in dataframe.iterrows():
         if row['column_value'] == 'n/a':
@@ -118,7 +138,7 @@ def hed_to_df(sidecar_dict, col_names=None):
 
     data = {"column_name": column_name, "column_value": column_value,
             "description": column_description, "HED": hed_tags}
-    dataframe = DataFrame(data)
+    dataframe = DataFrame(data).astype(str)
     return dataframe
 
 
@@ -135,8 +155,9 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             sidecar_dict[key] = value_dict
             continue
         sidecar_dict[key]['HED'] = value_dict['HED']
-        if isinstance(value_dict['HED'], str) and 'Description' in value_dict:
-            sidecar_dict[key]['Description'] = value_dict['Description']
+        if isinstance(value_dict['HED'], str):
+            if value_dict.get('Description', "n/a") != "n/a":
+                sidecar_dict[key]['Description'] = value_dict['Description']
             continue
         if isinstance(value_dict['HED'], dict) and 'Levels' in value_dict:
             sidecar_dict[key]['Levels'] = value_dict['Levels']
