@@ -1,7 +1,7 @@
 """ HED tools for analysis and summarization. """
 
 from hed.tools.annotation.annotation_util import \
-    extract_tag, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
+    check_df_columns, extract_tag, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
 from .bids.bids_dataset import BidsDataset
 from .bids.bids_event_file import BidsEventFile
 from .bids.bids_event_files import BidsEventFiles
