@@ -4,7 +4,7 @@ HED API reference
 .. _base_ref:
 
 
-HED tag classes
+HED models
 ----------------
 
 .. autosummary:: hed.models
@@ -62,14 +62,14 @@ HED tools
    hed.tools.BidsFile
    hed.tools.BidsJsonFile
    hed.tools.BidsSidecarFile
-   hed.tools.ColumnDict
+   hed.tools.BidsTsvFile
+   hed.tools.ColumnSummary
    hed.tools.DatasetSummary
    hed.tools.KeyMap
    hed.tools.KeyTemplate
    hed.tools.SummaryEntry
    hed.tools.TagSummary
-   hed.tools.summaries.map_summary
-   hed.tools.summaries.summary_util
+   hed.tools.annotation.annotation_util
 
 
 .. currentmodule:: hed

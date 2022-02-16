@@ -1,8 +1,8 @@
 import os
 import unittest
-from hed.tools.summaries.col_dict import ColumnDict
+from hed.tools.annotation.column_summary import ColumnSummary
 from hed.util.io_util import get_file_list, make_file_dict
-from hed.tools.summaries.map_summary import get_columns_info, get_key_counts, make_combined_dicts, update_dict_counts
+from hed.tools.annotation.map_summary import get_columns_info, get_key_counts, make_combined_dicts, update_dict_counts
 from hed.util.data_util import get_new_dataframe
 
 
@@ -55,13 +55,13 @@ class Test(unittest.TestCase):
         files_bids = get_file_list(self.bids_dir, extensions=[".tsv"], name_suffix="_events")
         file_dict = make_file_dict(files_bids)
         dicts_all1, dicts1 = make_combined_dicts(file_dict)
-        self.assertTrue(isinstance(dicts_all1, ColumnDict), "make_combined_dicts should return a ColumnDict")
+        self.assertTrue(isinstance(dicts_all1, ColumnSummary), "make_combined_dicts should return a ColumnSummary")
         self.assertTrue(isinstance(dicts1, dict), "make_combined_dicts should also return a dictionary of file names")
         self.assertEqual(len(dicts1), 6, "make_combined_dicts should return correct number of file names")
         self.assertEqual(len(dicts_all1.categorical_info), 10,
                          "make_combined_dicts should return right number of entries")
         dicts_all2, dicts2 = make_combined_dicts(file_dict, skip_cols=["onset", "duration", "sample"])
-        self.assertTrue(isinstance(dicts_all2, ColumnDict), "make_combined_dicts should return a ColumnDict")
+        self.assertTrue(isinstance(dicts_all2, ColumnSummary), "make_combined_dicts should return a ColumnSummary")
         self.assertTrue(isinstance(dicts2, dict), "make_combined_dicts should also return a dictionary of file names")
         self.assertEqual(len(dicts2), 6, "make_combined_dicts should return correct number of file names")
         self.assertEqual(len(dicts_all2.categorical_info), 7,

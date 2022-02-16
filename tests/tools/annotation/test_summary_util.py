@@ -3,7 +3,7 @@ import json
 import unittest
 from hed.models.hed_string import HedString
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.summaries.summary_util import breakout_tags, get_schema_entries, add_tag_list_to_dict
+from hed.tools.annotation.summary_util import breakout_tags, get_schema_entries, add_tag_list_to_dict
 
 
 class Test(unittest.TestCase):

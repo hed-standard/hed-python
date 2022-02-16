@@ -1,4 +1,4 @@
-""" Utilities used in computing dataset summaries. """
+""" Utilities used in computing dataset annotation. """
 from hed.models.hed_tag import HedTag
 
 
@@ -33,6 +33,7 @@ def extract_dict_values(tag_dict, tag_name, tags):
             return [], False
         tags.remove(tag_name)
         return list(tag_dict[tag_name].keys()), True
+
 
 def get_schema_entries(hed_schema, tag, library_prefix=""):
     entry_list = []

@@ -1,5 +1,5 @@
-Welcome to HED Python Tools documentation!
-=============================================
+HED Python Tools and User Guides
+=================================
 
 .. sidebar:: **Downloads**
 
