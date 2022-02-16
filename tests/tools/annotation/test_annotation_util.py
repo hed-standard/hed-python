@@ -2,8 +2,8 @@ import os
 import json
 import unittest
 from pandas import DataFrame
-from hed.tools import df_to_hed, extract_tag, generate_sidecar_entry, hed_to_df, merge_hed_dict
-from hed.tools.annotation.annotation_util import _flatten_cat_col, _flatten_val_col
+from hed.tools import check_df_columns, df_to_hed, extract_tag, generate_sidecar_entry, hed_to_df, merge_hed_dict
+from hed.tools.annotation.annotation_util import _flatten_cat_col, _flatten_val_col,  _get_value_entry, _update_cat_dict
 
 
 # noinspection PyBroadException
@@ -29,6 +29,15 @@ class Test(unittest.TestCase):
         with open(json_path) as fp:
             cls.sidecar3 = json.load(fp)
 
+    def test_check_df_columns(self):
+        df1 = hed_to_df(self.sidecar1a)
+        missing1 = check_df_columns(df1)
+        self.assertFalse(missing1)
+        df2 = df1.drop('column_value', axis=1)
+        missing2 = check_df_columns(df2, ('column_name', 'column_value'))
+        self.assertTrue(missing2, "check_df_column has non-empty return if items missing")
+        self.assertEqual(len(missing2), 1, "check_df_column finds correct number of missing items")
+
     def test_df_to_hed(self):
         df1 = hed_to_df(self.sidecar1a, col_names=None)
         hed1 = df_to_hed(df1)
@@ -39,7 +48,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(hed2, dict, "df_to_hed should produce a dictionary")
         self.assertEqual(len(hed2), 1, "df_to_hed ")
 
-    def test_df_to_dict_columns_missing(self):
+    def test_df_to_hed_columns_missing(self):
         df2a = hed_to_df(self.sidecar2a, col_names=None)
         df2b = hed_to_df(self.sidecar2b, col_names=None)
         df2c = hed_to_df(self.sidecar2c, col_names=None)
@@ -47,7 +56,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(hed2a, dict)
         # TODO: test of missing columns
 
-    def test_df_to_dict_col_names(self):
+    def test_df_to_hed_extra_col_names(self):
         df2a = hed_to_df(self.sidecar2a, col_names=None)
         df2b = hed_to_df(self.sidecar2b, col_names=None)
         df2c = hed_to_df(self.sidecar2c, col_names=None)
@@ -92,7 +101,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(entry2['HED'], str,
                               "generate_sidecar_entry HED entry should be str when no column values")
 
-    def test_hed_to_def(self):
+    def test_hed_to_df(self):
         df1a = hed_to_df(self.sidecar1a, col_names=None)
         self.assertIsInstance(df1a, DataFrame)
         self.assertEqual(len(df1a), 1)
@@ -173,6 +182,44 @@ class Test(unittest.TestCase):
         col1 = self.sidecar2c["a"]
         col2 = self.sidecar2c["b"]
         self.assertTrue(col1)
+
+    def test_get_value_entry(self):
+        dict1 = _get_value_entry('n/a', 'n/a')
+        self.assertFalse(dict1, "_get_value_entry should return empty dict if everything n/a")
+        dict2 = _get_value_entry('', '')
+        self.assertFalse(dict2, "_get_value_entry should return empty dict if everything empty")
+        dict3 = _get_value_entry('Red,Blue', '')
+        self.assertIn('HED', dict3, "_get_value_entry should have a HED entry when tags but no description")
+        self.assertNotIn('Description', dict3,
+                         "_get_value_entry should not have a Description entry when tags but no description")
+        dict4 = _get_value_entry('Red,Blue,Description/Too bad', '')
+        self.assertIn('HED', dict4, "_get_value_entry should have a HED entry when Description tag")
+        self.assertNotIn('Description', dict4,
+                         "_get_value_entry should not have a Description entry when Description tag")
+        dict5 = _get_value_entry('', 'This is a test')
+        self.assertIn('HED', dict5, "_get_value_entry should have a HED entry when Description used")
+        self.assertIn('Description', dict5,
+                      "_get_value_entry should have a Description entry when Description used")
+        dict6 = _get_value_entry('Red,Blue', 'This is a test')
+        self.assertIn('HED', dict5, "_get_value_entry should have a HED entry when Description used")
+        self.assertEqual(dict5['HED'], 'Description/This is a test',
+                         "_get_value_entry should correct value when Description used for HED tags")
+        self.assertIn('Description', dict5,
+                      "_get_value_entry should have a Description entry when Description used")
+        dict7 = _get_value_entry('Red,Blue', 'This is a test')
+        self.assertIn('HED', dict7, "_get_value_entry should have a HED entry when Description used")
+        self.assertIn('Description', dict7, "_get_value_entry should have a HED entry when Description used")
+        dict8 = _get_value_entry('', 'This is a test', description_tag=False)
+        self.assertNotIn('HED', dict8, "_get_value_entry should not have a HED entry when Description not used")
+        self.assertIn('Description', dict8, "_get_value_entry should have a Description entry when Description not used")
+
+    def test_update_cat_dict(self):
+        # TODO: Improve tests
+        cat_dict = self.sidecar3['event_type']
+        value1 = cat_dict['HED']['show_face']
+        self.assertNotEqual(cat_dict['HED']['show_face'], 'Blue,Red')
+        _update_cat_dict(cat_dict, 'show_face', 'Blue,Red', 'n/a', description_tag=True)
+        self.assertEqual(cat_dict['HED']['show_face'], 'Blue,Red')
 
 
 if __name__ == '__main__':

@@ -3,19 +3,20 @@ from pandas import DataFrame
 from hed.errors import HedFileError
 
 
-def check_df_columns(df, required_cols=['column_name', 'column_value', 'description', 'HED']):
+def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
     """ Return a list of the specified columns that are missing from a dataframe.
     Args:
-        df (DataFrame):        Spreadsheet to check the columns of.
-        required_cols (list):  List of column names that must be present
+        df (DataFrame):         Spreadsheet to check the columns of.
+        required_cols (tuple):  List of column names that must be present
 
     Returns:
         list:   List of column names that are missing
 
     """
     missing_cols = []
+    column_list = list(df.columns.values)
     for col in required_cols:
-        if col not in df.columns:
+        if col not in column_list:
             missing_cols.append(col)
     return missing_cols
 
@@ -38,16 +39,15 @@ def df_to_hed(dataframe, description_tag=True):
         raise HedFileError("RequiredColumnsMissing", f"Columns {str(missing_cols)} are missing from dataframe")
     hed_dict = {}
     for index, row in dataframe.iterrows():
-        if row['column_value'] == 'n/a':
-            hed_dict[row['column_name']] = {'HED': row['HED'], 'Description': row['description']}
+        if row['HED'] == 'n/a' and row['description'] == 'n/a':
             continue
-        cat_dict = hed_dict.get(row['column_name'], {'HED': {}, 'Levels': {}})
-        tags = row['HED']
-        if description_tag and row['description'] != 'n/a':
-            tags = tags + ", Description/" + row['description']
-        cat_dict['HED'][row['column_value']] = tags
-        if row['description'] != 'n/a':
-            cat_dict['Levels'][row['column_value']] = row['description']
+        if row['column_value'] == 'n/a':
+            hed_dict[row['column_name']] = _get_value_entry(row['HED'], row['description'],
+                                                            description_tag=description_tag)
+            continue
+        cat_dict = hed_dict.get(row['column_name'], {})
+        _update_cat_dict(cat_dict, row['column_value'], row['HED'], row['description'],
+                         description_tag=description_tag)
         hed_dict[row['column_name']] = cat_dict
     return hed_dict
 
@@ -230,3 +230,31 @@ def _get_row_tags(row, description_tag=True):
     if extracted:
         description = " ".join([description, extracted])
     return tags, description
+
+
+def _get_value_entry(hed_entry, description_entry, description_tag=True):
+    value_dict = {}
+    tags = ""
+    if hed_entry and hed_entry != 'n/a':
+        tags = hed_entry
+    if description_entry and description_entry != 'n/a':
+        value_dict['Description'] = description_entry
+        if description_tag and tags:
+            tags = tags + ", Description/" + description_entry
+        elif description_tag and not tags:
+            tags = "Description/" + description_entry
+    if tags:
+        value_dict["HED"] = tags
+    return value_dict
+
+
+def _update_cat_dict(cat_dict, value_entry, hed_entry, description_entry, description_tag=True):
+    value_dict = _get_value_entry(hed_entry, description_entry, description_tag)
+    if 'Description' in value_dict:
+        level_part = cat_dict.get('Levels', {})
+        level_part[value_entry] = value_dict['Description']
+        cat_dict['Levels'] = level_part
+    if 'HED' in value_dict:
+        hed_part = cat_dict.get('HED', {})
+        hed_part[value_entry] = value_dict['HED']
+        cat_dict['HED'] = hed_part
