@@ -34,7 +34,7 @@ def is_hed3_version_number(version_string):
 
 
 attribute_validators = {
-        "version": (_validate_version_string, HedExceptions.BAD_HED_SEMANTIC_VERSION),
+        "version": (_validate_version_string, HedExceptions.HED_SCHEMA_VERSION_INVALID),
         "library": (_validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
     }
 
@@ -48,5 +48,5 @@ def validate_attributes(attrib_dict, filename):
                 raise HedFileError(error_code, result, filename)
 
     if constants.VERSION_ATTRIBUTE not in attrib_dict:
-        raise HedFileError(HedExceptions.BAD_HED_SEMANTIC_VERSION, "No version attribute found in header",
+        raise HedFileError(HedExceptions.HED_SCHEMA_VERSION_INVALID, "No version attribute found in header",
                            filename=filename)

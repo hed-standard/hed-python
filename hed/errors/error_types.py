@@ -52,7 +52,7 @@ class ValidationErrors:
 
     HED_MISSING_COLUMN = "HED_MISSING_COLUMN"
     HED_UNKNOWN_COLUMN = "HED_UNKNOWN_COLUMN"
-    HED_UNKNOWN_PREFIX = "HED_UNKNOWN_PREFIX"
+    HED_LIBRARY_UNMATCHED = "HED_LIBRARY_UNMATCHED"
 
     # Below here shows what the given error maps to
     # HED_TAG_EMPTY
