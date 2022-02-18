@@ -445,7 +445,12 @@ def get_exception_issue_string(issues, title=None):
 
     issue_str = ''
     if issues:
-        translated_messages = [f"ERROR: {issue[1]}.\n    Source Line: {issue[0]}" for issue in issues]
+        translated_messages = []
+        for issue in issues:
+            if isinstance(issue, str):
+                translated_messages.append(f"ERROR: {issue}.")
+            else:
+                translated_messages.append(f"ERROR: {issue[1]}.\n    Source Line: {issue[0]}")
         issue_str += '\n' + '\n'.join(translated_messages)
     if title:
         issue_str = title + '\n' + issue_str
