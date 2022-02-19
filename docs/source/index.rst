@@ -1,9 +1,11 @@
-HED Python Tools and User Guides
-=================================
+Hierarchical Event Descriptor (HED) Python Tools
+================================================
 
 .. sidebar:: **Downloads**
 
-   `HED tools <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
+   * `PDF docs <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
+
+   * `Source code <https://github.com/hed-standard/hed-python/>`_
 
 Note:  this is a work in progress. More information is coming.
 
