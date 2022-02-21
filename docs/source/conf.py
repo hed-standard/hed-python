@@ -52,7 +52,7 @@ extensions = [
 autosummary_generate = True
 autodoc_default_flags = ['members', 'inherited-members']
 add_module_names = False
-
+myst_all_links_external = False
 myst_heading_anchors = 2
 myst_enable_extensions = ["deflist"]
 

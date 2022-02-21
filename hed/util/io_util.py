@@ -93,7 +93,7 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
 
 def get_file_list(dir_path, name_prefix=None, name_suffix=None, extensions=None):
     """ Traverses a directory tree and returns a list of paths to files ending with a particular name_suffix.
-
+    TODO: Add exclude_dirs parameter
     Args:
         dir_path (str):              Full path of the directory tree to be traversed (no ending slash)
         name_prefix (str, None):     An optional name_prefix for the base filename
