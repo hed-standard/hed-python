@@ -9,17 +9,17 @@ class HedExceptions:
     INVALID_EXTENSION = 'invalidExtension'
 
     # These are actual schema issues, not that the file cannot be found or parsed
-    SCHEMA_HEADER_MISSING = 'schemaHeaderMissing'
-    SCHEMA_HEADER_INVALID = 'schemaHeaderInvalid'
+    SCHEMA_HEADER_MISSING = 'HED_SCHEMA_HEADER_INVALID'
+    HED_SCHEMA_HEADER_INVALID = 'HED_SCHEMA_HEADER_INVALID'
     BAD_HED_LIBRARY_NAME = 'badHedLibraryName'
-    BAD_HED_SEMANTIC_VERSION = 'BadHedSemanticVersion'
-    SCHEMA_START_MISSING = 'schemaStartMissing'
-    SCHEMA_END_INVALID = 'schemaEndMissing'
-    HED_END_INVALID = 'hedEndMissing'
+    HED_SCHEMA_VERSION_INVALID = 'HED_SCHEMA_VERSION_INVALID'
+    SCHEMA_START_MISSING = 'HED_WIKI_SEPARATOR_INVALID'
+    SCHEMA_END_INVALID = 'HED_WIKI_SEPARATOR_INVALID'
+    HED_END_INVALID = 'HED_WIKI_SEPARATOR_INVALID'
     INVALID_SECTION_SEPARATOR = 'invalidSectionSeparator'
 
     # This issue will contain a list of lines with issues.
-    HED_SCHEMA_WIKI_WARNINGS = 'HED_SCHEMA_WIKI_WARNINGS'
+    HED_WIKI_DELIMITERS_INVALID = 'HED_WIKI_DELIMITERS_INVALID'
     HED_SCHEMA_NODE_NAME_INVALID = 'HED_SCHEMA_NODE_NAME_INVALID'
 
     SCHEMA_DUPLICATE_PREFIX = 'schemaDuplicatePrefix'
@@ -31,7 +31,7 @@ class HedFileError(Exception):
         self.error_type = error_type
         self.message = message
         self.filename = filename
-        # only filled in when this lists multiple errors, such as the HED_SCHEMA_WIKI_WARNINGS
+        # only filled in when this lists multiple errors, such as the HED_WIKI_DELIMITERS_INVALID
         self.issues = issues
 
     def format_error_message(self, include_tabbing=True, return_string_only=False,
@@ -66,15 +66,15 @@ class HedFileError(Exception):
                                             f"{message}.  '{filename}'",
             HedExceptions.CANNOT_PARSE_JSON: f"{error_prefix}Cannot parse json: {message}. '{filename}'",
             HedExceptions.SCHEMA_HEADER_MISSING: f"{error_prefix}{self.message}.  '{filename}'",
-            HedExceptions.SCHEMA_HEADER_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.HED_SCHEMA_HEADER_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.BAD_HED_LIBRARY_NAME: f"{error_prefix}{self.message}.  '{filename}'",
-            HedExceptions.BAD_HED_SEMANTIC_VERSION: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.HED_SCHEMA_VERSION_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.SCHEMA_START_MISSING: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.SCHEMA_END_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.HED_END_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.INVALID_SECTION_SEPARATOR: f"{error_prefix}{self.message}.  '{filename}'",
             HedExceptions.HED_SCHEMA_NODE_NAME_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
-            HedExceptions.HED_SCHEMA_WIKI_WARNINGS: f"{error_prefix}{self.message}.  '{filename}'",
+            HedExceptions.HED_WIKI_DELIMITERS_INVALID: f"{error_prefix}{self.message}.  '{filename}'",
         }
         default_error_message = f'{error_prefix}Internal Error'
         error_message = error_types.get(error_type, default_error_message)

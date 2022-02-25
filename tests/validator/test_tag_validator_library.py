@@ -101,7 +101,7 @@ class IndividualHedTagsShort(TestHed3):
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=14,
                 index_in_tag_end=18, expected_parent_tag="Item"),
             'unknownPrefix': self.format_error(
-                ValidationErrors.HED_UNKNOWN_PREFIX, tag=0, unknown_prefix="ul:", known_prefixes=["", "tl:"]),
+                ValidationErrors.HED_LIBRARY_UNMATCHED, tag=0, unknown_prefix="ul:", known_prefixes=["", "tl:"]),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

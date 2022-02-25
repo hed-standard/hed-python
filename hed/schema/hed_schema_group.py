@@ -152,7 +152,7 @@ class HedSchemaGroup:
         """
         specific_schema = self.schema_for_prefix(library_prefix)
         if not specific_schema:
-            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, name,
+            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_LIBRARY_UNMATCHED, name,
                                                           library_prefix, self.valid_prefixes)
             return None, None, validation_issues
 
@@ -182,7 +182,7 @@ class HedSchemaGroup:
         """
         specific_schema = self.schema_for_prefix(library_prefix)
         if not specific_schema:
-            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_PREFIX, tag,
+            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_LIBRARY_UNMATCHED, tag,
                                                           library_prefix, self.valid_prefixes)
             return None, None, validation_issues
 

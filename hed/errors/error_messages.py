@@ -121,7 +121,7 @@ def val_error_extra_column(extra_column_name):
         "or identified in sidecars.", {}
 
 
-@hed_tag_error(ValidationErrors.HED_UNKNOWN_PREFIX)
+@hed_tag_error(ValidationErrors.HED_LIBRARY_UNMATCHED)
 def val_error_unknown_prefix(tag, unknown_prefix, known_prefixes):
     return f"Tag '{tag} has unknown prefix '{unknown_prefix}'.  Valid prefixes: {known_prefixes}", {}
 

@@ -71,7 +71,7 @@ required_sections = [HedWikiSection.Schema, HedWikiSection.EndSchema, HedWikiSec
 class HedSchemaWikiParser:
     def __init__(self, wiki_file_path, schema_as_string):
         self.filename = wiki_file_path
-        self.warnings = []
+        self.fatal_errors = []
         self._schema = HedSchema()
         self._schema.filename = wiki_file_path
 
@@ -90,11 +90,11 @@ class HedSchemaWikiParser:
         except FileNotFoundError as e:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, wiki_file_path)
 
-        if self.warnings:
-            raise HedFileError(HedExceptions.HED_SCHEMA_WIKI_WARNINGS,
-                               f"{len(self.warnings)} issues found when parsing schema.  See the .issues "
+        if self.fatal_errors:
+            raise HedFileError(HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+                               f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
                                f"parameter on this exception for more details.", self.filename,
-                               issues=self.warnings)
+                               issues=self.fatal_errors)
         self._schema.finalize_dictionaries()
 
     @staticmethod
@@ -223,7 +223,7 @@ class HedSchemaWikiParser:
         for line in lines:
             if line.strip():
                 msg = f"Extra content [{line}] HED line and other sections"
-                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg,  filename=self.filename, issues=[msg])
+                raise HedFileError(HedExceptions.HED_SCHEMA_HEADER_INVALID, msg,  filename=self.filename, issues=[msg])
 
     def _read_text_block(self, lines):
         text = ""
@@ -273,12 +273,12 @@ class HedSchemaWikiParser:
                 if level < len(parent_tags):
                     parent_tags = parent_tags[:level]
                 elif level > len(parent_tags):
-                    self._add_warning(line, "Line has too many *'s at the front.  You cannot skip a level.")
+                    self._add_fatal_error(line, "Line has too many *'s at the front.  You cannot skip a level.")
                     continue
             new_tag_name = self._add_tag_line(parent_tags, line)
             if not new_tag_name:
                 if new_tag_name != "":
-                    self._add_warning(line)
+                    self._add_fatal_error(line)
                 continue
 
             parent_tags.append(new_tag_name)
@@ -295,7 +295,7 @@ class HedSchemaWikiParser:
         for line in lines:
             unit_class_unit, _ = self._get_tag_name(line)
             if unit_class_unit is None:
-                self._add_warning(line)
+                self._add_fatal_error(line)
                 continue
             level = self._get_tag_level(line)
             # This is a unit class
@@ -379,7 +379,7 @@ class HedSchemaWikiParser:
             divider_index = pair.find(':')
             if divider_index == -1:
                 msg = f"Found poorly matched key:value pair in header: {pair}"
-                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.filename, issues=[msg])
+                raise HedFileError(HedExceptions.HED_SCHEMA_HEADER_INVALID, msg, filename=self.filename, issues=[msg])
             key, value = pair[:divider_index], pair[divider_index + 1:]
             key = key.strip()
             value = value.strip()
@@ -424,9 +424,9 @@ class HedSchemaWikiParser:
         index1 = tag_line.find(no_wiki_start_tag)
         index2 = tag_line.find(no_wiki_end_tag)
         if (index1 == -1 and index2 != -1) or (index2 == -1 and index1 != -1):
-            self._add_warning(tag_line, "Invalid or non matching <nowiki> tags found")
+            self._add_fatal_error(tag_line, "Invalid or non matching <nowiki> tags found")
         elif index1 != -1 and index2 != -1 and index2 <= index1:
-            self._add_warning(tag_line, "</nowiki> appears before <nowiki> on a line")
+            self._add_fatal_error(tag_line, "</nowiki> appears before <nowiki> on a line")
         tag_line = re.sub(no_wiki_tag, '', tag_line)
         return tag_line
 
@@ -561,19 +561,19 @@ class HedSchemaWikiParser:
     def _add_single_line(self, tag_line, key_class, element_name=None):
         node_name, index = self._get_tag_name(tag_line)
         if node_name is None:
-            self._add_warning(tag_line)
+            self._add_fatal_error(tag_line)
             return
         if element_name:
             node_name = element_name
 
         node_attributes, index = self._get_tag_attributes(tag_line, index)
         if node_attributes is None:
-            self._add_warning(tag_line, "Attributes has mismatched delimiters")
+            self._add_fatal_error(tag_line, "Attributes has mismatched delimiters")
             return
 
         node_desc, _ = self._get_line_section(tag_line, index)
         if node_desc is None:
-            self._add_warning(tag_line, "Description has mismatched delimiters")
+            self._add_fatal_error(tag_line, "Description has mismatched delimiters")
             return
 
         tag_entry = self._schema._add_tag_to_dict(node_name, key_class)
@@ -585,6 +585,6 @@ class HedSchemaWikiParser:
 
         return tag_entry
 
-    def _add_warning(self, line, warning_message="Schema term is empty or the line is malformed"):
-        self.warnings.append((line, warning_message))
+    def _add_fatal_error(self, line, warning_message="Schema term is empty or the line is malformed"):
+        self.fatal_errors.append((line, warning_message))
         return
