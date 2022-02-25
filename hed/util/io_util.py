@@ -4,7 +4,6 @@ import os
 from werkzeug.utils import secure_filename
 
 
-
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
     """ Determines whether test_file has correct extension, name_suffix, and name_prefix.
 
@@ -138,14 +137,14 @@ def get_path_components(this_path, root_path):
         return [base_path]
 
 
-def make_file_dict(file_list, indices=(0, -2), separator='_'):
+def make_file_dict(file_list, name_indices=(0, 2), separator='_'):
     """ Return a dictionary with keys that are simplified file names and values that are full paths
 
     This function is used for cross listing BIDS style files for different studies.
 
     Args:
         file_list (list):      List containing full paths of files of interest
-        indices (tuple):       List of indices into base file names of pieces to assemble for the key
+        name_indices (tuple):  List of indices into base file names of pieces to assemble for the key
         separator (str):       Character used to separate pieces of key name
     Returns:
         dict:  A dictionary of simplified, path-independent key names and full paths values.
@@ -154,12 +153,12 @@ def make_file_dict(file_list, indices=(0, -2), separator='_'):
     for the_file in file_list:
         the_file = os.path.abspath(the_file)
         base = os.path.basename(the_file)
-        key = make_key(base, indices=indices, separator=separator)
+        key = make_key(base, indices=name_indices, separator=separator)
         file_dict[key] = the_file
     return file_dict
 
 
-def make_key(key_string, indices=(0, -2), separator='_'):
+def make_key(key_string, indices=(0, 2), separator='_'):
     key_value = ''
     pieces = key_string.split(separator)
     for index in list(indices):
