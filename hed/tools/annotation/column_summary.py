@@ -6,7 +6,7 @@ from hed.tools.annotation.annotation_util import generate_sidecar_entry
 class ColumnSummary:
     """Summarizes the contents of a spreadsheet. """
 
-    def __init__(self, value_cols=None, skip_cols=None, name='', header_char='*'):
+    def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ .
 
         Args:
@@ -17,7 +17,6 @@ class ColumnSummary:
         """
 
         self.name = name
-        self.header_char = header_char
         self.categorical_info = {}
         self.value_info = {}
         if value_cols and skip_cols and set(value_cols).intersection(skip_cols):
@@ -48,7 +47,6 @@ class ColumnSummary:
     def extract_sidecar_template(self):
         """ Extract a dictionary compatible with a BIDS JSON event sidecar."""
         side_dict = {}
-        print("Extracting template.....")
         for column_name, columns in self.categorical_info.items():
             column_values = list(columns.keys())
             column_values.sort()
@@ -188,3 +186,24 @@ class ColumnSummary:
             else:
                 self.value_info[col] = self.value_info[col] + col_dict.value_info[col]
 
+    @staticmethod
+    def make_combined_dicts(file_dict, skip_cols=None):
+        """ Return a combined dictionary of column information as well as individual summaries
+
+        Args:
+            file_dict (dict):  Dictionary of file name keys and full path
+            skip_cols (list):  Name of the column
+
+        Returns:
+            (ColumnSummary, dict)  A ColumnSummary of the file_dict, plus dict of individual ColumnSummary objects
+        """
+
+        summary_all = ColumnSummary(skip_cols=skip_cols)
+        summary_dict = {}
+        for key, file in file_dict.items():
+            orig_dict = ColumnSummary(skip_cols=skip_cols)
+            df = get_new_dataframe(file)
+            orig_dict.update(df)
+            summary_dict[key] = orig_dict
+            summary_all.update_dict(orig_dict)
+        return summary_all, summary_dict

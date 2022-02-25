@@ -68,7 +68,7 @@ if __name__ == '__main__':
     bids = BidsDataset(path)
     issue_list = bids.validate()
     if issue_list:
-        issue_str = get_printable_issue_string(issue_list, "HED_library")
+        issue_str = get_printable_issue_string(issue_list, "HED validation errors:")
     else:
         issue_str = "No issues"
     print(issue_str)
