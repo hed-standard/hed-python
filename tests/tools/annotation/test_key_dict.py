@@ -3,7 +3,7 @@ import os
 from unittest import mock
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.summaries.key_template import KeyTemplate
+from hed.tools.annotation.key_template import KeyTemplate
 from hed.util.data_util import get_row_hash
 
 

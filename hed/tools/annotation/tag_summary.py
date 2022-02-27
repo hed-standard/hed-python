@@ -3,8 +3,9 @@ import os
 import json
 from hed.models.model_constants import DefTagNames
 from hed.tools.bids.bids_dataset import BidsDataset
-from hed.tools.summaries.summary_entry import SummaryEntry
-from hed.tools.summaries.summary_util import add_tag_list_to_dict, breakout_tags
+
+from hed.tools.annotation.summary_entry import SummaryEntry
+from hed.tools.annotation.summary_util import add_tag_list_to_dict, breakout_tags
 from hed.models.def_dict import add_group_to_dict
 from hed.models import DefDict
 

@@ -3,7 +3,7 @@ import unittest
 from hed.models.hed_group import HedGroup
 from hed.models.hed_string import HedString
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.summaries.summary_entry import SummaryEntry
+from hed.tools.annotation.summary_entry import SummaryEntry
 
 
 class Test(unittest.TestCase):
