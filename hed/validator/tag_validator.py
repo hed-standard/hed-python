@@ -124,7 +124,6 @@ class TagValidator:
             The validation issues associated with each level in a HED string.
         """
         validation_issues = []
-        validation_issues += self.check_duplicate_tags_exist(original_tag_list)
         validation_issues += self.check_tag_level_issue(original_tag_list, is_top_level, is_group)
         return validation_issues
 
@@ -445,31 +444,6 @@ class TagValidator:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_STYLE_WARNING,
                                                                tag=original_tag)
                 break
-        return validation_issues
-
-    def check_duplicate_tags_exist(self, original_tag_list):
-        """Reports a validation error if two or more tags are the same.
-
-        This only tracks exact matches, it will not catch two identical  value tags with different values.
-        Parameters
-        ----------
-        original_tag_list: [HedTag]
-            A list containing tags that are used to report the error.
-        Returns
-        -------
-        []
-            A validation issues list. If no issues are found then an empty list is returned.
-
-        """
-        validation_issues = []
-        tag_set = set()
-        for tag in original_tag_list:
-            formatted_tag = tag.lower()
-            if formatted_tag in tag_set:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_REPEATED, tag=tag)
-                continue
-            tag_set.add(formatted_tag)
-
         return validation_issues
 
     def check_tag_level_issue(self, original_tag_list, is_top_level, is_group):

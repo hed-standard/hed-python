@@ -72,6 +72,11 @@ def val_error_duplicate_tag(tag):
     return f'Repeated tag - "{tag}"', {}
 
 
+@hed_error(ValidationErrors.HED_TAG_REPEATED_GROUP)
+def val_error_duplicate_group(group):
+    return f'Repeated group - "{group}"', {}
+
+
 @hed_error(ValidationErrors.HED_PARENTHESES_MISMATCH)
 def val_error_parentheses(opening_parentheses_count, closing_parentheses_count):
     return f'Number of opening and closing parentheses are unequal. '\

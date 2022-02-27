@@ -239,6 +239,52 @@ class Test(unittest.TestCase):
         def_issues = invalid_placeholder.validate(def_mapper)
         self.assertTrue(bool(def_issues))
 
+    def test_def_no_content(self):
+        def_dict = DefDict()
+        def_string = HedString("(Definition/EmptyDef)")
+        def_string.convert_to_canonical_forms(None)
+        def_dict.check_for_definitions(def_string)
+        def_mapper = DefinitionMapper(def_dict)
+
+        valid_empty = HedString("Def/EmptyDef")
+        def_issues = valid_empty.validate(def_mapper, expand_defs=True)
+        self.assertEqual(str(valid_empty), "(Def-expand/EmptyDef)")
+        self.assertFalse(def_issues)
+
+        valid_empty = HedString("Def/EmptyDef")
+        def_issues = valid_empty.validate(def_mapper, expand_defs=False)
+        self.assertFalse(def_issues)
+
+    def test_mutable(self):
+        import copy
+        basic_definition_string = "(Definition/TestDef, (Keypad-key/TestDef1,Keyboard-key/TestDef2))"
+        def_dict = DefDict()
+        def_string = HedString(basic_definition_string)
+        def_string.convert_to_canonical_forms(self.hed_schema)
+        def_dict.check_for_definitions(def_string)
+
+        def_mapper = DefinitionMapper(def_dict)
+        hed_ops = []
+        hed_ops.append(self.hed_schema)
+        hed_ops.append(def_mapper)
+
+        def_contents = def_dict.defs['testdef'].contents
+        def_contents.cascade_mutable(True)
+        # todo: clean this up some.  I think it's mostly good.
+        label_def_string = "Def/TestDef"
+        test_string = HedString(label_def_string)
+        test_string2 = HedString(label_def_string)
+        def_issues = test_string.validate(hed_ops, expand_defs=True)
+        def_issues = test_string2.validate(hed_ops, expand_defs=True)
+        tags_to_remove = test_string.find_tags(anchors=["keypad-key"], recursive=True)
+
+        for tag, group in tags_to_remove:
+            test_string.remove_groups([tag])
+
+
+        self.assertEqual(test_string, test_string2)
+
+        breakHEre = 3
 
 
 if __name__ == '__main__':

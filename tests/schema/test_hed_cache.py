@@ -1,6 +1,8 @@
 import unittest
 import os
 import itertools
+import urllib.error
+
 from hed.schema import hed_cache
 from hed import schema
 import shutil
@@ -22,9 +24,13 @@ class Test(unittest.TestCase):
         cls.semantic_version_three = '1.2.5'
         cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5']
 
-        cls.specific_hed_url = \
-            """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
-        hed_cache.cache_all_hed_xml_versions(cache_folder=cls.hed_cache_dir)
+        try:
+            cls.specific_hed_url = \
+                """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
+            hed_cache.cache_all_hed_xml_versions(cache_folder=cls.hed_cache_dir)
+        except urllib.error.HTTPError as e:
+            schema.set_cache_directory(cls.saved_cache_folder)
+            raise e
 
     @classmethod
     def tearDownClass(cls):

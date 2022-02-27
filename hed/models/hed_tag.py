@@ -1,4 +1,5 @@
 from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_entry import HedTagEntry
 
 
 class HedTag:
@@ -31,39 +32,19 @@ class HedTag:
         # if the tag has a name_prefix added, or is an expanded def.
         self._tag = None
 
-        # The long form of the tag, if generated.
-        self._long_tag = None
-
-        # offset into _long_tag where the short tag starts at.
-        self._short_tag_index = None
-
-        # offset into _long_tag where the base_tag ends at.  The "base tag" is the long form with no extension/value.
-        self._extension_index = None
-
         self._library_prefix = self._get_library_prefix(self.org_tag)
 
         # This is the schema this tag was converted to.
         self._schema = None
         self._schema_entry = None
 
+        self._extension_value = ""
+
+        self.mutable = True  # Note this only keeps track of tags also used in definitions.  You should also not
+                             # alter any tags used in a HedGroupFrozen
+
         if hed_schema:
             self.convert_to_canonical_forms(hed_schema)
-
-        self.mutable = True  # If False, this tag is potentially referenced in other places and should not be altered
-
-    def __eq__(self, other):
-        if self is other:
-            return True
-
-        if not isinstance(other, HedTag):
-            return False
-
-        if self.short_tag.lower() == other.short_tag.lower():
-            return True
-
-        if self.org_tag.lower() == other.org_tag.lower():
-            return True
-        return False
 
     @property
     def library_prefix(self):
@@ -88,10 +69,10 @@ class HedTag:
         short_tag: str
             The short version of the tag, including value or extension
         """
-        if self._short_tag_index is None:
-            return str(self)
+        if self._schema_entry:
+            return f"{self._library_prefix}{self._schema_entry.short_tag_name}{self._extension_value}"
 
-        return self._library_prefix + self._long_tag[self._short_tag_index:]
+        return str(self)
 
     @property
     def base_tag(self):
@@ -104,10 +85,9 @@ class HedTag:
         base_tag: str
             The long version of the tag, without value or extension
         """
-        if self._extension_index is None:
-            return str(self)
-
-        return self._long_tag[:self._extension_index]
+        if self._schema_entry:
+            return self._schema_entry.long_tag_name
+        return str(self)
 
     @property
     def short_base_tag(self):
@@ -121,10 +101,9 @@ class HedTag:
         base_tag: str
             The short non-extension port of a tag.
         """
-        if self._extension_index is None:
-            return str(self)
-
-        return self._long_tag[self._short_tag_index:self._extension_index]
+        if self._schema_entry:
+            return self._schema_entry.short_tag_name
+        return str(self)
 
     @short_base_tag.setter
     def short_base_tag(self, new_tag_val):
@@ -143,12 +122,15 @@ class HedTag:
         """
         if not self.mutable:
             raise ValueError("Trying to alter immutable tag")
-        long_part = self._long_tag[:self._short_tag_index]
-        self._long_tag = f"{long_part}{new_tag_val}/{self.extension_or_value_portion}"
-        self._extension_index = self._short_tag_index + len(new_tag_val)
+        if self._schema_entry:
+            if self._schema:
+                tag_entry = self._schema.get_tag_entry(new_tag_val, library_prefix=self.library_prefix)
+            else:
+                tag_entry, remainder = HedTagEntry.get_fake_tag_entry(new_tag_val, [new_tag_val.lower()])
 
-        if self._schema:
-            self._update_schema_entry()
+            self._schema_entry = tag_entry
+        else:
+            raise ValueError("cannot set unidentified tags")
 
     @property
     def org_base_tag(self):
@@ -164,19 +146,17 @@ class HedTag:
         base_tag: str
             The original version of the tag, without value or extension
         """
-        if self._extension_index is None:
-            return str(self)
+        if self._schema_entry:
+            extension_len = len(self._extension_value)
+            if not extension_len:
+                return self.tag
 
-        # This mess could be optimized better
-        extension_len = len(self.extension_or_value_portion)
-        if not extension_len:
-            return self.tag
+            org_len = len(self.tag)
+            if org_len == extension_len:
+                return ""
 
-        org_len = len(self.tag)
-        if org_len == extension_len:
-            return ""
-
-        return self.tag[:org_len - (extension_len + 1)]
+            return self.tag[:org_len - extension_len]
+        return str(self)
 
     def tag_modified(self):
         """
@@ -207,8 +187,6 @@ class HedTag:
 
         return self.org_tag
 
-    # Honestly this should probably be removed
-    # this should be replaced with a "set long tag" which updates the short and long versions automatically.
     @tag.setter
     def tag(self, new_tag_val):
         """
@@ -216,7 +194,7 @@ class HedTag:
 
             Primarily used to expand def tags.
 
-            Note: only valid after calling convert_to_canonical_forms
+            Note: only valid before calling convert_to_canonical_forms
 
         Parameters
         ----------
@@ -226,7 +204,7 @@ class HedTag:
         if not self.mutable:
             raise ValueError("Trying to alter immutable tag")
 
-        if self._long_tag:
+        if self._schema_entry:
             raise ValueError("Can only edit tags before calculating canonical forms. " +
                              "This could be updated to instead remove computed forms.")
         self._tag = new_tag_val
@@ -242,10 +220,10 @@ class HedTag:
         str
             The tag name.
         """
-        if self._extension_index is None:
-            return str(self)
+        if self._extension_value:
+            return self._extension_value[1:]
 
-        return self._long_tag[self._extension_index + 1:]
+        return ""
 
     @property
     def long_tag(self):
@@ -257,9 +235,9 @@ class HedTag:
         long_tag: str
             The long form of this tag.
         """
-        if self._long_tag is None:
-            return str(self)
-        return self._long_tag
+        if self._schema_entry:
+            return f"{self._library_prefix}{self._schema_entry.long_tag_name}{self._extension_value}"
+        return str(self)
 
     @property
     def org_tag(self):
@@ -282,8 +260,8 @@ class HedTag:
         str
             Return the original tag if we haven't set a new tag.(e.g. short to long)
         """
-        if self._long_tag:
-            return self._long_tag
+        if self._schema_entry:
+            return self.long_tag
 
         if self._tag:
             return self._tag
@@ -315,8 +293,8 @@ class HedTag:
         required_prefix : str
             The full name_prefix to add if not present
         """
-        if not self.mutable:
-            raise ValueError("Trying to alter immutable tag")
+        # if not self.mutable:
+        #     raise ValueError("Trying to alter immutable tag")
 
         checking_prefix = required_prefix
         while checking_prefix:
@@ -326,31 +304,12 @@ class HedTag:
             if slash_index == 0:
                 break
             checking_prefix = checking_prefix[slash_index:]
-        self._tag = required_prefix + self.org_tag
+        self.tag = required_prefix + self.org_tag
+        # self._tag = required_prefix + self.org_tag
 
     def lower(self):
         """Convenience function, equivalent to str(self).lower()"""
         return str(self).lower()
-
-    def replace_placeholder(self, placeholder_value):
-        """
-            If this tag a placeholder character(#), replace them with the placeholder value.
-
-        Parameters
-        ----------
-        placeholder_value : str
-            Value to replace placeholder with.
-        """
-        if not self.mutable:
-            raise ValueError("Trying to alter immutable tag")
-
-        if "#" in self.org_tag:
-            if self._long_tag:
-                # This could possibly be more efficient
-                self._tag = self.org_tag.replace("#", placeholder_value)
-                self._long_tag = self._long_tag.replace("#", placeholder_value)
-            else:
-                self._tag = self.org_tag.replace("#", placeholder_value)
 
     def convert_to_canonical_forms(self, hed_schema):
         """
@@ -372,15 +331,9 @@ class HedTag:
         tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.library_prefix)
         self._schema_entry = tag_entry
         self._schema = hed_schema
-        # todo: now that we always have a schema entry, have these get values from those instead.
         if self._schema_entry:
-            tag_name = tag_entry.long_tag_name
-            self._long_tag = self.library_prefix + tag_name + remainder
-            self._short_tag_index = len(self.library_prefix) \
-                                    + len(tag_entry.long_tag_name) - len(tag_entry.short_tag_name)
-            self._extension_index = len(self.library_prefix) + len(tag_name)
-        else:
-            self._long_tag = remainder
+            if remainder:
+                self._extension_value = remainder
 
         return tag_issues
 
@@ -619,65 +572,23 @@ class HedTag:
         if self._schema_entry:
             return self._schema_entry.any_parent_has_attribute(attribute=attribute)
 
-    def _update_schema_entry(self):
-        """
-            Sets the _schema_entry pointer based off the current schema.
-
-        Returns
-        -------
-
-        """
-        new_entry = None
-        if self.extension_or_value_portion:
-            new_entry = self._schema.get_tag_entry(self.base_tag.lower() + "/#")
-        if new_entry is None:
-            new_entry = self._schema.get_tag_entry(self.base_tag.lower())
-        self._schema_entry = new_entry
-
     def _convert_key_tags_to_canonical_form(self):
         """
             Finds the canonical form for basic known tags such as definition and def.
 
-            todo: This should have default HedTagEntries to point to eventually
         Returns
         -------
         issues_list: [{}]
             Always empty.
         """
         tags_to_identify = ["onset", "definition", "offset", "def-expand", "def"]
-        for key_tag in tags_to_identify:
-            is_key_tag = self._check_tag_starts_with(str(self), key_tag)
-            if is_key_tag is not None:
-                self._long_tag = str(self)
-                self._extension_index = len(str(self)) - len(is_key_tag)
-                self._short_tag_index = self._extension_index - len(key_tag)
-                break
+        tag_entry, remainder = HedTagEntry.get_fake_tag_entry(str(self), tags_to_identify)
+        if tag_entry:
+            self._schema_entry = tag_entry
+            self._schema = None
+            self._extension_value = remainder
 
         return []
-
-    @staticmethod
-    def _check_tag_starts_with(hed_tag, target_tag_short_name):
-        """ Check if a given tag starts with a given string, and returns the tag with name_prefix removed if it does.
-
-        Parameters
-        ----------
-        hed_tag : str
-            A single input tag
-        target_tag_short_name : str
-            The string to match e.g. find target_tag_short_name in hed_tag
-        Returns
-        -------
-            str: the tag without the removed name_prefix, or None
-        """
-        hed_tag_lower = hed_tag.lower()
-        found_index = hed_tag_lower.find(target_tag_short_name)
-
-        if found_index == -1:
-            return None
-
-        if found_index == 0 or hed_tag_lower[found_index - 1] == "/":
-            return hed_tag[found_index + len(target_tag_short_name):]
-        return None
 
     def _get_library_prefix(self, org_tag):
         first_slash = org_tag.find("/")
@@ -731,3 +642,45 @@ class HedTag:
                 possible_match = None
 
         return possible_match
+
+    def replace_placeholder(self, placeholder_value):
+        """
+            If this tag a placeholder character(#), replace them with the placeholder value.
+
+        Parameters
+        ----------
+        placeholder_value : str
+            Value to replace placeholder with.
+        """
+        # if not self.mutable:
+        #     raise ValueError("Trying to alter immutable tag")
+
+        if "#" in self.org_tag:
+            if self._schema_entry:
+                self._extension_value = self._extension_value.replace("#", placeholder_value)
+            else:
+                self._tag = self.tag.replace("#", placeholder_value)
+
+    def __hash__(self):
+        if self._schema_entry:
+            return hash(
+                self._library_prefix + self._schema_entry.short_tag_name.lower() + self._extension_value.lower())
+        else:
+            return hash(self.lower())
+
+    def __eq__(self, other):
+        if self is other:
+            return True
+
+        if isinstance(other, str):
+            return self.lower() == other
+
+        if not isinstance(other, HedTag):
+            return False
+
+        if self.short_tag.lower() == other.short_tag.lower():
+            return True
+
+        if self.org_tag.lower() == other.org_tag.lower():
+            return True
+        return False

@@ -60,6 +60,7 @@ class DefEntry:
         if self.contents:
             output_group = self.contents
             if placeholder_value:
+                # todo: This part could be optimized more
                 placeholder_tag = output_group.find_placeholder_tag()
                 if not placeholder_tag:
                     raise ValueError("Internal error related to placeholders in definition mapping")

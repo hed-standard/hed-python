@@ -7,6 +7,8 @@ class TestValidatorUtilityFunctions(TestHedBase):
 
     def test_if_tag_exists(self):
         valid_tag1 = HedTag('Left-handed', hed_schema=self.hed_schema)
+        hash1 = hash(valid_tag1)
+        hash2 = hash(valid_tag1)
         valid_tag2 = HedTag('Geometric-object', hed_schema=self.hed_schema)
         valid_tag3 = HedTag('duration/#', hed_schema=self.hed_schema)
         invalid_tag1 = HedTag('something', hed_schema=self.hed_schema)
@@ -152,13 +154,28 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertEqual(no_extension_tag2_result, False)
         self.assertEqual(no_extension_tag3_result, False)
 
+    def test_finding_tags_no_schema(self):
+        # Verify basic tag identification works.
+        tag = HedTag("Onset")
+        tag.convert_to_canonical_forms(hed_schema=None)
+        self.assertTrue(tag._schema_entry)
 
-    def test__check_tag_starts_with(self):
-        target_tag_name = "definition/"
+        tag2 = HedTag("OtherFolders/Onset")
+        tag2.convert_to_canonical_forms(hed_schema=None)
+        self.assertTrue(tag2._schema_entry)
 
-        test_tags = ["Definition/TempTestDef", "Informational/Definition/TempTestDef",
-                     "Attribute/Informational/Definition/TempTestDef"]
+        tag4 = HedTag("OtherFolders/Onset/Extension")
+        tag4.convert_to_canonical_forms(hed_schema=None)
+        self.assertTrue(tag4._schema_entry)
 
-        for tag in test_tags:
-            result = HedTag._check_tag_starts_with(tag, target_tag_name)
-            self.assertTrue(result)
+        tag3 = HedTag("OtherFolders/Onset-NotOnset")
+        tag3.convert_to_canonical_forms(hed_schema=None)
+        self.assertFalse(tag3._schema_entry)
+
+        tag = HedTag("Onset")
+        tag.convert_to_canonical_forms(hed_schema=self.hed_schema)
+        self.assertTrue(tag._schema_entry)
+
+        tag2 = HedTag("Property/Data-property/Data-marker/Temporal-marker/Onset")
+        tag2.convert_to_canonical_forms(hed_schema=self.hed_schema)
+        self.assertTrue(tag._schema_entry)

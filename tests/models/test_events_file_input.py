@@ -50,6 +50,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 0)
         input_file = EventsInput(events_path, sidecars=sidecar)
 
+        #Fix whatever is wrong with onset tag here.  It's thinking Description/Onset continues is an invalid tag???'
         validation_issues = input_file.validate_file_sidecars(validator)
         self.assertEqual(len(validation_issues), 0)
         validation_issues = input_file.validate_file(validator, check_for_warnings=True)

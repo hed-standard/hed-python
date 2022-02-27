@@ -10,7 +10,7 @@ from hed.models.hed_ops import HedOps
 class DefinitionMapper(HedOps):
     """Class for handling definitions in hed strings.
 
-       The class is responsible for gather and removing defintions.
+       The class is responsible for gather and removing definitions.
        The class also replaces labels in hed strings with the gathered definitions."""
 
     def __init__(self, def_dicts=None):
@@ -184,7 +184,7 @@ class DefinitionMapper(HedOps):
         def_tag : HedTag
             Source hed tag that may be a Def or Def-expand tag.
         def_expand_group: HedGroup or HedTag
-            Source group for this def-expand tag.  Same as def_tag if this is not an expand tag.
+            Source group for this def-expand tag.  Same as def_tag if this is not a def-expand tag.
         def_issues : [{}]
             List of issues to append any new issues to
 

@@ -6,6 +6,8 @@ from hed.errors import HedFileError
 from hed.models import EventsInput, HedInput, model_constants, Sidecar
 import shutil
 
+# TODO: Add tests about correct handling of 'n/a'
+
 
 class Test(unittest.TestCase):
     @classmethod

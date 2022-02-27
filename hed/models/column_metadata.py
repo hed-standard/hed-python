@@ -143,7 +143,7 @@ class ColumnMetadata:
         also_return_bad_types: bool
             If true, this will also yield types other than HedString
 
-        Returns
+        Yields
         -------
         hed_string: HedString
         position: str
