@@ -72,6 +72,11 @@ def val_error_duplicate_tag(tag):
     return f'Repeated tag - "{tag}"', {}
 
 
+@hed_error(ValidationErrors.HED_TAG_REPEATED_GROUP)
+def val_error_duplicate_group(group):
+    return f'Repeated group - "{group}"', {}
+
+
 @hed_error(ValidationErrors.HED_PARENTHESES_MISMATCH)
 def val_error_parentheses(opening_parentheses_count, closing_parentheses_count):
     return f'Number of opening and closing parentheses are unequal. '\
@@ -248,12 +253,6 @@ def sidecar_error_too_many_pound_signs(pound_sign_count):
 def sidecar_error_unknown_column(column_name):
     return f"Could not automatically identify column '{column_name}' type from file. "\
            "Most likely the column definition in question needs a # sign to replace a number somewhere.", {}
-
-
-@hed_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
-def def_error_wrong_def_tags(def_name, tag_list):
-    tag_list_strings = [str(tag) for tag in tag_list]
-    return f"Too many def tags found in definition for {def_name}.  Expected 1, also found: {tag_list_strings}", {}
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)

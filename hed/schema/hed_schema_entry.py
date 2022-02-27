@@ -10,7 +10,7 @@ pluralize.defnoun("hertz", "hertz")
 class HedSchemaEntry:
     """ Represents a single node in a HedSchema.
 
-        The structure contains all of the node information including attributes
+        The structure contains all the node information including attributes
         and properties.
     """
     def __init__(self, name, section):
@@ -116,6 +116,9 @@ class HedSchemaEntry:
             return False
         return True
 
+    def __hash__(self):
+        return hash((self.name, self._section._section_key))
+
 
 class UnitClassEntry(HedSchemaEntry):
     """
@@ -191,8 +194,38 @@ class HedTagEntry(HedSchemaEntry):
         # These always have any /# stripped off the end, so they can easily be used with normal code.
         self.long_tag_name = None
         self.short_tag_name = None
-        self.takes_value_child_entry = None # this is a child takes value tag, if one exists
+        self.takes_value_child_entry = None  # this is a child takes value tag, if one exists
         self._parent_tag = None
+
+    @staticmethod
+    def get_fake_tag_entry(tag, tags_to_identify):
+        """
+            Given a tag and a list of possible short tags, create a tag entry if we find a match.
+
+        Args:
+            tag: str
+                The short/mid/long form tag to identify
+            tags_to_identify: [str]
+                A list of lowercase short tags to identify.  Goes through tag left to right.
+
+        Returns:
+        tag_entry: HedTagEntry or None
+            The fake entry, showing the short tag name as the found tag
+        remainder: str
+            The remaining text after the located short tag.  May be empty.
+        """
+        split_names = tag.split("/")
+        index = 0
+        for name in split_names:
+            if name.lower() in tags_to_identify:
+                fake_entry = HedTagEntry(name=tag[:index + len(name)], section=None)
+                fake_entry.long_tag_name = fake_entry.name
+                fake_entry.short_tag_name = name
+                return fake_entry, tag[index + len(name):]
+
+            index += len(name) + 1
+
+        return None, ""
 
     def any_parent_has_attribute(self, attribute):
         """Checks to see if the tag (or any of its parents) have the given attribute.
