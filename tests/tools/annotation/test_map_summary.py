@@ -1,8 +1,8 @@
 import os
 import unittest
-from hed.tools.annotation.column_summary import ColumnSummary
-from hed.util.io_util import get_file_list, make_file_dict
-from hed.tools.annotation.map_summary import get_columns_info, get_key_counts, update_dict_counts
+from hed.tools import ColumnSummary
+from hed.util import get_file_list, make_file_dict
+from hed.tools import get_columns_info, get_key_counts, update_dict_counts
 from hed.util.data_util import get_new_dataframe
 
 

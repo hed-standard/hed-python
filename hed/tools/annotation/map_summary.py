@@ -35,9 +35,6 @@ def get_key_counts(root_dir, skip_cols=None):
     return count_dicts
 
 
-
-
-
 # def print_columns_info(columns_info, skip_cols=None):
 #
 #     for col_name, col_counts in columns_info.items():

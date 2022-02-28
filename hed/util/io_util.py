@@ -66,7 +66,7 @@ def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=N
 
 
 def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True):
-    """ Traverses a directory tree and creates dictionary with keys that are directories.
+    """ Traverses a directory tree and creates dictionary with keys that are directory paths a.
 
     Args:
         dir_path (str):               Full path of the directory tree to be traversed (no ending slash)
@@ -137,11 +137,25 @@ def get_path_components(this_path, root_path):
         return [base_path]
 
 
+def compare_dict_keys(dict1, dict2):
+    """ Return a dictionary with keys that are simplified file names and values that are full paths
+    This function is used for cross listing BIDS style files for different studies.
+    Args:
+        dict1 (dict):  List containing full paths of files of interest
+        dict2 (dict):  List of indices into base file names of pieces to assemble for the key
+    Returns: tuple
+        (list1, list2):  Lists of keys missing from respective lists
+    """
+    keys1 = set(dict1.keys())
+    keys2 = set(dict2.keys())
+    list1 = list(keys1.difference(keys2))
+    list2 = list(keys2.difference(keys1))
+    return list1, list2
+
+
 def make_file_dict(file_list, name_indices=(0, 2), separator='_'):
     """ Return a dictionary with keys that are simplified file names and values that are full paths
-
     This function is used for cross listing BIDS style files for different studies.
-
     Args:
         file_list (list):      List containing full paths of files of interest
         name_indices (tuple):  List of indices into base file names of pieces to assemble for the key
