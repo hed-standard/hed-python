@@ -9,6 +9,7 @@ from hed.errors.error_types import ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
 
 from hed.models.hed_string import HedString
+from hed.models import HedTag
 from hed.validator.tag_validator import TagValidator
 from functools import partial
 from hed.models.hed_ops import HedOps
@@ -22,7 +23,7 @@ class HedValidator(HedOps):
         Parameters
         ----------
         hed_schema: HedSchema
-            HedSchema object to use to use for validation
+            HedSchema object to use for validation
         run_semantic_validation: bool
             True if the validator should check the HED data against a schema. False for syntax-only validation.
         Returns
@@ -73,14 +74,37 @@ class HedValidator(HedOps):
          """
         validation_issues = []
         for original_tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
-            is_group = original_tag_group.is_group()
+            is_group = original_tag_group.is_group
             if not original_tag_group and is_group:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_GROUP_EMPTY,
                                                                tag=original_tag_group)
+
+            validation_issues += self._check_for_duplicate_groups(original_tag_group)
             validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group.tags(), is_top_level,
                                                                               is_group)
 
         return validation_issues
+
+    def _check_for_duplicate_groups(self, original_group):
+        # Todo: This could be optimized in various ways.  It repeatedly converts subgroups to HedGroupFrozen
+        frozen_group_or_string = original_group.get_frozen()
+        if len(frozen_group_or_string._children) != len(original_group._children):
+            validation_issues = []
+            valid_content = set(frozen_group_or_string._children)
+            for child in original_group._children:
+                if isinstance(child, HedTag):
+                    error_code = ValidationErrors.HED_TAG_REPEATED
+                    frozen_child = child
+                else:
+                    error_code = ValidationErrors.HED_TAG_REPEATED_GROUP
+                    frozen_child = child.get_frozen()
+                if frozen_child in valid_content:
+                    valid_content.remove(frozen_child)
+                else:
+                    validation_issues += ErrorHandler.format_error(error_code, child)
+
+            return validation_issues
+        return ()
 
     def _validate_tags_in_hed_string(self, hed_string_obj, check_for_warnings=False):
         """Validates the multi-tag properties in a hed string, eg required tags.
@@ -114,11 +138,16 @@ class HedValidator(HedOps):
              The issues associated with the individual tags in the HED string.
 
          """
+        from hed.models.def_dict import DefTagNames
         validation_issues = []
-        tags = hed_string_obj.get_all_tags()
-        for hed_tag in tags:
-            validation_issues += \
-                self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
-                                                                  check_for_warnings=check_for_warnings)
+        def_groups = hed_string_obj.find_top_level_tags(anchors={DefTagNames.DEFINITION_KEY}, include_groups=1)
+        all_def_groups = [group for sub_group in def_groups for group in sub_group.get_all_groups()]
+        for group in hed_string_obj.get_all_groups():
+            is_definition = group in all_def_groups
+            for hed_tag in group.tags():
+                validation_issues += \
+                    self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
+                                                                      check_for_warnings=check_for_warnings,
+                                                                      is_definition=is_definition)
 
         return validation_issues
