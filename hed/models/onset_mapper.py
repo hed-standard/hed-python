@@ -31,19 +31,21 @@ class OnsetMapper(HedOps):
             if not found_onset:
                 return []
 
-            def_tags, def_groups = self._find_def_tags(found_group)
+            def_tags = found_group.find_def_tags()
             if not def_tags:
                 onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, found_onset)
                 continue
 
             if len(def_tags) > 1:
                 onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_TOO_MANY_DEFS,
-                                                          tag=def_tags[0],
-                                                          tag_list=[tag for tag in def_tags[1:]])
+                                                          tag=def_tags[0][0],
+                                                          tag_list=[tag[0] for tag in def_tags[1:]])
                 continue
 
-            def_tag = def_tags[0]
-            def_group = def_groups[0]
+            # Get all children but def group and onset/offset, then validate #/type of children.
+            def_tag, def_group, _ = def_tags[0]
+            if def_group is None:
+                def_group = def_tag
             children = [child for child in found_group.get_direct_children() if
                         def_group is not child and found_onset is not child]
             max_children = 1
@@ -69,30 +71,7 @@ class OnsetMapper(HedOps):
         return onset_issues
 
     def _find_onset_tags(self, hed_string_obj):
-        for group in hed_string_obj.groups():
-            for tag in group.tags():
-                if tag.short_base_tag.lower() == DefTagNames.ONSET_KEY \
-                        or tag.short_base_tag.lower() == DefTagNames.OFFSET_KEY \
-                        and not tag.extension_or_value_portion:
-                    yield tag, group
-                    # only return one onset tag per group
-                    break
-
-    def _find_def_tags(self, onset_group):
-        def_tags = []
-        def_groups = []
-        for child in onset_group.get_direct_children():
-            if isinstance(child, HedTag):
-                if child.short_base_tag.lower() == DefTagNames.DEF_KEY:
-                    def_tags.append(child)
-                    def_groups.append(child)
-            else:
-                for tag in child.tags():
-                    if tag.short_base_tag.lower() == DefTagNames.DEF_EXPAND_KEY:
-                        def_tags.append(tag)
-                        def_groups.append(child)
-
-        return def_tags, def_groups
+        return hed_string_obj.find_top_level_tags(anchors={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY})
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
         is_onset = onset_offset_tag.short_base_tag.lower() == DefTagNames.ONSET_KEY

@@ -9,6 +9,7 @@ from hed.validator import HedValidator
 from tests.validator.test_tag_validator_base import TestHedBase
 
 
+# Todo: Add test case for Onset/Value and Offset/Value.  Make sure they bomb.
 class Test(TestHedBase):
     @classmethod
     def setUpClass(cls):

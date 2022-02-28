@@ -15,7 +15,8 @@ class Test(unittest.TestCase):
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed_pairs/')
         schema_filename = os.path.join(cls.hed_base_dir, "HED8.0.0t.xml")
         hed_schema = schema.load_schema(schema_filename)
-        cls.generic_hed_input_reader = HedValidator(hed_schema=hed_schema)
+        cls.hed_schema = hed_schema
+        cls.hed_validator = HedValidator(hed_schema=hed_schema)
         cls.validation_issues = []
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/validator_tests/')
         cls.hed_filepath_with_errors = os.path.join(cls.hed_base_dir, "ExcelMultipleSheets.xlsx")
@@ -30,27 +31,33 @@ class Test(unittest.TestCase):
 
     def test__validate_input(self):
         test_string_obj = HedString(self.base_hed_input)
-        validation_issues = test_string_obj.validate(self.generic_hed_input_reader)
+        validation_issues = test_string_obj.validate(self.hed_validator)
         self.assertIsInstance(validation_issues, list)
 
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.hed_file_with_errors.validate_file(self.generic_hed_input_reader, name=name)
+        validation_issues = self.hed_file_with_errors.validate_file(self.hed_validator, name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors(self):
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.hed_file_with_major_errors.validate_file(self.generic_hed_input_reader, name=name)
+        validation_issues = self.hed_file_with_major_errors.validate_file(self.hed_validator, name=name)
 
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors_columns(self):
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.hed_file_with_major_errors.validate_file(self.generic_hed_input_reader,
+        validation_issues = self.hed_file_with_major_errors.validate_file(self.hed_validator,
                                                                           check_for_warnings=True, name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
+
+    def test__validate_input_major_errors_multi_column(self):
+        validation_issues = self.hed_file_with_major_errors_multi_column.validate_file(self.hed_validator,
+                                                                                       check_for_warnings=True)
+        self.assertIsInstance(validation_issues, list)
+        self.assertEqual(len(validation_issues), 2)
 
     def test_complex_file_validation(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -128,7 +135,7 @@ class Test(unittest.TestCase):
 
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = loaded_file.validate_file(validator, check_for_warnings=True)
-        self.assertEqual(len(validation_issues), 3)
+        self.assertEqual(len(validation_issues), 4)
 
     def test_error_spans_from_file_and_missing_required_column(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -144,6 +151,18 @@ class Test(unittest.TestCase):
         self.assertEqual(validation_issues[1]['char_index'], 6)
         self.assertEqual(validation_issues[2]['char_index'], 6)
         self.assertEqual(len(validation_issues), 3)
+
+    # todo: move this test somewhere more appropriate
+    def test_org_tag_missing(self):
+        test_string_obj = HedString("Event, Item/NotItem")
+        removed_tag = test_string_obj.tags()[0]
+        test_string_obj.remove_groups([removed_tag])
+        from hed import HedTag
+        source_span = test_string_obj._get_org_span(removed_tag)
+        self.assertEqual(source_span, (0, 5))
+
+        source_span = test_string_obj._get_org_span(HedTag("Event"))
+        self.assertEqual(source_span, (None, None))
 
     def test_def_mapping_single_line(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),

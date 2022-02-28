@@ -175,7 +175,7 @@ class ColumnMapper:
         attribute_name_or_error_message: False or str
             Depends on the value of first return value.
             If None, this is an error message.
-            If string, this is an attribute name, that should be stored separately..
+            If string, this is an attribute name, that should be stored separately.
         """
         # Default 1-1 mapping if we don't have specific behavior.
         if not self._final_column_map:
@@ -199,6 +199,7 @@ class ColumnMapper:
         ----------
         row_text : [str]
             The text for the given row, one entry per column number.
+
         Returns
         -------
         expanded_dict: {str: }
@@ -212,6 +213,8 @@ class ColumnMapper:
         column_to_hed_tags_dictionary = {}
         column_issues_dict = {}
         for column_number, cell_text in enumerate(row_text):
+            # if column_number == 0:
+            #     continue
             translated_column, attribute_name_or_error = self._expand_column(column_number, str(cell_text))
             if translated_column is None:
                 if attribute_name_or_error:
@@ -295,7 +298,7 @@ class ColumnMapper:
 
     def _finalize_mapping(self):
         """
-        Internal function that gathers up all the various sources of column rules and puts them
+        Internal function that gathers all the various sources of column rules and puts them
         in a list mapping from column number to definition.
 
         This needs to be called after all definitions and columns are added.
@@ -343,7 +346,6 @@ class ColumnMapper:
         for column_number, prefix in self._column_prefix_dictionary.items():
             self._set_column_prefix(column_number, prefix)
 
-        # Finally check if any numbered columns don't have an entry in final columns and issue a warning.
         return self._finalize_mapping_issues
 
     def get_def_dicts(self):

@@ -96,34 +96,50 @@ class SummaryEntry:
 
 
 if __name__ == '__main__':
+    from hed.models import DefDict
+    from hed.models.def_dict import add_group_to_dict
     the_path = '../../../tests/data/bids/eeg_ds003654s_hed/task-FacePerception_events.json'
     sidecar = Sidecar(the_path)
     schema = load_schema_version(xml_version='8.0.0')
 
-    tag_dict = {}
-    no_defs_list = []
-    def_dict = {}
-    for column in sidecar:
-        for hed, key in column._hed_iter():
-            hed.convert_to_canonical_forms(schema)
-            no_defs_list += SummaryEntry.separate_anchored_groups(hed, def_dict, DefTagNames.DEFINITION_KEY)
-    add_tag_list_to_dict(no_defs_list, tag_dict)
+    tag_dict_no_defs = {}
+    tag_dict_with_defs = {}
+    def_dict = DefDict()
+    for hed_string_obj, _, _ in sidecar.hed_string_iter([schema, def_dict]):
+        add_group_to_dict(hed_string_obj, tag_dict_with_defs)
+        hed_string_obj.remove_definitions()
+        add_group_to_dict(hed_string_obj, tag_dict_no_defs)
 
-    hed_list = []
-    for column in sidecar:
-        for hed, key in column._hed_iter():
-            hed.convert_to_canonical_forms(schema)
-            hed_list.append(hed)
-
-    only_dict = {}
-    add_tag_list_to_dict(hed_list, only_dict )
-    print(only_dict.keys())
+    # tag_dict = {}
+    # no_defs_list = []
+    # def_dict = {}
+    # for column in sidecar:
+    #     for hed, key in column._hed_iter():
+    #         hed.convert_to_canonical_forms(schema)
+    #         no_defs_list += SummaryEntry.separate_anchored_groups(hed, def_dict, DefTagNames.DEFINITION_KEY)
+    # add_tag_list_to_dict(no_defs_list, tag_dict)
+    #
+    # hed_list = []
+    # for column in sidecar:
+    #     for hed, key in column._hed_iter():
+    #         hed.convert_to_canonical_forms(schema)
+    #         hed_list.append(hed)
+    #
+    # only_dict = {}
+    # add_tag_list_to_dict(hed_list, only_dict )
+    # print(only_dict.keys())
+    #
+    # # Todo: remove this block
+    # if tag_dict_with_defs != only_dict:
+    #     raise ValueError("def dict!")
+    # if tag_dict_no_defs != tag_dict:
+    #     raise ValueError("tag dict!")
 
     json_path = "../../../tests/data/summaries/tag_summary_template.json5"
     with open(json_path) as fp:
         rules = json.load(fp)
     breakout_list = rules["Tag-categories"]
-    breakout_dict = breakout_tags(schema, only_dict.keys(), breakout_list)
+    breakout_dict = breakout_tags(schema, tag_dict_with_defs.keys(), breakout_list)
     with open('d:/temp1.json', "w") as fp:
         json.dump(breakout_dict, fp, indent=4)
 
