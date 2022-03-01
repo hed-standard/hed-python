@@ -446,6 +446,35 @@ class TagValidator:
                 break
         return validation_issues
 
+    # # Possible new style check(but causes many existing errors, so holding off)
+    # def check_capitalization(self, original_tag):
+    #     """Reports a validation warning if the tag isn't correctly capitalized.
+    #
+    #     Parameters
+    #     ----------
+    #     original_tag: HedTag
+    #         The original tag that is used to report the warning.
+    #     Returns
+    #     -------
+    #     []
+    #         A validation issues list. If no issues are found then an empty list is returned.
+    #     """
+    #     validation_issues = []
+    #     org_name = original_tag.org_base_tag
+    #     if original_tag.library_prefix:
+    #         org_name = org_name[len(original_tag.library_prefix):]
+    #     tag_names = org_name.split("/")
+    #     for tag_name in tag_names:
+    #         correct_tag_name = tag_name.capitalize()
+    #         if tag_name != correct_tag_name:
+    #             # We assume any with spaces are correctly capitalized(descriptions, values, etc)
+    #             if " " in tag_name:
+    #                 continue
+    #             validation_issues += ErrorHandler.format_error(ValidationErrors.HED_STYLE_WARNING,
+    #                                                            tag=original_tag)
+    #             break
+    #     return validation_issues
+
     def check_tag_level_issue(self, original_tag_list, is_top_level, is_group):
         """
             Checks all tags in the group to verify they are correctly positioned in the hierarchy

@@ -211,7 +211,7 @@ class DefinitionMapper(HedOps):
                 def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder)
                 if def_tag_name:
                     if def_expand_group is not def_tag and def_expand_group != def_contents:
-                        def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_BAD,
+                        def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
                                                                 tag=def_tag, actual_def=def_contents,
                                                                 found_def=def_expand_group)
                         return None
