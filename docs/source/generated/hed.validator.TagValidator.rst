@@ -17,7 +17,6 @@
       ~TagValidator.check_capitalization
       ~TagValidator.check_count_tag_group_parentheses
       ~TagValidator.check_delimiter_issues_in_hed_string
-      ~TagValidator.check_duplicate_tags_exist
       ~TagValidator.check_for_invalid_extension_chars
       ~TagValidator.check_for_placeholder
       ~TagValidator.check_for_required_tags

@@ -14,6 +14,7 @@
    .. autosummary::
    
       check_filename
+      compare_dict_keys
       generate_filename
       get_dir_dictionary
       get_file_list
