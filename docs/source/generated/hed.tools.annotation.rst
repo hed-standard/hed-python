@@ -28,6 +28,14 @@ hed.tools.annotation.dataset\_summary module
    :undoc-members:
    :show-inheritance:
 
+hed.tools.annotation.file\_summary module
+-----------------------------------------
+
+.. automodule:: hed.tools.annotation.file_summary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hed.tools.annotation.key\_map module
 ------------------------------------
 

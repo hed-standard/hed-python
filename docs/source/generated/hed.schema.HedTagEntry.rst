@@ -18,6 +18,7 @@
       ~HedTagEntry.attribute_has_property
       ~HedTagEntry.base_tag_has_attribute
       ~HedTagEntry.finalize_entry
+      ~HedTagEntry.get_fake_tag_entry
       ~HedTagEntry.has_attribute
       ~HedTagEntry.set_attribute_value
    

@@ -14,7 +14,7 @@ from .annotation.column_summary import ColumnSummary
 from .annotation.dataset_summary import DatasetSummary
 from .annotation.key_map import KeyMap
 from .annotation.key_template import KeyTemplate
-from .annotation.map_summary import get_columns_info
+from .annotation.map_summary import get_columns_info, get_key_counts, update_dict_counts
 from .annotation.summary_entry import SummaryEntry
 from .annotation.tag_summary import TagSummary
 
