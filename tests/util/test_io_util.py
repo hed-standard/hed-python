@@ -59,7 +59,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
 
     def test_get_file_list_files(self):
-        dir_pairs = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/hed_pairs/prologue_tests')
+        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/hed_pairs/prologue_tests')
+        dir_pairs = os.path.realpath(dir_pairs)
+        print(f"{dir_pairs}")
         test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
         file_list1 = get_file_list(dir_pairs)
         for file in file_list1:
@@ -100,8 +102,7 @@ class Test(unittest.TestCase):
         self.assertEqual(345, len(file_list1), 'get_file_list has the right number of files when no exclude')
         file_list2 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=[])
         self.assertEqual(len(file_list1), len(file_list2), 'get_file_list should not change when exclude_dir is empty')
-        excluded = [os.path.join(dir_data, 'stimuli')]
-        file_list3 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=excluded)
+        file_list3 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=['stimuli'])
         self.assertFalse(file_list3, 'get_file_list should return an empty list when all are excluded')
 
     def test_get_path_components(self):
