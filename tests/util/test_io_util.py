@@ -98,10 +98,10 @@ class Test(unittest.TestCase):
         dir_data = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids/eeg_ds003654s_hed')
         file_list1 = get_file_list(dir_data, extensions=[".bmp"])
         self.assertEqual(345, len(file_list1), 'get_file_list has the right number of files when no exclude')
-        file_list2 = get_file_list(dir_data, extensions=[".bmp"], exclude_dir=[])
+        file_list2 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=[])
         self.assertEqual(len(file_list1), len(file_list2), 'get_file_list should not change when exclude_dir is empty')
         excluded = [os.path.join(dir_data, 'stimuli')]
-        file_list3 = get_file_list(dir_data, extensions=[".bmp"], exclude_dir=excluded)
+        file_list3 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=excluded)
         self.assertFalse(file_list3, 'get_file_list should return an empty list when all are excluded')
 
     def test_get_path_components(self):

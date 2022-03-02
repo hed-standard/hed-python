@@ -90,22 +90,22 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
     return dir_dict
 
 
-def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dir=[]):
+def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dirs=[]):
     """ Traverses a directory tree and returns a list of paths to files ending with a particular name_suffix.
-    TODO: Add exclude_dirs parameter
+
     Args:
         root_path (str):              Full path of the directory tree to be traversed (no ending slash)
         name_prefix (str, None):     An optional name_prefix for the base filename
         name_suffix (str, None):     The name_suffix of the paths to be extracted
         extensions (list, None):     A list of extensions to be selected
-        exclude_dir (list, None):    A list of paths to be excluded
+        exclude_dirs (list, None):    A list of paths to be excluded
 
     Returns:
         list:             A list of full paths
     """
     file_list = []
     for r, d, f in os.walk(root_path):
-        if r in exclude_dir:
+        if r in exclude_dirs:
             continue
         for r_file in f:
             if check_filename(r_file, name_prefix, name_suffix, extensions):
