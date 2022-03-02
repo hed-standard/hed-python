@@ -79,34 +79,64 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
         dict:             Dictionary with directories and keys and file lists values
     """
     dir_dict = {}
-    for r, d, f in os.walk(dir_path):
+    for root, dirs, files in os.walk(dir_path, topdown=True):
         file_list = []
-        for r_file in f:
+        for r_file in files:
             if check_filename(r_file, name_prefix, name_suffix, extensions):
-                file_list.append(os.path.abspath(os.path.join(r, r_file)))
+                file_list.append(os.path.join(os.path.realpath(root), r_file))
         if skip_empty and not file_list:
             continue
-        dir_dict[os.path.abspath(r)] = file_list
+        dir_dict[os.path.realpath(root)] = file_list
     return dir_dict
 
 
-def get_file_list(dir_path, name_prefix=None, name_suffix=None, extensions=None):
+def get_filtered_list(root_path, file_list, name_prefix=None, name_suffix=None, extensions=None):
+    """ Returns a new list with the filenames in file_list
+
+    Everything is converted to lower case prior to testing so this test should be case insensitive.
+
+     Args:
+         root_path (str) :           Path of filename to test
+         file_list (list):           List of files to test
+         name_prefix (str):          An optional name_prefix for the base filename
+         name_suffix (str):          An optional name_suffix for the base file name
+         extensions (list):     An optional list of file extensions
+
+     Returns:
+         tuple (list, list):            Returns two lists one with
+     """
+    filtered_files = []
+    for r_file in file_list:
+        file_split = os.path.splitext(r_file.lower())
+        if extensions and file_split[1] not in [x.lower() for x in extensions]:
+            continue
+        elif name_suffix and not file_split[0].endswith(name_suffix.lower()):
+            continue
+        elif name_prefix and not file_split[0].startswith(name_prefix.lower()):
+            continue
+        filtered_files.append(r_file)
+    return filtered_files
+
+
+def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dirs=[]):
     """ Traverses a directory tree and returns a list of paths to files ending with a particular name_suffix.
-    TODO: Add exclude_dirs parameter
+
     Args:
-        dir_path (str):              Full path of the directory tree to be traversed (no ending slash)
+        root_path (str):              Full path of the directory tree to be traversed (no ending slash)
         name_prefix (str, None):     An optional name_prefix for the base filename
         name_suffix (str, None):     The name_suffix of the paths to be extracted
         extensions (list, None):     A list of extensions to be selected
+        exclude_dirs (list, None):    A list of paths to be excluded
 
     Returns:
         list:             A list of full paths
     """
     file_list = []
-    for r, d, f in os.walk(dir_path):
-        for r_file in f:
+    for root, dirs, files in os.walk(root_path, topdown=True):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        for r_file in files:
             if check_filename(r_file, name_prefix, name_suffix, extensions):
-                file_list.append(os.path.join(r, r_file))
+                file_list.append(os.path.join(os.path.realpath(root), r_file))
     return file_list
 
 
