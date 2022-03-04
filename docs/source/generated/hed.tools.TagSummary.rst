@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: TagSummary
-
+.. autoclass:: hed.tools.TagSummary
    
    .. automethod:: __init__
 
@@ -21,3 +20,8 @@
    
    
    
+
+.. autoclass:: hed.tools.TagSummary
+   :members:
+   :undoc-members:
+   :show-inheritance:

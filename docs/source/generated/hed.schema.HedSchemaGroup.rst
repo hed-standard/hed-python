@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.schema
 
-.. autoclass:: HedSchemaGroup
-
+.. autoclass:: hed.schema.HedSchemaGroup
    
    .. automethod:: __init__
 
@@ -37,3 +36,8 @@
       ~HedSchemaGroup.value_classes
    
    
+
+.. autoclass:: hed.schema.HedSchemaGroup
+   :members:
+   :undoc-members:
+   :show-inheritance:

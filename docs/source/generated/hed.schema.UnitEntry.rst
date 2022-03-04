@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.schema
 
-.. autoclass:: UnitEntry
-
+.. autoclass:: hed.schema.UnitEntry
    
    .. automethod:: __init__
 
@@ -24,3 +23,8 @@
    
    
    
+
+.. autoclass:: hed.schema.UnitEntry
+   :members:
+   :undoc-members:
+   :show-inheritance:

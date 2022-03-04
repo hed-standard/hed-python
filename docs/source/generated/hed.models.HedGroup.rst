@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: HedGroup
-
+.. autoclass:: hed.models.HedGroup
    
    .. automethod:: __init__
 
@@ -48,3 +47,8 @@
       ~HedGroup.span
    
    
+
+.. autoclass:: hed.models.HedGroup
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: SummaryEntry
-
+.. autoclass:: hed.tools.SummaryEntry
    
    .. automethod:: __init__
 
@@ -23,3 +22,8 @@
    
    
    
+
+.. autoclass:: hed.tools.SummaryEntry
+   :members:
+   :undoc-members:
+   :show-inheritance:

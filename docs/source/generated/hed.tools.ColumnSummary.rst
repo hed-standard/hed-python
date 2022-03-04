@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: ColumnSummary
-
+.. autoclass:: hed.tools.ColumnSummary
    
    .. automethod:: __init__
 
@@ -26,3 +25,8 @@
    
    
    
+
+.. autoclass:: hed.tools.ColumnSummary
+   :members:
+   :undoc-members:
+   :show-inheritance:

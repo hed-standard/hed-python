@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: HedString
-
+.. autoclass:: hed.models.HedString
    
    .. automethod:: __init__
 
@@ -61,3 +60,8 @@
       ~HedString.span
    
    
+
+.. autoclass:: hed.models.HedString
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: EventsInput
-
+.. autoclass:: hed.models.EventsInput
    
    .. automethod:: __init__
 
@@ -54,3 +53,8 @@
       ~EventsInput.worksheet_name
    
    
+
+.. autoclass:: hed.models.EventsInput
+   :members:
+   :undoc-members:
+   :show-inheritance:
