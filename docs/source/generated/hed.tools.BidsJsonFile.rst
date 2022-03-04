@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: BidsJsonFile
-
+.. autoclass:: hed.tools.BidsJsonFile
    
    .. automethod:: __init__
 
@@ -22,3 +21,8 @@
    
    
    
+
+.. autoclass:: hed.tools.BidsJsonFile
+   :members:
+   :undoc-members:
+   :show-inheritance:

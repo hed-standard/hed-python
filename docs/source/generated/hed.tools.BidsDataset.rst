@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: BidsDataset
-
+.. autoclass:: hed.tools.BidsDataset
    
    .. automethod:: __init__
 
@@ -23,3 +22,8 @@
    
    
    
+
+.. autoclass:: hed.tools.BidsDataset
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: DefDict
-
+.. autoclass:: hed.models.DefDict
    
    .. automethod:: __init__
 
@@ -28,3 +27,8 @@
       ~DefDict.defs
    
    
+
+.. autoclass:: hed.models.DefDict
+   :members:
+   :undoc-members:
+   :show-inheritance:

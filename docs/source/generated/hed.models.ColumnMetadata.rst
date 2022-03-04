@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: ColumnMetadata
-
+.. autoclass:: hed.models.ColumnMetadata
    
    .. automethod:: __init__
 
@@ -34,3 +33,8 @@
       ~ColumnMetadata.hed_dict
    
    
+
+.. autoclass:: hed.models.ColumnMetadata
+   :members:
+   :undoc-members:
+   :show-inheritance:

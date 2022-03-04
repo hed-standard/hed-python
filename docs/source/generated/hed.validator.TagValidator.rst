@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.validator
 
-.. autoclass:: TagValidator
-
+.. autoclass:: hed.validator.TagValidator
    
    .. automethod:: __init__
 
@@ -54,3 +53,8 @@
       ~TagValidator.pattern_doubleslash
    
    
+
+.. autoclass:: hed.validator.TagValidator
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: HedTag
-
+.. autoclass:: hed.models.HedTag
    
    .. automethod:: __init__
 
@@ -54,3 +53,8 @@
       ~HedTag.value_classes
    
    
+
+.. autoclass:: hed.models.HedTag
+   :members:
+   :undoc-members:
+   :show-inheritance:

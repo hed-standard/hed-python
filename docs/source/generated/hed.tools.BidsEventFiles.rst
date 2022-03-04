@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: BidsEventFiles
-
+.. autoclass:: hed.tools.BidsEventFiles
    
    .. automethod:: __init__
 
@@ -23,3 +22,8 @@
    
    
    
+
+.. autoclass:: hed.tools.BidsEventFiles
+   :members:
+   :undoc-members:
+   :show-inheritance:
