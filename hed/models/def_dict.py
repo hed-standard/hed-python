@@ -164,6 +164,14 @@ class DefDict(HedOps):
             group_tag = groups[0] if groups else None
 
             # final validation
+            # Verify no other def or def expand tags found in group
+            if group_tag:
+                for def_tag in group.find_def_tags(recursive=True, include_groups=0):
+                    new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                             DefinitionErrors.DEF_TAG_IN_DEFINITION,
+                                                                             tag=def_tag,
+                                                                             def_name=def_tag_name)
+                    continue
             def_takes_value = def_tag_name.lower().endswith("/#")
             if def_takes_value:
                 def_tag_name = def_tag_name[:-len("/#")]

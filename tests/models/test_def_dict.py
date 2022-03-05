@@ -3,6 +3,7 @@ import unittest
 from hed.models.def_dict import DefDict
 from hed.errors import ErrorHandler, DefinitionErrors
 from hed.models.hed_string import HedString
+from hed import HedTag
 
 
 class TestDefBase(unittest.TestCase):
@@ -63,6 +64,8 @@ class TestDefDict(TestDefBase):
             'defTooManyPlaceholders': self.placeholder_invalid_def_string,
             'invalidPlaceholder': "(Definition/InvalidDef1/InvalidPlaceholder)",
             'invalidPlaceholderExtension': "(Definition/InvalidDef1/this-part-is-not-allowed/#)",
+            'defInGroup': "(Definition/ValidDefName, (Def/ImproperlyPlacedDef))",
+            'defExpandInGroup': "(Definition/ValidDefName, (Def-expand/ImproperlyPlacedDef, (ImproperContents)))"
         }
         expected_results = {
             'noGroupTag': [],
@@ -88,6 +91,10 @@ class TestDefDict(TestDefBase):
                                                                      "InvalidDef1/this-part-is-not-allowed"),
             'invalidPlaceholder': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
                                                             "InvalidDef1/InvalidPlaceholder"),
+            'defInGroup': ErrorHandler.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
+                                                    tag=HedTag("Def/ImproperlyPlacedDef"), def_name="ValidDefName"),
+            'defExpandInGroup': ErrorHandler.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
+                                                    tag=HedTag("Def-expand/ImproperlyPlacedDef"), def_name="ValidDefName")
         }
 
         self.check_def_base(test_strings, expected_results)

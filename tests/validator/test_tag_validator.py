@@ -92,6 +92,60 @@ class IndividualHedTagsShort(TestHed):
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, True)
 
+    # def test_proper_capitalization(self):
+    #     test_strings = {
+    #         'proper': 'Event/Sensory-event',
+    #         'camelCase': 'EvEnt/Something',
+    #         'takesValue': 'Sampling-rate/20 Hz',
+    #         'numeric': 'Statistical-uncertainty/20',
+    #         'lowercase': 'Event/something',
+    #         'multipleUpper': 'Event/SomeThing'
+    #     }
+    #     expected_results = {
+    #         'proper': True,
+    #         'camelCase': False,
+    #         'takesValue': True,
+    #         'numeric': True,
+    #         'lowercase': False,
+    #         'multipleUpper': False
+    #     }
+    #     expected_issues = {
+    #         'proper': [],
+    #         'camelCase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
+    #         'takesValue': [],
+    #         'numeric': [],
+    #         'lowercase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
+    #         'multipleUpper': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0)
+    #     }
+    #     self.validator_syntactic(test_strings, expected_results, expected_issues, True)
+    #
+    # def test_proper_capitalization_semantic(self):
+    #     test_strings = {
+    #         'proper': 'Event/Sensory-event',
+    #         'camelCase': 'EvEnt/Sensory-event',
+    #         'takesValue': 'Sampling-rate/20 Hz',
+    #         'numeric': 'Statistical-uncertainty/20',
+    #         'lowercase': 'Event/sensory-event',
+    #         'multipleUpper': 'Event/Sensory-Event'
+    #     }
+    #     expected_results = {
+    #         'proper': True,
+    #         'camelCase': False,
+    #         'takesValue': True,
+    #         'numeric': True,
+    #         'lowercase': False,
+    #         'multipleUpper': False
+    #     }
+    #     expected_issues = {
+    #         'proper': [],
+    #         'camelCase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
+    #         'takesValue': [],
+    #         'numeric': [],
+    #         'lowercase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
+    #         'multipleUpper': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0)
+    #     }
+    #     self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
     def test_child_required(self):
         test_strings = {
             'hasChild': 'Experimental-stimulus',
