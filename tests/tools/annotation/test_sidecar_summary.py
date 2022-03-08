@@ -1,8 +1,6 @@
 import os
 import unittest
 from hed.models.sidecar import Sidecar
-from hed.tools.bids.bids_event_file import BidsEventFile
-from hed.tools.bids.bids_file import BidsFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
 

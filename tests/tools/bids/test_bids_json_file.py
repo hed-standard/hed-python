@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
         cls.description_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                             '../../data/bids/eeg_ds003654s_hed/dataset_description.json')
         cls.json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
+                                     '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_constructor(self):
         json1 = BidsJsonFile(Test.description_path, set_contents=False)

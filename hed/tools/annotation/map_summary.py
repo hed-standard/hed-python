@@ -1,5 +1,5 @@
 """ Utilities for extracting counts of items in columns. """
-from hed.tools.annotation.column_summary import ColumnSummary
+from hed.tools.annotation.event_value_summary import EventValueSummary
 from hed.util.io_util import get_file_list
 from hed.util.data_util import get_new_dataframe
 
