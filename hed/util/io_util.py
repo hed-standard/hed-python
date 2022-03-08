@@ -167,54 +167,47 @@ def get_path_components(this_path, root_path):
         return [base_path]
 
 
-def compare_dict_keys(dict1, dict2):
-    """ Return a dictionary with keys that are simplified file names and values that are full paths
-    This function is used for cross listing BIDS style files for different studies.
-    Args:
-        dict1 (dict):  List containing full paths of files of interest
-        dict2 (dict):  List of indices into base file names of pieces to assemble for the key
-    Returns: tuple
-        (list1, list2):  Lists of keys missing from respective lists
-    """
-    keys1 = set(dict1.keys())
-    keys2 = set(dict2.keys())
-    list1 = list(keys1.difference(keys2))
-    list2 = list(keys2.difference(keys1))
-    return list1, list2
-
-
-def make_file_dict(file_list, name_indices=(0, 2), separator='_'):
-    """ Return a dictionary with keys that are simplified file names and values that are full paths
-    This function is used for cross listing BIDS style files for different studies.
-    Args:
-        file_list (list):      List containing full paths of files of interest
-        name_indices (tuple):  List of indices into base file names of pieces to assemble for the key
-        separator (str):       Character used to separate pieces of key name
-    Returns:
-        dict:  A dictionary of simplified, path-independent key names and full paths values.
-    """
-    file_dict = {}
-    for the_file in file_list:
-        the_file = os.path.abspath(the_file)
-        base = os.path.basename(the_file)
-        key = make_key(base, indices=name_indices, separator=separator)
-        file_dict[key] = the_file
-    return file_dict
-
-
-def make_key(key_string, indices=(0, 2), separator='_'):
-    key_value = ''
-    pieces = key_string.split(separator)
-    for index in list(indices):
-        key_value += pieces[index] + separator
-    return key_value[:-1]
-
-
-if __name__ == '__main__':
-    path = 'D:\\Research\\HED\\hed-examples\\datasets\\eeg_ds003654s'
-    files = get_file_list(path, name_prefix=None, name_suffix="events", extensions=None)
-    for file in files:
-        get_path_components(file, path)
+# def compare_dict_keys(dict1, dict2):
+#     """ Return a dictionary with keys that are simplified file names and values that are full paths
+#     This function is used for cross listing BIDS style files for different studies.
+#     Args:
+#         dict1 (dict):  List containing full paths of files of interest
+#         dict2 (dict):  List of indices into base file names of pieces to assemble for the key
+#     Returns: tuple
+#         (list1, list2):  Lists of keys missing from respective lists
+#     """
+#     keys1 = set(dict1.keys())
+#     keys2 = set(dict2.keys())
+#     list1 = list(keys1.difference(keys2))
+#     list2 = list(keys2.difference(keys1))
+#     return list1, list2
+#
+#
+# def make_file_dict(file_list, name_indices=(0, 2), separator='_'):
+#     """ Return a dictionary with keys that are simplified file names and values that are full paths
+#     This function is used for cross listing BIDS style files for different studies.
+#     Args:
+#         file_list (list):      List containing full paths of files of interest
+#         name_indices (tuple):  List of indices into base file names of pieces to assemble for the key
+#         separator (str):       Character used to separate pieces of key name
+#     Returns:
+#         dict:  A dictionary of simplified, path-independent key names and full paths values.
+#     """
+#     file_dict = {}
+#     for the_file in file_list:
+#         the_file = os.path.abspath(the_file)
+#         base = os.path.basename(the_file)
+#         key = make_key(base, indices=name_indices, separator=separator)
+#         file_dict[key] = the_file
+#     return file_dict
+#
+#
+# def make_key(key_string, indices=(0, 2), separator='_'):
+#     key_value = ''
+#     pieces = key_string.split(separator)
+#     for index in list(indices):
+#         key_value += pieces[index] + separator
+#     return key_value[:-1]
 
 
 def parse_bids_filename(file_path):

@@ -18,7 +18,7 @@
       ~ColumnSummary.make_combined_dicts
       ~ColumnSummary.print
       ~ColumnSummary.update
-      ~ColumnSummary.update_dict
+      ~ColumnSummary.update_summary
    
    
 

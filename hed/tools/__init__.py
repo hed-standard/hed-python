@@ -10,8 +10,10 @@ from .bids.bids_json_file import BidsJsonFile
 from .bids.bids_sidecar_file import BidsSidecarFile
 from .bids.bids_tsv_file import BidsTsvFile
 
-from .annotation.column_summary import ColumnSummary
+from .annotation.event_value_summary import EventValueSummary
 from .annotation.dataset_summary import DatasetSummary
+from .annotation.event_file_dictionary import EventFileDictionary
+from .annotation.file_dictionary import FileDictionary
 from .annotation.key_map import KeyMap
 from .annotation.key_template import KeyTemplate
 from .annotation.map_summary import get_columns_info, get_key_counts, update_dict_counts

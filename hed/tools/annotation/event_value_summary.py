@@ -3,8 +3,8 @@ from hed.util.data_util import get_new_dataframe
 from hed.tools.annotation.annotation_util import generate_sidecar_entry
 
 
-class ColumnSummary:
-    """Summarizes the contents of a spreadsheet. """
+class EventValueSummary:
+    """Summarizes the contents of event files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ .
@@ -108,19 +108,19 @@ class ColumnSummary:
         else:
             self._update_dataframe(data)
 
-    def update_dict(self, col_dict):
-        """ Adds the values of another ColDict object to this object.
+    def update_summary(self, col_sum):
+        """ Adds the values of another ColumnSummary object to this object.
 
         The value_cols and skip_cols are updated as long as they are not contradictory. A new skip column
         cannot be in the
 
           Args:
-              col_dict (ColDict):    A column dictionary to be combined with
+              col_sum (EventValueSummary):    A ColumnSummary to be combined with
 
           """
-        self._update_dict_skip(col_dict)
-        self._update_dict_value(col_dict)
-        self._update_dict_categorical(col_dict)
+        self._update_dict_skip(col_sum)
+        self._update_dict_value(col_sum)
+        self._update_dict_categorical(col_sum)
 
     def _update_categorical(self, col_name, values):
         if col_name not in self.categorical_info:
@@ -187,23 +187,23 @@ class ColumnSummary:
                 self.value_info[col] = self.value_info[col] + col_dict.value_info[col]
 
     @staticmethod
-    def make_combined_dicts(file_dict, skip_cols=None):
+    def make_combined_dicts(file_dictionary, skip_cols=None):
         """ Return a combined dictionary of column information as well as individual summaries
 
         Args:
-            file_dict (dict):  Dictionary of file name keys and full path
+            file_dictionary (FileDictionary):  Dictionary of file name keys and full path
             skip_cols (list):  Name of the column
 
         Returns:
-            (ColumnSummary, dict)  A ColumnSummary of the file_dict, plus dict of individual ColumnSummary objects
+            (EventValueSummary, dict)  A EventValueSummary of the file_dict, plus dict of individual EventValueSummary objects
         """
 
-        summary_all = ColumnSummary(skip_cols=skip_cols)
+        summary_all = EventValueSummary(skip_cols=skip_cols)
         summary_dict = {}
-        for key, file in file_dict.items():
-            orig_dict = ColumnSummary(skip_cols=skip_cols)
+        for key, file in file_dictionary.file_dict.items():
+            orig_dict = EventValueSummary(skip_cols=skip_cols)
             df = get_new_dataframe(file)
             orig_dict.update(df)
             summary_dict[key] = orig_dict
-            summary_all.update_dict(orig_dict)
+            summary_all.update_summary(orig_dict)
         return summary_all, summary_dict
