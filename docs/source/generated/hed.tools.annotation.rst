@@ -12,14 +12,6 @@ hed.tools.annotation.annotation\_util module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.annotation.column\_summary module
--------------------------------------------
-
-.. automodule:: hed.tools.annotation.column_summary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 hed.tools.annotation.dataset\_summary module
 --------------------------------------------
 
@@ -28,10 +20,26 @@ hed.tools.annotation.dataset\_summary module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.annotation.file\_summary module
------------------------------------------
+hed.tools.annotation.event\_file\_dictionary module
+---------------------------------------------------
 
-.. automodule:: hed.tools.annotation.file_summary
+.. automodule:: hed.tools.annotation.event_file_dictionary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.annotation.event\_value\_summary module
+-------------------------------------------------
+
+.. automodule:: hed.tools.annotation.event_value_summary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.annotation.file\_dictionary module
+--------------------------------------------
+
+.. automodule:: hed.tools.annotation.file_dictionary
    :members:
    :undoc-members:
    :show-inheritance:
