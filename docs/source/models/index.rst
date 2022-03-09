@@ -14,8 +14,10 @@ HED data models
 
 .. _loading_datasets:
 
-Loading BIDS datasets
+HED datasets
 ===========================================
+
+**This section is a placeholder and will be updated soon.**
 
 The :obj:`hed.models.BaseInput` class requires the path to a valid BIDS dataset::
 
@@ -35,5 +37,4 @@ the file tree. By default, defined BIDS entities include things like "subject",
 Querying datasets
 ===========================================
 
-Pybids layouts can be queried according to a number of parameters, using
-grabbit's ``get`` functionality.
+**Coming***

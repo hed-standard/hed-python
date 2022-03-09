@@ -2,8 +2,10 @@ import os
 import json
 import unittest
 from pandas import DataFrame
-from hed.tools import check_df_columns, df_to_hed, extract_tag, generate_sidecar_entry, hed_to_df, merge_hed_dict
+from hed.tools import check_df_columns, df_to_hed, extract_tag, generate_sidecar_entry, hed_to_df, merge_hed_dict, \
+    EventValueSummary
 from hed.tools.annotation.annotation_util import _flatten_cat_col, _flatten_val_col,  _get_value_entry, _update_cat_dict
+from hed.util import get_file_list
 
 
 # noinspection PyBroadException
@@ -11,8 +13,8 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        json_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                 '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json'))
+        cls.bids_root_path = os.path.realpath('../../data/bids/eeg_ds003654s_hed')
+        json_path = os.path.realpath('../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
         cls.sidecar1a = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
                          "b": {"HED": "Purple"}}
         cls.sidecar1b = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
@@ -136,6 +138,22 @@ class Test(unittest.TestCase):
         self.assertIn('Description', self.sidecar1b['b'], "merge_hed_dict should not have description when n/a")
         merge_hed_dict(self.sidecar1b, hed1b)
         self.assertIn('Description', self.sidecar1b['b'], "merge_hed_dict should not have description when n/a")
+
+    def test_merge_hed_dict_full(self):
+        exclude_dirs = ['stimuli']
+        name_indices = (0, 2)
+        skip_columns = ["onset", "duration", "sample", "trial", "response_time"]
+        value_columns = ["rep_lag", "stim_file", "value"]
+        event_files = get_file_list(self.bids_root_path, extensions=[".tsv"], name_suffix="_events",
+                                    exclude_dirs=exclude_dirs)
+        value_sum = EventValueSummary(value_cols=value_columns, skip_cols=skip_columns)
+        value_sum.update(event_files)
+        sidecar_template = value_sum.extract_sidecar_template()
+        example_spreadsheet = hed_to_df(sidecar_template)
+        spreadsheet_sidecar = df_to_hed(example_spreadsheet, description_tag=False)
+        example_sidecar = {}
+        merged_sidecar = merge_hed_dict(example_sidecar, spreadsheet_sidecar)
+        print("to here")
 
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]

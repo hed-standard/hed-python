@@ -27,7 +27,7 @@ HED models
 
 .. currentmodule:: hed
 
-.. _calibration_ref:
+.. _calibration_ref1:
 
 
 HED schema handling
@@ -63,8 +63,11 @@ HED tools
    hed.tools.BidsJsonFile
    hed.tools.BidsSidecarFile
    hed.tools.BidsTsvFile
-   hed.tools.ColumnSummary
    hed.tools.DatasetSummary
+   hed.tools.EventFileDictionary
+   hed.tools.EventValueSummary
+   hed.tools.FileDictionary
+   hed.tools.HedLogger
    hed.tools.KeyMap
    hed.tools.KeyTemplate
    hed.tools.SummaryEntry
@@ -101,4 +104,4 @@ HED validation
 
 .. currentmodule:: hed
 
-.. _calibration_ref:
+.. _calibration_ref2:
