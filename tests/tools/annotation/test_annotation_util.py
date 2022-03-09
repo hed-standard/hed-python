@@ -13,8 +13,9 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_root_path = os.path.realpath('../../data/bids/eeg_ds003654s_hed')
-        json_path = os.path.realpath('../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
+        cls.bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                          '../../data/bids/eeg_ds003654s_hed'))
+        json_path = os.path.realpath(os.path.join(cls.bids_root_path, 'task-FacePerception_events.json'))
         cls.sidecar1a = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
                          "b": {"HED": "Purple"}}
         cls.sidecar1b = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
@@ -152,8 +153,9 @@ class Test(unittest.TestCase):
         example_spreadsheet = hed_to_df(sidecar_template)
         spreadsheet_sidecar = df_to_hed(example_spreadsheet, description_tag=False)
         example_sidecar = {}
-        merged_sidecar = merge_hed_dict(example_sidecar, spreadsheet_sidecar)
-        print("to here")
+        self.assertEqual(0, len(example_sidecar), 'merge_hed_dict input is empty for this test')
+        merge_hed_dict(example_sidecar, spreadsheet_sidecar)
+        self.assertEqual(6, len(example_sidecar), 'merge_hed_dict merges with the correct length')
 
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]
