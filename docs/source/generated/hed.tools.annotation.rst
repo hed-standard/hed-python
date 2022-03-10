@@ -20,14 +20,6 @@ hed.tools.annotation.dataset\_summary module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.annotation.event\_file\_dictionary module
----------------------------------------------------
-
-.. automodule:: hed.tools.annotation.event_file_dictionary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 hed.tools.annotation.event\_value\_summary module
 -------------------------------------------------
 
@@ -88,6 +80,14 @@ hed.tools.annotation.tag\_summary module
 ----------------------------------------
 
 .. automodule:: hed.tools.annotation.tag_summary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.annotation.tsv\_file\_dictionary module
+-------------------------------------------------
+
+.. automodule:: hed.tools.annotation.tsv_file_dictionary
    :members:
    :undoc-members:
    :show-inheritance:
