@@ -2,8 +2,8 @@ from hed.util.data_util import get_new_dataframe
 from hed.tools.annotation.file_dictionary import FileDictionary
 
 
-class EventFileDictionary(FileDictionary):
-    """Holds a dictionary of path names keyed by specified entity pairs. """
+class TsvFileDictionary(FileDictionary):
+    """ Holds a key-file dictionary, but also reads each tsv file and keeps track of number of rows and column names."""
 
     def __init__(self, file_list, name_indices=(0, 2), separator='_'):
         """ Create a dictionary with keys that are simplified file names and values that are full paths

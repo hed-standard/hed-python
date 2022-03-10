@@ -11,7 +11,7 @@ from .bids.bids_tsv_file import BidsTsvFile
 
 from .annotation.event_value_summary import EventValueSummary
 from .annotation.dataset_summary import DatasetSummary
-from .annotation.event_file_dictionary import EventFileDictionary
+from .annotation.tsv_file_dictionary import TsvFileDictionary
 from .annotation.file_dictionary import FileDictionary
 from .annotation.key_map import KeyMap
 from .annotation.key_template import KeyTemplate
