@@ -27,7 +27,7 @@ author = 'HED Working Group'
 version = '0.0.1'
 release = '0.0.1'
 
-currentdir = os.path.abspath(os.path.dirname(__file__))
+currentdir = os.path.realpath(os.path.dirname(__file__))
 
 
 # -- General configuration ---------------------------------------------------

@@ -16,7 +16,7 @@ class TestHed3(TestValidatorBase):
     @classmethod
     def setUpClass(cls):
         schema_file = '../data/hed_pairs/HED8.0.0t.xml'
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
+        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml)
         hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
         cls.hed_schema = HedSchemaGroup([hed_schema1, hed_schema2])
@@ -26,7 +26,7 @@ class TestHed3(TestValidatorBase):
 
     def test_invalid_load(self):
         schema_file = '../data/hed_pairs/HED8.0.0t.xml'
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
+        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml, library_prefix="tl:")
         hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
 
@@ -34,7 +34,7 @@ class TestHed3(TestValidatorBase):
 
     def test_invalid_load_prefix(self):
         schema_file = '../data/hed_pairs/HED8.0.0t.xml'
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), schema_file)
+        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml)
         hed_schema2 = schema.load_schema(hed_xml)
 

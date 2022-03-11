@@ -9,12 +9,12 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        cls.root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
         cls.event_path = \
-            os.path.join(os.path.dirname(os.path.abspath(__file__)),
+            os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          '../../data/bids/eeg_ds003654s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
         cls.sidecar_path = \
-            os.path.join(os.path.dirname(os.path.abspath(__file__)),
+            os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.tsv')
 
     def test_constructor(self):

@@ -13,9 +13,9 @@ class TestConverterBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.xml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.xml_file)
+        cls.xml_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.xml_file)
         cls.hed_schema_xml = schema.load_schema(cls.xml_file)
-        cls.wiki_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.wiki_file)
+        cls.wiki_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.wiki_file)
         cls.hed_schema_wiki = schema.load_schema(cls.wiki_file)
 
     def test_schema2xml(self):
@@ -84,9 +84,9 @@ class TestComplianceBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.xml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.xml_file)
+        cls.xml_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.xml_file)
         cls.hed_schema_xml = schema.load_schema(cls.xml_file)
-        cls.wiki_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.wiki_file)
+        cls.wiki_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.wiki_file)
         cls.hed_schema_wiki = schema.load_schema(cls.wiki_file)
 
     def test_compliance(self):
@@ -172,7 +172,7 @@ class TestConverterSavingPrefix(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.xml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.xml_file)
+        cls.xml_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.xml_file)
         cls.hed_schema_xml = schema.load_schema(cls.xml_file)
         cls.hed_schema_xml_prefix = schema.load_schema(cls.xml_file, library_prefix="tl:")
 

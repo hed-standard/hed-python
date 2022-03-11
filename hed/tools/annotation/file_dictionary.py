@@ -17,7 +17,10 @@ class FileDictionary:
             name_indices (tuple):  List of indices into base file names of pieces to assemble for the key
             separator (str):       Character used to separate pieces of key name
         """
-        self.file_dict = self.make_file_dict(file_list, name_indices=name_indices, separator=separator)
+        if name_indices:
+            self.file_dict = self.make_file_dict(file_list, name_indices=name_indices, separator=separator)
+        else:
+            self.file_dict = {}
 
     @property
     def key_list(self):
@@ -50,7 +53,7 @@ class FileDictionary:
     def make_file_dict(file_list, name_indices=(0, 2), separator='_'):
         file_dict = {}
         for the_file in file_list:
-            the_file = os.path.abspath(the_file)
+            the_file = os.path.realpath(the_file)
             base = os.path.basename(the_file)
             key = FileDictionary.make_key(base, indices=name_indices, separator=separator)
             if key in file_dict:

@@ -7,7 +7,7 @@ class BidsJsonFile(BidsFile):
     """Represents a BIDS JSON file."""
 
     def __init__(self, file_path, set_contents=False):
-        super().__init__(os.path.abspath(file_path))
+        super().__init__(file_path)
         self.contents = None
         if set_contents:
             self.set_contents()

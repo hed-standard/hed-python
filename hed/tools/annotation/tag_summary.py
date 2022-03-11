@@ -61,7 +61,7 @@ class TagSummary:
 
 
 if __name__ == '__main__':
-    root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              '../../../tests/data/bids/eeg_ds003654s_hed')
 
     json_path = "../../../tests/data/summaries/tag_summary_template.json5"

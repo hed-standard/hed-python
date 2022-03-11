@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.sidecar_path1 = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        cls.sidecar_path1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                          '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
         cls.schema = load_schema_version(xml_version="8.0.0")
         cls.str1 = f"(Task,Experiment-participant,(See,Face),(Discriminate,(Face, Symmetrical))," \
@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         cls.str_with_def = f"(Definition/First-show-cond, ((Condition-variable/Repetition-type," \
                            f" (Item-count/1, Face), Item-interval/0), " \
                            f"Description/Factor level indicating the first display of this face.))"
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../../data/summaries/tag_summary_template.json5")
         with open(json_path) as fp:
             cls.rules = json.load(fp)

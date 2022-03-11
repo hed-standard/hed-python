@@ -154,8 +154,8 @@ def get_path_components(this_path, root_path):
                               remaining elements directory components to the file.
     """
 
-    base_path = os.path.abspath(root_path)
-    cur_path = os.path.abspath(this_path)
+    base_path = os.path.realpath(root_path)
+    cur_path = os.path.realpath(this_path)
     common_path = os.path.commonpath([base_path, cur_path])
     if common_path != base_path:
         return None

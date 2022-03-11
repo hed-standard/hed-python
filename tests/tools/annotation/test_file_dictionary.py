@@ -9,7 +9,7 @@ from hed.util import get_file_list
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.bids_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        cls.bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                          '../../data/bids/eeg_ds003654s_hed')
 
     def test_constructor_valid(self):

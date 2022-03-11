@@ -10,9 +10,9 @@ from hed.util import get_file_list, get_new_dataframe
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/attention_shift')
-        cls.bids_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/attention_shift')
+        cls.bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                          '../../data/bids/eeg_ds003654s_hed')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
         cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
         cls.wh_events_path = \
-            os.path.abspath(os.path.join(cls.bids_base_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+            os.path.realpath(os.path.join(cls.bids_base_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
 
     def test_constructor(self):
         dict1 = EventValueSummary()

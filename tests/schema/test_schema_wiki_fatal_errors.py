@@ -10,7 +10,7 @@ class TestHedSchema(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.full_base_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.base_schema_dir)
+        cls.full_base_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.base_schema_dir)
         cls.files_and_errors = {
             "HED_schema_no_start.mediawiki": HedExceptions.SCHEMA_START_MISSING,
             "HED_schema_no_end.mediawiki": HedExceptions.SCHEMA_END_INVALID,
