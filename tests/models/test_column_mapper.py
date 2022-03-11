@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         cls.category_tags = HedString('Participant response, Stimulus')
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
 
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
         cls.basic_events_json = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
         cls.basic_event_name = "trial_type"
         cls.basic_event_type = ColumnType.Categorical
@@ -176,7 +176,7 @@ class Test(unittest.TestCase):
 
     # Verify reading/writing a short tag to a file column with a name_prefix works
     def test_add_prefix_verify_short_tag_conversion(self):
-        schema_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.schema_file)
+        schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.schema_file)
         hed_schema = load_schema(schema_file)
         prepended_hed_string = ColumnMetadata._prepend_prefix_to_required_tag_column_if_needed(
             HedString(self.short_tag_with_missing_prefix), self.short_tag_key)

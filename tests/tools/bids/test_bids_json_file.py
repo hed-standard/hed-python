@@ -7,9 +7,9 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.description_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        cls.description_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                             '../../data/bids/eeg_ds003654s_hed/dataset_description.json')
-        cls.json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        cls.json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                      '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_constructor(self):

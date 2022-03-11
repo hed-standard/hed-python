@@ -18,7 +18,7 @@ class BidsTsvFile(BidsFile):
                 If true then the file contents are read into a dataframe.
 
         """
-        super().__init__(os.path.abspath(file_path))
+        super().__init__(file_path)
         self.contents = None
         if set_contents:
             self.set_contents()

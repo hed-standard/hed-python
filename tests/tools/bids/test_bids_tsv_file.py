@@ -9,7 +9,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tsv_path = \
-            os.path.join(os.path.dirname(os.path.abspath(__file__)),
+            os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          '../../data/bids/eeg_ds003654s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
 
     def test_bids_tsv_file_constructor(self):

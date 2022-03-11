@@ -8,9 +8,9 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids/eeg_ds003654s_hed')
-        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/attention_shift')
+        cls.bids_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
 
     def test_update_dict_counts(self):
         file_name = os.path.join(self.bids_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
-        file_name = os.path.abspath(file_name)
+        file_name = os.path.realpath(file_name)
         dataframe = get_new_dataframe(file_name)
         count_dicts = {}
         update_dict_counts(count_dicts, "onset", dataframe["onset"])

@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        cls.bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids/eeg_ds003654s_hed'))
         json_path = os.path.realpath(os.path.join(cls.bids_root_path, 'task-FacePerception_events.json'))
         cls.sidecar1a = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},

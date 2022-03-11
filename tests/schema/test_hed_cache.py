@@ -11,7 +11,7 @@ import shutil
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../schema_cache_test/')
+        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test/')
         cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
         schema.set_cache_directory(cls.hed_cache_dir)
 

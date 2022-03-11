@@ -30,7 +30,7 @@ DEFAULT_URL_LIST = (DEFAULT_HED_LIST_VERSIONS_URL, LIBRARY_HED_URL)
 
 DEFAULT_SKIP_FOLDERS = ('deprecated', )
 
-HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../validator/hed_cache/')
+HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../validator/hed_cache/')
 TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300 * 6
 

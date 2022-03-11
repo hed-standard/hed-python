@@ -13,7 +13,7 @@ class BidsEventFiles:
     """ Container for the event files and sidecars in a BIDS dataset."""
 
     def __init__(self, root_path):
-        self.root_path = os.path.abspath(root_path)
+        self.root_path = os.path.realpath(root_path)
         self.sidecar_dict = {}  # Dict uses os.path.abspath(file) as key
         self.events_dict = {}
         self.sidecar_dir_dict = {}
@@ -29,7 +29,7 @@ class BidsEventFiles:
         files = get_file_list(self.root_path, name_suffix='_events', extensions=['.tsv'])
         file_dict = {}
         for file in files:
-            file_dict[os.path.abspath(file)] = BidsEventFile(file)
+            file_dict[os.path.realpath(file)] = BidsEventFile(file)
         self.events_dict = file_dict
 
     def _set_sidecar_dict(self):
@@ -37,7 +37,7 @@ class BidsEventFiles:
         files = get_file_list(self.root_path, name_suffix='_events', extensions=['.json'])
         file_dict = {}
         for file in files:
-            file_dict[os.path.abspath(file)] = BidsSidecarFile(os.path.abspath(file), set_contents=True)
+            file_dict[os.path.realpath(file)] = BidsSidecarFile(os.path.realpath(file), set_contents=True)
         self.sidecar_dict = file_dict
 
     def _set_sidecar_dir_dict(self):
@@ -47,15 +47,15 @@ class BidsEventFiles:
         for this_dir, dir_list in dir_dict.items():
             new_dir_list = []
             for s_file in dir_list:
-                new_dir_list.append(self.sidecar_dict[os.path.abspath(s_file)])
-            sidecar_dir_dict[os.path.abspath(this_dir)] = new_dir_list
+                new_dir_list.append(self.sidecar_dict[os.path.realpath(s_file)])
+            sidecar_dir_dict[os.path.realpath(this_dir)] = new_dir_list
         self.sidecar_dir_dict = sidecar_dir_dict
 
     def get_sidecars_from_path(self, obj):
         sidecar_list = []
         current_path = ''
         for comp in get_path_components(obj.file_path, self.root_path):
-            current_path = os.path.abspath(os.path.join(current_path, comp))
+            current_path = os.path.realpath(os.path.join(current_path, comp))
             sidecars = self.sidecar_dir_dict.get(current_path, None)
             sidecar = BidsSidecarFile.get_sidecar(obj, sidecars)
             if sidecar:
@@ -85,7 +85,7 @@ class BidsEventFiles:
 
 
 if __name__ == '__main__':
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         '../../../tests/data/bids/eeg_ds003654s_hed')
     bids = BidsEventFiles(path)
 
