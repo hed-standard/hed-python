@@ -10,9 +10,9 @@ class BidsFile:
         suffix, ext, entity_dict, unmatched = parse_bids_filename(self.file_path)
         self.suffix = suffix
         self.ext = ext
-        self.entities = entity_dict
+        self.entity_dict = entity_dict
 
     def __str__(self):
         return self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
-               " entities=" + str(self.entities)
+               " entity_dict=" + str(self.entity_dict)
 

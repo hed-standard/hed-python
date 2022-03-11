@@ -16,13 +16,13 @@ class Test(unittest.TestCase):
         json1 = BidsJsonFile(Test.description_path, set_contents=False)
         self.assertEqual(json1.suffix, 'dataset_description', "BidsJsonFile should have correct name_suffix")
         self.assertEqual(json1.ext, '.json', "BidsJsonFile should have correct ext")
-        self.assertEqual(len(json1.entities), 0, "BidssonFile should have right number of entities")
+        self.assertEqual(len(json1.entity_dict), 0, "BidssonFile should have right number of entity_dict")
         self.assertFalse(json1.contents)
 
         sidecar2 = BidsJsonFile(Test.json_path, set_contents=True)
         self.assertEqual(sidecar2.suffix, 'events', "BidsJsonFile should have correct name_suffix")
         self.assertEqual(sidecar2.ext, '.json', "BidsJsonFile should have correct ext")
-        self.assertEqual(len(sidecar2.entities), 1, "BidsJsonFile should have right number of entities")
+        self.assertEqual(len(sidecar2.entity_dict), 1, "BidsJsonFile should have right number of entity_dict")
         self.assertIsInstance(sidecar2.contents, dict, "BidsJsonFile should contain a dictionary")
 
     def test_bids_json_file_str(self):

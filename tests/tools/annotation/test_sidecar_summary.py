@@ -15,13 +15,13 @@ class Test(unittest.TestCase):
         sidecar1 = BidsSidecarFile(Test.sidecar_path1, set_contents=False)
         self.assertEqual(sidecar1.suffix, 'events', "BidsSidecarFile should have correct name_suffix")
         self.assertEqual(sidecar1.ext, '.json', "BidsSidecarFile should have correct ext")
-        self.assertEqual(len(sidecar1.entities), 1, "BidsSidecarFile should have right number of entities")
+        self.assertEqual(len(sidecar1.entity_dict), 1, "BidsSidecarFile should have right number of entity_dict")
         self.assertFalse(sidecar1.contents)
 
         sidecar2 = BidsSidecarFile(Test.sidecar_path1, set_contents=True)
         self.assertEqual(sidecar2.suffix, 'events', "BidsSidecarFile should have correct name_suffix")
         self.assertEqual(sidecar2.ext, '.json', "BidsSidecarFile should have correct ext")
-        self.assertEqual(len(sidecar2.entities), 1, "BidsSidecarFile should have right number of entities")
+        self.assertEqual(len(sidecar2.entity_dict), 1, "BidsSidecarFile should have right number of entity_dict")
         self.assertIsInstance(sidecar2.contents, Sidecar, "BidsSidecarFile should contain a Sidecar")
 
 

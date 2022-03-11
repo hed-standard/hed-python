@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         events = BidsEventFile(Test.event_path)
         self.assertEqual(events.suffix, 'events', "BidsEventFile should have correct events suffix")
         self.assertEqual(events.ext, '.tsv', "BidsEventFile should have a .tsv extension")
-        self.assertEqual(len(events.entities), 3, "BidsEventFile should have right number of entities")
+        self.assertEqual(len(events.entity_dict), 3, "BidsEventFile should have right number of entity_dict")
         events_str = str(events)
         self.assertTrue(events_str, "BidsEventFile should have a string representation")
 

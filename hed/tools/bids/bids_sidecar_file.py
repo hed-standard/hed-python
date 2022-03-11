@@ -28,8 +28,8 @@ class BidsSidecarFile(BidsJsonFile):
         common_path = os.path.commonpath([obj.file_path, self.file_path])
         if common_path != os.path.dirname(self.file_path):
             return False
-        for key, item in self.entities.items():
-            if key not in obj.entities or obj.entities[key] != item:
+        for key, item in self.entity_dict.items():
+            if key not in obj.entity_dict or obj.entity_dict[key] != item:
                 return False
         return True
 

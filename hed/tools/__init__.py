@@ -5,6 +5,7 @@ from .bids.bids_dataset import BidsDataset
 from .bids.bids_event_file import BidsEventFile
 from .bids.bids_event_files import BidsEventFiles
 from .bids.bids_file import BidsFile
+from .bids.bids_file_dictionary import BidsFileDictionary
 from .bids.bids_json_file import BidsJsonFile
 from .bids.bids_sidecar_file import BidsSidecarFile
 from .bids.bids_tsv_file import BidsTsvFile
