@@ -51,16 +51,15 @@ class Test(unittest.TestCase):
         results2 = dict1.make_query(query_dict={'sub': '*', 'run': ['1']})
         self.assertEqual(len(results2), 2, "make_query should return the right number of entries ")
 
-    def test_split_by_entity(self):
+    def test_create_split_dict(self):
         dict1 = BidsFileDictionary(self.file_list, entities=('sub', 'run'))
-        dist1_split, leftovers = dict1.split_by_entity('run')
-        self.assertIsInstance(dist1_split, dict, "split_by_entity returns a dictionary")
-        self.assertEqual(3, len(dist1_split), 'split_by_entity should return the correct number of items')
+        dist1_split, leftovers = dict1.create_split_dict('run')
+        self.assertIsInstance(dist1_split, dict, "create_split_dict returns a dictionary")
+        self.assertEqual(3, len(dist1_split), 'create_split_dict should return the correct number of items')
         for value in dist1_split.values():
             self.assertIsInstance(value, BidsFileDictionary,
-                                  'split_by_entity dictionary values should be BidsFileDictionary objects')
-        self.assertIsInstance(leftovers, dict, "split_by_entity leftovers should be a dictionary")
-        self.assertFalse(leftovers, "split_by_entry leftovers should be empty")
+                                  'create_split_dict dictionary values should be BidsFileDictionary objects')
+        self.assertFalse(leftovers, "create_split_dict leftovers should be empty")
 
 if __name__ == '__main__':
     unittest.main()

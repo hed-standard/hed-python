@@ -26,11 +26,11 @@ class BidsTsvDictionary(BidsFileDictionary):
             self.rowcount_dict[key] = len(df.index)
             self.column_dict[key] = list(df.columns.values)
 
-    def iter_event_info(self):
+    def iter_tsv_info(self):
         for key, file in self.file_dict.items():
             yield key, file, self.rowcount_dict[key], self.column_dict[key]
 
-    def event_count_diffs(self, other_dict):
+    def count_diffs(self, other_dict):
         """Returns a list containing the keys in which the number of events differ
 
         Args:
@@ -45,3 +45,9 @@ class BidsTsvDictionary(BidsFileDictionary):
             if self.rowcount_dict[key] != other_dict.rowcount_dict[key]:
                 diff_list.append((key, self.rowcount_dict[key], other_dict.rowcount_dict[key]))
         return diff_list
+
+    def _create_dict_obj(self, file_dict):
+        dict_obj = BidsTsvDictionary(file_list=None, entities=self.entities)
+        dict_obj.file_dict = file_dict
+        dict_obj._set_tsv_info()
+        return dict_obj

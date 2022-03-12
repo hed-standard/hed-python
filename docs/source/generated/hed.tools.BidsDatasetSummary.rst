@@ -1,9 +1,9 @@
-﻿hed.tools.DatasetSummary
-========================
+﻿hed.tools.BidsDatasetSummary
+============================
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: hed.tools.DatasetSummary
+.. autoclass:: hed.tools.BidsDatasetSummary
    
    .. automethod:: __init__
 
@@ -12,7 +12,7 @@
 
    .. autosummary::
    
-      ~DatasetSummary.__init__
+      ~BidsDatasetSummary.__init__
    
    
 
@@ -20,7 +20,7 @@
    
    
 
-.. autoclass:: hed.tools.DatasetSummary
+.. autoclass:: hed.tools.BidsDatasetSummary
    :members:
    :undoc-members:
    :show-inheritance:

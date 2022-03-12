@@ -57,14 +57,15 @@ HED tools
    :toctree: generated/
 
    hed.tools.BidsDataset
+   hed.tools.BidsDatasetSummary
    hed.tools.BidsEventFile
    hed.tools.BidsEventFiles
    hed.tools.BidsFile
    hed.tools.BidsJsonFile
    hed.tools.BidsSidecarFile
+   hed.tools.BidsTsvDictionary
    hed.tools.BidsTsvFile
    hed.tools.BidsTsvSummary
-   hed.tools.DatasetSummary
 
    hed.tools.FileDictionary
    hed.tools.HedLogger
@@ -72,7 +73,6 @@ HED tools
    hed.tools.KeyTemplate
    hed.tools.SummaryEntry
    hed.tools.TagSummary
-   hed.tools.TsvFileDictionary
    hed.tools.annotation.annotation_util
 
 
@@ -93,7 +93,7 @@ HED utilities
 .. currentmodule:: hed
 
 
-HED validation
+HED validators
 --------------
 
 .. autosummary:: hed.validator

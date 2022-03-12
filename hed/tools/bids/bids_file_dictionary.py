@@ -47,7 +47,7 @@ class BidsFileDictionary(FileDictionary):
         diffs = set(self.file_dict.keys()).symmetric_difference(set(other_dict.file_dict.keys()))
         return list(diffs)
 
-    def make_query(self, query_dict={'sub':'*', 'run':['*']}):
+    def make_query(self, query_dict={'sub': '*', 'run': ['*']}):
         response_dict = {}
         for key, file in self.file_dict.items():
             if self.match_query(query_dict, file.entity_dict):
@@ -60,10 +60,29 @@ class BidsFileDictionary(FileDictionary):
         for key, value in self.file_dict.items():
             print(f"{key}: {os.path.basename(value.file_path)}")
 
-    def split_by_entity(self, entity):
+    def _create_dict_obj(self, file_dict):
+        dict_obj = BidsFileDictionary(file_list=None, entities=self.entities)
+        dict_obj.file_dict = file_dict
+        return dict_obj
+
+    def create_split_dict(self, entity):
+        split_dict, leftovers = self.split_dict_by_entity(self.file_dict, entity)
+        for entity_value, entity_dict in split_dict.items():
+            split_dict[entity_value] = self._create_dict_obj(split_dict[entity_value])
+        if leftovers:
+            leftover_dict = self._create_dict_obj(leftovers)
+        else:
+            leftover_dict = None
+        return split_dict, leftover_dict
+
+    @staticmethod
+    def split_dict_by_entity(file_dict, entity):
+        """ Split a dict of BidsFile into multiple dicts based on an entity
+
+        """
         split_dict = {}
         leftovers = {}
-        for key, file in self.file_dict.items():
+        for key, file in file_dict.items():
             if entity not in file.entity_dict:
                 leftovers[key] = file
                 continue
@@ -71,11 +90,6 @@ class BidsFileDictionary(FileDictionary):
             entity_dict = split_dict.get(entity_value, {})
             entity_dict[key] = file
             split_dict[entity_value] = entity_dict
-
-        for entity_value, entity_dict in split_dict.items():
-            this_bids_dict = BidsFileDictionary(file_list=None, entities=self.entities)
-            this_bids_dict.file_dict = split_dict[entity_value]
-            split_dict[entity_value] = this_bids_dict
         return split_dict, leftovers
 
     @staticmethod
