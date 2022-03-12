@@ -3,8 +3,8 @@ from hed.util.data_util import get_new_dataframe
 from hed.tools.annotation.annotation_util import generate_sidecar_entry
 
 
-class EventValueSummary:
-    """Summarizes the contents of event files. """
+class BidsTsvSummary:
+    """Summarizes the contents of tsv files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ .
@@ -115,7 +115,7 @@ class EventValueSummary:
         cannot be in the
 
           Args:
-              col_sum (EventValueSummary):    A ColumnSummary to be combined with
+              col_sum (BidsTsvSummary):    A ColumnSummary to be combined with
 
           """
         self._update_dict_skip(col_sum)
@@ -195,14 +195,14 @@ class EventValueSummary:
             skip_cols (list):  Name of the column
 
         Returns:
-            (EventValueSummary, dict)  A EventValueSummary of the file_dict, plus dict of individual EventValueSummary objects
+            (BidsTsvSummary, dict)  A BidsTsvSummary of the file_dict, plus dict of individual BidsTsvSummary objects
         """
 
-        summary_all = EventValueSummary(skip_cols=skip_cols)
+        summary_all = BidsTsvSummary(skip_cols=skip_cols)
         summary_dict = {}
         for key, file in file_dictionary.file_dict.items():
-            orig_dict = EventValueSummary(skip_cols=skip_cols)
-            df = get_new_dataframe(file)
+            orig_dict = BidsTsvSummary(skip_cols=skip_cols)
+            df = get_new_dataframe(file.file_path)
             orig_dict.update(df)
             summary_dict[key] = orig_dict
             summary_all.update_summary(orig_dict)

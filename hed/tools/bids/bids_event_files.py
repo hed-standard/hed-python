@@ -1,12 +1,10 @@
 import os
-from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.bids.bids_event_file import BidsEventFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
-from hed.tools.annotation.event_value_summary import EventValueSummary
+from hed.tools.bids.bids_tsv_summary import BidsTsvSummary
 from hed.models.events_input import EventsInput
 from hed.util.io_util import get_dir_dictionary, get_file_list, get_path_components
-from hed.validator.hed_validator import HedValidator
 
 
 class BidsEventFiles:
@@ -63,7 +61,7 @@ class BidsEventFiles:
         return sidecar_list
 
     def summarize(self, value_cols=None, skip_cols=None):
-        col_info = EventValueSummary(value_cols=None, skip_cols=None)
+        col_info = BidsTsvSummary(value_cols=None, skip_cols=None)
         for event_obj in self.events_dict.values():
             col_info.update(event_obj.file_path)
         return col_info

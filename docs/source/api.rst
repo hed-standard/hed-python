@@ -63,8 +63,9 @@ HED tools
    hed.tools.BidsJsonFile
    hed.tools.BidsSidecarFile
    hed.tools.BidsTsvFile
+   hed.tools.BidsTsvSummary
    hed.tools.DatasetSummary
-   hed.tools.EventValueSummary
+
    hed.tools.FileDictionary
    hed.tools.HedLogger
    hed.tools.KeyMap

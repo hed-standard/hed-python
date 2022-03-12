@@ -1,9 +1,7 @@
-
-
 from hed.tools.bids.bids_dataset import BidsDataset
 
 
-class DatasetSummary:
+class BidsDatasetSummary:
     """ Summarizes a BIDS dataset. """
 
     def __init__(self, dataset):
