@@ -211,7 +211,7 @@ def get_path_components(this_path, root_path):
 
 
 def parse_bids_filename(file_path):
-    """ Split a filename into its BIDS suffix, extension, and entities
+    """ Split a filename into its BIDS suffix, extension, and entity_dict
 
         Args:
             file_path (str)     Path to be parsed
@@ -219,7 +219,7 @@ def parse_bids_filename(file_path):
         Returns:
             suffix (str)        BIDS suffix name
             ext (str)           File extension (including the .)
-            entities (dict)     Dictionary with key-value pair being (entity type, entity value)
+            entity_dict (dict)     Dictionary with key-value pair being (entity type, entity value)
             unmatched (list)    List of unmatched pieces of the filename
 
     """

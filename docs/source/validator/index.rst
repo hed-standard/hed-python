@@ -1,7 +1,7 @@
 
 
 =====================================================
-HED validators
+HED validation
 =====================================================
 
 .. contents:: **Contents**
@@ -14,7 +14,7 @@ HED validators
 
 
 
-HED validation
+HED validation tools
 ===========================================
 
 **This section is a placeholder and will be updated soon.**

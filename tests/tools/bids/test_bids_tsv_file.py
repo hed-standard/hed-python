@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         tsv_file = BidsTsvFile(Test.tsv_path)
         self.assertEqual(tsv_file.suffix, 'events', "BidsTsvFile should have correct events suffix")
         self.assertEqual(tsv_file.ext, '.tsv', "BidsTsvFile should have a .tsv extension")
-        self.assertEqual(len(tsv_file.entities), 3, "BidsTsvFile should have right number of entities")
+        self.assertEqual(len(tsv_file.entity_dict), 3, "BidsTsvFile should have right number of entity_dict")
 
     def test_bids_tsv_file_str(self):
         tsv_file1 = BidsTsvFile(Test.tsv_path)
