@@ -30,6 +30,9 @@ class FileDictionary:
     def file_list(self):
         return list(self.file_dict.values())
 
+    def get_file(self, key):
+        return self.file_dict.get(key, None)
+
     def iter_files(self):
         for key, file in self.file_dict.items():
             yield key, file
