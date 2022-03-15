@@ -1,5 +1,7 @@
-hed-python
+hed
 ==========
+
+.. currentmodule:: hed
 
 .. toctree::
    :maxdepth: 4
