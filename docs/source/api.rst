@@ -105,4 +105,11 @@ HED validators
 
 .. currentmodule:: hed
 
+Modules
+--------------
+.. toctree::
+   :maxdepth: 6
+
+   generated/modules
+
 .. _calibration_ref2:
