@@ -1,7 +1,7 @@
 Hierarchical Event Descriptor (HED) Python Tools
 ================================================
 
-.. sidebar:: **Downloads**
+.. sidebar:: **Links**
 
    * `PDF docs <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
 
