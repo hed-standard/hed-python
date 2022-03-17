@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: Sidecar
-
+.. autoclass:: hed.models.Sidecar
    
    .. automethod:: __init__
 
@@ -28,3 +27,9 @@
    
    
    
+
+.. autoclass:: hed.models.Sidecar
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

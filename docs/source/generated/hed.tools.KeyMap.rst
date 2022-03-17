@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: KeyMap
-
+.. autoclass:: hed.tools.KeyMap
    
    .. automethod:: __init__
 
@@ -23,3 +22,9 @@
    
    
    
+
+.. autoclass:: hed.tools.KeyMap
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

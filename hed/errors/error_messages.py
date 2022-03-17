@@ -72,6 +72,11 @@ def val_error_duplicate_tag(tag):
     return f'Repeated tag - "{tag}"', {}
 
 
+@hed_error(ValidationErrors.HED_TAG_REPEATED_GROUP)
+def val_error_duplicate_group(group):
+    return f'Repeated group - "{group}"', {}
+
+
 @hed_error(ValidationErrors.HED_PARENTHESES_MISMATCH)
 def val_error_parentheses(opening_parentheses_count, closing_parentheses_count):
     return f'Number of opening and closing parentheses are unequal. '\
@@ -121,7 +126,7 @@ def val_error_extra_column(extra_column_name):
         "or identified in sidecars.", {}
 
 
-@hed_tag_error(ValidationErrors.HED_UNKNOWN_PREFIX)
+@hed_tag_error(ValidationErrors.HED_LIBRARY_UNMATCHED)
 def val_error_unknown_prefix(tag, unknown_prefix, known_prefixes):
     return f"Tag '{tag} has unknown prefix '{unknown_prefix}'.  Valid prefixes: {known_prefixes}", {}
 
@@ -140,7 +145,7 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
 def val_error_def_unmatched(tag):
     return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'", {}
 
-@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_BAD)
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
     return f"A data-recording’s Def-expand tag does not match the given definition.  Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}", {}
 
@@ -250,11 +255,10 @@ def sidecar_error_unknown_column(column_name):
            "Most likely the column definition in question needs a # sign to replace a number somewhere.", {}
 
 
-@hed_error(DefinitionErrors.WRONG_NUMBER_DEFINITION_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
-def def_error_wrong_def_tags(def_name, tag_list):
-    tag_list_strings = [str(tag) for tag in tag_list]
-    return f"Too many def tags found in definition for {def_name}.  Expected 1, also found: {tag_list_strings}", {}
-
+@hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+def def_error_def_tag_in_definition(tag, def_name):
+    return f"Invalid tag {tag} found in definition for {def_name}.  Def and Def-expand tags cannot be in definitions."\
+        , {}
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
 def def_error_wrong_group_tags(def_name, tag_list):

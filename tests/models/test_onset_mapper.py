@@ -9,10 +9,11 @@ from hed.validator import HedValidator
 from tests.validator.test_tag_validator_base import TestHedBase
 
 
+# Todo: Add test case for Onset/Value and Offset/Value.  Make sure they bomb.
 class Test(TestHedBase):
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
         hed_xml_file = os.path.join(cls.base_data_dir, "hed_pairs/HED8.0.0.mediawiki")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.placeholder_label_def_string = "def/TestDefPlaceholder/2471"

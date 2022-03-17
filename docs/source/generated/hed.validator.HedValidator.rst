@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.validator
 
-.. autoclass:: HedValidator
-
+.. autoclass:: hed.validator.HedValidator
    
    .. automethod:: __init__
 
@@ -20,3 +19,9 @@
    
    
    
+
+.. autoclass:: hed.validator.HedValidator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

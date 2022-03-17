@@ -12,7 +12,7 @@ from hed.validator import HedValidator
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/tests_output/")
+        cls.base_output_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
         os.makedirs(cls.base_output_folder, exist_ok=True)
 
     @classmethod

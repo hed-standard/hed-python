@@ -27,7 +27,7 @@ HED models
 
 .. currentmodule:: hed
 
-.. _calibration_ref:
+.. _calibration_ref1:
 
 
 HED schema handling
@@ -57,14 +57,18 @@ HED tools
    :toctree: generated/
 
    hed.tools.BidsDataset
+   hed.tools.BidsDatasetSummary
    hed.tools.BidsEventFile
    hed.tools.BidsEventFiles
    hed.tools.BidsFile
    hed.tools.BidsJsonFile
    hed.tools.BidsSidecarFile
+   hed.tools.BidsTsvDictionary
    hed.tools.BidsTsvFile
-   hed.tools.ColumnSummary
-   hed.tools.DatasetSummary
+   hed.tools.BidsTsvSummary
+
+   hed.tools.FileDictionary
+   hed.tools.HedLogger
    hed.tools.KeyMap
    hed.tools.KeyTemplate
    hed.tools.SummaryEntry
@@ -89,7 +93,7 @@ HED utilities
 .. currentmodule:: hed
 
 
-HED validation
+HED validators
 --------------
 
 .. autosummary:: hed.validator
@@ -101,4 +105,11 @@ HED validation
 
 .. currentmodule:: hed
 
-.. _calibration_ref:
+Modules
+--------------
+.. toctree::
+   :maxdepth: 6
+
+   generated/modules
+
+.. _calibration_ref2:

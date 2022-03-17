@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: KeyTemplate
-
+.. autoclass:: hed.tools.KeyTemplate
    
    .. automethod:: __init__
 
@@ -25,3 +24,9 @@
    
    
    
+
+.. autoclass:: hed.tools.KeyTemplate
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

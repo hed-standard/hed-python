@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: DefinitionMapper
-
+.. autoclass:: hed.models.DefinitionMapper
    
    .. automethod:: __init__
 
@@ -26,3 +25,9 @@
    
    
    
+
+.. autoclass:: hed.models.DefinitionMapper
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

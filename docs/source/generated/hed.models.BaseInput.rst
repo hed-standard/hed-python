@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: BaseInput
-
+.. autoclass:: hed.models.BaseInput
    
    .. automethod:: __init__
 
@@ -50,3 +49,9 @@
       ~BaseInput.worksheet_name
    
    
+
+.. autoclass:: hed.models.BaseInput
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

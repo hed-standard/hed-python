@@ -69,7 +69,8 @@ class TagValidator:
             validation_issues += self.check_tag_formatting(tag)
         return validation_issues
 
-    def run_individual_tag_validators(self, original_tag, check_for_warnings, allow_placeholders=False):
+    def run_individual_tag_validators(self, original_tag, check_for_warnings, allow_placeholders=False,
+                                      is_definition=False):
         """Runs the hed_ops on the individual tags in a HED string.
 
          Parameters
@@ -80,6 +81,8 @@ class TagValidator:
              If True, also check for warnings.
          allow_placeholders: bool
              Allow value class or extensions to be placeholders rather than a specific value.
+         is_definition: bool
+            This tag is part of a Definition, not a normal line.
          Returns
          -------
          []
@@ -97,7 +100,7 @@ class TagValidator:
                 validation_issues += self.check_for_invalid_extension_chars(original_tag)
 
             if not allow_placeholders:
-                validation_issues += self.check_for_placeholder(original_tag)
+                validation_issues += self.check_for_placeholder(original_tag, is_definition)
             validation_issues += self.check_tag_requires_child(original_tag)
         if check_for_warnings:
             validation_issues += self.check_capitalization(original_tag)
@@ -121,7 +124,6 @@ class TagValidator:
             The validation issues associated with each level in a HED string.
         """
         validation_issues = []
-        validation_issues += self.check_duplicate_tags_exist(original_tag_list)
         validation_issues += self.check_tag_level_issue(original_tag_list, is_top_level, is_group)
         return validation_issues
 
@@ -444,30 +446,34 @@ class TagValidator:
                 break
         return validation_issues
 
-    def check_duplicate_tags_exist(self, original_tag_list):
-        """Reports a validation error if two or more tags are the same.
-
-        This only tracks exact matches, it will not catch two identical  value tags with different values.
-        Parameters
-        ----------
-        original_tag_list: [HedTag]
-            A list containing tags that are used to report the error.
-        Returns
-        -------
-        []
-            A validation issues list. If no issues are found then an empty list is returned.
-
-        """
-        validation_issues = []
-        tag_set = set()
-        for tag in original_tag_list:
-            formatted_tag = tag.lower()
-            if formatted_tag in tag_set:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_REPEATED, tag=tag)
-                continue
-            tag_set.add(formatted_tag)
-
-        return validation_issues
+    # # Possible new style check(but causes many existing errors, so holding off)
+    # def check_capitalization(self, original_tag):
+    #     """Reports a validation warning if the tag isn't correctly capitalized.
+    #
+    #     Parameters
+    #     ----------
+    #     original_tag: HedTag
+    #         The original tag that is used to report the warning.
+    #     Returns
+    #     -------
+    #     []
+    #         A validation issues list. If no issues are found then an empty list is returned.
+    #     """
+    #     validation_issues = []
+    #     org_name = original_tag.org_base_tag
+    #     if original_tag.library_prefix:
+    #         org_name = org_name[len(original_tag.library_prefix):]
+    #     tag_names = org_name.split("/")
+    #     for tag_name in tag_names:
+    #         correct_tag_name = tag_name.capitalize()
+    #         if tag_name != correct_tag_name:
+    #             # We assume any with spaces are correctly capitalized(descriptions, values, etc)
+    #             if " " in tag_name:
+    #                 continue
+    #             validation_issues += ErrorHandler.format_error(ValidationErrors.HED_STYLE_WARNING,
+    #                                                            tag=original_tag)
+    #             break
+    #     return validation_issues
 
     def check_tag_level_issue(self, original_tag_list, is_top_level, is_group):
         """
@@ -622,20 +628,22 @@ class TagValidator:
         """
         return character == TagValidator.COMMA
 
-    def check_for_placeholder(self, original_tag):
+    def check_for_placeholder(self, original_tag, is_definition=False):
         """
             Checks for a placeholder character in the extension/value portion of a tag, unless they are allowed.
 
         Parameters
         ----------
         original_tag : HedTag
+        is_definition: bool
+            If True, placeholders are allowed.
 
         Returns
         -------
         error_list: [{}]
         """
         validation_issues = []
-        if not original_tag.is_definition:
+        if not is_definition:
             starting_index = len(original_tag.org_base_tag) + 1
             for i, character in enumerate(original_tag.extension_or_value_portion):
                 if character == "#":

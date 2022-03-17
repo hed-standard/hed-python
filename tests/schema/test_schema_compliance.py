@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.error_handler = ErrorHandler()
-        cls.schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
+        cls.schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file)
 
     def validate_term_base(self, input_text, expected_issues):
         for text, issues in zip(input_text, expected_issues):

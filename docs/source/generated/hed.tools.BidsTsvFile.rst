@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: BidsTsvFile
-
+.. autoclass:: hed.tools.BidsTsvFile
    
    .. automethod:: __init__
 
@@ -22,3 +21,9 @@
    
    
    
+
+.. autoclass:: hed.tools.BidsTsvFile
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

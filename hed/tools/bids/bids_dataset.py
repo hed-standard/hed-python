@@ -15,7 +15,7 @@ class BidsDataset:
     """Represents the metadata for a BIDS dataset."""
 
     def __init__(self, root_path):
-        self.root_path = os.path.abspath(root_path)
+        self.root_path = os.path.realpath(root_path)
         with open(os.path.join(self.root_path, "dataset_description.json"), "r") as fp:
             self.dataset_description = json.load(fp)
         self.participants = get_new_dataframe(os.path.join(self.root_path, "participants.tsv"))
@@ -63,12 +63,12 @@ class BidsDataset:
 
 
 if __name__ == '__main__':
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         '../../../tests/data/bids/eeg_ds003654s_hed_library')
     bids = BidsDataset(path)
     issue_list = bids.validate()
     if issue_list:
-        issue_str = get_printable_issue_string(issue_list, "HED_library")
+        issue_str = get_printable_issue_string(issue_list, "HED validation errors:")
     else:
         issue_str = "No issues"
     print(issue_str)

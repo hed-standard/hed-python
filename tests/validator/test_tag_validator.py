@@ -92,6 +92,60 @@ class IndividualHedTagsShort(TestHed):
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, True)
 
+    # def test_proper_capitalization(self):
+    #     test_strings = {
+    #         'proper': 'Event/Sensory-event',
+    #         'camelCase': 'EvEnt/Something',
+    #         'takesValue': 'Sampling-rate/20 Hz',
+    #         'numeric': 'Statistical-uncertainty/20',
+    #         'lowercase': 'Event/something',
+    #         'multipleUpper': 'Event/SomeThing'
+    #     }
+    #     expected_results = {
+    #         'proper': True,
+    #         'camelCase': False,
+    #         'takesValue': True,
+    #         'numeric': True,
+    #         'lowercase': False,
+    #         'multipleUpper': False
+    #     }
+    #     expected_issues = {
+    #         'proper': [],
+    #         'camelCase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
+    #         'takesValue': [],
+    #         'numeric': [],
+    #         'lowercase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
+    #         'multipleUpper': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0)
+    #     }
+    #     self.validator_syntactic(test_strings, expected_results, expected_issues, True)
+    #
+    # def test_proper_capitalization_semantic(self):
+    #     test_strings = {
+    #         'proper': 'Event/Sensory-event',
+    #         'camelCase': 'EvEnt/Sensory-event',
+    #         'takesValue': 'Sampling-rate/20 Hz',
+    #         'numeric': 'Statistical-uncertainty/20',
+    #         'lowercase': 'Event/sensory-event',
+    #         'multipleUpper': 'Event/Sensory-Event'
+    #     }
+    #     expected_results = {
+    #         'proper': True,
+    #         'camelCase': False,
+    #         'takesValue': True,
+    #         'numeric': True,
+    #         'lowercase': False,
+    #         'multipleUpper': False
+    #     }
+    #     expected_issues = {
+    #         'proper': [],
+    #         'camelCase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
+    #         'takesValue': [],
+    #         'numeric': [],
+    #         'lowercase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
+    #         'multipleUpper': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0)
+    #     }
+    #     self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
     def test_child_required(self):
         test_strings = {
             'hasChild': 'Experimental-stimulus',
@@ -316,18 +370,22 @@ class TestTagLevels(TestHed):
                            'Purple-color/Purple',
             'legalDuplicate': 'Item/Object/Man-made-object/VehicleTrain,(Item/Object/Man-made-object/VehicleTrain,'
                               'Event/Sensory-event)',
+            'duplicateGroup': 'Sensory-event, (Sensory-event, Man-made-object/VehicleTrain), (Man-made-object/VehicleTrain, Sensory-event)'
         }
         expected_results = {
             'topLevelDuplicate': False,
             'groupDuplicate': False,
             'legalDuplicate': True,
-            'noDuplicate': True
+            'noDuplicate': True,
+            'duplicateGroup': False
         }
+        from hed import HedString
         expected_issues = {
             'topLevelDuplicate': self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=1),
             'groupDuplicate': self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=3),
             'legalDuplicate': [],
-            'noDuplicate': []
+            'noDuplicate': [],
+            'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP, group=HedString("(Man-made-object/VehicleTrain, Sensory-event)")),
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 

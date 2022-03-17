@@ -7,22 +7,22 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.description_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        cls.description_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                             '../../data/bids/eeg_ds003654s_hed/dataset_description.json')
-        cls.json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
+        cls.json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                     '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_constructor(self):
         json1 = BidsJsonFile(Test.description_path, set_contents=False)
         self.assertEqual(json1.suffix, 'dataset_description', "BidsJsonFile should have correct name_suffix")
         self.assertEqual(json1.ext, '.json', "BidsJsonFile should have correct ext")
-        self.assertEqual(len(json1.entities), 0, "BidssonFile should have right number of entities")
+        self.assertEqual(len(json1.entity_dict), 0, "BidssonFile should have right number of entity_dict")
         self.assertFalse(json1.contents)
 
         sidecar2 = BidsJsonFile(Test.json_path, set_contents=True)
         self.assertEqual(sidecar2.suffix, 'events', "BidsJsonFile should have correct name_suffix")
         self.assertEqual(sidecar2.ext, '.json', "BidsJsonFile should have correct ext")
-        self.assertEqual(len(sidecar2.entities), 1, "BidsJsonFile should have right number of entities")
+        self.assertEqual(len(sidecar2.entity_dict), 1, "BidsJsonFile should have right number of entity_dict")
         self.assertIsInstance(sidecar2.contents, dict, "BidsJsonFile should contain a dictionary")
 
     def test_bids_json_file_str(self):

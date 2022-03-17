@@ -11,7 +11,7 @@ class TestBaseTagBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
+        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file)
         cls.hed_schema = load_schema(hed_xml)
         cls.error_handler = ErrorHandler()
 

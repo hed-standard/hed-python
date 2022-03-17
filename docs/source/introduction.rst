@@ -11,23 +11,23 @@ Introduction to HED
 Why HED?
 ========
 
-.. topic:: **Why use HED?**
+.. topic:: Why use HED?
 
-HED (Hierarchical Event Descriptors) is an infrastructure and
-a controlled vocabulary that allows researchers to annotate
-their experimental data, especially events,
-so that tools
+   HED (Hierarchical Event Descriptors) is an infrastructure and
+   a controlled vocabulary that allows researchers to annotate
+   their experimental data, especially events,
+   so that tools can automatically use this information in analysis.
 
-  For more information on Hierarchical Event Descriptors (HED),
-visit https://hed-specification.readthedocs.io/en/latest/index.html or
-the
+For more information on using Hierarchical Event Descriptors (HED)
+visit `HED examples <https://hed-examples.readthedocs.io/en/latest/index.html>`_:
 
 
 Installing hedtools
 ===================
 Hedtools will be available soon on pypi, but in the meantime,
-you can install directly from the  `GitHub repository
-      <https://github.com/hed-standard/hed-python>`_::
+you can install directly from the
+`GitHub repository <https://github.com/hed-standard/hed-python>`_
+using the following command:
 
 >>> pip install git+https://github.com/hed-standard/hed-python.git
 

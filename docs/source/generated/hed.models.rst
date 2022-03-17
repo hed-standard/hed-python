@@ -60,6 +60,14 @@ hed.models.hed\_group module
    :undoc-members:
    :show-inheritance:
 
+hed.models.hed\_group\_base module
+----------------------------------
+
+.. automodule:: hed.models.hed_group_base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hed.models.hed\_input module
 ----------------------------
 

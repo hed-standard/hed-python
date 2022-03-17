@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: OnsetMapper
-
+.. autoclass:: hed.models.OnsetMapper
    
    .. automethod:: __init__
 
@@ -21,3 +20,9 @@
    
    
    
+
+.. autoclass:: hed.models.OnsetMapper
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

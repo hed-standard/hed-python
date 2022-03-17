@@ -10,16 +10,16 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.event_path = \
-            os.path.join(os.path.dirname(os.path.abspath(__file__)),
+            os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          '../../data/bids/eeg_ds003654s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
-        cls.sidecar_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        cls.sidecar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_constructor(self):
         events = BidsEventFile(Test.event_path)
         self.assertEqual(events.suffix, 'events', "BidsEventFile should have correct events suffix")
         self.assertEqual(events.ext, '.tsv', "BidsEventFile should have a .tsv extension")
-        self.assertEqual(len(events.entities), 3, "BidsEventFile should have right number of entities")
+        self.assertEqual(len(events.entity_dict), 3, "BidsEventFile should have right number of entity_dict")
         events_str = str(events)
         self.assertTrue(events_str, "BidsEventFile should have a string representation")
 

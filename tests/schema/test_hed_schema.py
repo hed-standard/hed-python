@@ -12,8 +12,8 @@ class TestHedSchema(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g_xml)
-        cls.hed_wiki_3g = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file_3g)
+        cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file_3g_xml)
+        cls.hed_wiki_3g = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file_3g)
         cls.hed_schema_3g_wiki = load_schema(cls.hed_wiki_3g)
         cls.hed_schema_3g = load_schema(cls.hed_xml_3g)
 

@@ -12,18 +12,10 @@ hed.tools.annotation.annotation\_util module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.annotation.column\_summary module
--------------------------------------------
-
-.. automodule:: hed.tools.annotation.column_summary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-hed.tools.annotation.dataset\_summary module
+hed.tools.annotation.file\_dictionary module
 --------------------------------------------
 
-.. automodule:: hed.tools.annotation.dataset_summary
+.. automodule:: hed.tools.annotation.file_dictionary
    :members:
    :undoc-members:
    :show-inheritance:

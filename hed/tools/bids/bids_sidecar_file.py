@@ -8,7 +8,7 @@ class BidsSidecarFile(BidsJsonFile):
     """ Represents a BIDS JSON sidecar file."""
 
     def __init__(self, file_path, set_contents=False):
-        super().__init__(os.path.abspath(file_path), set_contents=False)
+        super().__init__(file_path, set_contents=False)
         if set_contents:
             self.set_contents()
 
@@ -28,13 +28,13 @@ class BidsSidecarFile(BidsJsonFile):
         common_path = os.path.commonpath([obj.file_path, self.file_path])
         if common_path != os.path.dirname(self.file_path):
             return False
-        for key, item in self.entities.items():
-            if key not in obj.entities or obj.entities[key] != item:
+        for key, item in self.entity_dict.items():
+            if key not in obj.entity_dict or obj.entity_dict[key] != item:
                 return False
         return True
 
     def set_contents(self):
-        self.contents = Sidecar(self.file_path, name=os.path.abspath(self.file_path))
+        self.contents = Sidecar(self.file_path, name=os.path.realpath(self.file_path))
 
     @staticmethod
     def get_sidecar(obj, sidecars):

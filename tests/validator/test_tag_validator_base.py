@@ -13,7 +13,7 @@ class TestHedBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if cls.schema_file:
-            hed_xml = os.path.join(os.path.dirname(os.path.abspath(__file__)), cls.schema_file)
+            hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file)
             cls.hed_schema = schema.load_schema(hed_xml)
         elif not cls.hed_schema:
             raise ValueError("No schema set for test case")

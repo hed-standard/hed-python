@@ -1,5 +1,4 @@
 """ Utilities for extracting counts of items in columns. """
-from hed.tools.annotation.column_summary import ColumnSummary
 from hed.util.io_util import get_file_list
 from hed.util.data_util import get_new_dataframe
 
@@ -33,28 +32,6 @@ def get_key_counts(root_dir, skip_cols=None):
                 continue
             update_dict_counts(count_dicts, col_name, col_values)
     return count_dicts
-
-
-def make_combined_dicts(file_dict, skip_cols=None):
-    """ Return a combined dictionary of column information as we
-
-    Args:
-        file_dict (dict):  Dictionary of file name keys and full path
-        skip_cols (list):  Name of the column
-
-    Returns:
-        dict:  A combined dictionary
-    """
-
-    dicts_all = ColumnSummary(skip_cols=skip_cols)
-    dicts = {}
-    for key, file in file_dict.items():
-        orig_dict = ColumnSummary(skip_cols=skip_cols)
-        df = get_new_dataframe(file)
-        orig_dict.update(df)
-        dicts[key] = orig_dict
-        dicts_all.update_dict(orig_dict)
-    return dicts_all, dicts
 
 
 # def print_columns_info(columns_info, skip_cols=None):

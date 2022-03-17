@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: DefDict
-
+.. autoclass:: hed.models.DefDict
    
    .. automethod:: __init__
 
@@ -21,4 +20,16 @@
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
    
+      ~DefDict.defs
+   
+   
+
+.. autoclass:: hed.models.DefDict
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

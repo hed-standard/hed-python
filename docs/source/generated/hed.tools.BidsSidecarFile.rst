@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: BidsSidecarFile
-
+.. autoclass:: hed.tools.BidsSidecarFile
    
    .. automethod:: __init__
 
@@ -24,3 +23,9 @@
    
    
    
+
+.. autoclass:: hed.tools.BidsSidecarFile
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

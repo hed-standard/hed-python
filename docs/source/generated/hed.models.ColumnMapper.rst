@@ -3,8 +3,7 @@
 
 .. currentmodule:: hed.models
 
-.. autoclass:: ColumnMapper
-
+.. autoclass:: hed.models.ColumnMapper
    
    .. automethod:: __init__
 
@@ -30,3 +29,9 @@
    
    
    
+
+.. autoclass:: hed.models.ColumnMapper
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:

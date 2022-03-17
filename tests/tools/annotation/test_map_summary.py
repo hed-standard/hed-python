@@ -1,8 +1,6 @@
 import os
 import unittest
-from hed.tools.annotation.column_summary import ColumnSummary
-from hed.util.io_util import get_file_list, make_file_dict
-from hed.tools.annotation.map_summary import get_columns_info, get_key_counts, make_combined_dicts, update_dict_counts
+from hed.tools import get_columns_info, get_key_counts, update_dict_counts
 from hed.util.data_util import get_new_dataframe
 
 
@@ -10,9 +8,9 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/bids/eeg_ds003654s_hed')
-        stern_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/attention_shift')
+        cls.bids_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
@@ -51,25 +49,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(key_counts2['event_type']), 8, "get_key_counts has right number of entries for event_type")
         self.assertTrue('onset' not in key_counts2, "get_key_counts dictionary does not have onset if skipped")
 
-    def test_make_combined_dicts(self):
-        files_bids = get_file_list(self.bids_dir, extensions=[".tsv"], name_suffix="_events")
-        file_dict = make_file_dict(files_bids)
-        dicts_all1, dicts1 = make_combined_dicts(file_dict)
-        self.assertTrue(isinstance(dicts_all1, ColumnSummary), "make_combined_dicts should return a ColumnSummary")
-        self.assertTrue(isinstance(dicts1, dict), "make_combined_dicts should also return a dictionary of file names")
-        self.assertEqual(len(dicts1), 6, "make_combined_dicts should return correct number of file names")
-        self.assertEqual(len(dicts_all1.categorical_info), 10,
-                         "make_combined_dicts should return right number of entries")
-        dicts_all2, dicts2 = make_combined_dicts(file_dict, skip_cols=["onset", "duration", "sample"])
-        self.assertTrue(isinstance(dicts_all2, ColumnSummary), "make_combined_dicts should return a ColumnSummary")
-        self.assertTrue(isinstance(dicts2, dict), "make_combined_dicts should also return a dictionary of file names")
-        self.assertEqual(len(dicts2), 6, "make_combined_dicts should return correct number of file names")
-        self.assertEqual(len(dicts_all2.categorical_info), 7,
-                         "make_combined_dicts should return right number of entries")
-
     def test_update_dict_counts(self):
         file_name = os.path.join(self.bids_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
-        file_name = os.path.abspath(file_name)
+        file_name = os.path.realpath(file_name)
         dataframe = get_new_dataframe(file_name)
         count_dicts = {}
         update_dict_counts(count_dicts, "onset", dataframe["onset"])
