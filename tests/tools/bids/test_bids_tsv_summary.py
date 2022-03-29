@@ -143,7 +143,7 @@ class Test(unittest.TestCase):
 
     def test_make_combined_dicts(self):
         files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="_events")
-        file_dict = BidsFileDictionary(files_bids)
+        file_dict = BidsFileDictionary("my name", files_bids)
         dicts_all1, dicts1 = BidsTsvSummary.make_combined_dicts(file_dict)
         self.assertTrue(isinstance(dicts_all1, BidsTsvSummary),
                         "make_combined_dicts should return a BidsTsvSummary")

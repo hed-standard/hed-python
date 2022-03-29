@@ -22,5 +22,6 @@ from .bids.bids_tsv_dictionary import BidsTsvDictionary
 from .bids.bids_tsv_file import BidsTsvFile
 from .bids.bids_tsv_summary import BidsTsvSummary
 
+from .curation.tsv_reports import report_tsv_diffs
 
 from .hed_logger import HedLogger

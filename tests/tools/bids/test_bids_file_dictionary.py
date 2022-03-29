@@ -15,13 +15,13 @@ class Test(unittest.TestCase):
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
 
     def test_constructor_valid(self):
-        dict1 = BidsFileDictionary(self.file_list, entities=('sub', 'run'))
+        dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
         self.assertEqual(6, len(dict1.key_list),
                          "BidsFileDictionary should have correct number of entries when key okay")
 
     def test_constructor_invalid(self):
         try:
-            dict1 = BidsFileDictionary(self.file_list, entities=('sub', 'task'))
+            dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'task'))
         except HedFileError:
             pass
         except Exception:
@@ -45,14 +45,14 @@ class Test(unittest.TestCase):
         self.assertTrue(result4, "match_query should return False when entity not in the dictionary")
 
     def test_make_query(self):
-        dict1 = BidsFileDictionary(self.file_list, entities=('sub', 'run'))
+        dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
         results1 = dict1.make_query(query_dict={'sub': '*', 'run': '*'})
         self.assertEqual(len(results1), len(dict1.file_dict), "make_query should return all of the entries when *")
         results2 = dict1.make_query(query_dict={'sub': '*', 'run': ['1']})
         self.assertEqual(len(results2), 2, "make_query should return the right number of entries ")
 
     def test_create_split_dict(self):
-        dict1 = BidsFileDictionary(self.file_list, entities=('sub', 'run'))
+        dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
         dist1_split, leftovers = dict1.create_split_dict('run')
         self.assertIsInstance(dist1_split, dict, "create_split_dict returns a dictionary")
         self.assertEqual(3, len(dist1_split), 'create_split_dict should return the correct number of items')
@@ -60,6 +60,7 @@ class Test(unittest.TestCase):
             self.assertIsInstance(value, BidsFileDictionary,
                                   'create_split_dict dictionary values should be BidsFileDictionary objects')
         self.assertFalse(leftovers, "create_split_dict leftovers should be empty")
+
 
 if __name__ == '__main__':
     unittest.main()
