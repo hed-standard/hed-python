@@ -4,7 +4,7 @@ import numpy as np
 from pandas import DataFrame, read_csv
 from hed.errors.exceptions import HedFileError
 from hed.util.data_util import add_columns, check_match, delete_columns, delete_rows_by_column, \
-    get_key_hash, get_new_dataframe, get_row_hash, \
+    get_key_hash, get_new_dataframe, get_row_hash, get_value_dict, \
     make_info_dataframe, remove_quotes, reorder_columns, replace_values, separate_columns
 
 
@@ -14,11 +14,13 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
         att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/attention_shift')
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/curation')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
         cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
+        cls.sampling_rate_path = os.path.join(curation_base_dir, "samplingRates.tsv")
 
     def test_add_column(self):
         data = {'Name': ['n/a', '', 'tom', 'alice', 0, 1],
@@ -94,6 +96,11 @@ class Test(unittest.TestCase):
         self.assertEqual(len(my_map.keys()), len(stern_df),
                          "get_row_hash should uniquely hash all of the keys in stern map")
 
+    def test_get_value_dict(self):
+        conv_dict = get_value_dict(self.sampling_rate_path)
+        self.assertIsInstance(conv_dict, dict, "get_value_dict should return a dictionary")
+        self.assertEqual(17, len(conv_dict), "get_value_dict should return a dictionary of the correct length")
+
     def test_make_info_dataframe(self):
         col_dict = {"a": {"b": 10, "c": 13, "d": 4}, "e": {"n/a": 10000}}
         df1 = make_info_dataframe(col_dict, "a")
@@ -106,8 +113,9 @@ class Test(unittest.TestCase):
         data = {'Name': ['n/a', '', 'tom', 'alice', 0, 1],
                 'Age': [np.nan, 10, '', 'n/a', '0', '10']}
         df1 = DataFrame(data)
-        replace_values(df1, values=['', 0])
-        self.assertEqual(df1.loc[0, 'Name'], 'n/a', "The empty string should be replaced")
+        num_replaced = replace_values(df1, values=['', 0])
+        self.assertEqual(df1.loc[0, 'Name'], 'n/a', "replace_values should replace the empty string with n/a")
+        self.assertEqual(4, num_replaced, "replace_values should replace the correct number of values")
 
     def test_remove_quotes(self):
         df1 = get_new_dataframe(self.stern_test2_path)
