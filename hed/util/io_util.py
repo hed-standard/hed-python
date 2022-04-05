@@ -2,6 +2,7 @@
 
 import os
 from werkzeug.utils import secure_filename
+from hed.errors import HedFileError
 
 
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
@@ -28,6 +29,28 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
     elif name_prefix and not file_split[0].startswith(name_prefix.lower()):
         is_name = False
     return is_name
+
+
+def extract_suffix_path(path, prefix_path):
+    """ Return the suffix path of path after prefix path has been removed
+
+    Args:
+        path (str)   path of the root directory
+        prefix_path (str)    sub-path relative to the root directory
+
+    Returns: (str)
+        Suffix path.
+
+    Notes: This function is useful for creating files within BIDS datasets
+
+    """
+
+    real_prefix = os.path.realpath(prefix_path).lower()
+    suffix_path = os.path.realpath(path).lower()
+    return_path = os.path.realpath(path)
+    if suffix_path.startswith(real_prefix):
+        return_path = return_path[len(real_prefix):]
+    return return_path
 
 
 def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None):
@@ -192,30 +215,51 @@ def parse_bids_filename(file_path):
         Args:
             file_path (str)     Path to be parsed
 
-        Returns:
+        Returns: dict
             suffix (str)        BIDS suffix name
             ext (str)           File extension (including the .)
-            entity_dict (dict)     Dictionary with key-value pair being (entity type, entity value)
-            unmatched (list)    List of unmatched pieces of the filename
+            entity_dict (dict)  Dictionary with key-value pair being (entity type, entity value)
+
+        Raises HedFileError when filename does not conform to name-value_suffix format.
 
     """
 
     filename = os.path.splitext(os.path.basename(file_path))
     ext = filename[1].lower()
-    basename = filename[0]
-    if '-' not in basename:
-        return basename, ext, {}, []
+    basename = filename[0].strip()
+    entity_dict = {}
+
+    if len(basename) == 0:
+        raise HedFileError("BlankFileName", f"The basename for {file_path} is blank", "")
     entity_pieces = basename.split('_')
-    if len(entity_pieces) < 2:
-        return '', ext, {}, [basename]
-    suffix = entity_pieces[-1]
-    entities = {}
-    unmatched = []
-    entity_pieces = entity_pieces[:-1]
-    for entity in reversed(list(enumerate(entity_pieces))):
-        pieces = entity[1].split('-')
-        if len(pieces) != 2:
-            unmatched.append(entity[1])
-        else:
-            entities[pieces[0]] = pieces[1]
-    return suffix, ext, entities, unmatched
+    split_dict = _split_entity(entity_pieces[-1])
+    if "bad" in split_dict:
+        raise HedFileError("BadSuffixPiece", f"The basename for {entity_pieces[-1]} has bad {ent_dict['bad']}", "")
+    if "suffix" in split_dict:
+        suffix = split_dict["suffix"]
+    else:
+        suffix = None
+        entity_dict[split_dict["key"]] = split_dict["value"]
+    for pos, entity in reversed(list(enumerate(entity_pieces[:-1]))):
+        split_dict = _split_entity(entity)
+        if "key" not in split_dict:
+            raise HedFileError("BadKeyValue", f"The piece {entity} is not in key-value form", "")
+        entity_dict[split_dict["key"]] = split_dict["value"]
+    return suffix, ext, entity_dict
+
+
+def _split_entity(piece):
+    """Splits an piece into an entity or suffix
+
+        Returns: dict
+    """
+    piece = piece.strip()
+    if not piece:
+        return {"bad": ""}
+    split_piece = piece.split('-')
+    if len(split_piece) == 1:
+        return {"suffix": piece}
+    if len(split_piece) == 2:
+        return {"key": split_piece[0].strip(), "value": split_piece[1].strip()}
+    else:
+        return {"bad": piece}

@@ -141,6 +141,23 @@ class Test(unittest.TestCase):
         else:
             self.fail('update_summary should have thrown a HedFileError when value columns should be categorical')
 
+    def test_get_columns_info(self):
+        df = get_new_dataframe(self.stern_test2_path)
+        col_info = BidsTsvSummary.get_columns_info(df)
+        self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
+        self.assertEqual(len(col_info.keys()), len(df.columns),
+                         "get_columns_info should return a dictionary with a key for each column")
+
+    def test_get_columns_info_skip_columns(self):
+        df = get_new_dataframe(self.stern_test2_path)
+        col_info = BidsTsvSummary.get_columns_info(df, ['latency'])
+        self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
+        self.assertEqual(len(col_info.keys()), len(df.columns) - 1,
+                         "get_columns_info should return a dictionary with a key for each column included")
+        col_info = BidsTsvSummary.get_columns_info(df, list(df.columns.values))
+        self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
+        self.assertFalse(col_info, "get_columns_info should return a dictionary with a key for each column included")
+
     def test_make_combined_dicts(self):
         files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="_events")
         file_dict = BidsFileDictionary("my name", files_bids)
