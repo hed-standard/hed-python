@@ -9,10 +9,10 @@ from hed.util import get_file_list
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                         '../../data/bids/eeg_ds003654s_hed')
-        cls.file_list = get_file_list(cls.bids_base_dir, name_suffix="_events",
-                                  extensions=['.tsv'], exclude_dirs=['stimuli'])
+        bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),  '../../data/bids/eeg_ds003654s_hed')
+        cls.bids_base_dir = bids_base_dir
+        cls.file_list = get_file_list(bids_base_dir, name_suffix="_events",
+                                      extensions=['.tsv'], exclude_dirs=['stimuli'])
 
     def test_constructor_valid(self):
         dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
@@ -30,14 +30,14 @@ class Test(unittest.TestCase):
             self.fail("BidsFileDictionary should have thrown a HedFileError when duplicate key")
 
     def test_match_query(self):
-        entity_dict = {'sub':'01', 'task': 'tempTask', 'run':'2'}
-        query_dict1 = {'sub':['01', '03']}
+        entity_dict = {'sub': '01', 'task': 'tempTask', 'run': '2'}
+        query_dict1 = {'sub': ['01', '03']}
         result1 = BidsFileDictionary.match_query(query_dict1, entity_dict)
         self.assertTrue(result1, "match_query should return true when entity in the dictionary")
-        query_dict2 = {'sub':['02', '03']}
+        query_dict2 = {'sub': ['02', '03']}
         result2 = BidsFileDictionary.match_query(query_dict2, entity_dict)
         self.assertFalse(result2, "match_query should return False when entity not in the dictionary")
-        query_dict3 = {'sub': ['01', '03'], 'run':['1', '2']}
+        query_dict3 = {'sub': ['01', '03'], 'run': ['1', '2']}
         result3 = BidsFileDictionary.match_query(query_dict3, entity_dict)
         self.assertTrue(result3, "match_query should return True when entity in the dictionary")
         query_dict4 = {'sub': ['01', '03'], 'run': ['3', '2']}

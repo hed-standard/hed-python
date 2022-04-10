@@ -1,5 +1,4 @@
 import os
-import json
 import unittest
 import pandas as pd
 from hed.schema.hed_schema_group import HedSchemaGroup
@@ -23,7 +22,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(bids1.event_files, BidsEventFiles, "BidsDataset event_files should be  BidsEventFiles")
         self.assertIsInstance(bids1.schemas, HedSchemaGroup, "BidsDataset schemas should be HedSchemaGroup")
 
-        bids2 = BidsDataset(Test.library_path)
+        bids2 = BidsDataset(self.library_path)
         self.assertIsInstance(bids2, BidsDataset,
                               "BidsDataset with libraries should create a valid object from valid dataset")
         self.assertIsInstance(bids2.participants, pd.DataFrame,
@@ -36,7 +35,7 @@ class Test(unittest.TestCase):
                               "BidsDataset with libraries should have schemas that is a HedSchemaGroup")
 
     def test_bids_validator(self):
-        bids1 = BidsDataset(Test.root_path)
+        bids1 = BidsDataset(self.root_path)
         self.assertIsInstance(bids1, BidsDataset, "BidsDataset should create a valid object from valid dataset")
         issues = bids1.validate()
         self.assertTrue(issues, "BidsDataset validate should return issues when the default check_for_warnings is used")
@@ -47,7 +46,7 @@ class Test(unittest.TestCase):
         self.assertFalse(issues,
                          "BidsDataset validate should return no issues when check_for_warnings is False")
 
-        bids2 = BidsDataset(Test.library_path)
+        bids2 = BidsDataset(self.library_path)
         self.assertIsInstance(bids2, BidsDataset,
                               "BidsDataset with libraries should create a valid object from valid dataset")
         issues = bids2.validate()
@@ -61,7 +60,7 @@ class Test(unittest.TestCase):
                          "BidsDataset with libraries should return no issues when check_for_warnings is False")
 
     def test_get_summary(self):
-        bids1 = BidsDataset(Test.root_path)
+        bids1 = BidsDataset(self.root_path)
         summary1 = bids1.get_summary()
         self.assertIsInstance(summary1, dict, "BidsDataset summary is a dictionary")
         self.assertTrue("hed_schema_versions" in summary1, "BidsDataset summary has a hed_schema_versions key")
@@ -70,7 +69,7 @@ class Test(unittest.TestCase):
         self.assertTrue("dataset" in summary1)
         self.assertEqual(len(summary1["hed_schema_versions"]), 1,
                          "BidsDataset summary hed_schema_versions entry has one schema")
-        bids2 = BidsDataset(Test.library_path)
+        bids2 = BidsDataset(self.library_path)
         summary2 = bids2.get_summary()
         self.assertIsInstance(summary2, dict, "BidsDataset with libraries has a summary that is a dictionary")
         self.assertTrue("hed_schema_versions" in summary2,

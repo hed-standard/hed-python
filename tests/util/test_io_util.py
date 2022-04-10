@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
+        cls.attention_shift_path = os.path.join(att_base_dir, "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
 
     def test_extract_suffix_path(self):
         suffix_path = extract_suffix_path('c:/myroot/temp.tsv', 'c:')
@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
 
     def test_get_file_list_files(self):
-        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/hed_pairs/prologue_tests')
+        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/schema_test_data/prologue_tests')
         dir_pairs = os.path.realpath(dir_pairs)
         test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
         file_list1 = get_file_list(dir_pairs)

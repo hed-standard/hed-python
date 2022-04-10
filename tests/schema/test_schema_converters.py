@@ -7,8 +7,8 @@ from hed.schema.hed_schema_constants import HedSectionKey
 
 
 class TestConverterBase(unittest.TestCase):
-    xml_file = '../data/hed_pairs/HED8.0.0t.xml'
-    wiki_file = '../data/hed_pairs/HED8.0.0.mediawiki'
+    xml_file = '../data/schema_test_data/HED8.0.0t.xml'
+    wiki_file = '../data/schema_test_data/HED8.0.0.mediawiki'
     can_compare = True
 
     @classmethod
@@ -77,8 +77,8 @@ class TestConverterBase(unittest.TestCase):
 
 
 class TestComplianceBase(unittest.TestCase):
-    xml_file = '../data/hed_pairs/HED8.0.0t.xml'
-    wiki_file = '../data/hed_pairs/HED8.0.0.mediawiki'
+    xml_file = '../data/schema_test_data/HED8.0.0t.xml'
+    wiki_file = '../data/schema_test_data/HED8.0.0.mediawiki'
     can_compare = True
     expected_issues = 5
 
@@ -99,63 +99,63 @@ class TestComplianceBase(unittest.TestCase):
 
 
 class TestPropertyAdded(TestConverterBase):
-    xml_file = '../data/hed_pairs/added_prop.xml'
-    wiki_file = '../data/hed_pairs/added_prop.mediawiki'
+    xml_file = '../data/schema_test_data/added_prop.xml'
+    wiki_file = '../data/schema_test_data/added_prop.mediawiki'
     can_compare = True
 
 
 class TestPropertyAddedUsage(TestConverterBase):
-    xml_file = '../data/hed_pairs/added_prop_with_usage.xml'
-    wiki_file = '../data/hed_pairs/added_prop_with_usage.mediawiki'
+    xml_file = '../data/schema_test_data/added_prop_with_usage.xml'
+    wiki_file = '../data/schema_test_data/added_prop_with_usage.mediawiki'
     can_compare = True
 
 
 class TestHedUnknownAttr(TestConverterBase):
-    xml_file = '../data/hed_pairs/unknown_attribute.xml'
-    wiki_file = '../data/hed_pairs/unknown_attribute.mediawiki'
+    xml_file = '../data/schema_test_data/unknown_attribute.xml'
+    wiki_file = '../data/schema_test_data/unknown_attribute.mediawiki'
     can_compare = True
 
 
 class TestHedMultiValueClass(TestConverterBase):
-    xml_file = '../data/hed_pairs/HED8.0.0_2_value_classes.xml'
-    wiki_file = '../data/hed_pairs/HED8.0.0_2_value_classes.mediawiki'
+    xml_file = '../data/schema_test_data/HED8.0.0_2_value_classes.xml'
+    wiki_file = '../data/schema_test_data/HED8.0.0_2_value_classes.mediawiki'
     can_compare = True
 
 
 class TestPrologueIssues1(TestConverterBase):
-    xml_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_end.xml'
-    wiki_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_end.mediawiki'
+    xml_file = '../data/schema_test_data/prologue_tests/test_extra_blank_line_end.xml'
+    wiki_file = '../data/schema_test_data/prologue_tests/test_extra_blank_line_end.mediawiki'
     can_compare = True
 
 
 class TestPrologueIssues2(TestConverterBase):
-    xml_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_middle.xml'
-    wiki_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_middle.mediawiki'
+    xml_file = '../data/schema_test_data/prologue_tests/test_extra_blank_line_middle.xml'
+    wiki_file = '../data/schema_test_data/prologue_tests/test_extra_blank_line_middle.mediawiki'
     can_compare = True
 
 
 class TestPrologueIssues3(TestConverterBase):
-    xml_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_start.xml'
-    wiki_file = '../data/hed_pairs/prologue_tests/test_extra_blank_line_start.mediawiki'
+    xml_file = '../data/schema_test_data/prologue_tests/test_extra_blank_line_start.xml'
+    wiki_file = '../data/schema_test_data/prologue_tests/test_extra_blank_line_start.mediawiki'
     can_compare = True
 
 
 class TestPrologueIssues4(TestConverterBase):
-    xml_file = '../data/hed_pairs/prologue_tests/test_no_blank_line.xml'
-    wiki_file = '../data/hed_pairs/prologue_tests/test_no_blank_line.mediawiki'
+    xml_file = '../data/schema_test_data/prologue_tests/test_no_blank_line.xml'
+    wiki_file = '../data/schema_test_data/prologue_tests/test_no_blank_line.mediawiki'
     can_compare = True
 
 
 class TestDuplicateUnitCompliance(TestComplianceBase):
-    xml_file = '../data/hed_pairs/duplicate_unit.xml'
-    wiki_file = '../data/hed_pairs/duplicate_unit.mediawiki'
+    xml_file = '../data/schema_test_data/duplicate_unit.xml'
+    wiki_file = '../data/schema_test_data/duplicate_unit.mediawiki'
     can_compare = True
     expected_issues = 1
 
 
 class TestDuplicateUnitClass(TestComplianceBase):
-    xml_file = '../data/hed_pairs/duplicate_unit_class.xml'
-    wiki_file = '../data/hed_pairs/duplicate_unit_class.mediawiki'
+    xml_file = '../data/schema_test_data/duplicate_unit_class.xml'
+    wiki_file = '../data/schema_test_data/duplicate_unit_class.mediawiki'
     can_compare = True
     expected_issues = 1
 
@@ -168,7 +168,7 @@ class TestDuplicateUnitClass(TestComplianceBase):
 
 
 class TestConverterSavingPrefix(unittest.TestCase):
-    xml_file = '../data/hed_pairs/HED8.0.0t.xml'
+    xml_file = '../data/schema_test_data/HED8.0.0t.xml'
 
     @classmethod
     def setUpClass(cls):

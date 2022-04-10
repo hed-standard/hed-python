@@ -1,7 +1,7 @@
 import os
 import unittest
 import numpy as np
-from pandas import DataFrame, read_csv
+from pandas import DataFrame
 from hed.errors.exceptions import HedFileError
 from hed.util.data_util import add_columns, check_match, delete_columns, delete_rows_by_column, \
     get_key_hash, get_new_dataframe, get_row_hash, get_value_dict, \
@@ -12,15 +12,13 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/attention_shift')
         curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/curation')
-        cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
-        cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
-        cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
-        cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
-        cls.sampling_rate_path = os.path.join(curation_base_dir, "samplingRates.tsv")
+        cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
+        cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
+        cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")
+        cls.stern_test3_path = os.path.join(curation_base_dir, "sternberg_no_quotes_events.tsv")
+        cls.attention_shift_path = os.path.join(curation_base_dir, "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
+        cls.sampling_rate_path = os.path.join(curation_base_dir, "bcit_basline_driving_samplingRates.tsv")
 
     def test_add_column(self):
         data = {'Name': ['n/a', '', 'tom', 'alice', 0, 1],
@@ -87,7 +85,7 @@ class Test(unittest.TestCase):
         self.assertEqual(t_hash1, t_hash2, "get_key_hash should return same hash for empty list and empty tuple")
 
     def test_get_row_hash(self):
-        stern_df = read_csv(self.stern_map_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
+        stern_df = get_new_dataframe(self.stern_map_path)
         key_columns = ['type', 'event_type']
         my_map = {}
         for index, row in stern_df.iterrows():

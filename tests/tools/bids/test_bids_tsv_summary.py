@@ -1,7 +1,6 @@
 import unittest
 import os
 from unittest import mock
-import pandas as pd
 from hed.errors.exceptions import HedFileError
 from hed.tools import BidsTsvSummary, BidsFileDictionary
 from hed.util import get_file_list, get_new_dataframe
@@ -10,18 +9,18 @@ from hed.util import get_file_list, get_new_dataframe
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/attention_shift')
-        cls.bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                         '../../data/bids/eeg_ds003654s_hed')
-        cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
-        cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
-        cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
-        cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
-        cls.wh_events_path = \
-            os.path.realpath(os.path.join(cls.bids_base_dir,
-                                          'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/curation')
+        bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                     '../../data/bids/eeg_ds003654s_hed')
+        cls.bids_base_dir = bids_base_dir
+        cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
+        cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
+        cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")
+        cls.stern_test3_path = os.path.join(curation_base_dir, "sternberg_no_quotes_events.tsv")
+        cls.attention_shift_path = os.path.join(curation_base_dir,
+                                                "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
+        cls.wh_events_path = os.path.realpath(os.path.join(bids_base_dir,
+                                                           'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
 
     def test_constructor(self):
         dict1 = BidsTsvSummary()
@@ -34,7 +33,7 @@ class Test(unittest.TestCase):
 
     def test_get_number_unique_values(self):
         dict1 = BidsTsvSummary()
-        wh_df = pd.read_csv(self.wh_events_path, delimiter='\t', header=0)
+        wh_df = get_new_dataframe(self.wh_events_path)
         dict1.update(wh_df)
         self.assertEqual(len(dict1.value_info.keys()), 0,
                          "BidsTsvSummary value_info should be empty if no value columns")
@@ -58,7 +57,7 @@ class Test(unittest.TestCase):
 
     def test_update(self):
         dict1 = BidsTsvSummary()
-        stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0)
+        stern_df = get_new_dataframe(self.stern_map_path)
         dict1.update(stern_df)
         self.assertEqual(len(dict1.value_info.keys()), 0,
                          "BidsTsvSummary value_info should be empty if no value columns")
@@ -83,7 +82,7 @@ class Test(unittest.TestCase):
     def test_update_dict(self):
         dict1 = BidsTsvSummary()
         dict2 = BidsTsvSummary()
-        stern_df_map = pd.read_csv(self.stern_map_path, delimiter='\t', header=0)
+        stern_df_map = get_new_dataframe(self.stern_map_path)
         dict1.update(stern_df_map)
         dict2.update_summary(dict1)
         dict2.update_summary(dict1)
@@ -97,8 +96,8 @@ class Test(unittest.TestCase):
                 self.assertEqual(value, key_dict2[key], "update_summary should give same values as update")
 
     def test_update_dict_with_value_cols(self):
-        stern_df_test1 = pd.read_csv(self.stern_test1_path, delimiter='\t', header=0)
-        stern_df_test3 = pd.read_csv(self.stern_test3_path, delimiter='\t', header=0)
+        stern_df_test1 = get_new_dataframe(self.stern_test1_path)
+        stern_df_test3 = get_new_dataframe(self.stern_test3_path)
         dict1 = BidsTsvSummary(value_cols=['latency'])
         dict1.update(stern_df_test3)
         dict2 = BidsTsvSummary(value_cols=['latency'])
@@ -111,8 +110,8 @@ class Test(unittest.TestCase):
                              "update_summary should update values correctly")
 
     def test_update_dict_with_bad_value_cols(self):
-        stern_df_test1 = pd.read_csv(self.stern_test1_path, delimiter='\t', header=0)
-        stern_df_test3 = pd.read_csv(self.stern_test3_path, delimiter='\t', header=0)
+        stern_df_test1 = get_new_dataframe(self.stern_test1_path)
+        stern_df_test3 = get_new_dataframe(self.stern_test3_path)
         dict1 = BidsTsvSummary(value_cols=['latency'])
         dict1.update(stern_df_test3)
         dict3 = BidsTsvSummary()
@@ -127,7 +126,7 @@ class Test(unittest.TestCase):
             self.fail('update_summary should have thrown a HedFileError when value columns should be categorical')
 
     def test_update_dict_bad_skip_col(self):
-        stern_test3 = pd.read_csv(self.stern_test3_path, delimiter='\t', header=0)
+        stern_test3 = get_new_dataframe(self.stern_test3_path)
         dict1 = BidsTsvSummary(skip_cols=['latency'])
         dict1.update(stern_test3)
         dict2 = BidsTsvSummary(value_cols=['latency'])

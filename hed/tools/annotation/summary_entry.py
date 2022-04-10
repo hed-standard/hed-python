@@ -135,7 +135,7 @@ if __name__ == '__main__':
     # if tag_dict_no_defs != tag_dict:
     #     raise ValueError("tag dict!")
 
-    json_path = "../../../tests/data/summaries/tag_summary_template.json5"
+    json_path = "../../../tests/data/curation/tag_summary_template.json5"
     with open(json_path) as fp:
         rules = json.load(fp)
     breakout_list = rules["Tag-categories"]

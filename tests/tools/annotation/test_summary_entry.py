@@ -1,4 +1,3 @@
-import os
 import unittest
 from hed.models.hed_group import HedGroup
 from hed.models.hed_string import HedString
@@ -33,8 +32,8 @@ class Test(unittest.TestCase):
                                   f"Description/Factor level indicating the first display of this face.))"
 
     def test_constructor(self):
-        hed1 = HedString(Test.str1)
-        hed1.convert_to_canonical_forms(Test.schema)
+        hed1 = HedString(self.str1)
+        hed1.convert_to_canonical_forms(self.schema)
         entry1 = SummaryEntry("Face-symmetry-evaluation-task", hed1)
         self.assertIsInstance(entry1, SummaryEntry, "SummaryEntry constructor should create an object")
         self.assertEqual(entry1.name, "Face-symmetry-evaluation-task",
@@ -51,7 +50,7 @@ class Test(unittest.TestCase):
         self.assertFalse(entry2.group, "SummaryEntry constructor group should be a None when contents empty")
         self.assertFalse(entry2.tag_dict, "SummaryEntry should not have a tag dictionary when contents empty")
 
-        entry3 = SummaryEntry("NoSchema",  HedString(Test.str1))
+        entry3 = SummaryEntry("NoSchema",  HedString(self.str1))
         self.assertIsInstance(entry3, SummaryEntry,
                               "SummaryEntry constructor should create an object when schema is None")
         self.assertEqual(entry3.name, "NoSchema",
@@ -61,20 +60,20 @@ class Test(unittest.TestCase):
         self.assertFalse('Description' in entry3.tag_dict, "SummaryEntry should not parse values when schema is None")
 
     def test_extract_anchored_group(self):
-        hed1 = HedString(Test.str1)
-        hed1.convert_to_canonical_forms(Test.schema)
+        hed1 = HedString(self.str1)
+        hed1.convert_to_canonical_forms(self.schema)
         no_entry = SummaryEntry.extract_anchored_group(hed1)
         self.assertFalse(no_entry, "extract_anchored_group should return None if no anchored group")
 
-        hed2 = HedString(Test.str_with_def)
-        hed2.convert_to_canonical_forms(Test.schema)
+        hed2 = HedString(self.str_with_def)
+        hed2.convert_to_canonical_forms(self.schema)
         groups2 = hed2.groups()
         definition_entry = SummaryEntry.extract_anchored_group(groups2[0])
         self.assertIsInstance(definition_entry, SummaryEntry,
                               "extract_anchored_group should return a SummaryEntry if anchored group")
 
-        hed3 = HedString(Test.str_with_def_expand)
-        hed3.convert_to_canonical_forms(Test.schema)
+        hed3 = HedString(self.str_with_def_expand)
+        hed3.convert_to_canonical_forms(self.schema)
         groups3 = hed3.groups()
         def_expand_entry = SummaryEntry.extract_anchored_group(groups3[0], "def-expand")
         self.assertIsInstance(def_expand_entry, SummaryEntry,
@@ -85,28 +84,28 @@ class Test(unittest.TestCase):
                               "extract_anchored_group should return a SummaryEntry anchor and is not case sensitive")
 
     def test_extract_anchored_groups(self):
-        hed1 = HedString(Test.str1)
-        hed1.convert_to_canonical_forms(Test.schema)
+        hed1 = HedString(self.str1)
+        hed1.convert_to_canonical_forms(self.schema)
         entry_dict1 = {}
         hed1_tags = SummaryEntry.separate_anchored_groups(hed1, entry_dict1, anchor_name="definition")
         self.assertIsInstance(hed1_tags, list, "separate_anchored_groups returns a list when no anchor")
         self.assertEqual(len(hed1_tags), 1, "separate_anchored_groups returns a list of right length when no anchor")
         self.assertFalse(entry_dict1, "separate_anchored_groups returns an empty dictionary if no anchored groups")
 
-        hed2 = HedString(Test.str2)
-        hed2.convert_to_canonical_forms(Test.schema)
+        hed2 = HedString(self.str2)
+        hed2.convert_to_canonical_forms(self.schema)
         entry_dict2 = {}
         hed2_tags = SummaryEntry.separate_anchored_groups(hed2, entry_dict2, anchor_name="definition")
         self.assertIsInstance(hed2_tags, list, "separate_anchored_groups returns a list when no anchor and tags")
         self.assertEqual(len(hed2_tags), 5,
                          "separate_anchored_groups returns a list of right length when no anchor and tags")
 
-        hed3 = HedString(Test.str_with_defs)
-        hed3.convert_to_canonical_forms(Test.schema)
+        hed3 = HedString(self.str_with_defs)
+        hed3.convert_to_canonical_forms(self.schema)
         entry_dict3 = {}
         hed3_tags = SummaryEntry.separate_anchored_groups(hed3, entry_dict3, anchor_name="definition")
         self.assertIsInstance(hed3_tags, list,
-                              "separate_anchored_groups returns a list when mulitple definitions no tags")
+                              "separate_anchored_groups returns a list when multiple definitions no tags")
         self.assertEqual(len(hed3_tags), 0,
                          "separate_anchored_groups returns a list of right length when no anchor and tags")
         self.assertEqual(len(entry_dict3), 3,

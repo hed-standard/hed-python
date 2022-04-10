@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
 
     def test_bids_tsv_dictionary_constructor_invalid(self):
         try:
-            dict1 = BidsTsvDictionary("Tsv name", self.file_list, entities=('sub'))
+            dict1 = BidsTsvDictionary("Tsv name", self.file_list, entities='sub')
         except HedFileError:
             pass
         except Exception:
