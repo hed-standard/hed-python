@@ -15,14 +15,14 @@ class Test(unittest.TestCase):
     def test_constructor_valid(self):
         file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
-        dict1 = FileDictionary(file_list)
+        dict1 = FileDictionary("My name", file_list)
         self.assertEqual(6, len(dict1.key_list), "FileDictionary should have correct number of entries when key okay")
 
     def test_constructor_invalid(self):
         file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
         try:
-            dict1 = FileDictionary(file_list, name_indices=(0, 1))
+            dict1 = FileDictionary("My name", file_list, key_indices=(0, 1))
         except HedFileError:
             pass
         except Exception:

@@ -7,7 +7,7 @@ class BidsFile:
 
     def __init__(self, file_path):
         self.file_path = os.path.realpath(file_path)
-        suffix, ext, entity_dict, unmatched = parse_bids_filename(self.file_path)
+        suffix, ext, entity_dict = parse_bids_filename(self.file_path)
         self.suffix = suffix
         self.ext = ext
         self.entity_dict = entity_dict

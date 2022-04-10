@@ -1,10 +1,6 @@
 import os
-import json
 import unittest
-import pandas as pd
-from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.tools import BidsDataset, BidsDatasetSummary
-from hed.tools.bids.bids_event_files import BidsEventFiles
+from hed.tools import BidsDatasetSummary
 
 
 class Test(unittest.TestCase):
@@ -16,7 +12,7 @@ class Test(unittest.TestCase):
                                         '../../data/bids/eeg_ds003654s_hed_library')
 
     def test_bids_constructor(self):
-        bids1 = BidsDatasetSummary(Test.root_path)
+        bids1 = BidsDatasetSummary(self.root_path)
         self.assertIsInstance(bids1, BidsDatasetSummary,
                               "BidsDatasetSummary should create a valid object from valid dataset")
 

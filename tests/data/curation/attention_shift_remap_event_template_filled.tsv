@@ -1,0 +1,33 @@
+event_code	cond_code	focus_modality	event_type	attention_status	task_role
+1	1	auditory	hear_word	n/a	cue_auditory_focus
+1	2	visual	hear_word	n/a	ignore
+1	3	auditory	hear_word	n/a	cue_auditory_focus
+2	1	auditory	look_word	n/a	ignore
+2	2	visual	look_word	n/a	cue_visual_focus
+2	3	visual	look_word	n/a	cue_visual_focus
+3	1	auditory	high_tone	attended	target
+3	2	visual	high_tone	unattended	ignored_target
+4	1	auditory	light_bar	unattended	ignored_target
+4	2	visual	light_bar	attended	target
+5	1	auditory	low_tone	attended	nontarget
+5	2	visual	low_tone	unattended	ignored nontarget
+6	1	auditory	dark_bar	unattended	ignored nontarget
+6	2	visual	dark_bar	attended	non_target
+7	3	auditory	high_tone	attended	target
+8	3	visual	light_bar	attended	target
+9	3	visual	high_tone	unattended	ignored target
+10	3	auditory	light_bar	unattended	ignored target
+11	3	auditory	low_tone	attended	non_target
+12	3	visual	dark_bar	attended	non_target
+13	3	visual	low_tone	unattended	ignored_nontarget
+14	3	auditory	dark_bar	unattended	ignored_nontarget
+201	1	auditory	button_press	n/a	auditory_target_detected
+201	2	visual	button_press	n/a	visual_target_detected
+201	3	auditory	button_press	n/a	auditory_target_detected
+201	3	visual	button_press	n/a	visual_target_detected
+202	1	auditory	pause_recording	n/a	n/a
+202	2	visual	pause_recording	n/a	n/a
+202	3	auditory	pause_recording	n/a	n/a
+202	3	n/a	pause_recording	n/a	n/a
+202	3	visual	pause_recording	n/a	n/a
+255	2	visual	bad_event	n/a	n/a

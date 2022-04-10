@@ -2,21 +2,22 @@ import unittest
 import os
 from unittest import mock
 import pandas as pd
-from hed.errors.exceptions import HedFileError
-from hed.tools.annotation.key_template import KeyTemplate
+from hed.errors import HedFileError
+from hed.tools import KeyTemplate
 from hed.util.data_util import get_row_hash
+from hed.util import get_new_dataframe
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/attention_shift')
-        cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
-        cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
-        cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
-        cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/curation')
+        cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
+        cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
+        cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")
+        cls.stern_test3_path = os.path.join(curation_base_dir, "sternberg_no_quotes_events.tsv")
+        cls.attention_shift_path = os.path.join(curation_base_dir,
+                                                "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
         cls.key_cols = ['type']
         cls.target_cols = ['event_type', 'task_role', 'letter']
         cls.count_col = ['counts']
@@ -41,7 +42,7 @@ class Test(unittest.TestCase):
 
     def test_key_hash_use(self):
         t_map = KeyTemplate(['type'])
-        stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
+        stern_df = get_new_dataframe(self.stern_map_path)
         t_map.update(stern_df)
         t_col = t_map.col_map
         for index, row in stern_df.iterrows():
@@ -49,7 +50,7 @@ class Test(unittest.TestCase):
             key_value = t_map.map_dict[key]
             self.assertEqual(t_col.iloc[key_value]['type'], row['type'], "The key should be looked up for same map")
 
-        stern_test1 = pd.read_csv(self.stern_test1_path, delimiter='\t', header=0)
+        stern_test1 = get_new_dataframe(self.stern_test1_path)
         for index, row in stern_test1.iterrows():
             key = get_row_hash(row, t_map.columns)
             key_value = t_map.map_dict[key]
@@ -57,7 +58,7 @@ class Test(unittest.TestCase):
 
     def test_make_template(self):
         t_map = KeyTemplate(self.key_cols)
-        stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0)
+        stern_df = get_new_dataframe(self.stern_map_path)
         t_map.update(stern_df)
         df1 = t_map.make_template()
         self.assertIsInstance(df1, pd.DataFrame, "make_template should return a DataFrame")
@@ -95,7 +96,7 @@ class Test(unittest.TestCase):
 
     def test_update_map(self):
         t_map = KeyTemplate(self.key_cols)
-        stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0)
+        stern_df = get_new_dataframe(self.stern_map_path)
         t_map.update(stern_df)
         df_map = t_map.col_map
         df_dict = t_map.map_dict
@@ -105,7 +106,7 @@ class Test(unittest.TestCase):
 
     def test_update_map_duplicate_keys(self):
         t_map = KeyTemplate(self.key_cols)
-        stern_df = pd.read_csv(self.stern_test2_path, delimiter='\t', header=0)
+        stern_df = get_new_dataframe(self.stern_test2_path)
         t_map.update(stern_df)
         self.assertEqual(len(t_map.count_dict), len(t_map.map_dict),
                          "The count dictionary and key dictionary should have same number of values")
@@ -122,14 +123,14 @@ class Test(unittest.TestCase):
     def test_update_map_missing_key(self):
         keys = self.key_cols + ['another']
         t_map = KeyTemplate(keys)
-        stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0)
+        stern_df = get_new_dataframe(self.stern_map_path)
         t_map.update(stern_df)
         self.assertEqual(len(t_map.col_map.columns), len(self.key_cols) + 1,
                          "update should have all of the columns")
 
     def test_update_map_not_unique(self):
         t_map = KeyTemplate(self.target_cols)
-        stern_df = pd.read_csv(self.stern_map_path, delimiter='\t', header=0)
+        stern_df = get_new_dataframe(self.stern_map_path)
         t_map.update(stern_df)
         self.assertEqual(len(t_map.col_map.columns), 3, "update should produce correct number of columns")
         self.assertEqual(len(t_map.col_map), len(stern_df) - 1, "update should produce the correct number of rows")

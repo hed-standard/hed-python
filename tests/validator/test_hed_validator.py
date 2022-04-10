@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_hed_input = 'Event'
-        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/hed_pairs/')
+        cls.hed_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/schema_test_data/')
         schema_filename = os.path.join(cls.hed_base_dir, "HED8.0.0t.xml")
         hed_schema = schema.load_schema(schema_filename)
         cls.hed_schema = hed_schema
@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/hed_pairs/HED8.0.0t.xml')
+                                   '../data/schema_test_data/HED8.0.0t.xml')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = schema.load_schema(schema_path)
@@ -139,7 +139,7 @@ class Test(unittest.TestCase):
 
     def test_error_spans_from_file_and_missing_required_column(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/hed_pairs/HED8.0.0.mediawiki')
+                                   '../data/schema_test_data/HED8.0.0.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/tag_error_span_test.tsv')
 
@@ -166,7 +166,7 @@ class Test(unittest.TestCase):
 
     def test_def_mapping_single_line(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/hed_pairs/HED8.0.0.mediawiki')
+                                   '../data/schema_test_data/HED8.0.0.mediawiki')
         hed_schema = schema.load_schema(schema_path)
         validator = HedValidator(hed_schema=hed_schema)
         def_mapper = DefinitionMapper()
