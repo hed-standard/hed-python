@@ -1,6 +1,7 @@
 import os
 import unittest
-from hed.tools.bids.bids_json_file import BidsJsonFile
+from hed.errors import HedFileError
+from hed.tools import BidsJsonFile
 
 
 class Test(unittest.TestCase):
@@ -13,10 +14,10 @@ class Test(unittest.TestCase):
                                      '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_constructor(self):
-        json1 = BidsJsonFile(Test.description_path, set_contents=False)
-        self.assertEqual(json1.suffix, 'dataset_description', "BidsJsonFile should have correct name_suffix")
+        json1 = BidsJsonFile(Test.json_path, set_contents=False)
+        self.assertEqual(json1.suffix, 'events', "BidsJsonFile should have correct suffix")
         self.assertEqual(json1.ext, '.json', "BidsJsonFile should have correct ext")
-        self.assertEqual(len(json1.entity_dict), 0, "BidssonFile should have right number of entity_dict")
+        self.assertEqual(len(json1.entity_dict), 1, "BidsJsonFile should have right size entity_dict")
         self.assertFalse(json1.contents)
 
         sidecar2 = BidsJsonFile(Test.json_path, set_contents=True)
@@ -25,10 +26,21 @@ class Test(unittest.TestCase):
         self.assertEqual(len(sidecar2.entity_dict), 1, "BidsJsonFile should have right number of entity_dict")
         self.assertIsInstance(sidecar2.contents, dict, "BidsJsonFile should contain a dictionary")
 
+    def test_bad_constructor(self):
+
+        try:
+            json1 = BidsJsonFile(Test.description_path, set_contents=True)
+        except HedFileError:
+            pass
+        except Exception:
+            self.fail("BidsJsonFile threw the wrong exception when filename invalid")
+        else:
+            self.fail("BidsJsonFile should have thrown a HedFileError when duplicate key")
+
     def test_bids_json_file_str(self):
-        json_file1 = BidsJsonFile(Test.description_path)
+        json_file1 = BidsJsonFile(Test.json_path)
         self.assertTrue(str(json_file1), "BidsJsonFile should have a string representation")
-        json_file2 = BidsJsonFile(Test.description_path, set_contents=True)
+        json_file2 = BidsJsonFile(Test.json_path, set_contents=True)
         self.assertTrue(str(json_file2), "BidsJsonFile should have a string representation")
         self.assertGreater(len(str(json_file2)), len(str(json_file1)),
                            "BidsJsonFile with contents should have a longer string representation than without")

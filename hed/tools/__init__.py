@@ -4,11 +4,11 @@
 from .annotation.file_dictionary import FileDictionary
 from .annotation.key_map import KeyMap
 from .annotation.key_template import KeyTemplate
-from .annotation.map_summary import get_columns_info, get_key_counts, update_dict_counts
+
 from .annotation.summary_entry import SummaryEntry
 from .annotation.tag_summary import TagSummary
 from .annotation.annotation_util import \
-    check_df_columns, extract_tag, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
+    check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
 
 from .bids.bids_dataset import BidsDataset
 from .bids.bids_dataset_summary import BidsDatasetSummary
@@ -22,5 +22,6 @@ from .bids.bids_tsv_dictionary import BidsTsvDictionary
 from .bids.bids_tsv_file import BidsTsvFile
 from .bids.bids_tsv_summary import BidsTsvSummary
 
+from .curation.tsv_reports import report_tsv_diffs
 
 from .hed_logger import HedLogger

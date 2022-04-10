@@ -1,8 +1,10 @@
 import os
 import unittest
 from hed.errors.exceptions import HedFileError
-from hed.util.io_util import generate_filename, get_dir_dictionary, get_file_list, get_path_components
-from hed.util.io_util import parse_bids_filename
+from hed.util.io_util import extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
+    get_path_components
+
+from hed.util.io_util import parse_bids_filename, _split_entity
 
 
 class Test(unittest.TestCase):
@@ -16,7 +18,11 @@ class Test(unittest.TestCase):
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(att_base_dir, "auditory_visual_shift_events.tsv")
+        cls.attention_shift_path = os.path.join(att_base_dir, "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
+
+    def test_extract_suffix_path(self):
+        suffix_path = extract_suffix_path('c:/myroot/temp.tsv', 'c:')
+        self.assertTrue(suffix_path.endswith('temp.tsv'), "extract_suffix_path has the right path")
 
     def test_generate_file_name(self):
         file1 = generate_filename('mybase')
@@ -59,7 +65,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
 
     def test_get_file_list_files(self):
-        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/hed_pairs/prologue_tests')
+        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/schema_test_data/prologue_tests')
         dir_pairs = os.path.realpath(dir_pairs)
         test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
         file_list1 = get_file_list(dir_pairs)
@@ -121,7 +127,7 @@ class Test(unittest.TestCase):
 
     def test_parse_bids_filename_full(self):
         the_path1 = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
-        suffix1, ext1, entity_dict1, unmatched1 = parse_bids_filename(the_path1)
+        suffix1, ext1, entity_dict1 = parse_bids_filename(the_path1)
         self.assertEqual(suffix1, 'bold', "parse_bids_filename should correctly parse name_suffix for full path")
         self.assertEqual(ext1, '.json', "parse_bids_filename should correctly parse ext for full path")
         self.assertIsInstance(entity_dict1, dict, "parse_bids_filename should return entity_dict as a dictionary")
@@ -130,24 +136,27 @@ class Test(unittest.TestCase):
         self.assertEqual(entity_dict1['task'], 'overt', "parse_bids_filename should have a task entity")
         self.assertEqual(entity_dict1['run'], '2', "parse_bids_filename should have a run entity")
         self.assertEqual(len(entity_dict1), 4, "parse_bids_filename should 4 entity_dict in the dictionary")
-        self.assertEqual(len(unmatched1), 0, "parse_bids_filename should not have unmatched items")
+
+        the_path2 = 'sub-01.json'
+        suffix2, ext2, entity_dict2 = parse_bids_filename(the_path2)
+        self.assertFalse(suffix2, "parse_bids_filename should not return a suffix if no suffix")
+        self.assertTrue(entity_dict2, "parse_bids_filename should have entity dictionary if suffix missing")
 
     def test_parse_bids_filename_partial(self):
         path1 = 'task-overt_bold.json'
-        suffix1, ext1, entity_dict1, unmatched1 = parse_bids_filename(path1)
-        self.assertEqual(suffix1, 'bold', "parse_bids_filename should correctly parse name_suffix for name")
+        suffix1, ext1, entity_dict1 = parse_bids_filename(path1)
         self.assertEqual(ext1, '.json', "parse_bids_filename should correctly parse ext for name")
         self.assertIsInstance(entity_dict1, dict, "parse_bids_filename should return entity_dict as a dictionary")
         self.assertEqual(entity_dict1['task'], 'overt', "parse_bids_filename should have a task entity")
         self.assertEqual(len(entity_dict1), 1, "parse_bids_filename should 1 entity_dict in the dictionary")
         path2 = 'task-overt_bold'
-        suffix2, ext2, entity_dict2, unmatched2 = parse_bids_filename(path2)
+        suffix2, ext2, entity_dict2 = parse_bids_filename(path2)
         self.assertEqual(suffix2, 'bold', "parse_bids_filename should correctly parse name_suffix for name")
         self.assertEqual(ext2, '', "parse_bids_filename should return empty extension when only name")
         self.assertIsInstance(entity_dict2, dict, "parse_bids_filename should return entity_dict as a dictionary")
         self.assertEqual(entity_dict2['task'], 'overt', "parse_bids_filename should have a task entity")
         path3 = 'bold'
-        suffix3, ext3, entity_dict3, unmatched3 = parse_bids_filename(path3)
+        suffix3, ext3, entity_dict3 = parse_bids_filename(path3)
         self.assertEqual(suffix3, 'bold', "parse_bids_filename should correctly parse name_suffix for name")
         self.assertEqual(ext3, '', "parse_bids_filename should return empty extension when only name")
         self.assertIsInstance(entity_dict3, dict, "parse_bids_filename should return entity_dict as a dictionary")
@@ -155,45 +164,41 @@ class Test(unittest.TestCase):
 
     def test_parse_bids_filename_unmatched(self):
         path1 = 'dataset_description.json'
-        suffix1, ext1, entity_dict1, unmatched1 = parse_bids_filename(path1)
-        self.assertEqual(suffix1, 'dataset_description',
-                         "parse_bids_filename should correctly parse name_suffix for name")
-        self.assertEqual(ext1, '.json', "parse_bids_filename should return empty extension when only name")
-        self.assertIsInstance(entity_dict1, dict, "parse_bids_filename should return entity_dict as a dictionary")
-        self.assertEqual(len(entity_dict1), 0, "parse_bids_filename should handle names with no entity_dict")
-        self.assertEqual(unmatched1, [],
-                         "parse_bids_filename a name with no entity_dict should be unmatched")
-
-        path2 = 'participants.json'
-        suffix2, ext2, entity_dict2, unmatched2 = parse_bids_filename(path2)
-        self.assertEqual(suffix2, 'participants', "parse_bids_filename should correctly parse name_suffix for name")
-        self.assertEqual(ext2, '.json', "parse_bids_filename should return correct extension when only suffix")
-        self.assertIsInstance(entity_dict2, dict, "parse_bids_filename should return entity_dict as a dictionary")
-        self.assertEqual(len(entity_dict2), 0, "parse_bids_filename should handle names with no entity_dict")
-        self.assertFalse(unmatched2, "parse_bids_filename a name with only suffix should have no unmatched")
+        try:
+            suffix1, ext1, entity_dict1 = parse_bids_filename(path1)
+        except HedFileError:
+            pass
+        except Exception:
+            self.fail("parse_bids_filename threw the wrong exception when filename invalid")
+        else:
+            self.fail("parse_bids_filename should have thrown a HedFileError when duplicate key")
 
     def test_parse_bids_filename_invalid(self):
         path1 = 'task_sub-01_description.json'
-        suffix1, ext1, entity_dict1, unmatched1 = parse_bids_filename(path1)
-        self.assertEqual(suffix1, 'description', "parse_bids_filename should correctly parse name_suffix for name")
-        self.assertEqual(ext1, '.json', "parse_bids_filename correctly return extension when unmatched entity")
-        self.assertIsInstance(entity_dict1, dict, "parse_bids_filename should return entity_dict as a dictionary")
-        self.assertEqual(len(entity_dict1), 1, "parse_bids_filename should handle names with no entity_dict")
-        self.assertEqual(len(unmatched1), 1,
-                         "parse_bids_filename unmatched list should have correct length when unmatched entity")
-        self.assertEqual(unmatched1[0], 'task',
-                         "parse_bids_filename unmatched list should have correct values when unmatched entity")
-        path2 = 'sub-01.json'
-        suffix2, ext2, entity_dict2, unmatched2 = parse_bids_filename(path2)
-        self.assertEqual(suffix2, '', "parse_bids_filename should correctly parse name_suffix for name")
-        self.assertEqual(ext2, '.json', "parse_bids_filename correctly return extension when unmatched entity")
-        self.assertIsInstance(entity_dict2, dict, "parse_bids_filename should return entity_dict as a dictionary")
-        self.assertEqual(len(entity_dict2), 0, "parse_bids_filename should handle names with no suffix")
-        self.assertEqual(len(unmatched2), 1,
-                         "parse_bids_filename unmatched list should have correct length when no suffix")
-        self.assertEqual(unmatched2[0], 'sub-01',
-                         "parse_bids_filename unmatched list should have correct values when unmatched entity")
+        try:
+            suffix1, ext1, entity_dict1 = parse_bids_filename(path1)
+        except HedFileError:
+            pass
+        except Exception:
+            self.fail("parse_bids_filename threw the wrong exception when missing value in name-value")
+        else:
+            self.fail("parse_bids_filename should have thrown a HedFileError when missing value in name-value")
 
+
+    def test_split_entity(self):
+        ent_dict1 = _split_entity("apple")
+        self.assertEqual("apple", ent_dict1["suffix"], "_split_entity returns the suffix of the entire piece")
+        ent_dict2 = _split_entity("task-plenty")
+        self.assertEqual("plenty", ent_dict2["value"], "_split_entity has the correct value")
+        self.assertEqual("task", ent_dict2["key"], "_split_entity dictionary has a key key")
+        self.assertFalse("suffix" in ent_dict2, "_split_entity has a key-value but no suffix")
+        ent_dict3 = _split_entity("task-plenty-oops")
+        self.assertEqual(1, len(ent_dict3), "_split_entity is returns a dictionary with 1 entry if invalid")
+        self.assertTrue("bad" in ent_dict3, "_split_entity should have a bad component if invalid")
+        ent_dict4 = _split_entity("    ")
+        self.assertEqual(1, len(ent_dict4), "_split_entity is returns a dictionary with 1 entry if invalid")
+        self.assertTrue("bad" in ent_dict4, "_split_entity should have a bad component if invalid")
+        self.assertFalse(ent_dict4["bad"], "_split_entity bad value should be empty if blank piece")
 
 if __name__ == '__main__':
     unittest.main()

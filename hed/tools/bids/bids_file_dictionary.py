@@ -7,20 +7,23 @@ from hed.tools.annotation.file_dictionary import FileDictionary
 class BidsFileDictionary(FileDictionary):
     """ Holds a dictionary of path names keyed by specified entity pairs. """
 
-    def __init__(self, file_list=None, entities=('sub', 'ses', 'task', 'run')):
+    def __init__(self, collection_name, file_list=None, entities=('sub', 'ses', 'task', 'run')):
         """ Create a dictionary with keys that are simplified file names and values that are full paths
 
         This function is used for cross listing BIDS style files for different studies.
 
         Args:
+            collection_name (str): Name of this collection
             file_list (list):      List containing full paths of files of interest
             entities (tuple:  List of indices into base file names of pieces to assemble for the key
         """
+        self.collection_name = collection_name
+        self.entities = entities
         if file_list:
             self.file_dict = self.make_bids_file_dict(file_list, entities)
         else:
             self.file_dict = {}
-        self.entities = entities
+
 
     @property
     def key_list(self):
@@ -29,6 +32,11 @@ class BidsFileDictionary(FileDictionary):
     @property
     def file_list(self):
         return list(self.file_dict.values())
+
+    def get_file_path(self, key):
+        if key in self.file_dict.keys():
+            return self.file_dict[key].file_path
+        return None
 
     def iter_files(self):
         for key, file in self.file_dict.items():
@@ -54,23 +62,26 @@ class BidsFileDictionary(FileDictionary):
                 response_dict[key] = file
         return response_dict
 
-    def print_files(self, title=None):
+    def output_files(self, title=None, logger=None):
         if title:
             print(f"{title} ({len(self.key_list)} files)")
         for key, value in self.file_dict.items():
             print(f"{key}: {os.path.basename(value.file_path)}")
+            if logger:
+                logger.add(key, f"{self.name}: {os.path.basename(value.file_path)}")
 
-    def _create_dict_obj(self, file_dict):
-        dict_obj = BidsFileDictionary(file_list=None, entities=self.entities)
+    def _create_dict_obj(self, collection_name, file_dict):
+        dict_obj = BidsFileDictionary(collection_name, file_list=None, entities=self.entities)
         dict_obj.file_dict = file_dict
         return dict_obj
 
     def create_split_dict(self, entity):
         split_dict, leftovers = self.split_dict_by_entity(self.file_dict, entity)
         for entity_value, entity_dict in split_dict.items():
-            split_dict[entity_value] = self._create_dict_obj(split_dict[entity_value])
+            split_dict[entity_value] = \
+                self._create_dict_obj(self.name + "_" + str(entity_value), split_dict[entity_value])
         if leftovers:
-            leftover_dict = self._create_dict_obj(leftovers)
+            leftover_dict = self._create_dict_obj(self.name + "_left_overs", leftovers)
         else:
             leftover_dict = None
         return split_dict, leftover_dict
@@ -101,21 +112,13 @@ class BidsFileDictionary(FileDictionary):
             key_list = []
             for entity in entities:
                 if entity in entity_dict:
-                    key_list.append(f"{entity}_{entity_dict[entity]}")
+                    key_list.append(f"{entity}-{entity_dict[entity]}")
             key = '_'.join(key_list)
             if key in file_dict:
                 raise HedFileError("NonUniqueFileKeys",
                                    f"dictionary key {key} is associated with {the_file} and {file_dict[key]}", "")
             file_dict[key] = the_file
         return file_dict
-
-    @staticmethod
-    def make_key(key_string, indices=(0, 2), separator='_'):
-        key_value = ''
-        pieces = key_string.split(separator)
-        for index in list(indices):
-            key_value += pieces[index] + separator
-        return key_value[:-1]
 
     @staticmethod
     def match_query(query_dict, entity_dict):

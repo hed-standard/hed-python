@@ -15,13 +15,13 @@ class Test(unittest.TestCase):
                                       extensions=['.tsv'], exclude_dirs=['stimuli'])
 
     def test_bids_tsv_dictionary_constructor_valid(self):
-        dict1 = BidsTsvDictionary(self.file_list, entities=('sub', 'run'))
+        dict1 = BidsTsvDictionary("Tsv Name", self.file_list, entities=('sub', 'run'))
         self.assertEqual(6, len(dict1.key_list),
                          "BidsTsvDictionary should have correct number of entries when key okay")
 
     def test_bids_tsv_dictionary_constructor_invalid(self):
         try:
-            dict1 = BidsTsvDictionary(self.file_list, entities=('sub'))
+            dict1 = BidsTsvDictionary("Tsv name", self.file_list, entities='sub')
         except HedFileError:
             pass
         except Exception:
@@ -30,7 +30,7 @@ class Test(unittest.TestCase):
             self.fail("FileDictionary should have thrown a HedFileError when duplicate key")
 
     def test_create_split_dict(self):
-        dict1 = BidsTsvDictionary(self.file_list, entities=('sub', 'run'))
+        dict1 = BidsTsvDictionary("My name", self.file_list, entities=('sub', 'run'))
         dist1_split, leftovers = dict1.create_split_dict('run')
         self.assertIsInstance(dist1_split, dict, "create_split_dict returns a dictionary")
         self.assertEqual(3, len(dist1_split), 'create_split_dict should return the correct number of items')

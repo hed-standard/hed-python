@@ -187,6 +187,25 @@ class BidsTsvSummary:
                 self.value_info[col] = self.value_info[col] + col_dict.value_info[col]
 
     @staticmethod
+    def get_columns_info(dataframe, skip_cols=None):
+        """ Extracts the number of times each unique value appears in each column.
+
+        Args:
+            dataframe (DataFrame):    The DataFrame to be analyzed
+            skip_cols(list):          List of names of columns to be skipped in the extraction
+
+        Returns:
+            dict:   A dictionary with keys that are column names and values that are dictionaries of unique value counts
+        """
+        col_info = dict()
+
+        for col_name, col_values in dataframe.iteritems():
+            if skip_cols and col_name in skip_cols:
+                continue
+            col_info[col_name] = col_values.value_counts(ascending=True).to_dict()
+        return col_info
+
+    @staticmethod
     def make_combined_dicts(file_dictionary, skip_cols=None):
         """ Return a combined dictionary of column information as well as individual summaries
 

@@ -122,6 +122,27 @@ def get_row_hash(row, key_list):
     return get_key_hash(row[key_list])
 
 
+def get_value_dict(srate_path, key_col='file_basename', value_col='sampling_rate'):
+    """ Return a dictionary of values from two columns a dataframe
+
+    Args:
+        srate_path (str)   Path to a tsv file with a header row
+        key_col (str)      Name of the column which should be the key
+        value_col (str)    Name of the column which should be the value
+
+    Returns: (dict)
+        Dictionary with key_col: value_col
+    """
+
+    value_dict = {}
+    df = get_new_dataframe(srate_path)
+    for index, row in df.iterrows():
+        if row[key_col] in value_dict:
+            raise HedFileError("DuplicateKeyInValueDict", "The key column must have unique values", "")
+        value_dict[row[key_col]] = row[value_col]
+    return value_dict
+
+
 def make_info_dataframe(col_info, selected_col):
     """ Return a dataframe containing the column information for the selected column
 
@@ -149,7 +170,11 @@ def replace_values(df, values=[''], replace_value='n/a', column_list=None):
         replace_value (str): String replacement value
         column_list (list):  List of columns in which to do replacement
 
+    Returns: (int)
+        number of values replaced
     """
+
+    num_replaced = 0
     if column_list:
         cols = list(set(column_list).intersection(set(list(df))))
     else:
@@ -157,8 +182,10 @@ def replace_values(df, values=[''], replace_value='n/a', column_list=None):
     for col in cols:
         for value in values:
             value_mask = df[col].map(str) == str(value)
+            num_replaced += sum(value_mask)
             index = df[value_mask].index
             df.loc[index, col] = 'n/a'
+    return num_replaced
 
 
 def remove_quotes(df):
