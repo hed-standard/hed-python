@@ -284,7 +284,6 @@ class Test(unittest.TestCase):
 
         self.assertEqual(test_string, test_string2)
 
-        breakHEre = 3
 
 
 if __name__ == '__main__':
