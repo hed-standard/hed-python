@@ -142,6 +142,8 @@ class HedGroup(HedGroupBase):
 
             Any groups that become empty will also be pruned.
 
+            Note: this goes by identity, not equivalence.
+
         Parameters
         ----------
         remove_groups : [HedGroup or HedTag]
@@ -151,13 +153,15 @@ class HedGroup(HedGroupBase):
         all_groups = self.get_all_groups()
         for remove_child in remove_groups:
             for group in all_groups:
-                if remove_child in group._children:
+                # only proceed if we have an EXACT match for this child
+                if any(remove_child is child for child in group._children):
                     if not group.mutable:
                         raise ValueError("Trying to alter immutable group")
                     if group._original_children is group._children:
                         group._original_children = group._children.copy()
 
                     group._children = [child for child in group._children if child is not remove_child]
+                    # If this was the last child, flag this group to be removed on a second pass
                     if not group._children and group is not self:
                         empty_groups.append(group)
                     break
