@@ -333,27 +333,46 @@ class BaseInput:
 
         # Iter tuples is ~ 25% faster compared to iterrows in our use case
         for row_number, text_file_row in enumerate(self._dataframe.itertuples(index=False)):
-            # todo: Double check if we need a check here for blank lines to avoid crashing.
-
-            row_dict = mapper.expand_row_tags(text_file_row)
-            column_to_hed_tags = row_dict[model_constants.COLUMN_TO_HED_TAGS]
-            expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
             error_handler.push_error_context(ErrorContext.ROW, row_number)
-            row_issues = []
-            if tag_funcs:
-                row_issues += self._run_column_ops(column_to_hed_tags, tag_funcs,
-                                                   expansion_column_issues,
-                                                   error_handler)
-            if return_row_dict:
-                final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
-                if string_funcs:
-                    row_issues += self._run_row_ops(final_hed_string, string_funcs, error_handler)
-                row_dict[model_constants.ROW_ISSUES] = row_issues
-                row_dict[model_constants.ROW_HED_STRING] = final_hed_string
-                yield row_number + start_at_one, row_dict
-            else:
-                yield row_number + start_at_one, column_to_hed_tags
+            yield row_number + start_at_one, self._expand_row_internal(text_file_row, tag_funcs, string_funcs,
+                                                                       error_handler=error_handler,
+                                                                       mapper=mapper, return_row_dict=return_row_dict)
             error_handler.pop_error_context()
+
+    def _expand_row_internal(self, text_file_row, tag_funcs, string_funcs, error_handler, mapper=None, return_row_dict=False):
+        row_dict = mapper.expand_row_tags(text_file_row)
+        column_to_hed_tags = row_dict[model_constants.COLUMN_TO_HED_TAGS]
+        expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
+
+        row_issues = []
+        if tag_funcs:
+            row_issues += self._run_column_ops(column_to_hed_tags, tag_funcs,
+                                               expansion_column_issues,
+                                               error_handler)
+        if return_row_dict:
+            final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
+            if string_funcs:
+                row_issues += self._run_row_ops(final_hed_string, string_funcs, error_handler)
+            row_dict[model_constants.ROW_ISSUES] = row_issues
+            row_dict[model_constants.ROW_HED_STRING] = final_hed_string
+            return row_dict
+        else:
+            return column_to_hed_tags
+
+    def get_assembled(self, row_number, expand_defs, shrink_defs, remove_definitions=False, error_handler=None):
+        if error_handler is None:
+            error_handler = ErrorHandler()
+
+        mapper = self._mapper
+        # this could be cached
+        tag_funcs = self._translate_ops([],
+                                        run_string_ops_on_columns=True,
+                                        expand_defs=expand_defs, shrink_defs=shrink_defs,
+                                        remove_definitions=remove_definitions, error_handler=error_handler)
+
+        text_file_row = self._dataframe.iloc[row_number]
+        return self._expand_row_internal(text_file_row, tag_funcs, None, error_handler=error_handler,
+                                         mapper=mapper, return_row_dict=False)
 
     def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
                  tag_form="short_tag"):
