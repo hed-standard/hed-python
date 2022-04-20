@@ -365,12 +365,16 @@ class BaseInput:
 
         mapper = self._mapper
         # this could be cached
-        tag_funcs = self._translate_ops([],
-                                        run_string_ops_on_columns=True,
-                                        expand_defs=expand_defs, shrink_defs=shrink_defs,
-                                        remove_definitions=remove_definitions, error_handler=error_handler)
+        tag_funcs, _ = self._translate_ops([],
+                                          run_string_ops_on_columns=True,
+                                          expand_defs=expand_defs, shrink_defs=shrink_defs,
+                                          remove_definitions=remove_definitions, error_handler=error_handler)
 
-        text_file_row = self._dataframe.iloc[row_number]
+        adj_row_number = 1
+        if self._has_column_names:
+            adj_row_number += 1
+
+        text_file_row = self._dataframe.iloc[row_number - adj_row_number]
         return self._expand_row_internal(text_file_row, tag_funcs, None, error_handler=error_handler,
                                          mapper=mapper, return_row_dict=False)
 
