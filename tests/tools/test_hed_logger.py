@@ -32,6 +32,17 @@ class Test(unittest.TestCase):
         self.assertEqual(len(keys), 1, "It should have one key after one message")
         self.assertEqual(keys[0], "baloney", "It should have the correct key after insertion")
 
+    def test_get_log_string(self):
+        status = HedLogger()
+        status.add("baloney", "Test message 1", level="ERROR")
+        status.add("baloney", "Test message 2")
+        stuff1 = status.get_log_string()
+        self.assertGreater(len(stuff1), 0, "get_log should contain messages.")
+        self.assertEqual(stuff1.count('\n'), 3, "get_log should output right number of lines.")
+        status.add("banana", "")
+        stuff2 = status.get_log_string(level="ERROR")
+        self.assertEqual(stuff2.count('\n'), 3, "get_log should output right number of lines when level is given.")
+
     def test_print_log(self):
         status = HedLogger()
         with mock.patch('sys.stdout', new=StringIO()) as fake_out1:
