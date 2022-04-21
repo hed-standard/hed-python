@@ -24,3 +24,6 @@ from hed import errors, models, schema, tools, util, validator
 #     "util",
 #     "validator"
 # ]
+
+from . import _version
+__version__ = _version.get_versions()['version']
