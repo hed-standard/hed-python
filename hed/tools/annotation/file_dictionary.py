@@ -12,16 +12,14 @@ class FileDictionary:
 
         Args:
             collection_name (str): Name of the file collection for reference
-            file_list (list):      List containing full paths of files of interest
-            key_indices (tuple):   List of indices into base file names of pieces to assemble for the key
+            file_list (list, None):      List containing full paths of files of interest
+            key_indices (tuple, None):   List of indices into base file names of pieces to assemble for the key
             separator (str):       Character used to separate pieces of key name
 
         """
         self.collection_name = collection_name
-        if key_indices:
-            self.file_dict = self.make_file_dict(file_list, key_indices=key_indices, separator=separator)
-        else:
-            self.file_dict = {}
+        self.file_dict = {}
+        self.create_file_dict(file_list, key_indices, separator)
 
     @property
     def name(self):
@@ -34,6 +32,10 @@ class FileDictionary:
     @property
     def file_list(self):
         return list(self.file_dict.values())
+
+    def create_file_dict(self, file_list, key_indices, separator):
+        if key_indices:
+            self.file_dict = self.make_file_dict(file_list, key_indices=key_indices, separator=separator)
 
     def get_file_path(self, key):
         return self.file_dict.get(key, None)
@@ -56,15 +58,27 @@ class FileDictionary:
         return list(diffs)
 
     def output_files(self, title=None, logger=None):
+        """ Returns a str with the output of the list
+        Args:
+            title (None, str)    Optional title.
+            logger (HedLogger)   Optional HED logger for recording.
+        Returns: (str)
+            Output the dictionary in string form. The logger is updated if available.
+
+        """
+        output_list = []
         if title:
-            print(f"{title} ({len(self.key_list)} files)")
+            output_list.append(f"{title} ({len(self.key_list)} files)")
         for key, value in self.file_dict.items():
-            print(f"{key}: {os.path.basename(value)}")
+            basename = os.path.basename(self.get_file_path(key))
+            output_list.append(f"{key}: {basename}")
             if logger:
-                logger.add(key, f"{self.name}: {os.path.basename(value)}")
+                logger.add(key, f"{self.name}: {basename}")
+        return "\n".join(output_list)
 
     @staticmethod
     def make_file_dict(file_list, key_indices=(0, 2), separator='_'):
+
         file_dict = {}
         for the_file in file_list:
             the_file = os.path.realpath(the_file)
