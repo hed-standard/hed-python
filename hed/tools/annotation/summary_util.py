@@ -1,11 +1,14 @@
 """ Utilities used in computing dataset annotation. """
+
 from hed.models.hed_tag import HedTag
 
 
 def breakout_tags(schema, tag_list, breakout_list):
-    """ Create a dictionary where the tags are broken up into specific tags
-    Parameters:
-    -----------
+    """ Create a dictionary where the tags are broken up into specific groups.
+
+    Args:
+        schema (HedSchema, HedSchemas)
+
         schema: HedSchema
 
 
