@@ -1,11 +1,7 @@
-""" Creates a summary from a list containing HedTags and HedGroups but no definitions """
 import os
 import json
-from hed.models.model_constants import DefTagNames
 from hed.tools.bids.bids_dataset import BidsDataset
-
-from hed.tools.annotation.summary_entry import SummaryEntry
-from hed.tools.annotation.summary_util import add_tag_list_to_dict, breakout_tags
+from hed.tools.annotation.summary_util import breakout_tags, extract_dict_values
 from hed.models.def_dict import add_group_to_dict
 from hed.models import DefDict
 
@@ -17,7 +13,22 @@ DEFAULT_BREAKOUT_LIST = [
 
 
 class TagSummary:
-    """ Holds a HED tag summary for a BIDS dataset. """
+    """ Creates a HED tag summary for a BIDS dataset.
+
+    Args:
+        dataset (BidsDataset)        Contains the information for a BIDS dataset.
+        breakout_list (list, None):  List of the tags to be explicitly broken out.
+
+    Attributes:
+        dataset (BidsDataset):  The BIDS dataset to be summarized.
+        all_tags_dict (dict):   The keys are all of the unique tags in the BIDS dataset. The values
+             are dictionaries of the unique values that these tags take on.
+        breakout_list (list):  The tag nodes that are to be specially summarized.
+        breakout_dict (dict):  The keys are the breakout nodes. The values are dictionaries of the
+             child nodes and the nodes themselves that appear in the dataset.
+        task_dict (dict):      The keys are definition names and the values are dictionaries with info.
+        cond_dict (dict):      The keys are definition names and the values are dictionaries with info.
+    """
     def __init__(self, dataset, breakout_list=None):
         self.dataset = dataset
         self.all_tags_dict = {}
@@ -26,8 +37,8 @@ class TagSummary:
         if not breakout_list:
             self.breakout_list = DEFAULT_BREAKOUT_LIST
         self.breakout_dict = breakout_tags(self.dataset.schemas, self.all_tags_dict, breakout_list)
-        self.task_dict = SummaryEntry.extract_summary_info(self.all_defs_dict, 'Task')
-        self.cond_dict = SummaryEntry.extract_summary_info(self.all_defs_dict, 'Condition-variable')
+        self.task_dict = self.extract_summary_info(self.all_defs_dict, 'Task')
+        self.cond_dict = self.extract_summary_info(self.all_defs_dict, 'Condition-variable')
 
     def _set_all_tags(self):
         schema = self.dataset.schemas
@@ -39,6 +50,14 @@ class TagSummary:
                 add_group_to_dict(hed_string_obj, self.all_tags_dict)
 
     def get_design_matrices(self):
+        """ Returns a dictionary with condition variables.
+
+        Returns: (dict, list, list)
+            Dictionary with condition variable levels corresponding to a design matrix.
+            List with the other condition variables that aren't associated with levels.
+            List of errors.
+
+        """
         cond_dict = self.cond_dict
         design_dict = {}
         other_list = []
@@ -59,6 +78,26 @@ class TagSummary:
                 error_list.append(level_info)
         return design_dict, other_list, error_list
 
+    @staticmethod
+    def extract_summary_info(entry_dict, tag_name):
+        """ Extracts the summary of tag that is stored in the entry dictionary.
+
+        Args:
+            entry_dict (dict):  Keys are individual tag node names
+            tag_name (str):     Name of an individual node.
+
+        """
+        dict_info = {}
+        for key, entry in entry_dict.items():
+            tags = list(entry.tag_dict.keys())
+            tag_names, tag_present = extract_dict_values(entry.tag_dict, tag_name, tags)
+            if not tag_present:
+                continue
+            descriptions, tag_present = extract_dict_values(entry.tag_dict, 'Description', tags)
+            dict_info[entry.name] = {'tag_name': tag_name, 'def_name': entry.name, 'tags': tags,
+                                     'description': ' '.join(descriptions), 'tag_values': tag_names}
+        return dict_info
+
 
 if __name__ == '__main__':
     root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -67,10 +106,8 @@ if __name__ == '__main__':
     json_path = "../../../tests/data/curation/tag_summary_template.json5"
     with open(json_path) as fp:
         rules = json.load(fp)
-    breakout_list = rules["Tag-categories"]
+    breakouts = rules["Tag-categories"]
 
-    summary = TagSummary(BidsDataset(root_path), breakout_list)
-    design_dict, other_list, error_list = summary.get_design_matrices()
-
-
-
+    summary = TagSummary(BidsDataset(root_path), breakouts)
+    designs, others, errors = summary.get_design_matrices()
+    print("to here")

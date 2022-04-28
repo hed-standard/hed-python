@@ -1,5 +1,5 @@
 from hed.models.model_constants import DefTagNames
-from hed.models.hed_group import HedTag, HedGroup
+from hed.models.hed_group import HedGroup
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import OnsetErrors
 from hed.models.hed_ops import HedOps

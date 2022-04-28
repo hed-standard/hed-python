@@ -9,7 +9,6 @@ ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
-
 def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
                      error_handler=None):
     """

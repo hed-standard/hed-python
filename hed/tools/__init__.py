@@ -4,8 +4,6 @@
 from .annotation.file_dictionary import FileDictionary
 from .annotation.key_map import KeyMap
 from .annotation.key_template import KeyTemplate
-
-from .annotation.summary_entry import SummaryEntry
 from .annotation.tag_summary import TagSummary
 from .annotation.annotation_util import \
     check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
