@@ -61,7 +61,7 @@ def get_version_from_xml(hed_xml_tree):
 
 
 def url_to_file(resource_url):
-    """Write data from a URL resource into a file. Data is decoded as unicode.
+    """ Write data from a URL resource into a file. Data is decoded as unicode.
 
     Args:
         resource_url (str): The URL to the resource.
@@ -78,7 +78,7 @@ def url_to_file(resource_url):
 
 
 def url_to_string(resource_url):
-    """Get the data from the specified url as a string.
+    """ Get the data from the specified url as a string.
 
     Args:
         resource_url (str): The URL to the resource.

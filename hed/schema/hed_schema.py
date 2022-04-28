@@ -466,7 +466,7 @@ class HedSchema:
                                                       tag,
                                                       index_in_tag=len(parent_name) + 1 + prefix_tag_adj,
                                                       index_in_tag_end=len(parent_name) + 1 +
-                                                                       len(child_name) + prefix_tag_adj,
+                                                      len(child_name) + prefix_tag_adj,
                                                       expected_parent_tag=self.all_tags[child_name].name)
                     return None, None, error
                 if not parent_name:
@@ -474,7 +474,7 @@ class HedSchema:
                                                       tag,
                                                       index_in_tag=len(parent_name) + prefix_tag_adj,
                                                       index_in_tag_end=len(parent_name)
-                                                                       + len(child_name) + prefix_tag_adj)
+                                                      + len(child_name) + prefix_tag_adj)
                     return None, None, error
                 working_tag = parent_name
                 remainder = clean_tag[len(working_tag):][:len(child_name) + 1] + remainder

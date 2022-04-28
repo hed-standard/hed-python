@@ -10,7 +10,6 @@ from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.util import file_util
 
 
-
 def from_string(schema_string, file_type=".xml", library_prefix=None):
     """
         Creates a schema from the given string as if it was loaded from the given file type.

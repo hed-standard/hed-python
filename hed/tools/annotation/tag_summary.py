@@ -19,6 +19,15 @@ class TagSummary:
         dataset (BidsDataset)        Contains the information for a BIDS dataset.
         breakout_list (list, None):  List of the tags to be explicitly broken out.
 
+    Attributes:
+        dataset (BidsDataset):  The BIDS dataset to be summarized.
+        all_tags_dict (dict):   The keys are all of the unique tags in the BIDS dataset. The values
+             are dictionaries of the unique values that these tags take on.
+        breakout_list (list):  The tag nodes that are to be specially summarized.
+        breakout_dict (dict):  The keys are the breakout nodes. The values are dictionaries of the
+             child nodes and the nodes themselves that appear in the dataset.
+        task_dict (dict):      The keys are definition names and the values are dictionaries with info.
+        cond_dict (dict):      The keys are definition names and the values are dictionaries with info.
     """
     def __init__(self, dataset, breakout_list=None):
         self.dataset = dataset
@@ -71,6 +80,13 @@ class TagSummary:
 
     @staticmethod
     def extract_summary_info(entry_dict, tag_name):
+        """ Extracts the summary of tag that is stored in the entry dictionary.
+
+        Args:
+            entry_dict (dict):  Keys are individual tag node names
+            tag_name (str):     Name of an individual node.
+
+        """
         dict_info = {}
         for key, entry in entry_dict.items():
             tags = list(entry.tag_dict.keys())

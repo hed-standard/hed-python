@@ -154,9 +154,9 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
 
 
 def get_path_components(this_path, root_path):
-    """ Return a list with root_path and remaining components
+    """ Get a list with root_path and remaining components.
 
-    this_path must be a descendant of root_path
+
 
     Args:
         this_path (str):      The path of a file or directory descendant of root_path
@@ -164,7 +164,10 @@ def get_path_components(this_path, root_path):
 
     Returns:
         list or None:         A list with the first element being root_path and the
-                              remaining elements directory components to the file.
+            remaining elements directory components to the file.
+
+    Notes: this_path must be a descendant of root_path.
+
     """
 
     base_path = os.path.realpath(root_path)
@@ -181,7 +184,7 @@ def get_path_components(this_path, root_path):
 
 
 def make_path(root_path, sub_path, filename):
-    """ Return the complete path for a file, making sure all path components exist.
+    """ Get the complete path for a file, making sure all path components exist.
 
     Args:
         root_path (str)   path of the root directory
@@ -201,17 +204,18 @@ def make_path(root_path, sub_path, filename):
 
 
 def parse_bids_filename(file_path):
-    """ Split a filename into its BIDS suffix, extension, and entity_dict
+    """ Split a filename into its BIDS suffix, extension, and a dictionary of entity name-value pairs.
 
         Args:
-            file_path (str)     Path to be parsed
+            file_path (str)     Path to be parsed.
 
         Returns: dict
-            suffix (str)        BIDS suffix name
-            ext (str)           File extension (including the .)
-            entity_dict (dict)  Dictionary with key-value pair being (entity type, entity value)
+            suffix (str)        BIDS suffix name.
+            ext (str)           File extension (including the .).
+            entity_dict (dict)  Dictionary with key-value pair being (entity type, entity value).
 
-        Raises HedFileError when filename does not conform to name-value_suffix format.
+        Raises:
+            HedFileError when filename does not conform to name-value_suffix format.
 
     """
 
@@ -241,9 +245,13 @@ def parse_bids_filename(file_path):
 
 
 def _split_entity(piece):
-    """Splits an piece into an entity or suffix
+    """Splits an piece into an entity or suffix.
 
-        Returns: dict
+        Args:
+            piece (str):   A string to be parsed.
+
+        Returns:
+            dict:  with entities as keys as well as the key "bad" and the key "suffix".
     """
     piece = piece.strip()
     if not piece:

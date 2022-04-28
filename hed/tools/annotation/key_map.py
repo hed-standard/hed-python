@@ -84,7 +84,7 @@ class KeyMap:
         for index, row in df.iterrows():
             key = get_row_hash(row, self.key_cols)
             key_value = self.map_dict.get(key, None)
-            if key_value != None:
+            if key_value is not None:
                 result = self.col_map.iloc[key_value]
                 row[self.target_cols] = result[self.target_cols].values
                 df.iloc[index] = row

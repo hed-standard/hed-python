@@ -339,7 +339,8 @@ class BaseInput:
                                                                        mapper=mapper, return_row_dict=return_row_dict)
             error_handler.pop_error_context()
 
-    def _expand_row_internal(self, text_file_row, tag_funcs, string_funcs, error_handler, mapper=None, return_row_dict=False):
+    def _expand_row_internal(self, text_file_row, tag_funcs, string_funcs, error_handler,
+                             mapper=None, return_row_dict=False):
         row_dict = mapper.expand_row_tags(text_file_row)
         column_to_hed_tags = row_dict[model_constants.COLUMN_TO_HED_TAGS]
         expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
@@ -366,9 +367,9 @@ class BaseInput:
         mapper = self._mapper
         # this could be cached
         tag_funcs, _ = self._translate_ops([],
-                                          run_string_ops_on_columns=True,
-                                          expand_defs=expand_defs, shrink_defs=shrink_defs,
-                                          remove_definitions=remove_definitions, error_handler=error_handler)
+                                           run_string_ops_on_columns=True,
+                                           expand_defs=expand_defs, shrink_defs=shrink_defs,
+                                           remove_definitions=remove_definitions, error_handler=error_handler)
 
         adj_row_number = 1
         if self._has_column_names:
@@ -546,7 +547,7 @@ class BaseInput:
         return row_issues
 
     def validate_file(self, hed_ops, name=None, error_handler=None, check_for_warnings=True, **kwargs):
-        """Run the given hed_ops on all columns and rows of the spreadsheet
+        """ Run the given hed_ops on all columns and rows of the spreadsheet
 
         Parameters
         ----------

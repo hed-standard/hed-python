@@ -74,8 +74,6 @@ class KeyTemplate:
         base_df[cols_missing] = 'n/a'
         self._update(base_df)
 
-
-
     def _update(self, base_df):
         """ Takes DataFrame objects containing keys
 

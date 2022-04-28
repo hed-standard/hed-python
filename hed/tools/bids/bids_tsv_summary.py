@@ -10,9 +10,9 @@ class BidsTsvSummary:
         """ .
 
         Args:
-            value_cols (list):   List of columns to be treated as value columns
-            skip_cols (list):    List of columns to be skipped
-            name (str):          Name associated with the dictionary
+            value_cols (list, None):  List of columns to be treated as value columns.
+            skip_cols (list, None):   List of columns to be skipped.
+            name (str):               Name associated with the dictionary.
 
         """
 

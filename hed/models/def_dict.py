@@ -156,9 +156,8 @@ class DefDict(HedOps):
                 continue
             if len(group.tags()) != 1:
                 new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                                                                         DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
-                                                                         def_name=def_tag_name,
-                                                                         tag_list=[tag for tag in group.tags() if tag is not definition_tag])
+                    DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, def_name=def_tag_name,
+                    tag_list=[tag for tag in group.tags() if tag is not definition_tag])
                 continue
 
             group_tag = groups[0] if groups else None
