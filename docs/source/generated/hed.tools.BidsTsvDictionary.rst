@@ -14,7 +14,10 @@
    
       ~BidsTsvDictionary.__init__
       ~BidsTsvDictionary.count_diffs
+      ~BidsTsvDictionary.create_file_dict
       ~BidsTsvDictionary.create_split_dict
+      ~BidsTsvDictionary.get_file_path
+      ~BidsTsvDictionary.get_info
       ~BidsTsvDictionary.iter_files
       ~BidsTsvDictionary.iter_tsv_info
       ~BidsTsvDictionary.key_diffs
@@ -23,7 +26,7 @@
       ~BidsTsvDictionary.make_key
       ~BidsTsvDictionary.make_query
       ~BidsTsvDictionary.match_query
-      ~BidsTsvDictionary.print_files
+      ~BidsTsvDictionary.output_files
       ~BidsTsvDictionary.split_dict_by_entity
    
    
@@ -36,6 +39,7 @@
    
       ~BidsTsvDictionary.file_list
       ~BidsTsvDictionary.key_list
+      ~BidsTsvDictionary.name
    
    
 

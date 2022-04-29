@@ -16,8 +16,7 @@ default_arguments = {
 
 
 def translate_ops(hed_ops, split_tag_and_string_ops=False, **kwargs):
-    """
-        Takes a list of hed_ops and/or functions and returns a list of functions to apply to a hed string object
+    """ Given a list of hed_ops and/or functions, returns a list of functions to apply to a hed string object.
 
     Parameters
     ----------
@@ -39,6 +38,7 @@ def translate_ops(hed_ops, split_tag_and_string_ops=False, **kwargs):
     -------
     tag_funcs, string_funcs: ([func], [func]) or [func]
         A list of functions to apply.  Tag vs string primarily applies to spreadsheets.
+
     """
     if not isinstance(hed_ops, list):
         hed_ops = [hed_ops]

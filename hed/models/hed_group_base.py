@@ -230,28 +230,26 @@ class HedGroupBase:
         return bool(self._children)
 
     def find_tags(self, anchors, recursive=False, include_groups=2):
-        """
-            Find tags given anchors.
-
-            Note: This can only find identified tags.  By default, definition, def, def-expand, onset, and offset
-                are identified, even without a schema.
+        """ Find tags given anchors.
 
         Args:
-            anchors: container
-                A container of short_base_tags to locate
-            recursive: bool
-                If true, also check subgroups.
-            include_groups: 0, 1 or 2
-                If 0: Return only tags
-                If 1: return only groups
-                If 2 or any other value: return both
-                
-        returns:
-        list:
-        tag: HedTag
-            The located tag
-        group: HedGroup
-            The group the located tag is in
+            anchors (container):        A container of short_base_tags to locate
+            recursive (bool):           If true, also check subgroups.
+            include_groups (0, 1 or 2): Specify return values.
+
+        Returns:
+            list:
+            tag (HedTag) The located tag
+            group (HedGroup) The group the located tag is in.
+
+        Notes:
+            This can only find identified tags.
+            By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
+            The rules for include_groups are:
+                If 0: return only tags.
+                If 1: return only groups.
+                If 2 or any other value: return both.
+
         """
         found_tags = []
         if recursive:
@@ -269,29 +267,28 @@ class HedGroupBase:
         return found_tags
 
     def find_exact_tags(self, tags_or_groups, recursive=False):
-        """
-            Find the given tags_or_groups.  Note if you pass in groups it will only find EXACT matches.
+        """  Find the given tags_or_groups.
+
+        Args:
+            tags_or_groups (HedTag, HedGroupBase): A container of tags to locate.
+            recursive (bool): If true, also check subgroups.
+
+        Returns:
+            [HedGroupBase]: A list of all groups the given tags/groups were found in.
+
+        Notes:
+            If you pass in groups it will only find EXACT matches.
+            This can only find identified tags.  By default, definition, def, def-expand, onset, and offset
+            are identified, even without a schema.
 
             If this is a HedGroup, order matters.  (b, a) != (a, b)
 
             If this is a HedGroupFrozen:
-            if "(a, b)" in tags_or_groups, then it will match 1 and 2, but not 3.
-            1. (a, b)
-            2. (b, a)
-            3. (a, b, c)
+                if "(a, b)" in tags_or_groups, then it will match 1 and 2, but not 3.
+                1. (a, b)
+                2. (b, a)
+                3. (a, b, c)
 
-            Note: This can only find identified tags.  By default, definition, def, def-expand, onset, and offset
-                are identified, even without a schema.
-
-        Args:
-            tags_or_groups: [HedTag or HedGroupBase]
-                A container of tags to locate
-            recursive: bool
-                If true, also check subgroups.
-
-        returns:
-        group_list: [HedGroupBase]
-            A list of all groups the given tags/groups were found in.
         """
         found_tags = []
         if recursive:
@@ -307,25 +304,28 @@ class HedGroupBase:
         return found_tags
 
     def find_def_tags(self, recursive=False, include_groups=3):
-        """
-            Find any def and def-expand tags in the group.
+        """ Find any def and def-expand tags in the group.
 
         Args:
-            recursive: bool
-                If true, also check subgroups.
-            include_groups: int, 0, 1, 2, 3
-                If 0: Return only def and def expand tags
-                If 1: Return only def tags and def-expand groups
-                If 2: Return only groups containing defs, or def-expand groups
-                If 3 or any other value: Return all 3 as a tuple.
+            recursive (bool):vIf true, also check subgroups.
+            include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
+
         Returns:
-        list:
+            list:
+
         def_tag: HedTag
             The located def tag
         def_expand_group: HedGroup or None
             If this is a def-expand rather than def tag, this will be the entire def-expand group.
         group: HedGroup
             The group the def tag or def expand group is in.
+
+        Notes: The include_groups option controls the tag expansion as follows:
+            If 0: Return only def and def expand tags/
+            If 1: Return only def tags and def-expand groups
+            If 2: Return only groups containing defs, or def-expand groups
+            If 3 or any other value: Return all 3 as a tuple.
+
         """
         from hed.models.def_dict import DefTagNames
         if recursive:

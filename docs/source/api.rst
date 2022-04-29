@@ -61,6 +61,7 @@ HED tools
    hed.tools.BidsEventFile
    hed.tools.BidsEventFiles
    hed.tools.BidsFile
+   hed.tools.BidsFileDictionary
    hed.tools.BidsJsonFile
    hed.tools.BidsSidecarFile
    hed.tools.BidsTsvDictionary
@@ -71,7 +72,6 @@ HED tools
    hed.tools.HedLogger
    hed.tools.KeyMap
    hed.tools.KeyTemplate
-   hed.tools.SummaryEntry
    hed.tools.TagSummary
    hed.tools.annotation.annotation_util
 

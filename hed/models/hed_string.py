@@ -255,25 +255,22 @@ class HedString(HedGroup):
 
     @staticmethod
     def split_hed_string(hed_string):
-        """
-        Takes a hed string and splits it into delimiters and tags
+        """ Split a hed string into delimiters and tags.
 
-        Note: This does not validate tags or delimiters in any form.
+        Args:
+            hed_string (str): The hed string to split
 
-        Parameters
-        ----------
-            hed_string: string
-                the hed string to split
-        Returns
-        -------
-        [tuple]
-            each tuple: (is_hed_tag, (start_pos, end_pos))
-            is_hed_tag: bool
-                This is a (possible) hed tag if true, delimiter if not
-            start_pos: int
-                index of start of string in hed_string
-            end_pos: int
-                index of end of string in hed_string
+        Returns:
+            [tuple]:  A list of tuples where each tuple is (is_hed_tag, (start_pos, end_pos)).
+
+        Notes:
+            The tuple format is as follows
+                is_hed_tag (bool): A (possible) hed tag if true, delimiter if not.
+                start_pos (int):   Index of start of string in hed_string.
+                end_pos (int):     Index of end of string in hed_string
+
+            This function does not validate tags or delimiters in any form.
+
         """
         tag_delimiters = ",()"
         current_spacing = 0
@@ -388,23 +385,25 @@ class HedString(HedGroup):
         return HedStringFrozen(self)
 
     def find_top_level_tags(self, anchors, include_groups=2):
-        """
-            Find top level groups containing the given anchor tags.
+        """ Find top level groups containing the given anchor tags.
 
-            Max of 1 tag located her top level group.
         Args:
-            anchors: container
-                A list/set/etc of short_base_tags to find groups by.
-            include_groups: 0, 1 or 2
-                If 0: Return only tags
-                If 1: return only groups
-                If 2 or any other value: return both
+            anchors (container): A list/set/etc of short_base_tags to find groups by.
+            include_groups (0, 1 or 2):  Parameter indicating what return values to include.
+
         Returns:
-        list:
-        tag: HedTag
-            The located tag
-        group: HedGroup
-            The group the located tag is in
+            list:
+            tag (HedTag): The located tag
+            group (HedGroup): The group the located tag is in.
+
+        Notes:
+            The include_groups parameter meanings are:
+                If 0: return only tags.
+                If 1: return only groups.
+                If 2 or any other value: return both.
+
+            A max of 1 tag located her top level group.
+
         """
         top_level_tags = []
         for group in self.groups():

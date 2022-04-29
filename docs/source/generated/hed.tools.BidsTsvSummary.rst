@@ -14,9 +14,9 @@
    
       ~BidsTsvSummary.__init__
       ~BidsTsvSummary.extract_sidecar_template
+      ~BidsTsvSummary.get_columns_info
       ~BidsTsvSummary.get_number_unique_values
       ~BidsTsvSummary.make_combined_dicts
-      ~BidsTsvSummary.print
       ~BidsTsvSummary.update
       ~BidsTsvSummary.update_summary
    

@@ -3,7 +3,18 @@ from hed.util.io_util import parse_bids_filename
 
 
 class BidsFile:
-    """Represents the entity and file names for a BIDs file."""
+    """ Represents the entity dictionary and file names for a BIDs file.
+
+    Args:
+        file_path (str):   Full path of the file.
+
+    Attributes:
+        file_path (str):     Real path of the file.
+        suffix (str):        Suffix part of the filename.
+        ext (str):           Extension (including the .).
+        entity_dict (dict):  Dictionary of entity-names (keys) and entity-values (values).
+
+    """
 
     def __init__(self, file_path):
         self.file_path = os.path.realpath(file_path)

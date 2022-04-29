@@ -76,14 +76,14 @@ class HedTag:
 
     @property
     def base_tag(self):
-        """
-            Returns the long version of the tag, without value or extension
+        """ Returns the long version of the tag, without value or extension.
 
-            Note: only valid after calling convert_to_canonical_forms
-        Returns
-        -------
-        base_tag: str
-            The long version of the tag, without value or extension
+        Returns:
+            base_tag (str): The long version of the tag, without value or extension.
+
+        Notes:
+            Only valid after calling convert_to_canonical_forms.
+
         """
         if self._schema_entry:
             return self._schema_entry.long_tag_name
@@ -91,15 +91,14 @@ class HedTag:
 
     @property
     def short_base_tag(self):
-        """
-            Returns just the short non-extension portion of a tag.
+        """ Returns just the short non-extension portion of a tag.
 
-            e.g. ParentNodes/Def/DefName would return just "Def"
+        Returns:
+            base_tag (str): The short non-extension port of a tag.
 
-        Returns
-        -------
-        base_tag: str
-            The short non-extension port of a tag.
+        Notes:
+            ParentNodes/Def/DefName would return just "Def".
+
         """
         if self._schema_entry:
             return self._schema_entry.short_tag_name
@@ -134,17 +133,17 @@ class HedTag:
 
     @property
     def org_base_tag(self):
-        """
-            Returns the original version of the tag, without value or extension
+        """ Return the original version of the tag, without value or extension.
 
+        Returns:
+            base_tag (str): The original version of the tag, without value or extension.
+
+        Notes:
             Warning: This could be empty if the original tag had a name_prefix prepended.
                 eg a column where "Label/" is prepended, thus the column value has zero base portion.
 
-            Note: only valid after calling convert_to_canonical_forms
-        Returns
-        -------
-        base_tag: str
-            The original version of the tag, without value or extension
+            Only valid after calling convert_to_canonical_forms.
+
         """
         if self._schema_entry:
             extension_len = len(self._extension_value)
@@ -275,24 +274,25 @@ class HedTag:
         return self._hed_string[self.span[0]:self.span[1]]
 
     def add_prefix_if_not_present(self, required_prefix):
-        """Add a name_prefix to this tag *unless* the tag is already formatted.
+        """ Add a name_prefix to this tag *unless* the tag is already formatted.
 
-        This means we verify the tag does not have the required name_prefix, or any partial name_prefix
+        Args:
+            required_prefix (str): The full name_prefix to add if not present.
 
-        Ex:
-        Required: KnownTag1/KnownTag2
-        Case 1: KnownTag1/KnownTag2/ColumnValue
-            Will not be changed, has name_prefix already
-        Case 2: KnownTag2/ColumnValue
-            Will not be changed, has partial name_prefix already
-        Case 3: ColumnValue
-            Prefix will be added.
+        Notes:
+            This means we verify the tag does not have the required name_prefix, or any partial name_prefix.
 
-        Parameters
-        ----------
-        required_prefix : str
-            The full name_prefix to add if not present
+            Ex:
+            Required: KnownTag1/KnownTag2
+            Case 1: KnownTag1/KnownTag2/ColumnValue
+                Will not be changed, has name_prefix already
+            Case 2: KnownTag2/ColumnValue
+                Will not be changed, has partial name_prefix already
+            Case 3: ColumnValue
+                Prefix will be added.
+
         """
+
         # if not self.mutable:
         #     raise ValueError("Trying to alter immutable tag")
 
@@ -312,18 +312,14 @@ class HedTag:
         return str(self).lower()
 
     def convert_to_canonical_forms(self, hed_schema):
-        """
-            This updates the internal tag states from the schema, and sets the schema entry.
+        """ Update the internal tag states from the schema and set the schema entry.
 
-        Parameters
-        ----------
-        hed_schema : HedSchema
-            The schema to use to validate this tag
+        Args:
+            hed_schema (HedSchema): The schema to use to validate this tag
 
-        Returns
-        -------
-        conversion_issues: [{}]
-            A list of issues found during conversion
+        Returns:
+            list:  A list of issues found during conversion. Each element is a dictionary.
+
         """
         if not hed_schema:
             return self._convert_key_tags_to_canonical_form()
@@ -415,58 +411,55 @@ class HedTag:
         return {}
 
     def tag_exists_in_schema(self):
-        """
-            Gets the schema entry for this tag.
+        """ Get the schema entry for this tag.
 
-            Note: This does NOT assure this is a valid tag.
-        Returns
-        -------
-        tag_exists: bool
-            Returns true if this tag exists
+        Returns:
+            (bool): True if this tag exists.
+
+        Notes:
+            This does NOT assure this is a valid tag.
         """
         return bool(self._schema_entry)
 
     def is_takes_value_tag(self):
-        """
-            Returns true if this is a takes value tag
-        Returns
-        -------
-        is_value_tag: bool
+        """ Returns true if this is a takes value tag.
+
+        Returns:
+            bool: True if this is a takes value tag.
+
         """
         if self._schema_entry:
             return self._schema_entry.has_attribute(HedKey.TakesValue)
         return False
 
     def is_unit_class_tag(self):
-        """
-            Returns true if this is a unit class tag
-        Returns
-        -------
-        is_unit_class_tag: bool
+        """ Returns true if this is a unit class tag.
+
+        Returns:
+            bool: True if this is a unit class tag.
+
         """
         if self._schema_entry:
             return bool(self._schema_entry.unit_classes)
         return False
 
     def is_value_class_tag(self):
-        """
-            Returns true if this is a value class tag
+        """ Returns true if this is a value class tag.
 
-        Returns
-        -------
-        is_value_class_tag: bool
+        Returns:
+            bool:  True if this is a a tag with a value class.
+
         """
         if self._schema_entry:
             return bool(self._schema_entry.value_classes)
         return False
 
     def is_basic_tag(self):
-        """
-            Returns true if this is a known tag with no extension or value.
+        """  Returns true if this is a known tag with no extension or value.
 
-        Returns
-        -------
-        is_basic_tag: bool
+        Returns:
+            bool:  True if this is a known tag without extension or value.
+
         """
         return bool(self._schema_entry and not self.extension_or_value_portion)
 

@@ -15,10 +15,12 @@
    
       check_df_columns
       df_to_hed
-      extract_tag
+      extract_tags
       generate_sidecar_entry
       hed_to_df
       merge_hed_dict
+      trim_back
+      trim_front
    
    
 
