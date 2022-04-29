@@ -74,10 +74,10 @@ class BidsEventFiles:
         the number of times each unique value appears in that column.
 
         """
-        col_info = BidsTsvSummary(value_cols=value_cols, skip_cols=skip_cols)
+        info = BidsTsvSummary(value_cols=value_cols, skip_cols=skip_cols)
         for event_obj in self.events_dict.values():
-            col_info.update(event_obj.file_path)
-        return col_info
+            info.update(event_obj.file_path)
+        return info
 
     def validate(self, validators, check_for_warnings=True, keep_events=False):
         """ Validate the events files and return an error list.

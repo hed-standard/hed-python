@@ -14,17 +14,17 @@ class OnsetMapper(HedOps):
         self._onsets = {}
 
     def check_for_onset_offset(self, hed_string_obj):
-        """
-            Checks for an onset or offset tag in the given string and adds it to the current context if found.
-        Parameters
-        ----------
-        hed_string_obj : HedString
-            The hed string to check.  Finds a maximum of one onset tag.
+        """ Check for an onset or offset tag in the given string and add it to the current context if found.
 
-        Returns
-        -------
-        onset_issues: [{}]
-            Issues found validating onsets.  Out of order onsets, unknown def names, etc.
+        Args:
+            hed_string_obj (HedString): The hed string to check.  Finds a maximum of one onset tag.
+
+        Returns:
+            list: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).
+
+        Notes:
+            Each issue in the return list is a dictionary.
+
         """
         onset_issues = []
         for found_onset, found_group in self._find_onset_tags(hed_string_obj):

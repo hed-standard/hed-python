@@ -16,6 +16,7 @@
       ~HedInput.convert_to_long
       ~HedInput.convert_to_short
       ~HedInput.extract_definitions
+      ~HedInput.get_assembled
       ~HedInput.get_def_and_mapper_issues
       ~HedInput.get_worksheet
       ~HedInput.iter_dataframe

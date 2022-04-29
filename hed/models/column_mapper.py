@@ -65,13 +65,11 @@ class ColumnMapper:
         self._finalize_mapping()
 
     def add_sidecars(self, sidecars):
-        """
-        Gathers column definitions from a list of files and adds them to the column mapper.
+        """ Gather column definitions from a list of sidecars and add them to the column mapper.
 
-        Parameters
-        ----------
-        sidecars : [str or Sidecar]
-            A list of filenames or loaded files in any mix
+        Args:
+            sidecars (list): A list of filenames or loaded sidecar files in any mix.
+
         """
         self._has_sidecars = True
         sidecars = Sidecar.load_multiple_sidecars(sidecars)
@@ -80,7 +78,7 @@ class ColumnMapper:
                 self._add_column_data(column_data)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
-        """Adds the given columns as hed tag columns with the required name_prefix if it does not already exist.
+        """ Add the given columns as hed tag columns with the required name_prefix if it does not already exist.
 
         Parameters
         ----------
@@ -192,22 +190,18 @@ class ColumnMapper:
         return column_entry.expand(input_text)
 
     def expand_row_tags(self, row_text):
-        """
-        Expands all mapped columns from a given row
+        """ Expand all mapped columns from a given row.
 
-        Parameters
-        ----------
-        row_text : [str]
-            The text for the given row, one entry per column number.
+        Args:
+            row_text ([str]): The text for the given row, one entry per column number.
 
-        Returns
-        -------
-        expanded_dict: {str: }
-            A dictionary containing:
-                "HED": The entire expanded row
-                "column_to_hed_tags": Each expanded column separately as a list of strings.
-                (attribute name): The attribute value from the spreadsheet column,
-                                    only present when a given column is an attribute
+        Returns:
+            dict: A dictionary containing the keys HED, column_to_hed_tags, and attribute.
+
+        Notes: The value of the "HED" entry is the entire expanded row. The "column_to_hed_tags"
+        is each expanded column given separately as a list of strings. The attribute is the value
+        from the spreadsheet column only present when a given column is an attribute.
+
         """
         result_dict = {}
         column_to_hed_tags_dictionary = {}
@@ -349,24 +343,21 @@ class ColumnMapper:
         return self._finalize_mapping_issues
 
     def get_def_dicts(self):
-        """
-            Return a list of all def dicts from every column description
+        """ Return a list of all def dicts from every column description.
 
-        Returns
-        -------
-        def_dicts: [DefDict]
-            A list of def dicts, corresponding to each column entry.
+        Returns:
+           list:   A list of DefDict objects corresponding to each column entry.
+
         """
         def_dicts = [entry.def_dict for entry in self.column_data.values()]
         return def_dicts
 
     def get_column_mapping_issues(self):
-        """
-            Gets all the issues with finalizing column mapping.  Primarily a missing required column.
-        Returns
-        -------
-        col_mapping_issues: [{}]
-            A list of all issues found from mapping column names to numbers.
+        """ Get all the issues with finalizing column mapping.  Primarily a missing required column.
+
+        Returns:
+            list: A list dictionaries of all issues found from mapping column names to numbers.
+
         """
         return self._finalize_mapping_issues
 

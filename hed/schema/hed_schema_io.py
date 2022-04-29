@@ -11,21 +11,16 @@ from hed.util import file_util
 
 
 def from_string(schema_string, file_type=".xml", library_prefix=None):
-    """
-        Creates a schema from the given string as if it was loaded from the given file type.
+    """ Create a schema from the given string as if it was loaded from the given file type.
 
-    Parameters
-    ----------
-    schema_string : str
-        An XML or mediawiki file as a single long string.
-    file_type : str
-        The extension(including the .) we should treat this string as
-    library_prefix : str or None
-        The name_prefix all tags in this schema will accept.
-    Returns
-    -------
-    schema: HedSchema
-        The loaded schema
+    Args:
+        schema_string (str):         An XML or mediawiki file as a single long string.
+        file_type (str):             The extension(including the .) corresponding to a file source.
+        library_prefix (str, None):  The name_prefix all tags in this schema will accept.
+
+    Returns:
+        (HedSchema):  The loaded schema.
+
     """
     if not schema_string:
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string",
@@ -86,7 +81,7 @@ def load_schema(hed_path=None, library_prefix=None):
 
 # todo: this could be updated to also support .mediawiki format.
 def get_hed_xml_version(hed_xml_file_path):
-    """Gets the version number from a HED XML file.
+    """ Gets the version number from a HED XML file.
     Parameters
     ----------
     hed_xml_file_path: str

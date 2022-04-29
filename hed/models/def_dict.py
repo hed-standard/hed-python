@@ -155,9 +155,12 @@ class DefDict(HedOps):
                                                            def_name=def_tag_name, tag_list=groups)
                 continue
             if len(group.tags()) != 1:
-                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                    DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, def_name=def_tag_name,
-                    tag_list=[tag for tag in group.tags() if tag is not definition_tag])
+                new_def_issues += \
+                    ErrorHandler.format_error_with_context(error_handler,
+                                                           DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+                                                           def_name=def_tag_name,
+                                                           tag_list=[tag for tag in group.tags()
+                                                                     if tag is not definition_tag])
                 continue
 
             group_tag = groups[0] if groups else None
@@ -214,17 +217,18 @@ class DefDict(HedOps):
         return new_def_issues
 
 
-# This may be moved later
 def add_group_to_dict(group, tag_dict=None):
-    """
-        Note: Expects tags to have forms calculated already.
-    Parameters:
-        group: HedGroup
-            contents to add to the tag dict
-        tag_dict: {}
-            Output dictionary
-    Returns: dict
-        Dictionary of tags with a list of values
+    """ Adds the tags and their values from a HED group to a tag dictionary.
+
+    Args:
+        group (HedGroup):   Contents to add to the tag dict.
+        tag_dict (dict):    The starting tag dictionary to which to add to.
+
+    Returns:
+        dict:  The updated tag_dict containing the tags with a list of values.
+
+    Notes:
+        Expects tags to have forms calculated already.
     """
     if tag_dict is None:
         tag_dict = {}

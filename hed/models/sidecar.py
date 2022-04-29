@@ -9,7 +9,7 @@ from hed.models.def_mapper import DefinitionMapper
 
 
 class Sidecar:
-    """Contents of a single JSON file with definition dictionaries."""
+    """ Contents of a single JSON file with definition dictionaries."""
 
     def __init__(self, file, name=None):
         """
@@ -51,12 +51,11 @@ class Sidecar:
             json.dump(output_dict, fp, indent=4)
 
     def get_as_json_string(self):
-        """
-        Returns this entire column definition group as a json string.
-        Returns
-        -------
-        json_string: str
-            The json string representing this column definition group.
+        """ Return this entire column definition group as a json string.
+
+        Returns:
+            str: The json string representing this column definition group.
+
         """
         output_dict = {}
         for entry in self._column_data.values():

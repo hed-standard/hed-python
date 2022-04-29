@@ -424,26 +424,20 @@ class HedSchema:
         return self._sections[key_class].get(name)
 
     def find_tag_entry(self, tag, library_prefix=""):
-        """
-        This takes a source tag and finds the schema entry for it.
+        """ Find the schema entry for a given source tag.
 
-        Works right to left.(mostly relevant for errors)
+        Args:
+            tag (str, HedTag): Any form of tag to look up.  Can have an extension, value, etc.
+        library_prefix (str):  The prefix the library, if any.
 
-        Parameters
-        ----------
-        tag : str or HedTag
-            Any form of tag to look up.  Can have an extension, value, etc.
-        library_prefix: str
-            The prefix the library, if any.
+        Returns:
+            HedTagEntry: The located tag entry for this tag.
+            str: The remainder of the tag that isn't part of the base tag.
+            list: A list of errors while converting.
 
-        Returns
-        -------
-        tag_entry: HedTagEntry
-            The located tag entry for this tag.
-        remainder: str
-            The remainder of the tag that isn't part of the base tag.
-        errors: list
-            a list of errors while converting
+        Notes:
+            Works right to left (which is mostly relevant for errors).
+
         """
         clean_tag = str(tag)
         prefix = library_prefix
