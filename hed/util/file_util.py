@@ -127,24 +127,6 @@ def write_strings_to_file(output_strings, extension=None):
         return opened_file.name
 
 
-def write_text_iter_to_file(text_iter, extension=".txt"):
-    """ Write a text file based on an iterator.
-
-    Args:
-        text_iter (text iterator): Iterates over values and writes to temporary file one per line.
-            Adds newlines.
-        extension (str):           Desired file extension of the temporary file.
-
-    Returns:
-        str:  Name of the temporary file.
-    """
-
-    with tempfile.NamedTemporaryFile(suffix=extension, mode='w', delete=False, encoding='utf-8') as hed_xml_file:
-        for line in text_iter:
-            hed_xml_file.write(f"{line}\n")
-        return hed_xml_file.name
-
-
 def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
     """ Write an XML element tree object into a XML file.
 

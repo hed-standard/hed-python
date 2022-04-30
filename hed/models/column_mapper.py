@@ -12,35 +12,41 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class ColumnMapper:
-    """Container class for mapping columns in event files into HED tags.
+    """ Container class for mapping columns in event files into HED tags.
 
+    Notes:
         Private Functions and variables column and row indexing starts at 0.
-        Public functions and variables indexing starts at 1 (or 2 if has column names)"""
+        Public functions and variables indexing starts at 1 (or 2 if has column names)
+
+    """
 
     def __init__(self, sidecars=None, tag_columns=None, column_prefix_dictionary=None,
                  attribute_columns=None, optional_tag_columns=None):
-        """Constructor for ColumnMapper
+        """ Constructor for ColumnMapper.
 
-        Parameters
-        ----------
-        sidecars : Sidecar or string or list
-            A list of ColumnDefinitionGroups or filenames to gather ColumnDefinitions from.
+        Args:
+            sidecars (Sidecar, string, or list of these): A list of ColumnDefinitionGroups or
+                 filenames to gather ColumnDefinitions from.
+            tag_columns: (list):  A list of ints or strings containing the columns that contain the HED tags.
+            column_prefix_dictionary (dict): Dictionary with keys that are column numbers and values are HED tag
+                prefixes to prepend to the tags in that column before processing.
+            attribute_columns (str, int or list): A column name, column number or a list of column names
+                or numbers to treat as attributes.
+            optional_tag_columns (list): A list of ints or strings containing the columns that contain
+                the HED tags. If the column is otherwise unspecified convert this column type to HEDTags.
+
+        Notes:
             Sidecars later in the list override those earlier in the list.
-        tag_columns: [int or str]
-             A list of ints or strings containing the columns that contain the HED tags.
-             If the column is otherwise unspecified, it will convert this column type to HEDTags
-        column_prefix_dictionary: dict
-            A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
-            prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
-            4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/
-            prepended to them, the fourth column contains tags that need Event/Label/ prepended to them,
-            and the fifth column contains tags that needs Event/Category/ prepended to them.
-        attribute_columns: str or int or [str] or [int]
-             A list of column names or numbers to treat as attributes.
-        optional_tag_columns: [int or str]
-             A list of ints or strings containing the columns that contain the HED tags.
-             If the column is otherwise unspecified, it will convert this column type to HEDTags
+            If the column is otherwise unspecified, it will convert this column type to HEDTags.
+
+        Examples:
+            column_prefix_dictionary = {3: 'Description/', 4: 'Label/'}
+
+            The third column contains tags that need Description/ tag prepended, while the fourth column
+            contains tag that needs Label/ prepended.
+
         """
+
         # This points to column_type entries based on column names or indexes if columns have no column_name.
         self.column_data = {}
         # Maps column number to column_entry.  This is what's actually used by most code.
@@ -78,18 +84,16 @@ class ColumnMapper:
                 self._add_column_data(column_data)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
-        """ Add the given columns as hed tag columns with the required name_prefix if it does not already exist.
+        """ Add the columns specified by the column_prefix_dictionary as HED tag columns with required prefix.
 
-        Parameters
-        ----------
-        column_prefix_dictionary: dict
-            A dictionary with keys pertaining to the required HED tag columns that correspond to tags that need to be
-            prefixed with a parent tag path. For example, prefixed_needed_tag_columns = {3: 'Event/Description',
-            4: 'Event/Label/', 5: 'Event/Category/'} The third column contains tags that need Event/Description/
-            prepended to them, the fourth column contains tags that need Event/Label/ prepended to them,
-            and the fifth column contains tags that needs Event/Category/ prepended to them.
-        finalize_mapping : bool
-            If True, will re-generate the internal mapping. If False, this function has no effect until you do finalize.
+        Args:
+            column_prefix_dictionary (dict):  Dictionary with keys that are column numbers and values are HED tag
+                prefixes to prepend to the tags in that column before processing.
+            finalize_mapping (bool): Re-generate the internal mapping if True, otherwise no effect until finalize.
+
+        Returns:
+            list:  List of issues that occurred during this process. Each issue is a dictionary.
+
         """
         if column_prefix_dictionary:
             self._column_prefix_dictionary = self._subtract_1_from_dictionary_keys(column_prefix_dictionary)
@@ -98,16 +102,17 @@ class ColumnMapper:
         return []
 
     def set_tag_columns(self, tag_columns=None, optional_tag_columns=None, finalize_mapping=True):
-        """Sets the current tag columns to the passed in values, clearing the current ones if None.
+        """ Set the current tag columns, clearing the current ones if None.
 
-        Parameters
-        ----------
-        tag_columns : [str or int]
-            A list of ints or strings containing the columns that contain the HED tags.
-        optional_tag_columns : [str or int]
-            A list of ints or strings containing the columns that contain the HED tags, but not an error if missing.
-        finalize_mapping :
-            If True, will re-generate the internal mapping. If False, this function has no effect until you do finalize.
+        Args:
+            tag_columns (list): A list of ints or strings containing the columns that contain the HED tags.
+            optional_tag_columns (list): A list of ints or strings containing the columns that contain the HED tags,
+                but not an error if missing.
+            finalize_mapping (bool): Re-generate the internal mapping if True, otherwise no effect until finalize.
+
+        Returns:
+            list: List of issues that occurred during this process. Each issue is a dictionary.
+
         """
         self._tag_columns = []
         self._optional_tag_columns = []
@@ -121,13 +126,15 @@ class ColumnMapper:
         return []
 
     def set_column_map(self, new_column_map=None):
-        """Pass in the column number to column_name mapping to finalize
+        """ Set the column number to column_name mapping.
 
-        Parameters
-        ----------
-        new_column_map : list or dict
-            If list, should be each column name with column numbers assumed to start at 1.
-            If dict, should be column_number : column name.  Column number should start at 1.
+        Args:
+            new_column_map (list or dict):  Either an ordered list of the column names or column_number:column name
+                dictionary. In both cases column numbers start at 1.
+
+        Returns:
+            list: List of issues. Each issue is a dictionary.
+
         """
         if isinstance(new_column_map, dict):
             column_map = self._subtract_1_from_dictionary_keys(new_column_map)
@@ -138,15 +145,12 @@ class ColumnMapper:
         return self._finalize_mapping()
 
     def add_columns(self, column_names_or_numbers, column_type=ColumnType.Attribute):
-        """
-        Add a list of blank columns of the given type.
+        """ Add a list of blank columns in the given column category.
 
-        Parameters
-        ----------
-        column_names_or_numbers : [int or str]
-            A list of column names or numbers to add as the specified type.
-        column_type : ColumnType, default Attribute
-            The type of this column.  Generally will be Attribute
+        Args:
+            column_names_or_numbers (list): A list of column names or numbers to add as the specified type.
+            column_type (ColumnType property): The category of column these should be.
+
         """
         if column_names_or_numbers:
             if not isinstance(column_names_or_numbers, list):
@@ -156,25 +160,19 @@ class ColumnMapper:
                 self._add_column_data(new_def)
 
     def _expand_column(self, column_number, input_text):
-        """
-        Expand the given text based on the rules for expanding this column
+        """ Expand the specified text based on the rules for expanding the specified column.
 
-        Parameters
-        ----------
-        column_number : int
-            The column number this text should be treated as from
-        input_text : str
-            The text to expand, generally a single cell of a spreadsheet.
+        Args:
+            column_number (int): The column number this text should be treated as from.
+            input_text (str): The text to expand, generally from a single cell of a spreadsheet.
 
-        Returns
-        -------
-        expanded_text : str or None
-            The text after expansion.  Returns None if this column is undefined or the given text is null.
-        attribute_name_or_error_message: False or str
-            Depends on the value of first return value.
-            If None, this is an error message.
-            If string, this is an attribute name, that should be stored separately.
+        Returns:
+            str or None: The text after expansion or None if this column is undefined or the given text is null.
+            False or str: Depends on the value of first return value. If None, this is an error message.
+                If string, this is an attribute name that should be stored separately.
+
         """
+
         # Default 1-1 mapping if we don't have specific behavior.
         if not self._final_column_map:
             return HedString(input_text), False
@@ -193,14 +191,15 @@ class ColumnMapper:
         """ Expand all mapped columns from a given row.
 
         Args:
-            row_text ([str]): The text for the given row, one entry per column number.
+            row_text (list): The text for the given row, one list entry per column number.
 
         Returns:
             dict: A dictionary containing the keys HED, column_to_hed_tags, and attribute.
 
-        Notes: The value of the "HED" entry is the entire expanded row. The "column_to_hed_tags"
-        is each expanded column given separately as a list of strings. The attribute is the value
-        from the spreadsheet column only present when a given column is an attribute.
+        Notes:
+            The value of the "HED" entry is the entire expanded row.
+            The "column_to_hed_tags" is each expanded column given separately as a list of strings.
+            The attribute is the value from the spreadsheet column only present when a given column is an attribute.
 
         """
         result_dict = {}
@@ -230,16 +229,14 @@ class ColumnMapper:
         return result_dict
 
     def get_prefix_remove_func(self, column_number):
-        """
-        Returns a function that will remove the name_prefix for the given column.
+        """ Return a function that removes the name_prefix for the given column.
 
-        Parameters
-        ----------
-        column_number : int
-            numbered column to use name_prefix check from.
-        Returns
-        -------
-            A function taking a tag and string, returning a string.
+        Args:
+            column_number (int): Column number to look up in the prefix dictionary.
+
+        Returns:
+            func: A function taking a tag and string, returning a string.
+
         """
         column_number -= 1
         if column_number not in self._final_column_map:
@@ -252,31 +249,31 @@ class ColumnMapper:
         return entry.remove_prefix_if_needed
 
     def _add_column_data(self, new_column_entry):
-        """
-        Add a column definition to this column mapper.
+        """ Add the definition of a column to this column mapper.
 
-        Note if an entry with the same name exists, the new entry will replace it.
+        Args:
+            new_column_entry (ColumnMetadata): The column definition to add.
 
-        Parameters
-        ----------
-        new_column_entry : ColumnMetadata
-            The column definition to add
+        Notes:
+            If an entry with the same name exists, the new entry will replace it.
+
         """
         column_name = new_column_entry.column_name
         self.column_data[column_name] = copy.deepcopy(new_column_entry)
 
     def _set_column_prefix(self, column_number, new_required_prefix):
-        """
-        Internal function to add this as a required name_prefix to a column
+        """ Internal function to add this as a required name_prefix to a column
 
-        If the column is not known to the mapper, it will be added as a HEDTags column.
+        Args:
+            column_number (int): The column number with this name_prefix.
+            new_required_prefix (str): The name_prefix to add to the column when loading from a spreadsheet.
 
-        Parameters
-        ----------
-        column_number : int
-            The column number with this name_prefix
-        new_required_prefix : str
-            The name_prefix to add to the column when loading from a spreadsheet.
+        Raises:
+            TypeError if column number is passed as a str rather an an int.
+
+        Notes:
+            If the column is not known to the mapper, it will be added as a HEDTags column.
+
         """
         if isinstance(column_number, str):
             raise TypeError("Must pass in a column number not column_name to _set_column_prefix")
@@ -291,11 +288,17 @@ class ColumnMapper:
             column_entry.column_type = ColumnType.HEDTags
 
     def _finalize_mapping(self):
-        """
+        """ Set the final column mapping information.
+
         Internal function that gathers all the various sources of column rules and puts them
         in a list mapping from column number to definition.
 
-        This needs to be called after all definitions and columns are added.
+        Returns:
+            list: A list of issues that occurred when creating the mapping. Each issue is a dictionary.
+
+        Notes:
+            This needs to be called after all definitions and columns are added.
+
         """
         self._final_column_map = {}
         found_named_tag_columns = {}
@@ -362,21 +365,17 @@ class ColumnMapper:
         return self._finalize_mapping_issues
 
     def validate_column_data(self, hed_ops, error_handler=None, **kwargs):
-        """
-        Validates all column definitions that are being used and column definition hed strings
+        """ Validate all column definitions that are being used and column definition hed strings
 
-        Parameters
-        ----------
-        hed_ops : [func or HedOps] or func or HedOps
-            A list of HedOps of funcs to apply to the hed strings in the sidecars.
-        error_handler : ErrorHandler or None
-            Used to report errors.  Uses a default one if none passed in.
-        kwargs:
-            See models.hed_ops.translate_ops or the specific hed_ops for additional options
-        Returns
-        -------
-        validation_issues : [{}]
-            A list of syntax and semantic issues found in the definitions.
+        Args:
+            hed_ops (list, func, or HedOps): A func, a HedOps or a list of these to apply to the
+                hed strings in the sidecars.
+            error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
+            kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
+
+        Returns:
+            list: A list of syntax and semantic issues found in the definitions. Each issue is a dictionary.
+
         """
         if error_handler is None:
             error_handler = ErrorHandler()
@@ -390,32 +389,26 @@ class ColumnMapper:
 
     @staticmethod
     def _subtract_1_from_dictionary_keys(int_key_dictionary):
-        """Subtracts 1 from each dictionary key.
+        """ Subtracts 1 from each dictionary key.
 
-        Parameters
-        ----------
-        int_key_dictionary: {}
-            A dictionary with int keys.
-        Returns
-        -------
-        adjusted_dict: {}
-            A dictionary with the keys subtracted by 1.
+        Args:
+            int_key_dictionary (dict): A dictionary with int keys.
+
+        Returns:
+            dict: A dictionary with the keys subtracted by 1.
 
         """
         return {key - 1: value for key, value in int_key_dictionary.items()}
 
     @staticmethod
     def _subtract_1_from_list_elements(int_list):
-        """Subtracts 1 from each int in a list.
+        """ Subtracts 1 from each int in a list.
 
-        Parameters
-        ----------
-        int_list: [int]
-            A list of ints.
-        Returns
-        -------
-        adjusted_list: [int]
-            A list of containing each element subtracted by 1.
+        Args:
+            int_list (list): A list of ints.
+
+        Returns:
+            list: A list of ints where corresponding elements are 1 less than int_list.
 
         """
         return [x if isinstance(x, str) else x - 1 for x in int_list]

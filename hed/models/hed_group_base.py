@@ -2,20 +2,16 @@ from hed.models.hed_tag import HedTag
 
 
 class HedGroupBase:
-    """ This is an abstract baseclass used for HedGroup API, so it's shared with HedGroupFrozen """
+    """ An abstract baseclass used for HedGroup API that is shared with HedGroupFrozen. """
 
     def __init__(self, hed_string="", startpos=None, endpos=None):
-        """
-        Returns an empty HedGroup object
+        """ Returns an empty HedGroup object.
 
-        Parameters
-        ----------
-        hed_string : str
-            Source hed string for this group
-        startpos : int
-            Starting index of group(including parentheses) in hed_string
-        endpos : int
-            Ending index of group(including parentheses) in hed_string
+        Args:
+            hed_string (str): Source hed string for this group.
+            startpos (int): Starting index of group (including parentheses) in hed_string.
+            endpos (int): Ending index of group (including parentheses) in hed_string.
+
         """
         self._startpos = startpos
         self._endpos = endpos
@@ -27,29 +23,24 @@ class HedGroupBase:
 
     @property
     def is_group(self):
-        """
-            Returns True if this is a group with parenthesis.
-        """
+        """ Return True if this is a group with parenthesis. """
         return True
 
     def get_direct_children(self):
-        """
-        Returns an iterator over all HedTags and HedGroups that are in this group.  Not recursive.
+        """ Return an iterator over all HedTags and HedGroups that are in this group (not recursive).
 
-        Returns
-        -------
-        iterator over the direct children
+        Returns:
+            iter: iterator over the direct children.
+
         """
         return self._children
 
     def get_all_tags(self):
-        """
-        Returns all the tags, including descendants.
+        """ Return all the tags, including descendants.
 
-        Returns
-        -------
-        tag_list: [HedTag]
-            The list of all tags in this group, including descendants.
+        Returns:
+            tag_list (list): The list of all HedTags in this group, including descendants.
+
         """
         node_list = [self]
         final_list = []
@@ -64,18 +55,14 @@ class HedGroupBase:
         return final_list
 
     def get_all_groups(self, also_return_depth=False):
-        """
-        Returns all the HedGroups, including descendants and self.
+        """ Return all the HedGroups, including descendants and self.
 
-        Parameters
-        ----------
-        also_return_depth : bool
-            If True, this yields tuples(group, depth) rather than just groups
+        Args:
+            also_return_depth (bool): If True, yield tuples (group, depth) rather than just groups.
 
-        Returns
-        -------
-        group_list: [HedGroup]
-            The list of all HedGroups in this group, including descendants and self.
+        Returns:
+            group_list (list): The list of all HedGroups in this group, including descendants and self.
+
         """
         node_list = [self]
         final_list = []
@@ -95,104 +82,92 @@ class HedGroupBase:
 
     @staticmethod
     def _check_in_group(group, group_list):
+        """ Return true if the group is in the group list. """
         for val in group_list:
             if val is group:
                 return True
         return False
 
     def tags(self):
-        """
-        Returns the direct child tags of this group, filtering out HedGroup children
+        """ Return the direct child tags of this group, filtering out HedGroup children.
 
-        Returns
-        -------
-        tag_list: [HedTag]
-            The list of all tags directly in this group.
+        Returns:
+            tag_list: (list): The list of all tags directly in this group.
+
         """
         return [tag for tag in self._children if isinstance(tag, HedTag)]
 
     def groups(self):
-        """
-        Returns the direct child groups of this group, filtering out HedTag children
+        """ Return the direct child groups of this group, filtering out HedTag children.
 
-        Returns
-        -------
-        group_list: [HedGroup]
-            The list of all tags directly in this group.
+        Return:
+            group_list (list): The list of all groups directly in this group.
+
         """
         return [group for group in self._children if isinstance(group, HedGroupBase)]
 
     def get_original_hed_string(self):
-        """
-            Get the original hed string with zero modification
+        """ Get the original hed string with zero modification.
 
-        Returns
-        -------
-        hed_string: str
-            The original string
+        Returns:
+            str: The original string.
+
         """
         return self._hed_string[self._startpos:self._endpos]
 
     @property
     def span(self):
-        """
-        Return the source span of this group from the source hed_string
-        Returns
-        -------
-        span: (int, int)
-            The start and end index of the group(including parentheses) from the source string
+        """ Return the source span of this group from the source hed string.
+
+        Return:
+            int: start index of the group (including parentheses) from the source string.
+            int: end index of the group (including parentheses) from the source string.
+
         """
         return self._startpos, self._endpos
 
     def __str__(self):
-        """
-        Convert this HedGroup to a string
+        """ Convert this HedGroup to a string.
 
-        Returns
-        -------
-        str
-            Returns the group as a string, including any modified HedTags
+        Returns:
+            str: The group as a string, including any modified HedTags.
+
         """
         if self.is_group:
             return "(" + ",".join([str(child) for child in self._children]) + ")"
         return ",".join([str(child) for child in self._children])
 
     def get_as_short(self):
-        """
-        Convert this HedGroup to a short tag string
+        """ Return this HedGroup as a short tag string
 
-        Returns
-        -------
-        str
-            Returns the group as a string, returning all tags as short tags.
+        Returns:
+            str: The group as a string with all tags as short tags.
+
         """
         return self.get_as_form("short_tag")
 
     def get_as_long(self):
-        """
-        Convert this HedGroup to a long tag string
+        """ Return this HedGroup as a long tag string.
 
-        Returns
-        -------
-        str
-            Returns the group as a string, returning all tags as long tags.
+        Returns:
+            str: The group as a string with all tags as long tags.
+
         """
         return self.get_as_form("long_tag")
 
     def get_as_form(self, tag_attribute, tag_transformer=None):
-        """
+        """ Get the string corresponding to the specified form of this group after transformation.
 
-        Parameters
-        ----------
-        tag_attribute : str
-            The hed_tag property to use to construct the string.  Most commonly short_tag or long_tag.
-        tag_transformer: func or None
-            A function that is applied to each tag string before returning.
-            signature: str def(HedTag, str)
-        Returns
-        -------
-        group_as_string: str
-            The constructed string
+        Args:
+            tag_attribute (str): The hed_tag property to use to construct the string (usually short_tag or long_tag).
+            tag_transformer (func or None): A function that is applied to each tag string before returning.
+
+        Returns:
+            str: The constructed string.
+
+        Notes:
+            The signature of a tag_transformer is str def(HedTag, str).
+
         """
         if tag_transformer:
             result = ",".join([tag_transformer(child, child.__getattribute__(tag_attribute))
@@ -206,19 +181,18 @@ class HedGroupBase:
         return result
 
     def lower(self):
-        """Convenience function, equivalent to str(self).lower()"""
+        """ Convenience function, equivalent to str(self).lower(). """
         return str(self).lower()
 
     def find_placeholder_tag(self):
-        """
-            If a placeholder tag is present, this will return it.
+        """ Return a placeholder tag, if present in this group.
 
+        Returns:
+            HedTag or None: The placeholder tag if found.
+
+        Notes:
             Assumes a valid HedString with no erroneous "#" characters.
 
-        Returns
-        -------
-        found_tag: HedTag or None
-            The placeholder tag if found.
         """
         for tag in self.get_all_tags():
             if "#" in tag.org_tag:
@@ -229,11 +203,11 @@ class HedGroupBase:
     def __bool__(self):
         return bool(self._children)
 
-    def find_tags(self, anchors, recursive=False, include_groups=2):
-        """ Find tags given anchors.
+    def find_tags(self, search_tags, recursive=False, include_groups=2):
+        """ Find the search tags and their containing groups that are in this group.
 
         Args:
-            anchors (container):        A container of short_base_tags to locate
+            search_tags (container):    A container of short_base_tags to locate
             recursive (bool):           If true, also check subgroups.
             include_groups (0, 1 or 2): Specify return values.
 
@@ -246,9 +220,9 @@ class HedGroupBase:
             This can only find identified tags.
             By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
             The rules for include_groups are:
-                If 0: return only tags.
-                If 1: return only groups.
-                If 2 or any other value: return both.
+                If 0: returns a list of HedTags corresponding to found search tags.
+                If 1: return a list of containing HedGroups for found search tags.
+                If 2 or any other value: returns a list of tuples (tag, containing_group)
 
         """
         found_tags = []
@@ -259,7 +233,7 @@ class HedGroupBase:
 
         for sub_group in groups:
             for tag in sub_group.tags():
-                if tag.short_base_tag.lower() in anchors:
+                if tag.short_base_tag.lower() in search_tags:
                     found_tags.append((tag, sub_group))
                     
         if include_groups == 0 or include_groups == 1:
@@ -274,12 +248,12 @@ class HedGroupBase:
             recursive (bool): If true, also check subgroups.
 
         Returns:
-            [HedGroupBase]: A list of all groups the given tags/groups were found in.
+            list: A list of HedGroupBases the given tags/groups were found in.
 
         Notes:
             If you pass in groups it will only find EXACT matches.
-            This can only find identified tags.  By default, definition, def, def-expand, onset, and offset
-            are identified, even without a schema.
+            This can only find identified tags.
+            By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
 
             If this is a HedGroup, order matters.  (b, a) != (a, b)
 
@@ -307,7 +281,7 @@ class HedGroupBase:
         """ Find any def and def-expand tags in the group.
 
         Args:
-            recursive (bool):vIf true, also check subgroups.
+            recursive (bool): If true, also check subgroups.
             include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
 
         Returns:

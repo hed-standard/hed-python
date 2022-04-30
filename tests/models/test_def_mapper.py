@@ -276,7 +276,7 @@ class Test(unittest.TestCase):
         test_string2 = HedString(label_def_string)
         def_issues = test_string.validate(hed_ops, expand_defs=True)
         def_issues = test_string2.validate(hed_ops, expand_defs=True)
-        tags_to_remove = test_string.find_tags(anchors=["keypad-key"], recursive=True)
+        tags_to_remove = test_string.find_tags(search_tags=["keypad-key"], recursive=True)
 
         for tag, group in tags_to_remove:
             test_string.remove_groups([tag])
