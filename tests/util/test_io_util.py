@@ -37,7 +37,9 @@ class Test(unittest.TestCase):
         self.assertTrue(check2c, "check_filename should return true if suffix after extension matches")
         name3 = "Changes"
         check3a = check_filename(name3, name_suffix="_events", extensions=None)
-        print("to here")
+        self.assertFalse(check3a, "check_filename should be false if it doesn't match with no extension")
+        check3b = check_filename(name3, name_suffix="es", extensions=None)
+        self.assertTrue(check3b, "check_filename should be true if match with no extension.")
 
     def test_extract_suffix_path(self):
         suffix_path = extract_suffix_path('c:/myroot/temp.tsv', 'c:')

@@ -110,4 +110,4 @@ if __name__ == '__main__':
 
     summary = TagSummary(BidsDataset(root_path), breakouts)
     designs, others, errors = summary.get_design_matrices()
-    print("to here")
+
