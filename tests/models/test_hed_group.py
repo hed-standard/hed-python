@@ -4,7 +4,6 @@ import os
 from hed import schema
 from hed.models import HedString
 
-
 class Test(unittest.TestCase):
 
     @classmethod
@@ -45,6 +44,23 @@ class Test(unittest.TestCase):
         for child in remaining_children:
             if child is definition_tag2:
                 self.assertFalse(False, "Nested definition tag not removed successfully")
+
+
+    def test_find_tags_with_term(self):
+        basic_hed_string = "(Keypad-key/TestDef1,Keyboard-key/TestDef2, Item/Object, Event), Event, Object, Geometric-object"
+        basic_hed_string_obj = HedString(basic_hed_string, self.hed_schema)
+        # works
+        located_tags = basic_hed_string_obj.find_tags_with_term("Object", recursive=True, include_groups=0)
+        self.assertEqual(len(located_tags), 5)
+        # located tags now has found all 5 hed tags
+
+        # This will find no tags
+        located_tags = basic_hed_string_obj.find_tags_with_term("bject", recursive=True, include_groups=0)
+        self.assertEqual(len(located_tags), 0)
+
+        # this will also find no tags
+        located_tags = basic_hed_string_obj.find_tags_with_term("Item/Object", recursive=True, include_groups=0)
+        self.assertEqual(len(located_tags), 0)
 
 
 if __name__ == '__main__':

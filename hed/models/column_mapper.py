@@ -25,9 +25,10 @@ class ColumnMapper:
         """ Constructor for ColumnMapper.
 
         Args:
-            sidecars (Sidecar, string, or list of these): A list of ColumnDefinitionGroups or
+            sidecars (Sidecar, string, or list of these): A list of Sidecars or
                  filenames to gather ColumnDefinitions from.
             tag_columns: (list):  A list of ints or strings containing the columns that contain the HED tags.
+                Sidecar column definitions will take precedent if there is a conflict with tag_columns.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers and values are HED tag
                 prefixes to prepend to the tags in that column before processing.
             attribute_columns (str, int or list): A column name, column number or a list of column names
@@ -37,7 +38,7 @@ class ColumnMapper:
 
         Notes:
             Sidecars later in the list override those earlier in the list.
-            If the column is otherwise unspecified, it will convert this column type to HEDTags.
+
 
         Examples:
             column_prefix_dictionary = {3: 'Description/', 4: 'Label/'}
@@ -249,7 +250,7 @@ class ColumnMapper:
         return entry.remove_prefix_if_needed
 
     def _add_column_data(self, new_column_entry):
-        """ Add the definition of a column to this column mapper.
+        """ Add the metadata of a column to this column mapper.
 
         Args:
             new_column_entry (ColumnMetadata): The column definition to add.

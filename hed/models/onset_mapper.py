@@ -46,7 +46,7 @@ class OnsetMapper(HedOps):
             def_tag, def_group, _ = def_tags[0]
             if def_group is None:
                 def_group = def_tag
-            children = [child for child in found_group.get_direct_children() if
+            children = [child for child in found_group.children if
                         def_group is not child and found_onset is not child]
             max_children = 1
             if found_onset.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
@@ -54,7 +54,7 @@ class OnsetMapper(HedOps):
             if len(children) > max_children:
                 onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS,
                                                           def_tag,
-                                                          found_group.get_direct_children())
+                                                          found_group.children)
                 continue
 
             if children:

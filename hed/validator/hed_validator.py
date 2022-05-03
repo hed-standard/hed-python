@@ -87,11 +87,12 @@ class HedValidator(HedOps):
 
     def _check_for_duplicate_groups(self, original_group):
         # Todo: This could be optimized in various ways.  It repeatedly converts subgroups to HedGroupFrozen
+        # This could also be accomplished by sorting the entire hed string.
         frozen_group_or_string = original_group.get_frozen()
-        if len(frozen_group_or_string._children) != len(original_group._children):
+        if len(frozen_group_or_string._children) != len(original_group.children):
             validation_issues = []
             valid_content = set(frozen_group_or_string._children)
-            for child in original_group._children:
+            for child in original_group.children:
                 if isinstance(child, HedTag):
                     error_code = ValidationErrors.HED_TAG_REPEATED
                     frozen_child = child

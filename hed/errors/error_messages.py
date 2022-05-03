@@ -195,7 +195,7 @@ def val_warning_default_units_used(tag, default_unit):
 
 
 @hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE)
-def schema_error_HED_SCHEMA_DUPLICATE_NODE(tag, duplicate_tag_list, section):
+def schema_error_hed_duplicate_node(tag, duplicate_tag_list, section):
     tag_join_delimiter = "\n\t"
     return f"Duplicate term '{str(tag)}' used {len(duplicate_tag_list)} places in '{section}' section schema as: " + \
            f"{tag_join_delimiter} {tag_join_delimiter.join(duplicate_tag_list)}", {}

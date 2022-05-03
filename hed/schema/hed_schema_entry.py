@@ -119,6 +119,9 @@ class HedSchemaEntry:
     def __hash__(self):
         return hash((self.name, self._section._section_key))
 
+    def __str__(self):
+        return self.name
+
 
 class UnitClassEntry(HedSchemaEntry):
     """
@@ -196,6 +199,7 @@ class HedTagEntry(HedSchemaEntry):
         self.short_tag_name = None
         self.takes_value_child_entry = None  # this is a child takes value tag, if one exists
         self._parent_tag = None
+        self.tag_terms = tuple()
 
     @staticmethod
     def get_fake_tag_entry(tag, tags_to_identify):
@@ -285,6 +289,7 @@ class HedTagEntry(HedSchemaEntry):
             parent_tag = schema.get_tag_entry(parent_name)
         self._parent_tag = parent_tag
         self.takes_value_child_entry = schema.get_tag_entry(self.name + "/#")
+        self.tag_terms = tuple(self.long_tag_name.lower().split("/"))
 
         if self.name.endswith("/#"):
             if HedKey.UnitClass in self.attributes:

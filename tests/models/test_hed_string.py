@@ -69,7 +69,7 @@ class HedTagLists(TestHedStrings):
                      '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
         string_obj = HedString(hed_string)
         # result = HedString.split_hed_string_into_groups(hed_string)
-        tags_as_strings = [str(tag) for tag in string_obj.get_direct_children()]
+        tags_as_strings = [str(tag) for tag in string_obj.children]
         self.assertCountEqual(tags_as_strings,
                               ['/Action/Reach/To touch',
                                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',

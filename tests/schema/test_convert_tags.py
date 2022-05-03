@@ -27,9 +27,9 @@ class TestConvertTag(TestTagFormat):
                                                       params=expected_params)
             error_handler.add_context_to_issues(test_issues)
 
-            # print(test_key)
-            # print(expected_issue)
-            # print(test_issues)
+            print(test_key)
+            print(expected_issue)
+            print(test_issues)
             self.assertEqual(string_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
@@ -66,16 +66,29 @@ class TestConvertToLongTag(TestConvertTag):
 
     def test_tag_takes_value(self):
         test_strings = {
+            # these should all be allowed by initial identifiers.  Validators should flag the second two for '/' not being an allowed char.
+            'singleNodeTakesPlaceholder': 'Item-count/#',
+            'existingNodeValue': 'Label/Red',
+            'existingNodeSubValue': 'Label/UniqueValue/Red',
+            'existingNodeSubValue2': 'Label/Red/UniqueValue',
             'uniqueValue': 'Label/Unique Value',
             'multiLevel': 'Label/Long Unique Value With/Slash Marks',
             'partialPath': 'Informational-property/Label/Unique Value',
         }
         expected_results = {
+            'singleNodeTakesPlaceholder': 'Property/Data-property/Data-value/Quantitative-value/Item-count/#',
+            'existingNodeValue': 'Property/Informational-property/Label/Red',
+            'existingNodeSubValue': 'Property/Informational-property/Label/UniqueValue/Red',
+            'existingNodeSubValue2': 'Property/Informational-property/Label/Red/UniqueValue',
             'uniqueValue': 'Property/Informational-property/Label/Unique Value',
             'multiLevel': 'Property/Informational-property/Label/Long Unique Value With/Slash Marks',
             'partialPath': 'Property/Informational-property/Label/Unique Value',
         }
         expected_errors = {
+            'singleNodeTakesPlaceholder': [],
+            'existingNodeValue': [],
+            'existingNodeSubValue': [],
+            'existingNodeSubValue2': [],
             'uniqueValue': [],
             'multiLevel': [],
             'partialPath': [],
@@ -142,22 +155,13 @@ class TestConvertToLongTag(TestConvertTag):
                 self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
                                   index_in_tag=25, index_in_tag_end=41,
                                   expected_parent_tag='Item/Object/Geometric-object'),
-            # old errors if we're doing left to right
-            # 'twoLevels':
-            #     self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-            #                                      index_in_tag=19, index_in_tag_end=35,
-            #                                      expected_parent_tag='Item/Object/Geometric-object'),
-            # 'partialDuplicate':
-            #     self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-            #                                      index_in_tag=10, index_in_tag_end=14, expected_parent_tag='Item'),
             'twoLevels':
                 self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                  index_in_tag=36, index_in_tag_end=41,
-                                  expected_parent_tag='Event'),
+                                                 index_in_tag=19, index_in_tag_end=35,
+                                                 expected_parent_tag='Item/Object/Geometric-object'),
             'partialDuplicate':
                 self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                  index_in_tag=29, index_in_tag_end=45,
-                                  expected_parent_tag='Item/Object/Geometric-object')
+                                                 index_in_tag=17, index_in_tag_end=21, expected_parent_tag='Item'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -165,11 +169,13 @@ class TestConvertToLongTag(TestConvertTag):
         test_strings = {
             'single': 'InvalidEvent',
             'invalidChild': 'InvalidEvent/InvalidExtension',
+            'invalidChildValidParent': 'Event/Event',
             'validChild': 'InvalidEvent/Event',
         }
         expected_results = {
             'single': 'InvalidEvent',
             'invalidChild': 'InvalidEvent/InvalidExtension',
+            'invalidChildValidParent': 'Event/Event',
             'validChild': 'InvalidEvent/Event',
         }
         expected_errors = {
@@ -177,10 +183,11 @@ class TestConvertToLongTag(TestConvertTag):
                                         tag=0, index_in_tag=0, index_in_tag_end=12),
             'invalidChild': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                               tag=0, index_in_tag=0, index_in_tag_end=12),
-
-            'validChild': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                            tag=0, index_in_tag=13, index_in_tag_end=18,
+            'invalidChildValidParent': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                            tag=0, index_in_tag=6, index_in_tag_end=11,
                                             expected_parent_tag="Event"),
+            'validChild': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                        tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -241,6 +248,8 @@ class TestConvertToShortTag(TestConvertTag):
             'placeholder': 'Informational-property/Label/#',
             # Todo: This should maybe be disallowed, but for now just make sure it works as expected
             'placeholderAfterValue': 'Informational-property/Label/UniqueValue/#',
+            'singleLevelKnown': 'Property/Informational-property/Label/Event',
+            'multiLevelKnown': 'Property/Informational-property/Label/Event/Sensory-event',
         }
         expected_results = {
             'uniqueValue': 'Label/Unique Value',
@@ -248,40 +257,17 @@ class TestConvertToShortTag(TestConvertTag):
             'partialPath': 'Label/Unique Value',
             'placeholder': 'Label/#',
             'placeholderAfterValue': 'Label/UniqueValue/#',
+            'singleLevelKnown': 'Label/Event',
+            'multiLevelKnown': 'Label/Event/Sensory-event',
         }
         expected_errors = {
             'uniqueValue': [],
             'multiLevel': [],
             'partialPath': [],
             'placeholder': [],
-            'placeholderAfterValue': []
-        }
-        self.validator(test_strings, expected_results, expected_errors)
-
-    def test_tag_takes_value_invalid(self):
-        test_strings = {
-            'singleLevel': 'Property/Informational-property/Label/Event',
-            'multiLevel': 'Property/Informational-property/Label/Event/Sensory-event',
-            'mixed': 'Item/Sound/Event/Sensory-event/Environmental-sound',
-        }
-        expected_results = {
-            'singleLevel': 'Property/Informational-property/Label/Event',
-            'multiLevel': 'Property/Informational-property/Label/Event/Sensory-event',
-            'mixed': 'Item/Sound/Event/Sensory-event/Environmental-sound',
-        }
-        expected_errors = {
-            'singleLevel':
-                self.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                  tag=0, index_in_tag=38, index_in_tag_end=43,
-                                  expected_parent_tag='Event'),
-            'multiLevel':
-                self.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                  tag=0, index_in_tag=44, index_in_tag_end=57,
-                                  expected_parent_tag='Event/Sensory-event'),
-            'mixed':
-                self.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                  tag=0, index_in_tag=31, index_in_tag_end=50,
-                                  expected_parent_tag='Item/Sound/Environmental-sound'),
+            'placeholderAfterValue': [],
+            'singleLevelKnown': [],
+            'multiLevelKnown': [],
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -345,11 +331,11 @@ class TestConvertToShortTag(TestConvertTag):
                                   tag=0, index_in_tag=19, index_in_tag_end=35,
                                   expected_parent_tag='Item/Object/Geometric-object'),
             'twoLevels': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                           tag=0, index_in_tag=42, index_in_tag_end=47,
-                                           expected_parent_tag='Event'),
+                                           tag=0, index_in_tag=25, index_in_tag_end=41,
+                                           expected_parent_tag='Item/Object/Geometric-object'),
             'duplicate': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                           tag=0, index_in_tag=41, index_in_tag_end=57,
-                                           expected_parent_tag='Item/Object/Geometric-object')
+                                           tag=0, index_in_tag=29, index_in_tag_end=33,
+                                           expected_parent_tag='Item')
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -369,31 +355,31 @@ class TestConvertToShortTag(TestConvertTag):
             'invalidWithExtension': 'InvalidEvent/InvalidExtension',
         }
         expected_errors = {
-            'invalidParentWithExistingGrandchild': self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=32, index_in_tag_end=48,
-                expected_parent_tag="Item/Object/Geometric-object"),
-            'invalidChildWithExistingGrandchild': self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=35,
-                expected_parent_tag="Item/Object/Geometric-object"),
-            'invalidParentWithExistingChild': self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=13, index_in_tag_end=29,
-                expected_parent_tag="Item/Object/Geometric-object"),
-            'invalidSingle': self.format_error(
-                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            'invalidWithExtension': self.format_error(
-                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            # Old errors if we go back to left to right processing.
+            # Old errors if we go back to right to left processing
             # 'invalidParentWithExistingGrandchild': self.format_error(
-            #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            #     ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=32, index_in_tag_end=48,
+            #     expected_parent_tag="Item/Object/Geometric-object"),
             # 'invalidChildWithExistingGrandchild': self.format_error(
-            #     ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=28,
+            #     ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=35,
             #     expected_parent_tag="Item/Object/Geometric-object"),
             # 'invalidParentWithExistingChild': self.format_error(
-            #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            #     ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=13, index_in_tag_end=29,
+            #     expected_parent_tag="Item/Object/Geometric-object"),
             # 'invalidSingle': self.format_error(
             #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
             # 'invalidWithExtension': self.format_error(
             #     ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidParentWithExistingGrandchild': self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidChildWithExistingGrandchild': self.format_error(
+                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=19, index_in_tag_end=35,
+                expected_parent_tag="Item/Object/Geometric-object"),
+            'invalidParentWithExistingChild': self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidSingle': self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            'invalidWithExtension': self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 

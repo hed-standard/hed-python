@@ -22,18 +22,18 @@ class HedGroupBase:
         self._children = None
 
     @property
+    def children(self):
+        """ Returns the direct children of this string.
+
+        Returns:
+            The list of direct children of this group
+        """
+        return self._children
+
+    @property
     def is_group(self):
         """ Return True if this is a group with parenthesis. """
         return True
-
-    def get_direct_children(self):
-        """ Return an iterator over all HedTags and HedGroups that are in this group (not recursive).
-
-        Returns:
-            iter: iterator over the direct children.
-
-        """
-        return self._children
 
     def get_all_tags(self):
         """ Return all the tags, including descendants.
@@ -49,7 +49,7 @@ class HedGroupBase:
         while node_list:
             current_group_or_tag = node_list.pop(0)
             if isinstance(current_group_or_tag, HedGroupBase):
-                node_list = list(current_group_or_tag._children) + node_list
+                node_list = list(current_group_or_tag.children) + node_list
             else:
                 final_list.append(current_group_or_tag)
         return final_list
@@ -71,7 +71,7 @@ class HedGroupBase:
         while node_list:
             current_group_or_tag = node_list.pop(0)
             if isinstance(current_group_or_tag, HedGroupBase):
-                node_list = list(current_group_or_tag._children) + node_list
+                node_list = list(current_group_or_tag.children) + node_list
                 final_list.append(current_group_or_tag)
 
         if also_return_depth:
@@ -95,7 +95,7 @@ class HedGroupBase:
             tag_list: (list): The list of all tags directly in this group.
 
         """
-        return [tag for tag in self._children if isinstance(tag, HedTag)]
+        return [tag for tag in self.children if isinstance(tag, HedTag)]
 
     def groups(self):
         """ Return the direct child groups of this group, filtering out HedTag children.
@@ -104,7 +104,7 @@ class HedGroupBase:
             group_list (list): The list of all groups directly in this group.
 
         """
-        return [group for group in self._children if isinstance(group, HedGroupBase)]
+        return [group for group in self.children if isinstance(group, HedGroupBase)]
 
     def get_original_hed_string(self):
         """ Get the original hed string with zero modification.
@@ -134,8 +134,8 @@ class HedGroupBase:
 
         """
         if self.is_group:
-            return "(" + ",".join([str(child) for child in self._children]) + ")"
-        return ",".join([str(child) for child in self._children])
+            return "(" + ",".join([str(child) for child in self.children]) + ")"
+        return ",".join([str(child) for child in self.children])
 
     def get_as_short(self):
         """ Return this HedGroup as a short tag string
@@ -172,10 +172,10 @@ class HedGroupBase:
         if tag_transformer:
             result = ",".join([tag_transformer(child, child.__getattribute__(tag_attribute))
                                if isinstance(child, HedTag) else child.get_as_form(tag_attribute, tag_transformer)
-                               for child in self._children])
+                               for child in self.children])
         else:
             result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
-                               child.get_as_form(tag_attribute) for child in self._children])
+                               child.get_as_form(tag_attribute) for child in self.children])
         if self.is_group:
             return f"({result})"
         return result
@@ -272,7 +272,7 @@ class HedGroupBase:
 
         for sub_group in groups:
             for search_tag in tags_or_groups:
-                if search_tag in sub_group._children:
+                if search_tag in sub_group.children:
                     found_tags.append(sub_group)
 
         return found_tags
@@ -309,7 +309,7 @@ class HedGroupBase:
 
         def_tags = []
         for group in groups:
-            for child in group.get_direct_children():
+            for child in group.children:
                 if isinstance(child, HedTag):
                     if child.short_base_tag.lower() == DefTagNames.DEF_KEY:
                         def_tags.append((child, child, group))
@@ -321,3 +321,42 @@ class HedGroupBase:
         if include_groups == 0 or include_groups == 1 or include_groups == 2:
             return [tag[include_groups] for tag in def_tags]
         return def_tags
+
+    def find_tags_with_term(self, term, recursive=False, include_groups=2):
+        """
+            Find any tags that contain the given term
+
+            Note: This can only find identified tags.
+
+        Args:
+            term: str
+                A single term to search for.
+            recursive: bool
+                If true, also check subgroups.
+            include_groups: 0, 1 or 2
+                If 0: Return only tags
+                If 1: return only groups
+                If 2 or any other value: return both
+
+        returns:
+        list:
+        tag: HedTag
+            The located tag
+        group: HedGroup
+            The group the located tag is in
+        """
+        found_tags = []
+        if recursive:
+            groups = self.get_all_groups()
+        else:
+            groups = (self,)
+
+        search_for = term.lower()
+        for sub_group in groups:
+            for tag in sub_group.tags():
+                if search_for in tag.tag_terms:
+                    found_tags.append((tag, sub_group))
+
+        if include_groups == 0 or include_groups == 1:
+            return [tag[include_groups] for tag in found_tags]
+        return found_tags

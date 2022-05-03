@@ -40,8 +40,9 @@ class HedTag:
 
         self._extension_value = ""
 
-        self.mutable = True  # Note this only keeps track of tags also used in definitions.  You should also not
-                             # alter any tags used in a HedGroupFrozen
+        # Note this only keeps track of tags also used in definitions.  You should also not
+        # alter any tags used in a HedGroupFrozen
+        self.mutable = True
 
         if hed_schema:
             self.convert_to_canonical_forms(hed_schema)
@@ -250,6 +251,22 @@ class HedTag:
         """
         return self._hed_string[self.span[0]:self.span[1]]
 
+    @property
+    def tag_terms(self):
+        """
+            Returns a tuple of all the terms in this tag, not counting any extension.  Lowercase.
+
+            Returns empty tuple for unidentified tag.
+
+        Returns
+        -------
+        tag_terms: (str)
+            Tuple of terms
+        """
+        if self._schema_entry:
+            return self._schema_entry.tag_terms
+        return tuple()
+
     def __str__(self):
         """
         Convert this HedTag to a string
@@ -260,7 +277,7 @@ class HedTag:
             Return the original tag if we haven't set a new tag.(e.g. short to long)
         """
         if self._schema_entry:
-            return self.long_tag
+            return self.short_tag
 
         if self._tag:
             return self._tag
@@ -305,7 +322,6 @@ class HedTag:
                 break
             checking_prefix = checking_prefix[slash_index:]
         self.tag = required_prefix + self.org_tag
-        # self._tag = required_prefix + self.org_tag
 
     def lower(self):
         """Convenience function, equivalent to str(self).lower()"""
