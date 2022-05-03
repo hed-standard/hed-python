@@ -127,14 +127,14 @@ class Test(unittest.TestCase):
         hed_ops = [validator, def_mapper]
 
         test_string = HedString(self.label_def_string)
-        tag = test_string.get_direct_children()[0]
+        tag = test_string.children[0]
         tag.tag = "Organizational-property/" + str(tag)
         def_issues = test_string.validate(hed_ops, expand_defs=True)
         self.assertFalse(def_issues)
         self.assertEqual(test_string.get_as_short(), f"{self.expanded_def_string}")
 
         test_string = HedString(self.label_def_string)
-        tag = test_string.get_direct_children()[0]
+        tag = test_string.children[0]
         tag.tag = "Organizational-property22/" + str(tag)
         def_issues = test_string.validate(hed_ops, expand_defs=True)
         self.assertTrue(def_issues)
@@ -256,7 +256,6 @@ class Test(unittest.TestCase):
         self.assertFalse(def_issues)
 
     def test_mutable(self):
-        import copy
         basic_definition_string = "(Definition/TestDef, (Keypad-key/TestDef1,Keyboard-key/TestDef2))"
         def_dict = DefDict()
         def_string = HedString(basic_definition_string)

@@ -128,10 +128,10 @@ class HedSchemaGroup:
             issues_list += schema.check_compliance(also_check_for_warnings, name, error_handler)
         return issues_list
 
-    def get_all_tags_with_attribute(self, key):
+    def get_tags_with_attribute(self, key):
         all_tags = set()
         for schema in self._schemas.values():
-            all_tags.update(schema.get_all_tags_with_attribute(key))
+            all_tags.update(schema.get_tags_with_attribute(key))
         return all_tags
 
     # todo: maybe tweak this API so you don't have to pass in library prefix?

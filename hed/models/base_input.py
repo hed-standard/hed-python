@@ -11,7 +11,7 @@ from hed.errors.error_reporter import ErrorHandler
 from hed.models import model_constants
 from hed.models.hed_ops import translate_ops
 from hed.models.onset_mapper import OnsetMapper
-from hed.models.hed_string import HedString
+from hed.models.hed_string_comb import HedStringComb
 from hed.models.def_mapper import DefinitionMapper
 
 
@@ -100,7 +100,7 @@ class BaseInput:
 
         self.file_def_dict = self.extract_definitions()
 
-        self.update_definition_mapper_with_file(self.file_def_dict)
+        self.update_definition_mapper(self.file_def_dict)
 
     @property
     def dataframe(self):
@@ -134,19 +134,15 @@ class BaseInput:
             dict: A list of issue dictionaries corresponding to issues found during conversion.
 
         """
-        if error_handler is None:
-            error_handler = ErrorHandler()
         error_list = []
-        for row_number, column_to_hed_tags_dictionary in self:
-            error_handler.push_error_context(ErrorContext.ROW, row_number)
+        for row_number, row_dict in self.iter_dataframe(hed_ops=hed_schema, return_row_dict=True,
+                                                        remove_definitions=False):
+            column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
+            error_list += row_dict[model_constants.ROW_ISSUES]
             for column_number in column_to_hed_tags_dictionary:
-                error_handler.push_error_context(ErrorContext.COLUMN, column_number)
                 column_hed_string = column_to_hed_tags_dictionary[column_number]
-                error_list += column_hed_string.convert_to_canonical_forms(hed_schema)
                 self.set_cell(row_number, column_number, column_hed_string,
                               include_column_prefix_if_exist=False, tag_form=tag_form)
-                error_handler.pop_error_context()
-            error_handler.pop_error_context()
 
         return error_list
 
@@ -322,7 +318,7 @@ class BaseInput:
                                                expansion_column_issues,
                                                error_handler)
         if return_row_dict:
-            final_hed_string = HedString.create_from_other(column_to_hed_tags.values())
+            final_hed_string = HedStringComb(column_to_hed_tags.values())
             if string_funcs:
                 row_issues += self._run_row_ops(final_hed_string, string_funcs, error_handler)
             row_dict[model_constants.ROW_ISSUES] = row_issues
@@ -547,7 +543,7 @@ class BaseInput:
         _ = self._run_validators(hed_ops, run_on_raw=True, error_handler=error_handler)
         return new_def_dict
 
-    def update_definition_mapper_with_file(self, def_dict):
+    def update_definition_mapper(self, def_dict):
         """ Add label definitions gathered from the given input if this has a definition mapper.
 
         Args:
@@ -568,6 +564,7 @@ class BaseInput:
             if not run_string_ops_on_columns:
                 self._add_def_onset_mapper(hed_ops)
                 tag_funcs, string_funcs = translate_ops(hed_ops, split_tag_and_string_ops=True, expand_defs=expand_defs,
+                                                        remove_definitions=remove_definitions,
                                                         **kwargs)
             else:
                 tag_funcs = translate_ops(hed_ops, expand_defs=expand_defs, **kwargs)

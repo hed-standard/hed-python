@@ -27,8 +27,6 @@ class HedString(HedGroup):
         Returns
         -------
         """
-        # The sub HedStrings that make up this object.  Empty if this is the lowest level one.
-        self._component_strings = []
         # This is a tree like structure containing the entire hed string
         try:
             contents = self.split_hed_string_into_groups(hed_string, hed_schema)
@@ -44,35 +42,6 @@ class HedString(HedGroup):
         """
         return False
 
-    @staticmethod
-    def create_from_other(hed_string_obj_list):
-        """
-            Creates a hed string from a list of hed strings.
-
-            Note: This does not allocate new tags for the new strings, they point to the same internal tags.
-
-        Parameters
-        ----------
-        hed_string_obj_list : [HedString]
-            The list of strings to combine
-
-        Returns
-        -------
-        combined_hed_string_obj: HedString
-            The combined hed string, containing all tags and delimiters from the list
-        """
-        hed_string_obj_list = [hed_string_obj for hed_string_obj in hed_string_obj_list if hed_string_obj is not None]
-        new_hed_string_obj = HedString("")
-        for hed_string_obj in hed_string_obj_list:
-            new_hed_string_obj._children += hed_string_obj._children
-        new_hed_string_obj._component_strings = list(hed_string_obj_list)
-
-        hed_string = ",".join([hed_string_obj._hed_string for hed_string_obj in hed_string_obj_list])
-        new_hed_string_obj._hed_string = hed_string
-        new_hed_string_obj._startpos = 0
-        new_hed_string_obj._endpos = len(hed_string)
-
-        return new_hed_string_obj
 
     def convert_to_canonical_forms(self, hed_schema):
         """
@@ -172,8 +141,8 @@ class HedString(HedGroup):
             Schema to use to identify tags.
         Returns
         -------
-        group: HedGroup
-            The group containing this hed_string.
+        child_list: [HedTag or HedGroupBase]
+            The list containing this hed_string.
 
         raises: ValueError
             Raises ValueError if the string is significantly malformed, such as mis-matched parenthesis.
@@ -221,8 +190,6 @@ class HedString(HedGroup):
         """
             If this tag or group was in the original hed string, find it's original span.
 
-            This handles all cases of strings, including hed strings made of other hed strings.
-
             If the hed tag or group was not in the original string, returns (None, None)
 
         Parameters
@@ -235,23 +202,10 @@ class HedString(HedGroup):
         tag_span: (int or None, int or None)
             The starting and ending index of the given tag in the original string
         """
-        strings_list = self._component_strings
-        found_string = None
-        string_start_index = 0
-        if not self._component_strings:
-            if self.check_if_in_original_tags_and_groups(tag_or_group):
-                return tag_or_group.span
-        for string in strings_list:
-            if string.check_if_in_original_tags_and_groups(tag_or_group):
-                found_string = string
-                break
-            # Add 1 for comma
-            string_start_index += string.span[1] + 1
+        if self.check_if_in_original_tags_and_groups(tag_or_group):
+            return tag_or_group.span
 
-        if not found_string:
-            return None, None
-
-        return tag_or_group.span[0] + string_start_index, tag_or_group.span[1] + string_start_index
+        return None, None
 
     @staticmethod
     def split_hed_string(hed_string):

@@ -540,7 +540,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
     ----------
     context_type : str
         The context type of this entry
-    context : str
+    context : str or HedString
         The value of this context
     tab_count : int
         Number of tabs to name_prefix each line with.

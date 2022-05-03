@@ -37,7 +37,7 @@ class HedGroup(HedGroupBase):
         if not isinstance(other, HedGroup):
             return False
 
-        if self._children != other._children:
+        if self.children != other.children:
             return False
         if self.is_group != other.is_group:
             return False
@@ -149,8 +149,11 @@ class HedGroup(HedGroupBase):
         remove_groups : [HedGroup or HedTag]
             A list of groups or tags to remove.
         """
-        empty_groups = []
         all_groups = self.get_all_groups()
+        self._remove_groups(remove_groups, all_groups)
+
+    def _remove_groups(self, remove_groups, all_groups):
+        empty_groups = []
         for remove_child in remove_groups:
             for group in all_groups:
                 # only proceed if we have an EXACT match for this child
@@ -226,7 +229,7 @@ class HedGroupFrozen(HedGroupBase):
         if isinstance(contents, HedGroupBase):
             span = contents.span
             hed_string = contents._hed_string
-            contents = contents._children
+            contents = contents.children
         else:
             if hed_string:
                 span = 0, len(hed_string)

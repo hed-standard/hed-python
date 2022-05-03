@@ -38,8 +38,8 @@ class Test(TestHedBase):
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(hed_ops, expand_defs=expand_defs)
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
-            # print(str(onset_issues))
-            # print(str(issues))
+            print(str(onset_issues))
+            print(str(issues))
             error_handler.pop_error_context()
             self.assertEqual(len(hed_ops[-1]._onsets), context)
             self.assertCountEqual(onset_issues, issues)
@@ -51,8 +51,8 @@ class Test(TestHedBase):
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
             onset_issues = test_string.validate(hed_ops, expand_defs=True)
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
-            # print(str(onset_issues))
-            # print(str(issues))
+            print(str(onset_issues))
+            print(str(issues))
             error_handler.pop_error_context()
             self.assertCountEqual(onset_issues, issues)
 
@@ -288,8 +288,8 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
         # count of issues the line generates
-        onset_list = ['Property/Data-property/Data-marker/Temporal-marker/Onset']
-        offset_list = ['Property/Data-property/Data-marker/Temporal-marker/Offset']
+        onset_list = ['Onset']
+        offset_list = ['Offset']
         test_issues = [
             self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=2)
