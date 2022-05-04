@@ -5,7 +5,7 @@ class HedGroupBase:
     """ An abstract baseclass used for HedGroup API that is shared with HedGroupFrozen. """
 
     def __init__(self, hed_string="", startpos=None, endpos=None):
-        """ Returns an empty HedGroup object.
+        """ Return an empty HedGroupBase object.
 
         Args:
             hed_string (str): Source hed string for this group.
@@ -23,11 +23,7 @@ class HedGroupBase:
 
     @property
     def children(self):
-        """ Returns the direct children of this string.
-
-        Returns:
-            The list of direct children of this group
-        """
+        """ Return a list of the direct children of this string. """
         return self._children
 
     @property
@@ -36,12 +32,7 @@ class HedGroupBase:
         return True
 
     def get_all_tags(self):
-        """ Return all the tags, including descendants.
-
-        Returns:
-            tag_list (list): The list of all HedTags in this group, including descendants.
-
-        """
+        """ Return all the HedTags in this group, including descendants. """
         node_list = [self]
         final_list = []
 
@@ -82,7 +73,16 @@ class HedGroupBase:
 
     @staticmethod
     def _check_in_group(group, group_list):
-        """ Return true if the group is in the group list. """
+        """ Return true if the group is in the group list.
+
+        Args:
+            group ():
+            group_list ():
+
+        Returns:
+            bool: True if group is in the group_list.
+
+        """
         for val in group_list:
             if val is group:
                 return True
@@ -92,7 +92,7 @@ class HedGroupBase:
         """ Return the direct child tags of this group, filtering out HedGroup children.
 
         Returns:
-            tag_list: (list): The list of all tags directly in this group.
+            tag_list (list): The list of all tags directly in this group.
 
         """
         return [tag for tag in self.children if isinstance(tag, HedTag)]
@@ -138,7 +138,7 @@ class HedGroupBase:
         return ",".join([str(child) for child in self.children])
 
     def get_as_short(self):
-        """ Return this HedGroup as a short tag string
+        """ Return this HedGroup as a short tag string.
 
         Returns:
             str: The group as a string with all tags as short tags.
@@ -182,6 +182,7 @@ class HedGroupBase:
 
     def lower(self):
         """ Convenience function, equivalent to str(self).lower(). """
+
         return str(self).lower()
 
     def find_placeholder_tag(self):
@@ -241,7 +242,7 @@ class HedGroupBase:
         return found_tags
 
     def find_exact_tags(self, tags_or_groups, recursive=False):
-        """  Find the given tags_or_groups.
+        """  Find the given tags or groups.
 
         Args:
             tags_or_groups (HedTag, HedGroupBase): A container of tags to locate.
@@ -285,6 +286,7 @@ class HedGroupBase:
             include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
 
         Returns:
+            tuple (HedTag
             list:
 
         def_tag: HedTag
@@ -323,28 +325,39 @@ class HedGroupBase:
         return def_tags
 
     def find_tags_with_term(self, term, recursive=False, include_groups=2):
-        """
-            Find any tags that contain the given term
+        """  Find any tags that contain the given term.
 
             Note: This can only find identified tags.
 
         Args:
-            term: str
-                A single term to search for.
-            recursive: bool
-                If true, also check subgroups.
+            term (str): A single term to search for.
+            recursive (bool): If true, recursively check subgroups.
             include_groups: 0, 1 or 2
                 If 0: Return only tags
                 If 1: return only groups
                 If 2 or any other value: return both
 
-        returns:
-        list:
-        tag: HedTag
-            The located tag
+           recursive (bool): If true, also check subgroups.
+            include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
+
+        Returns:
+            list:
+
+        def_tag: HedTag
+            The located def tag
+        def_expand_group: HedGroup or None
+            If this is a def-expand rather than def tag, this will be the entire def-expand group.
         group: HedGroup
-            The group the located tag is in
+            The group the def tag or def expand group is in.
+
+        Notes: The include_groups option controls the tag expansion as follows:
+            If 0: Return only def and def expand tags/
+            If 1: Return only def tags and def-expand groups
+            If 2: Return only groups containing defs, or def-expand groups
+            If 3 or any other value: Return all 3 as a tuple.
+
         """
+
         found_tags = []
         if recursive:
             groups = self.get_all_groups()

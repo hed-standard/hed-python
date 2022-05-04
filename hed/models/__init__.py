@@ -6,8 +6,10 @@ from .column_metadata import ColumnMetadata, ColumnType
 from .def_dict import DefDict, DefEntry
 from .def_mapper import DefinitionMapper
 from .events_input import EventsInput
-from .hed_group import HedGroup
+from .hed_group import HedGroup, HedGroupFrozen
+from .hed_group_base import HedGroupBase
 from .hed_input import HedInput
+from .hed_ops import HedOps
 from .hed_string import HedString
 from .hed_tag import HedTag
 from .onset_mapper import OnsetMapper

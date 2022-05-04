@@ -54,12 +54,12 @@ class TestHedString(unittest.TestCase):
 class HedTagLists(TestHedStrings):
     def test_type(self):
         hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
-        result = HedString.split_hed_string_into_groups(hed_string)
+        result = HedString.split_into_groups(hed_string)
         self.assertIsInstance(result, list)
 
     def test_top_level_tags(self):
         hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
-        result = HedString.split_hed_string_into_groups(hed_string)
+        result = HedString.split_into_groups(hed_string)
         tags_as_strings = [str(tag) for tag in result]
         self.assertCountEqual(tags_as_strings, ['Event/Category/Experimental stimulus', 'Item/Object/Vehicle/Train',
                                                 'Attribute/Visual/Color/Purple'])
@@ -68,7 +68,7 @@ class HedTagLists(TestHedStrings):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
                      '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
         string_obj = HedString(hed_string)
-        # result = HedString.split_hed_string_into_groups(hed_string)
+        # result = HedString.split_into_groups(hed_string)
         tags_as_strings = [str(tag) for tag in string_obj.children]
         self.assertCountEqual(tags_as_strings,
                               ['/Action/Reach/To touch',
@@ -81,8 +81,8 @@ class HedTagLists(TestHedStrings):
     #     double_quote_string = 'Event/Category/Experimental stimulus,"Item/Object/Vehicle/Train",' \
     #                           'Attribute/Visual/Color/Purple '
     #     normal_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
-    #     double_quote_result = HedString.split_hed_string_into_groups(double_quote_string)
-    #     normal_result = HedString.split_hed_string_into_groups(normal_string)
+    #     double_quote_result = HedString.split_into_groups(double_quote_string)
+    #     normal_result = HedString.split_into_groups(normal_string)
     #     self.assertEqual(double_quote_result, normal_result)
 
     def test_blanks(self):
@@ -110,7 +110,7 @@ class HedTagLists(TestHedStrings):
         }
 
         def test_function(string):
-            return [str(child) for child in HedString.split_hed_string_into_groups(string)]
+            return [str(child) for child in HedString.split_into_groups(string)]
 
         self.validator_list(test_strings, expected_results, test_function)
 

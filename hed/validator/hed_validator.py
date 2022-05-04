@@ -141,7 +141,7 @@ class HedValidator(HedOps):
          """
         from hed.models.def_dict import DefTagNames
         validation_issues = []
-        def_groups = hed_string_obj.find_top_level_tags(anchors={DefTagNames.DEFINITION_KEY}, include_groups=1)
+        def_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1)
         all_def_groups = [group for sub_group in def_groups for group in sub_group.get_all_groups()]
         for group in hed_string_obj.get_all_groups():
             is_definition = group in all_def_groups

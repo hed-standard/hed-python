@@ -12,24 +12,24 @@ from hed.models.hed_group_base import HedGroupBase
 
 
 class HedString(HedGroup):
-    """Represents a hed string."""
+    """Class representing a HED string."""
 
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
 
     def __init__(self, hed_string, hed_schema=None):
-        """Constructor for the HedString class.
+        """ Constructor for the HedString class.
 
-        Parameters
-        ----------
-        hed_string: str
-            A HED string consisting of tags and tag groups.
-        Returns
-        -------
+        Args:
+            hed_string (str): A HED string consisting of tags and tag groups.
+
+        Notes:
+            The HedString object parses its component tags and groups into a tree-like structure.
+
         """
-        # This is a tree like structure containing the entire hed string
+
         try:
-            contents = self.split_hed_string_into_groups(hed_string, hed_schema)
+            contents = self.split_into_groups(hed_string, hed_schema)
         except ValueError:
             contents = []
 
@@ -37,27 +37,21 @@ class HedString(HedGroup):
 
     @property
     def is_group(self):
-        """
-            Returns True if this is a group with parenthesis.
-        """
+        """ Returns False since the underlying string is not a group with parentheses. """
         return False
 
-
     def convert_to_canonical_forms(self, hed_schema):
-        """
-            Identify all tags using the given schema.  If no schema, still identify "key" tags such as definitions.
+        """ Identify all tags using the given schema. If no schema, still identify "key" tags such as definitions.
 
-            Also sets the "isDefinition" property on tags and groups.
+        Args:
+            hed_schema (HedSchema or None): The schema to use to validate/convert tags.
 
-        Parameters
-        ----------
-        hed_schema : HedSchema or None
-            The schema to use to validate/convert tags.
+        Returns:
+            list: A list of issues found while converting the string. Each issue is a dictionary.
 
-        Returns
-        -------
-        conversion_issues: [{}]
-            A list of issues found while converting the string.
+        Notes:
+            Sets the "isDefinition" property on tags and groups.
+
         """
         validation_issues = []
         for tag in self.get_all_tags():
@@ -66,13 +60,11 @@ class HedString(HedGroup):
         return validation_issues
 
     def remove_definitions(self):
-        """
-            Removes any definition tags and groups from this string.
+        """ Remove definition tags and groups from this string.
 
-        Returns
-        -------
-        issues: [{}]
-            There are no possible issues, this list is always blank.
+        Returns:
+            list: An empty list as there are no possible issues, this list is always blank.
+
         """
         definition_groups = self.find_top_level_tags({DefTagNames.DEFINITION_KEY}, include_groups=1)
         if definition_groups:
@@ -81,73 +73,66 @@ class HedString(HedGroup):
         return []
 
     def convert_to_short(self, hed_schema):
-        """
-            Compute string canonical forms and return the long form and issues.
+        """ Compute string canonical forms and return the short form and issues.
 
-        Parameters
-        ----------
-        hed_schema : HedSchema or None
-            The schema to use to calculate forms.
-        Returns
-        -------
-        short_form: str
-            The string with all tags converted to short form
-        conversion_issues: [{}]
-            Issues found during conversion.  No issues will be found if no schema is passed.
+        Args:
+            hed_schema (HedSchema or None): The schema to use to calculate forms.
+
+        Returns:
+            str:   The string with all tags converted to short form.
+            list:  A list of issues found during conversion. Each issue is a dictionary.
+
+        Notes:
+            No issues will be found if no schema is passed.
+
         """
         conversion_issues = self.convert_to_canonical_forms(hed_schema)
         short_string = self.get_as_short()
         return short_string, conversion_issues
 
     def convert_to_long(self, hed_schema):
-        """
-            Compute string canonical forms and return the long form and issues.
+        """ Compute string canonical forms and return the long form and issues.
 
-        Parameters
-        ----------
-        hed_schema : HedSchema or None
-            The schema to use to calculate forms.
-        Returns
-        -------
-        long_form: str
-            The string with all tags converted to long form
-        conversion_issues: [{}]
-            Issues found during conversion.  No issues will be found if no schema is passed.
+        Args:
+            hed_schema (HedSchema or None): The schema to use to calculate forms.
+
+        Returns:
+            str:   The string with all tags converted to long form.
+            list:  A list of issues found during conversion.  Each issue is a dictionary.
+
+        Notes:
+            No issues will be found if no schema is passed.
+
         """
         conversion_issues = self.convert_to_canonical_forms(hed_schema)
         short_string = self.get_as_long()
         return short_string, conversion_issues
 
     def convert_to_original(self):
-        """
-            Returns the original form of this string, though potentially with some extraneous spaces removed.
+        """ Return the original form of this string, though potentially with some extraneous spaces removed.
 
-        Returns
-        -------
-        org_string: str
-            The string with all the tags in their original form.
+        Returns:
+            str: The string with all the tags in their original form.
+
         """
         return self.get_as_form("org_tag")
 
     @staticmethod
-    def split_hed_string_into_groups(hed_string, hed_schema=None):
-        """Splits the hed_string into a tree of tag groups, tags, and delimiters.
+    def split_into_groups(hed_string, hed_schema=None):
+        """ Split the HED string into a tree of tag groups, tags, and delimiters.
 
-        Parameters
-        ----------
-        hed_string
-            A hed string consisting of tags and tag groups.
-        hed_schema
-            Schema to use to identify tags.
-        Returns
-        -------
-        child_list: [HedTag or HedGroupBase]
-            The list containing this hed_string.
+        Args:
+            hed_string (str): A hed string consisting of tags and tag groups to be processed.
+            hed_schema (HedSchema or None): Hed schema to use to identify tags.
 
-        raises: ValueError
-            Raises ValueError if the string is significantly malformed, such as mis-matched parenthesis.
+        Returns:
+            list:  A list of HedTag and/or HedGroupBase.
+
+        Raises:
+            ValueError: If the string is significantly malformed, such as mismatched parentheses.
+
         """
-        # Stack variable while processing
+
         current_tag_group = [[]]
 
         input_tags = HedString.split_hed_string(hed_string)
@@ -187,35 +172,33 @@ class HedString(HedGroup):
         return current_tag_group[0]
 
     def _get_org_span(self, tag_or_group):
+        """ If this tag or group was in the original hed string, find its original span.
+
+        Args:
+            tag_or_group (HedTag or HedGroup): The hed tag to locate in this string.
+
+        Returns:
+            int or None:   Starting position of the given item in the original string.
+            int or None:   Ending position of the given item in the original string.
+
+        Notes:
+            If the hed tag or group was not in the original string, returns (None, None).
+
         """
-            If this tag or group was in the original hed string, find it's original span.
-
-            If the hed tag or group was not in the original string, returns (None, None)
-
-        Parameters
-        ----------
-        tag_or_group : HedTag or HedGroup
-            The hed tag to locate in this string.
-
-        Returns
-        -------
-        tag_span: (int or None, int or None)
-            The starting and ending index of the given tag in the original string
-        """
-        if self.check_if_in_original_tags_and_groups(tag_or_group):
+        if self.check_if_in_original(tag_or_group):
             return tag_or_group.span
 
         return None, None
 
     @staticmethod
     def split_hed_string(hed_string):
-        """ Split a hed string into delimiters and tags.
+        """ Split a HED string into delimiters and tags.
 
         Args:
-            hed_string (str): The hed string to split
+            hed_string (str): The HED string to split.
 
         Returns:
-            [tuple]:  A list of tuples where each tuple is (is_hed_tag, (start_pos, end_pos)).
+            list:  A list of tuples where each tuple is (is_hed_tag, (start_pos, end_pos)).
 
         Notes:
             The tuple format is as follows
@@ -276,20 +259,17 @@ class HedString(HedGroup):
         return result_positions
 
     def apply_funcs(self, string_funcs):
-        """
-            Run the list of functions on this string and gather issues found.
+        """ Run the list of functions on this string and gather issues found.
 
-            This potentially modifies the hed string object.
+        Args:
+            string_funcs (list): A list of functions that take a hed string object and return a list of issues.
 
-        Parameters
-        ----------
-        string_funcs : [func]
-            A list of functions that take a hed string object and return a list of issues.
+        Returns:
+            list: A list of issues found by these operations. Each issue is a dictionary.
 
-        Returns
-        -------
-        issues_list: [{}]
-            A list of issues found by these operations
+        Notes:
+            This method potentially modifies the hed string object.
+
         """
         string_issues = []
         for string_func in string_funcs:
@@ -301,20 +281,19 @@ class HedString(HedGroup):
         return string_issues
 
     def validate(self, hed_ops=None, error_handler=None, **kwargs):
-        """
-            Run the given hed_ops on this string.
+        """ Run the given hed_ops on this string.
 
-        Parameters
-        ----------
-        hed_ops : [func or HedOps] or func or HedOps
-            A list of HedOps of funcs to apply to the hed strings in this sidecar.
-        error_handler : ErrorHandler or None
-            Used to report errors.  Uses a default one if none passed in.
-        kwargs:
-            See models.hed_ops.translate_ops or the specific hed_ops for additional options
+        Args:
+            hed_ops: (func, HedOps, or list): Operations to apply to this object.
+            error_handler (ErrorHandler or None): Used to report errors in context.  Uses a default if None.
+            kwargs:
+                See models.hed_ops.translate_ops or the specific hed_ops for additional options
 
-        Returns
-        -------
+        Returns:
+            list:  A list of issues encountered in applying these operations. Each issue is a dictionary.
+
+        Notes:
+            Although this function is called validation, the HedOps can represent other transformations.
 
         """
         if error_handler is None:
@@ -329,20 +308,22 @@ class HedString(HedGroup):
         return issues
 
     def get_frozen(self):
-        """
-            Returns a frozen copy of this HedString.
+        """ Return a frozen copy of this HedString.
 
-        Returns: HedStringFrozen
-            A frozen copy of this HedString.  Note: tags still point to the same place.  Do not alter them.
+        Returns:
+            HedStringFrozen: A frozen copy of this HedString.
+
+        Notes:
+            Tags in frozen hed strings still point to the same place.  Do not alter them.
 
         """
         return HedStringFrozen(self)
 
-    def find_top_level_tags(self, anchors, include_groups=2):
+    def find_top_level_tags(self, anchor_tags, include_groups=2):
         """ Find top level groups containing the given anchor tags.
 
         Args:
-            anchors (container): A list/set/etc of short_base_tags to find groups by.
+            anchor_tags (container):     A list/set/etc of short_base_tags to find groups by.
             include_groups (0, 1 or 2):  Parameter indicating what return values to include.
 
         Returns:
@@ -362,7 +343,7 @@ class HedString(HedGroup):
         top_level_tags = []
         for group in self.groups():
             for tag in group.tags():
-                if tag.short_base_tag.lower() in anchors:
+                if tag.short_base_tag.lower() in anchor_tags:
                     top_level_tags.append((tag, group))
                     # Only capture a max of 1 per group.  These are implicitly unique.
                     break
@@ -373,24 +354,21 @@ class HedString(HedGroup):
 
 
 class HedStringFrozen(HedGroupFrozen):
-    """
-        Represents an immutable hed string.
-    """
+    """ Class representing an immutable hed string. """
+
     def __init__(self, hed_string, hed_schema=None):
-        """
+        """ Initialize a frozen hed string object.
 
         Args:
-            hed_string: HedGroupBase or str
-                Source string
-            hed_schema: HedSchema or HedSchemaGroup or None
-                HedSchema to use to identify tags if hed_string is a str.
+            hed_string (HedGroupBase or str): The source HED string.
+            hed_schema (HedSchema, HedSchemaGroup or None): HedSchema to use to identify tags if hed_string is a str.
         """
         if isinstance(hed_string, HedGroupBase):
             contents = hed_string
             hed_string = hed_string._hed_string
         else:
             try:
-                contents = HedString.split_hed_string_into_groups(hed_string, hed_schema)
+                contents = HedString.split_into_groups(hed_string, hed_schema)
             except ValueError:
                 contents = []
 
@@ -398,9 +376,7 @@ class HedStringFrozen(HedGroupFrozen):
 
     @property
     def is_group(self):
-        """
-            Returns True if this is a group with parenthesis.
-        """
+        """ Return False since this does not have parentheses. """
         return False
 
     # Other functions from HedString we want.

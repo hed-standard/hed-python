@@ -577,6 +577,7 @@ class HedTag:
         -------
         tag_has_attribute: bool
             True if the tag has the given attribute. False, if otherwise.
+
         """
         if self._schema_entry:
             return self._schema_entry.any_parent_has_attribute(attribute=attribute)

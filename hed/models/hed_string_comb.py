@@ -124,7 +124,7 @@ class HedStringComb(HedString):
         found_string = None
         string_start_index = 0
         for string in self._children:
-            if string.check_if_in_original_tags_and_groups(tag_or_group):
+            if string.check_if_in_original(tag_or_group):
                 found_string = string
                 break
             # Add 1 for comma

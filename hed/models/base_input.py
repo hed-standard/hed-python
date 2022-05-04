@@ -31,8 +31,8 @@ class BaseInput:
         """Constructor for the BaseInput class.
 
         Args:
-            file (str or file like): An xlsx/tsv file to open.
-            file_type (str): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
+            file (str or file-like): An xlsx/tsv file to open.
+            file_type (str or None): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
                 Derived from file if file is a filename.
             worksheet_name (str or None): Name of Excel workbook worksheet name to use.
                 (Not applicable to tsv files.)
@@ -87,7 +87,7 @@ class BaseInput:
         """ Set the column mapper to allow a different view of the file.
 
         Args:
-            new_mapper (ColumnMapper): A column mapper to be associted with this base input.
+            new_mapper (ColumnMapper): A column mapper to be associated with this base input.
 
         """
         self._mapper = new_mapper
@@ -173,7 +173,7 @@ class BaseInput:
         return self._convert_to_form(hed_schema, "long_tag", error_handler)
 
     def to_excel(self, file, output_processed_file=False):
-        """ Convert this base input to an Excel file.
+        """ Output to an Excel file.
 
         Args:
             file (str or file-like):      Location to save this base input.
@@ -233,11 +233,11 @@ class BaseInput:
         return csv_string_if_filename_none
 
     def __iter__(self):
-        """ A pass through iterator to the underlying dataframe using iter_dataframe. """
+        """ Iterate over the underlying dataframe using iter_dataframe. """
         return self.iter_dataframe()
 
     def iter_raw(self, hed_ops=None, error_handler=None, **kwargs):
-        """ Iterate over (row, column value dict) without modification.
+        """ Iterate over (row, column value dict) without modifications or substitutions.
 
         Args:
             hed_ops (list, func, HedOps, or None): A func, a HedOps or a list of these to apply to the
@@ -251,7 +251,8 @@ class BaseInput:
 
         Notes:
             See models.hed_ops.translate_ops or the specific hed_ops for additional options.
-            This is primarily for altering or re-saving the original file.(eg convert short tags to long).
+            Primarily for altering or re-saving the original file (e.g., convert short tags to long).
+            Used for initial processing when trying to find definitions.
 
         """
         if error_handler is None:
@@ -354,8 +355,8 @@ class BaseInput:
             row_number (int):    The row number of the spreadsheet to set.
             column_number (int): The column number of the spreadsheet to set.
             new_string_obj (HedString): Object with text to put in the given cell.
-            include_column_prefix_if_exist (bool): If true and the column matches one from mapper
-                _column_prefix_dictionary, remove the name_prefix.
+            include_column_prefix_if_exist (bool): If True and the column matches one from mapper
+                _column_prefix_dictionary, remove the prefix.
             tag_form (str): Version of the tags (short_tag, long_tag, base_tag, etc)
 
         Notes:

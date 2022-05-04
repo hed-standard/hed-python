@@ -32,7 +32,7 @@ class ColumnMetadata:
         """ A single column entry in the column mapper.
 
         Args:
-            column_type (ColumnType or NOne): How to treat this column when reading data.
+            column_type (ColumnType or None): How to treat this column when reading data.
             name (str, int, or None): The column_name or column number identifying this column.
                 If name is a string, you'll need to use a column map to set the number later.
             hed_dict (dict or None): The loaded data (usually from json) for the given def
@@ -43,6 +43,7 @@ class ColumnMetadata:
 
         Notes:
             Each column from which data is retrieved must have a ColumnMetadata representing its contents.
+            The column_prefix dictionaries are used when the column is processed.
         """
         if column_type is None or column_type == ColumnType.Unknown:
             column_type = ColumnMetadata._detect_column_type(hed_dict)
@@ -421,13 +422,14 @@ class ColumnMetadata:
         return []
 
     def extract_definitions(self, error_handler=None):
-        """ Gather and validate all definitions found in this column of the spreadsheet.
+        """ Gather and validate all definitions found in this column.
 
         Args:
-            error_handler (ErrorHandler): The error handler to use for context, uses a default one if none.
+            error_handler (ErrorHandler): The error handler to use for context, uses a default one if None.
 
         Returns:
             DefDict: Contains all the definitions located in the column.
+
         """
         if error_handler is None:
             error_handler = ErrorHandler()

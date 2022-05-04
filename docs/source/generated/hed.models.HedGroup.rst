@@ -15,17 +15,17 @@
       ~HedGroup.__init__
       ~HedGroup.append
       ~HedGroup.cascade_mutable
-      ~HedGroup.check_if_in_original_tags_and_groups
+      ~HedGroup.check_if_in_original
       ~HedGroup.find_def_tags
       ~HedGroup.find_exact_tags
       ~HedGroup.find_placeholder_tag
       ~HedGroup.find_tags
+      ~HedGroup.find_tags_with_term
       ~HedGroup.get_all_groups
       ~HedGroup.get_all_tags
       ~HedGroup.get_as_form
       ~HedGroup.get_as_long
       ~HedGroup.get_as_short
-      ~HedGroup.get_direct_children
       ~HedGroup.get_frozen
       ~HedGroup.get_original_hed_string
       ~HedGroup.groups
@@ -43,6 +43,7 @@
 
    .. autosummary::
    
+      ~HedGroup.children
       ~HedGroup.is_group
       ~HedGroup.span
    

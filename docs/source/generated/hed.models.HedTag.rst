@@ -49,6 +49,7 @@
       ~HedTag.short_base_tag
       ~HedTag.short_tag
       ~HedTag.tag
+      ~HedTag.tag_terms
       ~HedTag.unit_classes
       ~HedTag.value_classes
    
