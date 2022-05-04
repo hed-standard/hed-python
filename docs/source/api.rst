@@ -18,7 +18,10 @@ HED models
    hed.models.DefinitionMapper
    hed.models.EventsInput
    hed.models.HedGroup
+   hed.models.HedGroupBase
+   hed.models.HedGroupFrozen
    hed.models.HedInput
+   hed.models.HedOps
    hed.models.HedString
    hed.models.HedTag
    hed.models.OnsetMapper
@@ -105,11 +108,3 @@ HED validators
 
 .. currentmodule:: hed
 
-Modules
---------------
-.. toctree::
-   :maxdepth: 6
-
-   generated/modules
-
-.. _calibration_ref2:

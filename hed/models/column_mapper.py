@@ -34,7 +34,7 @@ class ColumnMapper:
             attribute_columns (str, int or list): A column name, column number or a list of column names
                 or numbers to treat as attributes.
             optional_tag_columns (list): A list of ints or strings containing the columns that contain
-                the HED tags. If the column is otherwise unspecified convert this column type to HEDTags.
+                the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
 
         Notes:
             Sidecars later in the list override those earlier in the list.

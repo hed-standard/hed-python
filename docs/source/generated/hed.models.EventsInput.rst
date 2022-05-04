@@ -27,7 +27,7 @@
       ~EventsInput.set_cell
       ~EventsInput.to_csv
       ~EventsInput.to_excel
-      ~EventsInput.update_definition_mapper_with_file
+      ~EventsInput.update_definition_mapper
       ~EventsInput.validate_file
       ~EventsInput.validate_file_sidecars
    

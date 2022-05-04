@@ -71,7 +71,7 @@ class OnsetMapper(HedOps):
         return onset_issues
 
     def _find_onset_tags(self, hed_string_obj):
-        return hed_string_obj.find_top_level_tags(anchors={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY})
+        return hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY})
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
         is_onset = onset_offset_tag.short_base_tag.lower() == DefTagNames.ONSET_KEY

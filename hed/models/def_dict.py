@@ -10,21 +10,16 @@ from hed.models.hed_ops import HedOps
 
 
 class DefEntry:
-    """Represents a single definition tag"""
+    """ Represents a single definition."""
 
     def __init__(self, name, contents, takes_value, source_context):
-        """Contains info for a single definition tag
+        """ Initialize info for a single definition.
 
-        Parameters
-        ----------
-        name : str
-            The label portion of this name(not including definition/)
-        contents: HedGroup
-            The contents of this definition
-        takes_value : bool
-            If True, expects ONE tag to have a single # sign in it.
-        source_context: {}
-            Info about where this definition was declared.
+        Args:
+            name (str):            The label portion of this name (not including Definition/).
+            contents (HedGroup):   The contents of this definition.
+            takes_value (bool):    If True, expects ONE tag to have a single # sign in it.
+            source_context (dict): Info about where this definition was declared.
         """
         self.name = name
         self.contents = contents
@@ -37,20 +32,21 @@ class DefEntry:
             add_group_to_dict(contents, self.tag_dict)
 
     def get_definition(self, replace_tag, placeholder_value=None):
-        """
-            Returns a copy of the definition with the tag expanded and the placeholder plugged in
+        """ Return a copy of the definition with the tag expanded and the placeholder plugged in.
 
-        Parameters
-        ----------
-        replace_tag : HedTag
-            The def hed tag to replace with an expanded version
-        placeholder_value : str or None
-            If present and required, will replace any pound signs in the definition contents
+        Args:
+            replace_tag (HedTag): The def hed tag to replace with an expanded version
+            placeholder_value (str or None): If present and required, will replace any pound signs in the definition contents
 
-        Returns
-        -------
-        expanded_tag_name, def_contents: str, [HedGroup or HedTag]
+        Returns:
+            str:          The expanded def tag name
+            HedGroup:
+            expanded_tag_name, def_contents: str, [HedGroup or HedTag]
             The expanded def tag name, and the contents of this definition(including the def tag itself)
+
+        Raises:
+            ValueError:  If a placeholder_value is passed, but this definition doesn't have a placehold.
+
         """
         if self.takes_value == (placeholder_value is None):
             return None, []
@@ -79,17 +75,14 @@ class DefEntry:
 class DefDict(HedOps):
     """Class responsible for gathering and storing a group of definitions to be considered a single source.
 
-        A bids_old style file might have many of these(one for each json dict, and another for the actual file)
+        A bids_old style file might have many of these(one for each json dict, and another for the actual file).
+
+        This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
+
     """
 
     def __init__(self):
-        """
-        Class responsible for gathering and storing a group of definitions to be considered a single source.
-
-        A bids_old style file might have many of these(one for each json dict, and another for the actual file)
-        Parameters
-        ----------
-        """
+        """ Initialize the class. gathering and storing a group of definitions to be considered a single source. """
         super().__init__()
         self._defs = {}
 
@@ -97,15 +90,10 @@ class DefDict(HedOps):
         self._extract_def_issues = []
 
     def get_definition_issues(self):
-        """
-            Returns definition errors found during extraction
+        """ Return definition errors found during extraction.
 
-        Parameters
-        ----------
-        Returns
-        -------
-        issues_list: [{}]
-            List of DefinitionErrors found.
+        Returns:
+            list: List of DefinitionErrors issues found. Each issue is a dictionary.
         """
         return self._extract_def_issues
 
@@ -130,20 +118,18 @@ class DefDict(HedOps):
         return []
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
-        """
-        Check a given hed string for definition tags, and add them to the dictionary if so.
+        """ Check a given HedString for definition tags, and add them to the dictionary if so.
 
-        Parameters
-        ----------
-        hed_string_obj : HedString
-            A single hed string to gather definitions from
-        error_handler: ErrorHandler
-            Used to note where definitions are found.  Optional.
-        Returns
-        ----------
+        Args:
+            hed_string_obj (HedString): A single hed string to gather definitions from.
+            error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
+
+        Returns:
+            list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
+
         """
         new_def_issues = []
-        for definition_tag, group in hed_string_obj.find_top_level_tags(anchors={DefTagNames.DEFINITION_KEY}):
+        for definition_tag, group in hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}):
             def_tag_name = definition_tag.extension_or_value_portion
 
             # initial validation
@@ -218,7 +204,7 @@ class DefDict(HedOps):
 
 
 def add_group_to_dict(group, tag_dict=None):
-    """ Adds the tags and their values from a HED group to a tag dictionary.
+    """ Add the tags and their values from a HED group to a tag dictionary.
 
     Args:
         group (HedGroup):   Contents to add to the tag dict.
@@ -229,6 +215,7 @@ def add_group_to_dict(group, tag_dict=None):
 
     Notes:
         Expects tags to have forms calculated already.
+
     """
     if tag_dict is None:
         tag_dict = {}

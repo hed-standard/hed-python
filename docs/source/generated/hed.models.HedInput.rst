@@ -25,7 +25,7 @@
       ~HedInput.set_cell
       ~HedInput.to_csv
       ~HedInput.to_excel
-      ~HedInput.update_definition_mapper_with_file
+      ~HedInput.update_definition_mapper
       ~HedInput.validate_file
    
    

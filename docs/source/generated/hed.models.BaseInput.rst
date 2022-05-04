@@ -25,7 +25,7 @@
       ~BaseInput.set_cell
       ~BaseInput.to_csv
       ~BaseInput.to_excel
-      ~BaseInput.update_definition_mapper_with_file
+      ~BaseInput.update_definition_mapper
       ~BaseInput.validate_file
    
    
