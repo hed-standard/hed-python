@@ -73,7 +73,6 @@ class test_parser(unittest.TestCase):
         }
         self.base_test("[[a, b]]", test_strings)
 
-    # todo: I might've misinterpreted this one.
     def test_exact_group_simple_complex(self):
         test_strings = {
             "(A, C)": False,
@@ -114,7 +113,7 @@ class test_parser(unittest.TestCase):
             "(A, D)": False,
             "((A), (D))": True,
             "((A), ((D)))": True,
-            "((A, D))": False,  # todo: should this be true?  Probably not.
+            "((A, D))": True,  # todo: should this be true?  Probably not.
         }
         self.base_test("[[ [a], [d] ]]", test_strings)
 
@@ -123,7 +122,7 @@ class test_parser(unittest.TestCase):
             "(A, D)": False,
             "((A), (D))": True,
             "((A), ((D)))": False,
-            "((A, D))": False,  # todo: should this be true?  Probably not.
+            "((A, D))": True,  # todo: should this be true?  Probably not.
         }
         self.base_test("[[ [[a]], [[d]] ]]", test_strings)
 
@@ -152,7 +151,7 @@ class test_parser(unittest.TestCase):
             "(A, B)": False,
             "((A), (B))": False,
             "((A))": False,
-            "((A), ((B)))": True, # todo: should all result groups have to have tags?
+            "((A), ((B)))": True, # todo: should all result groups have to have tags?.  this is true because of ((B)) group with no tags
             "((A, B))": False,
             "((A), (C))": True,
             "((A), (B, C))": False,
@@ -217,7 +216,7 @@ class test_parser(unittest.TestCase):
             "(A, B, ((C, D)))": False,
             "(E, F, (A, B, (C, D)))": True,
             "((A, B), (C, D))": True,
-            "((A, B, C, D))": False, # todo: should this be true?  Probably not.
+            "((A, B, C, D))": True, # todo: should this be true?  Probably not.
         }
         self.base_test("[[ [a, b], [c, d] ]]", test_strings)
 
@@ -263,7 +262,9 @@ class test_parser(unittest.TestCase):
             "(A, (B))": False,
             "(A, (C))": True,
             "(A, (B, C))": True,
-            "(A), (B)": False
+            "(A), (B)": False,
+            "(C, (A))": False,
+            "(A, ((C)))": True
         }
         self.base_test("[a, [c] ]", test_strings)
 

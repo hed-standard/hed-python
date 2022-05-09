@@ -1,11 +1,4 @@
-import copy
 import re
-import os
-
-print("Number of CPUs:", os.cpu_count())
-pid = 0
-affinity = os.sched_getaffinity(pid)
-os.sched_setaffinity(pid, [0, 1, 2, 3])
 
 
 # Syntax:
@@ -153,69 +146,70 @@ class ExpressionContainingGroup(Expression):
 
 
 class TagExpressionParser:
+    """Parse a search expression into a form than can be used to search a hed string."""
     def __init__(self, expression_string):
         self.tokens = []
         self.at_token = -1
         self.tree = self._parse(expression_string)
         self._org_string = expression_string
 
-    def get_next_token(self):
+    def _get_next_token(self):
         self.at_token += 1
         if self.at_token >= len(self.tokens):
             raise ValueError("Parse error in get next token")
         return self.tokens[self.at_token]
 
-    def next_token_is(self, kinds):
+    def _next_token_is(self, kinds):
         if self.at_token + 1 >= len(self.tokens):
             return None
         if self.tokens[self.at_token + 1].kind in kinds:
-            return self.get_next_token()
+            return self._get_next_token()
         return None
 
-    def handle_and_op(self):
-        expr = self.handle_negation()
-        next_token = self.next_token_is([Token.And, Token.Or])
+    def _handle_and_op(self):
+        expr = self._handle_negation()
+        next_token = self._next_token_is([Token.And, Token.Or])
         while next_token:
-            right = self.handle_negation()
+            right = self._handle_negation()
             if next_token.kind == Token.And:
                 expr = ExpressionAnd(next_token, expr, right)
             else:
                 expr = ExpressionOr(next_token, expr, right)
-            next_token = self.next_token_is([Token.And, Token.Or])
+            next_token = self._next_token_is([Token.And, Token.Or])
 
         return expr
 
-    def handle_negation(self):
-        next_token = self.next_token_is([Token.LogicalNegation])
+    def _handle_negation(self):
+        next_token = self._next_token_is([Token.LogicalNegation])
         if next_token == Token.LogicalNegation:
-            interior = self.handle_grouping_op()
+            interior = self._handle_grouping_op()
             expr = ExpressionNegation(next_token, right=interior)
             return expr
         else:
-            return self.handle_grouping_op()
+            return self._handle_grouping_op()
 
-    def handle_grouping_op(self):
-        next_token = self.next_token_is([Token.ExactGroup, Token.LogicalGroup, Token.ContainingGroup])
+    def _handle_grouping_op(self):
+        next_token = self._next_token_is([Token.ExactGroup, Token.LogicalGroup, Token.ContainingGroup])
         if next_token == Token.ExactGroup:
-            interior = self.handle_and_op()
+            interior = self._handle_and_op()
             expr = ExpressionExactGroup(next_token, right=interior)
-            next_token = self.next_token_is([Token.ExactGroupEnd])
+            next_token = self._next_token_is([Token.ExactGroupEnd])
             if next_token != Token.ExactGroupEnd:
                 raise ValueError("Parse error: Missing closing square brackets")
         elif next_token == Token.LogicalGroup:
-            interior = self.handle_and_op()
+            interior = self._handle_and_op()
             expr = ExpressionLogicalGroup(next_token, right=interior)
-            next_token = self.next_token_is([Token.LogicalGroupEnd])
+            next_token = self._next_token_is([Token.LogicalGroupEnd])
             if next_token != Token.LogicalGroupEnd:
                 raise ValueError("Parse error: Missing closing paren")
         elif next_token == Token.ContainingGroup:
-            interior = self.handle_and_op()
+            interior = self._handle_and_op()
             expr = ExpressionContainingGroup(next_token, right=interior)
-            next_token = self.next_token_is([Token.ContainingGroupEnd])
+            next_token = self._next_token_is([Token.ContainingGroupEnd])
             if next_token != Token.ContainingGroupEnd:
                 raise ValueError("Parse error: Missing closing square bracket")
         else:
-            next_token = self.get_next_token()
+            next_token = self._get_next_token()
             if next_token:
                 expr = Expression(next_token)
 
@@ -224,7 +218,7 @@ class TagExpressionParser:
     def _parse(self, expression_string):
         self.tokens = self._tokenize(expression_string)
 
-        expr = self.handle_and_op()
+        expr = self._handle_and_op()
 
         if self.at_token + 1 != len(self.tokens):
             raise ValueError("Parse error in search string")
@@ -250,17 +244,9 @@ class TagExpressionParser:
         return result
 
 
-from hed.models.hed_string import HedStringFrozen
-
-
-def test_speed2():
-    expression = TagExpressionParser("[[a,b,[[c,d, [[e, f]]]]]]")
-    for i in range(100000):
-        hed_string_obj = HedStringFrozen("(a, b, ((e, f), c, d))")
-        expression.search_hed_string(hed_string_obj)
-
-
 if __name__ == '__main__':
+    from hed.models.hed_string import HedStringFrozen
+
     expression = TagExpressionParser("[[a,b]]")
     hed_string = HedStringFrozen("A, C, D, B")
     print(expression.search_hed_string(hed_string), False)  # False
@@ -343,31 +329,4 @@ if __name__ == '__main__':
     expression = TagExpressionParser("[[a,b,[[c,d, [[e, f]]]]]]")
     hed_string = HedStringFrozen("(a, b, (e, f, c, d))")
     print(expression.search_hed_string(hed_string), False)  # False
-
-    # this API needs work
-    # todo: clean up this trash with double layer strings.
-    from hed.models.hed_group import HedGroupFrozen
-
-    hed_string = HedStringFrozen("(a, b, ((e, f), c, d))")
-    group = hed_string.get_all_groups()[3]
-    search_string = HedStringFrozen("(f, e)")
-
-    # Need to figure out how to clean this up still
-    # This in particular seems wrong.  Why can I not search like this?
-    frozen_string = HedGroupFrozen(search_string.groups()[0])
-    print(frozen_string == group)
-    print(hed_string.find_exact_tags([frozen_string], recursive=True))
-
-    import cProfile
-    import time
-
-    start_time = time.time()
-    test_speed2()
-    time_taken = time.time() - start_time
-    print(f"time: {time_taken}")
-
-    start_time = time.time()
-    cProfile.run("test_speed2()", sort='cumtime')
-    time_taken = time.time() - start_time
-    print(f"time: {time_taken}")
 

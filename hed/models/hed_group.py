@@ -263,6 +263,7 @@ class HedGroupFrozen(HedGroupBase):
             else:
                 span = 0, 0
 
+        # Possibly temporary: Have frozen groups always know their parents
         self._parent = None
 
         super().__init__(hed_string=hed_string, startpos=span[0], endpos=span[1])
