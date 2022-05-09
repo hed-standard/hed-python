@@ -4,25 +4,6 @@ from hed.models.expression_parser import TagExpressionParser
 import os
 from hed import schema
 
-# @property
-# def tag_terms(self):
-#     """
-#         Returns a tuple of all the terms in this tag, not counting any extension.  Lowercase.
-#
-#         Returns empty tuple for unidentified tag.
-#
-#     Returns
-#     -------
-#     tag_terms: (str)
-#         Tuple of terms
-#     """
-#     if self._schema_entry:
-#         return self._schema_entry.tag_terms
-#
-#     return tuple()
-#
-#     # Return a default case
-#     return tuple(str(self).lower())
 
 class test_parser(unittest.TestCase):
     @classmethod
