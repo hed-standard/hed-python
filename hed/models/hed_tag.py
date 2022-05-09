@@ -265,7 +265,9 @@ class HedTag:
         """
         if self._schema_entry:
             return self._schema_entry.tag_terms
-        return tuple()
+
+        ## todo: Potentially remove this.  It's just a quick hack for testing and should not be on the main branch.
+        return tuple(str(self).lower())
 
     def __str__(self):
         """
