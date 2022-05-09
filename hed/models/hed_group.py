@@ -263,12 +263,18 @@ class HedGroupFrozen(HedGroupBase):
             else:
                 span = 0, 0
 
+        # Possibly temporary: Have frozen groups always know their parents
+        self._parent = None
+
         super().__init__(hed_string=hed_string, startpos=span[0], endpos=span[1])
         if contents is not None:
             self._children = frozenset(child if not isinstance(child, HedGroupBase)
                                        else HedGroupFrozen(child) for child in contents)
+            for child in self.groups():
+                child._parent = self
         else:
             self._children = None
+
 
     def __hash__(self):
         """ Get a hash of this HedFrozenGroup."""

@@ -136,7 +136,7 @@ class BaseInput:
         """
         error_list = []
         for row_number, row_dict in self.iter_dataframe(hed_ops=hed_schema, return_row_dict=True,
-                                                        remove_definitions=False):
+                                                        remove_definitions=False, error_handler=error_handler):
             column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
             error_list += row_dict[model_constants.ROW_ISSUES]
             for column_number in column_to_hed_tags_dictionary:
