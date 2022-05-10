@@ -1,6 +1,7 @@
 """ Utilities to facilitate annotation of events in BIDS. """
+
 from pandas import DataFrame
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 
 
 def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
@@ -79,7 +80,7 @@ def extract_tags(hed_string, search_tag):
 
 
 def generate_sidecar_entry(column_name, column_values=None):
-    """  Creates the sidecar column dictionary for a given column name
+    """  Create the sidecar column dictionary for a given column name
 
     Args:
         column_name (str):       Name of the column

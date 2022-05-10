@@ -1,5 +1,6 @@
-from hed.errors.exceptions import HedFileError
-from hed.util.data_util import get_new_dataframe
+
+from hed.errors import HedFileError
+from hed.util import get_new_dataframe
 from hed.tools.annotation.annotation_util import generate_sidecar_entry
 
 
@@ -83,7 +84,7 @@ class BidsTsvSummary:
         return side_dict
 
     def update(self, data):
-        """ Extracts the number of times each unique value appears in each column.
+        """ Extract the number of times each unique value appears in each column.
 
         Args:
             data (DataFrame, str, or list):    DataFrame to be analyzed or the full path of a tsv file.
