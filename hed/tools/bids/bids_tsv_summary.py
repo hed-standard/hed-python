@@ -1,7 +1,7 @@
 
 from hed.errors import HedFileError
 from hed.util import get_new_dataframe
-from hed.tools import generate_sidecar_entry
+from hed.tools.annotation.annotation_util import generate_sidecar_entry
 
 
 class BidsTsvSummary:
