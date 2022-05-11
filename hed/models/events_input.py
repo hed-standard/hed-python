@@ -1,7 +1,7 @@
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
 from hed.models.sidecar import Sidecar
-from hed.models.def_mapper import DefinitionMapper
+from hed.models.def_mapper import DefMapper
 
 
 class EventsInput(BaseInput):
@@ -22,8 +22,8 @@ class EventsInput(BaseInput):
         attribute_columns: str or int or [str] or [int]
             A list of column names or numbers to treat as attributes.
             Default: ["duration", "onset"]
-        extra_def_dicts: [DefDict] or DefDict or None
-            DefDict objects containing all the definitions this file should use other than the ones coming from the file
+        extra_def_dicts: [DefinitionDict] or DefinitionDict or None
+            DefinitionDict objects containing all the definitions this file should use other than the ones coming from the file
             itself and from the column def groups.  These are added as the last entries, so names will override
             earlier ones.
         also_gather_defs: bool
@@ -59,11 +59,11 @@ class EventsInput(BaseInput):
         ----------
         column_mapper : ColumnMapper
             The column mapper to gather definitions from
-        extra_def_dicts : DefDict or [DefDict]
+        extra_def_dicts : DefinitionDict or [DefinitionDict]
             Optional. Adds any definitions in these to the def mapper as well, in addition to any found in the columns.
         Returns
         -------
-        def mapper: DefinitionMapper
+        def mapper: DefMapper
             A class to validate or expand definitions with the given def dicts.
         """
         def_dicts = []
@@ -74,7 +74,7 @@ class EventsInput(BaseInput):
             extra_def_dicts = [extra_def_dicts]
         if extra_def_dicts:
             def_dicts += extra_def_dicts
-        def_mapper = DefinitionMapper(def_dicts)
+        def_mapper = DefMapper(def_dicts)
 
         return def_mapper
 

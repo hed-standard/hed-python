@@ -1,19 +1,18 @@
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
-from hed.models.def_dict import DefDict
+from hed.models.definition_dict import DefinitionDict
 from hed.models.model_constants import DefTagNames
 from hed.errors.error_types import ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.hed_ops import HedOps
 
 
-class DefinitionMapper(HedOps):
-    """ Class for handling definitions in hed strings.
+class DefMapper(HedOps):
+    """ Class for handling Def/ and Def-expand/ in hed strings.
 
     Notes:
        The class provides string funcs but no tag funcs when extending HedOps.
-       The class is responsible for gathering and removing definitions.
-       The class also replaces labels in hed strings with the gathered definitions.
+       The class can expand or shrink definitions in hed strings via Def/XXX and (Def-expand/XXX ...).
 
     """
 
@@ -44,7 +43,7 @@ class DefinitionMapper(HedOps):
             def_name (str):  Name of the definition to retrieve.
 
         Returns:
-            DefEntry:  Definition entry for the requested definition.
+            DefinitionEntry:  Definition entry for the requested definition.
 
         """
 
@@ -66,7 +65,7 @@ class DefinitionMapper(HedOps):
             list:  List of issues due to invalid definitions found in this string. Each issue is a dictionary.
 
         """
-        this_string_def_dict = DefDict()
+        this_string_def_dict = DefinitionDict()
         validation_issues = this_string_def_dict.check_for_definitions(hed_string_obj)
         self.add_definitions(this_string_def_dict, add_as_temp=True)
         return validation_issues
@@ -75,23 +74,23 @@ class DefinitionMapper(HedOps):
         """ Add the definitions found in the given definition dictionaries to this mapper.
 
         Args:
-            def_dicts (list or DefDict): DefDict or list of DefDicts whose definitions should be added.
+            def_dicts (list or DefinitionDict): DefDict or list of DefDicts whose definitions should be added.
             add_as_temp (bool):          If true, mark these new definitions as temporary (easily purged).
 
         """
         if not isinstance(def_dicts, list):
             def_dicts = [def_dicts]
         for def_dict in def_dicts:
-            if isinstance(def_dict, DefDict):
+            if isinstance(def_dict, DefinitionDict):
                 self._add_definitions_from_dict(def_dict, add_as_temp)
             else:
-                print(f"Invalid input type '{type(def_dict)} passed to DefinitionMapper.  Skipping.")
+                print(f"Invalid input type '{type(def_dict)} passed to DefMapper.  Skipping.")
 
     def _add_definitions_from_dict(self, def_dict, add_as_temp=False):
         """ Add the definitions found in the given definition dictionary to this mapper.
 
          Args:
-             def_dict (DefDict): DefDict whose definitions should be added.
+             def_dict (DefinitionDict): DefDict whose definitions should be added.
              add_as_temp (bool): If true, mark these new definitions as temporary (easily purged).
 
         """
@@ -99,7 +98,7 @@ class DefinitionMapper(HedOps):
             if def_tag in self._gathered_defs:
                 # todo: add detection here possibly.  Right now the first definition found is used.
                 # This is a warning.  Errors from a duplicate definition in a single source will be reported
-                # by DefDict
+                # by DefinitionDict
                 print(f"WARNING: Duplicate definition found for '{def_tag}'.")
                 continue
             self._gathered_defs[def_tag] = def_value
@@ -135,11 +134,11 @@ class DefinitionMapper(HedOps):
             if def_expand_group is def_tag:
                 if def_contents is not None and expand_defs:
                     def_tag.short_base_tag = DefTagNames.DEF_EXPAND_ORG_KEY
-                    def_group.replace_tag(def_tag, def_contents)
+                    def_group.replace(def_tag, def_contents)
             else:
                 if def_contents is not None and shrink_defs:
                     def_tag.short_base_tag = DefTagNames.DEF_ORG_KEY
-                    def_group.replace_tag(def_expand_group, def_tag)
+                    def_group.replace(def_expand_group, def_tag)
 
         return def_issues
 
@@ -215,7 +214,7 @@ class DefinitionMapper(HedOps):
                     def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_EXTRA, tag=def_tag)
             pass
         else:
-            raise ValueError("Internal error in DefinitionMapper")
+            raise ValueError("Internal error in DefMapper")
         return None
 
     def __get_string_funcs__(self, **kwargs):
@@ -226,7 +225,7 @@ class DefinitionMapper(HedOps):
         remove_definitions = kwargs.get("remove_definitions")
         check_for_definitions = kwargs.get("check_for_definitions")
         if shrink_defs and expand_defs:
-            raise ValueError("Cannot pass both shrink_defs and expand_defs to DefinitionMapper")
+            raise ValueError("Cannot pass both shrink_defs and expand_defs to DefMapper")
         from functools import partial
         string_funcs.append(partial(self.expand_and_remove_definitions,
                                     check_for_definitions=check_for_definitions,

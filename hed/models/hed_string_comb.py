@@ -44,9 +44,9 @@ class HedStringComb(HedString):
         """
         return [child for sub_string in self._children for child in sub_string._children]
 
-    def remove_groups(self, remove_groups):
+    def remove(self, items_to_remove):
         """
-            Remove any tags/groups in remove_groups found in this hed string.
+            Remove any tags/groups in remove found in this hed string.
 
             Any groups that become empty will also be pruned.
 
@@ -54,23 +54,23 @@ class HedStringComb(HedString):
 
         Parameters
         ----------
-        remove_groups : [HedGroup or HedTag]
+        items_to_remove : [HedGroup or HedTag]
             A list of groups or tags to remove.
         """
         all_groups = [group for sub_group in self._children for group in sub_group.get_all_groups()]
-        self._remove_groups(remove_groups, all_groups)
+        self._remove(items_to_remove, all_groups)
         # Remove any lingering empty HedStrings
         if any(not hed_string for hed_string in self._children):
             if self._original_children is self._children:
                 self._original_children = self._children.copy()
             self._children = [child for child in self._children if child]
 
-    def replace_tag(self, tag_or_group, new_contents):
+    def replace(self, item_to_replace, new_contents):
         """ Replaces an existing tag in the group with a new tag, list, or group
 
         Parameters
         ----------
-        tag_or_group : HedTag or HedGroup
+        item_to_replace : HedTag or HedGroup
             The tag to replace.  It must exist or this will raise an error.
         new_contents : HedTag or HedGroup or [HedTag or HedGroup]
             What to replace the tag with.
@@ -82,11 +82,11 @@ class HedStringComb(HedString):
         replace_sub_string = None
         for sub_string in self._children:
             for i, child in enumerate(sub_string.children):
-                if tag_or_group is child:
+                if item_to_replace is child:
                     replace_sub_string = sub_string
                     break
 
-        replace_sub_string.replace_tag(tag_or_group, new_contents)
+        replace_sub_string.replace(item_to_replace, new_contents)
 
     def __copy__(self):
         """

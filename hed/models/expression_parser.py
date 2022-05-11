@@ -150,7 +150,7 @@ class TagExpressionParser:
     def __init__(self, expression_string):
         self.tokens = []
         self.at_token = -1
-        self.tree = self._parse(expression_string)
+        self.tree = self._parse(expression_string.lower())
         self._org_string = expression_string
 
     def _get_next_token(self):
@@ -246,6 +246,8 @@ class TagExpressionParser:
 
 if __name__ == '__main__':
     from hed.models.hed_string import HedStringFrozen
+    from hed.schema.hed_schema_io import load_schema_version
+    hed_schema = load_schema_version(xml_version='8.0.0')
     my_string = "Sensory-event,(Intended-effect,Cue),((Def-expand/Circle-only," + \
                 "(Visual-presentation,(Foreground-view,((White,Circle)," + \
                 "(Center-of,Computer-screen))),(Background-view,Black))),Onset)," + \
@@ -255,97 +257,98 @@ if __name__ == '__main__':
                 "(Task,Experiment-participant,Inhibit-blinks)),Offset)," + \
                 "((Def-expand/Fixation-task,(Task,Experiment-participant,(Fixate,Cross)" + \
                 ")),Offset),Experimental-trial/1,(Image,Pathname/circle.bmp)"
-    hed_string = HedStringFrozen(my_string)
-    my_string1 = "Sensory-event,(Intended-effect,Cue)"
-    hed_string1 = HedStringFrozen(my_string1)
-    expression1 = TagExpressionParser("Sensory-event")
-    result1 = expression1.search_hed_string(hed_string1)
-    expression2 = TagExpressionParser("[Sensory-event, Cue]")
-    result2 = expression2.search_hed_string(hed_string1)
-    print("to here")
-    # expression = TagExpressionParser("[[a,b]]")
-    # hed_string = HedStringFrozen("A, C, D, B")
-    # x = expression.search_hed_string(hed_string)
-    # print(expression.search_hed_string(hed_string), False)  # False
-    # hed_string = HedStringFrozen("(A, B, C, D)")
-    # y = expression.search_hed_string(hed_string)
-    # print(expression.search_hed_string(hed_string), True)  # True
-    # hed_string = HedStringFrozen("(A, C, D, B)")
-    # print(expression.search_hed_string(hed_string), True)  # True
+    hed_string = HedStringFrozen(my_string, hed_schema=hed_schema)
+    my_string1 = "sensory-event,(intended-effect,cue)"
+    hed_string1 = HedStringFrozen(my_string1, hed_schema=hed_schema)
+    expression1 = TagExpressionParser("sensory-event")
+    print(expression1.search_hed_string(hed_string1), True)
+    expression2 = TagExpressionParser("sensory-event, cue")
+    print(expression2.search_hed_string(hed_string1), True)
+    expression3 = TagExpressionParser("onset")
+    print(expression3.search_hed_string(hed_string), True)
+    expression = TagExpressionParser("[[a,b]]")
+    hed_string = HedStringFrozen("A, C, D, B")
+    x = expression.search_hed_string(hed_string)
+    print(expression.search_hed_string(hed_string), False)  # False
+    hed_string = HedStringFrozen("(A, B, C, D)")
+    y = expression.search_hed_string(hed_string)
+    print(expression.search_hed_string(hed_string), True)  # True
+    hed_string = HedStringFrozen("(A, C, D, B)")
+    print(expression.search_hed_string(hed_string), True)  # True
 
     # Doesn't handle and/or precedence well(right to left and equal precedent currently)
-    # expression = TagExpressionParser("a and b or c")
-    # hed_string = HedStringFrozen("B")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    # hed_string = HedStringFrozen("A, B")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    # hed_string = HedStringFrozen("A, C")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    # hed_string = HedStringFrozen("C")
-    # print(expression.search_hed_string(hed_string), True)  # TRue
-    #
-    # expression = TagExpressionParser("a or b and c")
-    # hed_string = HedStringFrozen("B")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    # hed_string = HedStringFrozen("A, B")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    # hed_string = HedStringFrozen("A, C")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    # hed_string = HedStringFrozen("C")
-    # print(expression.search_hed_string(hed_string), False)  # false
-    # hed_string = HedStringFrozen("A")
-    # print(expression.search_hed_string(hed_string), False)  # false
-    #
-    # expression = TagExpressionParser("a and (b or c)")
-    # hed_string = HedStringFrozen("A, C")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    #
-    # expression = TagExpressionParser("[[a,b]] or [[c, d]]")
-    # hed_string = HedStringFrozen("(c, d)")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    # hed_string = HedStringFrozen("(b, d)")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    # hed_string = HedStringFrozen("(b, a)")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    #
-    # expression = TagExpressionParser("[[a,b]] and [[c, d]]")
-    # hed_string = HedStringFrozen("(c, d, a, b)")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    # hed_string = HedStringFrozen("(c, d, a)")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    # hed_string = HedStringFrozen("(c, d), (a, b)")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    # breakHere = 3
-    #
-    # expression = TagExpressionParser("[[a,b]] and d")
-    # hed_string = HedStringFrozen("(a, b), d")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    #
-    # expression = TagExpressionParser("[[a,b]] and d")
-    # hed_string = HedStringFrozen("(a, b), c")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    #
-    # expression = TagExpressionParser("[[a,b]] or d")
-    # hed_string = HedStringFrozen("d")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    #
-    # hed_string = HedStringFrozen("a, b")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    #
-    # expression = TagExpressionParser("[[a,b,[[c,d]]]]")
-    # # # Should this be valid?  It's iffy.
-    # hed_string = HedStringFrozen("(a, b, c, d)")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    #
-    # hed_string = HedStringFrozen("(a, b, (c, d))")
-    # y = expression.search_hed_string(hed_string)
-    # print(expression.search_hed_string(hed_string), True)  # True
-    #
-    # expression = TagExpressionParser("[[a,b,[[c,d, [[e, f]]]]]]")
-    # hed_string = HedStringFrozen("(a, b, ((e, f), c, d))")
-    # print(expression.search_hed_string(hed_string), True)  # True
-    #
-    # expression = TagExpressionParser("[[a,b,[[c,d, [[e, f]]]]]]")
-    # hed_string = HedStringFrozen("(a, b, (e, f, c, d))")
-    # print(expression.search_hed_string(hed_string), False)  # False
-    #
+    expression = TagExpressionParser("a and b or c")
+    hed_string = HedStringFrozen("B")
+    print(expression.search_hed_string(hed_string), False)  # False
+    hed_string = HedStringFrozen("A, B")
+    print(expression.search_hed_string(hed_string), True)  # True
+    hed_string = HedStringFrozen("A, C")
+    print(expression.search_hed_string(hed_string), True)  # True
+    hed_string = HedStringFrozen("C")
+    print(expression.search_hed_string(hed_string), True)  # TRue
+
+    expression = TagExpressionParser("a or b and c")
+    hed_string = HedStringFrozen("B")
+    print(expression.search_hed_string(hed_string), False)  # False
+    hed_string = HedStringFrozen("A, B")
+    print(expression.search_hed_string(hed_string), False)  # False
+    hed_string = HedStringFrozen("A, C")
+    print(expression.search_hed_string(hed_string), True)  # True
+    hed_string = HedStringFrozen("C")
+    print(expression.search_hed_string(hed_string), False)  # false
+    hed_string = HedStringFrozen("A")
+    print(expression.search_hed_string(hed_string), False)  # false
+
+    expression = TagExpressionParser("a and (b or c)")
+    hed_string = HedStringFrozen("A, C")
+    print(expression.search_hed_string(hed_string), True)  # True
+
+    expression = TagExpressionParser("[[a,b]] or [[c, d]]")
+    hed_string = HedStringFrozen("(c, d)")
+    print(expression.search_hed_string(hed_string), True)  # True
+    hed_string = HedStringFrozen("(b, d)")
+    print(expression.search_hed_string(hed_string), False)  # False
+    hed_string = HedStringFrozen("(b, a)")
+    print(expression.search_hed_string(hed_string), True)  # True
+
+    expression = TagExpressionParser("[[a,b]] and [[c, d]]")
+    hed_string = HedStringFrozen("(c, d, a, b)")
+    print(expression.search_hed_string(hed_string), True)  # True
+    hed_string = HedStringFrozen("(c, d, a)")
+    print(expression.search_hed_string(hed_string), False)  # False
+    hed_string = HedStringFrozen("(c, d), (a, b)")
+    print(expression.search_hed_string(hed_string), True)  # True
+    breakHere = 3
+
+    expression = TagExpressionParser("[[a,b]] and d")
+    hed_string = HedStringFrozen("(a, b), d")
+    print(expression.search_hed_string(hed_string), True)  # True
+
+    expression = TagExpressionParser("[[a,b]] and d")
+    hed_string = HedStringFrozen("(a, b), c")
+    print(expression.search_hed_string(hed_string), False)  # False
+
+    expression = TagExpressionParser("[[a,b]] or d")
+    hed_string = HedStringFrozen("d")
+    print(expression.search_hed_string(hed_string), True)  # True
+
+    hed_string = HedStringFrozen("a, b")
+    print(expression.search_hed_string(hed_string), False)  # False
+
+    expression = TagExpressionParser("[[a,b,[[c,d]]]]")
+    # # Should this be valid?  It's iffy.
+    hed_string = HedStringFrozen("(a, b, c, d)")
+    print(expression.search_hed_string(hed_string), False)  # False
+
+    hed_string = HedStringFrozen("(a, b, (c, d))")
+    y = expression.search_hed_string(hed_string)
+    print(expression.search_hed_string(hed_string), True)  # True
+
+    expression = TagExpressionParser("[[a,b,[[c,d, [[e, f]]]]]]")
+    hed_string = HedStringFrozen("(a, b, ((e, f), c, d))")
+    print(expression.search_hed_string(hed_string), True)  # True
+
+    expression = TagExpressionParser("[[a,b,[[c,d, [[e, f]]]]]]")
+    hed_string = HedStringFrozen("(a, b, (e, f, c, d))")
+    print(expression.search_hed_string(hed_string), False)  # False
+

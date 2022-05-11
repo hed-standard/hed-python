@@ -31,8 +31,8 @@
       ~HedGroup.groups
       ~HedGroup.lower
       ~HedGroup.make_tag_mutable
-      ~HedGroup.remove_groups
-      ~HedGroup.replace_tag
+      ~HedGroup.remove
+      ~HedGroup.replace
       ~HedGroup.tags
    
    

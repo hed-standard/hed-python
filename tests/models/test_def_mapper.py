@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed import schema
-from hed.models import DefDict, DefinitionMapper, HedString
+from hed.models import DefinitionDict, DefMapper, HedString
 from hed.validator import HedValidator
 
 
@@ -56,12 +56,12 @@ class Test(unittest.TestCase):
                            basic_definition_string=None):
         if not basic_definition_string:
             basic_definition_string = self.basic_definition_string
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(basic_definition_string)
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
 
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         hed_ops = []
         if extra_ops:
             hed_ops += extra_ops
@@ -118,11 +118,11 @@ class Test(unittest.TestCase):
 
     # special case test
     def test_changing_tag_then_def_mapping(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.basic_definition_string)
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         validator = HedValidator(self.hed_schema)
         hed_ops = [validator, def_mapper]
 
@@ -196,11 +196,11 @@ class Test(unittest.TestCase):
                                 extra_ops=extra_ops)
 
     def test_expand_def_tags_placeholder_invalid(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
 
         placeholder_label_def_string_no_placeholder = "def/TestDefPlaceholder"
 
@@ -210,11 +210,11 @@ class Test(unittest.TestCase):
         self.assertEqual(str(test_string), placeholder_label_def_string_no_placeholder)
         self.assertTrue(def_issues)
 
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.basic_definition_string)
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
 
         label_def_string_has_invalid_placeholder = "def/TestDef/54687"
 
@@ -225,11 +225,11 @@ class Test(unittest.TestCase):
         self.assertTrue(def_issues)
 
     def test_bad_def_expand(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
 
         valid_placeholder = HedString(self.placeholder_expanded_def_string)
         def_issues = valid_placeholder.validate(def_mapper)
@@ -240,11 +240,11 @@ class Test(unittest.TestCase):
         self.assertTrue(bool(def_issues))
 
     def test_def_no_content(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString("(Definition/EmptyDef)")
         def_string.convert_to_canonical_forms(None)
         def_dict.check_for_definitions(def_string)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
 
         valid_empty = HedString("Def/EmptyDef")
         def_issues = valid_empty.validate(def_mapper, expand_defs=True)
@@ -257,12 +257,12 @@ class Test(unittest.TestCase):
 
     def test_mutable(self):
         basic_definition_string = "(Definition/TestDef, (Keypad-key/TestDef1,Keyboard-key/TestDef2))"
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(basic_definition_string)
         def_string.convert_to_canonical_forms(self.hed_schema)
         def_dict.check_for_definitions(def_string)
 
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         hed_ops = []
         hed_ops.append(self.hed_schema)
         hed_ops.append(def_mapper)
@@ -278,7 +278,7 @@ class Test(unittest.TestCase):
         tags_to_remove = test_string.find_tags(search_tags=["keypad-key"], recursive=True)
 
         for tag, group in tags_to_remove:
-            test_string.remove_groups([tag])
+            test_string.remove([tag])
 
 
         self.assertEqual(test_string, test_string2)

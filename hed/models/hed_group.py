@@ -92,11 +92,11 @@ class HedGroup(HedGroupBase):
 
         return self._check_in_group(tag_or_group, final_list)
 
-    def replace_tag(self, tag_or_group, new_contents):
+    def replace(self, item_to_replace, new_contents):
         """ Replace an existing tag or group in the group with a new tag, list, or group.
 
         Args:
-            tag_or_group (HedTag or HedGroup): The item to  replace.  It must exist or this will raise an error.
+            item_to_replace (HedTag or HedGroup): The item to  replace must exist or this will raise an error.
             new_contents (HedTag, HedGroup or list of HedTag and/or HedGroup): Replacement contents.
 
         Raises:
@@ -111,7 +111,7 @@ class HedGroup(HedGroupBase):
 
         replace_index = -1
         for i, child in enumerate(self._children):
-            if tag_or_group is child:
+            if item_to_replace is child:
                 replace_index = i
                 break
         self._children[replace_index] = new_contents
@@ -150,11 +150,11 @@ class HedGroup(HedGroupBase):
             else:
                 child.mutable = value
 
-    def remove_groups(self, remove_groups):
-        """Remove any tags/groups in remove_groups found in this HedGroup.
+    def remove(self, items_to_remove):
+        """Remove any tags/groups in items_to_remoe found in this HedGroup.
 
         Args:
-            remove_groups (list):  List of HedGroups and/or HedTags to remove.
+            items_to_remove (list):  List of HedGroups and/or HedTags to remove.
 
         Notes:
             Any groups that become empty will also be pruned.
@@ -162,13 +162,13 @@ class HedGroup(HedGroupBase):
 
         """
         all_groups = self.get_all_groups()
-        self._remove_groups(remove_groups, all_groups)
+        self._remove(items_to_remove, all_groups)
 
-    def _remove_groups(self, remove_groups, all_groups):
+    def _remove(self, items_to_remove, all_groups):
         """ Needs to be documented.
 
         Args:
-            remove_groups ( ):
+            items_to_remove ( ):
             all_groups ( ):
 
         Returns:
@@ -178,7 +178,7 @@ class HedGroup(HedGroupBase):
 
         """
         empty_groups = []
-        for remove_child in remove_groups:
+        for remove_child in items_to_remove:
             for group in all_groups:
                 # only proceed if we have an EXACT match for this child
                 if any(remove_child is child for child in group._children):
@@ -194,7 +194,7 @@ class HedGroup(HedGroupBase):
                     break
 
         if empty_groups:
-            return self.remove_groups(empty_groups)
+            return self.remove(empty_groups)
 
     def make_tag_mutable(self, tag):
         """ Replace the given tag in this group with a tag that can be altered and return new version.
@@ -218,7 +218,7 @@ class HedGroup(HedGroupBase):
         if not tag.mutable:
             tag_copy = copy.copy(tag)
             tag_copy.mutable = True
-            self.replace_tag(tag, tag_copy)
+            self.replace(tag, tag_copy)
             return tag_copy
         return tag
 

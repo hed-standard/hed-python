@@ -3,7 +3,7 @@ import openpyxl
 import pandas
 import copy
 
-from hed.models.def_dict import DefDict
+from hed.models.definition_dict import DefinitionDict
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors.error_types import ErrorContext, ErrorSeverity
@@ -12,7 +12,7 @@ from hed.models import model_constants
 from hed.models.hed_ops import translate_ops
 from hed.models.onset_mapper import OnsetMapper
 from hed.models.hed_string_comb import HedStringComb
-from hed.models.def_mapper import DefinitionMapper
+from hed.models.def_mapper import DefMapper
 
 
 class BaseInput:
@@ -520,7 +520,7 @@ class BaseInput:
             error_handler = ErrorHandler()
 
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
-        validation_issues = self.get_def_and_mapper_issues(error_handler, check_for_warnings)
+        validation_issues = self.get_def_and_mapper_issues(error_handler, check_for_warnings=check_for_warnings)
         validation_issues += self._run_validators(hed_ops, error_handler=error_handler,
                                                   check_for_warnings=check_for_warnings, **kwargs)
         error_handler.pop_error_context()
@@ -534,12 +534,12 @@ class BaseInput:
             error_handler (ErrorHandler): The error handler to use for context or a default if None.
 
         Returns:
-            DefDict: Contains all the definitions located in the file.
+            DefinitionDict: Contains all the definitions located in the file.
 
         """
         if error_handler is None:
             error_handler = ErrorHandler()
-        new_def_dict = DefDict()
+        new_def_dict = DefinitionDict()
         hed_ops = [new_def_dict]
         _ = self._run_validators(hed_ops, run_on_raw=True, error_handler=error_handler)
         return new_def_dict
@@ -548,7 +548,7 @@ class BaseInput:
         """ Add label definitions gathered from the given input if this has a definition mapper.
 
         Args:
-            def_dict (list or DefDict): Add the DefDict or list of DefDict to the internal definition mapper.
+            def_dict (list or DefinitionDict): Add the DefDict or list of DefDict to the internal definition mapper.
 
         """
         if self._def_mapper is not None:
@@ -573,7 +573,7 @@ class BaseInput:
         return tag_funcs, string_funcs
 
     def _add_def_onset_mapper(self, hed_ops):
-        if not any(isinstance(hed_op, DefinitionMapper) for hed_op in hed_ops):
+        if not any(isinstance(hed_op, DefMapper) for hed_op in hed_ops):
             if self._def_mapper:
                 hed_ops.append(self._def_mapper)
                 hed_ops.append(OnsetMapper(self._def_mapper))

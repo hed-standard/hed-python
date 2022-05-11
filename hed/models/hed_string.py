@@ -68,7 +68,7 @@ class HedString(HedGroup):
         """
         definition_groups = self.find_top_level_tags({DefTagNames.DEFINITION_KEY}, include_groups=1)
         if definition_groups:
-            self.remove_groups(definition_groups)
+            self.remove(definition_groups)
 
         return []
 

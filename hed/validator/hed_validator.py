@@ -139,7 +139,7 @@ class HedValidator(HedOps):
              The issues associated with the individual tags in the HED string.
 
          """
-        from hed.models.def_dict import DefTagNames
+        from hed.models.definition_dict import DefTagNames
         validation_issues = []
         def_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1)
         all_def_groups = [group for sub_group in def_groups for group in sub_group.get_all_groups()]

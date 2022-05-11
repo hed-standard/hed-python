@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed.errors import ErrorHandler, OnsetErrors, ErrorContext, ValidationErrors
-from hed.models import DefinitionMapper, HedString, OnsetMapper, DefDict
+from hed.models import DefMapper, HedString, OnsetMapper, DefinitionDict
 from hed import schema
 from hed.validator import HedValidator
 
@@ -57,10 +57,10 @@ class Test(TestHedBase):
             self.assertCountEqual(onset_issues, issues)
 
     def test_basic_onset_errors(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
 
         test_strings = [
@@ -107,10 +107,10 @@ class Test(TestHedBase):
         self._test_issues_base(test_strings, test_issues, expected_context, [onset_mapper])
 
     def test_basic_onset_errors_with_def_mapper(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
         hed_ops = [def_mapper, onset_mapper]
 
@@ -159,12 +159,12 @@ class Test(TestHedBase):
         self._test_issues_base(test_strings, test_issues, expected_context, hed_ops, expand_defs=False)
 
     def test_basic_onset_errors_expanded(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
         def_string = HedString(self.definition_string)
         def_string.validate(def_dict)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
 
         test_strings = [
@@ -210,12 +210,12 @@ class Test(TestHedBase):
         self._test_issues_base(test_strings, test_issues, expected_context, [onset_mapper])
 
     def test_test_interleaving_onset_offset(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
         def_string = HedString(self.definition_string)
         def_string.validate(def_dict)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
 
         test_strings = [
@@ -251,10 +251,10 @@ class Test(TestHedBase):
         self._test_issues_base(test_strings, test_issues, expected_context, [onset_mapper])
 
     def test_onset_with_defs_in_them(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
 
         test_strings = [
@@ -272,12 +272,12 @@ class Test(TestHedBase):
         self._test_issues_base(test_strings, test_issues, expected_context, [onset_mapper])
 
     def test_onset_multiple_or_misplaced_errors(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
         def_string = HedString(self.definition_string)
         def_string.validate(def_dict)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
         hed_validator = HedValidator(hed_schema=self.hed_schema)
         hed_ops = [hed_validator, def_mapper, onset_mapper]
@@ -314,12 +314,12 @@ class Test(TestHedBase):
         self._test_issues_no_context(test_strings, test_issues, hed_validator)
 
     def test_onset_multiple_or_misplaced_errors_no_validator(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
         def_string = HedString(self.definition_string)
         def_string.validate(def_dict)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
         hed_ops = [def_mapper, onset_mapper]
 
@@ -356,12 +356,12 @@ class Test(TestHedBase):
         self._test_issues_no_context(test_strings, test_issues, [hed_ops[1]])
 
     def test_onset_two_in_one_line(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string)
         def_string.validate(def_dict)
         def_string = HedString(self.definition_string)
         def_string.validate(def_dict)
-        def_mapper = DefinitionMapper(def_dict)
+        def_mapper = DefMapper(def_dict)
         onset_mapper = OnsetMapper(def_mapper)
 
         test_strings = [
