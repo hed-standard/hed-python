@@ -173,6 +173,21 @@ class Test(unittest.TestCase):
         self.assertIsInstance(entry2['HED'], str,
                               "generate_sidecar_entry HED entry should be str when no column values")
 
+    def test_generate_sidecar_entry_non_letters(self):
+        entry1 = generate_sidecar_entry('my !#$-123_10', column_values=['apple 1', '@banana', 'grape%cherry&'])
+        self.assertIsInstance(entry1, dict,
+                              "generate_sidecar_entry is a dictionary when column values and special chars.")
+        self.assertIn('HED', entry1,
+                      "generate_sidecar_entry has a HED key when column values and special chars")
+        hed_entry1 = entry1['HED']
+        self.assertEqual(hed_entry1['apple 1'], '(Label/my_-123_10, Label/apple_1)',
+                         "generate_sidecar_entry HED entry should convert labels correctly when column values")
+        entry2 = generate_sidecar_entry('my !#$-123_10')
+        self.assertIsInstance(entry2, dict,
+                              "generate_sidecar_entry is a dictionary when no column values and special chars.")
+        self.assertEqual(entry2['HED'], '(Label/my_-123_10, Label/#)',
+                         "generate_sidecar_entry HED entry has correct label when no column values and special chars.")
+
     def test_hed_to_df(self):
         df1a = hed_to_df(self.sidecar1a, col_names=None)
         self.assertIsInstance(df1a, DataFrame)

@@ -6,7 +6,7 @@ from hed.errors import HedFileError
 from hed.models import ColumnMetadata, HedString, Sidecar
 from hed.validator import HedValidator
 from hed import schema
-from hed.models import DefDict
+from hed.models import DefinitionDict
 
 
 class Test(unittest.TestCase):
@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(validation_issues), 1)
 
         hed_string = HedString("(Definition/JsonFileDef/#, (Item/JsonDef1/#,Item/JsonDef1))")
-        extra_def_dict = DefDict()
+        extra_def_dict = DefinitionDict()
         hed_string.validate(extra_def_dict)
 
         validation_issues = self.json_without_definitions_sidecar.validate_entries(validator, check_for_warnings=True,

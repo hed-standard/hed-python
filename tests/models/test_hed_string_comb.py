@@ -23,22 +23,22 @@ class Test(unittest.TestCase):
         self.assertEqual(len(string1.get_all_tags()), 1)
         self.assertEqual(len(string2.get_all_tags()), 3)
         tags = comb_string.find_tags(["Object".lower()], include_groups=0)
-        comb_string.remove_groups(tags)
+        comb_string.remove(tags)
         self.assertEqual(len(string1.get_all_tags()), 0)
         self.assertEqual(len(string2.get_all_tags()), 3)
         self.assertEqual(len(comb_string.get_all_tags()), 3)
 
         tags = comb_string.find_tags(["Event".lower()], recursive=True, include_groups=0)
-        comb_string.remove_groups(tags)
+        comb_string.remove(tags)
         self.assertEqual(len(string2.get_all_tags()), 1)
         self.assertEqual(len(comb_string.get_all_tags()), 1)
 
         tags = comb_string.find_tags(["Square".lower()], recursive=True, include_groups=0)
-        comb_string.remove_groups(tags)
+        comb_string.remove(tags)
         self.assertEqual(len(string2.get_all_tags()), 0)
         self.assertEqual(len(comb_string.get_all_tags()), 0)
 
-    def test_replace_tag(self):
+    def test_replace(self):
         string1 = HedString("Item/Object", self.hed_schema)
         string2 = HedString("Event, (Event, Square)", self.hed_schema)
         new_contents = HedTag("Def/TestTag", hed_schema=self.hed_schema)
@@ -47,21 +47,21 @@ class Test(unittest.TestCase):
         self.assertEqual(len(string2.get_all_tags()), 3)
         self.assertEqual(len(comb_string.get_all_tags()), 4)
         tags = comb_string.find_tags(["Object".lower()], include_groups=0)
-        comb_string.replace_tag(tags[0], copy.copy(new_contents))
+        comb_string.replace(tags[0], copy.copy(new_contents))
 
         self.assertEqual(len(string1.get_all_tags()), 1)
         self.assertEqual(len(string2.get_all_tags()), 3)
         self.assertEqual(len(comb_string.get_all_tags()), 4)
 
         tags = comb_string.find_tags(["Event".lower()], include_groups=0)
-        comb_string.replace_tag(tags[0], copy.copy(new_contents))
+        comb_string.replace(tags[0], copy.copy(new_contents))
         self.assertEqual(len(string1.get_all_tags()), 1)
         self.assertEqual(len(string2.get_all_tags()), 3)
         self.assertEqual(len(comb_string.get_all_tags()), 4)
 
         tag_group = comb_string.find_tags(["Event".lower()], recursive=True, include_groups=2)
         tag, group = tag_group[0][0], tag_group[0][1]
-        group.replace_tag(tag, copy.copy(new_contents))
+        group.replace(tag, copy.copy(new_contents))
         self.assertEqual(len(string1.get_all_tags()), 1)
         self.assertEqual(len(string2.get_all_tags()), 3)
         self.assertEqual(len(comb_string.get_all_tags()), 4)

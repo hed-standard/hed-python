@@ -2,8 +2,8 @@ import os
 import json
 from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.annotation.summary_util import breakout_tags, extract_dict_values
-from hed.models.def_dict import add_group_to_dict
-from hed.models import DefDict
+from hed.models.definition_dict import add_group_to_dict
+from hed.models import DefinitionDict
 
 DEFAULT_BREAKOUT_LIST = [
     "Sensory-event", "Agent-action", "Event", "Action", "Task-event-role", "Task-action-type",
@@ -42,7 +42,7 @@ class TagSummary:
 
     def _set_all_tags(self):
         schema = self.dataset.schemas
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         self.all_defs_dict = def_dict.defs
         for bids_sidecar in self.dataset.event_files.sidecar_dict.values():
             sidecar = bids_sidecar.contents

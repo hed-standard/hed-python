@@ -38,8 +38,8 @@
       ~HedString.lower
       ~HedString.make_tag_mutable
       ~HedString.remove_definitions
-      ~HedString.remove_groups
-      ~HedString.replace_tag
+      ~HedString.remove
+      ~HedString.replace
       ~HedString.split_hed_string
       ~HedString.split_into_groups
       ~HedString.tags

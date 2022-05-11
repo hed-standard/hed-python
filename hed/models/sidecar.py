@@ -5,7 +5,7 @@ from hed.errors import error_reporter
 from hed.errors import ErrorHandler
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.models.hed_string import HedString
-from hed.models.def_mapper import DefinitionMapper
+from hed.models.def_mapper import DefMapper
 
 
 class Sidecar:
@@ -153,7 +153,7 @@ class Sidecar:
             If True, remove all definitions found in the string.
         allow_placeholders: bool
             If False, placeholders will be marked as validation warnings.
-        extra_def_dicts: [DefDict] or DefDict or None
+        extra_def_dicts: [DefinitionDict] or DefinitionDict or None
             Extra dicts to add to the list
         kwargs:
             See models.hed_ops.translate_ops or the specific hed_ops for additional options
@@ -205,9 +205,9 @@ class Sidecar:
         if not isinstance(hed_ops, list):
             hed_ops = [hed_ops]
         hed_ops = hed_ops.copy()
-        if not any(isinstance(hed_op, DefinitionMapper) for hed_op in hed_ops):
+        if not any(isinstance(hed_op, DefMapper) for hed_op in hed_ops):
             def_dicts = self.get_def_dicts(extra_def_dicts)
-            def_mapper = DefinitionMapper(def_dicts)
+            def_mapper = DefMapper(def_dicts)
             hed_ops.append(def_mapper)
         return hed_ops
 
@@ -233,11 +233,11 @@ class Sidecar:
 
         Parameters
         ----------
-        extra_def_dicts: [DefDict] or DefDict or None
+        extra_def_dicts: [DefinitionDict] or DefinitionDict or None
             Extra dicts to add to the list
         Returns
         -------
-        def_dicts: [DefDict]
+        def_dicts: [DefinitionDict]
             A list of def dicts for each column plus any found in extra_def_dicts.
         """
         def_dicts = [column_entry.def_dict for column_entry in self]
@@ -259,7 +259,7 @@ class Sidecar:
         name: str
             If present, will use this as the filename for context, rather than using the actual filename
             Useful for temp filenames.
-        extra_def_dicts: [DefDict] or DefDict or None
+        extra_def_dicts: [DefinitionDict] or DefinitionDict or None
             If present, also use these in addition to the sidecars def dicts.
         error_handler : ErrorHandler or None
             Used to report errors.  Uses a default one if none passed in.

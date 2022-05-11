@@ -9,7 +9,7 @@ from hed.models.model_constants import DefTagNames
 from hed.models.hed_ops import HedOps
 
 
-class DefEntry:
+class DefinitionEntry:
     """ Represents a single definition."""
 
     def __init__(self, name, contents, takes_value, source_context):
@@ -72,7 +72,7 @@ class DefEntry:
         return f"{DefTagNames.DEF_EXPAND_ORG_KEY}/{name}", output_contents
 
 
-class DefDict(HedOps):
+class DefinitionDict(HedOps):
     """Class responsible for gathering and storing a group of definitions to be considered a single source.
 
         A bids_old style file might have many of these(one for each json dict, and another for the actual file).
@@ -103,7 +103,7 @@ class DefDict(HedOps):
             Provides direct access to internal dictionary.  Alter at your own risk.
         Returns
         -------
-        def_dict: {str: DefEntry}
+        def_dict: {str: DefinitionEntry}
         """
         return self._defs
 
@@ -195,9 +195,9 @@ class DefDict(HedOps):
                                                                          DefinitionErrors.DUPLICATE_DEFINITION,
                                                                          def_name=def_tag_name)
                 continue
-            self._defs[def_tag_lower] = DefEntry(name=def_tag_name, contents=group_tag,
-                                                 takes_value=def_takes_value,
-                                                 source_context=context)
+            self._defs[def_tag_lower] = DefinitionEntry(name=def_tag_name, contents=group_tag,
+                                                        takes_value=def_takes_value,
+                                                        source_context=context)
 
         self._extract_def_issues += new_def_issues
         return new_def_issues

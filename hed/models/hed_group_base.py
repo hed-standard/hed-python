@@ -303,7 +303,7 @@ class HedGroupBase:
             If 3 or any other value: Return all 3 as a tuple.
 
         """
-        from hed.models.def_dict import DefTagNames
+        from hed.models.definition_dict import DefTagNames
         if recursive:
             groups = self.get_all_groups()
         else:

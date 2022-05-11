@@ -1,6 +1,6 @@
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
-from hed.models.def_mapper import DefinitionMapper
+from hed.models.def_mapper import DefMapper
 
 
 class HedInput(BaseInput):
@@ -21,7 +21,7 @@ class HedInput(BaseInput):
             has_column_names (bool): True if file has column names. Validation will skip over the
                 first line of the file if the spreadsheet as column names.
             column_prefix_dictionary (dict): A dictionary with column number keys and prefix values.
-            def_dicts (DefDict or list):  A DefDict or list of DefDicts containing definitions for this
+            def_dicts (DefinitionDict or list):  A DefinitionDict or list of DefDicts containing definitions for this
                 object other than the ones extracted from the HedInput object itself.
 
         Examples:
@@ -37,7 +37,7 @@ class HedInput(BaseInput):
 
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
 
-        def_mapper = DefinitionMapper(def_dicts)
+        def_mapper = DefMapper(def_dicts)
 
         super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, def_mapper=def_mapper,
                          name=name)

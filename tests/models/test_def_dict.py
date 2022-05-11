@@ -1,6 +1,6 @@
 import unittest
 
-from hed.models.def_dict import DefDict
+from hed.models.definition_dict import DefinitionDict
 from hed.errors import ErrorHandler, DefinitionErrors
 from hed.models.hed_string import HedString
 from hed import HedTag
@@ -9,7 +9,7 @@ from hed import HedTag
 class TestDefBase(unittest.TestCase):
     def check_def_base(self, test_strings, expected_issues):
         for test_key in test_strings:
-            def_dict = DefDict()
+            def_dict = DefinitionDict()
             hed_string_obj = HedString(test_strings[test_key])
             hed_string_obj.convert_to_canonical_forms(None)
             test_issues = def_dict.check_for_definitions(hed_string_obj)
@@ -32,7 +32,7 @@ class TestDefDict(TestDefBase):
     placeholder_def_string = f"(Definition/TestDefPlaceholder/#,{placeholder_def_contents})"
 
     def test_check_for_definitions(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         original_def_count = len(def_dict._defs)
         hed_string_obj = HedString(self.basic_definition_string)
         hed_string_obj.validate(def_dict)
@@ -40,7 +40,7 @@ class TestDefDict(TestDefBase):
         self.assertGreater(new_def_count, original_def_count)
 
     def test_check_for_definitions_placeholder(self):
-        def_dict = DefDict()
+        def_dict = DefinitionDict()
         original_def_count = len(def_dict._defs)
         hed_string_obj = HedString(self.placeholder_def_string)
         hed_string_obj.validate(def_dict)

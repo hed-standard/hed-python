@@ -1,6 +1,6 @@
 from enum import Enum
 from hed.models.hed_string import HedString
-from hed.models.def_dict import DefDict
+from hed.models.definition_dict import DefinitionDict
 from hed.errors.error_types import SidecarErrors, ErrorContext, ValidationErrors
 from hed.errors import error_reporter
 from hed.errors.error_reporter import ErrorHandler
@@ -63,7 +63,7 @@ class ColumnMetadata:
         """ Return the definition dictionary for this column.
 
         Returns:
-            DefDict: Contains all the definitions located in the column.
+            DefinitionDict: Contains all the definitions located in the column.
 
         """
         return self._def_dict
@@ -428,12 +428,12 @@ class ColumnMetadata:
             error_handler (ErrorHandler): The error handler to use for context, uses a default one if None.
 
         Returns:
-            DefDict: Contains all the definitions located in the column.
+            DefinitionDict: Contains all the definitions located in the column.
 
         """
         if error_handler is None:
             error_handler = ErrorHandler()
-        new_def_dict = DefDict()
+        new_def_dict = DefinitionDict()
         hed_ops = []
         hed_ops.append(new_def_dict)
         hed_ops.append(HedString.remove_definitions)

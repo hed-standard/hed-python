@@ -350,7 +350,7 @@ class ColumnMapper:
         """ Return a list of all def dicts from every column description.
 
         Returns:
-           list:   A list of DefDict objects corresponding to each column entry.
+           list:   A list of DefinitionDict objects corresponding to each column entry.
 
         """
         def_dicts = [entry.def_dict for entry in self.column_data.values()]
