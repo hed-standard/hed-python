@@ -1,4 +1,3 @@
-import os
 from hed.errors.exceptions import HedFileError
 from hed.tools import BidsFile
 from hed.tools.annotation.file_dictionary import FileDictionary
@@ -14,16 +13,13 @@ class BidsFileDictionary(FileDictionary):
 
         Args:
             collection_name (str): Name of this collection
-            file_list (list):      List containing full paths of files of interest
+            file_list (list, None):      List containing full paths of files of interest
             entities (tuple:  List of indices into base file names of pieces to assemble for the key
         """
-        self.collection_name = collection_name
+        super().__init__(collection_name, None, None, separator='_')
         self.entities = entities
         if file_list:
             self.file_dict = self.make_bids_file_dict(file_list, entities)
-        else:
-            self.file_dict = {}
-
 
     @property
     def key_list(self):
@@ -61,14 +57,6 @@ class BidsFileDictionary(FileDictionary):
             if self.match_query(query_dict, file.entity_dict):
                 response_dict[key] = file
         return response_dict
-
-    def output_files(self, title=None, logger=None):
-        if title:
-            print(f"{title} ({len(self.key_list)} files)")
-        for key, value in self.file_dict.items():
-            print(f"{key}: {os.path.basename(value.file_path)}")
-            if logger:
-                logger.add(key, f"{self.name}: {os.path.basename(value.file_path)}")
 
     def _create_dict_obj(self, collection_name, file_dict):
         dict_obj = BidsFileDictionary(collection_name, file_list=None, entities=self.entities)

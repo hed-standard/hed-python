@@ -1,5 +1,5 @@
 from hed.models.model_constants import DefTagNames
-from hed.models.hed_group import HedTag, HedGroup
+from hed.models.hed_group import HedGroup
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import OnsetErrors
 from hed.models.hed_ops import HedOps
@@ -14,17 +14,17 @@ class OnsetMapper(HedOps):
         self._onsets = {}
 
     def check_for_onset_offset(self, hed_string_obj):
-        """
-            Checks for an onset or offset tag in the given string and adds it to the current context if found.
-        Parameters
-        ----------
-        hed_string_obj : HedString
-            The hed string to check.  Finds a maximum of one onset tag.
+        """ Check for an onset or offset tag in the given string and add it to the current context if found.
 
-        Returns
-        -------
-        onset_issues: [{}]
-            Issues found validating onsets.  Out of order onsets, unknown def names, etc.
+        Args:
+            hed_string_obj (HedString): The hed string to check.  Finds a maximum of one onset tag.
+
+        Returns:
+            list: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).
+
+        Notes:
+            Each issue in the return list is a dictionary.
+
         """
         onset_issues = []
         for found_onset, found_group in self._find_onset_tags(hed_string_obj):
@@ -46,7 +46,7 @@ class OnsetMapper(HedOps):
             def_tag, def_group, _ = def_tags[0]
             if def_group is None:
                 def_group = def_tag
-            children = [child for child in found_group.get_direct_children() if
+            children = [child for child in found_group.children if
                         def_group is not child and found_onset is not child]
             max_children = 1
             if found_onset.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
@@ -54,7 +54,7 @@ class OnsetMapper(HedOps):
             if len(children) > max_children:
                 onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS,
                                                           def_tag,
-                                                          found_group.get_direct_children())
+                                                          found_group.children)
                 continue
 
             if children:
@@ -71,7 +71,7 @@ class OnsetMapper(HedOps):
         return onset_issues
 
     def _find_onset_tags(self, hed_string_obj):
-        return hed_string_obj.find_top_level_tags(anchors={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY})
+        return hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY})
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
         is_onset = onset_offset_tag.short_base_tag.lower() == DefTagNames.ONSET_KEY

@@ -338,6 +338,7 @@ class HedSchema:
         if self.epilogue != other.epilogue:
             return False
         if self._sections != other._sections:
+            # This block is useful for debugging when modifying the schema class itself.
             # for section1, section2 in zip(self._sections.values(), other._sections.values()):
             #     if section1 != section2:
             #         dict1 = section1.all_names
@@ -379,9 +380,9 @@ class HedSchema:
             return unit_class_entry.unit_class_units
         return []
 
-    def get_all_tags_with_attribute(self, key, section_key=HedSectionKey.AllTags):
+    def get_tags_with_attribute(self, key, section_key=HedSectionKey.AllTags):
         """
-            Returns a list of all tags with the given attribute.
+            Returns a list of all tag entries with the given attribute.
 
             Note: Result is cached so will be fast after first call.
 
@@ -397,7 +398,8 @@ class HedSchema:
         tag_list: [str]
             A list of all tags with this attribute
         """
-        return self._sections[section_key].get_entries_with_attribute(key, return_name_only=True)
+        return self._sections[section_key].get_entries_with_attribute(key, return_name_only=True,
+                                                                      library_prefix=self._library_prefix)
 
     def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, library_prefix=""):
         """
@@ -424,66 +426,84 @@ class HedSchema:
         return self._sections[key_class].get(name)
 
     def find_tag_entry(self, tag, library_prefix=""):
-        """
-        This takes a source tag and finds the schema entry for it.
+        """ Find the schema entry for a given source tag.
 
-        Works right to left.(mostly relevant for errors)
+        Args:
+            tag (str, HedTag): Any form of tag to look up.  Can have an extension, value, etc.
+        library_prefix (str):  The prefix the library, if any.
 
-        Parameters
-        ----------
-        tag : str or HedTag
-            Any form of tag to look up.  Can have an extension, value, etc.
-        library_prefix: str
-            The prefix the library, if any.
+        Returns:
+            HedTagEntry: The located tag entry for this tag.
+            str: The remainder of the tag that isn't part of the base tag.
+            list: A list of errors while converting.
 
-        Returns
-        -------
-        tag_entry: HedTagEntry
-            The located tag entry for this tag.
-        remainder: str
-            The remainder of the tag that isn't part of the base tag.
-        errors: list
-            a list of errors while converting
+        Notes:
+            Works right to left (which is mostly relevant for errors).
+
         """
         clean_tag = str(tag)
         prefix = library_prefix
         clean_tag = clean_tag[len(prefix):]
         prefix_tag_adj = len(prefix)
         working_tag = clean_tag.lower()
-        found_entry = None
-        remainder = ""
 
-        # this handles the one special case where the actual tag contains "/#" instead of something specific.
-        if working_tag.endswith("/#"):
-            working_tag = working_tag[:-2]
-            remainder = "/#"
+        # Most tags are in the schema directly, so test that first
+        found_entry = self.get_tag_entry(working_tag)
+        if found_entry:
+            # this handles the one special case where the actual tag contains "/#" instead of something specific.
+            if working_tag.endswith("/#"):
+                remainder = working_tag[-2:]
+            else:
+                remainder = ""
+
+            return found_entry, remainder, []
+
+        current_slash_index = -1
+        current_entry = None
+
+        # Loop left to right, checking each word.  Once we find an invalid word, we stop.
         while True:
-            tag_entry = self.get_tag_entry(working_tag)
-            parent_name, _, child_name = working_tag.rpartition("/")
-            if tag_entry is None:
-                if self.get_tag_entry(child_name):
-                    error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                                      tag,
-                                                      index_in_tag=len(parent_name) + 1 + prefix_tag_adj,
-                                                      index_in_tag_end=len(parent_name) + 1 +
-                                                                       len(child_name) + prefix_tag_adj,
-                                                      expected_parent_tag=self.all_tags[child_name].name)
-                    return None, None, error
-                if not parent_name:
+            next_index = working_tag.find("/", current_slash_index + 1)
+            if next_index == -1:
+                next_index = len(working_tag)
+            parent_name = working_tag[:next_index]
+            parent_entry = self.get_tag_entry(parent_name)
+
+            if not parent_entry:
+                # We haven't found any tag at all yet
+                if current_entry is None:
                     error = ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                                       tag,
-                                                      index_in_tag=len(parent_name) + prefix_tag_adj,
-                                                      index_in_tag_end=len(parent_name)
-                                                                       + len(child_name) + prefix_tag_adj)
+                                                      index_in_tag=prefix_tag_adj,
+                                                      index_in_tag_end=prefix_tag_adj + next_index)
                     return None, None, error
-                working_tag = parent_name
-                remainder = clean_tag[len(working_tag):][:len(child_name) + 1] + remainder
-                continue
+                # If this is not a takes value node, validate each term in the remainder.
+                if not current_entry.takes_value_child_entry:
+                    child_names = working_tag[current_slash_index + 1:].split("/")
+                    word_start_index = current_slash_index + 1 + prefix_tag_adj
+                    for name in child_names:
+                        if self.get_tag_entry(name):
+                            error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                                              tag,
+                                                              index_in_tag=word_start_index,
+                                                              index_in_tag_end=word_start_index + len(name),
+                                                              expected_parent_tag=self.all_tags[name].name)
+                            return None, None, error
+                        word_start_index += len(name) + 1
+                break
 
-            if remainder and tag_entry.takes_value_child_entry:
-                tag_entry = tag_entry.takes_value_child_entry
-            found_entry = tag_entry
-            break
+            current_entry = parent_entry
+            current_slash_index = next_index
+            if next_index == len(working_tag):
+                break
+            continue
+
+        remainder = None
+        if current_slash_index != -1:
+            remainder = clean_tag[current_slash_index:]
+        if remainder and current_entry.takes_value_child_entry:
+            current_entry = current_entry.takes_value_child_entry
+        found_entry = current_entry
 
         return found_entry, remainder, []
 

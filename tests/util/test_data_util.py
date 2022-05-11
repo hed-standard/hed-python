@@ -17,8 +17,9 @@ class Test(unittest.TestCase):
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(curation_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(curation_base_dir, "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
-        cls.sampling_rate_path = os.path.join(curation_base_dir, "bcit_basline_driving_samplingRates.tsv")
+        cls.attention_shift_path = os.path.join(curation_base_dir,
+                                                "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
+        cls.sampling_rate_path = os.path.join(curation_base_dir, "bcit_baseline_driving_samplingRates.tsv")
 
     def test_add_column(self):
         data = {'Name': ['n/a', '', 'tom', 'alice', 0, 1],
@@ -111,9 +112,16 @@ class Test(unittest.TestCase):
         data = {'Name': ['n/a', '', 'tom', 'alice', 0, 1],
                 'Age': [np.nan, 10, '', 'n/a', '0', '10']}
         df1 = DataFrame(data)
-        num_replaced = replace_values(df1, values=['', 0])
-        self.assertEqual(df1.loc[0, 'Name'], 'n/a', "replace_values should replace the empty string with n/a")
-        self.assertEqual(4, num_replaced, "replace_values should replace the correct number of values")
+        self.assertFalse(df1.loc[1, 'Name'], "replace_values before replacement value is empty")
+        num_replaced1 = replace_values(df1, values=['', 0])
+        self.assertEqual(df1.loc[1, 'Name'], 'n/a', "replace_values should replace the empty string with n/a")
+        self.assertEqual(4, num_replaced1, "replace_values should replace the correct number of values")
+        df2 = DataFrame(data)
+        num_replaced2 = replace_values(df2, replace_value='Baloney', column_list=['Name'])
+        self.assertEqual(df2.loc[1, 'Name'], 'Baloney',
+                         "replace_values should replace the empty string with specified value in correct columns")
+        self.assertEqual(1, num_replaced2,
+                         "replace_values should replace the correct number of values when columns are specified")
 
     def test_remove_quotes(self):
         df1 = get_new_dataframe(self.stern_test2_path)

@@ -1,5 +1,6 @@
-from hed.errors.exceptions import HedFileError
-from hed.util.data_util import get_new_dataframe
+
+from hed.errors import HedFileError
+from hed.util import get_new_dataframe
 from hed.tools.annotation.annotation_util import generate_sidecar_entry
 
 
@@ -10,9 +11,9 @@ class BidsTsvSummary:
         """ .
 
         Args:
-            value_cols (list):   List of columns to be treated as value columns
-            skip_cols (list):    List of columns to be skipped
-            name (str):          Name associated with the dictionary
+            value_cols (list, None):  List of columns to be treated as value columns.
+            skip_cols (list, None):   List of columns to be skipped.
+            name (str):               Name associated with the dictionary.
 
         """
 
@@ -32,8 +33,34 @@ class BidsTsvSummary:
         self.total_files = 0
         self.total_events = 0
 
+    def __str__(self):
+        indent = "   "
+        summary_list = [f"Summary for column dictionary {self.name}:"]
+        sorted_keys = sorted(self.categorical_info.keys())
+        summary_list.append(f"{indent}Categorical columns ({len(sorted_keys)}):")
+        for key in sorted_keys:
+            value_dict = self.categorical_info[key]
+            sorted_v_keys = sorted(list(value_dict))
+            summary_list.append(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
+            for v_key in sorted_v_keys:
+                summary_list.append(f"{indent * 3}{v_key}: {value_dict[v_key]}")
+
+        sorted_cols = sorted(map(str, list(self.value_info)))
+        summary_list.append(f"{indent}Value columns ({len(sorted_cols)}):")
+        for key in sorted_cols:
+            summary_list.append(f"{indent * 2}{key}: {self.value_info[key]}")
+        return "\n".join(summary_list)
+
     def get_number_unique_values(self, column_names=None):
-        """ Extract the number of unique values the specified columns if available ."""
+        """ Extract the number of unique values in each of the specified columns if available .
+
+        Args:
+            column_names (list, None):   A list of column names to analyze or all columns if None.
+
+        Returns: (dict)
+            Dictionary with a column name as the key and the number of unique values in the column as the value.
+
+        """
         if not column_names:
             column_names = list(self.categorical_info.keys())
         counts = {}
@@ -56,44 +83,8 @@ class BidsTsvSummary:
             side_dict[column_name] = generate_sidecar_entry(column_name, [])
         return side_dict
 
-    def print(self, title=None, indent="  "):
-        if not title:
-            title = f"Summary for column dictionary {self.name}:"
-        print(title)
-        sorted_keys = sorted(self.categorical_info.keys())
-        print(f"{indent}Categorical columns ({len(sorted_keys)}):")
-        for key in sorted_keys:
-            value_dict = self.categorical_info[key]
-            sorted_v_keys = sorted(list(value_dict))
-            print(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
-            for v_key in sorted_v_keys:
-                print(f"{indent * 3}{v_key}: {value_dict[v_key]}")
-
-        sorted_cols = sorted(map(str, list(self.value_info)))
-        print(f"{indent}Value columns ({len(sorted_cols)}):")
-        for key in sorted_cols:
-            print(f"{indent * 2}{key}: {self.value_info[key]}")
-
-    # def tojson(self, max= indent=4):
-    #     if not title:
-    #         title = f"Summary for column dictionary {self.name}:"
-    #     print(title)
-    #     sorted_keys = sorted(self.categorical_info.keys())
-    #     print(f"{indent}Categorical columns ({len(sorted_keys)}):")
-    #     for key in sorted_keys:
-    #         value_dict = self.categorical_info[key]
-    #         sorted_v_keys = sorted(list(value_dict))
-    #         print(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
-    #         for v_key in sorted_v_keys:
-    #             print(f"{indent * 3}{v_key}: {value_dict[v_key]}")
-    #
-    #     sorted_cols = sorted(map(str, list(self.value_info)))
-    #     print(f"{indent}Value columns ({len(sorted_cols)}):")
-    #     for key in sorted_cols:
-    #         print(f"{indent * 2}{key}: {self.value_info[key]}")
-
     def update(self, data):
-        """ Extracts the number of times each unique value appears in each column.
+        """ Extract the number of times each unique value appears in each column.
 
         Args:
             data (DataFrame, str, or list):    DataFrame to be analyzed or the full path of a tsv file.

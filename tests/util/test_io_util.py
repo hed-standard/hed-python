@@ -1,7 +1,7 @@
 import os
 import unittest
 from hed.errors.exceptions import HedFileError
-from hed.util.io_util import extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
+from hed.util.io_util import check_filename, extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
     get_path_components
 
 from hed.util.io_util import parse_bids_filename, _split_entity
@@ -19,6 +19,27 @@ class Test(unittest.TestCase):
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
         cls.attention_shift_path = os.path.join(att_base_dir, "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
+
+    def test_check_filename(self):
+        name1 = "/user/local/task_baloney.gz_events.nii"
+        check1a = check_filename(name1, extensions=[".txt", ".nii"])
+        self.assertTrue(check1a, "check_filename should return true if has required extension")
+        check1b = check_filename(name1, name_prefix="apple", extensions=[".txt", ".nii"])
+        self.assertFalse(check1b, "check_filename should return false if right extension but wrong prefix")
+        check1c = check_filename(name1, name_suffix='_events')
+        self.assertTrue(check1c, "check_filename should return true if has a default extension and correct suffix")
+        name2 = "/user/local/task_baloney.gz_events.nii.gz"
+        check2a = check_filename(name2, extensions=[".txt", ".nii"])
+        self.assertFalse(check2a, "check_filename should return false if extension does not match")
+        check2b = check_filename(name2, extensions=[".txt", ".nii.gz"])
+        self.assertTrue(check2b, "check_filename should return true if extension with gz matches")
+        check2c = check_filename(name2, name_suffix="_events", extensions=[".txt", ".nii.gz"])
+        self.assertTrue(check2c, "check_filename should return true if suffix after extension matches")
+        name3 = "Changes"
+        check3a = check_filename(name3, name_suffix="_events", extensions=None)
+        self.assertFalse(check3a, "check_filename should be false if it doesn't match with no extension")
+        check3b = check_filename(name3, name_suffix="es", extensions=None)
+        self.assertTrue(check3b, "check_filename should be true if match with no extension.")
 
     def test_extract_suffix_path(self):
         suffix_path = extract_suffix_path('c:/myroot/temp.tsv', 'c:')

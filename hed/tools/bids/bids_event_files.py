@@ -61,12 +61,36 @@ class BidsEventFiles:
         return sidecar_list
 
     def summarize(self, value_cols=None, skip_cols=None):
-        col_info = BidsTsvSummary(value_cols=None, skip_cols=None)
+        """
+
+        Args:
+            value_cols (list):  Column names designated as value columns.
+            skip_cols (list):   Column names designated as columns to skip.
+
+        Returns:
+            BidsTsvSummary:  A summary of the number of values in different columns.
+
+        Notes: The columns that are not value_cols or skip_col are summarized by counting
+        the number of times each unique value appears in that column.
+
+        """
+        info = BidsTsvSummary(value_cols=value_cols, skip_cols=skip_cols)
         for event_obj in self.events_dict.values():
-            col_info.update(event_obj.file_path)
-        return col_info
+            info.update(event_obj.file_path)
+        return info
 
     def validate(self, validators, check_for_warnings=True, keep_events=False):
+        """ Validate the events files and return an error list.
+
+        Args:
+            validators ([func or HedOps], func, HedOps):  Validation functions to apply.
+            check_for_warnings (bool):  If True, include warnings in the check.
+            keep_events (bool):         If True, the underlying event files are read and their contents retained.
+
+        Returns:
+            (list):    A list of validation issues found.
+
+        """
         issues = []
         for json_obj in self.sidecar_dict.values():
             issues += json_obj.contents.validate_entries(hed_ops=validators, check_for_warnings=check_for_warnings)
@@ -101,4 +125,3 @@ if __name__ == '__main__':
     # print(f"Issues: {issue_str}")
 
     col_info = bids.summarize()
-    col_info.print()

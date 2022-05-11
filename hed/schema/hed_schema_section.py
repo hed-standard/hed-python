@@ -46,12 +46,9 @@ class HedSchemaSection:
 
         return new_entry
 
-    def get_entries_with_attribute(self, attribute_name, return_name_only=False):
+    def get_entries_with_attribute(self, attribute_name, return_name_only=False, library_prefix=""):
         """
-            Returns an iterator of all entries with the given attribute
-
-            If this is called outside of schema validation, you may wish to cache this result or update
-            this function to have a cache.
+            Returns a list of all entries(or names) with the given attribute
 
         Parameters
         ----------
@@ -59,6 +56,8 @@ class HedSchemaSection:
             The name of the attribute(generally a HedKey entry)
         return_name_only: bool
             If true, return the name as a string rather than the tag entry.
+        library_prefix: str
+            Only valid if returning names.  Prepends given prefix to each name
         Returns
         -------
         [HedSchemaEntry] or [str]
@@ -69,7 +68,7 @@ class HedSchemaSection:
 
         cache_val = self._attribute_cache[attribute_name]
         if return_name_only:
-            return [tag_entry.name for tag_entry in cache_val]
+            return [f"{library_prefix}{tag_entry.name}" for tag_entry in cache_val]
         return cache_val
 
     # ===============================================

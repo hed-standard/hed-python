@@ -23,6 +23,13 @@ class KeyTemplate:
         self.map_dict = {}
         self.count_dict = {}
 
+    def __str__(self):
+        temp_list = [f"{self.name} counts for key [{str(self.columns)}]:"]
+        for index, row in self.col_map.iterrows():
+            key_hash = get_row_hash(row, self.columns)
+            temp_list.append(f"{str(list(row.values))}\t{self.count_dict[key_hash]}")
+        return "\n".join(temp_list)
+
     def make_template(self, additional_cols=[]):
         if additional_cols and set(self.columns).intersection(additional_cols):
             raise HedFileError("AdditionalColumnsNotDisjoint",
@@ -33,6 +40,13 @@ class KeyTemplate:
         if additional_cols:
             df[additional_cols] = 'n/a'
         return df
+
+    def resort(self):
+        """Sort the col_map in place by the key columns """
+        self.col_map.sort_values(by=self.columns, inplace=True, ignore_index=True)
+        for index, row in self.col_map.iterrows():
+            key_hash = get_row_hash(row, self.columns)
+            self.map_dict[key_hash] = index
 
     def update_by_tuple(self, key_tuple):
         key_hash = get_key_hash(key_tuple)
@@ -74,15 +88,3 @@ class KeyTemplate:
                 self.col_map = self.col_map.append(row[self.columns], ignore_index=True)
                 self.count_dict[key] = 0
             self.count_dict[key] += 1
-
-    def resort(self):
-        self.col_map.sort_values(by=self.columns, inplace=True, ignore_index=True)
-        for index, row in self.col_map.iterrows():
-            key_hash = get_row_hash(row, self.columns)
-            self.map_dict[key_hash] = index
-
-    def print(self, file=None):
-        print(f"Counts for key [{str(self.columns)}]:", file=file)
-        for index, row in self.col_map.iterrows():
-            key_hash = get_row_hash(row, self.columns)
-            print(f"{str(list(row.values))}\t{self.count_dict[key_hash]}", file=file)

@@ -15,7 +15,7 @@ class TestHed3(TestValidatorBase):
 
     @classmethod
     def setUpClass(cls):
-        schema_file = '../data/schema_test_data/HED8.0.0t.xml'
+        schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml)
         hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
@@ -56,9 +56,9 @@ class IndividualHedTagsShort(TestHed3):
             'invalidExtension': 'tl:Agent/Red',
             'invalidExtension2': 'tl:Agent/Red/Extension2',
             'usedToBeIllegalComma': 'tl:Label/This is a label,tl:This/Is/A/Tag',
-            'illegalDef': 'tl:Def/Item',
-            'illegalDefExpand': 'tl:Def-expand/Item',
-            'illegalDefinition': 'tl:Definition/Item',
+            'legalDef': 'tl:Def/Item',
+            'legalDefExpand': 'tl:Def-expand/Item',
+            'legalDefinition': 'tl:Definition/Item',
             'unknownPrefix': 'ul:Definition/Item'
         }
         expected_results = {
@@ -70,9 +70,9 @@ class IndividualHedTagsShort(TestHed3):
             'invalidExtension': False,
             'invalidExtension2': False,
             'usedToBeIllegalComma': False,
-            'illegalDef': False,
-            'illegalDefExpand': False,
-            'illegalDefinition': False,
+            'legalDef': True,
+            'legalDefExpand': True,
+            'legalDefinition': True,
             'unknownPrefix': False
         }
         expected_issues = {
@@ -91,15 +91,9 @@ class IndividualHedTagsShort(TestHed3):
                                     "/Color/CSS-color/Red-color/Red"),
             'usedToBeIllegalComma': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=1,
                                                       index_in_tag=3, index_in_tag_end=7),
-            'illegalDef': self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=7, index_in_tag_end=11,
-                expected_parent_tag="Item"),
-            'illegalDefExpand': self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=14,
-                index_in_tag_end=18, expected_parent_tag="Item"),
-            'illegalDefinition': self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=14,
-                index_in_tag_end=18, expected_parent_tag="Item"),
+            'legalDef': [],
+            'legalDefExpand': [],
+            'legalDefinition': [],
             'unknownPrefix': self.format_error(
                 ValidationErrors.HED_LIBRARY_UNMATCHED, tag=0, unknown_prefix="ul:", known_prefixes=["", "tl:"]),
         }
@@ -379,10 +373,10 @@ class TestTagLevels3(TestHed3):
             'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             'invalidTwoInOne': self.format_error(
                 ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="tl:Property/Organizational-property/Definition/InvalidDef3".split(", ")),
+                multiple_tags="tl:Definition/InvalidDef3".split(", ")),
             'invalid2TwoInOne': self.format_error(
                 ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="tl:Property/Data-property/Data-marker/Temporal-marker/Onset".split(", ")),
+                multiple_tags="tl:Onset".split(", ")),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -417,6 +411,64 @@ class TestTagLevels3(TestHed3):
             'valid3': [],
             'semivalid1': [],
             'semivalid2': []
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+class RequiredTags(TestHed3):
+    @staticmethod
+    def string_obj_func(validator, check_for_warnings):
+        return partial(validator._validate_tags_in_hed_string, check_for_warnings=check_for_warnings)
+
+    def test_includes_all_required_tags(self):
+        test_strings = {
+            'complete': 'Animal-agent, Action, tl:Animal-agent, tl:Action',
+            'missingAgent': 'Action, tl:Animal-agent, tl:Action',
+            'missingAction': 'Animal-agent, tl:Animal-agent, tl:Action',
+            'inSubGroup': 'Animal-agent, (Action, tl:Animal-agent, tl:Action)',
+            'missingAll': 'Event'
+        }
+        expected_results = {
+            'complete': True,
+            'missingAgent': False,
+            'missingAction': False,
+            'inSubGroup': True,
+            'missingAll': False,
+        }
+        expected_issues = {
+            'complete': [],
+            'missingAgent': self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING,
+                                              tag_prefix='Agent/Animal-agent'),
+            'missingAction': self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Action'),
+            'inSubGroup': [],
+            'missingAll':
+                self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Action')
+                + self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Agent/Animal-agent')
+                + self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='tl:Action')
+                + self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='tl:Agent/Animal-agent'),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
+    def test_multiple_copies_unique_tags(self):
+        test_strings = {
+            'legal': 'tl:Event-context,'
+                     '(Vehicle,Event)',
+            'multipleDesc': 'tl:Event-context,'
+                            'tl:Event-context,'
+                            'Vehicle,(Vehicle,tl:Event-context)',
+            'multipleDescIncShort': 'tl:Event-context,'
+                                    'tl:Organizational-property/Event-context'
+        }
+        expected_results = {
+            'legal': True,
+            'multipleDesc': False,
+            'multipleDescIncShort': False
+        }
+        expected_issues = {
+            'legal': [],
+            'multipleDesc': self.format_error(ValidationErrors.HED_TAG_NOT_UNIQUE,
+                                              tag_prefix='tl:Property/Organizational-property/Event-context'),
+            'multipleDescIncShort': self.format_error(ValidationErrors.HED_TAG_NOT_UNIQUE,
+                                                      tag_prefix='tl:Property/Organizational-property/Event-context'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

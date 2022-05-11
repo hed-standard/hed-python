@@ -14,7 +14,6 @@
    
       ~KeyTemplate.__init__
       ~KeyTemplate.make_template
-      ~KeyTemplate.print
       ~KeyTemplate.resort
       ~KeyTemplate.update
       ~KeyTemplate.update_by_tuple

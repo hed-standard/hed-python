@@ -5,10 +5,10 @@ import unittest
 from pandas import DataFrame
 from hed import schema as hedschema
 from hed.models import Sidecar
-from hed.tools import BidsTsvSummary, check_df_columns, df_to_hed, extract_tags, generate_sidecar_entry, \
-    hed_to_df, merge_hed_dict
+from hed.tools import BidsTsvSummary, check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
 from hed.tools.annotation.annotation_util import _find_last_pos, _find_first_pos, \
-    _flatten_cat_col, _flatten_val_col, _get_value_entry, trim_back, trim_front, _tag_list_to_str, _update_cat_dict
+    _flatten_cat_col, _flatten_val_col, _get_value_entry, trim_back, trim_front, _tag_list_to_str, _update_cat_dict, \
+    generate_sidecar_entry
 from hed.util import get_file_list
 from hed.validator import HedValidator
 
@@ -172,6 +172,21 @@ class Test(unittest.TestCase):
         self.assertIn('HED', entry2, "generate_sidecar_entry should have a Description when no column values")
         self.assertIsInstance(entry2['HED'], str,
                               "generate_sidecar_entry HED entry should be str when no column values")
+
+    def test_generate_sidecar_entry_non_letters(self):
+        entry1 = generate_sidecar_entry('my !#$-123_10', column_values=['apple 1', '@banana', 'grape%cherry&'])
+        self.assertIsInstance(entry1, dict,
+                              "generate_sidecar_entry is a dictionary when column values and special chars.")
+        self.assertIn('HED', entry1,
+                      "generate_sidecar_entry has a HED key when column values and special chars")
+        hed_entry1 = entry1['HED']
+        self.assertEqual(hed_entry1['apple 1'], '(Label/my_-123_10, Label/apple_1)',
+                         "generate_sidecar_entry HED entry should convert labels correctly when column values")
+        entry2 = generate_sidecar_entry('my !#$-123_10')
+        self.assertIsInstance(entry2, dict,
+                              "generate_sidecar_entry is a dictionary when no column values and special chars.")
+        self.assertEqual(entry2['HED'], '(Label/my_-123_10, Label/#)',
+                         "generate_sidecar_entry HED entry has correct label when no column values and special chars.")
 
     def test_hed_to_df(self):
         df1a = hed_to_df(self.sidecar1a, col_names=None)

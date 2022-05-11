@@ -5,6 +5,8 @@ import io
 from hed.errors import HedFileError
 from hed.models import EventsInput, HedInput, model_constants, Sidecar
 import shutil
+from hed import schema
+
 
 # TODO: Add tests about correct handling of 'n/a'
 
@@ -12,6 +14,9 @@ import shutil
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        hed_xml_file = os.path.join(cls.base_data_dir, "schema_test_data/HED8.0.0t.xml")
+        cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.default_test_file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                   "../data/validator_tests/ExcelMultipleSheets.xlsx")
         cls.generic_file_input = HedInput(cls.default_test_file_name)
@@ -61,7 +66,8 @@ class Test(unittest.TestCase):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_events.tsv')
 
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate_entries(expand_defs=True)), 0)
         input_file = EventsInput(events_path, sidecars=sidecar)
@@ -122,7 +128,8 @@ class Test(unittest.TestCase):
     def test_loading_and_reset_mapper(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_events.tsv')
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate_entries()), 0)
         input_file_1 = EventsInput(events_path, sidecars=sidecar)
@@ -138,6 +145,42 @@ class Test(unittest.TestCase):
                             f"The column dictionary for row {row_number} should have the right length")
             self.assertTrue(len(column_dict2) == 11,
                             f"The reset column dictionary for row {row_number2} should have the right length")
+
+    def test_no_column_header_and_convert(self):
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/no_column_header.tsv')
+        hed_input = HedInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input.convert_to_long(self.hed_schema)
+
+        events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                        '../data/model_tests/no_column_header_long.tsv')
+        hed_input_long = HedInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        for column1, column2 in zip(hed_input, hed_input_long):
+            self.assertEqual(column1, column2)
+
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/no_column_header.tsv')
+        hed_input = HedInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                        '../data/model_tests/no_column_header_long.tsv')
+        hed_input_long = HedInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        hed_input_long.convert_to_short(self.hed_schema)
+        for column1, column2 in zip(hed_input, hed_input_long):
+            self.assertEqual(column1, column2)
+
+    def test_convert_short_long_with_definitions(self):
+        # Verify behavior works as expected even if definitions are present
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/no_column_header_definition.tsv')
+        hed_input = HedInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input.convert_to_long(self.hed_schema)
+
+        events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                        '../data/model_tests/no_column_header_definition_long.tsv')
+        hed_input_long = HedInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        for column1, column2 in zip(hed_input, hed_input_long):
+            self.assertEqual(column1, column2)
+
 
 
 if __name__ == '__main__':

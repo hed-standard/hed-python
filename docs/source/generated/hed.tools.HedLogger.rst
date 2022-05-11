@@ -16,7 +16,10 @@
       ~HedLogger.add
       ~HedLogger.get_log
       ~HedLogger.get_log_keys
+      ~HedLogger.get_log_string
+      ~HedLogger.load_log
       ~HedLogger.print_log
+      ~HedLogger.save_log
    
    
 

@@ -1,6 +1,8 @@
 """ Utilities to facilitate annotation of events in BIDS. """
+
+import re
 from pandas import DataFrame
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 
 
 def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
@@ -79,7 +81,7 @@ def extract_tags(hed_string, search_tag):
 
 
 def generate_sidecar_entry(column_name, column_values=None):
-    """  Creates the sidecar column dictionary for a given column name
+    """  Create the sidecar column dictionary for a given column name
 
     Args:
         column_name (str):       Name of the column
@@ -87,19 +89,22 @@ def generate_sidecar_entry(column_name, column_values=None):
 
      Returns:
          dict   A dictionary representing a template for a sidecar entry.
+
     """
 
+    name_label = re.sub(r'[^A-Za-z0-9-]+', '_', column_name)
     sidecar_entry = {"Description": f"Description for {column_name}", "HED": ""}
     if not column_values:
-        sidecar_entry["HED"] = "Label/#"
+        sidecar_entry["HED"] = f"(Label/{name_label}, Label/#)"
     else:
         levels = {}
         hed = {}
         for column_value in column_values:
             if column_value == "n/a":
                 continue
-            levels[column_value] = f"Description for {column_value}"
-            hed[column_value] = f"Label/{column_value}"
+            value_label = re.sub(r'[^A-Za-z0-9-]+', '_', column_value)
+            levels[column_value] = f"Description for {column_value} of {column_name}"
+            hed[column_value] = f"(Label/{name_label}, Label/{value_label})"
         sidecar_entry["Levels"] = levels
         sidecar_entry["HED"] = hed
     return sidecar_entry

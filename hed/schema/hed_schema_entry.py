@@ -119,6 +119,9 @@ class HedSchemaEntry:
     def __hash__(self):
         return hash((self.name, self._section._section_key))
 
+    def __str__(self):
+        return self.name
+
 
 class UnitClassEntry(HedSchemaEntry):
     """
@@ -196,23 +199,23 @@ class HedTagEntry(HedSchemaEntry):
         self.short_tag_name = None
         self.takes_value_child_entry = None  # this is a child takes value tag, if one exists
         self._parent_tag = None
+        self.tag_terms = tuple()
 
     @staticmethod
     def get_fake_tag_entry(tag, tags_to_identify):
-        """
-            Given a tag and a list of possible short tags, create a tag entry if we find a match.
+        """ Create a tag entry if a given a tag has a match in a list of possible short tags.
 
         Args:
-            tag: str
-                The short/mid/long form tag to identify
-            tags_to_identify: [str]
-                A list of lowercase short tags to identify.  Goes through tag left to right.
+            tag (str): The short/mid/long form tag to identify.
+            tags_to_identify (list): A list of lowercase short tags to identify.
 
         Returns:
-        tag_entry: HedTagEntry or None
-            The fake entry, showing the short tag name as the found tag
-        remainder: str
-            The remaining text after the located short tag.  May be empty.
+            (HedTagEntry or None): The fake entry showing the short tag name as the found tag.
+            (str): The remaining text after the located short tag, which may be empty.
+
+        Notes:
+             The match is done left to right.
+
         """
         split_names = tag.split("/")
         index = 0
@@ -228,17 +231,19 @@ class HedTagEntry(HedSchemaEntry):
         return None, ""
 
     def any_parent_has_attribute(self, attribute):
-        """Checks to see if the tag (or any of its parents) have the given attribute.
+        """ Check if the tag (or any of its parents) has the given attribute.
 
-            This is mostly used to check extension allowed.  Could be cached.
-        Parameters
-        ----------
+        Args:
         attribute: str
             The name of the attribute to check for.
         Returns
         -------
         tag_has_attribute: bool
             True if the tag has the given attribute. False, if otherwise.
+
+        Notes:
+             This is mostly used to check extension allowed.  Could be cached.
+
         """
         iter_entry = self
         while iter_entry is not None:
@@ -284,6 +289,7 @@ class HedTagEntry(HedSchemaEntry):
             parent_tag = schema.get_tag_entry(parent_name)
         self._parent_tag = parent_tag
         self.takes_value_child_entry = schema.get_tag_entry(self.name + "/#")
+        self.tag_terms = tuple(self.long_tag_name.lower().split("/"))
 
         if self.name.endswith("/#"):
             if HedKey.UnitClass in self.attributes:

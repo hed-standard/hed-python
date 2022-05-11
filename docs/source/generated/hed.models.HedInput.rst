@@ -16,6 +16,7 @@
       ~HedInput.convert_to_long
       ~HedInput.convert_to_short
       ~HedInput.extract_definitions
+      ~HedInput.get_assembled
       ~HedInput.get_def_and_mapper_issues
       ~HedInput.get_worksheet
       ~HedInput.iter_dataframe
@@ -24,7 +25,7 @@
       ~HedInput.set_cell
       ~HedInput.to_csv
       ~HedInput.to_excel
-      ~HedInput.update_definition_mapper_with_file
+      ~HedInput.update_definition_mapper
       ~HedInput.validate_file
    
    

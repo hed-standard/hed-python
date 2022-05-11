@@ -24,9 +24,9 @@ class IndividualHedTagsShort(TestHed):
             'invalidExtension': 'Agent/Red',
             'invalidExtension2': 'Agent/Red/Extension2',
             'usedToBeIllegalComma': 'Label/This is a label,This/Is/A/Tag',
-            'illegalDef': 'Def/Item',
-            'illegalDefExpand': 'Def-expand/Item',
-            'illegalDefinition': 'Definition/Item',
+            'legalDef': 'Def/Item',
+            'legalDefExpand': 'Def-expand/Item',
+            'legalDefinition': 'Definition/Item',
         }
         expected_results = {
             'takesValue': True,
@@ -37,9 +37,9 @@ class IndividualHedTagsShort(TestHed):
             'invalidExtension': False,
             'invalidExtension2': False,
             'usedToBeIllegalComma': False,
-            'illegalDef': False,
-            'illegalDefExpand': False,
-            'illegalDefinition': False,
+            'legalDef': True,
+            'legalDefExpand': True,
+            'legalDefinition': True,
         }
         expected_issues = {
             'takesValue': [],
@@ -57,14 +57,9 @@ class IndividualHedTagsShort(TestHed):
                                     "/Color/CSS-color/Red-color/Red"),
             'usedToBeIllegalComma': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=1,
                                                       index_in_tag=0, index_in_tag_end=4),
-            'illegalDef': self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=4,
-                                            index_in_tag_end=8, expected_parent_tag="Item"),
-            'illegalDefExpand': self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                  index_in_tag=11, index_in_tag_end=15,
-                                                  expected_parent_tag="Item"),
-            'illegalDefinition': self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                   index_in_tag=11, index_in_tag_end=15,
-                                                   expected_parent_tag="Item"),
+            'legalDef': [],
+            'legalDefExpand': [],
+            'legalDefinition': []
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -428,10 +423,10 @@ class TestTagLevels(TestHed):
             'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             'invalidTwoInOne': self.format_error(
                 ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="Property/Organizational-property/Definition/InvalidDef3".split(", ")),
+                multiple_tags="Definition/InvalidDef3".split(", ")),
             'invalid2TwoInOne': self.format_error(
                 ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="Property/Data-property/Data-marker/Temporal-marker/Onset".split(", ")),
+                multiple_tags="Onset".split(", ")),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

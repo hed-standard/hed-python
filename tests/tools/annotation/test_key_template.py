@@ -111,14 +111,15 @@ class Test(unittest.TestCase):
         self.assertEqual(len(t_map.count_dict), len(t_map.map_dict),
                          "The count dictionary and key dictionary should have same number of values")
 
-    def test_print(self):
-        from io import StringIO
-        t_map = KeyTemplate(self.key_cols+self.target_cols)
+    def test__str__(self):
+        t_map = KeyTemplate(self.key_cols+self.target_cols, name="Test map")
+        map_str1 = str(t_map)
+
+        self.assertTrue(map_str1, "__str__ should return a non-empty string")
+        self.assertEqual(-1, map_str1.find("\n"), "__str__ should not have a new line if no contents")
         t_map.update(self.stern_map_path)
-        t_map.update(self.stern_map_path)
-        with mock.patch('sys.stdout', new=StringIO()):
-            t_map.print()
-            print("This should be eaten by the StringIO")
+        map_str2 = str(t_map)
+        self.assertTrue(map_str2, "__str__ should return a non-empty string")
 
     def test_update_map_missing_key(self):
         keys = self.key_cols + ['another']

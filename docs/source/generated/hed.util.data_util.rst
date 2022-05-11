@@ -20,6 +20,7 @@
       get_key_hash
       get_new_dataframe
       get_row_hash
+      get_value_dict
       make_info_dataframe
       remove_quotes
       reorder_columns

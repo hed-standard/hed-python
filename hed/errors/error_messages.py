@@ -145,9 +145,12 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
 def val_error_def_unmatched(tag):
     return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'", {}
 
+
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
-    return f"A data-recording’s Def-expand tag does not match the given definition.  Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}", {}
+    return f"A data-recording’s Def-expand tag does not match the given definition." + \
+           f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}", {}
+
 
 @hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.HED_DEF_VALUE_INVALID)
 def val_error_def_value_missing(tag):
@@ -192,7 +195,7 @@ def val_warning_default_units_used(tag, default_unit):
 
 
 @hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE)
-def schema_error_HED_SCHEMA_DUPLICATE_NODE(tag, duplicate_tag_list, section):
+def schema_error_hed_duplicate_node(tag, duplicate_tag_list, section):
     tag_join_delimiter = "\n\t"
     return f"Duplicate term '{str(tag)}' used {len(duplicate_tag_list)} places in '{section}' section schema as: " + \
            f"{tag_join_delimiter} {tag_join_delimiter.join(duplicate_tag_list)}", {}
@@ -257,8 +260,9 @@ def sidecar_error_unknown_column(column_name):
 
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
 def def_error_def_tag_in_definition(tag, def_name):
-    return f"Invalid tag {tag} found in definition for {def_name}.  Def and Def-expand tags cannot be in definitions."\
-        , {}
+    return f"Invalid tag {tag} found in definition for {def_name}. " +\
+           f"Def and Def-expand tags cannot be in definitions.", {}
+
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
 def def_error_wrong_group_tags(def_name, tag_list):

@@ -13,6 +13,7 @@
    .. autosummary::
    
       ~TagSummary.__init__
+      ~TagSummary.extract_summary_info
       ~TagSummary.get_design_matrices
    
    

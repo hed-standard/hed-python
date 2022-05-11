@@ -43,17 +43,16 @@ class Test(unittest.TestCase):
         self.assertEqual(len(count_dict), 10, "get_number_unique_values should have the correct number of entries")
         self.assertEqual(count_dict['onset'], 551, "get_number_unique_values should have the right number of unique")
 
-    def test_print(self):
+    def test__str__(self):
         from io import StringIO
-        t_map = BidsTsvSummary()
+        t_map = BidsTsvSummary(name="My output")
         t_map.update(self.stern_map_path)
         df = get_new_dataframe(self.stern_map_path)
         t_map.update(self.stern_map_path)
         self.assertEqual(len(t_map.categorical_info.keys()), len(df.columns),
                          "BidsTsvSummary should have all columns as categorical if no value or skip are given")
-        with mock.patch('sys.stdout', new=StringIO()):
-            t_map.print()
-            print("This should be eaten by the StringIO")
+        t_map_str = str(t_map)
+        self.assertTrue(t_map_str, "__str__ returns a non-empty string when the map has content.")
 
     def test_update(self):
         dict1 = BidsTsvSummary()

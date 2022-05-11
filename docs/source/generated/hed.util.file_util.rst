@@ -20,7 +20,6 @@
       url_to_string
       write_errors_to_file
       write_strings_to_file
-      write_text_iter_to_file
       write_xml_tree_2_xml_file
    
    

@@ -4,7 +4,7 @@ import os
 #from hed import
 from hed.errors import ErrorContext
 from hed import schema
-from hed.models import DefinitionMapper, HedString, HedInput, EventsInput, Sidecar
+from hed.models import DefMapper, HedString, HedInput, EventsInput, Sidecar
 from hed.validator import HedValidator
 
 
@@ -89,12 +89,12 @@ class Test(unittest.TestCase):
                                  "../data/validator_tests/bids_events_bad_defs.json")
         validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
-        issues = sidecar.validate_entries(hed_ops=validator, check_for_warnings=True)
-        self.assertEqual(len(issues), 4)
+        # issues = sidecar.validate_entries(hed_ops=validator, check_for_warnings=True)
+        # self.assertEqual(len(issues), 4)
         input_file = EventsInput(events_path, sidecars=sidecar)
-
-        validation_issues = input_file.validate_file_sidecars(validator, check_for_warnings=True)
-        self.assertEqual(len(validation_issues), 4)
+        #
+        # validation_issues = input_file.validate_file_sidecars(validator, check_for_warnings=True)
+        # self.assertEqual(len(validation_issues), 4)
 
         validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 42)
@@ -156,7 +156,7 @@ class Test(unittest.TestCase):
     def test_org_tag_missing(self):
         test_string_obj = HedString("Event, Item/NotItem")
         removed_tag = test_string_obj.tags()[0]
-        test_string_obj.remove_groups([removed_tag])
+        test_string_obj.remove([removed_tag])
         from hed import HedTag
         source_span = test_string_obj._get_org_span(removed_tag)
         self.assertEqual(source_span, (0, 5))
@@ -169,12 +169,25 @@ class Test(unittest.TestCase):
                                    '../data/schema_test_data/HED8.0.0.mediawiki')
         hed_schema = schema.load_schema(schema_path)
         validator = HedValidator(hed_schema=hed_schema)
-        def_mapper = DefinitionMapper()
+        def_mapper = DefMapper()
         string_with_def = \
             '(Definition/TestDefPlaceholder/#,(Item/TestDef1/#,Item/TestDef2)), def/TestDefPlaceholder/2471'
         test_string = HedString(string_with_def)
         issues = test_string.validate([validator, def_mapper], check_for_definitions=True)
         self.assertEqual(len(issues), 0)
+
+    def test_duplicate_group_in_definition(self):
+        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/schema_test_data/HED8.0.0.mediawiki')
+        hed_schema = schema.load_schema(schema_path)
+        validator = HedValidator(hed_schema=hed_schema)
+        def_mapper = DefMapper()
+        string_with_def = \
+            '(Definition/TestDef,(Item/TestDef1,Item/TestDef1))'
+        test_string = HedString(string_with_def)
+        issues = test_string.validate([validator, def_mapper], check_for_definitions=False)
+        self.assertEqual(len(issues), 1)
+
 
 
 if __name__ == '__main__':

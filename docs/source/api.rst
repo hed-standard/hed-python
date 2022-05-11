@@ -18,7 +18,10 @@ HED models
    hed.models.DefinitionMapper
    hed.models.EventsInput
    hed.models.HedGroup
+   hed.models.HedGroupBase
+   hed.models.HedGroupFrozen
    hed.models.HedInput
+   hed.models.HedOps
    hed.models.HedString
    hed.models.HedTag
    hed.models.OnsetMapper
@@ -61,6 +64,7 @@ HED tools
    hed.tools.BidsEventFile
    hed.tools.BidsEventFiles
    hed.tools.BidsFile
+   hed.tools.BidsFileDictionary
    hed.tools.BidsJsonFile
    hed.tools.BidsSidecarFile
    hed.tools.BidsTsvDictionary
@@ -71,7 +75,6 @@ HED tools
    hed.tools.HedLogger
    hed.tools.KeyMap
    hed.tools.KeyTemplate
-   hed.tools.SummaryEntry
    hed.tools.TagSummary
    hed.tools.annotation.annotation_util
 
@@ -105,11 +108,3 @@ HED validators
 
 .. currentmodule:: hed
 
-Modules
---------------
-.. toctree::
-   :maxdepth: 6
-
-   generated/modules
-
-.. _calibration_ref2:

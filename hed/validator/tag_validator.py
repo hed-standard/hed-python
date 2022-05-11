@@ -527,34 +527,32 @@ class TagValidator:
             A validation issues list. If no issues are found then an empty list is returned.
         """
         validation_issues = []
-        required_tag_prefixes = self._hed_schema.get_all_tags_with_attribute(HedKey.Required)
-        for capitalized_required_tag_prefix in required_tag_prefixes:
-            required_tag_prefix = capitalized_required_tag_prefix.lower()
-            if sum([x.lower().startswith(required_tag_prefix) for x in tags]) < 1:
+        required_prefixes = self._hed_schema.get_tags_with_attribute(HedKey.Required)
+        for required_prefix in required_prefixes:
+            if not any(tag.long_tag.lower().startswith(required_prefix.lower()) for tag in tags):
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING,
-                                                               tag_prefix=capitalized_required_tag_prefix)
+                                                               tag_prefix=required_prefix)
         return validation_issues
 
-    def check_multiple_unique_tags_exist(self, original_tag_list):
+    def check_multiple_unique_tags_exist(self, tags):
         """Reports a validation error if two or more tags start with a tag name_prefix that has the 'unique' attribute.
 
         Parameters
         ----------
-        original_tag_list: [HedTag]
-            A list containing tags that are used to report the error.
+        tags: [HedTag]
+            A list containing the tags.
         Returns
         -------
         []
             A validation issues list. If no issues are found then an empty list is returned.
         """
         validation_issues = []
-        unique_tag_prefixes = self._hed_schema.get_all_tags_with_attribute(HedKey.Unique)
-        for capitalized_unique_tag_prefix in unique_tag_prefixes:
-            unique_tag_prefix = capitalized_unique_tag_prefix.lower()
-            unique_tag_prefix_bool_mask = [x.lower().startswith(unique_tag_prefix) for x in original_tag_list]
+        unique_prefixes = self._hed_schema.get_tags_with_attribute(HedKey.Unique)
+        for unique_prefix in unique_prefixes:
+            unique_tag_prefix_bool_mask = [x.long_tag.lower().startswith(unique_prefix.lower()) for x in tags]
             if sum(unique_tag_prefix_bool_mask) > 1:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_NOT_UNIQUE,
-                                                               tag_prefix=capitalized_unique_tag_prefix)
+                                                               tag_prefix=unique_prefix)
         return validation_issues
 
     # ==========================================================================

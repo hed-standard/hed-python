@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         cls.zero_based_row_column_count = 3
         cls.column_prefix_dictionary = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
         cls.category_key = 'Event/Category/'
-        cls.category_partipant_and_stimulus_tags = \
+        cls.category_participant_and_stimulus_tags = \
             HedString('Event/Category/Participant response, Event/Category/Stimulus')
         cls.category_tags = HedString('Participant response, Stimulus')
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
@@ -172,7 +172,7 @@ class Test(unittest.TestCase):
         prepended_hed_string = ColumnMetadata._prepend_prefix_to_required_tag_column_if_needed(
             self.category_tags, self.category_key)
         self.assertIsInstance(prepended_hed_string, HedString)
-        self.assertEqual(str(prepended_hed_string), str(self.category_partipant_and_stimulus_tags))
+        self.assertEqual(str(prepended_hed_string), str(self.category_participant_and_stimulus_tags))
 
     # Verify reading/writing a short tag to a file column with a name_prefix works
     def test_add_prefix_verify_short_tag_conversion(self):

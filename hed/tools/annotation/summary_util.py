@@ -1,13 +1,22 @@
 """ Utilities used in computing dataset annotation. """
+
 from hed.models.hed_tag import HedTag
 
 
 def breakout_tags(schema, tag_list, breakout_list):
-    """ Create a dictionary where the tags are broken up into specific tags
-    Parameters:
-    -----------
-        schema: HedSchema
+    """ Create a dictionary where the tags are broken up into specific groups.
 
+    Args:
+        schema (HedSchema, HedSchemas):   Schemas to use to break out the tags.
+        tag_list (list, dict):            Iteratable of tags to be broken out.
+        breakout_list (list):             List of hed tag node strings that should be summarized separately.
+
+    Returns:
+        dict:  Dictionary where the keys are the tags from tag_list and all of their parents. The values are
+               each a list of all of the tags from the breakout_list and their parents.
+
+    Notes:
+        The tags that aren't in the breakout list appear in the returned dictionary under "leftovers".
 
     """
     breakout_dict = {}
@@ -29,15 +38,40 @@ def breakout_tags(schema, tag_list, breakout_list):
 
 
 def extract_dict_values(tag_dict, tag_name, tags):
-        if tag_name not in tag_dict:
-            return [], False
-        tags.remove(tag_name)
-        return list(tag_dict[tag_name].keys()), True
+    """ Get the tags associated with tag name from the tag dictionary.
+
+    Args:
+        tag_dict (dict):  Dictionary with keys that a tag node names and values are dictionaries.
+        tag_name (str):   Name of a node.
+        tags (list):      List of tags left to process.
+
+    Returns:
+        list:             Tags associated with tag_name.
+        bool:             True if tag_name was found in tag_dict.
+
+    Notes:
+        Side-effect the tags list is modified.
+    """
+    if tag_name not in tag_dict:
+        return [], False
+    tags.remove(tag_name)
+    return list(tag_dict[tag_name].keys()), True
 
 
 def get_schema_entries(hed_schema, tag, library_prefix=""):
+    """ Get a list of schema entries corresponding to tag and to its parents.
+
+    Args:
+        hed_schema (HedSchema, HedSchemaGroup):  The schemas in which to search for tag.
+        tag (HedTag, str):       The HED tag to look for.
+        library_prefix (str):    The library prefix to use in the search.
+
+    Returns:
+        list:  A list of HedTagEntry objects for the tag and its parent nodes in the schema.
+    """
+
     entry_list = []
-    tag_entry, remainder, tag_issues=hed_schema.find_tag_entry(tag, library_prefix)
+    tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(tag, library_prefix)
     while tag_entry is not None:
         entry_list.append(tag_entry)
         tag_entry = tag_entry._parent_tag
@@ -47,16 +81,16 @@ def get_schema_entries(hed_schema, tag, library_prefix=""):
 
 
 def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
-    """ Convert a list of tags and groups into a single list of tags and create a dictionary
+    """ Convert a list of tags and groups into a dictionary with short tag as key and dict of values as the value.
 
-    Parameters:
-        tag_list: list
-            List of HedTag and HedGroup to transform
-        hed_schema: HedSchema or HedSchemaGroup
-            Hed schema to use to convert tags to canonical form. If None, assumes already converted
+    Args:
+        tag_list (list): List of HedTag and HedGroup objects to transform.
+        tag_dict (dict):
+        hed_schema (HedSchema or HedSchemaGroup):  Hed schema to use to convert tags to canonical form.
+            If None, assumes already converted
 
-    Returns: dict
-        Dictionary of tags with a list of values
+    Returns:
+        dict: Dictionary of tags as keys with a dict of values as the value.
     """
     unfolded_list = unfold_tag_list(tag_list)
     for tag in unfolded_list:
@@ -72,7 +106,15 @@ def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
 
 
 def unfold_tag_list(tag_list):
-    """ Unfold a list consisting of HedTag and HedGroup objects """
+    """ Unfold a list consisting of HedTag and HedGroup objects making it a single level of HedTags.
+
+     Args:
+         tag_list (list):  List of HedTags and HedGroup objects.
+
+     Returns:
+         list:    A list of HedTags.
+
+    """
     unfolded_list = []
     for element in tag_list:
         if isinstance(element, HedTag):

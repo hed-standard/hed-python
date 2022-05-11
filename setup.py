@@ -1,23 +1,8 @@
-import setuptools
+# dummy setup file for versioneer
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+import versioneer
+from setuptools import setup
 
-setuptools.setup(
-    name="hedtools",
-    version="0.0.1",
-    author="VisLab, Ian Callanan, Jeremy Cockfield, Alexander Jones, Owen Winterberg, Kay Robbins",
-    author_email="Kay.Robbins@utsa.edu",
-    description="Utilities for converting among different representations of the HED " +
-                "(Hierarchical Event Descriptor) specification.",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/hed-standard/hed-python/",
-    packages=setuptools.find_namespace_packages(include=["hed.*"]),
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-    ],
-    python_requires='>=3.7',
-)
+if __name__ == "__main__":
+    setup(version=versioneer.get_version(),
+          cmdclass=versioneer.get_cmdclass())

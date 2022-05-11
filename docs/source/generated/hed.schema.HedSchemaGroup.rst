@@ -15,8 +15,8 @@
       ~HedSchemaGroup.__init__
       ~HedSchemaGroup.check_compliance
       ~HedSchemaGroup.find_tag_entry
-      ~HedSchemaGroup.get_all_tags_with_attribute
       ~HedSchemaGroup.get_tag_entry
+      ~HedSchemaGroup.get_tags_with_attribute
       ~HedSchemaGroup.schema_for_prefix
    
    
