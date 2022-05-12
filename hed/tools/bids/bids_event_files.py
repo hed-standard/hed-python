@@ -79,11 +79,11 @@ class BidsEventFiles:
             info.update(event_obj.file_path)
         return info
 
-    def validate(self, validators, check_for_warnings=True, keep_events=False):
+    def validate(self, hed_ops, check_for_warnings=True, keep_events=False):
         """ Validate the events files and return an error list.
 
         Args:
-            validators ([func or HedOps], func, HedOps):  Validation functions to apply.
+            hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
             check_for_warnings (bool):  If True, include warnings in the check.
             keep_events (bool):         If True, the underlying event files are read and their contents retained.
 
@@ -93,7 +93,7 @@ class BidsEventFiles:
         """
         issues = []
         for json_obj in self.sidecar_dict.values():
-            issues += json_obj.contents.validate_entries(hed_ops=validators, check_for_warnings=check_for_warnings)
+            issues += json_obj.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
         if issues:
             return issues
         for event_obj in self.events_dict.values():
@@ -102,7 +102,7 @@ class BidsEventFiles:
                 contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecars)
                 if keep_events:
                     event_obj.my_contents = contents
-            issues += contents.validate_file(hed_ops=validators, check_for_warnings=check_for_warnings)
+            issues += contents.validate_file(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
         return issues
 
 
@@ -118,10 +118,5 @@ if __name__ == '__main__':
         print(file_obj)
 
     hed_schema = load_schema_version(xml_version="8.0.0")
-    # print("Now validating.....")
-    # validator = HedValidator(hed_schema=hed_schema)
-    # validation_issues = bids.validate(validators=[validator], check_for_warnings=False)
-    # issue_str = get_printable_issue_string(validation_issues, skip_filename=False)
-    # print(f"Issues: {issue_str}")
 
     col_info = bids.summarize()
