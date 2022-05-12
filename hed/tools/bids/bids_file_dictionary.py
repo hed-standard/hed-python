@@ -1,6 +1,6 @@
 from hed.errors.exceptions import HedFileError
 from hed.tools import BidsFile
-from hed.tools.annotation.file_dictionary import FileDictionary
+from hed.tools.analysis.file_dictionary import FileDictionary
 
 
 class BidsFileDictionary(FileDictionary):

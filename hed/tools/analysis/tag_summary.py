@@ -1,7 +1,7 @@
 import os
 import json
 from hed.tools.bids.bids_dataset import BidsDataset
-from hed.tools.annotation.summary_util import breakout_tags, extract_dict_values
+from hed.tools.analysis.summary_util import breakout_tags, extract_dict_values
 from hed.models.definition_dict import add_group_to_dict
 from hed.models import DefinitionDict
 

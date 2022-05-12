@@ -6,7 +6,7 @@ from pandas import DataFrame
 from hed import schema as hedschema
 from hed.models import Sidecar
 from hed.tools import BidsTsvSummary, check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
-from hed.tools.annotation.annotation_util import _find_last_pos, _find_first_pos, \
+from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, \
     _flatten_cat_col, _flatten_val_col, _get_value_entry, trim_back, trim_front, _tag_list_to_str, _update_cat_dict, \
     generate_sidecar_entry
 from hed.util import get_file_list
