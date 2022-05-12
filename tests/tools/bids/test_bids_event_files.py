@@ -31,9 +31,9 @@ class Test(unittest.TestCase):
         hed_schema = \
             load_schema('https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
         validator = HedValidator(hed_schema)
-        validation_issues = events.validate(validators=[validator], check_for_warnings=False)
+        validation_issues = events.validate(hed_ops=[validator], check_for_warnings=False)
         self.assertFalse(validation_issues, "BidsEventFiles should have no validation errors")
-        validation_issues = events.validate(validators=[validator], check_for_warnings=True)
+        validation_issues = events.validate(hed_ops=[validator], check_for_warnings=True)
         self.assertTrue(validation_issues, "BidsEventFiles should have validation warnings")
         self.assertEqual(len(validation_issues), 6,
                          "BidsEventFiles should have 2 validation warnings for missing columns")
