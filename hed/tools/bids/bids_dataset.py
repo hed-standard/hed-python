@@ -24,7 +24,7 @@ class BidsDataset:
 
     def validate(self, check_for_warnings=True):
         validator = HedValidator(hed_schema=self.schemas)
-        issues = self.event_files.validate(validators=[validator], check_for_warnings=check_for_warnings)
+        issues = self.event_files.validate(hed_ops=[validator], check_for_warnings=check_for_warnings)
         return issues
 
     def _schema_from_description(self):
