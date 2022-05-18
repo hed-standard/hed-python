@@ -26,7 +26,7 @@ class BidsDataset:
     def validate(self, check_for_warnings=True):
         validator = HedValidator(hed_schema=self.schemas)
         issues1 = self.event_files.validate_sidecars(hed_ops=[validator], check_for_warnings=check_for_warnings)
-        issues2 = self.event_files.validate(hed_ops=[validator], check_for_warnings=check_for_warnings)
+        issues2 = self.event_files.validate_events(hed_ops=[validator], check_for_warnings=check_for_warnings)
         return issues1 + issues2
 
     def _schema_from_description(self):
@@ -65,14 +65,17 @@ class BidsDataset:
 
 
 if __name__ == '__main__':
+    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    #                     '../../../tests/data/bids/eeg_ds003654s_hed_library')
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        '../../../tests/data/bids/eeg_ds003654s_hed_library')
+                        '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
+
     bids = BidsDataset(path)
-    issue_list = bids.validate()
+    issue_list = bids.validate(check_for_warnings=False)
     if issue_list:
         issue_str = get_printable_issue_string(issue_list, "HED validation errors:")
     else:
         issue_str = "No issues"
     print(issue_str)
-    summary1 = bids.get_summary()
-    print(json.dumps(summary1, indent=4))
+    # summary1 = bids.get_summary()
+    # print(json.dumps(summary1, indent=4))
