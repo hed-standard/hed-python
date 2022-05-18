@@ -32,28 +32,6 @@ class Test(unittest.TestCase):
         events.clear_contents()
         self.assertFalse(events.contents, "BidsEventFile should have no contents after clearing")
 
-    def test_set_sidecars(self):
-        events = BidsEventFile(Test.event_path)
-        self.assertFalse(events.bids_sidecar, "BidsEventFile should not have a sidecar on construction")
-        sidecar = BidsSidecarFile(Test.sidecar_path)
-        events.set_sidecars(sidecar)
-        self.assertIsInstance(events.bids_sidecars, list, "BidsEventFile converts a single sidecar to a list")
-        events.set_sidecars([sidecar])
-        self.assertIsInstance(events.bids_sidecars, list, "BidsEventFile is a list")
-        self.assertEqual(len(events.bids_sidecars), 1, "BidsEventFile has the correct number of sidecars")
-        self.assertIsInstance(events.bids_sidecars[0], BidsSidecarFile,
-                              "BidsEventFile has sidecars which are of type BidsSidecarFile")
-
-    def test_set_sidecars_empty(self):
-        events = BidsEventFile(Test.event_path)
-        events.set_sidecars([])
-        self.assertIsInstance(events.bids_sidecars, list, "BidsEventFile is a list event when empty")
-        self.assertFalse(events.bids_sidecars, "BidsEventFile can have an empty list of sidecars")
-
-        events.set_sidecars(None)
-        self.assertIsInstance(events.bids_sidecars, list, "BidsEventFile is a list event when empty")
-        self.assertFalse(events.bids_sidecars, "BidsEventFile can have an empty list of sidecars")
-
 
 if __name__ == '__main__':
     unittest.main()

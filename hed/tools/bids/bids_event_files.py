@@ -18,7 +18,8 @@ class BidsEventFiles:
         self.sidecar_dir_dict = self._make_sidecar_dir_dict()
 
         for bids_obj in self.sidecar_dict.values():
-            bids_obj.set_contents(self.get_sidecars_from_path(bids_obj))
+            x = self.get_sidecars_from_path(bids_obj)
+            bids_obj.set_contents(content_info=x)
 
         for bids_obj in self.events_dict.values():
             sidecar_list = self.get_sidecars_from_path(bids_obj)
@@ -39,11 +40,21 @@ class BidsEventFiles:
         current_path = ''
         for comp in get_path_components(obj.file_path, self.root_path):
             current_path = os.path.realpath(os.path.join(current_path, comp))
-            sidecars = self.sidecar_dir_dict.get(current_path, None)
-            sidecar = BidsSidecarFile.get_sidecar(obj, sidecars)
-            if sidecar:
-                sidecar_list.append(sidecar)
+            #x = os.path.realpath(os.path.join(current_path, comp))
+            next_sidecar = self._get_sidecar_for_obj(obj, current_path)
+            if next_sidecar:
+                sidecar_list.append(next_sidecar)
         return sidecar_list
+
+    def _get_sidecar_for_obj(self, obj, current_path):
+        """ Return a single BidsSidecarFile relevant to obj from the sidecars in the current path """
+        sidecars = self.sidecar_dir_dict.get(current_path, None)
+        if not sidecars:
+            return None
+        for sidecar in sidecars:
+            if sidecar.is_sidecar_for(obj):
+                return sidecar
+        return None
 
     def summarize(self, value_cols=None, skip_cols=None):
         """
@@ -65,7 +76,7 @@ class BidsEventFiles:
         return info
 
     def validate_sidecars(self, hed_ops, check_for_warnings=True):
-        """ Validate inherited sidecars.
+        """ Validate merged sidecars.
 
         Args:
             hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
@@ -77,16 +88,10 @@ class BidsEventFiles:
         """
         issues = []
         for sidecar in self.sidecar_dict.values():
-            if sidecar.is_validated:
-                issues = issues + sidecar.issues
-                continue
-            sidecar.add_inherited_columns()
-            sidecar.issues= sidecar.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
-            sidecar.is_validated = True
-            issues = issues + sidecar.issues
+            issues += sidecar.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
         return issues
 
-    def validate(self, hed_ops, check_for_warnings=True, keep_events=False):
+    def validate_events(self, hed_ops, check_for_warnings=True, keep_events=False):
         """ Validate the events files and return an error list.
 
         Args:
@@ -102,7 +107,7 @@ class BidsEventFiles:
         for event_obj in self.events_dict.values():
             contents = event_obj.contents
             if not contents:
-                contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.bids_sidecars)
+                contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecar.contents)
                 if keep_events:
                     event_obj.my_contents = contents
             issues += contents.validate_file(hed_ops=hed_ops, check_for_warnings=check_for_warnings)

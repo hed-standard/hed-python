@@ -21,11 +21,13 @@ class BidsSidecarFile(BidsFile):
              bool:   True if this is a BIDS parent of obj and False otherwise
 
          Notes:
-             A sidecar cannot be a sidecar for itself.
+             A sidecar is a sidecar for itself.
 
          """
 
-        if obj.file_path == self.file_path or obj.suffix != self.suffix:
+        if obj.file_path == self.file_path:
+            return True
+        elif obj.suffix != self.suffix:
             return False
         elif os.path.dirname(self.file_path) != os.path.commonpath([obj.file_path, self.file_path]):
             return False
@@ -40,10 +42,10 @@ class BidsSidecarFile(BidsFile):
             self.contents = Sidecar(self.file_path, name=os.path.realpath(os.path.basename(self.file_path)))
         else:
             merged_sidecar = {}
-            for file in content_info:
-                with open(file, 'r') as fp:
+            for s in content_info:
+                with open(s.file_path, 'r') as fp:
                     next_sidecar = json.load(fp)
-                    for key, item in next_sidecar.iteritems():
+                    for key, item in next_sidecar.items():
                         merged_sidecar[key] = item
 
             self.contents = Sidecar(file=io.StringIO(json.dumps(merged_sidecar)),
