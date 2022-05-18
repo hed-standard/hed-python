@@ -82,7 +82,7 @@ class Test(unittest.TestCase):
     # def set_hed_string(self, new_hed_string, position):
     #
     #
-    # def _add_single_col_type(self, column_name, dict_for_entry, column_type=None):
+    # def _add_single_column(self, column_name, dict_for_entry, column_type=None):
     #
     # def get_validation_issues(self):
     #

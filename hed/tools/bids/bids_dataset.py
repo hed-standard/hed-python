@@ -5,10 +5,11 @@ from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.util.data_util import get_new_dataframe
 from hed.tools.bids.bids_event_files import BidsEventFiles
+from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.validator import HedValidator
 
 
-LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/hedxml/"
+LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/schema_libraries/"
 
 
 class BidsDataset:
@@ -24,8 +25,9 @@ class BidsDataset:
 
     def validate(self, check_for_warnings=True):
         validator = HedValidator(hed_schema=self.schemas)
-        issues = self.event_files.validate(hed_ops=[validator], check_for_warnings=check_for_warnings)
-        return issues
+        issues1 = self.event_files.validate_sidecars(hed_ops=[validator], check_for_warnings=check_for_warnings)
+        issues2 = self.event_files.validate(hed_ops=[validator], check_for_warnings=check_for_warnings)
+        return issues1 + issues2
 
     def _schema_from_description(self):
         hed = self.dataset_description.get("HEDVersion", None)
@@ -40,7 +42,7 @@ class BidsDataset:
         if 'libraries' in hed:
             for key, library in hed['libraries'].items():
                 library_pieces = library.split('_')
-                url = LIBRARY_URL_BASE + library_pieces[0] + '/HED_' + library + '.xml'
+                url = LIBRARY_URL_BASE + library_pieces[0] + '/hedxml/HED_' + library + '.xml'
                 x = load_schema(url, library_prefix=key)
                 x.set_library_prefix(key)  # TODO: temporary work around
                 hed_list.append(x)

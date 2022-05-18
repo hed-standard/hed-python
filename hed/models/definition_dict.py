@@ -75,14 +75,13 @@ class DefinitionEntry:
 class DefinitionDict(HedOps):
     """Class responsible for gathering and storing a group of definitions to be considered a single source.
 
-        A bids_old style file might have many of these(one for each json dict, and another for the actual file).
-
         This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
 
     """
 
     def __init__(self):
-        """ Initialize the class. gathering and storing a group of definitions to be considered a single source. """
+        """ Initialize the class, gathering and storing a group of definitions to be considered a single source. """
+
         super().__init__()
         self._defs = {}
 
@@ -94,16 +93,16 @@ class DefinitionDict(HedOps):
 
         Returns:
             list: List of DefinitionErrors issues found. Each issue is a dictionary.
+
         """
         return self._extract_def_issues
 
     @property
     def defs(self):
-        """
-            Provides direct access to internal dictionary.  Alter at your own risk.
-        Returns
-        -------
-        def_dict: {str: DefinitionEntry}
+        """ Provides direct access to internal dictionary.  Alter at your own risk.
+
+        Returns:
+            dict: {str: DefinitionEntry}
         """
         return self._defs
 
@@ -118,7 +117,7 @@ class DefinitionDict(HedOps):
         return []
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
-        """ Check a given HedString for definition tags, and add them to the dictionary if so.
+        """ Check a given HedString for definition tags and add them to the dictionary if so.
 
         Args:
             hed_string_obj (HedString): A single hed string to gather definitions from.

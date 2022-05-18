@@ -22,8 +22,26 @@ class BidsFile:
         self.suffix = suffix
         self.ext = ext
         self.entity_dict = entity_dict
+        self.bids_sidecars = []
+        self.contents = None
+
+    def clear_contents(self):
+        self.contents = None
+
+    def set_contents(self):
+        self.contents = None
+
+    def set_sidecars(self, sidecars):
+        if sidecars is None:
+            self.bids_sidecars = []
+        elif not isinstance(sidecars, list):
+            self.bids_sidecars = [sidecars]
+        else:
+            self.bids_sidecars = sidecars
 
     def __str__(self):
-        return self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
+        my_str = self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
                " entity_dict=" + str(self.entity_dict)
-
+        if self.bids_sidecars:
+            my_str = my_str + "\n\tsidecars=" + str(self.bids_sidecars)
+        return my_str
