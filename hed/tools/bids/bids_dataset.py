@@ -9,7 +9,7 @@ from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.validator import HedValidator
 
 
-LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/schema_libraries/"
+LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/"
 
 
 class BidsDataset:
