@@ -13,7 +13,7 @@
    .. autosummary::
    
       ~Sidecar.__init__
-      ~Sidecar.add_sidecar_file
+      ~Sidecar.load_sidecar_file
       ~Sidecar.get_as_json_string
       ~Sidecar.get_def_dicts
       ~Sidecar.hed_string_iter

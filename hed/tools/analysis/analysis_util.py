@@ -21,8 +21,6 @@ def assemble_hed(events, additional_columns=None, expand_defs=False):
         for column in additional_columns:
             if column in eligible_columns:
                 frame_dict[column] = []
-    else:
-        frame_dict['onset'] = []
 
     hed_tags = []
     onsets = []
@@ -73,3 +71,40 @@ def search_events(events, query, hed_schema):
         return pd.DataFrame({'row_number': row_numbers, 'matched_tags': matched_tags, 'HED': hed_tags})
     else:
         return None
+
+
+def filter_events(events, filter, hed_schema):
+    """ Return a dataframe with results of query.
+
+    Args:
+        events (EventsInput): The input events file to be searched.
+        query (str):     The str query to make.
+        hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
+
+    Returns:
+        DataFrame or None: A DataFrame with the results of the query or None if no events satisfied the query.
+
+    """
+    matched_tags = []
+    hed_tags = []
+    row_numbers = []
+    expression = TagExpressionParser(query)
+    for row_number, row_dict in events.iter_dataframe(return_row_dict=True, expand_defs=True, remove_definitions=True):
+        expanded_string = str(row_dict.get("HED", ""))
+        hed_string = HedStringFrozen(expanded_string, hed_schema=hed_schema)
+        match = expression.search_hed_string(hed_string)
+        if not match:
+            continue
+        match_str = ""
+        for m in match:
+            match_str = match_str + f" [{str(m)}] "
+
+        hed_tags.append(expanded_string)
+        matched_tags.append(match_str)
+        row_numbers.append(row_number - 2)
+
+    if row_numbers:
+        return pd.DataFrame({'row_number': row_numbers, 'matched_tags': matched_tags, 'HED': hed_tags})
+    else:
+        return None
+

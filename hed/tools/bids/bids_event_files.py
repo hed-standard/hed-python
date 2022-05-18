@@ -12,44 +12,39 @@ class BidsEventFiles:
 
     def __init__(self, root_path):
         self.root_path = os.path.realpath(root_path)
-        self.sidecar_dict = {}  # Dict uses os.path.abspath(file) as key
-        self.events_dict = {}
-        self.sidecar_dir_dict = {}
-        self._set_sidecar_dict()  # Dict uses os.path.abspath(file) as key
-        self._set_event_file_dict()
-        self._set_sidecar_dir_dict()
+        self.sidecar_dict = self.create_sidecar_dict(self.root_path, suffix='_events')
+        self.events_dict = self._get_event_file_dict()
+        self.sidecar_dir_dict = self.create_sidecar_dir_dict(self.root_path, self.sidecar_dict, suffix='_events')
+
+        for bids_obj in self.sidecar_dict.values():
+            bids_obj.set_sidecars(self.get_sidecars_from_path(bids_obj))
 
         for bids_obj in self.events_dict.values():
             bids_obj.set_sidecars(self.get_sidecars_from_path(bids_obj))
 
-    def _set_event_file_dict(self):
-        """ Get a dictionary of BidsEventFile objects with underlying EventInput objects not set"""
+    def _get_event_file_dict(self):
+        """ Get a dictionary of BidsEventFile objects with underlying EventInput objects not set.
+
+        Returns:
+            dict:   A dictionary of BidsEventFile objects keyed by real path.
+
+        """
         files = get_file_list(self.root_path, name_suffix='_events', extensions=['.tsv'])
         file_dict = {}
         for file in files:
             file_dict[os.path.realpath(file)] = BidsEventFile(file)
-        self.events_dict = file_dict
-
-    def _set_sidecar_dict(self):
-        """ Get a dictionary of BidsSidecarFile objects with underlying Sidecar objects set"""
-        files = get_file_list(self.root_path, name_suffix='_events', extensions=['.json'])
-        file_dict = {}
-        for file in files:
-            file_dict[os.path.realpath(file)] = BidsSidecarFile(os.path.realpath(file), set_contents=True)
-        self.sidecar_dict = file_dict
-
-    def _set_sidecar_dir_dict(self):
-        """ Set the dictionary with direct pointers to sidecars rather than paths"""
-        dir_dict = get_dir_dictionary(self.root_path, name_suffix='events', extensions=['.json'])
-        sidecar_dir_dict = {}
-        for this_dir, dir_list in dir_dict.items():
-            new_dir_list = []
-            for s_file in dir_list:
-                new_dir_list.append(self.sidecar_dict[os.path.realpath(s_file)])
-            sidecar_dir_dict[os.path.realpath(this_dir)] = new_dir_list
-        self.sidecar_dir_dict = sidecar_dir_dict
+        return file_dict
 
     def get_sidecars_from_path(self, obj):
+        """ Creates a list of the applicable sidecars for the indicated object.
+
+        Args:
+            obj (BidsEventFile or BidsSidecarFile):  The BIDS event file to get the sidecars for
+
+        Returns:
+            list:  A list of the applicable sidecars for obj starting at the root.
+
+        """
         sidecar_list = []
         current_path = ''
         for comp in get_path_components(obj.file_path, self.root_path):
@@ -79,6 +74,28 @@ class BidsEventFiles:
             info.update(event_obj.file_path)
         return info
 
+    def validate_sidecars(self, hed_ops, check_for_warnings=True):
+        """ Validate inherited sidecars.
+
+        Args:
+            hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
+            check_for_warnings (bool):  If True, include warnings in the check.
+
+        Returns:
+            (list):    A list of validation issues found. Each issue is a dictionary.
+
+        """
+        issues = []
+        for sidecar in self.sidecar_dict.values():
+            if sidecar.is_validated:
+                issues = issues + sidecar.issues
+                continue
+            sidecar.add_inherited_columns()
+            sidecar.issues= sidecar.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
+            sidecar.is_validated = True
+            issues = issues + sidecar.issues
+        return issues
+
     def validate(self, hed_ops, check_for_warnings=True, keep_events=False):
         """ Validate the events files and return an error list.
 
@@ -88,22 +105,63 @@ class BidsEventFiles:
             keep_events (bool):         If True, the underlying event files are read and their contents retained.
 
         Returns:
-            (list):    A list of validation issues found.
+            (list):    A list of validation issues found. Each issue is a dictionary.
 
         """
         issues = []
-        for json_obj in self.sidecar_dict.values():
-            issues += json_obj.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
-        if issues:
-            return issues
         for event_obj in self.events_dict.values():
             contents = event_obj.contents
             if not contents:
-                contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecars)
+                contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.bids_sidecars)
                 if keep_events:
                     event_obj.my_contents = contents
             issues += contents.validate_file(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
         return issues
+
+    @staticmethod
+    def create_sidecar_dict(bids_root_path, suffix='_events'):
+        """ Create a dictionary of BidsSidecarFile objects for the specified entity type.
+
+        Args:
+            bids_root_path (str):   Real path of the root of a BIDS dataset.
+            suffix (str):           Suffix type of the dictionary.
+
+        Returns:
+            dict:   a dictionary of events BidsSidecarFile objects keyed by real path for the specified suffix type
+
+        Notes:
+            This function creates the sidecars and sets their contents.
+
+        """
+        files = get_file_list(bids_root_path, name_suffix=suffix, extensions=['.json'])
+        file_dict = {}
+        for file in files:
+            s = BidsSidecarFile(os.path.realpath(file))
+            s.set_contents()
+            file_dict[os.path.realpath(file)] = s
+        return file_dict
+
+    @staticmethod
+    def create_sidecar_dir_dict(bids_root_path, sidecar_dict, suffix='_events'):
+        """ Create a the dictionary with real paths of directories as keys and a list of sidecars as values.
+
+        Args:
+            bids_root_path (str):   Real path of the root of a BIDS dataset.
+            sidecar_dict (dict):    A dictionary of sidecars corresponding to suffix with keys being the real path.
+            suffix (str):           Suffix type of the dictionary.
+
+        Returns:
+            dict: A dictionary of lists of BidsSidecarFile
+
+        """
+        dir_dict = get_dir_dictionary(bids_root_path, name_suffix=suffix, extensions=['.json'])
+        sidecar_dir_dict = {}
+        for this_dir, dir_list in dir_dict.items():
+            new_dir_list = []
+            for s_file in dir_list:
+                new_dir_list.append(sidecar_dict[os.path.realpath(s_file)])
+            sidecar_dir_dict[os.path.realpath(this_dir)] = new_dir_list
+        return sidecar_dir_dict
 
 
 if __name__ == '__main__':

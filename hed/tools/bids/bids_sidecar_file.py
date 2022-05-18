@@ -1,16 +1,28 @@
 import os
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_file import BidsFile
-from hed.tools.bids.bids_json_file import BidsJsonFile
 
 
-class BidsSidecarFile(BidsJsonFile):
+class BidsSidecarFile(BidsFile):
     """ Represents a BIDS JSON sidecar file."""
 
-    def __init__(self, file_path, set_contents=False):
-        super().__init__(file_path, set_contents=False)
-        if set_contents:
-            self.set_contents()
+    def __init__(self, file_path):
+        super().__init__(file_path)
+        self.is_validated = False
+        self.issues = []
+
+    def add_inherited_columns(self):
+        """ Add additional columns assuming that the inherited sidecars are from top to bottom. """
+
+        for sidecar in self.bids_sidecars:
+            column_dict = sidecar.contents._column_data
+            for column_name, column_meta in column_dict.items():
+                self._column_data[column_name] = column_meta
+
+    def clear_contents(self):
+        self.contents = None
+        self.is_validated = False
+        self.issues = []
 
     def is_sidecar_for(self, obj):
         """ Returns true if this is a sidecar for obj.
@@ -20,14 +32,17 @@ class BidsSidecarFile(BidsJsonFile):
 
          Returns:
              bool:   True if this is a BIDS parent of obj and False otherwise
+
+         Notes:
+             A sidecar cannot be a sidecar for itself.
+
          """
 
-        if obj.suffix != self.suffix:
+        if obj.file_path == self.file_path or obj.suffix != self.suffix:
+            return False
+        elif os.path.dirname(self.file_path) != os.path.commonpath([obj.file_path, self.file_path]):
             return False
 
-        common_path = os.path.commonpath([obj.file_path, self.file_path])
-        if common_path != os.path.dirname(self.file_path):
-            return False
         for key, item in self.entity_dict.items():
             if key not in obj.entity_dict or obj.entity_dict[key] != item:
                 return False

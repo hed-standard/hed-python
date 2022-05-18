@@ -21,10 +21,9 @@ class Test(unittest.TestCase):
     def test_bids_tsv_file_str(self):
         tsv_file1 = BidsTsvFile(Test.tsv_path)
         self.assertTrue(str(tsv_file1), "BidsTsvFile should have a string representation")
-        tsv_file2 = BidsTsvFile(Test.tsv_path, set_contents=True)
-        self.assertTrue(str(tsv_file2), "BidsTsvFile should have a string representation")
-        self.assertGreater(len(str(tsv_file2)), len(str(tsv_file1)),
-                           "BidsTsvFile with contents should have a longer string representation than without")
+        self.assertFalse(tsv_file1.contents, "BidsTsvFile should not have contents when constructed.")
+        tsv_file1.set_contents()
+        self.assertFalse(tsv_file1.contents.empty, "BidsTsvFile should have contents when set.")
 
     def test_bids_tsv_file_set_contents(self):
         tsv_file = BidsTsvFile(Test.tsv_path)

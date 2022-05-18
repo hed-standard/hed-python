@@ -429,6 +429,7 @@ class ColumnMetadata:
 
         Returns:
             DefinitionDict: Contains all the definitions located in the column.
+            issues: List of issues encountered in extracting the definitions. Each issue is a dictionary.
 
         """
         if error_handler is None:
