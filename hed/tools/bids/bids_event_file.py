@@ -13,5 +13,4 @@ class BidsEventFile(BidsTsvFile):
         super().__init__(file_path)
 
     def set_contents(self):
-        self.contents = EventsInput(file=self.file_path, sidecars=self.bids_sidecars,
-                                    name=os.path.realpath(self.file_path))
+        self.contents = EventsInput(file=self.file_path, sidecars=self.sidecar, name=os.path.realpath(self.file_path))

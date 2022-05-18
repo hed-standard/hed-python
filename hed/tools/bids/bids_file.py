@@ -22,22 +22,22 @@ class BidsFile:
         self.suffix = suffix
         self.ext = ext
         self.entity_dict = entity_dict
-        self.bids_sidecars = []
+        self.sidecar = None    # list of sidecars starting at the root.
         self.contents = None
 
     def clear_contents(self):
         self.contents = None
 
-    def set_contents(self):
-        self.contents = None
+    def set_contents(self, content_info=None):
+        self.contents = content_info
 
-    def set_sidecars(self, sidecars):
-        if sidecars is None:
-            self.bids_sidecars = []
-        elif not isinstance(sidecars, list):
-            self.bids_sidecars = [sidecars]
-        else:
-            self.bids_sidecars = sidecars
+    # def set_sidecars(self, sidecars):
+    #     if sidecars is None:
+    #         self.bids_sidecars = []
+    #     elif not isinstance(sidecars, list):
+    #         self.bids_sidecars = [sidecars]
+    #     else:
+    #         self.bids_sidecars = sidecars
 
     def __str__(self):
         my_str = self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \

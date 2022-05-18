@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
 
     def test_set_sidecars(self):
         events = BidsEventFile(Test.event_path)
-        self.assertFalse(events.bids_sidecars, "BidsEventFile should have no sidecars on construction")
+        self.assertFalse(events.bids_sidecar, "BidsEventFile should not have a sidecar on construction")
         sidecar = BidsSidecarFile(Test.sidecar_path)
         events.set_sidecars(sidecar)
         self.assertIsInstance(events.bids_sidecars, list, "BidsEventFile converts a single sidecar to a list")

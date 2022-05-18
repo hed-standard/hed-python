@@ -156,8 +156,6 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
 def get_path_components(this_path, root_path):
     """ Get a list with root_path and remaining components.
 
-
-
     Args:
         this_path (str):      The path of a file or directory descendant of root_path
         root_path (str):      A path (no trailing separator)
