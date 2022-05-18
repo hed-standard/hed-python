@@ -150,12 +150,9 @@ class Sidecar:
         """
         if error_handler is None:
             error_handler = ErrorHandler()
+        hed_ops = self._standardize_ops(hed_ops)
         if expand_defs or remove_definitions:
-            hed_ops = self._add_definition_mapper(hed_ops, extra_def_dicts)
-        else:
-            if not isinstance(hed_ops, list):
-                hed_ops = [hed_ops]
-            hed_ops = hed_ops.copy()
+            self._add_definition_mapper(hed_ops, extra_def_dicts)
         for column_name, entry in self._column_data.items():
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
             for (hed_string_obj, position, issues) in entry.hed_string_iter(hed_ops=hed_ops,
@@ -188,17 +185,21 @@ class Sidecar:
             extra_def_dicts (list):  DefDicts from outside.
 
         Returns:
-            list:  A shallow copy of the hed_ops list with a DefMapper added if there wasn't one.
+            DefMapper:  A shallow copy of the hed_ops list with a DefMapper added if there wasn't one.
 
         """
-        if not isinstance(hed_ops, list):
-            hed_ops = [hed_ops]
-        hed_ops = hed_ops.copy()
         if not any(isinstance(hed_op, DefMapper) for hed_op in hed_ops):
             def_dicts = self.get_def_dicts(extra_def_dicts)
             def_mapper = DefMapper(def_dicts)
             hed_ops.append(def_mapper)
-        return hed_ops
+            return def_mapper
+        return None
+
+    @staticmethod
+    def _standardize_ops(hed_ops):
+        if not isinstance(hed_ops, list):
+            hed_ops = [hed_ops]
+        return hed_ops.copy()
 
     def _add_single_column(self, column_name, dict_for_entry, column_type=None):
         """ Create a single column metadata entry and add to this sidecar.
@@ -253,9 +254,11 @@ class Sidecar:
         if name:
             error_handler.push_error_context(ErrorContext.FILE_NAME, name, False)
 
-        hed_ops = self._add_definition_mapper(hed_ops, extra_def_dicts)
+        hed_ops = self._standardize_ops(hed_ops)
+        def_mapper = self._add_definition_mapper(hed_ops, extra_def_dicts)
 
         all_validation_issues = []
+        all_validation_issues += def_mapper.issues
         for column_data in self:
             all_validation_issues += column_data.validate_column(hed_ops, error_handler=error_handler, **kwargs)
         if name:

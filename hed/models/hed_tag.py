@@ -39,10 +39,7 @@ class HedTag:
         self._schema_entry = None
 
         self._extension_value = ""
-
-        # Note this only keeps track of tags also used in definitions.  You should also not
-        # alter any tags used in a HedGroupFrozen
-        self.mutable = True
+        self._parent = None
 
         if hed_schema:
             self.convert_to_canonical_forms(hed_schema)
@@ -120,8 +117,6 @@ class HedTag:
         -------
 
         """
-        if not self.mutable:
-            raise ValueError("Trying to alter immutable tag")
         if self._schema_entry:
             if self._schema:
                 tag_entry = self._schema.get_tag_entry(new_tag_val, library_prefix=self.library_prefix)
@@ -201,8 +196,6 @@ class HedTag:
         new_tag_val : str
             New (implicitly long form) of tag to set
         """
-        if not self.mutable:
-            raise ValueError("Trying to alter immutable tag")
 
         if self._schema_entry:
             raise ValueError("Can only edit tags before calculating canonical forms. " +
@@ -311,9 +304,6 @@ class HedTag:
                 Prefix will be added.
 
         """
-
-        # if not self.mutable:
-        #     raise ValueError("Trying to alter immutable tag")
 
         checking_prefix = required_prefix
         while checking_prefix:
@@ -664,9 +654,6 @@ class HedTag:
         placeholder_value : str
             Value to replace placeholder with.
         """
-        # if not self.mutable:
-        #     raise ValueError("Trying to alter immutable tag")
-
         if "#" in self.org_tag:
             if self._schema_entry:
                 self._extension_value = self._extension_value.replace("#", placeholder_value)

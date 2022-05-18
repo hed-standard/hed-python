@@ -227,7 +227,7 @@ class TagExpressionParser:
 
     def _tokenize(self, expression_string):
         grouping_re = r"\[\[|\[|,|\]\]|\]"
-        paren_re = "\)|\(|~"
+        paren_re = r"\)|\(|~"
         word_re = r"\band\b|\bor\b|[_\-a-zA-Z0-9/.^#]+"
         re_string = fr"({grouping_re}|{paren_re}|{word_re})"
         token_re = re.compile(re_string)

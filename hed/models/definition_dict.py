@@ -23,8 +23,6 @@ class DefinitionEntry:
         """
         self.name = name
         self.contents = contents
-        if contents:
-            contents.cascade_mutable(False)
         self.takes_value = takes_value
         self.source_context = source_context
         self.tag_dict = {}
@@ -56,12 +54,10 @@ class DefinitionEntry:
         if self.contents:
             output_group = self.contents
             if placeholder_value:
-                # todo: This part could be optimized more
+                output_group = copy.deepcopy(self.contents)
                 placeholder_tag = output_group.find_placeholder_tag()
                 if not placeholder_tag:
                     raise ValueError("Internal error related to placeholders in definition mapping")
-                output_group = copy.copy(self.contents)
-                placeholder_tag = output_group.make_tag_mutable(placeholder_tag)
                 name = f"{name}/{placeholder_value}"
                 placeholder_tag.replace_placeholder(placeholder_value)
 

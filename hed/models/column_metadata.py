@@ -413,7 +413,7 @@ class ColumnMetadata:
             return []
 
         # Make a copy without definitions to check placeholder count.
-        hed_string_copy = copy.copy(hed_string)
+        hed_string_copy = copy.deepcopy(hed_string)
         hed_string_copy.remove_definitions()
 
         if hed_string_copy.lower().count("#") != expected_pound_sign_count:

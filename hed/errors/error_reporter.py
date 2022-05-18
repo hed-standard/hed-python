@@ -300,18 +300,18 @@ class ErrorHandler:
         """
         error_func = error_functions.get(error_type)
         if not error_func:
-            error_object_list = ErrorHandler.val_error_unknown(*args, **kwargs)
-            error_object_list[0]['code'] = error_type
-            ErrorHandler._add_context_to_errors(error_object_list[0], error_context)
-            return error_object_list
+            error_object = ErrorHandler.val_error_unknown(*args, **kwargs)
+            error_object['code'] = error_type
+            ErrorHandler._add_context_to_errors(error_object, error_context)
+            return [error_object]
 
-        error_object_list = error_func(*args, **kwargs)
+        error_object = error_func(*args, **kwargs)
         if actual_error:
-            error_object_list[0]['code'] = actual_error
+            error_object['code'] = actual_error
 
-        ErrorHandler._add_context_to_errors(error_object_list[0], error_context)
-        ErrorHandler._update_error_with_char_pos(error_object_list[0])
-        return error_object_list
+        ErrorHandler._add_context_to_errors(error_object, error_context)
+        ErrorHandler._update_error_with_char_pos(error_object)
+        return [error_object]
 
     @staticmethod
     def _add_context_to_errors(error_object, error_context_to_add):

@@ -3,7 +3,7 @@ import os
 
 from hed.models import ColumnMapper, ColumnType, ColumnMetadata, HedString, model_constants
 from hed.schema import load_schema
-
+from hed import HedFileError
 
 class Test(unittest.TestCase):
     schema_file = '../data/schema_test_data/HED8.0.0t.xml'
@@ -206,7 +206,6 @@ class Test(unittest.TestCase):
             expanded_row = column_mapper.expand_row_tags([test_string])
             prepended_hed_string = expanded_row[model_constants.COLUMN_TO_HED_TAGS][1]
             self.assertEqual(expected_result, str(prepended_hed_string))
-
 
 if __name__ == '__main__':
     unittest.main()
