@@ -1,11 +1,11 @@
 
 
 def report_tsv_diffs(tsv_dict1, tsv_dict2, logger):
-    """ Reports and logs the contents and differences of two equivalent BidsTsvDictionary objects
+    """ Reports and logs the contents and differences of two equivalent BidsTabularDictionary objects
 
     Args:
-        tsv_dict1 (BidsTsvDictionary): A dictionary representing BIDS-keyed tsv files
-        tsv_dict2 (BidsTsvDictionary): A dictionary representing BIDS-keyed tsv files
+        tsv_dict1 (BidsTabularDictionary): A dictionary representing BIDS-keyed tsv files
+        tsv_dict2 (BidsTabularDictionary): A dictionary representing BIDS-keyed tsv files
         logger (HedLogger):            A HedLogger object for reporting the values by key
 
     Returns: (str)                     A string with the differences
