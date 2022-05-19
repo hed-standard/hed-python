@@ -25,10 +25,16 @@ class BidsFile:
         self.sidecar = None    # list of sidecars starting at the root (including itself if sidecar)
         self.contents = None
 
+    @property
+    def get_contents(self):
+        return self.contents
+
     def clear_contents(self):
         self.contents = None
 
-    def set_contents(self, content_info=None):
+    def set_contents(self, content_info=None, no_overwrite=True):
+        if self.contents and no_overwrite:
+            return
         self.contents = content_info
 
     def __str__(self):
