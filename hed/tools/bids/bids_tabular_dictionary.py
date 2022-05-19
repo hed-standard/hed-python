@@ -2,8 +2,8 @@ from hed.util.data_util import get_new_dataframe
 from hed.tools.bids.bids_file_dictionary import BidsFileDictionary
 
 
-class BidsTsvDictionary(BidsFileDictionary):
-    """ Holds a key-file dictionary, but also reads each tsv file and keeps track of number of rows and column names."""
+class BidsTabularDictionary(BidsFileDictionary):
+    """ Holds a key-file dictionary, but also reads each tabular file and keeps track of number of rows and column names."""
 
     def __init__(self, collection_name, file_list=None, entities=('sub', 'ses', 'task', 'run')):
         """ Create a dictionary with keys that are simplified file names and values that are full paths
@@ -62,7 +62,7 @@ class BidsTsvDictionary(BidsFileDictionary):
         return diff_list
 
     def _create_dict_obj(self, collection_name, file_dict):
-        dict_obj = BidsTsvDictionary(collection_name, file_list=None, entities=self.entities)
+        dict_obj = BidsTabularDictionary(collection_name, file_list=None, entities=self.entities)
         dict_obj.file_dict = file_dict
         dict_obj._set_tsv_info()
         return dict_obj

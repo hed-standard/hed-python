@@ -11,14 +11,13 @@ from .analysis.analysis_util import assemble_hed, search_events
 from .bids.bids_continuous_file import BidsContinuousFile
 from .bids.bids_dataset import BidsDataset
 from .bids.bids_dataset_summary import BidsDatasetSummary
-from .bids.bids_tabular_file import BidsTabularFile
 from .bids.bids_file_group import BidsFileGroup
 from .bids.bids_file import BidsFile
 from .bids.bids_file_dictionary import BidsFileDictionary
 from .bids.bids_sidecar_file import BidsSidecarFile
-from .bids.bids_tsv_dictionary import BidsTsvDictionary
+from .bids.bids_tabular_dictionary import BidsTabularDictionary
 from .bids.bids_tabular_file import BidsTabularFile
-from .bids.bids_tsv_summary import BidsTsvSummary
+from .bids.bids_tabular_summary import BidsTabularSummary
 
 from hed.tools.analysis.tsv_reports import report_tsv_diffs
 

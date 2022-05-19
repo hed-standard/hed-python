@@ -4,8 +4,8 @@ from hed.util import get_new_dataframe
 from hed.tools.analysis.annotation_util import generate_sidecar_entry
 
 
-class BidsTsvSummary:
-    """Summarizes the contents of tsv files. """
+class BidsTabularSummary:
+    """Summarizes the contents of BIDS tabular files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ .
@@ -106,7 +106,7 @@ class BidsTsvSummary:
         cannot be in the
 
           Args:
-              col_sum (BidsTsvSummary):    A ColumnSummary to be combined with
+              col_sum (BidsTabularSummary):    A ColumnSummary to be combined with
 
           """
         self._update_dict_skip(col_sum)
@@ -205,13 +205,14 @@ class BidsTsvSummary:
             skip_cols (list):  Name of the column
 
         Returns:
-            (BidsTsvSummary, dict)  A BidsTsvSummary of the file_dict, plus dict of individual BidsTsvSummary objects
+            BidsTabularSummary:  A summary of the file dictionary
+            dict: A dict of individual BidsTabularSummary objects
         """
 
-        summary_all = BidsTsvSummary(skip_cols=skip_cols)
+        summary_all = BidsTabularSummary(skip_cols=skip_cols)
         summary_dict = {}
         for key, file in file_dictionary.file_dict.items():
-            orig_dict = BidsTsvSummary(skip_cols=skip_cols)
+            orig_dict = BidsTabularSummary(skip_cols=skip_cols)
             df = get_new_dataframe(file.file_path)
             orig_dict.update(df)
             summary_dict[key] = orig_dict

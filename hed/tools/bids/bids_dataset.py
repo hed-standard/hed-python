@@ -13,14 +13,24 @@ LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-li
 
 
 class BidsDataset:
-    """Represents the metadata for a BIDS dataset."""
+    """Represents the metadata for a BIDS dataset primarily focused on HED evaluation."""
 
-    def __init__(self, root_path):
+    def __init__(self, root_path, schema_group=None):
+        """ Constructor for a BIDS dataset.
+
+        Args:
+            root_path (str):  Root path of the BIDS dataset.
+            schema_group (HedSchemaGroup):  An optional HedSchemaGroup that overrides the one specified in dataset.
+
+        """
         self.root_path = os.path.realpath(root_path)
         with open(os.path.join(self.root_path, "dataset_description.json"), "r") as fp:
             self.dataset_description = json.load(fp)
         self.participants = get_new_dataframe(os.path.join(self.root_path, "participants.tsv"))
-        self.schemas = HedSchemaGroup(self._schema_from_description())
+        if schema_group:
+            self.HedSchemaGroup = schema_group
+        else:
+            self.schemas = HedSchemaGroup(self._schema_from_description())
         self.event_files = BidsFileGroup(root_path)
 
     def validate(self, check_for_warnings=True):

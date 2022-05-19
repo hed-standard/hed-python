@@ -3,7 +3,7 @@ from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.bids.bids_continuous_file import BidsContinuousFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
-from hed.tools.bids.bids_tsv_summary import BidsTsvSummary
+from hed.tools.bids.bids_tabular_summary import BidsTabularSummary
 from hed.models.events_input import EventsInput
 from hed.util.io_util import get_dir_dictionary, get_file_list, get_path_components
 
@@ -65,13 +65,13 @@ class BidsFileGroup:
             skip_cols (list):   Column names designated as columns to skip.
 
         Returns:
-            BidsTsvSummary:  A summary of the number of values in different columns.
+            BidsTabularSummary:  A summary of the number of values in different columns.
 
         Notes: The columns that are not value_cols or skip_col are summarized by counting
         the number of times each unique value appears in that column.
 
         """
-        info = BidsTsvSummary(value_cols=value_cols, skip_cols=skip_cols)
+        info = BidsTabularSummary(value_cols=value_cols, skip_cols=skip_cols)
         for event_obj in self.datafile_dict.values():
             info.update(event_obj.file_path)
         return info
