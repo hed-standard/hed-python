@@ -65,7 +65,7 @@ def load_schema(hed_path=None, library_prefix=None):
 
     if is_url:
         file_as_string = file_util.url_to_string(hed_path)
-        return from_string(file_as_string, file_type=os.path.splitext(hed_path.lower())[1])
+        hed_schema = from_string(file_as_string, file_type=os.path.splitext(hed_path.lower())[1])
     elif hed_path.lower().endswith(".xml"):
         hed_schema = HedSchemaXMLParser.load_xml(hed_path)
     elif hed_path.lower().endswith(".mediawiki"):
