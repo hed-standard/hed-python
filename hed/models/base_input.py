@@ -42,7 +42,7 @@ class BaseInput:
 
         Notes:
             The validation will skip over the first line of the file.
-            See HedInput or EventsInput for examples of how to use built-in a ColumnMapper.
+            See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
 
          """
         if mapper is None:

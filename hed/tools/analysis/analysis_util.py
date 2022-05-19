@@ -1,12 +1,12 @@
 import pandas as pd
-from hed.models import EventsInput, HedStringFrozen, TagExpressionParser
+from hed.models import TabularInput, HedStringFrozen, TagExpressionParser
 
 
 def assemble_hed(events, additional_columns=None, expand_defs=False):
     """ Return a dataframe representing the assembled HED annotations for an events file.
 
     Args:
-        events (EventsInput): The input events file to be searched.
+        events (TabularInput): The input events file to be searched.
         additional_columns (list or None):  A list of additional column names to include. If None, only onset is used.
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
 
@@ -41,7 +41,7 @@ def search_events(events, query, hed_schema):
     """ Return a dataframe with results of query.
 
     Args:
-        events (EventsInput): The input events file to be searched.
+        events (TabularInput): The input events file to be searched.
         query (str):     The str query to make.
         hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
 
@@ -77,7 +77,7 @@ def filter_events(events, filter, hed_schema):
     """ Return a dataframe with results of query.
 
     Args:
-        events (EventsInput): The input events file to be searched.
+        events (TabularInput): The input events file to be searched.
         query (str):     The str query to make.
         hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
 

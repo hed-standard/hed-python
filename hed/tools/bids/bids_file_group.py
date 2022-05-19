@@ -4,7 +4,7 @@ from hed.tools.bids.bids_continuous_file import BidsContinuousFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_summary import BidsTabularSummary
-from hed.models.events_input import EventsInput
+from hed.models.tabular_input import TabularInput
 from hed.util.io_util import get_dir_dictionary, get_file_list, get_path_components
 
 

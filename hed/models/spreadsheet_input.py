@@ -3,13 +3,13 @@ from hed.models.base_input import BaseInput
 from hed.models.def_mapper import DefMapper
 
 
-class HedInput(BaseInput):
+class SpreadsheetInput(BaseInput):
     """ Class representing a spreadsheet of HED tags."""
 
     def __init__(self, file=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
                  def_dicts=None, name=None):
-        """Constructor for the HedInput class.
+        """Constructor for the SpreadsheetInput class.
 
         Args:
             file (str or file like): An xlsx/tsv file to open or a File object.
@@ -22,7 +22,7 @@ class HedInput(BaseInput):
                 first line of the file if the spreadsheet as column names.
             column_prefix_dictionary (dict): A dictionary with column number keys and prefix values.
             def_dicts (DefinitionDict or list):  A DefinitionDict or list of DefDicts containing definitions for this
-                object other than the ones extracted from the HedInput object itself.
+                object other than the ones extracted from the SpreadsheetInput object itself.
 
         Examples:
             A prefix dictionary {3: 'Label/', 5: 'Description/'} indicates that column 3 and 5 have HED tags

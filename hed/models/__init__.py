@@ -5,11 +5,11 @@ from .column_mapper import ColumnMapper
 from .column_metadata import ColumnMetadata, ColumnType
 from .definition_dict import DefinitionDict, DefinitionEntry
 from .def_mapper import DefMapper
-from .events_input import EventsInput
+from .tabular_input import TabularInput
 from .expression_parser import TagExpressionParser
 from .hed_group import HedGroup, HedGroupFrozen
 from .hed_group_base import HedGroupBase
-from .hed_input import HedInput
+from .spreadsheet_input import SpreadsheetInput
 from .hed_ops import HedOps
 from .hed_string import HedString, HedStringFrozen
 from .hed_tag import HedTag
