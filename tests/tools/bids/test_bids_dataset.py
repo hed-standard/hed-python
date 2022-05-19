@@ -3,7 +3,7 @@ import unittest
 import pandas as pd
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_dataset import BidsDataset
-from hed.tools.bids.bids_event_files import BidsEventFiles
+from hed.tools.bids.bids_file_group import BidsFileGroup
 
 
 class Test(unittest.TestCase):
@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(bids1, BidsDataset, "BidsDataset should create a valid object from valid dataset")
         self.assertIsInstance(bids1.participants, pd.DataFrame, "BidsDataset participants should be a DataFrame")
         self.assertIsInstance(bids1.dataset_description, dict, "BidsDataset dataset_description should be a dict")
-        self.assertIsInstance(bids1.event_files, BidsEventFiles, "BidsDataset event_files should be  BidsEventFiles")
+        self.assertIsInstance(bids1.event_files, BidsFileGroup, "BidsDataset event_files should be  BidsFileGroup")
         self.assertIsInstance(bids1.schemas, HedSchemaGroup, "BidsDataset schemas should be HedSchemaGroup")
 
         bids2 = BidsDataset(self.library_path)
@@ -29,8 +29,8 @@ class Test(unittest.TestCase):
                               "BidsDataset with libraries should have a participants that is a DataFrame")
         self.assertIsInstance(bids2.dataset_description, dict,
                               "BidsDataset with libraries dataset_description should be a dict")
-        self.assertIsInstance(bids2.event_files, BidsEventFiles,
-                              "BidsDataset with libraries event_files should be  BidsEventFiles")
+        self.assertIsInstance(bids2.event_files, BidsFileGroup,
+                              "BidsDataset with libraries event_files should be  BidsFileGroup")
         self.assertIsInstance(bids2.schemas, HedSchemaGroup,
                               "BidsDataset with libraries should have schemas that is a HedSchemaGroup")
 

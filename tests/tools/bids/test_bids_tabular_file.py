@@ -1,7 +1,7 @@
 import os
 import unittest
 from hed.models import EventsInput
-from hed.tools.bids.bids_event_file import BidsEventFile
+from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
 
@@ -16,21 +16,21 @@ class Test(unittest.TestCase):
                                         '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_constructor(self):
-        events = BidsEventFile(Test.event_path)
-        self.assertEqual(events.suffix, 'events', "BidsEventFile should have correct events suffix")
-        self.assertEqual(events.ext, '.tsv', "BidsEventFile should have a .tsv extension")
-        self.assertEqual(len(events.entity_dict), 3, "BidsEventFile should have right number of entity_dict")
+        events = BidsTabularFile(Test.event_path)
+        self.assertEqual(events.suffix, 'events', "BidsTabularFile should have correct events suffix")
+        self.assertEqual(events.ext, '.tsv', "BidsTabularFile should have a .tsv extension")
+        self.assertEqual(len(events.entity_dict), 3, "BidsTabularFile should have right number of entity_dict")
         events_str = str(events)
-        self.assertTrue(events_str, "BidsEventFile should have a string representation")
+        self.assertTrue(events_str, "BidsTabularFile should have a string representation")
 
     def test_set_contents(self):
-        events = BidsEventFile(Test.event_path)
-        self.assertFalse(events.contents, "BidsEventFile should have no contents until set")
+        events = BidsTabularFile(Test.event_path)
+        self.assertFalse(events.contents, "BidsTabularFile should have no contents until set")
         events.set_contents()
         self.assertIsInstance(events.contents, EventsInput,
-                              "BidsEventFile should have EventsInput contents after setting")
+                              "BidsTabularFile should have EventsInput contents after setting")
         events.clear_contents()
-        self.assertFalse(events.contents, "BidsEventFile should have no contents after clearing")
+        self.assertFalse(events.contents, "BidsTabularFile should have no contents after clearing")
 
 
 if __name__ == '__main__':

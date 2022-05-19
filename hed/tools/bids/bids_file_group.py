@@ -1,27 +1,29 @@
 import os
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.bids.bids_event_file import BidsEventFile
+from hed.tools.bids.bids_continuous_file import BidsContinuousFile
+from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tsv_summary import BidsTsvSummary
 from hed.models.events_input import EventsInput
 from hed.util.io_util import get_dir_dictionary, get_file_list, get_path_components
 
 
-class BidsEventFiles:
-    """ Container for the event files and sidecars in a BIDS dataset."""
+class BidsFileGroup:
+    """ Container for a group of files with a specified suffix and their supporting sidecars in a BIDS dataset."""
 
-    def __init__(self, root_path, suffix="_events"):
+    def __init__(self, root_path, suffix="_events", type="tabular"):
         self.root_path = os.path.realpath(root_path)
         self.suffix = suffix
+        self.type = type
         self.sidecar_dict = self._make_sidecar_dict()
-        self.events_dict = self._make_event_file_dict()
+        self.datafile_dict = self._make_datafile_dict()
         self.sidecar_dir_dict = self._make_sidecar_dir_dict()
 
         for bids_obj in self.sidecar_dict.values():
             x = self.get_sidecars_from_path(bids_obj)
             bids_obj.set_contents(content_info=x)
 
-        for bids_obj in self.events_dict.values():
+        for bids_obj in self.datafile_dict.values():
             sidecar_list = self.get_sidecars_from_path(bids_obj)
             if sidecar_list:
                 bids_obj.sidecar = sidecar_list[-1]
@@ -30,7 +32,7 @@ class BidsEventFiles:
         """ Creates a list of the applicable sidecars for the indicated object.
 
         Args:
-            obj (BidsEventFile or BidsSidecarFile):  The BIDS event file to get the sidecars for
+            obj (BidsTabularFile or BidsSidecarFile):  The BIDS event file to get the sidecars for
 
         Returns:
             list:  A list of the applicable sidecars for obj starting at the root.
@@ -40,7 +42,6 @@ class BidsEventFiles:
         current_path = ''
         for comp in get_path_components(obj.file_path, self.root_path):
             current_path = os.path.realpath(os.path.join(current_path, comp))
-            #x = os.path.realpath(os.path.join(current_path, comp))
             next_sidecar = self._get_sidecar_for_obj(obj, current_path)
             if next_sidecar:
                 sidecar_list.append(next_sidecar)
@@ -71,7 +72,7 @@ class BidsEventFiles:
 
         """
         info = BidsTsvSummary(value_cols=value_cols, skip_cols=skip_cols)
-        for event_obj in self.events_dict.values():
+        for event_obj in self.datafile_dict.values():
             info.update(event_obj.file_path)
         return info
 
@@ -91,39 +92,42 @@ class BidsEventFiles:
             issues += sidecar.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
         return issues
 
-    def validate_events(self, hed_ops, check_for_warnings=True, keep_events=False):
-        """ Validate the events files and return an error list.
+    def validate_datafiles(self, hed_ops, check_for_warnings=True, keep_contents=False):
+        """ Validate the datafiles and return an error list.
 
         Args:
             hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
             check_for_warnings (bool):  If True, include warnings in the check.
-            keep_events (bool):         If True, the underlying event files are read and their contents retained.
+            keep_contents (bool):       If True, the underlying data files are read and their contents retained.
 
         Returns:
             (list):    A list of validation issues found. Each issue is a dictionary.
 
         """
         issues = []
-        for event_obj in self.events_dict.values():
-            contents = event_obj.contents
-            if not contents:
-                contents = EventsInput(file=event_obj.file_path, sidecars=event_obj.sidecar.contents)
-                if keep_events:
-                    event_obj.my_contents = contents
-            issues += contents.validate_file(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
+        for data_obj in self.datafile_dict.values():
+            data_obj.set_contents(no_overwrite=True)
+            data = data_obj.contents
+            issues += data.validate_file(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
+            if not keep_contents:
+                data_obj.clear_contents()
         return issues
 
-    def _make_event_file_dict(self):
-        """ Get a dictionary of BidsEventFile objects with underlying EventInput objects not set.
+    def _make_datafile_dict(self):
+        """ Get a dictionary of BidsTabularFile objects with underlying EventInput objects not set.
 
         Returns:
-            dict:   A dictionary of BidsEventFile objects keyed by real path.
+            dict:   A dictionary of BidsTabularFile objects keyed by real path.
 
         """
-        files = get_file_list(self.root_path, name_suffix='_events', extensions=['.tsv'])
+        files = get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.tsv'])
         file_dict = {}
-        for file in files:
-            file_dict[os.path.realpath(file)] = BidsEventFile(file)
+        if self.type == "tabular":
+            for file in files:
+                file_dict[os.path.realpath(file)] = BidsTabularFile(file)
+        else:
+            for file in files:
+                file_dict[os.path.realpath(file)] = BidsContinuousFile(file)
         return file_dict
 
     def _make_sidecar_dict(self):
@@ -162,12 +166,12 @@ class BidsEventFiles:
 if __name__ == '__main__':
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         '../../../tests/data/bids/eeg_ds003654s_hed')
-    bids = BidsEventFiles(path)
+    bids = BidsFileGroup(path)
 
     for file_obj in bids.sidecar_dict.values():
         print(file_obj)
 
-    for file_obj in bids.events_dict.values():
+    for file_obj in bids.datafile_dict.values():
         print(file_obj)
 
     hed_schema = load_schema_version(xml_version="8.0.0")

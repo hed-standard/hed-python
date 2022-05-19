@@ -4,7 +4,7 @@ from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.util.data_util import get_new_dataframe
-from hed.tools.bids.bids_event_files import BidsEventFiles
+from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.validator import HedValidator
 
@@ -21,12 +21,12 @@ class BidsDataset:
             self.dataset_description = json.load(fp)
         self.participants = get_new_dataframe(os.path.join(self.root_path, "participants.tsv"))
         self.schemas = HedSchemaGroup(self._schema_from_description())
-        self.event_files = BidsEventFiles(root_path)
+        self.event_files = BidsFileGroup(root_path)
 
     def validate(self, check_for_warnings=True):
         validator = HedValidator(hed_schema=self.schemas)
         issues1 = self.event_files.validate_sidecars(hed_ops=[validator], check_for_warnings=check_for_warnings)
-        issues2 = self.event_files.validate_events(hed_ops=[validator], check_for_warnings=check_for_warnings)
+        issues2 = self.event_files.validate_datafiles(hed_ops=[validator], check_for_warnings=check_for_warnings)
         return issues1 + issues2
 
     def _schema_from_description(self):

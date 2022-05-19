@@ -2,7 +2,7 @@ import os
 import unittest
 from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
-from hed.tools.bids.bids_event_file import BidsEventFile
+from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_file import BidsFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
 
     def test_is_sidecar_for(self):
         sidecar1 = BidsSidecarFile(Test.sidecar_path)
-        events1 = BidsEventFile(Test.event_path)
+        events1 = BidsTabularFile(Test.event_path)
         self.assertTrue(sidecar1.is_sidecar_for(events1))
 
         the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.nfti'
