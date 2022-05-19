@@ -23,11 +23,11 @@ class Test(unittest.TestCase):
         cls.hed_file_with_errors = HedInput(cls.hed_filepath_with_errors)
 
         cls.hed_filepath_major_errors = os.path.join(cls.hed_base_dir, "bids_events_invalid.tsv")
-        cls.hed_file_with_major_errors = HedInput(cls.hed_filepath_major_errors, tag_columns=[3])
+        cls.hed_file_with_major_errors = HedInput(cls.hed_filepath_major_errors, tag_columns=[2])
 
         cls.hed_filepath_major_errors_multi_column = os.path.join(cls.hed_base_dir, "bids_events_invalid_columns.tsv")
         cls.hed_file_with_major_errors_multi_column = \
-            HedInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[3, 4])
+            HedInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[2, 3])
 
     def test__validate_input(self):
         test_string_obj = HedString(self.base_hed_input)
@@ -127,9 +127,9 @@ class Test(unittest.TestCase):
                                    '../data/validator_tests/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = schema.load_schema(schema_path)
 
-        prefixed_needed_tag_columns = {2: 'Property/Informational-property/Label/',
-                                       3: 'Property/Informational-property/Description/'}
-        loaded_file = HedInput(events_path, tag_columns=[4],
+        prefixed_needed_tag_columns = {1: 'Property/Informational-property/Label/',
+                                       2: 'Property/Informational-property/Description/'}
+        loaded_file = HedInput(events_path, tag_columns=[3],
                                column_prefix_dictionary=prefixed_needed_tag_columns,
                                worksheet_name='LKT Events')
 
@@ -145,7 +145,7 @@ class Test(unittest.TestCase):
 
         hed_schema = schema.load_schema(schema_path)
 
-        input_file = HedInput(events_path, tag_columns=[2, 3, "error"])
+        input_file = HedInput(events_path, tag_columns=[1, 2, "error"])
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = input_file.validate_file(validator)
         self.assertEqual(validation_issues[1]['char_index'], 6)

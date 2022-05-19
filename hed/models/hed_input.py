@@ -31,7 +31,7 @@ class HedInput(BaseInput):
 
         """
         if tag_columns is None:
-            tag_columns = [2]
+            tag_columns = [1]
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 

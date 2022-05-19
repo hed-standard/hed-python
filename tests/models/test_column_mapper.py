@@ -11,10 +11,10 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.event_mapper = ColumnMapper()
-        cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
-        cls.one_based_tag_columns = [1, 2, 3]
+        cls.integer_key_dictionary = {0: 'one', 1: 'two', 2: 'three'}
+        cls.zero_based_tag_columns = [0, 1, 2]
         cls.zero_based_row_column_count = 3
-        cls.column_prefix_dictionary = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
+        cls.column_prefix_dictionary = {2: 'Event/Description/', 3: 'Event/Label/', 4: 'Event/Category/'}
         cls.category_key = 'Event/Category/'
         cls.category_participant_and_stimulus_tags = \
             HedString('Event/Category/Participant response, Event/Category/Stimulus')
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
 
     def test_set_tag_columns(self):
         mapper = ColumnMapper()
-        mapper.set_tag_columns(self.one_based_tag_columns, finalize_mapping=True)
+        mapper.set_tag_columns(self.zero_based_tag_columns, finalize_mapping=True)
         self.assertTrue(len(mapper._final_column_map) >= 2)
 
     def test_optional_column(self):
@@ -138,7 +138,7 @@ class Test(unittest.TestCase):
         mapper.add_columns(self.basic_attribute_column)
         mapper.set_column_map(self.basic_column_map)
         expanded_row = mapper.expand_row_tags(self.basic_event_row_invalid)
-        column_issues = expanded_row[model_constants.COLUMN_ISSUES][3]
+        column_issues = expanded_row[model_constants.COLUMN_ISSUES][2]
         self.assertEqual(len(column_issues), 1)
         self.assertTrue(self.basic_attribute_column in expanded_row)
 
@@ -149,24 +149,6 @@ class Test(unittest.TestCase):
         test_string_obj = HedString(self.complex_hed_tag_required_prefix)
         no_prefix_string = test_string_obj.get_as_form("org_tag", remove_prefix_func)
         self.assertEqual(str(no_prefix_string), str(self.complex_hed_tag_no_prefix))
-
-    def test_subtract_1_from_dictionary_keys(self):
-        one_subtracted_key_dictionary = self.event_mapper._subtract_1_from_dictionary_keys(self.integer_key_dictionary)
-        self.assertIsInstance(one_subtracted_key_dictionary, dict)
-        self.assertTrue(one_subtracted_key_dictionary)
-        original_dictionary_key_sum = sum(self.integer_key_dictionary.keys())
-        new_dictionary_key_sum = sum(one_subtracted_key_dictionary.keys())
-        original_dictionary_key_length = len(self.integer_key_dictionary.keys())
-        self.assertEqual(original_dictionary_key_sum - new_dictionary_key_sum, original_dictionary_key_length)
-
-    def test_subtract_1_from_list_elements(self):
-        one_subtracted_list = self.event_mapper._subtract_1_from_list_elements(self.one_based_tag_columns)
-        self.assertIsInstance(one_subtracted_list, list)
-        self.assertTrue(one_subtracted_list)
-        original_list_sum = sum(self.one_based_tag_columns)
-        new_list_sum = sum(one_subtracted_list)
-        original_list_length = len(self.one_based_tag_columns)
-        self.assertEqual(original_list_sum - new_list_sum, original_list_length)
 
     def test__prepend_prefix_to_required_tag_column_if_needed(self):
         prepended_hed_string = ColumnMetadata._prepend_prefix_to_required_tag_column_if_needed(
@@ -185,7 +167,7 @@ class Test(unittest.TestCase):
             self.assertEqual("Character/D", tag.short_tag)
 
     def test_add_prefix_verify_short_tag_read(self):
-        column_mapper = ColumnMapper(column_prefix_dictionary={1: self.short_tag_key})
+        column_mapper = ColumnMapper(column_prefix_dictionary={0: self.short_tag_key})
         test_strings = {
             'test_no_prefix': self.short_tag_with_missing_prefix,
             'test_full_prefix': self.short_tag_key + self.short_tag_with_missing_prefix,
@@ -204,7 +186,7 @@ class Test(unittest.TestCase):
             expected_result = expected_results[test_key]
 
             expanded_row = column_mapper.expand_row_tags([test_string])
-            prepended_hed_string = expanded_row[model_constants.COLUMN_TO_HED_TAGS][1]
+            prepended_hed_string = expanded_row[model_constants.COLUMN_TO_HED_TAGS][0]
             self.assertEqual(expected_result, str(prepended_hed_string))
 
 if __name__ == '__main__':
