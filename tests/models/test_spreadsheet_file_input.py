@@ -3,7 +3,7 @@ import os
 import io
 
 from hed.errors import HedFileError
-from hed.models import EventsInput, HedInput, model_constants, Sidecar
+from hed.models import TabularInput, SpreadsheetInput, model_constants, Sidecar
 import shutil
 from hed import schema
 
@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.default_test_file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                   "../data/validator_tests/ExcelMultipleSheets.xlsx")
-        cls.generic_file_input = HedInput(cls.default_test_file_name)
+        cls.generic_file_input = SpreadsheetInput(cls.default_test_file_name)
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
         cls.one_based_tag_columns = [1, 2, 3]
         cls.zero_based_tag_columns = [0, 1, 2, 3, 4]
@@ -45,8 +45,8 @@ class Test(unittest.TestCase):
         tag_columns = [4]
         worksheet_name = 'LKT Events'
 
-        file_input = HedInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
-                              tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+        file_input = SpreadsheetInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
+                                      tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
 
         for row_number, column_to_hed_tags in file_input:
             break_here = 3
@@ -70,25 +70,25 @@ class Test(unittest.TestCase):
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate_entries(expand_defs=True)), 0)
-        input_file = EventsInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecars=sidecar)
 
         with open(events_path) as file:
             events_file_as_string = io.StringIO(file.read())
-        input_file_from_string = EventsInput(file=events_file_as_string, sidecars=sidecar)
+        input_file_from_string = TabularInput(file=events_file_as_string, sidecars=sidecar)
 
         for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
             self.assertEqual(row_number, row_number2)
             self.assertEqual(column_dict, column_dict)
 
     def test_bad_file_inputs(self):
-        self.assertRaises(HedFileError, EventsInput, None)
+        self.assertRaises(HedFileError, TabularInput, None)
 
     def test_loading_binary(self):
         with open(self.default_test_file_name, "rb") as f:
-            self.assertRaises(HedFileError, HedInput, f)
+            self.assertRaises(HedFileError, SpreadsheetInput, f)
 
         with open(self.default_test_file_name, "rb") as f:
-            opened_binary_file = HedInput(f, file_type=".xlsx")
+            opened_binary_file = SpreadsheetInput(f, file_type=".xlsx")
             self.assertTrue(True)
 
     def test_to_excel(self):
@@ -121,7 +121,7 @@ class Test(unittest.TestCase):
 
         test_input_file.to_excel(test_output_name)
 
-        reloaded_input = HedInput(test_output_name)
+        reloaded_input = SpreadsheetInput(test_output_name)
 
         self.assertTrue(test_input_file._dataframe.equals(reloaded_input._dataframe))
 
@@ -132,15 +132,15 @@ class Test(unittest.TestCase):
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate_entries()), 0)
-        input_file_1 = EventsInput(events_path, sidecars=sidecar)
-        input_file_2 = EventsInput(events_path, sidecars=sidecar)
+        input_file_1 = TabularInput(events_path, sidecars=sidecar)
+        input_file_2 = TabularInput(events_path, sidecars=sidecar)
 
         input_file_2.reset_column_mapper()
 
         for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(),
                                                                           input_file_2.iter_dataframe()):
             self.assertEqual(row_number, row_number2,
-                             f"EventsInput should have row {row_number} equal to {row_number2} after reset")
+                             f"TabularInput should have row {row_number} equal to {row_number2} after reset")
             self.assertTrue(len(column_dict) == 5,
                             f"The column dictionary for row {row_number} should have the right length")
             self.assertTrue(len(column_dict2) == 11,
@@ -149,21 +149,21 @@ class Test(unittest.TestCase):
     def test_no_column_header_and_convert(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header.tsv')
-        hed_input = HedInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
         hed_input.convert_to_long(self.hed_schema)
 
         events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         '../data/model_tests/no_column_header_long.tsv')
-        hed_input_long = HedInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
         for column1, column2 in zip(hed_input, hed_input_long):
             self.assertEqual(column1, column2)
 
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header.tsv')
-        hed_input = HedInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
         events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         '../data/model_tests/no_column_header_long.tsv')
-        hed_input_long = HedInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
         hed_input_long.convert_to_short(self.hed_schema)
         for column1, column2 in zip(hed_input, hed_input_long):
             self.assertEqual(column1, column2)
@@ -172,12 +172,12 @@ class Test(unittest.TestCase):
         # Verify behavior works as expected even if definitions are present
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
-        hed_input = HedInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
         hed_input.convert_to_long(self.hed_schema)
 
         events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         '../data/model_tests/no_column_header_definition_long.tsv')
-        hed_input_long = HedInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
         for column1, column2 in zip(hed_input, hed_input_long):
             self.assertEqual(column1, column2)
 

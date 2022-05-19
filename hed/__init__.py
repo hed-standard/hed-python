@@ -4,8 +4,8 @@ from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError, HedExceptions
 
 from hed.models.base_input import BaseInput
-from hed.models.hed_input import HedInput
-from hed.models.events_input import EventsInput
+from hed.models.spreadsheet_input import SpreadsheetInput
+from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 
 from hed.schema.hed_schema import HedSchema
