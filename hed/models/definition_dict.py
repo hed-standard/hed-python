@@ -22,6 +22,8 @@ class DefinitionEntry:
             source_context (dict): Info about where this definition was declared.
         """
         self.name = name
+        if contents:
+            contents = contents.copy()
         self.contents = contents
         self.takes_value = takes_value
         self.source_context = source_context

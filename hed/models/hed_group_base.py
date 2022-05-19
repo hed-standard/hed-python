@@ -1,3 +1,5 @@
+import copy
+
 from hed.models.hed_tag import HedTag
 
 
@@ -23,6 +25,19 @@ class HedGroupBase:
 
     def __copy__(self):
         raise ValueError("Cannot make shallow copies of HedGroups")
+
+    def copy(self):
+        """
+            Return a deep copy of this group, with the parent pointer removed.
+
+        Returns:
+            copied_group (HedGroupBase): The copied group
+        """
+        save_parent = self._parent
+        self._parent = None
+        return_copy = copy.deepcopy(self)
+        self._parent = save_parent
+        return return_copy
 
     @property
     def children(self):
