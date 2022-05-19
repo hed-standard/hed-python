@@ -42,7 +42,7 @@ class BaseInput:
 
         Notes:
             The validation will skip over the first line of the file.
-            See HedInput or EventsInput for examples of how to use built-in a ColumnMapper.
+            See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
 
          """
         if mapper is None:
@@ -295,12 +295,10 @@ class BaseInput:
                                                       expand_defs=expand_defs, remove_definitions=remove_definitions,
                                                       error_handler=error_handler, **kwargs)
 
-        start_at_one = 1
-
         # Iter tuples is ~ 25% faster compared to iterrows in our use case
         for row_number, text_file_row in enumerate(self._dataframe.itertuples(index=False)):
             error_handler.push_error_context(ErrorContext.ROW, row_number)
-            yield row_number + start_at_one, self._expand_row_internal(text_file_row, tag_funcs, string_funcs,
+            yield row_number, self._expand_row_internal(text_file_row, tag_funcs, string_funcs,
                                                                        error_handler=error_handler,
                                                                        mapper=mapper, return_row_dict=return_row_dict)
             error_handler.pop_error_context()
@@ -337,9 +335,7 @@ class BaseInput:
                                            expand_defs=expand_defs, shrink_defs=shrink_defs,
                                            remove_definitions=remove_definitions, error_handler=error_handler)
 
-        adj_row_number = 1
-
-        text_file_row = self._dataframe.iloc[row_number - adj_row_number]
+        text_file_row = self._dataframe.iloc[row_number]
         return self._expand_row_internal(text_file_row, tag_funcs, None, error_handler=error_handler,
                                          mapper=mapper, return_row_dict=False)
 
@@ -367,8 +363,7 @@ class BaseInput:
             transform_func = self._mapper.get_prefix_remove_func(column_number)
 
         new_text = new_string_obj.get_as_form(tag_form, transform_func)
-        adj_row_number = 1
-        self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = new_text
+        self._dataframe.iloc[row_number, column_number] = new_text
 
     def get_worksheet(self, worksheet_name=None):
         """ Get the requested worksheet from the workbook by name or the first worksheet if None.

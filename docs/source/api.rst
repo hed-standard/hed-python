@@ -16,11 +16,11 @@ HED models
    hed.models.DefDict
    hed.models.DefEntry
    hed.models.DefinitionMapper
-   hed.models.EventsInput
+   hed.models.TabularInput
    hed.models.HedGroup
    hed.models.HedGroupBase
    hed.models.HedGroupFrozen
-   hed.models.HedInput
+   hed.models.SpreadsheetInput
    hed.models.HedOps
    hed.models.HedString
    hed.models.HedTag

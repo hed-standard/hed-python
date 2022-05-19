@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.models import EventsInput
+from hed.models import TabularInput
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
@@ -27,8 +27,8 @@ class Test(unittest.TestCase):
         events = BidsTabularFile(Test.event_path)
         self.assertFalse(events.contents, "BidsTabularFile should have no contents until set")
         events.set_contents()
-        self.assertIsInstance(events.contents, EventsInput,
-                              "BidsTabularFile should have EventsInput contents after setting")
+        self.assertIsInstance(events.contents, TabularInput,
+                              "BidsTabularFile should have TabularInput contents after setting")
         events.clear_contents()
         self.assertFalse(events.contents, "BidsTabularFile should have no contents after clearing")
 

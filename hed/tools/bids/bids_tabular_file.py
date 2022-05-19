@@ -1,5 +1,5 @@
 import os
-from hed.models.events_input import EventsInput
+from hed.models.tabular_input import TabularInput
 from hed.tools.bids.bids_file import BidsFile
 
 
@@ -16,7 +16,7 @@ class BidsTabularFile(BidsFile):
         if self.contents and no_overwrite:
             return
         if self.sidecar:
-            x = EventsInput(file=self.file_path, sidecars=self.sidecar.contents, name=os.path.realpath(self.file_path))
+            x = TabularInput(file=self.file_path, sidecars=self.sidecar.contents, name=os.path.realpath(self.file_path))
         else:
-            x = EventsInput(file=self.file_path, name=os.path.realpath(self.file_path))
+            x = TabularInput(file=self.file_path, name=os.path.realpath(self.file_path))
         BidsFile.set_contents(self, content_info=x)

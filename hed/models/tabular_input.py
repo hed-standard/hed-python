@@ -4,14 +4,14 @@ from hed.models.sidecar import Sidecar
 from hed.models.def_mapper import DefMapper
 
 
-class EventsInput(BaseInput):
+class TabularInput(BaseInput):
     """ Represents a BIDS tsv file."""
 
     HED_COLUMN_NAME = "HED"
 
     def __init__(self, file=None, sidecars=None, attribute_columns=None, extra_def_dicts=None,
                  also_gather_defs=True, name=None):
-        """Constructor for the EventsInput class.
+        """Constructor for the TabularInput class.
 
         Parameters
         ----------
@@ -104,7 +104,7 @@ class EventsInput(BaseInput):
         Validates all column definitions and column definition hed strings.
 
         This is not an encouraged way to do this.  You should instead validate the sidecars BEFORE creating the
-        EventsInput object.
+        TabularInput object.
 
         Parameters
         ----------
