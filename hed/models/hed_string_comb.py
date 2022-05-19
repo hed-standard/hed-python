@@ -20,6 +20,11 @@ class HedStringComb(HedString):
         """
         super().__init__("")
         self._children = list(hed_string for hed_string in hed_string_obj_list if hed_string is not None)
+        # Update the direct children to point to this combined string, rather than their original string
+        for child in self._children:
+            for sub_child in child.children:
+                sub_child._parent = self
+
         self._original_children = self._children
 
     def get_original_hed_string(self):
@@ -75,9 +80,6 @@ class HedStringComb(HedString):
         new_contents : HedTag or HedGroup or [HedTag or HedGroup]
             What to replace the tag with.
         """
-        if not self.mutable:
-            raise ValueError("Trying to alter immutable group")
-
         # this needs to pass the tag off to the appropriate group
         replace_sub_string = None
         for sub_string in self._children:
@@ -102,7 +104,6 @@ class HedStringComb(HedString):
         result._startpos, result._endpos = self.span
         result._hed_string = self.get_original_hed_string()
         result._children = self.children.copy()
-        result.mutable = True
         return result
 
     def _get_org_span(self, tag_or_group):

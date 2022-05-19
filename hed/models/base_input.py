@@ -296,8 +296,6 @@ class BaseInput:
                                                       error_handler=error_handler, **kwargs)
 
         start_at_one = 1
-        if self._has_column_names:
-            start_at_one += 1
 
         # Iter tuples is ~ 25% faster compared to iterrows in our use case
         for row_number, text_file_row in enumerate(self._dataframe.itertuples(index=False)):
@@ -340,8 +338,6 @@ class BaseInput:
                                            remove_definitions=remove_definitions, error_handler=error_handler)
 
         adj_row_number = 1
-        if self._has_column_names:
-            adj_row_number += 1
 
         text_file_row = self._dataframe.iloc[row_number - adj_row_number]
         return self._expand_row_internal(text_file_row, tag_funcs, None, error_handler=error_handler,
@@ -372,8 +368,6 @@ class BaseInput:
 
         new_text = new_string_obj.get_as_form(tag_form, transform_func)
         adj_row_number = 1
-        if self._has_column_names:
-            adj_row_number += 1
         self._dataframe.iloc[row_number - adj_row_number, column_number - 1] = new_text
 
     def get_worksheet(self, worksheet_name=None):

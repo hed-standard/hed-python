@@ -32,7 +32,6 @@ class HedString(HedGroup):
             contents = self.split_into_groups(hed_string, hed_schema)
         except ValueError:
             contents = []
-
         super().__init__(hed_string, contents=contents, startpos=0, endpos=len(hed_string))
 
     @property

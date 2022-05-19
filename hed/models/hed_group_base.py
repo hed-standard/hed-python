@@ -1,3 +1,5 @@
+import copy
+
 from hed.models.hed_tag import HedTag
 
 
@@ -16,10 +18,26 @@ class HedGroupBase:
         self._startpos = startpos
         self._endpos = endpos
         self._hed_string = hed_string
-        self.mutable = True  # If False, this group is potentially referenced in other places and should not be altered
+        self._parent = None
 
         # placeholder just to make IDE not complain
         self._children = None
+
+    def __copy__(self):
+        raise ValueError("Cannot make shallow copies of HedGroups")
+
+    def copy(self):
+        """
+            Return a deep copy of this group, with the parent pointer removed.
+
+        Returns:
+            copied_group (HedGroupBase): The copied group
+        """
+        save_parent = self._parent
+        self._parent = None
+        return_copy = copy.deepcopy(self)
+        self._parent = save_parent
+        return return_copy
 
     @property
     def children(self):
@@ -203,6 +221,23 @@ class HedGroupBase:
 
     def __bool__(self):
         return bool(self._children)
+
+    def __eq__(self, other):
+        """
+
+        """
+        if self is other:
+            return True
+
+        if not isinstance(other, HedGroupBase):
+            return False
+
+        if self.children != other.children:
+            return False
+
+        if self.is_group != other.is_group:
+            return False
+        return True
 
     def find_tags(self, search_tags, recursive=False, include_groups=2):
         """ Find the search tags and their containing groups that are in this group.

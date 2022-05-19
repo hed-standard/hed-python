@@ -9,11 +9,6 @@ from hed.errors.error_types import ValidationErrors, SchemaErrors, \
     SidecarErrors, SchemaWarnings, ErrorSeverity, DefinitionErrors, OnsetErrors
 
 
-@hed_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
-def def_error_invalid_def_extension(def_name):
-    return f"Term '{def_name}' has an invalid extension.  Definitions can only have one term.", {}
-
-
 @hed_tag_error(ValidationErrors.HED_UNITS_INVALID)
 def val_error_invalid_unit(tag, unit_class_units):
     units_string = ','.join(sorted(unit_class_units))
@@ -285,6 +280,12 @@ def def_error_duplicate_definition(def_name):
 @hed_error(DefinitionErrors.TAG_IN_SCHEMA, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
 def def_error_tag_already_in_schema(def_name):
     return f"Term '{def_name}' already used as term in schema and cannot be re-used as a definition.", {}
+
+
+@hed_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+def def_error_invalid_def_extension(def_name):
+    return f"Term '{def_name}' has an invalid extension.  Definitions can only have one term.", {}
+
 
 
 @hed_tag_error(OnsetErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.HED_ONSET_OFFSET_ERROR)

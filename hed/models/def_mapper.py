@@ -2,7 +2,7 @@ from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
 from hed.models.model_constants import DefTagNames
-from hed.errors.error_types import ValidationErrors
+from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.hed_ops import HedOps
 
@@ -20,7 +20,7 @@ class DefMapper(HedOps):
         """ Initialize mapper for definitions in hed strings to fill them in with their values.
 
         Args:
-            def_dicts (list): DefDicts containing the definitions this mapper should initialize with.
+            def_dicts (list or DefDict): DefDicts containing the definitions this mapper should initialize with.
 
         Notes:
             More definitions can be added later.
@@ -32,9 +32,14 @@ class DefMapper(HedOps):
         self._temporary_def_names = set()
         self._def_tag_name = DefTagNames.DEFINITION_KEY
         self._label_tag_name = DefTagNames.DEF_KEY
-
+        # this only gathers issues with duplicate definitions
+        self._issues = []
         if def_dicts:
             self.add_definitions(def_dicts)
+
+    @property
+    def issues(self):
+        return self._issues
 
     def get_def_entry(self, def_name):
         """ Get the definition entry for the definition name.
@@ -96,10 +101,10 @@ class DefMapper(HedOps):
         """
         for def_tag, def_value in def_dict:
             if def_tag in self._gathered_defs:
-                # todo: add detection here possibly.  Right now the first definition found is used.
-                # This is a warning.  Errors from a duplicate definition in a single source will be reported
-                # by DefinitionDict
-                print(f"WARNING: Duplicate definition found for '{def_tag}'.")
+                error_context = self._gathered_defs[def_tag].source_context
+                self._issues += ErrorHandler.format_error_from_context(DefinitionErrors.DUPLICATE_DEFINITION,
+                                                                       error_context=error_context,
+                                                                       def_name=def_tag)
                 continue
             self._gathered_defs[def_tag] = def_value
             if add_as_temp:
@@ -186,35 +191,35 @@ class DefMapper(HedOps):
             The contents to replace the previous def-tag with.
         """
         # todo: This check could be removed for optimizing
-        if def_tag.short_base_tag.lower() == DefTagNames.DEF_EXPAND_KEY or \
-                def_tag.short_base_tag.lower() == DefTagNames.DEF_KEY:
-            is_label_tag = def_tag.extension_or_value_portion
-            placeholder = None
-            found_slash = is_label_tag.find("/")
-            if found_slash != -1:
-                placeholder = is_label_tag[found_slash + 1:]
-                is_label_tag = is_label_tag[:found_slash]
-
-            label_tag_lower = is_label_tag.lower()
-            def_entry = self._gathered_defs.get(label_tag_lower)
-            if def_entry is None:
-                def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_UNMATCHED, tag=def_tag)
-            else:
-                def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder)
-                if def_tag_name:
-                    if def_expand_group is not def_tag and def_expand_group != def_contents:
-                        def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
-                                                                tag=def_tag, actual_def=def_contents,
-                                                                found_def=def_expand_group)
-                        return None
-                    return def_contents
-                elif def_entry.takes_value:
-                    def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_MISSING, tag=def_tag)
-                else:
-                    def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_EXTRA, tag=def_tag)
-            pass
-        else:
+        if def_tag.short_base_tag.lower() != DefTagNames.DEF_EXPAND_KEY and \
+                def_tag.short_base_tag.lower() != DefTagNames.DEF_KEY:
             raise ValueError("Internal error in DefMapper")
+
+        is_label_tag = def_tag.extension_or_value_portion
+        placeholder = None
+        found_slash = is_label_tag.find("/")
+        if found_slash != -1:
+            placeholder = is_label_tag[found_slash + 1:]
+            is_label_tag = is_label_tag[:found_slash]
+
+        label_tag_lower = is_label_tag.lower()
+        def_entry = self._gathered_defs.get(label_tag_lower)
+        if def_entry is None:
+            def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_UNMATCHED, tag=def_tag)
+        else:
+            def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder)
+            if def_tag_name:
+                if def_expand_group is not def_tag and def_expand_group != def_contents:
+                    def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
+                                                            tag=def_tag, actual_def=def_contents,
+                                                            found_def=def_expand_group)
+                    return None
+                return def_contents
+            elif def_entry.takes_value:
+                def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_MISSING, tag=def_tag)
+            else:
+                def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_EXTRA, tag=def_tag)
+
         return None
 
     def __get_string_funcs__(self, **kwargs):

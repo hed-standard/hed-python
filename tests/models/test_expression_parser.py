@@ -1,5 +1,6 @@
 import unittest
-from hed.models.hed_string import HedStringFrozen
+from hed.models.hed_string import HedStringFrozen, HedString
+from hed.models.hed_string_comb import HedStringComb
 from hed.models.expression_parser import TagExpressionParser
 import os
 from hed import schema
@@ -17,12 +18,38 @@ class TestParser(unittest.TestCase):
 
         # print(f"Search Pattern: {expression._org_string}")
         for string, expected_result in search_strings.items():
-            hed_string = HedStringFrozen(string, self.hed_schema)
-            result = expression.search_hed_string(hed_string)
+            hed_string_frozen = HedStringFrozen(string, self.hed_schema)
+            result1 = expression.search_hed_string(hed_string_frozen)
             # print(f"\tSearching string '{str(hed_string)}'")
             # if result:
             #    print(f"\t\tFound as group(s) {str([str(r) for r in result])}")
-            self.assertEqual(bool(result), expected_result)
+            self.assertEqual(bool(result1), expected_result)
+
+            # Same test with HedString
+            hed_string = HedString(string, self.hed_schema)
+            result2 = expression.search_hed_string(hed_string)
+            # print(f"\tSearching string '{str(hed_string)}'")
+            # if result:
+            #    print(f"\t\tFound as group(s) {str([str(r) for r in result])}")
+            self.assertEqual(bool(result2), expected_result)
+
+            # Same test with HedStringCombined
+            hed_string_comb = HedStringComb([hed_string])
+            result3 = expression.search_hed_string(hed_string_comb)
+            # print(f"\tSearching string '{str(hed_string)}'")
+            # if result:
+            #    print(f"\t\tFound as group(s) {str([str(r) for r in result])}")
+            self.assertEqual(bool(result3), expected_result)
+
+            for r1, r2, r3 in zip(result1, result2, result3):
+                # Ensure r2 is only a HedString if r3 is.
+                if isinstance(r3, HedStringComb):
+                    self.assertIsInstance(r2, HedString)
+                else:
+                    self.assertNotIsInstance(r2, HedString)
+                self.assertEqual(r2, r3)
+            if len(hed_string_frozen.get_all_tags()) == len(hed_string_comb.get_all_tags()):
+                self.assertEqual(len(result1), len(result2))
 
     def test_broken_search_strings(self):
         test_search_strings = [
