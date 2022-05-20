@@ -5,7 +5,6 @@ from .column_mapper import ColumnMapper
 from .column_metadata import ColumnMetadata, ColumnType
 from .definition_dict import DefinitionDict, DefinitionEntry
 from .def_mapper import DefMapper
-from .tabular_input import TabularInput
 from .expression_parser import TagExpressionParser
 from .hed_group import HedGroup, HedGroupFrozen
 from .hed_group_base import HedGroupBase
@@ -15,3 +14,5 @@ from .hed_string import HedString, HedStringFrozen
 from .hed_tag import HedTag
 from .onset_mapper import OnsetMapper
 from .sidecar import Sidecar
+from .tabular_input import TabularInput
+from .timeseries_input import TimeseriesInput

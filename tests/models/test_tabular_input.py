@@ -38,6 +38,7 @@ class Test(unittest.TestCase):
         validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 1)
 
+
     def test_expand_column_issues(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')

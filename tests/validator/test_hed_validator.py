@@ -59,11 +59,30 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_issues, list)
         self.assertEqual(len(validation_issues), 2)
 
-    def test_complex_file_validation(self):
+    def test_complex_file_validation_no_index(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events.tsv')
+                                   '../data/validator_tests/bids_events_no_index.tsv')
+
+        hed_schema = schema.load_schema(schema_path)
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        validator = HedValidator(hed_schema=hed_schema)
+        sidecar = Sidecar(json_path)
+        issues = sidecar.validate_entries(validator)
+        self.assertEqual(len(issues), 0)
+        input_file = TabularInput(events_path, sidecars=sidecar)
+
+        validation_issues = input_file.validate_file_sidecars(validator)
+        self.assertEqual(len(validation_issues), 0)
+        validation_issues = input_file.validate_file(validator)
+        self.assertEqual(len(validation_issues), 0)
+
+    def test_complex_file_validation_with_index(self):
+        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/validator_tests/bids_schema.mediawiki')
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/validator_tests/bids_events_with_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
@@ -82,7 +101,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events.tsv')
+                                   '../data/validator_tests/bids_events_with_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -105,7 +124,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events.tsv')
+                                   '../data/validator_tests/bids_events_with_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
