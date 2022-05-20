@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
 
     def test_file_as_string(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events.tsv')
+                                   '../data/validator_tests/bids_events_with_index.tsv')
 
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events.json")
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
 
     def test_loading_and_reset_mapper(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events.tsv')
+                                   '../data/validator_tests/bids_events_with_index.tsv')
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)

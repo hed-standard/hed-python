@@ -65,7 +65,7 @@ def search_events(events, query, hed_schema):
 
         hed_tags.append(expanded_string)
         matched_tags.append(match_str)
-        row_numbers.append(row_number - 2)
+        row_numbers.append(row_number)
 
     if row_numbers:
         return pd.DataFrame({'row_number': row_numbers, 'matched_tags': matched_tags, 'HED': hed_tags})

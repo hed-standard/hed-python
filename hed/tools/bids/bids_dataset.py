@@ -28,15 +28,16 @@ class BidsDataset:
             self.dataset_description = json.load(fp)
         self.participants = get_new_dataframe(os.path.join(self.root_path, "participants.tsv"))
         if schema_group:
-            self.HedSchemaGroup = schema_group
+            self.schemas = schema_group
         else:
             self.schemas = HedSchemaGroup(self._schema_from_description())
-        self.event_files = BidsFileGroup(root_path)
+        self.tabular_files = {"events": BidsFileGroup(root_path, suffix="_events", type="tabular")}
 
     def validate(self, check_for_warnings=True):
         validator = HedValidator(hed_schema=self.schemas)
-        issues1 = self.event_files.validate_sidecars(hed_ops=[validator], check_for_warnings=check_for_warnings)
-        issues2 = self.event_files.validate_datafiles(hed_ops=[validator], check_for_warnings=check_for_warnings)
+        event_files = self.tabular_files["events"]
+        issues1 = event_files.validate_sidecars(hed_ops=[validator], check_for_warnings=check_for_warnings)
+        issues2 = event_files.validate_datafiles(hed_ops=[validator], check_for_warnings=check_for_warnings)
         return issues1 + issues2
 
     def _schema_from_description(self):
@@ -53,9 +54,7 @@ class BidsDataset:
             for key, library in hed['libraries'].items():
                 library_pieces = library.split('_')
                 url = LIBRARY_URL_BASE + library_pieces[0] + '/hedxml/HED_' + library + '.xml'
-                x = load_schema(url, library_prefix=key)
-                x.set_library_prefix(key)  # TODO: temporary work around
-                hed_list.append(x)
+                hed_list.append(load_schema(url, library_prefix=key))
         return hed_list
 
     def get_summary(self):
