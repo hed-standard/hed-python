@@ -364,7 +364,7 @@ class ColumnMapper:
         return self._finalize_mapping_issues
 
     def validate_column_data(self, hed_ops, error_handler=None, **kwargs):
-        """ Validate all column definitions that are being used and column definition hed strings
+        """ Validate all column definitions that are being used and column definition hed strings.
 
         Args:
             hed_ops (list, func, or HedOps): A func, a HedOps or a list of these to apply to the

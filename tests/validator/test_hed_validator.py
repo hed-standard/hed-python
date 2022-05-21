@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
         self.assertEqual(len(issues), 0)
-        input_file = TabularInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(validator)
         self.assertEqual(len(validation_issues), 0)
@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
         self.assertEqual(len(issues), 0)
-        input_file = TabularInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(validator)
         self.assertEqual(len(validation_issues), 0)
@@ -110,7 +110,7 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(json_path)
         # issues = sidecar.validate_entries(hed_ops=validator, check_for_warnings=True)
         # self.assertEqual(len(issues), 4)
-        input_file = TabularInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
         #
         # validation_issues = input_file.validate_file_sidecars(validator, check_for_warnings=True)
         # self.assertEqual(len(validation_issues), 4)
@@ -130,7 +130,7 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events_bad_defs2.json")
         sidecar = Sidecar(json_path)
-        input_file = TabularInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
         validator = HedValidator(hed_schema=hed_schema)
 
         validation_issues1 = input_file.validate_file_sidecars(validator)

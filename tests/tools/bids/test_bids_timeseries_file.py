@@ -1,7 +1,7 @@
 import os
 import unittest
 from hed.models import TabularInput
-from hed.tools.bids.bids_continuous_file import BidsContinuousFile
+from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
 
@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
                                         '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
 
     def test_constructor(self):
-        events = BidsContinuousFile(Test.event_path)
+        events = BidsTimeseriesFile(Test.event_path)
         self.assertEqual(events.suffix, 'events', "BidsTabularFile should have correct events suffix")
         self.assertEqual(events.ext, '.tsv', "BidsTabularFile should have a .tsv extension")
         self.assertEqual(len(events.entity_dict), 3, "BidsTabularFile should have right number of entity_dict")
@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         self.assertTrue(events_str, "BidsTabularFile should have a string representation")
 
     def test_set_contents(self):
-        events = BidsContinuousFile(Test.event_path)
+        events = BidsTimeseriesFile(Test.event_path)
         self.assertFalse(events.contents, "BidsTabularFile should have no contents until set")
         events.set_contents()
         self.assertIsInstance(events.contents, TabularInput,

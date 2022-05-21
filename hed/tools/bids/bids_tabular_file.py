@@ -16,7 +16,7 @@ class BidsTabularFile(BidsFile):
         if self.contents and no_overwrite:
             return
         if self.sidecar:
-            x = TabularInput(file=self.file_path, sidecars=self.sidecar.contents, name=os.path.realpath(self.file_path))
+            x = TabularInput(file=self.file_path, sidecar=self.sidecar.contents, name=os.path.realpath(self.file_path))
         else:
             x = TabularInput(file=self.file_path, name=os.path.realpath(self.file_path))
         BidsFile.set_contents(self, content_info=x)

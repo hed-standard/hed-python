@@ -9,35 +9,31 @@ class TabularInput(BaseInput):
 
     HED_COLUMN_NAME = "HED"
 
-    def __init__(self, file=None, sidecars=None, attribute_columns=None, extra_def_dicts=None,
+    def __init__(self, file=None, sidecar=None, attribute_columns=None, extra_def_dicts=None,
                  also_gather_defs=True, name=None):
-        """Constructor for the TabularInput class.
+        """ Constructor for the TabularInput class.
 
-        Parameters
-        ----------
-         file: str or file like
-             An xlsx/tsv file to open.
-        sidecars : str or [str] or Sidecar or [Sidecar]
-            A list of json files to pull column metadata from
-        attribute_columns: str or int or [str] or [int]
-            A list of column names or numbers to treat as attributes.
-            Default: ["duration", "onset"]
-        extra_def_dicts: [DefinitionDict] or DefinitionDict or None
-            DefinitionDict objects containing all the definitions this file should use other than the ones coming from the file
-            itself and from the column def groups.  These are added as the last entries, so names will override
-            earlier ones.
-        also_gather_defs: bool
-            Default to true.  If False, do NOT extract any definitions from column groups, assume they are already
-            in the def_dict list.
-        name: str
-            The name to display for this file for error purposes.
+        Args:
+            file (str or file like): A tsv file to open.
+            sidecar (str or Sidecar): A Sidecar filename or Sidecar
+            attribute_columns (str or int or [str] or [int]): A list of column names or numbers to treat as attributes.
+                Default: ["duration", "onset"]
+            extra_def_dicts ([DefinitionDict], DefinitionDict, or None): DefinitionDict objects containing all
+                the definitions this file should use other than the ones coming from the file
+                itself and from the sidecar.  These are added as the last entries, so names will override
+                earlier ones.
+            also_gather_defs (bool): If False, do NOT extract any definitions from column groups,
+                assume they are already in the def_dict list.
+            name (str): The name to display for this file for error purposes.
+
         """
         if attribute_columns is None:
             attribute_columns = ["duration", "onset"]
-        if sidecars:
-            sidecars = Sidecar.load_multiple_sidecars(sidecars)
-
-        new_mapper = ColumnMapper(sidecars=sidecars, optional_tag_columns=[self.HED_COLUMN_NAME],
+        if sidecar:
+            sidecar_list = Sidecar.load_multiple_sidecars(sidecar)
+        else:
+            sidecar_list = None
+        new_mapper = ColumnMapper(sidecars=sidecar_list, optional_tag_columns=[self.HED_COLUMN_NAME],
                                   attribute_columns=attribute_columns)
 
         self._also_gather_defs = also_gather_defs
@@ -52,19 +48,18 @@ class TabularInput(BaseInput):
                              "This is probably not intended.")
 
     def create_def_mapper(self, column_mapper, extra_def_dicts=None):
-        """
-            Creates the definition mapper to parse definitions in this file.
+        """ Create the definition mapper to parse definitions in this file.
 
-        Parameters
-        ----------
-        column_mapper : ColumnMapper
-            The column mapper to gather definitions from
-        extra_def_dicts : DefinitionDict or [DefinitionDict]
-            Optional. Adds any definitions in these to the def mapper as well, in addition to any found in the columns.
-        Returns
-        -------
-        def mapper: DefMapper
-            A class to validate or expand definitions with the given def dicts.
+        Args:
+            column_mapper (ColumnMapper): The column mapper to gather definitions from.
+            extra_def_dicts (DefinitionDict or [DefinitionDict]): Additional definitions to add to mapper.
+
+        Returns:
+            def mapper (DefMapper): A class to validate or expand definitions with the given def dicts.
+
+        Notes:
+            The extra_def_dicts are definitions not included in the column mapper.
+
         """
         def_dicts = []
         if self._also_gather_defs:
@@ -79,18 +74,12 @@ class TabularInput(BaseInput):
         return def_mapper
 
     def reset_column_mapper(self, sidecars=None, attribute_columns=None):
-        """
-            Change the sidecars and settings in use for parsing this file.
+        """ Change the sidecars and settings in use for parsing this file.
 
-        Parameters
-        ----------
-        sidecars : str or [str] or Sidecar or [Sidecar]
-            A list of json filenames to pull events from
-        attribute_columns: str or int or [str] or [int]
-            A list of column names or numbers to treat as attributes.
-            Default: ["duration", "onset"]
-        Returns
-        -------
+        Args:
+            sidecars (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.
+            attribute_columns (str or int or [str] or [int]): Column names or numbers to treat as attributes.
+                    Default: ["duration", "onset"]
 
         """
         new_mapper = ColumnMapper(sidecars=sidecars, optional_tag_columns=[self.HED_COLUMN_NAME],

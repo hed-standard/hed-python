@@ -17,19 +17,14 @@ from hed.models.hed_ops import HedOps
 
 class HedValidator(HedOps):
     """ Top level validation of HED strings. """
-    def __init__(self, hed_schema=None, run_semantic_validation=True):
-        """Constructor for the HedValidator class.
 
-        Parameters
-        ----------
-        hed_schema: HedSchema
-            HedSchema object to use for validation
-        run_semantic_validation: bool
-            True if the validator should check the HED data against a schema. False for syntax-only validation.
-        Returns
-        -------
-        HedValidator object
-            A HedValidator object.
+    def __init__(self, hed_schema=None, run_semantic_validation=True):
+        """ Constructor for the HedValidator class.
+
+        Args:
+            hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
+            run_semantic_validation (bool): True if the validator should check the HED data against a schema.
+            False for syntax-only validation.
 
         """
         super().__init__()
