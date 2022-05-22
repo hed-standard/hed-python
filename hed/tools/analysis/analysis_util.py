@@ -2,11 +2,11 @@ import pandas as pd
 from hed.models import TabularInput, HedStringFrozen, TagExpressionParser
 
 
-def assemble_hed(events, columns_included=None, expand_defs=False):
+def assemble_hed(data_input, columns_included=None, expand_defs=False):
     """ Return a dataframe representing the assembled HED annotations for an events file.
 
     Args:
-        events (TabularInput): The input events file to be searched.
+        data_input (TabularInput): The input events file to be searched.
         columns_included (list or None):  A list of additional column names to include. If None, only onset is used.
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
 
@@ -15,13 +15,17 @@ def assemble_hed(events, columns_included=None, expand_defs=False):
 
     """
 
-    columns = frozenset(list(events.dataframe.columns))
-    eligible_columns = [x for x in columns_included if x in columns]
-    hed_obj_list = get_assembled_strings(events, expand_defs=expand_defs)
+    if columns_included:
+        columns = frozenset(list(data_input.dataframe.columns))
+        eligible_columns = [x for x in columns_included if x in columns]
+    else:
+        eligible_columns = None
+
+    hed_obj_list = get_assembled_strings(data_input, expand_defs=expand_defs)
     hed_string_list = [str(hed) for hed in hed_obj_list]
     if not eligible_columns:
         return pd.DataFrame({"HED": hed_string_list})
-    df = events.dataframe[eligible_columns].copy(deep=True)
+    df = data_input.dataframe[eligible_columns].copy(deep=True)
     df['HED'] = hed_string_list
     return df
 
@@ -83,11 +87,11 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
     if not row_numbers:
         df = None
     elif not eligible_columns:
-        df = pd.DataFrame({'row_number': row_numbers, 'HED': hed_tags})
+        df = pd.DataFrame({'row_number': row_numbers, 'HED_expanded': hed_tags})
     else:
         df = pd.DataFrame({"row_number": row_numbers})
         df[eligible_columns] = data_input._dataframe.iloc[row_numbers][eligible_columns]
-        df['HED'] = hed_tags
+        df['HED_expanded'] = hed_tags
     return df
 
 
