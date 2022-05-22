@@ -1,7 +1,7 @@
-﻿hed.tools.annotation.annotation\_util
-=====================================
+﻿hed.tools.analysis.annotation\_util
+===================================
 
-.. automodule:: hed.tools.annotation.annotation_util
+.. automodule:: hed.tools.analysis.annotation_util
 
    
    

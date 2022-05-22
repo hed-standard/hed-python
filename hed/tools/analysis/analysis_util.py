@@ -24,9 +24,9 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
     hed_obj_list = get_assembled_strings(data_input, expand_defs=expand_defs)
     hed_string_list = [str(hed) for hed in hed_obj_list]
     if not eligible_columns:
-        return pd.DataFrame({"HED": hed_string_list})
+        return pd.DataFrame({"HED_assembled": hed_string_list})
     df = data_input.dataframe[eligible_columns].copy(deep=True)
-    df['HED'] = hed_string_list
+    df['HED_assembled'] = hed_string_list
     return df
 
 
@@ -87,11 +87,11 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
     if not row_numbers:
         df = None
     elif not eligible_columns:
-        df = pd.DataFrame({'row_number': row_numbers, 'HED_expanded': hed_tags})
+        df = pd.DataFrame({'row_number': row_numbers, 'HED_assembled': hed_tags})
     else:
-        df = pd.DataFrame({"row_number": row_numbers})
-        df[eligible_columns] = data_input._dataframe.iloc[row_numbers][eligible_columns]
-        df['HED_expanded'] = hed_tags
+        df = data_input.dataframe.iloc[row_numbers][eligible_columns].reset_index()  #df[eligible_columns] = data_input.dataframe.iloc[row_numbers][eligible_columns]
+        df['HED_assembled'] = hed_tags
+        df.rename(columns={'index': 'row_number'})
     return df
 
 
@@ -118,6 +118,6 @@ if __name__ == '__main__':
     # print("to there")
 
     query = "Sensory-event"
-    df3 = search_events(input_data, hed_schema, query, columns_included=None)
+    df3 = search_tabular(input_data, hed_schema, query, columns_included=['onset', 'event_type'])
 
     print(f"{len(df3)} events match")

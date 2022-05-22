@@ -1,9 +1,9 @@
-﻿hed.models.DefEntry
-===================
+﻿hed.models.HedOps
+=================
 
 .. currentmodule:: hed.models
 
-.. autoclass:: hed.models.DefEntry
+.. autoclass:: hed.models.HedOps
    
    .. automethod:: __init__
 
@@ -12,8 +12,7 @@
 
    .. autosummary::
    
-      ~DefEntry.__init__
-      ~DefEntry.get_definition
+      ~HedOps.__init__
    
    
 
@@ -21,7 +20,7 @@
    
    
 
-.. autoclass:: hed.models.DefEntry
+.. autoclass:: hed.models.HedOps
    :members:
    :undoc-members:
    :show-inheritance:

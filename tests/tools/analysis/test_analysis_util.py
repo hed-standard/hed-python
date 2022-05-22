@@ -81,12 +81,12 @@ class Test(unittest.TestCase):
         columns1 = list(df1.columns)
         self.assertEqual(len(columns1), 4,
                          "assemble_hed should return the correct number of columns when columns are included ")
-        first_str1 = df1.iloc[0]['HED']
+        first_str1 = df1.iloc[0]['HED_assembled']
         self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
         self.assertEqual(first_str1.find('Def-expand'), -1,
                          "assemble_hed with no def expand does not have Def-expand tags")
         df2 = assemble_hed(self.input_data, columns_included=["onset", "duration", "event_type"], expand_defs=True)
-        first_str2 = df2.iloc[0]['HED']
+        first_str2 = df2.iloc[0]['HED_assembled']
         self.assertEqual(first_str2.find('Def/'), -1, "assemble_hed with def expand has no Def tag")
         self.assertNotEqual(first_str2.find('Def-expand/'), -1, "assemble_hed with def expand has Def-expand tags")
 
