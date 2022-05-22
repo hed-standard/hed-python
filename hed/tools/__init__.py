@@ -7,8 +7,8 @@ from .analysis.key_template import KeyTemplate
 from .analysis.tag_summary import TagSummary
 from .analysis.annotation_util import \
     check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
-from .analysis.analysis_util import assemble_hed, search_events
-from .bids.bids_continuous_file import BidsContinuousFile
+from .analysis.analysis_util import assemble_hed, search_tabular, get_assembled_strings
+from .bids.bids_timeseries_file import BidsTimeseriesFile
 from .bids.bids_dataset import BidsDataset
 from .bids.bids_dataset_summary import BidsDatasetSummary
 from .bids.bids_file_group import BidsFileGroup

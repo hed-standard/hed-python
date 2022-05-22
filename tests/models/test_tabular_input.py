@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
         self.assertEqual(len(issues), 0)
-        input_file = TabularInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(validator)
         self.assertEqual(len(validation_issues), 0)
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
         self.assertEqual(len(issues), 0)
-        input_file = TabularInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
         #Fix whatever is wrong with onset tag here.  It's thinking Description/Onset continues is an invalid tag???'
         validation_issues = input_file.validate_file_sidecars(validator)

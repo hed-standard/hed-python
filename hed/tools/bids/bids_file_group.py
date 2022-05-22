@@ -1,6 +1,6 @@
 import os
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.bids.bids_continuous_file import BidsContinuousFile
+from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_summary import BidsTabularSummary
@@ -127,7 +127,7 @@ class BidsFileGroup:
                 file_dict[os.path.realpath(file)] = BidsTabularFile(file)
         else:
             for file in files:
-                file_dict[os.path.realpath(file)] = BidsContinuousFile(file)
+                file_dict[os.path.realpath(file)] = BidsTimeseriesFile(file)
         return file_dict
 
     def _make_sidecar_dict(self):

@@ -1,5 +1,5 @@
 ﻿hed.models.SpreadsheetInput
-===================
+===========================
 
 .. currentmodule:: hed.models
 

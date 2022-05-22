@@ -5,18 +5,14 @@ from hed.models.hed_string import HedString
 
 
 class HedStringComb(HedString):
-    """Represents a hed string made from other hed strings(generally multiple columns)."""
+    """A hed string object made from other hed string objects(generally multiple columns)."""
 
     def __init__(self, hed_string_obj_list):
-        """Constructor for the HedStringComb class.
+        """ Constructor for the HedStringComb class.
 
-        Parameters
-        ----------
-        hed_string_obj_list: [HedString]
-            A list of component HedStrings for this combined
+        Args:
+            hed_string_obj_list ([HedString]): A list of component HedStrings for this combined string.
 
-        Returns
-        -------
         """
         super().__init__("")
         self._children = list(hed_string for hed_string in hed_string_obj_list if hed_string is not None)
@@ -91,11 +87,10 @@ class HedStringComb(HedString):
         replace_sub_string.replace(item_to_replace, new_contents)
 
     def __copy__(self):
-        """
-            Returns a copy of this combined string converted to HedString
+        """ Return a copy of this combined string converted to HedString.
 
-        Returns
-        -------
+        Returns:
+            HedString: The combined string converted.
 
         """
         # When we copy a combined string, just turn it into a normal string.

@@ -14,8 +14,8 @@
    
       ~HedGroup.__init__
       ~HedGroup.append
-      ~HedGroup.cascade_mutable
       ~HedGroup.check_if_in_original
+      ~HedGroup.copy
       ~HedGroup.find_def_tags
       ~HedGroup.find_exact_tags
       ~HedGroup.find_placeholder_tag
@@ -30,7 +30,6 @@
       ~HedGroup.get_original_hed_string
       ~HedGroup.groups
       ~HedGroup.lower
-      ~HedGroup.make_tag_mutable
       ~HedGroup.remove
       ~HedGroup.replace
       ~HedGroup.tags

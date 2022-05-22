@@ -1,5 +1,5 @@
 ﻿hed.models.TabularInput
-======================
+=======================
 
 .. currentmodule:: hed.models
 

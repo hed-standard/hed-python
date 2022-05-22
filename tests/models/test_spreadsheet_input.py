@@ -70,11 +70,11 @@ class Test(unittest.TestCase):
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate_entries(expand_defs=True)), 0)
-        input_file = TabularInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
         with open(events_path) as file:
             events_file_as_string = io.StringIO(file.read())
-        input_file_from_string = TabularInput(file=events_file_as_string, sidecars=sidecar)
+        input_file_from_string = TabularInput(file=events_file_as_string, sidecar=sidecar)
 
         for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
             self.assertEqual(row_number, row_number2)
@@ -132,8 +132,8 @@ class Test(unittest.TestCase):
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate_entries()), 0)
-        input_file_1 = TabularInput(events_path, sidecars=sidecar)
-        input_file_2 = TabularInput(events_path, sidecars=sidecar)
+        input_file_1 = TabularInput(events_path, sidecar=sidecar)
+        input_file_2 = TabularInput(events_path, sidecar=sidecar)
 
         input_file_2.reset_column_mapper()
 

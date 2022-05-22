@@ -13,10 +13,18 @@
    .. autosummary::
    
       ~BidsFile.__init__
+      ~BidsFile.clear_contents
+      ~BidsFile.set_contents
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BidsFile.get_contents
    
    
 

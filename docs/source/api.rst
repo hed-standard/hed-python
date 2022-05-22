@@ -13,10 +13,9 @@ HED models
    hed.models.BaseInput
    hed.models.ColumnMapper
    hed.models.ColumnMetadata
-   hed.models.DefDict
-   hed.models.DefEntry
-   hed.models.DefinitionMapper
-   hed.models.TabularInput
+   hed.models.DefinitionDict
+   hed.models.DefinitionEntry
+   hed.models.DefMapper
    hed.models.HedGroup
    hed.models.HedGroupBase
    hed.models.HedGroupFrozen
@@ -26,6 +25,7 @@ HED models
    hed.models.HedTag
    hed.models.OnsetMapper
    hed.models.Sidecar
+   hed.models.TabularInput
    hed.models.hed_ops
 
 .. currentmodule:: hed
@@ -61,22 +61,22 @@ HED tools
 
    hed.tools.BidsDataset
    hed.tools.BidsDatasetSummary
-   hed.tools.BidsEventFile
-   hed.tools.BidsEventFiles
    hed.tools.BidsFile
    hed.tools.BidsFileDictionary
-   hed.tools.BidsJsonFile
+   hed.tools.BidsFileGroup
    hed.tools.BidsSidecarFile
-   hed.tools.BidsTsvDictionary
-   hed.tools.BidsTsvFile
-   hed.tools.BidsTsvSummary
+   hed.tools.BidsTabularDictionary
+   hed.tools.BidsTabularFile
+   hed.tools.BidsTabularSummary
 
    hed.tools.FileDictionary
    hed.tools.HedLogger
    hed.tools.KeyMap
    hed.tools.KeyTemplate
    hed.tools.TagSummary
-   hed.tools.annotation.annotation_util
+   hed.tools.analysis.analysis_util
+   hed.tools.analysis.annotation_util
+   hed.tools.analysis.summary_util
 
 
 .. currentmodule:: hed

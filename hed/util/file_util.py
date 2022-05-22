@@ -1,4 +1,4 @@
-"""Utilities for writing content to files and for other file manipulation."""
+""" Utilities for writing content to files and for other file manipulation."""
 
 import tempfile
 import os

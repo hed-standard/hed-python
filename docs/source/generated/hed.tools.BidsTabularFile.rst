@@ -1,9 +1,9 @@
-﻿hed.tools.BidsSidecarFile
+﻿hed.tools.BidsTabularFile
 =========================
 
 .. currentmodule:: hed.tools
 
-.. autoclass:: hed.tools.BidsSidecarFile
+.. autoclass:: hed.tools.BidsTabularFile
    
    .. automethod:: __init__
 
@@ -12,10 +12,9 @@
 
    .. autosummary::
    
-      ~BidsSidecarFile.__init__
-      ~BidsSidecarFile.clear_contents
-      ~BidsSidecarFile.is_sidecar_for
-      ~BidsSidecarFile.set_contents
+      ~BidsTabularFile.__init__
+      ~BidsTabularFile.clear_contents
+      ~BidsTabularFile.set_contents
    
    
 
@@ -25,11 +24,11 @@
 
    .. autosummary::
    
-      ~BidsSidecarFile.get_contents
+      ~BidsTabularFile.get_contents
    
    
 
-.. autoclass:: hed.tools.BidsSidecarFile
+.. autoclass:: hed.tools.BidsTabularFile
    :members:
    :undoc-members:
    :show-inheritance:

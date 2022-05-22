@@ -1,9 +1,9 @@
-﻿hed.models.DefDict
-==================
+﻿hed.models.DefinitionDict
+=========================
 
 .. currentmodule:: hed.models
 
-.. autoclass:: hed.models.DefDict
+.. autoclass:: hed.models.DefinitionDict
    
    .. automethod:: __init__
 
@@ -12,9 +12,9 @@
 
    .. autosummary::
    
-      ~DefDict.__init__
-      ~DefDict.check_for_definitions
-      ~DefDict.get_definition_issues
+      ~DefinitionDict.__init__
+      ~DefinitionDict.check_for_definitions
+      ~DefinitionDict.get_definition_issues
    
    
 
@@ -24,11 +24,11 @@
 
    .. autosummary::
    
-      ~DefDict.defs
+      ~DefinitionDict.defs
    
    
 
-.. autoclass:: hed.models.DefDict
+.. autoclass:: hed.models.DefinitionDict
    :members:
    :undoc-members:
    :show-inheritance:
