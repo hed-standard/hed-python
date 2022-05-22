@@ -1,9 +1,10 @@
 import os
 import unittest
 import pandas as pd
+from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_dataset import BidsDataset
-from hed.tools.bids.bids_event_files import BidsEventFiles
+from hed.tools.bids.bids_file_group import BidsFileGroup
 
 
 class Test(unittest.TestCase):
@@ -11,15 +12,17 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
-        cls.library_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                        '../../data/bids/eeg_ds003654s_hed_library')
+        cls.library_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                        '../../data/bids/eeg_ds003654s_hed_library'))
 
-    def test_bids_constructor(self):
+    def test_constructor(self):
         bids1 = BidsDataset(Test.root_path)
         self.assertIsInstance(bids1, BidsDataset, "BidsDataset should create a valid object from valid dataset")
         self.assertIsInstance(bids1.participants, pd.DataFrame, "BidsDataset participants should be a DataFrame")
         self.assertIsInstance(bids1.dataset_description, dict, "BidsDataset dataset_description should be a dict")
-        self.assertIsInstance(bids1.event_files, BidsEventFiles, "BidsDataset event_files should be  BidsEventFiles")
+        for group in bids1.tabular_files.values():
+            self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
+
         self.assertIsInstance(bids1.schemas, HedSchemaGroup, "BidsDataset schemas should be HedSchemaGroup")
 
         bids2 = BidsDataset(self.library_path)
@@ -29,12 +32,14 @@ class Test(unittest.TestCase):
                               "BidsDataset with libraries should have a participants that is a DataFrame")
         self.assertIsInstance(bids2.dataset_description, dict,
                               "BidsDataset with libraries dataset_description should be a dict")
-        self.assertIsInstance(bids2.event_files, BidsEventFiles,
-                              "BidsDataset with libraries event_files should be  BidsEventFiles")
+        for group in bids2.tabular_files.values():
+            self.assertIsInstance(group, BidsFileGroup,
+                                  "BidsDataset event files with libraries should be in a BidsFileGroup")
+
         self.assertIsInstance(bids2.schemas, HedSchemaGroup,
                               "BidsDataset with libraries should have schemas that is a HedSchemaGroup")
 
-    def test_bids_validator(self):
+    def test_validator(self):
         bids1 = BidsDataset(self.root_path)
         self.assertIsInstance(bids1, BidsDataset, "BidsDataset should create a valid object from valid dataset")
         issues = bids1.validate()
@@ -43,8 +48,7 @@ class Test(unittest.TestCase):
         self.assertTrue(issues,
                         "BidsDataset validate should return issues when check_for_warnings is True")
         issues = bids1.validate(check_for_warnings=False)
-        self.assertFalse(issues,
-                         "BidsDataset validate should return no issues when check_for_warnings is False")
+        self.assertFalse(issues, "BidsDataset validate should return no issues when check_for_warnings is False")
 
         bids2 = BidsDataset(self.library_path)
         self.assertIsInstance(bids2, BidsDataset,
@@ -58,6 +62,35 @@ class Test(unittest.TestCase):
         issues = bids2.validate(check_for_warnings=False)
         self.assertFalse(issues,
                          "BidsDataset with libraries should return no issues when check_for_warnings is False")
+
+    def test_with_schema_group(self):
+
+        base_version = '8.0.0'
+        library1_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
+                       "library_schemas/score/hedxml/HED_score_0.0.1.xml"
+        library2_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
+                       "library_schemas/testlib/hedxml/HED_testlib_1.0.2.xml"
+        schema_list = [load_schema_version(xml_version=base_version)]
+        schema_list.append(load_schema(library1_url, library_prefix="sc"))
+        schema_list.append(load_schema(library2_url, library_prefix="test"))
+        x = HedSchemaGroup(schema_list)
+        bids1 = BidsDataset(self.library_path, schema_group=x)
+        self.assertIsInstance(bids1, BidsDataset,
+                              "BidsDataset with libraries should create a valid object from valid dataset")
+        self.assertIsInstance(bids1.participants, pd.DataFrame,
+                              "BidsDataset with libraries should have a participants that is a DataFrame")
+        self.assertIsInstance(bids1.dataset_description, dict,
+                              "BidsDataset with libraries dataset_description should be a dict")
+        for group in bids1.tabular_files.values():
+            self.assertIsInstance(group, BidsFileGroup,
+                                  "BidsDataset with libraries event_files should be  BidsFileGroup")
+        self.assertIsInstance(bids1.schemas, HedSchemaGroup,
+                              "BidsDataset with libraries should have schemas that is a HedSchemaGroup")
+        issues = bids1.validate()
+        self.assertTrue(issues, "BidsDataset validate should return issues when the default check_for_warnings is used")
+        issues = bids1.validate(check_for_warnings=True)
+        self.assertTrue(issues, "BidsDataset validate should return issues when check_for_warnings is True")
+        issues = bids1.validate(check_for_warnings=False)
 
     def test_get_summary(self):
         bids1 = BidsDataset(self.root_path)

@@ -2,7 +2,7 @@ import unittest
 import os
 import io
 
-from hed.errors import HedFileError
+from hed.errors import HedFileError, ValidationErrors
 from hed.models import ColumnMetadata, HedString, Sidecar
 from hed.validator import HedValidator
 from hed import schema
@@ -82,7 +82,7 @@ class Test(unittest.TestCase):
     # def set_hed_string(self, new_hed_string, position):
     #
     #
-    # def _add_single_col_type(self, column_name, dict_for_entry, column_type=None):
+    # def _add_single_column(self, column_name, dict_for_entry, column_type=None):
     #
     # def get_validation_issues(self):
     #
@@ -110,6 +110,14 @@ class Test(unittest.TestCase):
         validation_issues = self.json_without_definitions_sidecar.validate_entries(validator, check_for_warnings=True,
                                                                                    extra_def_dicts=extra_def_dict)
         self.assertEqual(len(validation_issues), 0)
+
+    def test_duplicate_def(self):
+        sidecar = self.json_def_sidecar
+        def_dicts = sidecar.get_def_dicts()
+
+        issues = sidecar.validate_entries(extra_def_dicts=def_dicts)
+        self.assertEqual(len(issues), 5)
+        self.assertTrue(issues[0]['code'], ValidationErrors.HED_DEFINITION_INVALID)
 
 
 if __name__ == '__main__':

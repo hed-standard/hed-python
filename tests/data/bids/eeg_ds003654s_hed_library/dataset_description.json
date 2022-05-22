@@ -5,7 +5,7 @@
         "base": "8.0.0",
         "libraries": {
             "sc": "score_0.0.1",
-            "test": "test_1.0.2"
+            "test": "testlib_1.0.2"
         }
     },
     "License": "CC0",

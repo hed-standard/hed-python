@@ -413,7 +413,7 @@ class ColumnMetadata:
             return []
 
         # Make a copy without definitions to check placeholder count.
-        hed_string_copy = copy.copy(hed_string)
+        hed_string_copy = copy.deepcopy(hed_string)
         hed_string_copy.remove_definitions()
 
         if hed_string_copy.lower().count("#") != expected_pound_sign_count:
@@ -429,6 +429,7 @@ class ColumnMetadata:
 
         Returns:
             DefinitionDict: Contains all the definitions located in the column.
+            issues: List of issues encountered in extracting the definitions. Each issue is a dictionary.
 
         """
         if error_handler is None:

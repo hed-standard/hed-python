@@ -5,21 +5,22 @@ from hed.models.hed_string import HedString
 
 
 class HedStringComb(HedString):
-    """Represents a hed string made from other hed strings(generally multiple columns)."""
+    """A hed string object made from other hed string objects(generally multiple columns)."""
 
     def __init__(self, hed_string_obj_list):
-        """Constructor for the HedStringComb class.
+        """ Constructor for the HedStringComb class.
 
-        Parameters
-        ----------
-        hed_string_obj_list: [HedString]
-            A list of component HedStrings for this combined
+        Args:
+            hed_string_obj_list ([HedString]): A list of component HedStrings for this combined string.
 
-        Returns
-        -------
         """
         super().__init__("")
         self._children = list(hed_string for hed_string in hed_string_obj_list if hed_string is not None)
+        # Update the direct children to point to this combined string, rather than their original string
+        for child in self._children:
+            for sub_child in child.children:
+                sub_child._parent = self
+
         self._original_children = self._children
 
     def get_original_hed_string(self):
@@ -75,9 +76,6 @@ class HedStringComb(HedString):
         new_contents : HedTag or HedGroup or [HedTag or HedGroup]
             What to replace the tag with.
         """
-        if not self.mutable:
-            raise ValueError("Trying to alter immutable group")
-
         # this needs to pass the tag off to the appropriate group
         replace_sub_string = None
         for sub_string in self._children:
@@ -89,11 +87,10 @@ class HedStringComb(HedString):
         replace_sub_string.replace(item_to_replace, new_contents)
 
     def __copy__(self):
-        """
-            Returns a copy of this combined string converted to HedString
+        """ Return a copy of this combined string converted to HedString.
 
-        Returns
-        -------
+        Returns:
+            HedString: The combined string converted.
 
         """
         # When we copy a combined string, just turn it into a normal string.
@@ -102,7 +99,6 @@ class HedStringComb(HedString):
         result._startpos, result._endpos = self.span
         result._hed_string = self.get_original_hed_string()
         result._children = self.children.copy()
-        result.mutable = True
         return result
 
     def _get_org_span(self, tag_or_group):

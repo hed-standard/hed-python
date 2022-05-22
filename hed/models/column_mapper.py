@@ -15,8 +15,7 @@ class ColumnMapper:
     """ Container class for mapping columns in event files into HED tags.
 
     Notes:
-        Private Functions and variables column and row indexing starts at 0.
-        Public functions and variables indexing starts at 1 (or 2 if has column names)
+        Functions and variables column and row indexing starts at 0.
 
     """
 
@@ -38,7 +37,7 @@ class ColumnMapper:
 
         Notes:
             Sidecars later in the list override those earlier in the list.
-
+            All column numbers are 0 based.
 
         Examples:
             column_prefix_dictionary = {3: 'Description/', 4: 'Label/'}
@@ -97,7 +96,7 @@ class ColumnMapper:
 
         """
         if column_prefix_dictionary:
-            self._column_prefix_dictionary = self._subtract_1_from_dictionary_keys(column_prefix_dictionary)
+            self._column_prefix_dictionary = column_prefix_dictionary
         if finalize_mapping:
             return self._finalize_mapping()
         return []
@@ -115,12 +114,12 @@ class ColumnMapper:
             list: List of issues that occurred during this process. Each issue is a dictionary.
 
         """
-        self._tag_columns = []
-        self._optional_tag_columns = []
-        if tag_columns:
-            self._tag_columns = self._subtract_1_from_list_elements(tag_columns)
-        if optional_tag_columns:
-            self._optional_tag_columns = self._subtract_1_from_list_elements(optional_tag_columns)
+        if tag_columns is None:
+            tag_columns = []
+        if optional_tag_columns is None:
+            optional_tag_columns = []
+        self._tag_columns = tag_columns
+        self._optional_tag_columns = optional_tag_columns
         if finalize_mapping:
             issues = self._finalize_mapping()
             return issues
@@ -131,14 +130,14 @@ class ColumnMapper:
 
         Args:
             new_column_map (list or dict):  Either an ordered list of the column names or column_number:column name
-                dictionary. In both cases column numbers start at 1.
+                dictionary. In both cases column numbers start at 0
 
         Returns:
             list: List of issues. Each issue is a dictionary.
 
         """
         if isinstance(new_column_map, dict):
-            column_map = self._subtract_1_from_dictionary_keys(new_column_map)
+            column_map = new_column_map
         # List like
         else:
             column_map = {column_number: column_name for column_number, column_name in enumerate(new_column_map)}
@@ -212,16 +211,16 @@ class ColumnMapper:
             translated_column, attribute_name_or_error = self._expand_column(column_number, str(cell_text))
             if translated_column is None:
                 if attribute_name_or_error:
-                    if column_number + 1 not in column_issues_dict:
-                        column_issues_dict[column_number + 1] = []
-                    column_issues_dict[column_number + 1] += attribute_name_or_error
-                    column_to_hed_tags_dictionary[column_number + 1] = translated_column
+                    if column_number not in column_issues_dict:
+                        column_issues_dict[column_number] = []
+                    column_issues_dict[column_number] += attribute_name_or_error
+                    column_to_hed_tags_dictionary[column_number] = translated_column
                 continue
             if attribute_name_or_error:
                 result_dict[attribute_name_or_error] = translated_column
                 continue
 
-            column_to_hed_tags_dictionary[column_number + 1] = translated_column
+            column_to_hed_tags_dictionary[column_number] = translated_column
 
         result_dict[model_constants.COLUMN_TO_HED_TAGS] = column_to_hed_tags_dictionary
         if column_issues_dict:
@@ -239,7 +238,6 @@ class ColumnMapper:
             func: A function taking a tag and string, returning a string.
 
         """
-        column_number -= 1
         if column_number not in self._final_column_map:
             return None
 
@@ -270,7 +268,7 @@ class ColumnMapper:
             new_required_prefix (str): The name_prefix to add to the column when loading from a spreadsheet.
 
         Raises:
-            TypeError if column number is passed as a str rather an an int.
+            TypeError if column number is passed as a str rather an int.
 
         Notes:
             If the column is not known to the mapper, it will be added as a HEDTags column.
@@ -324,7 +322,7 @@ class ColumnMapper:
         for column_name, column_entry in self.column_data.items():
             if isinstance(column_name, int):
                 # Convert to internal numbering format
-                column_number = column_name - 1
+                column_number = column_name
                 self._final_column_map[column_number] = column_entry
 
         # Add any tag columns
@@ -366,7 +364,7 @@ class ColumnMapper:
         return self._finalize_mapping_issues
 
     def validate_column_data(self, hed_ops, error_handler=None, **kwargs):
-        """ Validate all column definitions that are being used and column definition hed strings
+        """ Validate all column definitions that are being used and column definition hed strings.
 
         Args:
             hed_ops (list, func, or HedOps): A func, a HedOps or a list of these to apply to the
@@ -387,29 +385,3 @@ class ColumnMapper:
                                                                  **kwargs)
 
         return all_validation_issues
-
-    @staticmethod
-    def _subtract_1_from_dictionary_keys(int_key_dictionary):
-        """ Subtracts 1 from each dictionary key.
-
-        Args:
-            int_key_dictionary (dict): A dictionary with int keys.
-
-        Returns:
-            dict: A dictionary with the keys subtracted by 1.
-
-        """
-        return {key - 1: value for key, value in int_key_dictionary.items()}
-
-    @staticmethod
-    def _subtract_1_from_list_elements(int_list):
-        """ Subtracts 1 from each int in a list.
-
-        Args:
-            int_list (list): A list of ints.
-
-        Returns:
-            list: A list of ints where corresponding elements are 1 less than int_list.
-
-        """
-        return [x if isinstance(x, str) else x - 1 for x in int_list]

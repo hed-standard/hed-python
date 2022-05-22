@@ -14,13 +14,18 @@
    
       ~BidsSidecarFile.__init__
       ~BidsSidecarFile.clear_contents
-      ~BidsSidecarFile.get_sidecar
       ~BidsSidecarFile.is_sidecar_for
       ~BidsSidecarFile.set_contents
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BidsSidecarFile.get_contents
    
    
 

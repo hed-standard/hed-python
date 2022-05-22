@@ -22,8 +22,24 @@ class BidsFile:
         self.suffix = suffix
         self.ext = ext
         self.entity_dict = entity_dict
+        self.sidecar = None    # list of sidecars starting at the root (including itself if sidecar)
+        self.contents = None
+
+    @property
+    def get_contents(self):
+        return self.contents
+
+    def clear_contents(self):
+        self.contents = None
+
+    def set_contents(self, content_info=None, no_overwrite=True):
+        if self.contents and no_overwrite:
+            return
+        self.contents = content_info
 
     def __str__(self):
-        return self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
+        my_str = self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
                " entity_dict=" + str(self.entity_dict)
-
+        if self.sidecar:
+            my_str = my_str + "\n\tmerged sidecar=" + str(self.sidecar.file_path)
+        return my_str

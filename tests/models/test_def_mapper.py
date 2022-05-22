@@ -4,6 +4,7 @@ import os
 from hed import schema
 from hed.models import DefinitionDict, DefMapper, HedString
 from hed.validator import HedValidator
+from hed.errors import ErrorHandler, ErrorContext
 
 
 class Test(unittest.TestCase):
@@ -255,34 +256,23 @@ class Test(unittest.TestCase):
         def_issues = valid_empty.validate(def_mapper, expand_defs=False)
         self.assertFalse(def_issues)
 
-    def test_mutable(self):
-        basic_definition_string = "(Definition/TestDef, (Keypad-key/TestDef1,Keyboard-key/TestDef2))"
+    def test_duplicate_def(self):
         def_dict = DefinitionDict()
-        def_string = HedString(basic_definition_string)
-        def_string.convert_to_canonical_forms(self.hed_schema)
-        def_dict.check_for_definitions(def_string)
+        def_string = HedString(self.placeholder_definition_string)
+        def_string.convert_to_canonical_forms(None)
+        error_handler = ErrorHandler()
+        error_handler.push_error_context(ErrorContext.ROW, 5)
+        def_dict.check_for_definitions(def_string, error_handler=error_handler)
+        def_mapper = DefMapper([])
+        self.assertEqual(len(def_mapper.issues), 0)
 
-        def_mapper = DefMapper(def_dict)
-        hed_ops = []
-        hed_ops.append(self.hed_schema)
-        hed_ops.append(def_mapper)
+        def_mapper = DefMapper([def_dict, def_dict])
+        self.assertEqual(len(def_mapper.issues), 1)
+        self.assertTrue('ec_row' in def_mapper.issues[0])
 
-        def_contents = def_dict.defs['testdef'].contents
-        def_contents.cascade_mutable(True)
-        # todo: clean this up some.  I think it's mostly good.
-        label_def_string = "Def/TestDef"
-        test_string = HedString(label_def_string)
-        test_string2 = HedString(label_def_string)
-        def_issues = test_string.validate(hed_ops, expand_defs=True)
-        def_issues = test_string2.validate(hed_ops, expand_defs=True)
-        tags_to_remove = test_string.find_tags(search_tags=["keypad-key"], recursive=True)
-
-        for tag, group in tags_to_remove:
-            test_string.remove([tag])
-
-
-        self.assertEqual(test_string, test_string2)
-
+        def_mapper = DefMapper([def_dict, def_dict, def_dict])
+        self.assertEqual(len(def_mapper.issues), 2)
+        self.assertTrue('ec_row' in def_mapper.issues[0])
 
 
 if __name__ == '__main__':

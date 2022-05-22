@@ -22,9 +22,9 @@ class DefinitionEntry:
             source_context (dict): Info about where this definition was declared.
         """
         self.name = name
-        self.contents = contents
         if contents:
-            contents.cascade_mutable(False)
+            contents = contents.copy()
+        self.contents = contents
         self.takes_value = takes_value
         self.source_context = source_context
         self.tag_dict = {}
@@ -56,12 +56,10 @@ class DefinitionEntry:
         if self.contents:
             output_group = self.contents
             if placeholder_value:
-                # todo: This part could be optimized more
+                output_group = copy.deepcopy(self.contents)
                 placeholder_tag = output_group.find_placeholder_tag()
                 if not placeholder_tag:
                     raise ValueError("Internal error related to placeholders in definition mapping")
-                output_group = copy.copy(self.contents)
-                placeholder_tag = output_group.make_tag_mutable(placeholder_tag)
                 name = f"{name}/{placeholder_value}"
                 placeholder_tag.replace_placeholder(placeholder_value)
 
@@ -75,14 +73,13 @@ class DefinitionEntry:
 class DefinitionDict(HedOps):
     """Class responsible for gathering and storing a group of definitions to be considered a single source.
 
-        A bids_old style file might have many of these(one for each json dict, and another for the actual file).
-
         This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
 
     """
 
     def __init__(self):
-        """ Initialize the class. gathering and storing a group of definitions to be considered a single source. """
+        """ Initialize the class, gathering and storing a group of definitions to be considered a single source. """
+
         super().__init__()
         self._defs = {}
 
@@ -94,16 +91,16 @@ class DefinitionDict(HedOps):
 
         Returns:
             list: List of DefinitionErrors issues found. Each issue is a dictionary.
+
         """
         return self._extract_def_issues
 
     @property
     def defs(self):
-        """
-            Provides direct access to internal dictionary.  Alter at your own risk.
-        Returns
-        -------
-        def_dict: {str: DefinitionEntry}
+        """ Provides direct access to internal dictionary.  Alter at your own risk.
+
+        Returns:
+            dict: {str: DefinitionEntry}
         """
         return self._defs
 
@@ -118,7 +115,7 @@ class DefinitionDict(HedOps):
         return []
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
-        """ Check a given HedString for definition tags, and add them to the dictionary if so.
+        """ Check a given HedString for definition tags and add them to the dictionary if so.
 
         Args:
             hed_string_obj (HedString): A single hed string to gather definitions from.

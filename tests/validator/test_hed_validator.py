@@ -4,7 +4,7 @@ import os
 #from hed import
 from hed.errors import ErrorContext
 from hed import schema
-from hed.models import DefMapper, HedString, HedInput, EventsInput, Sidecar
+from hed.models import DefMapper, HedString, SpreadsheetInput, TabularInput, Sidecar
 from hed.validator import HedValidator
 
 
@@ -20,14 +20,14 @@ class Test(unittest.TestCase):
         cls.validation_issues = []
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/validator_tests/')
         cls.hed_filepath_with_errors = os.path.join(cls.hed_base_dir, "ExcelMultipleSheets.xlsx")
-        cls.hed_file_with_errors = HedInput(cls.hed_filepath_with_errors)
+        cls.hed_file_with_errors = SpreadsheetInput(cls.hed_filepath_with_errors)
 
         cls.hed_filepath_major_errors = os.path.join(cls.hed_base_dir, "bids_events_invalid.tsv")
-        cls.hed_file_with_major_errors = HedInput(cls.hed_filepath_major_errors, tag_columns=[3])
+        cls.hed_file_with_major_errors = SpreadsheetInput(cls.hed_filepath_major_errors, tag_columns=[2])
 
         cls.hed_filepath_major_errors_multi_column = os.path.join(cls.hed_base_dir, "bids_events_invalid_columns.tsv")
         cls.hed_file_with_major_errors_multi_column = \
-            HedInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[3, 4])
+            SpreadsheetInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[2, 3])
 
     def test__validate_input(self):
         test_string_obj = HedString(self.base_hed_input)
@@ -59,11 +59,11 @@ class Test(unittest.TestCase):
         self.assertIsInstance(validation_issues, list)
         self.assertEqual(len(validation_issues), 2)
 
-    def test_complex_file_validation(self):
+    def test_complex_file_validation_no_index(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events.tsv')
+                                   '../data/validator_tests/bids_events_no_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
@@ -71,7 +71,26 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
         self.assertEqual(len(issues), 0)
-        input_file = EventsInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
+
+        validation_issues = input_file.validate_file_sidecars(validator)
+        self.assertEqual(len(validation_issues), 0)
+        validation_issues = input_file.validate_file(validator)
+        self.assertEqual(len(validation_issues), 0)
+
+    def test_complex_file_validation_with_index(self):
+        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/validator_tests/bids_schema.mediawiki')
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/validator_tests/bids_events_with_index.tsv')
+
+        hed_schema = schema.load_schema(schema_path)
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        validator = HedValidator(hed_schema=hed_schema)
+        sidecar = Sidecar(json_path)
+        issues = sidecar.validate_entries(validator)
+        self.assertEqual(len(issues), 0)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate_file_sidecars(validator)
         self.assertEqual(len(validation_issues), 0)
@@ -82,7 +101,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events.tsv')
+                                   '../data/validator_tests/bids_events_with_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -91,7 +110,7 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(json_path)
         # issues = sidecar.validate_entries(hed_ops=validator, check_for_warnings=True)
         # self.assertEqual(len(issues), 4)
-        input_file = EventsInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
         #
         # validation_issues = input_file.validate_file_sidecars(validator, check_for_warnings=True)
         # self.assertEqual(len(validation_issues), 4)
@@ -105,13 +124,13 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events.tsv')
+                                   '../data/validator_tests/bids_events_with_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events_bad_defs2.json")
         sidecar = Sidecar(json_path)
-        input_file = EventsInput(events_path, sidecars=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
         validator = HedValidator(hed_schema=hed_schema)
 
         validation_issues1 = input_file.validate_file_sidecars(validator)
@@ -127,11 +146,11 @@ class Test(unittest.TestCase):
                                    '../data/validator_tests/hed3_tags_single_sheet_bad_defs.xlsx')
         hed_schema = schema.load_schema(schema_path)
 
-        prefixed_needed_tag_columns = {2: 'Property/Informational-property/Label/',
-                                       3: 'Property/Informational-property/Description/'}
-        loaded_file = HedInput(events_path, tag_columns=[4],
-                               column_prefix_dictionary=prefixed_needed_tag_columns,
-                               worksheet_name='LKT Events')
+        prefixed_needed_tag_columns = {1: 'Property/Informational-property/Label/',
+                                       2: 'Property/Informational-property/Description/'}
+        loaded_file = SpreadsheetInput(events_path, tag_columns=[3],
+                                       column_prefix_dictionary=prefixed_needed_tag_columns,
+                                       worksheet_name='LKT Events')
 
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = loaded_file.validate_file(validator, check_for_warnings=True)
@@ -145,7 +164,7 @@ class Test(unittest.TestCase):
 
         hed_schema = schema.load_schema(schema_path)
 
-        input_file = HedInput(events_path, tag_columns=[2, 3, "error"])
+        input_file = SpreadsheetInput(events_path, tag_columns=[1, 2, "error"])
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = input_file.validate_file(validator)
         self.assertEqual(validation_issues[1]['char_index'], 6)
