@@ -17,22 +17,41 @@ class HedString(HedGroup):
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
 
-    def __init__(self, hed_string, hed_schema=None):
+    def __init__(self, hed_string, hed_schema=None, _contents=None):
         """ Constructor for the HedString class.
 
         Args:
             hed_string (str): A HED string consisting of tags and tag groups.
-
+            hed_schema (HedSchema or None): The schema to use to identify tags.  Can be passed later.
+            _contents (list(HedGroupBase or HedTag) or None): Create a HedString from this exact list of children.
+                                                              Does not make a copy.
         Notes:
             The HedString object parses its component tags and groups into a tree-like structure.
 
         """
 
-        try:
-            contents = self.split_into_groups(hed_string, hed_schema)
-        except ValueError:
-            contents = []
+        if _contents is not None:
+            contents = _contents
+        else:
+            try:
+                contents = self.split_into_groups(hed_string, hed_schema)
+            except ValueError:
+                contents = []
         super().__init__(hed_string, contents=contents, startpos=0, endpos=len(hed_string))
+
+    @classmethod
+    def from_hed_strings(cls, contents):
+        """ Factory for the HedString class when created via combining existing HedString objects.
+
+        Args:
+            contents (list(HedString) or None): A list of HedString objects to combine.  This takes ownership of their
+                                                children.
+        """
+        result = HedString.__new__(HedString)
+        hed_string = "".join([group._hed_string for group in contents])
+        contents = [child for sub_string in contents for child in sub_string.children]
+        result.__init__(hed_string=hed_string, _contents=contents)
+        return result
 
     @property
     def is_group(self):

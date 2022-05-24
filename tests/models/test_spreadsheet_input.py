@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
         file_input = SpreadsheetInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
                                       tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
 
-        for row_number, column_to_hed_tags in file_input:
+        for column_to_hed_tags in file_input:
             break_here = 3
 
         # Just make sure this didn't crash for now
@@ -76,8 +76,7 @@ class Test(unittest.TestCase):
             events_file_as_string = io.StringIO(file.read())
         input_file_from_string = TabularInput(file=events_file_as_string, sidecar=sidecar)
 
-        for (row_number, column_dict), (row_number2, column_dict) in zip(input_file, input_file_from_string):
-            self.assertEqual(row_number, row_number2)
+        for  column_dict, column_dict in zip(input_file, input_file_from_string):
             self.assertEqual(column_dict, column_dict)
 
     def test_bad_file_inputs(self):
@@ -137,12 +136,14 @@ class Test(unittest.TestCase):
 
         input_file_2.reset_column_mapper()
 
-        for (row_number, column_dict), (row_number2, column_dict2) in zip(input_file_1.iter_dataframe(),
-                                                                          input_file_2.iter_dataframe()):
+        for (row_number, row_dict), (row_number2, row_dict2) in zip(enumerate(input_file_1.iter_dataframe(return_string_only=False)),
+                                                                          enumerate(input_file_2.iter_dataframe(return_string_only=False))):
             self.assertEqual(row_number, row_number2,
                              f"TabularInput should have row {row_number} equal to {row_number2} after reset")
+            column_dict = row_dict["column_to_hed_tags"]
             self.assertTrue(len(column_dict) == 5,
                             f"The column dictionary for row {row_number} should have the right length")
+            column_dict2 = row_dict2["column_to_hed_tags"]
             self.assertTrue(len(column_dict2) == 11,
                             f"The reset column dictionary for row {row_number2} should have the right length")
 

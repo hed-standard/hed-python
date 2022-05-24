@@ -11,7 +11,8 @@ from hed.errors.error_reporter import ErrorHandler
 from hed.models import model_constants
 from hed.models.hed_ops import translate_ops
 from hed.models.onset_mapper import OnsetMapper
-from hed.models.hed_string_comb import HedStringComb
+from hed.models.hed_string import HedString
+from hed.models.hed_string_group import HedStringGroup
 from hed.models.def_mapper import DefMapper
 
 
@@ -135,8 +136,10 @@ class BaseInput:
 
         """
         error_list = []
-        for row_number, row_dict in self.iter_dataframe(hed_ops=hed_schema, return_row_dict=True,
-                                                        remove_definitions=False, error_handler=error_handler):
+        for row_number, row_dict in enumerate(self.iter_dataframe(hed_ops=hed_schema,
+                                                                  return_string_only=False,
+                                                                  remove_definitions=False,
+                                                                  error_handler=error_handler)):
             column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
             error_list += row_dict[model_constants.ROW_ISSUES]
             for column_number in column_to_hed_tags_dictionary:
@@ -259,19 +262,18 @@ class BaseInput:
             error_handler = ErrorHandler()
 
         default_mapper = ColumnMapper()
-        return self.iter_dataframe(default_mapper, hed_ops=hed_ops, run_string_ops_on_columns=True,
+        return self.iter_dataframe(hed_ops=hed_ops, mapper=default_mapper, run_string_ops_on_columns=True,
                                    error_handler=error_handler, **kwargs)
 
-    def iter_dataframe(self, mapper=None, return_row_dict=False, hed_ops=None, run_string_ops_on_columns=False,
+    def iter_dataframe(self, hed_ops=None, mapper=None, return_string_only=True, run_string_ops_on_columns=False,
                        error_handler=None, expand_defs=False, remove_definitions=True, **kwargs):
         """ Iterate over (row number, parsed row dictionary) based on the given column mapper.
 
         Args:
-            mapper (ColumnMapper or None): The column name to column number mapper (or internal mapper if None).
-            return_row_dict (bool): If True, return the full row_dict including issues,
-                otherwise just the HedStrings for each column.
             hed_ops (list, func, HedOps, or None): A func, a HedOps or a list of these to apply to the
                 hed strings before returning.
+            mapper (ColumnMapper or None): The column name to column number mapper (or internal mapper if None).
+            return_string_only (bool): If True, do not return issues list, individual columns, attribute columns, etc.
             run_string_ops_on_columns (bool): If true, run all tag and string ops on columns,
                 rather than columns then rows.
             error_handler (ErrorHandler or None): The error handler to use for context or a default if None.
@@ -298,13 +300,13 @@ class BaseInput:
         # Iter tuples is ~ 25% faster compared to iterrows in our use case
         for row_number, text_file_row in enumerate(self._dataframe.itertuples(index=False)):
             error_handler.push_error_context(ErrorContext.ROW, row_number)
-            yield row_number, self._expand_row_internal(text_file_row, tag_funcs, string_funcs,
-                                                                       error_handler=error_handler,
-                                                                       mapper=mapper, return_row_dict=return_row_dict)
+            yield self._expand_row_internal(text_file_row, tag_funcs, string_funcs,
+                                            error_handler=error_handler,
+                                            mapper=mapper, return_string_only=return_string_only)
             error_handler.pop_error_context()
 
     def _expand_row_internal(self, text_file_row, tag_funcs, string_funcs, error_handler,
-                             mapper=None, return_row_dict=False):
+                             mapper=None, return_string_only=False):
         row_dict = mapper.expand_row_tags(text_file_row)
         column_to_hed_tags = row_dict[model_constants.COLUMN_TO_HED_TAGS]
         expansion_column_issues = row_dict.get(model_constants.COLUMN_ISSUES, {})
@@ -314,15 +316,22 @@ class BaseInput:
             row_issues += self._run_column_ops(column_to_hed_tags, tag_funcs,
                                                expansion_column_issues,
                                                error_handler)
-        if return_row_dict:
-            final_hed_string = HedStringComb(column_to_hed_tags.values())
-            if string_funcs:
-                row_issues += self._run_row_ops(final_hed_string, string_funcs, error_handler)
+
+        # Return a combined string if we're also returning columns.
+        if not return_string_only:
+            final_hed_string = HedStringGroup(column_to_hed_tags.values())
+        else:
+            final_hed_string = HedString.from_hed_strings(contents=column_to_hed_tags.values())
+
+        if string_funcs:
+            row_issues += self._run_row_ops(final_hed_string, string_funcs, error_handler)
+
+        if not return_string_only:
             row_dict[model_constants.ROW_ISSUES] = row_issues
             row_dict[model_constants.ROW_HED_STRING] = final_hed_string
             return row_dict
-        else:
-            return column_to_hed_tags
+        # Return a HedString rather than a HedStringGroup
+        return final_hed_string
 
     def get_assembled(self, row_number, expand_defs, shrink_defs, remove_definitions=False, error_handler=None):
         if error_handler is None:
@@ -337,7 +346,7 @@ class BaseInput:
 
         text_file_row = self._dataframe.iloc[row_number]
         return self._expand_row_internal(text_file_row, tag_funcs, None, error_handler=error_handler,
-                                         mapper=mapper, return_row_dict=False)
+                                         mapper=mapper)
 
     def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
                  tag_form="short_tag"):
@@ -444,14 +453,16 @@ class BaseInput:
     def _run_validators(self, hed_ops, error_handler, run_on_raw=False, expand_defs=False, **kwargs):
         validation_issues = []
         if run_on_raw:
-            for row_number, row_dict in self.iter_raw(return_row_dict=True, hed_ops=hed_ops,
-                                                      error_handler=error_handler, expand_defs=expand_defs,
-                                                      **kwargs):
+            for row_dict in self.iter_raw(hed_ops=hed_ops,
+                                          return_string_only=False,
+                                          error_handler=error_handler, expand_defs=expand_defs,
+                                          **kwargs):
                 validation_issues += row_dict[model_constants.ROW_ISSUES]
         else:
-            for row_number, row_dict in self.iter_dataframe(return_row_dict=True, hed_ops=hed_ops,
-                                                            error_handler=error_handler, expand_defs=expand_defs,
-                                                            **kwargs):
+            for row_dict in self.iter_dataframe(hed_ops=hed_ops,
+                                                return_string_only=False,
+                                                error_handler=error_handler, expand_defs=expand_defs,
+                                                **kwargs):
                 validation_issues += row_dict[model_constants.ROW_ISSUES]
 
         return validation_issues

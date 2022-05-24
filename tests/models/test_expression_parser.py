@@ -1,6 +1,6 @@
 import unittest
 from hed.models.hed_string import HedStringFrozen, HedString
-from hed.models.hed_string_comb import HedStringComb
+from hed.models.hed_string_group import HedStringGroup
 from hed.models.expression_parser import TagExpressionParser
 import os
 from hed import schema
@@ -33,8 +33,8 @@ class TestParser(unittest.TestCase):
             #    print(f"\t\tFound as group(s) {str([str(r) for r in result])}")
             self.assertEqual(bool(result2), expected_result)
 
-            # Same test with HedStringCombined
-            hed_string_comb = HedStringComb([hed_string])
+            # Same test with HedStringGroupined
+            hed_string_comb = HedStringGroup([hed_string])
             result3 = expression.search_hed_string(hed_string_comb)
             # print(f"\tSearching string '{str(hed_string)}'")
             # if result:
@@ -43,7 +43,7 @@ class TestParser(unittest.TestCase):
 
             for r1, r2, r3 in zip(result1, result2, result3):
                 # Ensure r2 is only a HedString if r3 is.
-                if isinstance(r3, HedStringComb):
+                if isinstance(r3, HedStringGroup):
                     self.assertIsInstance(r2, HedString)
                 else:
                     self.assertNotIsInstance(r2, HedString)

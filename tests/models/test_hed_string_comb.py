@@ -4,7 +4,7 @@ import os
 from hed import schema
 from hed.models import HedString
 from hed.models import HedTag
-from hed.models.hed_string_comb import HedStringComb
+from hed.models.hed_string_group import HedStringGroup
 import copy
 
 
@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
     def test_remove_groups(self):
         string1 = HedString("Item/Object", self.hed_schema)
         string2 = HedString("Event, (Event, Square)", self.hed_schema)
-        comb_string = HedStringComb([string1, string2])
+        comb_string = HedStringGroup([string1, string2])
         self.assertEqual(len(comb_string.get_all_tags()), 4)
         self.assertEqual(len(string1.get_all_tags()), 1)
         self.assertEqual(len(string2.get_all_tags()), 3)
@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         string1 = HedString("Item/Object", self.hed_schema)
         string2 = HedString("Event, (Event, Square)", self.hed_schema)
         new_contents = HedTag("Def/TestTag", hed_schema=self.hed_schema)
-        comb_string = HedStringComb([string1, string2])
+        comb_string = HedStringGroup([string1, string2])
         self.assertEqual(len(string1.get_all_tags()), 1)
         self.assertEqual(len(string2.get_all_tags()), 3)
         self.assertEqual(len(comb_string.get_all_tags()), 4)
