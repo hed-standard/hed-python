@@ -206,8 +206,6 @@ class ColumnMapper:
         column_to_hed_tags_dictionary = {}
         column_issues_dict = {}
         for column_number, cell_text in enumerate(row_text):
-            # if column_number == 0:
-            #     continue
             translated_column, attribute_name_or_error = self._expand_column(column_number, str(cell_text))
             if translated_column is None:
                 if attribute_name_or_error:

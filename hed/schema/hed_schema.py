@@ -1,8 +1,8 @@
 """ Represents a HED schema file in a format suitable for use in analysis."""
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
-from hed.schema.io.schema2xml import HedSchema2XML
-from hed.schema.io.schema2wiki import HedSchema2Wiki
+from hed.schema.schema_io.schema2xml import HedSchema2XML
+from hed.schema.schema_io.schema2wiki import HedSchema2Wiki
 
 from hed.schema import schema_validation_util
 from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection

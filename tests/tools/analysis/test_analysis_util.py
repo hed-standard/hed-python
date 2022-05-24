@@ -4,7 +4,7 @@ import json
 import unittest
 from pandas import DataFrame
 from hed import schema as hedschema
-from hed.models import Sidecar, TabularInput, HedStringComb
+from hed.models import Sidecar, TabularInput, HedStringGroup, HedString
 from hed.tools import assemble_hed, get_assembled_strings, search_tabular
 
 
@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
     def test_get_assembled_strings_no_schema(self):
         hed_list1 = get_assembled_strings(self.input_data, expand_defs=False)
         self.assertIsInstance(hed_list1, list, "get_assembled_groups should return a list when expand defs is False")
-        self.assertIsInstance(hed_list1[0], HedStringComb)
+        self.assertIsInstance(hed_list1[0], HedString)
         hed_strings1 = [str(hed) for hed in hed_list1]
         self.assertIsInstance(hed_strings1[0], str, "get_assembled_strings can be converted.")
         self.assertIsInstance(hed_strings1, list)
@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
                           "get_assembled_strings should have Def/ when expand_defs is False")
         hed_list2 = get_assembled_strings(self.input_data, expand_defs=True)
         self.assertIsInstance(hed_list2, list, "get_assembled_groups should return a list")
-        self.assertIsInstance(hed_list2[0], HedStringComb)
+        self.assertIsInstance(hed_list2[0], HedString)
         hed_strings2 = [str(hed) for hed in hed_list2]
         self.assertIsInstance(hed_strings2[0], str, "get_assembled_strings can be converted.")
         self.assertIsInstance(hed_strings2, list, "get_assembled")
@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
         hed_list1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
         self.assertIsInstance(hed_list1, list,
                               "get_assembled_groups should return a list when expand defs is False")
-        self.assertIsInstance(hed_list1[0], HedStringComb)
+        self.assertIsInstance(hed_list1[0], HedString)
         hed_strings1 = [str(hed) for hed in hed_list1]
         self.assertIsInstance(hed_strings1[0], str, "get_assembled_strings can be converted.")
         self.assertIsInstance(hed_strings1, list)
@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
                             "get_assembled_strings should have Def/ when expand_defs is False")
         hed_list2 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=True)
         self.assertIsInstance(hed_list2, list, "get_assembled_groups should return a list")
-        self.assertIsInstance(hed_list2[0], HedStringComb)
+        self.assertIsInstance(hed_list2[0], HedString)
         hed_strings2 = [str(hed) for hed in hed_list2]
         self.assertIsInstance(hed_strings2[0], str, "get_assembled_strings can be converted.")
         self.assertIsInstance(hed_strings2, list, "get_assembled")

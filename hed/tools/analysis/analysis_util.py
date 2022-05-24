@@ -1,5 +1,5 @@
 import pandas as pd
-from hed.models import TabularInput, HedStringFrozen, TagExpressionParser
+from hed.models import TabularInput, TagExpressionParser
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):
@@ -39,18 +39,11 @@ def get_assembled_strings(events, hed_schema=None, expand_defs=False):
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
 
     Returns:
-        List: A list ov HedString or HedStringComb objects.
+        List: A list of HedString or HedStringGroup objects.
 
     """
-
-    hed_list = []
-    for row, row_dict in events.iter_dataframe(return_row_dict=True, expand_defs=expand_defs, remove_definitions=True):
-        this_group = row_dict.get("HED", None)
-        if hed_schema and this_group:
-            this_group.convert_to_canonical_forms(hed_schema)
-            hed_list.append(this_group)
-        else:
-            hed_list.append(row_dict.get("HED", None))
+    hed_list = list(events.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,
+                                          expand_defs=expand_defs, remove_definitions=True))
     return hed_list
 
 

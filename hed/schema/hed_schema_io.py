@@ -2,8 +2,8 @@
 import os
 
 
-from hed.schema.io.xml2schema import HedSchemaXMLParser
-from hed.schema.io.wiki2schema import HedSchemaWikiParser
+from hed.schema.schema_io.xml2schema import HedSchemaXMLParser
+from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions

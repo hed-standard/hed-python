@@ -4,11 +4,11 @@
 from hed.models.hed_string import HedString
 
 
-class HedStringComb(HedString):
+class HedStringGroup(HedString):
     """A hed string object made from other hed string objects(generally multiple columns)."""
 
     def __init__(self, hed_string_obj_list):
-        """ Constructor for the HedStringComb class.
+        """ Constructor for the HedStringGroup class.
 
         Args:
             hed_string_obj_list ([HedString]): A list of component HedStrings for this combined string.
@@ -85,21 +85,6 @@ class HedStringComb(HedString):
                     break
 
         replace_sub_string.replace(item_to_replace, new_contents)
-
-    def __copy__(self):
-        """ Return a copy of this combined string converted to HedString.
-
-        Returns:
-            HedString: The combined string converted.
-
-        """
-        # When we copy a combined string, just turn it into a normal string.
-        result = HedString.__new__(HedString)
-        result.__dict__.update(self.__dict__)
-        result._startpos, result._endpos = self.span
-        result._hed_string = self.get_original_hed_string()
-        result._children = self.children.copy()
-        return result
 
     def _get_org_span(self, tag_or_group):
         """

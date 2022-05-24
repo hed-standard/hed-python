@@ -6,7 +6,7 @@ from hed.schema.hed_schema_constants import HedSectionKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema import HedSchema
 from hed.schema import schema_validation_util
-from hed.schema.io import wiki_constants
+from hed.schema.schema_io import wiki_constants
 
 header_attr_expression = "([^ ]+?)=\"(.*?)\""
 attr_re = re.compile(header_attr_expression)
