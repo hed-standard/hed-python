@@ -422,7 +422,8 @@ class BaseInput:
 
         """
         output_file = copy.deepcopy(self)
-        for row_number, column_to_hed_tags_dictionary in self:
+        for row_number, row_dict in enumerate(self.iter_dataframe(return_string_only=False)):
+            column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
             for column_number in column_to_hed_tags_dictionary:
                 new_text = column_to_hed_tags_dictionary[column_number]
                 output_file.set_cell(row_number, column_number, new_text, tag_form="short_tag")
