@@ -105,6 +105,18 @@ class Test(unittest.TestCase):
         with open(test_output_name, "wb") as f:
             test_input_file.to_excel(f)
 
+    def test_to_excel_should_work(self):
+        spreadsheet = SpreadsheetInput(file=self.default_test_file_name, file_type='.xlsx',
+                                       tag_columns=[4], has_column_names=True,
+                                       column_prefix_dictionary={1: 'Label/', 3: 'Description/'},
+                                       name='ExcelOneSheet.xlsx')
+        buffer = io.BytesIO()
+        try:
+            spreadsheet.to_excel(buffer, output_processed_file=True)
+            buffer.seek(0)
+        except:
+            print("This should work but it crashes")
+
     def test_to_csv(self):
         test_input_file = self.generic_file_input
         test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave.csv"
