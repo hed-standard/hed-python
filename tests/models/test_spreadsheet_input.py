@@ -111,11 +111,8 @@ class Test(unittest.TestCase):
                                        column_prefix_dictionary={1: 'Label/', 3: 'Description/'},
                                        name='ExcelOneSheet.xlsx')
         buffer = io.BytesIO()
-        try:
-            spreadsheet.to_excel(buffer, output_processed_file=True)
-            buffer.seek(0)
-        except:
-            print("This should work but it crashes")
+        spreadsheet.to_excel(buffer, output_processed_file=True)
+        buffer.seek(0)
 
     def test_to_csv(self):
         test_input_file = self.generic_file_input
