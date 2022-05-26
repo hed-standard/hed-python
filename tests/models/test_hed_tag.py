@@ -60,7 +60,7 @@ class TestSchemaUtilityFunctions(TestHedBase):
     def test_should_determine_default_unit(self):
         unit_class_tag1 = HedTag('duration/35 ms', hed_schema=self.hed_schema)
         # unit_class_tag2 = HedTag('participant/effect/cognitive/reward/11 dollars',
-        #                          schemas=self.schemas)
+        #                          schema=self.schema)
         no_unit_class_tag = HedTag('RGB-red/0.5', hed_schema=self.hed_schema)
         no_value_tag = HedTag('Black', hed_schema=self.hed_schema)
         unit_class_tag1_result = unit_class_tag1.get_unit_class_default_unit()
@@ -75,7 +75,7 @@ class TestSchemaUtilityFunctions(TestHedBase):
     def test_correctly_determine_tag_unit_classes(self):
         unit_class_tag1 = HedTag('distance/35 px', hed_schema=self.hed_schema)
         # Todo: Make a schema with a currency unit to test this
-        # unit_class_tag2 = HedTag('reward/$10.55', schemas=self.schemas)
+        # unit_class_tag2 = HedTag('reward/$10.55', schema=self.schema)
         unit_class_tag3 = HedTag('duration/#', hed_schema=self.hed_schema)
         no_unit_class_tag = HedTag('RGB-red/0.5', hed_schema=self.hed_schema)
         unit_class_tag1_result = list(unit_class_tag1.unit_classes.keys())
@@ -90,7 +90,7 @@ class TestSchemaUtilityFunctions(TestHedBase):
     def test_determine_tags_legal_units(self):
         unit_class_tag1 = HedTag('distance/35 px', hed_schema=self.hed_schema)
         # todo: add this back in when we have a currency unit or make a test for one.
-        # unit_class_tag2 = HedTag('reward/$10.55', schemas=self.schemas)
+        # unit_class_tag2 = HedTag('reward/$10.55', schema=self.schema)
         no_unit_class_tag = HedTag('RGB-red/0.5', hed_schema=self.hed_schema)
         unit_class_tag1_result = unit_class_tag1.get_tag_unit_class_units()
         # unit_class_tag2_result = unit_class_tag2.get_tag_unit_class_units()
@@ -112,15 +112,15 @@ class TestSchemaUtilityFunctions(TestHedBase):
 
     def test_strip_off_units_from_value(self):
         # todo: add this back in when we have a currency unit or make a test for one.
-        # dollars_string_no_space = HedTag('Participant/Effect/Cognitive/Reward/$25.99', schemas=self.schemas)
-        # dollars_string = HedTag('Participant/Effect/Cognitive/Reward/$ 25.99', schemas=self.schemas)
-        # dollars_string_invalid = HedTag('Participant/Effect/Cognitive/Reward/25.99$', schemas=self.schemas)
+        # dollars_string_no_space = HedTag('Participant/Effect/Cognitive/Reward/$25.99', schema=self.schema)
+        # dollars_string = HedTag('Participant/Effect/Cognitive/Reward/$ 25.99', schema=self.schema)
+        # dollars_string_invalid = HedTag('Participant/Effect/Cognitive/Reward/25.99$', schema=self.schema)
         volume_string_no_space = HedTag('Volume/100m^3', hed_schema=self.hed_schema)
         volume_string = HedTag('Volume/100 m^3', hed_schema=self.hed_schema)
         prefixed_volume_string = HedTag('Volume/100 cm^3', hed_schema=self.hed_schema)
         invalid_volume_string = HedTag('Volume/200 cm', hed_schema=self.hed_schema)
         # currency_units = {
-        #     'currency':self.schemas.unit_classes['currency']
+        #     'currency':self.schema.unit_classes['currency']
         # }
         volume_units = {
             'volume': self.hed_schema.unit_classes['volumeUnits']

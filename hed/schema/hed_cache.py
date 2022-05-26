@@ -24,7 +24,7 @@ HED_VERSION_FINAL = r'^[hH][eE][dD](_([a-z0-9]+)_)?(' + HED_VERSION + r')\.[xX][
 
 HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
-hedxml_suffix = "/hedxml" # The suffix for schemas and library schemas at the given urls
+hedxml_suffix = "/hedxml" # The suffix for schema and library schema at the given urls
 
 DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
 LIBRARY_HED_URL = 'https://api.github.com/repos/hed-standard/hed-schema-library/contents/library_schemas'
@@ -203,7 +203,7 @@ def cache_all_hed_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFA
         Path to a directory on GitHub API, or a list of them.
         eg: https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml
     skip_folders: [str]
-        A list of subfolders to skip over when downloading schemas.  Default 'deprecated'
+        A list of subfolders to skip over when downloading schema.  Default 'deprecated'
     cache_folder: str
         hed cache folder: Defaults to HED_CACHE_DIRECTORY
     Returns

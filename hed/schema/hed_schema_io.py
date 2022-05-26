@@ -1,4 +1,4 @@
-""" Utilities for loading and outputting HED schemas."""
+""" Utilities for loading and outputting HED schema."""
 import os
 
 
@@ -103,7 +103,7 @@ def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
     Parameters
     ----------
     xml_folder: str
-        Path to a folder containing schemas
+        Path to a folder containing schema
     xml_version: str
         HED version format string. Expected format: 'X.Y.Z'
     library_name: str or None, optional
