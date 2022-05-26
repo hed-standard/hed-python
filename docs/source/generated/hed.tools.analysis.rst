@@ -36,14 +36,6 @@ hed.tools.analysis.key\_map module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.analysis.key\_template module
----------------------------------------
-
-.. automodule:: hed.tools.analysis.key_template
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 hed.tools.analysis.summary\_util module
 ---------------------------------------
 

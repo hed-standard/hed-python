@@ -13,8 +13,9 @@
    .. autosummary::
    
       ~KeyMap.__init__
-      ~KeyMap.lookup_row
+      ~KeyMap.make_template
       ~KeyMap.remap
+      ~KeyMap.resort
       ~KeyMap.update
    
    

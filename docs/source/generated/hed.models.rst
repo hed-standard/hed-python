@@ -84,10 +84,10 @@ hed.models.hed\_string module
    :undoc-members:
    :show-inheritance:
 
-hed.models.hed\_string\_comb module
------------------------------------
+hed.models.hed\_string\_group module
+------------------------------------
 
-.. automodule:: hed.models.hed_string_comb
+.. automodule:: hed.models.hed_string_group
    :members:
    :undoc-members:
    :show-inheritance:
