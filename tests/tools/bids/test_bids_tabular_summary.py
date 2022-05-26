@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
                          "BidsTabularSummary categorical_info should have all the columns if no restrictions")
         count_dict = dict1.get_number_unique_values()
         self.assertEqual(len(count_dict), 10, "get_number_unique_values should have the correct number of entries")
-        self.assertEqual(count_dict['onset'], 551, "get_number_unique_values should have the right number of unique")
+        self.assertEqual(count_dict['onset'], 199, "get_number_unique_values should have the right number of unique")
 
     def test__str__(self):
         t_map = BidsTabularSummary(name="My output")

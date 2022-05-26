@@ -62,7 +62,7 @@ def get_schema_entries(hed_schema, tag, library_prefix=""):
     """ Get a list of schema entries corresponding to tag and to its parents.
 
     Args:
-        hed_schema (HedSchema, HedSchemaGroup):  The schemas in which to search for tag.
+        hed_schema (HedSchema, HedSchemaGroup):  The schema in which to search for tag.
         tag (HedTag, str):       The HED tag to look for.
         library_prefix (str):    The library prefix to use in the search.
 

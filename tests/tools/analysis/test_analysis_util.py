@@ -101,7 +101,7 @@ class Test(unittest.TestCase):
         df1 = search_tabular(self.input_data, self.hed_schema, query1, columns_included=None)
         self.assertIsInstance(df1, DataFrame, "search_tabular returns a dataframe when the query is satisfied.")
         self.assertEqual(len(df1.columns), 2, "search_tabular has the right number of columns when query okay")
-        self.assertEqual(len(df1.index), 438, "search_tabular has right number of rows when query okay")
+        self.assertEqual(len(df1.index), 155, "search_tabular has right number of rows when query okay")
         query2 = 'data-feature'
         df2 = search_tabular(self.input_data, self.hed_schema, query2, columns_included=None)
         self.assertFalse(df2, "search_tabular returns None when query is not satisfied.")
@@ -110,7 +110,7 @@ class Test(unittest.TestCase):
         df3 = search_tabular(self.input_data, self.hed_schema, query3, columns_included=['event_type', 'rep_status'])
         self.assertIsInstance(df3, DataFrame, "search_tabular returns a DataFrame when extra columns")
         self.assertEqual(len(df3.columns), 4, "search_tabular returns right number of columns when extra columns")
-        self.assertEqual(len(df3.index), 438, "search_tabular has right number of rows when query okay")
+        self.assertEqual(len(df3.index), 155, "search_tabular has right number of rows when query okay")
 
 
 if __name__ == '__main__':

@@ -319,7 +319,7 @@ class HedSchema:
 
     def __eq__(self, other):
         """
-            Returns True if these schemas match exactly.  All attributes, tag names, etc.
+            Returns True if these schema match exactly.  All attributes, tag names, etc.
 
         Parameters
         ----------
@@ -548,7 +548,7 @@ class HedSchema:
         self._sections[key_class].valid_attributes = self._get_attributes_for_class(key_class)
 
     # ===============================================
-    # Getters used to write out schemas primarily.
+    # Getters used to write out schema primarily.
     # ===============================================
     def get_desc_iter(self):
         """

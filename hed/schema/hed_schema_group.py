@@ -11,14 +11,14 @@ from hed.schema.hed_schema_constants import HedSectionKey
 class HedSchemaGroup:
     """ A container class for multiple HedSchema objects.
 
-        The container class is useful when library schemas are included.
+        The container class is useful when library schema are included.
         You cannot save/load/etc the combined schema object directly.
     """
     def __init__(self, schema_list):
         """
         Create combination of multiple HedSchema objects you can use with the hed tags.
 
-        Note: will raise HedFileError if two schemas share the same name_prefix
+        Note: will raise HedFileError if two schema share the same name_prefix
 
         Parameters
         ----------
@@ -30,7 +30,7 @@ class HedSchemaGroup:
         library_prefixes = [hed_schema._library_prefix for hed_schema in schema_list]
         if len(set(library_prefixes)) != len(library_prefixes):
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
-                               "Multiple schemas share the same tag name_prefix.  This is not allowed.",
+                               "Multiple schema share the same tag name_prefix.  This is not allowed.",
                                filename="Combined Schema")
         self._schemas = {hed_schema._library_prefix: hed_schema for hed_schema in schema_list}
 
@@ -59,7 +59,7 @@ class HedSchemaGroup:
 
     @property
     def is_hed3_schema(self):
-        # All combined schemas are implicitly hed3.
+        # All combined schema are implicitly hed3.
         return True
 
     @property

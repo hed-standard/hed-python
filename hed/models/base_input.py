@@ -565,7 +565,7 @@ class BaseInput:
             hed_ops = hed_ops.copy()
             if not run_string_ops_on_columns:
                 self._add_def_onset_mapper(hed_ops)
-                tag_funcs, string_funcs = translate_ops(hed_ops, split_tag_and_string_ops=True, expand_defs=expand_defs,
+                tag_funcs, string_funcs = translate_ops(hed_ops, split_ops=True, expand_defs=expand_defs,
                                                         remove_definitions=remove_definitions,
                                                         **kwargs)
             else:
