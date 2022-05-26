@@ -113,6 +113,8 @@ class Test(unittest.TestCase):
         buffer = io.BytesIO()
         spreadsheet.to_excel(buffer, output_processed_file=True)
         buffer.seek(0)
+        v = buffer.getvalue()
+        self.assertGreater(len(v), 0, "It should have a length greater than 0")
 
     def test_to_csv(self):
         test_input_file = self.generic_file_input

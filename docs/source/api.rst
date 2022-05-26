@@ -19,12 +19,13 @@ HED models
    hed.models.HedGroup
    hed.models.HedGroupBase
    hed.models.HedGroupFrozen
-   hed.models.SpreadsheetInput
    hed.models.HedOps
    hed.models.HedString
+   hed.models.HedStringGroup
    hed.models.HedTag
    hed.models.OnsetMapper
    hed.models.Sidecar
+   hed.models.SpreadsheetInput
    hed.models.TabularInput
    hed.models.hed_ops
 
@@ -70,14 +71,13 @@ HED tools
    hed.tools.BidsTabularSummary
 
    hed.tools.FileDictionary
-   hed.tools.HedLogger
    hed.tools.KeyMap
-   hed.tools.KeyTemplate
    hed.tools.TagSummary
-   hed.tools.analysis.analysis_util
-   hed.tools.analysis.annotation_util
-   hed.tools.analysis.summary_util
+   hed.tools.analysis_util
+   hed.tools.annotation_util
+   hed.tools.summary_util
 
+   hed.tools.HedLogger
 
 .. currentmodule:: hed
 

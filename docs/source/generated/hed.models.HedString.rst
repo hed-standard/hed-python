@@ -27,6 +27,7 @@
       ~HedString.find_tags
       ~HedString.find_tags_with_term
       ~HedString.find_top_level_tags
+      ~HedString.from_hed_strings
       ~HedString.get_all_groups
       ~HedString.get_all_tags
       ~HedString.get_as_form
