@@ -4,17 +4,35 @@ from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_summary import BidsTabularSummary
-from hed.models.tabular_input import TabularInput
 from hed.util.io_util import get_dir_dictionary, get_file_list, get_path_components
 
 
 class BidsFileGroup:
-    """ Container for a group of files with a specified suffix and their supporting sidecars in a BIDS dataset."""
+    """ Container for a group of files with a specified suffix and their supporting sidecars in a BIDS dataset.
 
-    def __init__(self, root_path, suffix="_events", type="tabular"):
+    Attributes:
+        root_path (str):          Real root path of the Bids dataset.
+        suffix (str):             The file suffix specifying the class of file represented in this group (e.g., events).
+        obj_type (str):           Type of file in this group (e.g., Tabular or Timeseries).
+        sidecar_dict (dict):      A dictionary of sidecars associated with this suffix .
+        datafile_dict (dict):     A dictionary with values either BidsTabularFile or BidsTimeseriesFile.
+        sidecar_dir_dict (dict):  Dictionary whose keys are directory paths and values are list of sidecars in the
+            corresponding directory.
+
+    """
+
+    def __init__(self, root_path, suffix="_events", obj_type="tabular"):
+        """ Constructor for a BidsFileGroup.
+
+        Args:
+            root_path (str):  Path of the root of the BIDS dataset.
+            suffix (str):     Suffix indicating the type this group represents (e.g. events, or channels, etc.).
+            obj_type (str):   Indicates the type of underlying file represents the contents.
+
+        """
         self.root_path = os.path.realpath(root_path)
         self.suffix = suffix
-        self.type = type
+        self.obj_type = obj_type
         self.sidecar_dict = self._make_sidecar_dict()
         self.datafile_dict = self._make_datafile_dict()
         self.sidecar_dir_dict = self._make_sidecar_dir_dict()
@@ -29,7 +47,7 @@ class BidsFileGroup:
                 bids_obj.sidecar = sidecar_list[-1]
 
     def get_sidecars_from_path(self, obj):
-        """ Creates a list of the applicable sidecars for the indicated object.
+        """ Create a list of the applicable sidecars for the indicated object.
 
         Args:
             obj (BidsTabularFile or BidsSidecarFile):  The BIDS event file to get the sidecars for
@@ -48,7 +66,16 @@ class BidsFileGroup:
         return sidecar_list
 
     def _get_sidecar_for_obj(self, obj, current_path):
-        """ Return a single BidsSidecarFile relevant to obj from the sidecars in the current path """
+        """ Return a single BidsSidecarFile relevant to obj from the sidecars in the current path.
+
+         Args:
+             obj (BidsFile):      A file whose sidecars are to be found.
+             current_path (str):  The path of the directory whose sidecars are to be checked.
+
+         Returns:
+             BidsSidecarFile or None:  The BidsSidecarFile in current_path relevant to obj, if any.
+
+         """
         sidecars = self.sidecar_dir_dict.get(current_path, None)
         if not sidecars:
             return None
@@ -58,22 +85,24 @@ class BidsFileGroup:
         return None
 
     def summarize(self, value_cols=None, skip_cols=None):
-        """
+        """ Return a BidsTabularSummary of the files in this group if this group rep
 
         Args:
             value_cols (list):  Column names designated as value columns.
             skip_cols (list):   Column names designated as columns to skip.
 
         Returns:
-            BidsTabularSummary:  A summary of the number of values in different columns.
+            BidsTabularSummary or None:  A summary of the number of values in different columns if tabular group.
 
         Notes: The columns that are not value_cols or skip_col are summarized by counting
         the number of times each unique value appears in that column.
 
         """
+        if self.obj_type != 'tabular':
+            return None
         info = BidsTabularSummary(value_cols=value_cols, skip_cols=skip_cols)
-        for event_obj in self.datafile_dict.values():
-            info.update(event_obj.file_path)
+        for obj in self.datafile_dict.values():
+            info.update(obj.file_path)
         return info
 
     def validate_sidecars(self, hed_ops, check_for_warnings=True):
@@ -84,7 +113,7 @@ class BidsFileGroup:
             check_for_warnings (bool):  If True, include warnings in the check.
 
         Returns:
-            (list):    A list of validation issues found. Each issue is a dictionary.
+            list:   A list of validation issues found. Each issue is a dictionary.
 
         """
         issues = []
@@ -101,7 +130,7 @@ class BidsFileGroup:
             keep_contents (bool):       If True, the underlying data files are read and their contents retained.
 
         Returns:
-            (list):    A list of validation issues found. Each issue is a dictionary.
+            list:    A list of validation issues found. Each issue is a dictionary.
 
         """
         issues = []
@@ -114,15 +143,15 @@ class BidsFileGroup:
         return issues
 
     def _make_datafile_dict(self):
-        """ Get a dictionary of BidsTabularFile objects with underlying EventInput objects not set.
+        """ Get a dictionary of objects  corresponding to the underlying obj_type with underlying contents unset.
 
         Returns:
-            dict:   A dictionary of BidsTabularFile objects keyed by real path.
+            dict:   A dictionary of BidsTabularFile or BidsTimeseriesFile objects keyed by real path.
 
         """
         files = get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.tsv'])
         file_dict = {}
-        if self.type == "tabular":
+        if self.obj_type == "tabular":
             for file in files:
                 file_dict[os.path.realpath(file)] = BidsTabularFile(file)
         else:

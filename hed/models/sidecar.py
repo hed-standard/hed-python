@@ -283,4 +283,3 @@ if __name__ == '__main__':
 
     sidecar2.add_inherited_columns([sidecar1])
     issues3 = sidecar2.validate_entries([validator], check_for_warnings=True)
-    print("to here")

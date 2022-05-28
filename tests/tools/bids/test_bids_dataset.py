@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
         events = bids.get_tabular_group("events")
         self.assertFalse(events, "BidsDataset should not have events if tabular_files do not include them.")
         channels = bids.get_tabular_group("channels")
-        self.assertFalse(channels, "BidsDataset should the type of tabular file specified in constructor.")
+        self.assertTrue(channels, "BidsDataset should the type of tabular file specified in constructor.")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
         self.assertIsInstance(bids.schema, HedSchemaGroup, "BidsDataset schema should be HedSchemaGroup")
 

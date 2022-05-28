@@ -40,22 +40,18 @@ def from_string(schema_string, file_type=".xml", library_prefix=None):
 
 
 def load_schema(hed_path=None, library_prefix=None):
-    """
-        Load a schema from the given file or URL path.
+    """ Load a schema from the given file or URL path.
 
-        Raises HedFileError if there are any fatal issues.
+    Args:
+        hed_path (str or None): A filepath or url to open a schema from.
+        library_prefix (str or None): The name_prefix all tags in this schema will accept.
 
-    Parameters
-    ----------
-    hed_path : str or None
-        A filepath or url to open a schema from
-    library_prefix : str or None
-        The name_prefix all tags in this schema will accept.
+    Returns:
+        HedSchema: The loaded schema.
 
-    Returns
-    -------
-    schema: HedSchema
-        The loaded schema
+    Raises:
+         HedFileError: If there are any fatal issues when loading the schema.
+
     """
     if not hed_path:
         raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file",

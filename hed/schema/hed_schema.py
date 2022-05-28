@@ -182,16 +182,11 @@ class HedSchema:
         return local_wiki_file
 
     def set_library_prefix(self, library_prefix):
-        """
-        Updates the tags in this schema with the given name_prefix, removing any existing name_prefix.
+        """ Set the library prefix associated with this schema.
 
-        Parameters
-        ----------
-        library_prefix : str
-            Should be empty, or end with a colon.(Colon will be automated added if missing)
-        Returns
-        -------
-        None
+        Args:
+            library_prefix (str): Should be empty, or end with a colon.(Colon will be automated added if missing).
+
         """
         if library_prefix and library_prefix[-1] != ":":
             library_prefix += ":"

@@ -6,7 +6,7 @@ from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsSidecarFile(BidsFile):
-    """ Represents a BIDS JSON sidecar file."""
+    """ Class representing a BIDS JSON sidecar file."""
 
     def __init__(self, file_path):
         super().__init__(file_path)
@@ -15,10 +15,10 @@ class BidsSidecarFile(BidsFile):
         """ Returns true if this is a sidecar for obj.
 
          Args:
-             obj (BidsFile):       A BIDSFile object to check
+             obj (BidsFile):  A BIDSFile object to check.
 
          Returns:
-             bool:   True if this is a BIDS parent of obj and False otherwise
+             bool:   True if this is a BIDS parent of obj and False otherwise.
 
          Notes:
              A sidecar is a sidecar for itself.
@@ -38,8 +38,15 @@ class BidsSidecarFile(BidsFile):
         return True
 
     def set_contents(self, content_info=None):
+        """ Set the contents of the sidecar.
+
+        Args:
+            content_info (list or None): If None, create a Sidecar from the objects file-path.
+                Otherwise a list of .json files to be merged starting from the root level downward.
+
+         """
         if not content_info:
-            self.contents = Sidecar(self.file_path, name=os.path.realpath(os.path.basename(self.file_path)))
+            file_contents = self.file_path
         else:
             merged_sidecar = {}
             for s in content_info:
@@ -47,6 +54,5 @@ class BidsSidecarFile(BidsFile):
                     next_sidecar = json.load(fp)
                     for key, item in next_sidecar.items():
                         merged_sidecar[key] = item
-
-            self.contents = Sidecar(file=io.StringIO(json.dumps(merged_sidecar)),
-                                    name=os.path.realpath(os.path.basename(self.file_path)))
+            file_contents = io.StringIO(json.dumps(merged_sidecar))
+        self.contents = Sidecar(file=file_contents, name=os.path.realpath(os.path.basename(self.file_path)))

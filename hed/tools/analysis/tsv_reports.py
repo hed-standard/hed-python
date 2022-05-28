@@ -33,11 +33,11 @@ def report_tsv_diffs(tsv_dict1, tsv_dict2, logger):
 
     # Output the column names for each type of event file
     report_list.append(f"\n{tsv_dict1.name} event file columns:")
-    for key, file, rowcount, columns in tsv_dict1.iter_tsv_info():
+    for key, file, rowcount, columns in tsv_dict1.iter_files():
         report_list.append(f"{tsv_dict1.name}: [{rowcount} events] {str(columns)}")
         logger.add(key, f"{report_list[-1]}")
 
-    for key, file, rowcount, columns in tsv_dict2.iter_tsv_info():
+    for key, file, rowcount, columns in tsv_dict2.iter_files():
         report_list.append(f"{tsv_dict2.name}: [{rowcount} events] {str(columns)}")
         logger.add(key, f"{report_list[-1]}")
 

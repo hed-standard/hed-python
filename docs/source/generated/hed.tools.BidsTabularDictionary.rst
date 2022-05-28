@@ -15,7 +15,7 @@
       ~BidsTabularDictionary.__init__
       ~BidsTabularDictionary.count_diffs
       ~BidsTabularDictionary.create_file_dict
-      ~BidsTabularDictionary.create_split_dict
+      ~BidsTabularDictionary.split_by_entity
       ~BidsTabularDictionary.get_file_path
       ~BidsTabularDictionary.get_info
       ~BidsTabularDictionary.iter_files
@@ -27,7 +27,7 @@
       ~BidsTabularDictionary.make_query
       ~BidsTabularDictionary.match_query
       ~BidsTabularDictionary.output_files
-      ~BidsTabularDictionary.split_dict_by_entity
+      ~BidsTabularDictionary._split_dict_by_entity
    
    
 

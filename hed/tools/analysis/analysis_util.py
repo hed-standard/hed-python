@@ -103,13 +103,6 @@ if __name__ == '__main__':
     sidecar = Sidecar(json_path, name='face_sub1_json')
     input_data = TabularInput(events_path, sidecar=sidecar, name="face_sub1_events")
     hed_schema = load_schema_version(xml_version="8.0.0")
-    print("to here")
-
-    # df = assemble_hed(input_data, columns_included=["onset", "duration", "event_type"], expand_defs=False)
-    # df1 = assemble_hed(input_data, columns_included=["onset", "duration", "event_type"], expand_defs=True)
-    # df2 = assemble_hed(input_data, columns_included=["onset", "baloney", "duration", "event_type"], expand_defs=False)
-    # print("to there")
-
     query = "Sensory-event"
     df3 = search_tabular(input_data, hed_schema, query, columns_included=['onset', 'event_type'])
 
