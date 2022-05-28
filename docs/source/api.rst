@@ -52,6 +52,7 @@ HED schema handling
    hed.schema.schema_compliance
    hed.schema.schema_validation_util
 
+
 .. currentmodule:: hed
 
 HED tools
@@ -73,9 +74,9 @@ HED tools
    hed.tools.FileDictionary
    hed.tools.KeyMap
    hed.tools.TagSummary
-   hed.tools.analysis_util
-   hed.tools.annotation_util
-   hed.tools.summary_util
+   hed.tools.analysis.analysis_util
+   hed.tools.analysis.annotation_util
+   hed.tools.analysis.summary_util
 
    hed.tools.HedLogger
 
@@ -92,7 +93,6 @@ HED utilities
    hed.util.file_util
    hed.util.io_util
 
-
 .. currentmodule:: hed
 
 
@@ -107,4 +107,3 @@ HED validators
    hed.validator.tag_validator_util
 
 .. currentmodule:: hed
-

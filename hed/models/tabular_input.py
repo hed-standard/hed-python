@@ -5,7 +5,7 @@ from hed.models.def_mapper import DefMapper
 
 
 class TabularInput(BaseInput):
-    """ Represents a BIDS tabular tsv file."""
+    """ Represents a BIDS tabular tsv file with sidecar."""
 
     HED_COLUMN_NAME = "HED"
 

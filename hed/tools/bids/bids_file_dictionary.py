@@ -4,10 +4,10 @@ from hed.tools.analysis.file_dictionary import FileDictionary
 
 
 class BidsFileDictionary(FileDictionary):
-    """ Class representing a dictionary of path names keyed by specified entity pairs. """
+    """ A dictionary of BidsFile keyed by entity pairs. """
 
     def __init__(self, collection_name, files, entities=('sub', 'ses', 'task', 'run')):
-        """ Create a dictionary object with keys that are simplified file names and values that are full paths.
+        """ Create a dictionary object with keys that are simplified file names and values are BidsFile objects.
 
         Args:
             collection_name (str):      Name of this collection.
@@ -30,6 +30,7 @@ class BidsFileDictionary(FileDictionary):
 
     @property
     def key_list(self):
+        """ Return a list of the dictionary keys. """
         return list(self.file_dict.keys())
 
     @property
@@ -39,7 +40,7 @@ class BidsFileDictionary(FileDictionary):
         return list(self.file_dict.values())
 
     def get_file_path(self, key):
-        """ Return the file path corresponding to the specified key or None if not in this dictionary.
+        """ Return the file path corresponding to key or None if not present.
 
         Args:
             key (str):  The key to use to look up the file in this dictionary.
@@ -64,7 +65,7 @@ class BidsFileDictionary(FileDictionary):
             yield key, file
 
     def key_diffs(self, other_dict):
-        """Return a list containing the symmetric difference of the keys in the two dictionaries.
+        """ Return a list containing the symmetric difference of the keys in this and the other.
 
         Args:
             other_dict (FileDictionary)  A file dictionary object

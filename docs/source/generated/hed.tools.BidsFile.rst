@@ -14,6 +14,7 @@
    
       ~BidsFile.__init__
       ~BidsFile.clear_contents
+      ~BidsFile.get_key
       ~BidsFile.set_contents
    
    

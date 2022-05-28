@@ -8,7 +8,7 @@ from hed.util.io_util import get_dir_dictionary, get_file_list, get_path_compone
 
 
 class BidsFileGroup:
-    """ Container for a group of files with a specified suffix and their supporting sidecars in a BIDS dataset.
+    """ Container for BIDS files with a specified suffix.
 
     Attributes:
         root_path (str):          Real root path of the Bids dataset.
@@ -50,7 +50,7 @@ class BidsFileGroup:
         """ Create a list of the applicable sidecars for the indicated object.
 
         Args:
-            obj (BidsTabularFile or BidsSidecarFile):  The BIDS event file to get the sidecars for
+            obj (BidsTabularFile or BidsSidecarFile):  The BIDS event file to get the sidecars for.
 
         Returns:
             list:  A list of the applicable sidecars for obj starting at the root.

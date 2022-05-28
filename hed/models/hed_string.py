@@ -23,7 +23,7 @@ class HedString(HedGroup):
         Args:
             hed_string (str): A HED string consisting of tags and tag groups.
             hed_schema (HedSchema or None): The schema to use to identify tags.  Can be passed later.
-            _contents (list(HedGroupBase or HedTag) or None): Create a HedString from this exact list of children.
+            _contents ([HedGroupBase and/or HedTag] or None): Create a HedString from this exact list of children.
                                                               Does not make a copy.
         Notes:
             The HedString object parses its component tags and groups into a tree-like structure.

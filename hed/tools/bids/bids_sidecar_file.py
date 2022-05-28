@@ -6,7 +6,7 @@ from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsSidecarFile(BidsFile):
-    """ Class representing a BIDS JSON sidecar file."""
+    """ Representation of a BIDS sidecar file."""
 
     def __init__(self, file_path):
         super().__init__(file_path)
@@ -15,7 +15,7 @@ class BidsSidecarFile(BidsFile):
         """ Returns true if this is a sidecar for obj.
 
          Args:
-             obj (BidsFile):  A BIDSFile object to check.
+             obj (BidsFile):  A BidsFile object to check.
 
          Returns:
              bool:   True if this is a BIDS parent of obj and False otherwise.
@@ -47,12 +47,31 @@ class BidsSidecarFile(BidsFile):
          """
         if not content_info:
             file_contents = self.file_path
-        else:
-            merged_sidecar = {}
-            for s in content_info:
-                with open(s.file_path, 'r') as fp:
-                    next_sidecar = json.load(fp)
-                    for key, item in next_sidecar.items():
-                        merged_sidecar[key] = item
-            file_contents = io.StringIO(json.dumps(merged_sidecar))
+        elif isinstance(content_info, str):
+            file_contents = content_info
+        elif isinstance(content_info, list):
+            file_contents = io.StringIO(json.dumps(self.get_merged(content_info)))
         self.contents = Sidecar(file=file_contents, name=os.path.realpath(os.path.basename(self.file_path)))
+
+    @staticmethod
+    def get_merged(file_list):
+        """ Return the dictionary representing the merged contents of a list of JSON files.
+
+        Args:
+            file_list (list or None):  A list of JSON files representing sidecars in the order they are to be merged.
+
+        Returns:
+            dict:  A merged JSON dictionary. Merging takes place from front to back with overwriting of top-level keys.
+
+        """
+        merged_sidecar = {}
+        if not file_list:
+            return merged_sidecar
+        for file in file_list:
+            if isinstance(file, BidsSidecarFile):
+                file = file.file_path
+            with open(file, 'r') as fp:
+                next_sidecar = json.load(fp)
+            for key, item in next_sidecar.items():
+                merged_sidecar[key] = item
+        return merged_sidecar

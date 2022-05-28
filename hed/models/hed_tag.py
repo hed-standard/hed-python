@@ -259,17 +259,15 @@ class HedTag:
         if self._schema_entry:
             return self._schema_entry.tag_terms
 
-        ## todo: Potentially remove this.  It's just a quick hack for testing and should not be on the main branch.
+        # TODO: Potentially remove this.  It's just a quick hack for testing and should not be on the main branch.
         return tuple(str(self).lower())
 
     def __str__(self):
-        """
-        Convert this HedTag to a string
+        """ Convert this HedTag to a string.
 
-        Returns
-        -------
-        str
-            Return the original tag if we haven't set a new tag.(e.g. short to long)
+        Returns:
+            str: The original tag if we haven't set a new tag.(e.g. short to long).
+
         """
         if self._schema_entry:
             return self.short_tag
@@ -316,7 +314,7 @@ class HedTag:
         self.tag = required_prefix + self.org_tag
 
     def lower(self):
-        """Convenience function, equivalent to str(self).lower()"""
+        """ Convenience function, equivalent to str(self).lower(). """
         return str(self).lower()
 
     def convert_to_canonical_forms(self, hed_schema):

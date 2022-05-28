@@ -1,4 +1,4 @@
-""" Represents a HED schema file in a format suitable for use in analysis."""
+
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.util import file_util
 from hed.schema.schema_io.schema2xml import HedSchema2XML
@@ -11,9 +11,7 @@ from hed.errors.error_types import ValidationErrors
 
 
 class HedSchema:
-    """
-        Data structure for a loaded hed schema xml or mediawiki file.
-    """
+    """ Representation of a HED schema file suitable for processing. """
 
     def __init__(self):
         """Constructor for the HedSchema class.
@@ -349,8 +347,8 @@ class HedSchema:
             #                     print(f"{key} not in dict2")
             #                     continue
             #                 if dict1[key] != dict2[key]:
-            #                     print(
-            #                         f"{key} doesn't match.  '{str(dict1[key].long_name)}' vs '{str(dict2[key].long_name)}'")
+            #                     s = f"{key} unmatched: '{str(dict1[key].long_name)}' vs '{str(dict2[key].long_name)}'"
+            #                     print(s)
             return False
         return True
 
@@ -397,21 +395,17 @@ class HedSchema:
                                                                       library_prefix=self._library_prefix)
 
     def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, library_prefix=""):
-        """
-            Returns the schema entry for this tag, if one exists.
+        """ Return the schema entry for this tag, if one exists.
 
-        Parameters
-        ----------
-        name : str
-            Any form of basic tag(or other section entry) to look up.  This will not handle extensions or similar.
-        key_class : HedSectionKey or str
+        Args:
+            name (str): Any form of basic tag(or other section entry) to look up.
+                This will not handle extensions or similar.
+            key_class (HedSectionKey or str):  The type of entry to return.
+            library_prefix (str): Only used for HedSchemaGroup otherwise ignored.
 
-        library_prefix: str
-            Unused(only used for HedSchemaGroup currently)
-        Returns
-        -------
-        tag_entry: HedSchemaEntry
-            The schema entry for the given tag.
+        Returns:
+            HedSchemaEntry: The schema entry for the given tag.
+
         """
         if self._library_prefix and key_class == HedSectionKey.AllTags:
             name = name.lower()
@@ -424,8 +418,8 @@ class HedSchema:
         """ Find the schema entry for a given source tag.
 
         Args:
-            tag (str, HedTag): Any form of tag to look up.  Can have an extension, value, etc.
-        library_prefix (str):  The prefix the library, if any.
+            tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
+            library_prefix (str):  The prefix the library, if any.
 
         Returns:
             HedTagEntry: The located tag entry for this tag.
@@ -517,27 +511,16 @@ class HedSchema:
         self._update_all_entries()
 
     def _update_all_entries(self):
-        """
-            Calls finalize_entry on every schema entry(tag, unit, etc)
-
-        Returns
-        -------
-
-        """
+        """ Call finalize_entry on every schema entry(tag, unit, etc). """
         for section in self._sections.values():
             for entry in section.values():
                 entry.finalize_entry(self)
 
     def _initialize_attributes(self, key_class):
-        """
-        Sets the valid attributes for the given section based on the schema.
+        """ Set the valid attributes for the given section based on the schema.
 
-        Parameters
-        ----------
-        key_class : str
-            The section key for the section to update.
-        Returns
-        -------
+        Args:
+            key_class (str): The section key for the section to update.
 
         """
         self._sections[key_class].valid_attributes = self._get_attributes_for_class(key_class)
@@ -546,13 +529,12 @@ class HedSchema:
     # Getters used to write out schema primarily.
     # ===============================================
     def get_desc_iter(self):
-        """
-            Returns an iterator over all the descriptions found in all sections.
+        """ Return an iterator over all the descriptions found in all sections.
 
-        Returns
-        -------
-        tag_name: str
-        description: str
+        Yields:
+            str: The tag node name.
+            str: The description associated with the node.
+
         """
         for section in self._sections.values():
             for tag_entry in section.values():
@@ -560,19 +542,16 @@ class HedSchema:
                     yield tag_entry.name, tag_entry.description
 
     def get_tag_description(self, tag_name, key_class=HedSectionKey.AllTags):
-        """
-            If a description exists for the given name, returns it
+        """ Return the description associated with the tag.
 
-        Parameters
-        ----------
-        tag_name : str
-            A hed tag name(or unit/unit modifier etc) with proper capitalization.
-        key_class: str, default HedSectionKey.AllTags
-            A HedKey indicating what type of description you are asking for.  (All tags, Units, Unit modifier)
+        Args:
+            tag_name (str): A hed tag name(or unit/unit modifier etc) with proper capitalization.
+            key_class (str): A string indicating type of description (e.g. All tags, Units, Unit modifier).
+                The default is HedSectionKey.AllTags.
 
-        Returns
-        -------
-        description: str or None
+        Returns:
+            str:  A description of the specified tag.
+
         """
         tag_entry = self.get_tag_entry(tag_name, key_class)
         if tag_entry:

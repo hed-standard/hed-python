@@ -18,6 +18,6 @@ from .bids.bids_tabular_dictionary import BidsTabularDictionary
 from .bids.bids_tabular_file import BidsTabularFile
 from .bids.bids_tabular_summary import BidsTabularSummary
 
-from hed.tools.analysis.tsv_reports import report_tsv_diffs
+from hed.tools.analysis.tabular_reports import report_diffs
 
 from .hed_logger import HedLogger

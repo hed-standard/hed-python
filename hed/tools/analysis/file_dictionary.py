@@ -3,7 +3,7 @@ from hed.errors.exceptions import HedFileError
 
 
 class FileDictionary:
-    """Holds a dictionary of path names keyed by specified entity pairs. """
+    """ A file dictionary keyed by entity pair indices. """
 
     def __init__(self, collection_name, file_list, key_indices=(0, 2), separator='_'):
         """ Create a dictionary with keys that are simplified file names and values that are full paths

@@ -4,7 +4,7 @@ from io import StringIO
 from unittest import mock
 
 from hed.errors.exceptions import HedFileError
-from hed.tools import BidsTabularDictionary, HedLogger, report_tsv_diffs
+from hed.tools import BidsTabularDictionary, HedLogger, report_diffs
 from hed.util import get_file_list
 
 
@@ -22,11 +22,11 @@ class Test(unittest.TestCase):
         logger = HedLogger()
         self.assertEqual(6, len(dict1.key_list),
                          "BidsTabularDictionary should have correct number of entries when key okay")
-        self.assertFalse(logger.log, "report_tsv_diffs the logger is empty before report is called")
+        self.assertFalse(logger.log, "report_diffs the logger is empty before report is called")
         with mock.patch('sys.stdout', new=StringIO()) as fake_out1:
             self.assertIsInstance(fake_out1, StringIO, "Mock creates a StringIO")
-            report_tsv_diffs(dict1, dict2, logger)
-        self.assertTrue(logger.log, "report_tsv_diffs the logger is empty before report is called")
+            report_diffs(dict1, dict2, logger)
+        self.assertTrue(logger.log, "report_diffs the logger is empty before report is called")
 
 
 if __name__ == '__main__':

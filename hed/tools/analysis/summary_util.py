@@ -8,7 +8,7 @@ def breakout_tags(schema, tag_list, breakout_list):
 
     Args:
         schema (HedSchema, HedSchemas):   Schemas to use to break out the tags.
-        tag_list (list, dict):            Iteratable of tags to be broken out.
+        tag_list (list, dict):            Iterable of tags to be broken out.
         breakout_list (list):             List of hed tag node strings that should be summarized separately.
 
     Returns:
@@ -68,6 +68,7 @@ def get_schema_entries(hed_schema, tag, library_prefix=""):
 
     Returns:
         list:  A list of HedTagEntry objects for the tag and its parent nodes in the schema.
+
     """
 
     entry_list = []
@@ -91,6 +92,7 @@ def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
 
     Returns:
         dict: Dictionary of tags as keys with a dict of values as the value.
+
     """
     unfolded_list = unfold_tag_list(tag_list)
     for tag in unfolded_list:

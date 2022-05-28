@@ -279,7 +279,7 @@ class BaseInput:
             error_handler (ErrorHandler or None): The error handler to use for context or a default if None.
             expand_defs (bool):  If True, expand def tags into def-expand groups.
             remove_definitions (bool): If true, remove all definition tags found.
-            kwargs:     See models.hed_ops.translate_ops or the specific hed_ops for additional options.
+            kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
         Yields:
             int: The current row number.

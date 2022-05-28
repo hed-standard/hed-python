@@ -12,7 +12,7 @@ LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-li
 
 
 class BidsDataset:
-    """ Class representing the metadata for a BIDS dataset primarily focused on HED evaluation.
+    """ Representation of a BIDS dataset primarily focused on HED evaluation.
 
     Attributes:
         root_path (str):  Real root path of the BIDS dataset.

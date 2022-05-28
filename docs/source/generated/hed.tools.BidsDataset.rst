@@ -15,6 +15,7 @@
       ~BidsDataset.__init__
       ~BidsDataset.get_schema_versions
       ~BidsDataset.get_summary
+      ~BidsDataset.get_tabular_group
       ~BidsDataset.validate
    
    

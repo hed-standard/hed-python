@@ -13,7 +13,7 @@ DEFAULT_BREAKOUT_LIST = [
 
 
 class TagSummary:
-    """ Class representing  a HED tag summary for a BID file group.
+    """ Representation of a HED tag summary for a BID file group.
 
     Attributes:
         file_group (BidsFileGroup):  The BIDS file group to be summarized.
@@ -88,11 +88,14 @@ class TagSummary:
 
     @staticmethod
     def extract_summary_info(entry_dict, tag_name):
-        """ Extracts the summary of tag that is stored in the entry dictionary.
+        """ Extract the summary of tag that is stored in the entry dictionary.
 
         Args:
-            entry_dict (dict):  Keys are individual tag node names
+            entry_dict (dict):  Keys are individual tag node names.
             tag_name (str):     Name of an individual node.
+
+        Returns:
+            dict: A diectionary of the extracted tag information.
 
         """
         dict_info = {}

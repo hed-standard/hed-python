@@ -6,7 +6,7 @@ from hed.tools.bids.bids_tabular_file import BidsTabularFile
 
 
 class BidsTabularDictionary(BidsFileDictionary):
-    """ Class with key-file dictionary for tabular files."""
+    """ A key tabular-file dictionary for tabular files."""
 
     def __init__(self, collection_name, files, entities=('sub', 'ses', 'task', 'run')):
         """ Create a dictionary with keys that are simplified file names and values that are full paths

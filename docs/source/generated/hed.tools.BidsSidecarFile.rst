@@ -14,6 +14,8 @@
    
       ~BidsSidecarFile.__init__
       ~BidsSidecarFile.clear_contents
+      ~BidsSidecarFile.get_key
+      ~BidsSidecarFile.get_merged
       ~BidsSidecarFile.is_sidecar_for
       ~BidsSidecarFile.set_contents
    

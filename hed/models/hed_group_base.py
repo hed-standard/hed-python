@@ -27,11 +27,11 @@ class HedGroupBase:
         raise ValueError("Cannot make shallow copies of HedGroups")
 
     def copy(self):
-        """
-            Return a deep copy of this group, with the parent pointer removed.
+        """ Return a deep copy of this group, with the parent pointer removed.
 
         Returns:
-            copied_group (HedGroupBase): The copied group
+            HedGroupBase: The copied group.
+
         """
         save_parent = self._parent
         self._parent = None
@@ -70,7 +70,7 @@ class HedGroupBase:
             also_return_depth (bool): If True, yield tuples (group, depth) rather than just groups.
 
         Returns:
-            group_list (list): The list of all HedGroups in this group, including descendants and self.
+            list: The list of all HedGroups in this group, including descendants and self.
 
         """
         node_list = [self]
