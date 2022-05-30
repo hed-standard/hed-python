@@ -22,7 +22,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
         list: A list of all warnings and errors found in the file. Each issue is a dictionary.
 
     Notes:
-        Useful for temp filenames in support of web services.
+        - Useful for temp filenames in support of web services.
 
     """
     if not isinstance(hed_schema, HedSchema):
@@ -89,7 +89,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
 
 
 def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
-    """ Check if the comma separated list in possible tags are valid HedTags.
+    """ Check if comma separated list has valid HedTags.
 
     Args:
         hed_schema (HedSchema): The schema to check if the tag exists.
@@ -114,7 +114,7 @@ def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_
 
 
 def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
-    """ Check if the comma separated list in possible tags are valid HedTags.
+    """ Check if comma separated list are valid HedTags.
 
     Args:
         hed_schema (HedSchema): The schema to check if the tag exists.
@@ -142,7 +142,7 @@ def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warni
 
 
 def validate_schema_term(hed_term):
-    """ Check a short tag for capitalization and illegal characters.
+    """ Check short tag for capitalization and illegal characters.
 
     Args:
         hed_term (str): A single hed term.

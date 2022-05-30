@@ -61,9 +61,10 @@ class TagSummary:
         """ Return information about the condition variables.
 
         Returns:
-            dict: Dictionary with condition variable levels corresponding to a design matrix.
-            list: List with the other condition variables that aren't associated with levels.
-            list: List of errors.
+            tuple:
+                - dict: Dictionary with condition variable levels corresponding to a design matrix.
+                - list: List with the other condition variables that aren't associated with levels.
+                - list: List of errors.
 
         """
         cond_dict = self.cond_dict
@@ -88,14 +89,14 @@ class TagSummary:
 
     @staticmethod
     def extract_summary_info(entry_dict, tag_name):
-        """ Extract the summary of tag that is stored in the entry dictionary.
+        """ Extract the summary of tag in this entry.
 
         Args:
             entry_dict (dict):  Keys are individual tag node names.
             tag_name (str):     Name of an individual node.
 
         Returns:
-            dict: A diectionary of the extracted tag information.
+            dict: A dictionary of the extracted tag information.
 
         """
         dict_info = {}

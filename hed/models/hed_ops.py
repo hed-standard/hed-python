@@ -17,7 +17,7 @@ default_arguments = {
 
 
 def translate_ops(hed_ops, split_ops=False, **kwargs):
-    """ Return a list of functions to apply to a hed string object given a list of hed_ops and/or functions.
+    """ Return functions to apply to a hed string object.
 
     Args:
         hed_ops (list): A list of func or HedOps or HedSchema to apply to hed strings.
@@ -29,18 +29,18 @@ def translate_ops(hed_ops, split_ops=False, **kwargs):
         list or tuple: A list of functions to apply or a tuple containing separate lists of tag and string ops.
 
     Notes:
-        1.  The distinction between tag and string ops primarily applies to spreadsheets.
-        2.  Splitting the ops into two lists is mainly used for parsing spreadsheets where any given
+        - The distinction between tag and string ops primarily applies to spreadsheets.
+        - Splitting the ops into two lists is mainly used for parsing spreadsheets where any given
             column isn't an entire hed string, but additional detail is needed on which column an
             issue original came from.
-        3. The currently accepted values of kwargs are:
-                allow_placeholders
-                check_for_definitions
-                expand_defs
-                shrink_defs
-                error_handler
-                check_for_warnings
-                remove_definitions
+        - The currently accepted values of kwargs are:
+            - allow_placeholders
+            - check_for_definitions
+            - expand_defs
+            - shrink_defs
+            - error_handler
+            - check_for_warnings
+            - remove_definitions
 
     """
     if not isinstance(hed_ops, list):
@@ -78,7 +78,7 @@ class HedOps:
     """ Base class to support HedOps.
 
     Notes:
-        HED ops are operations that apply to HedStrings in a sequence.
+        - HED ops are operations that apply to HedStrings in a sequence.
 
     """
 

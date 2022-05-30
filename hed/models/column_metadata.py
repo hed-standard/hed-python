@@ -26,7 +26,7 @@ class ColumnType(Enum):
 
 
 class ColumnMetadata:
-    """ A column in a ColumnMapper or top-level dict in Sidecar. """
+    """ Column or top-level Sidecar dict in a ColumnMapper. """
 
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None, error_handler=None):
         """ A single column entry in the column mapper.
@@ -42,8 +42,8 @@ class ColumnMetadata:
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default if None.
 
         Notes:
-            Each column from which data is retrieved must have a ColumnMetadata representing its contents.
-            The column_prefix dictionaries are used when the column is processed.
+            - Each column from which data is retrieved must have a ColumnMetadata representing its contents.
+            - The column_prefix dictionaries are used when the column is processed.
         """
         if column_type is None or column_type == ColumnType.Unknown:
             column_type = ColumnMetadata._detect_column_type(hed_dict)
@@ -79,7 +79,7 @@ class ColumnMetadata:
         return self._hed_dict
 
     def hed_string_iter(self, hed_ops=None, error_handler=None, **kwargs):
-        """ Iterator that yields all hed strings in this column metadata.
+        """ Iterator yielding columns's hed strings.
 
         Args:
             hed_ops (func, HedOps, or list of these): The HedOps or funcs to apply to the hed strings before returning.
@@ -87,9 +87,10 @@ class ColumnMetadata:
             kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options
 
         Yields:
-            HedString: The hed string at a given column and key position.
-            str: Indication of the where hed string was loaded from so it can be later set by the user.
-            list: List of issues found applying hed_ops. Each issue is a dictionary.
+            tuple:
+                - HedString: The hed string at a given column and key position.
+                - str: Indication of the where hed string was loaded from so it can be later set by the user.
+                - list: Issues found applying hed_ops. Each issue is a dictionary.
 
         """
         if error_handler is None:
@@ -127,8 +128,9 @@ class ColumnMetadata:
             also_return_bad_types (bool): If true, this can yield types other than HedString, otherwise skips these.
 
         Yields:
-            HedString: Individual hed strings for different entries.
-            str: The position to pass back to set this string.
+            tuple:
+                - HedString: Individual hed strings for different entries.
+                - str: The position to pass back to set this string.
 
         """
         hed_strings = self._hed_dict.get("HED", None)
@@ -423,7 +425,7 @@ class ColumnMetadata:
         return []
 
     def extract_definitions(self, error_handler=None):
-        """ Gather and validate all definitions found in this column.
+        """ Gather and validate the definitions.
 
         Args:
             error_handler (ErrorHandler): The error handler to use for context, uses a default one if None.

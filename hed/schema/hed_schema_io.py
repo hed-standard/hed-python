@@ -11,7 +11,7 @@ from hed.util import file_util
 
 
 def from_string(schema_string, file_type=".xml", library_prefix=None):
-    """ Create a schema from the given string as if it was loaded from the given file type.
+    """ Create a schema from the given string.
 
     Args:
         schema_string (str):         An XML or mediawiki file as a single long string.
@@ -23,6 +23,9 @@ def from_string(schema_string, file_type=".xml", library_prefix=None):
 
     Raises:
         HedFileError:  If empty string or invalid extension is passed.
+
+    Notes:
+        - The loading is determined by file type.
 
     """
     if not schema_string:
@@ -95,7 +98,7 @@ def get_hed_xml_version(xml_file_path):
 
 def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
                         library_prefix=None):
-    """ Return specified HedSchema object or latest if not specified.
+    """ Return specified version or latest if not specified.
 
     Args:
         xml_folder (str): Path to a folder containing schema.
@@ -107,7 +110,7 @@ def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
         HedSchema: The requested HedSchema object.
 
     Notes:
-        The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
+        - The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
     """
     try:
         final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)

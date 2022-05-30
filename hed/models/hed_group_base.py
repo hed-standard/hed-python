@@ -7,7 +7,7 @@ class HedGroupBase:
     """ Base class for the HedGroup API.
 
     Notes:
-        This interface is shared by HedGroup and HedGroupFrozen.
+        - This interface is shared by HedGroup and HedGroupFrozen.
 
     """
 
@@ -61,7 +61,7 @@ class HedGroupBase:
         """ All the HedTags in this group.
 
         Returns:
-            list:  A list of all the tags in thsi group including descendants.
+            list:  A list of all the tags in this group including descendants.
 
         """
         node_list = [self]
@@ -325,10 +325,10 @@ class HedGroupBase:
 
         Notes:
             - The include_groups option controls the tag expansion as follows:
-                If 0: Return only def and def expand tags/.
-                If 1: Return only def tags and def-expand groups.
-                If 2: Return only groups containing defs, or def-expand groups.
-                If 3 or any other value: Return all 3 as a tuple.
+                - If 0: Return only def and def expand tags/.
+                - If 1: Return only def tags and def-expand groups.
+                - If 2: Return only groups containing defs, or def-expand groups.
+                - If 3 or any other value: Return all 3 as a tuple.
 
         """
         from hed.models.definition_dict import DefTagNames
@@ -378,11 +378,12 @@ class HedGroupBase:
         group: HedGroup
             The group the def tag or def expand group is in.
 
-        Notes: The include_groups option controls the tag expansion as follows:
-            If 0: Return only def and def expand tags/.
-            If 1: Return only def tags and def-expand groups.
-            If 2: Return only groups containing defs, or def-expand groups.
-            If 3 or any other value: Return all 3 as a tuple.
+        Notes:
+            - The include_groups option controls the tag expansion as follows:
+                - If 0: Return only def and def expand tags/.
+                - If 1: Return only def tags and def-expand groups.
+                - If 2: Return only groups containing defs, or def-expand groups.
+                - If 3 or any other value: Return all 3 as a tuple.
 
         """
 

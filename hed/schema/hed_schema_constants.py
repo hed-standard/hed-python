@@ -22,7 +22,7 @@ class HedKey:
     """ Known property and attribute names.
 
     Notes:
-        These names should match the attribute values in the XML/wiki.
+        - These names should match the attribute values in the XML/wiki.
 
     """
     # Tag attributes

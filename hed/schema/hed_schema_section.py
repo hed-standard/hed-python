@@ -55,7 +55,7 @@ class HedSchemaSection:
         return new_entry
 
     def get_entries_with_attribute(self, attribute_name, return_name_only=False, library_prefix=""):
-        """ Return a list of entries(or names) with the given attribute.
+        """ Return entries or names with given attribute.
 
         Args:
             attribute_name (str): The name of the attribute(generally a HedKey entry).
@@ -85,12 +85,15 @@ class HedSchemaSection:
         return len(self.all_names)
 
     def items(self):
+        """ Return the items. """
         return self.all_names.items()
 
     def values(self):
+        """ All names of the sections. """
         return self.all_names.values()
 
     def keys(self):
+        """ The names of the keys. """
         return self.all_names.keys()
 
     def __getitem__(self, key):
@@ -99,6 +102,12 @@ class HedSchemaSection:
         return self.all_names[key]
 
     def get(self, key):
+        """ Return the name associated with key.
+
+        Args:
+            key (str): The name of the key.
+
+        """
         if not self.case_sensitive:
             key = key.lower()
         return self.all_names.get(key)

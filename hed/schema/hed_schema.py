@@ -39,7 +39,7 @@ class HedSchema:
     # ===============================================
     @property
     def filename(self):
-        """ Return the filename if one is known.
+        """ The filename if one is known.
 
         Returns:
             str: The filename of this schema.
@@ -59,7 +59,7 @@ class HedSchema:
 
     @property
     def version(self):
-        """ Return the HED version of this schema.
+        """ The HED version of this schema.
 
         Returns:
             str: The version of this schema.
@@ -69,7 +69,7 @@ class HedSchema:
 
     @property
     def library(self):
-        """ Return the name of this library schema if one exists.
+        """ The name of this library schema if one exists.
 
         Returns:
             str or None: Library name if any.
@@ -87,7 +87,7 @@ class HedSchema:
             HedSchema: The HED schema object for this schema.
 
         Notes:
-            This is mostly a placeholder for HedSchemaGroup.  May be refactored out later.
+            -This is mostly a placeholder for HedSchemaGroup and may be refactored out later.
 
         """
         if self._library_prefix != prefix:
@@ -102,7 +102,7 @@ class HedSchema:
             list:   A list of valid tag prefixes for this schema.
 
         Notes:
-            The return value is always length 1 if using a HedSchema.
+            - The return value is always length 1 if using a HedSchema.
         """
         return list(self._library_prefix)
 
@@ -156,7 +156,7 @@ class HedSchema:
         return local_wiki_file
 
     def set_library_prefix(self, library_prefix):
-        """ Set the library prefix associated with this schema.
+        """ Set library prefix associated for this schema.
 
         Args:
             library_prefix (str): Should be empty, or end with a colon.(Colon will be automated added if missing).
@@ -179,9 +179,9 @@ class HedSchema:
             list: A list of all warnings and errors found in the file. Each issue is a dictionary.
 
         Notes:
-            Formatting issues include invalid characters and capitalization.
-            The name parameter is useful when handling temporary files.
-            A default error handler is created if none passed in.
+            - Formatting issues include invalid characters and capitalization.
+            - The name parameter is useful when handling temporary files.
+            - A default error handler is created if none passed in.
 
         """
         from hed.schema import schema_compliance
@@ -194,8 +194,8 @@ class HedSchema:
             dict: A dictionary of all duplicate short tags
 
         Notes:
-            The returned dictionary has the short-form tags as keys and lists
-                of long tags sharing the short form as the values.
+            - The returned dictionary has the short-form tags as keys and lists
+            of long tags sharing the short form as the values.
 
         """
         return self.all_tags.duplicate_names
@@ -261,7 +261,7 @@ class HedSchema:
             bool: True if this is a hed3 schema.
 
         Notes:
-            This is considered true if the version number is >= 8.0 or it has a library name.
+            - This is considered true if the version number is >= 8.0 or it has a library name.
 
         """
         if self._is_hed3_schema is not None:
@@ -279,7 +279,7 @@ class HedSchema:
             bool: True if other exactly matches this schema.
 
         Notes:
-            Matches must include attributes, tag names, etc.
+            - Matches must include attributes, tag names, etc.
 
         """
         if self.header_attributes != other.header_attributes:
@@ -331,7 +331,7 @@ class HedSchema:
         return []
 
     def get_tags_with_attribute(self, key, section_key=HedSectionKey.AllTags):
-        """ Return a list of all tag entries with the given attribute.
+        """ Return tag entries with the given attribute.
 
 
 
@@ -343,7 +343,7 @@ class HedSchema:
             list: A list of all tags with this attribute.
 
         Notes:
-            The result is cached so will be fast after first call.
+            - The result is cached so will be fast after first call.
 
         """
         return self._sections[section_key].get_entries_with_attribute(key, return_name_only=True,
@@ -482,8 +482,9 @@ class HedSchema:
         """ Return an iterator over all the descriptions.
 
         Yields:
-            str: The tag node name.
-            str: The description associated with the node.
+            tuple:
+                - str: The tag node name.
+                - str: The description associated with the node.
 
         """
         for section in self._sections.values():

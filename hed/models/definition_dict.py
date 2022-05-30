@@ -72,14 +72,14 @@ class DefinitionEntry:
 
 
 class DefinitionDict(HedOps):
-    """ Gathers and stores a single source of definitions.
+    """ Gathers definitions from a single source.
 
         This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
 
     """
 
     def __init__(self):
-        """ Initialize the class, gathering and storing a group of definitions to be considered a single source. """
+        """ Definitions to be considered a single source. """
 
         super().__init__()
         self._defs = {}
@@ -116,7 +116,7 @@ class DefinitionDict(HedOps):
         return []
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
-        """ Check a given HedString for definition tags and add them to the dictionary if so.
+        """ Check string for definition tags and add to the dictionary.
 
         Args:
             hed_string_obj (HedString): A single hed string to gather definitions from.
@@ -212,7 +212,7 @@ def add_group_to_dict(group, tag_dict=None):
         dict:  The updated tag_dict containing the tags with a list of values.
 
     Notes:
-        Expects tags to have forms calculated already.
+        - Expects tags to have forms calculated already.
 
     """
     if tag_dict is None:

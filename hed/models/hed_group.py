@@ -16,7 +16,7 @@ class HedGroup(HedGroupBase):
             contents (list or None):  A list of HedTags and/or HedGroups that will be set as the contents of this group.
 
         Notes:
-            contents is mainly used for processing definitions.
+            - The contents is mainly used for processing definitions.
 
         """
 
@@ -52,7 +52,7 @@ class HedGroup(HedGroupBase):
             bool:  True if in this group.
 
         Notes:
-            Creates a list of full tags and groups contained in this group.
+            - Creates a list of full tags and groups contained in this group.
 
         """
         node_list = [self]
@@ -93,8 +93,8 @@ class HedGroup(HedGroupBase):
             items_to_remove (list):  List of HedGroups and/or HedTags to remove.
 
         Notes:
-            Any groups that become empty will also be pruned.
-            Identity, not equivalence is used in determining whether or not to remove.
+            - Any groups that become empty will also be pruned.
+            - Identity, not equivalence is used in determining whether or not to remove.
 
         """
         all_groups = self.get_all_groups()
@@ -181,13 +181,12 @@ class HedGroupFrozen(HedGroupBase):
         else:
             self._children = None
 
-
     def __hash__(self):
         """ Get a hash of this HedFrozenGroup. """
         return hash((self._children, self.is_group))
 
     def get_all_tags(self):
-        """ Return the HedTags in this group including descendants.
+        """ Return the HedTags including descendants.
 
         Returns:
             list: A list of all the HedTags in this group including descendants.
@@ -201,7 +200,7 @@ class HedGroupFrozen(HedGroupBase):
         return self._tags
 
     def get_all_groups(self, also_return_depth=False):
-        """ Return all the HedGroups, including descendants and self.
+        """ Return HedGroups including descendants and self.
 
         Args:
             also_return_depth (bool): If True, this yields tuples (group, depth) rather than just groups.

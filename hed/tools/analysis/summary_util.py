@@ -4,7 +4,7 @@ from hed.models.hed_tag import HedTag
 
 
 def breakout_tags(schema, tag_list, breakout_list):
-    """ Create a dictionary where the tags are broken up into specific groups.
+    """ Create a dictionary with tags split into groups.
 
     Args:
         schema (HedSchema, HedSchemas):   Schemas to use to break out the tags.
@@ -16,7 +16,7 @@ def breakout_tags(schema, tag_list, breakout_list):
                each a list of all of the tags from the breakout_list and their parents.
 
     Notes:
-        The tags that aren't in the breakout list appear in the returned dictionary under "leftovers".
+        - The tags that aren't in the breakout list appear in the returned dictionary under "leftovers".
 
     """
     breakout_dict = {}
@@ -46,11 +46,12 @@ def extract_dict_values(tag_dict, tag_name, tags):
         tags (list):      List of tags left to process.
 
     Returns:
-        list:             Tags associated with tag_name.
-        bool:             True if tag_name was found in tag_dict.
+        tuple:
+            - list: Tags associated with tag_name.
+            - bool: True if tag_name was found in tag_dict.
 
     Notes:
-        Side-effect the tags list is modified.
+        - Side-effect the tags list is modified.
     """
     if tag_name not in tag_dict:
         return [], False
@@ -59,7 +60,7 @@ def extract_dict_values(tag_dict, tag_name, tags):
 
 
 def get_schema_entries(hed_schema, tag, library_prefix=""):
-    """ Get a list of schema entries corresponding to tag and to its parents.
+    """ Get schema entries for tag and to its parents.
 
     Args:
         hed_schema (HedSchema, HedSchemaGroup):  The schema in which to search for tag.
@@ -82,7 +83,7 @@ def get_schema_entries(hed_schema, tag, library_prefix=""):
 
 
 def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
-    """ Convert a list of tags and groups into a dictionary with short tag as key and dict of values as the value.
+    """ Convert tags and groups to a dictionary.
 
     Args:
         tag_list (list): List of HedTag and HedGroup objects to transform.
@@ -92,6 +93,9 @@ def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
 
     Returns:
         dict: Dictionary of tags as keys with a dict of values as the value.
+
+    Notes:
+        - The returned dictionary has short tag as key and dict of values as the value.
 
     """
     unfolded_list = unfold_tag_list(tag_list)
@@ -108,7 +112,7 @@ def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
 
 
 def unfold_tag_list(tag_list):
-    """ Unfold a list consisting of HedTag and HedGroup objects making it a single level of HedTags.
+    """ Unfold a list to a single-level list of HedTags.
 
      Args:
          tag_list (list):  List of HedTags and HedGroup objects.

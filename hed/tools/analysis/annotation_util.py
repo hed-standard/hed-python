@@ -25,7 +25,7 @@ def check_df_columns(df, required_cols=('column_name', 'column_value', 'descript
 
 
 def df_to_hed(dataframe, description_tag=True):
-    """ Create a sidecar-like dictionary from a four-column dataframe.
+    """ Create sidecar-like dictionary from a 4-column dataframe.
 
     Args:
         dataframe (DataFrame):   A four-column Pandas DataFrame with specific columns.
@@ -35,7 +35,7 @@ def df_to_hed(dataframe, description_tag=True):
         dict:  A dictionary compatible compatible with BIDS JSON tabular file that includes HED.
 
     Notes:
-        The DataFrame must have the columns with names: column_name, column_value, description, and HED.
+        - The DataFrame must have the columns with names: column_name, column_value, description, and HED.
 
     """
     missing_cols = check_df_columns(dataframe)
@@ -64,8 +64,9 @@ def extract_tags(hed_string, search_tag):
            search_tag (str):   HED tag to extract.
 
         Returns:
-            str:   Tag string without the tags.
-            list:  A list of the tags that were extracted, for example descriptions.
+            tuple:
+                - str:   Tag string without the tags.
+                - list:  A list of the tags that were extracted, for example descriptions.
 
     """
     extracted = []
@@ -86,7 +87,7 @@ def extract_tags(hed_string, search_tag):
 
 
 def generate_sidecar_entry(column_name, column_values=None):
-    """ Create the sidecar column dictionary for a given column name.
+    """ Create a sidecar column dictionary for column.
 
     Args:
         column_name (str):       Name of the column.
@@ -116,7 +117,7 @@ def generate_sidecar_entry(column_name, column_values=None):
 
 
 def hed_to_df(sidecar_dict, col_names=None):
-    """ Return a four-column dataframe version of the HED portions of a JSON sidecar.
+    """ Return a 4-column dataframe of HED portions of sidecar.
 
     Args:
         sidecar_dict (dict):      A dictionary conforming to BIDS JSON events sidecar format.
@@ -126,7 +127,7 @@ def hed_to_df(sidecar_dict, col_names=None):
         DataFrame:  Four-column spreadsheet representing HED portion of sidecar.
 
     Notes:
-        The returned DataFrame has columns: column_name, column_value, description, and HED.
+        - The returned DataFrame has columns: column_name, column_value, description, and HED.
 
     """
 
@@ -177,13 +178,17 @@ def merge_hed_dict(sidecar_dict, hed_dict):
 
 
 def trim_back(tag_string):
-    """ Return a copy of tag_string with trailing blanks and commas removed.
+    """ Return a trimmed copy of tag_string.
 
     Args:
         tag_string (str):  A tag string to be trimmed.
 
     Returns:
         str:  A copy of tag_string that has been trimmed.
+
+    Notes:
+        -  The trailing blanks and commas are removed from the copy.
+
 
     """
 
@@ -412,7 +417,7 @@ def _update_cat_dict(cat_dict, value_entry, hed_entry, description_entry, descri
 
 
 def _update_remainder(remainder, update_piece):
-    """ Update the remainder string with update piece, paying attention to separating commas.
+    """ Update remainder with update piece.
 
     Args:
         remainder (str):      A tag string without trailing comma.

@@ -10,7 +10,7 @@ NO_VERSION_INFO_STRING = "No version info found"
 
 
 def delete_file_if_it_exists(file_path):
-    """Deletes a file if it exists.
+    """ Deletes a file if it exists.
 
     Args:
         file_path (str):    Path of the file to be deleted.
@@ -40,7 +40,7 @@ def get_file_extension(file):
 
 
 def get_version_from_xml(hed_xml_tree):
-    """Get version info from root node of an XML tree if present
+    """Get version from root node of an XML tree.
 
         Args:
             hed_xml_tree (Element):  The root node of an XML tree.
@@ -48,7 +48,11 @@ def get_version_from_xml(hed_xml_tree):
         Returns:
             str: The version of the HED schema (e.g. "8.0.0").
 
+        Raises:
+            KeyError or AttributeError: If invalid.
+
         TODO: This should be moved to the schema module
+
     """
 
     if hed_xml_tree is None:
@@ -108,7 +112,7 @@ def write_errors_to_file(issues, extension=".txt"):
 
 
 def write_strings_to_file(output_strings, extension=None):
-    """ Write a list of output strings to a temporary file and return the open file.
+    """ Write output strings to a temporary file.
 
     Args:
         output_strings ([str], str):  Strings to output one per line.

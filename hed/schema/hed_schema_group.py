@@ -12,12 +12,12 @@ class HedSchemaGroup:
     """ Container for multiple HedSchema objects.
 
     Notes:
-        The container class is useful when library schema are included.
-        You cannot save/load/etc the combined schema object directly.
+        - The container class is useful when library schema are included.
+        - You cannot save/load/etc the combined schema object directly.
 
     """
     def __init__(self, schema_list):
-        """ Create combination of multiple HedSchema objects from a list.
+        """ Combine multiple HedSchema objects from a list.
 
         Args:
             schema_list (list): A list of HedSchema for the container.
@@ -41,7 +41,7 @@ class HedSchemaGroup:
     # ===============================================
     @property
     def has_duplicate_tags(self):
-        """ Return True if this is a valid hed3 schema with no duplicate short tags.
+        """ Return True if valid hed3 schema with no duplicate short tags.
 
         Returns:
             bool: True if this is a valid hed3 schema with no duplicate short tags.
@@ -108,10 +108,10 @@ class HedSchemaGroup:
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
 
         Returns:
-            issue_list (list): A list of all warnings and errors found in the file.
+            list: A list of all warnings and errors found in the file. Each issue is a dictionary.
 
         Notes:
-            Useful for temp filenames when supporting web services.
+            - Useful for temp filenames when supporting web services.
 
         """
         issues_list = []
@@ -120,6 +120,12 @@ class HedSchemaGroup:
         return issues_list
 
     def get_tags_with_attribute(self, key):
+        """ Return the tags with this attribute.
+
+        Args:
+            key (str): The attributes.
+
+        """
         all_tags = set()
         for schema in self._schemas.values():
             all_tags.update(schema.get_tags_with_attribute(key))
@@ -135,10 +141,10 @@ class HedSchemaGroup:
             library_prefix (str): An optional prefix associated with this tag.
 
         Returns:
-            tag_entry (HedSchemaEntry):  The schema entry for the given tag.
+            HedSchemaEntry:  The schema entry for the given tag.
 
         Notes:
-              This will not handle extensions or similar.
+            - This will not handle extensions or similar.
 
         """
         specific_schema = self.schema_for_prefix(library_prefix)
@@ -157,12 +163,13 @@ class HedSchemaGroup:
             library_prefix (str): The prefix the library, if any.
 
         Returns:
-            tag_entry (HedTagEntry): The located tag entry for this tag.
-            remainder (str): The remainder of the tag that isn't part of the base tag.
-            errors (list): A list of errors while converting.
+            tuple:
+                - HedTagEntry: The located tag entry for this tag.
+                - str: The remainder of the tag that isn't part of the base tag.
+                - list: A list of errors while converting.
 
         Notes:
-            Works right to left.(mostly relevant for errors).
+            - Works right to left.(mostly relevant for errors).
 
         """
         specific_schema = self.schema_for_prefix(library_prefix)

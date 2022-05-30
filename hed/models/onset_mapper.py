@@ -23,7 +23,7 @@ class OnsetMapper(HedOps):
             list: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).
 
         Notes:
-            Each issue in the return list is a dictionary.
+            - Each issue in the return list is a dictionary.
 
         """
         onset_issues = []

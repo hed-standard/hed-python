@@ -11,8 +11,9 @@ class DefMapper(HedOps):
     """ Handles Def/ and Def-expand/.
 
     Notes:
-       The class provides string funcs but no tag funcs when extending HedOps.
-       The class can expand or shrink definitions in hed strings via Def/XXX and (Def-expand/XXX ...).
+       - The class provides string funcs but no tag funcs when extending HedOps.
+       - The class can expand or shrink definitions in hed strings via
+         Def/XXX and (Def-expand/XXX ...).
 
     """
 
@@ -23,7 +24,7 @@ class DefMapper(HedOps):
             def_dicts (list or DefDict): DefDicts containing the definitions this mapper should initialize with.
 
         Notes:
-            More definitions can be added later.
+            - More definitions can be added later.
 
         """
         super().__init__()
@@ -61,7 +62,7 @@ class DefMapper(HedOps):
         self._temporary_def_names = set()
 
     def add_definitions_from_string_as_temp(self, hed_string_obj):
-        """ Add any definitions found in the hed string to this mapper as temporary definitions.
+        """ Add definitions from hed string as temporary definitions.
 
         Args:
             hed_string_obj (HedString):  Hed string object to search for definitions
@@ -76,7 +77,7 @@ class DefMapper(HedOps):
         return validation_issues
 
     def add_definitions(self, def_dicts, add_as_temp=False):
-        """ Add the definitions found in the given definition dictionaries to this mapper.
+        """ Add the definitions to this mapper.
 
         Args:
             def_dicts (list or DefinitionDict): DefDict or list of DefDicts whose definitions should be added.
@@ -111,7 +112,7 @@ class DefMapper(HedOps):
                 self._temporary_def_names.add(def_tag)
 
     def expand_def_tags(self, hed_string_obj, expand_defs=True, shrink_defs=False):
-        """ Validate Def and Def-expand tags, and optionally expands or shrinks them.
+        """ Validate Def and Def-expand tags.
 
         Args:
             hed_string_obj (HedString): The hed string to process.
@@ -122,8 +123,10 @@ class DefMapper(HedOps):
             list: Issues found related to validating defs. Each issue is a dictionary.
 
         Notes:
-            Usually issues are mismatched placeholders or a missing definition.
-            The expand_defs and shrink_defs cannot both be True.
+            - This function can optionally expand or shrink Def/ and Def-expand, respectively.
+            - Usually issues are mismatched placeholders or a missing definition.
+            - The expand_defs and shrink_defs cannot both be True.
+
 
         """
 
@@ -149,7 +152,7 @@ class DefMapper(HedOps):
 
     def expand_and_remove_definitions(self, hed_string_obj, check_for_definitions=False, expand_defs=True,
                                       shrink_defs=False, remove_definitions=True):
-        """ Validate any Definition tags and remove any definitions found in the given hed string.
+        """ Handle definitions found in the given hed string.
 
         Args:
             hed_string_obj (HedString): The string to search for definitions.
@@ -162,7 +165,8 @@ class DefMapper(HedOps):
             def_issues (list): A list of issues for definition-related tags in this string. Each issue is a dictionary.
 
         Notes:
-            The check_for_definitions is mainly used for individual HedStrings in isolation.
+            - The check_for_definitions is mainly used for individual HedStrings in isolation.
+            - The defintions can be expanded, shrunk, and/or removed.
 
         """
         def_issues = []

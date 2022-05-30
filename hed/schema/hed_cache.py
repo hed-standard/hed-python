@@ -186,7 +186,7 @@ def get_path_from_hed_version(hed_version, library_name=None, local_hed_director
         str: The HED XML file path in the hed directory that corresponds to the hed version specified.
 
     Notes:
-        Note if no local directory is given, it defaults to HED_CACHE_DIRECTORY.
+        - Note if no local directory is given, it defaults to HED_CACHE_DIRECTORY.
 
     """
     if not local_hed_directory:
@@ -207,9 +207,9 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
             if it didn't cache, 0 if it cached successfully this time.
 
     Notes:
-        The Default skip_folders is 'deprecated'.
-        The HED cache folder defaults to HED_CACHE_DIRECTORY.
-        The directories on Github are of the form:
+        - The Default skip_folders is 'deprecated'.
+        - The HED cache folder defaults to HED_CACHE_DIRECTORY.
+        - The directories on Github are of the form:
             https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml
 
     """

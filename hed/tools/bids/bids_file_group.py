@@ -47,10 +47,10 @@ class BidsFileGroup:
                 bids_obj.sidecar = sidecar_list[-1]
 
     def get_sidecars_from_path(self, obj):
-        """ Create a list of the applicable sidecars for the indicated object.
+        """ Return applicable sidecars for the object.
 
         Args:
-            obj (BidsTabularFile or BidsSidecarFile):  The BIDS event file to get the sidecars for.
+            obj (BidsTabularFile or BidsSidecarFile):  The BIDS file object to get the sidecars for.
 
         Returns:
             list:  A list of the applicable sidecars for obj starting at the root.
@@ -85,7 +85,7 @@ class BidsFileGroup:
         return None
 
     def summarize(self, value_cols=None, skip_cols=None):
-        """ Return a BidsTabularSummary of the files in this group if this group rep
+        """ Return a BidsTabularSummary of group files.
 
         Args:
             value_cols (list):  Column names designated as value columns.
@@ -94,7 +94,8 @@ class BidsFileGroup:
         Returns:
             BidsTabularSummary or None:  A summary of the number of values in different columns if tabular group.
 
-        Notes: The columns that are not value_cols or skip_col are summarized by counting
+        Notes:
+            - The columns that are not value_cols or skip_col are summarized by counting
         the number of times each unique value appears in that column.
 
         """
@@ -166,7 +167,7 @@ class BidsFileGroup:
             dict:   a dictionary of BidsSidecarFile objects keyed by real path for the specified suffix type
 
         Notes:
-            This function creates the sidecars and but does not set their contents.
+            - This function creates the sidecars and but does not set their contents.
 
         """
         files = get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.json'])

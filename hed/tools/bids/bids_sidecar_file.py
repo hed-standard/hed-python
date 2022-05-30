@@ -21,7 +21,7 @@ class BidsSidecarFile(BidsFile):
              bool:   True if this is a BIDS parent of obj and False otherwise.
 
          Notes:
-             A sidecar is a sidecar for itself.
+             - A sidecar is a sidecar for itself.
 
          """
 
@@ -55,13 +55,16 @@ class BidsSidecarFile(BidsFile):
 
     @staticmethod
     def get_merged(file_list):
-        """ Return the dictionary representing the merged contents of a list of JSON files.
+        """ Return merged contents of JSON files as dict.
 
         Args:
             file_list (list or None):  A list of JSON files representing sidecars in the order they are to be merged.
 
         Returns:
-            dict:  A merged JSON dictionary. Merging takes place from front to back with overwriting of top-level keys.
+            dict:  A merged JSON dictionary.
+
+        Notes:
+            - Merging takes place from front to back with overwriting of top-level keys.
 
         """
         merged_sidecar = {}

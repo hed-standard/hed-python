@@ -14,7 +14,7 @@ class BidsFile:
         contents:                    Contents of this file
 
     Notes:
-        This class may hold the merged sidecar giving metadata for this file as well as contents.
+        - This class may hold the merged sidecar giving metadata for this file as well as contents.
 
     """
 
@@ -67,7 +67,7 @@ class BidsFile:
             no_overwrite (bool):  If True and the contents are not empty, do nothing.
 
         Notes:
-             - Do not set if the contents are already set and no_overwrite is True.
+            - Do not set if the contents are already set and no_overwrite is True.
 
         """
         if self.contents and no_overwrite:

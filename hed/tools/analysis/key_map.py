@@ -51,7 +51,7 @@ class KeyMap:
         return "\n".join(temp_list)
 
     def make_template(self, additional_cols=None):
-        """ Return a dataframe template consisting of the unique key columns in this map plus additional columns.
+        """ Return a dataframe template.
 
         Args:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
@@ -61,6 +61,9 @@ class KeyMap:
 
         Raises:
             HedFileError: If additional columns are not disjoint from the key columns.
+
+        Notes:
+            -  The template consists of the unique key columns in this map plus additional columns.
 
         """
         if additional_cols and set(self.key_cols).intersection(additional_cols):
@@ -79,8 +82,9 @@ class KeyMap:
             data (DataFrame, str) :     Columnar data (either DataFrame or filename) whose columns are to be remapped.
 
         Returns:
-            DataFrame:     New dataframe with columns remapped.
-            list           List of row numbers that had no correspondence in the mapping.
+            tuple:
+                - DataFrame: New dataframe with columns remapped.
+                - list:  List of row numbers that had no correspondence in the mapping.
 
         Raises:
             HedFileError:  If data is missing some of the key columns.
@@ -103,7 +107,7 @@ class KeyMap:
             df (DataFrame):    DataFrame in which to perform the mapping.
 
         Returns:
-            list:              List of row numbers that had no correspondence in the mapping.
+            list:  The row numbers that had no correspondence in the mapping.
 
         """
 
@@ -135,7 +139,7 @@ class KeyMap:
             keep_counts (bool):          If true keep a count of the times each key is present.
 
         Returns:
-            list:                        Indices of duplicates.
+            list: The indices of duplicates.
 
         Raises:
             HedFileError:  If there are missing keys and allow_missing is False.

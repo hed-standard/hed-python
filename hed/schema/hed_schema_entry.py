@@ -41,14 +41,14 @@ class HedSchemaEntry:
         pass
 
     def set_attribute_value(self, attribute_name, attribute_value):
-        """ Add the given attribute to this entry and set its value.
+        """ Add attribute and set its value.
 
         Args:
             attribute_name (str): The name of the schema entry attribute.
             attribute_value (bool or str):  The value of the attribute.
 
         Notes:
-            If this an invalid attribute name, it will be also added as an unknown attribute.
+            - If this an invalid attribute name, it will be also added as an unknown attribute.
 
         """
         if not attribute_value:
@@ -62,7 +62,7 @@ class HedSchemaEntry:
         self.attributes[attribute_name] = attribute_value
 
     def has_attribute(self, attribute_name, return_value=False):
-        """ Indicate whether this entry has the attribute.
+        """ Return True if this entry has the attribute.
 
         Args:
             attribute_name (str): The attribute to check for.
@@ -72,7 +72,7 @@ class HedSchemaEntry:
             bool or str:  If return_value is false, a boolean is returned rather than the actual value.
 
         Notes:
-            A return value of True does not indicate whether or not this attribute is valid
+            - A return value of True does not indicate whether or not this attribute is valid
 
         """
         if return_value:
@@ -81,14 +81,14 @@ class HedSchemaEntry:
             return attribute_name in self.attributes
 
     def attribute_has_property(self, attribute_name, property_name):
-        """ Retrieve the attribute value from this hed schema entry.
+        """ Return True if attribute has property.
 
         Args:
             attribute_name (str): Attribute name to check for property_name.
             property_name (str): The property value to return.
 
         Returns:
-            has_property (bool): Returns True if this entry has the property.
+            bool: Returns True if this entry has the property.
 
         """
         attr_entry = self._section.valid_attributes.get(attribute_name)
@@ -137,7 +137,7 @@ class UnitClassEntry(HedSchemaEntry):
         self._units.append(unit_entry)
 
     def finalize_entry(self, schema):
-        """ Called once after schema load to set up the internal state of this entry.
+        """ Called once after schema load to set state.
 
         Args:
             schema (HedSchema): The object with the schema rules.
@@ -197,11 +197,12 @@ class HedTagEntry(HedSchemaEntry):
             tags_to_identify (list): A list of lowercase short tags to identify.
 
         Returns:
-            (HedTagEntry or None): The fake entry showing the short tag name as the found tag.
-            (str): The remaining text after the located short tag, which may be empty.
+            tuple:
+                - HedTagEntry or None: The fake entry showing the short tag name as the found tag.
+                - str: The remaining text after the located short tag, which may be empty.
 
         Notes:
-             The match is done left to right.
+             - The match is done left to right.
 
         """
         split_names = tag.split("/")
@@ -218,7 +219,7 @@ class HedTagEntry(HedSchemaEntry):
         return None, ""
 
     def any_parent_has_attribute(self, attribute):
-        """ Check if the tag (or any of its parents) has the given attribute.
+        """ Check if tag (or parents) has the attribute.
 
         Args:
             attribute (str): The name of the attribute to check for.
@@ -227,7 +228,7 @@ class HedTagEntry(HedSchemaEntry):
             bool: True if the tag has the given attribute. False, if otherwise.
 
         Notes:
-             This is mostly used to check extension allowed.  Could be cached.
+            - This is mostly used to check extension allowed.  Could be cached.
 
         """
         iter_entry = self
@@ -257,7 +258,7 @@ class HedTagEntry(HedSchemaEntry):
         return base_entry.has_attribute(tag_attribute)
 
     def finalize_entry(self, schema):
-        """ Called once after schema loading to set the internal state.
+        """ Called once after schema loading to set state.
 
         Args:
             schema (HedSchema): The schema that the rules come from.

@@ -42,8 +42,8 @@ class BaseInput:
             name (str or None): Optional field for how this file will report errors.
 
         Notes:
-            The validation will skip over the first line of the file.
-            See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
+            - The validation will skip over the first line of the file.
+            - See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
 
          """
         if mapper is None:
@@ -187,11 +187,11 @@ class BaseInput:
             file (str or file-like):      Location to save this base input.
             output_processed_file (bool): If True, replace definitions and labels in HED columns.
 
-        Notes:
-            Also fills in things like categories.
-
         Raises:
             HedFileError if empty file object or file cannot be opened.
+
+        Notes:
+            - Also fills in things like categories.
 
         """
         if not file:
@@ -253,13 +253,14 @@ class BaseInput:
             kwargs:
 
         Yields:
-            int: The current row number.
-            dict: A dict with column_number keys and values corresponding to the cell at that position.
+            tuple:
+                - int: The current row number.
+                - dict: A dict with column_number keys and values corresponding to the cell at that position.
 
         Notes:
-            See models.hed_ops.translate_ops or the specific hed_ops for additional options.
-            Primarily for altering or re-saving the original file (e.g., convert short tags to long).
-            Used for initial processing when trying to find definitions.
+            - See models.hed_ops.translate_ops or the specific hed_ops for additional options.
+            - Primarily for altering or re-saving the original file (e.g., convert short tags to long).
+            - Used for initial processing when trying to find definitions.
 
         """
         if error_handler is None:
@@ -286,8 +287,9 @@ class BaseInput:
             kwargs ():  See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
         Yields:
-            int:    The current row number.
-            dict:   A dict with parsed row, including keys: "HED", "column_to_hed_tags", and possibly "column_issues".
+            tuple:
+                - int:    The current row number.
+                - dict:   A dict with parsed row, including keys: "HED", "column_to_hed_tags", and possibly "column_issues".
 
         """
         if error_handler is None:
