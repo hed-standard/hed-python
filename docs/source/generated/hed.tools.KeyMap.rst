@@ -22,6 +22,12 @@
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~KeyMap.columns
+   
    
 
 .. autoclass:: hed.tools.KeyMap

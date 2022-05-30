@@ -1,14 +1,15 @@
 
 
-def report_tsv_diffs(tsv_dict1, tsv_dict2, logger):
+def report_diffs(tsv_dict1, tsv_dict2, logger):
     """ Reports and logs the contents and differences of two equivalent BidsTabularDictionary objects
 
     Args:
-        tsv_dict1 (BidsTabularDictionary): A dictionary representing BIDS-keyed tsv files
-        tsv_dict2 (BidsTabularDictionary): A dictionary representing BIDS-keyed tsv files
-        logger (HedLogger):            A HedLogger object for reporting the values by key
+        tsv_dict1 (BidsTabularDictionary):  A dictionary representing BIDS-keyed tsv files.
+        tsv_dict2 (BidsTabularDictionary):  A dictionary representing BIDS-keyed tsv files.
+        logger (HedLogger):                 A HedLogger object for reporting the values by key.
 
-    Returns: (str)                     A string with the differences
+    Returns:
+        str:  A string with the differences.
 
     """
     report_list = [f"{tsv_dict1.name} has {len(tsv_dict1.file_list)} event files"]
@@ -33,11 +34,11 @@ def report_tsv_diffs(tsv_dict1, tsv_dict2, logger):
 
     # Output the column names for each type of event file
     report_list.append(f"\n{tsv_dict1.name} event file columns:")
-    for key, file, rowcount, columns in tsv_dict1.iter_tsv_info():
+    for key, file, rowcount, columns in tsv_dict1.iter_files():
         report_list.append(f"{tsv_dict1.name}: [{rowcount} events] {str(columns)}")
         logger.add(key, f"{report_list[-1]}")
 
-    for key, file, rowcount, columns in tsv_dict2.iter_tsv_info():
+    for key, file, rowcount, columns in tsv_dict2.iter_files():
         report_list.append(f"{tsv_dict2.name}: [{rowcount} events] {str(columns)}")
         logger.add(key, f"{report_list[-1]}")
 

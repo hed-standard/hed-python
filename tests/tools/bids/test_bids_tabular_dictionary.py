@@ -22,22 +22,22 @@ class Test(unittest.TestCase):
     def test_constructor_invalid(self):
         try:
             dict1 = BidsTabularDictionary("Tsv name", self.file_list, entities=('sub'))
-        except HedFileError:
+        except HedFileError or TypeError:
             pass
-        except Exception:
+        except Exception as ex:
             self.fail("BidsTabularDictionary threw the wrong exception when duplicate key")
         else:
             self.fail("FileDictionary should have thrown a HedFileError when duplicate key")
 
     def test_create_split_dict(self):
         dict1 = BidsTabularDictionary("My name", self.file_list, entities=('sub', 'run'))
-        dist1_split, leftovers = dict1.create_split_dict('run')
-        self.assertIsInstance(dist1_split, dict, "create_split_dict returns a dictionary")
-        self.assertEqual(3, len(dist1_split), 'create_split_dict should return the correct number of items')
+        dist1_split, leftovers = dict1.split_by_entity('run')
+        self.assertIsInstance(dist1_split, dict, "split_by_entity returns a dictionary")
+        self.assertEqual(3, len(dist1_split), 'split_by_entity should return the correct number of items')
         for value in dist1_split.values():
             self.assertIsInstance(value, BidsTabularDictionary,
-                                  "create_split_dict dict has BidsTabularDictionary objects")
-        self.assertFalse(leftovers, "create_split_dict leftovers should be empty")
+                                  "split_by_entity dict has BidsTabularDictionary objects")
+        self.assertFalse(leftovers, "split_by_entity leftovers should be empty")
 
 
 if __name__ == '__main__':

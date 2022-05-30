@@ -14,6 +14,7 @@
    
       ~BidsTabularFile.__init__
       ~BidsTabularFile.clear_contents
+      ~BidsTabularFile.get_key
       ~BidsTabularFile.set_contents
    
    

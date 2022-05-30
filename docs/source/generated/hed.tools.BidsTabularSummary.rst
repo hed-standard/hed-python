@@ -15,7 +15,7 @@
       ~BidsTabularSummary.__init__
       ~BidsTabularSummary.extract_sidecar_template
       ~BidsTabularSummary.get_columns_info
-      ~BidsTabularSummary.get_number_unique_values
+      ~BidsTabularSummary.get_number_unique
       ~BidsTabularSummary.make_combined_dicts
       ~BidsTabularSummary.update
       ~BidsTabularSummary.update_summary

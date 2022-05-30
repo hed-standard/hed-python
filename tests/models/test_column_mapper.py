@@ -151,7 +151,7 @@ class Test(unittest.TestCase):
         self.assertEqual(str(no_prefix_string), str(self.complex_hed_tag_no_prefix))
 
     def test__prepend_prefix_to_required_tag_column_if_needed(self):
-        prepended_hed_string = ColumnMetadata._prepend_prefix_to_required_tag_column_if_needed(
+        prepended_hed_string = ColumnMetadata._prepend_prefix(
             self.category_tags, self.category_key)
         self.assertIsInstance(prepended_hed_string, HedString)
         self.assertEqual(str(prepended_hed_string), str(self.category_participant_and_stimulus_tags))
@@ -160,7 +160,7 @@ class Test(unittest.TestCase):
     def test_add_prefix_verify_short_tag_conversion(self):
         schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.schema_file)
         hed_schema = load_schema(schema_file)
-        prepended_hed_string = ColumnMetadata._prepend_prefix_to_required_tag_column_if_needed(
+        prepended_hed_string = ColumnMetadata._prepend_prefix(
             HedString(self.short_tag_with_missing_prefix), self.short_tag_key)
         issues = prepended_hed_string.convert_to_canonical_forms(hed_schema)
         for tag in prepended_hed_string.get_all_tags():

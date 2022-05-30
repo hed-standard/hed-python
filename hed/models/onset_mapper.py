@@ -6,7 +6,7 @@ from hed.models.hed_ops import HedOps
 
 
 class OnsetMapper(HedOps):
-    """ HED operator responsible for matching onset/offset pairs. """
+    """ HedOps responsible for matching onset/offset pairs. """
 
     def __init__(self, def_mapper):
         super().__init__()
@@ -23,7 +23,7 @@ class OnsetMapper(HedOps):
             list: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).
 
         Notes:
-            Each issue in the return list is a dictionary.
+            - Each issue in the return list is a dictionary.
 
         """
         onset_issues = []

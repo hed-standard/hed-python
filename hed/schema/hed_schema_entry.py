@@ -8,12 +8,19 @@ pluralize.defnoun("hertz", "hertz")
 
 
 class HedSchemaEntry:
-    """ Represents a single node in a HedSchema.
+    """ A single node in a HedSchema.
 
-        The structure contains all the node information including attributes
-        and properties.
+        The structure contains all the node information including attributes and properties.
+
     """
     def __init__(self, name, section):
+        """ Constructor for HedSchemaEntry.
+
+        Args:
+            name (str): The name of the entry.
+            section (HedSchemaSection):  The section to which it belongs.
+
+        """
         self.name = name
         # key: property/attribute name, value = property value.  Will often be a bool
         self.attributes = {}
@@ -25,31 +32,23 @@ class HedSchemaEntry:
         self._unknown_attributes = None
 
     def finalize_entry(self, schema):
-        """
-            Called once after schema load to set up the internal state of this entry.
+        """ Called once after loading to set internal state.
 
-        Parameters
-        ----------
-        schema: HedSchema
-            The schema rules come from.
-        Returns
-        -------
+        Args:
+            schema (HedSchema): The schema that holds the rules.
+
         """
         pass
 
     def set_attribute_value(self, attribute_name, attribute_value):
-        """
-            Add the given attribute to this entry and set its value
+        """ Add attribute and set its value.
 
-            If this is not a valid attribute name, it will be also added as an unknown attribute.
+        Args:
+            attribute_name (str): The name of the schema entry attribute.
+            attribute_value (bool or str):  The value of the attribute.
 
-        Parameters
-        ----------
-        attribute_name : str
-        attribute_value : bool or str
-
-        Returns
-        -------
+        Notes:
+            - If this an invalid attribute name, it will be also added as an unknown attribute.
 
         """
         if not attribute_value:
@@ -63,18 +62,17 @@ class HedSchemaEntry:
         self.attributes[attribute_name] = attribute_value
 
     def has_attribute(self, attribute_name, return_value=False):
-        """
-        Returns if this entry has this attribute.  This does not guarantee it's a valid attribute for this entry.
+        """ Return True if this entry has the attribute.
 
-        Parameters
-        ----------
-        attribute_name : str
-            The attribute to check for
-        return_value : bool
-            Return the value of the attribute, rather than simply if it is present
+        Args:
+            attribute_name (str): The attribute to check for.
+            return_value (bool):  If True return the actual attribute value rather than just indicate presence.
 
-        Returns
-        -------
+        Returns:
+            bool or str:  If return_value is false, a boolean is returned rather than the actual value.
+
+        Notes:
+            - A return value of True does not indicate whether or not this attribute is valid
 
         """
         if return_value:
@@ -83,19 +81,15 @@ class HedSchemaEntry:
             return attribute_name in self.attributes
 
     def attribute_has_property(self, attribute_name, property_name):
-        """
-            If this is a valid attribute for this section, retrieve if it has the given property
+        """ Return True if attribute has property.
 
-        Parameters
-        ----------
-        attribute_name : str
-            Attribute name to check for property_name
-        property_name : str
-            The property name we're looking for in attribute_name
-        Returns
-        -------
-        has_property: bool
-            Returns if it has the property
+        Args:
+            attribute_name (str): Attribute name to check for property_name.
+            property_name (str): The property value to return.
+
+        Returns:
+            bool: Returns True if this entry has the property.
+
         """
         attr_entry = self._section.valid_attributes.get(attribute_name)
         if attr_entry and attr_entry.has_attribute(property_name):
@@ -124,9 +118,8 @@ class HedSchemaEntry:
 
 
 class UnitClassEntry(HedSchemaEntry):
-    """
-        A single unit class entry in the HedSchema, containing it's units, etc.
-    """
+    """ A single unit class entry in the HedSchema. """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._units = []
@@ -135,19 +128,20 @@ class UnitClassEntry(HedSchemaEntry):
         self.unit_class_entry = None
 
     def add_unit(self, unit_entry):
-        """Called to add the given unit entry to this unit class"""
+        """ Add the given unit entry to this unit class.
+
+        Args:
+            unit_entry (HedSchemaEntry): Unit entry to add.
+
+        """
         self._units.append(unit_entry)
 
     def finalize_entry(self, schema):
-        """
-            Called once after schema load to set up the internal state of this entry.
+        """ Called once after schema load to set state.
 
-        Parameters
-        ----------
-        schema: HedSchema
-            The schema rules come from.
-        Returns
-        -------
+        Args:
+            schema (HedSchema): The object with the schema rules.
+
         """
         derivative_units = {}
         self.unit_class_units = {unit_entry.name: unit_entry for unit_entry in self._units}
@@ -164,32 +158,25 @@ class UnitClassEntry(HedSchemaEntry):
 
 
 class UnitEntry(HedSchemaEntry):
-    """
-        A single unit entry in the HedSchema, containing its unit modifiers etc.
-    """
+    """ A single unit entry with modifiers in the HedSchema. """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.unit_class_name = None
         self.unit_modifiers = []
 
     def finalize_entry(self, schema):
-        """
-            Called once after schema load to set up the internal state of this entry.
+        """ Called once after loading to set internal state.
 
-        Parameters
-        ----------
-        schema: HedSchema
-            The schema rules come from.
-        Returns
-        -------
+        Args:
+            schema (HedSchema): The schema rules come from.
+
         """
         self.unit_modifiers = schema.get_modifiers_for_unit(self.name)
 
 
 class HedTagEntry(HedSchemaEntry):
-    """
-        A single tag entry in the HedSchema, containing its parent tag, unit classes, value classes, etc.
-    """
+    """ A single tag entry in the HedSchema. """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.unit_classes = {}
@@ -210,11 +197,12 @@ class HedTagEntry(HedSchemaEntry):
             tags_to_identify (list): A list of lowercase short tags to identify.
 
         Returns:
-            (HedTagEntry or None): The fake entry showing the short tag name as the found tag.
-            (str): The remaining text after the located short tag, which may be empty.
+            tuple:
+                - HedTagEntry or None: The fake entry showing the short tag name as the found tag.
+                - str: The remaining text after the located short tag, which may be empty.
 
         Notes:
-             The match is done left to right.
+             - The match is done left to right.
 
         """
         split_names = tag.split("/")
@@ -231,18 +219,16 @@ class HedTagEntry(HedSchemaEntry):
         return None, ""
 
     def any_parent_has_attribute(self, attribute):
-        """ Check if the tag (or any of its parents) has the given attribute.
+        """ Check if tag (or parents) has the attribute.
 
         Args:
-        attribute: str
-            The name of the attribute to check for.
-        Returns
-        -------
-        tag_has_attribute: bool
-            True if the tag has the given attribute. False, if otherwise.
+            attribute (str): The name of the attribute to check for.
+
+        Returns:
+            bool: True if the tag has the given attribute. False, if otherwise.
 
         Notes:
-             This is mostly used to check extension allowed.  Could be cached.
+            - This is mostly used to check extension allowed.  Could be cached.
 
         """
         iter_entry = self
@@ -253,16 +239,16 @@ class HedTagEntry(HedSchemaEntry):
         return False
 
     def base_tag_has_attribute(self, tag_attribute):
-        """Checks to see if the base tag has a specific attribute.  This mostly is relevant for takes value tags.
+        """ Check if the base tag has a specific attribute.
 
-        Parameters
-        ----------
-        tag_attribute: str
-            A tag attribute.
-        Returns
-        -------
-        bool
-            True if the tag has the specified attribute. False, if otherwise.
+        Args:
+            tag_attribute (str): A tag attribute.
+
+        Returns:
+            bool: True if the tag has the specified attribute. False, if otherwise.
+
+        Notes:
+            This mostly is relevant for takes value tags.
 
         """
         base_entry = self
@@ -272,15 +258,11 @@ class HedTagEntry(HedSchemaEntry):
         return base_entry.has_attribute(tag_attribute)
 
     def finalize_entry(self, schema):
-        """
-            Called once after schema load to set up the internal state of this entry.
+        """ Called once after schema loading to set state.
 
-        Parameters
-        ----------
-        schema: HedSchema
-            The schema rules come from.
-        Returns
-        -------
+        Args:
+            schema (HedSchema): The schema that the rules come from.
+
         """
         # Set the parent and child pointers.  Child is just for "takes value"
         parent_name, _, child_name = self.name.rpartition("/")

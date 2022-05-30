@@ -5,10 +5,16 @@ from hed.util.data_util import get_new_dataframe, remove_quotes, separate_column
 
 
 class KeyMap:
-    """ Extracts unique column values for remapping columns."""
+    """ A map of unique column values for remapping columns.
 
+    Attributes:
+        name (str):       Name of this remap for identification purposes.
+        key_cols (list):  A list of column names that will be hashed into the keys for the map.
+        target_cols (list):   An optional list of column names that will be inserted into data and later remapped.
+
+    """
     def __init__(self, key_cols, target_cols=None, name=''):
-        """ Class stores base data for doing event remapping.
+        """ Information for remapping columns of tabular files.
 
         Args:
             key_cols (list):       List of columns to be replaced (assumed in the DataFrame)
@@ -28,10 +34,14 @@ class KeyMap:
         else:
             self.target_cols = []
         self.name = name
-        self.columns = self.key_cols + self.target_cols
-        self.col_map = pd.DataFrame(columns=self.columns)
+        x = self.key_cols + self.target_cols
+        self.col_map = pd.DataFrame(columns=self.key_cols + self.target_cols)
         self.map_dict = {}
         self.count_dict = {}
+
+    @property
+    def columns(self):
+        return self.key_cols + self.target_cols
 
     def __str__(self):
         temp_list = [f"{self.name} counts for key [{str(self.key_cols)}]:"]
@@ -40,7 +50,22 @@ class KeyMap:
             temp_list.append(f"{str(list(row.values))}\t{self.count_dict[key_hash]}")
         return "\n".join(temp_list)
 
-    def make_template(self, additional_cols=[]):
+    def make_template(self, additional_cols=None):
+        """ Return a dataframe template.
+
+        Args:
+            additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
+
+        Returns:
+            DataFrame:  A dataframe containing the template.
+
+        Raises:
+            HedFileError: If additional columns are not disjoint from the key columns.
+
+        Notes:
+            -  The template consists of the unique key columns in this map plus additional columns.
+
+        """
         if additional_cols and set(self.key_cols).intersection(additional_cols):
             raise HedFileError("AdditionalColumnsNotDisjoint",
                                f"Additional columns {str(additional_cols)} must be disjoint from \
@@ -51,14 +76,19 @@ class KeyMap:
         return df
 
     def remap(self, data):
-        """ Takes a dataframe or filename and remaps the columns
+        """ Remap the columns of a dataframe or columnar file.
 
         Args:
-            data (DataFrame, str) :        Data whose columns are to be remapped
+            data (DataFrame, str) :     Columnar data (either DataFrame or filename) whose columns are to be remapped.
 
         Returns:
-            DataFrame                      New dataframe with columns remapped
-            list                           List of row numbers that had no correspondence in the mapping
+            tuple:
+                - DataFrame: New dataframe with columns remapped.
+                - list:  List of row numbers that had no correspondence in the mapping.
+
+        Raises:
+            HedFileError:  If data is missing some of the key columns.
+
         """
 
         df_new = get_new_dataframe(data)
@@ -71,13 +101,14 @@ class KeyMap:
         return df_new, missing_indices
 
     def _remap(self, df):
-        """ Utility method that iterates through df to do the replacements.
+        """ Utility method that iterates through dataframes to do the remapping.
 
         Args:
             df (DataFrame):    DataFrame in which to perform the mapping.
 
         Returns:
-            list:              List of row numbers that had no correspondence in the mapping.
+            list:  The row numbers that had no correspondence in the mapping.
+
         """
 
         missing_indices = []
@@ -108,7 +139,10 @@ class KeyMap:
             keep_counts (bool):          If true keep a count of the times each key is present.
 
         Returns:
-            list:                        Indices of duplicates.
+            list: The indices of duplicates.
+
+        Raises:
+            HedFileError:  If there are missing keys and allow_missing is False.
 
         """
         df = get_new_dataframe(data)
@@ -126,26 +160,27 @@ class KeyMap:
             targets_present, targets_missing = separate_columns(col_list, self.target_cols)
             if targets_present:
                 base_df[targets_present] = df[targets_present].values
-        return self._update(base_df, keep_counts=keep_counts)
+        return self._update(base_df, track_duplicates=keep_counts)
 
-    def _update(self, base_df, keep_counts=True):
-        """ Updates the dictionary of key values based on information in the dataframe.
+    def _update(self, base_df, track_duplicates=True):
+        """ Update the dictionary of key values based on information in the dataframe.
 
         Args:
             base_df (DataFrame):       DataFrame of consisting of the columns in the KeyMap
-            keep_counts (bool):        If true, keep counts of the indices.
+            track_duplicates (bool):        If true, keep counts of the indices.
 
         Returns:
-            list:         List of key positions that appeared more than once.
+            list:         List of key positions that appeared more than once or an empty list of no duplicates or
+                          track_duplicates was false.
         """
 
         duplicate_indices = []
         row_list = []
         next_pos = len(self.col_map)
         for index, row in base_df.iterrows():
-            key, pos_update = self._handle_update(row, row_list, next_pos, keep_counts)
+            key, pos_update = self._handle_update(row, row_list, next_pos, track_duplicates)
             next_pos += pos_update
-            if not keep_counts and not pos_update:
+            if not track_duplicates and not pos_update:
                 duplicate_indices.append(index)
         if row_list:
             df = pd.DataFrame(row_list)
@@ -153,6 +188,14 @@ class KeyMap:
         return duplicate_indices
 
     def _handle_update(self, row, row_list, next_pos, keep_counts):
+        """ Update the dictionary and counts of the number of times this combination of key columns appears.
+
+        Args:
+            row (DataSeries):  Data the values in a row.
+            row_list (list):   A list of rows to be appended to hold the unique rows
+            next_pos (int):    Index into the
+
+        """
         key = get_row_hash(row, self.key_cols)
         pos_update = 0
         if key not in self.map_dict:

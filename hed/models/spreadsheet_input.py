@@ -4,7 +4,7 @@ from hed.models.def_mapper import DefMapper
 
 
 class SpreadsheetInput(BaseInput):
-    """ Class representing a spreadsheet of HED tags."""
+    """ A spreadsheet of HED tags. """
 
     def __init__(self, file=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,

@@ -6,19 +6,22 @@ from hed.errors import HedFileError
 
 
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
-    """ Determine whether test_file has correct extension, name suffix, and name prefix.
+    """ Return True if correct extension, suffix, and prefix.
 
-    Everything is converted to lower case prior to testing so this test should be case insensitive.
+    Args:
+        test_file (str) :           Path of filename to test.
+        name_prefix (str, None):     An optional name_prefix for the base filename
+        name_suffix (str, None):     An optional name_suffix for the base file name
+        extensions (list, None):     An optional list of file extensions
 
-     Args:
-         test_file (str) :           Path of filename to test.
-         name_prefix (str, None):     An optional name_prefix for the base filename
-         name_suffix (str, None):     An optional name_suffix for the base file name
-         extensions (list, None):     An optional list of file extensions
+    Returns:
+        bool: True if file has the appropriate format.
 
-     Returns:
-         tuple (list, list):            Returns two lists one with
-     """
+    Notes:
+        - Everything is converted to lower case prior to testing so this test should be case insensitive.
+
+
+    """
 
     basename = os.path.basename(test_file.lower())
     if name_prefix and not basename.startswith(name_prefix.lower()):
@@ -36,7 +39,7 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 
 
 def extract_suffix_path(path, prefix_path):
-    """ Return the suffix path of path after prefix path has been removed
+    """ Return suffix of path after prefix path has been removed.
 
     Args:
         path (str)           path of the root directory.
@@ -45,7 +48,8 @@ def extract_suffix_path(path, prefix_path):
     Returns:
         str:   Suffix path.
 
-    Notes: This function is useful for creating files within BIDS datasets
+    Notes:
+        - This function is useful for creating files within BIDS datasets
 
     """
 
@@ -58,7 +62,7 @@ def extract_suffix_path(path, prefix_path):
 
 
 def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None):
-    """ Generate a filename for the attachment of the form prefix_basename_suffix + extension.
+    """ Generate a filename for the attachment.
 
     Args:
         base_name (str):   Name of the base, usually the name of the file that the issues were generated from.
@@ -68,6 +72,10 @@ def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=N
 
     Returns:
         str:  Name of the attachment other containing the issues.
+
+    Notes:
+        - The form prefix_basename_suffix + extension.
+
     """
 
     pieces = []
@@ -84,17 +92,18 @@ def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=N
 
 
 def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True):
-    """ Traverse a directory tree and create dictionary with keys that are directory paths.
+    """ Create dictionary directory paths keys.
 
     Args:
-        dir_path (str):               Full path of the directory tree to be traversed (no ending slash)
-        name_prefix (str, None):      An optional name_prefix for the base filename
-        name_suffix (str, None):      An optional name_suffix for the base file name
-        extensions (list, None):      An optional list of file extensions
-        skip_empty (bool):            Do not put entry for directories that have no files
+        dir_path (str):               Full path of the directory tree to be traversed (no ending slash).
+        name_prefix (str, None):      An optional name_prefix for the base filename.
+        name_suffix (str, None):      An optional name_suffix for the base file name.
+        extensions (list, None):      An optional list of file extensions.
+        skip_empty (bool):            Do not put entry for directories that have no files.
 
     Returns:
-        dict:             Dictionary with directories and keys and file lists values
+        dict:  Dictionary with directories as keys and file lists values.
+
     """
     dir_dict = {}
     for root, dirs, files in os.walk(dir_path, topdown=True):
@@ -109,7 +118,7 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
 
 
 def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=None):
-    """ Get a new list with the filenames in file_list satisfying the criteria
+    """ Get list of filenames satisfying the criteria.
 
     Everything is converted to lower case prior to testing so this test should be case insensitive.
 
@@ -120,7 +129,8 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
          extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz)
 
      Returns:
-         list:  A list of filtered file names
+         list:  The filtered file names.
+         
      """
     filtered_files = []
     for r_file in file_list:
@@ -140,7 +150,7 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
         exclude_dirs (list, None):    A list of paths to be excluded.
 
     Returns:
-        list:  A list of full paths.
+        list:   The full paths.
     """
     file_list = []
     if not exclude_dirs:
@@ -161,8 +171,8 @@ def get_path_components(this_path, root_path):
         root_path (str):      A path (no trailing separator)
 
     Returns:
-        list or None:         A list with the first element being root_path and the
-            remaining elements directory components to the file.
+        list or None:   A list with the first element being root_path and the
+                        remaining elements directory components to the file.
 
     Notes: this_path must be a descendant of root_path.
 

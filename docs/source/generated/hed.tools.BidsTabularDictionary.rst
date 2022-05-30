@@ -13,21 +13,22 @@
    .. autosummary::
    
       ~BidsTabularDictionary.__init__
+      ~BidsTabularDictionary.correct_file
       ~BidsTabularDictionary.count_diffs
       ~BidsTabularDictionary.create_file_dict
-      ~BidsTabularDictionary.create_split_dict
       ~BidsTabularDictionary.get_file_path
       ~BidsTabularDictionary.get_info
+      ~BidsTabularDictionary.get_new_dict
       ~BidsTabularDictionary.iter_files
-      ~BidsTabularDictionary.iter_tsv_info
       ~BidsTabularDictionary.key_diffs
-      ~BidsTabularDictionary.make_bids_file_dict
+      ~BidsTabularDictionary.make_dict
       ~BidsTabularDictionary.make_file_dict
       ~BidsTabularDictionary.make_key
+      ~BidsTabularDictionary.make_new
       ~BidsTabularDictionary.make_query
       ~BidsTabularDictionary.match_query
       ~BidsTabularDictionary.output_files
-      ~BidsTabularDictionary.split_dict_by_entity
+      ~BidsTabularDictionary.split_by_entity
    
    
 

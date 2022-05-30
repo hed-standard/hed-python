@@ -17,7 +17,7 @@
       ~ColumnMetadata.extract_definitions
       ~ColumnMetadata.get_definition_issues
       ~ColumnMetadata.hed_string_iter
-      ~ColumnMetadata.remove_prefix_if_needed
+      ~ColumnMetadata.remove_prefix
       ~ColumnMetadata.set_hed_string
       ~ColumnMetadata.validate_column
    

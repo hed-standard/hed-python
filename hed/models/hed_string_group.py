@@ -5,7 +5,13 @@ from hed.models.hed_string import HedString
 
 
 class HedStringGroup(HedString):
-    """A hed string object made from other hed string objects(generally multiple columns)."""
+    """ A container with hed string objects.
+
+    Notes:
+        - Often this is used for assembling the hed strings from multiple columns.
+        - The HedStringGroup passes through many of the HedString operations.
+
+    """
 
     def __init__(self, hed_string_obj_list):
         """ Constructor for the HedStringGroup class.
@@ -31,32 +37,33 @@ class HedStringGroup(HedString):
         """ Return the source span of this group from the source hed string.
 
         Return:
-            int: start index of the group (including parentheses) from the source string.
-            int: end index of the group (including parentheses) from the source string.
+            tuple:
+                - int: start index of the group (including parentheses) from the source string.
+                - int: end index of the group (including parentheses) from the source string.
+
         """
         return 0, len(self.get_original_hed_string())
 
     @property
     def children(self):
-        """ Returns the direct children of this string.
+        """ Return the direct children of this string.
 
         Returns:
-            The list of direct children of this group
+            list: a list of direct children of this group.
+
         """
         return [child for sub_string in self._children for child in sub_string._children]
 
     def remove(self, items_to_remove):
-        """
-            Remove any tags/groups in remove found in this hed string.
+        """ Remove tags/groups from this group.
 
-            Any groups that become empty will also be pruned.
+        Args:
+            items_to_remove (list): A list of HedGroup and HedTag objects to remove.
 
-            Note: this goes by identity, not equivalence.
+        Notes:
+            - Any groups that become empty will also be pruned.
+            - This goes by identity, not equivalence.
 
-        Parameters
-        ----------
-        items_to_remove : [HedGroup or HedTag]
-            A list of groups or tags to remove.
         """
         all_groups = [group for sub_group in self._children for group in sub_group.get_all_groups()]
         self._remove(items_to_remove, all_groups)
@@ -67,15 +74,17 @@ class HedStringGroup(HedString):
             self._children = [child for child in self._children if child]
 
     def replace(self, item_to_replace, new_contents):
-        """ Replaces an existing tag in the group with a new tag, list, or group
+        """ Replace an existing tag with a new tag.
 
-        Parameters
-        ----------
-        item_to_replace : HedTag or HedGroup
-            The tag to replace.  It must exist or this will raise an error.
-        new_contents : HedTag or HedGroup or [HedTag or HedGroup]
-            What to replace the tag with.
+        Args:
+            item_to_replace (HedTag or HedGroup): The tag to replace.
+            new_contents (HedTag or HedGroup or list): The replacements for the tag.
+
+        Notes:
+            - It tag must exist in this an error is raised.
+
         """
+
         # this needs to pass the tag off to the appropriate group
         replace_sub_string = None
         for sub_string in self._children:
@@ -87,8 +96,7 @@ class HedStringGroup(HedString):
         replace_sub_string.replace(item_to_replace, new_contents)
 
     def _get_org_span(self, tag_or_group):
-        """
-            If this tag or group was in the original hed string, find it's original span.
+        """ If this tag or group was in the original hed string, find it's original span.
 
             If the hed tag or group was not in the original string, returns (None, None)
 

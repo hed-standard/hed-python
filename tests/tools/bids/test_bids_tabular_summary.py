@@ -39,9 +39,9 @@ class Test(unittest.TestCase):
                          "BidsTabularSummary value_info should be empty if no value columns")
         self.assertEqual(len(dict1.categorical_info.keys()), len(wh_df.columns),
                          "BidsTabularSummary categorical_info should have all the columns if no restrictions")
-        count_dict = dict1.get_number_unique_values()
-        self.assertEqual(len(count_dict), 10, "get_number_unique_values should have the correct number of entries")
-        self.assertEqual(count_dict['onset'], 199, "get_number_unique_values should have the right number of unique")
+        count_dict = dict1.get_number_unique()
+        self.assertEqual(len(count_dict), 10, "get_number_unique should have the correct number of entries")
+        self.assertEqual(count_dict['onset'], 199, "get_number_unique should have the right number of unique")
 
     def test__str__(self):
         t_map = BidsTabularSummary(name="My output")

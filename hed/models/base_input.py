@@ -17,7 +17,7 @@ from hed.models.def_mapper import DefMapper
 
 
 class BaseInput:
-    """ Superclass representing a basic spreadsheet file. """
+    """ Superclass representing a basic columnar file. """
 
     TEXT_EXTENSION = ['.tsv', '.txt']
     EXCEL_EXTENSION = ['.xlsx']
@@ -29,7 +29,7 @@ class BaseInput:
 
     def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, def_mapper=None,
                  name=None):
-        """Constructor for the BaseInput class.
+        """ Constructor for the BaseInput class.
 
         Args:
             file (str or file-like): An xlsx/tsv file to open.
@@ -42,8 +42,8 @@ class BaseInput:
             name (str or None): Optional field for how this file will report errors.
 
         Notes:
-            The validation will skip over the first line of the file.
-            See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
+            - The validation will skip over the first line of the file.
+            - See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
 
          """
         if mapper is None:
@@ -85,7 +85,7 @@ class BaseInput:
         self.reset_mapper(mapper)
 
     def reset_mapper(self, new_mapper):
-        """ Set the column mapper to allow a different view of the file.
+        """ Set mapper to a different view of the file.
 
         Args:
             new_mapper (ColumnMapper): A column mapper to be associated with this base input.
@@ -105,26 +105,31 @@ class BaseInput:
 
     @property
     def dataframe(self):
+        """ The underlying dataframe. """
         return self._dataframe
 
     @property
     def name(self):
+        """ Name of the data. """
         return self._name
 
     @property
     def has_column_names(self):
+        """ True if dataframe has column names. """
         return self._has_column_names
 
     @property
     def loaded_workbook(self):
+        """ The underlying loaded workbooks. """
         return self._loaded_workbook
 
     @property
     def worksheet_name(self):
+        """ The worksheet name. """
         return self._worksheet_name
 
     def _convert_to_form(self, hed_schema, tag_form, error_handler):
-        """ Convert all tags in a given spreadsheet to the specified form.
+        """ Convert all tags to the specified form.
 
         Args:
             hed_schema (HedSchema): The schema to use to convert tags.
@@ -150,7 +155,7 @@ class BaseInput:
         return error_list
 
     def convert_to_short(self, hed_schema, error_handler=None):
-        """ Convert all tags in a given spreadsheet to short form.
+        """ Convert all tags to short form.
 
         Args:
             hed_schema (HedSchema): The schema to use to convert tags.
@@ -163,7 +168,7 @@ class BaseInput:
         return self._convert_to_form(hed_schema, "short_tag", error_handler)
 
     def convert_to_long(self, hed_schema, error_handler=None):
-        """ Convert all tags in a given spreadsheet to long form.
+        """ Convert all tags to long form.
 
         Args:
             hed_schema (HedSchema): The schema to use to convert tags.
@@ -182,11 +187,11 @@ class BaseInput:
             file (str or file-like):      Location to save this base input.
             output_processed_file (bool): If True, replace definitions and labels in HED columns.
 
-        Notes:
-            Also fills in things like categories.
-
         Raises:
             HedFileError if empty file object or file cannot be opened.
+
+        Notes:
+            - Also fills in things like categories.
 
         """
         if not file:
@@ -215,12 +220,11 @@ class BaseInput:
             output_file._dataframe.to_excel(file, header=self._has_column_names)
 
     def to_csv(self, file=None, output_processed_file=False):
-        """ Write the data of this base input object to file or return as a string.
+        """ Write to file or return as a string.
 
         Args:
             file (str, file-like, or None): Location to save this file. If None, return as string.
-            output_processed_file (bool):
-            Replace all definitions and labels in HED columns as appropriate.  Also fills in things like categories.
+            output_processed_file (bool): Replace all definitions and labels in HED columns as appropriate.
 
         Returns:
             None or str:  None if file is given or the contents as a str if file is None.
@@ -236,11 +240,11 @@ class BaseInput:
         return csv_string_if_filename_none
 
     def __iter__(self):
-        """ Iterate over the underlying dataframe using iter_dataframe. """
+        """ Iterate over the underlying dataframe. """
         return self.iter_dataframe()
 
     def iter_raw(self, hed_ops=None, error_handler=None, **kwargs):
-        """ Iterate over (row, column value dict) without modifications or substitutions.
+        """ Iterate without modifications or substitutions.
 
         Args:
             hed_ops (list, func, HedOps, or None): A func, a HedOps or a list of these to apply to the
@@ -249,13 +253,14 @@ class BaseInput:
             kwargs:
 
         Yields:
-            int: The current row number.
-            dict: A dict with column_number keys and values corresponding to the cell at that position.
+            tuple:
+                - int: The current row number.
+                - dict: A dict with column_number keys and values corresponding to the cell at that position.
 
         Notes:
-            See models.hed_ops.translate_ops or the specific hed_ops for additional options.
-            Primarily for altering or re-saving the original file (e.g., convert short tags to long).
-            Used for initial processing when trying to find definitions.
+            - See models.hed_ops.translate_ops or the specific hed_ops for additional options.
+            - Primarily for altering or re-saving the original file (e.g., convert short tags to long).
+            - Used for initial processing when trying to find definitions.
 
         """
         if error_handler is None:
@@ -267,24 +272,24 @@ class BaseInput:
 
     def iter_dataframe(self, hed_ops=None, mapper=None, return_string_only=True, run_string_ops_on_columns=False,
                        error_handler=None, expand_defs=False, remove_definitions=True, **kwargs):
-        """ Iterate over (row number, parsed row dictionary) based on the given column mapper.
+        """ Iterate based on the given column mapper.
 
         Args:
-            hed_ops (list, func, HedOps, or None): A func, a HedOps or a list of these to apply to the
-                hed strings before returning.
+            hed_ops (list, func, HedOps, or None):  A func, a HedOps or a list of these to apply to the
+                                                    hed strings before returning.
             mapper (ColumnMapper or None): The column name to column number mapper (or internal mapper if None).
             return_string_only (bool): If True, do not return issues list, individual columns, attribute columns, etc.
-            run_string_ops_on_columns (bool): If true, run all tag and string ops on columns,
-                rather than columns then rows.
-            error_handler (ErrorHandler or None): The error handler to use for context or a default if None.
+            run_string_ops_on_columns (bool):   If true, run all tag and string ops on columns,
+                                                rather than columns then rows.
+            error_handler (ErrorHandler or None):   The error handler to use for context or a default if None.
             expand_defs (bool):  If True, expand def tags into def-expand groups.
             remove_definitions (bool): If true, remove all definition tags found.
-            kwargs:     See models.hed_ops.translate_ops or the specific hed_ops for additional options.
+            kwargs ():  See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
         Yields:
-            int: The current row number.
-            dict: A dict containing the parsed row, including keys: "HED", "column_to_hed_tags",
-                and possibly "column_issues".
+            tuple:
+                - int:    The current row number.
+                - dict:   A dict with parsed row, including keys: "HED", "column_to_hed_tags", and possibly "column_issues".
 
         """
         if error_handler is None:
@@ -334,6 +339,16 @@ class BaseInput:
         return final_hed_string
 
     def get_assembled(self, row_number, expand_defs, shrink_defs, remove_definitions=False, error_handler=None):
+        """ Return assembled string.
+
+        Args:
+            row_number (int):           Number of the row corresponding to this string.
+            expand_defs (bool):         If True, expand the definitions.
+            shrink_defs (bool):         If True, shrink the definitions.
+            remove_definitions (bool):  If True, remove definitions.
+            error_handler (ErrorHandler or None): If None, a default error handler.
+
+        """
         if error_handler is None:
             error_handler = ErrorHandler()
 
@@ -345,12 +360,11 @@ class BaseInput:
                                            remove_definitions=remove_definitions, error_handler=error_handler)
 
         text_file_row = self._dataframe.iloc[row_number]
-        return self._expand_row_internal(text_file_row, tag_funcs, None, error_handler=error_handler,
-                                         mapper=mapper)
+        return self._expand_row_internal(text_file_row, tag_funcs, None, error_handler=error_handler, mapper=mapper)
 
     def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
                  tag_form="short_tag"):
-        """ Replace the specified cell of the spreadsheet with transformed text.
+        """ Replace the specified cell with transformed text.
 
         Args:
             row_number (int):    The row number of the spreadsheet to set.
@@ -375,13 +389,16 @@ class BaseInput:
         self._dataframe.iloc[row_number, column_number] = new_text
 
     def get_worksheet(self, worksheet_name=None):
-        """ Get the requested worksheet from the workbook by name or the first worksheet if None.
+        """ Get the requested worksheet.
 
         Args:
             worksheet_name (str or None): The name of the requested worksheet by name or the first one if None.
 
         Returns:
             openpyxl.workbook.Workbook: The workbook request.
+
+        Notes:
+            If None, use the first worksheet.
 
         """
         if worksheet_name and self._loaded_workbook:
@@ -393,7 +410,7 @@ class BaseInput:
             return None
 
     def get_def_and_mapper_issues(self, error_handler, check_for_warnings=False):
-        """ Return formatted issues found with definitions and columns.
+        """ Return definitions and column issues.
 
         Args:
             error_handler (ErrorHandler): The error handler to use.
@@ -415,10 +432,13 @@ class BaseInput:
         return issues
 
     def _get_processed_copy(self):
-        """ Return a copy of this file with processing applied (definitions replaced, columns expanded, etc).
+        """ Return a processed copy of this file.
 
         Returns:
             BaseInput: The copy.
+
+        Notes:
+             Processing includes definitions replaced, columns expanded, etc.
 
         """
         output_file = copy.deepcopy(self)
@@ -432,7 +452,7 @@ class BaseInput:
 
     @staticmethod
     def _get_dataframe_from_worksheet(worksheet, has_headers):
-        """ Create a pandas dataframe from the given worksheet object.
+        """ Create a dataframe from the worksheet.
 
         Args:
             worksheet (Worksheet): The loaded worksheet to convert.
@@ -498,7 +518,7 @@ class BaseInput:
         return row_issues
 
     def validate_file(self, hed_ops, name=None, error_handler=None, check_for_warnings=True, **kwargs):
-        """ Run the given hed_ops on all columns and rows of the spreadsheet
+        """ Run the hed_ops on columns and rows.
 
         Args:
             hed_ops (func, HedOps, or list of func and/or HedOps): The HedOps of funcs to apply.
@@ -529,7 +549,7 @@ class BaseInput:
         return validation_issues
 
     def extract_definitions(self, error_handler=None):
-        """ Gather and validate all definitions found in this object.
+        """ Gather and validate all definitions.
 
         Args:
             error_handler (ErrorHandler): The error handler to use for context or a default if None.
@@ -546,7 +566,7 @@ class BaseInput:
         return new_def_dict
 
     def update_definition_mapper(self, def_dict):
-        """ Add label definitions gathered from the given input if this has a definition mapper.
+        """ Add label definitions if there is a definition mapper.
 
         Args:
             def_dict (list or DefinitionDict): Add the DefDict or list of DefDict to the internal definition mapper.
