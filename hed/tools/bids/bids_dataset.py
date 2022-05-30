@@ -12,7 +12,7 @@ LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-li
 
 
 class BidsDataset:
-    """ Representation of a BIDS dataset primarily focused on HED evaluation.
+    """ A BIDS dataset primarily focused on HED evaluation.
 
     Attributes:
         root_path (str):  Real root path of the BIDS dataset.
@@ -47,10 +47,10 @@ class BidsDataset:
                 self.tabular_files[suffix] = BidsFileGroup(root_path, suffix=suffix, obj_type="tabular")
 
     def get_tabular_group(self, obj_type="events"):
-        """ Return the tabular file group of the specified type or None if this dataset doesn't it.
+        """ Return the specified tabular file group.
 
         Args:
-            obj_type (str):  Suffix of the BidsFile Group to be returned.
+            obj_type (str):  Suffix of the BidsFileGroup to be returned.
 
         Returns:
             BidsFileGroup or None:  The requested tabular group.
@@ -62,14 +62,14 @@ class BidsDataset:
             return None
 
     def validate(self, types=None, check_for_warnings=True):
-        """ Validate the specified file group types and return issues.
+        """ Validate the specified file group types.
 
         Args:
             types (list):  A list of strings indicating the file group types to be validated.
             check_for_warnings (bool):  If True, check for warnings.
 
         Returns:
-            list:  List of issues encountered during validation.
+            list:  List of issues encountered during validation. Each issue is a dictionary.
 
         """
         validator = HedValidator(hed_schema=self.schema)
@@ -106,7 +106,7 @@ class BidsDataset:
         return HedSchemaGroup(hed_list)
 
     def get_summary(self):
-        """ Returns an abbreviated summary of the contents of the dataset. """
+        """ Return an abbreviated summary of the dataset. """
         summary = {"dataset": self.dataset_description['Name'],
                    "hed_schema_versions": self.get_schema_versions(),
                    "file_group_types": f"{str(list(self.tabular_files.keys()))}"}

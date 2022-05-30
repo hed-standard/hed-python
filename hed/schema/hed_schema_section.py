@@ -14,8 +14,16 @@ entries_by_section = {
 
 
 class HedSchemaSection:
-    """A container class holding the HED schema entries in one section of the schema. """
+    """Container with entries in one section of the schema. """
+
     def __init__(self, section_key, case_sensitive=True):
+        """ Construct schema section.
+
+        Args:
+            section_key (str):  Name of the schema section.
+            case_sensitive (bool): If True, names are case sensitive.
+
+        """
         # {lower_case_name: HedSchemaEntry}
         self.all_names = {}
         self._section_key = section_key
@@ -30,6 +38,7 @@ class HedSchemaSection:
         self.all_entries = []
 
     def _add_to_dict(self, name):
+        """ Add a name to the dictionary for this section. """
         name_key = name
         if not self.case_sensitive:
             name_key = name.lower()
@@ -43,24 +52,19 @@ class HedSchemaSection:
             self.all_names[name_key] = new_entry
 
         self.all_entries.append(new_entry)
-
         return new_entry
 
     def get_entries_with_attribute(self, attribute_name, return_name_only=False, library_prefix=""):
-        """
-            Returns a list of all entries(or names) with the given attribute
+        """ Return a list of entries(or names) with the given attribute.
 
-        Parameters
-        ----------
-        attribute_name: str
-            The name of the attribute(generally a HedKey entry)
-        return_name_only: bool
-            If true, return the name as a string rather than the tag entry.
-        library_prefix: str
-            Only valid if returning names.  Prepends given prefix to each name
-        Returns
-        -------
-        [HedSchemaEntry] or [str]
+        Args:
+            attribute_name (str): The name of the attribute(generally a HedKey entry).
+            return_name_only (bool): If true, return the name as a string rather than the tag entry.
+            library_prefix (str): Prepends given prefix to each name if returning names.
+
+        Returns:
+            list: List of HedSchemaEntry or strings representing the names.
+
         """
         if attribute_name not in self._attribute_cache:
             new_val = [tag_entry for tag_entry in self.values() if tag_entry.has_attribute(attribute_name)]
@@ -115,6 +119,8 @@ class HedSchemaSection:
 
 
 class HedSchemaTagSection(HedSchemaSection):
+    """ A section of the schema. """
+
     def __init__(self, *args, case_sensitive=False, **kwargs):
         super().__init__(*args, **kwargs, case_sensitive=case_sensitive)
         # This dict contains all forms of all tags.  The .all_names variable has ONLY the long forms.

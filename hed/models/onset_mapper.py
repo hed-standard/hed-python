@@ -6,7 +6,7 @@ from hed.models.hed_ops import HedOps
 
 
 class OnsetMapper(HedOps):
-    """ HED operator responsible for matching onset/offset pairs. """
+    """ HedOps responsible for matching onset/offset pairs. """
 
     def __init__(self, def_mapper):
         super().__init__()

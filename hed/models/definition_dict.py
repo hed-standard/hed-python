@@ -10,7 +10,7 @@ from hed.models.hed_ops import HedOps
 
 
 class DefinitionEntry:
-    """ Represents a single definition."""
+    """ A single definition. """
 
     def __init__(self, name, contents, takes_value, source_context):
         """ Initialize info for a single definition.
@@ -36,7 +36,8 @@ class DefinitionEntry:
 
         Args:
             replace_tag (HedTag): The def hed tag to replace with an expanded version
-            placeholder_value (str or None): If present and required, will replace any pound signs in the definition contents
+            placeholder_value (str or None):    If present and required, will replace any pound signs
+                                                in the definition contents.
 
         Returns:
             str:          The expanded def tag name
@@ -45,7 +46,7 @@ class DefinitionEntry:
             The expanded def tag name, and the contents of this definition(including the def tag itself)
 
         Raises:
-            ValueError:  If a placeholder_value is passed, but this definition doesn't have a placehold.
+            ValueError:  If a placeholder_value is passed, but this definition doesn't have a placeholder.
 
         """
         if self.takes_value == (placeholder_value is None):
@@ -71,7 +72,7 @@ class DefinitionEntry:
 
 
 class DefinitionDict(HedOps):
-    """Class responsible for gathering and storing a group of definitions to be considered a single source.
+    """ Gathers and stores a single source of definitions.
 
         This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
 

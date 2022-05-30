@@ -12,7 +12,7 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class ColumnMapper:
-    """ Container class for mapping columns in event files into HED tags.
+    """ Mapping of a tabular file columns into HED tags.
 
     Notes:
         Functions and variables column and row indexing starts at 0.
@@ -36,8 +36,8 @@ class ColumnMapper:
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
 
         Notes:
-            Sidecars later in the list override those earlier in the list.
-            All column numbers are 0 based.
+            - Sidecars later in the list override those earlier in the list.
+            - All column numbers are 0 based.
 
         Examples:
             column_prefix_dictionary = {3: 'Description/', 4: 'Label/'}
@@ -188,7 +188,7 @@ class ColumnMapper:
         return column_entry.expand(input_text)
 
     def expand_row_tags(self, row_text):
-        """ Expand all mapped columns from a given row.
+        """ Expand all mapped columns for row.
 
         Args:
             row_text (list): The text for the given row, one list entry per column number.
@@ -243,7 +243,7 @@ class ColumnMapper:
         if not entry.column_prefix:
             return None
 
-        return entry.remove_prefix_if_needed
+        return entry.remove_prefix
 
     def _add_column_data(self, new_column_entry):
         """ Add the metadata of a column to this column mapper.

@@ -12,7 +12,7 @@ from hed.models.hed_group_base import HedGroupBase
 
 
 class HedString(HedGroup):
-    """Class representing a HED string."""
+    """ A HED string. """
 
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
@@ -55,7 +55,7 @@ class HedString(HedGroup):
 
     @property
     def is_group(self):
-        """ Returns False since the underlying string is not a group with parentheses. """
+        """ Return False since the underlying string is not a group with parentheses. """
         return False
 
     def convert_to_canonical_forms(self, hed_schema):

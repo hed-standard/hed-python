@@ -1,4 +1,5 @@
-"""Infrastructure for processing lists of HED operations."""
+""" Infrastructure for processing HED operations. """
+
 from functools import partial
 from hed.schema import HedSchema, HedSchemaGroup
 
@@ -74,7 +75,12 @@ def translate_ops(hed_ops, split_ops=False, **kwargs):
 
 
 class HedOps:
-    """ Baseclass to support HedOps.  These are operations that apply to HedStrings in a sequence. """
+    """ Base class to support HedOps.
+
+    Notes:
+        HED ops are operations that apply to HedStrings in a sequence.
+
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

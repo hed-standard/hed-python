@@ -96,7 +96,7 @@ class BidsTabularDictionary(BidsFileDictionary):
             yield key, file, self.rowcount_dict[key], self.column_dict[key]
 
     def count_diffs(self, other_dict):
-        """ Returns  a list containing the keys in which the number of rows differ.
+        """ Return a list containing the keys in which the number of rows differ.
 
         Args:
             other_dict (FileDictionary)  A file dictionary object.

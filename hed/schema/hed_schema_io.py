@@ -21,6 +21,9 @@ def from_string(schema_string, file_type=".xml", library_prefix=None):
     Returns:
         (HedSchema):  The loaded schema.
 
+    Raises:
+        HedFileError:  If empty string or invalid extension is passed.
+
     """
     if not schema_string:
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string",
@@ -76,47 +79,42 @@ def load_schema(hed_path=None, library_prefix=None):
 
 
 # todo: this could be updated to also support .mediawiki format.
-def get_hed_xml_version(hed_xml_file_path):
-    """ Gets the version number from a HED XML file.
-    Parameters
-    ----------
-    hed_xml_file_path: str
-        The path to a HED XML file.
-    Returns
-    -------
-    str
-        The version number of the HED XML file.
+def get_hed_xml_version(xml_file_path):
+    """ Get the version number from a HED XML file.
+
+    Args:
+        xml_file_path (str): The path to a HED XML file.
+
+    Returns:
+        str: The version number of the HED XML file.
+
     """
-    root_node = HedSchemaXMLParser._parse_hed_xml(hed_xml_file_path)
+    root_node = HedSchemaXMLParser._parse_hed_xml(xml_file_path)
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
 def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
                         library_prefix=None):
-    """
-    Gets a HedSchema object based on the hed xml file specified. If no HED file is specified then the latest
-       file will be retrieved.
-    Parameters
-    ----------
-    xml_folder: str
-        Path to a folder containing schema
-    xml_version: str
-        HED version format string. Expected format: 'X.Y.Z'
-    library_name: str or None, optional
-        The schema library name.  HED_(LIBRARY_NAME)_(version).xml
-    library_prefix : str or None
-        The name_prefix all tags in this schema will accept.
-    Returns
-    -------
-    HedSchema
-        A HedSchema object.
+    """ Return specified HedSchema object or latest if not specified.
+
+    Args:
+        xml_folder (str): Path to a folder containing schema.
+        xml_version (str): HED version format string. Expected format: 'X.Y.Z'.
+        library_name (str or None): Optional library name
+        library_prefix  (str or None): The name_prefix all tags in this schema will accept.
+
+    Returns:
+        HedSchema: The requested HedSchema object.
+
+    Notes:
+        The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
     """
     try:
         final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file)
     except HedFileError as e:
         if e.error_type == HedExceptions.FILE_NOT_FOUND:
-            hed_cache.cache_all_hed_xml_versions()
+            hed_cache.cache_xml_versions()
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
             hed_schema = load_schema(final_hed_xml_file)
         else:

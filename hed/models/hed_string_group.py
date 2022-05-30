@@ -5,7 +5,13 @@ from hed.models.hed_string import HedString
 
 
 class HedStringGroup(HedString):
-    """A hed string object made from other hed string objects(generally multiple columns)."""
+    """ A container with hed string objects.
+
+    Notes:
+        Often this is used for assembling the hed strings from multiple columns.
+        The HedStringGroup passes through many of the HedString operations.
+
+    """
 
     def __init__(self, hed_string_obj_list):
         """ Constructor for the HedStringGroup class.
@@ -38,7 +44,7 @@ class HedStringGroup(HedString):
 
     @property
     def children(self):
-        """ Returns the direct children of this string.
+        """ Return the direct children of this string.
 
         Returns:
             The list of direct children of this group

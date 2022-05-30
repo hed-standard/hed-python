@@ -13,18 +13,18 @@ DEFAULT_BREAKOUT_LIST = [
 
 
 class TagSummary:
-    """ Representation of a HED tag summary for a BID file group.
+    """ A HED tag summary for a BID file group.
 
     Attributes:
         file_group (BidsFileGroup):  The BIDS file group to be summarized.
         schema (HedSchema or Hed
         all_tags_dict (dict):        The keys are all of the unique tags in the file group.
             The values are dictionaries of the unique values that these tags take on.
-        breakout_list (list):  The tag nodes that are to be specially summarized.
-        breakout_dict (dict):  The keys are the breakout nodes. The values are dictionaries of the
-             child nodes and the nodes themselves that appear in the dataset.
-        task_dict (dict):      The keys are definition names and the values are dictionaries with info.
-        cond_dict (dict):      The keys are definition names and the values are dictionaries with info.
+        breakout_list (list):   The tag nodes that are to be specially summarized.
+        breakout_dict (dict):   The keys are the breakout nodes. The values are dictionaries of the
+                                child nodes and the nodes themselves that appear in the dataset.
+        task_dict (dict):       The keys are definition names and the values are dictionaries with info.
+        cond_dict (dict):       The keys are definition names and the values are dictionaries with info.
 
     """
 

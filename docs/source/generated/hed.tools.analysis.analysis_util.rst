@@ -14,7 +14,6 @@
    .. autosummary::
    
       assemble_hed
-      filter_events
       get_assembled_strings
       search_tabular
    

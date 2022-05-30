@@ -8,7 +8,7 @@ from hed.models.hed_ops import HedOps
 
 
 class DefMapper(HedOps):
-    """ Class for handling Def/ and Def-expand/ in hed strings.
+    """ Handles Def/ and Def-expand/.
 
     Notes:
        The class provides string funcs but no tag funcs when extending HedOps.
@@ -17,7 +17,7 @@ class DefMapper(HedOps):
     """
 
     def __init__(self, def_dicts=None):
-        """ Initialize mapper for definitions in hed strings to fill them in with their values.
+        """ Initialize mapper for definitions in hed strings.
 
         Args:
             def_dicts (list or DefDict): DefDicts containing the definitions this mapper should initialize with.

@@ -19,7 +19,6 @@
       ~HedSchema.find_tag_entry
       ~HedSchema.get_all_schema_tags
       ~HedSchema.get_all_tag_attributes
-      ~HedSchema.get_all_unknown_attributes
       ~HedSchema.get_as_mediawiki_string
       ~HedSchema.get_as_xml_string
       ~HedSchema.get_desc_iter
@@ -29,6 +28,7 @@
       ~HedSchema.get_tag_entry
       ~HedSchema.get_tags_with_attribute
       ~HedSchema.get_unit_class_units
+      ~HedSchema.get_unknown_attributes
       ~HedSchema.save_as_mediawiki
       ~HedSchema.save_as_xml
       ~HedSchema.schema_for_prefix

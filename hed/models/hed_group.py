@@ -4,7 +4,7 @@ import copy
 
 
 class HedGroup(HedGroupBase):
-    """ Represents a single parenthesized hed string. """
+    """ A single parenthesized hed string. """
 
     def __init__(self, hed_string="", startpos=None, endpos=None, contents=None):
         """ Return an empty HedGroup object.
@@ -43,7 +43,7 @@ class HedGroup(HedGroupBase):
         self._children.append(tag_or_group)
 
     def check_if_in_original(self, tag_or_group):
-        """ Check if the tag or group was in the original string, even if it has since been removed.
+        """ Check if the tag or group was original.
 
         Args:
             tag_or_group (HedTag or HedGroup): The HedTag or HedGroup to be looked for in this group.
@@ -68,11 +68,12 @@ class HedGroup(HedGroupBase):
         return self._check_in_group(tag_or_group, final_list)
 
     def replace(self, item_to_replace, new_contents):
-        """ Replace an existing tag or group in the group with a new tag, list, or group.
+        """ Replace an existing tag or group.
 
         Args:
             item_to_replace (HedTag or HedGroup): The item to replace must exist or this will raise an error.
             new_contents (HedTag, HedGroup or list of HedTag and/or HedGroup): Replacement contents.
+
         """
         if self._original_children is self._children:
             self._original_children = self._children.copy()
@@ -86,7 +87,7 @@ class HedGroup(HedGroupBase):
         new_contents._parent = self
 
     def remove(self, items_to_remove):
-        """ Remove any tags/groups in items_to_remove found in this HedGroup.
+        """ Remove any tags/groups in items_to_remove.
 
         Args:
             items_to_remove (list):  List of HedGroups and/or HedTags to remove.
@@ -105,6 +106,7 @@ class HedGroup(HedGroupBase):
         Args:
             items_to_remove (list):  List of HedGroups and/or HedTags to remove.
             all_groups (list):   List of HedGroups.
+
         """
         empty_groups = []
         for remove_child in items_to_remove:
@@ -124,24 +126,24 @@ class HedGroup(HedGroupBase):
             self.remove(empty_groups)
 
     def get_frozen(self):
-        """ Returns a frozen (non-mutable) copy of this HedGroup.
+        """ Return a frozen (non-mutable) copy of this HedGroup.
 
         Returns:
             HedGroupFrozen: A frozen copy of this HedGroup.
 
         Notes:
-            The tags still point to the same place.  Do not alter them.
+            - The tags still point to the same place.  Do not alter them.
 
         """
         return HedGroupFrozen(self)
 
 
 class HedGroupFrozen(HedGroupBase):
-    """ This is the same as a HedGroup, except it is frozen as sets and cannot be altered further.
+    """ A frozen version of the HedGroup.
 
-        Searching and getting all tags/groups will be faster.
-
-        Additionally, HedGroupFrozen is order-agnostic: (a, b) = (b, a)
+    Notes:
+        - Searching and getting all tags/groups will be faster.
+        - Additionally, HedGroupFrozen is order-agnostic: (a, b) = (b, a).
 
     """
     def __init__(self, contents, hed_string=None):
@@ -149,12 +151,13 @@ class HedGroupFrozen(HedGroupBase):
 
         Args:
             contents (HedGroupBase or list): Used to set the contents of this group.
-                If HedGroupBase, get the source hed_string from the group.
-                If a list, may be a mixture of HedTags and HedGroups. Use the hed_string parameter as the source.
             hed_string (str or None): If contents is a list, this is the raw string the contents came from.
 
-        Notes
-            This makes a complete copy of the HedString.
+        Notes:
+            - This makes a complete copy of the HedString.
+            - If HedGroupBase, get the source hed_string from the group.
+            - If a list, may be a mixture of HedTags and HedGroups. Use the hed_string parameter as the source.
+
         """
         if isinstance(contents, HedGroupBase):
             span = contents.span
@@ -180,17 +183,17 @@ class HedGroupFrozen(HedGroupBase):
 
 
     def __hash__(self):
-        """ Get a hash of this HedFrozenGroup."""
+        """ Get a hash of this HedFrozenGroup. """
         return hash((self._children, self.is_group))
 
     def get_all_tags(self):
-        """ Return all the HedTags in this group, including descendants.
+        """ Return the HedTags in this group including descendants.
 
         Returns:
             list: A list of all the HedTags in this group including descendants.
 
         Notes:
-            This list is cached when initially called since its contents never change.
+            - This list is cached when initially called since its contents never change.
 
         """
         if not hasattr(self, "_tags"):
@@ -205,6 +208,7 @@ class HedGroupFrozen(HedGroupBase):
 
         Returns:
             list: The list of all HedGroups in this group, including descendants and self.
+
         """
         if also_return_depth:
             if not hasattr(self, "_groups1"):
@@ -221,7 +225,5 @@ class HedGroupFrozen(HedGroupBase):
         Returns:
             HedGroupFrozen: This same group.
 
-        Notes:
-            The base
         """
         return self

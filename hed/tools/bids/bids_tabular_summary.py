@@ -5,10 +5,10 @@ from hed.tools.analysis.annotation_util import generate_sidecar_entry
 
 
 class BidsTabularSummary:
-    """Summarizes the contents of BIDS tabular files. """
+    """ Summarize the contents of BIDS tabular files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
-        """ .
+        """ Constructor for a BIDS tabular file summary.
 
         Args:
             value_cols (list, None):  List of columns to be treated as value columns.
@@ -90,7 +90,9 @@ class BidsTabularSummary:
             data (DataFrame, str, or list):    DataFrame to be analyzed or the full path of a tsv file.
 
         Returns:
-            dict:   A dictionary with keys that are column names and values that are dictionaries of unique value counts
+            dict:   A dictionary with keys that are column names and values that are dictionaries
+                    of unique value counts.
+
         """
 
         if isinstance(data, list):
@@ -100,15 +102,16 @@ class BidsTabularSummary:
             self._update_dataframe(data)
 
     def update_summary(self, col_sum):
-        """ Adds the values of another ColumnSummary object to this object.
+        """ Add the values of another ColumnSummary object to this object.
 
-        The value_cols and skip_cols are updated as long as they are not contradictory. A new skip column
-        cannot be in the
+        Args:
+            col_sum (BidsTabularSummary):   A ColumnSummary to be combined.
 
-          Args:
-              col_sum (BidsTabularSummary):    A ColumnSummary to be combined with
+        Notes:
+            The value_cols and skip_cols are updated as long as they are not contradictory.
+            A new skip column cannot used.
 
-          """
+        """
         self._update_dict_skip(col_sum)
         self._update_dict_value(col_sum)
         self._update_dict_categorical(col_sum)
@@ -179,14 +182,16 @@ class BidsTabularSummary:
 
     @staticmethod
     def get_columns_info(dataframe, skip_cols=None):
-        """ Extracts the number of times each unique value appears in each column.
+        """ Extract the count of each unique value appears in each column.
 
         Args:
-            dataframe (DataFrame):    The DataFrame to be analyzed
-            skip_cols(list):          List of names of columns to be skipped in the extraction
+            dataframe (DataFrame):    The DataFrame to be analyzed.
+            skip_cols(list):          List of names of columns to be skipped in the extraction.
 
         Returns:
-            dict:   A dictionary with keys that are column names and values that are dictionaries of unique value counts
+            dict:   A dictionary with keys that are column names and values that
+                    are dictionaries of unique value counts.
+
         """
         col_info = dict()
 
@@ -198,15 +203,15 @@ class BidsTabularSummary:
 
     @staticmethod
     def make_combined_dicts(file_dictionary, skip_cols=None):
-        """ Return a combined dictionary of column information as well as individual summaries
+        """ Return a combined and individual column summaries.
 
         Args:
-            file_dictionary (FileDictionary):  Dictionary of file name keys and full path
-            skip_cols (list):  Name of the column
+            file_dictionary (FileDictionary):  Dictionary of file name keys and full path.
+            skip_cols (list):  Name of the column.
 
         Returns:
-            BidsTabularSummary:  A summary of the file dictionary
-            dict: A dict of individual BidsTabularSummary objects
+            BidsTabularSummary:  A summary of the file dictionary.
+            dict: A dict of individual BidsTabularSummary objects.
         """
 
         summary_all = BidsTabularSummary(skip_cols=skip_cols)

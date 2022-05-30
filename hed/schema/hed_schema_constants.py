@@ -1,7 +1,6 @@
 
 class HedSectionKey:
-    """
-    Used to get at a specific section in a HedSchema object.
+    """ Kegs designating specific sections in a HedSchema object.
     """
     # overarching category listing all tags
     AllTags = 'tags'
@@ -20,10 +19,11 @@ class HedSectionKey:
 
 
 class HedKey:
-    """
-        Known property and attribute names.  These should directly match what's in the file.
+    """ Known property and attribute names.
 
+    Notes:
         These names should match the attribute values in the XML/wiki.
+
     """
     # Tag attributes
     ExtensionAllowed = 'extensionAllowed'

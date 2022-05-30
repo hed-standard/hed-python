@@ -3,7 +3,7 @@ from hed.util.io_util import parse_bids_filename
 
 
 class BidsFile:
-    """ Representation of a BIDS file with entity dictionary.
+    """ A BIDS file with entity dictionary.
 
     Attributes:
         file_path (str):             Real path of the file.
@@ -60,11 +60,14 @@ class BidsFile:
         return key
 
     def set_contents(self, content_info=None, no_overwrite=True):
-        """ Set the contents of this object unless already set and no_overwrite is True.
+        """ Set the contents of this object.
 
         Args:
             content_info:  The contents appropriate for this object.
             no_overwrite (bool):  If True and the contents are not empty, do nothing.
+
+        Notes:
+             - Do not set if the contents are already set and no_overwrite is True.
 
         """
         if self.contents and no_overwrite:
@@ -74,7 +77,7 @@ class BidsFile:
     def __str__(self):
         """ Return a string representation of this object. """
         my_str = self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
-               " entity_dict=" + str(self.entity_dict)
+            " entity_dict=" + str(self.entity_dict)
         if self.sidecar:
             my_str = my_str + "\n\tmerged sidecar=" + str(self.sidecar.file_path)
         return my_str

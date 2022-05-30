@@ -5,7 +5,7 @@ from hed.util.data_util import get_new_dataframe, remove_quotes, separate_column
 
 
 class KeyMap:
-    """ Extracts unique column values for remapping columns.
+    """ A map of unique column values for remapping columns.
 
     Attributes:
         name (str):       Name of this remap for identification purposes.

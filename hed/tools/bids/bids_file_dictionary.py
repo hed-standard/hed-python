@@ -14,14 +14,14 @@ class BidsFileDictionary(FileDictionary):
             files (list or dict):   List containing full paths of files of interest or entity dict.
             entities (tuple:  List of indices into base file names of pieces to assemble for the key.
 
+        Raises:
+            HedFileError: If files has inappropriate values.
+
         Notes:
-            This function is used for cross listing BIDS style files for different studies.
+            - This function is used for cross listing BIDS style files for different studies.
 
         Examples:
             If entities is ('sub', 'ses', 'task', 'run'), a typical key might be sub-001_ses-01_task-memory_run-01.
-
-        Raises:
-            HedFileError: If files has inappropriate values.
 
         """
         super().__init__(collection_name, None, None, separator='_')
@@ -30,23 +30,26 @@ class BidsFileDictionary(FileDictionary):
 
     @property
     def key_list(self):
-        """ Return a list of the dictionary keys. """
+        """ A list of the dictionary keys. """
         return list(self.file_dict.keys())
 
     @property
     def file_list(self):
-        """ Return a list of the files contained in this dictionary. """
+        """ A list of the files contained in this dictionary. """
 
         return list(self.file_dict.values())
 
     def get_file_path(self, key):
-        """ Return the file path corresponding to key or None if not present.
+        """ Return the file path corresponding to key.
 
         Args:
             key (str):  The key to use to look up the file in this dictionary.
 
         Returns:
             str:  The real path of the file being looked up.
+
+        Notes:
+            -  None if not present.
 
         """
         if key in self.file_dict.keys():
@@ -65,7 +68,7 @@ class BidsFileDictionary(FileDictionary):
             yield key, file
 
     def key_diffs(self, other_dict):
-        """ Return a list containing the symmetric difference of the keys in this and the other.
+        """ Return the symmetric difference of keys with other.
 
         Args:
             other_dict (FileDictionary)  A file dictionary object
@@ -100,10 +103,10 @@ class BidsFileDictionary(FileDictionary):
             dict: A dictionary entries in this dictionary that match the query.
 
         Notes:
-            A query dictionary key a valid BIDS entity name such as sub or task.
-            A query dictionary value may be a string or a list.
-            A query value string should contain a specific value of the entity or a '*' indicating any value matches.
-            A query value list should be a list of valid values for the corresponding entity.
+            - A query dictionary key a valid BIDS entity name such as sub or task.
+            - A query dictionary value may be a string or a list.
+            - A query value string should contain a specific value of the entity or a '*' indicating any value matches.
+            - A query value list should be a list of valid values for the corresponding entity.
 
         """
         response_dict = {}
@@ -113,7 +116,7 @@ class BidsFileDictionary(FileDictionary):
         return response_dict
 
     def split_by_entity(self, entity):
-        """ Split this dictionary object into two dictionaries -- one with the entity and the other not containing it.
+        """ Split this dictionary based on an entity..
 
         Args:
             entity (str):  Entity name (for example task).
@@ -123,7 +126,7 @@ class BidsFileDictionary(FileDictionary):
             dict: A BidsFileDictionary containing the files that don't have entity in their names.
 
         Notes:
-            This function is used for analysis where a single subject or single type of task is being analyzed.
+            - This function is used for analysis where a single subject or single type of task is being analyzed.
 
         """
         split_dict, leftovers = self._split_dict_by_entity(self.file_dict, entity)
@@ -137,7 +140,7 @@ class BidsFileDictionary(FileDictionary):
 
     @staticmethod
     def _split_dict_by_entity(file_dict, entity):
-        """ Split a dict of BidsFile into two dictionaries based on an entity.
+        """ Split a dict of BidsFile based on an entity.
 
         Args:
             file_dict (dict): Dictionary of BidsFile keyed by entity keys.
@@ -161,7 +164,7 @@ class BidsFileDictionary(FileDictionary):
         return split_dict, leftovers
 
     def make_dict(self, files, entities):
-        """ Make a dictionary of appropriate file objects from a list of files or a dict of files.
+        """ Make a dictionary from or a dict of files.
 
         Args:
             files (list or dict):  Full paths (or the file objects) of the files to be values in the dictionary.

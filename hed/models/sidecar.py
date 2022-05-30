@@ -9,10 +9,15 @@ from hed.models.def_mapper import DefMapper
 
 
 class Sidecar:
-    """ Contents of a single JSON file with definition dictionaries. """
+    """ Contents of a JSON file or merged file.
+
+    Notes:
+        The Sidecar maintains its own definition dictionaries.
+
+    """
 
     def __init__(self, file, name=None):
-        """ Constructs a Sidecar object representing a JSON file.
+        """ Construct a Sidecar object representing a JSON file.
 
         Args:
             file (str or FileLike): A string or file-like object representing a JSON file.
@@ -269,8 +274,8 @@ class Sidecar:
 if __name__ == '__main__':
     import os
     from hed.validator.hed_validator import HedValidator
-    from hed.schema.hed_schema_io import load_schema, load_schema_version
-    base_dir= 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_hed_inheritance'
+    from hed.schema.hed_schema_io import load_schema_version
+    base_dir = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_hed_inheritance'
     root_path1 = os.path.realpath(os.path.join(base_dir, 'task-FacePerception_events.json'))
     root_path2 = os.path.realpath(os.path.join(base_dir, 'sub-002/sub-002_task-FacePerception_events.json'))
 
@@ -280,6 +285,3 @@ if __name__ == '__main__':
     validator = HedValidator(hed_schema=hed_schema)
     issues1 = sidecar1.validate_entries([validator], check_for_warnings=True)
     issues2 = sidecar2.validate_entries([validator], check_for_warnings=True)
-
-    sidecar2.add_inherited_columns([sidecar1])
-    issues3 = sidecar2.validate_entries([validator], check_for_warnings=True)

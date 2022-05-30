@@ -1,4 +1,4 @@
-""" Utilities for checking that a HED schema is correct. """
+""" Utilities for HED schema checking. """
 
 from hed.errors import error_reporter
 from hed.errors.error_types import SchemaWarnings, ErrorContext, SchemaErrors, ErrorSeverity, ValidationErrors
@@ -9,26 +9,21 @@ ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
-def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
-                     error_handler=None):
-    """
-        Checks for hed3 compliance of a schema object.
+def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None):
+    """ Check for hed3 compliance of a schema object.
 
-    Parameters
-    ----------
-    hed_schema : HedSchema
-        HedSchema object to check for hed3 compliance
-    also_check_for_warnings : bool, default True
-        If True, also checks for formatting issues like invalid characters, capitalization, etc.
-    name: str
-        If present, will use this as the filename for context, rather than using the actual filename
-        Useful for temp filenames.
-    error_handler : ErrorHandler or None
-        Used to report errors.  Uses a default one if none passed in.
-    Returns
-    -------
-    issue_list : [{}]
-        A list of all warnings and errors found in the file.
+    Args:
+        hed_schema (HedSchema): HedSchema object to check for hed3 compliance.
+        check_for_warnings (bool): If True, check for formatting issues like invalid characters, capitalization, etc.
+        name (str): If present, will use as filename for context.
+        error_handler (ErrorHandler or None): Used to report errors. Uses a default one if none passed in.
+
+    Returns:
+        list: A list of all warnings and errors found in the file. Each issue is a dictionary.
+
+    Notes:
+        Useful for temp filenames in support of web services.
+
     """
     if not isinstance(hed_schema, HedSchema):
         raise ValueError("To check compliance of a HedGroupSchema, call self.check_compliance on the schema itself.")
@@ -41,7 +36,7 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
         name = hed_schema.filename
     error_handler.push_error_context(ErrorContext.FILE_NAME, name)
 
-    unknown_attributes = hed_schema.get_all_unknown_attributes()
+    unknown_attributes = hed_schema.get_unknown_attributes()
     if unknown_attributes:
         for attribute_name, source_tags in unknown_attributes.items():
             for tag in source_tags:
@@ -81,7 +76,7 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
 
         error_handler.pop_error_context()
 
-    if also_check_for_warnings:
+    if check_for_warnings:
         hed_terms = hed_schema.get_all_schema_tags(True)
         for hed_term in hed_terms:
             issues_list += validate_schema_term(hed_term)
@@ -94,23 +89,17 @@ def check_compliance(hed_schema, also_check_for_warnings=True, name=None,
 
 
 def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
-    """
-        Checks if the comma separated list in possible tags are valid HedTags
+    """ Check if the comma separated list in possible tags are valid HedTags.
 
-    Parameters
-    ----------
-    hed_schema: HedSchema
-        The schema to check if the tag exists
-    tag_entry: HedSchemaEntry
-        The schema entry for this tag.
-    possible_tags: str
-        Comma separated list of tags.  Short long or mixed form valid.
-    force_issues_as_warnings: bool
-        If True sets all the severity levels to warning
+    Args:
+        hed_schema (HedSchema): The schema to check if the tag exists.
+        tag_entry (HedSchemaEntry): The schema entry for this tag.
+        possible_tags (str): Comma separated list of tags.  Short long or mixed form valid.
+        force_issues_as_warnings (bool): If True sets all the severity levels to warning.
 
-    Returns
-    -------
-    issues_list: [{}]
+    Returns:
+        list: A list of issues. Each issue is a dictionary.
+
     """
     issues = []
     if not tag_entry.name.endswith("/#"):
@@ -125,23 +114,17 @@ def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_
 
 
 def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
-    """
-        Checks if the comma separated list in possible tags are valid HedTags
+    """ Check if the comma separated list in possible tags are valid HedTags.
 
-    Parameters
-    ----------
-    hed_schema: HedSchema
-        The schema to check if the tag exists
-    tag_entry: HedSchemaEntry
-        The schema entry for this tag.
-    possible_tags: str
-        Comma separated list of tags.  Short long or mixed form valid.
-    force_issues_as_warnings: bool
-        If True sets all the severity levels to warning
+    Args:
+        hed_schema (HedSchema): The schema to check if the tag exists.
+        tag_entry (HedSchemaEntry): The schema entry for this tag.
+        possible_tags (str): Comma separated list of tags.  Short long or mixed form valid.
+        force_issues_as_warnings (bool): If True, set all the severity levels to warning.
 
-    Returns
-    -------
-    issues_list: [{}]
+    Returns:
+        list: A list of issues. Each issue is a dictionary.
+
     """
     issues = []
     split_tags = possible_tags.split(",")
@@ -159,17 +142,14 @@ def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warni
 
 
 def validate_schema_term(hed_term):
-    """
-    Takes a single term(ie short tag) and checks capitalization and illegal characters.
+    """ Check a short tag for capitalization and illegal characters.
 
-    Parameters
-    ----------
-    hed_term : str
-        A single hed term
-    Returns
-    -------
-    issue_list: [{}]
-        A list of all formatting issues found in the term
+    Args:
+        hed_term (str): A single hed term.
+
+    Returns:
+        list: A list of all formatting issues found in the term. Each issue is a dictionary.
+
     """
     issues_list = []
     # Any # terms will have already been validated as the previous entry.
@@ -181,9 +161,7 @@ def validate_schema_term(hed_term):
             issues_list += ErrorHandler.format_error(SchemaWarnings.INVALID_CAPITALIZATION,
                                                      hed_term, char_index=i, problem_char=char)
             continue
-        if char in ALLOWED_TAG_CHARS:
-            continue
-        if char.isalnum():
+        if char in ALLOWED_TAG_CHARS or char.isalnum():
             continue
         issues_list += ErrorHandler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG,
                                                  hed_term, char_index=i, problem_char=char)
@@ -191,19 +169,15 @@ def validate_schema_term(hed_term):
 
 
 def validate_schema_description(tag_name, hed_description):
-    """
-    Takes a single term description and returns a list of warnings and errors in it.
+    """ Check the description of a single schema term.
 
-    Parameters
-    ----------
-    tag_name : str
-        A single hed tag - not validated here, just used for error messages
-    hed_description: str
-        The description string to validate
-    Returns
-    -------
-    issue_list: [{}]
-        A list of all formatting issues found in the description
+    Args:
+        tag_name (str): A single hed tag - not validated here, just used for error messages.
+        hed_description (str): The description string to validate.
+
+    Returns:
+        list: A list of all formatting issues found in the description.
+
     """
     issues_list = []
     # Blank description is fine

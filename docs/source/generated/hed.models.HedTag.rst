@@ -13,7 +13,7 @@
    .. autosummary::
    
       ~HedTag.__init__
-      ~HedTag.add_prefix_if_not_present
+      ~HedTag.add_prefix
       ~HedTag.any_parent_has_attribute
       ~HedTag.base_tag_has_attribute
       ~HedTag.convert_to_canonical_forms

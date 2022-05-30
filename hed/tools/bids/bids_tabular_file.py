@@ -4,7 +4,7 @@ from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsTabularFile(BidsFile):
-    """ Representation of a BIDS tabular file including its associated sidecar. """
+    """ A BIDS tabular file including its associated sidecar. """
 
     def __init__(self, file_path):
         """ Constructor for a BIDS tabular file.

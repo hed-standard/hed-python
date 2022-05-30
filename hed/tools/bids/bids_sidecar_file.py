@@ -6,13 +6,13 @@ from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsSidecarFile(BidsFile):
-    """ Representation of a BIDS sidecar file."""
+    """ A BIDS sidecar file. """
 
     def __init__(self, file_path):
         super().__init__(file_path)
 
     def is_sidecar_for(self, obj):
-        """ Returns true if this is a sidecar for obj.
+        """ Return true if this is a sidecar for obj.
 
          Args:
              obj (BidsFile):  A BidsFile object to check.

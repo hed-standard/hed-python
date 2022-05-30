@@ -4,7 +4,12 @@ from hed.models.hed_tag import HedTag
 
 
 class HedGroupBase:
-    """ An abstract baseclass used for HedGroup API that is shared with HedGroupFrozen. """
+    """ Base class for the HedGroup API.
+
+    Notes:
+        This interface is shared by HedGroup and HedGroupFrozen.
+
+    """
 
     def __init__(self, hed_string="", startpos=None, endpos=None):
         """ Return an empty HedGroupBase object.
@@ -27,10 +32,13 @@ class HedGroupBase:
         raise ValueError("Cannot make shallow copies of HedGroups")
 
     def copy(self):
-        """ Return a deep copy of this group, with the parent pointer removed.
+        """ Return a deep copy of this group.
 
         Returns:
             HedGroupBase: The copied group.
+
+        Notes:
+            - The parent tag is removed.
 
         """
         save_parent = self._parent
@@ -41,16 +49,21 @@ class HedGroupBase:
 
     @property
     def children(self):
-        """ Return a list of the direct children of this string. """
+        """ A list of the direct children. """
         return self._children
 
     @property
     def is_group(self):
-        """ Return True if this is a group with parenthesis. """
+        """ True if this is a parenthesized group. """
         return True
 
     def get_all_tags(self):
-        """ Return all the HedTags in this group, including descendants. """
+        """ All the HedTags in this group.
+
+        Returns:
+            list:  A list of all the tags in thsi group including descendants.
+
+        """
         node_list = [self]
         final_list = []
 
@@ -64,7 +77,7 @@ class HedGroupBase:
         return final_list
 
     def get_all_groups(self, also_return_depth=False):
-        """ Return all the HedGroups, including descendants and self.
+        """ Return the HedGroups.
 
         Args:
             also_return_depth (bool): If True, yield tuples (group, depth) rather than just groups.
@@ -91,14 +104,14 @@ class HedGroupBase:
 
     @staticmethod
     def _check_in_group(group, group_list):
-        """ Return true if the group is in the group list.
+        """ Return true if the group is list.
 
         Args:
-            group ():
-            group_list ():
+            group (HedGroupBase): The group to check for.
+            group_list (list):    A list of groups to search.
 
         Returns:
-            bool: True if group is in the group_list.
+            bool: True if group is in the group list.
 
         """
         for val in group_list:
@@ -107,35 +120,35 @@ class HedGroupBase:
         return False
 
     def tags(self):
-        """ Return the direct child tags of this group, filtering out HedGroup children.
+        """ Return the direct child tags of this group.
 
         Returns:
-            tag_list (list): The list of all tags directly in this group.
+            list: All tags directly in this group, filtering out HedGroup children.
 
         """
         return [tag for tag in self.children if isinstance(tag, HedTag)]
 
     def groups(self):
-        """ Return the direct child groups of this group, filtering out HedTag children.
+        """ Return the direct child groups of this group.
 
-        Return:
-            group_list (list): The list of all groups directly in this group.
+        Returns:
+            list: All groups directly in this group, filtering out HedTag children.
 
         """
         return [group for group in self.children if isinstance(group, HedGroupBase)]
 
     def get_original_hed_string(self):
-        """ Get the original hed string with zero modification.
+        """ Get the original hed string.
 
         Returns:
-            str: The original string.
+            str: The original string with zero modification.
 
         """
         return self._hed_string[self._startpos:self._endpos]
 
     @property
     def span(self):
-        """ Return the source span of this group from the source hed string.
+        """ Return the source span.
 
         Return:
             int: start index of the group (including parentheses) from the source string.
@@ -174,17 +187,17 @@ class HedGroupBase:
         return self.get_as_form("long_tag")
 
     def get_as_form(self, tag_attribute, tag_transformer=None):
-        """ Get the string corresponding to the specified form of this group after transformation.
+        """ Get the string corresponding to the specified form.
 
         Args:
             tag_attribute (str): The hed_tag property to use to construct the string (usually short_tag or long_tag).
             tag_transformer (func or None): A function that is applied to each tag string before returning.
 
         Returns:
-            str: The constructed string.
+            str: The constructed string after transformation
 
         Notes:
-            The signature of a tag_transformer is str def(HedTag, str).
+            - The signature of a tag_transformer is str def(HedTag, str).
 
         """
         if tag_transformer:
@@ -199,7 +212,7 @@ class HedGroupBase:
         return result
 
     def lower(self):
-        """ Convenience function, equivalent to str(self).lower(). """
+        """ Convert the string form to lowercase. """
 
         return str(self).lower()
 
@@ -210,7 +223,7 @@ class HedGroupBase:
             HedTag or None: The placeholder tag if found.
 
         Notes:
-            Assumes a valid HedString with no erroneous "#" characters.
+            - Assumes a valid HedString with no erroneous "#" characters.
 
         """
         for tag in self.get_all_tags():
@@ -223,24 +236,16 @@ class HedGroupBase:
         return bool(self._children)
 
     def __eq__(self, other):
-        """
-
-        """
+        """ Test whether other is equal to this object. """
         if self is other:
             return True
 
-        if not isinstance(other, HedGroupBase):
-            return False
-
-        if self.children != other.children:
-            return False
-
-        if self.is_group != other.is_group:
+        if not isinstance(other, HedGroupBase) or self.children != other.children or self.is_group != other.is_group:
             return False
         return True
 
     def find_tags(self, search_tags, recursive=False, include_groups=2):
-        """ Find the search tags and their containing groups that are in this group.
+        """ Find the tags and containing groups.
 
         Args:
             search_tags (container):    A container of short_base_tags to locate
@@ -248,17 +253,14 @@ class HedGroupBase:
             include_groups (0, 1 or 2): Specify return values.
 
         Returns:
-            list:
-            tag (HedTag) The located tag
-            group (HedGroup) The group the located tag is in.
+            list: The contents of the list depends on the value of include_groups.
 
         Notes:
-            This can only find identified tags.
-            By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
-            The rules for include_groups are:
-                If 0: returns a list of HedTags corresponding to found search tags.
-                If 1: return a list of containing HedGroups for found search tags.
-                If 2 or any other value: returns a list of tuples (tag, containing_group)
+            - If include_groups is 0, return a list of the HedTags.
+            - If include_groups is 1, return a list of the HedGroups containing the HedTags.
+            - If include_groups is 2, return a list of tuples (HedTag, HedGroup) for the found tags.
+            - This can only find identified tags.
+            - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
 
         """
         found_tags = []
@@ -287,17 +289,15 @@ class HedGroupBase:
             list: A list of HedGroupBases the given tags/groups were found in.
 
         Notes:
-            If you pass in groups it will only find EXACT matches.
-            This can only find identified tags.
-            By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
-
-            If this is a HedGroup, order matters.  (b, a) != (a, b)
-
-            If this is a HedGroupFrozen:
-                if "(a, b)" in tags_or_groups, then it will match 1 and 2, but not 3.
-                1. (a, b)
-                2. (b, a)
-                3. (a, b, c)
+            - If you pass in groups it will only find EXACT matches.
+            - This can only find identified tags.
+            - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
+            - If this is a HedGroup, order matters.  (b, a) != (a, b)
+            - If this is a HedGroupFrozen:
+                    if "(a, b)" in tags_or_groups, then it will match 1 and 2, but not 3.
+                        1. (a, b)
+                        2. (b, a)
+                        3. (a, b, c)
 
         """
         found_tags = []
@@ -314,28 +314,21 @@ class HedGroupBase:
         return found_tags
 
     def find_def_tags(self, recursive=False, include_groups=3):
-        """ Find any def and def-expand tags in the group.
+        """ Find def and def-expand tags in the group.
 
         Args:
             recursive (bool): If true, also check subgroups.
             include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
 
         Returns:
-            tuple (HedTag
-            list:
+            list: A list of tuples. The contents depends on the values of the include group.
 
-        def_tag: HedTag
-            The located def tag
-        def_expand_group: HedGroup or None
-            If this is a def-expand rather than def tag, this will be the entire def-expand group.
-        group: HedGroup
-            The group the def tag or def expand group is in.
-
-        Notes: The include_groups option controls the tag expansion as follows:
-            If 0: Return only def and def expand tags/
-            If 1: Return only def tags and def-expand groups
-            If 2: Return only groups containing defs, or def-expand groups
-            If 3 or any other value: Return all 3 as a tuple.
+        Notes:
+            - The include_groups option controls the tag expansion as follows:
+                If 0: Return only def and def expand tags/.
+                If 1: Return only def tags and def-expand groups.
+                If 2: Return only groups containing defs, or def-expand groups.
+                If 3 or any other value: Return all 3 as a tuple.
 
         """
         from hed.models.definition_dict import DefTagNames
@@ -372,7 +365,7 @@ class HedGroupBase:
                 If 1: return only groups
                 If 2 or any other value: return both
 
-           recursive (bool): If true, also check subgroups.
+            recursive (bool): If true, also check subgroups.
             include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
 
         Returns:
@@ -386,9 +379,9 @@ class HedGroupBase:
             The group the def tag or def expand group is in.
 
         Notes: The include_groups option controls the tag expansion as follows:
-            If 0: Return only def and def expand tags/
-            If 1: Return only def tags and def-expand groups
-            If 2: Return only groups containing defs, or def-expand groups
+            If 0: Return only def and def expand tags/.
+            If 1: Return only def tags and def-expand groups.
+            If 2: Return only groups containing defs, or def-expand groups.
             If 3 or any other value: Return all 3 as a tuple.
 
         """

@@ -26,7 +26,7 @@ class ColumnType(Enum):
 
 
 class ColumnMetadata:
-    """ Class representing a single column in a ColumnMapper or top-level dict in Sidecar. """
+    """ A column in a ColumnMapper or top-level dict in Sidecar. """
 
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None, error_handler=None):
         """ A single column entry in the column mapper.
@@ -121,7 +121,7 @@ class ColumnMetadata:
             error_handler.pop_error_context()
 
     def _hed_iter(self, also_return_bad_types=False):
-        """ Iterate over all the hed string entries, returning HedString objects.
+        """ Iterate over the hed string entries.
 
         Args:
             also_return_bad_types (bool): If true, this can yield types other than HedString, otherwise skips these.
@@ -145,12 +145,15 @@ class ColumnMetadata:
             yield hed_string, None
 
     def set_hed_string(self, new_hed_string, position=None, set_def_removed=False):
-        """ Set a hed string in a provided category key/etc.
+        """ Set a hed string for a category key/etc.
 
         Args:
             new_hed_string (str or HedString): The new hed_string to replace the value at position.
             position (str, optional): This should only be a value returned from hed_string_iter.
             set_def_removed (bool): If True, set the version with definitions removed, rather than the normal version.
+
+        Raises:
+            TypeError: If the mapping cannot occur.
 
         """
         hed_strings = self._hed_dict.get("HED", None)
@@ -174,7 +177,7 @@ class ColumnMetadata:
             raise TypeError("Error: Trying to set a HED string on a column_type that doesn't support it.")
 
     def _get_category_hed_string(self, category):
-        """ Fetch the hed string from a given category key.
+        """ Fetch the hed string for a category key.
 
         Args:
             category (str): The category key to retrieve the string from.
@@ -189,7 +192,7 @@ class ColumnMetadata:
         return self._def_removed_hed_dict.get(category, None)
 
     def _get_value_hed_string(self):
-        """ Fetch the hed string from a given value column.
+        """ Fetch the hed string in a value column.
 
         Returns:
             str: The hed string for a given value column.
@@ -201,18 +204,18 @@ class ColumnMetadata:
         return self._def_removed_hed_dict
 
     def expand(self, input_text):
-        """ Expand the input_text based on the rules for this column.
+        """ Expand using the rules for this column.
 
         Args:
             input_text (str): Text to expand (generally from a single cell in a spreadsheet).
 
         Returns:
-            str: The expanded column as a hed_string.
-            attribute_name_or_error_message (str or dict): If this is a string, contains the name of this column
-                as an attribute. If the first return value is None, this is an error message dictionary.
+            str or None:    The expanded column as a hed_string.
+            str or dict:    If this is a string, contains the name of this column
+                            as an attribute. If the first return value is None, this is an error message dictionary.
 
         Notes:
-            An example is adding name_prefix, inserting a column hed_string from key, etc.
+            - An example is adding name_prefix, inserting a column hed_string from key, etc.
 
         """
         column_type = self.column_type
@@ -230,7 +233,7 @@ class ColumnMetadata:
             return HedString(final_text), False
         elif column_type == ColumnType.HEDTags:
             hed_string_obj = HedString(input_text)
-            final_text = self._prepend_prefix_to_required_tag_column_if_needed(hed_string_obj, self.column_prefix)
+            final_text = self._prepend_prefix(hed_string_obj, self.column_prefix)
             return final_text, False
         elif column_type == ColumnType.Ignore:
             return None, False
@@ -240,30 +243,28 @@ class ColumnMetadata:
         return None, {"error_type": "INTERNAL_ERROR"}
 
     @staticmethod
-    def _prepend_prefix_to_required_tag_column_if_needed(required_tag_column_tags, required_tag_prefix):
+    def _prepend_prefix(required_tag_column_tags, required_tag_prefix):
         """ Prepend the tag paths to the required tag column tags that need them.
 
         Args:
             required_tag_column_tags (HedString): A string containing HED tags associated with a
-                required tag column that may need a tag
-            name_prefix prepended to its tags.
+                required tag column that may need a tag name_prefix prepended to its tags.
             required_tag_prefix (str): A string that will be added if missing to any given tag.
 
         Returns:
-            HedString: A comma separated string that contains the required HED tags with the tag name_prefix prepended to them if
-            needed.
+            HedString: A comma separated string with the required HED tags with the tag name_prefix prepended.
 
         """
         if not required_tag_prefix:
             return required_tag_column_tags
 
         for tag in required_tag_column_tags.get_all_tags():
-            tag.add_prefix_if_not_present(required_tag_prefix)
+            tag.add_prefix(required_tag_prefix)
 
         return required_tag_column_tags
 
-    def remove_prefix_if_needed(self, original_tag, current_tag_text):
-        """ Remove column_prefix if present from the given tag text.
+    def remove_prefix(self, original_tag, current_tag_text):
+        """ Remove column_prefix if present from tag.
 
         Args:
             original_tag (HedTag): The original hed tag being written.
@@ -312,10 +313,10 @@ class ColumnMetadata:
         return ColumnType.Value
 
     def get_definition_issues(self):
-        """ Return the issues found from extracting definitions from this column.
+        """ Return the issues from extracting definitions.
 
         Returns:
-            list: A list of issues found when parsing definitions. Indiviudal issues are dictionaries.
+            list: A list of issues found when parsing definitions. Individual issues are dictionaries.
 
         """
         return self._def_dict.get_definition_issues()

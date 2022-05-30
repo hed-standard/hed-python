@@ -246,17 +246,13 @@ class HedSchemaXMLParser:
         return tag_entry
 
     def _get_ancestor_tag_names(self, tag_element):
-        """Gets all the ancestor tag names of a tag element.
+        """ Get all ancestor tag names of a tag element.
 
-        Parameters
-        ----------
-        tag_element: Element
-            A tag element in the HED XML file.
+        Args:
+            tag_element (Element): A tag element in the HED XML file.
 
-        Returns
-        -------
-        []
-            A list containing all the ancestor tag names of a given tag.
+        Returns:
+            list: Contains all the ancestor tag names of a given tag.
 
         """
         ancestor_tags = []
@@ -270,19 +266,17 @@ class HedSchemaXMLParser:
         return ancestor_tags
 
     def _get_element_tag_value(self, element, tag_name=xml_constants.NAME_ELEMENT):
-        """Gets the value of the element's tag.
+        """ Get the value of the element's tag.
 
-        Parameters
-        ----------
-        element: Element
-            A element in the HED XML file.
-        tag_name: str
-            The name of the XML element's tag. The default is 'name'.
+        Args:
+            element (Element): A element in the HED XML file.
+            tag_name (str): The name of the XML element's tag. The default is 'name'.
 
-        Returns
-        -------
-        str
-            The value of the element's tag. If the element doesn't have the tag then it will return an empty string.
+        Returns:
+            str: The value of the element's tag.
+
+        Notes:
+            If the element doesn't have the tag then it will return an empty string.
 
         """
         element = element.find(tag_name)
@@ -295,17 +289,16 @@ class HedSchemaXMLParser:
         return ""
 
     def _get_parent_tag_name(self, tag_element):
-        """Gets the name of the tag parent element.
+        """ Return the name of the tag parent element.
 
-        Parameters
-        ----------
-        tag_element: Element
-            A tag element in the HED XML file.
+        Args:
+            tag_element (Element): A tag element in the HED XML file.
 
-        Returns
-        -------
-        str
-            The name of the tag element's parent. If there is no parent tag then an empty string is returned.
+        Returns:
+            str: The name of the tag element's parent.
+
+        Notes:
+            If there is no parent tag then an empty string is returned.
 
         """
         parent_tag_element = self._parent_map[tag_element]
@@ -315,17 +308,16 @@ class HedSchemaXMLParser:
             return ''
 
     def _get_tag_path_from_tag_element(self, tag_element):
-        """Gets the tag path from a given tag element.
+        """ Get the tag path from a given tag element.
 
-        Parameters
-        ----------
-        tag_element: Element
-            A tag element in the HED XML file.
+        Args:
+            tag_element (Element): A tag element in the HED XML file.
 
-        Returns
-        -------
-        str
-            A tag path which is typically referred to as a tag. The tag and it's ancestor tags will be separated by /'s.
+        Returns:
+            str: A tag path which is typically referred to as a tag.
+
+        Notes:
+            The tag and it's ancestor tags will be separated by /'s.
 
         """
         ancestor_tag_names = self._get_ancestor_tag_names(tag_element)
@@ -334,20 +326,18 @@ class HedSchemaXMLParser:
         return '/'.join(ancestor_tag_names)
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
-        """Gets the elements that have a specific element name.
+        """ Get the elements that have a specific element name.
 
-        Parameters
-        ----------
-        element_name: str
-            The name of the element. The default is 'node'.
-        parent_element: RestrictedElement
-            The parent element. The default is 'None'. If a parent element is specified then only the children of the
-            parent will be returned with the given 'element_name'. If not specified the root element will be the parent.
+        Args:
+            element_name (str): The name of the element. The default is 'node'.
+            parent_element (RestrictedElement or None): The parent element.
 
-        Returns
-        -------
-        []
-            A list containing elements that have a specific element name.
+        Returns:
+            list: A list containing elements that have a specific element name.
+        Notes:
+            If a parent element is specified then only the children of the
+            parent will be returned with the given 'element_name'.
+            If not specified the root element will be the parent.
 
         """
         if parent_element is None:

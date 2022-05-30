@@ -46,7 +46,7 @@ def get_assembled_strings(table, hed_schema=None, expand_defs=False):
 
     """
     hed_list = list(table.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,
-                                        expand_defs=expand_defs, remove_definitions=True))
+                                         expand_defs=expand_defs, remove_definitions=True))
     return hed_list
 
 

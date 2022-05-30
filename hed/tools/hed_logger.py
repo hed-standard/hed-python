@@ -1,12 +1,10 @@
 
-""" HedLogger class. """
-
 import os
 import json
 
 
 class HedLogger:
-    """ Class to log status messages organized by key """
+    """ Log status messages organized by key. """
     def __init__(self, name=""):
         self.log = {}
         self.name = name

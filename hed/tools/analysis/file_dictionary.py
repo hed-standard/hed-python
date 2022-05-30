@@ -45,7 +45,7 @@ class FileDictionary:
             yield key, file
 
     def key_diffs(self, other_dict):
-        """Returns a list containing the symmetric difference of the keys in the two dictionaries
+        """ Return a list containing the symmetric difference of the keys in the two dictionaries
 
         Args:
             other_dict (FileDictionary)  A file dictionary object
@@ -58,10 +58,11 @@ class FileDictionary:
         return list(diffs)
 
     def output_files(self, title=None, logger=None):
-        """ Returns a str with the output of the list
+        """ Return a str with the output of the list.
         Args:
             title (None, str)    Optional title.
             logger (HedLogger)   Optional HED logger for recording.
+
         Returns: (str)
             Output the dictionary in string form. The logger is updated if available.
 
