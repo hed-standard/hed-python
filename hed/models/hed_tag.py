@@ -73,7 +73,7 @@ class HedTag:
 
     @property
     def base_tag(self):
-        """ Long version without value or extension.
+        """ Long form without value or extension.
 
         Returns:
             base_tag (str): The long version of the tag, without value or extension.
@@ -217,7 +217,7 @@ class HedTag:
 
     @property
     def long_tag(self):
-        """ Long form if exists, otherwise default tag form.
+        """ Long form including value or extension.
 
         Returns:
             str: The long form of this tag.
@@ -313,7 +313,7 @@ class HedTag:
         return str(self).lower()
 
     def convert_to_canonical_forms(self, hed_schema):
-        """ Update internal state set the schema entry.
+        """ Update internal state based on schema.
 
         Args:
             hed_schema (HedSchema): The schema to use to validate this tag

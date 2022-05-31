@@ -102,7 +102,7 @@ class ColumnMapper:
         return []
 
     def set_tag_columns(self, tag_columns=None, optional_tag_columns=None, finalize_mapping=True):
-        """ Set tag columns or current ones if None.
+        """ Set tag columns and optional tag columns
 
         Args:
             tag_columns (list): A list of ints or strings containing the columns that contain the HED tags.

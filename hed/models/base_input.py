@@ -542,7 +542,7 @@ class BaseInput:
         return new_def_dict
 
     def update_definition_mapper(self, def_dict):
-        """ Add label definitions if mapper.
+        """ Add label definitions if mapper exists.
 
         Args:
             def_dict (list or DefinitionDict): Add the DefDict or list of DefDict to the internal definition mapper.

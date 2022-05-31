@@ -3,7 +3,7 @@ import os
 
 from hed.errors import HedFileError
 from hed.models import HedString, HedTag
-from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema
+from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup
 
 
 class TestHedSchema(unittest.TestCase):
@@ -16,6 +16,13 @@ class TestHedSchema(unittest.TestCase):
         cls.hed_wiki_3g = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file_3g)
         cls.hed_schema_3g_wiki = load_schema(cls.hed_wiki_3g)
         cls.hed_schema_3g = load_schema(cls.hed_xml_3g)
+
+        schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
+        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
+        hed_schema1 = load_schema(hed_xml)
+        hed_schema2 = load_schema(hed_xml, library_prefix="tl:")
+        cls.hed_schema_group = HedSchemaGroup([hed_schema1, hed_schema2])
+
 
     def test_invalid_schema(self):
         # Handle missing or invalid files.
@@ -164,3 +171,7 @@ class TestHedSchema(unittest.TestCase):
 
     def test_short_tag_mapping(self):
         self.assertEqual(len(self.hed_schema_3g.all_tags.keys()), 1110)
+
+    def test_schema_complicance(self):
+        warnings = self.hed_schema_group.check_compliance(True)
+        self.assertEqual(len(warnings), 10)
