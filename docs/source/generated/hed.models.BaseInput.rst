@@ -16,7 +16,6 @@
       ~BaseInput.convert_to_long
       ~BaseInput.convert_to_short
       ~BaseInput.extract_definitions
-      ~BaseInput.get_assembled
       ~BaseInput.get_def_and_mapper_issues
       ~BaseInput.get_worksheet
       ~BaseInput.iter_dataframe

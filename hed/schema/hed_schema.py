@@ -123,8 +123,8 @@ class HedSchema:
     def get_as_xml_string(self):
         """ Return the schema to an XML string.
 
-        Args:
-            str: The schema as a string in XML format.
+        Returns:
+            str: Return the schema as an XML string.
 
         """
         schema2xml = HedSchema2XML()

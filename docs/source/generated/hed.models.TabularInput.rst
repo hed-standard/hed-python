@@ -17,7 +17,6 @@
       ~TabularInput.convert_to_short
       ~TabularInput.create_def_mapper
       ~TabularInput.extract_definitions
-      ~TabularInput.get_assembled
       ~TabularInput.get_def_and_mapper_issues
       ~TabularInput.get_worksheet
       ~TabularInput.iter_dataframe

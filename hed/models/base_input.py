@@ -338,30 +338,6 @@ class BaseInput:
         # Return a HedString rather than a HedStringGroup
         return final_hed_string
 
-    def get_assembled(self, row_number, expand_defs, shrink_defs, remove_definitions=False, error_handler=None):
-        """ Return assembled string.
-
-        Args:
-            row_number (int):           Number of the row corresponding to this string.
-            expand_defs (bool):         If True, expand the definitions.
-            shrink_defs (bool):         If True, shrink the definitions.
-            remove_definitions (bool):  If True, remove definitions.
-            error_handler (ErrorHandler or None): If None, a default error handler.
-
-        """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-
-        mapper = self._mapper
-        # this could be cached
-        tag_funcs, _ = self._translate_ops([],
-                                           run_string_ops_on_columns=True,
-                                           expand_defs=expand_defs, shrink_defs=shrink_defs,
-                                           remove_definitions=remove_definitions, error_handler=error_handler)
-
-        text_file_row = self._dataframe.iloc[row_number]
-        return self._expand_row_internal(text_file_row, tag_funcs, None, error_handler=error_handler, mapper=mapper)
-
     def set_cell(self, row_number, column_number, new_string_obj, include_column_prefix_if_exist=False,
                  tag_form="short_tag"):
         """ Replace the specified cell with transformed text.
@@ -566,7 +542,7 @@ class BaseInput:
         return new_def_dict
 
     def update_definition_mapper(self, def_dict):
-        """ Add label definitions if there is a definition mapper.
+        """ Add label definitions if mapper.
 
         Args:
             def_dict (list or DefinitionDict): Add the DefDict or list of DefDict to the internal definition mapper.

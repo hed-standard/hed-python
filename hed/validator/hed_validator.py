@@ -24,7 +24,9 @@ class HedValidator(HedOps):
         Args:
             hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
             run_semantic_validation (bool): True if the validator should check the HED data against a schema.
-            False for syntax-only validation.
+
+        Notes:
+            - False for syntax-only validation.
 
         """
         super().__init__()
@@ -54,19 +56,18 @@ class HedValidator(HedOps):
         return string_funcs
 
     def _validate_groups_in_hed_string(self, hed_string_obj):
-        """Validates the tags at each level in a HED string. This pertains to the top-level, all groups, and nested
-           groups.
+        """ Report invalid groups at each level.
 
-         Parameters
-         ----------
-         hed_string_obj: HedString
-            A HedString object.
-         Returns
-         -------
-         list
-             The issues associated with each level in the HED string.
+        Args:
+            hed_string_obj (HedString): A HedString object.
 
-         """
+        Returns:
+            list: Issues associated with each level in the HED string. Each issue is a dictionary.
+
+        Notes:
+            - This pertains to the top-level, all groups, and nested groups.
+
+        """
         validation_issues = []
         for original_tag_group, is_top_level in hed_string_obj.get_all_groups(also_return_depth=True):
             is_group = original_tag_group.is_group
@@ -77,7 +78,6 @@ class HedValidator(HedOps):
             validation_issues += self._check_for_duplicate_groups(original_tag_group)
             validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group.tags(), is_top_level,
                                                                               is_group)
-
         return validation_issues
 
     def _check_for_duplicate_groups(self, original_group):
@@ -103,16 +103,16 @@ class HedValidator(HedOps):
         return ()
 
     def _validate_tags_in_hed_string(self, hed_string_obj, check_for_warnings=False):
-        """Validates the multi-tag properties in a hed string, eg required tags.
+        """ Report invalid the multi-tag properties.
 
-         Parameters
-         ----------
-         hed_string_obj: HedString
-            A HedString  object.
-         Returns
-         -------
-         list
-             The issues associated with the tags in the HED string.
+         Args:
+            hed_string_obj (HedString): A HedString object.
+
+         Returns:
+            list: The issues associated with the tags in the HED string. Each issue is a dictionary.
+
+        Notes:
+            - in a hed string, eg required tags.
 
          """
         validation_issues = []
@@ -122,16 +122,13 @@ class HedValidator(HedOps):
 
     def _validate_individual_tags_in_hed_string(self, hed_string_obj, allow_placeholders=False,
                                                 check_for_warnings=False):
-        """Validates the individual tags in a HED string.
+        """ Validate individual tags in a HED string.
 
-         Parameters
-         ----------
-         hed_string_obj: HedString
-            A HedString  object.
-         Returns
-         -------
-         list
-             The issues associated with the individual tags in the HED string.
+         Args:
+            hed_string_obj (HedString): A HedString  object.
+
+         Returns:
+            list: The issues associated with the individual tags. Each issue is a dictionary.
 
          """
         from hed.models.definition_dict import DefTagNames

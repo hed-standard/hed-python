@@ -130,7 +130,7 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
 
      Returns:
          list:  The filtered file names.
-         
+
      """
     filtered_files = []
     for r_file in file_list:
@@ -140,7 +140,7 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
 
 
 def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dirs=None):
-    """ Traverse a directory tree and return a list of paths of files satisfying various conditions.
+    """ Return paths satisfying various conditions.
 
     Args:
         root_path (str):              Full path of the directory tree to be traversed (no ending slash).
@@ -192,7 +192,7 @@ def get_path_components(this_path, root_path):
 
 
 def make_path(root_path, sub_path, filename):
-    """ Get the complete path for a file, making sure all path components exist.
+    """ Get path for a file, verifying all components exist.
 
     Args:
         root_path (str)   path of the root directory
@@ -212,7 +212,7 @@ def make_path(root_path, sub_path, filename):
 
 
 def parse_bids_filename(file_path):
-    """ Split a filename into its BIDS suffix, extension, and a dictionary of entity name-value pairs.
+    """ Split a filename into BIDS-relevant components.
 
         Args:
             file_path (str)     Path to be parsed.
@@ -224,6 +224,9 @@ def parse_bids_filename(file_path):
 
         Raises:
             HedFileError when filename does not conform to name-value_suffix format.
+
+        Notes:
+            into BIDS suffix, extension, and a dictionary of entity name-value pairs.
 
     """
 

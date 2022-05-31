@@ -14,12 +14,14 @@ from hed import schema
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "schema_test_data/HED8.0.0t.xml")
+        base = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        cls.base_data_dir = base
+        hed_xml_file = os.path.join(base, "schema_test_data/HED8.0.0t.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
-        cls.default_test_file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                  "../data/validator_tests/ExcelMultipleSheets.xlsx")
-        cls.generic_file_input = SpreadsheetInput(cls.default_test_file_name)
+        default = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               "../data/validator_tests/ExcelMultipleSheets.xlsx")
+        cls.default_test_file_name = default
+        cls.generic_file_input = SpreadsheetInput(default)
         cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
         cls.one_based_tag_columns = [1, 2, 3]
         cls.zero_based_tag_columns = [0, 1, 2, 3, 4]
@@ -30,9 +32,9 @@ class Test(unittest.TestCase):
         cls.category_participant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
         cls.category_tags = 'Participant response, Stimulus'
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
-
-        cls.base_output_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
-        os.makedirs(cls.base_output_folder, exist_ok=True)
+        base_output = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
+        cls.base_output_folder = base_output
+        os.makedirs(base_output, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -76,7 +78,7 @@ class Test(unittest.TestCase):
             events_file_as_string = io.StringIO(file.read())
         input_file_from_string = TabularInput(file=events_file_as_string, sidecar=sidecar)
 
-        for  column_dict, column_dict in zip(input_file, input_file_from_string):
+        for column_dict, column_dict in zip(input_file, input_file_from_string):
             self.assertEqual(column_dict, column_dict)
 
     def test_bad_file_inputs(self):
@@ -88,6 +90,7 @@ class Test(unittest.TestCase):
 
         with open(self.default_test_file_name, "rb") as f:
             opened_binary_file = SpreadsheetInput(f, file_type=".xlsx")
+            self.assertIsInstance(opened_binary_file, SpreadsheetInput, "SpreadsheetInput creates a correct object.")
             self.assertTrue(True)
 
     def test_to_excel(self):
@@ -147,8 +150,9 @@ class Test(unittest.TestCase):
 
         input_file_2.reset_column_mapper()
 
-        for (row_number, row_dict), (row_number2, row_dict2) in zip(enumerate(input_file_1.iter_dataframe(return_string_only=False)),
-                                                                          enumerate(input_file_2.iter_dataframe(return_string_only=False))):
+        for (row_number, row_dict), (row_number2, row_dict2) in \
+                zip(enumerate(input_file_1.iter_dataframe(return_string_only=False)),
+                    enumerate(input_file_2.iter_dataframe(return_string_only=False))):
             self.assertEqual(row_number, row_number2,
                              f"TabularInput should have row {row_number} equal to {row_number2} after reset")
             column_dict = row_dict["column_to_hed_tags"]
@@ -192,7 +196,6 @@ class Test(unittest.TestCase):
         hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
         for column1, column2 in zip(hed_input, hed_input_long):
             self.assertEqual(column1, column2)
-
 
 
 if __name__ == '__main__':

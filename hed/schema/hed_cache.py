@@ -25,7 +25,7 @@ HED_VERSION_FINAL = r'^[hH][eE][dD](_([a-z0-9]+)_)?(' + HED_VERSION + r')\.[xX][
 
 HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
-hedxml_suffix = "/hedxml" # The suffix for schema and library schema at the given urls
+hedxml_suffix = "/hedxml"  # The suffix for schema and library schema at the given urls
 
 DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
 LIBRARY_HED_URL = 'https://api.github.com/repos/hed-standard/hed-schema-library/contents/library_schemas'
@@ -320,8 +320,9 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                 continue
             if file_entry['name'] in skip_folders:
                 continue
-            sub_folder_versions = _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
-                                                                 skip_folders=skip_folders, get_all_libraries=True)
+            sub_folder_versions = \
+                _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
+                                               skip_folders=skip_folders, get_all_libraries=True)
             _merge_in_versions(all_hed_versions, sub_folder_versions)
         expression_match = version_pattern.match(file_entry["name"])
         if expression_match is not None:

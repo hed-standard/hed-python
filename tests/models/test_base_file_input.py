@@ -2,10 +2,6 @@ import unittest
 import os
 import shutil
 
-from hed.models import Sidecar, TabularInput
-from hed import schema
-from hed.validator import HedValidator
-
 # TODO: Add tests for base_file_input and include correct handling of 'n/a'
 
 

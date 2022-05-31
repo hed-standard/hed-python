@@ -199,7 +199,7 @@ class BidsTabularSummary:
 
     @staticmethod
     def make_combined_dicts(file_dictionary, skip_cols=None):
-        """ Return combined summary and individual summaries.
+        """ Return combined and individual summaries.
 
         Args:
             file_dictionary (FileDictionary):  Dictionary of file name keys and full path.

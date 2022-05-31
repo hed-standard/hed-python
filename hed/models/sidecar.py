@@ -108,16 +108,16 @@ class Sidecar:
 
     @staticmethod
     def load_multiple_sidecars(input_list):
-        """ Utility function for easily loading multiple json files at once
-            This takes a list of filenames or ColumnDefinitionGroups and returns a list of ColumnDefinitionGroups.
-
-            Note: it will completely fail and raise a HedFileError if any of the files are not found.
+        """ Utility for loading multiple json files.
 
         Args:
-            input_list (list): A list of filenames or Sidecar files in any mix. [
+            input_list (list): A list of filenames or Sidecar files in any mix.
 
         Returns:
             list: A list sidecars.
+
+        Raises:
+            HedFileError: If any of the files are not found.
 
         """
         if not isinstance(input_list, list):
