@@ -5,7 +5,7 @@ from hed.models import TabularInput, TagExpressionParser
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):
-    """ Return a dataframe with assembled HED annotations.
+    """ Return assembled HED annotations in a dataframe.
 
     Args:
         data_input (TabularInput): The tabular input file whose HED annotations are to be assembled.
@@ -34,7 +34,7 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
 
 
 def get_assembled_strings(table, hed_schema=None, expand_defs=False):
-    """ Return HED string objects corresponding to a tabular file.
+    """ Return HED string objects for a tabular file.
 
     Args:
         table (TabularInput): The input file to be searched.

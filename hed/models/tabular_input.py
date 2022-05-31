@@ -74,7 +74,7 @@ class TabularInput(BaseInput):
         return def_mapper
 
     def reset_column_mapper(self, sidecars=None, attribute_columns=None):
-        """ Change the sidecars and settings in use for parsing this file.
+        """ Change the sidecars and settings.
 
         Args:
             sidecars (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.

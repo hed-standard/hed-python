@@ -217,7 +217,7 @@ class HedTag:
 
     @property
     def long_tag(self):
-        """ long form if it exists, otherwise default tag form.
+        """ Long form if exists, otherwise default tag form.
 
         Returns:
             str: The long form of this tag.
@@ -313,7 +313,7 @@ class HedTag:
         return str(self).lower()
 
     def convert_to_canonical_forms(self, hed_schema):
-        """ Update the internal tag states from the schema and set the schema entry.
+        """ Update internal state set the schema entry.
 
         Args:
             hed_schema (HedSchema): The schema to use to validate this tag

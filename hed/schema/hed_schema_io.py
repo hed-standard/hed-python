@@ -1,4 +1,4 @@
-""" Utilities for loading and outputting HED schema."""
+""" Utilities for loading and outputting HED schema. """
 import os
 
 

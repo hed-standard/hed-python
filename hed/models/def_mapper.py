@@ -62,7 +62,7 @@ class DefMapper(HedOps):
         self._temporary_def_names = set()
 
     def add_definitions_from_string_as_temp(self, hed_string_obj):
-        """ Add definitions from hed string as temporary definitions.
+        """ Add definitions from hed string as temporary.
 
         Args:
             hed_string_obj (HedString):  Hed string object to search for definitions
