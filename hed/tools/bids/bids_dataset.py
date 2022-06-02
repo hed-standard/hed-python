@@ -86,7 +86,7 @@ class BidsDataset:
         """ Return a HedSchema or HedSchemaGroup extracted from the dataset_description.
 
         Returns:
-            HedSchema or HedSchemaGroup or None: The schema or schema group extracted
+            HedSchema, HedSchemaGroup, or None: The schema or schema group extracted.
 
         """
         hed = self.dataset_description.get("HEDVersion", None)

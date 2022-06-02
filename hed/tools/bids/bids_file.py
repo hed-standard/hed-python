@@ -32,6 +32,7 @@ class BidsFile:
         self.entity_dict = entity_dict
         self.sidecar = None    # list of sidecars starting at the root (including itself if sidecar)
         self.contents = None
+        self.has_hed = False
 
     @property
     def get_contents(self):
@@ -73,6 +74,7 @@ class BidsFile:
         if self.contents and no_overwrite:
             return
         self.contents = content_info
+        self.has_hed = False
 
     def __str__(self):
         """ Return a string representation of this object. """

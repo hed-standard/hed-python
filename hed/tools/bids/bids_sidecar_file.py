@@ -37,7 +37,7 @@ class BidsSidecarFile(BidsFile):
                 return False
         return True
 
-    def set_contents(self, content_info=None):
+    def set_contents(self, content_info=None, no_overwrite=True):
         """ Set the contents of the sidecar.
 
         Args:
@@ -45,13 +45,17 @@ class BidsSidecarFile(BidsFile):
                 Otherwise a list of .json files to be merged starting from the root level downward.
 
          """
+        if no_overwrite and self.contents:
+            return
         if not content_info:
-            file_contents = self.file_path
+            file_contents = self.get_merged([self.file_path])
         elif isinstance(content_info, str):
-            file_contents = content_info
+            file_contents = self.get_merged([content_info])
         elif isinstance(content_info, list):
-            file_contents = io.StringIO(json.dumps(self.get_merged(content_info)))
-        self.contents = Sidecar(file=file_contents, name=os.path.realpath(os.path.basename(self.file_path)))
+            file_contents = self.get_merged(content_info)
+        self.has_hed = self.is_hed(file_contents)
+        self.contents = Sidecar(file=io.StringIO(json.dumps(file_contents)),
+                                name=os.path.realpath(os.path.basename(self.file_path)))
 
     @staticmethod
     def get_merged(file_list):
@@ -67,14 +71,37 @@ class BidsSidecarFile(BidsFile):
             - Merging takes place from front to back with overwriting of top-level keys.
 
         """
-        merged_sidecar = {}
+        merged_dict = {}
         if not file_list:
-            return merged_sidecar
+            return merged_dict
         for file in file_list:
             if isinstance(file, BidsSidecarFile):
                 file = file.file_path
             with open(file, 'r') as fp:
                 next_sidecar = json.load(fp)
             for key, item in next_sidecar.items():
-                merged_sidecar[key] = item
-        return merged_sidecar
+                merged_dict[key] = item
+        return merged_dict
+
+    @staticmethod
+    def is_hed(json_dict):
+        """ Return True if the json has HED.
+
+        Args:
+            json_dict (dict): A dictionary representing a JSON file or merged file.
+
+        Returns:
+            bool:  True if the dictionary has HED or HED_assembled as a first or second-level key.
+
+        """
+
+        json_keys = json_dict.keys()
+        if 'HED' in json_keys or 'HED_assembled' in json_keys:
+            return True
+        for key, value in json_dict.items():
+            if not isinstance(value, dict):
+                continue
+            val_keys = value.keys()
+            if 'HED' in val_keys or 'HED_assembled' in val_keys:
+                return True
+        return False
