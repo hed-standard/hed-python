@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
         try:
             cls.specific_hed_url = \
                 """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
-            hed_cache.cache_xml_versions(cache_folder=cls.hed_cache_dir)
+            hed_cache.cache_all_xml_versions(cache_folder=cls.hed_cache_dir)
         except urllib.error.HTTPError as e:
             schema.set_cache_directory(cls.saved_cache_folder)
             raise e
@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
         schema.set_cache_directory(cls.saved_cache_folder)
 
     def test_cache_again(self):
-        time_since_update = hed_cache.cache_all_hed_xml_versions(cache_folder=self.hed_cache_dir)
+        time_since_update = hed_cache.cache_all_xml_versions(cache_folder=self.hed_cache_dir)
         self.assertGreater(time_since_update, 0)
 
     def test_cache_specific_urls(self):

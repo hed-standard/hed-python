@@ -20,7 +20,7 @@ class HedTag:
             hed_schema (HedSchema or None): A convenience parameter for calculating canonical forms on creation.
 
         Notes:
-            - This does not produce issues and is used for testing.
+            - This does not produce issues and is used primarily for testing.
 
         """
         self._hed_string = hed_string
@@ -60,7 +60,7 @@ class HedTag:
         """ Short form including value or extension.
 
         Returns:
-            short_tag (str): The short version of the tag, including value or extension.
+            short_tag (str): The short form of the tag, including value or extension.
 
          Note:
              Only valid after calling convert_to_canonical_forms
@@ -76,7 +76,7 @@ class HedTag:
         """ Long form without value or extension.
 
         Returns:
-            base_tag (str): The long version of the tag, without value or extension.
+            base_tag (str): The long form of the tag, without value or extension.
 
         Notes:
             - Only valid after calling convert_to_canonical_forms.
@@ -88,7 +88,7 @@ class HedTag:
 
     @property
     def short_base_tag(self):
-        """ Short non-extension portion of a tag.
+        """ Short form without value or extension
 
         Returns:
             base_tag (str): The short non-extension port of a tag.
@@ -103,7 +103,7 @@ class HedTag:
 
     @short_base_tag.setter
     def short_base_tag(self, new_tag_val):
-        """ Change the short term of the tag.
+        """ Change base tag, leaving extension or value.
 
         Args:
             new_tag_val (str): The new short_base_tag for this tag.
@@ -113,8 +113,6 @@ class HedTag:
 
         Note:
             - Generally this is used to swap def to def-expand.
-            - This does not change the long form location, so only set this on tags with the same parent node.
-
         """
         if self._schema_entry:
             if self._schema:
@@ -128,10 +126,10 @@ class HedTag:
 
     @property
     def org_base_tag(self):
-        """ Original version without value or extension.
+        """ Original form without value or extension.
 
         Returns:
-            base_tag (str): The original version of the tag, without value or extension.
+            base_tag (str): The original form of the tag, without value or extension.
 
         Notes:
             - Warning: This could be empty if the original tag had a name_prefix prepended.
@@ -152,7 +150,7 @@ class HedTag:
         return str(self)
 
     def tag_modified(self):
-        """ Return true if tag has been modified original.
+        """ Return true if tag has been modified from original.
 
         Returns:
             bool: Return True if the tag is modified.
@@ -167,11 +165,10 @@ class HedTag:
     def tag(self):
         """ Return the entire user editable attribute in the tag.
 
-        Returns:
-            tag (str): The custom set user version of the tag.
+            Returns the original tag if no user form set.
 
-        Note:
-            Only valid after calling convert_to_canonical_forms.
+        Returns:
+            tag (str): The custom set user form of the tag.
 
         """
         if self._tag:
@@ -187,7 +184,7 @@ class HedTag:
             new_tag_val (str): New (implicitly long form) of tag to set.
 
         Notes:
-            - Primarily used to expand def tags.
+            - Primarily used to add prefixes from column metadata to tags.
             - Only valid before calling convert_to_canonical_forms.
 
         """
@@ -199,9 +196,10 @@ class HedTag:
 
     @property
     def extension_or_value_portion(self):
-        """ Get the extension or value portion at the end of a hed tag, if one exists
+        """ Get the extension or value of tag
 
-        Generally this is just the portion after the last slash.
+            Generally this is just the portion after the last slash.
+            Returns an empty string if no extension or value.
 
         Returns:
             str: The tag name.
@@ -251,7 +249,7 @@ class HedTag:
         if self._schema_entry:
             return self._schema_entry.tag_terms
 
-        # TODO: Potentially remove this.  It's just a quick hack for testing and should not be on the main branch.
+        # TODO: Potentially remove this.  It's just a quick hack for testing
         return tuple(str(self).lower())
 
     def __str__(self):
@@ -269,13 +267,7 @@ class HedTag:
 
         return self._hed_string[self.span[0]:self.span[1]]
 
-    def _str_no_long_tag(self):
-        if self._tag:
-            return self._tag
-
-        return self._hed_string[self.span[0]:self.span[1]]
-
-    def add_prefix(self, required_prefix):
+    def add_prefix_if_needed(self, required_prefix):
         """ Add a prefix to this tag *unless* already formatted.
 
         Args:
@@ -470,13 +462,12 @@ class HedTag:
         return False
 
     def is_extension_allowed_tag(self):
-        """Check if tag has 'extensionAllowed' attribute.
+        """ Check if tag has 'extensionAllowed' attribute.
+
+            Recursively checks parent tag entries for the attribute as well.
 
         Returns:
             bool: True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
-
-        Notes:
-            - It will strip the tag until there are no more slashes to check if its ancestors have the attribute.
 
         """
         if self.is_takes_value_tag():
@@ -552,7 +543,7 @@ class HedTag:
             list: Always return an empty list.
 
         Notes:
-            -  This is used for such as definition and def.
+            -  This is used for such as definition and def when no schema present
 
         """
         tags_to_identify = ["onset", "definition", "offset", "def-expand", "def"]
@@ -565,7 +556,7 @@ class HedTag:
         return []
 
     def _get_library_prefix(self, org_tag):
-        """ Return the library prefix for the tag.
+        """ Finds the library prefix for the tag.
 
         Args:
             org_tag (str): A string representing a tag.
@@ -585,7 +576,7 @@ class HedTag:
         return ""
 
     def _get_tag_units_portion(self, tag_unit_classes):
-        """ Check that this string has valid units and removed them.
+        """ Check that this string has valid units and remove them.
 
         Args:
             tag_unit_classes (list): A list of valid UnitClassEntry objects for this tag.
@@ -623,7 +614,7 @@ class HedTag:
         return possible_match
 
     def replace_placeholder(self, placeholder_value):
-        """ If this tag a placeholder character(#), replace with value.
+        """ If tag has a placeholder character(#), replace with value.
 
         Args:
             placeholder_value (str): Value to replace placeholder with.

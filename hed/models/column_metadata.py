@@ -26,7 +26,7 @@ class ColumnType(Enum):
 
 
 class ColumnMetadata:
-    """ Column or top-level Sidecar dict in a ColumnMapper. """
+    """ Column in a ColumnMapper or top-level Sidecar dict. """
 
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None, error_handler=None):
         """ A single column entry in the column mapper.
@@ -206,7 +206,7 @@ class ColumnMetadata:
         return self._def_removed_hed_dict
 
     def expand(self, input_text):
-        """ Expand using the rules for this column.
+        """ Expand text using the rules for this column.
 
         Args:
             input_text (str): Text to expand (generally from a single cell in a spreadsheet).
@@ -217,7 +217,7 @@ class ColumnMetadata:
                             as an attribute. If the first return value is None, this is an error message dictionary.
 
         Notes:
-            - An example is adding name_prefix, inserting a column hed_string from key, etc.
+            - Examples are adding name_prefix, inserting a column hed_string from a category key, etc.
 
         """
         column_type = self.column_type
@@ -235,8 +235,8 @@ class ColumnMetadata:
             return HedString(final_text), False
         elif column_type == ColumnType.HEDTags:
             hed_string_obj = HedString(input_text)
-            final_text = self._prepend_prefix(hed_string_obj, self.column_prefix)
-            return final_text, False
+            self._prepend_required_prefix(hed_string_obj, self.column_prefix)
+            return hed_string_obj, False
         elif column_type == ColumnType.Ignore:
             return None, False
         elif column_type == ColumnType.Attribute:
@@ -245,23 +245,19 @@ class ColumnMetadata:
         return None, {"error_type": "INTERNAL_ERROR"}
 
     @staticmethod
-    def _prepend_prefix(required_tag_column_tags, required_tag_prefix):
+    def _prepend_required_prefix(required_tag_column_tags, required_tag_prefix):
         """ Prepend the tag paths to the required tag column tags that need them.
 
         Args:
             required_tag_column_tags (HedString): A string containing HED tags associated with a
                 required tag column that may need a tag name_prefix prepended to its tags.
             required_tag_prefix (str): A string that will be added if missing to any given tag.
-
-        Returns:
-            HedString: A comma separated string with the required HED tags with the tag name_prefix prepended.
-
         """
         if not required_tag_prefix:
             return required_tag_column_tags
 
         for tag in required_tag_column_tags.get_all_tags():
-            tag.add_prefix(required_tag_prefix)
+            tag.add_prefix_if_needed(required_tag_prefix)
 
         return required_tag_column_tags
 
@@ -315,7 +311,7 @@ class ColumnMetadata:
         return ColumnType.Value
 
     def get_definition_issues(self):
-        """ Return the issues from extracting definitions.
+        """ Return the issues found extracting definitions.
 
         Returns:
             list: A list of issues found when parsing definitions. Individual issues are dictionaries.
@@ -425,7 +421,7 @@ class ColumnMetadata:
         return []
 
     def extract_definitions(self, error_handler=None):
-        """ Gather and validate the definitions.
+        """ Gather and validate definitions in metadata.
 
         Args:
             error_handler (ErrorHandler): The error handler to use for context, uses a default one if None.

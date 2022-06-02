@@ -8,7 +8,7 @@ from hed.models.hed_ops import HedOps
 
 
 class DefMapper(HedOps):
-    """ Handles Def/ and Def-expand/.
+    """ Handles converting Def/ and Def-expand/.
 
     Notes:
        - The class provides string funcs but no tag funcs when extending HedOps.
@@ -77,7 +77,7 @@ class DefMapper(HedOps):
         return validation_issues
 
     def add_definitions(self, def_dicts, add_as_temp=False):
-        """ Add the definitions to this mapper.
+        """ Add definitions from dict(s) to mapper
 
         Args:
             def_dicts (list or DefinitionDict): DefDict or list of DefDicts whose definitions should be added.
@@ -112,7 +112,7 @@ class DefMapper(HedOps):
                 self._temporary_def_names.add(def_tag)
 
     def expand_def_tags(self, hed_string_obj, expand_defs=True, shrink_defs=False):
-        """ Validate Def and Def-expand tags.
+        """ Validate and expand Def/Def-Expand tags.
 
         Args:
             hed_string_obj (HedString): The hed string to process.
@@ -127,9 +127,7 @@ class DefMapper(HedOps):
             - Usually issues are mismatched placeholders or a missing definition.
             - The expand_defs and shrink_defs cannot both be True.
 
-
         """
-
         # First see if the "def" is found at all.  This covers def and def-expand.
         hed_string_lower = hed_string_obj.lower()
         if self._label_tag_name not in hed_string_lower:
@@ -152,7 +150,9 @@ class DefMapper(HedOps):
 
     def expand_and_remove_definitions(self, hed_string_obj, check_for_definitions=False, expand_defs=True,
                                       shrink_defs=False, remove_definitions=True):
-        """ Handle definitions found in the given hed string.
+        """ Validate and expand Def/Def-Expand tags.
+
+            Also removes definitions
 
         Args:
             hed_string_obj (HedString): The string to search for definitions.
@@ -166,7 +166,8 @@ class DefMapper(HedOps):
 
         Notes:
             - The check_for_definitions is mainly used for individual HedStrings in isolation.
-            - The defintions can be expanded, shrunk, and/or removed.
+            - The defs can be expanded or shrunk, while definitions can be removed.
+            - This does not validate definitions, it will blindly remove invalid definitions as well.
 
         """
         def_issues = []
