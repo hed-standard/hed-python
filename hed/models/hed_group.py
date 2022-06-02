@@ -16,7 +16,7 @@ class HedGroup(HedGroupBase):
             contents (list or None):  A list of HedTags and/or HedGroups that will be set as the contents of this group.
 
         Notes:
-            - The contents is mainly used for processing definitions.
+            - contents parameter is mainly used for processing definitions.
 
         """
 
@@ -43,17 +43,13 @@ class HedGroup(HedGroupBase):
         self._children.append(tag_or_group)
 
     def check_if_in_original(self, tag_or_group):
-        """ Check if the tag or group was original.
+        """ Check if the tag or group in original string.
 
         Args:
             tag_or_group (HedTag or HedGroup): The HedTag or HedGroup to be looked for in this group.
 
         Returns:
             bool:  True if in this group.
-
-        Notes:
-            - Creates a list of full tags and groups contained in this group.
-
         """
         node_list = [self]
         final_list = []
@@ -72,7 +68,7 @@ class HedGroup(HedGroupBase):
 
         Args:
             item_to_replace (HedTag or HedGroup): The item to replace must exist or this will raise an error.
-            new_contents (HedTag, HedGroup or list of HedTag and/or HedGroup): Replacement contents.
+            new_contents (HedTag or HedGroup): Replacement contents.
 
         """
         if self._original_children is self._children:
@@ -94,7 +90,7 @@ class HedGroup(HedGroupBase):
 
         Notes:
             - Any groups that become empty will also be pruned.
-            - Identity, not equivalence is used in determining whether or not to remove.
+            - Identity, not equivalence is used in determining whether to remove.
 
         """
         all_groups = self.get_all_groups()
@@ -128,12 +124,10 @@ class HedGroup(HedGroupBase):
     def get_frozen(self):
         """ Return a frozen (non-mutable) copy of this HedGroup.
 
+            This is a deep copy if the group was not already frozen.
+
         Returns:
             HedGroupFrozen: A frozen copy of this HedGroup.
-
-        Notes:
-            - The tags still point to the same place.  Do not alter them.
-
         """
         return HedGroupFrozen(self)
 
@@ -186,7 +180,7 @@ class HedGroupFrozen(HedGroupBase):
         return hash((self._children, self.is_group))
 
     def get_all_tags(self):
-        """ Return the HedTags including descendants.
+        """ Return HedTags, including descendants.
 
         Returns:
             list: A list of all the HedTags in this group including descendants.
@@ -200,7 +194,7 @@ class HedGroupFrozen(HedGroupBase):
         return self._tags
 
     def get_all_groups(self, also_return_depth=False):
-        """ Return HedGroups including descendants and self.
+        """ Return HedGroups, including descendants and self.
 
         Args:
             also_return_depth (bool): If True, this yields tuples (group, depth) rather than just groups.
@@ -223,6 +217,5 @@ class HedGroupFrozen(HedGroupBase):
 
         Returns:
             HedGroupFrozen: This same group.
-
         """
         return self

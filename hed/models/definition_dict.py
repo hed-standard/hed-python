@@ -41,9 +41,7 @@ class DefinitionEntry:
 
         Returns:
             str:          The expanded def tag name
-            HedGroup:
-            expanded_tag_name, def_contents: str, [HedGroup or HedTag]
-            The expanded def tag name, and the contents of this definition(including the def tag itself)
+            HedGroup:     The contents of this definition(including the def tag itself)
 
         Raises:
             ValueError:  If a placeholder_value is passed, but this definition doesn't have a placeholder.
@@ -77,7 +75,6 @@ class DefinitionDict(HedOps):
         This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
 
     """
-
     def __init__(self):
         """ Definitions to be considered a single source. """
 
@@ -116,7 +113,7 @@ class DefinitionDict(HedOps):
         return []
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
-        """ Check string for definition tags and add to the dictionary.
+        """ Check string for definition tags, adding them to self.
 
         Args:
             hed_string_obj (HedString): A single hed string to gather definitions from.

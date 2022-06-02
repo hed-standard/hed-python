@@ -58,7 +58,7 @@ class HedGroupBase:
         return True
 
     def get_all_tags(self):
-        """ All the HedTags in this group.
+        """ Return HedTags, including descendants.
 
         Returns:
             list:  A list of all the tags in this group including descendants.
@@ -77,7 +77,7 @@ class HedGroupBase:
         return final_list
 
     def get_all_groups(self, also_return_depth=False):
-        """ Return the HedGroups.
+        """ Return HedGroups, including descendants and self.
 
         Args:
             also_return_depth (bool): If True, yield tuples (group, depth) rather than just groups.
@@ -141,7 +141,7 @@ class HedGroupBase:
         """ Get the original hed string.
 
         Returns:
-            str: The original string with zero modification.
+            str: The original string with no modification.
 
         """
         return self._hed_string[self._startpos:self._endpos]
@@ -212,8 +212,7 @@ class HedGroupBase:
         return result
 
     def lower(self):
-        """ Convert the string form to lowercase. """
-
+        """ Convenience function, equivalent to str(self).lower() """
         return str(self).lower()
 
     def find_placeholder_tag(self):
@@ -245,7 +244,7 @@ class HedGroupBase:
         return True
 
     def find_tags(self, search_tags, recursive=False, include_groups=2):
-        """ Find the tags and containing groups.
+        """ Find the tags and their containing groups.
 
         Args:
             search_tags (container):    A container of short_base_tags to locate
@@ -314,7 +313,7 @@ class HedGroupBase:
         return found_tags
 
     def find_def_tags(self, recursive=False, include_groups=3):
-        """ Find def and def-expand tags in the group.
+        """ Find def and def-expand tags
 
         Args:
             recursive (bool): If true, also check subgroups.

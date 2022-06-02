@@ -59,16 +59,15 @@ class HedString(HedGroup):
         return False
 
     def convert_to_canonical_forms(self, hed_schema):
-        """ Identify all tags using the given schema. If no schema, still identify "key" tags such as definitions.
+        """ Identify all tags using the given schema.
+
+            If schema is None, still identify "key" tags such as definitions.
 
         Args:
             hed_schema (HedSchema or None): The schema to use to validate/convert tags.
 
         Returns:
             list: A list of issues found while converting the string. Each issue is a dictionary.
-
-        Notes:
-            - Sets the "isDefinition" property on tags and groups.
 
         """
         validation_issues = []
@@ -79,6 +78,8 @@ class HedString(HedGroup):
 
     def remove_definitions(self):
         """ Remove definition tags and groups from this string.
+
+            This does not validate definitions and will blindly removing invalid ones as well.
 
         Returns:
             list: An empty list as there are no possible issues, this list is always blank.
@@ -335,12 +336,9 @@ class HedString(HedGroup):
     def get_frozen(self):
         """ Return a frozen copy of this HedString.
 
+            This is a deep copy if the group was not already frozen.
         Returns:
             HedStringFrozen: A frozen copy of this HedString.
-
-        Notes:
-            - Tags in frozen hed strings still point to the same place.  Do not alter them.
-
         """
         return HedStringFrozen(self)
 
@@ -358,7 +356,7 @@ class HedString(HedGroup):
                 - If 2 or any other value: return both.
 
         Notes:
-            - A max of 1 tag located in the top level group.
+            - A max of 1 tag located per top level group.
 
         """
         top_level_tags = []

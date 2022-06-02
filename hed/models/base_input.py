@@ -42,7 +42,6 @@ class BaseInput:
             name (str or None): Optional field for how this file will report errors.
 
         Notes:
-            - The validation will skip over the first line of the file.
             - See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
 
          """
@@ -186,13 +185,9 @@ class BaseInput:
         Args:
             file (str or file-like):      Location to save this base input.
             output_processed_file (bool): If True, replace definitions and labels in HED columns.
-
+                                          Also fills in things like categories.
         Raises:
             HedFileError if empty file object or file cannot be opened.
-
-        Notes:
-            - Also fills in things like categories.
-
         """
         if not file:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
@@ -225,7 +220,7 @@ class BaseInput:
         Args:
             file (str, file-like, or None): Location to save this file. If None, return as string.
             output_processed_file (bool): Replace all definitions and labels in HED columns as appropriate.
-
+                                          Also fills in things like categories.
         Returns:
             None or str:  None if file is given or the contents as a str if file is None.
 
@@ -244,7 +239,7 @@ class BaseInput:
         return self.iter_dataframe()
 
     def iter_raw(self, hed_ops=None, error_handler=None, **kwargs):
-        """ Iterate without modifications or substitutions.
+        """ Iterate all columns without substitutions
 
         Args:
             hed_ops (list, func, HedOps, or None): A func, a HedOps or a list of these to apply to the
@@ -253,9 +248,7 @@ class BaseInput:
             kwargs:
 
         Yields:
-            tuple:
-                - int: The current row number.
-                - dict: A dict with column_number keys and values corresponding to the cell at that position.
+            - dict: A dict with column_number keys and values corresponding to the cell at that position.
 
         Notes:
             - See models.hed_ops.translate_ops or the specific hed_ops for additional options.
@@ -272,7 +265,7 @@ class BaseInput:
 
     def iter_dataframe(self, hed_ops=None, mapper=None, return_string_only=True, run_string_ops_on_columns=False,
                        error_handler=None, expand_defs=False, remove_definitions=True, **kwargs):
-        """ Iterate based on the given column mapper.
+        """ Iterate rows based on the given column mapper.
 
         Args:
             hed_ops (list, func, HedOps, or None):  A func, a HedOps or a list of these to apply to the
@@ -287,9 +280,7 @@ class BaseInput:
             kwargs ():  See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
         Yields:
-            tuple:
-                - int:    The current row number.
-                - dict:   A dict with parsed row, including keys: "HED", "column_to_hed_tags", and possibly "column_issues".
+             - dict:   A dict with parsed row, including keys: "HED", "column_to_hed_tags", and possibly "column_issues".
 
         """
         if error_handler is None:
@@ -374,7 +365,7 @@ class BaseInput:
             openpyxl.workbook.Workbook: The workbook request.
 
         Notes:
-            If None, use the first worksheet.
+            If None, returns the first worksheet.
 
         """
         if worksheet_name and self._loaded_workbook:
@@ -386,7 +377,7 @@ class BaseInput:
             return None
 
     def get_def_and_mapper_issues(self, error_handler, check_for_warnings=False):
-        """ Return definitions and column issues.
+        """ Return definition and column issues.
 
         Args:
             error_handler (ErrorHandler): The error handler to use.
@@ -542,7 +533,7 @@ class BaseInput:
         return new_def_dict
 
     def update_definition_mapper(self, def_dict):
-        """ Add label definitions if mapper.
+        """ Add definitions from dict(s) if mapper exists.
 
         Args:
             def_dict (list or DefinitionDict): Add the DefDict or list of DefDict to the internal definition mapper.
