@@ -16,14 +16,6 @@ from hed.validator.hed_validator import HedValidator
 
 from hed import errors, models, schema, tools, util, validator
 
-# __all__ = [
-#     "errors",
-#     "models",
-#     "schema",
-#     "tools",
-#     "util",
-#     "validator"
-# ]
 
 from . import _version
 __version__ = _version.get_versions()['version']

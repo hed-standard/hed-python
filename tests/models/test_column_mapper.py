@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
         cls.category_key = 'Event/Category/'
         cls.category_participant_and_stimulus_tags = \
             HedString('Event/Category/Participant response, Event/Category/Stimulus')
-        cls.category_tags = HedString('Participant response, Stimulus')
+
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
 
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
@@ -151,19 +151,19 @@ class Test(unittest.TestCase):
         self.assertEqual(str(no_prefix_string), str(self.complex_hed_tag_no_prefix))
 
     def test__prepend_prefix_to_required_tag_column_if_needed(self):
-        prepended_hed_string = ColumnMetadata._prepend_prefix(
-            self.category_tags, self.category_key)
-        self.assertIsInstance(prepended_hed_string, HedString)
-        self.assertEqual(str(prepended_hed_string), str(self.category_participant_and_stimulus_tags))
+        category_tags = HedString('Participant response, Stimulus')
+        ColumnMetadata._prepend_required_prefix(category_tags, self.category_key)
+        self.assertIsInstance(category_tags, HedString)
+        self.assertEqual(str(category_tags), str(self.category_participant_and_stimulus_tags))
 
     # Verify reading/writing a short tag to a file column with a name_prefix works
     def test_add_prefix_verify_short_tag_conversion(self):
         schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.schema_file)
         hed_schema = load_schema(schema_file)
-        prepended_hed_string = ColumnMetadata._prepend_prefix(
-            HedString(self.short_tag_with_missing_prefix), self.short_tag_key)
-        issues = prepended_hed_string.convert_to_canonical_forms(hed_schema)
-        for tag in prepended_hed_string.get_all_tags():
+        hed_string_obj = HedString(self.short_tag_with_missing_prefix)
+        ColumnMetadata._prepend_required_prefix(hed_string_obj, self.short_tag_key)
+        issues = hed_string_obj.convert_to_canonical_forms(hed_schema)
+        for tag in hed_string_obj.get_all_tags():
             self.assertEqual("Character/D", tag.short_tag)
 
     def test_add_prefix_verify_short_tag_read(self):

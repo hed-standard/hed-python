@@ -12,13 +12,11 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class ColumnMapper:
-    """ Mapping of a tabular file columns into HED tags.
+    """ Mapping of a base input file columns into HED tags.
 
     Notes:
         - Functions and variables column and row indexing starts at 0.
-
     """
-
     def __init__(self, sidecars=None, tag_columns=None, column_prefix_dictionary=None,
                  attribute_columns=None, optional_tag_columns=None):
         """ Constructor for ColumnMapper.
@@ -26,6 +24,7 @@ class ColumnMapper:
         Args:
             sidecars (Sidecar, string, or list of these): A list of Sidecars or
                  filenames to gather ColumnDefinitions from.
+                Sidecars later in the list override those earlier in the list.
             tag_columns: (list):  A list of ints or strings containing the columns that contain the HED tags.
                 Sidecar column definitions will take precedent if there is a conflict with tag_columns.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers and values are HED tag
@@ -36,7 +35,6 @@ class ColumnMapper:
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
 
         Notes:
-            - Sidecars later in the list override those earlier in the list.
             - All column numbers are 0 based.
 
         Examples:
@@ -44,9 +42,7 @@ class ColumnMapper:
 
             The third column contains tags that need Description/ tag prepended, while the fourth column
             contains tag that needs Label/ prepended.
-
         """
-
         # This points to column_type entries based on column names or indexes if columns have no column_name.
         self.column_data = {}
         # Maps column number to column_entry.  This is what's actually used by most code.
@@ -84,7 +80,7 @@ class ColumnMapper:
                 self._add_column_data(column_data)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
-        """ Add the columns to the column prefix dictionary.
+        """ Replace the column prefix dictionary
 
         Args:
             column_prefix_dictionary (dict):  Dictionary with keys that are column numbers and values are HED tag
@@ -102,12 +98,14 @@ class ColumnMapper:
         return []
 
     def set_tag_columns(self, tag_columns=None, optional_tag_columns=None, finalize_mapping=True):
-        """ Set tag columns or current ones if None.
+        """ Set tag columns and optional tag columns
 
         Args:
             tag_columns (list): A list of ints or strings containing the columns that contain the HED tags.
+                                If None, clears existing tag_columns
             optional_tag_columns (list): A list of ints or strings containing the columns that contain the HED tags,
-                but not an error if missing.
+                                         but not an error if missing.
+                                         If None, clears existing tag_columns
             finalize_mapping (bool): Re-generate the internal mapping if True, otherwise no effect until finalize.
 
         Returns:
@@ -126,7 +124,7 @@ class ColumnMapper:
         return []
 
     def set_column_map(self, new_column_map=None):
-        """ Set the column number mapping.
+        """ Set the column number to name mapping.
 
         Args:
             new_column_map (list or dict):  Either an ordered list of the column names or column_number:column name
@@ -194,12 +192,12 @@ class ColumnMapper:
             row_text (list): The text for the given row, one list entry per column number.
 
         Returns:
-            dict: A dictionary containing the keys HED, column_to_hed_tags, and attribute.
+            dict: A dictionary containing the keys COLUMN_TO_HED_TAGS, COLUMN_ISSUES, and arbitrary attributes.
 
         Notes:
-            - The value of the "HED" entry is the entire expanded row.
-            - The "column_to_hed_tags" is each expanded column given separately as a list of strings.
-            - The attribute is the value from the spreadsheet column only present when a given column is an attribute.
+            - The "column_to_hed_tags" is each expanded column given separately as a list of HedStrings.
+            - Attributes are any column identified as an attribute.
+              They will appear in the return value as {attribute_name: value_of_column}
 
         """
         result_dict = {}
@@ -227,7 +225,7 @@ class ColumnMapper:
         return result_dict
 
     def get_prefix_remove_func(self, column_number):
-        """ Return a function to removes name prefixes.
+        """ Return a function to removes name prefixes for column
 
         Args:
             column_number (int): Column number to look up in the prefix dictionary.

@@ -29,6 +29,7 @@ class TagValidator:
 
         Args:
             hed_schema (HedSchema): A HedSchema object.
+            run_semantic_validation (bool): True if the validator should check the HED data against a schema.
 
         Returns:
             TagValidator: A Tag_Validator object.
@@ -143,7 +144,7 @@ class TagValidator:
     # Mostly internal functions to check individual types of errors
     # =========================================================================+
     def check_invalid_character_issues(self, hed_string):
-        """ Report an error if invalid characters
+        """ Report invalid characters
 
         Args:
             hed_string (str): A hed string.
@@ -152,9 +153,7 @@ class TagValidator:
             list: Validation issues. Each issue is a dictionary.
 
         Notes:
-            - Invalid tags are defined by TagValidator.INVALID_STRING_CHARS.
-            - If no issues are found then an empty list is returned.
-
+            - Invalid tag characters are defined by TagValidator.INVALID_STRING_CHARS.
         """
         validation_issues = []
         for index, character in enumerate(hed_string):
@@ -171,11 +170,6 @@ class TagValidator:
 
         Returns:
             list: A list of validation list. Each issue is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
-            - This is the first check before the tags are parsed.
-
         """
         validation_issues = []
         number_open_parentheses = hed_string.count('(')
@@ -194,10 +188,6 @@ class TagValidator:
 
         Returns:
             list: A validation issues list. Each issue is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
-
         """
         last_non_empty_valid_character = ''
         last_non_empty_valid_index = 0
@@ -242,10 +232,6 @@ class TagValidator:
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
-
         """
         validation_issues = []
         for match in self.pattern_doubleslash.finditer(original_tag.org_tag):
@@ -265,10 +251,6 @@ class TagValidator:
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
-
         """
         allowed_chars = self.TAG_ALLOWED_CHARS
         if not self._hed_schema or not self._hed_schema.is_hed3_schema:
@@ -286,10 +268,6 @@ class TagValidator:
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
-
         """
         validation_issues = []
         if original_tag.is_basic_tag() or original_tag.is_takes_value_tag():
@@ -313,10 +291,6 @@ class TagValidator:
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
-
-        Notes:
-            If no issues are found then an empty list is returned.
-
         """
         validation_issues = []
         if original_tag.is_unit_class_tag():
@@ -346,10 +320,6 @@ class TagValidator:
 
         Returns:
             list: Validation issues.
-
-        Notes:
-            If no issues are found then an empty list is returned.
-
         """
         validation_issues = []
         if not self._validate_value_class_portion(original_tag, original_tag.extension_or_value_portion):
@@ -359,17 +329,13 @@ class TagValidator:
         return validation_issues
 
     def check_tag_requires_child(self, original_tag):
-        """ Report if the tag has the 'requireChild' attribute.
+        """ Report if tag is a leaf with 'requiredTag' attribute.
 
         Args:
             original_tag (HedTag): The original tag that is used to report the error.
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
-
         """
         validation_issues = []
         if original_tag.has_attribute(HedKey.RequireChild):
@@ -378,16 +344,13 @@ class TagValidator:
         return validation_issues
 
     def check_tag_unit_class_units_exist(self, original_tag):
-        """ Report warning if tag has a unit class no units.
+        """ Report warning if tag has a unit class tag with no units.
 
         Args:
             original_tag (HedTag): The original tag that is used to report the error.
 
         Returns:
             list: Validation issues.  Each issue is a dictionary.
-
-        Notes:
-            - Returns an empty list if no issues found.
 
         """
         validation_issues = []
@@ -408,10 +371,6 @@ class TagValidator:
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
-
         """
         allowed_chars = self.TAG_ALLOWED_CHARS
         allowed_chars += self.DEFAULT_ALLOWED_PLACEHOLDER_CHARS
@@ -427,10 +386,6 @@ class TagValidator:
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
-
         """
         validation_issues = []
         tag_names = original_tag.org_base_tag.split("/")
@@ -455,7 +410,6 @@ class TagValidator:
 
         Notes:
             - Top-level groups can contain definitions, Onset, etc tags.
-
         """
         validation_issues = []
         if self._run_semantic_validation:
@@ -486,10 +440,7 @@ class TagValidator:
             tags (list): HedTags containing the tags.
 
         Returns:
-            list: Validation issues. Each each is a dictionary.
-
-        Notes:
-            - If no issues are found then an empty list is returned.
+            list: Validation issues. Each issue is a dictionary.
 
         """
         validation_issues = []
@@ -501,18 +452,16 @@ class TagValidator:
         return validation_issues
 
     def check_multiple_unique_tags_exist(self, tags):
-        """ Report if multiple unique tags.
+        """ Report if multiple identical unique tags exist
+
+            A unique Term can only appear once in a given HedString.
+            Unique terms are terms with the 'unique' property in the schema.
 
         Args:
             tags (list): HedTags containing the tags.
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
-
-        Notes:
-            - Two or more tags start with a tag name_prefix and have the same name and have the 'unique' attribute.
-            - If no issues are found then an empty list is returned.
-
         """
         validation_issues = []
         unique_prefixes = self._hed_schema.get_tags_with_attribute(HedKey.Unique)
@@ -587,7 +536,7 @@ class TagValidator:
         return character == TagValidator.COMMA
 
     def check_for_placeholder(self, original_tag, is_definition=False):
-        """ Report invalid placeholder characters .
+        """ Report invalid placeholder characters.
 
         Args:
             original_tag (HedTag):  The HedTag to be checked

@@ -1,5 +1,6 @@
 import unittest
-from hed.errors import ErrorHandler, ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings
+from hed.errors import ErrorHandler, ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings, \
+    get_printable_issue_string
 
 
 class Test(unittest.TestCase):
@@ -72,3 +73,20 @@ class Test(unittest.TestCase):
         filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list,
                                                                      severity=ErrorSeverity.ERROR)
         self.assertTrue(len(filtered_list) == 1)
+
+    def test_printable_issue_string(self):
+        self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+                                                                   "dummy", problem_char="#", char_index=0)
+
+        printable_issues = get_printable_issue_string(error_list)
+        self.assertTrue(len(printable_issues) > 10)
+
+        printable_issues2 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR)
+        self.assertTrue(len(printable_issues) > len(printable_issues2))
+
+        printable_issues3 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR, title="Later added custom title that is longer")
+        self.assertTrue(len(printable_issues3) > len(printable_issues2))
+
+        self.error_handler.reset_error_context()

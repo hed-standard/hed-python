@@ -14,7 +14,7 @@ class OnsetMapper(HedOps):
         self._onsets = {}
 
     def check_for_onset_offset(self, hed_string_obj):
-        """ Check for onset or offset and add context.
+        """ Check for onset or offset and track context.
 
         Args:
             hed_string_obj (HedString): The hed string to check.  Finds a maximum of one onset tag.

@@ -55,7 +55,7 @@ class HedStringGroup(HedString):
         return [child for sub_string in self._children for child in sub_string._children]
 
     def remove(self, items_to_remove):
-        """ Remove tags/groups from this group.
+        """ Remove any tags/groups in items_to_remove.
 
         Args:
             items_to_remove (list): A list of HedGroup and HedTag objects to remove.
@@ -74,7 +74,7 @@ class HedStringGroup(HedString):
             self._children = [child for child in self._children if child]
 
     def replace(self, item_to_replace, new_contents):
-        """ Replace an existing tag with a new tag.
+        """ Replace an existing tag or group.
 
         Args:
             item_to_replace (HedTag or HedGroup): The tag to replace.

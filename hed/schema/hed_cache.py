@@ -194,7 +194,7 @@ def get_path_from_hed_version(hed_version, library_name=None, local_hed_director
     return _create_xml_filename(hed_version, library_name, local_hed_directory)
 
 
-def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
+def cache_all_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
     """ Cache a file from a URL.
 
     Args:

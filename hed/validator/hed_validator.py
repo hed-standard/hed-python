@@ -24,10 +24,6 @@ class HedValidator(HedOps):
         Args:
             hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
             run_semantic_validation (bool): True if the validator should check the HED data against a schema.
-
-        Notes:
-            - False for syntax-only validation.
-
         """
         super().__init__()
         self._tag_validator = None

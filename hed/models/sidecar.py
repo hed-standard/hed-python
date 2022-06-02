@@ -268,18 +268,3 @@ class Sidecar:
             error_handler.pop_error_context()
         return all_validation_issues
 
-
-if __name__ == '__main__':
-    import os
-    from hed.validator.hed_validator import HedValidator
-    from hed.schema.hed_schema_io import load_schema_version
-    base_dir = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_hed_inheritance'
-    root_path1 = os.path.realpath(os.path.join(base_dir, 'task-FacePerception_events.json'))
-    root_path2 = os.path.realpath(os.path.join(base_dir, 'sub-002/sub-002_task-FacePerception_events.json'))
-
-    sidecar1 = Sidecar(root_path1, name="sidecar1")
-    sidecar2 = Sidecar(root_path2, name="sidecar2")
-    hed_schema = load_schema_version(xml_version="8.0.0")
-    validator = HedValidator(hed_schema=hed_schema)
-    issues1 = sidecar1.validate_entries([validator], check_for_warnings=True)
-    issues2 = sidecar2.validate_entries([validator], check_for_warnings=True)
