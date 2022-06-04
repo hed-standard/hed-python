@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
         try:
             cls.specific_hed_url = \
                 """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
-            hed_cache.cache_all_xml_versions(cache_folder=cls.hed_cache_dir)
+            hed_cache.cache_xml_versions(cache_folder=cls.hed_cache_dir)
         except urllib.error.HTTPError as e:
             schema.set_cache_directory(cls.saved_cache_folder)
             raise e
@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
         schema.set_cache_directory(cls.saved_cache_folder)
 
     def test_cache_again(self):
-        time_since_update = hed_cache.cache_all_xml_versions(cache_folder=self.hed_cache_dir)
+        time_since_update = hed_cache.cache_xml_versions(cache_folder=self.hed_cache_dir)
         self.assertGreater(time_since_update, 0)
 
     def test_cache_specific_urls(self):
@@ -73,17 +73,17 @@ class Test(unittest.TestCase):
         self.assertTrue(local_filename)
 
     def test_get_all_hed_versions_all(self):
-        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, get_all_libraries=True)
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, get_all_libraries=True)
         self.assertIsInstance(cached_versions, dict)
         self.assertTrue(len(cached_versions) > 0)
 
     def test_get_all_hed_versions(self):
-        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir)
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
 
     def test_get_all_hed_versions_library(self):
-        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, library_name="score")
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
 

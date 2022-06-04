@@ -32,6 +32,7 @@ class Test(unittest.TestCase):
         self.assertEqual(sidecar1.ext, '.json', "BidsSidecarFile should have correct ext")
         self.assertEqual(len(sidecar1.entity_dict), 1, "BidsSidecarFile should have right number of entity_dict")
         self.assertFalse(sidecar1.contents)
+        self.assertFalse(sidecar1.has_hed)
 
     def test_bad_constructor(self):
         try:
@@ -57,25 +58,6 @@ class Test(unittest.TestCase):
         sidecar1.clear_contents()
         self.assertFalse(sidecar1.contents, "BidsSidecarFile should have no contents after clearing")
 
-    def test_is_sidecar_for(self):
-        sidecar1 = BidsSidecarFile(self.sidecar_path)
-        events1 = BidsTabularFile(self.event_path)
-        self.assertTrue(sidecar1.is_sidecar_for(events1))
-
-        the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.nfti'
-        bids = BidsFile(the_path)
-        other = BidsSidecarFile('/d/base/task-overt_run-2_bold.json')
-        self.assertTrue(other.is_sidecar_for(bids), "is_a_parent returns true if parent at top level")
-        other1 = BidsSidecarFile('/d/base1/task-overt_run-2_bold.json')
-        self.assertFalse(other1.is_sidecar_for(bids), "is_a_parent returns false if directories don't match")
-        other2 = BidsSidecarFile('/d/base/task-overt_run-3_bold.json')
-        self.assertFalse(other2.is_sidecar_for(bids), "is_a_parent returns false if entity_dict don't match")
-        other3 = BidsSidecarFile('/d/base/sub-01/sub-01_task-overt_bold.json')
-        self.assertTrue(other3.is_sidecar_for(bids), "is_a_parent returns true if entity_dict  match")
-        other4 = BidsSidecarFile('/d/base/sub-01/sub-01_task-overt_events.json')
-        self.assertFalse(other4.is_sidecar_for(bids), "is_a_parent returns false if suffixes don't match")
-        other5 = BidsSidecarFile('/d/base/sub-01/ses-test/func/temp/sub-01_ses-test_task-overt_run-2_bold.json')
-        self.assertFalse(other5.is_sidecar_for(bids), "is_a_parent returns false for child even if entity_dict match")
 
     def test_get_merged(self):
         side_upper = BidsSidecarFile.get_merged([self.sidecar_path_upper])
@@ -112,6 +94,64 @@ class Test(unittest.TestCase):
         side_dict2 = BidsSidecarFile.get_merged(None)
         self.assertFalse(side_dict2, "get_merged is empty if None")
         self.assertIsInstance(side_dict2, dict, "get_merged produces dict when None")
+
+    def test_is_hed(self):
+        dict1 = {'a' : 'b', 'c': {'d': 'e'}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict1), 'is_hed returns False if no HED or HED_assembled')
+        dict2 = {'HED' : 'b', 'c': {'d':'e'}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict2), 'is_hed returns True if HED at top level.')
+        dict3 = {'HED_assembled': 'b', 'c': {'d':'e'}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict3), 'is_hed returns True if HED_assembled at top level.')
+        dict4 = {'a' : 'b', 'c': {'d':'HED'}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict4),
+                         'is_hed returns False if HED at second level is not a key')
+        dict5 = {'a' : 'b', 'c': {'d':'HED_assembled'}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict5),
+                         'is_hed returns False if HED_assembled at second level is not a key')
+        dict6 = {'a' : 'b', 'c': {'HED': 'a', 'Levels': {'e':'f'}}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict6), 'is_hed returns True if HED key at second level')
+        dict7 = {'a' : 'b', 'c': {'HED_assembled': 'a', 'Levels': {'e':'f'}}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict7), 'is_hed returns True if HED_assembled key at second level')
+        dict8 = {'a': 'b', 'c': {'HED': {'a': 'b'}, 'Levels': {'e': 'f'}}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict8), 'is_hed returns True if HED key at second level')
+        dict9 = {'a': 'b', 'c': {'HED_assembled': {'a': 'b'}, 'Levels': {'e': 'f'}}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict9), 'is_hed returns True if HED_assembled key at second level')
+        dict10 = {'a': 'b', 'c': {'d': {'f': {'HED': 'g'}}}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict10), 'is_hed returns False if HED key at third level')
+        dict11 = {'a': 'b', 'c': {'d': {'f': {'HED_assembled': 'g'}}}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict11), 'is_hed returns False if HED_assembled key at third level')
+
+
+    def test_is_sidecar_for(self):
+        sidecar1 = BidsSidecarFile(self.sidecar_path)
+        events1 = BidsTabularFile(self.event_path)
+        self.assertTrue(sidecar1.is_sidecar_for(events1))
+
+        the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.nfti'
+        bids = BidsFile(the_path)
+        other = BidsSidecarFile('/d/base/task-overt_run-2_bold.json')
+        self.assertTrue(other.is_sidecar_for(bids), "is_a_parent returns true if parent at top level")
+        other1 = BidsSidecarFile('/d/base1/task-overt_run-2_bold.json')
+        self.assertFalse(other1.is_sidecar_for(bids), "is_a_parent returns false if directories don't match")
+        other2 = BidsSidecarFile('/d/base/task-overt_run-3_bold.json')
+        self.assertFalse(other2.is_sidecar_for(bids), "is_a_parent returns false if entity_dict don't match")
+        other3 = BidsSidecarFile('/d/base/sub-01/sub-01_task-overt_bold.json')
+        self.assertTrue(other3.is_sidecar_for(bids), "is_a_parent returns true if entity_dict  match")
+        other4 = BidsSidecarFile('/d/base/sub-01/sub-01_task-overt_events.json')
+        self.assertFalse(other4.is_sidecar_for(bids), "is_a_parent returns false if suffixes don't match")
+        other5 = BidsSidecarFile('/d/base/sub-01/ses-test/func/temp/sub-01_ses-test_task-overt_run-2_bold.json')
+        self.assertFalse(other5.is_sidecar_for(bids), "is_a_parent returns false for child even if entity_dict match")
+
+    def test_set_contents(self):
+        sidecar1 = BidsSidecarFile(self.sidecar_path)
+        self.assertFalse(sidecar1.contents, "set_contents before has no contents")
+        self.assertFalse(sidecar1.has_hed, "set_contents before has_hed false")
+        sidecar1.set_contents()
+        self.assertIsInstance(sidecar1.contents, Sidecar, "set_contents creates a sidecar on setcontents")
+        self.assertTrue(sidecar1.has_hed, "set_contents before has_hed false")
+        a = sidecar1.contents
+        sidecar1.set_contents({'HED': 'xyz'})
+        self.assertIs(a, sidecar1.contents, 'By default, existing contents are not overwritten.')
 
 
 if __name__ == '__main__':

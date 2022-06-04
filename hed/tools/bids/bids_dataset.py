@@ -134,8 +134,10 @@ class BidsDataset:
 if __name__ == '__main__':
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                     '../../../tests/data/bids/eeg_ds003654s_hed_library')
+    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
+                        '../../../tests/data/bids/eeg_ds003654s_hed')
 
     bids = BidsDataset(path)
     issue_list = bids.validate(check_for_warnings=False)

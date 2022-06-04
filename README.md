@@ -1,10 +1,7 @@
 # HEDTools - Python
 HED (Hierarchical Event Descriptors) is a framework for systematically describing
-both laboratory and real-world events.
+both laboratory and real-world events as well as other experimental metadata.
 HED tags are comma-separated path strings.
- 
-The goal of HED is to describe precisely the nature of the events of interest
-occurring in an experiment using a common language.
 HED, itself, is platform-independent, extendable, and data-neutral. 
 
 This repository contains the underlying python tools that support validation,
@@ -27,11 +24,29 @@ since the `hedtools` in this repository are not yet available on PyPI:
 
 The HEDTools in this repository require python 3.7 or greater.
 
+### Relationship to other repositories
+
+The hed-python repository contains the Python infrastructure for validating
+and analyzing HED. This repository has two companion repositories:
+- [`hed-web`](https://github.com/hed-standard/hed-web) contains the web interface
+for HED as well as a deployable docker module that supports web services for HED.
+- [`hed-examples`](https://github.com/hed-standard/hed-examples) contains examples of
+using HED in Python and MATLAB. The site contains many Jupyter notes illustrating
+various aspect of data curation and analysis using HED.
+The site also hosts the test HED test datasets and the HED user manuals.
+
+#### Development versus master branches
+
+Because the three repositories are interrelated, the following conventions are followed.
+The latest usable version is on the master branches of `hed-python` and `hed-web` and the
+`main` branch of `hed-examples`.
+The documentation link on `readthedocs` will describe the versions. 
+
 ### Support for earlier versions of HED (HED-2G)
 
 **Note:** As of January 1, 2022, the `hed-python` repository will no longer support HED-2G. 
 The existing support continues to be available in the `hed2-python` repository.
-An on online version of the tools in this repository are available at 
+An on online version of the HED-2G tools are available at 
 [https://hedtools.ucsd.edu/hed2](https://hedtools.ucsd.edu/hed2)
 
 

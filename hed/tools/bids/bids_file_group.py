@@ -1,10 +1,12 @@
 import os
+from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_summary import BidsTabularSummary
 from hed.util.io_util import get_dir_dictionary, get_file_list, get_path_components
+from hed.validator.hed_validator import HedValidator
 
 
 class BidsFileGroup:
@@ -34,13 +36,13 @@ class BidsFileGroup:
         self.suffix = suffix
         self.obj_type = obj_type
         self.sidecar_dict = self._make_sidecar_dict()
-        self.datafile_dict = self._make_datafile_dict()
         self.sidecar_dir_dict = self._make_sidecar_dir_dict()
 
         for bids_obj in self.sidecar_dict.values():
             x = self.get_sidecars_from_path(bids_obj)
             bids_obj.set_contents(content_info=x)
 
+        self.datafile_dict = self._make_datafile_dict()
         for bids_obj in self.datafile_dict.values():
             sidecar_list = self.get_sidecars_from_path(bids_obj)
             if sidecar_list:
@@ -119,7 +121,8 @@ class BidsFileGroup:
         """
         issues = []
         for sidecar in self.sidecar_dict.values():
-            issues += sidecar.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
+            if sidecar.has_hed:
+                issues += sidecar.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
         return issues
 
     def validate_datafiles(self, hed_ops, check_for_warnings=True, keep_contents=False):
@@ -136,7 +139,9 @@ class BidsFileGroup:
         """
         issues = []
         for data_obj in self.datafile_dict.values():
-            data_obj.set_contents(no_overwrite=True)
+            data_obj.set_contents(overwrite=False)
+            if not data_obj.has_hed:
+                continue
             data = data_obj.contents
             issues += data.validate_file(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
             if not keep_contents:
@@ -195,7 +200,7 @@ class BidsFileGroup:
 
 if __name__ == '__main__':
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        '../../../tests/data/bids/eeg_ds003654s_hed')
+                        '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
     bids = BidsFileGroup(path)
 
     for file_obj in bids.sidecar_dict.values():
@@ -204,6 +209,20 @@ if __name__ == '__main__':
     for file_obj in bids.datafile_dict.values():
         print(file_obj)
 
-    hed_schema = load_schema_version(xml_version="8.0.0")
+    schema = load_schema_version(xml_version="8.0.0")
+    validator = HedValidator(hed_schema=schema)
 
-    col_info = bids.summarize()
+    issues = []
+    issues_side = bids.validate_sidecars(hed_ops=[validator], check_for_warnings=False)
+    issues_data = bids.validate_datafiles(hed_ops=[validator], check_for_warnings=False)
+    if issues_side:
+        print(get_printable_issue_string(issues, "Sidecar errors"))
+    else:
+        print("No validation errors in the sidecars")
+
+    if issues_data:
+        print(get_printable_issue_string(issues, "Tabular errors"))
+    else:
+        print("No validation errors in the datafiles")
+    # col_info = bids.summarize()
+    # print(f"Info: {str(col_info)}")

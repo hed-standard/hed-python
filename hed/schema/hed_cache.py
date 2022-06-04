@@ -41,12 +41,10 @@ version_pattern = re.compile(HED_VERSION_FINAL)
 
 
 def set_cache_directory(new_cache_dir):
-    """Set default global hed cache directory
+    """ Set default global hed cache directory.
 
-    Parameters
-    ----------
-    new_cache_dir: str
-        Directory to check for versions.
+    Args:
+        new_cache_dir (str): Directory to check for versions.
 
     """
     if new_cache_dir:
@@ -55,22 +53,17 @@ def set_cache_directory(new_cache_dir):
         os.makedirs(new_cache_dir, exist_ok=True)
 
 
-def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_libraries=False):
-    """Get all the HED versions in the hed directory.
+def get_hed_versions(local_hed_directory=None, library_name=None, get_all_libraries=False):
+    """ Get the HED versions in the hed directory.
 
-    Parameters
-    ----------
-    local_hed_directory: str
-        Directory to check for versions.  Defaults to hed_cache
-    library_name: str or None, optional
-        The schema library name
-    get_all_libraries: bool
-        If true, return a dictionary of version numbers, with an entry for each library name.
-    Returns
-    -------
-    version_numbers: [str] or {str: [str]}
-        [versions] OR {library_name: [versions]}
-        A list of semantic version numbers, or a dictionary of them, depending on get_all_libraries
+    Args:
+        local_hed_directory (str): Directory to check for versions which defaults to hed_cache.
+        library_name (str or None): An optional schema library name.
+        get_all_libraries (bool): If true, return a dictionary of version numbers, with an entry for each library name.
+
+    Returns:
+        list or dict: List of version numbers or dictionary {library_name: [versions]}.
+
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
@@ -100,22 +93,17 @@ def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_li
 
 
 def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_folder=None):
-    """Cache a file from a URL.
+    """ Cache a file from a URL.
 
-    Parameters
-    ----------
-    hed_xml_url: str
-        Path to an exact file at a URL, or a GitHub API url to a directory.
-    xml_version: str
-        If not None and hed_xml_url is a directory, return this version or None.
-    library_name: str or None, optional
-        The schema library name
-    cache_folder:
-        hed cache folder: Defaults to HED_CACHE_DIRECTORY
-    Returns
-    -------
-    str
-        Path to local hed XML file to use.
+    Args:
+        hed_xml_url (str): Path to an exact file at a URL, or a GitHub API url to a directory.
+        xml_version (str): If not None and hed_xml_url is a directory, return this version or None.
+        library_name (str or None): Optional schema library name.
+        cache_folder (str): The path of the hed cache. Defaults to HED_CACHE_DIRECTORY.
+
+    Returns:
+        str: Path to local hed XML file to use.
+
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
@@ -145,25 +133,21 @@ def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_f
 
 
 def get_hed_version_path(xml_version=None, library_name=None, local_hed_directory=None):
-    """Get the latest HED XML file path in the hed directory.
+    """ Get latest HED XML file path in a directory.
 
-    Parameters
-    ----------
-    library_name: str or None, optional
-        The schema library name
-    xml_version: str
-        If not None, return this version or None.
-    local_hed_directory: str
-        Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
-    Returns
-    -------
-    str
-        The path to the latest HED version the hed directory.
+    Args:
+        library_name (str or None): Optional the schema library name.
+        xml_version (str or None): If not None, return this version or None.
+        local_hed_directory (str): Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
+
+    Returns:
+        str: The path to the latest HED version the hed directory.
+
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
 
-    hed_versions = get_all_hed_versions(local_hed_directory, library_name)
+    hed_versions = get_hed_versions(local_hed_directory, library_name)
     if xml_version:
         if xml_version in hed_versions:
             latest_hed_version = xml_version
@@ -194,7 +178,7 @@ def get_path_from_hed_version(hed_version, library_name=None, local_hed_director
     return _create_xml_filename(hed_version, library_name, local_hed_directory)
 
 
-def cache_all_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
+def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
     """ Cache a file from a URL.
 
     Args:
