@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
     def test_make_dict(self):
         from hed.tools import BidsFile
         bids_dict = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
-        dict1 = bids_dict.make_dict(self.file_list, ['sub', 'run'])
+        dict1 = bids_dict.make_dict(self.file_list, ('sub', 'run'))
         self.assertIsInstance(dict1, dict, "make_dict creates a dictionary.")
         self.assertEqual(len(dict1), 6, "make_dict should return a dictionary of the right size.")
         for file in dict1.values():

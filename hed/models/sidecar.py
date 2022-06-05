@@ -267,4 +267,3 @@ class Sidecar:
         if name:
             error_handler.pop_error_context()
         return all_validation_issues
-

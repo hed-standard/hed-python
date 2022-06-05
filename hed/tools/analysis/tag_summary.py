@@ -120,7 +120,7 @@ if __name__ == '__main__':
         rules = json.load(fp)
     breakouts = rules["Tag-categories"]
     bids = BidsDataset(root_path)
-    event_group = bids.get_tabular_group(type="events")
+    event_group = bids.get_tabular_group(obj_type="events")
     summary = TagSummary(event_group, schema=bids.schema, breakout_list=breakouts)
     designs, others, errors = summary.get_design_matrices()
 

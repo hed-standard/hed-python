@@ -287,7 +287,6 @@ def def_error_invalid_def_extension(def_name):
     return f"Term '{def_name}' has an invalid extension.  Definitions can only have one term.", {}
 
 
-
 @hed_tag_error(OnsetErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.HED_ONSET_OFFSET_ERROR)
 def onset_error_def_unmatched(tag):
     return f"The def tag in an onset/offset tag is unmatched.  Def tag: '{tag}'", {}

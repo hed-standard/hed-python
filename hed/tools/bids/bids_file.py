@@ -47,7 +47,7 @@ class BidsFile:
         """ Return a key for this BIDS file given a list of entities.
 
         Args:
-            entities (list):  A list of strings representing entities.
+            entities (tuple):  A tuple of strings representing entities.
 
         Returns:
             str:  A key based on this object.

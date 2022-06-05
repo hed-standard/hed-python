@@ -212,16 +212,15 @@ if __name__ == '__main__':
     schema = load_schema_version(xml_version="8.0.0")
     validator = HedValidator(hed_schema=schema)
 
-    issues = []
     issues_side = bids.validate_sidecars(hed_ops=[validator], check_for_warnings=False)
     issues_data = bids.validate_datafiles(hed_ops=[validator], check_for_warnings=False)
     if issues_side:
-        print(get_printable_issue_string(issues, "Sidecar errors"))
+        print(get_printable_issue_string(issues_side, "Sidecar errors"))
     else:
         print("No validation errors in the sidecars")
 
     if issues_data:
-        print(get_printable_issue_string(issues, "Tabular errors"))
+        print(get_printable_issue_string(issues_data, "Tabular errors"))
     else:
         print("No validation errors in the datafiles")
     # col_info = bids.summarize()
