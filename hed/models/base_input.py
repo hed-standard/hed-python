@@ -280,7 +280,7 @@ class BaseInput:
             kwargs ():  See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
         Yields:
-             - dict:   A dict with parsed row, including keys: "HED", "column_to_hed_tags", and possibly "column_issues".
+            dict:  A dict with parsed row, including keys: "HED", "column_to_hed_tags", and possibly "column_issues".
 
         """
         if error_handler is None:

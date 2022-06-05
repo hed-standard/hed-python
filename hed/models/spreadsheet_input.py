@@ -41,4 +41,3 @@ class SpreadsheetInput(BaseInput):
 
         super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, def_mapper=def_mapper,
                          name=name)
-

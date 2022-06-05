@@ -79,7 +79,7 @@ class ColumnMetadata:
         return self._hed_dict
 
     def hed_string_iter(self, hed_ops=None, error_handler=None, **kwargs):
-        """ Iterator yielding columns's hed strings.
+        """ Iterator yielding column hed strings.
 
         Args:
             hed_ops (func, HedOps, or list of these): The HedOps or funcs to apply to the hed strings before returning.

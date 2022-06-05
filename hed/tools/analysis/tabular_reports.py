@@ -22,8 +22,8 @@ def report_diffs(tsv_dict1, tsv_dict2, logger):
 
     # Make sure there are the same number of files in both collections
     if len(tsv_dict1.key_list) != len(tsv_dict2.key_list):
-        report_list.append(f"{tsv_dict1.name} has {len(tsv_dict1.file_list)} files and " +\
-              f"{tsv_dict2.name} has {len(tsv_dict2.file_list)} files")
+        report_list.append(f"{tsv_dict1.name} has {len(tsv_dict1.file_list)} files and " +
+                           f"{tsv_dict2.name} has {len(tsv_dict2.file_list)} files")
         logger.add("overall", f"{report_list[-1]}", level="ERROR")
 
     # Compare keys from the two dictionaries to make sure they have the same keys
@@ -45,11 +45,11 @@ def report_diffs(tsv_dict1, tsv_dict2, logger):
     # Output keys for files in which the BIDS and EEG.events have different numbers of events
     count_diffs = tsv_dict1.count_diffs(tsv_dict2)
     if count_diffs:
-        report_list.append(f"\nThe number of {tsv_dict1.name} events and {tsv_dict2.name} events" +\
+        report_list.append(f"\nThe number of {tsv_dict1.name} events and {tsv_dict2.name} events" +
                            f"differ for the following files:")
         for item in count_diffs:
-            report_list.append(f"The {tsv_dict1.name} file has {item[1]} rows and " +\
-                  f"the {tsv_dict2.name} event file has {item[2]} rows")
+            report_list.append(f"The {tsv_dict1.name} file has {item[1]} rows and " +
+                               f"the {tsv_dict2.name} event file has {item[2]} rows")
             logger.add(item[0], f"{report_list[-1]}", level="ERROR")
     else:
         report_list.append(f"\nThe {tsv_dict1.name} and {tsv_dict2.name} files have the same number of rows")

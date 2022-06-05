@@ -32,6 +32,7 @@ class BidsFile:
         self.entity_dict = entity_dict
         self.sidecar = None    # list of sidecars starting at the root (including itself if sidecar)
         self.contents = None
+        self.has_hed = False
 
     @property
     def get_contents(self):
@@ -46,7 +47,7 @@ class BidsFile:
         """ Return a key for this BIDS file given a list of entities.
 
         Args:
-            entities (list):  A list of strings representing entities.
+            entities (tuple):  A tuple of strings representing entities.
 
         Returns:
             str:  A key based on this object.
@@ -59,20 +60,21 @@ class BidsFile:
         key = '_'.join(key_list)
         return key
 
-    def set_contents(self, content_info=None, no_overwrite=True):
+    def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of this object.
 
         Args:
-            content_info:  The contents appropriate for this object.
-            no_overwrite (bool):  If True and the contents are not empty, do nothing.
+            content_info:      The contents appropriate for this object.
+            overwrite (bool):  If False and the contents are not empty, do nothing.
 
         Notes:
             - Do not set if the contents are already set and no_overwrite is True.
 
         """
-        if self.contents and no_overwrite:
+        if self.contents and not overwrite:
             return
         self.contents = content_info
+        self.has_hed = False
 
     def __str__(self):
         """ Return a string representation of this object. """

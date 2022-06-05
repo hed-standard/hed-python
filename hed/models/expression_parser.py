@@ -99,7 +99,7 @@ class ExpressionNegation(Expression):
         # todo: This probably needs fixing
         negated_groups = [group for group in hed_group.get_all_groups() if group not in groups]
         # Possible alternate if only groups with tags are valid results(is this a real case?)
-        #negated_groups = [group for group in hed_group.get_all_groups() if group not in groups if group.tags()]
+        # negated_groups = [group for group in hed_group.get_all_groups() if group not in groups if group.tags()]
 
         return negated_groups
 
@@ -138,7 +138,6 @@ class ExpressionContainingGroup(Expression):
                     continue
                 if group._parent:
                     found_parent_groups.append(group._parent)
-
 
         if found_parent_groups:
             return found_parent_groups

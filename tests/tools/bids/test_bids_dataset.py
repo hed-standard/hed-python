@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         cls.root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
         cls.library_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                        '../../data/bids/eeg_ds003654s_hed_library'))
+                                            '../../data/bids/eeg_ds003654s_hed_library'))
 
     def test_constructor(self):
         bids = BidsDataset(Test.root_path)

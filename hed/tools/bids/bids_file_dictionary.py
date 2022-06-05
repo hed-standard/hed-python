@@ -124,7 +124,7 @@ class BidsFileDictionary(FileDictionary):
 
         Args:
             files (list or dict):  List or dictionary of file-like objs to use.
-            entities (list):    List of entity names to use as keys, e.g. ['sub', 'run'].
+            entities (tuple):   Tuple of entity names to use as keys, e.g. ('sub', 'run').
 
         Returns:
             dict:  A dictionary whose keys are entity keys and values are BidsFile objects.
@@ -178,7 +178,7 @@ class BidsFileDictionary(FileDictionary):
 
         Returns:
             tuple:
-                - dict: A dictionary whose keys are the unique values of entity and whose values are BidsFileDictionary objs.
+                - dict: A dictionary unique values of entity as keys and BidsFileDictionary objs as values.
                 - dict: A BidsFileDictionary containing the files that don't have entity in their names.
 
         Notes:

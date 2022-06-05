@@ -34,7 +34,6 @@ class KeyMap:
         else:
             self.target_cols = []
         self.name = name
-        x = self.key_cols + self.target_cols
         self.col_map = pd.DataFrame(columns=self.key_cols + self.target_cols)
         self.map_dict = {}
         self.count_dict = {}

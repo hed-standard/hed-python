@@ -41,12 +41,10 @@ version_pattern = re.compile(HED_VERSION_FINAL)
 
 
 def set_cache_directory(new_cache_dir):
-    """Set default global hed cache directory
+    """ Set default global hed cache directory.
 
-    Parameters
-    ----------
-    new_cache_dir: str
-        Directory to check for versions.
+    Args:
+        new_cache_dir (str): Directory to check for versions.
 
     """
     if new_cache_dir:
@@ -55,22 +53,17 @@ def set_cache_directory(new_cache_dir):
         os.makedirs(new_cache_dir, exist_ok=True)
 
 
-def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_libraries=False):
-    """Get all the HED versions in the hed directory.
+def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=False):
+    """ Get the HED versions in the hed directory.
 
-    Parameters
-    ----------
-    local_hed_directory: str
-        Directory to check for versions.  Defaults to hed_cache
-    library_name: str or None, optional
-        The schema library name
-    get_all_libraries: bool
-        If true, return a dictionary of version numbers, with an entry for each library name.
-    Returns
-    -------
-    version_numbers: [str] or {str: [str]}
-        [versions] OR {library_name: [versions]}
-        A list of semantic version numbers, or a dictionary of them, depending on get_all_libraries
+    Args:
+        local_hed_directory (str): Directory to check for versions which defaults to hed_cache.
+        library_name (str or None): An optional schema library name.
+        get_libraries (bool): If true, return a dictionary of version numbers, with an entry for each library name.
+
+    Returns:
+        list or dict: List of version numbers or dictionary {library_name: [versions]}.
+
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
@@ -92,7 +85,7 @@ def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_li
             all_hed_versions[found_library_name].append(version)
     for name, hed_versions in all_hed_versions.items():
         all_hed_versions[name] = _sort_version_list(hed_versions)
-    if get_all_libraries:
+    if get_libraries:
         return all_hed_versions
     if library_name in all_hed_versions:
         return all_hed_versions[library_name]
@@ -100,22 +93,17 @@ def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_li
 
 
 def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_folder=None):
-    """Cache a file from a URL.
+    """ Cache a file from a URL.
 
-    Parameters
-    ----------
-    hed_xml_url: str
-        Path to an exact file at a URL, or a GitHub API url to a directory.
-    xml_version: str
-        If not None and hed_xml_url is a directory, return this version or None.
-    library_name: str or None, optional
-        The schema library name
-    cache_folder:
-        hed cache folder: Defaults to HED_CACHE_DIRECTORY
-    Returns
-    -------
-    str
-        Path to local hed XML file to use.
+    Args:
+        hed_xml_url (str): Path to an exact file at a URL, or a GitHub API url to a directory.
+        xml_version (str): If not None and hed_xml_url is a directory, return this version or None.
+        library_name (str or None): Optional schema library name.
+        cache_folder (str): The path of the hed cache. Defaults to HED_CACHE_DIRECTORY.
+
+    Returns:
+        str: Path to local hed XML file to use.
+
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
@@ -145,25 +133,21 @@ def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_f
 
 
 def get_hed_version_path(xml_version=None, library_name=None, local_hed_directory=None):
-    """Get the latest HED XML file path in the hed directory.
+    """ Get latest HED XML file path in a directory.
 
-    Parameters
-    ----------
-    library_name: str or None, optional
-        The schema library name
-    xml_version: str
-        If not None, return this version or None.
-    local_hed_directory: str
-        Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
-    Returns
-    -------
-    str
-        The path to the latest HED version the hed directory.
+    Args:
+        library_name (str or None): Optional the schema library name.
+        xml_version (str or None): If not None, return this version or None.
+        local_hed_directory (str): Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
+
+    Returns:
+        str: The path to the latest HED version the hed directory.
+
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
 
-    hed_versions = get_all_hed_versions(local_hed_directory, library_name)
+    hed_versions = get_hed_versions(local_hed_directory, library_name)
     if xml_version:
         if xml_version in hed_versions:
             latest_hed_version = xml_version
@@ -194,7 +178,7 @@ def get_path_from_hed_version(hed_version, library_name=None, local_hed_director
     return _create_xml_filename(hed_version, library_name, local_hed_directory)
 
 
-def cache_all_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
+def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
     """ Cache a file from a URL.
 
     Args:
@@ -229,7 +213,7 @@ def cache_all_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_
         with portalocker.Lock(cache_lock_filename, timeout=1):
             for hed_base_url in hed_base_urls:
                 all_hed_versions = _get_hed_xml_versions_from_url(hed_base_url, skip_folders=skip_folders,
-                                                                  get_all_libraries=True)
+                                                                  get_libraries=True)
                 for library_name, hed_versions in all_hed_versions.items():
                     for version, version_info in hed_versions.items():
                         _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
@@ -308,7 +292,7 @@ def _sort_version_list(hed_versions):
 
 
 def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
-                                   skip_folders=DEFAULT_SKIP_FOLDERS, get_all_libraries=False):
+                                   skip_folders=DEFAULT_SKIP_FOLDERS, get_libraries=False):
     url_request = urllib.request.urlopen(hed_base_url)
     url_data = str(url_request.read(), 'utf-8')
     loaded_json = json.loads(url_data)
@@ -322,13 +306,13 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                 continue
             sub_folder_versions = \
                 _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
-                                               skip_folders=skip_folders, get_all_libraries=True)
+                                               skip_folders=skip_folders, get_libraries=True)
             _merge_in_versions(all_hed_versions, sub_folder_versions)
         expression_match = version_pattern.match(file_entry["name"])
         if expression_match is not None:
             version = expression_match.group(3)
             found_library_name = expression_match.group(2)
-            if not get_all_libraries and found_library_name != library_name:
+            if not get_libraries and found_library_name != library_name:
                 continue
             if found_library_name not in all_hed_versions:
                 all_hed_versions[found_library_name] = {}
@@ -340,7 +324,7 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
         ordered_versions2 = [(version, hed_versions[version]) for version in ordered_versions1]
         ordered_versions[hed_library_name] = dict(ordered_versions2)
 
-    if get_all_libraries:
+    if get_libraries:
         return ordered_versions
     if library_name in ordered_versions:
         return ordered_versions[library_name]
