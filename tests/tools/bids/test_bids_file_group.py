@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
                          '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.tsv')
 
     def test_constructor(self):
-        events = BidsFileGroup(Test.root_path)
+        events = BidsFileGroup(self.root_path)
         self.assertIsInstance(events, BidsFileGroup, "BidsFileGroup should create an BidsFileGroup instance")
         self.assertIsInstance(events.datafile_dict, dict, "BidsFileGroup should have an event files dictionary")
         self.assertEqual(len(events.datafile_dict), 6, "BidsFileGroup event files dictionary should have 2 entries")
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(events.sidecar_dir_dict, dict, "BidsFileGroup should have sidecar directory dictionary")
 
     def test_validator(self):
-        events = BidsFileGroup(Test.root_path)
+        events = BidsFileGroup(self.root_path)
         hed_schema = \
             load_schema('https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml')
         validator = HedValidator(hed_schema)

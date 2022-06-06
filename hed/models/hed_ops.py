@@ -1,4 +1,5 @@
-"""Infrastructure for processing lists of HED operations."""
+""" Infrastructure for processing HED operations. """
+
 from functools import partial
 from hed.schema import HedSchema, HedSchemaGroup
 
@@ -15,29 +16,31 @@ default_arguments = {
 }
 
 
-def translate_ops(hed_ops, split_tag_and_string_ops=False, **kwargs):
-    """ Given a list of hed_ops and/or functions, returns a list of functions to apply to a hed string object.
+def translate_ops(hed_ops, split_ops=False, **kwargs):
+    """ Return functions to apply to a hed string object.
 
-    Parameters
-    ----------
-    hed_ops : [func or HedOps or HedSchema] or func or HedOps or HedSchema
-            A list of HedOps of funcs to apply to the hed strings in the sidecars.
-    split_tag_and_string_ops: bool
-        If true, will split the operations into tag and string operations
-            This is primarily for parsing spreadsheets where any given column isn't an entire hed string,
-            but you might want additional detail on which column the issue original came from.
-    kwargs : optional list of parameters, passed to each HedOps
-        Currently accepted values: allow_placeholders
-                                   check_for_definitions
-                                   expand_defs
-                                   shrink_defs
-                                   error_handler
-                                   check_for_warnings
-                                   remove_definitions
-    Returns
-    -------
-    tag_funcs, string_funcs: ([func], [func]) or [func]
-        A list of functions to apply.  Tag vs string primarily applies to spreadsheets.
+    Args:
+        hed_ops (list): A list of func or HedOps or HedSchema to apply to hed strings.
+        split_ops (bool): If true, will split the operations into separate lists of tag and string operations.
+
+    kwargs (dict):  An optional dictionary of name-value pairs representing parameters passed to each HedOps
+
+    Returns:
+        list or tuple: A list of functions to apply or a tuple containing separate lists of tag and string ops.
+
+    Notes:
+        - The distinction between tag and string ops primarily applies to spreadsheets.
+        - Splitting the ops into two lists is mainly used for parsing spreadsheets where any given
+            column isn't an entire hed string, but additional detail is needed on which column an
+            issue original came from.
+        - The currently accepted values of kwargs are:
+            - allow_placeholders
+            - check_for_definitions
+            - expand_defs
+            - shrink_defs
+            - error_handler
+            - check_for_warnings
+            - remove_definitions
 
     """
     if not isinstance(hed_ops, list):
@@ -66,45 +69,43 @@ def translate_ops(hed_ops, split_tag_and_string_ops=False, **kwargs):
     if not _func_in_list(HedString.convert_to_canonical_forms, tag_funcs):
         tag_funcs.insert(0, partial(HedString.convert_to_canonical_forms, hed_schema=None))
 
-    if split_tag_and_string_ops:
+    if split_ops:
         return tag_funcs, string_funcs
     return tag_funcs + string_funcs
 
 
 class HedOps:
+    """ Base class to support HedOps.
+
+    Notes:
+        - HED ops are operations that apply to HedStrings in a sequence.
+
     """
-        Baseclass to support HedOps.  These are operations that apply to HedStrings in a sequence.
-    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def __get_string_funcs__(self, **kwargs):
-        """
-            Returns the operations that should be done on the full string at once.
+        """ Return the operations that should be done on the full string at once.
 
-        Parameters
-        ----------
-        kwargs: See above.
+        Args:
+            kwargs See above.
 
-        Returns
-        -------
-        string_funcs: []
-            A list of functions that take a single hed string as a parameter, and return a list of issues.
+        Returns:
+            list: A list of functions that take a single hed string as a parameter, and return a list of issues.
+
         """
         return []
 
     def __get_tag_funcs__(self, **kwargs):
-        """
-            Returns the operations that should be done on the individual tags in the string.
+        """ Return the operations that should be done on the individual tags in the string.
 
-        Parameters
-        ----------
-        kwargs: See above.
+        Args:
+            kwargs: See above.
 
-        Returns
-        -------
-        tag_funcs: []
-            A list of functions that take a single hed string as a parameter, and return a list of issues.
+        Returns:
+            list: A list of functions that take a single hed string as a parameter, and return a list of issues.
+
         """
         return []
 

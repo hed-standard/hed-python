@@ -7,7 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   hed.schema.io
+   hed.schema.schema_io
 
 Submodules
 ----------

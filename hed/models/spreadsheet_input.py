@@ -4,7 +4,7 @@ from hed.models.def_mapper import DefMapper
 
 
 class SpreadsheetInput(BaseInput):
-    """ Class representing a spreadsheet of HED tags."""
+    """ A spreadsheet of HED tags. """
 
     def __init__(self, file=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
@@ -41,13 +41,3 @@ class SpreadsheetInput(BaseInput):
 
         super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, def_mapper=def_mapper,
                          name=name)
-
-
-if __name__ == '__main__':
-    import os
-    from hed.schema import load_schema_version
-    path1 = os.path.realpath('H:/HEDPython/hed-web/tests/data/ExcelMultipleSheets.xlsx')
-    base1 = SpreadsheetInput(path1, tag_columns=[4], worksheet_name='LKT 8HED3')
-    hed_schema = load_schema_version(xml_version='8.0.0')
-    issues = base1.convert_to_long(hed_schema=hed_schema)
-    base1.to_excel('D:/temp.xlsx', output_processed_file=True)

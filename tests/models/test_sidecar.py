@@ -1,6 +1,7 @@
 import unittest
 import os
 import io
+import shutil
 
 from hed.errors import HedFileError, ValidationErrors
 from hed.models import ColumnMetadata, HedString, Sidecar
@@ -24,6 +25,13 @@ class Test(unittest.TestCase):
         cls.json_def_sidecar = Sidecar(cls.json_def_filename)
         cls.errors_sidecar = Sidecar(cls.json_errors_filename)
         cls.json_without_definitions_sidecar = Sidecar(cls.json_without_definitions_filename)
+
+        cls.base_output_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
+        os.makedirs(cls.base_output_folder, exist_ok=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.base_output_folder)
 
     def test_invalid_filenames(self):
         # Handle missing or invalid files.
@@ -68,27 +76,6 @@ class Test(unittest.TestCase):
 
         self.assertEqual(columns_target, columns_count)
 
-    # todo: fill out these tests.
-    # def save_as_json(self, save_filename):
-    #
-    # def add_sidecars(self, json_filename):
-    #
-    # @staticmethod
-    # def load_multiple_sidecars(json_file_input_list):
-    #
-    # def hed_string_iter(self, include_position=False):
-    #
-    #
-    # def set_hed_string(self, new_hed_string, position):
-    #
-    #
-    # def _add_single_column(self, column_name, dict_for_entry, column_type=None):
-    #
-    # def get_validation_issues(self):
-    #
-    # def validate_entries(self, schemas=None, name=None):
-    #
-
     def test_validate_column_group(self):
         validator = HedValidator(hed_schema=None)
         validation_issues = self.json_def_sidecar.validate_entries(validator, check_for_warnings=True)
@@ -119,6 +106,24 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 5)
         self.assertTrue(issues[0]['code'], ValidationErrors.HED_DEFINITION_INVALID)
 
+    def test_save_load(self):
+        sidecar = Sidecar(self.json_def_filename)
+        save_filename = self.base_output_folder + "test_sidecar_save.json"
+        sidecar.save_as_json(save_filename)
+
+        reloaded_sidecar = Sidecar(save_filename)
+
+        for str1, str2 in zip(sidecar.hed_string_iter(), reloaded_sidecar.hed_string_iter()):
+            self.assertEqual(str1, str2)
+
+    def test_save_load2(self):
+        sidecar = Sidecar(self.json_def_filename)
+        json_string = sidecar.get_as_json_string()
+
+        reloaded_sidecar = Sidecar(io.StringIO(json_string))
+
+        for str1, str2 in zip(sidecar.hed_string_iter(), reloaded_sidecar.hed_string_iter()):
+            self.assertEqual(str1, str2)
 
 if __name__ == '__main__':
     unittest.main()

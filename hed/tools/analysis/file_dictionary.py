@@ -3,18 +3,32 @@ from hed.errors.exceptions import HedFileError
 
 
 class FileDictionary:
-    """Holds a dictionary of path names keyed by specified entity pairs. """
+    """ A file dictionary keyed by entity pair indices.
+
+    Notes:
+        - The entities are identified as 0, 1, ... depending on order in the base filename.
+        - The entity key-value pairs are assumed separated by '_' unless a separator is provided.
+
+    """
 
     def __init__(self, collection_name, file_list, key_indices=(0, 2), separator='_'):
-        """ Create a dictionary with keys that are simplified file names and values that are full paths
+        """ Create a dictionary with full paths as values.
 
-        This function is used for cross listing BIDS style files for different studies.
 
         Args:
-            collection_name (str): Name of the file collection for reference
-            file_list (list, None):      List containing full paths of files of interest
-            key_indices (tuple, None):   List of indices into base file names of pieces to assemble for the key
-            separator (str):       Character used to separate pieces of key name
+            collection_name (str): Name of the file collection for reference.
+            file_list (list, None):      List containing full paths of files of interest.
+            key_indices (tuple, None):   List of order of key-value pieces to assemble for the key.
+            separator (str):             Character used to separate pieces of key name.
+
+
+        Notes:
+            - This dictionary is used for cross listing BIDS style files for different studies.
+            -
+
+        Examples:
+            If key_indices is (0, 2), the key generated for /tmp/sub-001_task-FaceCheck_run-01_events.tsv is
+            sub_001_run-01.
 
         """
         self.collection_name = collection_name
@@ -23,47 +37,79 @@ class FileDictionary:
 
     @property
     def name(self):
+        """ Name of this dictionary"""
         return self.collection_name
 
     @property
     def key_list(self):
+        """ Keys in this dictionary. """
         return list(self.file_dict.keys())
 
     @property
     def file_list(self):
+        """ List of path values in this dictionary. """
         return list(self.file_dict.values())
 
     def create_file_dict(self, file_list, key_indices, separator):
+        """ Create new dict based on key indices.
+
+        Args:
+            file_list (list): Paths of the files to include.
+            key_indices (tuple): A tuple of integers representing order of entities for key.
+            separator (str): The separator used between entities to form the key.
+
+        """
         if key_indices:
             self.file_dict = self.make_file_dict(file_list, key_indices=key_indices, separator=separator)
 
     def get_file_path(self, key):
+        """ Return file path corresponding to key.
+
+        Args:
+            key (str): Key used to retrieve the file path.
+
+        Returns:
+            str: File path.
+
+        """
         return self.file_dict.get(key, None)
 
     def iter_files(self):
+        """ Iterator over the files in this dictionary.
+
+        Yields:
+            - str: Key into the dictionary.
+            - file: File path.
+
+        """
         for key, file in self.file_dict.items():
             yield key, file
 
     def key_diffs(self, other_dict):
-        """Returns a list containing the symmetric difference of the keys in the two dictionaries
+        """ Return symmetric key difference with other.
 
         Args:
             other_dict (FileDictionary)  A file dictionary object
 
-        Returns: list
-            A list of the symmetric difference of the keys in this dictionary and the other one.
+        Returns:
+            list: The symmetric difference of the keys in this dictionary and the other one.
 
         """
         diffs = set(self.file_dict.keys()).symmetric_difference(set(other_dict.file_dict.keys()))
         return list(diffs)
 
     def output_files(self, title=None, logger=None):
-        """ Returns a str with the output of the list
+        """ Return a string with the output of the list.
+
         Args:
             title (None, str)    Optional title.
             logger (HedLogger)   Optional HED logger for recording.
-        Returns: (str)
-            Output the dictionary in string form. The logger is updated if available.
+
+        Returns:
+            str: The dictionary in string form.
+
+        Notes:
+            - The logger is updated if available.
 
         """
         output_list = []
@@ -78,7 +124,14 @@ class FileDictionary:
 
     @staticmethod
     def make_file_dict(file_list, key_indices=(0, 2), separator='_'):
+        """ Return a dictionary of files using entity keys.
 
+        Args:
+            file_list (list):    Paths to files to use.
+            key_indices (tuple): Positions of entities to use for key.
+            separator (str):  Separator character used to construct key.
+
+        """
         file_dict = {}
         for the_file in file_list:
             the_file = os.path.realpath(the_file)
@@ -92,6 +145,17 @@ class FileDictionary:
 
     @staticmethod
     def make_key(key_string, indices=(0, 2), separator='_'):
+        """ Create a key from specified entities.
+
+        Args:
+            key_string (str): The string from which to extract the key (usually a filename or path).
+            indices (tuple):  Positions of entity pairs to use as key.
+            separator (str):  Separator between entity pairs in the created key.
+
+        Returns:
+            str:  The created key.
+
+        """
         key_value = ''
         pieces = key_string.split(separator)
         for index in list(indices):

@@ -11,7 +11,7 @@ from .hed_group_base import HedGroupBase
 from .spreadsheet_input import SpreadsheetInput
 from .hed_ops import HedOps
 from .hed_string import HedString, HedStringFrozen
-from .hed_string_comb import HedStringComb
+from .hed_string_group import HedStringGroup
 from .hed_tag import HedTag
 from .onset_mapper import OnsetMapper
 from .sidecar import Sidecar

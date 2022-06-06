@@ -23,6 +23,15 @@ class Test(unittest.TestCase):
         self.assertEqual(bids2.ext, '.json', "BidsFile should have a .json extension")
         self.assertEqual(len(bids2.entity_dict), 1, "BidsFile should have right number of entity_dict")
 
+    def test_get_key(self):
+        bids1 = BidsFile(Test.event_path)
+        key1 = bids1.get_key('')
+        self.assertFalse(key1, "get_key when no entities should be empty")
+        key2 = bids1.get_key(('sub', 'task'))
+        self.assertEqual(key2, 'sub-002_task-FacePerception', 'get_key should give the correct key with two entities')
+        key3 = bids1.get_key(('sub', 'ses'))
+        self.assertEqual(key3, 'sub-002', 'get_key should give the correct key when one entity is missing')
+
     def test_bids_file_str(self):
         bids = BidsFile(Test.sidecar_path)
         my_str1 = str(bids)

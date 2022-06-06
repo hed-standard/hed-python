@@ -5,7 +5,7 @@ from hed.models.def_mapper import DefMapper
 
 
 class TabularInput(BaseInput):
-    """ Represents a BIDS tabular tsv file."""
+    """ A BIDS tabular tsv file with sidecar. """
 
     HED_COLUMN_NAME = "HED"
 
@@ -48,7 +48,7 @@ class TabularInput(BaseInput):
                              "This is probably not intended.")
 
     def create_def_mapper(self, column_mapper, extra_def_dicts=None):
-        """ Create the definition mapper to parse definitions in this file.
+        """ Create the definition mapper for this file.
 
         Args:
             column_mapper (ColumnMapper): The column mapper to gather definitions from.
@@ -58,7 +58,7 @@ class TabularInput(BaseInput):
             def mapper (DefMapper): A class to validate or expand definitions with the given def dicts.
 
         Notes:
-            The extra_def_dicts are definitions not included in the column mapper.
+            - The extra_def_dicts are definitions not included in the column mapper.
 
         """
         def_dicts = []
@@ -74,7 +74,7 @@ class TabularInput(BaseInput):
         return def_mapper
 
     def reset_column_mapper(self, sidecars=None, attribute_columns=None):
-        """ Change the sidecars and settings in use for parsing this file.
+        """ Change the sidecars and settings.
 
         Args:
             sidecars (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.
@@ -89,24 +89,19 @@ class TabularInput(BaseInput):
         self.reset_mapper(new_mapper)
 
     def validate_file_sidecars(self, hed_ops=None, error_handler=None, **kwargs):
-        """
-        Validates all column definitions and column definition hed strings.
+        """ Validate column definitions and hed strings.
 
-        This is not an encouraged way to do this.  You should instead validate the sidecars BEFORE creating the
-        TabularInput object.
+        Args:
+            hed_ops (list): A list of HedOps of funcs to apply to the hed strings in the sidecars.
+            error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
+            kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
-        Parameters
-        ----------
-        hed_ops : [func or HedOps] or func or HedOps
-            A list of HedOps of funcs to apply to the hed strings in the sidecars.
-        error_handler : ErrorHandler or None
-            Used to report errors.  Uses a default one if none passed in.
-        kwargs:
-            See models.hed_ops.translate_ops or the specific hed_ops for additional options
-        Returns
-        -------
-        validation_issues : [{}]
-            A list of syntax and semantic issues found in the definitions.
+        Returns:
+            list: A list of syntax and semantic issues found in the definitions. Each issue is a dictionary.
+
+        Notes:
+            - For full validation you should validate the sidecar separately.
+
         """
         if not isinstance(hed_ops, list):
             hed_ops = [hed_ops]

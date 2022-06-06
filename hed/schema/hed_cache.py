@@ -1,4 +1,5 @@
-"""Infrastructure for caching HED schema from remote repositories."""
+""" Infrastructure for caching HED schema. """
+
 import os
 import urllib.request
 
@@ -24,7 +25,7 @@ HED_VERSION_FINAL = r'^[hH][eE][dD](_([a-z0-9]+)_)?(' + HED_VERSION + r')\.[xX][
 
 HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
-hedxml_suffix = "/hedxml" # The suffix for schemas and library schemas at the given urls
+hedxml_suffix = "/hedxml"  # The suffix for schema and library schema at the given urls
 
 DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
 LIBRARY_HED_URL = 'https://api.github.com/repos/hed-standard/hed-schema-library/contents/library_schemas'
@@ -40,12 +41,10 @@ version_pattern = re.compile(HED_VERSION_FINAL)
 
 
 def set_cache_directory(new_cache_dir):
-    """Set default global hed cache directory
+    """ Set default global hed cache directory.
 
-    Parameters
-    ----------
-    new_cache_dir: str
-        Directory to check for versions.
+    Args:
+        new_cache_dir (str): Directory to check for versions.
 
     """
     if new_cache_dir:
@@ -54,22 +53,22 @@ def set_cache_directory(new_cache_dir):
         os.makedirs(new_cache_dir, exist_ok=True)
 
 
-def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_libraries=False):
-    """Get all the HED versions in the hed directory.
+def get_cache_directory():
+    """ Return the current value of HED_CACHE_DIRECTORY. """
+    return HED_CACHE_DIRECTORY
 
-    Parameters
-    ----------
-    local_hed_directory: str
-        Directory to check for versions.  Defaults to hed_cache
-    library_name: str or None, optional
-        The schema library name
-    get_all_libraries: bool
-        If true, return a dictionary of version numbers, with an entry for each library name.
-    Returns
-    -------
-    version_numbers: [str] or {str: [str]}
-        [versions] OR {library_name: [versions]}
-        A list of semantic version numbers, or a dictionary of them, depending on get_all_libraries
+
+def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=False):
+    """ Get the HED versions in the hed directory.
+
+    Args:
+        local_hed_directory (str): Directory to check for versions which defaults to hed_cache.
+        library_name (str or None): An optional schema library name.
+        get_libraries (bool): If true, return a dictionary of version numbers, with an entry for each library name.
+
+    Returns:
+        list or dict: List of version numbers or dictionary {library_name: [versions]}.
+
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
@@ -91,7 +90,7 @@ def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_li
             all_hed_versions[found_library_name].append(version)
     for name, hed_versions in all_hed_versions.items():
         all_hed_versions[name] = _sort_version_list(hed_versions)
-    if get_all_libraries:
+    if get_libraries:
         return all_hed_versions
     if library_name in all_hed_versions:
         return all_hed_versions[library_name]
@@ -99,22 +98,17 @@ def get_all_hed_versions(local_hed_directory=None, library_name=None, get_all_li
 
 
 def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_folder=None):
-    """Cache a file from a URL.
+    """ Cache a file from a URL.
 
-    Parameters
-    ----------
-    hed_xml_url: str
-        Path to an exact file at a URL, or a GitHub API url to a directory.
-    xml_version: str
-        If not None and hed_xml_url is a directory, return this version or None.
-    library_name: str or None, optional
-        The schema library name
-    cache_folder:
-        hed cache folder: Defaults to HED_CACHE_DIRECTORY
-    Returns
-    -------
-    str
-        Path to local hed XML file to use.
+    Args:
+        hed_xml_url (str): Path to an exact file at a URL, or a GitHub API url to a directory.
+        xml_version (str): If not None and hed_xml_url is a directory, return this version or None.
+        library_name (str or None): Optional schema library name.
+        cache_folder (str): The path of the hed cache. Defaults to HED_CACHE_DIRECTORY.
+
+    Returns:
+        str: Path to local hed XML file to use.
+
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
@@ -144,25 +138,21 @@ def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_f
 
 
 def get_hed_version_path(xml_version=None, library_name=None, local_hed_directory=None):
-    """Get the latest HED XML file path in the hed directory.
+    """ Get latest HED XML file path in a directory.
 
-    Parameters
-    ----------
-    library_name: str or None, optional
-        The schema library name
-    xml_version: str
-        If not None, return this version or None.
-    local_hed_directory: str
-        Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
-    Returns
-    -------
-    str
-        The path to the latest HED version the hed directory.
+    Args:
+        library_name (str or None): Optional the schema library name.
+        xml_version (str or None): If not None, return this version or None.
+        local_hed_directory (str): Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
+
+    Returns:
+        str: The path to the latest HED version the hed directory.
+
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
 
-    hed_versions = get_all_hed_versions(local_hed_directory, library_name)
+    hed_versions = get_hed_versions(local_hed_directory, library_name)
     if xml_version:
         if xml_version in hed_versions:
             latest_hed_version = xml_version
@@ -174,44 +164,43 @@ def get_hed_version_path(xml_version=None, library_name=None, local_hed_director
 
 
 def get_path_from_hed_version(hed_version, library_name=None, local_hed_directory=None):
-    """Gets the HED XML file path in the hed directory that corresponds to the hed version specified.
+    """ Return the HED XML file path for a version.
 
-    Parameters
-    ----------
-    hed_version: str
-         The HED version that is in the hed directory.
-    library_name: str or None, optional
-        The schema library name
-    local_hed_directory: str
-        Local hed path.  Defaults to HED_CACHE_DIRECTORY
-    Returns
-    -------
-    string
-        The HED XML file path in the hed directory that corresponds to the hed version specified.
+    Args:
+        hed_version (str): The HED version that is in the hed directory.
+        library_name (str or None): An optional schema library name.
+        local_hed_directory (str): The local hed path to use.
+
+    Returns:
+        str: The HED XML file path in the hed directory that corresponds to the hed version specified.
+
+    Notes:
+        - Note if no local directory is given, it defaults to HED_CACHE_DIRECTORY.
+
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
     return _create_xml_filename(hed_version, library_name, local_hed_directory)
 
 
-def cache_all_hed_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
-    """Cache a file from a URL.
+def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
+    """ Cache a file from a URL.
 
-    Parameters
-    ----------
-    hed_base_urls: str or [str]
-        Path to a directory on GitHub API, or a list of them.
-        eg: https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml
-    skip_folders: [str]
-        A list of subfolders to skip over when downloading schemas.  Default 'deprecated'
-    cache_folder: str
-        hed cache folder: Defaults to HED_CACHE_DIRECTORY
-    Returns
-    -------
-    time_since_update: float
-        -1 if cache failed
-        positive number meaning time in seconds since last update if it didn't cache
-        0 if it cached successfully this time
+    Args:
+        hed_base_urls (str or list): Path or list of paths.
+        skip_folders (list): A list of subfolders to skip over when downloading.
+        cache_folder (str): The folder holding the cache.
+
+    Returns:
+        float: Returns -1 if cache failed, a positive number meaning time in seconds since last update
+            if it didn't cache, 0 if it cached successfully this time.
+
+    Notes:
+        - The Default skip_folders is 'deprecated'.
+        - The HED cache folder defaults to HED_CACHE_DIRECTORY.
+        - The directories on Github are of the form:
+            https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml
+
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
@@ -229,7 +218,7 @@ def cache_all_hed_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFA
         with portalocker.Lock(cache_lock_filename, timeout=1):
             for hed_base_url in hed_base_urls:
                 all_hed_versions = _get_hed_xml_versions_from_url(hed_base_url, skip_folders=skip_folders,
-                                                                  get_all_libraries=True)
+                                                                  get_libraries=True)
                 for library_name, hed_versions in all_hed_versions.items():
                     for version, version_info in hed_versions.items():
                         _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
@@ -242,18 +231,14 @@ def cache_all_hed_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFA
 
 
 def _read_last_cached_time(cache_folder):
-    """
-    Checks the given cache folder to see when it was last updated.
+    """ Check the given cache folder to see when it was last updated.
 
-    Parameters
-    ----------
-    cache_folder : str
-        The folder we're caching hed schema in.
+    Args:
+        cache_folder (str): The folder we're caching hed schema in.
 
-    Returns
-    -------
-    time_stamp: float
-        The time we last updated the cache.  Zero if no update found.
+    Returns:
+        float: The time we last updated the cache.  Zero if no update found.
+
     """
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
 
@@ -266,15 +251,12 @@ def _read_last_cached_time(cache_folder):
 
 
 def _write_last_cached_time(new_time, cache_folder):
-    """
-    Sets the given time as when we last updated cache_folder.
+    """ Set the time of last cache update.
 
-    Parameters
-    ----------
-    new_time : float
-        The time this was updated
-    cache_folder : str
-        The folder we're caching hed schema in.
+    Args:
+        new_time (float): The time this was updated.
+        cache_folder (str): The folder used for caching the hed schema.
+
     """
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
     try:
@@ -315,7 +297,7 @@ def _sort_version_list(hed_versions):
 
 
 def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
-                                   skip_folders=DEFAULT_SKIP_FOLDERS, get_all_libraries=False):
+                                   skip_folders=DEFAULT_SKIP_FOLDERS, get_libraries=False):
     url_request = urllib.request.urlopen(hed_base_url)
     url_data = str(url_request.read(), 'utf-8')
     loaded_json = json.loads(url_data)
@@ -327,14 +309,15 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                 continue
             if file_entry['name'] in skip_folders:
                 continue
-            sub_folder_versions = _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
-                                                                 skip_folders=skip_folders, get_all_libraries=True)
+            sub_folder_versions = \
+                _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
+                                               skip_folders=skip_folders, get_libraries=True)
             _merge_in_versions(all_hed_versions, sub_folder_versions)
         expression_match = version_pattern.match(file_entry["name"])
         if expression_match is not None:
             version = expression_match.group(3)
             found_library_name = expression_match.group(2)
-            if not get_all_libraries and found_library_name != library_name:
+            if not get_libraries and found_library_name != library_name:
                 continue
             if found_library_name not in all_hed_versions:
                 all_hed_versions[found_library_name] = {}
@@ -346,7 +329,7 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
         ordered_versions2 = [(version, hed_versions[version]) for version in ordered_versions1]
         ordered_versions[hed_library_name] = dict(ordered_versions2)
 
-    if get_all_libraries:
+    if get_libraries:
         return ordered_versions
     if library_name in ordered_versions:
         return ordered_versions[library_name]
@@ -393,19 +376,18 @@ def _calculate_sha1(filename):
 
 
 def _safe_copy_tmp_to_folder(temp_hed_xml_file, dest_filename):
-    """
-    Copies the schema file to destination folder, and renames it.
+    """ Copy to destination folder and rename.
 
-    Parameters
-    ----------
-    temp_hed_xml_file : str
-        An XML file, generally from a temp folder.  Will be deleted on a successful copy.
-    dest_filename : str
-        A destination folder and filename
-    Returns
-    -------
-    dest_filename: str
-        Returns the new filename on success, returns None on failure.
+    Args:
+        temp_hed_xml_file (str): An XML file, generally from a temp folder.
+        dest_filename (str): A destination folder and filename.
+
+    Returns:
+        dest_filename (str): The new filename on success or None on failure.
+
+    Notes:
+        The file will be deleted on a successful copy.
+
     """
     _, temp_xml_file = os.path.split(temp_hed_xml_file)
     dest_folder, _ = os.path.split(dest_filename)
@@ -441,16 +423,13 @@ def _cache_hed_version(version, library_name, version_info, cache_folder):
 
 
 def _get_latest_semantic_version_in_list(semantic_version_list):
-    """Gets the latest semantic version in a list.
+    """ Get the latest semantic version in a list.
 
-    Parameters
-    ----------
-    semantic_version_list: [str]
-         A list containing semantic versions.
-    Returns
-    -------
-    str
-        The latest semantic version in the list.
+    Args:
+        semantic_version_list (list): A list containing semantic versions.
+
+    Returns:
+        str: The latest semantic version in the list.
 
     """
     if not semantic_version_list:
@@ -464,18 +443,14 @@ def _get_latest_semantic_version_in_list(semantic_version_list):
 
 
 def _compare_semantic_versions(first_semantic_version, second_semantic_version):
-    """Compares two semantic versions.
+    """ Compare two semantic versions.
 
-    Parameters
-    ----------
-    first_semantic_version: str
-         The first semantic version.
-    second_semantic_version: str
-         The second semantic version.
-    Returns
-    -------
-    string
-        The later semantic version.
+    Args:
+        first_semantic_version (str): The first semantic version.
+        second_semantic_version (str): The second semantic version.
+
+    Returns:
+        str: The later semantic version.
 
     """
     if Version(first_semantic_version) > Version(second_semantic_version):

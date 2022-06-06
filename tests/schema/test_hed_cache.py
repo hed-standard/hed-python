@@ -23,11 +23,11 @@ class Test(unittest.TestCase):
         cls.semantic_version_two = '1.2.4'
         cls.semantic_version_three = '1.2.5'
         cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5']
-
+        cls.specific_base_url = "https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"
         try:
             cls.specific_hed_url = \
                 """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
-            hed_cache.cache_all_hed_xml_versions(cache_folder=cls.hed_cache_dir)
+            hed_cache.cache_xml_versions(cache_folder=cls.hed_cache_dir)
         except urllib.error.HTTPError as e:
             schema.set_cache_directory(cls.saved_cache_folder)
             raise e
@@ -36,6 +36,21 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.hed_cache_dir)
         schema.set_cache_directory(cls.saved_cache_folder)
+
+    def test_cache_again(self):
+        time_since_update = hed_cache.cache_xml_versions(cache_folder=self.hed_cache_dir)
+        self.assertGreater(time_since_update, 0)
+
+    def test_cache_specific_urls(self):
+        filename = hed_cache.cache_specific_url(self.specific_base_url)
+        self.assertTrue(os.path.exists(filename))
+
+    def test_get_cache_directory(self):
+        from hed.schema import get_cache_directory
+        cache_dir = get_cache_directory()
+        self.assertTrue(cache_dir, "get_cache_directory gives a non-blank element")
+        print(f"\nCache directory is {os.path.realpath(cache_dir)}\n")
+        self.assertEqual(cache_dir, self.hed_cache_dir)
 
     def test_get_hed_version_path(self):
         latest_hed_version_path = hed_cache.get_hed_version_path()
@@ -64,18 +79,18 @@ class Test(unittest.TestCase):
         local_filename = hed_cache.cache_specific_url(self.specific_hed_url, None, self.hed_cache_dir)
         self.assertTrue(local_filename)
 
-    def test_get_all_hed_versions_all(self):
-        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, get_all_libraries=True)
+    def test_get_hed_versions_all(self):
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, get_libraries=True)
         self.assertIsInstance(cached_versions, dict)
         self.assertTrue(len(cached_versions) > 0)
 
-    def test_get_all_hed_versions(self):
-        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir)
+    def test_get_hed_versions(self):
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir)
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
 
-    def test_get_all_hed_versions_library(self):
-        cached_versions = hed_cache.get_all_hed_versions(self.hed_cache_dir, library_name="score")
+    def test_get_hed_versions_library(self):
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
 

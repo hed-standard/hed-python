@@ -13,49 +13,58 @@ DEFAULT_BREAKOUT_LIST = [
 
 
 class TagSummary:
-    """ Creates a HED tag summary for a BIDS dataset.
-
-    Args:
-        dataset (BidsDataset)        Contains the information for a BIDS dataset.
-        breakout_list (list, None):  List of the tags to be explicitly broken out.
+    """ A HED tag summary for a BID file group.
 
     Attributes:
-        dataset (BidsDataset):  The BIDS dataset to be summarized.
-        all_tags_dict (dict):   The keys are all of the unique tags in the BIDS dataset. The values
-             are dictionaries of the unique values that these tags take on.
-        breakout_list (list):  The tag nodes that are to be specially summarized.
-        breakout_dict (dict):  The keys are the breakout nodes. The values are dictionaries of the
-             child nodes and the nodes themselves that appear in the dataset.
-        task_dict (dict):      The keys are definition names and the values are dictionaries with info.
-        cond_dict (dict):      The keys are definition names and the values are dictionaries with info.
+        file_group (BidsFileGroup):  The BIDS file group to be summarized.
+        schema (HedSchema or Hed
+        all_tags_dict (dict):        The keys are all of the unique tags in the file group.
+            The values are dictionaries of the unique values that these tags take on.
+        breakout_list (list):   The tag nodes that are to be specially summarized.
+        breakout_dict (dict):   The keys are the breakout nodes. The values are dictionaries of the
+                                child nodes and the nodes themselves that appear in the dataset.
+        task_dict (dict):       The keys are definition names and the values are dictionaries with info.
+        cond_dict (dict):       The keys are definition names and the values are dictionaries with info.
+
     """
-    def __init__(self, dataset, breakout_list=None):
-        self.dataset = dataset
+
+    def __init__(self, file_group, schema, breakout_list=None):
+        """ Constructor for TagSummary.
+
+        Args:
+            file_group (BidsFileGroup):  Container holding the files with a particular suffix.
+            schema (HedSchema or HedSchemaGroup):  The HED schema(s) used in the summary.
+            breakout_list (list or None):   Used to arrange the tags in specified groupings.
+
+        """
+
+        self.file_group = file_group
+        self.schema = schema
         self.all_tags_dict = {}
         self._set_all_tags()
         self.breakout_list = breakout_list
         if not breakout_list:
             self.breakout_list = DEFAULT_BREAKOUT_LIST
-        self.breakout_dict = breakout_tags(self.dataset.schemas, self.all_tags_dict, breakout_list)
+        self.breakout_dict = breakout_tags(self.schema, self.all_tags_dict, breakout_list)
         self.task_dict = self.extract_summary_info(self.all_defs_dict, 'Task')
         self.cond_dict = self.extract_summary_info(self.all_defs_dict, 'Condition-variable')
 
     def _set_all_tags(self):
-        schema = self.dataset.schemas
         def_dict = DefinitionDict()
         self.all_defs_dict = def_dict.defs
-        for bids_sidecar in self.dataset.event_files.sidecar_dict.values():
+        for bids_sidecar in self.file_group.sidecar_dict.values():
             sidecar = bids_sidecar.contents
-            for hed_string_obj, _, _ in sidecar.hed_string_iter([schema, def_dict]):
+            for hed_string_obj, _, _ in sidecar.hed_string_iter([self.schema, def_dict]):
                 add_group_to_dict(hed_string_obj, self.all_tags_dict)
 
     def get_design_matrices(self):
-        """ Returns a dictionary with condition variables.
+        """ Return information about the condition variables.
 
-        Returns: (dict, list, list)
-            Dictionary with condition variable levels corresponding to a design matrix.
-            List with the other condition variables that aren't associated with levels.
-            List of errors.
+        Returns:
+            tuple:
+                - dict: Dictionary with condition variable levels corresponding to a design matrix.
+                - list: List with the other condition variables that aren't associated with levels.
+                - list: List of errors.
 
         """
         cond_dict = self.cond_dict
@@ -80,11 +89,14 @@ class TagSummary:
 
     @staticmethod
     def extract_summary_info(entry_dict, tag_name):
-        """ Extracts the summary of tag that is stored in the entry dictionary.
+        """ Extract the summary of tag in this entry.
 
         Args:
-            entry_dict (dict):  Keys are individual tag node names
+            entry_dict (dict):  Keys are individual tag node names.
             tag_name (str):     Name of an individual node.
+
+        Returns:
+            dict: A dictionary of the extracted tag information.
 
         """
         dict_info = {}
@@ -107,8 +119,9 @@ if __name__ == '__main__':
     with open(json_path) as fp:
         rules = json.load(fp)
     breakouts = rules["Tag-categories"]
-
-    summary = TagSummary(BidsDataset(root_path), breakouts)
+    bids = BidsDataset(root_path)
+    event_group = bids.get_tabular_group(obj_type="events")
+    summary = TagSummary(event_group, schema=bids.schema, breakout_list=breakouts)
     designs, others, errors = summary.get_design_matrices()
 
     print("to here")

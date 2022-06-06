@@ -1,82 +1,237 @@
 from hed.errors.exceptions import HedFileError
-from hed.tools import BidsFile
+from hed.tools.bids.bids_file import BidsFile
 from hed.tools.analysis.file_dictionary import FileDictionary
 
 
 class BidsFileDictionary(FileDictionary):
-    """ Holds a dictionary of path names keyed by specified entity pairs. """
+    """ A dictionary of BidsFile keyed by entity pairs.
 
-    def __init__(self, collection_name, file_list=None, entities=('sub', 'ses', 'task', 'run')):
-        """ Create a dictionary with keys that are simplified file names and values that are full paths
+    The keys are simplified entity key-value pairs and the values are BidsFile objects.
 
-        This function is used for cross listing BIDS style files for different studies.
+    """
+
+    def __init__(self, collection_name, files, entities=('sub', 'ses', 'task', 'run')):
+        """ Create the dictionary keyed to entities.
 
         Args:
-            collection_name (str): Name of this collection
-            file_list (list, None):      List containing full paths of files of interest
-            entities (tuple:  List of indices into base file names of pieces to assemble for the key
+            collection_name (str):      Name of this collection.
+            files (list or dict):   Full paths of files to include.
+            entities (tuple):  Entity names to use in creating the keys.
+
+        Raises:
+            HedFileError: If files has inappropriate values.
+
+        Notes:
+            - This function is used for cross listing BIDS style files for different studies.
+
+        Examples:
+            If entities is ('sub', 'ses', 'task', 'run'), a typical key might be sub-001_ses-01_task-memory_run-01.
+
         """
         super().__init__(collection_name, None, None, separator='_')
         self.entities = entities
-        if file_list:
-            self.file_dict = self.make_bids_file_dict(file_list, entities)
+        self.file_dict = self.make_dict(files, entities)
 
     @property
     def key_list(self):
+        """ The dictionary keys. """
         return list(self.file_dict.keys())
 
     @property
     def file_list(self):
+        """ Files contained in this dictionary. """
         return list(self.file_dict.values())
 
+    def correct_file(self, the_file):
+        """ Transform to BidsFile if needed.
+
+        Args:
+            the_file (str or BidsFile): If a str, create a new BidsFile object, otherwise pass the original on.
+
+        Returns:
+            BidsFile:  Either the original file or a newly created BidsTabularFile.
+
+        Raises:
+            HedFileError: If the_file isn't str or BidsFile.
+
+        """
+        if isinstance(the_file, str):
+            the_file = BidsFile(the_file)
+        elif not isinstance(the_file, BidsFile):
+            HedFileError("BadArgument", f"correct_file expects file path or BidsFile but found {str(the_file)}", [])
+        return the_file
+
     def get_file_path(self, key):
+        """ Return the file path corresponding to key.
+
+        Args:
+            key (str):  The key to use to look up the file in this dictionary.
+
+        Returns:
+            str:  The real path of the file being looked up.
+
+        Notes:
+            - None is returned if the key is not present.
+
+        """
         if key in self.file_dict.keys():
             return self.file_dict[key].file_path
         return None
 
     def iter_files(self):
+        """ Iterator over the files in this dictionary.
+
+        Yields:
+            tuple:
+                - str: The next entity-based key.
+                - BidsFile:  The next BidsFile.
+
+        """
         for key, file in self.file_dict.items():
             yield key, file
 
     def key_diffs(self, other_dict):
-        """Returns a list containing the symmetric difference of the keys in the two dictionaries
+        """ Return the symmetric key difference with other.
 
         Args:
             other_dict (FileDictionary)  A file dictionary object
 
-        Returns: list
-            A list of the symmetric difference of the keys in this dictionary and the other one.
+        Returns:
+            list: The symmetric difference of the keys in this dictionary and the other one.
 
         """
         diffs = set(self.file_dict.keys()).symmetric_difference(set(other_dict.file_dict.keys()))
         return list(diffs)
 
-    def make_query(self, query_dict={'sub': '*', 'run': ['*']}):
+    def get_new_dict(self, name, files):
+        """ Create a dictionary with these files.
+
+        Args:
+            name (str):  Name of this dictionary
+            files (list or dict):  List or dictionary of files. These could be paths or objects.
+
+        Returns:
+            BidsFileDictionary:  The newly created dictionary.
+
+        Notes:
+            - The new dictionary uses the same type of entities for keys as this dictionary.
+
+        """
+        return BidsFileDictionary(name, files, entities=self.entities)
+
+    def make_dict(self, files, entities):
+        """ Make a dictionary from files or a dict.
+
+        Args:
+            files (list or dict):  List or dictionary of file-like objs to use.
+            entities (tuple):   Tuple of entity names to use as keys, e.g. ('sub', 'run').
+
+        Returns:
+            dict:  A dictionary whose keys are entity keys and values are BidsFile objects.
+
+        Raises:
+            HedFileError: If incorrect format is passed or something not recognizable as a Bids file.
+
+        """
+        file_dict = {}
+
+        if isinstance(files, dict):
+            files = files.values()
+        elif not isinstance(files, list):
+            raise HedFileError("BadArgument", "make_bids_file_dict expects a list or dict", [])
+        for the_file in files:
+            the_file = self.correct_file(the_file)
+            key = the_file.get_key(entities)
+            if key in file_dict:
+                raise HedFileError("NonUniqueFileKeys",
+                                   f"dictionary key {key} is associated with {the_file} and {file_dict[key]}", "")
+            file_dict[key] = the_file
+        return file_dict
+
+    def make_query(self, query_dict={'sub': '*'}):
+        """ Return a dictionary of files matching query.
+
+        Args:
+            query_dict (dict): A dictionary whose keys are entities and whose values are entity values to match.
+
+        Returns:
+            dict: A dictionary entries in this dictionary that match the query.
+
+        Notes:
+            - A query dictionary key a valid BIDS entity name such as sub or task.
+            - A query dictionary value may be a string or a list.
+            - A query value string should contain a specific value of the entity or a '*' indicating any value matches.
+            - A query value list should be a list of valid values for the corresponding entity.
+
+        """
         response_dict = {}
         for key, file in self.file_dict.items():
             if self.match_query(query_dict, file.entity_dict):
                 response_dict[key] = file
         return response_dict
 
-    def _create_dict_obj(self, collection_name, file_dict):
-        dict_obj = BidsFileDictionary(collection_name, file_list=None, entities=self.entities)
-        dict_obj.file_dict = file_dict
-        return dict_obj
+    def split_by_entity(self, entity):
+        """ Split this dictionary based on an entity.
 
-    def create_split_dict(self, entity):
-        split_dict, leftovers = self.split_dict_by_entity(self.file_dict, entity)
+        Args:
+            entity (str):  Entity name (for example task).
+
+        Returns:
+            tuple:
+                - dict: A dictionary unique values of entity as keys and BidsFileDictionary objs as values.
+                - dict: A BidsFileDictionary containing the files that don't have entity in their names.
+
+        Notes:
+            - This function is used for analysis where a single subject or single type of task is being analyzed.
+
+        """
+        split_dict, leftovers = self._split_dict_by_entity(self.file_dict, entity)
         for entity_value, entity_dict in split_dict.items():
-            split_dict[entity_value] = \
-                self._create_dict_obj(self.name + "_" + str(entity_value), split_dict[entity_value])
+            split_dict[entity_value] = self.get_new_dict(f"{self.name}_{entity_value}", entity_dict)
         if leftovers:
-            leftover_dict = self._create_dict_obj(self.name + "_left_overs", leftovers)
+            leftover_dict = self.get_new_dict(self.name + "_left_overs", leftovers)
         else:
             leftover_dict = None
         return split_dict, leftover_dict
 
     @staticmethod
-    def split_dict_by_entity(file_dict, entity):
-        """ Split a dict of BidsFile into multiple dicts based on an entity
+    def match_query(query_dict, entity_dict):
+        """ Return True if query has a match in dictionary.
+
+        Args:
+            query_dict (dict): A dictionary representing a query about entities.
+            entity_dict (dict): A dictionary containing the entity representation for a BIDS file.
+
+        Returns:
+            bool:  True if the query matches the entities representing the file.
+
+        Notes:
+            - A query is a dictionary whose keys are entity names and whose values are specific entity values or '*'.
+
+        Examples:
+            {'sub', '001', 'run', '*'} requests all runs from subject 001.
+
+        """
+        for query, query_value in query_dict.items():
+            if query not in entity_dict:
+                return False
+            elif isinstance(query_value, str) and query_value != '*':
+                return False
+            elif isinstance(query_value, list) and (entity_dict[query] not in query_value):
+                return False
+        return True
+
+    @staticmethod
+    def _split_dict_by_entity(file_dict, entity):
+        """ Split a dict of BidsFile based on an entity.
+
+        Args:
+            file_dict (dict): Dictionary of BidsFile keyed by entity keys.
+            entity (str):     String
+
+        Returns:
+            dict: Dictionary of dictionaries with first-level keys constructed from the unique values of entities.
+            dict: Dictionary of BidsFile that do not have the entity.
 
         """
         split_dict = {}
@@ -90,32 +245,3 @@ class BidsFileDictionary(FileDictionary):
             entity_dict[key] = file
             split_dict[entity_value] = entity_dict
         return split_dict, leftovers
-
-    @staticmethod
-    def make_bids_file_dict(file_list, entities):
-        file_dict = {}
-        for the_file in file_list:
-            the_file = BidsFile(the_file)
-            entity_dict = the_file.entity_dict
-            key_list = []
-            for entity in entities:
-                if entity in entity_dict:
-                    key_list.append(f"{entity}-{entity_dict[entity]}")
-            key = '_'.join(key_list)
-            if key in file_dict:
-                raise HedFileError("NonUniqueFileKeys",
-                                   f"dictionary key {key} is associated with {the_file} and {file_dict[key]}", "")
-            file_dict[key] = the_file
-        return file_dict
-
-    @staticmethod
-    def match_query(query_dict, entity_dict):
-
-        for query, query_value in query_dict.items():
-            if query not in entity_dict:
-                return False
-            elif isinstance(query_value, str) and query_value != '*':
-                return False
-            elif isinstance(query_value, list) and (entity_dict[query] not in query_value):
-                return False
-        return True

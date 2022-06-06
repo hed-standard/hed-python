@@ -1,10 +1,7 @@
 # HEDTools - Python
 HED (Hierarchical Event Descriptors) is a framework for systematically describing
-both laboratory and real-world events.
+both laboratory and real-world events as well as other experimental metadata.
 HED tags are comma-separated path strings.
- 
-The goal of HED is to describe precisely the nature of the events of interest
-occurring in an experiment using a common language.
 HED, itself, is platform-independent, extendable, and data-neutral. 
 
 This repository contains the underlying python tools that support validation,
@@ -27,18 +24,55 @@ since the `hedtools` in this repository are not yet available on PyPI:
 
 The HEDTools in this repository require python 3.7 or greater.
 
+### Relationship to other repositories
+
+The `hed-python` repository contains the Python infrastructure for validating
+and analyzing HED. This repository has two companion repositories:
+- [`hed-web`](https://github.com/hed-standard/hed-web) contains the web interface
+for HED as well as a deployable docker module that supports web services for HED.
+- [`hed-examples`](https://github.com/hed-standard/hed-examples) contains examples of
+using HED in Python and MATLAB.
+The site also contains many Jupyter notes illustrating
+various aspect of data curation and analysis using HED.
+The site hosts HED test datasets and the HED user manuals.
+
+#### Develop versus master branches
+
+Because the three repositories are interrelated, the following conventions are followed.
+The latest stable version is on the master branches of `hed-python` and `hed-web` and the
+`main` branch of `hed-examples`.
+The documentation link on `readthedocs` will describe the stable versions.
+
+As features are integrated, they first appear in the `develop` branches of the
+three repositories.
+The `develop` branches of the three repositories will be kept in sync.
+If an interface change in `hed-python` triggers a change in `hed-web` or `hed-examples`,
+every effort will be made to get the stable branches of the respective repositories in
+sync.
+
+#### To contribute
+
+Contributions are welcome.
+Please use the [Github issues](https://github.com/hed-standard/hed-python/issues)
+for suggestions or bug reports.
+The [Github pull request](https://github.com/hed-standard/hed-python/pulls)
+may also be used for contributions.
+Usually these updates should be made to the `develop` branch, not the `master`.
+
 ### Support for earlier versions of HED (HED-2G)
 
 **Note:** As of January 1, 2022, the `hed-python` repository will no longer support HED-2G. 
 The existing support continues to be available in the `hed2-python` repository.
-An on online version of the tools in this repository are available at 
+An on online version of the HED-2G tools are available at 
 [https://hedtools.ucsd.edu/hed2](https://hedtools.ucsd.edu/hed2)
 
 
 ### Other links of interest
 
-HED specification documentation: [https://hed-specification.readthedocs.io/en/latest/](https://hed-specification.readthedocs.io/en/latest/)
+HED specification documentation: [https://hed-specification.readthedocs.io/en/latest/](https://hed-specification.readthedocs.io/en/latest/).
 
-Documentation: [https://hed-python.readthedocs.io/en/latest/](https://hed-python.readthedocs.io/en/latest/)
+Examples: [https://hed-examples.readthedocs.io/en/latest/](https://hed-examples.readthedocs.io/en/latest/).
 
-Code climate reports: [https://codeclimate.com/github/hed-standard/hed-python](https://codeclimate.com/github/hed-standard/hed-python)
+Documentation: [https://hed-python.readthedocs.io/en/latest/](https://hed-python.readthedocs.io/en/latest/).
+
+Code climate reports: [https://codeclimate.com/github/hed-standard/hed-python](https://codeclimate.com/github/hed-standard/hed-python).

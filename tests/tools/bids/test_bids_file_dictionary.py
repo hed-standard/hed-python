@@ -29,6 +29,30 @@ class Test(unittest.TestCase):
         else:
             self.fail("BidsFileDictionary should have thrown a HedFileError when duplicate key")
 
+    def test_make_dict(self):
+        from hed.tools import BidsFile
+        bids_dict = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
+        dict1 = bids_dict.make_dict(self.file_list, ('sub', 'run'))
+        self.assertIsInstance(dict1, dict, "make_dict creates a dictionary.")
+        self.assertEqual(len(dict1), 6, "make_dict should return a dictionary of the right size.")
+        for file in dict1.values():
+            self.assertIsInstance(file, BidsFile, "make_dict dictionary values should be BidsFile")
+
+    def test_make_query(self):
+        dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
+        results1 = dict1.make_query(query_dict={'sub': '*', 'run': '*'})
+        self.assertEqual(len(results1), len(dict1.file_dict), "make_query should return all of the entries when *.")
+        results2 = dict1.make_query(query_dict={'sub': '*', 'run': ['1']})
+        self.assertEqual(len(results2), 2, "make_query should return the right number of entries.")
+        results3= dict1.make_query(query_dict={'sub': '*', 'run': ['*']})
+        self.assertFalse(results3, "make_query should return an empty dictionary when * is used in a list. ")
+        results4 = dict1.make_query(query_dict={'sub': '*', 'run': ['*', '1']})
+        self.assertEqual(len(results4), 2, "make_query should ignore the * in a list.")
+        results5 = dict1.make_query(query_dict={'sub': '*', 'run': []})
+        self.assertFalse(len(results5), "make_query be empty if the list for one of the entities is empty.")
+        results6 = dict1.make_query(query_dict={'sub': '*',})
+        self.assertEqual(len(results6), len(dict1.file_dict), "make_query should return all of the entries when *.")
+
     def test_match_query(self):
         entity_dict = {'sub': '01', 'task': 'tempTask', 'run': '2'}
         query_dict1 = {'sub': ['01', '03']}
@@ -44,22 +68,25 @@ class Test(unittest.TestCase):
         result4 = BidsFileDictionary.match_query(query_dict4, entity_dict)
         self.assertTrue(result4, "match_query should return False when entity not in the dictionary")
 
-    def test_make_query(self):
+    def test_split_by_entity(self):
         dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
-        results1 = dict1.make_query(query_dict={'sub': '*', 'run': '*'})
-        self.assertEqual(len(results1), len(dict1.file_dict), "make_query should return all of the entries when *")
-        results2 = dict1.make_query(query_dict={'sub': '*', 'run': ['1']})
-        self.assertEqual(len(results2), 2, "make_query should return the right number of entries ")
+        split_dict, leftovers = dict1.split_by_entity('sub')
 
-    def test_create_split_dict(self):
-        dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
-        dist1_split, leftovers = dict1.create_split_dict('run')
-        self.assertIsInstance(dist1_split, dict, "create_split_dict returns a dictionary")
-        self.assertEqual(3, len(dist1_split), 'create_split_dict should return the correct number of items')
-        for value in dist1_split.values():
+        self.assertIsInstance(split_dict, dict, "split_by_entity returns a dictionary")
+        self.assertEqual(2, len(split_dict), 'split_by_entity should return the correct number of items')
+        for value in split_dict.values():
             self.assertIsInstance(value, BidsFileDictionary,
-                                  'create_split_dict dictionary values should be BidsFileDictionary objects')
-        self.assertFalse(leftovers, "create_split_dict leftovers should be empty")
+                                  'split_by_entity dictionary values should be BidsFileDictionary objects')
+        self.assertFalse(leftovers, "split_by_entity leftovers should be empty")
+
+    def test_split_dict_by_entity(self):
+        dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
+        dist1_split, leftovers = BidsFileDictionary._split_dict_by_entity(dict1.file_dict, 'run')
+        self.assertIsInstance(dist1_split, dict, "split_by_entity returns a dictionary")
+        self.assertEqual(3, len(dist1_split), 'split_by_entity should return the correct number of items')
+        for value in dist1_split.values():
+            self.assertIsInstance(value, dict, 'split_by_entity dictionary values should be dictionaries')
+        self.assertFalse(leftovers, "split_by_entity leftovers should be empty")
 
 
 if __name__ == '__main__':

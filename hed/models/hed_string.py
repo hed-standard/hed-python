@@ -12,44 +12,62 @@ from hed.models.hed_group_base import HedGroupBase
 
 
 class HedString(HedGroup):
-    """Class representing a HED string."""
+    """ A HED string. """
 
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
 
-    def __init__(self, hed_string, hed_schema=None):
+    def __init__(self, hed_string, hed_schema=None, _contents=None):
         """ Constructor for the HedString class.
 
         Args:
             hed_string (str): A HED string consisting of tags and tag groups.
-
+            hed_schema (HedSchema or None): The schema to use to identify tags.  Can be passed later.
+            _contents ([HedGroupBase and/or HedTag] or None): Create a HedString from this exact list of children.
+                                                              Does not make a copy.
         Notes:
-            The HedString object parses its component tags and groups into a tree-like structure.
+            - The HedString object parses its component tags and groups into a tree-like structure.
 
         """
 
-        try:
-            contents = self.split_into_groups(hed_string, hed_schema)
-        except ValueError:
-            contents = []
+        if _contents is not None:
+            contents = _contents
+        else:
+            try:
+                contents = self.split_into_groups(hed_string, hed_schema)
+            except ValueError:
+                contents = []
         super().__init__(hed_string, contents=contents, startpos=0, endpos=len(hed_string))
+
+    @classmethod
+    def from_hed_strings(cls, contents):
+        """ Factory for creating HedStrings via combination.
+
+        Args:
+            contents (list(HedString) or None): A list of HedString objects to combine.  This takes ownership of their
+                                                children.
+        """
+        result = HedString.__new__(HedString)
+        hed_string = "".join([group._hed_string for group in contents])
+        contents = [child for sub_string in contents for child in sub_string.children]
+        result.__init__(hed_string=hed_string, _contents=contents)
+        return result
 
     @property
     def is_group(self):
-        """ Returns False since the underlying string is not a group with parentheses. """
+        """ Always False since the underlying string is not a group with parentheses. """
         return False
 
     def convert_to_canonical_forms(self, hed_schema):
-        """ Identify all tags using the given schema. If no schema, still identify "key" tags such as definitions.
+        """ Identify all tags using the given schema.
+
+            If schema is None, still identify "key" tags such as definitions.
 
         Args:
             hed_schema (HedSchema or None): The schema to use to validate/convert tags.
 
         Returns:
             list: A list of issues found while converting the string. Each issue is a dictionary.
-
-        Notes:
-            Sets the "isDefinition" property on tags and groups.
 
         """
         validation_issues = []
@@ -60,6 +78,8 @@ class HedString(HedGroup):
 
     def remove_definitions(self):
         """ Remove definition tags and groups from this string.
+
+            This does not validate definitions and will blindly removing invalid ones as well.
 
         Returns:
             list: An empty list as there are no possible issues, this list is always blank.
@@ -72,17 +92,18 @@ class HedString(HedGroup):
         return []
 
     def convert_to_short(self, hed_schema):
-        """ Compute string canonical forms and return the short form and issues.
+        """ Compute canonical forms and return the short form.
 
         Args:
             hed_schema (HedSchema or None): The schema to use to calculate forms.
 
         Returns:
-            str:   The string with all tags converted to short form.
-            list:  A list of issues found during conversion. Each issue is a dictionary.
+            tuple:
+                - str:   The string with all tags converted to short form.
+                - list:  A list of issues found during conversion. Each issue is a dictionary.
 
         Notes:
-            No issues will be found if no schema is passed.
+            - No issues will be found if no schema is passed.
 
         """
         conversion_issues = self.convert_to_canonical_forms(hed_schema)
@@ -90,17 +111,18 @@ class HedString(HedGroup):
         return short_string, conversion_issues
 
     def convert_to_long(self, hed_schema):
-        """ Compute string canonical forms and return the long form and issues.
+        """ Compute canonical forms and return the long form.
 
         Args:
             hed_schema (HedSchema or None): The schema to use to calculate forms.
 
         Returns:
-            str:   The string with all tags converted to long form.
-            list:  A list of issues found during conversion.  Each issue is a dictionary.
+            tuple:
+                - str:   The string with all tags converted to long form.
+                - list:  A list of issues found during conversion.  Each issue is a dictionary.
 
         Notes:
-            No issues will be found if no schema is passed.
+            - No issues will be found if no schema is passed.
 
         """
         conversion_issues = self.convert_to_canonical_forms(hed_schema)
@@ -108,17 +130,20 @@ class HedString(HedGroup):
         return short_string, conversion_issues
 
     def convert_to_original(self):
-        """ Return the original form of this string, though potentially with some extraneous spaces removed.
+        """ Return the original form of this string.
 
         Returns:
             str: The string with all the tags in their original form.
+
+        Notes:
+            Potentially with some extraneous spaces removed on returned string.
 
         """
         return self.get_as_form("org_tag")
 
     @staticmethod
     def split_into_groups(hed_string, hed_schema=None):
-        """ Split the HED string into a tree of tag groups, tags, and delimiters.
+        """ Split the HED string into a parse tree.
 
         Args:
             hed_string (str): A hed string consisting of tags and tag groups to be processed.
@@ -130,6 +155,8 @@ class HedString(HedGroup):
         Raises:
             ValueError: If the string is significantly malformed, such as mismatched parentheses.
 
+        Notes:
+            - The parse tree consists of tag groups, tags, and delimiters.
         """
 
         current_tag_group = [[]]
@@ -181,7 +208,7 @@ class HedString(HedGroup):
             int or None:   Ending position of the given item in the original string.
 
         Notes:
-            If the hed tag or group was not in the original string, returns (None, None).
+            - If the hed tag or group was not in the original string, returns (None, None).
 
         """
         if self.check_if_in_original(tag_or_group):
@@ -200,12 +227,12 @@ class HedString(HedGroup):
             list:  A list of tuples where each tuple is (is_hed_tag, (start_pos, end_pos)).
 
         Notes:
-            The tuple format is as follows
-                is_hed_tag (bool): A (possible) hed tag if true, delimiter if not.
-                start_pos (int):   Index of start of string in hed_string.
-                end_pos (int):     Index of end of string in hed_string
+            - The tuple format is as follows
+                - is_hed_tag (bool): A (possible) hed tag if true, delimiter if not.
+                - start_pos (int):   Index of start of string in hed_string.
+                - end_pos (int):     Index of end of string in hed_string
 
-            This function does not validate tags or delimiters in any form.
+            - This function does not validate tags or delimiters in any form.
 
         """
         tag_delimiters = ",()"
@@ -258,7 +285,7 @@ class HedString(HedGroup):
         return result_positions
 
     def apply_funcs(self, string_funcs):
-        """ Run the list of functions on this string and gather issues found.
+        """ Run functions on this string.
 
         Args:
             string_funcs (list): A list of functions that take a hed string object and return a list of issues.
@@ -267,7 +294,7 @@ class HedString(HedGroup):
             list: A list of issues found by these operations. Each issue is a dictionary.
 
         Notes:
-            This method potentially modifies the hed string object.
+            - This method potentially modifies the hed string object.
 
         """
         string_issues = []
@@ -292,7 +319,7 @@ class HedString(HedGroup):
             list:  A list of issues encountered in applying these operations. Each issue is a dictionary.
 
         Notes:
-            Although this function is called validation, the HedOps can represent other transformations.
+            - Although this function is called validation, the HedOps can represent other transformations.
 
         """
         if error_handler is None:
@@ -309,34 +336,27 @@ class HedString(HedGroup):
     def get_frozen(self):
         """ Return a frozen copy of this HedString.
 
+            This is a deep copy if the group was not already frozen.
         Returns:
             HedStringFrozen: A frozen copy of this HedString.
-
-        Notes:
-            Tags in frozen hed strings still point to the same place.  Do not alter them.
-
         """
         return HedStringFrozen(self)
 
     def find_top_level_tags(self, anchor_tags, include_groups=2):
-        """ Find top level groups containing the given anchor tags.
+        """ Find top level groups with an anchor tag.
 
         Args:
             anchor_tags (container):     A list/set/etc of short_base_tags to find groups by.
             include_groups (0, 1 or 2):  Parameter indicating what return values to include.
 
         Returns:
-            list:
-            tag (HedTag): The located tag
-            group (HedGroup): The group the located tag is in.
+            list or tuple: The returned result depends on include_groups:
+                - If 0: return only tags.
+                - If 1: return only groups.
+                - If 2 or any other value: return both.
 
         Notes:
-            The include_groups parameter meanings are:
-                If 0: return only tags.
-                If 1: return only groups.
-                If 2 or any other value: return both.
-
-            A max of 1 tag located her top level group.
+            - A max of 1 tag located per top level group.
 
         """
         top_level_tags = []

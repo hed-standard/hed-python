@@ -6,7 +6,7 @@ from hed.schema.hed_schema_constants import HedSectionKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema import HedSchema
 from hed.schema import schema_validation_util
-from hed.schema.io import wiki_constants
+from hed.schema.schema_io import wiki_constants
 
 header_attr_expression = "([^ ]+?)=\"(.*?)\""
 attr_re = re.compile(header_attr_expression)
@@ -389,17 +389,17 @@ class HedSchemaWikiParser:
 
     @staticmethod
     def _get_tag_level(tag_line):
-        """Gets the tag level from a line in a wiki file.
+        """ Get the tag level from a line in a wiki file.
 
-        Parameters
-        ----------
-        tag_line: string
-            A tag line.
+        Args:
+            tag_line (str): A tag line.
 
-        Returns
-        -------
-        int
-            Gets the tag level. The number of asterisks determine what level the tag is on.
+        Returns:
+            int: Gets the tag level.
+
+        Notes:
+            The number of asterisks determine what level the tag is on.
+
         """
         count = 0
         while tag_line[count] == '*':
@@ -431,17 +431,14 @@ class HedSchemaWikiParser:
         return tag_line
 
     def _get_tag_name(self, tag_line):
-        """Gets the tag name from the tag line.
+        """ Get the tag name from the tag line.
 
-        Parameters
-        ----------
-        tag_line: string
-            A tag line.
+        Args:
+            tag_line (str): A tag line.
 
-        Returns
-        -------
-        string
-            The tag name.
+        Returns:
+            str: The tag name.
+
         """
         if tag_line.find(extend_here_line) != -1:
             return '', 0
@@ -457,21 +454,16 @@ class HedSchemaWikiParser:
 
     @staticmethod
     def _get_tag_attributes(tag_line, starting_index):
-        """Gets the tag attributes from a line.
+        """ Get the tag attributes from a line.
 
-        Parameters
-        ----------
-        tag_line: string
-            A tag line.
-        starting_index: int
-            The first index we can check for the brackets
+        Args:
+            tag_line (str): A tag line.
+            starting_index (int): The first index we can check for the brackets.
 
-        Returns
-        -------
-        {}
-            Dict containing the attributes
-        int
-            The last index we found tag attributes at
+        Returns:
+            dict: Dictionary of attributes.
+            int: The last index we found tag attributes at.
+
         """
         attr_string, starting_index = HedSchemaWikiParser._get_line_section(tag_line, starting_index, '{', '}')
         if attr_string is None:
@@ -497,24 +489,18 @@ class HedSchemaWikiParser:
 
     @staticmethod
     def _get_line_section(tag_line, starting_index, start_delim='[', end_delim=']'):
-        """Gets the section of the line enclosed by the given delimiters, after starting_index
+        """ Get the portion enclosed by the given delimiters.
 
-        Parameters
-        ----------
-        tag_line: string
-            A tag line.
-        starting_index: int
-            The first index we can check for the brackets
-        start_delim: str
-            The string that starts this block
-        end_delim: str
-            The string that ends this block
-        Returns
-        -------
-        string
-            The tag description.
-        int
-            The last index we found tag attributes at
+        Args:
+            tag_line (str): A tag line.
+            starting_index (int): The first index we can check for the brackets.
+            start_delim (str): The string that starts this block.
+            end_delim (str): The string that ends this block.
+
+        Returns:
+            str: The tag description.
+            int: The last index we found tag attributes at.
+
         """
         count1 = tag_line.count(start_delim)
         count2 = tag_line.count(end_delim)
@@ -534,19 +520,17 @@ class HedSchemaWikiParser:
         return tag_line[index1 + 1: index2], index2 + starting_index
 
     def _add_tag_line(self, parent_tags, tag_line):
-        """Add a tag to the dictionaries, including attributes and description.
+        """ Add a tag to the dictionaries.
 
-        Parameters
-        ----------
-        parent_tags: [str]
-            A list of parent tags in order.
-        tag_line: string
-            A tag line.
+        Args:
+            parent_tags (list): A list of parent tags in order.
+            tag_line (str): A tag line.
 
-        Returns
-        -------
-        tag_entry: HedSchemaEntry
-            The entry for the added tag
+        Returns:
+            HedSchemaEntry: The entry for the added tag.
+
+        Notes:
+            Includes attributes and description.
         """
         tag_name, _ = self._get_tag_name(tag_line)
         if tag_name:

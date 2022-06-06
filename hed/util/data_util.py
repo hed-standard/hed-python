@@ -6,7 +6,7 @@ from hed.errors.exceptions import HedFileError
 
 
 def add_columns(df, column_list, value='n/a'):
-    """ Add specified columns to df if they are not already there.
+    """ Add specified columns to df if not there.
 
     Args:
         df (DataFrame):      Pandas dataframe.
@@ -21,7 +21,7 @@ def add_columns(df, column_list, value='n/a'):
 
 
 def check_match(ds1, ds2, numeric=False):
-    """ Check that two Pandas data series have the same values.
+    """ Check two Pandas data series have the same values.
 
     Args:
         ds1 (DataSeries):      Pandas data series to check.
@@ -54,8 +54,9 @@ def delete_columns(df, column_list):
         df (DataFrame):      Pandas dataframe from which to delete columns.
         column_list (list):  List of candidate column names for deletion.
 
-    Notes: The deletion of columns is done in place.
-           This does not raise an error if df does not have a column in the list.
+    Notes:
+        - The deletion of columns is done in place.
+        - This does not raise an error if df does not have a column in the list.
 
     """
 
@@ -64,15 +65,17 @@ def delete_columns(df, column_list):
 
 
 def delete_rows_by_column(df, value, column_list=None):
-    """ Delete rows in which the specified columns of a dataframe has a particular value.
+    """ Delete rows where columns have this value.
 
     Args:
         df (DataFrame):      Pandas dataframe from which to delete rows.
         value (str):         Specified value to indicate row should be deleted.
         column_list (list):  List of columns to search for value.
 
-    Notes: All values are converted to string before testing.
-           Deletion is done in place.
+    Notes:
+        - All values are converted to string before testing.
+        - Deletion is done in place.
+
     """
     if column_list:
         cols = list(set(column_list).intersection(set(list(df))))
@@ -85,7 +88,7 @@ def delete_rows_by_column(df, value, column_list=None):
 
 
 def get_key_hash(key_tuple):
-    """ Calculate a hash key for the indicated tuple of values.
+    """ Calculate a hash key for tuple of values.
 
     Args:
         key_tuple (tuple, list):  The key values in the correct order for lookup.
@@ -123,7 +126,7 @@ def get_new_dataframe(data):
 
 
 def get_row_hash(row, key_list):
-    """ Get a hash key from the values in row corresponding to the column names in a list of keys.
+    """ Get a hash key from key column values for row.
 
     Args:
         row (DataSeries)   A Pandas data series corresponding to a row in a spreadsheet.
@@ -143,7 +146,7 @@ def get_row_hash(row, key_list):
 
 
 def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate'):
-    """ Get a dictionary created from two columns of a dataframe.
+    """ Get a dictionary of two columns of a dataframe.
 
     Args:
         tsv_path (str)   Path to a tsv file with a header row to be read into a DataFrame.
@@ -168,7 +171,7 @@ def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate')
 
 
 def make_info_dataframe(col_info, selected_col):
-    """ Get a dataframe containing the column information from a dictionary for the selected column.
+    """ Get a dataframe from selected columns.
 
     Args:
         col_info (dict):      Dictionary of dictionaries of column values and counts.
@@ -176,8 +179,9 @@ def make_info_dataframe(col_info, selected_col):
 
     Returns:
         dataframe:  A two-column dataframe with first column containing values from the
-           dictionary whose key is selected_col and whose second column are the corresponding counts.
-           The returned value is None if selected_col is not a top-level key in col_info.
+                    dictionary whose key is selected_col and whose second column are the corresponding counts.
+                    The returned value is None if selected_col is not a top-level key in col_info.
+
     """
     col_dict = col_info.get(selected_col, None)
     if not col_dict:
@@ -188,7 +192,7 @@ def make_info_dataframe(col_info, selected_col):
 
 
 def replace_values(df, values=None, replace_value='n/a', column_list=None):
-    """ Replace specified string values in specified columns of a dataframe with indicated value.
+    """ Replace string values in specified columns.
 
     Args:
         df (DataFrame):            Dataframe whose values will replaced.
@@ -217,13 +221,14 @@ def replace_values(df, values=None, replace_value='n/a', column_list=None):
 
 
 def remove_quotes(df):
-    """ Remove quotes from the entries for all columns of dataframe of type string or object.
+    """ Remove quotes from all columns.
 
     Args:
         df (Dataframe):   Dataframe to process by removing quotes.
 
     Notes:
-        Replacement is done in place.
+        - Replacement is done in place.
+
     """
 
     col_types = df.dtypes
@@ -234,7 +239,7 @@ def remove_quotes(df):
 
 
 def reorder_columns(data, col_order, skip_missing=True):
-    """ Create a new dataframe with columns of data reordered.
+    """ Create a new dataframe with columns reordered.
     Args:
         data (DataFrame, str) :        Dataframe or filename of dataframe whose columns are to be reordered.
         col_order (list):              List of column names in desired order.
@@ -256,18 +261,21 @@ def reorder_columns(data, col_order, skip_missing=True):
 
 
 def separate_columns(base_cols, target_cols):
-    """ Get a list of target columns that are present and missing from the base list.
+    """ Get target columns from the base list.
 
-     Args:
-         base_cols (list) :        List of columns to be tested.
-         target_cols (list):       List of desired column names.
+    Args:
+        base_cols (list) :        List of columns to be tested.
+        target_cols (list):       List of desired column names.
 
-     Returns: (list, list):
-         list:  Target columns present in base_cols.
-         list:  Target columns missing from base_cols.
+     Returns:
+        tuples:
+            list:  Target columns present in base_cols.
+            list:  Target columns missing from base_cols.
 
-     Notes:  The function computes the set difference of target_cols and base_cols and returns a list
+     Notes:
+         - The function computes the set difference of target_cols and base_cols and returns a list
          of columns of target_cols that are in base_cols and a list of those missing.
+
      """
 
     if not target_cols:

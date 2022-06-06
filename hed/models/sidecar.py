@@ -9,10 +9,15 @@ from hed.models.def_mapper import DefMapper
 
 
 class Sidecar:
-    """ Contents of a single JSON file with definition dictionaries. """
+    """ Contents of a JSON file or merged file.
+
+    Notes:
+        - The Sidecar maintains its own definition dictionaries.
+
+    """
 
     def __init__(self, file, name=None):
-        """ Constructs a Sidecar object representing a JSON file.
+        """ Construct a Sidecar object representing a JSON file.
 
         Args:
             file (str or FileLike): A string or file-like object representing a JSON file.
@@ -68,7 +73,7 @@ class Sidecar:
             HedFileError: If the file was not found or could not be parsed into JSON.
 
         Notes:
-             You can load multiple files into one Sidecar, but it is discouraged.
+            - Multiple files can be loaded into one Sidecar, but it is discouraged.
 
         """
         if isinstance(file, str):
@@ -103,16 +108,16 @@ class Sidecar:
 
     @staticmethod
     def load_multiple_sidecars(input_list):
-        """ Utility function for easily loading multiple json files at once
-            This takes a list of filenames or ColumnDefinitionGroups and returns a list of ColumnDefinitionGroups.
-
-            Note: it will completely fail and raise a HedFileError if any of the files are not found.
+        """ Utility for loading multiple json files.
 
         Args:
-            input_list (list): A list of filenames or Sidecar files in any mix. [
+            input_list (list): A list of filenames or Sidecar files in any mix.
 
         Returns:
             list: A list sidecars.
+
+        Raises:
+            HedFileError: If any of the files are not found.
 
         """
         if not isinstance(input_list, list):
@@ -127,14 +132,11 @@ class Sidecar:
 
     def hed_string_iter(self, hed_ops=None, error_handler=None, expand_defs=False, remove_definitions=False,
                         allow_placeholders=True, extra_def_dicts=None, **kwargs):
-        """ Get an iterator to loop over all hed strings in all column definitions.
-
-        Returns a tuple of (string, position)
-        Pass position to set_hed_string to change one.
+        """ Iterator over hed strings in columns.
 
         Args:
-            hed_ops (func, HedOps, list): A HedOps, funcs or list of these to apply to the hed strings
-                before returning
+            hed_ops (func, HedOps, list):  A HedOps, funcs or list of these to apply to the hed strings
+                                            before returning
             error_handler (ErrorHandler): The error handler to use for context, uses a default one if none.
             expand_defs (bool): If True, expand all def tags located in the strings.
             remove_definitions (bool): If True, remove all definitions found in the string.
@@ -143,9 +145,10 @@ class Sidecar:
             kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
         Yields:
-            HedString: A HedString at a given column and key position.
-            (tuple): Indicates where hed_string was loaded from so it can be later set by the user
-            list: A list of issues found performing ops. Each issue is a dictionary.
+            tuple:
+                - HedString: A HedString at a given column and key position.
+                - tuple: Indicates where hed_string was loaded from so it can be later set by the user
+                - list: A list of issues found performing ops. Each issue is a dictionary.
 
         """
         if error_handler is None:
@@ -166,7 +169,7 @@ class Sidecar:
             error_handler.pop_error_context()
 
     def set_hed_string(self, new_hed_string, position):
-        """ Set a hed string in a provided column/category key/etc.
+        """ Set a provided column/category key/etc.
 
         Args:
             new_hed_string (str or HedString): The new hed_string to replace the value at position.
@@ -215,7 +218,7 @@ class Sidecar:
         self._column_data[column_name] = column_entry
 
     def get_def_dicts(self, extra_def_dicts=None):
-        """ Return a list of DefinitionDict for the columns in this sidecar.
+        """ Return DefinitionDicts for the columns in this sidecar.
 
         Args:
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
@@ -264,23 +267,3 @@ class Sidecar:
         if name:
             error_handler.pop_error_context()
         return all_validation_issues
-
-
-if __name__ == '__main__':
-    import os
-    from hed.validator.hed_validator import HedValidator
-    from hed.schema.hed_schema_io import load_schema, load_schema_version
-    base_dir= 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s_hed_inheritance'
-    root_path1 = os.path.realpath(os.path.join(base_dir, 'task-FacePerception_events.json'))
-    root_path2 = os.path.realpath(os.path.join(base_dir, 'sub-002/sub-002_task-FacePerception_events.json'))
-
-    sidecar1 = Sidecar(root_path1, name="sidecar1")
-    sidecar2 = Sidecar(root_path2, name="sidecar2")
-    hed_schema = load_schema_version(xml_version="8.0.0")
-    validator = HedValidator(hed_schema=hed_schema)
-    issues1 = sidecar1.validate_entries([validator], check_for_warnings=True)
-    issues2 = sidecar2.validate_entries([validator], check_for_warnings=True)
-
-    sidecar2.add_inherited_columns([sidecar1])
-    issues3 = sidecar2.validate_entries([validator], check_for_warnings=True)
-    print("to here")

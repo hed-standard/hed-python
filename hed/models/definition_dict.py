@@ -10,7 +10,7 @@ from hed.models.hed_ops import HedOps
 
 
 class DefinitionEntry:
-    """ Represents a single definition."""
+    """ A single definition. """
 
     def __init__(self, name, contents, takes_value, source_context):
         """ Initialize info for a single definition.
@@ -36,16 +36,15 @@ class DefinitionEntry:
 
         Args:
             replace_tag (HedTag): The def hed tag to replace with an expanded version
-            placeholder_value (str or None): If present and required, will replace any pound signs in the definition contents
+            placeholder_value (str or None):    If present and required, will replace any pound signs
+                                                in the definition contents.
 
         Returns:
             str:          The expanded def tag name
-            HedGroup:
-            expanded_tag_name, def_contents: str, [HedGroup or HedTag]
-            The expanded def tag name, and the contents of this definition(including the def tag itself)
+            HedGroup:     The contents of this definition(including the def tag itself)
 
         Raises:
-            ValueError:  If a placeholder_value is passed, but this definition doesn't have a placehold.
+            ValueError:  If a placeholder_value is passed, but this definition doesn't have a placeholder.
 
         """
         if self.takes_value == (placeholder_value is None):
@@ -71,14 +70,13 @@ class DefinitionEntry:
 
 
 class DefinitionDict(HedOps):
-    """Class responsible for gathering and storing a group of definitions to be considered a single source.
+    """ Gathers definitions from a single source.
 
         This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
 
     """
-
     def __init__(self):
-        """ Initialize the class, gathering and storing a group of definitions to be considered a single source. """
+        """ Definitions to be considered a single source. """
 
         super().__init__()
         self._defs = {}
@@ -115,7 +113,7 @@ class DefinitionDict(HedOps):
         return []
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
-        """ Check a given HedString for definition tags and add them to the dictionary if so.
+        """ Check string for definition tags, adding them to self.
 
         Args:
             hed_string_obj (HedString): A single hed string to gather definitions from.
@@ -211,7 +209,7 @@ def add_group_to_dict(group, tag_dict=None):
         dict:  The updated tag_dict containing the tags with a list of values.
 
     Notes:
-        Expects tags to have forms calculated already.
+        - Expects tags to have forms calculated already.
 
     """
     if tag_dict is None:

@@ -36,14 +36,6 @@ hed.tools.analysis.key\_map module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.analysis.key\_template module
----------------------------------------
-
-.. automodule:: hed.tools.analysis.key_template
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 hed.tools.analysis.summary\_util module
 ---------------------------------------
 
@@ -52,18 +44,18 @@ hed.tools.analysis.summary\_util module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.analysis.tag\_summary module
---------------------------------------
+hed.tools.analysis.tabular\_reports module
+------------------------------------------
 
-.. automodule:: hed.tools.analysis.tag_summary
+.. automodule:: hed.tools.analysis.tabular_reports
    :members:
    :undoc-members:
    :show-inheritance:
 
-hed.tools.analysis.tsv\_reports module
+hed.tools.analysis.tag\_summary module
 --------------------------------------
 
-.. automodule:: hed.tools.analysis.tsv_reports
+.. automodule:: hed.tools.analysis.tag_summary
    :members:
    :undoc-members:
    :show-inheritance:

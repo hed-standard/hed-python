@@ -1,13 +1,16 @@
+""" Utilities for downstream analysis such as searching. """
+
 import pandas as pd
-from hed.models import TabularInput, HedStringFrozen, TagExpressionParser
+from hed.models import TabularInput, TagExpressionParser
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):
-    """ Return a dataframe representing the assembled HED annotations for an events file.
+    """ Return assembled HED annotations in a dataframe.
 
     Args:
-        data_input (TabularInput): The input events file to be searched.
-        columns_included (list or None):  A list of additional column names to include. If None, only onset is used.
+        data_input (TabularInput): The tabular input file whose HED annotations are to be assembled.
+        columns_included (list or None):  A list of additional column names to include.
+            If None, only the list of assembled tags is included.
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
 
     Returns:
@@ -30,27 +33,20 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
     return df
 
 
-def get_assembled_strings(events, hed_schema=None, expand_defs=False):
-    """ Return a list of the HED string objects corresponding to the rows of events.
+def get_assembled_strings(table, hed_schema=None, expand_defs=False):
+    """ Return HED string objects for a tabular file.
 
     Args:
-        events (TabularInput): The input events file to be searched.
+        table (TabularInput): The input file to be searched.
         hed_schema (HedSchema or HedschemaGroup): If provided the HedStrings are converted to canonical form.
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
 
     Returns:
-        List: A list ov HedString or HedStringComb objects.
+        List: A list of HedString or HedStringGroup objects.
 
     """
-
-    hed_list = []
-    for row, row_dict in events.iter_dataframe(return_row_dict=True, expand_defs=expand_defs, remove_definitions=True):
-        this_group = row_dict.get("HED", None)
-        if hed_schema and this_group:
-            this_group.convert_to_canonical_forms(hed_schema)
-            hed_list.append(this_group)
-        else:
-            hed_list.append(row_dict.get("HED", None))
+    hed_list = list(table.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,
+                                         expand_defs=expand_defs, remove_definitions=True))
     return hed_list
 
 
@@ -61,7 +57,7 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
         data_input (TabularInput): The tabular input file (e.g., events) to be searched.
         hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
         query (str):     The str query to make.
-        columns_included (list):  List of names of columns to include
+        columns_included (list or None):  List of names of columns to include
 
     Returns:
         DataFrame or None: A DataFrame with the results of the query or None if no events satisfied the query.
@@ -89,15 +85,9 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
     elif not eligible_columns:
         df = pd.DataFrame({'row_number': row_numbers, 'HED_assembled': hed_tags})
     else:
-        df = data_input.dataframe.iloc[row_numbers][eligible_columns].reset_index()  #df[eligible_columns] = data_input.dataframe.iloc[row_numbers][eligible_columns]
-        df['HED_assembled'] = hed_tags
+        df = data_input.dataframe.iloc[row_numbers][eligible_columns].reset_index()
         df.rename(columns={'index': 'row_number'})
     return df
-
-
-def filter_events(events, hed_schema, filter_hed):
-    """ Return a dataframe with results of query. """
-    return None
 
 
 if __name__ == '__main__':
@@ -109,15 +99,8 @@ if __name__ == '__main__':
     json_path = os.path.realpath(os.path.join(root_path, 'task-FacePerception_events.json'))
     sidecar = Sidecar(json_path, name='face_sub1_json')
     input_data = TabularInput(events_path, sidecar=sidecar, name="face_sub1_events")
-    hed_schema = load_schema_version(xml_version="8.0.0")
-    print("to here")
-
-    # df = assemble_hed(input_data, columns_included=["onset", "duration", "event_type"], expand_defs=False)
-    # df1 = assemble_hed(input_data, columns_included=["onset", "duration", "event_type"], expand_defs=True)
-    # df2 = assemble_hed(input_data, columns_included=["onset", "baloney", "duration", "event_type"], expand_defs=False)
-    # print("to there")
-
-    query = "Sensory-event"
-    df3 = search_tabular(input_data, hed_schema, query, columns_included=['onset', 'event_type'])
+    hed_schema1 = load_schema_version(xml_version="8.0.0")
+    query1 = "Sensory-event"
+    df3 = search_tabular(input_data, hed_schema1, query1, columns_included=['onset', 'event_type'])
 
     print(f"{len(df3)} events match")

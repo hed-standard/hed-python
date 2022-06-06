@@ -1,4 +1,4 @@
-""" Utitlities to support HED validation. """
+""" Utilities to support HED validation. """
 import datetime
 import re
 
@@ -12,16 +12,16 @@ DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
 
 
 def is_date_time(date_time_string):
-    """Checks to see if the specified string is a valid ISO 8601 datetime string.
+    """Check if the specified string is a valid datetime.
 
-    Parameters
-    ----------
-    date_time_string: str
-        A datetime string.
-    Returns
-    -------
-    bool
-        True if the datetime string is valid. False, if otherwise.
+    Args:
+        date_time_string (str): A datetime string.
+
+    Returns:
+        bool: True if the datetime string is valid. False, if otherwise.
+
+    Notes:
+        - ISO 8601 datetime string.
 
     """
     try:
@@ -32,16 +32,13 @@ def is_date_time(date_time_string):
 
 
 def validate_numeric_value_class(numeric_string):
-    """Checks to see if the specified string is a valid ISO 8601 datetime string.
+    """ Checks to see if valid numeric value.
 
-    Parameters
-    ----------
-    numeric_string: str
-        A string that should be only a number, with no units at all.
-    Returns
-    -------
-    bool
-        True if the numeric string is valid. False, if otherwise.
+    Args:
+        numeric_string (str): A string that should be only a number with no units.
+
+    Returns:
+        bool: True if the numeric string is valid. False, if otherwise.
 
     """
     if re.search(DIGIT_OR_POUND_EXPRESSION, numeric_string):
@@ -51,32 +48,29 @@ def validate_numeric_value_class(numeric_string):
 
 
 def validate_text_value_class(text_string):
-    """
-        Placeholder for eventual text value class validation
+    """ Placeholder for eventual text value class validation
 
-    Parameters
-    ----------
-    text_string :
+    Args:
+        text_string (str): Text class.
 
-    Returns
-    -------
+    Returns:
+        bool: True
 
     """
     return True
 
 
 def is_clock_face_time(time_string):
-    """Checks to see if the specified string is a valid HH:MM time string.
+    """ Check if a valid HH:MM time string.
 
-    This is deprecated and has no expected use going forward.
-    Parameters
-    ----------
-    time_string: str
-        A time string.
-    Returns
-    -------
-    bool
-        True if the time string is valid. False, if otherwise.
+    Args:
+        time_string (str): A time string.
+
+    Returns:
+        bool: True if the time string is valid. False, if otherwise.
+
+    Notes:
+        - This is deprecated and has no expected use going forward.
 
     """
     try:

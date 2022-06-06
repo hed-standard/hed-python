@@ -12,13 +12,11 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class ColumnMapper:
-    """ Container class for mapping columns in event files into HED tags.
+    """ Mapping of a base input file columns into HED tags.
 
     Notes:
-        Functions and variables column and row indexing starts at 0.
-
+        - Functions and variables column and row indexing starts at 0.
     """
-
     def __init__(self, sidecars=None, tag_columns=None, column_prefix_dictionary=None,
                  attribute_columns=None, optional_tag_columns=None):
         """ Constructor for ColumnMapper.
@@ -26,6 +24,7 @@ class ColumnMapper:
         Args:
             sidecars (Sidecar, string, or list of these): A list of Sidecars or
                  filenames to gather ColumnDefinitions from.
+                Sidecars later in the list override those earlier in the list.
             tag_columns: (list):  A list of ints or strings containing the columns that contain the HED tags.
                 Sidecar column definitions will take precedent if there is a conflict with tag_columns.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers and values are HED tag
@@ -36,17 +35,14 @@ class ColumnMapper:
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
 
         Notes:
-            Sidecars later in the list override those earlier in the list.
-            All column numbers are 0 based.
+            - All column numbers are 0 based.
 
         Examples:
             column_prefix_dictionary = {3: 'Description/', 4: 'Label/'}
 
             The third column contains tags that need Description/ tag prepended, while the fourth column
             contains tag that needs Label/ prepended.
-
         """
-
         # This points to column_type entries based on column names or indexes if columns have no column_name.
         self.column_data = {}
         # Maps column number to column_entry.  This is what's actually used by most code.
@@ -71,7 +67,7 @@ class ColumnMapper:
         self._finalize_mapping()
 
     def add_sidecars(self, sidecars):
-        """ Gather column definitions from a list of sidecars and add them to the column mapper.
+        """ Add sidecar column info.
 
         Args:
             sidecars (list): A list of filenames or loaded sidecar files in any mix.
@@ -84,7 +80,7 @@ class ColumnMapper:
                 self._add_column_data(column_data)
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
-        """ Add the columns specified by the column_prefix_dictionary as HED tag columns with required prefix.
+        """ Replace the column prefix dictionary
 
         Args:
             column_prefix_dictionary (dict):  Dictionary with keys that are column numbers and values are HED tag
@@ -102,12 +98,14 @@ class ColumnMapper:
         return []
 
     def set_tag_columns(self, tag_columns=None, optional_tag_columns=None, finalize_mapping=True):
-        """ Set the current tag columns, clearing the current ones if None.
+        """ Set tag columns and optional tag columns
 
         Args:
             tag_columns (list): A list of ints or strings containing the columns that contain the HED tags.
+                                If None, clears existing tag_columns
             optional_tag_columns (list): A list of ints or strings containing the columns that contain the HED tags,
-                but not an error if missing.
+                                         but not an error if missing.
+                                         If None, clears existing tag_columns
             finalize_mapping (bool): Re-generate the internal mapping if True, otherwise no effect until finalize.
 
         Returns:
@@ -126,7 +124,7 @@ class ColumnMapper:
         return []
 
     def set_column_map(self, new_column_map=None):
-        """ Set the column number to column_name mapping.
+        """ Set the column number to name mapping.
 
         Args:
             new_column_map (list or dict):  Either an ordered list of the column names or column_number:column name
@@ -145,7 +143,7 @@ class ColumnMapper:
         return self._finalize_mapping()
 
     def add_columns(self, column_names_or_numbers, column_type=ColumnType.Attribute):
-        """ Add a list of blank columns in the given column category.
+        """ Add blank columns in the given column category.
 
         Args:
             column_names_or_numbers (list): A list of column names or numbers to add as the specified type.
@@ -188,26 +186,24 @@ class ColumnMapper:
         return column_entry.expand(input_text)
 
     def expand_row_tags(self, row_text):
-        """ Expand all mapped columns from a given row.
+        """ Expand all mapped columns for row.
 
         Args:
             row_text (list): The text for the given row, one list entry per column number.
 
         Returns:
-            dict: A dictionary containing the keys HED, column_to_hed_tags, and attribute.
+            dict: A dictionary containing the keys COLUMN_TO_HED_TAGS, COLUMN_ISSUES, and arbitrary attributes.
 
         Notes:
-            The value of the "HED" entry is the entire expanded row.
-            The "column_to_hed_tags" is each expanded column given separately as a list of strings.
-            The attribute is the value from the spreadsheet column only present when a given column is an attribute.
+            - The "column_to_hed_tags" is each expanded column given separately as a list of HedStrings.
+            - Attributes are any column identified as an attribute.
+              They will appear in the return value as {attribute_name: value_of_column}
 
         """
         result_dict = {}
         column_to_hed_tags_dictionary = {}
         column_issues_dict = {}
         for column_number, cell_text in enumerate(row_text):
-            # if column_number == 0:
-            #     continue
             translated_column, attribute_name_or_error = self._expand_column(column_number, str(cell_text))
             if translated_column is None:
                 if attribute_name_or_error:
@@ -229,7 +225,7 @@ class ColumnMapper:
         return result_dict
 
     def get_prefix_remove_func(self, column_number):
-        """ Return a function that removes the name_prefix for the given column.
+        """ Return a function to removes name prefixes for column
 
         Args:
             column_number (int): Column number to look up in the prefix dictionary.
@@ -245,7 +241,7 @@ class ColumnMapper:
         if not entry.column_prefix:
             return None
 
-        return entry.remove_prefix_if_needed
+        return entry.remove_prefix
 
     def _add_column_data(self, new_column_entry):
         """ Add the metadata of a column to this column mapper.
@@ -345,7 +341,7 @@ class ColumnMapper:
         return self._finalize_mapping_issues
 
     def get_def_dicts(self):
-        """ Return a list of all def dicts from every column description.
+        """ Return def dicts from every column description.
 
         Returns:
            list:   A list of DefinitionDict objects corresponding to each column entry.
@@ -364,7 +360,7 @@ class ColumnMapper:
         return self._finalize_mapping_issues
 
     def validate_column_data(self, hed_ops, error_handler=None, **kwargs):
-        """ Validate all column definitions that are being used and column definition hed strings.
+        """ Validate the column data.
 
         Args:
             hed_ops (list, func, or HedOps): A func, a HedOps or a list of these to apply to the
@@ -380,8 +376,6 @@ class ColumnMapper:
             error_handler = ErrorHandler()
         all_validation_issues = []
         for column_data in self.column_data.values():
-            all_validation_issues += column_data.validate_column(hed_ops,
-                                                                 error_handler=error_handler,
-                                                                 **kwargs)
+            all_validation_issues += column_data.validate_column(hed_ops, error_handler=error_handler, **kwargs)
 
         return all_validation_issues

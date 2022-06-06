@@ -4,7 +4,7 @@ from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsTimeseriesFile(BidsFile):
-    """ Represents a BIDS continuous file including its associated sidecar. """
+    """ A BIDS continuous file including its associated sidecar. """
 
     def __init__(self, file_path):
         """ Constructor for a BIDS events file. """
