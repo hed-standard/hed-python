@@ -272,7 +272,7 @@ class HedGroupBase:
             for tag in sub_group.tags():
                 if tag.short_base_tag.lower() in search_tags:
                     found_tags.append((tag, sub_group))
-                    
+
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in found_tags]
         return found_tags
