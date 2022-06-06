@@ -53,6 +53,11 @@ def set_cache_directory(new_cache_dir):
         os.makedirs(new_cache_dir, exist_ok=True)
 
 
+def get_cache_directory():
+    """ Return the current value of HED_CACHE_DIRECTORY. """
+    return HED_CACHE_DIRECTORY
+
+
 def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=False):
     """ Get the HED versions in the hed directory.
 

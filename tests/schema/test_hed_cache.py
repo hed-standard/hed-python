@@ -45,6 +45,13 @@ class Test(unittest.TestCase):
         filename = hed_cache.cache_specific_url(self.specific_base_url)
         self.assertTrue(os.path.exists(filename))
 
+    def test_get_cache_directory(self):
+        from hed.schema import get_cache_directory
+        cache_dir = get_cache_directory()
+        self.assertTrue(cache_dir, "get_cache_directory gives a non-blank element")
+        print(f"\nCache directory is {os.path.realpath(cache_dir)}\n")
+        self.assertEqual(cache_dir, self.hed_cache_dir)
+
     def test_get_hed_version_path(self):
         latest_hed_version_path = hed_cache.get_hed_version_path()
         self.assertIsInstance(latest_hed_version_path, str)
