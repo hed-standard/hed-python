@@ -9,36 +9,6 @@ from xml.etree import ElementTree
 NO_VERSION_INFO_STRING = "No version info found"
 
 
-def delete_file_if_it_exists(file_path):
-    """ Deletes a file if it exists.
-
-    Args:
-        file_path (str):    Path of the file to be deleted.
-
-    Returns:
-        bool:  True if the file exists and was deleted.
-    """
-    if file_path is None:
-        return False
-
-    if os.path.isfile(file_path):
-        os.remove(file_path)
-        return True
-    return False
-
-
-def get_file_extension(file):
-    """Get the extension from the specified filename. This can be the full path or just the name.
-
-        Args:
-            file (str):    Full path or filename with extension of a file.
-
-        Returns:
-            str: The extension if there is one.
-       """
-    return os.path.splitext(file)[1]
-
-
 def get_version_from_xml(hed_xml_tree):
     """Get version from root node of an XML tree.
 
@@ -74,7 +44,7 @@ def url_to_file(resource_url):
         str: The local temporary filename for the downloaded file,
     """
     url_request = urllib.request.urlopen(resource_url)
-    suffix = get_file_extension(resource_url)
+    suffix = os.path.splitext(resource_url)[1]
     url_data = str(url_request.read(), 'utf-8')
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False, mode='w', encoding='utf-8') as opened_file:
         opened_file.write(url_data)

@@ -579,7 +579,7 @@ class HedTag:
         """ Check that this string has valid units and remove them.
 
         Args:
-            tag_unit_classes (list): A list of valid UnitClassEntry objects for this tag.
+            tag_unit_classes (dict): Dictionary of valid UnitClassEntry objects for this tag.
 
         Returns:
             stripped_value (str): The value with the units removed.
