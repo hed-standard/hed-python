@@ -144,7 +144,7 @@ class TagValidator:
     # Mostly internal functions to check individual types of errors
     # =========================================================================+
     def check_invalid_character_issues(self, hed_string):
-        """ Report invalid characters
+        """ Report invalid characters.
 
         Args:
             hed_string (str): A hed string.
