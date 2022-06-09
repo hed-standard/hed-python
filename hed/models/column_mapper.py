@@ -17,14 +17,12 @@ class ColumnMapper:
     Notes:
         - Functions and variables column and row indexing starts at 0.
     """
-    def __init__(self, sidecars=None, tag_columns=None, column_prefix_dictionary=None,
+    def __init__(self, sidecar=None, tag_columns=None, column_prefix_dictionary=None,
                  attribute_columns=None, optional_tag_columns=None):
         """ Constructor for ColumnMapper.
 
         Args:
-            sidecars (Sidecar, string, or list of these): A list of Sidecars or
-                 filenames to gather ColumnDefinitions from.
-                Sidecars later in the list override those earlier in the list.
+            sidecar (Sidecar): A sidecar to gather column data from.
             tag_columns: (list):  A list of ints or strings containing the columns that contain the HED tags.
                 Sidecar column definitions will take precedent if there is a conflict with tag_columns.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers and values are HED tag
@@ -55,9 +53,8 @@ class ColumnMapper:
 
         self._na_patterns = ["n/a", "nan"]
         self._finalize_mapping_issues = []
-        self._has_sidecars = False
-        if sidecars:
-            self.add_sidecars(sidecars)
+        self._sidecar = None
+        self._set_sidecar(sidecar)
         self.add_columns(attribute_columns)
 
         self.set_tag_columns(tag_columns, optional_tag_columns, False)
@@ -66,18 +63,23 @@ class ColumnMapper:
         # finalize the column map based on initial settings with no header
         self._finalize_mapping()
 
-    def add_sidecars(self, sidecars):
-        """ Add sidecar column info.
+    def _set_sidecar(self, sidecar):
+        """ Set the sidecar this column mapper uses
 
         Args:
-            sidecars (list): A list of filenames or loaded sidecar files in any mix.
+            sidecar (Sidecar or None): the sidecar to use
+
+        Returns:
 
         """
-        self._has_sidecars = True
-        sidecars = Sidecar.load_multiple_sidecars(sidecars)
-        for sidecar in sidecars:
-            for column_data in sidecar:
-                self._add_column_data(column_data)
+        if self._sidecar:
+            raise ValueError("Trying to set a second sidecar on a column mapper.")
+        if not sidecar:
+            return None
+        for column_data in sidecar.column_data:
+            self._add_column_data(column_data)
+
+        self._sidecar = sidecar
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
         """ Replace the column prefix dictionary
@@ -128,7 +130,7 @@ class ColumnMapper:
 
         Args:
             new_column_map (list or dict):  Either an ordered list of the column names or column_number:column name
-                dictionary. In both cases column numbers start at 0
+                dictionary. In both cases, column numbers start at 0
 
         Returns:
             list: List of issues. Each issue is a dictionary.
@@ -309,7 +311,7 @@ class ColumnMapper:
                     found_named_tag_columns[column_name] = column_number
                 elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                     continue
-                elif self._has_sidecars:
+                elif self._sidecar:
                     if column_number not in all_tag_columns:
                         self._finalize_mapping_issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
                                                                                    extra_column_name=column_name)
@@ -347,8 +349,9 @@ class ColumnMapper:
            list:   A list of DefinitionDict objects corresponding to each column entry.
 
         """
-        def_dicts = [entry.def_dict for entry in self.column_data.values()]
-        return def_dicts
+        if self._sidecar:
+            return self._sidecar.get_def_dicts()
+        return []
 
     def get_column_mapping_issues(self):
         """ Get all the issues with finalizing column mapping.  Primarily a missing required column.
@@ -358,24 +361,3 @@ class ColumnMapper:
 
         """
         return self._finalize_mapping_issues
-
-    def validate_column_data(self, hed_ops, error_handler=None, **kwargs):
-        """ Validate the column data.
-
-        Args:
-            hed_ops (list, func, or HedOps): A func, a HedOps or a list of these to apply to the
-                hed strings in the sidecars.
-            error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
-            kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
-
-        Returns:
-            list: A list of syntax and semantic issues found in the definitions. Each issue is a dictionary.
-
-        """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        all_validation_issues = []
-        for column_data in self.column_data.values():
-            all_validation_issues += column_data.validate_column(hed_ops, error_handler=error_handler, **kwargs)
-
-        return all_validation_issues

@@ -1,42 +1,88 @@
 import json
 from hed.models.column_metadata import ColumnMetadata
-from hed.errors.error_types import ErrorContext
-from hed.errors import error_reporter
+from hed.errors.error_types import ErrorContext, SidecarErrors
 from hed.errors import ErrorHandler
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.models.hed_string import HedString
-from hed.models.def_mapper import DefMapper
+from hed.models.column_metadata import ColumnType
+from hed.models.hed_ops import apply_ops, hed_string_iter, set_hed_string
+from hed.models.sidecar_base import SidecarBase
 
 
-class Sidecar:
+class Sidecar(SidecarBase):
     """ Contents of a JSON file or merged file.
-
-    Notes:
-        - The Sidecar maintains its own definition dictionaries.
 
     """
 
-    def __init__(self, file, name=None):
+    def __init__(self, files, name=None):
         """ Construct a Sidecar object representing a JSON file.
 
         Args:
-            file (str or FileLike): A string or file-like object representing a JSON file.
+            files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
             name (str or None): Optional name identifying this sidecar, generally a filename.
 
         """
-        self._column_data = {}
-        self.name = name
-        if file:
-            self.load_sidecar_file(file)
+        super().__init__(name)
+        self.loaded_dict = self.load_sidecar_files(files)
+        self.def_dict = self.extract_definitions()
 
-    def __iter__(self):
-        """ An iterator to go over the individual column metadata.
+    @property
+    def column_data(self):
+        """ Generates the list of ColumnMetadata for this sidecar
 
         Returns:
-            iterator: An iterator over the column metadata values.
-
+            list(ColumnMetadata): the list of column metadata defined by this sidecar
         """
-        return iter(self._column_data.values())
+        for col_name, col_dict in self.loaded_dict.items():
+            yield self._generate_single_column(col_name, col_dict)
+
+    def _hed_string_iter(self, tag_funcs, error_handler):
+        """ Low level function to retrieve hed string in sidecar
+
+        Args:
+            tag_funcs(list): A list of functions to apply to returned strings
+            error_handler(ErrorHandler): Error handler to use for context
+
+        Yields:
+            tuple:
+                string(HedString): The retrieved and modified string
+                position(tuple): The location of this hed string.  Black box.
+                issues(list): A list of issues running the tag_funcs.
+        """
+        for column_name, dict_for_entry in self.loaded_dict.items():
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
+            hed_dict = dict_for_entry.get("HED", {})
+            for (hed_string_obj, position, issues) in hed_string_iter(hed_dict, tag_funcs, error_handler):
+                yield hed_string_obj, (column_name, position), issues
+
+            error_handler.pop_error_context()
+
+    def _set_hed_string(self, new_hed_string, position):
+        """ Low level function to update hed string in sidecar
+
+        Args:
+            new_hed_string (str or HedString): The new hed_string to replace the value at position.
+            position (tuple):   The value returned from hed_string_iter.
+        """
+        column_name, position = position
+        hed_dict = self.loaded_dict[column_name]
+        hed_dict["HED"] = set_hed_string(new_hed_string, hed_dict["HED"], position)
+
+    def validate_structure(self, error_handler):
+        """ Validate the raw structure of this sidecar.
+
+        Args:
+            error_handler(ErrorHandler): The error handler to use for error context
+
+        Returns:
+            issues(list): A list of issues found with the structure
+        """
+        all_validation_issues = []
+        for column_name, dict_for_entry in self.loaded_dict.items():
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
+            all_validation_issues += self._validate_column_structure(column_name, dict_for_entry, error_handler)
+            error_handler.pop_error_context()
+        return all_validation_issues
 
     def save_as_json(self, save_filename):
         """ Save column metadata to a JSON file.
@@ -45,11 +91,8 @@ class Sidecar:
             save_filename (str): Path to save file
 
         """
-        output_dict = {}
-        for entry in self._column_data.values():
-            output_dict[entry.column_name] = entry.hed_dict
         with open(save_filename, "w") as fp:
-            json.dump(output_dict, fp, indent=4)
+            json.dump(self.loaded_dict, fp, indent=4)
 
     def get_as_json_string(self):
         """ Return this sidecar's column metadata as a string.
@@ -58,10 +101,7 @@ class Sidecar:
             str: The json string representing this sidecar.
 
         """
-        output_dict = {}
-        for entry in self._column_data.values():
-            output_dict[entry.column_name] = entry.hed_dict
-        return json.dumps(output_dict, indent=4)
+        return json.dumps(self.loaded_dict, indent=4)
 
     def load_sidecar_file(self, file):
         """ Load column metadata from a given json file.
@@ -71,140 +111,56 @@ class Sidecar:
 
         Raises:
             HedFileError: If the file was not found or could not be parsed into JSON.
-
-        Notes:
-            - Multiple files can be loaded into one Sidecar, but it is discouraged.
-
         """
-        if isinstance(file, str):
+        if not file:
+            return {}
+        elif isinstance(file, str):
             try:
                 with open(file, "r") as fp:
                     if not self.name:
                         self.name = file
-                    self._load_json_columns(fp)
+                    return self._load_json_file(fp)
             except FileNotFoundError as e:
                 raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, file)
             except TypeError as e:
                 raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), file)
         else:
-            self._load_json_columns(file)
+            return self._load_json_file(file)
 
-    def _load_json_columns(self, fp):
-        """ Parse a JSON file into columns and load in the column entry dictionary.
+    def load_sidecar_files(self, files):
+        """ Load json from a given file or list
+
+        Args:
+            files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
+        Raises:
+            HedFileError: If the file was not found or could not be parsed into JSON.
+        """
+        if not files:
+            return {}
+        if not isinstance(files, list):
+            files = [files]
+
+        merged_dict = {}
+        for file in files:
+            loaded_json = self.load_sidecar_file(file)
+            merged_dict.update(loaded_json)
+        return merged_dict
+
+    def _load_json_file(self, fp):
+        """ Load the raw json of a given file
 
         Args:
             fp (File-like): The JSON source stream.
 
         Raises:
             HedFileError:  If the file cannot be parsed.
-
         """
         try:
-            loaded_defs = json.load(fp)
-            for col_name, col_dict in loaded_defs.items():
-                self._add_single_column(col_name, col_dict)
+            return json.load(fp)
         except json.decoder.JSONDecodeError as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name)
 
-    @staticmethod
-    def load_multiple_sidecars(input_list):
-        """ Utility for loading multiple json files.
-
-        Args:
-            input_list (list): A list of filenames or Sidecar files in any mix.
-
-        Returns:
-            list: A list sidecars.
-
-        Raises:
-            HedFileError: If any of the files are not found.
-
-        """
-        if not isinstance(input_list, list):
-            input_list = [input_list]
-
-        loaded_files = []
-        for json_file in input_list:
-            if isinstance(json_file, str):
-                json_file = Sidecar(json_file)
-            loaded_files.append(json_file)
-        return loaded_files
-
-    def hed_string_iter(self, hed_ops=None, error_handler=None, expand_defs=False, remove_definitions=False,
-                        allow_placeholders=True, extra_def_dicts=None, **kwargs):
-        """ Iterator over hed strings in columns.
-
-        Args:
-            hed_ops (func, HedOps, list):  A HedOps, funcs or list of these to apply to the hed strings
-                                            before returning
-            error_handler (ErrorHandler): The error handler to use for context, uses a default one if none.
-            expand_defs (bool): If True, expand all def tags located in the strings.
-            remove_definitions (bool): If True, remove all definitions found in the string.
-            allow_placeholders (bool): If False, placeholders will be marked as validation warnings.
-            extra_def_dicts (DefinitionDict, list, None): Extra dicts to add to the list.
-            kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
-
-        Yields:
-            tuple:
-                - HedString: A HedString at a given column and key position.
-                - tuple: Indicates where hed_string was loaded from so it can be later set by the user
-                - list: A list of issues found performing ops. Each issue is a dictionary.
-
-        """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        hed_ops = self._standardize_ops(hed_ops)
-        if expand_defs or remove_definitions:
-            self._add_definition_mapper(hed_ops, extra_def_dicts)
-        for column_name, entry in self._column_data.items():
-            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
-            for (hed_string_obj, position, issues) in entry.hed_string_iter(hed_ops=hed_ops,
-                                                                            error_handler=error_handler,
-                                                                            expand_defs=expand_defs,
-                                                                            allow_placeholders=allow_placeholders,
-                                                                            remove_definitions=remove_definitions,
-                                                                            **kwargs):
-                yield hed_string_obj, (column_name, position), issues
-
-            error_handler.pop_error_context()
-
-    def set_hed_string(self, new_hed_string, position):
-        """ Set a provided column/category key/etc.
-
-        Args:
-            new_hed_string (str or HedString): The new hed_string to replace the value at position.
-            position (tuple):   The (HedString, str, list) tuple returned from hed_string_iter.
-
-        """
-        column_name, position = position
-        entry = self._column_data[column_name]
-        entry.set_hed_string(new_hed_string, position)
-
-    def _add_definition_mapper(self, hed_ops, extra_def_dicts=None):
-        """ Add a DefMapper if the hed_ops list doesn't have one.
-
-        Args:
-            hed_ops (list):  A list of HedOps
-            extra_def_dicts (list):  DefDicts from outside.
-
-        Returns:
-            DefMapper:  A shallow copy of the hed_ops list with a DefMapper added if there wasn't one.
-
-        """
-        if not any(isinstance(hed_op, DefMapper) for hed_op in hed_ops):
-            def_dicts = self.get_def_dicts(extra_def_dicts)
-            def_mapper = DefMapper(def_dicts)
-            hed_ops.append(def_mapper)
-            return def_mapper
-        return None
-
-    @staticmethod
-    def _standardize_ops(hed_ops):
-        if not isinstance(hed_ops, list):
-            hed_ops = [hed_ops]
-        return hed_ops.copy()
-
-    def _add_single_column(self, column_name, dict_for_entry, column_type=None):
+    def _generate_single_column(self, column_name, dict_for_entry, column_type=None):
         """ Create a single column metadata entry and add to this sidecar.
 
         Args:
@@ -214,56 +170,77 @@ class Sidecar:
                 This overrides auto-detection from the dict_for_entry.
 
         """
-        column_entry = ColumnMetadata(column_type, column_name, dict_for_entry)
-        self._column_data[column_name] = column_entry
+        if column_type is None:
+            column_type = self._detect_column_type(dict_for_entry)
+        if dict_for_entry:
+            hed_dict = dict_for_entry.get("HED")
+        else:
+            hed_dict = None
+        def_removed_dict, _ = apply_ops(hed_dict, HedString.remove_definitions)
+        column_entry = ColumnMetadata(column_type, column_name, def_removed_dict)
+        return column_entry
 
-    def get_def_dicts(self, extra_def_dicts=None):
-        """ Return DefinitionDicts for the columns in this sidecar.
-
-        Args:
-            extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
-
-        Returns:
-            list: A list of definition dicts for each column plus any found in extra_def_dicts.
-
-        """
-        def_dicts = [column_entry.def_dict for column_entry in self]
-        if extra_def_dicts:
-            if not isinstance(extra_def_dicts, list):
-                extra_def_dicts = [extra_def_dicts]
-            def_dicts += extra_def_dicts
-        return def_dicts
-
-    def validate_entries(self, hed_ops=None, name=None, extra_def_dicts=None,
-                         error_handler=None, **kwargs):
-        """ Run the given hed_ops on all columns in this sidecar.
+    @staticmethod
+    def _detect_column_type(dict_for_entry):
+        """ Determine the ColumnType of a given json entry.
 
         Args:
-            hed_ops (list, func, or HedOps): A HedOps, func or list of these to apply to hed strings in this sidecar.
-            name (str): If present, will use this as the filename for context, rather than using the actual filename
-                Useful for temp filenames.
-            extra_def_dicts: (DefinitionDict, list, or None): If present use these in addition to sidecar's def dicts.
-            error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
-            kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
+            dict_for_entry (dict): The loaded json entry a specific column.
+                Generally has a "HED" entry among other optional ones.
 
         Returns:
-            list: The list of validation issues found. Individual issues are in the form of a dict.
+            ColumnType: The determined type of given column.  Returns None if unknown.
 
         """
-        if error_handler is None:
-            error_handler = error_reporter.ErrorHandler()
-        if not name:
-            name = self.name
-        if name:
-            error_handler.push_error_context(ErrorContext.FILE_NAME, name, False)
+        if not dict_for_entry or not isinstance(dict_for_entry, dict):
+            return ColumnType.Attribute
 
-        hed_ops = self._standardize_ops(hed_ops)
-        def_mapper = self._add_definition_mapper(hed_ops, extra_def_dicts)
+        minimum_required_keys = ("HED",)
+        if not set(minimum_required_keys).issubset(dict_for_entry.keys()):
+            return ColumnType.Attribute
 
-        all_validation_issues = []
-        all_validation_issues += def_mapper.issues
-        for column_data in self:
-            all_validation_issues += column_data.validate_column(hed_ops, error_handler=error_handler, **kwargs)
-        if name:
-            error_handler.pop_error_context()
-        return all_validation_issues
+        hed_entry = dict_for_entry["HED"]
+        if isinstance(hed_entry, dict):
+            return ColumnType.Categorical
+
+        if not isinstance(hed_entry, str):
+            return None
+
+        if "#" not in dict_for_entry["HED"]:
+            return None
+
+        return ColumnType.Value
+
+    def _validate_column_structure(self, column_name, dict_for_entry, error_handler):
+        """ Checks primarily for type errors such as expecting a string and getting a list in a json sidecar.
+
+        Args:
+            error_handler (ErrorHandler)  Sets the context for the error reporting. Cannot be None.
+
+        Returns:
+            list:  Issues in performing the operations. Each issue is a dictionary.
+
+        """
+        val_issues = []
+        column_type = self._detect_column_type(dict_for_entry=dict_for_entry)
+        if column_type is None:
+            val_issues += ErrorHandler.format_error(SidecarErrors.UNKNOWN_COLUMN_TYPE,
+                                                    column_name=column_name)
+        elif column_type == ColumnType.Categorical:
+            raw_hed_dict = dict_for_entry["HED"]
+            if not raw_hed_dict:
+                val_issues += ErrorHandler.format_error(SidecarErrors.BLANK_HED_STRING)
+            if not isinstance(raw_hed_dict, dict):
+                val_issues += ErrorHandler.format_error(SidecarErrors.WRONG_HED_DATA_TYPE,
+                                                        given_type=type(raw_hed_dict),
+                                                        expected_type="dict")
+            for key_name, hed_string in raw_hed_dict.items():
+                if not isinstance(hed_string, str):
+                    error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+                    val_issues += ErrorHandler.format_error(SidecarErrors.WRONG_HED_DATA_TYPE,
+                                                            given_type=type(hed_string),
+                                                            expected_type="str")
+                    error_handler.pop_error_context()
+        error_handler.add_context_to_issues(val_issues)
+
+        return val_issues

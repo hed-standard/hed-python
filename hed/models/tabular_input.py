@@ -29,13 +29,12 @@ class TabularInput(BaseInput):
         """
         if attribute_columns is None:
             attribute_columns = ["duration", "onset"]
-        if sidecar:
-            sidecar_list = Sidecar.load_multiple_sidecars(sidecar)
-        else:
-            sidecar_list = None
-        new_mapper = ColumnMapper(sidecars=sidecar_list, optional_tag_columns=[self.HED_COLUMN_NAME],
+        if sidecar and not isinstance(sidecar, Sidecar):
+            sidecar = Sidecar(sidecar)
+        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
                                   attribute_columns=attribute_columns)
 
+        self._sidecar = sidecar
         self._also_gather_defs = also_gather_defs
         self._extra_def_dicts = extra_def_dicts
         def_mapper = self.create_def_mapper(new_mapper, extra_def_dicts)
@@ -73,16 +72,16 @@ class TabularInput(BaseInput):
 
         return def_mapper
 
-    def reset_column_mapper(self, sidecars=None, attribute_columns=None):
+    def reset_column_mapper(self, sidecar=None, attribute_columns=None):
         """ Change the sidecars and settings.
 
         Args:
-            sidecars (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.
+            sidecar (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.
             attribute_columns (str or int or [str] or [int]): Column names or numbers to treat as attributes.
                     Default: ["duration", "onset"]
 
         """
-        new_mapper = ColumnMapper(sidecars=sidecars, optional_tag_columns=[self.HED_COLUMN_NAME],
+        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
                                   attribute_columns=attribute_columns)
 
         self._def_mapper = self.create_def_mapper(new_mapper, self._extra_def_dicts)
@@ -106,4 +105,4 @@ class TabularInput(BaseInput):
         if not isinstance(hed_ops, list):
             hed_ops = [hed_ops]
         hed_ops.append(self._def_mapper)
-        return self._mapper.validate_column_data(hed_ops, error_handler=error_handler, **kwargs)
+        return self._sidecar.validate_entries(hed_ops, error_handler=error_handler, **kwargs)
