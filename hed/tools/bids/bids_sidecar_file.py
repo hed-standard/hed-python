@@ -66,7 +66,7 @@ class BidsSidecarFile(BidsFile):
             raise HedFileError("InvalidJSONSidecarContents",
                                f"Attempt to set {self.file_path} to invalid {str(content_info)}", "")
         self.has_hed = self.is_hed(file_contents)
-        self.contents = Sidecar(file=io.StringIO(json.dumps(file_contents)),
+        self.contents = Sidecar(files=io.StringIO(json.dumps(file_contents)),
                                 name=os.path.realpath(os.path.basename(self.file_path)))
 
     @staticmethod

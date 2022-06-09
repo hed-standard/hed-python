@@ -4,6 +4,8 @@ import os
 from hed.models import ColumnMapper, ColumnType, ColumnMetadata, HedString, model_constants
 from hed.schema import load_schema
 from hed import HedFileError
+from hed.models.sidecar import Sidecar
+
 
 class Test(unittest.TestCase):
     schema_file = '../data/schema_test_data/HED8.0.0t.xml'
@@ -77,12 +79,12 @@ class Test(unittest.TestCase):
 
     def test_add_json_file_events(self):
         mapper = ColumnMapper()
-        mapper.add_sidecars(self.basic_events_json)
+        mapper._set_sidecar(Sidecar(self.basic_events_json))
         self.assertTrue(len(mapper.column_data) >= 2)
 
     def test__detect_event_type(self):
         mapper = ColumnMapper()
-        mapper.add_sidecars(self.basic_events_json)
+        mapper._set_sidecar(Sidecar(self.basic_events_json))
         self.assertTrue(mapper.column_data[self.basic_event_name].column_type == self.basic_event_type)
 
     def test_add_attribute_columns(self):
@@ -118,14 +120,14 @@ class Test(unittest.TestCase):
 
     def test_expand_column(self):
         mapper = ColumnMapper()
-        mapper.add_sidecars(self.basic_events_json)
+        mapper._set_sidecar(Sidecar(self.basic_events_json))
         mapper.set_column_map(self.basic_column_map)
         expanded_column = mapper._expand_column(2, "go")
         self.assertTrue(isinstance(expanded_column[0], HedString))
 
     def test_expand_row_tags(self):
         mapper = ColumnMapper()
-        mapper.add_sidecars(self.basic_events_json)
+        mapper._set_sidecar(Sidecar(self.basic_events_json))
         mapper.add_columns(self.basic_attribute_column)
         mapper.set_column_map(self.basic_column_map)
         expanded_row = mapper.expand_row_tags(self.basic_event_row)
@@ -134,7 +136,7 @@ class Test(unittest.TestCase):
 
     def test_expansion_issues(self):
         mapper = ColumnMapper()
-        mapper.add_sidecars(self.basic_events_json)
+        mapper._set_sidecar(Sidecar(self.basic_events_json))
         mapper.add_columns(self.basic_attribute_column)
         mapper.set_column_map(self.basic_column_map)
         expanded_row = mapper.expand_row_tags(self.basic_event_row_invalid)

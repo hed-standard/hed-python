@@ -2,6 +2,8 @@
 
 from functools import partial
 from hed.schema import HedSchema, HedSchemaGroup
+from hed.errors.error_types import ErrorContext, SidecarErrors
+from hed.errors import ErrorHandler
 
 
 # These are the defaults if you pass in nothing.  Most built in routes will have other default values.
@@ -22,8 +24,7 @@ def translate_ops(hed_ops, split_ops=False, **kwargs):
     Args:
         hed_ops (list): A list of func or HedOps or HedSchema to apply to hed strings.
         split_ops (bool): If true, will split the operations into separate lists of tag and string operations.
-
-    kwargs (dict):  An optional dictionary of name-value pairs representing parameters passed to each HedOps
+        kwargs (dict):  An optional dictionary of name-value pairs representing parameters passed to each HedOps
 
     Returns:
         list or tuple: A list of functions to apply or a tuple containing separate lists of tag and string ops.
@@ -72,6 +73,143 @@ def translate_ops(hed_ops, split_ops=False, **kwargs):
     if split_ops:
         return tag_funcs, string_funcs
     return tag_funcs + string_funcs
+
+
+def apply_ops(hed_strings, hed_ops, **kwargs):
+    """ Convenience function to update a list/dict of hed strings
+
+    Args:
+        hed_strings(str, dict, list): A list/dict/str to update
+        hed_ops (list or HedOps or func): A list of func or HedOps or HedSchema to apply to hed strings.
+        kwargs (dict):  An optional dictionary of name-value pairs representing parameters passed to each HedOps
+
+    Returns:
+        tuple:
+            hed_strings(str, dict, list): Same type as input
+            issues(list): A list of issues found applying the hed_ops
+    """
+    from hed.models.hed_string import HedString
+
+    if not hed_strings:
+        return hed_strings, []
+    issues = []
+    tag_funcs = translate_ops(hed_ops, **kwargs)
+    if isinstance(hed_strings, str):
+        hed_string_obj = HedString(hed_strings)
+        issues += hed_string_obj.apply_funcs(tag_funcs)
+        return str(hed_string_obj), issues
+    elif isinstance(hed_strings, dict):
+        return_dict = {}
+        for key, hed_string in hed_strings.items():
+            hed_string_obj = HedString(hed_string)
+            issues += hed_string_obj.apply_funcs(tag_funcs)
+            return_dict[key] = str(hed_string_obj)
+        return return_dict, issues
+    elif isinstance(hed_strings, list):
+        return_list = []
+        for hed_string in hed_strings:
+            hed_string_obj = HedString(hed_string)
+            issues += hed_string_obj.apply_funcs(tag_funcs)
+            return_list.append(str(hed_string_obj))
+        return return_list, issues
+
+    raise ValueError("Unaccounted for type in apply_ops")
+
+
+def hed_string_iter(hed_strings, tag_funcs, error_handler):
+    """ Iterate over the given dict of strings, returning HedStrings
+
+        Also gives issues for blank strings
+
+    Args:
+        hed_strings(dict or str): A hed_string or dict of hed strings
+        tag_funcs (list of funcs): The functions to apply before returning
+        error_handler (ErrorHandler): The error handler to use for context, uses a default one if none.
+
+    Yields:
+        tuple:
+            - HedString: The hed string at a given column and key position.
+            - str: Indication of the where hed string was loaded from so it can be later set by the user.
+            - list: Issues found applying hed_ops. Each issue is a dictionary.
+
+    """
+    for hed_string_obj, key_name in _hed_iter_low(hed_strings):
+        new_col_issues = []
+        error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+        if not hed_string_obj:
+            new_col_issues += ErrorHandler.format_error(SidecarErrors.BLANK_HED_STRING)
+            error_handler.add_context_to_issues(new_col_issues)
+            yield hed_string_obj, key_name, new_col_issues
+        else:
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
+                                             increment_depth_after=False)
+            if tag_funcs:
+                new_col_issues += hed_string_obj.apply_funcs(tag_funcs)
+
+            error_handler.add_context_to_issues(new_col_issues)
+            yield hed_string_obj, key_name, new_col_issues
+            error_handler.pop_error_context()
+        error_handler.pop_error_context()
+
+
+def _hed_iter_low(hed_strings):
+    """ Iterate over the hed string entries.
+
+        Used by hed_string_iter
+
+    Args:
+        hed_strings(dict or str): A hed_string or dict of hed strings
+
+    Yields:
+        tuple:
+            - HedString: Individual hed strings for different entries.
+            - str: The position to pass back to set this string.
+
+    """
+    from hed.models.hed_string import HedString
+
+    if isinstance(hed_strings, dict):
+        for key, hed_string in hed_strings.items():
+            if isinstance(hed_string, str):
+                hed_string = HedString(hed_string)
+            else:
+                continue
+            yield hed_string, key
+    elif isinstance(hed_strings, str):
+        hed_string = HedString(hed_strings)
+        yield hed_string, None
+
+
+def set_hed_string(new_hed_string, hed_strings, position=None):
+    """ Set a hed string for a category key/etc.
+
+    Args:
+        new_hed_string (str or HedString): The new hed_string to replace the value at position.
+        hed_strings(dict or str or HedString): The hed strings we want to update
+        position (str, optional): This should only be a value returned from hed_string_iter.
+
+    Returns:
+        updated_string (str or dict): The newly updated string/dict.
+    Raises:
+        TypeError: If the mapping cannot occur.
+
+    """
+    from hed.models.hed_string import HedString
+
+    if isinstance(hed_strings, dict):
+        if position is None:
+            raise TypeError("Error: Trying to set a category HED string with no category")
+        if position not in hed_strings:
+            raise TypeError("Error: Not allowed to add new categories to a column")
+        hed_strings[position] = str(new_hed_string)
+    elif isinstance(hed_strings, (str, HedString)):
+        if position is not None:
+            raise TypeError("Error: Trying to set a value HED string with a category")
+        hed_strings = str(new_hed_string)
+    else:
+        raise TypeError("Error: Trying to set a HED string on a column_type that doesn't support it.")
+
+    return hed_strings
 
 
 class HedOps:

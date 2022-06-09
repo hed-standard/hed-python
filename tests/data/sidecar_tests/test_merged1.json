@@ -1,0 +1,14 @@
+{
+   "response_time": {
+       "LongName": "Response time after stimulus",
+       "Description": "Time from stimulus presentation until subject presses button",
+       "Units": "ms",
+       "HED": "Action/Button press/#"
+   },
+   "response_time2": {
+       "LongName": "Response time after stimulus",
+       "Description": "Time from stimulus presentation until subject presses button",
+       "Units": "ms",
+       "HED": "Action/Button press/#"
+   }
+}
