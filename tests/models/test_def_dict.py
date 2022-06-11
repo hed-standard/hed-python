@@ -94,7 +94,8 @@ class TestDefDict(TestDefBase):
             'defInGroup': ErrorHandler.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
                                                     tag=HedTag("Def/ImproperlyPlacedDef"), def_name="ValidDefName"),
             'defExpandInGroup': ErrorHandler.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
-                                                    tag=HedTag("Def-expand/ImproperlyPlacedDef"), def_name="ValidDefName")
+                                                          tag=HedTag("Def-expand/ImproperlyPlacedDef"),
+                                                          def_name="ValidDefName")
         }
 
         self.check_def_base(test_strings, expected_results)

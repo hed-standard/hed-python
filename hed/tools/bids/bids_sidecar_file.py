@@ -1,7 +1,4 @@
 import os
-import io
-import json
-from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_file import BidsFile
 
@@ -59,32 +56,6 @@ class BidsSidecarFile(BidsFile):
         self.contents = Sidecar(files=content_info,
                                 name=os.path.realpath(os.path.basename(self.file_path)))
         self.has_hed = self.is_hed(self.contents.loaded_dict)
-
-    # @staticmethod
-    # def get_merged(file_list):
-    #     """ Return merged contents of JSON files as dict.
-    #
-    #     Args:
-    #         file_list (list or None):  A list of JSON files representing sidecars in the order they are to be merged.
-    #
-    #     Returns:
-    #         dict:  A merged JSON dictionary.
-    #
-    #     Notes:
-    #         - Merging takes place from front to back with overwriting of top-level keys.
-    #
-    #     """
-    #     merged_dict = {}
-    #     if not file_list:
-    #         return merged_dict
-    #     for file in file_list:
-    #         if isinstance(file, BidsSidecarFile):
-    #             file = file.file_path
-    #         with open(file, 'r') as fp:
-    #             next_sidecar = json.load(fp)
-    #         for key, item in next_sidecar.items():
-    #             merged_dict[key] = item
-    #     return merged_dict
 
     @staticmethod
     def is_hed(json_dict):

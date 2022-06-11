@@ -1,8 +1,8 @@
 import os
 import unittest
 from hed.errors.exceptions import HedFileError
-from hed.util.io_util import check_filename, extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
-    get_path_components
+from hed.util.io_util import check_filename, extract_suffix_path, generate_filename, \
+    get_dir_dictionary, get_file_list, get_path_components
 
 from hed.util.io_util import parse_bids_filename, _split_entity
 
@@ -205,7 +205,6 @@ class Test(unittest.TestCase):
         else:
             self.fail("parse_bids_filename should have thrown a HedFileError when missing value in name-value")
 
-
     def test_split_entity(self):
         ent_dict1 = _split_entity("apple")
         self.assertEqual("apple", ent_dict1["suffix"], "_split_entity returns the suffix of the entire piece")
@@ -220,6 +219,7 @@ class Test(unittest.TestCase):
         self.assertEqual(1, len(ent_dict4), "_split_entity is returns a dictionary with 1 entry if invalid")
         self.assertTrue("bad" in ent_dict4, "_split_entity should have a bad component if invalid")
         self.assertFalse(ent_dict4["bad"], "_split_entity bad value should be empty if blank piece")
+
 
 if __name__ == '__main__':
     unittest.main()

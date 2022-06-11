@@ -66,7 +66,8 @@ class TestConvertToLongTag(TestConvertTag):
 
     def test_tag_takes_value(self):
         test_strings = {
-            # these should all be allowed by initial identifiers.  Validators should flag the second two for '/' not being an allowed char.
+            # these should all be allowed by initial identifiers.
+            # Validators should flag the second two for '/' not being an allowed char.
             'singleNodeTakesPlaceholder': 'Item-count/#',
             'existingNodeValue': 'Label/Red',
             'existingNodeSubValue': 'Label/UniqueValue/Red',
@@ -157,11 +158,11 @@ class TestConvertToLongTag(TestConvertTag):
                                   expected_parent_tag='Item/Object/Geometric-object'),
             'twoLevels':
                 self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=19, index_in_tag_end=35,
-                                                 expected_parent_tag='Item/Object/Geometric-object'),
+                                  index_in_tag=19, index_in_tag_end=35,
+                                  expected_parent_tag='Item/Object/Geometric-object'),
             'partialDuplicate':
                 self.format_error(ValidationErrors.INVALID_PARENT_NODE, tag=0,
-                                                 index_in_tag=17, index_in_tag_end=21, expected_parent_tag='Item'),
+                                  index_in_tag=17, index_in_tag_end=21, expected_parent_tag='Item'),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -184,10 +185,10 @@ class TestConvertToLongTag(TestConvertTag):
             'invalidChild': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                               tag=0, index_in_tag=0, index_in_tag_end=12),
             'invalidChildValidParent': self.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                            tag=0, index_in_tag=6, index_in_tag_end=11,
-                                            expected_parent_tag="Event"),
+                                                         tag=0, index_in_tag=6, index_in_tag_end=11,
+                                                         expected_parent_tag="Event"),
             'validChild': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
-                                        tag=0, index_in_tag=0, index_in_tag_end=12),
+                                            tag=0, index_in_tag=0, index_in_tag_end=12),
         }
         self.validator(test_strings, expected_results, expected_errors)
 

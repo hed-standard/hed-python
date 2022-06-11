@@ -2,9 +2,7 @@ import unittest
 import os
 import shutil
 
-from hed.models import Sidecar, TimeseriesInput
-from hed import schema
-from hed.validator import HedValidator
+from hed.models import TimeseriesInput
 
 # TODO: Add tests about correct handling of 'n/a'
 
