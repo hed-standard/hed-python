@@ -131,6 +131,9 @@ class FileDictionary:
             key_indices (tuple): Positions of entities to use for key.
             separator (str):  Separator character used to construct key.
 
+        Returns:
+            dict: Key is based on key indices and value is a full path.
+
         """
         file_dict = {}
         for the_file in file_list:

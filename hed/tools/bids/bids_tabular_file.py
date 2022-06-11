@@ -18,7 +18,7 @@ class BidsTabularFile(BidsFile):
         """ Set the contents of this tabular file.
 
         Args:
-            content_info (str or None):   If string should be a file path if None use self.file_path.
+            content_info (None):   This always uses the internal file_path to create the contents.
             overwrite:  If False, do not overwrite existing contents if any.
 
         """

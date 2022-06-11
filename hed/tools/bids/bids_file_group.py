@@ -46,7 +46,7 @@ class BidsFileGroup:
         for bids_obj in self.datafile_dict.values():
             sidecar_list = self.get_sidecars_from_path(bids_obj)
             if sidecar_list:
-                bids_obj.sidecar = sidecar_list[-1]
+                bids_obj.sidecar = self.sidecar_dict[sidecar_list[-1]]
 
     def get_sidecars_from_path(self, obj):
         """ Return applicable sidecars for the object.
@@ -55,7 +55,7 @@ class BidsFileGroup:
             obj (BidsTabularFile or BidsSidecarFile):  The BIDS file object to get the sidecars for.
 
         Returns:
-            list:  A list of the applicable sidecars for obj starting at the root.
+            list:  A list of the paths for applicable sidecars for obj starting at the root.
 
         """
         sidecar_list = []
@@ -64,7 +64,7 @@ class BidsFileGroup:
             current_path = os.path.realpath(os.path.join(current_path, comp))
             next_sidecar = self._get_sidecar_for_obj(obj, current_path)
             if next_sidecar:
-                sidecar_list.append(next_sidecar)
+                sidecar_list.append(next_sidecar.file_path)
         return sidecar_list
 
     def _get_sidecar_for_obj(self, obj, current_path):
