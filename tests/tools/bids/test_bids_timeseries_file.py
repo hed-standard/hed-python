@@ -17,20 +17,15 @@ class Test(unittest.TestCase):
 
     def test_constructor(self):
         events = BidsTimeseriesFile(Test.event_path)
-        self.assertEqual(events.suffix, 'events', "BidsTabularFile should have correct events suffix")
-        self.assertEqual(events.ext, '.tsv', "BidsTabularFile should have a .tsv extension")
-        self.assertEqual(len(events.entity_dict), 3, "BidsTabularFile should have right number of entity_dict")
+        self.assertEqual(events.suffix, 'events', "BidsTimeseriesFile should have correct events suffix")
+        self.assertEqual(events.ext, '.tsv', "BidsTimeseriesFile should have a .tsv extension")
+        self.assertEqual(len(events.entity_dict), 3, "BidsTimeseriesFile should have right number of entity_dict")
         events_str = str(events)
-        self.assertTrue(events_str, "BidsTabularFile should have a string representation")
+        self.assertTrue(events_str, "BidsTimeseriesFile should have a string representation")
 
     def test_set_contents(self):
         events = BidsTimeseriesFile(Test.event_path)
-        self.assertFalse(events.contents, "BidsTabularFile should have no contents until set")
-        events.set_contents()
-        self.assertIsInstance(events.contents, TabularInput,
-                              "BidsTabularFile should have TabularInput contents after setting")
-        events.clear_contents()
-        self.assertFalse(events.contents, "BidsTabularFile should have no contents after clearing")
+        self.assertFalse(events.contents, "BidsTimeseriesFile should have no contents until set")
 
 
 if __name__ == '__main__':
