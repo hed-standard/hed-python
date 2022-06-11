@@ -4,6 +4,7 @@ import os
 from hed import schema
 from hed.models import HedString
 
+
 class Test(unittest.TestCase):
 
     @classmethod
@@ -17,7 +18,8 @@ class Test(unittest.TestCase):
         basic_definition_string = "(Definition/TestDef, (Keypad-key/TestDef1,Keyboard-key/TestDef2))"
         basic_definition_string_repeated = f"{basic_definition_string},{basic_definition_string}"
         def_string_with_repeat = HedString(basic_definition_string_repeated, self.hed_schema)
-        definition_tags = def_string_with_repeat.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True, include_groups=1)
+        definition_tags = def_string_with_repeat.find_tags({DefTagNames.DEFINITION_KEY},
+                                                           recursive=True, include_groups=1)
         definition_tag2 = definition_tags[1]
         def_string_with_repeat.remove([definition_tag2])
         remaining_children = def_string_with_repeat.get_all_groups()
@@ -25,9 +27,11 @@ class Test(unittest.TestCase):
             if child is definition_tag2:
                 self.assertFalse(False, "Definition tag not removed successfully")
 
-        basic_definition_string_repeated_subgroup = f"{basic_definition_string},{basic_definition_string}, ({basic_definition_string})"
+        basic_definition_string_repeated_subgroup = \
+            f"{basic_definition_string},{basic_definition_string}, ({basic_definition_string})"
         def_string_with_repeat = HedString(basic_definition_string_repeated_subgroup, self.hed_schema)
-        definition_tags = def_string_with_repeat.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True, include_groups=1)
+        definition_tags = def_string_with_repeat.find_tags({DefTagNames.DEFINITION_KEY},
+                                                           recursive=True, include_groups=1)
         definition_tag3 = definition_tags[2]
         def_string_with_repeat.remove([definition_tag3])
         remaining_children = def_string_with_repeat.get_all_groups()
@@ -35,9 +39,11 @@ class Test(unittest.TestCase):
             if child is definition_tag3:
                 self.assertFalse(False, "Nested definition tag not removed successfully")
 
-        basic_definition_string_repeated_subgroup = f"{basic_definition_string},{basic_definition_string}, ({basic_definition_string})"
+        basic_definition_string_repeated_subgroup = \
+            f"{basic_definition_string},{basic_definition_string}, ({basic_definition_string})"
         def_string_with_repeat = HedString(basic_definition_string_repeated_subgroup, self.hed_schema)
-        definition_tags = def_string_with_repeat.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True, include_groups=1)
+        definition_tags = def_string_with_repeat.find_tags({DefTagNames.DEFINITION_KEY},
+                                                           recursive=True, include_groups=1)
         definition_tag2 = definition_tags[1]
         def_string_with_repeat.remove([definition_tag2])
         remaining_children = def_string_with_repeat.get_all_groups()
@@ -45,9 +51,9 @@ class Test(unittest.TestCase):
             if child is definition_tag2:
                 self.assertFalse(False, "Nested definition tag not removed successfully")
 
-
     def test_find_tags_with_term(self):
-        basic_hed_string = "(Keypad-key/TestDef1,Keyboard-key/TestDef2, Item/Object, Event), Event, Object, Geometric-object"
+        basic_hed_string = \
+            "(Keypad-key/TestDef1,Keyboard-key/TestDef2, Item/Object, Event), Event, Object, Geometric-object"
         basic_hed_string_obj = HedString(basic_hed_string, self.hed_schema)
         # works
         located_tags = basic_hed_string_obj.find_tags_with_term("Object", recursive=True, include_groups=0)

@@ -414,6 +414,7 @@ class TestTagLevels3(TestHed3):
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
+
 class RequiredTags(TestHed3):
     @staticmethod
     def string_obj_func(validator, check_for_warnings):

@@ -27,7 +27,8 @@ class Test(unittest.TestCase):
         cls.placeholder_label_def_string = "Def/TestDefPlaceholder/2471"
         cls.placeholder_definition_contents = "(Item/TestDef1/#,Item/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents})"
-        cls.placeholder_definition_string_no_paren = f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
+        cls.placeholder_definition_string_no_paren = \
+            f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
         cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2))"
 
         cls.placeholder_hed_string_with_def = f"{cls.basic_hed_string},{cls.placeholder_label_def_string}"
@@ -53,7 +54,8 @@ class Test(unittest.TestCase):
             'str7': False,
         }
 
-    def base_def_validator(self, test_strings, result_strings, valid_strings, expand_defs, shrink_defs, remove_definitions, extra_ops=None,
+    def base_def_validator(self, test_strings, result_strings, valid_strings, expand_defs, shrink_defs,
+                           remove_definitions, extra_ops=None,
                            basic_definition_string=None):
         if not basic_definition_string:
             basic_definition_string = self.basic_definition_string
@@ -71,7 +73,8 @@ class Test(unittest.TestCase):
         for key in test_strings:
             string, expected_result, invalid = test_strings[key], result_strings[key], valid_strings[key]
             test_string = HedString(string)
-            def_issues = test_string.validate(hed_ops, expand_defs=expand_defs, shrink_defs=shrink_defs, remove_definitions=remove_definitions)
+            def_issues = test_string.validate(hed_ops, expand_defs=expand_defs, shrink_defs=shrink_defs,
+                                              remove_definitions=remove_definitions)
             self.assertEqual(invalid, bool(def_issues))
             self.assertEqual(test_string.get_as_short(), expected_result)
 
@@ -104,17 +107,27 @@ class Test(unittest.TestCase):
             'str7': "(" + self.expanded_def_string + "," + self.basic_hed_string + ")"
         }
 
-        self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition, self.mark_all_as_valid_strings, expand_defs=True, shrink_defs=False, remove_definitions=False)
-        self.base_def_validator(basic_def_strings, basic_def_strings, self.mark_all_as_valid_strings, expand_defs=False, shrink_defs=False, remove_definitions=False)
-        self.base_def_validator(basic_def_strings, basic_def_strings, self.mark_all_as_valid_strings, expand_defs=False, shrink_defs=True, remove_definitions=False)
-        self.base_def_validator(expanded_def_strings_with_definition, basic_def_strings, self.mark_all_as_valid_strings, expand_defs=False, shrink_defs=True, remove_definitions=False)
-        self.base_def_validator(expanded_def_strings_with_definition, expanded_def_strings_with_definition, self.mark_all_as_valid_strings, expand_defs=True, shrink_defs=False, remove_definitions=False)
-        self.base_def_validator(basic_def_strings, expanded_def_strings, self.mark_all_as_valid_strings, expand_defs=True, shrink_defs=False, remove_definitions=True)
+        self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition,
+                                self.mark_all_as_valid_strings, expand_defs=True,
+                                shrink_defs=False, remove_definitions=False)
+        self.base_def_validator(basic_def_strings, basic_def_strings, self.mark_all_as_valid_strings,
+                                expand_defs=False, shrink_defs=False, remove_definitions=False)
+        self.base_def_validator(basic_def_strings, basic_def_strings, self.mark_all_as_valid_strings,
+                                expand_defs=False, shrink_defs=True, remove_definitions=False)
+        self.base_def_validator(expanded_def_strings_with_definition, basic_def_strings,
+                                self.mark_all_as_valid_strings, expand_defs=False, shrink_defs=True,
+                                remove_definitions=False)
+        self.base_def_validator(expanded_def_strings_with_definition, expanded_def_strings_with_definition,
+                                self.mark_all_as_valid_strings, expand_defs=True, shrink_defs=False,
+                                remove_definitions=False)
+        self.base_def_validator(basic_def_strings, expanded_def_strings, self.mark_all_as_valid_strings,
+                                expand_defs=True, shrink_defs=False, remove_definitions=True)
 
         validator = HedValidator(self.hed_schema)
         extra_ops = [validator]
 
-        self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition, self.valid_definition_strings, expand_defs=True, shrink_defs=False,
+        self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition,
+                                self.valid_definition_strings, expand_defs=True, shrink_defs=False,
                                 extra_ops=extra_ops, remove_definitions=False)
 
     # special case test

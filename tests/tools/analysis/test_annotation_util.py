@@ -400,7 +400,6 @@ class Test(unittest.TestCase):
     def test_update_cat_dict(self):
         # TODO: Improve tests
         cat_dict = self.sidecar_face['event_type']
-        value1 = cat_dict['HED']['show_face']
         self.assertNotEqual(cat_dict['HED']['show_face'], 'Blue,Red')
         _update_cat_dict(cat_dict, 'show_face', 'Blue,Red', 'n/a', description_tag=True)
         self.assertEqual(cat_dict['HED']['show_face'], 'Blue,Red')

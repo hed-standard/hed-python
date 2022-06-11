@@ -9,9 +9,9 @@ from hed.util import get_file_list
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                         '../../data/bids/eeg_ds003654s_hed')
-        cls.file_list = get_file_list(cls.bids_base_dir, name_suffix="_events",
+        bids_base = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        cls.bids_base_dir = bids_base
+        cls.file_list = get_file_list(bids_base, name_suffix="_events",
                                       extensions=['.tsv'], exclude_dirs=['stimuli'])
 
     def test_bids_constructor_valid(self):

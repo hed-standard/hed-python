@@ -58,9 +58,6 @@ class Test(unittest.TestCase):
         sidecar1.clear_contents()
         self.assertFalse(sidecar1.contents, "BidsSidecarFile should have no contents after clearing")
 
-
-
-
     def test_is_sidecar_for(self):
         sidecar1 = BidsSidecarFile(self.sidecar_path)
         events1 = BidsTabularFile(self.event_path)
@@ -144,23 +141,22 @@ class Test(unittest.TestCase):
         bids_upper1.set_contents([])
         self.assertTrue(bids_upper.contents, "set_contents not empty when content_info is an empty list")
 
-
     def test_is_hed(self):
-        dict1 = {'a' : 'b', 'c': {'d': 'e'}}
+        dict1 = {'a': 'b', 'c': {'d': 'e'}}
         self.assertFalse(BidsSidecarFile.is_hed(dict1), 'is_hed returns False if no HED or HED_assembled')
-        dict2 = {'HED' : 'b', 'c': {'d':'e'}}
+        dict2 = {'HED': 'b', 'c': {'d': 'e'}}
         self.assertTrue(BidsSidecarFile.is_hed(dict2), 'is_hed returns True if HED at top level.')
-        dict3 = {'HED_assembled': 'b', 'c': {'d':'e'}}
+        dict3 = {'HED_assembled': 'b', 'c': {'d': 'e'}}
         self.assertTrue(BidsSidecarFile.is_hed(dict3), 'is_hed returns True if HED_assembled at top level.')
-        dict4 = {'a' : 'b', 'c': {'d':'HED'}}
+        dict4 = {'a': 'b', 'c': {'d': 'HED'}}
         self.assertFalse(BidsSidecarFile.is_hed(dict4),
                          'is_hed returns False if HED at second level is not a key')
-        dict5 = {'a' : 'b', 'c': {'d':'HED_assembled'}}
+        dict5 = {'a': 'b', 'c': {'d': 'HED_assembled'}}
         self.assertFalse(BidsSidecarFile.is_hed(dict5),
                          'is_hed returns False if HED_assembled at second level is not a key')
-        dict6 = {'a' : 'b', 'c': {'HED': 'a', 'Levels': {'e':'f'}}}
+        dict6 = {'a': 'b', 'c': {'HED': 'a', 'Levels': {'e': 'f'}}}
         self.assertTrue(BidsSidecarFile.is_hed(dict6), 'is_hed returns True if HED key at second level')
-        dict7 = {'a' : 'b', 'c': {'HED_assembled': 'a', 'Levels': {'e':'f'}}}
+        dict7 = {'a': 'b', 'c': {'HED_assembled': 'a', 'Levels': {'e': 'f'}}}
         self.assertTrue(BidsSidecarFile.is_hed(dict7), 'is_hed returns True if HED_assembled key at second level')
         dict8 = {'a': 'b', 'c': {'HED': {'a': 'b'}, 'Levels': {'e': 'f'}}}
         self.assertTrue(BidsSidecarFile.is_hed(dict8), 'is_hed returns True if HED key at second level')

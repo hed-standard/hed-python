@@ -3,7 +3,6 @@ import os
 
 from hed.models import ColumnMapper, ColumnType, ColumnMetadata, HedString, model_constants
 from hed.schema import load_schema
-from hed import HedFileError
 from hed.models.sidecar import Sidecar
 
 
@@ -190,6 +189,7 @@ class Test(unittest.TestCase):
             expanded_row = column_mapper.expand_row_tags([test_string])
             prepended_hed_string = expanded_row[model_constants.COLUMN_TO_HED_TAGS][0]
             self.assertEqual(expected_result, str(prepended_hed_string))
+
 
 if __name__ == '__main__':
     unittest.main()

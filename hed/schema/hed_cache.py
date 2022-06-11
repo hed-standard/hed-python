@@ -10,7 +10,7 @@ import re
 from semantic_version import Version
 import portalocker
 import time
-from hed.util.file_util import url_to_file
+from hed.schema.schema_util import url_to_file
 
 """Infrastructure for caching HED schema from remote repositories."""
 

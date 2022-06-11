@@ -44,13 +44,13 @@ class Test(unittest.TestCase):
         self.assertEqual(len(results1), len(dict1.file_dict), "make_query should return all of the entries when *.")
         results2 = dict1.make_query(query_dict={'sub': '*', 'run': ['1']})
         self.assertEqual(len(results2), 2, "make_query should return the right number of entries.")
-        results3= dict1.make_query(query_dict={'sub': '*', 'run': ['*']})
+        results3 = dict1.make_query(query_dict={'sub': '*', 'run': ['*']})
         self.assertFalse(results3, "make_query should return an empty dictionary when * is used in a list. ")
         results4 = dict1.make_query(query_dict={'sub': '*', 'run': ['*', '1']})
         self.assertEqual(len(results4), 2, "make_query should ignore the * in a list.")
         results5 = dict1.make_query(query_dict={'sub': '*', 'run': []})
         self.assertFalse(len(results5), "make_query be empty if the list for one of the entities is empty.")
-        results6 = dict1.make_query(query_dict={'sub': '*',})
+        results6 = dict1.make_query(query_dict={'sub': '*'})
         self.assertEqual(len(results6), len(dict1.file_dict), "make_query should return all of the entries when *.")
 
     def test_match_query(self):

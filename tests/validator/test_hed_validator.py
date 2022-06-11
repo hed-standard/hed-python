@@ -1,7 +1,7 @@
 import unittest
 import os
 
-#from hed import
+# from hed import
 from hed.errors import ErrorContext
 from hed import schema
 from hed.models import DefMapper, HedString, SpreadsheetInput, TabularInput, Sidecar
@@ -66,7 +66,8 @@ class Test(unittest.TestCase):
                                    '../data/validator_tests/bids_events_no_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events.json")
         validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
@@ -85,7 +86,8 @@ class Test(unittest.TestCase):
                                    '../data/validator_tests/bids_events_with_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events.json")
         validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
@@ -206,7 +208,6 @@ class Test(unittest.TestCase):
         test_string = HedString(string_with_def)
         issues = test_string.validate([validator, def_mapper], check_for_definitions=False)
         self.assertEqual(len(issues), 1)
-
 
 
 if __name__ == '__main__':

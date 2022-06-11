@@ -86,7 +86,8 @@ class Test(unittest.TestCase):
         printable_issues2 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR)
         self.assertTrue(len(printable_issues) > len(printable_issues2))
 
-        printable_issues3 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR, title="Later added custom title that is longer")
+        printable_issues3 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR,
+                                                       title="Later added custom title that is longer")
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
 
         self.error_handler.reset_error_context()

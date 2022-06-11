@@ -1,10 +1,9 @@
 
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
-from hed.util import file_util
 from hed.schema.schema_io.schema2xml import HedSchema2XML
 from hed.schema.schema_io.schema2wiki import HedSchema2Wiki
 
-from hed.schema import schema_validation_util
+from hed.schema import schema_validation_util, schema_util
 from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
@@ -129,7 +128,7 @@ class HedSchema:
         """
         schema2xml = HedSchema2XML()
         xml_tree = schema2xml.process_schema(self)
-        return file_util._xml_element_2_str(xml_tree)
+        return schema_util._xml_element_2_str(xml_tree)
 
     def save_as_xml(self):
         """ Save as XML to a temporary file.
@@ -140,7 +139,7 @@ class HedSchema:
         """
         schema2xml = HedSchema2XML()
         xml_tree = schema2xml.process_schema(self)
-        local_xml_file = file_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
+        local_xml_file = schema_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
         return local_xml_file
 
     def save_as_mediawiki(self):
@@ -152,7 +151,7 @@ class HedSchema:
         """
         schema2wiki = HedSchema2Wiki()
         output_strings = schema2wiki.process_schema(self)
-        local_wiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
+        local_wiki_file = schema_util.write_strings_to_file(output_strings, ".mediawiki")
         return local_wiki_file
 
     def set_library_prefix(self, library_prefix):

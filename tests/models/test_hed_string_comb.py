@@ -65,4 +65,3 @@ class Test(unittest.TestCase):
         self.assertEqual(len(string1.get_all_tags()), 1)
         self.assertEqual(len(string2.get_all_tags()), 3)
         self.assertEqual(len(comb_string.get_all_tags()), 4)
-
