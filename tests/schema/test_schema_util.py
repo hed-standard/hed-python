@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from hed.schema import schema_util
+from hed.schema.schema_io import schema_util
 
 
 class Test(unittest.TestCase):

@@ -10,7 +10,7 @@ import re
 from semantic_version import Version
 import portalocker
 import time
-from hed.schema.schema_util import url_to_file
+from hed.schema.schema_io.schema_util import url_to_file
 
 """Infrastructure for caching HED schema from remote repositories."""
 
@@ -128,13 +128,18 @@ def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_f
     filename = hed_xml_url.split('/')[-1]
     cache_filename = os.path.join(cache_folder, filename)
 
+    return _cache_specific_url(hed_xml_url, cache_filename)
+
+
+def _cache_specific_url(hed_xml_url, cache_filename):
+    cache_folder = cache_filename.rpartition("/")[0]
     os.makedirs(cache_folder, exist_ok=True)
     temp_hed_xml_file = url_to_file(hed_xml_url)
     if temp_hed_xml_file:
-        cache_filename = _safe_copy_tmp_to_folder(temp_hed_xml_file, cache_filename)
+        cache_filename = _safe_move_tmp_to_folder(temp_hed_xml_file, cache_filename)
+        os.remove(temp_hed_xml_file)
         return cache_filename
-    else:
-        return None
+    return None
 
 
 def get_hed_version_path(xml_version=None, library_name=None, local_hed_directory=None):
@@ -184,7 +189,7 @@ def get_path_from_hed_version(hed_version, library_name=None, local_hed_director
 
 
 def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
-    """ Cache a file from a URL.
+    """ Cache all schemas at the given URLs.
 
     Args:
         hed_base_urls (str or list): Path or list of paths.
@@ -298,6 +303,22 @@ def _sort_version_list(hed_versions):
 
 def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                                    skip_folders=DEFAULT_SKIP_FOLDERS, get_libraries=False):
+    """ Get all available schemas and their hash values
+
+    Args:
+        hed_base_url (str): A single GitHub API url to cache
+        library_name(str or None): If str, cache only the named library schemas
+        skip_folders (list): A list of subfolders to skip over when downloading.
+        get_libraries (bool): If true, return a dictionary of version numbers, with an entry for each library name.
+
+    Returns:
+        list or dict: List of version numbers or dictionary {library_name: [versions]}.
+
+        - The Default skip_folders is 'deprecated'.
+        - The HED cache folder defaults to HED_CACHE_DIRECTORY.
+        - The directories on Github are of the form:
+            https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml
+    """
     url_request = urllib.request.urlopen(hed_base_url)
     url_data = str(url_request.read(), 'utf-8')
     loaded_json = json.loads(url_data)
@@ -375,7 +396,7 @@ def _calculate_sha1(filename):
         return None
 
 
-def _safe_copy_tmp_to_folder(temp_hed_xml_file, dest_filename):
+def _safe_move_tmp_to_folder(temp_hed_xml_file, dest_filename):
     """ Copy to destination folder and rename.
 
     Args:
@@ -385,16 +406,12 @@ def _safe_copy_tmp_to_folder(temp_hed_xml_file, dest_filename):
     Returns:
         dest_filename (str): The new filename on success or None on failure.
 
-    Notes:
-        The file will be deleted on a successful copy.
-
     """
     _, temp_xml_file = os.path.split(temp_hed_xml_file)
     dest_folder, _ = os.path.split(dest_filename)
 
     temp_filename_in_cache = os.path.join(dest_folder, temp_xml_file)
     copyfile(temp_hed_xml_file, temp_filename_in_cache)
-    os.remove(temp_hed_xml_file)
     try:
         os.replace(temp_filename_in_cache, dest_filename)
     except OSError:
@@ -413,13 +430,7 @@ def _cache_hed_version(version, library_name, version_info, cache_folder):
     if sha_hash == local_sha_hash:
         return possible_cache_filename
 
-    os.makedirs(cache_folder, exist_ok=True)
-    temp_hed_xml_file = url_to_file(download_url)
-    if temp_hed_xml_file:
-        cache_filename = _safe_copy_tmp_to_folder(temp_hed_xml_file, possible_cache_filename)
-        return cache_filename
-    else:
-        return None
+    return _cache_specific_url(download_url, possible_cache_filename)
 
 
 def _get_latest_semantic_version_in_list(semantic_version_list):

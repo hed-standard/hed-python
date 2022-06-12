@@ -18,7 +18,7 @@ class ColumnMapper:
         - Functions and variables column and row indexing starts at 0.
     """
     def __init__(self, sidecar=None, tag_columns=None, column_prefix_dictionary=None,
-                 attribute_columns=None, optional_tag_columns=None):
+                 attribute_columns=None, optional_tag_columns=None, requested_columns=None):
         """ Constructor for ColumnMapper.
 
         Args:
@@ -45,8 +45,10 @@ class ColumnMapper:
         self.column_data = {}
         # Maps column number to column_entry.  This is what's actually used by most code.
         self._final_column_map = {}
+        self._no_mapping_info = True
 
         self._column_map = None
+        self._requested_columns = []
         self._tag_columns = []
         self._optional_tag_columns = []
         self._column_prefix_dictionary = {}
@@ -57,6 +59,7 @@ class ColumnMapper:
         self._set_sidecar(sidecar)
         self.add_columns(attribute_columns)
 
+        self.set_requested_columns(requested_columns, False)
         self.set_tag_columns(tag_columns, optional_tag_columns, False)
         self.set_column_prefix_dict(column_prefix_dictionary, False)
 
@@ -125,6 +128,21 @@ class ColumnMapper:
             return issues
         return []
 
+    def set_requested_columns(self, requested_columns, finalize_mapping=True):
+        """ Set to return only the columns listed in requested_columns
+
+        Args:
+            requested_columns(list or None): If this is not None, return ONLY these columns.  Names or numbers allowed.
+            finalize_mapping(bool): Finalize the mapping right now if True
+
+        Returns:
+        issues(list): An empty list of mapping issues
+        """
+        self._requested_columns = requested_columns
+        if finalize_mapping:
+            return self._finalize_mapping()
+        return []
+
     def set_column_map(self, new_column_map=None):
         """ Set the column number to name mapping.
 
@@ -174,7 +192,7 @@ class ColumnMapper:
         """
 
         # Default 1-1 mapping if we don't have specific behavior.
-        if not self._final_column_map:
+        if self._no_mapping_info:
             return HedString(input_text), False
 
         # If no entry, ignore this column.
@@ -300,14 +318,17 @@ class ColumnMapper:
         self._final_column_map = {}
         found_named_tag_columns = {}
         all_tag_columns = self._tag_columns + self._optional_tag_columns
+        if self._requested_columns:
+            all_tag_columns += self._requested_columns
         self._finalize_mapping_issues = []
         if self._column_map is not None:
             for column_number, column_name in self._column_map.items():
-                if column_name in self.column_data:
+                name_requested = self._column_name_requested(column_name)
+                if name_requested and column_name in self.column_data:
                     column_entry = self.column_data[column_name]
                     column_entry.column_name = column_name
                     self._final_column_map[column_number] = column_entry
-                elif column_name in all_tag_columns:
+                elif name_requested and column_name in all_tag_columns:
                     found_named_tag_columns[column_name] = column_number
                 elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                     continue
@@ -318,13 +339,16 @@ class ColumnMapper:
 
         # Add any numbered columns
         for column_name, column_entry in self.column_data.items():
-            if isinstance(column_name, int):
+            if isinstance(column_name, int) and self._column_name_requested(column_name):
                 # Convert to internal numbering format
                 column_number = column_name
                 self._final_column_map[column_number] = column_entry
 
         # Add any tag columns
         for column_number in all_tag_columns:
+            name_requested = self._column_name_requested(column_number)
+            if not name_requested:
+                continue
             if isinstance(column_number, int):
                 if column_number not in self._final_column_map:
                     self._final_column_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_number)
@@ -340,7 +364,13 @@ class ColumnMapper:
         for column_number, prefix in self._column_prefix_dictionary.items():
             self._set_column_prefix(column_number, prefix)
 
+        self._no_mapping_info = self._requested_columns is None and not self._final_column_map
         return self._finalize_mapping_issues
+
+    def _column_name_requested(self, column_name):
+        if self._requested_columns is None:
+            return True
+        return column_name in self._requested_columns
 
     def get_def_dicts(self):
         """ Return def dicts from every column description.
