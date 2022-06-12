@@ -1,7 +1,7 @@
 import unittest
 import os
 
-#from hed import
+# from hed import
 from hed.errors import ErrorContext
 from hed import schema
 from hed.models import DefMapper, HedString, SpreadsheetInput, TabularInput, Sidecar
@@ -66,7 +66,8 @@ class Test(unittest.TestCase):
                                    '../data/validator_tests/bids_events_no_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events.json")
         validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
@@ -85,7 +86,8 @@ class Test(unittest.TestCase):
                                    '../data/validator_tests/bids_events_with_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events.json")
         validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
         issues = sidecar.validate_entries(validator)
@@ -108,12 +110,12 @@ class Test(unittest.TestCase):
                                  "../data/validator_tests/bids_events_bad_defs.json")
         validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
-        # issues = sidecar.validate_entries(hed_ops=validator, check_for_warnings=True)
-        # self.assertEqual(len(issues), 4)
+        issues = sidecar.validate_entries(hed_ops=validator, check_for_warnings=True)
+        self.assertEqual(len(issues), 4)
         input_file = TabularInput(events_path, sidecar=sidecar)
-        #
-        # validation_issues = input_file.validate_file_sidecars(validator, check_for_warnings=True)
-        # self.assertEqual(len(validation_issues), 4)
+
+        validation_issues = input_file.validate_file_sidecars(validator, check_for_warnings=True)
+        self.assertEqual(len(validation_issues), 4)
 
         validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 42)
@@ -137,7 +139,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(validation_issues1), 4)
 
         validation_issues = input_file.validate_file(validator)
-        self.assertEqual(len(validation_issues), 42)
+        self.assertEqual(len(validation_issues), 21)
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -206,7 +208,6 @@ class Test(unittest.TestCase):
         test_string = HedString(string_with_def)
         issues = test_string.validate([validator, def_mapper], check_for_definitions=False)
         self.assertEqual(len(issues), 1)
-
 
 
 if __name__ == '__main__':

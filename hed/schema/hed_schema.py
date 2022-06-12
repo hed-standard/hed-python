@@ -1,6 +1,6 @@
 
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
-from hed.util import file_util
+from hed.schema.schema_io import schema_util
 from hed.schema.schema_io.schema2xml import HedSchema2XML
 from hed.schema.schema_io.schema2wiki import HedSchema2Wiki
 
@@ -16,10 +16,7 @@ class HedSchema:
     def __init__(self):
         """ Constructor for the HedSchema class.
 
-
-        Returns:
-            HedSchema:  The constructed HED schema.
-
+            A HedSchema can be used for validation, checking tag attributes, parsing tags, etc.
         """
         self._has_duplicate_tags = False
         self.header_attributes = {}
@@ -32,7 +29,6 @@ class HedSchema:
         self._library_prefix = ""
 
         self._sections = self._create_empty_sections()
-        self.short_tag_mapping = {}
 
     # ===============================================
     # Basic schema properties
@@ -43,7 +39,6 @@ class HedSchema:
 
         Returns:
             str: The filename of this schema.
-
         """
         return self._filename
 
@@ -52,7 +47,7 @@ class HedSchema:
         """ Set the filename, if one has not already been set.
 
         Args:
-         value (str): The source filename for this file
+            value (str): The source filename for this file
         """
         if self._filename is None:
             self._filename = value
@@ -104,7 +99,7 @@ class HedSchema:
         Notes:
             - The return value is always length 1 if using a HedSchema.
         """
-        return list(self._library_prefix)
+        return [self._library_prefix]
 
     # ===============================================
     # Creation and saving functions
@@ -129,7 +124,7 @@ class HedSchema:
         """
         schema2xml = HedSchema2XML()
         xml_tree = schema2xml.process_schema(self)
-        return file_util._xml_element_2_str(xml_tree)
+        return schema_util._xml_element_2_str(xml_tree)
 
     def save_as_xml(self):
         """ Save as XML to a temporary file.
@@ -140,7 +135,7 @@ class HedSchema:
         """
         schema2xml = HedSchema2XML()
         xml_tree = schema2xml.process_schema(self)
-        local_xml_file = file_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
+        local_xml_file = schema_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
         return local_xml_file
 
     def save_as_mediawiki(self):
@@ -152,7 +147,7 @@ class HedSchema:
         """
         schema2wiki = HedSchema2Wiki()
         output_strings = schema2wiki.process_schema(self)
-        local_wiki_file = file_util.write_strings_to_file(output_strings, ".mediawiki")
+        local_wiki_file = schema_util.write_strings_to_file(output_strings, ".mediawiki")
         return local_wiki_file
 
     def set_library_prefix(self, library_prefix):
@@ -382,7 +377,7 @@ class HedSchema:
             list: A list of errors while converting.
 
         Notes:
-            Works right to left (which is mostly relevant for errors).
+            Works left to right (which is mostly relevant for errors).
 
         """
         clean_tag = str(tag)
@@ -473,7 +468,7 @@ class HedSchema:
             key_class (str): The section key for the section to update.
 
         """
-        self._sections[key_class].valid_attributes = self._get_attributes_for_class(key_class)
+        self._sections[key_class].valid_attributes = self._get_attributes_for_section(key_class)
 
     # ===============================================
     # Getters used to write out schema primarily.
@@ -625,7 +620,7 @@ class HedSchema:
         valid_modifiers = self.unit_modifiers.get_entries_with_attribute(modifier_attribute_name)
         return valid_modifiers
 
-    def _get_attributes_for_class(self, key_class):
+    def _get_attributes_for_section(self, key_class):
         """ Return the valid attributes for this section.
 
         Args:

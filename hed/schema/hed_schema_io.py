@@ -7,7 +7,7 @@ from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.util import file_util
+from hed.schema.schema_io import schema_util
 
 
 def from_string(schema_string, file_type=".xml", library_prefix=None):
@@ -66,7 +66,7 @@ def load_schema(hed_path=None, library_prefix=None):
     is_url = hed_cache._check_if_url(hed_path)
 
     if is_url:
-        file_as_string = file_util.url_to_string(hed_path)
+        file_as_string = schema_util.url_to_string(hed_path)
         hed_schema = from_string(file_as_string, file_type=os.path.splitext(hed_path.lower())[1])
     elif hed_path.lower().endswith(".xml"):
         hed_schema = HedSchemaXMLParser.load_xml(hed_path)

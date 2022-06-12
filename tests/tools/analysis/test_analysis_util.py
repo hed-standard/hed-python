@@ -117,5 +117,6 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df4.columns), 4, "search_tabular returns right number of columns when extra columns")
         self.assertEqual(len(df4.index), 155, "search_tabular has right number of rows when query okay")
 
+
 if __name__ == '__main__':
     unittest.main()

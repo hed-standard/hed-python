@@ -3,7 +3,6 @@ import unittest
 import os
 
 from hed import schema
-from hed.schema.hed_schema_constants import HedSectionKey
 
 
 class TestConverterBase(unittest.TestCase):

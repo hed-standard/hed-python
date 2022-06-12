@@ -58,70 +58,6 @@ class Test(unittest.TestCase):
         sidecar1.clear_contents()
         self.assertFalse(sidecar1.contents, "BidsSidecarFile should have no contents after clearing")
 
-
-    def test_get_merged(self):
-        side_upper = BidsSidecarFile.get_merged([self.sidecar_path_upper])
-        side_lower2 = BidsSidecarFile.get_merged([self.sidecar_path_lower2])
-        side_lower3 = BidsSidecarFile.get_merged([self.sidecar_path_lower3])
-        side_merged2 = BidsSidecarFile.get_merged([self.sidecar_path_upper, self.sidecar_path_lower2])
-        self.assertIsInstance(side_upper, dict, "get_merged produces a dict when one path")
-        self.assertIsInstance(side_lower2, dict, "get_merged produces a dict when one path")
-        self.assertIsInstance(side_merged2, dict, "get_merged produces a dict when one path")
-        self.assertIn('event_type', side_upper, "get_merged upper has key event_type")
-        self.assertNotIn('event_type', side_lower2, "get_merged lower does not have event_type")
-        self.assertIn('event_type', side_merged2, "get_merged merged has key event_type from upper")
-        self.assertIn('rep_lag', side_merged2, "get_merged merged has key rep_lag from lower")
-        self.assertEqual(side_merged2['rep_lag']['HED'], side_lower2['rep_lag']['HED'],
-                         "get_merged overrode key from lower")
-
-        side_merged3 = BidsSidecarFile.get_merged([self.sidecar_path_upper, self.sidecar_path_lower3])
-        self.assertIn('face_type', side_upper, "get_merged upper has key face_type")
-        self.assertIn('face_type', side_lower3, "get_merged lower3 has key face_type")
-        self.assertIn('face_type', side_merged3, "get_merged merged3 has key face_type")
-        self.assertEqual(side_merged3['rep_lag']['HED'], side_lower3['rep_lag']['HED'],
-                         "get_merged side_merged3 got rep_lag key from lower")
-        self.assertNotEqual(side_merged3['face_type']['HED']['famous_face'],
-                            side_upper['face_type']['HED']['famous_face'],
-                            "get_merged overrode face_type key with lower has changed")
-        self.assertEqual(side_merged3['face_type']['HED']['famous_face'],
-                         side_lower3['face_type']['HED']['famous_face'],
-                         "get_merged overrode face_type key with lower3 has changed")
-
-    def test_get_merged_empty(self):
-        side_dict1 = BidsSidecarFile.get_merged([])
-        self.assertFalse(side_dict1, "get_merged is empty if empty list")
-        self.assertIsInstance(side_dict1, dict, "get_merged produces dict when empty list")
-        side_dict2 = BidsSidecarFile.get_merged(None)
-        self.assertFalse(side_dict2, "get_merged is empty if None")
-        self.assertIsInstance(side_dict2, dict, "get_merged produces dict when None")
-
-    def test_is_hed(self):
-        dict1 = {'a' : 'b', 'c': {'d': 'e'}}
-        self.assertFalse(BidsSidecarFile.is_hed(dict1), 'is_hed returns False if no HED or HED_assembled')
-        dict2 = {'HED' : 'b', 'c': {'d':'e'}}
-        self.assertTrue(BidsSidecarFile.is_hed(dict2), 'is_hed returns True if HED at top level.')
-        dict3 = {'HED_assembled': 'b', 'c': {'d':'e'}}
-        self.assertTrue(BidsSidecarFile.is_hed(dict3), 'is_hed returns True if HED_assembled at top level.')
-        dict4 = {'a' : 'b', 'c': {'d':'HED'}}
-        self.assertFalse(BidsSidecarFile.is_hed(dict4),
-                         'is_hed returns False if HED at second level is not a key')
-        dict5 = {'a' : 'b', 'c': {'d':'HED_assembled'}}
-        self.assertFalse(BidsSidecarFile.is_hed(dict5),
-                         'is_hed returns False if HED_assembled at second level is not a key')
-        dict6 = {'a' : 'b', 'c': {'HED': 'a', 'Levels': {'e':'f'}}}
-        self.assertTrue(BidsSidecarFile.is_hed(dict6), 'is_hed returns True if HED key at second level')
-        dict7 = {'a' : 'b', 'c': {'HED_assembled': 'a', 'Levels': {'e':'f'}}}
-        self.assertTrue(BidsSidecarFile.is_hed(dict7), 'is_hed returns True if HED_assembled key at second level')
-        dict8 = {'a': 'b', 'c': {'HED': {'a': 'b'}, 'Levels': {'e': 'f'}}}
-        self.assertTrue(BidsSidecarFile.is_hed(dict8), 'is_hed returns True if HED key at second level')
-        dict9 = {'a': 'b', 'c': {'HED_assembled': {'a': 'b'}, 'Levels': {'e': 'f'}}}
-        self.assertTrue(BidsSidecarFile.is_hed(dict9), 'is_hed returns True if HED_assembled key at second level')
-        dict10 = {'a': 'b', 'c': {'d': {'f': {'HED': 'g'}}}}
-        self.assertFalse(BidsSidecarFile.is_hed(dict10), 'is_hed returns False if HED key at third level')
-        dict11 = {'a': 'b', 'c': {'d': {'f': {'HED_assembled': 'g'}}}}
-        self.assertFalse(BidsSidecarFile.is_hed(dict11), 'is_hed returns False if HED_assembled key at third level')
-
-
     def test_is_sidecar_for(self):
         sidecar1 = BidsSidecarFile(self.sidecar_path)
         events1 = BidsTabularFile(self.event_path)
@@ -152,6 +88,84 @@ class Test(unittest.TestCase):
         a = sidecar1.contents
         sidecar1.set_contents({'HED': 'xyz'})
         self.assertIs(a, sidecar1.contents, 'By default, existing contents are not overwritten.')
+
+    def test_set_contents_multiple(self):
+        bids_upper = BidsSidecarFile(self.sidecar_path_upper)
+        self.assertFalse(bids_upper.contents)
+        bids_upper.set_contents([self.sidecar_path_upper])
+
+        bids_lower2 = BidsSidecarFile(self.sidecar_path_lower2)
+        self.assertFalse(bids_lower2.contents)
+        bids_lower2.set_contents([self.sidecar_path_lower2])
+        bids_lower2_merged = BidsSidecarFile(self.sidecar_path_lower2)
+        self.assertFalse(bids_lower2_merged.contents)
+        bids_lower2_merged.set_contents([self.sidecar_path_upper, self.sidecar_path_lower2])
+
+        bids_lower3 = BidsSidecarFile(self.sidecar_path_lower3)
+        self.assertFalse(bids_lower3.contents)
+        bids_lower3.set_contents([self.sidecar_path_lower3])
+        bids_lower3_merged = BidsSidecarFile(self.sidecar_path_lower3)
+        self.assertFalse(bids_lower3_merged.contents)
+        bids_lower3_merged.set_contents([self.sidecar_path_upper, self.sidecar_path_lower3])
+
+        lower_dict2 = bids_lower2.contents.loaded_dict
+        lower_dict2_merged = bids_lower2_merged.contents.loaded_dict
+        lower_dict3 = bids_lower3.contents.loaded_dict
+        lower_dict3_merged = bids_lower3_merged.contents.loaded_dict
+        upper_dict = bids_upper.contents.loaded_dict
+        self.assertIn('event_type', upper_dict, "set_contents upper has key event_type")
+        self.assertNotIn('event_type', lower_dict2, "set_contents lower does not have event_type")
+        self.assertIn('event_type', lower_dict2_merged, "set_contents merged has key event_type from upper")
+        self.assertIn('rep_lag', lower_dict2_merged, "set_contents merged has key rep_lag from lower")
+        self.assertEqual(lower_dict2_merged['rep_lag']['HED'], lower_dict2['rep_lag']['HED'],
+                         "set_contents overrode key from lower")
+        self.assertIn('face_type', upper_dict, "set_contents upper has key face_type")
+        self.assertIn('face_type', lower_dict3, "set_contents lower3 has key face_type")
+        self.assertIn('face_type', lower_dict3_merged, "set_contents merged3 has key face_type")
+        self.assertEqual(lower_dict3_merged['rep_lag']['HED'], lower_dict3['rep_lag']['HED'],
+                         "set_contents side_merged3 got rep_lag key from lower")
+        self.assertNotEqual(lower_dict3_merged['face_type']['HED']['famous_face'],
+                            upper_dict['face_type']['HED']['famous_face'],
+                            "set_contents overrode face_type key with lower has changed")
+        self.assertEqual(lower_dict3_merged['face_type']['HED']['famous_face'],
+                         lower_dict3['face_type']['HED']['famous_face'],
+                         "set_contents overrode face_type key with lower3 has changed")
+
+    def test_set_contents_empty(self):
+        bids_upper = BidsSidecarFile(self.sidecar_path_upper)
+        self.assertFalse(bids_upper.contents, "set_contents empty when created.")
+        bids_upper.set_contents(None)
+        self.assertTrue(bids_upper.contents, "set_contents not empty when content_info is None")
+        bids_upper1 = BidsSidecarFile(self.sidecar_path_upper)
+        self.assertFalse(bids_upper1.contents, "set_contents empty when created.")
+        bids_upper1.set_contents([])
+        self.assertTrue(bids_upper.contents, "set_contents not empty when content_info is an empty list")
+
+    def test_is_hed(self):
+        dict1 = {'a': 'b', 'c': {'d': 'e'}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict1), 'is_hed returns False if no HED or HED_assembled')
+        dict2 = {'HED': 'b', 'c': {'d': 'e'}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict2), 'is_hed returns True if HED at top level.')
+        dict3 = {'HED_assembled': 'b', 'c': {'d': 'e'}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict3), 'is_hed returns True if HED_assembled at top level.')
+        dict4 = {'a': 'b', 'c': {'d': 'HED'}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict4),
+                         'is_hed returns False if HED at second level is not a key')
+        dict5 = {'a': 'b', 'c': {'d': 'HED_assembled'}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict5),
+                         'is_hed returns False if HED_assembled at second level is not a key')
+        dict6 = {'a': 'b', 'c': {'HED': 'a', 'Levels': {'e': 'f'}}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict6), 'is_hed returns True if HED key at second level')
+        dict7 = {'a': 'b', 'c': {'HED_assembled': 'a', 'Levels': {'e': 'f'}}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict7), 'is_hed returns True if HED_assembled key at second level')
+        dict8 = {'a': 'b', 'c': {'HED': {'a': 'b'}, 'Levels': {'e': 'f'}}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict8), 'is_hed returns True if HED key at second level')
+        dict9 = {'a': 'b', 'c': {'HED_assembled': {'a': 'b'}, 'Levels': {'e': 'f'}}}
+        self.assertTrue(BidsSidecarFile.is_hed(dict9), 'is_hed returns True if HED_assembled key at second level')
+        dict10 = {'a': 'b', 'c': {'d': {'f': {'HED': 'g'}}}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict10), 'is_hed returns False if HED key at third level')
+        dict11 = {'a': 'b', 'c': {'d': {'f': {'HED_assembled': 'g'}}}}
+        self.assertFalse(BidsSidecarFile.is_hed(dict11), 'is_hed returns False if HED_assembled key at third level')
 
 
 if __name__ == '__main__':

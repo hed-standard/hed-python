@@ -13,7 +13,7 @@ class TestHedSchema(unittest.TestCase):
         hed_schema2 = load_schema(hed_xml, library_prefix="tl:")
         cls.hed_schema_group = HedSchemaGroup([hed_schema1, hed_schema2])
 
-    def test_schema_complicance(self):
+    def test_schema_compliance(self):
         warnings = self.hed_schema_group.check_compliance(True)
         self.assertEqual(len(warnings), 10)
 
