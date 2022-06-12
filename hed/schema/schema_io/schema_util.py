@@ -6,33 +6,6 @@ import urllib.request
 from xml.dom import minidom
 from xml.etree import ElementTree
 
-NO_VERSION_INFO_STRING = "No version info found"
-
-
-def get_version_from_xml(hed_xml_tree):
-    """Get version from root node of an XML tree.
-
-        Args:
-            hed_xml_tree (Element):  The root node of an XML tree.
-
-        Returns:
-            str: The version of the HED schema (e.g. "8.0.0").
-
-        Raises:
-            KeyError or AttributeError: If invalid.
-
-        TODO: This should be moved to the schema module
-
-    """
-
-    if hed_xml_tree is None:
-        return NO_VERSION_INFO_STRING
-
-    try:
-        return hed_xml_tree.attrib['version']
-    except KeyError or AttributeError:
-        return NO_VERSION_INFO_STRING
-
 
 def url_to_file(resource_url):
     """ Write data from a URL resource into a file. Data is decoded as unicode.
@@ -65,22 +38,6 @@ def url_to_string(resource_url):
     return url_data
 
 
-def write_errors_to_file(issues, extension=".txt"):
-    """ Write an array of issue dictionaries to a temporary file.
-
-    Args:
-        issues (list):    List of 2-element dictionaries containing code and message keys.
-        extension (str):  Desired file extension.
-
-    Returns:
-        str: The name of the temporary file.
-    """
-    with tempfile.NamedTemporaryFile(suffix=extension, mode='w', delete=False, encoding='utf-8') as error_file:
-        for line in issues:
-            error_file.write(f"{line['code']}: {line['message']}\n")
-        return error_file.name
-
-
 def write_strings_to_file(output_strings, extension=None):
     """ Write output strings to a temporary file.
 
@@ -111,8 +68,6 @@ def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
     Returns:
         str:  Name of the temporary file.
 
-    TODO:  Should this be in the schema module?
-
     """
     with tempfile.NamedTemporaryFile(suffix=extension, mode='w', delete=False, encoding='utf-8') as hed_xml_file:
         xml_string = _xml_element_2_str(xml_tree)
@@ -128,8 +83,6 @@ def _xml_element_2_str(elem):
 
     Returns:
         str: An XML string representing the XML element.
-
-    TODO: Shouldn't this be with the schema?
 
     """
     rough_string = ElementTree.tostring(elem, method='xml')

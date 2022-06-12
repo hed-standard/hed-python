@@ -34,13 +34,14 @@ class TabularInput(BaseInput):
         new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
                                   attribute_columns=attribute_columns)
 
+        definition_columns = [self.HED_COLUMN_NAME]
         self._sidecar = sidecar
         self._also_gather_defs = also_gather_defs
         self._extra_def_dicts = extra_def_dicts
         def_mapper = self.create_def_mapper(new_mapper, extra_def_dicts)
 
         super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=True, mapper=new_mapper,
-                         def_mapper=def_mapper, name=name)
+                         def_mapper=def_mapper, name=name, definition_columns=definition_columns)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids_old style file with no column headers provided.\n"

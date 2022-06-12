@@ -28,7 +28,7 @@ class BaseInput:
     COMMA_DELIMITER = ','
 
     def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, def_mapper=None,
-                 name=None):
+                 definition_columns=None, name=None):
         """ Constructor for the BaseInput class.
 
         Args:
@@ -39,6 +39,7 @@ class BaseInput:
                 (Not applicable to tsv files.)
             has_column_names (bool): True if file has column names.
             mapper (ColumnMapper or None):  Indicates which columns have HED tags.
+            definition_columns(list or None): A list of columns to check for definitions.  Explicit 'None' means all.
             name (str or None): Optional field for how this file will report errors.
 
         Notes:
@@ -54,6 +55,7 @@ class BaseInput:
         # This is the loaded workbook if we loaded originally from an excel file.
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
+        self._def_columns = definition_columns
         self.file_def_dict = None
         pandas_header = 0
         if not self._has_column_names:
@@ -234,43 +236,34 @@ class BaseInput:
                                                                     header=output_file._has_column_names)
         return csv_string_if_filename_none
 
+    @property
+    def columns(self):
+        """ Returns a list of the column names.
+
+            Empty if no column names.
+
+        Returns:
+            columns(list): The column names.
+        """
+        columns = []
+        if self._dataframe is not None and self._has_column_names:
+            columns = list(self._dataframe.columns)
+        return columns
+
     def __iter__(self):
         """ Iterate over the underlying dataframe. """
         return self.iter_dataframe()
 
-    def iter_raw(self, hed_ops=None, error_handler=None, **kwargs):
-        """ Iterate all columns without substitutions
-
-        Args:
-            hed_ops (list, func, HedOps, or None): A func, a HedOps or a list of these to apply to the
-                hed strings before returning.
-            error_handler (ErrorHandler or None): Handler to use for context or a default one if None.
-            kwargs:
-
-        Yields:
-            - dict: A dict with column_number keys and values corresponding to the cell at that position.
-
-        Notes:
-            - See models.hed_ops.translate_ops or the specific hed_ops for additional options.
-            - Primarily for altering or re-saving the original file (e.g., convert short tags to long).
-            - Used for initial processing when trying to find definitions.
-
-        """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-
-        default_mapper = ColumnMapper()
-        return self.iter_dataframe(hed_ops=hed_ops, mapper=default_mapper, run_string_ops_on_columns=True,
-                                   error_handler=error_handler, **kwargs)
-
-    def iter_dataframe(self, hed_ops=None, mapper=None, return_string_only=True, run_string_ops_on_columns=False,
-                       error_handler=None, expand_defs=False, remove_definitions=True, **kwargs):
+    def iter_dataframe(self, hed_ops=None, mapper=None, requested_columns=None, return_string_only=True,
+                       run_string_ops_on_columns=False, error_handler=None, expand_defs=False, remove_definitions=True,
+                       **kwargs):
         """ Iterate rows based on the given column mapper.
 
         Args:
             hed_ops (list, func, HedOps, or None):  A func, a HedOps or a list of these to apply to the
                                                     hed strings before returning.
             mapper (ColumnMapper or None): The column name to column number mapper (or internal mapper if None).
+            requested_columns(list or None): If this is not None, return ONLY these columns.  Names or numbers allowed.
             return_string_only (bool): If True, do not return issues list, individual columns, attribute columns, etc.
             run_string_ops_on_columns (bool):   If true, run all tag and string ops on columns,
                                                 rather than columns then rows.
@@ -288,6 +281,11 @@ class BaseInput:
 
         if mapper is None:
             mapper = self._mapper
+
+        if requested_columns:
+            # Make a copy to ensure we don't alter the actual mapper
+            mapper = copy.deepcopy(mapper)
+            mapper.set_requested_columns(requested_columns)
 
         tag_funcs, string_funcs = self._translate_ops(hed_ops, run_string_ops_on_columns=run_string_ops_on_columns,
                                                       expand_defs=expand_defs, remove_definitions=remove_definitions,
@@ -438,20 +436,13 @@ class BaseInput:
         else:
             return pandas.DataFrame(worksheet.values, dtype=str)
 
-    def _run_validators(self, hed_ops, error_handler, run_on_raw=False, expand_defs=False, **kwargs):
+    def _run_validators(self, hed_ops, error_handler, expand_defs=False, **kwargs):
         validation_issues = []
-        if run_on_raw:
-            for row_dict in self.iter_raw(hed_ops=hed_ops,
-                                          return_string_only=False,
-                                          error_handler=error_handler, expand_defs=expand_defs,
-                                          **kwargs):
-                validation_issues += row_dict[model_constants.ROW_ISSUES]
-        else:
-            for row_dict in self.iter_dataframe(hed_ops=hed_ops,
-                                                return_string_only=False,
-                                                error_handler=error_handler, expand_defs=expand_defs,
-                                                **kwargs):
-                validation_issues += row_dict[model_constants.ROW_ISSUES]
+        for row_dict in self.iter_dataframe(hed_ops=hed_ops,
+                                            return_string_only=False,
+                                            error_handler=error_handler, expand_defs=expand_defs,
+                                            **kwargs):
+            validation_issues += row_dict[model_constants.ROW_ISSUES]
 
         return validation_issues
 
@@ -529,7 +520,14 @@ class BaseInput:
             error_handler = ErrorHandler()
         new_def_dict = DefinitionDict()
         hed_ops = [new_def_dict]
-        _ = self._run_validators(hed_ops, run_on_raw=True, error_handler=error_handler)
+        for _ in self.iter_dataframe(hed_ops=hed_ops,
+                                     return_string_only=False,
+                                     requested_columns=self._def_columns,
+                                     run_string_ops_on_columns=True,
+                                     remove_definitions=False,
+                                     error_handler=error_handler):
+            pass
+
         return new_def_dict
 
     def update_definition_mapper(self, def_dict):

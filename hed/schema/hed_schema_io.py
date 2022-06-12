@@ -4,9 +4,10 @@ import os
 
 from hed.schema.schema_io.xml2schema import HedSchemaXMLParser
 from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
-from hed.schema import hed_schema_constants, hed_cache, schema_util
+from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.schema.schema_io import schema_util
 
 
 def from_string(schema_string, file_type=".xml", library_prefix=None):
