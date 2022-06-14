@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
 
     def test_get_assembled_strings_no_schema(self):
-        hed_list1 = get_assembled_strings(self.input_data, expand_defs=False)
+        hed_list1, dict1 = get_assembled_strings(self.input_data, expand_defs=False)
         self.assertIsInstance(hed_list1, list, "get_assembled_groups should return a list when expand defs is False")
         self.assertIsInstance(hed_list1[0], HedString)
         hed_strings1 = [str(hed) for hed in hed_list1]
@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
                          "get_assembled_strings should not have Def-expand when expand_defs is False")
         self.assertNotEqual(hed_strings_joined1.find("Def/"), -1,
                             "get_assembled_strings should have Def/ when expand_defs is False")
-        hed_list2 = get_assembled_strings(self.input_data, expand_defs=True)
+        hed_list2, dict2 = get_assembled_strings(self.input_data, expand_defs=True)
         self.assertIsInstance(hed_list2, list, "get_assembled_groups should return a list")
         self.assertIsInstance(hed_list2[0], HedString)
         hed_strings2 = [str(hed) for hed in hed_list2]
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
                          "get_assembled_strings should not have Def/ when expand_defs is True")
 
     def test_get_assembled_strings_with_schema(self):
-        hed_list1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        hed_list1, dict1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
         self.assertIsInstance(hed_list1, list,
                               "get_assembled_groups should return a list when expand defs is False")
         self.assertIsInstance(hed_list1[0], HedString)
@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
                          "get_assembled_strings should not have Def-expand when expand_defs is False")
         self.assertNotEqual(hed_strings_joined1.find("Def/"), -1,
                             "get_assembled_strings should have Def/ when expand_defs is False")
-        hed_list2 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=True)
+        hed_list2, dict2 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=True)
         self.assertIsInstance(hed_list2, list, "get_assembled_groups should return a list")
         self.assertIsInstance(hed_list2[0], HedString)
         hed_strings2 = [str(hed) for hed in hed_list2]
@@ -75,7 +75,8 @@ class Test(unittest.TestCase):
                          "get_assembled_strings should not have Def/ when expand_defs is True")
 
     def test_assemble_hed(self):
-        df1 = assemble_hed(self.input_data, columns_included=["onset", "duration", "event_type"], expand_defs=False)
+        df1, dict1 = assemble_hed(self.input_data,
+                                  columns_included=["onset", "duration", "event_type"], expand_defs=False)
         self.assertIsInstance(df1, DataFrame, "hed_assemble should return a dataframe when columns are included")
         columns1 = list(df1.columns)
         self.assertEqual(len(columns1), 4,
@@ -84,13 +85,14 @@ class Test(unittest.TestCase):
         self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
         self.assertEqual(first_str1.find('Def-expand'), -1,
                          "assemble_hed with no def expand does not have Def-expand tags")
-        df2 = assemble_hed(self.input_data, columns_included=["onset", "duration", "event_type"], expand_defs=True)
+        df2, dict2 = assemble_hed(self.input_data,
+                                  columns_included=["onset", "duration", "event_type"], expand_defs=True)
         first_str2 = df2.iloc[0]['HED_assembled']
         self.assertEqual(first_str2.find('Def/'), -1, "assemble_hed with def expand has no Def tag")
         self.assertNotEqual(first_str2.find('Def-expand/'), -1, "assemble_hed with def expand has Def-expand tags")
 
-        df3 = assemble_hed(self.input_data,
-                           columns_included=["onset", "baloney", "duration", "event_type"], expand_defs=False)
+        df3, dict3 = assemble_hed(self.input_data,
+                                  columns_included=["onset", "baloney", "duration", "event_type"], expand_defs=False)
         columns3 = list(df3.columns)
         self.assertEqual(len(columns3), 4,
                          "assemble_hed should return the correct number of columns when bad columns are included ")

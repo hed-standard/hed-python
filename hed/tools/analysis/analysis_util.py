@@ -15,7 +15,7 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
 
     Returns:
         DataFrame or None: A DataFrame with the assembled events.
-
+        dict: A dictionary of definitions
     """
 
     if columns_included:
@@ -24,13 +24,13 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
     else:
         eligible_columns = None
 
-    hed_obj_list = get_assembled_strings(data_input, expand_defs=expand_defs)
+    hed_obj_list, definitions = get_assembled_strings(data_input, expand_defs=expand_defs)
     hed_string_list = [str(hed) for hed in hed_obj_list]
     if not eligible_columns:
         return pd.DataFrame({"HED_assembled": hed_string_list})
     df = data_input.dataframe[eligible_columns].copy(deep=True)
     df['HED_assembled'] = hed_string_list
-    return df
+    return df, definitions
 
 
 def get_assembled_strings(table, hed_schema=None, expand_defs=False):
@@ -42,12 +42,14 @@ def get_assembled_strings(table, hed_schema=None, expand_defs=False):
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
 
     Returns:
-        List: A list of HedString or HedStringGroup objects.
+        list: A list of HedString or HedStringGroup objects.
+        dict: A dictionary of definitions for this table.
 
     """
     hed_list = list(table.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,
                                          expand_defs=expand_defs, remove_definitions=True))
-    return hed_list
+    definitions = table._def_mapper._gathered_defs
+    return hed_list, definitions
 
 
 def search_tabular(data_input, hed_schema, query, columns_included=None):
@@ -69,7 +71,7 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
     else:
         eligible_columns = None
 
-    hed_list = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
+    hed_list, dictionary = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
     expression = TagExpressionParser(query)
     hed_tags = []
     row_numbers = []
