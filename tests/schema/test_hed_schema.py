@@ -3,7 +3,7 @@ import os
 
 from hed.errors import HedFileError
 from hed.models import HedString, HedTag
-from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup
+from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version
 
 
 class TestHedSchema(unittest.TestCase):
@@ -175,3 +175,9 @@ class TestHedSchema(unittest.TestCase):
     def test_schema_complicance(self):
         warnings = self.hed_schema_group.check_compliance(True)
         self.assertEqual(len(warnings), 10)
+
+    def test_load_schema_version(self):
+        schema = load_schema_version(xml_version="st:8.0.0")
+        schema2 = load_schema_version(xml_version="8.0.0")
+        schema2.set_library_prefix("st")
+        self.assertEqual(schema, schema2)
