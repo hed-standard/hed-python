@@ -193,11 +193,11 @@ class Sidecar(SidecarBase):
 
         """
         if not dict_for_entry or not isinstance(dict_for_entry, dict):
-            return ColumnType.Attribute
+            return ColumnType.Ignore
 
         minimum_required_keys = ("HED",)
         if not set(minimum_required_keys).issubset(dict_for_entry.keys()):
-            return ColumnType.Attribute
+            return ColumnType.Ignore
 
         hed_entry = dict_for_entry["HED"]
         if isinstance(hed_entry, dict):

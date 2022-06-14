@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         cls.basic_events_json = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
         cls.basic_event_name = "trial_type"
         cls.basic_event_type = ColumnType.Categorical
-        cls.basic_attribute_column = "onset"
+        cls.basic_hed_tags_column = "onset"
         cls.basic_column_map = ["onset", "duration", "trial_type", "response_time", " stim_file"]
         cls.basic_event_row = ["1.2", "0.6", "go", "1.435", "images/red_square.jpg"]
         cls.basic_event_row_invalid = ["1.2", "0.6", "invalid_category_key", "1.435", "images/red_square.jpg"]
@@ -86,9 +86,9 @@ class Test(unittest.TestCase):
         mapper._set_sidecar(Sidecar(self.basic_events_json))
         self.assertTrue(mapper.column_data[self.basic_event_name].column_type == self.basic_event_type)
 
-    def test_add_attribute_columns(self):
+    def test_add_hed_tags_columns(self):
         mapper = ColumnMapper()
-        mapper.add_columns([self.add_column_name], ColumnType.Attribute)
+        mapper.add_columns([self.add_column_name], ColumnType.HEDTags)
         self.assertTrue(len(mapper.column_data) >= 1)
 
     def test__add_single_event_type(self):
@@ -127,21 +127,21 @@ class Test(unittest.TestCase):
     def test_expand_row_tags(self):
         mapper = ColumnMapper()
         mapper._set_sidecar(Sidecar(self.basic_events_json))
-        mapper.add_columns(self.basic_attribute_column)
+        mapper.add_columns(self.basic_hed_tags_column)
         mapper.set_column_map(self.basic_column_map)
         expanded_row = mapper.expand_row_tags(self.basic_event_row)
         self.assertTrue(isinstance(expanded_row, dict))
-        self.assertTrue(self.basic_attribute_column in expanded_row)
+        self.assertTrue(0 in expanded_row[model_constants.COLUMN_TO_HED_TAGS])
 
     def test_expansion_issues(self):
         mapper = ColumnMapper()
         mapper._set_sidecar(Sidecar(self.basic_events_json))
-        mapper.add_columns(self.basic_attribute_column)
+        mapper.add_columns(self.basic_hed_tags_column)
         mapper.set_column_map(self.basic_column_map)
         expanded_row = mapper.expand_row_tags(self.basic_event_row_invalid)
         column_issues = expanded_row[model_constants.COLUMN_ISSUES][2]
         self.assertEqual(len(column_issues), 1)
-        self.assertTrue(self.basic_attribute_column in expanded_row)
+        self.assertTrue(0 in expanded_row[model_constants.COLUMN_TO_HED_TAGS])
 
     def test_remove_prefix_if_needed(self):
         mapper = ColumnMapper()
