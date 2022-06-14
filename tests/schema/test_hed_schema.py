@@ -179,5 +179,6 @@ class TestHedSchema(unittest.TestCase):
     def test_load_schema_version(self):
         schema = load_schema_version(xml_version="st:8.0.0")
         schema2 = load_schema_version(xml_version="8.0.0")
+        self.assertNotEqual(schema, schema2)
         schema2.set_library_prefix("st")
         self.assertEqual(schema, schema2)

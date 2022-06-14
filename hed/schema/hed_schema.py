@@ -305,6 +305,8 @@ class HedSchema:
             #                     s = f"{key} unmatched: '{str(dict1[key].long_name)}' vs '{str(dict2[key].long_name)}'"
             #                     print(s)
             return False
+        if self._library_prefix != other._library_prefix:
+            return False
         return True
 
     def get_unit_class_units(self, unit_class_type):
