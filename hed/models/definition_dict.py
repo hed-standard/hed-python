@@ -75,11 +75,12 @@ class DefinitionDict(HedOps):
         This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
 
     """
+
     def __init__(self):
         """ Definitions to be considered a single source. """
 
         super().__init__()
-        self._defs = {}
+        self.defs = {}
 
         # Definition related issues
         self._extract_def_issues = []
@@ -93,17 +94,11 @@ class DefinitionDict(HedOps):
         """
         return self._extract_def_issues
 
-    @property
-    def defs(self):
-        """ Provides direct access to internal dictionary.  Alter at your own risk.
-
-        Returns:
-            dict: {str: DefinitionEntry}
-        """
-        return self._defs
+    def get(self, def_name):
+        return self.defs.get(def_name.lower())
 
     def __iter__(self):
-        return iter(self._defs.items())
+        return iter(self.defs.items())
 
     def __get_string_funcs__(self, **kwargs):
         error_handler = kwargs.get("error_handler")
@@ -185,17 +180,32 @@ class DefinitionDict(HedOps):
                 context = error_handler.get_error_context_copy()
             else:
                 context = []
-            if def_tag_lower in self._defs:
+            if def_tag_lower in self.defs:
                 new_def_issues += ErrorHandler.format_error_with_context(error_handler,
                                                                          DefinitionErrors.DUPLICATE_DEFINITION,
                                                                          def_name=def_tag_name)
                 continue
-            self._defs[def_tag_lower] = DefinitionEntry(name=def_tag_name, contents=group_tag,
-                                                        takes_value=def_takes_value,
-                                                        source_context=context)
+            self.defs[def_tag_lower] = DefinitionEntry(name=def_tag_name, contents=group_tag,
+                                                       takes_value=def_takes_value,
+                                                       source_context=context)
 
         self._extract_def_issues += new_def_issues
         return new_def_issues
+
+    @staticmethod
+    def get_as_strings(def_dict):
+        """ Convert the entries to strings of the contents
+
+        Args:
+            def_dict(DefinitionDict or dict): A dict of definitions
+
+        Returns:
+            dict(str: str): definition name and contents
+        """
+        if isinstance(def_dict, DefinitionDict):
+            def_dict = def_dict.defs
+
+        return {key: str(value.contents) for key, value in def_dict.items()}
 
 
 def add_group_to_dict(group, tag_dict=None):

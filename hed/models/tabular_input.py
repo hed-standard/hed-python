@@ -9,15 +9,13 @@ class TabularInput(BaseInput):
 
     HED_COLUMN_NAME = "HED"
 
-    def __init__(self, file=None, sidecar=None, attribute_columns=None, extra_def_dicts=None,
+    def __init__(self, file=None, sidecar=None, extra_def_dicts=None,
                  also_gather_defs=True, name=None):
         """ Constructor for the TabularInput class.
 
         Args:
             file (str or file like): A tsv file to open.
             sidecar (str or Sidecar): A Sidecar filename or Sidecar
-            attribute_columns (str or int or [str] or [int]): A list of column names or numbers to treat as attributes.
-                Default: ["duration", "onset"]
             extra_def_dicts ([DefinitionDict], DefinitionDict, or None): DefinitionDict objects containing all
                 the definitions this file should use other than the ones coming from the file
                 itself and from the sidecar.  These are added as the last entries, so names will override
@@ -27,12 +25,9 @@ class TabularInput(BaseInput):
             name (str): The name to display for this file for error purposes.
 
         """
-        if attribute_columns is None:
-            attribute_columns = ["duration", "onset"]
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
-        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
-                                  attribute_columns=attribute_columns)
+        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
 
         definition_columns = [self.HED_COLUMN_NAME]
         self._sidecar = sidecar
@@ -73,17 +68,14 @@ class TabularInput(BaseInput):
 
         return def_mapper
 
-    def reset_column_mapper(self, sidecar=None, attribute_columns=None):
+    def reset_column_mapper(self, sidecar=None):
         """ Change the sidecars and settings.
 
         Args:
             sidecar (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.
-            attribute_columns (str or int or [str] or [int]): Column names or numbers to treat as attributes.
-                    Default: ["duration", "onset"]
 
         """
-        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
-                                  attribute_columns=attribute_columns)
+        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
 
         self._def_mapper = self.create_def_mapper(new_mapper, self._extra_def_dicts)
         self.reset_mapper(new_mapper)

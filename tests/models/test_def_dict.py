@@ -33,18 +33,18 @@ class TestDefDict(TestDefBase):
 
     def test_check_for_definitions(self):
         def_dict = DefinitionDict()
-        original_def_count = len(def_dict._defs)
+        original_def_count = len(def_dict.defs)
         hed_string_obj = HedString(self.basic_definition_string)
         hed_string_obj.validate(def_dict)
-        new_def_count = len(def_dict._defs)
+        new_def_count = len(def_dict.defs)
         self.assertGreater(new_def_count, original_def_count)
 
     def test_check_for_definitions_placeholder(self):
         def_dict = DefinitionDict()
-        original_def_count = len(def_dict._defs)
+        original_def_count = len(def_dict.defs)
         hed_string_obj = HedString(self.placeholder_def_string)
         hed_string_obj.validate(def_dict)
-        new_def_count = len(def_dict._defs)
+        new_def_count = len(def_dict.defs)
         self.assertGreater(new_def_count, original_def_count)
 
     placeholder_invalid_def_contents = "(Item/TestDef1/#,Item/TestDef2/#)"

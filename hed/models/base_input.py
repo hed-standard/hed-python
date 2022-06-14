@@ -250,6 +250,17 @@ class BaseInput:
             columns = list(self._dataframe.columns)
         return columns
 
+    @property
+    def def_dict(self):
+        """  Returns a dict of all the definitions found in this and sidecars
+
+        Returns:
+            def_dict(dict): {str: DefinitionEntry} pairs for each found definition
+        """
+        if self._def_mapper:
+            return self._def_mapper.gathered_defs
+        return {}
+
     def __iter__(self):
         """ Iterate over the underlying dataframe. """
         return self.iter_dataframe()
