@@ -18,8 +18,6 @@ class ColumnType(Enum):
     Value = "value"
     # Return this column exactly as given, it is HED tags.
     HEDTags = "hed_tags"
-    # Return this as a separate property in the dictionary, rather than as part of the hed string.
-    Attribute = "attribute"
 
 
 class ColumnMetadata:
@@ -121,8 +119,6 @@ class ColumnMetadata:
             return hed_string_obj, False
         elif column_type == ColumnType.Ignore:
             return None, False
-        elif column_type == ColumnType.Attribute:
-            return input_text, self.column_name
 
         return None, {"error_type": "INTERNAL_ERROR"}
 
@@ -173,7 +169,7 @@ class ColumnMetadata:
                 expected_count(int): The expected count.  0 or 1
                 error_type(str): The type of the error we should issue
         """
-        if column_type == ColumnType.Value or column_type == ColumnType.Attribute:
+        if column_type == ColumnType.Value:
             expected_count = 1
             error_type = SidecarErrors.INVALID_POUND_SIGNS_VALUE
         elif column_type == ColumnType.HEDTags or column_type == ColumnType.Categorical:

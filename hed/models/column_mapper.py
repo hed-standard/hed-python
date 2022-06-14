@@ -18,7 +18,7 @@ class ColumnMapper:
         - Functions and variables column and row indexing starts at 0.
     """
     def __init__(self, sidecar=None, tag_columns=None, column_prefix_dictionary=None,
-                 attribute_columns=None, optional_tag_columns=None, requested_columns=None):
+                 optional_tag_columns=None, requested_columns=None):
         """ Constructor for ColumnMapper.
 
         Args:
@@ -27,8 +27,6 @@ class ColumnMapper:
                 Sidecar column definitions will take precedent if there is a conflict with tag_columns.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers and values are HED tag
                 prefixes to prepend to the tags in that column before processing.
-            attribute_columns (str, int or list): A column name, column number or a list of column names
-                or numbers to treat as attributes.
             optional_tag_columns (list): A list of ints or strings containing the columns that contain
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
 
@@ -57,7 +55,6 @@ class ColumnMapper:
         self._finalize_mapping_issues = []
         self._sidecar = None
         self._set_sidecar(sidecar)
-        self.add_columns(attribute_columns)
 
         self.set_requested_columns(requested_columns, False)
         self.set_tag_columns(tag_columns, optional_tag_columns, False)
@@ -162,7 +159,7 @@ class ColumnMapper:
         self._column_map = column_map
         return self._finalize_mapping()
 
-    def add_columns(self, column_names_or_numbers, column_type=ColumnType.Attribute):
+    def add_columns(self, column_names_or_numbers, column_type=ColumnType.HEDTags):
         """ Add blank columns in the given column category.
 
         Args:
@@ -212,7 +209,7 @@ class ColumnMapper:
             row_text (list): The text for the given row, one list entry per column number.
 
         Returns:
-            dict: A dictionary containing the keys COLUMN_TO_HED_TAGS, COLUMN_ISSUES, and arbitrary attributes.
+            dict: A dictionary containing the keys COLUMN_TO_HED_TAGS, COLUMN_ISSUES.
 
         Notes:
             - The "column_to_hed_tags" is each expanded column given separately as a list of HedStrings.
@@ -224,16 +221,13 @@ class ColumnMapper:
         column_to_hed_tags_dictionary = {}
         column_issues_dict = {}
         for column_number, cell_text in enumerate(row_text):
-            translated_column, attribute_name_or_error = self._expand_column(column_number, str(cell_text))
+            translated_column, translation_errors = self._expand_column(column_number, str(cell_text))
             if translated_column is None:
-                if attribute_name_or_error:
+                if translation_errors:
                     if column_number not in column_issues_dict:
                         column_issues_dict[column_number] = []
-                    column_issues_dict[column_number] += attribute_name_or_error
+                    column_issues_dict[column_number] += translation_errors
                     column_to_hed_tags_dictionary[column_number] = translated_column
-                continue
-            if attribute_name_or_error:
-                result_dict[attribute_name_or_error] = translated_column
                 continue
 
             column_to_hed_tags_dictionary[column_number] = translated_column
