@@ -85,6 +85,8 @@ class Test(unittest.TestCase):
         self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
         self.assertEqual(first_str1.find('Def-expand'), -1,
                          "assemble_hed with no def expand does not have Def-expand tags")
+        self.assertIsInstance(dict1, dict, "hed_assemble returns a dictionary of definitions")
+        self.assertEqual(len(dict1), 17, "hed_assemble definition dictionary has the right number of elements.")
         df2, dict2 = assemble_hed(self.input_data,
                                   columns_included=["onset", "duration", "event_type"], expand_defs=True)
         first_str2 = df2.iloc[0]['HED_assembled']

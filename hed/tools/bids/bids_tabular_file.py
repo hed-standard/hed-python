@@ -35,3 +35,41 @@ class BidsTabularFile(BidsFile):
         columns = self.contents._mapper._column_map.values()
         if 'HED' in columns or 'HED_assembled' in columns:
             self.has_hed = True
+
+
+if __name__ == '__main__':
+    from hed import HedSchemaGroup, HedValidator, load_schema, load_schema_version, Sidecar, TabularInput
+    from hed.tools import BidsSidecarFile
+    check_for_warnings = False
+    base_version = '8.1.0'
+    score_url = f"https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
+                f"library_schemas/score/prerelease/HED_score_1.0.0.xml"
+
+    schema_base = load_schema_version(xml_version="8.1.0")
+    schema_score = load_schema(score_url, library_prefix="sc")
+    schema = HedSchemaGroup([schema_base, schema_score])
+    validator = HedValidator(hed_schema=schema)
+
+    base_path = 'D:/tempbids/bids-examples/xeeg_hed_score/sub-ieegModulator/ses-ieeg01/ieeg'
+    tab_path = os.path.join(base_path, 'sub-ieegModulator_ses-ieeg01_task-photicstim_run-01_events.tsv')
+    side_path = os.path.join(base_path, 'sub-ieegModulator_ses-ieeg01_task-photicstim_run-01_events.json')
+
+    bids_side = Sidecar(side_path)
+    bids_tab = TabularInput(tab_path, sidecar=bids_side)
+    issues = bids_tab.validate_file(hed_ops=validator, check_for_warnings=False)
+    print(f"Issues  {issues}")
+
+    bids_tab1 = TabularInput(tab_path)
+    issues1 = bids_tab1.validate_file(hed_ops=validator, check_for_warnings=False)
+    print(f"Issues 1 {issues1}")
+    # bids_side
+    # bids_tab = BidsTabularFile(tab_path)
+    # # summary1 = bids.get_summary()
+    # # print(json.dumps(summary1, indent=4))
+    # print("\nNow validating with the prerelease schema.")
+    # bids_side = BidsSidecarFile(side_path)
+    # bids_side.set_contents()
+
+    # bids_tab.set_contents()
+    # issues = bids_tab.contents.validate_file(hed_ops=[validator], check_for_warnings=check_for_warnings)
+    # print(f"Issues {str(issues)}")
