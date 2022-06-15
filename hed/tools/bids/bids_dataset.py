@@ -136,15 +136,33 @@ if __name__ == '__main__':
     #                     '../../../tests/data/bids/eeg_ds003654s_hed_library')
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        '../../../tests/data/bids/eeg_ds003654s_hed')
-
+    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    #                     '../../../tests/data/bids/eeg_ds003654s_hed')
+    #
+    # bids = BidsDataset(path)
+    # issue_list = bids.validate(check_for_warnings=False)
+    # if issue_list:
+    #     issue_str = get_printable_issue_string(issue_list, "HED validation errors:")
+    # else:
+    #     issue_str = "No issues"
+    # print(issue_str)
+    check_for_warnings = False
+    path = 'D:/tempbids/bids-examples/xeeg_hed_score/'
     bids = BidsDataset(path)
-    issue_list = bids.validate(check_for_warnings=False)
-    if issue_list:
-        issue_str = get_printable_issue_string(issue_list, "HED validation errors:")
-    else:
-        issue_str = "No issues"
-    print(issue_str)
     # summary1 = bids.get_summary()
     # print(json.dumps(summary1, indent=4))
+    print("\nNow validating with the prerelease schema.")
+    base_version = '8.1.0'
+    score_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/score/prerelease/HED_score_1.0.0.xml"
+
+    schema_base = load_schema_version(xml_version="8.1.0")
+    schema_score = load_schema(score_url, library_prefix="sc")
+    bids.schema = HedSchemaGroup([schema_base, schema_score])
+
+
+    issue_list2 = bids.validate(check_for_warnings=check_for_warnings)
+    if issue_list2:
+        issue_str2 = get_printable_issue_string(issue_list2, "HED validation errors: ", skip_filename=False)
+    else:
+        issue_str2 = "No HED validation errors"
+    print(issue_str2)
