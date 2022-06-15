@@ -3,7 +3,7 @@ import os
 
 from hed.errors import HedFileError
 from hed.models import HedString, HedTag
-from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup
+from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version
 
 
 class TestHedSchema(unittest.TestCase):
@@ -175,3 +175,41 @@ class TestHedSchema(unittest.TestCase):
     def test_schema_complicance(self):
         warnings = self.hed_schema_group.check_compliance(True)
         self.assertEqual(len(warnings), 10)
+
+    def test_load_schema_version(self):
+        schema = load_schema_version(xml_version="st:8.0.0")
+        schema2 = load_schema_version(xml_version="8.0.0")
+        self.assertNotEqual(schema, schema2)
+        schema2.set_library_prefix("st")
+        self.assertEqual(schema, schema2)
+
+        score_lib = load_schema_version(xml_version="score_0.0.1")
+        self.assertEqual(score_lib._library_prefix, "")
+        self.assertTrue(score_lib.get_tag_entry("Modulators"))
+
+        score_lib = load_schema_version(xml_version="sc:score_0.0.1")
+        self.assertEqual(score_lib._library_prefix, "sc:")
+        self.assertTrue(score_lib.get_tag_entry("Modulators", library_prefix="sc:"))
+
+    def test_bad_prefixes(self):
+        schema = load_schema_version(xml_version="8.0.0")
+
+        self.assertTrue(schema.get_tag_entry("Event"))
+        self.assertFalse(schema.get_tag_entry("sc:Event"))
+        self.assertFalse(schema.get_tag_entry("unknown:Event"))
+        self.assertFalse(schema.get_tag_entry(":Event"))
+        self.assertFalse(schema.get_tag_entry("Event", library_prefix=None))
+        self.assertTrue(schema.get_tag_entry("Event", library_prefix=''))
+        self.assertFalse(schema.get_tag_entry("Event", library_prefix='unknown'))
+
+    def test_bad_prefixes_library(self):
+        schema = load_schema_version(xml_version="tl:8.0.0")
+
+        self.assertTrue(schema.get_tag_entry("tl:Event", library_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry("sc:Event", library_prefix="tl:"))
+        self.assertTrue(schema.get_tag_entry("Event", library_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry("unknown:Event", library_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry(":Event", library_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry("Event", library_prefix=None))
+        self.assertFalse(schema.get_tag_entry("Event", library_prefix=''))
+        self.assertFalse(schema.get_tag_entry("Event", library_prefix='unknown'))

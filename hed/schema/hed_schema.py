@@ -305,6 +305,8 @@ class HedSchema:
             #                     s = f"{key} unmatched: '{str(dict1[key].long_name)}' vs '{str(dict2[key].long_name)}'"
             #                     print(s)
             return False
+        if self._library_prefix != other._library_prefix:
+            return False
         return True
 
     def get_unit_class_units(self, unit_class_type):
@@ -350,26 +352,66 @@ class HedSchema:
         Args:
             name (str): Any form of basic tag(or other section entry) to look up.
                 This will not handle extensions or similar.
+                If this is a tag, it can have a schema prefix, but it's not required
             key_class (HedSectionKey or str):  The type of entry to return.
-            library_prefix (str): Only used for HedSchemaGroup otherwise ignored.
+            library_prefix (str): Only used on AllTags.  If incorrect, will return None.
 
         Returns:
             HedSchemaEntry: The schema entry for the given tag.
 
         """
-        if self._library_prefix and key_class == HedSectionKey.AllTags:
-            name = name.lower()
+        if key_class == HedSectionKey.AllTags:
+            if library_prefix != self._library_prefix:
+                return None
             if name.startswith(self._library_prefix):
                 name = name[len(self._library_prefix):]
 
+        return self._get_tag_entry(name, key_class)
+
+    def _get_tag_entry(self, name, key_class=HedSectionKey.AllTags):
+        """ Return the schema entry for this tag, if one exists.
+
+        Args:
+            name (str): Any form of basic tag(or other section entry) to look up.
+                This will not handle extensions or similar.
+            key_class (HedSectionKey or str):  The type of entry to return.
+
+        Returns:
+            HedSchemaEntry: The schema entry for the given tag.
+
+        """
         return self._sections[key_class].get(name)
 
     def find_tag_entry(self, tag, library_prefix=""):
         """ Find the schema entry for a given source tag.
 
+            Note: Will not identify tags if library_prefix is set incorrectly
+
         Args:
             tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
-            library_prefix (str):  The prefix the library, if any.
+            library_prefix (str):  The schema prefix of the tag, if any.
+
+        Returns:
+            HedTagEntry: The located tag entry for this tag.
+            str: The remainder of the tag that isn't part of the base tag.
+            list: A list of errors while converting.
+
+        Notes:
+            Works left to right (which is mostly relevant for errors).
+
+        """
+        if library_prefix != self._library_prefix:
+            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_LIBRARY_UNMATCHED, tag,
+                                                          library_prefix, self.valid_prefixes)
+            return None, None, validation_issues
+        return self._find_tag_entry(tag, library_prefix)
+
+    def _find_tag_entry(self, tag, library_prefix=""):
+        """ Find the schema entry for a given source tag.
+
+        Args:
+            tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
+            library_prefix (str):  The schema prefix of the tag, if any.
 
         Returns:
             HedTagEntry: The located tag entry for this tag.
@@ -387,7 +429,7 @@ class HedSchema:
         working_tag = clean_tag.lower()
 
         # Most tags are in the schema directly, so test that first
-        found_entry = self.get_tag_entry(working_tag)
+        found_entry = self._get_tag_entry(working_tag)
         if found_entry:
             # this handles the one special case where the actual tag contains "/#" instead of something specific.
             if working_tag.endswith("/#"):
@@ -406,7 +448,7 @@ class HedSchema:
             if next_index == -1:
                 next_index = len(working_tag)
             parent_name = working_tag[:next_index]
-            parent_entry = self.get_tag_entry(parent_name)
+            parent_entry = self._get_tag_entry(parent_name)
 
             if not parent_entry:
                 # We haven't found any tag at all yet
@@ -421,7 +463,7 @@ class HedSchema:
                     child_names = working_tag[current_slash_index + 1:].split("/")
                     word_start_index = current_slash_index + 1 + prefix_tag_adj
                     for name in child_names:
-                        if self.get_tag_entry(name):
+                        if self._get_tag_entry(name):
                             error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE,
                                                               tag,
                                                               index_in_tag=word_start_index,
@@ -499,7 +541,7 @@ class HedSchema:
             str:  A description of the specified tag.
 
         """
-        tag_entry = self.get_tag_entry(tag_name, key_class)
+        tag_entry = self._get_tag_entry(tag_name, key_class)
         if tag_entry:
             return tag_entry.description
 
@@ -569,7 +611,7 @@ class HedSchema:
             If keys is None, gets all normal hed tag attributes.
 
         """
-        tag_entry = self.get_tag_entry(tag_name, key_class)
+        tag_entry = self._get_tag_entry(tag_name, key_class)
         attributes = {}
         if tag_entry:
             attributes = tag_entry.attributes

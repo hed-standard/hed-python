@@ -20,3 +20,20 @@ class TestHedSchema(unittest.TestCase):
     def test_get_tag_entry(self):
         tag_entry = self.hed_schema_group.get_tag_entry("Event", library_prefix="tl:")
         self.assertTrue(tag_entry)
+
+    def test_bad_prefixes(self):
+        schema = self.hed_schema_group
+
+        self.assertTrue(schema.get_tag_entry("Event"))
+        self.assertFalse(schema.get_tag_entry("sc:Event"))
+        self.assertFalse(schema.get_tag_entry("unknown:Event"))
+        self.assertFalse(schema.get_tag_entry(":Event"))
+
+        self.assertTrue(schema.get_tag_entry("tl:Event", library_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry("sc:Event", library_prefix="tl:"))
+        self.assertTrue(schema.get_tag_entry("Event", library_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry("unknown:Event", library_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry(":Event", library_prefix="tl:"))
+
+        self.assertFalse(schema.get_tag_entry("Event", library_prefix=None))
+        self.assertTrue(schema.get_tag_entry("Event", library_prefix=""))

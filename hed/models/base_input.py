@@ -145,6 +145,7 @@ class BaseInput:
         for row_number, row_dict in enumerate(self.iter_dataframe(hed_ops=hed_schema,
                                                                   return_string_only=False,
                                                                   remove_definitions=False,
+                                                                  requested_columns=self._mapper.get_tag_columns(),
                                                                   error_handler=error_handler)):
             column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
             error_list += row_dict[model_constants.ROW_ISSUES]

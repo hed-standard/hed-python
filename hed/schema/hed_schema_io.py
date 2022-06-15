@@ -96,15 +96,12 @@ def get_hed_xml_version(xml_file_path):
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
-def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
-                        library_prefix=None):
+def load_schema_version(xml_folder=None, xml_version=None):
     """ Return specified version or latest if not specified.
 
     Args:
         xml_folder (str): Path to a folder containing schema.
-        xml_version (str): HED version format string. Expected format: 'X.Y.Z'.
-        library_name (str or None): Optional library name
-        library_prefix  (str or None): The name_prefix all tags in this schema will accept.
+        xml_version (str): HED version format string. Expected format: '[library_prefix:][library_name_]X.Y.Z'.
 
     Returns:
         HedSchema: The requested HedSchema object.
@@ -112,6 +109,13 @@ def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
     Notes:
         - The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
     """
+    library_prefix = ""
+    library_name = None
+    if xml_version:
+        if ":" in xml_version:
+            library_prefix, _, xml_version = xml_version.partition(":")
+        if "_" in xml_version:
+            library_name, _, xml_version = xml_version.rpartition("_")
     try:
         final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file)

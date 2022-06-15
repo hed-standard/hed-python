@@ -138,7 +138,7 @@ class HedSchemaGroup:
         Args:
             name (str): Any form of basic tag(or other section entry) to look up.
             key_class (HedSectionKey): The tag section to search.
-            library_prefix (str): An optional prefix associated with this tag.
+            library_prefix (str or None): An optional prefix associated with this tag.
 
         Returns:
             HedSchemaEntry:  The schema entry for the given tag.
@@ -149,9 +149,7 @@ class HedSchemaGroup:
         """
         specific_schema = self.schema_for_prefix(library_prefix)
         if not specific_schema:
-            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_LIBRARY_UNMATCHED, name,
-                                                          library_prefix, self.valid_prefixes)
-            return None, None, validation_issues
+            return None
 
         return specific_schema.get_tag_entry(name, key_class, library_prefix)
 
@@ -178,4 +176,4 @@ class HedSchemaGroup:
                                                           library_prefix, self.valid_prefixes)
             return None, None, validation_issues
 
-        return specific_schema.find_tag_entry(tag, library_prefix)
+        return specific_schema._find_tag_entry(tag, library_prefix)
