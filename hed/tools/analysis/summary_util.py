@@ -59,13 +59,13 @@ def extract_dict_values(tag_dict, tag_name, tags):
     return list(tag_dict[tag_name].keys()), True
 
 
-def get_schema_entries(hed_schema, tag, library_prefix=""):
+def get_schema_entries(hed_schema, tag, schema_prefix=""):
     """ Get schema entries for tag and to its parents.
 
     Args:
         hed_schema (HedSchema, HedSchemaGroup):  The schema in which to search for tag.
         tag (HedTag, str):       The HED tag to look for.
-        library_prefix (str):    The library prefix to use in the search.
+        schema_prefix (str):    The library prefix to use in the search.
 
     Returns:
         list:  A list of HedTagEntry objects for the tag and its parent nodes in the schema.
@@ -73,7 +73,7 @@ def get_schema_entries(hed_schema, tag, library_prefix=""):
     """
 
     entry_list = []
-    tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(tag, library_prefix)
+    tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(tag, schema_prefix)
     while tag_entry is not None:
         entry_list.append(tag_entry)
         tag_entry = tag_entry._parent_tag

@@ -90,7 +90,7 @@ if __name__ == '__main__':
     bids_json = BidsSidecarFile(path)
     bids_json.set_contents()
     schema_base = load_schema_version(xml_version="8.1.0")
-    schema_score = load_schema(score_url, library_prefix="sc")
+    schema_score = load_schema(score_url, schema_prefix="sc")
     schemas = HedSchemaGroup([schema_base, schema_score])
     validator = HedValidator(hed_schema=schemas)
     issues = bids_json.contents.validate_entries(hed_ops=validator, check_for_warnings=False)

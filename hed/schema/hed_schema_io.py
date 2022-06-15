@@ -10,13 +10,13 @@ from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.schema_io import schema_util
 
 
-def from_string(schema_string, file_type=".xml", library_prefix=None):
+def from_string(schema_string, file_type=".xml", schema_prefix=None):
     """ Create a schema from the given string.
 
     Args:
         schema_string (str):         An XML or mediawiki file as a single long string.
         file_type (str):             The extension(including the .) corresponding to a file source.
-        library_prefix (str, None):  The name_prefix all tags in this schema will accept.
+        schema_prefix (str, None):  The name_prefix all tags in this schema will accept.
 
     Returns:
         (HedSchema):  The loaded schema.
@@ -39,18 +39,18 @@ def from_string(schema_string, file_type=".xml", library_prefix=None):
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
 
-    if library_prefix:
-        hed_schema.set_library_prefix(library_prefix=library_prefix)
+    if schema_prefix:
+        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
     return hed_schema
 
 
-def load_schema(hed_path=None, library_prefix=None):
+def load_schema(hed_path=None, schema_prefix=None):
     """ Load a schema from the given file or URL path.
 
     Args:
         hed_path (str or None): A filepath or url to open a schema from.
-        library_prefix (str or None): The name_prefix all tags in this schema will accept.
+        schema_prefix (str or None): The name_prefix all tags in this schema will accept.
 
     Returns:
         HedSchema: The loaded schema.
@@ -75,8 +75,8 @@ def load_schema(hed_path=None, library_prefix=None):
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
-    if library_prefix:
-        hed_schema.set_library_prefix(library_prefix=library_prefix)
+    if schema_prefix:
+        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
     return hed_schema
 
@@ -101,7 +101,7 @@ def load_schema_version(xml_folder=None, xml_version=None):
 
     Args:
         xml_folder (str): Path to a folder containing schema.
-        xml_version (str): HED version format string. Expected format: '[library_prefix:][library_name_]X.Y.Z'.
+        xml_version (str): HED version format string. Expected format: '[schema_prefix:][library_name_]X.Y.Z'.
 
     Returns:
         HedSchema: The requested HedSchema object.
@@ -109,11 +109,11 @@ def load_schema_version(xml_folder=None, xml_version=None):
     Notes:
         - The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
     """
-    library_prefix = ""
+    schema_prefix = ""
     library_name = None
     if xml_version:
         if ":" in xml_version:
-            library_prefix, _, xml_version = xml_version.partition(":")
+            schema_prefix, _, xml_version = xml_version.partition(":")
         if "_" in xml_version:
             library_name, _, xml_version = xml_version.rpartition("_")
     try:
@@ -127,7 +127,7 @@ def load_schema_version(xml_folder=None, xml_version=None):
         else:
             raise e
         
-    if library_prefix:
-        hed_schema.set_library_prefix(library_prefix=library_prefix)
+    if schema_prefix:
+        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
     return hed_schema

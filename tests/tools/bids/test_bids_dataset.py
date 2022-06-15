@@ -87,8 +87,8 @@ class Test(unittest.TestCase):
         library2_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
                        "library_schemas/testlib/hedxml/HED_testlib_1.0.2.xml"
         schema_list = [load_schema_version(xml_version=base_version)]
-        schema_list.append(load_schema(library1_url, library_prefix="sc"))
-        schema_list.append(load_schema(library2_url, library_prefix="test"))
+        schema_list.append(load_schema(library1_url, schema_prefix="sc"))
+        schema_list.append(load_schema(library2_url, schema_prefix="test"))
         x = HedSchemaGroup(schema_list)
         bids = BidsDataset(self.library_path, schema=x)
         self.assertIsInstance(bids, BidsDataset,
