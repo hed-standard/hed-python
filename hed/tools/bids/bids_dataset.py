@@ -102,7 +102,7 @@ class BidsDataset:
             for key, library in hed['libraries'].items():
                 library_pieces = library.split('_')
                 url = LIBRARY_URL_BASE + library_pieces[0] + '/hedxml/HED_' + library + '.xml'
-                hed_list.append(load_schema(url, library_prefix=key))
+                hed_list.append(load_schema(url, schema_prefix=key))
         return HedSchemaGroup(hed_list)
 
     def get_summary(self):
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     score_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/score/prerelease/HED_score_1.0.0.xml"
 
     schema_base = load_schema_version(xml_version="8.1.0")
-    schema_score = load_schema(score_url, library_prefix="sc")
+    schema_score = load_schema(score_url, schema_prefix="sc")
     bids.schema = HedSchemaGroup([schema_base, schema_score])
 
 

@@ -3,7 +3,7 @@ import os
 
 from hed.errors import HedFileError
 from hed.models import HedString, HedTag
-from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup
+from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version
 
 
 class TestHedSchema(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestHedSchema(unittest.TestCase):
         schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = load_schema(hed_xml)
-        hed_schema2 = load_schema(hed_xml, library_prefix="tl:")
+        hed_schema2 = load_schema(hed_xml, schema_prefix="tl:")
         cls.hed_schema_group = HedSchemaGroup([hed_schema1, hed_schema2])
 
 
@@ -175,3 +175,41 @@ class TestHedSchema(unittest.TestCase):
     def test_schema_complicance(self):
         warnings = self.hed_schema_group.check_compliance(True)
         self.assertEqual(len(warnings), 10)
+
+    def test_load_schema_version(self):
+        schema = load_schema_version(xml_version="st:8.0.0")
+        schema2 = load_schema_version(xml_version="8.0.0")
+        self.assertNotEqual(schema, schema2)
+        schema2.set_schema_prefix("st")
+        self.assertEqual(schema, schema2)
+
+        score_lib = load_schema_version(xml_version="score_0.0.1")
+        self.assertEqual(score_lib._schema_prefix, "")
+        self.assertTrue(score_lib.get_tag_entry("Modulators"))
+
+        score_lib = load_schema_version(xml_version="sc:score_0.0.1")
+        self.assertEqual(score_lib._schema_prefix, "sc:")
+        self.assertTrue(score_lib.get_tag_entry("Modulators", schema_prefix="sc:"))
+
+    def test_bad_prefixes(self):
+        schema = load_schema_version(xml_version="8.0.0")
+
+        self.assertTrue(schema.get_tag_entry("Event"))
+        self.assertFalse(schema.get_tag_entry("sc:Event"))
+        self.assertFalse(schema.get_tag_entry("unknown:Event"))
+        self.assertFalse(schema.get_tag_entry(":Event"))
+        self.assertFalse(schema.get_tag_entry("Event", schema_prefix=None))
+        self.assertTrue(schema.get_tag_entry("Event", schema_prefix=''))
+        self.assertFalse(schema.get_tag_entry("Event", schema_prefix='unknown'))
+
+    def test_bad_prefixes_library(self):
+        schema = load_schema_version(xml_version="tl:8.0.0")
+
+        self.assertTrue(schema.get_tag_entry("tl:Event", schema_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry("sc:Event", schema_prefix="tl:"))
+        self.assertTrue(schema.get_tag_entry("Event", schema_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry("unknown:Event", schema_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry(":Event", schema_prefix="tl:"))
+        self.assertFalse(schema.get_tag_entry("Event", schema_prefix=None))
+        self.assertFalse(schema.get_tag_entry("Event", schema_prefix=''))
+        self.assertFalse(schema.get_tag_entry("Event", schema_prefix='unknown'))

@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 f"library_schemas/score/prerelease/HED_score_1.0.0.xml"
 
     schema_base = load_schema_version(xml_version="8.1.0")
-    schema_score = load_schema(score_url, library_prefix="sc")
+    schema_score = load_schema(score_url, schema_prefix="sc")
     schema = HedSchemaGroup([schema_base, schema_score])
     validator = HedValidator(hed_schema=schema)
 

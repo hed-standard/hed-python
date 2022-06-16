@@ -18,7 +18,7 @@ class TestHed3(TestValidatorBase):
         schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml)
-        hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
+        hed_schema2 = schema.load_schema(hed_xml, schema_prefix="tl:")
         cls.hed_schema = HedSchemaGroup([hed_schema1, hed_schema2])
 
         cls.error_handler = error_reporter.ErrorHandler()
@@ -27,8 +27,8 @@ class TestHed3(TestValidatorBase):
     def test_invalid_load(self):
         schema_file = '../data/schema_test_data/HED8.0.0t.xml'
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
-        hed_schema1 = schema.load_schema(hed_xml, library_prefix="tl:")
-        hed_schema2 = schema.load_schema(hed_xml, library_prefix="tl:")
+        hed_schema1 = schema.load_schema(hed_xml, schema_prefix="tl:")
+        hed_schema2 = schema.load_schema(hed_xml, schema_prefix="tl:")
 
         self.assertRaises(HedFileError, HedSchemaGroup, [hed_schema1, hed_schema2])
 

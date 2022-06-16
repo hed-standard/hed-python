@@ -72,6 +72,10 @@ def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
+
+    if not library_name:
+        library_name = None
+
     all_hed_versions = {}
     local_directory = local_hed_directory
     try:

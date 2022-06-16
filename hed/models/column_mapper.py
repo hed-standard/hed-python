@@ -45,7 +45,7 @@ class ColumnMapper:
         self._final_column_map = {}
         self._no_mapping_info = True
 
-        self._column_map = None
+        self._column_map = {}
         self._requested_columns = []
         self._tag_columns = []
         self._optional_tag_columns = []
@@ -80,6 +80,17 @@ class ColumnMapper:
             self._add_column_data(column_data)
 
         self._sidecar = sidecar
+
+    def get_tag_columns(self):
+        """ Returns the column numbers that are mapped to be HedTags
+
+            Note: This is NOT the tag_columns or optional_tag_columns parameter, though they set it.
+
+        Returns:
+            column_numbers(list): A list of column numbers that are ColumnType.HedTags
+        """
+        return [number for number, column_entry in self._final_column_map.items()
+                if column_entry.column_type == ColumnType.HEDTags]
 
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
         """ Replace the column prefix dictionary
@@ -151,6 +162,8 @@ class ColumnMapper:
             list: List of issues. Each issue is a dictionary.
 
         """
+        if new_column_map is None:
+            new_column_map = {}
         if isinstance(new_column_map, dict):
             column_map = new_column_map
         # List like
@@ -315,13 +328,16 @@ class ColumnMapper:
         if self._requested_columns:
             all_tag_columns += self._requested_columns
         self._finalize_mapping_issues = []
-        if self._column_map is not None:
+
+        if self._column_map:
             for column_number, column_name in self._column_map.items():
                 name_requested = self._column_name_requested(column_name)
                 if name_requested and column_name in self.column_data:
                     column_entry = self.column_data[column_name]
                     column_entry.column_name = column_name
                     self._final_column_map[column_number] = column_entry
+                    if column_entry.column_type == column_entry.column_type.Ignore and column_name in all_tag_columns:
+                        column_entry.column_type = ColumnType.HEDTags
                 elif name_requested and column_name in all_tag_columns:
                     found_named_tag_columns[column_name] = column_number
                 elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
@@ -346,6 +362,10 @@ class ColumnMapper:
             if isinstance(column_number, int):
                 if column_number not in self._final_column_map:
                     self._final_column_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_number)
+                else:
+                    entry = self._final_column_map[column_number]
+                    if entry.column_type == entry.column_type.Ignore:
+                        entry.column_type = ColumnType.HEDTags
             elif column_number in found_named_tag_columns:
                 column_name = column_number
                 column_number = found_named_tag_columns[column_name]
