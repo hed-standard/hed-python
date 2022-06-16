@@ -1,5 +1,6 @@
 import os
 import unittest
+from hed.errors import HedFileError
 from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
@@ -27,6 +28,109 @@ class Test(unittest.TestCase):
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
         self.assertIsInstance(bids.schema, HedSchema, "BidsDataset schema should be HedSchema")
+
+    def test_schema_from_hed_version(self):
+        ver1 = "8.0.0"
+        schemas1 = BidsDataset.schema_from_hed_version(ver1)
+        self.assertIsInstance(schemas1, HedSchema, "schema_from_hed_version returns a HedSchema if a string version")
+        self.assertEqual(schemas1.version, "8.0.0", "schema_from_hed_version has the right version")
+        self.assertEqual(schemas1.library, None, "schema_from_hed_version standard schema has no library")
+        ver2 = "base:8.0.0"
+        schemas2 = BidsDataset.schema_from_hed_version(ver2)
+        self.assertIsInstance(schemas2, HedSchema, "schema_from_hed_version returns HedSchema version+prefix")
+        self.assertEqual(schemas2.version, "8.0.0", "schema_from_hed_version has the right version with prefix")
+        self.assertEqual(schemas2._schema_prefix, "base:", "schema_from_hed_version has the right version with prefix")
+        ver3 = ["base:8.0.0"]
+        schemas3 = BidsDataset.schema_from_hed_version(ver3)
+        self.assertIsInstance(schemas3, HedSchema, "schema_from_hed_version returns HedSchema version+prefix")
+        self.assertEqual(schemas3.version, "8.0.0", "schema_from_hed_version has the right version with prefix")
+        self.assertEqual(schemas3._schema_prefix, "base:", "schema_from_hed_version has the right version with prefix")
+
+    def test_schema_from_hed_version_libraries(self):
+        ver1 = "score_0.0.1"
+        schemas1 = BidsDataset.schema_from_hed_version(ver1)
+        self.assertIsInstance(schemas1, HedSchema, "schema_from_hed_version returns a HedSchema if a string version")
+        self.assertEqual(schemas1.version, "0.0.1", "schema_from_hed_version has the right version")
+        self.assertEqual(schemas1.library, "score", "schema_from_hed_version works with single library no prefix")
+        ver2 = "base:score_0.0.1"
+        schemas2 = BidsDataset.schema_from_hed_version(ver2)
+        self.assertIsInstance(schemas2, HedSchema, "schema_from_hed_version returns HedSchema version+prefix")
+        self.assertEqual(schemas2.version, "0.0.1", "schema_from_hed_version has the right version with prefix")
+        self.assertEqual(schemas2._schema_prefix, "base:", "schema_from_hed_version has the right version with prefix")
+        ver3 = ["8.0.0", "sc:score_0.0.1"]
+        schemas3 = BidsDataset.schema_from_hed_version(ver3)
+        self.assertIsInstance(schemas3, HedSchemaGroup, "schema_from_hed_version returns HedSchema version+prefix")
+        self.assertIsInstance(schemas3._schemas, dict, "schema_from_hed_version group keeps dictionary of hed versions")
+        self.assertEqual(len(schemas3._schemas), 2, "schema_from_hed_version group dictionary is right length")
+        s = schemas3._schemas[""]
+        self.assertEqual(s.version, "8.0.0", "schema_from_hed_version has the right version with prefix")
+
+    def test_schema_from_hed_version_empty(self):
+        schemas1 = BidsDataset.schema_from_hed_version("")
+        self.assertIsInstance(schemas1, HedSchema, "schema_from_hed_version for empty string returns latest version")
+        self.assertTrue(schemas1.version, "schema_from_hed_version for empty string has a version")
+        self.assertFalse(schemas1.library, "schema_from_hed_version for empty string is not a library")
+        schemas2 = BidsDataset.schema_from_hed_version(None)
+        self.assertEqual(schemas2, None, "schema_from_hed_version None returns None")
+        schemas3 = BidsDataset.schema_from_hed_version([""])
+        self.assertIsInstance(schemas3, HedSchema, "schema_from_hed_version empty list returns None")
+        self.assertTrue(schemas3.version, "schema_from_hed_version for empty string has a version")
+        self.assertFalse(schemas3.library, "schema_from_hed_version for empty string is not a library")
+
+    def test_schema_from_hed_version_invalid(self):
+        try:
+            dict1 = BidsDataset.schema_from_hed_version("x.0.1")
+        except HedFileError:
+            pass
+        except Exception as ex:
+            self.fail("schema_from_hed_version threw the wrong exception when bad version")
+        else:
+            self.fail("schema_from_hed_version should have thrown a HedFileError for bad version")
+
+        try:
+            BidsDataset.schema_from_hed_version("base:score_x.0.1")
+        except HedFileError:
+            pass
+        except Exception as ex:
+            self.fail("schema_from_hed_version threw the wrong exception when bad library version")
+        else:
+            self.fail("schema_from_hed_version should have thrown a HedFileError for bad library version")
+
+        try:
+            BidsDataset.schema_from_hed_version([])
+        except HedFileError:
+            pass
+        except Exception as ex:
+            self.fail("schema_from_hed_version threw the wrong exception empty version list")
+        else:
+            self.fail("schema_from_hed_version should have thrown a HedFileError for empty version list")
+
+        try:
+            BidsDataset.schema_from_hed_version([None])
+        except HedFileError:
+            pass
+        except Exception as ex:
+            self.fail("schema_from_hed_version threw the wrong exception for None version list")
+        else:
+            self.fail("schema_from_hed_version should have thrown a HedFileError for None version list")
+
+        try:
+            BidsDataset.schema_from_hed_version(["8.0.0", "score_0.0.1)"])
+        except HedFileError:
+            pass
+        except Exception as ex:
+            self.fail("schema_from_hed_version threw the wrong exception for two no prefix")
+        else:
+            self.fail("schema_from_hed_version should have thrown a HedFileError two with no prefix")
+
+        try:
+            BidsDataset.schema_from_hed_version(["sc:8.0.0", "sc:score_0.0.1)"])
+        except HedFileError:
+            pass
+        except Exception as ex:
+            self.fail("schema_from_hed_version threw the wrong exception for two with same prefix")
+        else:
+            self.fail("schema_from_hed_version should have thrown a HedFileError two with same prefix")
 
     def test_constructor_libraries(self):
         bids = BidsDataset(self.library_path)

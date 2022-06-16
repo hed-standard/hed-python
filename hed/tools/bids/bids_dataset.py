@@ -1,5 +1,6 @@
 import os
 import json
+from hed.errors import HedFileError
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_io import load_schema, load_schema_version
@@ -37,7 +38,7 @@ class BidsDataset:
         if schema:
             self.schema = schema
         else:
-            self.schema = self._schema_from_description()
+            self.schema = self.schema_from_hed_version(self.dataset_description.get("HEDVersion", None))
 
         self.tabular_files = {"participants": BidsFileGroup(root_path, suffix="participants", obj_type="tabular")}
         if not tabular_types:
@@ -91,19 +92,15 @@ class BidsDataset:
         """
         hed = self.dataset_description.get("HEDVersion", None)
         if isinstance(hed, str):
-            return load_schema_version(xml_version=hed)
-        elif not isinstance(hed, dict):
-            return None
-
-        hed_list = []
-        if 'base' in hed:
-            hed_list.append(load_schema_version(xml_version=hed['base']))
-        if 'libraries' in hed:
-            for key, library in hed['libraries'].items():
-                library_pieces = library.split('_')
-                url = LIBRARY_URL_BASE + library_pieces[0] + '/hedxml/HED_' + library + '.xml'
-                hed_list.append(load_schema(url, schema_prefix=key))
-        return HedSchemaGroup(hed_list)
+            schemas = load_schema_version(xml_version=hed)
+        elif isinstance(hed, list):
+            hed_list = []
+            for schema_version in hed:
+                hed_list.append(load_schema_version(xml_version=schema_version))
+            schemas = HedSchemaGroup(hed_list)
+        else:
+            schemas = None
+        return schemas
 
     def get_summary(self):
         """ Return an abbreviated summary of the dataset. """
@@ -130,22 +127,58 @@ class BidsDataset:
             version_list.append(name)
         return version_list
 
+    @staticmethod
+    def schema_from_hed_version(version_contents):
+        """ Return a HedSchema or HedSchemaGroup extracted from HED version field.
+
+        Args:
+            version_contents (str or list): List or str specifying which official HED schemas to use.
+
+        Returns:
+            HedSchema, HedSchemaGroup, or None: The schema or schema group extracted.
+
+        Raises:
+            HedFileError: If the version_contents is not valid.
+
+        Notes:
+            - Loads the latest schema value if an empty version is given (string or list).
+
+
+        """
+
+        if version_contents is None:
+            schemas = None
+        elif isinstance(version_contents, str):
+            schemas = load_schema_version(xml_version=version_contents)
+        elif not isinstance(version_contents, list) or not version_contents or version_contents[0] is None:
+            raise HedFileError("IncorrectSchemaVersion", "The schema version does not in correct form.", "")
+        elif len(version_contents) == 1:
+            schemas = load_schema_version(xml_version=version_contents[0])
+        else:
+            hed_list = []
+            for schema_version in version_contents:
+                if schema_version is None:
+                    continue
+                hed_list.append(load_schema_version(xml_version=schema_version))
+            schemas = HedSchemaGroup(hed_list)
+        return schemas
+
 
 if __name__ == '__main__':
-    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed_library')
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        '../../../tests/data/bids/eeg_ds003654s_hed_library')
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                     '../../../tests/data/bids/eeg_ds003654s_hed')
     #
-    # bids = BidsDataset(path)
-    # issue_list = bids.validate(check_for_warnings=False)
-    # if issue_list:
-    #     issue_str = get_printable_issue_string(issue_list, "HED validation errors:")
-    # else:
-    #     issue_str = "No issues"
-    # print(issue_str)
+    bids = BidsDataset(path)
+    issue_list = bids.validate(check_for_warnings=False)
+    if issue_list:
+        issue_str = get_printable_issue_string(issue_list, "HED validation errors:")
+    else:
+        issue_str = "No issues"
+    print(issue_str)
     check_for_warnings = False
     path = 'D:/tempbids/bids-examples/xeeg_hed_score/'
     bids = BidsDataset(path)
@@ -153,12 +186,12 @@ if __name__ == '__main__':
     # print(json.dumps(summary1, indent=4))
     print("\nNow validating with the prerelease schema.")
     base_version = '8.1.0'
-    score_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/score/prerelease/HED_score_1.0.0.xml"
+    score_url = f"https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/" \
+                f"score/prerelease/HED_score_1.0.0.xml"
 
     schema_base = load_schema_version(xml_version="8.1.0")
     schema_score = load_schema(score_url, schema_prefix="sc")
     bids.schema = HedSchemaGroup([schema_base, schema_score])
-
 
     issue_list2 = bids.validate(check_for_warnings=check_for_warnings)
     if issue_list2:
