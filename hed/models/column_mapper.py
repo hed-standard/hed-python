@@ -294,6 +294,7 @@ class ColumnMapper:
         """ Internal function to add this as a required name_prefix to a column
 
         Args:
+            final_map (dict): {column_number:prefix} Dict of column numbers with prefixes
             column_number (int): The column number with this name_prefix.
             new_required_prefix (str): The name_prefix to add to the column when loading from a spreadsheet.
 
@@ -327,9 +328,9 @@ class ColumnMapper:
                     column_entry.column_name = column_name
                     basic_final_map[column_number] = column_entry
                     continue
-                elif column_number in column_data:
-                    raise ValueError("Does this case ever happen?  Is it even possible?")
-                elif not warn_on_blank_column_name and column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
+                # todo: Improve ignoring the index column and/or remove index support
+                elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE) and \
+                        (warn_on_blank_column_name or column_number == 0):
                     continue
                 unhandled_names[column_name] = column_number
         for column_number in column_data:
