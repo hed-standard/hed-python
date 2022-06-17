@@ -38,7 +38,7 @@ class BidsDataset:
         if schema:
             self.schema = schema
         else:
-            self.schema = self.schema_from_hed_version(self.dataset_description.get("HEDVersion", None))
+            self.schema = load_schema_version(self.dataset_description.get("HEDVersion", None))
 
         self.tabular_files = {"participants": BidsFileGroup(root_path, suffix="participants", obj_type="tabular")}
         if not tabular_types:
@@ -126,42 +126,6 @@ class BidsDataset:
             name = prefix + name
             version_list.append(name)
         return version_list
-
-    @staticmethod
-    def schema_from_hed_version(version_contents):
-        """ Return a HedSchema or HedSchemaGroup extracted from HED version field.
-
-        Args:
-            version_contents (str or list): List or str specifying which official HED schemas to use.
-
-        Returns:
-            HedSchema, HedSchemaGroup, or None: The schema or schema group extracted.
-
-        Raises:
-            HedFileError: If the version_contents is not valid.
-
-        Notes:
-            - Loads the latest schema value if an empty version is given (string or list).
-
-
-        """
-
-        if version_contents is None:
-            schemas = None
-        elif isinstance(version_contents, str):
-            schemas = load_schema_version(xml_version=version_contents)
-        elif not isinstance(version_contents, list) or not version_contents or version_contents[0] is None:
-            raise HedFileError("IncorrectSchemaVersion", "The schema version does not in correct form.", "")
-        elif len(version_contents) == 1:
-            schemas = load_schema_version(xml_version=version_contents[0])
-        else:
-            hed_list = []
-            for schema_version in version_contents:
-                if schema_version is None:
-                    continue
-                hed_list.append(load_schema_version(xml_version=schema_version))
-            schemas = HedSchemaGroup(hed_list)
-        return schemas
 
 
 if __name__ == '__main__':

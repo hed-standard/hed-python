@@ -277,6 +277,8 @@ class HedSchema:
             - Matches must include attributes, tag names, etc.
 
         """
+        if other is None:
+            return False
         if self.header_attributes != other.header_attributes:
             return False
         if self._has_duplicate_tags != other._has_duplicate_tags:

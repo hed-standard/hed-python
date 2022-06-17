@@ -8,6 +8,8 @@ from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.schema_io import schema_util
+from hed.schema.hed_schema_group import HedSchemaGroup
+from hed.schema.schema_validation_util import validate_version_string
 
 
 def from_string(schema_string, file_type=".xml", schema_prefix=None):
@@ -96,15 +98,18 @@ def get_hed_xml_version(xml_file_path):
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
-def load_schema_version(xml_folder=None, xml_version=None):
+def _load_schema_version(xml_version=None, xml_folder=None):
     """ Return specified version or latest if not specified.
 
     Args:
         xml_folder (str): Path to a folder containing schema.
-        xml_version (str): HED version format string. Expected format: '[schema_prefix:][library_name_]X.Y.Z'.
+        xml_version (str or list): HED version format string. Expected format: '[schema_prefix:][library_name_]X.Y.Z'.
 
     Returns:
-        HedSchema: The requested HedSchema object.
+        HedSchema or HedSchemaGroup: The requested HedSchema object.
+
+    Raises:
+        HedFileError: If the xml_version is not valid.
 
     Notes:
         - The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
@@ -116,6 +121,9 @@ def load_schema_version(xml_folder=None, xml_version=None):
             schema_prefix, _, xml_version = xml_version.partition(":")
         if "_" in xml_version:
             library_name, _, xml_version = xml_version.rpartition("_")
+        elif validate_version_string(xml_version):
+            library_name = xml_version
+            xml_version = None
     try:
         final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file)
@@ -131,3 +139,30 @@ def load_schema_version(xml_folder=None, xml_version=None):
         hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
     return hed_schema
+
+
+def load_schema_version(xml_version=None, xml_folder=None):
+    """ Return a HedSchema or HedSchemaGroup extracted from xml_version field.
+
+    Args:
+        xml_version (str or list or None): List or str specifying which official HED schemas to use.
+                                           An empty string returns the latest version
+        xml_folder (str): Path to a folder containing schema.
+
+    Returns:
+        HedSchema or HedSchemaGroup: The schema or schema group extracted.
+
+    Raises:
+        HedFileError: If the xml_version is not valid.
+
+    Notes:
+        - Loads the latest schema value if an empty version is given (string or list).
+    """
+    if xml_version and isinstance(xml_version, list):
+        schemas = [_load_schema_version(xml_version=version, xml_folder=xml_folder) for version in xml_version]
+        if len(schemas) == 1:
+            return schemas[0]
+
+        return HedSchemaGroup(schemas)
+    else:
+        return _load_schema_version(xml_version=xml_version, xml_folder=xml_folder)
