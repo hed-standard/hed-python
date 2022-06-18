@@ -27,7 +27,8 @@ class TabularInput(BaseInput):
         """
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
-        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
+        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
+                                  warn_on_blank_column_name=True, warn_on_missing_columns=True)
 
         definition_columns = [self.HED_COLUMN_NAME]
         self._sidecar = sidecar
