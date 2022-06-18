@@ -18,7 +18,8 @@ class ColumnMapper:
         - Functions and variables column and row indexing starts at 0.
     """
     def __init__(self, sidecar=None, tag_columns=None, column_prefix_dictionary=None,
-                 optional_tag_columns=None, requested_columns=None):
+                 optional_tag_columns=None, requested_columns=None, warn_on_blank_column_name=False,
+                 warn_on_missing_columns=False):
         """ Constructor for ColumnMapper.
 
         Args:
@@ -29,6 +30,9 @@ class ColumnMapper:
                 prefixes to prepend to the tags in that column before processing.
             optional_tag_columns (list): A list of ints or strings containing the columns that contain
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
+            warn_on_blank_column_name (bool): If True, issue mapping warnings on blank column names
+            warn_on_missing_columns (bool): If True, issue mapping warnings on column names that are missing from
+                                            the sidecar.
 
         Notes:
             - All column numbers are 0 based.
@@ -47,6 +51,8 @@ class ColumnMapper:
 
         self._column_map = {}
         self._requested_columns = []
+        self._warn_on_blank_column_name = warn_on_blank_column_name
+        self._warn_on_missing_columns = warn_on_missing_columns
         self._tag_columns = []
         self._optional_tag_columns = []
         self._column_prefix_dictionary = {}
@@ -283,10 +289,12 @@ class ColumnMapper:
         column_name = new_column_entry.column_name
         self.column_data[column_name] = copy.deepcopy(new_column_entry)
 
-    def _set_column_prefix(self, column_number, new_required_prefix):
+    @staticmethod
+    def _set_column_prefix(final_map, column_number, new_required_prefix):
         """ Internal function to add this as a required name_prefix to a column
 
         Args:
+            final_map (dict): {column_number:prefix} Dict of column numbers with prefixes
             column_number (int): The column number with this name_prefix.
             new_required_prefix (str): The name_prefix to add to the column when loading from a spreadsheet.
 
@@ -299,87 +307,105 @@ class ColumnMapper:
         """
         if isinstance(column_number, str):
             raise TypeError("Must pass in a column number not column_name to _set_column_prefix")
-        if column_number not in self._final_column_map:
+        if column_number not in final_map:
             column_entry = ColumnMetadata(ColumnType.HEDTags)
-            self._final_column_map[column_number] = column_entry
+            final_map[column_number] = column_entry
         else:
-            column_entry = self._final_column_map[column_number]
+            column_entry = final_map[column_number]
 
         column_entry.column_prefix = new_required_prefix
         if column_entry.column_type is None or column_entry.column_type == ColumnType.Ignore:
             column_entry.column_type = ColumnType.HEDTags
 
-    def _finalize_mapping(self):
-        """ Set the final column mapping information.
-
-        Internal function that gathers all the various sources of column rules and puts them
-        in a list mapping from column number to definition.
-
-        Returns:
-            list: A list of issues that occurred when creating the mapping. Each issue is a dictionary.
-
-        Notes:
-            This needs to be called after all definitions and columns are added.
-
-        """
-        self._final_column_map = {}
-        found_named_tag_columns = {}
-        all_tag_columns = self._tag_columns + self._optional_tag_columns
-        if self._requested_columns:
-            all_tag_columns += self._requested_columns
-        self._finalize_mapping_issues = []
-
-        if self._column_map:
-            for column_number, column_name in self._column_map.items():
-                name_requested = self._column_name_requested(column_name)
-                if name_requested and column_name in self.column_data:
-                    column_entry = self.column_data[column_name]
+    @staticmethod
+    def _get_basic_final_map(column_map, column_data, warn_on_blank_column_name):
+        basic_final_map = {}
+        unhandled_names = {}
+        if column_map:
+            for column_number, column_name in column_map.items():
+                if column_name in column_data:
+                    column_entry = copy.deepcopy(column_data[column_name])
                     column_entry.column_name = column_name
-                    self._final_column_map[column_number] = column_entry
-                    if column_entry.column_type == column_entry.column_type.Ignore and column_name in all_tag_columns:
-                        column_entry.column_type = ColumnType.HEDTags
-                elif name_requested and column_name in all_tag_columns:
-                    found_named_tag_columns[column_name] = column_number
-                elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
+                    basic_final_map[column_number] = column_entry
                     continue
-                elif self._sidecar:
-                    if column_number not in all_tag_columns:
-                        self._finalize_mapping_issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
-                                                                                   extra_column_name=column_name)
-
-        # Add any numbered columns
-        for column_name, column_entry in self.column_data.items():
-            if isinstance(column_name, int) and self._column_name_requested(column_name):
-                # Convert to internal numbering format
-                column_number = column_name
-                self._final_column_map[column_number] = column_entry
-
-        # Add any tag columns
-        for column_number in all_tag_columns:
-            name_requested = self._column_name_requested(column_number)
-            if not name_requested:
-                continue
+                # todo: Improve ignoring the index column and/or remove index support
+                elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE) and \
+                        (warn_on_blank_column_name or column_number == 0):
+                    continue
+                unhandled_names[column_name] = column_number
+        for column_number in column_data:
             if isinstance(column_number, int):
-                if column_number not in self._final_column_map:
-                    self._final_column_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_number)
+                column_entry = copy.deepcopy(column_data[column_number])
+                column_entry.column_name = column_number
+                basic_final_map[column_number] = column_entry
+
+        return basic_final_map, unhandled_names
+
+    @staticmethod
+    def _add_tag_columns(final_map, unhandled_names, column_map, tag_columns, optional_tag_columns, requested_columns,
+                         warn_on_missing_columns):
+        issues = []
+        all_tag_columns = tag_columns + optional_tag_columns
+        required_tag_columns = tag_columns.copy()
+        if requested_columns:
+            all_tag_columns += requested_columns
+            required_tag_columns += requested_columns
+
+        # Add tag columns
+        if column_map:
+            for column_name, column_number in unhandled_names.items():
+                if column_name in all_tag_columns:
+                    if column_number not in final_map:
+                        final_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_name)
                 else:
-                    entry = self._final_column_map[column_number]
-                    if entry.column_type == entry.column_type.Ignore:
-                        entry.column_type = ColumnType.HEDTags
-            elif column_number in found_named_tag_columns:
-                column_name = column_number
-                column_number = found_named_tag_columns[column_name]
-                self._final_column_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_number)
-            elif column_number in self._tag_columns:
-                self._finalize_mapping_issues += ErrorHandler.format_error(ValidationErrors.HED_MISSING_COLUMN,
-                                                                           missing_column_name=column_number)
+                    if warn_on_missing_columns and column_name not in required_tag_columns and column_number not in required_tag_columns:
+                        issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
+                                                            extra_column_name=column_name)
+        for column_name_or_number in all_tag_columns:
+            if isinstance(column_name_or_number, int):
+                if column_name_or_number not in final_map:
+                    final_map[column_name_or_number] = ColumnMetadata(ColumnType.HEDTags,
+                                                                      column_name_or_number)
+            else:
+                if column_name_or_number in required_tag_columns:
+                    issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
+                                                        extra_column_name=column_name_or_number)
+
+        # Switch any tag/requested columns to be HedTags if they were being ignored
+        for column_number, entry in final_map.items():
+            if (column_number in all_tag_columns or entry.column_name in all_tag_columns) \
+                    and entry.column_type == ColumnType.Ignore:
+                entry.column_type = ColumnType.HEDTags
+
+        return issues
+
+    @staticmethod
+    def _filter_by_requested(final_map, requested_columns):
+        if requested_columns is not None:
+            return {key: value for key, value in final_map.items()
+                    if key in requested_columns or value.column_name in requested_columns}
+        return final_map
+
+    def _finalize_mapping(self):
+        # 1. All named and numbered columns are located from sidecars and put in final mapping
+        # 2. Add any tag columns and note issues about missing columns
+        # 3. Add any numbered columns that have required prefixes
+        # 4. Filter to just requested columns, if any
+        final_map, unhandled_names = self._get_basic_final_map(self._column_map, self.column_data,
+                                                               self._warn_on_blank_column_name)
+
+        issues = self._add_tag_columns(final_map, unhandled_names, self._column_map, self._tag_columns,
+                                       self._optional_tag_columns, self._requested_columns,
+                                       self._warn_on_missing_columns)
 
         # Add prefixes
         for column_number, prefix in self._column_prefix_dictionary.items():
-            self._set_column_prefix(column_number, prefix)
+            self._set_column_prefix(final_map, column_number, prefix)
+
+        self._final_column_map = self._filter_by_requested(final_map, self._requested_columns)
 
         self._no_mapping_info = self._requested_columns is None and not self._final_column_map
-        return self._finalize_mapping_issues
+        self._finalize_mapping_issues = issues
 
     def _column_name_requested(self, column_name):
         if self._requested_columns is None:

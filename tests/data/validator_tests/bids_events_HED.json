@@ -1,0 +1,15 @@
+{
+    "onset": {
+        "Description": "Onset of the go signal which is the disappearance of the cue bar",
+        "Units": "s"
+    },
+    "duration": {
+        "Description": "Duration of the event",
+        "Units": "s"
+    },
+    "HED": {
+        "Description": "This is a column to verity the often reserved HED name causes no issues.",
+        "Units": "s"
+    }
+
+}

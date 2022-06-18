@@ -35,7 +35,8 @@ class SpreadsheetInput(BaseInput):
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
 
-        new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+        new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
+                                  warn_on_missing_columns=False, warn_on_blank_column_name=False)
 
         def_mapper = DefMapper(def_dicts)
 

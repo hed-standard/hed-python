@@ -158,6 +158,26 @@ class Test(unittest.TestCase):
         validation_issues = loaded_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 4)
 
+    def test_tabular_input_with_HED_col_in_json(self):
+        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/validator_tests/bids_schema.mediawiki')
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/validator_tests/bids_events_HED.tsv')
+
+        hed_schema = schema.load_schema(schema_path)
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events_HED.json")
+        validator = HedValidator(hed_schema=hed_schema)
+        sidecar = Sidecar(json_path)
+        issues = sidecar.validate_entries(validator)
+        self.assertEqual(len(issues), 0)
+        input_file = TabularInput(events_path, sidecar=sidecar)
+
+        validation_issues = input_file.validate_file_sidecars(validator)
+        self.assertEqual(len(validation_issues), 0)
+        validation_issues = input_file.validate_file(validator)
+        self.assertEqual(len(validation_issues), 1)
+
     def test_error_spans_from_file_and_missing_required_column(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/schema_test_data/HED8.0.0.mediawiki')

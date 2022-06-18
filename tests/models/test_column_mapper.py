@@ -104,12 +104,12 @@ class Test(unittest.TestCase):
 
     def test__set_column_prefix(self):
         mapper = ColumnMapper()
-        mapper._set_column_prefix(self.add_column_number, self.required_prefix)
+        mapper._set_column_prefix(mapper._final_column_map, self.add_column_number, self.required_prefix)
         self.assertTrue(len(mapper._final_column_map) >= 1)
 
         mapper = ColumnMapper()
         with self.assertRaises(TypeError):
-            mapper._set_column_prefix(self.add_column_name, self.required_prefix)
+            mapper._set_column_prefix(mapper._final_column_map, self.add_column_name, self.required_prefix)
 
     def test__finalize_mapping(self):
         mapper = ColumnMapper()
