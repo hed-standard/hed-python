@@ -7,7 +7,7 @@ class HedTag:
 
     Notes:
         - HedTag is a smart class in that it keeps track of its original value and positioning
-        as well as pointers to the relevant HED schema information, if relevant.
+          as well as pointers to the relevant HED schema information, if relevant.
 
     """
 
@@ -280,10 +280,10 @@ class HedTag:
             Required: KnownTag1/KnownTag2
 
             Case 1: KnownTag1/KnownTag2/ColumnValue
-                Will not be changed, has name_prefix already
+                Will not be changed, has name_prefix already.
 
             Case 2: KnownTag2/ColumnValue
-                Will not be changed, has partial name_prefix already
+                Will not be changed, has partial name_prefix already.
 
             Case 3: ColumnValue
                 Prefix will be added.

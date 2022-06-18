@@ -14,7 +14,7 @@ from hed.schema.hed_schema_io import load_schema, load_schema_version
 
 from hed.validator.hed_validator import HedValidator
 
-from hed import errors, models, schema, tools, util, validator
+# from hed import errors, models, schema, tools, util, validator
 
 
 from . import _version
