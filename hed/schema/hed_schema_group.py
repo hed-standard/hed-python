@@ -29,6 +29,9 @@ class HedSchemaGroup:
             HedFileError:  If multiple schemas have the same library prefixes.
 
         """
+        if len(schema_list) == 0:
+            raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty list passed to HedSchemaGroup constructor.",
+                               filename="Combined Schema")
         schema_prefixes = [hed_schema._schema_prefix for hed_schema in schema_list]
         if len(set(schema_prefixes)) != len(schema_prefixes):
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
