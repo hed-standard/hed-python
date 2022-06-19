@@ -12,14 +12,6 @@ hed.util.data\_util module
    :undoc-members:
    :show-inheritance:
 
-hed.util.file\_util module
---------------------------
-
-.. automodule:: hed.util.file_util
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 hed.util.io\_util module
 ------------------------
 

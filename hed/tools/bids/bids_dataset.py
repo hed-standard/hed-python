@@ -1,6 +1,5 @@
 import os
 import json
-from hed.errors import HedFileError
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_io import load_schema, load_schema_version
@@ -82,25 +81,6 @@ class BidsDataset:
             issues += files.validate_sidecars(hed_ops=[validator], check_for_warnings=check_for_warnings)
             issues += files.validate_datafiles(hed_ops=[validator], check_for_warnings=check_for_warnings)
         return issues
-
-    def _schema_from_description(self):
-        """ Return a HedSchema or HedSchemaGroup extracted from the dataset_description.
-
-        Returns:
-            HedSchema, HedSchemaGroup, or None: The schema or schema group extracted.
-
-        """
-        hed = self.dataset_description.get("HEDVersion", None)
-        if isinstance(hed, str):
-            schemas = load_schema_version(xml_version=hed)
-        elif isinstance(hed, list):
-            hed_list = []
-            for schema_version in hed:
-                hed_list.append(load_schema_version(xml_version=schema_version))
-            schemas = HedSchemaGroup(hed_list)
-        else:
-            schemas = None
-        return schemas
 
     def get_summary(self):
         """ Return an abbreviated summary of the dataset. """

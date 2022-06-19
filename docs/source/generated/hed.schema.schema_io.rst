@@ -20,6 +20,14 @@ hed.schema.schema\_io.schema2xml module
    :undoc-members:
    :show-inheritance:
 
+hed.schema.schema\_io.schema\_util module
+-----------------------------------------
+
+.. automodule:: hed.schema.schema_io.schema_util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hed.schema.schema\_io.wiki2schema module
 ----------------------------------------
 
