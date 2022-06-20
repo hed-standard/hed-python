@@ -7,7 +7,7 @@ class HedTag:
 
     Notes:
         - HedTag is a smart class in that it keeps track of its original value and positioning
-        as well as pointers to the relevant HED schema information, if relevant.
+          as well as pointers to the relevant HED schema information, if relevant.
 
     """
 
@@ -33,7 +33,7 @@ class HedTag:
         # if the tag has a name_prefix added, or is an expanded def.
         self._tag = None
 
-        self._library_prefix = self._get_library_prefix(self.org_tag)
+        self._schema_prefix = self._get_schema_prefix(self.org_tag)
 
         # This is the schema this tag was converted to.
         self._schema = None
@@ -46,14 +46,14 @@ class HedTag:
             self.convert_to_canonical_forms(hed_schema)
 
     @property
-    def library_prefix(self):
+    def schema_prefix(self):
         """ Library prefix for this tag if one exists.
 
         Returns:
             prefix (str): The library prefix, including the colon.
 
         """
-        return self._library_prefix
+        return self._schema_prefix
 
     @property
     def short_tag(self):
@@ -67,7 +67,7 @@ class HedTag:
 
         """
         if self._schema_entry:
-            return f"{self._library_prefix}{self._schema_entry.short_tag_name}{self._extension_value}"
+            return f"{self._schema_prefix}{self._schema_entry.short_tag_name}{self._extension_value}"
 
         return str(self)
 
@@ -116,7 +116,7 @@ class HedTag:
         """
         if self._schema_entry:
             if self._schema:
-                tag_entry = self._schema.get_tag_entry(new_tag_val, library_prefix=self.library_prefix)
+                tag_entry = self._schema.get_tag_entry(new_tag_val, schema_prefix=self.schema_prefix)
             else:
                 tag_entry, remainder = HedTagEntry.get_fake_tag_entry(new_tag_val, [new_tag_val.lower()])
 
@@ -222,7 +222,7 @@ class HedTag:
 
         """
         if self._schema_entry:
-            return f"{self._library_prefix}{self._schema_entry.long_tag_name}{self._extension_value}"
+            return f"{self._schema_prefix}{self._schema_entry.long_tag_name}{self._extension_value}"
         return str(self)
 
     @property
@@ -280,10 +280,10 @@ class HedTag:
             Required: KnownTag1/KnownTag2
 
             Case 1: KnownTag1/KnownTag2/ColumnValue
-                Will not be changed, has name_prefix already
+                Will not be changed, has name_prefix already.
 
             Case 2: KnownTag2/ColumnValue
-                Will not be changed, has partial name_prefix already
+                Will not be changed, has partial name_prefix already.
 
             Case 3: ColumnValue
                 Prefix will be added.
@@ -317,7 +317,7 @@ class HedTag:
         if not hed_schema:
             return self._convert_key_tags_to_canonical_form()
 
-        tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.library_prefix)
+        tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.schema_prefix)
         self._schema_entry = tag_entry
         self._schema = hed_schema
         if self._schema_entry:
@@ -555,7 +555,7 @@ class HedTag:
 
         return []
 
-    def _get_library_prefix(self, org_tag):
+    def _get_schema_prefix(self, org_tag):
         """ Finds the library prefix for the tag.
 
         Args:
@@ -629,7 +629,7 @@ class HedTag:
     def __hash__(self):
         if self._schema_entry:
             return hash(
-                self._library_prefix + self._schema_entry.short_tag_name.lower() + self._extension_value.lower())
+                self._schema_prefix + self._schema_entry.short_tag_name.lower() + self._extension_value.lower())
         else:
             return hash(self.lower())
 

@@ -42,6 +42,10 @@ class DefMapper(HedOps):
     def issues(self):
         return self._issues
 
+    @property
+    def gathered_defs(self):
+        return self._gathered_defs
+
     def get_def_entry(self, def_name):
         """ Get the definition entry for the definition name.
 

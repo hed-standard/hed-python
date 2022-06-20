@@ -28,7 +28,7 @@ class BaseInput:
     COMMA_DELIMITER = ','
 
     def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, def_mapper=None,
-                 definition_columns=None, name=None):
+                 definition_columns=None, name=None, allow_blank_names=True):
         """ Constructor for the BaseInput class.
 
         Args:
@@ -41,7 +41,7 @@ class BaseInput:
             mapper (ColumnMapper or None):  Indicates which columns have HED tags.
             definition_columns(list or None): A list of columns to check for definitions.  Explicit 'None' means all.
             name (str or None): Optional field for how this file will report errors.
-
+            allow_blank_names(bool): If True, column names can be blank
         Notes:
             - See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
 
@@ -82,6 +82,12 @@ class BaseInput:
             self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
+
+        column_issues = ColumnMapper.validate_column_map(self.columns,
+                                                         allow_blank_names=allow_blank_names)
+        if column_issues:
+            raise HedFileError(HedExceptions.BAD_COLUMN_NAMES, "Duplicate or blank columns found.  See issues.",
+                               self.name, issues=column_issues)
 
         self.reset_mapper(mapper)
 
@@ -145,6 +151,7 @@ class BaseInput:
         for row_number, row_dict in enumerate(self.iter_dataframe(hed_ops=hed_schema,
                                                                   return_string_only=False,
                                                                   remove_definitions=False,
+                                                                  requested_columns=self._mapper.get_tag_columns(),
                                                                   error_handler=error_handler)):
             column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
             error_list += row_dict[model_constants.ROW_ISSUES]
@@ -243,12 +250,23 @@ class BaseInput:
             Empty if no column names.
 
         Returns:
-            columns(list): The column names.
+            columns(dict): The column number:name pairs
         """
-        columns = []
+        columns = {}
         if self._dataframe is not None and self._has_column_names:
             columns = list(self._dataframe.columns)
         return columns
+
+    @property
+    def def_dict(self):
+        """  Returns a dict of all the definitions found in this and sidecars
+
+        Returns:
+            def_dict(dict): {str: DefinitionEntry} pairs for each found definition
+        """
+        if self._def_mapper:
+            return self._def_mapper.gathered_defs
+        return {}
 
     def __iter__(self):
         """ Iterate over the underlying dataframe. """

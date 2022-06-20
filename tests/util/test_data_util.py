@@ -17,8 +17,7 @@ class Test(unittest.TestCase):
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(curation_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(curation_base_dir,
-                                                "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
+        cls.attention_shift_path = os.path.join(curation_base_dir, "sub-001_task-AuditoryVisualShift_run-01_events.tsv")
         cls.sampling_rate_path = os.path.join(curation_base_dir, "bcit_baseline_driving_samplingRates.tsv")
 
     def test_add_column(self):

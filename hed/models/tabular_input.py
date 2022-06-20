@@ -9,15 +9,13 @@ class TabularInput(BaseInput):
 
     HED_COLUMN_NAME = "HED"
 
-    def __init__(self, file=None, sidecar=None, attribute_columns=None, extra_def_dicts=None,
+    def __init__(self, file=None, sidecar=None, extra_def_dicts=None,
                  also_gather_defs=True, name=None):
         """ Constructor for the TabularInput class.
 
         Args:
             file (str or file like): A tsv file to open.
             sidecar (str or Sidecar): A Sidecar filename or Sidecar
-            attribute_columns (str or int or [str] or [int]): A list of column names or numbers to treat as attributes.
-                Default: ["duration", "onset"]
             extra_def_dicts ([DefinitionDict], DefinitionDict, or None): DefinitionDict objects containing all
                 the definitions this file should use other than the ones coming from the file
                 itself and from the sidecar.  These are added as the last entries, so names will override
@@ -27,12 +25,10 @@ class TabularInput(BaseInput):
             name (str): The name to display for this file for error purposes.
 
         """
-        if attribute_columns is None:
-            attribute_columns = ["duration", "onset"]
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
         new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
-                                  attribute_columns=attribute_columns)
+                                  warn_on_missing_column=True)
 
         definition_columns = [self.HED_COLUMN_NAME]
         self._sidecar = sidecar
@@ -41,7 +37,8 @@ class TabularInput(BaseInput):
         def_mapper = self.create_def_mapper(new_mapper, extra_def_dicts)
 
         super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=True, mapper=new_mapper,
-                         def_mapper=def_mapper, name=name, definition_columns=definition_columns)
+                         def_mapper=def_mapper, name=name, definition_columns=definition_columns,
+                         allow_blank_names=False)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids_old style file with no column headers provided.\n"
@@ -73,17 +70,14 @@ class TabularInput(BaseInput):
 
         return def_mapper
 
-    def reset_column_mapper(self, sidecar=None, attribute_columns=None):
+    def reset_column_mapper(self, sidecar=None):
         """ Change the sidecars and settings.
 
         Args:
             sidecar (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.
-            attribute_columns (str or int or [str] or [int]): Column names or numbers to treat as attributes.
-                    Default: ["duration", "onset"]
 
         """
-        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
-                                  attribute_columns=attribute_columns)
+        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
 
         self._def_mapper = self.create_def_mapper(new_mapper, self._extra_def_dicts)
         self.reset_mapper(new_mapper)

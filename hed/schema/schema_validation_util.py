@@ -4,39 +4,39 @@ from hed.schema import hed_schema_constants as constants
 from hed.errors.exceptions import HedExceptions, HedFileError
 
 
-def _validate_library_name(library_name):
+def validate_library_name(library_name):
     """ Check the validity of the library name.
 
     Args:
         library_name (str): Name of the library.
 
     Returns:
-        bool or str:  If not True, string indicates the issue.
+        bool or str:  If not False, string indicates the issue.
 
     """
     if library_name.isalpha():
-        return True
+        return False
 
     for i, character in enumerate(library_name):
         if not character.isalpha():
             return f"Non alpha character '{character}' at position {i} in '{library_name}'"
 
 
-def _validate_version_string(version_string):
+def validate_version_string(version_string):
     """ Check validity of the version.
 
     Args:
         version_string (str):  A version string.
 
     Returns:
-        bool or str:  If not True, string indicates the issue.
+        bool or str:  If not False, string indicates the issue.
 
     """
     try:
         Version(version_string)
     except ValueError as e:
         return str(e)
-    return True
+    return False
 
 
 def is_hed3_version_number(version_string):
@@ -59,8 +59,8 @@ def is_hed3_version_number(version_string):
 
 
 attribute_validators = {
-        "version": (_validate_version_string, HedExceptions.HED_SCHEMA_VERSION_INVALID),
-        "library": (_validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
+        "version": (validate_version_string, HedExceptions.HED_SCHEMA_VERSION_INVALID),
+        "library": (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
     }
 
 
@@ -81,9 +81,9 @@ def validate_attributes(attrib_dict, filename):
     for attribute_name, attribute_value in attrib_dict.items():
         if attribute_name in attribute_validators:
             validator, error_code = attribute_validators[attribute_name]
-            result = validator(attribute_value)
-            if result is not True:
-                raise HedFileError(error_code, result, filename)
+            had_error = validator(attribute_value)
+            if had_error:
+                raise HedFileError(error_code, had_error, filename)
 
     if constants.VERSION_ATTRIBUTE not in attrib_dict:
         raise HedFileError(HedExceptions.HED_SCHEMA_VERSION_INVALID,

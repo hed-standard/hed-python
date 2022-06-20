@@ -124,6 +124,14 @@ hed.models.sidecar module
    :undoc-members:
    :show-inheritance:
 
+hed.models.sidecar\_base module
+-------------------------------
+
+.. automodule:: hed.models.sidecar_base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hed.models.spreadsheet\_input module
 ------------------------------------
 

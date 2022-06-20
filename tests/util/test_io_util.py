@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
         cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(att_base_dir, "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
+        cls.attention_shift_path = os.path.join(att_base_dir, "sub-001_task-AuditoryVisualShift_run-01_events.tsv")
 
     def test_check_filename(self):
         name1 = "/user/local/task_baloney.gz_events.nii"
@@ -132,19 +132,19 @@ class Test(unittest.TestCase):
         self.assertFalse(file_list3, 'get_file_list should return an empty list when all are excluded')
 
     def test_get_path_components(self):
-        base_path = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s'
-        file_path1 = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s/sub-01/ses-1/eeg/temp_events.tsv'
+        base_path = '../../data/bids/eeg_ds003654s'
+        file_path1 = os.path.realpath(os.path.join(base_path, 'sub-002/eeg/sub-002_FacePerception_run-1_events.tsv'))
         comps1 = get_path_components(file_path1, base_path)
         self.assertEqual(comps1[0], os.path.realpath(base_path),
                          "get_path_components base_path is is the first component")
-        self.assertEqual(len(comps1), 4, "get_path_components has correct number of components")
+        self.assertEqual(len(comps1), 3, "get_path_components has correct number of components")
         comps2 = get_path_components(base_path, base_path)
         self.assertEqual(comps2[0], os.path.realpath(base_path), "get_path_components base_path is its own base_path")
         self.assertEqual(len(comps2), 1, "get_path_components base_path has no additional components")
-        file_path3 = 'D:/Research/HED/hed-examples/datasets/eeg_ds003654s/temp_events.tsv'
+        file_path3 = os.path.join(base_path, 'temp_events.tsv')
         comps3 = get_path_components(file_path3, base_path)
         self.assertEqual(comps3[0], os.path.realpath(base_path), "get_path_components base_path is its own base_path")
-        self.assertEqual(len(comps2), 1, "get_path_components file in base_path has no additional components")
+        self.assertEqual(len(comps3), 1, "get_path_components file in base_path has no additional components")
 
     def test_parse_bids_filename_full(self):
         the_path1 = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'

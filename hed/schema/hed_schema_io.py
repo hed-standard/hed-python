@@ -8,15 +8,17 @@ from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.schema_io import schema_util
+from hed.schema.hed_schema_group import HedSchemaGroup
+from hed.schema.schema_validation_util import validate_version_string
 
 
-def from_string(schema_string, file_type=".xml", library_prefix=None):
+def from_string(schema_string, file_type=".xml", schema_prefix=None):
     """ Create a schema from the given string.
 
     Args:
         schema_string (str):         An XML or mediawiki file as a single long string.
         file_type (str):             The extension(including the .) corresponding to a file source.
-        library_prefix (str, None):  The name_prefix all tags in this schema will accept.
+        schema_prefix (str, None):  The name_prefix all tags in this schema will accept.
 
     Returns:
         (HedSchema):  The loaded schema.
@@ -39,18 +41,18 @@ def from_string(schema_string, file_type=".xml", library_prefix=None):
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
 
-    if library_prefix:
-        hed_schema.set_library_prefix(library_prefix=library_prefix)
+    if schema_prefix:
+        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
     return hed_schema
 
 
-def load_schema(hed_path=None, library_prefix=None):
+def load_schema(hed_path=None, schema_prefix=None):
     """ Load a schema from the given file or URL path.
 
     Args:
         hed_path (str or None): A filepath or url to open a schema from.
-        library_prefix (str or None): The name_prefix all tags in this schema will accept.
+        schema_prefix (str or None): The name_prefix all tags in this schema will accept.
 
     Returns:
         HedSchema: The loaded schema.
@@ -75,8 +77,8 @@ def load_schema(hed_path=None, library_prefix=None):
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
-    if library_prefix:
-        hed_schema.set_library_prefix(library_prefix=library_prefix)
+    if schema_prefix:
+        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
     return hed_schema
 
@@ -96,22 +98,32 @@ def get_hed_xml_version(xml_file_path):
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
-def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
-                        library_prefix=None):
+def _load_schema_version(xml_version=None, xml_folder=None):
     """ Return specified version or latest if not specified.
 
     Args:
         xml_folder (str): Path to a folder containing schema.
-        xml_version (str): HED version format string. Expected format: 'X.Y.Z'.
-        library_name (str or None): Optional library name
-        library_prefix  (str or None): The name_prefix all tags in this schema will accept.
+        xml_version (str or list): HED version format string. Expected format: '[schema_prefix:][library_name_]X.Y.Z'.
 
     Returns:
-        HedSchema: The requested HedSchema object.
+        HedSchema or HedSchemaGroup: The requested HedSchema object.
+
+    Raises:
+        HedFileError: If the xml_version is not valid.
 
     Notes:
         - The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
     """
+    schema_prefix = ""
+    library_name = None
+    if xml_version:
+        if ":" in xml_version:
+            schema_prefix, _, xml_version = xml_version.partition(":")
+        if "_" in xml_version:
+            library_name, _, xml_version = xml_version.rpartition("_")
+        elif validate_version_string(xml_version):
+            library_name = xml_version
+            xml_version = None
     try:
         final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file)
@@ -123,7 +135,34 @@ def load_schema_version(xml_folder=None, xml_version=None, library_name=None,
         else:
             raise e
         
-    if library_prefix:
-        hed_schema.set_library_prefix(library_prefix=library_prefix)
+    if schema_prefix:
+        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
     return hed_schema
+
+
+def load_schema_version(xml_version=None, xml_folder=None):
+    """ Return a HedSchema or HedSchemaGroup extracted from xml_version field.
+
+    Args:
+        xml_version (str or list or None): List or str specifying which official HED schemas to use.
+                                           An empty string returns the latest version
+        xml_folder (str): Path to a folder containing schema.
+
+    Returns:
+        HedSchema or HedSchemaGroup: The schema or schema group extracted.
+
+    Raises:
+        HedFileError: If the xml_version is not valid.
+
+    Notes:
+        - Loads the latest schema value if an empty version is given (string or list).
+    """
+    if xml_version and isinstance(xml_version, list):
+        schemas = [_load_schema_version(xml_version=version, xml_folder=xml_folder) for version in xml_version]
+        if len(schemas) == 1:
+            return schemas[0]
+
+        return HedSchemaGroup(schemas)
+    else:
+        return _load_schema_version(xml_version=xml_version, xml_folder=xml_folder)

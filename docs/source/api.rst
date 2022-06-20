@@ -90,7 +90,6 @@ HED utilities
    :toctree: generated/
 
    hed.util.data_util
-   hed.util.file_util
    hed.util.io_util
 
 .. currentmodule:: hed

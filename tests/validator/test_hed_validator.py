@@ -23,11 +23,11 @@ class Test(unittest.TestCase):
         cls.hed_file_with_errors = SpreadsheetInput(cls.hed_filepath_with_errors)
 
         cls.hed_filepath_major_errors = os.path.join(cls.hed_base_dir, "bids_events_invalid.tsv")
-        cls.hed_file_with_major_errors = SpreadsheetInput(cls.hed_filepath_major_errors, tag_columns=[2])
+        cls.hed_file_with_major_errors = SpreadsheetInput(cls.hed_filepath_major_errors, tag_columns=[1])
 
         cls.hed_filepath_major_errors_multi_column = os.path.join(cls.hed_base_dir, "bids_events_invalid_columns.tsv")
         cls.hed_file_with_major_errors_multi_column = \
-            SpreadsheetInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[2, 3])
+            SpreadsheetInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[1, 2])
 
     def test__validate_input(self):
         test_string_obj = HedString(self.base_hed_input)
@@ -83,7 +83,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events_with_index.tsv')
+                                   '../data/validator_tests/bids_events_no_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events_with_index.tsv')
+                                   '../data/validator_tests/bids_events_no_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -126,7 +126,7 @@ class Test(unittest.TestCase):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/bids_schema.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events_with_index.tsv')
+                                   '../data/validator_tests/bids_events_no_index.tsv')
 
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -158,6 +158,26 @@ class Test(unittest.TestCase):
         validation_issues = loaded_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 4)
 
+    def test_tabular_input_with_HED_col_in_json(self):
+        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/validator_tests/bids_schema.mediawiki')
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/validator_tests/bids_events_HED.tsv')
+
+        hed_schema = schema.load_schema(schema_path)
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events_HED.json")
+        validator = HedValidator(hed_schema=hed_schema)
+        sidecar = Sidecar(json_path)
+        issues = sidecar.validate_entries(validator)
+        self.assertEqual(len(issues), 0)
+        input_file = TabularInput(events_path, sidecar=sidecar)
+
+        validation_issues = input_file.validate_file_sidecars(validator)
+        self.assertEqual(len(validation_issues), 0)
+        validation_issues = input_file.validate_file(validator)
+        self.assertEqual(len(validation_issues), 1)
+
     def test_error_spans_from_file_and_missing_required_column(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/schema_test_data/HED8.0.0.mediawiki')
@@ -166,7 +186,7 @@ class Test(unittest.TestCase):
 
         hed_schema = schema.load_schema(schema_path)
 
-        input_file = SpreadsheetInput(events_path, tag_columns=[1, 2, "error"])
+        input_file = SpreadsheetInput(events_path, tag_columns=[0, 1, "error"])
         validator = HedValidator(hed_schema=hed_schema)
         validation_issues = input_file.validate_file(validator)
         self.assertEqual(validation_issues[1]['char_index'], 6)

@@ -23,6 +23,7 @@ class HedExceptions:
     HED_SCHEMA_NODE_NAME_INVALID = 'HED_SCHEMA_NODE_NAME_INVALID'
 
     SCHEMA_DUPLICATE_PREFIX = 'schemaDuplicatePrefix'
+    BAD_COLUMN_NAMES = 'BAD_COLUMN_NAMES'
 
 
 class HedFileError(Exception):
@@ -31,7 +32,7 @@ class HedFileError(Exception):
         self.error_type = error_type
         self.message = message
         self.filename = filename
-        # only filled in when this lists multiple errors, such as the HED_WIKI_DELIMITERS_INVALID
+        # only filled in when this lists multiple errors, such as the HED_WIKI_DELIMITERS_INVALID or BAD_COLUMN_NAMES
         self.issues = issues
 
     def format_error_message(self, include_tabbing=True, return_string_only=False,
