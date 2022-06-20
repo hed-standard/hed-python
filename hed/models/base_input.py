@@ -254,7 +254,7 @@ class BaseInput:
         """
         columns = {}
         if self._dataframe is not None and self._has_column_names:
-            columns = dict(enumerate(self._dataframe.columns))
+            columns = list(self._dataframe.columns)
         return columns
 
     @property

@@ -74,7 +74,7 @@ class ColumnMapper:
         """ Validate there are no issues with column names.
 
         Args:
-            column_map(dict): {int:name} pairs for the column names
+            column_map(iterable): A list of column names
             allow_blank_names(bool): Only find issues if this is true
 
         Returns:
@@ -85,7 +85,7 @@ class ColumnMapper:
             return []
         issues = []
         used_names = set()
-        for column_number, name in column_map.items():
+        for column_number, name in enumerate(column_map):
             if name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                 issues += ErrorHandler.format_error(ValidationErrors.HED_BLANK_COLUMN, column_number)
                 continue
@@ -458,7 +458,7 @@ class ColumnMapper:
         for column_number, prefix in self._column_prefix_dictionary.items():
             self._set_column_prefix(final_map, column_number, prefix)
 
-        issues += ColumnMapper.validate_column_map(self._column_map, allow_blank_names=False)
+        issues += ColumnMapper.validate_column_map(self._column_map.values(), allow_blank_names=False)
 
         self._final_column_map = self._filter_by_requested(final_map, self._requested_columns)
 
