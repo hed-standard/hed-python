@@ -31,10 +31,7 @@ class BidsTabularFile(BidsFile):
             if self.sidecar.has_hed:
                 self.has_hed = True
         else:
-            x = os.path.realpath(os.path.abspath(self.file_path))
-            print(x)
-            z = TabularInput(file=x)
-            self.contents = TabularInput(file=x)
+            self.contents = TabularInput(file=self.file_path, name=os.path.realpath(self.file_path))
         columns = self.contents.columns
         if 'HED' in columns or 'HED_assembled' in columns:
             self.has_hed = True
@@ -43,9 +40,6 @@ class BidsTabularFile(BidsFile):
 if __name__ == '__main__':
     from hed import HedSchemaGroup, HedValidator, load_schema, load_schema_version, Sidecar, TabularInput
 
-    y = '../../../tests/data/curation/sub-001_task-AuditoryVisualShift_run-01_events.tsv'
-    print(os.path.realpath(os.path.abspath(y)))
-    x = TabularInput(file=y, name=os.path.realpath(y))
     # check_for_warnings = False
     # base_version = '8.1.0'
     # score_url = f"https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
@@ -68,3 +62,7 @@ if __name__ == '__main__':
     # bids_tab1 = TabularInput(tab_path)
     # issues1 = bids_tab1.validate_file(hed_ops=validator, check_for_warnings=False)
     # print(f"Issues 1 {issues1}")
+
+    y = '../../../tests/data/curation/sub-001_task-AuditoryVisualShift_run-01_events.tsv'
+    print(os.path.realpath(os.path.abspath(y)))
+    x = TabularInput(file=y, name=os.path.realpath(y))

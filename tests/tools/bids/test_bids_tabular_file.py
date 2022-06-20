@@ -1,8 +1,7 @@
 import os
 import unittest
-from hed.models.tabular_input import TabularInput
-from hed.tools.bids.bids_tabular_file import BidsTabularFile
-from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
+from hed.models import TabularInput
+from hed.tools import BidsSidecarFile, BidsTabularFile
 
 
 class Test(unittest.TestCase):
@@ -54,7 +53,6 @@ class Test(unittest.TestCase):
     def test_set_contents_with_hed_col(self):
         events = BidsTabularFile(self.event_path_hed_col)
         self.assertFalse(events.has_hed, "The events file does not have HED until contents set.")
-        print(os.path.realpath(self.event_path_hed_col))
         events.set_contents()
         self.assertIsInstance(events.contents, TabularInput, "BidsTabularFile the right contents after setting")
         self.assertTrue(events.has_hed, "The events file has HED after contents are set if HED column no sidecar.")
