@@ -66,7 +66,7 @@ class Test(unittest.TestCase):
 
     def test_file_as_string(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events_with_index.tsv')
+                                   '../data/validator_tests/bids_events_no_index.tsv')
 
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events.json")
@@ -140,7 +140,7 @@ class Test(unittest.TestCase):
 
     def test_loading_and_reset_mapper(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/validator_tests/bids_events_with_index.tsv')
+                                   '../data/validator_tests/bids_events_no_index.tsv')
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
@@ -159,7 +159,7 @@ class Test(unittest.TestCase):
             self.assertTrue(len(column_dict) == 5,
                             f"The column dictionary for row {row_number} should have the right length")
             column_dict2 = row_dict2["column_to_hed_tags"]
-            self.assertTrue(len(column_dict2) == 11,
+            self.assertTrue(len(column_dict2) == 10,
                             f"The reset column dictionary for row {row_number2} should have the right length")
 
     def test_no_column_header_and_convert(self):
@@ -196,6 +196,7 @@ class Test(unittest.TestCase):
         hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
         for column1, column2 in zip(hed_input, hed_input_long):
             self.assertEqual(column1, column2)
+
 
 
 if __name__ == '__main__':

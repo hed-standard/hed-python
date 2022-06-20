@@ -18,8 +18,7 @@ class ColumnMapper:
         - Functions and variables column and row indexing starts at 0.
     """
     def __init__(self, sidecar=None, tag_columns=None, column_prefix_dictionary=None,
-                 optional_tag_columns=None, requested_columns=None, warn_on_blank_column_name=False,
-                 warn_on_missing_columns=False):
+                 optional_tag_columns=None, requested_columns=None, warn_on_missing_column=False):
         """ Constructor for ColumnMapper.
 
         Args:
@@ -30,8 +29,9 @@ class ColumnMapper:
                 prefixes to prepend to the tags in that column before processing.
             optional_tag_columns (list): A list of ints or strings containing the columns that contain
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
-            warn_on_blank_column_name (bool): If True, issue mapping warnings on blank column names
-            warn_on_missing_columns (bool): If True, issue mapping warnings on column names that are missing from
+            requested_columns (list or None): A list of columns you wish to retrieve.
+                If None, retrieve all columns.
+            warn_on_missing_column (bool): If True, issue mapping warnings on column names that are missing from
                                             the sidecar.
 
         Notes:
@@ -50,9 +50,9 @@ class ColumnMapper:
         self._no_mapping_info = True
 
         self._column_map = {}
+        self._reverse_column_map = {}
         self._requested_columns = []
-        self._warn_on_blank_column_name = warn_on_blank_column_name
-        self._warn_on_missing_columns = warn_on_missing_columns
+        self._warn_on_missing_column = warn_on_missing_column
         self._tag_columns = []
         self._optional_tag_columns = []
         self._column_prefix_dictionary = {}
@@ -68,6 +68,34 @@ class ColumnMapper:
 
         # finalize the column map based on initial settings with no header
         self._finalize_mapping()
+
+    @staticmethod
+    def validate_column_map(column_map, allow_blank_names):
+        """ Validate there are no issues with column names.
+
+        Args:
+            column_map(iterable): A list of column names
+            allow_blank_names(bool): Only find issues if this is true
+
+        Returns:
+            issues(list): A list of dicts, one per issue.
+        """
+        # We don't have any checks right now if blank/duplicate is allowed
+        if allow_blank_names:
+            return []
+        issues = []
+        used_names = set()
+        for column_number, name in enumerate(column_map):
+            if name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
+                issues += ErrorHandler.format_error(ValidationErrors.HED_BLANK_COLUMN, column_number)
+                continue
+            if name in used_names:
+                # todo: Add this check once it's more fleshed out
+                # issues += ErrorHandler.format_error(ValidationErrors.HED_DUPLICATE_COLUMN, name)
+                continue
+            used_names.add(name)
+
+        return issues
 
     def _set_sidecar(self, sidecar):
         """ Set the sidecar this column mapper uses
@@ -176,6 +204,7 @@ class ColumnMapper:
         else:
             column_map = {column_number: column_name for column_number, column_name in enumerate(new_column_map)}
         self._column_map = column_map
+        self._reverse_column_map = {column_name: column_number for column_number, column_name in column_map.items()}
         return self._finalize_mapping()
 
     def add_columns(self, column_names_or_numbers, column_type=ColumnType.HEDTags):
@@ -318,7 +347,7 @@ class ColumnMapper:
             column_entry.column_type = ColumnType.HEDTags
 
     @staticmethod
-    def _get_basic_final_map(column_map, column_data, warn_on_blank_column_name):
+    def _get_basic_final_map(column_map, column_data):
         basic_final_map = {}
         unhandled_names = {}
         if column_map:
@@ -328,9 +357,7 @@ class ColumnMapper:
                     column_entry.column_name = column_name
                     basic_final_map[column_number] = column_entry
                     continue
-                # todo: Improve ignoring the index column and/or remove index support
-                elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE) and \
-                        (warn_on_blank_column_name or column_number == 0):
+                elif column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                     continue
                 unhandled_names[column_name] = column_number
         for column_number in column_data:
@@ -342,39 +369,44 @@ class ColumnMapper:
         return basic_final_map, unhandled_names
 
     @staticmethod
-    def _add_tag_columns(final_map, unhandled_names, column_map, tag_columns, optional_tag_columns, requested_columns,
-                         warn_on_missing_columns):
-        issues = []
-        all_tag_columns = tag_columns + optional_tag_columns
-        required_tag_columns = tag_columns.copy()
-        if requested_columns:
-            all_tag_columns += requested_columns
-            required_tag_columns += requested_columns
-
-        # Add tag columns
-        if column_map:
-            for column_name, column_number in unhandled_names.items():
-                if column_name in all_tag_columns:
-                    if column_number not in final_map:
-                        final_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_name)
+    def _convert_to_indexes(name_to_column_map, column_list):
+        converted_indexes = []
+        unknown_names = []
+        for name in column_list:
+            if isinstance(name, str):
+                if name in name_to_column_map:
+                    converted_indexes.append(name_to_column_map[name])
+                    continue
                 else:
-                    if warn_on_missing_columns and column_name not in required_tag_columns and column_number not in required_tag_columns:
-                        issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
-                                                            extra_column_name=column_name)
+                    unknown_names.append(name)
+            else:
+                # Name is in int here
+                converted_indexes.append(name)
+        return converted_indexes, unknown_names
+
+    @staticmethod
+    def _add_tag_columns(final_map, unhandled_names, all_tag_columns, required_tag_columns, warn_on_missing_columns):
+        issues = []
+
+        # Add numbered tag columns
+        for column_name, column_number in unhandled_names.items():
+            if column_number in all_tag_columns:
+                final_map[column_number] = ColumnMetadata(ColumnType.HEDTags, column_name)
+            else:
+                if warn_on_missing_columns and column_number not in required_tag_columns:
+                    issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
+                                                        column_name=column_name)
+
+        # Add numbered tag columns
         for column_name_or_number in all_tag_columns:
             if isinstance(column_name_or_number, int):
                 if column_name_or_number not in final_map:
                     final_map[column_name_or_number] = ColumnMetadata(ColumnType.HEDTags,
                                                                       column_name_or_number)
-            else:
-                if column_name_or_number in required_tag_columns:
-                    issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN,
-                                                        extra_column_name=column_name_or_number)
 
         # Switch any tag/requested columns to be HedTags if they were being ignored
         for column_number, entry in final_map.items():
-            if (column_number in all_tag_columns or entry.column_name in all_tag_columns) \
-                    and entry.column_type == ColumnType.Ignore:
+            if column_number in all_tag_columns and entry.column_type == ColumnType.Ignore:
                 entry.column_type = ColumnType.HEDTags
 
         return issues
@@ -386,26 +418,53 @@ class ColumnMapper:
                     if key in requested_columns or value.column_name in requested_columns}
         return final_map
 
+    @staticmethod
+    def _convert_tag_columns(tag_columns, optional_tag_columns, requested_columns, reverse_column_map):
+        all_tag_columns = tag_columns + optional_tag_columns
+        required_tag_columns = tag_columns.copy()
+        if requested_columns:
+            all_tag_columns += requested_columns
+            required_tag_columns += requested_columns
+
+        all_tag_columns, _ = ColumnMapper._convert_to_indexes(reverse_column_map, all_tag_columns)
+        required_tag_columns, missing_tag_column_names = ColumnMapper._convert_to_indexes(reverse_column_map,
+                                                                                          required_tag_columns)
+
+        issues = []
+        for column_name in missing_tag_column_names:
+            issues += ErrorHandler.format_error(ValidationErrors.HED_MISSING_REQUIRED_COLUMN,
+                                                column_name=column_name)
+
+        return all_tag_columns, required_tag_columns, issues
+
     def _finalize_mapping(self):
         # 1. All named and numbered columns are located from sidecars and put in final mapping
         # 2. Add any tag columns and note issues about missing columns
         # 3. Add any numbered columns that have required prefixes
         # 4. Filter to just requested columns, if any
-        final_map, unhandled_names = self._get_basic_final_map(self._column_map, self.column_data,
-                                                               self._warn_on_blank_column_name)
+        final_map, unhandled_names = self._get_basic_final_map(self._column_map, self.column_data)
 
-        issues = self._add_tag_columns(final_map, unhandled_names, self._column_map, self._tag_columns,
-                                       self._optional_tag_columns, self._requested_columns,
-                                       self._warn_on_missing_columns)
+        # convert all tag lists to indexes -> Issuing warnings at this time potentially for unknown ones
+        all_tag_columns, required_tag_columns, issues = self._convert_tag_columns(self._tag_columns,
+                                                                                  self._optional_tag_columns,
+                                                                                  self._requested_columns,
+                                                                                  self._reverse_column_map)
+
+        # Notes any missing required columns
+        issues += self._add_tag_columns(final_map, unhandled_names, all_tag_columns, required_tag_columns,
+                                        self._warn_on_missing_column)
 
         # Add prefixes
         for column_number, prefix in self._column_prefix_dictionary.items():
             self._set_column_prefix(final_map, column_number, prefix)
 
+        issues += ColumnMapper.validate_column_map(self._column_map.values(), allow_blank_names=False)
+
         self._final_column_map = self._filter_by_requested(final_map, self._requested_columns)
 
         self._no_mapping_info = self._requested_columns is None and not self._final_column_map
         self._finalize_mapping_issues = issues
+        return issues
 
     def _column_name_requested(self, column_name):
         if self._requested_columns is None:

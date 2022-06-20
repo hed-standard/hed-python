@@ -5,8 +5,7 @@ import shutil
 from hed.models import Sidecar, TabularInput
 from hed import schema
 from hed.validator import HedValidator
-
-# TODO: Add tests about correct handling of 'n/a'
+from hed.errors import HedFileError
 
 
 class Test(unittest.TestCase):
@@ -59,6 +58,18 @@ class Test(unittest.TestCase):
         self.assertEqual(len(validation_issues), 0)
         validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 1)
+
+    def test_blank_and_duplicate_columns(self):
+        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/blank_column_name.tsv")
+
+        with self.assertRaises(HedFileError):
+            _ = TabularInput(filepath)
+
+        # todo: add back in when we do this check
+        # filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/duplicate_column_name.tsv")
+        #
+        # with self.assertRaises(HedFileError):
+        #     _ = TabularInput(filepath)
 
 
 if __name__ == '__main__':

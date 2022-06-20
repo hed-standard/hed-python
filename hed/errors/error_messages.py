@@ -110,15 +110,25 @@ def val_error_no_value(tag):
     return f"''{tag}' has an invalid value portion.", {}
 
 
-@hed_error(ValidationErrors.HED_MISSING_COLUMN)
-def val_error_missing_column(missing_column_name):
-    return f"Required column '{missing_column_name}' not specified or found in file.", {}
+@hed_error(ValidationErrors.HED_MISSING_REQUIRED_COLUMN, default_severity=ErrorSeverity.WARNING)
+def val_error_missing_column(column_name):
+    return f"Required column '{column_name}' not specified or found in file.", {}
 
 
 @hed_error(ValidationErrors.HED_UNKNOWN_COLUMN, default_severity=ErrorSeverity.WARNING)
-def val_error_extra_column(extra_column_name):
-    return f"Column named '{extra_column_name}' found in file, but not specified as a tag column " + \
+def val_error_extra_column(column_name):
+    return f"Column named '{column_name}' found in file, but not specified as a tag column " + \
         "or identified in sidecars.", {}
+
+
+@hed_error(ValidationErrors.HED_BLANK_COLUMN, default_severity=ErrorSeverity.WARNING)
+def val_error_hed_blank_column(column_number):
+    return f"Column number {column_number} has no column name", {}
+
+
+@hed_error(ValidationErrors.HED_DUPLICATE_COLUMN, default_severity=ErrorSeverity.WARNING)
+def val_error_hed_duplicate_column(column_name):
+    return f"Multiple columns have name {column_name}.  This is not a fatal error, but discouraged.", {}
 
 
 @hed_tag_error(ValidationErrors.HED_LIBRARY_UNMATCHED)
