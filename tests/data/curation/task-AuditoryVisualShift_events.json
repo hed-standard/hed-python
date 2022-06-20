@@ -1,0 +1,88 @@
+{
+    "focus_modality": {
+        "Levels": {
+            "auditory": "Participant should focus only on auditory stimuli",
+            "visual": "Participant should focus only on visual stimuli."
+        },
+        "HED": {
+            "auditory": "(Selective-attention, Auditory-presentation)",
+            "visual": "(Selective-attention, Visual-presentation)"
+        }
+    },
+    "event_type": {
+        "Levels": {
+            "bad_event": "An event presentation that should not have been made.",
+            "button_press": "Participant presses a button.",
+            "dark_bar": "Presentation of a dark blue square.",
+            "hear_word": "Auditory and visual presentation of a hear cue.",
+            "high_tone": "Presentation of a 550 Hz tone.",
+            "light_bar": "Presentation of a light blue square.",
+            "look_word": "Auditory and visual presentation of a look cue.",
+            "low_tone": "Presentation of a 500 Hz tone.",
+            "pause_recording": "Pause the recording of the experiment."
+        },
+        "HED": {
+            "bad_event": "Sensory-presentation, Mishap",
+            "button_press": "Participant-response, (Experiment-participant, (Press, Mouse-button))",
+            "dark_bar": "Sensory-presentation, Experimental-stimulus, Visual-presentation, (Square, DarkBlue, (Center-of, Computer-screen))",
+            "hear_word": "Sensory-presentation, (Word, Label/Word-hear), Auditory-presentation, Visual-presentation",
+            "high_tone": "Sensory-presentation, Experimental-stimulus, Auditory-presentation, (Tone, Frequency/550 Hz)",
+            "light_bar": "Sensory-presentation, Experimental-stimulus, Visual-presentation, (Square, LightBlue, (Center-of, Computer-screen))",
+            "look_word": "Sensory-presentation, (Word, Label/Word-look), Auditory-presentation, Visual-presentation",
+            "low_tone": "Sensory-presentation, Experimental-stimulus, Auditory-presentation, (Tone, Frequency/500 Hz)",
+            "pause_recording": "Experiment-control, Pause"
+        }
+    },
+    "attention_status": {
+        "Levels": {
+            "attended": "Indicates that the stimulus should be attended to.",
+            "unattended": "Indicates that the stimulus should be ignored."
+        },
+        "HED": {
+            "attended": "Attend-to",
+            "unattended": "Label/Ignore"
+        }
+    },
+    "task_role": {
+        "Levels": {
+            "cue_auditory": "Cue indicating participant should focus on auditory stimuli.",
+            "cue_visual": "Cue indicating participant should focus on visual stimuli.",
+            "frequent_stimulus": "Stimulus that is a non-target.",
+            "infrequent_stimulus": "Stimulus that is designated as the one to be looked for.",
+            "target_detected": "A target in the attended to modality has been detected."
+        },
+        "HED": {
+            "cue_auditory": "(Cue, Instructional, Focused-attention, Auditory-presentation)",
+            "cue_visual": "(Cue, Instructional, Focused-attention, Visual-presentation)",
+            "frequent_stimulus": "Non-target",
+            "infrequent_stimulus": "Target, Oddball",
+            "target_detected": "(Detect, Target)"
+        }
+    },
+    "condition": {
+        "Levels": {
+            "attend_auditory": "Experimental condition in which participant only pays attention to auditory stimuli.",
+            "attend_visual": "Experimental condition in which participant only pays attention to visual stimuli.",
+            "shift_attention": "Experimental condition in which participant shifts attention based on instructions."
+        },
+        "HED": {
+            "attend_auditory": "(Condition-variable/Auditory-focus, (Focused-attention, Auditory-presentation))",
+            "attend_visual": "(Condition-variable/Visual-focus, (Focused-attention, Visual-presentation))",
+            "shift_attention": "(Condition-variable/Shift-focus, (Switch-attention, Auditory-presentation, Visual-presentation))"
+        }
+    },
+    "trial": {
+        "Description": "Number of the trial within the experiment.",
+        "HED": "Experimental-trial/#"
+    },
+    "sub_block": {
+        "Description": "Number of the sub-block within the experiment. A sub-block starts with a cue word and ends when the next sub-block begins.",
+        "HED": "Time-block/#"
+    },
+	"event_code": {
+		"Description": "Original encoding of events."
+	},
+	"cond_code": {
+		"Description": "Original encoding of experimental conditions."
+	}
+}

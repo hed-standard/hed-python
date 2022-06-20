@@ -15,8 +15,6 @@ class Test(unittest.TestCase):
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(curation_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path1 = os.path.join(curation_base_dir,
-                                                 "sub-001_task-AuditoryVisualShiftHed2_run-01_events.tsv")
         cls.attention_shift_path2 = os.path.join(curation_base_dir,
                                                  "sub-001_task-AuditoryVisualShift_run-01_events.tsv")
         cls.attn_map_path = os.path.join(curation_base_dir, "attention_shift_remap_event_template_filled.tsv")

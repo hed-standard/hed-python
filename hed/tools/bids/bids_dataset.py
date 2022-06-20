@@ -123,8 +123,8 @@ if __name__ == '__main__':
     else:
         issue_str = "No issues"
     print(issue_str)
-    check_for_warnings = False
-    path = 'D:/tempbids/bids-examples/xeeg_hed_score/'
+    warnings = False
+    path = '/XXX/bids-examples/xeeg_hed_score/'
     bids = BidsDataset(path)
     # summary1 = bids.get_summary()
     # print(json.dumps(summary1, indent=4))
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     schema_score = load_schema(score_url, schema_prefix="sc")
     bids.schema = HedSchemaGroup([schema_base, schema_score])
 
-    issue_list2 = bids.validate(check_for_warnings=check_for_warnings)
+    issue_list2 = bids.validate(check_for_warnings=warnings)
     if issue_list2:
         issue_str2 = get_printable_issue_string(issue_list2, "HED validation errors: ", skip_filename=False)
     else:

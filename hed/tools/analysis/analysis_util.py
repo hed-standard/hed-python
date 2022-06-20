@@ -49,8 +49,7 @@ def get_assembled_strings(table, hed_schema=None, expand_defs=False):
     """
     hed_list = list(table.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,
                                          expand_defs=expand_defs, remove_definitions=True))
-    definitions = table._def_mapper._gathered_defs
-    definitions = DefinitionDict.get_as_strings(table._def_mapper._gathered_defs)
+    definitions = DefinitionDict.get_as_strings(table._def_mapper.gathered_defs)
     return hed_list, definitions
 
 
@@ -109,4 +108,3 @@ if __name__ == '__main__':
     #
     # print(f"{len(df3)} events match")
     df1, defs = assemble_hed(input_data, columns_included=None, expand_defs=False)
-    print("to here")

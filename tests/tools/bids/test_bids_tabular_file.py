@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.models import TabularInput
+from hed.models.tabular_input import TabularInput
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
@@ -9,13 +9,14 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        event_path = '../../data/bids/eeg_ds003654s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'
+
+        event_path = '../../data/curation/sub-001_task-AuditoryVisualShift_run-01_events.tsv'
         cls.event_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), event_path)
 
         hed_col_path = '../../data/curation/sub-002_task-FacePerception_run-1_events.tsv'
         cls.event_path_hed_col = os.path.join(os.path.dirname(os.path.realpath(__file__)), hed_col_path)
 
-        sidecar_path = '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json'
+        sidecar_path = '../../data/curation/task-AuditoryVisualShift_events.json'
         cls.sidecar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), sidecar_path)
 
     def test_constructor(self):
@@ -26,8 +27,6 @@ class Test(unittest.TestCase):
         events_str = str(events)
         self.assertTrue(events_str, "BidsTabularFile should have a string representation.")
         self.assertFalse(events.sidecar, "BidsTabularFile does not have a sidecar unless set.")
-
-        # self.assertIsInstance()
 
     def test_set_contents_no_sidecar(self):
         events = BidsTabularFile(self.event_path)
@@ -55,6 +54,7 @@ class Test(unittest.TestCase):
     def test_set_contents_with_hed_col(self):
         events = BidsTabularFile(self.event_path_hed_col)
         self.assertFalse(events.has_hed, "The events file does not have HED until contents set.")
+        print(os.path.realpath(self.event_path_hed_col))
         events.set_contents()
         self.assertIsInstance(events.contents, TabularInput, "BidsTabularFile the right contents after setting")
         self.assertTrue(events.has_hed, "The events file has HED after contents are set if HED column no sidecar.")
