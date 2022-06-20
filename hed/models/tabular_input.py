@@ -28,7 +28,7 @@ class TabularInput(BaseInput):
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
         new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
-                                  warn_on_blank_column_name=True, warn_on_missing_columns=True)
+                                  warn_on_missing_column=True)
 
         definition_columns = [self.HED_COLUMN_NAME]
         self._sidecar = sidecar
@@ -37,7 +37,8 @@ class TabularInput(BaseInput):
         def_mapper = self.create_def_mapper(new_mapper, extra_def_dicts)
 
         super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=True, mapper=new_mapper,
-                         def_mapper=def_mapper, name=name, definition_columns=definition_columns)
+                         def_mapper=def_mapper, name=name, definition_columns=definition_columns,
+                         allow_blank_names=False)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids_old style file with no column headers provided.\n"

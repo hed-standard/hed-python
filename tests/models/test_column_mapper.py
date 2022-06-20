@@ -11,7 +11,6 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.event_mapper = ColumnMapper()
         cls.integer_key_dictionary = {0: 'one', 1: 'two', 2: 'three'}
         cls.zero_based_tag_columns = [0, 1, 2]
         cls.zero_based_row_column_count = 3
@@ -62,12 +61,23 @@ class Test(unittest.TestCase):
         self.assertTrue(len(mapper._final_column_map) == 1)
 
         mapper = ColumnMapper()
+        mapper.set_requested_columns(requested_columns=["HED"])
+        mapper.set_column_map({1: "HED"})
+        self.assertTrue(len(mapper._final_column_map) == 1)
+        self.assertTrue(len(mapper._finalize_mapping_issues) == 0)
+
+        mapper = ColumnMapper()
         mapper.set_tag_columns(optional_tag_columns=["HED"])
         mapper.set_column_map({1: "HED"})
         self.assertTrue(len(mapper._final_column_map) == 1)
 
         mapper = ColumnMapper()
         mapper.set_tag_columns(tag_columns=["HED"])
+        self.assertTrue(len(mapper._final_column_map) == 0)
+        self.assertTrue(len(mapper._finalize_mapping_issues) == 1)
+
+        mapper = ColumnMapper()
+        mapper.set_requested_columns(requested_columns=["HED"])
         self.assertTrue(len(mapper._final_column_map) == 0)
         self.assertTrue(len(mapper._finalize_mapping_issues) == 1)
 

@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
         cls.json_def_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_with_defs.json")
         cls.json_def_sidecar = Sidecar(cls.json_def_filename)
 
-        events_path = os.path.join(cls.base_data_dir, '../data/validator_tests/bids_events_with_index.tsv')
+        events_path = os.path.join(cls.base_data_dir, '../data/validator_tests/bids_events_no_index.tsv')
         cls.tabular_file = TabularInput(events_path, sidecar=cls.json_def_sidecar)
 
         base_output = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
