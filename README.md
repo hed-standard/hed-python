@@ -14,9 +14,14 @@ you can use the HED Online Validator currently available at
 your files without downloading any tools.
 
 ### Installation
-Use `pip` to install `hedtool` from the 
-[GitHub](https://github.com/hed-standard/hed-python) repository,
-since the `hedtools` in this repository are not yet available on PyPI:
+Use `pip` to install `hedtools` from PyPI:
+
+   ```
+       pip install hedtools
+   ```
+
+To install directly from the 
+[GitHub](https://github.com/hed-standard/hed-python) repository:
 
    ```
        pip install git+https://github.com/hed-standard/hed-python/@master
