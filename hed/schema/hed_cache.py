@@ -1,4 +1,4 @@
-""" Infrastructure for caching HED schema. """
+"""Infrastructure for caching HED schema from remote repositories."""
 
 import os
 import urllib.request
@@ -11,8 +11,7 @@ from semantic_version import Version
 import portalocker
 import time
 from hed.schema.schema_io.schema_util import url_to_file
-
-"""Infrastructure for caching HED schema from remote repositories."""
+from pathlib import Path
 
 # From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 HED_VERSION_P1 = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"
@@ -33,7 +32,7 @@ DEFAULT_URL_LIST = (DEFAULT_HED_LIST_VERSIONS_URL, LIBRARY_HED_URL, )
 
 DEFAULT_SKIP_FOLDERS = ('deprecated', )
 
-HED_CACHE_DIRECTORY = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../validator/hed_cache/')
+HED_CACHE_DIRECTORY = os.path.join(Path.home(), '.hedtools/hed_cache/')
 TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300 * 6
 
