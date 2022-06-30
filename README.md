@@ -14,9 +14,14 @@ you can use the HED Online Validator currently available at
 your files without downloading any tools.
 
 ### Installation
-Use `pip` to install `hedtool` from the 
-[GitHub](https://github.com/hed-standard/hed-python) repository,
-since the `hedtools` in this repository are not yet available on PyPI:
+Use `pip` to install `hedtools` from PyPI:
+
+   ```
+       pip install hedtools
+   ```
+
+To install directly from the 
+[GitHub](https://github.com/hed-standard/hed-python) repository:
 
    ```
        pip install git+https://github.com/hed-standard/hed-python/@master
@@ -58,13 +63,6 @@ for suggestions or bug reports.
 The [Github pull request](https://github.com/hed-standard/hed-python/pulls)
 may also be used for contributions.
 Usually these updates should be made to the `develop` branch, not the `master`.
-
-### Support for earlier versions of HED (HED-2G)
-
-**Note:** As of January 1, 2022, the `hed-python` repository will no longer support HED-2G. 
-The existing support continues to be available in the `hed2-python` repository.
-An on online version of the HED-2G tools are available at 
-[https://hedtools.ucsd.edu/hed2](https://hedtools.ucsd.edu/hed2)
 
 
 ### Other links of interest
