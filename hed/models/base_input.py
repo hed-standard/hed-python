@@ -49,6 +49,8 @@ class BaseInput:
         if mapper is None:
             mapper = ColumnMapper()
         self._mapper = mapper
+        if def_mapper is None:
+            def_mapper = DefMapper(mapper.get_def_dicts())
         self._def_mapper = def_mapper
         self._has_column_names = has_column_names
         self._name = name
@@ -134,6 +136,12 @@ class BaseInput:
     def worksheet_name(self):
         """ The worksheet name. """
         return self._worksheet_name
+
+    def get_definitions(self, as_strings=True):
+        if as_strings:
+            return DefinitionDict.get_as_strings(self._def_mapper.gathered_defs)
+        else:
+            return self._def_mapper.gathered_defs
 
     def _convert_to_form(self, hed_schema, tag_form, error_handler):
         """ Convert all tags to the specified form.
