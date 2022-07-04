@@ -159,7 +159,7 @@ class Test(unittest.TestCase):
             self.assertTrue(len(column_dict) == 5,
                             f"The column dictionary for row {row_number} should have the right length")
             column_dict2 = row_dict2["column_to_hed_tags"]
-            self.assertTrue(len(column_dict2) == 10,
+            self.assertTrue(len(column_dict2) == 0,
                             f"The reset column dictionary for row {row_number2} should have the right length")
 
     def test_no_column_header_and_convert(self):

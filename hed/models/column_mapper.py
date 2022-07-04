@@ -86,7 +86,7 @@ class ColumnMapper:
         issues = []
         used_names = set()
         for column_number, name in enumerate(column_map):
-            if name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
+            if name is None or name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                 issues += ErrorHandler.format_error(ValidationErrors.HED_BLANK_COLUMN, column_number)
                 continue
             if name in used_names:
@@ -352,6 +352,8 @@ class ColumnMapper:
         unhandled_names = {}
         if column_map:
             for column_number, column_name in column_map.items():
+                if column_name is None:
+                    continue
                 if column_name in column_data:
                     column_entry = copy.deepcopy(column_data[column_name])
                     column_entry.column_name = column_name
@@ -462,9 +464,14 @@ class ColumnMapper:
 
         self._final_column_map = self._filter_by_requested(final_map, self._requested_columns)
 
-        self._no_mapping_info = self._requested_columns is None and not self._final_column_map
+        self._no_mapping_info = not self._check_if_mapping_info()
         self._finalize_mapping_issues = issues
         return issues
+
+    def _check_if_mapping_info(self):
+        # If any of these have any data, don't do default behavior.
+        return bool(self.column_data or self._final_column_map or self._requested_columns is not None or self._tag_columns \
+            or self._optional_tag_columns or self._column_prefix_dictionary)
 
     def _column_name_requested(self, column_name):
         if self._requested_columns is None:
