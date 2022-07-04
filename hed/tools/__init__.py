@@ -1,6 +1,6 @@
 """ HED tools for analysis and summarization. """
 
-
+from .analysis.condition_manager import ConditionVariable, ConditionManager
 from .analysis.file_dictionary import FileDictionary
 from .analysis.key_map import KeyMap
 from .analysis.onset_manager import OnsetGroup, OnsetManager

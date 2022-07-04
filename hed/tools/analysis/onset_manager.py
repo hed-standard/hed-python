@@ -1,7 +1,5 @@
 from hed.errors import HedFileError
-from hed.models import Sidecar, TabularInput
 from hed.schema import load_schema_version
-from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 class OnsetGroup:
@@ -32,8 +30,9 @@ class OnsetManager:
         self.hed_schema = hed_schema
         self.hed_strings = hed_strings
         self.onset_list = []
-        self.event_contexts = []
+        self.event_contexts = [None]*len(hed_strings)
         self._create_onset_list()
+        self._set_event_contexts()
 
     def _create_onset_list(self):
         """ Create a list of events of extended duration.
@@ -63,6 +62,15 @@ class OnsetManager:
         for key, value in onset_dict.items():
             value.end_index = len(self.hed_strings)
             self.onset_list.append(value)
+
+    def _set_event_contexts(self):
+        contexts = [0]*len(self.hed_strings)
+        for i in range(len(self.hed_strings)):
+            contexts[i] = []
+        for onset in self.onset_list:
+            for i in range(onset.start_index+1, onset.end_index):
+                contexts[i].append(onset.contents)
+        self.event_contexts = contexts
 
     def _update_onset_list(self, group, onset_dict, event_index, is_offset=False):
         """ Process one onset or offset group to create onset_list.
