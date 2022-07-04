@@ -11,8 +11,8 @@ from hed.errors import HedFileError
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_output_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
-        os.makedirs(cls.base_output_folder, exist_ok=True)
+        base_output_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
+        os.makedirs(base_output_folder, exist_ok=True)
 
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                        '../data/bids/eeg_ds003654s_hed'))
@@ -25,6 +25,7 @@ class Test(unittest.TestCase):
         cls.hed_schema = schema.load_schema(schema_path)
         sidecar1 = Sidecar(json_path, name='face_sub1_json')
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        cls.base_output_folder = base_output_folder
 
     @classmethod
     def tearDownClass(cls):
@@ -42,12 +43,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(defs2), 17, "get_definitions should have the right number of definitions when not strings")
         for key, value in defs2.items():
             self.assertIsInstance(key, str, "get_definitions dictionary keys should be strings")
-            self.assertIsInstance(value, DefinitionEntry, "get_definitions dictionary values should be strings when as strings")
+            self.assertIsInstance(value, DefinitionEntry,
+                                  "get_definitions dictionary values should be strings when as strings")
         self.assertIsInstance(defs2, dict, "get_definitions returns DefinitionDict when not as strings")
-
-        x = 3
-
-        print("to here")
 
     def test_missing_column_name_issue(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -64,7 +62,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 0)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_file_sidecars(validator)
+        validation_issues = input_file.validate_sidecar(validator)
         self.assertEqual(len(validation_issues), 0)
         validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 1)
@@ -85,7 +83,7 @@ class Test(unittest.TestCase):
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         # Fix whatever is wrong with onset tag here.  It's thinking Description/Onset continues is an invalid tag???'
-        validation_issues = input_file.validate_file_sidecars(validator)
+        validation_issues = input_file.validate_sidecar(validator)
         self.assertEqual(len(validation_issues), 0)
         validation_issues = input_file.validate_file(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 1)

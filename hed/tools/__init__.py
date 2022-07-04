@@ -3,6 +3,7 @@
 
 from .analysis.file_dictionary import FileDictionary
 from .analysis.key_map import KeyMap
+from .analysis.onset_manager import OnsetGroup, OnsetManager
 from .analysis.tag_summary import TagSummary
 from .analysis.annotation_util import \
     check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict

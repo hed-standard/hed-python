@@ -24,6 +24,7 @@ class Test(unittest.TestCase):
         sidecar1 = Sidecar(json_path, name='face_sub1_json')
         cls.sidecar = sidecar1
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        cls.input_data_no_sidecar = TabularInput(events_path, name="face_sub1_events_no_sidecar")
 
     def test_get_assembled_strings_no_schema(self):
         hed_list1 = get_assembled_strings(self.input_data, expand_defs=False)
@@ -98,6 +99,10 @@ class Test(unittest.TestCase):
         columns3 = list(df3.columns)
         self.assertEqual(len(columns3), 4,
                          "assemble_hed should return the correct number of columns when bad columns are included ")
+
+    def test_get_assembled_strings_no_hed(self):
+        hed_list1 = get_assembled_strings(self.input_data_no_sidecar, expand_defs=False)
+        print("to here")
 
     def test_search_tabular(self):
         query1 = "sensory-event"

@@ -84,7 +84,7 @@ class Test(unittest.TestCase):
     #     self.assertEqual(len(issues), 0)
     #     input_file = TabularInput(events_path, sidecars=sidecar)
     #
-    #     validation_issues = input_file.validate_file_sidecars(validator)
+    #     validation_issues = input_file.validate_sidecar(validator)
     #     self.assertEqual(len(validation_issues), 0)
     #     validation_issues = input_file.validate_file(validator, check_for_warnings=True)
     #     self.assertEqual(len(validation_issues), 1)
@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
     #     self.assertEqual(len(issues), 0)
     #     input_file = TabularInput(events_path, sidecars=sidecar)
     #
-    #     validation_issues = input_file.validate_file_sidecars(validator)
+    #     validation_issues = input_file.validate_sidecar(validator)
     #     self.assertEqual(len(validation_issues), 0)
     #     validation_issues = input_file.validate_file(validator, check_for_warnings=True)
     #     self.assertEqual(len(validation_issues), 1)

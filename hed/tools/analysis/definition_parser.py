@@ -3,35 +3,26 @@ from hed.schema import load_schema_version
 import pandas as pd
 
 
-class Query:
-    def __init__(self, query):
-        self.name = query['name']
-        self.query_type = query['query_type']
-        self.query_str = query['query_str']
-        self.expression = TagExpressionParser(self.query_str)
+class ConditionVariable:
 
-    def evaluate(self, hed_string_obj):
-        return self.expression.search_hed_string(hed_string_obj)
+    def __init__(self, name, has_levels=False):
+        self.name = name
+        self.has_levels = has_levels
+        self.def_level_dict = {}
+        self.label_dict
+
+class DefinitionParser:
+
+    def __init__(self, definitions):
+        self.definitions = definitions
 
 
-class QueryParser:
-
-    def __init__(self, query_list):
-        self.query_list = query_list
-
-    def get_column_names(self):
-        columns = ['cond']*len(self.query_list)
-        for index, query in enumerate(self.query_list):
-            columns[index] = query.name
-        return columns
-
-    def parse(self, hed_string_obj):
-        matches = [0] * len(self.query_list)
-        for index, query in enumerate(self.query_list):
-            if query.evaluate(hed_string_obj):
-                matches[index] = 1
-        return matches
-
+    def find_condition_variables(self):
+        conditions = {}
+        for def_name, definition in self.definitions.items():
+            for tag in sub_group.tags():
+                if tag.short_base_tag.lower() in search_tags:
+                    found_tags.append((tag, sub_group))
 
 
 # def get_design(hed_list, definitions, hed_schema, query_parser):

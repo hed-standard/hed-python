@@ -76,11 +76,11 @@ class TabularInput(BaseInput):
         self._def_mapper = self.create_def_mapper(new_mapper)
         self.reset_mapper(new_mapper)
 
-    def validate_file_sidecars(self, hed_ops=None, error_handler=None, **kwargs):
+    def validate_sidecar(self, hed_ops=None, error_handler=None, **kwargs):
         """ Validate column definitions and hed strings.
 
         Args:
-            hed_ops (list): A list of HedOps of funcs to apply to the hed strings in the sidecars.
+            hed_ops (list or HedOps): A list of HedOps of funcs to apply to the hed strings in the sidecars.
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
             kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
