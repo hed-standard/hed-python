@@ -17,9 +17,9 @@ class Test(unittest.TestCase):
                              HedString('White, Black', hed_schema=schema),
                              HedString('', hed_schema=schema),
                              HedString('(Def/Cond2, Onset)', hed_schema=schema),
-                             HedString('(Def/Cond3, Onset)', hed_schema=schema),
+                             HedString('(Def/Cond3/1.3, Onset)', hed_schema=schema),
                              HedString('Arm, Leg', hed_schema=schema)]
-        cls.test_strings2 = [HedString('(Def/Cond3, Offset)', hed_schema=schema)]
+        cls.test_strings2 = [HedString('(Def/Cond3/2, Offset)', hed_schema=schema)]
 
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids/eeg_ds003654s_hed'))

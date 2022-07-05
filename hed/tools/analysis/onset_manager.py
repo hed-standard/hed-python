@@ -30,7 +30,7 @@ class OnsetManager:
         self.hed_schema = hed_schema
         self.hed_strings = hed_strings
         self.onset_list = []
-        self.event_contexts = [None]*len(hed_strings)
+        self.event_contexts = []
         self._create_onset_list()
         self._set_event_contexts()
 
@@ -64,6 +64,13 @@ class OnsetManager:
             self.onset_list.append(value)
 
     def _set_event_contexts(self):
+        """ Creates an event context for each hed string.
+
+        Notes:
+            The event context would be placed in a event context group, but is kept in a separate array without the
+            event context group or tag.
+
+        """
         contexts = [0]*len(self.hed_strings)
         for i in range(len(self.hed_strings)):
             contexts[i] = []

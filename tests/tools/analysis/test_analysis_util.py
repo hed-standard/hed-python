@@ -102,7 +102,11 @@ class Test(unittest.TestCase):
 
     def test_get_assembled_strings_no_hed(self):
         hed_list1 = get_assembled_strings(self.input_data_no_sidecar, expand_defs=False)
-        print("to here")
+        self.assertEqual(len(hed_list1),200,
+                         "get_assembled_strings should have right number of entries when no sidecar")
+        self.assertIsInstance(hed_list1[0], HedString,
+                              "get_assembled_string should return an HedString when no sidecar")
+        self.assertFalse(hed_list1[0].children, "get_assembled_string returned HedString is empty when no sidecar")
 
     def test_search_tabular(self):
         query1 = "sensory-event"
