@@ -9,8 +9,8 @@ class TabularInput(BaseInput):
 
     HED_COLUMN_NAME = "HED"
 
-    def __init__(self, file=None, sidecar=None, extra_def_dicts=None,
-                 also_gather_defs=True, name=None):
+    def __init__(self, file=None, sidecar=None, extra_def_dicts=None, also_gather_defs=True, name=None,
+                 hed_schema=None):
         """ Constructor for the TabularInput class.
 
         Args:
@@ -23,7 +23,7 @@ class TabularInput(BaseInput):
             also_gather_defs (bool): If False, do NOT extract any definitions from column groups,
                 assume they are already in the def_dict list.
             name (str): The name to display for this file for error purposes.
-
+            hed_schema(HedSchema or None): The schema to use by default in identifying tags
         """
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
@@ -38,7 +38,7 @@ class TabularInput(BaseInput):
 
         super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=True, mapper=new_mapper,
                          def_mapper=def_mapper, name=name, definition_columns=definition_columns,
-                         allow_blank_names=False)
+                         allow_blank_names=False, hed_schema=hed_schema)
 
         if not self._has_column_names:
             raise ValueError("You are attempting to open a bids_old style file with no column headers provided.\n"

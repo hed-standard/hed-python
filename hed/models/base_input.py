@@ -28,20 +28,22 @@ class BaseInput:
     COMMA_DELIMITER = ','
 
     def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, def_mapper=None,
-                 definition_columns=None, name=None, allow_blank_names=True):
+                 definition_columns=None, name=None, allow_blank_names=True, hed_schema=None):
         """ Constructor for the BaseInput class.
 
         Args:
-            file (str or file-like): An xlsx/tsv file to open.
+            file (str or file-like or pandas dataframe): An xlsx/tsv file to open.
             file_type (str or None): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
-                Derived from file if file is a filename.
+                Derived from file if file is a filename.  Ignored if pandas dataframe.
             worksheet_name (str or None): Name of Excel workbook worksheet name to use.
                 (Not applicable to tsv files.)
             has_column_names (bool): True if file has column names.
+                This value is ignored if you pass in a pandas dataframe.
             mapper (ColumnMapper or None):  Indicates which columns have HED tags.
             definition_columns(list or None): A list of columns to check for definitions.  Explicit 'None' means all.
             name (str or None): Optional field for how this file will report errors.
             allow_blank_names(bool): If True, column names can be blank
+            hed_schema(HedSchema or None): The schema to use by default in identifying tags
         Notes:
             - See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
 
@@ -56,13 +58,11 @@ class BaseInput:
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
         self._def_columns = definition_columns
+        self._schema = hed_schema
         self.file_def_dict = None
         pandas_header = 0
         if not self._has_column_names:
             pandas_header = None
-
-        if not file:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
 
         input_type = file_type
         if isinstance(file, str):
@@ -73,7 +73,12 @@ class BaseInput:
 
         self._dataframe = None
 
-        if input_type in self.TEXT_EXTENSION:
+        if isinstance(file, pandas.DataFrame):
+            self._dataframe = file
+            self._has_column_names = self._dataframe_has_names(self._dataframe)
+        elif not file:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
+        elif input_type in self.TEXT_EXTENSION:
             self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
                                               dtype=str, keep_default_na=False, na_values=None)
         elif input_type in self.EXCEL_EXTENSION:
@@ -139,7 +144,8 @@ class BaseInput:
         """ Convert all tags to the specified form.
 
         Args:
-            hed_schema (HedSchema): The schema to use to convert tags.
+            hed_schema (HedSchema or None): The schema to use to convert tags.
+                If None, uses the one used to open the file.
             tag_form (str): The form to convert the tags to (short_tag, long_tag, base_tag, etc).
             error_handler (ErrorHandler or None): The error handler to use for context or default if none.
 
@@ -148,6 +154,10 @@ class BaseInput:
 
         """
         error_list = []
+        if hed_schema is None:
+            hed_schema = self._schema
+        if hed_schema is None:
+            raise ValueError("Cannot convert between tag forms without a schema.")
         for row_number, row_dict in enumerate(self.iter_dataframe(hed_ops=hed_schema,
                                                                   return_string_only=False,
                                                                   remove_definitions=False,
@@ -162,11 +172,12 @@ class BaseInput:
 
         return error_list
 
-    def convert_to_short(self, hed_schema, error_handler=None):
+    def convert_to_short(self, hed_schema=None, error_handler=None):
         """ Convert all tags to short form.
 
         Args:
-            hed_schema (HedSchema): The schema to use to convert tags.
+            hed_schema (HedSchema or None): The schema to use to convert tags.
+                If None, uses the one used to open the file.
             error_handler (ErrorHandler): The error handler to use for context, uses a default if none.
 
         Returns:
@@ -175,11 +186,12 @@ class BaseInput:
         """
         return self._convert_to_form(hed_schema, "short_tag", error_handler)
 
-    def convert_to_long(self, hed_schema, error_handler=None):
+    def convert_to_long(self, hed_schema=None, error_handler=None):
         """ Convert all tags to long form.
 
         Args:
-            hed_schema (HedSchema): The schema to use to convert tags.
+            hed_schema (HedSchema or None): The schema to use to convert tags.
+                If None, uses the one used to open the file.
             error_handler (ErrorHandler): The error handler to use for context, uses a default if none.
 
         Returns:
@@ -288,7 +300,7 @@ class BaseInput:
             error_handler (ErrorHandler or None):   The error handler to use for context or a default if None.
             expand_defs (bool):  If True, expand def tags into def-expand groups.
             remove_definitions (bool): If true, remove all definition tags found.
-            kwargs ():  See models.hed_ops.translate_ops or the specific hed_ops for additional options.
+            kwargs (kwargs):  See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
         Yields:
             dict:  A dict with parsed row, including keys: "HED", "column_to_hed_tags", and possibly "column_issues".
@@ -537,7 +549,7 @@ class BaseInput:
         if error_handler is None:
             error_handler = ErrorHandler()
         new_def_dict = DefinitionDict()
-        hed_ops = [new_def_dict]
+        hed_ops = [self._schema, new_def_dict]
         for _ in self.iter_dataframe(hed_ops=hed_ops,
                                      return_string_only=False,
                                      requested_columns=self._def_columns,
@@ -568,11 +580,12 @@ class BaseInput:
             hed_ops = hed_ops.copy()
             if not run_string_ops_on_columns:
                 self._add_def_onset_mapper(hed_ops)
-                tag_funcs, string_funcs = translate_ops(hed_ops, split_ops=True, expand_defs=expand_defs,
+                tag_funcs, string_funcs = translate_ops(hed_ops, split_ops=True, hed_schema=self._schema,
+                                                        expand_defs=expand_defs,
                                                         remove_definitions=remove_definitions,
                                                         **kwargs)
             else:
-                tag_funcs = translate_ops(hed_ops, expand_defs=expand_defs, **kwargs)
+                tag_funcs = translate_ops(hed_ops, hed_schema=self._schema, expand_defs=expand_defs, **kwargs)
 
         return tag_funcs, string_funcs
 
@@ -582,3 +595,10 @@ class BaseInput:
                 hed_ops.append(self._def_mapper)
                 hed_ops.append(OnsetMapper(self._def_mapper))
         return hed_ops
+
+    @staticmethod
+    def _dataframe_has_names(dataframe):
+        for column in dataframe.columns:
+            if isinstance(column, str):
+                return True
+        return False

@@ -18,13 +18,14 @@ default_arguments = {
 }
 
 
-def translate_ops(hed_ops, split_ops=False, **kwargs):
+def translate_ops(hed_ops, split_ops=False, hed_schema=None, **kwargs):
     """ Return functions to apply to a hed string object.
 
     Args:
         hed_ops (list): A list of func or HedOps or HedSchema to apply to hed strings.
         split_ops (bool): If true, will split the operations into separate lists of tag and string operations.
-        kwargs (dict):  An optional dictionary of name-value pairs representing parameters passed to each HedOps
+        hed_schema(HedSchema or None): The schema to use by default in identifying tags
+        kwargs (kwargs):  An optional dictionary of name-value pairs representing parameters passed to each HedOps
 
     Returns:
         list or tuple: A list of functions to apply or a tuple containing separate lists of tag and string ops.
@@ -68,7 +69,7 @@ def translate_ops(hed_ops, split_ops=False, **kwargs):
 
     # Make sure the first column operation is a convert to forms, if we don't have one.
     if not _func_in_list(HedString.convert_to_canonical_forms, tag_funcs):
-        tag_funcs.insert(0, partial(HedString.convert_to_canonical_forms, hed_schema=None))
+        tag_funcs.insert(0, partial(HedString.convert_to_canonical_forms, hed_schema=hed_schema))
 
     if split_ops:
         return tag_funcs, string_funcs
@@ -81,7 +82,7 @@ def apply_ops(hed_strings, hed_ops, **kwargs):
     Args:
         hed_strings(str, dict, list): A list/dict/str to update
         hed_ops (list or HedOps or func): A list of func or HedOps or HedSchema to apply to hed strings.
-        kwargs (dict):  An optional dictionary of name-value pairs representing parameters passed to each HedOps
+        kwargs (kwargs):  An optional dictionary of name-value pairs representing parameters passed to each HedOps
 
     Returns:
         tuple:
