@@ -228,7 +228,9 @@ class Test(unittest.TestCase):
         self.assertFalse(tag._schema_entry)
 
     def test_loading_dataframe_directly(self):
-        ds = pd.read_csv("../data/model_tests/no_column_header_definition.tsv", delimiter="\t", header=None)
+        ds_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               '../data/model_tests/no_column_header_definition.tsv')
+        ds = pd.read_csv(ds_path, delimiter="\t", header=None)
         hed_input = SpreadsheetInput(ds, has_column_names=False, tag_columns=[1, 2])
 
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
