@@ -30,7 +30,7 @@ class OnsetManager:
         self.hed_schema = hed_schema
         self.hed_strings = hed_strings
         self.onset_list = []
-        self.event_contexts = []
+        self.contexts = []
         self._create_onset_list()
         self._set_event_contexts()
 
@@ -77,7 +77,7 @@ class OnsetManager:
         for onset in self.onset_list:
             for i in range(onset.start_index+1, onset.end_index):
                 contexts[i].append(onset.contents)
-        self.event_contexts = contexts
+        self.contexts = contexts
 
     def _update_onset_list(self, group, onset_dict, event_index, is_offset=False):
         """ Process one onset or offset group to create onset_list.
@@ -108,4 +108,15 @@ class OnsetManager:
 
 
 if __name__ == '__main__':
+    from hed import HedString
     schema = load_schema_version(xml_version="8.1.0")
+    test_strings1 = [HedString('Sensory-event,(Def/Cond1,(Red, Blue),Onset),(Def/Cond2,Onset),Green,Yellow',
+                               hed_schema=schema),
+                     HedString('(Def/Cond1, Offset)', hed_schema=schema),
+                     HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),
+                     HedString('', hed_schema=schema),
+                     HedString('(Def/Cond2, Onset)', hed_schema=schema),
+                     HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
+                     HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
+    manager = OnsetManager(test_strings1, schema)
+    print("to here")

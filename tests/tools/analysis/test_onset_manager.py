@@ -3,7 +3,7 @@ import unittest
 from hed import HedString, load_schema_version, Sidecar, TabularInput
 from hed.models import HedGroup
 from hed.errors import HedFileError
-from hed.tools import OnsetGroup, OnsetManager, get_assembled_strings
+from hed.tools import OnsetManager, get_assembled_strings
 
 
 class Test(unittest.TestCase):
@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")
         cls.test_strings1 = [HedString('Sensory-event,(Def/Cond1,(Red, Blue),Onset),(Def/Cond2,Onset),Green,Yellow',
-                                      hed_schema=schema),
+                                       hed_schema=schema),
                              HedString('(Def/Cond1, Offset)', hed_schema=schema),
                              HedString('White, Black', hed_schema=schema),
                              HedString('', hed_schema=schema),
@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(manager1.onset_list), 4, "The constructor should have right length onset list")
         self.assertIsInstance(manager1.hed_strings[1], HedString, "Constructor hed string should be a hedstring")
         self.assertFalse(manager1.hed_strings[1].children, "When no tags list HedString is empty")
-        context = manager1.event_contexts
+        context = manager1.contexts
         self.assertIsInstance(context, list, "The constructor event contexts should be a list")
         self.assertIsInstance(context[1][0], HedGroup, "The constructor event contexts has a correct element")
 

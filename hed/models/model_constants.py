@@ -19,3 +19,5 @@ class DefTagNames:
 
     ONSET_KEY = ONSET_ORG_KEY.lower()
     OFFSET_KEY = OFFSET_ORG_KEY.lower()
+
+    DEF_KEYS = (DEF_KEY, DEF_EXPAND_KEY)
