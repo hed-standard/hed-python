@@ -3,7 +3,7 @@ import unittest
 from hed import HedString, load_schema_version, Sidecar, TabularInput
 from hed.errors import HedFileError
 from hed.models import DefinitionEntry
-from hed.tools import VariableManager, get_assembled_strings
+from hed.tools import VariableManager, VariableSummary, get_assembled_strings
 
 
 class Test(unittest.TestCase):
@@ -55,11 +55,10 @@ class Test(unittest.TestCase):
 
     def test_constructor(self):
         var_manager = VariableManager(self.test_strings1, self.schema, self.defs)
-        self.assertIsInstance(var_manager, VariableManager, "Constructor should create a VariableManager from strings")
-        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
-                         "Variable managers have context same length as hed_strings")
-        self.assertEqual(len(var_manager._variable_map), 8,
-                         "Constructor ConditionVariables should have the right length")
+        var1_summary = var_manager.get_variable('var1')
+        self.assertIsInstance(var1_summary, VariableSummary)
+        self.assertEqual(var1_summary.number_elements, len(var_manager.hed_strings),
+                         "The constructor should have the same number of elements as there are hed strings")
 
     def test_constructor_from_tabular_input(self):
         hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
@@ -67,8 +66,10 @@ class Test(unittest.TestCase):
         var_manager = VariableManager(hed_strings, self.schema, definitions)
         self.assertIsInstance(var_manager, VariableManager,
                               "Constructor should create a VariableManager from a tabular input")
-        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
-                         "Variable managers have context same length as hed_strings")
+        var_sum = var_manager.get_variable('face-type')
+        self.assertIsInstance(var_sum, VariableSummary)
+        self.assertEqual(var_sum.number_elements, len(var_manager.hed_strings),
+                         "The constructor should have the same number of elements as there are hed strings")
 
     def test_constructor_multiple_values(self):
         var_manager = VariableManager(self.test_strings2, self.schema, self.defs)
@@ -77,6 +78,10 @@ class Test(unittest.TestCase):
                          "Constructor should have right number of variables if multiple")
         self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
                          "Variable managers have context same length as hed_strings")
+        var_sum = var_manager.get_variable('var2')
+        self.assertIsInstance(var_sum, VariableSummary)
+        self.assertEqual(var_sum.number_elements, len(var_manager.hed_strings),
+                         "The constructor should have the same number of elements as there are hed strings")
 
     def test_constructor_unmatched(self):
         with self.assertRaises(HedFileError):

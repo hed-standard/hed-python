@@ -20,6 +20,12 @@ class Test(unittest.TestCase):
                              HedString('(Def/Cond3/1.3, Onset)', hed_schema=schema),
                              HedString('Arm, Leg', hed_schema=schema)]
         cls.test_strings2 = [HedString('(Def/Cond3/2, Offset)', hed_schema=schema)]
+        cls.test_strings3 = [HedString(f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
+                                       hed_schema=schema),
+                             HedString("Yellow", hed_schema=schema),
+                             HedString("Def/Cond2, (Def/Cond6/4, Onset)", hed_schema=schema),
+                             HedString("Def/Cond2, Def/Cond6/5.2 (Def/Cond6/7.8, Offset)", hed_schema=schema),
+                             HedString("Def/Cond2, Def/Cond6/4", hed_schema=schema)]
 
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids/eeg_ds003654s_hed'))
@@ -52,6 +58,10 @@ class Test(unittest.TestCase):
     def test_constructor_unmatched(self):
         with self.assertRaises(HedFileError):
             OnsetManager(self.test_strings2, self.schema)
+
+    def test_constructor_multiple_values(self):
+        manager = OnsetManager(self.test_strings3, self.schema)
+        print("to here")
 
 
 if __name__ == '__main__':
