@@ -27,7 +27,6 @@ HED models
    hed.models.Sidecar
    hed.models.SpreadsheetInput
    hed.models.TabularInput
-   hed.models.hed_ops
 
 .. currentmodule:: hed
 
@@ -55,29 +54,33 @@ HED schema handling
 
 .. currentmodule:: hed
 
+.. _calibration_ref2:
+
 HED tools
 ---------
 
 .. autosummary:: hed.tools
    :toctree: generated/
 
-   hed.tools.BidsDataset
-   hed.tools.BidsDatasetSummary
-   hed.tools.BidsFile
-   hed.tools.BidsFileDictionary
-   hed.tools.BidsFileGroup
-   hed.tools.BidsSidecarFile
-   hed.tools.BidsTabularDictionary
-   hed.tools.BidsTabularFile
-   hed.tools.BidsTabularSummary
-
-   hed.tools.FileDictionary
-   hed.tools.KeyMap
-   hed.tools.TagSummary
+   hed.tools.bids.bids_dataset.BidsDataset
+   hed.tools.bids.bids_dataset_summary.BidsDatasetSummary
+   hed.tools.bids.bids_file.BidsFile
+   hed.tools.bids.bids_file_dictionary.BidsFileDictionary
+   hed.tools.bids.bids_file_group.BidsFileGroup
+   hed.tools.bids.bids_sidecar_file.BidsSidecarFile
+   hed.tools.bids.bids_tabular_dictionary.BidsTabularDictionary
+   hed.tools.bids.bids_tabular_file.BidsTabularFile
+   hed.tools.bids.bids_tabular_summary.BidsTabularSummary
+   hed.tools.analysis.definition_manager.DefinitionManager
+   hed.tools.analysis.file_dictionary.FileDictionary
+   hed.tools.analysis.key_map.KeyMap
+   hed.tools.analysis.onset_manager.OnsetManager
+   hed.tools.analysis.tag_summary.TagSummary
+   hed.tools.analysis.variable_manager.VariableManager
+   hed.tools.analysis.variable_summary.VariableSummary
    hed.tools.analysis.analysis_util
    hed.tools.analysis.annotation_util
    hed.tools.analysis.summary_util
-
    hed.tools.HedLogger
 
 .. currentmodule:: hed
