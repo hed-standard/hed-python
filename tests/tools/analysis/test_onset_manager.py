@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
 
     def test_constructor_multiple_values(self):
         manager = OnsetManager(self.test_strings3, self.schema)
-        print("to here")
+        self.assertEqual(len(manager.onset_list), 3, "Constructor should have right number of onsets")
 
 
 if __name__ == '__main__':

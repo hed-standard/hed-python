@@ -1,5 +1,6 @@
 import os
 import unittest
+import pandas as pd
 from hed import HedString, load_schema_version, Sidecar, TabularInput
 from hed.errors import HedFileError
 from hed.models import DefinitionEntry
@@ -86,6 +87,62 @@ class Test(unittest.TestCase):
     def test_constructor_unmatched(self):
         with self.assertRaises(HedFileError):
             VariableManager(self.test_strings3, self.schema, self.defs)
+
+    def test_variable_summary(self):
+        var_manager = VariableManager(self.test_strings2, self.schema, self.defs)
+        self.assertIsInstance(var_manager, VariableManager, "Constructor should create a VariableManager from strings")
+        self.assertEqual(len(var_manager._variable_map), 3,
+                         "Constructor should have right number of variables if multiple")
+        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
+                         "Variable managers have context same length as hed_strings")
+        for variable in var_manager.variables:
+            var_sum = var_manager.get_variable(variable)
+            self.assertEqual(var_sum.number_elements, len(var_manager.hed_strings))
+            summary = var_sum.get_summary()
+            self.assertIsInstance(summary, dict, "get_summary returns a dictionary summary")
+
+    def test_get_variable_factors(self):
+        var_manager = VariableManager(self.test_strings2, self.schema, self.defs)
+        self.assertIsInstance(var_manager, VariableManager,
+                              "Constructor should create a VariableManager from strings")
+        self.assertEqual(len(var_manager._variable_map), 3,
+                         "Constructor should have right number of variables if multiple")
+        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
+                         "Variable managers have context same length as hed_strings")
+        for variable in var_manager.variables:
+            var_sum = var_manager.get_variable(variable)
+            self.assertEqual(var_sum.number_elements, len(var_manager.hed_strings))
+            summary = var_sum.get_summary()
+            factors = var_sum.get_variable_factors()
+            self.assertIsInstance(factors, pd.DataFrame, "get_variable_factors contains dataframe.")
+            self.assertEqual(len(factors), var_sum.number_elements,
+                             "get_variable_factors has factors of same length as number of elements")
+            self.assertEqual(len(factors.columns), summary["levels"] + 1,
+                             'get_variable_factors has factors levels + 1 (direct references)')
+
+    def test_count_events(self):
+        list1 = [0, 2, 6, 1, 2, 0, 0]
+        number_events, number_multiple, max_multiple = VariableSummary.count_events(list1)
+        self.assertEqual(number_events, 4, "count_events should have right number of events")
+        self.assertEqual(number_multiple, 3, "count_events should have right number of multiple events")
+        self.assertEqual(max_multiple, 6, "count_events should have right maximum multiples")
+
+    def test_get_summary(self):
+        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False)
+        var_manager = VariableManager(hed_strings, self.schema, definitions)
+        var_key = var_manager.get_variable('key-assignment')
+        sum_key = var_key.get_summary()
+        self.assertEqual(sum_key['number events'], 200, "get_summary has right number of events")
+        self.assertEqual(sum_key['multiple maximum'], 1, "Get_summary has right multiple maximum")
+        self.assertIsInstance(sum_key['level counts'], dict, "get_summary level counts is a dictionary")
+        self.assertEqual(sum_key['level counts']['right-sym-cond'], 200, "get_summary level counts value correct.")
+        var_face = var_manager.get_variable('face-type')
+        sum_key = var_face.get_summary()
+        self.assertEqual(sum_key['number events'], 52, "get_summary has right number of events")
+        self.assertEqual(sum_key['multiple maximum'], 1, "Get_summary has right multiple maximum")
+        self.assertIsInstance(sum_key['level counts'], dict, "get_summary level counts is a dictionary")
+        self.assertEqual(sum_key['level counts']['unfamiliar-face-cond'], 20, "get_summary level counts value correct.")
 
 
 if __name__ == '__main__':

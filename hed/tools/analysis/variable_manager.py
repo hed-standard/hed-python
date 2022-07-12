@@ -1,66 +1,9 @@
 import json
-import pandas as pd
 from hed.schema import load_schema_version
 from hed.models import HedString, HedTag, HedGroup, DefinitionEntry
 from hed.tools.analysis.onset_manager import OnsetManager
+from hed.tools.analysis.variable_summary import VariableSummary
 from hed.tools.analysis.definition_manager import DefinitionManager
-
-
-class VariableSummary:
-    """ Holds index of positions for variables, defined and otherwise. """
-
-    def __init__(self, name, number_elements, variable_type="condition-variable"):
-        """ Constructor for VariableSummary.
-
-        Args:
-            name (str): Name of the variable summarized by this class.
-            number_elements (int): Number of elements in the data column
-            variable_type (str):  Lowercase string corresponding to a HED tag which has a takes value child.
-
-        """
-
-        self.name = name
-        self.number_elements = number_elements
-        self.variable_type = variable_type.lower()
-        self.levels = {}
-        self.direct_indices = {}
-
-    def __str__(self):
-        return f"{self.name}[{self.variable_type}]: {self.number_elements} elements "
-        f"{str(self.levels)} levels {len(self.direct_indices)} references"
-
-    def get_unique_level_values(self, level):
-        unique_values = []
-        level_dict = self.levels.get(level, None)
-        if None:
-            return None
-        dict = {}
-        for key, value_dict in level_dict.items():
-            value_keys = value_dict.values()
-
-    def get_variable_factors(self):
-        df = pd.DataFrame(0, index=range(self.number_elements), columns=[self.name])
-        df.loc[self.direct_indices, [self.name]] = 1
-        if not self.levels:
-            return df
-
-        levels = list(self.levels.keys())
-        levels_list = [f"{self.name}.{level}" for level in levels]
-        df_levels = pd.DataFrame(0, index=range(self.number_elements), columns=[levels_list])
-        for index, level in enumerate(levels):
-            index_keys = list(self.levels[level].keys())
-            df_levels.loc[index_keys, [levels_list[index]]] = 1
-        print(f"{str(levels_list)}")
-        x = pd.concat([df, df_levels], axis=1)
-        return x
-
-    def get_summary(self):
-        summary = {'name': self.name, 'variable_type': self.variable_type, 'levels': self.levels.copy(),
-                   'direct_references': len(self.direct_indices)}
-        for level, item in summary['levels'].items():
-            summary['levels'][level] = len(item.values())
-
-        return summary
 
 
 class VariableManager:
@@ -92,6 +35,10 @@ class VariableManager:
         """ Return the VariableSummary associated with var_name or None. """
         return self._variable_map.get(var_name, None)
 
+    @property
+    def variables(self):
+        return list(self._variable_map.keys())
+
     def summarize_variables(self, as_json=False):
         summary = self._variable_map.copy()
         for var_name, var_sum in summary.items():
@@ -102,7 +49,8 @@ class VariableManager:
             return summary
 
     def __str__(self):
-        return f"{len(self.hed_strings)} strings: {str(list(self._variable_map.keys()))} {self.variable_type} variables "
+        return f"{len(self.hed_strings)} strings: {str(list(self._variable_map.keys()))}" + \
+               f"{self.variable_type} variables"
 
     def _extract_definition_variables(self, item, index):
         """ Extract the variables from a HedTag, HedGroup, or HedString.
@@ -137,28 +85,22 @@ class VariableManager:
             This modifies the VariableSummary map.
 
         """
-        level_name, level_value = DefinitionManager.split_name(tag.extension_or_value_portion, lowercase=True)
+        level = tag.extension_or_value_portion.lower()
         for var_name in hed_vars:
             hed_var = self._variable_map.get(var_name, None)
             if hed_var is None:
                 hed_var = VariableSummary(var_name, len(self.hed_strings))
                 self._variable_map[var_name] = hed_var
-
-            var_levels = hed_var.levels.get(level_name, {})
-            index_values = var_levels.get(index, {})
-            index_values[level_value] = ''
-            var_levels[index] = index_values
-            hed_var.levels[level_name] = var_levels
-            print(f"{hed_var}: level_name {level_name} level_value {level_value}")
+            var_levels = hed_var.levels.get(level, {index: 0})
+            var_levels[index] = 0
+            hed_var.levels[level] = var_levels
 
     def _extract_variables(self):
         """ Extract all condition variables from hed_strings and event_contexts. """
         for index, hed in enumerate(self.hed_strings):
-            print(f"{index}: {str(hed)}")
             self._extract_direct_variables(hed, index)
             self._extract_definition_variables(hed, index)
             for item in self._contexts[index]:
-                print(f"Contexts: {index}: {str(item)}")
                 self._extract_direct_variables(item, index)
                 self._extract_definition_variables(item, index)
 
@@ -170,10 +112,10 @@ class VariableManager:
             index (int):  Position in the array.
 
         """
-        if isinstance(item, HedTag) and item.short_base_tag.lower() == 'condition-variable':
+        if isinstance(item, HedTag) and item.short_base_tag.lower() == self.variable_type:
             tag_list = [item]
         elif isinstance(item, HedGroup) and item.children:
-            tag_list = item.find_tags_with_term("condition-variable", recursive=True, include_groups=0)
+            tag_list = item.find_tags_with_term(self.variable_type, recursive=True, include_groups=0)
         else:
             tag_list = []
         self._update_variables(tag_list, index)
@@ -198,9 +140,6 @@ class VariableManager:
 
 
 if __name__ == '__main__':
-    import os
-    from hed.tools.analysis.analysis_util import get_assembled_strings
-    from hed import Sidecar, TabularInput
     schema = load_schema_version(xml_version="8.1.0")
     test_strings1 = [HedString(f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
                                f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4", hed_schema=schema),
@@ -215,7 +154,8 @@ if __name__ == '__main__':
                      HedString("Yellow", hed_schema=schema),
                      HedString("Def/Cond2", hed_schema=schema),
                      HedString("Def/Cond2, Def/Cond6/5.2", hed_schema=schema)]
-    test_strings3 = [HedString(f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha", hed_schema=schema),
+    test_strings3 = [HedString(f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
+                               hed_schema=schema),
                      HedString("Yellow", hed_schema=schema),
                      HedString("Def/Cond2, (Def/Cond6/4, Onset)", hed_schema=schema),
                      HedString("Def/Cond2, Def/Cond6/5.2 (Def/Cond6/7.8, Offset)", hed_schema=schema),
@@ -249,7 +189,6 @@ if __name__ == '__main__':
     # definitions = input_data.get_definitions(as_strings=False)
     # var_manager = VariableManager(hed_strings, schema, definitions)
     print(conditions)
-    print("to Here")
     test_var = conditions.get_variable('var2')
     s = test_var.get_summary()
     print("s")
@@ -257,14 +196,6 @@ if __name__ == '__main__':
     print(f"{test_sum}")
     test_lumber = conditions.get_variable('lumber')
     test_sum_lumber = test_lumber.get_summary()
-    print(f"{test_sum_lumber}")
-
-    # print("to here")
-    #     # sum = conditions.summarize_variables()
-    #     # print(f'{str(sum)}')
-    #     #
-    #     # sum_json = conditions.summarize_variables(as_json=True)
-    #     # print(f"{sum_json}")
 
     lumber_factor = test_lumber.get_variable_factors()
     print(f"lumber_factor: {lumber_factor.to_string()}")
@@ -272,5 +203,3 @@ if __name__ == '__main__':
     test_fast = conditions.get_variable('fast')
     fast_factor = test_fast.get_variable_factors()
     print(f"fast_factor: {fast_factor.to_string()}")
-
-

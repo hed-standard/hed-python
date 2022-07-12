@@ -6,7 +6,7 @@ from hed.tools.analysis.onset_manager import OnsetManager
 class DefinitionManager:
 
     def __init__(self, definitions, hed_schema, variable_type='condition-variable'):
-        """ Create a definition manager for a list of definitions.
+        """ Create a definition manager for a type of variable.
 
         Args:
             definitions (dict): A dictionary of DefinitionEntry objects.

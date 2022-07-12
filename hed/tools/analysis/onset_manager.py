@@ -119,4 +119,3 @@ if __name__ == '__main__':
                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
     manager = OnsetManager(test_strings1, schema)
-    print("to here")

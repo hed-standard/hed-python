@@ -82,6 +82,17 @@ class Test(unittest.TestCase):
         with self.assertRaises(HedFileError):
             VariableManager(self.test_strings3, self.schema, self.defs)
 
+    def test_summarize_variables(self):
+        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False)
+        var_manager = VariableManager(hed_strings, self.schema, definitions)
+        summary = var_manager.summarize_variables()
+        self.assertIsInstance(summary, dict, "summarize_variables produces a dictionary if not json")
+        self.assertEqual(len(summary), 3, "Summarize_variables has right number of condition variables")
+        self.assertIn("key-assignment", summary, "summarize_variables has a correct key")
+        summary_json = var_manager.summarize_variables(as_json=True)
+        self.assertIsInstance(summary_json, str, "summarize_variables as json returns a string")
+
 
 if __name__ == '__main__':
     unittest.main()
