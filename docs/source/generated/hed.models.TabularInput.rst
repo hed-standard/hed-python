@@ -27,7 +27,7 @@
       ~TabularInput.to_excel
       ~TabularInput.update_definition_mapper
       ~TabularInput.validate_file
-      ~TabularInput.validate_file_sidecars
+      ~TabularInput.validate_sidecar
    
    
 

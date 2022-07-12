@@ -9,8 +9,7 @@ class TabularInput(BaseInput):
 
     HED_COLUMN_NAME = "HED"
 
-    def __init__(self, file=None, sidecar=None, extra_def_dicts=None,
-                 also_gather_defs=True, name=None):
+    def __init__(self, file=None, sidecar=None, extra_def_dicts=None, name=None):
         """ Constructor for the TabularInput class.
 
         Args:
@@ -20,8 +19,6 @@ class TabularInput(BaseInput):
                 the definitions this file should use other than the ones coming from the file
                 itself and from the sidecar.  These are added as the last entries, so names will override
                 earlier ones.
-            also_gather_defs (bool): If False, do NOT extract any definitions from column groups,
-                assume they are already in the def_dict list.
             name (str): The name to display for this file for error purposes.
 
         """
@@ -32,9 +29,10 @@ class TabularInput(BaseInput):
 
         definition_columns = [self.HED_COLUMN_NAME]
         self._sidecar = sidecar
-        self._also_gather_defs = also_gather_defs
+        if extra_def_dicts and not isinstance(extra_def_dicts, list):
+            extra_def_dicts = [extra_def_dicts]
         self._extra_def_dicts = extra_def_dicts
-        def_mapper = self.create_def_mapper(new_mapper, extra_def_dicts)
+        def_mapper = self.create_def_mapper(new_mapper)
 
         super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=True, mapper=new_mapper,
                          def_mapper=def_mapper, name=name, definition_columns=definition_columns,
@@ -44,12 +42,12 @@ class TabularInput(BaseInput):
             raise ValueError("You are attempting to open a bids_old style file with no column headers provided.\n"
                              "This is probably not intended.")
 
-    def create_def_mapper(self, column_mapper, extra_def_dicts=None):
+    def create_def_mapper(self, column_mapper):
         """ Create the definition mapper for this file.
 
         Args:
             column_mapper (ColumnMapper): The column mapper to gather definitions from.
-            extra_def_dicts (DefinitionDict or [DefinitionDict]): Additional definitions to add to mapper.
+
 
         Returns:
             def mapper (DefMapper): A class to validate or expand definitions with the given def dicts.
@@ -58,14 +56,10 @@ class TabularInput(BaseInput):
             - The extra_def_dicts are definitions not included in the column mapper.
 
         """
-        def_dicts = []
-        if self._also_gather_defs:
-            def_dicts = column_mapper.get_def_dicts()
 
-        if extra_def_dicts and not isinstance(extra_def_dicts, list):
-            extra_def_dicts = [extra_def_dicts]
-        if extra_def_dicts:
-            def_dicts += extra_def_dicts
+        def_dicts = column_mapper.get_def_dicts()
+        if self._extra_def_dicts:
+            def_dicts += self._extra_def_dicts
         def_mapper = DefMapper(def_dicts)
 
         return def_mapper
@@ -79,14 +73,14 @@ class TabularInput(BaseInput):
         """
         new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
 
-        self._def_mapper = self.create_def_mapper(new_mapper, self._extra_def_dicts)
+        self._def_mapper = self.create_def_mapper(new_mapper)
         self.reset_mapper(new_mapper)
 
-    def validate_file_sidecars(self, hed_ops=None, error_handler=None, **kwargs):
+    def validate_sidecar(self, hed_ops=None, error_handler=None, **kwargs):
         """ Validate column definitions and hed strings.
 
         Args:
-            hed_ops (list): A list of HedOps of funcs to apply to the hed strings in the sidecars.
+            hed_ops (list or HedOps): A list of HedOps of funcs to apply to the hed strings in the sidecars.
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
             kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 

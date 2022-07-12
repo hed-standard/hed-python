@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 0)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_file_sidecars(validator)
+        validation_issues = input_file.validate_sidecar(validator)
         self.assertEqual(len(validation_issues), 0)
         validation_issues = input_file.validate_file(validator)
         self.assertEqual(len(validation_issues), 0)
@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 0)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_file_sidecars(validator)
+        validation_issues = input_file.validate_sidecar(validator)
         self.assertEqual(len(validation_issues), 0)
         validation_issues = input_file.validate_file(validator)
         self.assertEqual(len(validation_issues), 0)
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 4)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_file_sidecars(validator, check_for_warnings=True)
+        validation_issues = input_file.validate_sidecar(validator, check_for_warnings=True)
         self.assertEqual(len(validation_issues), 4)
 
         validation_issues = input_file.validate_file(validator, check_for_warnings=True)
@@ -135,7 +135,7 @@ class Test(unittest.TestCase):
         input_file = TabularInput(events_path, sidecar=sidecar)
         validator = HedValidator(hed_schema=hed_schema)
 
-        validation_issues1 = input_file.validate_file_sidecars(validator)
+        validation_issues1 = input_file.validate_sidecar(validator)
         self.assertEqual(len(validation_issues1), 4)
 
         validation_issues = input_file.validate_file(validator)
@@ -173,7 +173,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 0)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_file_sidecars(validator)
+        validation_issues = input_file.validate_sidecar(validator)
         self.assertEqual(len(validation_issues), 0)
         validation_issues = input_file.validate_file(validator)
         self.assertEqual(len(validation_issues), 1)

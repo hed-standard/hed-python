@@ -123,5 +123,4 @@ if __name__ == '__main__':
     event_group = bids.get_tabular_group(obj_type="events")
     summary = TagSummary(event_group, schema=bids.schema, breakout_list=breakouts)
     designs, others, errors = summary.get_design_matrices()
-
     print("to here")
