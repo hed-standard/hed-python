@@ -361,28 +361,11 @@ class HedGroupBase:
             recursive (bool): If true, recursively check subgroups.
             include_groups: 0, 1 or 2
                 If 0: Return only tags
-                If 1: return only groups
-                If 2 or any other value: return both
-
-            recursive (bool): If true, also check subgroups.
-            include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
+                If 1: Return only groups
+                If 2 or any other value: Return both
 
         Returns:
             list:
-
-        def_tag: HedTag
-            The located def tag
-        def_expand_group: HedGroup or None
-            If this is a def-expand rather than def tag, this will be the entire def-expand group.
-        group: HedGroup
-            The group the def tag or def expand group is in.
-
-        Notes:
-            - The include_groups option controls the tag expansion as follows:
-                - If 0: Return only def and def expand tags/.
-                - If 1: Return only def tags and def-expand groups.
-                - If 2: Return only groups containing defs, or def-expand groups.
-                - If 3 or any other value: Return all 3 as a tuple.
 
         """
 

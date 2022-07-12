@@ -21,14 +21,8 @@ class Test(unittest.TestCase):
     def test_constructor_invalid(self):
         file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
-        try:
+        with self.assertRaises(HedFileError):
             dict1 = FileDictionary("My name", file_list, key_indices=(0, 1))
-        except HedFileError:
-            pass
-        except Exception:
-            self.fail("FileDictionary threw the wrong exception when duplicate key")
-        else:
-            self.fail("FileDictionary should have thrown a HedFileError when duplicate key")
 
 
 if __name__ == '__main__':

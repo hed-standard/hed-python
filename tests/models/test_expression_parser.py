@@ -97,6 +97,8 @@ class TestParser(unittest.TestCase):
             "(A, (B, C))": False,
             "(A), (A, B)": True,
             "(A, B), (A)": True,
+            "(A, B, (C, D))": True,
+            "(A, B, C)": True
         }
         self.base_test("[[a, b]]", test_strings)
 

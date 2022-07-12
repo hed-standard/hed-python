@@ -24,9 +24,10 @@ class Test(unittest.TestCase):
         sidecar1 = Sidecar(json_path, name='face_sub1_json')
         cls.sidecar = sidecar1
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        cls.input_data_no_sidecar = TabularInput(events_path, name="face_sub1_events_no_sidecar")
 
     def test_get_assembled_strings_no_schema(self):
-        hed_list1, dict1 = get_assembled_strings(self.input_data, expand_defs=False)
+        hed_list1 = get_assembled_strings(self.input_data, expand_defs=False)
         self.assertIsInstance(hed_list1, list, "get_assembled_groups should return a list when expand defs is False")
         self.assertIsInstance(hed_list1[0], HedString)
         hed_strings1 = [str(hed) for hed in hed_list1]
@@ -37,7 +38,7 @@ class Test(unittest.TestCase):
                          "get_assembled_strings should not have Def-expand when expand_defs is False")
         self.assertNotEqual(hed_strings_joined1.find("Def/"), -1,
                             "get_assembled_strings should have Def/ when expand_defs is False")
-        hed_list2, dict2 = get_assembled_strings(self.input_data, expand_defs=True)
+        hed_list2 = get_assembled_strings(self.input_data, expand_defs=True)
         self.assertIsInstance(hed_list2, list, "get_assembled_groups should return a list")
         self.assertIsInstance(hed_list2[0], HedString)
         hed_strings2 = [str(hed) for hed in hed_list2]
@@ -50,7 +51,7 @@ class Test(unittest.TestCase):
                          "get_assembled_strings should not have Def/ when expand_defs is True")
 
     def test_get_assembled_strings_with_schema(self):
-        hed_list1, dict1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        hed_list1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
         self.assertIsInstance(hed_list1, list,
                               "get_assembled_groups should return a list when expand defs is False")
         self.assertIsInstance(hed_list1[0], HedString)
@@ -62,7 +63,7 @@ class Test(unittest.TestCase):
                          "get_assembled_strings should not have Def-expand when expand_defs is False")
         self.assertNotEqual(hed_strings_joined1.find("Def/"), -1,
                             "get_assembled_strings should have Def/ when expand_defs is False")
-        hed_list2, dict2 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=True)
+        hed_list2 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=True)
         self.assertIsInstance(hed_list2, list, "get_assembled_groups should return a list")
         self.assertIsInstance(hed_list2[0], HedString)
         hed_strings2 = [str(hed) for hed in hed_list2]
@@ -98,6 +99,14 @@ class Test(unittest.TestCase):
         columns3 = list(df3.columns)
         self.assertEqual(len(columns3), 4,
                          "assemble_hed should return the correct number of columns when bad columns are included ")
+
+    def test_get_assembled_strings_no_hed(self):
+        hed_list1 = get_assembled_strings(self.input_data_no_sidecar, expand_defs=False)
+        self.assertEqual(len(hed_list1),200,
+                         "get_assembled_strings should have right number of entries when no sidecar")
+        self.assertIsInstance(hed_list1[0], HedString,
+                              "get_assembled_string should return an HedString when no sidecar")
+        self.assertFalse(hed_list1[0].children, "get_assembled_string returned HedString is empty when no sidecar")
 
     def test_search_tabular(self):
         query1 = "sensory-event"

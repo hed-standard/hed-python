@@ -2,8 +2,10 @@ import unittest
 import os
 import shutil
 from hed import Sidecar
-from hed import TabularInput
+from hed import BaseInput, TabularInput
+from hed.models.column_mapper import ColumnMapper
 from hed.models import DefinitionDict
+from hed import schema
 # TODO: Add tests for base_file_input and include correct handling of 'n/a'
 
 
@@ -22,9 +24,39 @@ class Test(unittest.TestCase):
         cls.base_output_folder = base_output
         os.makedirs(base_output, exist_ok=True)
 
+        bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                       '../data/bids/eeg_ds003654s_hed'))
+        schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                    '../data/schema_test_data/HED8.0.0.xml'))
+        cls.bids_root_path = bids_root_path
+        json_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
+        events_path = os.path.realpath(os.path.join(bids_root_path,
+                                                    'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+
+        cls.hed_schema = schema.load_schema(schema_path)
+        sidecar1 = Sidecar(json_path, name='face_sub1_json')
+        mapper1 = ColumnMapper(sidecar=sidecar1, optional_tag_columns=['HED'], warn_on_missing_column=False)
+        cls.input_data1 = BaseInput(events_path, file_type='.tsv', has_column_names=True,
+                                   name="face_sub1_events", mapper=mapper1,
+                                   definition_columns=['HED'], allow_blank_names=False)
+        cls.input_data2 = BaseInput(events_path, file_type='.tsv', has_column_names=True, name="face_sub2_events")
+
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.base_output_folder)
+
+    def test_get_definitions(self):
+        defs1 = self.input_data1.get_definitions()
+        self.assertIsInstance(defs1, dict, "get_definitions returns dictionary by default")
+        self.assertEqual(len(defs1), 17, "get_definitions should have the right number of definitions")
+
+        defs2 = self.input_data1.get_definitions(as_strings=False)
+        self.assertIsInstance(defs2, dict, "get_definitions returns dictionary by when not as strings")
+        self.assertEqual(len(defs2), 17, "get_definitions should have the right number when as strings")
+
+        defs3 = self.input_data2.get_definitions()
+        self.assertIsInstance(defs3, dict, "get_definitions returns dictionary by default")
+        self.assertFalse(defs3, "get_definitions returns an empty dictionary when no definitions")
 
     def test_gathered_defs(self):
         # todo: add unit tests for definitions in tsv file
@@ -52,7 +84,7 @@ class Test(unittest.TestCase):
     #     self.assertEqual(len(issues), 0)
     #     input_file = TabularInput(events_path, sidecars=sidecar)
     #
-    #     validation_issues = input_file.validate_file_sidecars(validator)
+    #     validation_issues = input_file.validate_sidecar(validator)
     #     self.assertEqual(len(validation_issues), 0)
     #     validation_issues = input_file.validate_file(validator, check_for_warnings=True)
     #     self.assertEqual(len(validation_issues), 1)
@@ -72,7 +104,7 @@ class Test(unittest.TestCase):
     #     self.assertEqual(len(issues), 0)
     #     input_file = TabularInput(events_path, sidecars=sidecar)
     #
-    #     validation_issues = input_file.validate_file_sidecars(validator)
+    #     validation_issues = input_file.validate_sidecar(validator)
     #     self.assertEqual(len(validation_issues), 0)
     #     validation_issues = input_file.validate_file(validator, check_for_warnings=True)
     #     self.assertEqual(len(validation_issues), 1)
