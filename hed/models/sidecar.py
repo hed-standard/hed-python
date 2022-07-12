@@ -14,17 +14,17 @@ class Sidecar(SidecarBase):
 
     """
 
-    def __init__(self, files, name=None):
+    def __init__(self, files, name=None, hed_schema=None):
         """ Construct a Sidecar object representing a JSON file.
 
         Args:
             files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
             name (str or None): Optional name identifying this sidecar, generally a filename.
-
+            hed_schema(HedSchema or None): The schema to use by default in identifying tags
         """
-        super().__init__(name)
+        super().__init__(name, hed_schema=hed_schema)
         self.loaded_dict = self.load_sidecar_files(files)
-        self.def_dict = self.extract_definitions()
+        self.def_dict = self.extract_definitions(hed_schema)
 
     @property
     def column_data(self):

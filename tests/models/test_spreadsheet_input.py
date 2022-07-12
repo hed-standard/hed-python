@@ -6,6 +6,7 @@ from hed.errors import HedFileError
 from hed.models import TabularInput, SpreadsheetInput, model_constants, Sidecar
 import shutil
 from hed import schema
+import pandas as pd
 
 
 # TODO: Add tests about correct handling of 'n/a'
@@ -197,6 +198,46 @@ class Test(unittest.TestCase):
         for column1, column2 in zip(hed_input, hed_input_long):
             self.assertEqual(column1, column2)
 
+    def test_convert_short_long_with_definitions_new_style(self):
+        # Verify behavior works as expected even if definitions are present
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/no_column_header_definition.tsv')
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2],
+                                     hed_schema=self.hed_schema)
+        hed_input.convert_to_long()
+
+        events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                        '../data/model_tests/no_column_header_definition_long.tsv')
+        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        for column1, column2 in zip(hed_input, hed_input_long):
+            self.assertEqual(column1, column2)
+
+    def test_definitions_identified(self):
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/no_column_header_definition.tsv')
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2],
+                                     hed_schema=self.hed_schema)
+        def_entry = hed_input.def_dict['deftest1']
+        tag = def_entry.contents.tags()[0]
+        self.assertTrue(tag._schema_entry)
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/no_column_header_definition.tsv')
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        def_entry = hed_input.def_dict['deftest1']
+        tag = def_entry.contents.tags()[0]
+        self.assertFalse(tag._schema_entry)
+
+    def test_loading_dataframe_directly(self):
+        ds_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               '../data/model_tests/no_column_header_definition.tsv')
+        ds = pd.read_csv(ds_path, delimiter="\t", header=None)
+        hed_input = SpreadsheetInput(ds, has_column_names=False, tag_columns=[1, 2])
+
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/no_column_header_definition.tsv')
+        hed_input2 = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        for column1, column2 in zip(hed_input, hed_input2):
+            self.assertEqual(column1, column2)
 
 
 if __name__ == '__main__':
