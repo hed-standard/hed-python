@@ -20,14 +20,15 @@ class SidecarBase:
         column_data property <- This is the only truly mandatory one
 
     """
-    def __init__(self, name=None):
+    def __init__(self, name=None, hed_schema=None):
         """ Initialize a sidecar baseclass
 
         Args:
             name (str or None): Optional name identifying this sidecar, generally a filename.
-
+            hed_schema(HedSchema or None): The schema to use by default in identifying tags
         """
         self.name = name
+        self._schema = hed_schema
         # Expected to be called in subclass after data is loaded
         # self.def_dict = self.extract_definitions()
 
@@ -110,9 +111,9 @@ class SidecarBase:
         hed_ops = self._standardize_ops(hed_ops)
         if expand_defs or remove_definitions:
             self._add_definition_mapper(hed_ops, extra_def_dicts)
-        tag_funcs = translate_ops(hed_ops, error_handler=error_handler, expand_defs=expand_defs,
-                                  allow_placeholders=allow_placeholders, remove_definitions=remove_definitions,
-                                  **kwargs)
+        tag_funcs = translate_ops(hed_ops, hed_schema=self._schema, error_handler=error_handler,
+                                  expand_defs=expand_defs, allow_placeholders=allow_placeholders,
+                                  remove_definitions=remove_definitions, **kwargs)
 
         return self._hed_string_iter(tag_funcs, error_handler)
 
@@ -217,12 +218,12 @@ class SidecarBase:
             error_handler.pop_error_context()
         return all_validation_issues
 
-    def extract_definitions(self, error_handler=None):
+    def extract_definitions(self, hed_schema=None, error_handler=None):
         """ Gather and validate definitions in metadata.
 
         Args:
             error_handler (ErrorHandler): The error handler to use for context, uses a default one if None.
-
+            hed_schema(HedSchema or None): The schema to used to identify tags
         Returns:
             DefinitionDict: Contains all the definitions located in the column.
             issues: List of issues encountered in extracting the definitions. Each issue is a dictionary.
@@ -232,6 +233,7 @@ class SidecarBase:
             error_handler = ErrorHandler()
         new_def_dict = DefinitionDict()
         hed_ops = []
+        hed_ops.append(hed_schema)
         hed_ops.append(new_def_dict)
 
         all_issues = []

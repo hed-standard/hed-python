@@ -130,6 +130,7 @@ class TestParser(unittest.TestCase):
         test_strings = {
             "A, B, C, D": False,
             "(A, B, C, D)": False,
+            "((A, B, C, D))": True,  # todo: should this be true?  Probably not.
             "(A, B, (C, D))": False,
             "(A, B, ((C, D)))": False,
             "(E, F, (A, B, (C, D)))": False,
@@ -192,10 +193,11 @@ class TestParser(unittest.TestCase):
             "(A, B)": False,
             "((A), (B))": False,
             "((A))": False,
-            "((A), ((B)))": True,
+            "((A), ((B)))": True, # TODO: must all result groups have tags?  True because of ((B)) group with no tags.
             "((A, B))": False,
             "((A), (C))": True,
             "((A), (B, C))": False,
+            "((A), ((B), C))": True,
         }
         self.base_test("[[ [[~(a or b)]] ]]", test_strings)
 
@@ -232,6 +234,8 @@ class TestParser(unittest.TestCase):
             "((A))": False,
             "((A), ((D, B)))": True,
             "((A, D))": False,
+            "(B, (D))": True,
+            "(B)": True
         }
         self.base_test("[[ ~[[a]], b]]", test_strings)
 
@@ -255,7 +259,8 @@ class TestParser(unittest.TestCase):
             "(A, B, (C)), (A, B)": True,
             "(A, B), (A, B, (C))": True,
             "(A, B), (B, (C))": False,
-            "(B, (C)), (A, B, (C))": True
+            "(B, (C)), (A, B, (C))": True,
+            "(A, B, (A, (C)))": False
         }
         self.base_test("[[a, b, [[c]] ]]", test_strings)
 

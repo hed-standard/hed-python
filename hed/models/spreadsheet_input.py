@@ -8,7 +8,7 @@ class SpreadsheetInput(BaseInput):
 
     def __init__(self, file=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
-                 def_dicts=None, name=None):
+                 def_dicts=None, name=None, hed_schema=None):
         """Constructor for the SpreadsheetInput class.
 
         Args:
@@ -23,7 +23,7 @@ class SpreadsheetInput(BaseInput):
             column_prefix_dictionary (dict): A dictionary with column number keys and prefix values.
             def_dicts (DefinitionDict or list):  A DefinitionDict or list of DefDicts containing definitions for this
                 object other than the ones extracted from the SpreadsheetInput object itself.
-
+            hed_schema(HedSchema or None): The schema to use by default in identifying tags
         Examples:
             A prefix dictionary {3: 'Label/', 5: 'Description/'} indicates that column 3 and 5 have HED tags
             that need to be prefixed by Label/ and Description/ respectively.
@@ -41,4 +41,4 @@ class SpreadsheetInput(BaseInput):
         def_mapper = DefMapper(def_dicts)
 
         super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, def_mapper=def_mapper,
-                         name=name)
+                         name=name, hed_schema=hed_schema)
