@@ -1,9 +1,9 @@
-﻿hed.tools.KeyMap
-================
+﻿hed.tools.analysis.key\_map.KeyMap
+==================================
 
-.. currentmodule:: hed.tools
+.. currentmodule:: hed.tools.analysis.key_map
 
-.. autoclass:: hed.tools.KeyMap
+.. autoclass:: hed.tools.analysis.key_map.KeyMap
    
    .. automethod:: __init__
 
@@ -30,7 +30,7 @@
    
    
 
-.. autoclass:: hed.tools.KeyMap
+.. autoclass:: hed.tools.analysis.key_map.KeyMap
    :members:
    :undoc-members:
    :show-inheritance:

@@ -134,6 +134,7 @@ class HedTag:
         Notes:
             - Warning: This could be empty if the original tag had a name_prefix prepended.
             e.g. a column where "Label/" is prepended, thus the column value has zero base portion.
+
             - Only valid after calling convert_to_canonical_forms.
 
         """

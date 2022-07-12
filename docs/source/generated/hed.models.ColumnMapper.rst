@@ -23,6 +23,7 @@
       ~ColumnMapper.set_column_prefix_dict
       ~ColumnMapper.set_requested_columns
       ~ColumnMapper.set_tag_columns
+      ~ColumnMapper.validate_column_map
    
    
 

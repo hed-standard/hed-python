@@ -1,9 +1,9 @@
-﻿hed.tools.FileDictionary
-========================
+﻿hed.tools.analysis.file\_dictionary.FileDictionary
+==================================================
 
-.. currentmodule:: hed.tools
+.. currentmodule:: hed.tools.analysis.file_dictionary
 
-.. autoclass:: hed.tools.FileDictionary
+.. autoclass:: hed.tools.analysis.file_dictionary.FileDictionary
    
    .. automethod:: __init__
 
@@ -35,7 +35,7 @@
    
    
 
-.. autoclass:: hed.tools.FileDictionary
+.. autoclass:: hed.tools.analysis.file_dictionary.FileDictionary
    :members:
    :undoc-members:
    :show-inheritance:

@@ -20,6 +20,14 @@ hed.tools.analysis.annotation\_util module
    :undoc-members:
    :show-inheritance:
 
+hed.tools.analysis.definition\_manager module
+---------------------------------------------
+
+.. automodule:: hed.tools.analysis.definition_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hed.tools.analysis.file\_dictionary module
 ------------------------------------------
 
@@ -32,6 +40,22 @@ hed.tools.analysis.key\_map module
 ----------------------------------
 
 .. automodule:: hed.tools.analysis.key_map
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.analysis.onset\_manager module
+----------------------------------------
+
+.. automodule:: hed.tools.analysis.onset_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.analysis.query\_parser module
+---------------------------------------
+
+.. automodule:: hed.tools.analysis.query_parser
    :members:
    :undoc-members:
    :show-inheritance:
@@ -56,6 +80,22 @@ hed.tools.analysis.tag\_summary module
 --------------------------------------
 
 .. automodule:: hed.tools.analysis.tag_summary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.analysis.variable\_manager module
+-------------------------------------------
+
+.. automodule:: hed.tools.analysis.variable_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.analysis.variable\_summary module
+-------------------------------------------
+
+.. automodule:: hed.tools.analysis.variable_summary
    :members:
    :undoc-members:
    :show-inheritance:

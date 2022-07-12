@@ -92,9 +92,9 @@ class ColumnMetadata:
             input_text (str): Text to expand (generally from a single cell in a spreadsheet).
 
         Returns:
-            str or None:    The expanded column as a hed_string.
-            str or dict:    If this is a string, contains the name of this column
-                            as an attribute. If the first return value is None, this is an error message dictionary.
+            str or None: The expanded column as a hed_string.
+            str or dict: If this is a string, contains the name of this column
+                as an attribute. If the first return value is None, this is an error message dictionary.
 
         Notes:
             - Examples are adding name_prefix, inserting a column hed_string from a category key, etc.
