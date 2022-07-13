@@ -113,19 +113,24 @@ class Test(unittest.TestCase):
             var_sum = var_manager.get_variable(variable)
             self.assertEqual(var_sum.number_elements, len(var_manager.hed_strings))
             summary = var_sum.get_summary()
-            factors = var_sum.get_variable_factors()
-            self.assertIsInstance(factors, pd.DataFrame, "get_variable_factors contains dataframe.")
+            factors = var_sum.get_factors()
+            self.assertIsInstance(factors, pd.DataFrame, "get_factors contains dataframe.")
             self.assertEqual(len(factors), var_sum.number_elements,
-                             "get_variable_factors has factors of same length as number of elements")
+                             "get_factors has factors of same length as number of elements")
             self.assertEqual(len(factors.columns), summary["levels"] + 1,
-                             'get_variable_factors has factors levels + 1 (direct references)')
+                             'get_factors has factors levels + 1 (direct references)')
 
     def test_count_events(self):
         list1 = [0, 2, 6, 1, 2, 0, 0]
-        number_events, number_multiple, max_multiple = VariableSummary.count_events(list1)
-        self.assertEqual(number_events, 4, "count_events should have right number of events")
-        self.assertEqual(number_multiple, 3, "count_events should have right number of multiple events")
-        self.assertEqual(max_multiple, 6, "count_events should have right maximum multiples")
+        number_events1, number_multiple1, max_multiple1 = VariableSummary.count_events(list1)
+        self.assertEqual(number_events1, 4, "count_events should have right number of events")
+        self.assertEqual(number_multiple1, 3, "count_events should have right number of multiple events")
+        self.assertEqual(max_multiple1, 6, "count_events should have right maximum multiples")
+        list2 = []
+        number_events2, number_multiple2, max_multiple2 = VariableSummary.count_events(list2)
+        self.assertEqual(number_events2, 0, "count_events should have 0 events for empty list")
+        self.assertEqual(number_multiple2, 0, "count_events should have 0 multiples for empty list")
+        self.assertIsNone(max_multiple2, "count_events should not have a max multiple for empty list")
 
     def test_get_summary(self):
         hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)

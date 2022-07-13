@@ -1,6 +1,6 @@
 
 import pandas as pd
-
+from hed.errors import HedFileError
 
 class VariableSummary:
     """ Holds index of positions for variables, defined and otherwise. """
@@ -25,7 +25,7 @@ class VariableSummary:
         return f"{self.name}[{self.variable_type}]: {self.number_elements} elements " + \
                f"{str(self.levels)} levels {len(self.direct_indices)} references"
 
-    def get_variable_factors(self):
+    def get_factors(self, as_one_hot=True):
         df = pd.DataFrame(0, index=range(self.number_elements), columns=[self.name])
         df.loc[self.direct_indices, [self.name]] = 1
         if not self.levels:
@@ -33,12 +33,31 @@ class VariableSummary:
 
         levels = list(self.levels.keys())
         levels_list = [f"{self.name}.{level}" for level in levels]
-        df_levels = pd.DataFrame(0, index=range(self.number_elements), columns=[levels_list])
+        df_levels = pd.DataFrame(0, index=range(self.number_elements), columns=levels_list)
         for index, level in enumerate(levels):
             index_keys = list(self.levels[level].keys())
             df_levels.loc[index_keys, [levels_list[index]]] = 1
-        x = pd.concat([df, df_levels], axis=1)
-        return x
+        factors = pd.concat([df, df_levels], axis=1)
+        if as_one_hot:
+            return factors
+        sum_factors = factors.sum(axis=1)
+        if sum_factors.max() > 1:
+            raise HedFileError("MultipleFactorSameEvent",
+                               f"{self.name} has multiple occurrences at index{sum_factors.idxmax()}")
+        return self.factors_to_vector(factors, levels)
+
+    def factors_to_vector(self, factors, levels):
+        df = pd.DataFrame('n/a', index=range(len(factors.index)), columns=[self.name])
+        for index, row in factors.iterrows():
+            if row[self.name]:
+                df.at[index, self.name] = self.name
+                continue
+            for level in levels:
+                if row[f"{self.name}.{level}"]:
+                    df.at[index, self.name] = level
+                    break
+        return df
+
 
     def get_summary(self, full=True):
         count_list = [0] * self.number_elements
@@ -65,6 +84,8 @@ class VariableSummary:
 
     @staticmethod
     def count_events(count_list):
+        if not len(count_list):
+            return 0, 0, None
         number_events = 0
         number_multiple = 0
         max_multiple = count_list[0]
@@ -120,7 +141,8 @@ if __name__ == '__main__':
     #         'Cond6': DefinitionEntry('Cond6', def6, True, None)
     #         }
     #
-    # conditions = VariableManager(test_strings3, schema, defs)
+    # conditions = VariableManager(test_strings1, schema, defs)
+    # print("to here")
     # for man_var in conditions.variables:
     #     var_sum = conditions.get_variable(man_var)
     #     s = var_sum.get_summary()
@@ -141,6 +163,7 @@ if __name__ == '__main__':
 
     for man_var in var_manager.variables:
         var_sum = var_manager.get_variable(man_var)
+        factors = var_sum.get_factors(as_one_hot=False)
         s = var_sum.get_summary()
         print(json.dumps(s))
         # s = var_sum.get_summary(full=False)

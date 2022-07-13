@@ -15,7 +15,7 @@
       ~VariableSummary.__init__
       ~VariableSummary.count_events
       ~VariableSummary.get_summary
-      ~VariableSummary.get_variable_factors
+      ~VariableSummary.get_factors
    
    
 
