@@ -36,6 +36,14 @@ hed.tools.analysis.file\_dictionary module
    :undoc-members:
    :show-inheritance:
 
+hed.tools.analysis.hed\_filters module
+--------------------------------------
+
+.. automodule:: hed.tools.analysis.hed_filters
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hed.tools.analysis.key\_map module
 ----------------------------------
 
@@ -52,10 +60,10 @@ hed.tools.analysis.onset\_manager module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.analysis.query\_parser module
----------------------------------------
+hed.tools.analysis.query\_manager module
+----------------------------------------
 
-.. automodule:: hed.tools.analysis.query_parser
+.. automodule:: hed.tools.analysis.query_manager
    :members:
    :undoc-members:
    :show-inheritance:
