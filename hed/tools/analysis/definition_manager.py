@@ -15,7 +15,7 @@ class DefinitionManager:
 
         """
 
-        self.variable_type = variable_type
+        self.variable_type = variable_type.lower()
         self.hed_schema = hed_schema
         self.definitions = definitions
         self.variable_map = {}   # maps def names to conditions.

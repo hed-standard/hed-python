@@ -266,6 +266,16 @@ class TestHedSchema(unittest.TestCase):
         s = schemas3._schemas[""]
         self.assertEqual(s.version, "8.0.0", "load_schema_version has the right version with prefix")
 
+        ver4 = ["ts:8.0.0", "sc:score_0.0.1"]
+        schemas4 = load_schema_version(ver4)
+        self.assertIsInstance(schemas4, HedSchemaGroup, "load_schema_version returns HedSchema version+prefix")
+        self.assertIsInstance(schemas4._schemas, dict, "load_schema_version group keeps dictionary of hed versions")
+        self.assertEqual(len(schemas4._schemas), 2, "load_schema_version group dictionary is right length")
+        s = schemas4._schemas["ts:"]
+        self.assertEqual(s.version, "8.0.0", "load_schema_version has the right version with prefix")
+        with self.assertRaises(KeyError):
+            s = schemas4._schemas[""]
+
     def test_load_schema_version_empty(self):
         schemas = load_schema_version("")
         self.assertIsInstance(schemas, HedSchema, "load_schema_version for empty string returns latest version")

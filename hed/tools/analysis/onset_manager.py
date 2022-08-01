@@ -130,7 +130,7 @@ if __name__ == '__main__':
                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
     manager = OnsetManager(test_strings1, schema)
-
+    print("to here")
     # hed_list1 = [HedString('Yellow, Green', hed_schema=schema),
     #             HedString('(Def/Cond1, Offset)', hed_schema=schema),
     #             HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),

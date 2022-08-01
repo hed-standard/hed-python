@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed import HedString, load_schema_version, Sidecar, TabularInput
+from hed import HedString, HedTag, load_schema_version, Sidecar, TabularInput
 from hed.errors import HedFileError
 from hed.models import DefinitionEntry
 from hed.tools import VariableManager, get_assembled_strings
@@ -70,6 +70,24 @@ class Test(unittest.TestCase):
         self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
                          "Variable managers have context same length as hed_strings")
 
+    def test_constructor_variable_caps(self):
+        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False)
+        var_manager = VariableManager(hed_strings, self.schema, definitions, variable_type="Condition-variable")
+        self.assertIsInstance(var_manager, VariableManager,
+                              "Constructor should create a VariableManager variable caps")
+        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
+                         "Variable managers have context same length as hed_strings when variable caps")
+
+    def test_constructor_variable_task(self):
+        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False)
+        var_manager = VariableManager(hed_strings, self.schema, definitions, variable_type="task")
+        self.assertIsInstance(var_manager, VariableManager,
+                              "Constructor should create a VariableManager variable taks")
+        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
+                         "Variable managers have context same length as hed_strings when variable task")
+
     def test_constructor_multiple_values(self):
         var_manager = VariableManager(self.test_strings2, self.schema, self.defs)
         self.assertIsInstance(var_manager, VariableManager, "Constructor should create a VariableManager from strings")
@@ -92,6 +110,16 @@ class Test(unittest.TestCase):
         self.assertIn("key-assignment", summary, "summarize_variables has a correct key")
         summary_json = var_manager.summarize_variables(as_json=True)
         self.assertIsInstance(summary_json, str, "summarize_variables as json returns a string")
+
+    def test_extract_definition_variables(self):
+        var_manager = VariableManager(self.test_strings1, self.schema, self.defs)
+        var_levels = var_manager._variable_map['var3'].levels
+        self.assertNotIn('cond3/7', var_levels,
+                         "_extract_definition_variables before extraction def/cond3/7 not in levels")
+        tag = HedTag("Def/Cond3/7", hed_schema=self.schema)
+        var_manager._extract_definition_variables(tag, 5)
+        self.assertIn('cond3/7', var_levels,
+                      "_extract_definition_variables after extraction def/cond3/7 not in levels")
 
 
 if __name__ == '__main__':
