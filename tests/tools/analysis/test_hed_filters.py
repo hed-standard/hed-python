@@ -1,8 +1,8 @@
 import os
 import unittest
 from hed import HedString, load_schema_version, Sidecar, TabularInput
-from hed.models import DefinitionEntry
-from hed.tools.analysis.hed_filters import RemoveFilter
+from hed.models import DefinitionEntry, HedGroup
+from hed.tools.analysis.hed_filters import RemoveTypeFilter, RemoveTagsFilter
 
 
 class Test(unittest.TestCase):
@@ -47,6 +47,15 @@ class Test(unittest.TestCase):
                     'Other': DefinitionEntry('Other', def7, False, None)
                     }
 
+        cls.dlist = \
+            ['(Definition/Cond1, (Condition-variable/Var1, Circle, Square))',
+             '(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))',
+             '(Definition/Cond3, (Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross))',
+             '(Definition/Cond4, (Condition-variable, Apple, Banana))',
+             '(Definition/Cond5, (Condition-variable/Lumber, Apple, Banana))',
+             '(Definition/Cond6, (Condition-variable/Lumber, Label/#, Apple, Banana))',
+             '(Definition/Cond6, (Label/#, Apple, Banana))']
+
         cls.string1 = f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset)," + \
                       f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4, Def/Other"
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -56,11 +65,16 @@ class Test(unittest.TestCase):
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
-        cls.schema = schema
+        cls.hed_schema = schema
 
-    def test_remove_filter(self):
-        filter1 = RemoveFilter("Onset")
-        hed1 = HedString(self.string1, self.schema)
+    def test_remove_tags_filter(self):
+        filter1 = RemoveTagsFilter(["Definition"], remove_option="all")
+        definitions = (',').join(self.dlist)
+        hed1 = HedString(definitions, hed_schema=self.hed_schema)
+        self.assertTrue(hed1.children, "remove_tags_filter test string before is not empty")
+        filter1.remove_tags(hed1)
+        self.assertFalse(hed1.children, "remove_tags_filter test after is empty")
+
 
 if __name__ == '__main__':
     unittest.main()

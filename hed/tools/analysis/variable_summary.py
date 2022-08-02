@@ -44,7 +44,7 @@ class VariableCounts:
 class VariableSummary:
 
     def __init__(self, variable_type="condition-variable"):
-        """ Constructor for VariableFactors.
+        """ Constructor for VariableSummary.
 
         Args:
             variable_type (str)    Tag representing the type in this summary
@@ -68,7 +68,8 @@ class VariableSummary:
 
     def update_summary(self, var_counts):
         if var_counts.variable_name not in self.summaries:
-            self.summaries[var_counts.variable_name] = VariableCounts(var_counts.variable_name, var_counts.variable_type)
+            self.summaries[var_counts.variable_name] = VariableCounts(var_counts.variable_name,
+                                                                      var_counts.variable_type)
         summary = self.summaries[var_counts.variable_name]
         summary.update(var_counts)
 
