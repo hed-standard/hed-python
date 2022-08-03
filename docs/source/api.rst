@@ -76,12 +76,14 @@ HED tools
    hed.tools.analysis.key_map.KeyMap
    hed.tools.analysis.onset_manager.OnsetManager
    hed.tools.analysis.tag_summary.TagSummary
+   hed.tools.analysis.variable_manager.VariableFactors
    hed.tools.analysis.variable_manager.VariableManager
+   hed.tools.analysis.variable_manager.VariableCounts
    hed.tools.analysis.variable_summary.VariableSummary
    hed.tools.analysis.analysis_util
    hed.tools.analysis.annotation_util
    hed.tools.analysis.summary_util
-   hed.tools.HedLogger
+   hed.tools.hed_logger.HedLogger
 
 .. currentmodule:: hed
 

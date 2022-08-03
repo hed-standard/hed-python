@@ -13,6 +13,7 @@
    .. autosummary::
    
       ~OnsetManager.__init__
+      ~OnsetManager.hed_list_to_string
    
    
 

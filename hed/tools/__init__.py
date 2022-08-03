@@ -1,7 +1,7 @@
 """ HED tools for analysis and summarization. """
 
-from .analysis.variable_manager import VariableManager
-from .analysis.variable_summary import VariableSummary
+from .analysis.variable_manager import VariableManager, VariableFactors
+from .analysis.variable_summary import VariableCounts, VariableSummary
 from .analysis.definition_manager import DefinitionManager
 from .analysis.file_dictionary import FileDictionary
 from .analysis.key_map import KeyMap

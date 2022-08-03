@@ -14,7 +14,7 @@ class Query:
         return self.expression.search_hed_string(hed_string_obj)
 
 
-class QueryParser:
+class QueryManager:
 
     def __init__(self, query_list):
         self.query_list = query_list
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     test_strings = [HedString('Condition-variable/Test-cond', hed_schema=schema),
                     HedString('Visual-presentation', hed_schema=schema),
                     HedString('Agent-action, (Move, Hand)', hed_schema=schema)]
-    q_parser = QueryParser(qlist)
+    q_parser = QueryManager(qlist)
     col_names = q_parser.get_column_names()
     print(f"Column names:{str(col_names)}")
 

@@ -9,7 +9,6 @@ class TabularInput(BaseInput):
 
     HED_COLUMN_NAME = "HED"
 
-
     def __init__(self, file=None, sidecar=None, extra_def_dicts=None, also_gather_defs=True, name=None,
                  hed_schema=None):
 
