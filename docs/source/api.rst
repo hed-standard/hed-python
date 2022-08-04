@@ -74,7 +74,7 @@ HED tools
    hed.tools.analysis.definition_manager.DefinitionManager
    hed.tools.analysis.file_dictionary.FileDictionary
    hed.tools.analysis.key_map.KeyMap
-   hed.tools.analysis.onset_manager.OnsetManager
+   hed.tools.analysis.context_manager.ContextManager
    hed.tools.analysis.tag_summary.TagSummary
    hed.tools.analysis.hed_type_factors.HedTypeFactors
    hed.tools.analysis.hed_type_variable.HedTypeVariable

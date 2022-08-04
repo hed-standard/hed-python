@@ -36,6 +36,14 @@ hed.tools.analysis.file\_dictionary module
    :undoc-members:
    :show-inheritance:
 
+hed.tools.analysis.hed\_context\_manager module
+-----------------------------------------------
+
+.. automodule:: hed.tools.analysis.hed_context_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hed.tools.analysis.hed\_filters module
 --------------------------------------
 
@@ -44,18 +52,42 @@ hed.tools.analysis.hed\_filters module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.analysis.key\_map module
-----------------------------------
+hed.tools.analysis.hed\_type\_factors module
+--------------------------------------------
 
-.. automodule:: hed.tools.analysis.key_map
+.. automodule:: hed.tools.analysis.hed_type_factors
    :members:
    :undoc-members:
    :show-inheritance:
 
-hed.tools.analysis.onset\_manager module
-----------------------------------------
+hed.tools.analysis.hed\_type\_variable module
+---------------------------------------------
 
-.. automodule:: hed.tools.analysis.onset_manager
+.. automodule:: hed.tools.analysis.hed_type_variable
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.analysis.hed\_variable\_manager module
+------------------------------------------------
+
+.. automodule:: hed.tools.analysis.hed_variable_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.analysis.hed\_variable\_summary module
+------------------------------------------------
+
+.. automodule:: hed.tools.analysis.hed_variable_summary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.tools.analysis.key\_map module
+----------------------------------
+
+.. automodule:: hed.tools.analysis.key_map
    :members:
    :undoc-members:
    :show-inheritance:
@@ -88,22 +120,6 @@ hed.tools.analysis.tag\_summary module
 --------------------------------------
 
 .. automodule:: hed.tools.analysis.tag_summary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-hed.tools.analysis.variable\_manager module
--------------------------------------------
-
-.. automodule:: hed.tools.analysis.variable_manager
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-hed.tools.analysis.variable\_summary module
--------------------------------------------
-
-.. automodule:: hed.tools.analysis.variable_summary
    :members:
    :undoc-members:
    :show-inheritance:
