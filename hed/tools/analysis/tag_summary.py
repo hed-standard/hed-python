@@ -58,12 +58,12 @@ class TagSummary:
                 add_group_to_dict(hed_string_obj, self.all_tags_dict)
 
     def get_design_matrices(self):
-        """ Return information about the condition variables.
+        """ Return information about the condition type_variables.
 
         Returns:
             tuple:
                 - dict: Dictionary with condition variable levels corresponding to a design matrix.
-                - list: List with the other condition variables that aren't associated with levels.
+                - list: List with the other condition type_variables that aren't associated with levels.
                 - list: List of errors.
 
         """

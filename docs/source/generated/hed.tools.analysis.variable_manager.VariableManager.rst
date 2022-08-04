@@ -15,7 +15,7 @@
       ~VariableManager.__init__
       ~VariableManager.get_variable
       ~VariableManager.get_variable_factors
-      ~VariableManager.summarize_variables
+      ~VariableManager.summarize
    
    
 
@@ -25,7 +25,7 @@
 
    .. autosummary::
    
-      ~VariableManager.variables
+      ~VariableManager.type_variables
    
    
 

@@ -74,14 +74,14 @@ class Test(unittest.TestCase):
         def_man = DefinitionManager(self.definitions1, self.schema)
         item1 = HedString(f"Sensory-event,((Red,Blue)),", self.schema)
         vars1 = def_man.get_vars(item1)
-        self.assertFalse(vars1, "get_vars should return None if no condition variables")
+        self.assertFalse(vars1, "get_vars should return None if no condition type_variables")
         item2 = HedString(f"Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble))", self.schema)
         vars2 = def_man.get_vars(item2)
-        self.assertEqual(len(vars2), 1, "get_vars should return correct number of condition variables")
+        self.assertEqual(len(vars2), 1, "get_vars should return correct number of condition type_variables")
         item3 = HedString(f"Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble)),"
                           f"(Def/Cond2),Green,Yellow,Def/Cond5, Def/Cond6/4", self.schema)
         vars3 = def_man.get_vars(item3)
-        self.assertEqual(len(vars3), 5, "get_vars should return multiple condition variables")
+        self.assertEqual(len(vars3), 5, "get_vars should return multiple condition type_variables")
 
     def test_get_def_names(self):
         def_man = DefinitionManager(self.definitions1, self.schema)

@@ -1,6 +1,6 @@
 from hed.schema import load_schema_version
 from hed.models import HedString, HedTag, DefinitionEntry
-from hed.tools.analysis.onset_manager import OnsetManager
+from hed.tools.analysis.hed_context_manager import HedContextManager
 
 
 class DefinitionManager:
@@ -22,7 +22,7 @@ class DefinitionManager:
         self._extract_variable_map()
 
     def get_vars(self, item):
-        """ Return a list of variables in item.
+        """ Return a list of type_variables in item.
 
         Args:
             item (HedTag, HedGroup, or HedString): An item potentially containing def tags.
@@ -40,19 +40,19 @@ class DefinitionManager:
         return var_list
 
     def _extract_variable_map(self):
-        """ Extract all of the variables associated with each definition and add them to the dictionary. """
+        """ Extract all of the type_variables associated with each definition and add them to the dictionary. """
         self.variable_map = {}
         for entry in self.definitions.values():
             self.variable_map[entry.name.lower()] = self._extract_from_entry(entry)
 
     def _extract_from_entry(self, entry):
-        """ Extract a list of variables associated with a definition.
+        """ Extract a list of type_variables associated with a definition.
 
         Args:
             entry (DictionaryEntry): A definition entry to be processed.
 
         Returns:
-            A list of variables associated with this definition.
+            A list of type_variables associated with this definition.
 
 
         """
@@ -159,7 +159,7 @@ if __name__ == '__main__':
                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
 
-    onset_man = OnsetManager(test_strings1, schema)
+    onset_man = HedContextManager(test_strings1, schema)
     def1 = HedString('(Condition-variable/Var1, Circle, Square)', hed_schema=schema)
     def2 = HedString('(condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere)', hed_schema=schema)
     def3 = HedString('(Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross)',

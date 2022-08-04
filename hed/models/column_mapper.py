@@ -15,7 +15,7 @@ class ColumnMapper:
     """ Mapping of a base input file columns into HED tags.
 
     Notes:
-        - Functions and variables column and row indexing starts at 0.
+        - Functions and type_variables column and row indexing starts at 0.
     """
     def __init__(self, sidecar=None, tag_columns=None, column_prefix_dictionary=None,
                  optional_tag_columns=None, requested_columns=None, warn_on_missing_column=False):
