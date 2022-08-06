@@ -31,7 +31,7 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
     else:
         df = data_input.dataframe[eligible_columns].copy(deep=True)
         df['HED_assembled'] = hed_string_list
-    definitions = data_input.get_definitions()
+    definitions = data_input.get_definitions().gathered_defs
     return df, definitions
 
 

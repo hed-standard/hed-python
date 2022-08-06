@@ -3797,7 +3797,7 @@
             </node>
             <node>
                <name>Condition-variable</name>
-               <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.</description>
+               <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent type_variables or contrasts.</description>
                <node>
                   <name>#</name>
                   <description>Name of the condition variable.</description>
@@ -3941,7 +3941,7 @@
             </node>
             <node>
                <name>Indicator-variable</name>
-               <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent variables.</description>
+               <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent type_variables.</description>
                <node>
                   <name>#</name>
                   <description>Name of the indicator variable.</description>

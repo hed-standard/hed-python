@@ -483,13 +483,13 @@ This is a second prologue line.
 ** Block <nowiki>[An event used to indicate a particular organizational part in the experimental design or plan. Usually the Block tag is used with scoping tags as well as tags describing what the block represents to assist with downstream analysis.]</nowiki>
 ** Collection <nowiki>[A tag designating a grouping of items such as in a set or list.]</nowiki>
 ** Context <nowiki>[A tag indicating the overall environment and setup of the experiment or a portion of the experiment. This event is often inserted into a recording at the beginning of an experimental record to describe information such as whether the experiment is conducted indoors or outdoors or whether the experiment is conducted in the real-world or in a controlled laboratory setting. Tags specifying subject metadata might also be included.]</nowiki>
-** Condition-variable <nowiki>[An aspect of the experiment or task that is to be varied during the experiment. Condition-variables are sometimes called independent variables.]</nowiki>
+** Condition-variable <nowiki>[An aspect of the experiment or task that is to be varied during the experiment. Condition-type_variables are sometimes called independent type_variables.]</nowiki>
 ** Control-variable <nowiki>[An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.]</nowiki>
 ** Data-acquisition <nowiki>[An activity related to data acquisition.]</nowiki>
 ** Event-stream <nowiki>[An ordered list of events]</nowiki>
 ** Namespace <nowiki>[Tag used to indicate a namespace type of definition.]</nowiki>
 ** Permutation <nowiki>[A tag used within a tag group also containing a Label tag to indicate that the Label represents events that are permutations of each other.]</nowiki>
-** Response-variable <nowiki>[An aspect of the experiment or task that is measured as control-variables are varied during the experiment. Response-variables are sometimes called dependent variables.]</nowiki>
+** Response-variable <nowiki>[An aspect of the experiment or task that is measured as control-type_variables are varied during the experiment. Response-type_variables are sometimes called dependent type_variables.]</nowiki>
 ** Sequence <nowiki>[A tag used within a tag group also containing a Label tag to indicate that the Label represents events related in a sequential order.]</nowiki>
 ** Session
 ** Task <nowiki>[A tag used to indicate a linkage to the task.]</nowiki>

@@ -735,7 +735,7 @@ This schema is the first official release that includes an xsd and requires unit
 * Organizational-property <nowiki>[Relating to an organization or the action of organizing something.]</nowiki>
 ** Collection <nowiki>[A tag designating a grouping of items such as in a set or list.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the collection.]</nowiki>
-** Condition-variable <nowiki>[An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.]</nowiki>
+** Condition-variable <nowiki>[An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent type_variables or contrasts.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the condition variable.]</nowiki>
 ** Control-variable <nowiki>[An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the control variable.]</nowiki>
@@ -752,7 +752,7 @@ This schema is the first official release that includes an xsd and requires unit
 *** <nowiki># {takesValue, valueClass=nameClass}[Optional label for the intertrial block.]</nowiki>
 ** Experimental-trial <nowiki>[Designates a run or execution of an activity, for example, one execution of a script. A tag used to indicate a particular organizational part in the experimental design often containing a stimulus-response pair or stimulus-response-feedback triad.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Optional label for the trial (often a numerical string).]</nowiki>
-** Indicator-variable <nowiki>[An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent variables.]</nowiki>
+** Indicator-variable <nowiki>[An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent type_variables.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Name of the indicator variable.]</nowiki>
 ** Recording <nowiki>[A tag designating the data recording. Recording tags are usually have temporal scope which is the entire recording.]</nowiki>
 *** <nowiki># {takesValue, valueClass=nameClass}[Optional label for the recording.]</nowiki>

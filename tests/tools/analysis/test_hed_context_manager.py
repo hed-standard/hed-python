@@ -3,7 +3,7 @@ import unittest
 from hed import HedString, load_schema_version, Sidecar, TabularInput
 from hed.models import HedGroup
 from hed.errors import HedFileError
-from hed.tools import OnsetManager, get_assembled_strings
+from hed.tools import HedContextManager, get_assembled_strings
 
 
 class Test(unittest.TestCase):
@@ -37,8 +37,8 @@ class Test(unittest.TestCase):
         cls.schema = schema
 
     def test_constructor(self):
-        manager1 = OnsetManager(self.test_strings1, self.schema)
-        self.assertIsInstance(manager1, OnsetManager, "The constructor should create an OnsetManager")
+        manager1 = HedContextManager(self.test_strings1, self.schema)
+        self.assertIsInstance(manager1, HedContextManager, "The constructor should create an HedContextManager")
         self.assertEqual(len(manager1.hed_strings), 7, "The constructor should have the right number of strings")
         self.assertEqual(len(manager1.onset_list), 4, "The constructor should have right length onset list")
         self.assertIsInstance(manager1.hed_strings[1], HedString, "Constructor hed string should be a hedstring")
@@ -49,7 +49,7 @@ class Test(unittest.TestCase):
 
     def test_constructor_from_assembled(self):
         hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        manager1 = OnsetManager(hed_strings, self.schema)
+        manager1 = HedContextManager(hed_strings, self.schema)
         self.assertEqual(len(manager1.hed_strings), 200,
                          "The constructor for assembled strings has expected # of strings")
         self.assertEqual(len(manager1.onset_list), 261,
@@ -57,10 +57,10 @@ class Test(unittest.TestCase):
 
     def test_constructor_unmatched(self):
         with self.assertRaises(HedFileError):
-            OnsetManager(self.test_strings2, self.schema)
+            HedContextManager(self.test_strings2, self.schema)
 
     def test_constructor_multiple_values(self):
-        manager = OnsetManager(self.test_strings3, self.schema)
+        manager = HedContextManager(self.test_strings3, self.schema)
         self.assertEqual(len(manager.onset_list), 3, "Constructor should have right number of onsets")
 
 

@@ -1,50 +1,43 @@
 from hed.models import DefMapper
+from hed import HedTag
+from hed.models.definition_dict import DefTagNames
+from hed.errors import get_printable_issue_string
 
-class Ops:
+class StringOp:
     def __init__(self, filter_name):
         self.filter_name = filter_name
 
-    def __get_string_funcs__(self, **kwargs):
-        return []
-
-    def __get_tag_funcs__(self, **kwargs):
-        return []
+    def do_op(self):
+        pass
 
 
-class CollapseDefs(Ops):
+class CollapseDefs(StringOp):
 
     def __init__(self, def_mapper):
         super().__init__("collapse_defs")
         self.def_mapper = def_mapper
 
-    def get_string_funcs(self, **kwargs):
-        string_funcs = [self.collapse_defs]
-        return string_funcs
-
-    def collapse_defs(self, hed_string):
-        # self.def_mapper.expand_def_tags(self, hed_string, expand_defs=False, shrink_defs=True)
-        if 'def-expand' not in hed_string.lower():
-            return
-        #
-        # # We need to check for labels to expand in ALL groups
-        # for def_tag, def_expand_group, def_group in hed_string.find_def_tags(recursive=True):
-        #     def_contents = self._get_definition_contents(def_tag, def_expand_group, def_issues)
-        #     if def_expand_group is def_tag:
-        #         if def_contents is not None and expand_defs:
-        #             def_tag.short_base_tag = DefTagNames.DEF_EXPAND_ORG_KEY
-        #             def_group.replace(def_tag, def_contents)
-        #     else:
-        #         if def_contents is not None and shrink_defs:
-        #             def_tag.short_base_tag = DefTagNames.DEF_ORG_KEY
-        #             def_group.replace(def_expand_group, def_tag)
-        #
-        # return def_issues
-
-    def expand_defs(self, hed_string):
-        self.def_mapper.expand_def_tags(self, hed_string, expand_defs=True, shrink_defs=False)
+    def do_op(self, hed_string):
+        issues = self.def_mapper.expand_def_tags(self, hed_string, expand_defs=False, shrink_defs=True)
+        if issues:
+            error_string = get_printable_issue_string(issues)
+            raise ValueError("BadDefExpand", f"Collapse definitions failed {error_string}")
 
 
-class RemoveTagsFilter(Ops):
+class ExpandDefs(StringOp):
+
+    def __init__(self, def_mapper):
+        super().__init__("collapse_defs")
+        self.def_mapper = def_mapper
+
+    def do_op(self, hed_string):
+        issues = self.def_mapper.expand_def_tags(self, hed_string, expand_defs=True, shrink_defs=False)
+        if issues:
+            error_string = get_printable_issue_string(issues)
+            raise ValueError("BadDefExpand", f"Collapse definitions failed {error_string}")
+
+
+class RemoveTagsFilter(StringOp):
 
     def __init__(self, tag_names, remove_option="both"):
         super().__init__("remove_tags")
@@ -66,7 +59,7 @@ class RemoveTagsFilter(Ops):
         return True
 
 
-class RemoveTypeFilter(Ops):
+class RemoveTypeFilter(StringOp):
 
     def __init__(self, type_name, type_values, def_values):
         super().__init__("remove_type")
@@ -84,7 +77,7 @@ class RemoveTypeFilter(Ops):
             hed_string.remove(remove_tags)
 
 
-class HedFilters(Ops):
+class HedFilters(StringOp):
 
     def __init__(self, name, filters, **kwargs):
         super().__init__(name)
@@ -108,7 +101,7 @@ class HedFilters(Ops):
 if __name__ == '__main__':
     import os
     import json
-    from hed.tools.analysis.variable_manager import VariableManager
+    from hed.tools.analysis.hed_variable_manager import HedVariableManager
     from hed.schema import load_schema_version
     from hed.models import HedString, DefinitionEntry, TabularInput, Sidecar
     from hed.tools.analysis.analysis_util import get_assembled_strings
@@ -149,7 +142,7 @@ if __name__ == '__main__':
     }
 
     test_objs1 = [HedString(hed, hed_schema=hed_schema) for hed in test_strings1]
-    var_manager = VariableManager(test_objs1, hed_schema, defs)
+    var_manager = HedVariableManager(test_objs1, hed_schema, defs)
     remove_strings = var_manager.get_variable_tags()
     print(f"Remove strings {str(remove_strings)}")
     filter1 = RemoveTypeFilter(remove_strings, remove_option="all")

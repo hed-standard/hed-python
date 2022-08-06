@@ -32,13 +32,14 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.base_output_folder)
 
     def test_get_definitions(self):
-        defs1 = self.input_data.get_definitions()
+        defs1 = self.input_data.get_definitions().gathered_defs
         self.assertIsInstance(defs1, dict, "get_definitions returns dictionary by default")
         self.assertEqual(len(defs1), 17, "get_definitions should have the right number of definitions")
         for key, value in defs1.items():
             self.assertIsInstance(key, str, "get_definitions dictionary keys should be strings")
-            self.assertIsInstance(value, str, "get_definitions dictionary values should be strings when as strings")
-        defs2 = self.input_data.get_definitions(as_strings=False)
+            self.assertIsInstance(value, DefinitionEntry,
+                                  "get_definitions dict values should be strings when as strings")
+        defs2 = self.input_data.get_definitions(as_strings=False).gathered_defs
         self.assertIsInstance(defs2, dict, "get_definitions returns dictionary by when not as strings")
         self.assertEqual(len(defs2), 17, "get_definitions should have the right number of definitions when not strings")
         for key, value in defs2.items():

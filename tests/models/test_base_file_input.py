@@ -3,6 +3,7 @@ import os
 import shutil
 from hed import Sidecar
 from hed import BaseInput, TabularInput
+from hed.models.def_mapper import DefMapper
 from hed.models.column_mapper import ColumnMapper
 from hed.models import DefinitionDict
 from hed import schema
@@ -46,17 +47,15 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.base_output_folder)
 
     def test_get_definitions(self):
-        defs1 = self.input_data1.get_definitions()
-        self.assertIsInstance(defs1, dict, "get_definitions returns dictionary by default")
+        defs1 = self.input_data1.get_definitions(as_strings=True)
+        self.assertIsInstance(defs1, dict, "get_definitions returns dictionary when as strings")
         self.assertEqual(len(defs1), 17, "get_definitions should have the right number of definitions")
 
-        defs2 = self.input_data1.get_definitions(as_strings=False)
-        self.assertIsInstance(defs2, dict, "get_definitions returns dictionary by when not as strings")
-        self.assertEqual(len(defs2), 17, "get_definitions should have the right number when as strings")
+        defs2 = self.input_data1.get_definitions()
+        self.assertIsInstance(defs2, DefMapper, "get_definitions returns a DefMapper by default")
 
-        defs3 = self.input_data2.get_definitions()
-        self.assertIsInstance(defs3, dict, "get_definitions returns dictionary by default")
-        self.assertFalse(defs3, "get_definitions returns an empty dictionary when no definitions")
+        defs3 = self.input_data2.get_definitions(as_strings=False)
+        self.assertIsInstance(defs3, DefMapper, "get_definitions returns a DefMapper when not as strings")
 
     def test_gathered_defs(self):
         # todo: add unit tests for definitions in tsv file

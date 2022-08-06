@@ -74,12 +74,13 @@ HED tools
    hed.tools.analysis.definition_manager.DefinitionManager
    hed.tools.analysis.file_dictionary.FileDictionary
    hed.tools.analysis.key_map.KeyMap
-   hed.tools.analysis.onset_manager.OnsetManager
+   hed.tools.analysis.context_manager.ContextManager
    hed.tools.analysis.tag_summary.TagSummary
-   hed.tools.analysis.variable_manager.VariableFactors
-   hed.tools.analysis.variable_manager.VariableManager
-   hed.tools.analysis.variable_manager.VariableCounts
-   hed.tools.analysis.variable_summary.VariableSummary
+   hed.tools.analysis.hed_type_factors.HedTypeFactors
+   hed.tools.analysis.hed_type_variable.HedTypeVariable
+   hed.tools.analysis.hed_variable_manager.HedVariableManager
+   hed.tools.analysis.hed_variable_summary.HedVariableCounts
+   hed.tools.analysis.hed_variable_summary.HedVariableSummary
    hed.tools.analysis.analysis_util
    hed.tools.analysis.annotation_util
    hed.tools.analysis.summary_util

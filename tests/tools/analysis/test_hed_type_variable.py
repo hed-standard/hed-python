@@ -3,7 +3,7 @@ import unittest
 from hed import HedString, HedTag, load_schema_version, Sidecar, TabularInput
 from hed.errors import HedFileError
 from hed.models import DefinitionEntry
-from hed.tools import VariableManager, get_assembled_strings
+from hed.tools import HedTypeVariable, get_assembled_strings, HedContextManager
 
 
 class Test(unittest.TestCase):
@@ -41,8 +41,6 @@ class Test(unittest.TestCase):
                     'Cond6': DefinitionEntry('Cond6', def6, True, None)
                     }
 
-
-
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids/eeg_ds003654s_hed'))
         events_path = os.path.realpath(os.path.join(bids_root_path,
@@ -54,68 +52,62 @@ class Test(unittest.TestCase):
 
     def test_constructor(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        var_manager = VariableManager(test_strings1, self.hed_schema, self.defs)
-        self.assertIsInstance(var_manager, VariableManager, "Constructor should create a VariableManager from strings")
-        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
-                         "Variable managers have context same length as hed_strings")
+        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+        self.assertIsInstance(var_manager, HedTypeVariable,
+                              "Constructor should create a HedVariableManager from strings")
         self.assertEqual(len(var_manager._variable_map), 8,
                          "Constructor ConditionVariables should have the right length")
 
     def test_constructor_from_tabular_input(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
-        var_manager = VariableManager(hed_strings, self.hed_schema, definitions)
-        self.assertIsInstance(var_manager, VariableManager,
-                              "Constructor should create a VariableManager from a tabular input")
-        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
-                         "Variable managers have context same length as hed_strings")
+        test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, definitions)
+        self.assertIsInstance(var_manager, HedTypeVariable,
+                              "Constructor should create a HedVariableManager from a tabular input")
 
     def test_constructor_variable_caps(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
-        var_manager = VariableManager(hed_strings, self.hed_schema, definitions, variable_type="Condition-variable")
-        self.assertIsInstance(var_manager, VariableManager,
-                              "Constructor should create a VariableManager variable caps")
-        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
-                         "Variable managers have context same length as hed_strings when variable caps")
+        test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema,
+                                      definitions, variable_type="Condition-variable")
+        self.assertIsInstance(var_manager, HedTypeVariable,
+                              "Constructor should create a HedVariableManager variable caps")
 
     def test_constructor_variable_task(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
-        var_manager = VariableManager(hed_strings, self.hed_schema, definitions, variable_type="task")
-        self.assertIsInstance(var_manager, VariableManager,
-                              "Constructor should create a VariableManager variable taks")
-        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
-                         "Variable managers have context same length as hed_strings when variable task")
+        test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema,
+                                      definitions, variable_type="task")
+        self.assertIsInstance(var_manager, HedTypeVariable,
+                              "Constructor should create a HedVariableManager variable task")
 
     def test_constructor_multiple_values(self):
-        test_strings2 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings2]
-        var_manager = VariableManager(test_strings2, self.hed_schema, self.defs)
-        self.assertIsInstance(var_manager, VariableManager, "Constructor should create a VariableManager from strings")
+        test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings2]
+        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+        self.assertIsInstance(var_manager, HedTypeVariable,
+                              "Constructor should create a HedVariableManager from strings")
         self.assertEqual(len(var_manager._variable_map), 3,
-                         "Constructor should have right number of variables if multiple")
-        self.assertEqual(len(var_manager.hed_strings), len(var_manager._contexts),
-                         "Variable managers have context same length as hed_strings")
+                         "Constructor should have right number of type_variables if multiple")
 
     def test_constructor_unmatched(self):
-        test_strings3 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings3]
+        test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings3]
         with self.assertRaises(HedFileError):
-            VariableManager(test_strings3, self.hed_schema, self.defs)
+            HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
 
     def test_summarize_variables(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
-        var_manager = VariableManager(hed_strings, self.hed_schema, definitions)
-        summary = var_manager.summarize_variables()
-        self.assertIsInstance(summary, dict, "summarize_variables produces a dictionary if not json")
-        self.assertEqual(len(summary), 3, "Summarize_variables has right number of condition variables")
-        self.assertIn("key-assignment", summary, "summarize_variables has a correct key")
-        summary_json = var_manager.summarize_variables(as_json=True)
-        self.assertIsInstance(summary_json, str, "summarize_variables as json returns a string")
+        test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, definitions)
+        summary = var_manager.summarize()
+        self.assertIsInstance(summary, dict, "summarize produces a dictionary if not json")
+        self.assertEqual(len(summary), 3, "Summarize_variables has right number of condition type_variables")
+        self.assertIn("key-assignment", summary, "summarize has a correct key")
+        summary_json = var_manager.summarize(as_json=True)
+        self.assertIsInstance(summary_json, str, "summarize as json returns a string")
 
     def test_extract_definition_variables(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        var_manager = VariableManager(test_strings1, self.hed_schema, self.defs)
+        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
         var_levels = var_manager._variable_map['var3'].levels
         self.assertNotIn('cond3/7', var_levels,
                          "_extract_definition_variables before extraction def/cond3/7 not in levels")
@@ -126,13 +118,13 @@ class Test(unittest.TestCase):
 
     def test_get_variable_names(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        conditions1 = VariableManager(test_strings1, self.hed_schema, self.defs)
+        conditions1 = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
         list1 = conditions1.get_variable_names()
         self.assertEqual(len(list1), 8, "get_variable_tags list should have the right length")
 
     def test_get_variable_def_names(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        conditions1 = VariableManager(test_strings1, self.hed_schema, self.defs)
+        conditions1 = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
         list1 = conditions1.get_variable_def_names()
         self.assertEqual(len(list1), 5, "get_variable_def_names list should have the right length")
 

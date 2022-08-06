@@ -13,7 +13,7 @@ class OnsetGroup:
         return f"{self.name}:[{self.start_index}, {self.end_index}] contents {str(self.contents)}"
 
 
-class OnsetManager:
+class HedContextManager:
 
     def __init__(self, hed_strings, hed_schema):
         """ Create an onset manager for an events file.
@@ -129,7 +129,8 @@ if __name__ == '__main__':
                      HedString('(Def/Cond2, Onset)', hed_schema=schema),
                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
-    manager = OnsetManager(test_strings1, schema)
+
+    manager = HedContextManager(test_strings1, schema)
     print("to here")
     # hed_list1 = [HedString('Yellow, Green', hed_schema=schema),
     #             HedString('(Def/Cond1, Offset)', hed_schema=schema),
@@ -138,7 +139,7 @@ if __name__ == '__main__':
     #             HedString('Blue', hed_schema=schema)]
     #
     #
-    # str_result1 = OnsetManager.hed_list_to_string(hed_list1)
+    # str_result1 = HedContextManager.hed_list_to_string(hed_list1)
     # print(str_result1)
     #
     # big = HedString('Sensory-event,(Def/Cond1,(Red, Blue),Onset),(Def/Cond2,Onset),Green,Yellow', hed_schema=schema)
@@ -149,5 +150,5 @@ if __name__ == '__main__':
     # # for group, depth in big_groups:
     # #     print(f"{group}: {depth}")
     # # these_groups = [group for group, depth in big_groups if depth]
-    # # str_result2 = OnsetManager.hed_list_to_string(these_groups)
+    # # str_result2 = HedContextManager.hed_list_to_string(these_groups)
     # # print(str_result2)

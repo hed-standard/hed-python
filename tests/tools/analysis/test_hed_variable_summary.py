@@ -1,9 +1,8 @@
 import os
 import unittest
-from hed import HedString, HedTag, load_schema_version, Sidecar, TabularInput
-from hed.errors import HedFileError
+from hed import HedString, load_schema_version, Sidecar, TabularInput
 from hed.models import DefinitionEntry
-from hed.tools import VariableManager, VariableSummary, VariableCounts, get_assembled_strings
+from hed.tools import HedContextManager, HedTypeVariable, HedVariableSummary, get_assembled_strings
 
 
 class Test(unittest.TestCase):
@@ -52,15 +51,15 @@ class Test(unittest.TestCase):
 
     def test_variable_summary_get_summaries(self):
         hed_strings1 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions1 = self.input_data.get_definitions(as_strings=False)
-        var_manager1 = VariableManager(hed_strings1, self.schema, definitions1)
-        var_summary1 = VariableSummary(variable_type="condition-variable")
-        self.assertIsInstance(var_summary1, VariableSummary,
-                              "Constructor should create a VariableSummary")
+        definitions1 = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager1 = HedTypeVariable(HedContextManager(hed_strings1, self.schema), self.schema, definitions1)
+        var_summary1 = HedVariableSummary(variable_type="condition-variable")
+        self.assertIsInstance(var_summary1, HedVariableSummary,
+                              "Constructor should create a HedVariableSummary")
         summary1 = var_summary1.get_summaries(as_json=False)
         self.assertIsInstance(summary1, dict, "get_summaries should return a dictionary when empty")
         self.assertFalse(summary1, "get_summaries should create a empty dictionary before updates")
-        for man_var in var_manager1.variables:
+        for man_var in var_manager1.get_variable_names():
             var_factor = var_manager1.get_variable(man_var)
             var_summary1.update_summary(var_factor)
 
@@ -68,13 +67,17 @@ class Test(unittest.TestCase):
         self.assertIsInstance(summary1, dict, "get_summaries should return a dictionary")
         self.assertEqual(len(summary1), 3, "get_summaries should have correct length when updated with tabular input")
 
-        var_summary1 = VariableSummary(variable_type="condition-variable")
-        self.assertIsInstance(var_summary1, VariableSummary,
-                              "Constructor should create a VariableSummary")
+    def test_empty(self):
+        hed_strings1 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
+        definitions1 = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager1 = HedTypeVariable(HedContextManager(hed_strings1, self.schema), self.schema, definitions1)
+        var_summary1 = HedVariableSummary(variable_type="condition-variable")
+        self.assertIsInstance(var_summary1, HedVariableSummary,
+                              "Constructor should create a HedVariableSummary")
         summary1 = var_summary1.get_summaries(as_json=False)
         self.assertIsInstance(summary1, dict, "get_summaries should return a dictionary when empty")
         self.assertFalse(summary1, "get_summaries should create a empty dictionary before updates")
-        for man_var in var_manager1.variables:
+        for man_var in var_manager1.get_variable_names():
             var_factor = var_manager1.get_variable(man_var)
             var_summary1.update_summary(var_factor)
 
@@ -83,17 +86,17 @@ class Test(unittest.TestCase):
         self.assertEqual(len(summary1), 3, "get_summaries should have correct length when updated with tabular input")
 
         hed_strings2 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions2 = self.input_data.get_definitions(as_strings=False)
-        var_manager2 = VariableManager(hed_strings2, self.schema, definitions2)
-        var_summary2 = VariableSummary(variable_type="condition-variable")
-        for man_var in var_manager2.variables:
+        definitions2 = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager2 = HedTypeVariable(HedContextManager(hed_strings2, self.schema), self.schema, definitions2)
+        var_summary2 = HedVariableSummary(variable_type="condition-variable")
+        for man_var in var_manager2.get_variable_names():
             var_factor = var_manager2.get_variable(man_var)
             var_summary2.update_summary(var_factor)
 
         hed_strings2a = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions2a = self.input_data.get_definitions(as_strings=False)
-        var_manager2a = VariableManager(hed_strings2a, self.schema, definitions2a)
-        for man_var in var_manager2.variables:
+        definitions2a = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager2a = HedTypeVariable(HedContextManager(hed_strings2a, self.schema), self.schema, definitions2a)
+        for man_var in var_manager2.get_variable_names():
             var_factor = var_manager2a.get_variable(man_var)
             var_summary2.update_summary(var_factor)
 
@@ -104,6 +107,7 @@ class Test(unittest.TestCase):
         face_type2 = summary2["face-type"]
         self.assertEqual(2*face_type1["number_type_events"], face_type2["number_type_events"],
                          "get_summaries should have twice as many type events if the data is summarized twice")
+
 
 if __name__ == '__main__':
     unittest.main()

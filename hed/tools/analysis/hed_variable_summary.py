@@ -1,5 +1,5 @@
 
-class VariableCounts:
+class HedVariableCounts:
 
     def __init__(self, name, variable_type="condition-variable"):
         self.variable_name = name
@@ -41,10 +41,10 @@ class VariableCounts:
         return summary
 
 
-class VariableSummary:
+class HedVariableSummary:
 
     def __init__(self, variable_type="condition-variable"):
-        """ Constructor for VariableSummary.
+        """ Constructor for HedVariableSummary.
 
         Args:
             variable_type (str)    Tag representing the type in this summary
@@ -55,7 +55,7 @@ class VariableSummary:
         self.summaries = {}
 
     def __str__(self):
-        return f"{self.variable_type}[{self.variable_type}]: {len(self.summaries)} variables "
+        return f"{self.variable_type}[{self.variable_type}]: {len(self.summaries)} type_variables "
 
     def get_summaries(self, as_json=True):
         sum_dict = {}
@@ -68,8 +68,8 @@ class VariableSummary:
 
     def update_summary(self, var_counts):
         if var_counts.variable_name not in self.summaries:
-            self.summaries[var_counts.variable_name] = VariableCounts(var_counts.variable_name,
-                                                                      var_counts.variable_type)
+            self.summaries[var_counts.variable_name] = HedVariableCounts(var_counts.variable_name,
+                                                                         var_counts.variable_type)
         summary = self.summaries[var_counts.variable_name]
         summary.update(var_counts)
 
@@ -77,7 +77,7 @@ class VariableSummary:
 if __name__ == '__main__':
     import os
     import json
-    from hed.tools.analysis.variable_manager import VariableManager
+    from hed.tools.analysis.hed_variable_manager import HedVariableManager
     from hed.schema import load_schema_version
     from hed.models import HedString, DefinitionEntry, TabularInput, Sidecar
     from hed.tools.analysis.analysis_util import get_assembled_strings
@@ -90,11 +90,11 @@ if __name__ == '__main__':
     sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
     input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
     hed_strings = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
-    definitions = input_data.get_definitions(as_strings=False)
-    var_manager = VariableManager(hed_strings, schema, definitions)
-    var_summary = VariableSummary(variable_type="condition-variable")
+    def_mapper = input_data.get_definitions()
+    var_manager = HedVariableManager(hed_strings, schema, def_mapper)
+    var_summary = HedVariableSummary(variable_type="condition-variable")
 
-    for man_var in var_manager.variables:
+    for man_var in var_manager.type_variables:
         var_map = var_manager.get_variable(man_var)
         var_summary.update_summary(var_map)
 
