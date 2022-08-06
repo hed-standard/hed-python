@@ -142,11 +142,11 @@ class BaseInput:
         """ The worksheet name. """
         return self._worksheet_name
 
-    def get_definitions(self, as_strings=True):
+    def get_definitions(self, as_strings=False):
         if as_strings:
             return DefinitionDict.get_as_strings(self._def_mapper.gathered_defs)
         else:
-            return self._def_mapper.gathered_defs
+            return self._def_mapper
 
     def _convert_to_form(self, hed_schema, tag_form, error_handler):
         """ Convert all tags to the specified form.

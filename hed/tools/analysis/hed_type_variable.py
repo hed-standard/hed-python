@@ -40,14 +40,18 @@ class HedTypeVariable:
     def type_variables(self):
         return list(self._variable_map.keys())
 
-    def get_variable_names(self):
-        return list(self._variable_map.keys())
-
     def get_variable_def_names(self):
         tag_list = []
         for variable, factor in self._variable_map.items():
             tag_list = tag_list + [key for key in factor.levels.keys()]
         return list(set(tag_list))
+
+    def get_variable_type_map(self, type_name):
+        return self._variable_map.get(type_name.lower(), None)
+
+    def get_variable_names(self):
+        return list(self._variable_map.keys())
+
 
     def summarize(self, as_json=False):
         summary = self._variable_map.copy()
@@ -213,7 +217,7 @@ if __name__ == '__main__':
     input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
     hed_strings = get_assembled_strings(input_data, hed_schema=hed_schema, expand_defs=False)
     onset_man = HedContextManager(hed_strings, hed_schema=hed_schema)
-    definitions = input_data.get_definitions(as_strings=False)
+    definitions = input_data.get_definitions().gathered_defs
     var_type = HedTypeVariable(onset_man, hed_schema, definitions)
     df = var_type.get_variable_factors()
     summary = var_type.summarize()

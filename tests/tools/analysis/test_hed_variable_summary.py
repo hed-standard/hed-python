@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
 
     def test_variable_summary_get_summaries(self):
         hed_strings1 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions1 = self.input_data.get_definitions(as_strings=False)
+        definitions1 = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager1 = HedTypeVariable(HedContextManager(hed_strings1, self.schema), self.schema, definitions1)
         var_summary1 = HedVariableSummary(variable_type="condition-variable")
         self.assertIsInstance(var_summary1, HedVariableSummary,
@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
 
     def test_empty(self):
         hed_strings1 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions1 = self.input_data.get_definitions(as_strings=False)
+        definitions1 = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager1 = HedTypeVariable(HedContextManager(hed_strings1, self.schema), self.schema, definitions1)
         var_summary1 = HedVariableSummary(variable_type="condition-variable")
         self.assertIsInstance(var_summary1, HedVariableSummary,
@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(summary1), 3, "get_summaries should have correct length when updated with tabular input")
 
         hed_strings2 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions2 = self.input_data.get_definitions(as_strings=False)
+        definitions2 = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager2 = HedTypeVariable(HedContextManager(hed_strings2, self.schema), self.schema, definitions2)
         var_summary2 = HedVariableSummary(variable_type="condition-variable")
         for man_var in var_manager2.get_variable_names():
@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
             var_summary2.update_summary(var_factor)
 
         hed_strings2a = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions2a = self.input_data.get_definitions(as_strings=False)
+        definitions2a = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager2a = HedTypeVariable(HedContextManager(hed_strings2a, self.schema), self.schema, definitions2a)
         for man_var in var_manager2.get_variable_names():
             var_factor = var_manager2a.get_variable(man_var)

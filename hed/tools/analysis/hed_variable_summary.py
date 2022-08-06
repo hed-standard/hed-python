@@ -90,8 +90,8 @@ if __name__ == '__main__':
     sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
     input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
     hed_strings = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
-    definitions = input_data.get_definitions(as_strings=False)
-    var_manager = HedVariableManager(hed_strings, schema, definitions)
+    def_mapper = input_data.get_definitions()
+    var_manager = HedVariableManager(hed_strings, schema, def_mapper)
     var_summary = HedVariableSummary(variable_type="condition-variable")
 
     for man_var in var_manager.type_variables:

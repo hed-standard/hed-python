@@ -60,14 +60,14 @@ class Test(unittest.TestCase):
 
     def test_constructor_from_tabular_input(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, definitions)
         self.assertIsInstance(var_manager, HedTypeVariable,
                               "Constructor should create a HedVariableManager from a tabular input")
 
     def test_constructor_variable_caps(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema,
                                       definitions, variable_type="Condition-variable")
         self.assertIsInstance(var_manager, HedTypeVariable,
@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
 
     def test_constructor_variable_task(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema,
                                       definitions, variable_type="task")
         self.assertIsInstance(var_manager, HedTypeVariable,
@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
 
     def test_summarize_variables(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, definitions)
         summary = var_manager.summarize()
         self.assertIsInstance(summary, dict, "summarize produces a dictionary if not json")

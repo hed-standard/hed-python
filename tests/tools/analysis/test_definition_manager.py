@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
                          "Constructor condition_map should be the same length as the definitions dictionary")
 
     def test_constructor_from_tabular_input(self):
-        definitions = self.input_data.get_definitions(as_strings=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
         def_man = DefinitionManager(definitions, self.schema)
         self.assertIsInstance(def_man, DefinitionManager,
                               "Constructor should create a DefinitionManager from a tabular input")

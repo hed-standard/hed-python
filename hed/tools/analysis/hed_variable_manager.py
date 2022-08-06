@@ -35,10 +35,11 @@ class HedVariableManager:
         if type_name.lower() in self._variable_type_map:
             return
         self._variable_type_map[type_name.lower()] = HedTypeVariable(self.context_manager, self.hed_schema,
-                                                                     self.def_mapper, variable_type=type_name)
+                                                                     self.def_mapper.gathered_defs,
+                                                                     variable_type=type_name)
 
     def get_factor_vectors(self, type_name, type_variables=None, factor_encoding="one-hot"):
-        this_map = self._variable_type_map.get(type_name, None)
+        this_map = self.get_type_variable_map(type_name)
         if this_map is None:
             return None
         variables = this_map.get_variable_names()
@@ -50,7 +51,7 @@ class HedVariableManager:
             df_list[index] = var_sum.get_factors(factor_encoding=factor_encoding)
         return pd.concat(df_list, axis=1)
 
-    def get_type_variable(self, type_name):
+    def get_type_variable_map(self, type_name):
         return self._variable_type_map.get(type_name.lower(), None)
 
     def get_type_variable_factor(self, var_type, var_name):
@@ -184,8 +185,8 @@ if __name__ == '__main__':
     sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
     input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
     hed_strings = get_assembled_strings(input_data, hed_schema=hed_schema, expand_defs=False)
-    definitions = input_data.get_definitions(as_strings=False)
-    var_manager = HedVariableManager(hed_strings, hed_schema, definitions)
+    def_mapper = input_data.get_definitions()
+    var_manager = HedVariableManager(hed_strings, hed_schema, def_mapper)
     var_manager.add_type_variable("condition-variable")
     var_type = var_manager.get_type_variable("condition-variable")
     summary = var_type.summarize_variables()

@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
 
     def test_constructor_from_tabular_input(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager = HedTypeVariable(HedContextManager(test_strings1, self.schema), self.schema, definitions)
         self.assertIsInstance(var_manager, HedTypeVariable,
                               "Constructor should create a HedVariableManager from a tabular input")
@@ -124,7 +124,7 @@ class Test(unittest.TestCase):
 
     def test_get_summary(self):
         hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
         var_manager = HedTypeVariable(HedContextManager(hed_strings, self.schema), self.schema, definitions)
         var_key = var_manager.get_variable('key-assignment')
         sum_key = var_key.get_summary()
