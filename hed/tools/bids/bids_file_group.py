@@ -23,18 +23,20 @@ class BidsFileGroup:
 
     """
 
-    def __init__(self, root_path, suffix="_events", obj_type="tabular"):
+    def __init__(self, root_path, suffix="_events", obj_type="tabular", exclude_dirs=['sourcedata', 'derivatives', 'code']):
         """ Constructor for a BidsFileGroup.
 
         Args:
             root_path (str):  Path of the root of the BIDS dataset.
             suffix (str):     Suffix indicating the type this group represents (e.g. events, or channels, etc.).
+            exclude_dirs (list): List of directories to exclude
             obj_type (str):   Indicates the type of underlying file represents the contents.
 
         """
         self.root_path = os.path.realpath(root_path)
         self.suffix = suffix
         self.obj_type = obj_type
+        self.exclude_dirs = exclude_dirs
         self.sidecar_dict = self._make_sidecar_dict()
         self.sidecar_dir_dict = self._make_sidecar_dir_dict()
 
@@ -155,7 +157,8 @@ class BidsFileGroup:
             dict:   A dictionary of BidsTabularFile or BidsTimeseriesFile objects keyed by real path.
 
         """
-        files = get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.tsv'])
+        files = get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.tsv'],
+                              exclude_dirs=self.exclude_dirs)
         file_dict = {}
         if self.obj_type == "tabular":
             for file in files:
@@ -175,7 +178,8 @@ class BidsFileGroup:
             - This function creates the sidecars and but does not set their contents.
 
         """
-        files = get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.json'])
+        files = get_file_list(self.root_path, name_suffix=self.suffix,
+                              extensions=['.json'], exclude_dirs=self.exclude_dirs)
         file_dict = {}
         for file in files:
             file_dict[os.path.realpath(file)] = BidsSidecarFile(os.path.realpath(file))
