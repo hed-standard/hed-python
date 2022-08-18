@@ -23,14 +23,16 @@ class BidsFileGroup:
 
     """
 
-    def __init__(self, root_path, suffix="_events", obj_type="tabular", exclude_dirs=['sourcedata', 'derivatives', 'code']):
+    def __init__(self, root_path, suffix="_events", obj_type="tabular",
+                 exclude_dirs=['sourcedata', 'derivatives', 'code']):
         """ Constructor for a BidsFileGroup.
 
         Args:
             root_path (str):  Path of the root of the BIDS dataset.
             suffix (str):     Suffix indicating the type this group represents (e.g. events, or channels, etc.).
-            exclude_dirs (list): List of directories to exclude
             obj_type (str):   Indicates the type of underlying file represents the contents.
+            exclude_dirs (list):  Directories to exclude.
+
 
         """
         self.root_path = os.path.realpath(root_path)
