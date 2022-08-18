@@ -21,7 +21,7 @@ class BidsDataset:
 
     """
 
-    def __init__(self, root_path, schema=None, tabular_types=None):
+    def __init__(self, root_path, schema=None, tabular_types=None, exclude_dirs=['sourcedata', 'derivatives', 'code']):
         """ Constructor for a BIDS dataset.
 
         Args:
@@ -29,6 +29,7 @@ class BidsDataset:
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             tabular_types (list or None):  List of strings specifying types of tabular types to include.
                 If None or empty, then ['events'] is assumed.
+           exclude_dirs=['sourcedata', 'derivatives', 'code']):
 
         """
         self.root_path = os.path.realpath(root_path)

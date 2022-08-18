@@ -91,7 +91,8 @@ def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=N
     return secure_filename(filename)
 
 
-def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True):
+def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True,
+                       exclude_dirs = None):
     """ Create dictionary directory paths keys.
 
     Args:
@@ -100,13 +101,18 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
         name_suffix (str, None):      An optional name_suffix for the base file name.
         extensions (list, None):      An optional list of file extensions.
         skip_empty (bool):            Do not put entry for directories that have no files.
+        exclude_dirs (list):          List of directories to skip
 
     Returns:
         dict:  Dictionary with directories as keys and file lists values.
 
     """
+
+    if not exclude_dirs:
+        exclude_dirs = []
     dir_dict = {}
     for root, dirs, files in os.walk(dir_path, topdown=True):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
         file_list = []
         for r_file in files:
             if check_filename(r_file, name_prefix, name_suffix, extensions):
