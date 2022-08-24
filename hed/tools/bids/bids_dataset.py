@@ -61,7 +61,7 @@ class BidsDataset:
 
         """
         if obj_type in self.tabular_files:
-            return  self.tabular_files[obj_type]
+            return self.tabular_files[obj_type]
         else:
             return None
 
