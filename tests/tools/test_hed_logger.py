@@ -1,7 +1,7 @@
 import unittest
 from io import StringIO
 from unittest import mock
-from hed.tools.hed_logger import HedLogger
+from hed.tools.util.hed_logger import HedLogger
 
 
 class Test(unittest.TestCase):

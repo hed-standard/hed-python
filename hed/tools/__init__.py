@@ -25,4 +25,5 @@ from .bids.bids_tabular_summary import BidsTabularSummary
 
 from hed.tools.analysis.tabular_reports import report_diffs
 
-from .hed_logger import HedLogger
+from hed.tools.util.hed_logger import HedLogger
+from hed.tools.util.io_util import get_file_list, parse_bids_filename

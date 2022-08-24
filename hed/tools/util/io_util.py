@@ -92,7 +92,7 @@ def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=N
 
 
 def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True,
-                       exclude_dirs = None):
+                       exclude_dirs=None):
     """ Create dictionary directory paths keys.
 
     Args:

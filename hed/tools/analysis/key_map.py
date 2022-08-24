@@ -1,7 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.util.data_util import get_row_hash
-from hed.util.data_util import get_new_dataframe, remove_quotes, separate_columns
+from hed.tools.util.data_util import get_new_dataframe, get_row_hash, remove_quotes, separate_columns
 
 
 class KeyMap:
