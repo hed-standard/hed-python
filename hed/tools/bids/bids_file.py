@@ -1,5 +1,5 @@
 import os
-from hed.util.io_util import parse_bids_filename
+from hed.tools.util.io_util import parse_bids_filename
 
 
 class BidsFile:
@@ -42,6 +42,9 @@ class BidsFile:
     def clear_contents(self):
         """ Set the contents attribute of this object to None. """
         self.contents = None
+
+    def get_entity(self, entity_name):
+        return self.entity_dict.get(entity_name, None)
 
     def get_key(self, entities=None):
         """ Return a key for this BIDS file given a list of entities.

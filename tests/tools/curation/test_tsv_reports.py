@@ -3,9 +3,8 @@ import os
 from io import StringIO
 from unittest import mock
 
-from hed.errors.exceptions import HedFileError
 from hed.tools import BidsTabularDictionary, HedLogger, report_diffs
-from hed.util import get_file_list
+from hed.tools.util import get_file_list
 
 
 class Test(unittest.TestCase):

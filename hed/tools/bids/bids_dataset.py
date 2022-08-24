@@ -29,7 +29,7 @@ class BidsDataset:
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             tabular_types (list or None):  List of strings specifying types of tabular types to include.
                 If None or empty, then ['events'] is assumed.
-           exclude_dirs=['sourcedata', 'derivatives', 'code']):
+            exclude_dirs=['sourcedata', 'derivatives', 'code']):
 
         """
         self.root_path = os.path.realpath(root_path)
@@ -40,12 +40,15 @@ class BidsDataset:
         else:
             self.schema = load_schema_version(self.dataset_description.get("HEDVersion", None))
 
+        self.exclude_dirs = exclude_dirs
         self.tabular_files = {"participants": BidsFileGroup(root_path, suffix="participants", obj_type="tabular")}
         if not tabular_types:
-            self.tabular_files["events"] = BidsFileGroup(root_path, suffix="events", obj_type="tabular")
+            self.tabular_files["events"] = BidsFileGroup(root_path, suffix="events", obj_type="tabular",
+                                                         exclude_dirs=exclude_dirs)
         else:
             for suffix in tabular_types:
-                self.tabular_files[suffix] = BidsFileGroup(root_path, suffix=suffix, obj_type="tabular")
+                self.tabular_files[suffix] = BidsFileGroup(root_path, suffix=suffix, obj_type="tabular",
+                                                           exclude_dirs=exclude_dirs)
 
     def get_tabular_group(self, obj_type="events"):
         """ Return the specified tabular file group.
