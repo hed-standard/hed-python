@@ -5,6 +5,7 @@ from hed.errors.exceptions import HedFileError
 from hed.tools import FileDictionary, get_file_list
 
 
+
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

@@ -1,8 +1,8 @@
 import os
 import unittest
 from hed.errors.exceptions import HedFileError
-from hed.tools import check_filename, extract_suffix_path, generate_filename, \
-    get_dir_dictionary, get_file_list, get_path_components, parse_bids_filename
+from hed.tools import check_filename, extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
+    get_path_components, parse_bids_filename
 from hed.tools.util.io_util import _split_entity
 
 

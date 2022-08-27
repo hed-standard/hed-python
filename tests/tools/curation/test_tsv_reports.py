@@ -2,7 +2,6 @@ import unittest
 import os
 from io import StringIO
 from unittest import mock
-
 from hed.tools import BidsTabularDictionary, get_file_list, HedLogger, report_diffs
 
 
