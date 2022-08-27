@@ -1,9 +1,8 @@
 import os
 import unittest
-from pandas import DataFrame
 from hed import schema as hedschema
-from hed.models import Sidecar, TabularInput, HedString
-from hed.tools import assemble_hed, get_assembled_strings, search_tabular
+from hed.models import TabularInput, HedString
+from hed.tools import get_assembled_strings
 
 
 # noinspection PyBroadException
@@ -18,7 +17,7 @@ class Test(unittest.TestCase):
         cls.bids_root_path = bids_root_path
         cls.json_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         cls.events_path = os.path.realpath(os.path.join(bids_root_path,
-                                                    'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+                                           'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         cls.hed_schema = hedschema.load_schema(schema_path)
         # sidecar1 = Sidecar(self.json_path, name='face_sub1_json')
         # cls.sidecar_path = sidecar1
@@ -79,13 +78,14 @@ class Test(unittest.TestCase):
     def test_get_assembled_strings_no_hed(self):
         input_data_no_sidecar = TabularInput(self.events_path, name="face_sub1_events")
         hed_list1 = get_assembled_strings(input_data_no_sidecar, expand_defs=False)
-        self.assertEqual(len(hed_list1),200,
+        self.assertEqual(len(hed_list1), 200,
                          "get_assembled_strings should have right number of entries when no sidecar")
         self.assertIsInstance(hed_list1[0], HedString,
                               "get_assembled_string should return an HedString when no sidecar")
         self.assertFalse(hed_list1[0].children, "get_assembled_string returned HedString is empty when no sidecar")
 
-        input_data_no_sidecar_with_schema = TabularInput(self.events_path, hed_schema=self.hed_schema, name="face_sub1_events")
+        input_data_no_sidecar_with_schema = TabularInput(self.events_path, hed_schema=self.hed_schema,
+                                                         name="face_sub1_events")
         hed_list2 = get_assembled_strings(input_data_no_sidecar_with_schema, expand_defs=False)
         self.assertEqual(len(hed_list2), 200,
                          "get_assembled_strings should have right number of entries when no sidecar")

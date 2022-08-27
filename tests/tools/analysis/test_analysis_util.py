@@ -2,8 +2,8 @@ import os
 import unittest
 from pandas import DataFrame
 from hed import schema as hedschema
-from hed.models import Sidecar, TabularInput, HedString
-from hed.tools import assemble_hed, get_assembled_strings, search_tabular
+from hed.models import Sidecar, TabularInput
+from hed.tools import assemble_hed, search_tabular
 
 
 # noinspection PyBroadException

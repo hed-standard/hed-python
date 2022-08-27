@@ -1,8 +1,8 @@
 import os
 import unittest
 from hed import HedString, load_schema_version, Sidecar, TabularInput
-from hed.models import DefinitionEntry, HedGroup
-from hed.tools.analysis.hed_filters import RemoveTypeFilter, RemoveTagsFilter
+from hed.models import DefinitionEntry
+from hed.tools.analysis.hed_filters import RemoveTagsFilter
 
 
 class Test(unittest.TestCase):
@@ -15,7 +15,8 @@ class Test(unittest.TestCase):
                                        '../../data/schema_test_data/HED8.0.0.xml'))
         schema = load_schema_version(xml_version="8.1.0")
         cls.test_strings1 = [HedString(f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
-                                       f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4, Def/Other", hed_schema=schema),
+                                       f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4, Def/Other",
+                                       hed_schema=schema),
                              HedString('(Def/Cond1, Offset)', hed_schema=schema),
                              HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast',
                                        hed_schema=schema),

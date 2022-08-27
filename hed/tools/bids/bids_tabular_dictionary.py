@@ -1,4 +1,4 @@
-from hed.tools.util import get_new_dataframe
+from hed.tools.util.data_util import get_new_dataframe
 from hed.tools.bids.bids_file_dictionary import BidsFileDictionary
 from hed.errors.exceptions import HedFileError
 from hed.tools.bids.bids_file import BidsFile

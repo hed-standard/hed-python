@@ -1,11 +1,9 @@
 import pandas as pd
 import json
 from hed.schema import load_schema_version
-from hed.models import HedTag, HedGroup, DefMapper
-from hed.tools.analysis.hed_type_factors import HedTypeFactors
+from hed.models import DefMapper
 from hed.tools.analysis.hed_type_variable import HedTypeVariable
 from hed.tools.analysis.hed_context_manager import HedContextManager
-from hed.tools.analysis.definition_manager import DefinitionManager
 
 
 class HedVariableManager:
@@ -75,7 +73,6 @@ class HedVariableManager:
             return json.dumps(summary, indent=4)
         else:
             return summary
-
 
     def __str__(self):
         return f"Type_variables: {str(list(self._variable_type_map.keys()))}"
