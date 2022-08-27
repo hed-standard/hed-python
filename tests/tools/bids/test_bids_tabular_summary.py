@@ -2,7 +2,7 @@ import unittest
 import os
 from hed.errors.exceptions import HedFileError
 from hed.tools import BidsTabularSummary, BidsFileDictionary
-from hed.tools.util import get_file_list, get_new_dataframe
+from hed.tools import get_file_list, get_new_dataframe
 
 
 class Test(unittest.TestCase):

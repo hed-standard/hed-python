@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.models import TabularInput
+from hed.models.tabular_input import TabularInput
 from hed.tools import BidsSidecarFile, BidsTabularFile
 
 

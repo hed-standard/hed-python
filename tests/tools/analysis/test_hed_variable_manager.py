@@ -1,8 +1,6 @@
 import os
 import unittest
-from hed import HedString, HedTag, load_schema_version, Sidecar, TabularInput
-from hed.errors import HedFileError
-from hed.models import DefinitionEntry
+from hed import load_schema_version, Sidecar, TabularInput
 from hed.tools import HedTypeFactors, HedTypeVariable, HedVariableManager, get_assembled_strings
 
 
@@ -95,12 +93,12 @@ class Test(unittest.TestCase):
         this_map1 = var_manager.get_type_variable_map("condition-variable")
         self.assertIsInstance(this_map1, HedTypeVariable,
                               "get_type_variable_map returns a non-empty map when key lower case")
-        self.assertEqual(len(this_map1.type_variables),3,
+        self.assertEqual(len(this_map1.type_variables), 3,
                          "get_type_variable_map map has right length when key lower case")
         this_map2 = var_manager.get_type_variable_map("Condition-variable")
         self.assertIsInstance(this_map2, HedTypeVariable,
                               "get_type_variable_map returns a non-empty map when key upper case")
-        self.assertEqual(len(this_map2.type_variables),3,
+        self.assertEqual(len(this_map2.type_variables), 3,
                          "get_type_variable_map map has right length when key upper case")
 
     def test_get_type_variable_factor(self):

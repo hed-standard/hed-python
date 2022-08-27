@@ -1,5 +1,3 @@
-import os
-from hed.models.timeseries_input import TimeseriesInput
 from hed.tools.bids.bids_file import BidsFile
 
 

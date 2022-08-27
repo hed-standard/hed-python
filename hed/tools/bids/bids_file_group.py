@@ -5,7 +5,7 @@ from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_summary import BidsTabularSummary
-from hed.tools.util import get_dir_dictionary, get_file_list, get_path_components
+from hed.tools.util.io_util import get_dir_dictionary, get_file_list, get_path_components
 from hed.validator.hed_validator import HedValidator
 
 

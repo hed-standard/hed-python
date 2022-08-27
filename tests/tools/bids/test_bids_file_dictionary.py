@@ -2,8 +2,7 @@ import unittest
 import os
 
 from hed.errors.exceptions import HedFileError
-from hed.tools import BidsFileDictionary
-from hed.tools.util import get_file_list
+from hed.tools import BidsFileDictionary, get_file_list
 
 
 class Test(unittest.TestCase):

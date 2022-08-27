@@ -1,8 +1,8 @@
 import os
 import unittest
 from hed.errors.exceptions import HedFileError
-from hed.tools.util import check_filename, extract_suffix_path, generate_filename, \
-    get_dir_dictionary, get_file_list, get_path_components, parse_bids_filename
+from hed.tools import check_filename, extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
+    get_path_components, parse_bids_filename
 from hed.tools.util.io_util import _split_entity
 
 
@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/bids/eeg_ds003654s_hed')
+        cls.bids_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
         stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
         att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
@@ -85,7 +85,8 @@ class Test(unittest.TestCase):
         self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
 
     def test_get_file_list_files(self):
-        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/schema_test_data/prologue_tests')
+        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 '../../data/schema_test_data/prologue_tests')
         dir_pairs = os.path.realpath(dir_pairs)
         test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
         file_list1 = get_file_list(dir_pairs)
@@ -100,7 +101,7 @@ class Test(unittest.TestCase):
             raise HedFileError("FileShouldNotBeFound", f"get_event_files should have not have found file {file}", "")
 
     def test_get_get_file_list_suffix(self):
-        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data')
+        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data')
         file_list = get_file_list(dir_data, extensions=[".json", ".tsv"])
         for item in file_list:
             if item.endswith(".json") or item.endswith(".tsv"):
@@ -122,7 +123,7 @@ class Test(unittest.TestCase):
             self.assertTrue(filename.startswith('sternberg'))
 
     def test_get_file_list_exclude_dir(self):
-        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/bids/eeg_ds003654s_hed')
+        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
         file_list1 = get_file_list(dir_data, extensions=[".bmp"])
         self.assertEqual(345, len(file_list1), 'get_file_list has the right number of files when no exclude')
         file_list2 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=[])
