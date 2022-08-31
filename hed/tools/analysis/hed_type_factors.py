@@ -50,7 +50,7 @@ class HedTypeFactors:
             return self.factors_to_vector(factors, levels)
         else:
             raise ValueError("BadFactorEncoding",
-                             f"{factor_encoding} is not in the allowed encodings: {str(self.ALLOWED_ENDCODINGS)}")
+                             f"{factor_encoding} is not in the allowed encodings: {str(self.ALLOWED_ENCODINGS)}")
 
     def factors_to_vector(self, factors, levels):
         df = pd.DataFrame('n/a', index=range(len(factors.index)), columns=[self.variable_name])

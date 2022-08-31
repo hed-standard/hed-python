@@ -8,6 +8,7 @@ from .analysis.definition_manager import DefinitionManager
 from .analysis.file_dictionary import FileDictionary
 from .analysis.key_map import KeyMap
 from .analysis.hed_context_manager import OnsetGroup, HedContextManager
+from .analysis.tabular_summary import TabularSummary
 from .analysis.tag_summary import TagSummary
 from .analysis.annotation_util import \
     check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
@@ -21,7 +22,6 @@ from .bids.bids_file_dictionary import BidsFileDictionary
 from .bids.bids_sidecar_file import BidsSidecarFile
 from .bids.bids_tabular_dictionary import BidsTabularDictionary
 from .bids.bids_tabular_file import BidsTabularFile
-from .bids.bids_tabular_summary import BidsTabularSummary
 
 from .analysis.tabular_reports import report_diffs
 from .util.hed_logger import HedLogger

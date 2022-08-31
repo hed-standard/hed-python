@@ -5,7 +5,7 @@ import unittest
 from pandas import DataFrame
 from hed import schema as hedschema
 from hed.models import Sidecar
-from hed.tools import BidsTabularSummary, check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
+from hed.tools import TabularSummary, check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
 from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, \
     _flatten_cat_col, _flatten_val_col, _get_value_entry, trim_back, trim_front, _tag_list_to_str, _update_cat_dict, \
     generate_sidecar_entry
@@ -256,7 +256,7 @@ class Test(unittest.TestCase):
         value_columns = ["rep_lag", "stim_file", "value"]
         event_files = get_file_list(self.bids_root_path, extensions=[".tsv"], name_suffix="_events",
                                     exclude_dirs=exclude_dirs)
-        value_sum = BidsTabularSummary(value_cols=value_columns, skip_cols=skip_columns)
+        value_sum = TabularSummary(value_cols=value_columns, skip_cols=skip_columns)
         value_sum.update(event_files)
         sidecar_template = value_sum.extract_sidecar_template()
         example_spreadsheet = hed_to_df(sidecar_template)

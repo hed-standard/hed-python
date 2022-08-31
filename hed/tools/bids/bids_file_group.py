@@ -1,10 +1,10 @@
 import os
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_io import load_schema_version
+from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
-from hed.tools.bids.bids_tabular_summary import BidsTabularSummary
 from hed.tools.util.io_util import get_dir_dictionary, get_file_list, get_path_components
 from hed.validator.hed_validator import HedValidator
 
@@ -98,7 +98,7 @@ class BidsFileGroup:
             skip_cols (list):   Column names designated as columns to skip.
 
         Returns:
-            BidsTabularSummary or None:  A summary of the number of values in different columns if tabular group.
+            TabularSummary or None:  A summary of the number of values in different columns if tabular group.
 
         Notes:
             - The columns that are not value_cols or skip_col are summarized by counting
@@ -107,9 +107,8 @@ class BidsFileGroup:
         """
         if self.obj_type != 'tabular':
             return None
-        info = BidsTabularSummary(value_cols=value_cols, skip_cols=skip_cols)
-        for obj in self.datafile_dict.values():
-            info.update(obj.file_path)
+        info = TabularSummary(value_cols=value_cols, skip_cols=skip_cols)
+        info.update(list(self.datafile_dict.keys()))
         return info
 
     def validate_sidecars(self, hed_ops, check_for_warnings=True):

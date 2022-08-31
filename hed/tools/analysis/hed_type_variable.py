@@ -52,7 +52,6 @@ class HedTypeVariable:
     def get_variable_names(self):
         return list(self._variable_map.keys())
 
-
     def summarize(self, as_json=False):
         summary = self._variable_map.copy()
         for var_name, var_sum in summary.items():
@@ -229,4 +228,3 @@ if __name__ == '__main__':
     df_no_hot.to_csv("D:/wh_conditions_no_hot.csv", sep='\t', index=False)
     with open('d:/wh_summarylong.json', 'w') as f:
         json.dump(summary, f, indent=4)
-    print("to here")

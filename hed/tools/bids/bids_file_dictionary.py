@@ -39,8 +39,8 @@ class BidsFileDictionary(FileDictionary):
 
     @property
     def file_list(self):
-        """ Files contained in this dictionary. """
-        return list(self.file_dict.values())
+        """ Paths of the files in the list. """
+        return [file.file_path for file in self.file_dict.values()]
 
     def correct_file(self, the_file):
         """ Transform to BidsFile if needed.

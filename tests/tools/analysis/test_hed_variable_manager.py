@@ -66,10 +66,10 @@ class Test(unittest.TestCase):
         def_mapper = self.input_data._def_mapper
         var_manager = HedVariableManager(hed_strings, self.hed_schema, def_mapper)
         var_manager.add_type_variable("Condition-variable")
-        type_var = var_manager.get_type_variable_map("condition-variable")
+        type_var = var_manager.get_type_variable("condition-variable")
         self.assertIsInstance(type_var, HedTypeVariable,
                               "get_type_variable returns a HedTypeVariable if the key exists")
-        type_var = var_manager.get_type_variable_map("baloney")
+        type_var = var_manager.get_type_variable("baloney")
         self.assertIsNone(type_var, "get_type_variable returns None if the key does not exist")
 
     def test_get_type_variable_def_names(self):
@@ -90,15 +90,15 @@ class Test(unittest.TestCase):
         def_mapper = self.input_data._def_mapper
         var_manager = HedVariableManager(hed_strings, self.hed_schema, def_mapper)
         var_manager.add_type_variable("Condition-variable")
-        this_map1 = var_manager.get_type_variable_map("condition-variable")
-        self.assertIsInstance(this_map1, HedTypeVariable,
+        this_var = var_manager.get_type_variable("condition-variable")
+        self.assertIsInstance(this_var, HedTypeVariable,
                               "get_type_variable_map returns a non-empty map when key lower case")
-        self.assertEqual(len(this_map1.type_variables), 3,
+        self.assertEqual(len(this_var.type_variables), 3,
                          "get_type_variable_map map has right length when key lower case")
-        this_map2 = var_manager.get_type_variable_map("Condition-variable")
-        self.assertIsInstance(this_map2, HedTypeVariable,
+        this_var2 = var_manager.get_type_variable("Condition-variable")
+        self.assertIsInstance(this_var2, HedTypeVariable,
                               "get_type_variable_map returns a non-empty map when key upper case")
-        self.assertEqual(len(this_map2.type_variables), 3,
+        self.assertEqual(len(this_var2.type_variables), 3,
                          "get_type_variable_map map has right length when key upper case")
 
     def test_get_type_variable_factor(self):

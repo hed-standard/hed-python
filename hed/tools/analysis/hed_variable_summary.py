@@ -1,3 +1,4 @@
+import json
 
 class HedVariableCounts:
 
@@ -79,7 +80,7 @@ if __name__ == '__main__':
     import json
     from hed.tools.analysis.hed_variable_manager import HedVariableManager
     from hed.schema import load_schema_version
-    from hed.models import HedString, DefinitionEntry, TabularInput, Sidecar
+    from hed.models import TabularInput, Sidecar
     from hed.tools.analysis.analysis_util import get_assembled_strings
     schema = load_schema_version(xml_version="8.1.0")
     bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -95,8 +96,8 @@ if __name__ == '__main__':
     var_summary = HedVariableSummary(variable_type="condition-variable")
 
     for man_var in var_manager.type_variables:
-        var_map = var_manager.get_variable(man_var)
+        var_map = var_manager.get_type_variable(man_var)
         var_summary.update_summary(var_map)
 
-    summary = var_summary.get_summaries(as_json=False)
-    print(f"Variable summary\n{var_summary.get_summaries()}")
+    final_summary = var_summary.get_summaries(as_json=False)
+    print(f"Variable summary\n{final_summary}")
