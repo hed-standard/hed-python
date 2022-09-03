@@ -1,5 +1,6 @@
 import unittest
 import os
+import json
 from hed.errors.exceptions import HedFileError
 from hed.tools import FileDictionary, TabularSummary
 from hed.tools import get_file_list, get_new_dataframe
@@ -41,6 +42,21 @@ class Test(unittest.TestCase):
         count_dict = dict1.get_number_unique()
         self.assertEqual(len(count_dict), 10, "get_number_unique should have the correct number of entries")
         self.assertEqual(count_dict['onset'], 199, "get_number_unique should have the right number of unique")
+
+    def test_get_summary(self):
+        dict1 = TabularSummary(value_cols=['letter'], skip_cols=['event_type'], name="Sternberg1")
+        stern_df = get_new_dataframe(self.stern_map_path)
+        dict1.update(stern_df)
+        self.assertEqual(len(dict1.value_info.keys()), 1,
+                         "BidsTabularSummary value_info should be empty if no value columns")
+        self.assertEqual(len(dict1.categorical_info.keys()), len(stern_df.columns)-2,
+                         "BidsTabularSummary categorical_info be columns minus skip and value columns")
+        summary1 = dict1.get_summary(as_json=False)
+        self.assertIsInstance(summary1, dict)
+        self.assertEqual(len(summary1), 3)
+        summary2 = dict1.get_summary(as_json=True).replace('"', '')
+        self.assertIsInstance(summary2, str)
+        print(f"{summary2}")
 
     def test__str__(self):
         t_map = TabularSummary(name="My output")

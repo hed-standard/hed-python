@@ -11,11 +11,11 @@ from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 class HedTypeVariable:
 
-    def __init__(self, onset_manager, hed_schema, hed_definitions, variable_type="condition-variable"):
-        """ Create a variable manager for an events file.
+    def __init__(self, context_manager, hed_schema, hed_definitions, variable_type="condition-variable"):
+        """ Create a variable manager for one type-variable for one tabular file.
 
         Args:
-            onset_manager (HedContextManager): A list of HED strings.
+            context_manager (HedContextManager): A list of HED strings.
             hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
             hed_definitions (dict): A dictionary of DefinitionEntry objects.
             variable_type (str): Lowercase short form of the variable to be managed.
@@ -26,8 +26,8 @@ class HedTypeVariable:
 
         self.variable_type = variable_type.lower()
         self.definitions = DefinitionManager(hed_definitions, hed_schema, variable_type=variable_type)
-        hed_strings = onset_manager.hed_strings
-        hed_contexts = onset_manager.contexts
+        hed_strings = context_manager.hed_strings
+        hed_contexts = context_manager.contexts
         self.number_events = len(hed_strings)
         self._variable_map = {}
         self._extract_variables(hed_strings, hed_contexts)
@@ -38,7 +38,7 @@ class HedTypeVariable:
 
     @property
     def type_variables(self):
-        return list(self._variable_map.keys())
+        return set(self._variable_map.keys())
 
     def get_variable_def_names(self):
         tag_list = []

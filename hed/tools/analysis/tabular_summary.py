@@ -1,4 +1,4 @@
-
+import json
 from hed.errors import HedFileError
 from hed.tools.util.data_util import get_new_dataframe
 from hed.tools.analysis.annotation_util import generate_sidecar_entry
@@ -64,8 +64,24 @@ class TabularSummary:
         return side_dict
 
     def get_summary(self, as_json=False):
-        """ TODO: Implement this version """
-        return None
+        sorted_keys = sorted(self.categorical_info.keys())
+        categorical_cols = {}
+        for key in sorted_keys:
+            cat_dict = self.categorical_info[key]
+            sorted_v_keys = sorted(list(cat_dict))
+            val_dict = {}
+            for v_key in sorted_v_keys:
+                val_dict[v_key] = cat_dict[v_key]
+            categorical_cols[f"{key} [categorical column] values"] = val_dict
+        sorted_cols = sorted(map(str, list(self.value_info)))
+        value_cols = {}
+        for key in sorted_cols:
+            value_cols[f"{key} [value_column]"] = f"{self.value_info[key]} values"
+        summary = {"Summary name": self.name, "Categorical columns": categorical_cols, "Value columns": value_cols}
+        if as_json:
+            return json.dumps(summary, indent=4)
+        else:
+            return summary
 
     def get_number_unique(self, column_names=None):
         """ Return the number of unique values in columns.

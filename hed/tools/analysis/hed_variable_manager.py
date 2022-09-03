@@ -8,20 +8,20 @@ from hed.tools.analysis.hed_context_manager import HedContextManager
 
 class HedVariableManager:
 
-    def __init__(self, hed_strings, hed_schema, def_mapper):
-        """ Create a variable manager for an events file.
+    def __init__(self, hed_strings, hed_schema, definitions):
+        """ Create a variable manager for one tabular file for all type variables.
 
         Args:
             hed_strings (list): A list of HED strings.
             hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
-            def_mapper (DefMapper): A dictionary of DefinitionEntry objects.
+            definitions (dict): A dictionary of DefinitionEntry objects.
 
         Raises:
             HedFileError:  On errors such as unmatched onsets or missing definitions.
         """
 
         self.hed_schema = hed_schema
-        self.def_mapper = def_mapper
+        self.definitions = definitions
         self.context_manager = HedContextManager(hed_strings, hed_schema)
         self._variable_type_map = {}   # a map of type variable into HedTypeVariable objects
 
@@ -33,7 +33,7 @@ class HedVariableManager:
         if type_name.lower() in self._variable_type_map:
             return
         self._variable_type_map[type_name.lower()] = HedTypeVariable(self.context_manager, self.hed_schema,
-                                                                     self.def_mapper.gathered_defs,
+                                                                     self.definitions,
                                                                      variable_type=type_name)
 
     def get_factor_vectors(self, type_name, type_variables=None, factor_encoding="one-hot"):
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
     input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
     assembled_strings = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
-    def_map = input_data.get_definitions()
-    var_manager = HedVariableManager(assembled_strings, schema, def_map)
+    definitions = input_data.get_definitions()
+    var_manager = HedVariableManager(assembled_strings, schema, definitions)
     var_manager.add_type_variable("condition-variable")
     var_cond = var_manager.get_type_variable("condition-variable")
     var_summary = var_cond.summarize()

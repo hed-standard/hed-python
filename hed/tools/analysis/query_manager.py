@@ -50,4 +50,3 @@ if __name__ == '__main__':
         result[index] = q_parser.parse(obj)
 
     df = pd.DataFrame(result, columns=col_names)
-    print("toHere")
