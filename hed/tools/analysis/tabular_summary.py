@@ -1,10 +1,10 @@
-
+import json
 from hed.errors import HedFileError
 from hed.tools.util.data_util import get_new_dataframe
 from hed.tools.analysis.annotation_util import generate_sidecar_entry
 
 
-class BidsTabularSummary:
+class TabularSummary:
     """ Summarize the contents of BIDS tabular files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
@@ -62,6 +62,26 @@ class BidsTabularSummary:
         for column_name in self.value_info.keys():
             side_dict[column_name] = generate_sidecar_entry(column_name, [])
         return side_dict
+
+    def get_summary(self, as_json=False):
+        sorted_keys = sorted(self.categorical_info.keys())
+        categorical_cols = {}
+        for key in sorted_keys:
+            cat_dict = self.categorical_info[key]
+            sorted_v_keys = sorted(list(cat_dict))
+            val_dict = {}
+            for v_key in sorted_v_keys:
+                val_dict[v_key] = cat_dict[v_key]
+            categorical_cols[f"{key} [categorical column] values"] = val_dict
+        sorted_cols = sorted(map(str, list(self.value_info)))
+        value_cols = {}
+        for key in sorted_cols:
+            value_cols[f"{key} [value_column]"] = f"{self.value_info[key]} values"
+        summary = {"Summary name": self.name, "Categorical columns": categorical_cols, "Value columns": value_cols}
+        if as_json:
+            return json.dumps(summary, indent=4)
+        else:
+            return summary
 
     def get_number_unique(self, column_names=None):
         """ Return the number of unique values in columns.
@@ -207,16 +227,16 @@ class BidsTabularSummary:
 
         Returns:
             tuple:
-                - BidsTabularSummary: Summary of the file dictionary.
-                - dict: of individual BidsTabularSummary objects.
+                - TabularSummary: Summary of the file dictionary.
+                - dict: of individual TabularSummary objects.
 
         """
 
-        summary_all = BidsTabularSummary(skip_cols=skip_cols)
+        summary_all = TabularSummary(skip_cols=skip_cols)
         summary_dict = {}
-        for key, file in file_dictionary.file_dict.items():
-            orig_dict = BidsTabularSummary(skip_cols=skip_cols)
-            df = get_new_dataframe(file.file_path)
+        for key, file_path in file_dictionary.items():
+            orig_dict = TabularSummary(skip_cols=skip_cols)
+            df = get_new_dataframe(file_path)
             orig_dict.update(df)
             summary_dict[key] = orig_dict
             summary_all.update_summary(orig_dict)

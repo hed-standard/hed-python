@@ -3,7 +3,7 @@ from hed.schema import load_schema_version
 import pandas as pd
 
 
-class Query:
+class HedQuery:
     def __init__(self, query):
         self.name = query['name']
         self.query_type = query['query_type']
@@ -14,7 +14,7 @@ class Query:
         return self.expression.search_hed_string(hed_string_obj)
 
 
-class QueryManager:
+class HedQueryManager:
 
     def __init__(self, query_list):
         self.query_list = query_list
@@ -34,14 +34,14 @@ class QueryManager:
 
 
 if __name__ == '__main__':
-    qlist = [Query({'name': 'cond_1', 'query_type': 'condition', 'query_str': 'Condition-variable'}),
-             Query({'name': 'tag_1', 'query_type': 'get_tag', 'query_str': 'Sensory-presentation'})]
+    qlist = [HedQuery({'name': 'cond_1', 'query_type': 'condition', 'query_str': 'Condition-variable'}),
+             HedQuery({'name': 'tag_1', 'query_type': 'get_tag', 'query_str': 'Sensory-presentation'})]
 
     schema = load_schema_version(xml_version="8.0.0")
     test_strings = [HedString('Condition-variable/Test-cond', hed_schema=schema),
                     HedString('Visual-presentation', hed_schema=schema),
                     HedString('Agent-action, (Move, Hand)', hed_schema=schema)]
-    q_parser = QueryManager(qlist)
+    q_parser = HedQueryManager(qlist)
     col_names = q_parser.get_column_names()
     print(f"Column names:{str(col_names)}")
 
@@ -50,4 +50,3 @@ if __name__ == '__main__':
         result[index] = q_parser.parse(obj)
 
     df = pd.DataFrame(result, columns=col_names)
-    print("toHere")

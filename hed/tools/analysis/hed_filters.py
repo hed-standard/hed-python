@@ -1,7 +1,5 @@
-from hed.models import DefMapper
-from hed import HedTag
-from hed.models.definition_dict import DefTagNames
 from hed.errors import get_printable_issue_string
+
 
 class StringOp:
     def __init__(self, filter_name):

@@ -1,8 +1,20 @@
+import json
+
 
 class HedVariableCounts:
+    """ Keeps a summary of one value of one type of variable.
 
-    def __init__(self, name, variable_type="condition-variable"):
-        self.variable_name = name
+    Args:
+        variable_value (str)  The value of the variable to be counted
+        variable_type (str)   The type of variable.
+
+    Examples:
+        HedVariableCounts('SymmetricCond', 'condition-variable') keeps counts of Condition-variable/Symmetric
+
+    """
+
+    def __init__(self, variable_value, variable_type):
+        self.variable_value = variable_value
         self.variable_type = variable_type.lower()
         self.direct_references = 0
         self.total_events = 0
@@ -11,8 +23,14 @@ class HedVariableCounts:
         self.multiple_event_maximum = 0
         self.level_counts = {}
 
-    def update(self, var_counts):
-        var_sum = var_counts.get_summary(full=True)
+    def update(self, variable_info):
+        """ Update the counts from a HedTypeVariable.
+
+        Args:
+            variable_info (HedTypeFactor) information about the contents for a particular data file.
+
+        """
+        var_sum = variable_info.get_summary(full=True)
         self.direct_references += var_sum['direct_references']
         self.total_events += var_sum['total_events']
         self.number_type_events += var_sum['number_type_events']
@@ -28,7 +46,8 @@ class HedVariableCounts:
             self.level_counts[key]['events'] = self.level_counts[key]['events'] + item
 
     def get_summary(self, as_json=False):
-        summary = {'name': self.variable_name, 'variable_type': self.variable_type,
+        summary = {'variable_value': self.variable_value,
+                   'variable_type': self.variable_type,
                    'levels': len(self.level_counts.keys()),
                    'direct_references': self.direct_references,
                    'total_events': self.total_events,
@@ -42,9 +61,10 @@ class HedVariableCounts:
 
 
 class HedVariableSummary:
+    """ Holds a consolidated summary for one type variable. """
 
-    def __init__(self, variable_type="condition-variable"):
-        """ Constructor for HedVariableSummary.
+    def __init__(self, variable_type, name=''):
+        """ Constructor for HedVariableSummary for a particular type of variable.
 
         Args:
             variable_type (str)    Tag representing the type in this summary
@@ -52,34 +72,41 @@ class HedVariableSummary:
         """
 
         self.variable_type = variable_type.lower()
-        self.summaries = {}
+        self.name = name
+        self.summary = {}
 
     def __str__(self):
-        return f"{self.variable_type}[{self.variable_type}]: {len(self.summaries)} type_variables "
+        return f"Summary {self.name} for HED {self.variable_type} [{len(self.summary)} values]:" + '\n' + \
+            self.get_summary(as_json=True)
 
-    def get_summaries(self, as_json=True):
+    def get_summary(self, as_json=True):
         sum_dict = {}
-        for var_name, var_counts in self.summaries.items():
-            sum_dict[var_name] = var_counts.get_summary(as_json=False)
+        for var_value, var_counts in self.summary.items():
+            sum_dict[var_value] = var_counts.get_summary(as_json=False)
         if as_json:
             return json.dumps(sum_dict, indent=4)
         else:
             return sum_dict
 
-    def update_summary(self, var_counts):
-        if var_counts.variable_name not in self.summaries:
-            self.summaries[var_counts.variable_name] = HedVariableCounts(var_counts.variable_name,
-                                                                         var_counts.variable_type)
-        summary = self.summaries[var_counts.variable_name]
-        summary.update(var_counts)
+    def update_summary(self, variable):
+        """ Update this summary based on the type variable map.
+
+        Args:
+            variable (HedTypeVariable):  Contains the information about
+        """
+
+        for type_var in variable.type_variables:
+            if type_var not in self.summary:
+                self.summary[type_var] = HedVariableCounts(type_var, self.variable_type)
+            var_counts = self.summary[type_var]
+            var_counts.update(variable.get_variable(type_var))
 
 
 if __name__ == '__main__':
     import os
-    import json
     from hed.tools.analysis.hed_variable_manager import HedVariableManager
     from hed.schema import load_schema_version
-    from hed.models import HedString, DefinitionEntry, TabularInput, Sidecar
+    from hed.models import TabularInput, Sidecar
     from hed.tools.analysis.analysis_util import get_assembled_strings
     schema = load_schema_version(xml_version="8.1.0")
     bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -92,11 +119,12 @@ if __name__ == '__main__':
     hed_strings = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
     def_mapper = input_data.get_definitions()
     var_manager = HedVariableManager(hed_strings, schema, def_mapper)
-    var_summary = HedVariableSummary(variable_type="condition-variable")
-
+    var_manager.add_type_variable("condition-variable")
+    var_summary = HedVariableSummary("condition-variable")
     for man_var in var_manager.type_variables:
-        var_map = var_manager.get_variable(man_var)
+        var_map = var_manager.get_type_variable(man_var)
         var_summary.update_summary(var_map)
 
-    summary = var_summary.get_summaries(as_json=False)
-    print(f"Variable summary\n{var_summary.get_summaries()}")
+    final_summary = var_summary.get_summary(as_json=False)
+    print(f"Variable summary\n{final_summary}")
+    print(f"\n\n{str(var_summary)}")

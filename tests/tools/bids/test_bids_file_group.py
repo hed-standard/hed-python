@@ -1,6 +1,7 @@
 import os
 import unittest
 from hed.schema.hed_schema_io import load_schema
+from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.validator.hed_validator import HedValidator
 
@@ -37,6 +38,15 @@ class Test(unittest.TestCase):
         self.assertTrue(validation_issues, "BidsFileGroup should have validation warnings")
         self.assertEqual(len(validation_issues), 6,
                          "BidsFileGroup should have 2 validation warnings for missing columns")
+
+    def test_summarize(self):
+        events = BidsFileGroup(self.root_path)
+        info = events.summarize()
+        self.assertIsInstance(info, TabularSummary, "summarize returns a TabularSummary")
+        self.assertEqual(len(info.categorical_info), 10, "summarize info has entries with all columns if non-skipped")
+        info2 = events.summarize(skip_cols=['onset', 'sample'])
+        self.assertEqual(len(info2.categorical_info), len(info.categorical_info)-2,
+                         "summarize info has two less entries if two columns are skipped")
 
 
 if __name__ == '__main__':

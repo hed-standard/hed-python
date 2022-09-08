@@ -1,15 +1,15 @@
 from hed.schema import load_schema_version
-from hed.models import HedString, HedTag, DefinitionEntry
+from hed.models import HedString, HedTag, DefinitionEntry, DefMapper
 from hed.tools.analysis.hed_context_manager import HedContextManager
 
 
-class DefinitionManager:
+class HedDefinitionManager:
 
     def __init__(self, definitions, hed_schema, variable_type='condition-variable'):
         """ Create a definition manager for a type of variable.
 
         Args:
-            definitions (dict): A dictionary of DefinitionEntry objects.
+            definitions (dict or DefMapper): A dictionary of DefinitionEntry objects.
             hed_schema (Hedschema or HedSchemaGroup): The schema used for parsing.
             variable_type (str): Lower-case string giving the type of HED variable.
 
@@ -17,7 +17,12 @@ class DefinitionManager:
 
         self.variable_type = variable_type.lower()
         self.hed_schema = hed_schema
-        self.definitions = definitions
+        if isinstance(definitions, DefMapper):
+            self.definitions = definitions.gathered_defs
+        elif isinstance(definitions, dict):
+            self.definitions = definitions
+        else:
+            self.definitions = {}
         self.variable_map = {}   # maps def names to conditions.
         self._extract_variable_map()
 
@@ -87,7 +92,7 @@ class DefinitionManager:
             names = [tag.extension_or_value_portion.lower() for tag in item.get_all_tags() if 'def' in tag.tag_terms]
         if no_value:
             for index, name in enumerate(names):
-                name, name_value = DefinitionManager.split_name(name)
+                name, name_value = HedDefinitionManager.split_name(name)
                 names[index] = name
         return names
 
@@ -130,7 +135,7 @@ class DefinitionManager:
         for i in range(len(hed_strings)):
             def_groups[i] = []
         for i, hed in enumerate(hed_strings):
-            def_groups[i] = DefinitionManager.extract_defs(hed)
+            def_groups[i] = HedDefinitionManager.extract_defs(hed)
         return def_groups
 
     @staticmethod
@@ -169,7 +174,7 @@ if __name__ == '__main__':
                    'cond2': DefinitionEntry('Cond2', def2, False, None),
                    'cond3': DefinitionEntry('Cond3', def3, True, None),
                    'cond4': DefinitionEntry('Cond4', def4, False, None)}
-    def_man = DefinitionManager(definitions, schema)
+    def_man = HedDefinitionManager(definitions, schema)
     a = def_man.get_def_names(HedTag('Def/Cond3/4', hed_schema=schema))
     b = def_man.get_def_names(HedString('(Def/Cond3/5,(Red, Blue))', hed_schema=schema))
     c = def_man.get_def_names(HedString('(Def/Cond3/6,(Red, Blue, Def/Cond1), Def/Cond2)', hed_schema=schema))
