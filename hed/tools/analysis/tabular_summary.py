@@ -234,7 +234,7 @@ class TabularSummary:
 
         summary_all = TabularSummary(skip_cols=skip_cols)
         summary_dict = {}
-        for key, file_path in file_dictionary.file_dict.items():
+        for key, file_path in file_dictionary.items():
             orig_dict = TabularSummary(skip_cols=skip_cols)
             df = get_new_dataframe(file_path)
             orig_dict.update(df)

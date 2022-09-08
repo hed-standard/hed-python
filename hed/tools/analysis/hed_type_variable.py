@@ -4,7 +4,7 @@ import pandas as pd
 from hed import HedTag
 from hed.models import HedGroup
 from hed.schema import load_schema_version
-from hed.tools.analysis.definition_manager import DefinitionManager
+from hed.tools.analysis.hed_definition_manager import HedDefinitionManager
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
@@ -25,7 +25,7 @@ class HedTypeVariable:
         """
 
         self.variable_type = variable_type.lower()
-        self.definitions = DefinitionManager(hed_definitions, hed_schema, variable_type=variable_type)
+        self.definitions = HedDefinitionManager(hed_definitions, hed_schema, variable_type=variable_type)
         hed_strings = context_manager.hed_strings
         hed_contexts = context_manager.contexts
         self.number_events = len(hed_strings)

@@ -91,3 +91,25 @@ class Test(unittest.TestCase):
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
 
         self.error_handler.reset_error_context()
+
+    def test_printable_issue_string_with_filenames(self):
+        myfile = 'my_file.txt'
+        self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
+        self.error_handler.push_error_context(ErrorContext.FILE_NAME, myfile)
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+                                                                   "dummy", problem_char="#", char_index=0)
+
+        printable_issues = get_printable_issue_string(error_list, skip_filename=False)
+        self.assertTrue(len(printable_issues) > 10)
+        self.assertEqual(printable_issues.count(myfile), 1)
+
+        printable_issues2 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR, skip_filename=False)
+        self.assertTrue(len(printable_issues) > len(printable_issues2))
+        self.assertEqual(printable_issues2.count(myfile), 1)
+        printable_issues3 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR, skip_filename=False,
+                                                       title="Later added custom title that is longer")
+        self.assertTrue(len(printable_issues3) > len(printable_issues2))
+        self.assertEqual(printable_issues3.count(myfile), 1)
+
+        self.error_handler.reset_error_context()

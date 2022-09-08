@@ -14,10 +14,10 @@ class Test(unittest.TestCase):
                                        'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
-        input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
-        self.hed_strings = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
+        self.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        self.hed_strings = get_assembled_strings(self.input_data, hed_schema=schema, expand_defs=False)
         self.hed_schema = schema
-        self.definitions = input_data.get_definitions()
+        self.definitions = self.input_data.get_definitions()
 
     def test_constructor(self):
         var_manager = HedVariableManager(self.hed_strings, self.hed_schema, self.definitions)

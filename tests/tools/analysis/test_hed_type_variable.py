@@ -52,10 +52,10 @@ class Test(unittest.TestCase):
 
     def test_constructor(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
-        self.assertIsInstance(var_manager, HedTypeVariable,
-                              "Constructor should create a HedVariableManager from strings")
-        self.assertEqual(len(var_manager._variable_map), 8,
+        type_var = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+        self.assertIsInstance(type_var, HedTypeVariable,
+                              "Constructor should create a HedTypeManager from strings")
+        self.assertEqual(len(type_var._variable_map), 8,
                          "Constructor ConditionVariables should have the right length")
 
     def test_constructor_from_tabular_input(self):

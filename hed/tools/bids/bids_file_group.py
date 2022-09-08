@@ -1,5 +1,5 @@
 import os
-from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.error_reporter import ErrorContext, ErrorHandler, get_printable_issue_string
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
@@ -24,7 +24,7 @@ class BidsFileGroup:
     """
 
     def __init__(self, root_path, suffix="_events", obj_type="tabular",
-                 exclude_dirs=['sourcedata', 'derivatives', 'code']):
+                 exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
         """ Constructor for a BidsFileGroup.
 
         Args:
@@ -111,37 +111,50 @@ class BidsFileGroup:
         info.update(list(self.datafile_dict.keys()))
         return info
 
-    def validate_sidecars(self, hed_ops, check_for_warnings=True):
+    def validate_sidecars(self, hed_ops, check_for_warnings=True, error_handler=None):
         """ Validate merged sidecars.
 
         Args:
             hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
             check_for_warnings (bool):  If True, include warnings in the check.
+            error_handler (ErrorHandler): The common error handler for the dataset.
 
         Returns:
             list:   A list of validation issues found. Each issue is a dictionary.
 
         """
+
+        if not error_handler:
+            error_handler = ErrorHandler()
         issues = []
         for sidecar in self.sidecar_dict.values():
+            error_handler.push_error_context(ErrorContext.FILE_NAME, sidecar.file_path)
             if sidecar.has_hed:
-                issues += sidecar.contents.validate_entries(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
+                issues += sidecar.contents.validate_entries(hed_ops=hed_ops,
+                                                            name=sidecar.file_path,
+                                                            check_for_warnings=check_for_warnings)
+                error_handler.pop_error_context()
         return issues
 
-    def validate_datafiles(self, hed_ops, check_for_warnings=True, keep_contents=False):
+    def validate_datafiles(self, hed_ops, check_for_warnings=True, keep_contents=False, error_handler=None):
         """ Validate the datafiles and return an error list.
 
         Args:
             hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
             check_for_warnings (bool):  If True, include warnings in the check.
             keep_contents (bool):       If True, the underlying data files are read and their contents retained.
+            error_handler (ErrorHandler): The common error handler to use for the dataset.
 
         Returns:
             list:    A list of validation issues found. Each issue is a dictionary.
 
         """
+
+        if not error_handler:
+            error_handler = ErrorHandler()
         issues = []
         for data_obj in self.datafile_dict.values():
+            error_handler.push_error_context(ErrorContext.FILE_NAME, data_obj.file_path)
             data_obj.set_contents(overwrite=False)
             if not data_obj.has_hed:
                 continue
@@ -149,6 +162,7 @@ class BidsFileGroup:
             issues += data.validate_file(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
             if not keep_contents:
                 data_obj.clear_contents()
+            error_handler.pop_error_context()
         return issues
 
     def _make_datafile_dict(self):
@@ -204,23 +218,26 @@ class BidsFileGroup:
 
 
 if __name__ == '__main__':
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
+    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
+    path = 'G:\WakemanHenson\WH_Released'
     bids = BidsFileGroup(path)
 
-    for file_obj in bids.sidecar_dict.values():
-        print(file_obj)
-
-    for file_obj in bids.datafile_dict.values():
-        print(file_obj)
+    # for file_obj in bids.sidecar_dict.values():
+    #     print(file_obj.file_path)
+    #
+    # for file_obj in bids.datafile_dict.values():
+    #     print(file_obj.file_path)
 
     schema = load_schema_version(xml_version="8.0.0")
     validator = HedValidator(hed_schema=schema)
 
     issues_side = bids.validate_sidecars(hed_ops=[validator], check_for_warnings=False)
+    print(f"Side issues {str(issues_side)}\n")
     issues_data = bids.validate_datafiles(hed_ops=[validator], check_for_warnings=False)
+    print(f"Data issues {str(issues_data)}\n")
     if issues_side:
-        print(get_printable_issue_string(issues_side, "Sidecar errors"))
+        print(get_printable_issue_string(issues_side, "Sidecar errors", skip_filename=False))
     else:
         print("No validation errors in the sidecars")
 

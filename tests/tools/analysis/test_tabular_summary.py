@@ -1,6 +1,5 @@
 import unittest
 import os
-import json
 from hed.errors.exceptions import HedFileError
 from hed.tools import FileDictionary, TabularSummary
 from hed.tools import get_file_list, get_new_dataframe
@@ -56,7 +55,6 @@ class Test(unittest.TestCase):
         self.assertEqual(len(summary1), 3)
         summary2 = dict1.get_summary(as_json=True).replace('"', '')
         self.assertIsInstance(summary2, str)
-        print(f"{summary2}")
 
     def test__str__(self):
         t_map = TabularSummary(name="My output")
@@ -172,15 +170,15 @@ class Test(unittest.TestCase):
 
     def test_make_combined_dicts(self):
         files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="_events")
-        file_dict = FileDictionary("my name", files_bids)
-        dicts_all1, dicts1 = TabularSummary.make_combined_dicts(file_dict)
+        file_dict1 = FileDictionary("my name", files_bids)
+        dicts_all1, dicts1 = TabularSummary.make_combined_dicts(file_dict1.file_dict)
         self.assertTrue(isinstance(dicts_all1, TabularSummary),
                         "make_combined_dicts should return a BidsTabularSummary")
         self.assertTrue(isinstance(dicts1, dict), "make_combined_dicts should also return a dictionary of file names")
         self.assertEqual(6, len(dicts1), "make_combined_dicts should return correct number of file names")
         self.assertEqual(10, len(dicts_all1.categorical_info),
                          "make_combined_dicts should return right number of entries")
-        dicts_all2, dicts2 = TabularSummary.make_combined_dicts(file_dict,
+        dicts_all2, dicts2 = TabularSummary.make_combined_dicts(file_dict1.file_dict,
                                                                 skip_cols=["onset", "duration", "sample"])
         self.assertTrue(isinstance(dicts_all2, TabularSummary),
                         "make_combined_dicts should return a BidsTabularSummary")

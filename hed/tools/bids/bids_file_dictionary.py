@@ -30,17 +30,22 @@ class BidsFileDictionary(FileDictionary):
         """
         super().__init__(collection_name, None, None, separator='_')
         self.entities = entities
-        self.file_dict = self.make_dict(files, entities)
+        self._file_dict = self.make_dict(files, entities)
 
     @property
     def key_list(self):
         """ The dictionary keys. """
-        return list(self.file_dict.keys())
+        return list(self._file_dict.keys())
+
+    @property
+    def file_dict(self):
+        """ Dictionary of keys and paths. """
+        return {key:file.file_path for key, file in self._file_dict.items()}
 
     @property
     def file_list(self):
         """ Paths of the files in the list. """
-        return [file.file_path for file in self.file_dict.values()]
+        return [file.file_path for file in self._file_dict.values()]
 
     def correct_file(self, the_file):
         """ Transform to BidsFile if needed.
@@ -74,8 +79,8 @@ class BidsFileDictionary(FileDictionary):
             - None is returned if the key is not present.
 
         """
-        if key in self.file_dict.keys():
-            return self.file_dict[key].file_path
+        if key in self._file_dict.keys():
+            return self._file_dict[key].file_path
         return None
 
     def iter_files(self):
@@ -87,7 +92,7 @@ class BidsFileDictionary(FileDictionary):
                 - BidsFile:  The next BidsFile.
 
         """
-        for key, file in self.file_dict.items():
+        for key, file in self._file_dict.items():
             yield key, file
 
     def key_diffs(self, other_dict):
@@ -100,7 +105,7 @@ class BidsFileDictionary(FileDictionary):
             list: The symmetric difference of the keys in this dictionary and the other one.
 
         """
-        diffs = set(self.file_dict.keys()).symmetric_difference(set(other_dict.file_dict.keys()))
+        diffs = set(self._file_dict.keys()).symmetric_difference(set(other_dict._file_dict.keys()))
         return list(diffs)
 
     def get_new_dict(self, name, files):
@@ -165,7 +170,7 @@ class BidsFileDictionary(FileDictionary):
 
         """
         response_dict = {}
-        for key, file in self.file_dict.items():
+        for key, file in self._file_dict.items():
             if self.match_query(query_dict, file.entity_dict):
                 response_dict[key] = file
         return response_dict
@@ -185,7 +190,7 @@ class BidsFileDictionary(FileDictionary):
             - This function is used for analysis where a single subject or single type of task is being analyzed.
 
         """
-        split_dict, leftovers = self._split_dict_by_entity(self.file_dict, entity)
+        split_dict, leftovers = self._split_dict_by_entity(self._file_dict, entity)
         for entity_value, entity_dict in split_dict.items():
             split_dict[entity_value] = self.get_new_dict(f"{self.name}_{entity_value}", entity_dict)
         if leftovers:

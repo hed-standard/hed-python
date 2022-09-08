@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
     def test_make_query(self):
         dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
         results1 = dict1.make_query(query_dict={'sub': '*', 'run': '*'})
-        self.assertEqual(len(results1), len(dict1.file_dict), "make_query should return all of the entries when *.")
+        self.assertEqual(len(results1), len(dict1._file_dict), "make_query should return all of the entries when *.")
         results2 = dict1.make_query(query_dict={'sub': '*', 'run': ['1']})
         self.assertEqual(len(results2), 2, "make_query should return the right number of entries.")
         results3 = dict1.make_query(query_dict={'sub': '*', 'run': ['*']})
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         results5 = dict1.make_query(query_dict={'sub': '*', 'run': []})
         self.assertFalse(len(results5), "make_query be empty if the list for one of the entities is empty.")
         results6 = dict1.make_query(query_dict={'sub': '*'})
-        self.assertEqual(len(results6), len(dict1.file_dict), "make_query should return all of the entries when *.")
+        self.assertEqual(len(results6), len(dict1._file_dict), "make_query should return all of the entries when *.")
 
     def test_match_query(self):
         entity_dict = {'sub': '01', 'task': 'tempTask', 'run': '2'}
@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
 
     def test_split_dict_by_entity(self):
         dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
-        dist1_split, leftovers = BidsFileDictionary._split_dict_by_entity(dict1.file_dict, 'run')
+        dist1_split, leftovers = BidsFileDictionary._split_dict_by_entity(dict1._file_dict, 'run')
         self.assertIsInstance(dist1_split, dict, "split_by_entity returns a dictionary")
         self.assertEqual(3, len(dist1_split), 'split_by_entity should return the correct number of items')
         for value in dist1_split.values():

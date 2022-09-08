@@ -2,7 +2,7 @@ import os
 import unittest
 from hed import HedString, HedTag, load_schema_version, Sidecar, TabularInput
 from hed.models import DefinitionEntry
-from hed.tools import DefinitionManager
+from hed.tools import HedDefinitionManager
 
 
 class Test(unittest.TestCase):
@@ -54,24 +54,24 @@ class Test(unittest.TestCase):
         cls.schema = schema
 
     def test_constructor(self):
-        def_man = DefinitionManager(self.definitions1, self.schema)
-        self.assertIsInstance(def_man, DefinitionManager,
-                              "Constructor should create a DefinitionManager directly from a dict")
+        def_man = HedDefinitionManager(self.definitions1, self.schema)
+        self.assertIsInstance(def_man, HedDefinitionManager,
+                              "Constructor should create a HedDefinitionManager directly from a dict")
         self.assertEqual(len(def_man.variable_map), 6, "Constructor condition_map should have the right length")
         self.assertEqual(len(def_man.variable_map), len(def_man.definitions),
                          "Constructor condition_map should be the same length as the definitions dictionary")
 
     def test_constructor_from_tabular_input(self):
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        def_man = DefinitionManager(definitions, self.schema)
-        self.assertIsInstance(def_man, DefinitionManager,
-                              "Constructor should create a DefinitionManager from a tabular input")
+        def_man = HedDefinitionManager(definitions, self.schema)
+        self.assertIsInstance(def_man, HedDefinitionManager,
+                              "Constructor should create a HedDefinitionManager from a tabular input")
         self.assertEqual(len(def_man.variable_map), 17, "Constructor condition_map should have the right length")
         self.assertEqual(len(def_man.variable_map), len(def_man.definitions),
                          "Constructor condition_map should be the same length as the definitions dictionary")
 
     def test_get_vars(self):
-        def_man = DefinitionManager(self.definitions1, self.schema)
+        def_man = HedDefinitionManager(self.definitions1, self.schema)
         item1 = HedString(f"Sensory-event,((Red,Blue)),", self.schema)
         vars1 = def_man.get_vars(item1)
         self.assertFalse(vars1, "get_vars should return None if no condition type_variables")
@@ -84,7 +84,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(vars3), 5, "get_vars should return multiple condition type_variables")
 
     def test_get_def_names(self):
-        def_man = DefinitionManager(self.definitions1, self.schema)
+        def_man = HedDefinitionManager(self.definitions1, self.schema)
         a = def_man.get_def_names(HedTag('Def/Cond3/4', hed_schema=self.schema))
         self.assertEqual(len(a), 1, "get_def_names returns 1 item if single tag")
         self.assertEqual(a[0], 'cond3', "get_def_names returns the correct item if single tag")
@@ -102,16 +102,16 @@ class Test(unittest.TestCase):
         self.assertFalse(e, "get_def_names returns no items if no defs")
 
     def test_split_name(self):
-        name1, val1 = DefinitionManager.split_name('')
+        name1, val1 = HedDefinitionManager.split_name('')
         self.assertIsNone(name1, "split_name should return None split name for empty name")
         self.assertIsNone(val1, "split_name should return None split value for empty name")
-        name2, val2 = DefinitionManager.split_name('lumber')
+        name2, val2 = HedDefinitionManager.split_name('lumber')
         self.assertEqual(name2, 'lumber', 'split_name should return name if no split value')
         self.assertEqual(val2, '', 'split_name should return empty string if no split value')
-        name3, val3 = DefinitionManager.split_name('Lumber/5.23', lowercase=False)
+        name3, val3 = HedDefinitionManager.split_name('Lumber/5.23', lowercase=False)
         self.assertEqual(name3, 'Lumber', 'split_name should return name if split value')
         self.assertEqual(val3, '5.23', 'split_name should return value as string if split value')
-        name4, val4 = DefinitionManager.split_name('Lumber/5.23')
+        name4, val4 = HedDefinitionManager.split_name('Lumber/5.23')
         self.assertEqual(name4, 'lumber', 'split_name should return name if split value')
         self.assertEqual(val4, '5.23', 'split_name should return value as string if split value')
 
