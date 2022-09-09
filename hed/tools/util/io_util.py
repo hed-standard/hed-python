@@ -1,6 +1,8 @@
 """Utilities for generating and handling file names."""
 
 import os
+import shutil
+from pathlib import Path
 from werkzeug.utils import secure_filename
 from hed.errors import HedFileError
 
@@ -60,6 +62,12 @@ def extract_suffix_path(path, prefix_path):
         return_path = return_path[len(real_prefix):]
     return return_path
 
+def find_task_files(bids_dir, task=None, suffix='*_events.tsv'):
+    # TODO: May need to be replaced.
+    if task is None:
+        return [path for path in Path(bids_dir).rglob(suffix)]
+    else:
+        return [path for path in Path(bids_dir).rglob(suffix) if task in str(path)]
 
 def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None):
     """ Generate a filename for the attachment.
@@ -261,6 +269,29 @@ def parse_bids_filename(file_path):
         entity_dict[split_dict["key"]] = split_dict["value"]
     return suffix, ext, entity_dict
 
+def replace_new_with_old(path):
+    """ Replaces path with the one whose basename ends in orig.
+
+    # TODO: May need to be rewritten after new backup strategy is implemented.
+    Args:
+        path (str):  Full path of the file to be replaced.
+
+    Returns:
+        bool:  True if successful replacement.
+
+    Notes:
+        The _orig file remains in place and can be deleted separately if all place all replacements are successful.
+
+    """
+    old_path = str(path)[:-4] + 'orig' + str(path)[-4:]
+    if not os.path.exists(old_path) or not os.path.isfile(old_path):
+        return False
+    try:
+        os.remove(path)
+        shutil.copy(old_path, path)
+    except:
+        return False
+    return True
 
 def _split_entity(piece):
     """Splits an piece into an entity or suffix.

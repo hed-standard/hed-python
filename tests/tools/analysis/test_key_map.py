@@ -8,7 +8,7 @@ from hed.tools import KeyMap, get_file_list, get_new_dataframe
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/curation')
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
         cls.curation_base_dir = curation_base_dir
         cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")

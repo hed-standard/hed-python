@@ -290,3 +290,43 @@ def separate_columns(base_cols, target_cols):
         else:
             present_cols.append(col)
     return present_cols, missing_cols
+
+## TODO: ------------------------------------------------------------------
+def get_indices(df, column, start, stop):
+    start_event = [i for (i, v) in enumerate(df[column].tolist())
+                   if v in start]
+    end_event = [i for (i, v) in enumerate(df[column].tolist())
+                 if v in stop]
+
+    lst = []
+
+    next_start = start_event[0]
+    while 1:
+        try:
+            next_end = find_next(next_start, end_event)
+            lst.append((next_start, next_end))
+            next_start = find_next_start(next_end, start_event)
+        except IndexError:
+            break
+
+    return lst
+
+
+def find_next(v, lst):
+    return [x for x in sorted(lst) if x > v][0]
+
+def tuple_to_range(tuple_list, inclusion):
+    # change normal range inclusion behaviour based on user input
+    [k, m] = [0, 0]
+    if inclusion[0] == 'exclude':
+        k += 1
+    if inclusion[1] == 'include':
+        m += 1
+
+    range_list = []
+    for tup in tuple_list:
+        range_list.append([*range(tup[0] + k, tup[1] + m)])
+    return range_list
+
+def find_next_start(v, lst):
+    return [x for x in sorted(lst) if x >= v][0]
