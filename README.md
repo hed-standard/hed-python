@@ -64,6 +64,12 @@ The [Github pull request](https://github.com/hed-standard/hed-python/pulls)
 may also be used for contributions.
 Usually these updates should be made to the `develop` branch, not the `master`.
 
+#### Local Settings Storage
+Cached Schemas by default are stored in "home/.hedtools/" 
+Location of "home" directory varies by OS.
+
+Use hed.schema.set_cache_directory to change the location.
+The HED cache can be shared across processes.
 
 ### Other links of interest
 

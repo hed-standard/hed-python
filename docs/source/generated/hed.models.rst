@@ -116,6 +116,14 @@ hed.models.onset\_mapper module
    :undoc-members:
    :show-inheritance:
 
+hed.models.onset\_mapper\_hedops module
+---------------------------------------
+
+.. automodule:: hed.models.onset_mapper_hedops
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hed.models.sidecar module
 -------------------------
 
@@ -144,6 +152,14 @@ hed.models.tabular\_input module
 --------------------------------
 
 .. automodule:: hed.models.tabular_input
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hed.models.tabular\_input\_temp module
+--------------------------------------
+
+.. automodule:: hed.models.tabular_input_temp
    :members:
    :undoc-members:
    :show-inheritance:

@@ -2,19 +2,16 @@ import unittest
 import os
 from io import StringIO
 from unittest import mock
-
-from hed.errors.exceptions import HedFileError
-from hed.tools import BidsTabularDictionary, HedLogger, report_diffs
-from hed.util import get_file_list
+from hed.tools import BidsTabularDictionary, get_file_list, HedLogger, report_diffs
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                         '../../data/bids/eeg_ds003654s_hed')
-        cls.file_list = get_file_list(cls.bids_base_dir, name_suffix="_events",
+        bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        cls.file_list = get_file_list(bids_base_dir, name_suffix="_events",
                                       extensions=['.tsv'], exclude_dirs=['stimuli'])
+        cls.bids_base_dir = bids_base_dir
 
     def test_report_tsv_diffs(self):
         dict1 = BidsTabularDictionary("Bids1", self.file_list, entities=('sub', 'run'))

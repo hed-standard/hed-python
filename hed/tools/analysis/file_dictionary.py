@@ -32,7 +32,7 @@ class FileDictionary:
 
         """
         self.collection_name = collection_name
-        self.file_dict = {}
+        self._file_dict = {}
         self.create_file_dict(file_list, key_indices, separator)
 
     @property
@@ -43,12 +43,17 @@ class FileDictionary:
     @property
     def key_list(self):
         """ Keys in this dictionary. """
-        return list(self.file_dict.keys())
+        return list(self._file_dict.keys())
+
+    @property
+    def file_dict(self):
+        """ Dictionary of path values in this dictionary. """
+        return self._file_dict
 
     @property
     def file_list(self):
         """ List of path values in this dictionary. """
-        return list(self.file_dict.values())
+        return list(self._file_dict.values())
 
     def create_file_dict(self, file_list, key_indices, separator):
         """ Create new dict based on key indices.
@@ -60,7 +65,7 @@ class FileDictionary:
 
         """
         if key_indices:
-            self.file_dict = self.make_file_dict(file_list, key_indices=key_indices, separator=separator)
+            self._file_dict = self.make_file_dict(file_list, key_indices=key_indices, separator=separator)
 
     def get_file_path(self, key):
         """ Return file path corresponding to key.
@@ -72,7 +77,7 @@ class FileDictionary:
             str: File path.
 
         """
-        return self.file_dict.get(key, None)
+        return self._file_dict.get(key, None)
 
     def iter_files(self):
         """ Iterator over the files in this dictionary.
@@ -82,7 +87,7 @@ class FileDictionary:
             - file: File path.
 
         """
-        for key, file in self.file_dict.items():
+        for key, file in self._file_dict.items():
             yield key, file
 
     def key_diffs(self, other_dict):
@@ -95,7 +100,7 @@ class FileDictionary:
             list: The symmetric difference of the keys in this dictionary and the other one.
 
         """
-        diffs = set(self.file_dict.keys()).symmetric_difference(set(other_dict.file_dict.keys()))
+        diffs = set(self._file_dict.keys()).symmetric_difference(set(other_dict._file_dict.keys()))
         return list(diffs)
 
     def output_files(self, title=None, logger=None):
@@ -115,7 +120,7 @@ class FileDictionary:
         output_list = []
         if title:
             output_list.append(f"{title} ({len(self.key_list)} files)")
-        for key, value in self.file_dict.items():
+        for key, value in self._file_dict.items():
             basename = os.path.basename(self.get_file_path(key))
             output_list.append(f"{key}: {basename}")
             if logger:

@@ -17,6 +17,7 @@
       ~SpreadsheetInput.convert_to_short
       ~SpreadsheetInput.extract_definitions
       ~SpreadsheetInput.get_def_and_mapper_issues
+      ~SpreadsheetInput.get_definitions
       ~SpreadsheetInput.get_worksheet
       ~SpreadsheetInput.iter_dataframe
       ~SpreadsheetInput.reset_mapper

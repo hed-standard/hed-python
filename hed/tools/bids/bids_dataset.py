@@ -1,6 +1,6 @@
 import os
 import json
-from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
@@ -21,7 +21,8 @@ class BidsDataset:
 
     """
 
-    def __init__(self, root_path, schema=None, tabular_types=None):
+    def __init__(self, root_path, schema=None, tabular_types=None,
+                 exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
         """ Constructor for a BIDS dataset.
 
         Args:
@@ -29,6 +30,7 @@ class BidsDataset:
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             tabular_types (list or None):  List of strings specifying types of tabular types to include.
                 If None or empty, then ['events'] is assumed.
+            exclude_dirs=['sourcedata', 'derivatives', 'code']):
 
         """
         self.root_path = os.path.realpath(root_path)
@@ -39,12 +41,15 @@ class BidsDataset:
         else:
             self.schema = load_schema_version(self.dataset_description.get("HEDVersion", None))
 
+        self.exclude_dirs = exclude_dirs
         self.tabular_files = {"participants": BidsFileGroup(root_path, suffix="participants", obj_type="tabular")}
         if not tabular_types:
-            self.tabular_files["events"] = BidsFileGroup(root_path, suffix="events", obj_type="tabular")
+            self.tabular_files["events"] = BidsFileGroup(root_path, suffix="events", obj_type="tabular",
+                                                         exclude_dirs=exclude_dirs)
         else:
             for suffix in tabular_types:
-                self.tabular_files[suffix] = BidsFileGroup(root_path, suffix=suffix, obj_type="tabular")
+                self.tabular_files[suffix] = BidsFileGroup(root_path, suffix=suffix, obj_type="tabular",
+                                                           exclude_dirs=exclude_dirs)
 
     def get_tabular_group(self, obj_type="events"):
         """ Return the specified tabular file group.
@@ -73,13 +78,17 @@ class BidsDataset:
 
         """
         validator = HedValidator(hed_schema=self.schema)
+        error_handler = ErrorHandler()
         if not types:
             types = list(self.tabular_files.keys())
         issues = []
         for tab_type in types:
             files = self.tabular_files[tab_type]
-            issues += files.validate_sidecars(hed_ops=[validator], check_for_warnings=check_for_warnings)
-            issues += files.validate_datafiles(hed_ops=[validator], check_for_warnings=check_for_warnings)
+            issues += files.validate_sidecars(hed_ops=[validator],
+                                              check_for_warnings=check_for_warnings, error_handler=error_handler)
+            issues += files.validate_datafiles(hed_ops=[validator],
+                                               check_for_warnings=check_for_warnings,
+                                               error_handler=error_handler)
         return issues
 
     def get_summary(self):
@@ -109,37 +118,39 @@ class BidsDataset:
 
 
 if __name__ == '__main__':
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        '../../../tests/data/bids/eeg_ds003654s_hed_library')
+    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    #                     '../../../tests/data/bids/eeg_ds003654s_hed_library')
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                     '../../../tests/data/bids/eeg_ds003654s_hed')
     #
+    # path = 'Q:\WakemanHensonON'
+    path = 'G:\WakemanHenson\WH_Released'
     bids = BidsDataset(path)
     issue_list = bids.validate(check_for_warnings=False)
     if issue_list:
-        issue_str = get_printable_issue_string(issue_list, "HED validation errors:")
+        issue_str = get_printable_issue_string(issue_list, "HED validation errors:", skip_filename=False)
     else:
         issue_str = "No issues"
     print(issue_str)
     warnings = False
-    path = '/XXX/bids-examples/xeeg_hed_score/'
-    bids = BidsDataset(path)
-    # summary1 = bids.get_summary()
-    # print(json.dumps(summary1, indent=4))
-    print("\nNow validating with the prerelease schema.")
-    base_version = '8.1.0'
-    score_url = f"https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/" \
-                f"score/prerelease/HED_score_1.0.0.xml"
-
-    schema_base = load_schema_version(xml_version="8.1.0")
-    schema_score = load_schema(score_url, schema_prefix="sc")
-    bids.schema = HedSchemaGroup([schema_base, schema_score])
-
-    issue_list2 = bids.validate(check_for_warnings=warnings)
-    if issue_list2:
-        issue_str2 = get_printable_issue_string(issue_list2, "HED validation errors: ", skip_filename=False)
-    else:
-        issue_str2 = "No HED validation errors"
-    print(issue_str2)
+    # path = '/XXX/bids-examples/xeeg_hed_score/'
+    # bids = BidsDataset(path)
+    # # summary1 = bids.get_summary()
+    # # print(json.dumps(summary1, indent=4))
+    # print("\nNow validating with the prerelease schema.")
+    # base_version = '8.1.0'
+    # score_url = f"https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/" \
+    #             f"score/prerelease/HED_score_1.0.0.xml"
+    #
+    # schema_base = load_schema_version(xml_version="8.1.0")
+    # schema_score = load_schema(score_url, schema_prefix="sc")
+    # bids.schema = HedSchemaGroup([schema_base, schema_score])
+    #
+    # issue_list2 = bids.validate(check_for_warnings=warnings)
+    # if issue_list2:
+    #     issue_str2 = get_printable_issue_string(issue_list2, "HED validation errors: ", skip_filename=False)
+    # else:
+    #     issue_str2 = "No HED validation errors"
+    # print(issue_str2)

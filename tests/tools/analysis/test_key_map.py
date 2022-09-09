@@ -2,8 +2,7 @@ import unittest
 import os
 import pandas as pd
 from hed.errors import HedFileError
-from hed.tools import KeyMap
-from hed.util import get_file_list, get_new_dataframe
+from hed.tools import KeyMap, get_file_list, get_new_dataframe
 
 
 class Test(unittest.TestCase):

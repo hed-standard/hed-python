@@ -18,6 +18,7 @@
       ~TabularInput.create_def_mapper
       ~TabularInput.extract_definitions
       ~TabularInput.get_def_and_mapper_issues
+      ~TabularInput.get_definitions
       ~TabularInput.get_worksheet
       ~TabularInput.iter_dataframe
       ~TabularInput.reset_column_mapper
@@ -27,7 +28,7 @@
       ~TabularInput.to_excel
       ~TabularInput.update_definition_mapper
       ~TabularInput.validate_file
-      ~TabularInput.validate_file_sidecars
+      ~TabularInput.validate_sidecar
    
    
 

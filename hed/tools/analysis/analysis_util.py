@@ -1,7 +1,7 @@
 """ Utilities for downstream analysis such as searching. """
 
 import pandas as pd
-from hed.models import DefinitionDict, TabularInput, TagExpressionParser
+from hed.models import TabularInput, TagExpressionParser
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):
@@ -24,13 +24,14 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
     else:
         eligible_columns = None
 
-    hed_obj_list, definitions = get_assembled_strings(data_input, expand_defs=expand_defs)
+    hed_obj_list = get_assembled_strings(data_input, expand_defs=expand_defs)
     hed_string_list = [str(hed) for hed in hed_obj_list]
     if not eligible_columns:
         df = pd.DataFrame({"HED_assembled": hed_string_list})
     else:
         df = data_input.dataframe[eligible_columns].copy(deep=True)
         df['HED_assembled'] = hed_string_list
+    definitions = data_input.get_definitions().gathered_defs
     return df, definitions
 
 
@@ -44,13 +45,11 @@ def get_assembled_strings(table, hed_schema=None, expand_defs=False):
 
     Returns:
         list: A list of HedString or HedStringGroup objects.
-        dict: A dictionary of definitions for this table.
 
     """
     hed_list = list(table.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,
                                          expand_defs=expand_defs, remove_definitions=True))
-    definitions = DefinitionDict.get_as_strings(table._def_mapper.gathered_defs)
-    return hed_list, definitions
+    return hed_list
 
 
 def search_tabular(data_input, hed_schema, query, columns_included=None):
@@ -59,7 +58,7 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
     Args:
         data_input (TabularInput): The tabular input file (e.g., events) to be searched.
         hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
-        query (str):     The str query to make.
+        query (str or list):     The str query or list of string queries to make.
         columns_included (list or None):  List of names of columns to include
 
     Returns:
@@ -72,7 +71,7 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
     else:
         eligible_columns = None
 
-    hed_list, dictionary = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
+    hed_list = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
     expression = TagExpressionParser(query)
     hed_tags = []
     row_numbers = []
@@ -103,8 +102,8 @@ if __name__ == '__main__':
     sidecar = Sidecar(json_path, name='face_sub1_json')
     input_data = TabularInput(events_path, sidecar=sidecar, name="face_sub1_events")
     hed_schema1 = load_schema_version(xml_version="8.1.0")
-    # query1 = "Sensory-event"
-    # df3 = search_tabular(input_data, hed_schema1, query1, columns_included=['onset', 'event_type'])
-    #
-    # print(f"{len(df3)} events match")
+    query1 = "Sensory-event"
+    df3 = search_tabular(input_data, hed_schema1, query1, columns_included=['onset', 'event_type'])
+
+    print(f"{len(df3)} events match")
     df1, defs = assemble_hed(input_data, columns_included=None, expand_defs=False)

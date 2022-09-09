@@ -1,4 +1,4 @@
-from hed.util.data_util import get_new_dataframe
+from hed.tools.util.data_util import get_new_dataframe
 from hed.tools.bids.bids_file_dictionary import BidsFileDictionary
 from hed.errors.exceptions import HedFileError
 from hed.tools.bids.bids_file import BidsFile
@@ -71,7 +71,7 @@ class BidsTabularDictionary(BidsFileDictionary):
         """
         self._set_tsv_info()
         diff_list = []
-        for key in self.file_dict.keys():
+        for key in self._file_dict.keys():
             if self.rowcount_dict[key] != other_dict.rowcount_dict[key]:
                 diff_list.append((key, self.rowcount_dict[key], other_dict.rowcount_dict[key]))
         return diff_list
@@ -121,7 +121,7 @@ class BidsTabularDictionary(BidsFileDictionary):
 
         """
         self._set_tsv_info()
-        for key, file in self.file_dict.items():
+        for key, file in self._file_dict.items():
             yield key, file, self.rowcount_dict[key], self.column_dict[key]
 
     def make_new(self, name, files):
@@ -141,8 +141,65 @@ class BidsTabularDictionary(BidsFileDictionary):
         if self._info_set:
             return
 
-        for key, file in self.file_dict.items():
+        for key, file in self._file_dict.items():
             df = get_new_dataframe(file.file_path)
             self.rowcount_dict[key] = len(df.index)
             self.column_dict[key] = list(df.columns.values)
         self.info_set = True
+
+    def report_diffs(self, tsv_dict, logger=None):
+        """ Reports and logs the contents and differences between this tabular dictionary and another
+
+        Args:
+            tsv_dict (BidsTabularDictionary):  A dictionary representing BIDS-keyed tsv files.
+            logger (HedLogger):                 A HedLogger object for reporting the values by key.
+
+        Returns:
+            str:  A string with the differences.
+
+        """
+        report_list = [f"{self.name} has {len(self.file_list)} event files"]
+        logger.add("overall", f"{report_list[-1]}")
+        report_list.append(f"{self.name} has {len(tsv_dict.file_list)} event files")
+        logger.add("overall", f"{report_list[-1]}")
+
+        report_list.append(self.output_files(title=f"\n{self.name} event files", logger=logger))
+        report_list.append(tsv_dict.output_files(title=f"\n{tsv_dict.name} event files", logger=logger))
+
+        # Make sure there are the same number of files in both collections
+        if len(self.key_list) != len(tsv_dict.key_list):
+            report_list.append(f"{self.name} has {len(self.file_list)} files and " +
+                               f"{tsv_dict.name} has {len(tsv_dict.file_list)} files")
+            if logger:
+                logger.add("overall", f"{report_list[-1]}", level="ERROR")
+
+        # Compare keys from the two dictionaries to make sure they have the same keys
+        key_diff = self.key_diffs(tsv_dict)
+        if key_diff:
+            report_list.append(f"File key differences {str(key_diff)}")
+            logger.add("overall", f"{report_list[-1]}", level="ERROR")
+
+        # Output the column names for each type of event file
+        report_list.append(f"\n{self.name} event file columns:")
+        for key, file, rowcount, columns in self.iter_files():
+            report_list.append(f"{self.name}: [{rowcount} events] {str(columns)}")
+            logger.add(key, f"{report_list[-1]}")
+
+        for key, file, rowcount, columns in tsv_dict.iter_files():
+            report_list.append(f"{tsv_dict.name}: [{rowcount} events] {str(columns)}")
+            logger.add(key, f"{report_list[-1]}")
+
+        # Output keys for files in which the BIDS and EEG.events have different numbers of events
+        count_diffs = self.count_diffs(tsv_dict)
+        if count_diffs:
+            report_list.append(f"\nThe number of {self.name} events and {tsv_dict.name} events" +
+                               f"differ for the following files:")
+            for item in count_diffs:
+                report_list.append(f"The {self.name} file has {item[1]} rows and " +
+                                   f"the {tsv_dict.name} event file has {item[2]} rows")
+                logger.add(item[0], f"{report_list[-1]}", level="ERROR")
+        else:
+            report_list.append(f"\nThe {self.name} and {tsv_dict.name} files have the same number of rows")
+            logger.add("overall", f"{report_list[-1]}")
+
+        return "\n".join(report_list)

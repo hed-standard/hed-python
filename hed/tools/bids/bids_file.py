@@ -1,5 +1,5 @@
 import os
-from hed.util.io_util import parse_bids_filename
+from hed.tools.util.io_util import parse_bids_filename
 
 
 class BidsFile:
@@ -43,7 +43,10 @@ class BidsFile:
         """ Set the contents attribute of this object to None. """
         self.contents = None
 
-    def get_key(self, entities):
+    def get_entity(self, entity_name):
+        return self.entity_dict.get(entity_name, None)
+
+    def get_key(self, entities=None):
         """ Return a key for this BIDS file given a list of entities.
 
         Args:
@@ -52,7 +55,13 @@ class BidsFile:
         Returns:
             str:  A key based on this object.
 
+        Notes:
+            If entities is None, then the file path is used as the key
+
         """
+
+        if not entities:
+            return self.file_path
         key_list = []
         for entity in entities:
             if entity in self.entity_dict:

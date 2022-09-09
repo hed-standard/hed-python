@@ -1,6 +1,5 @@
 import os
 import unittest
-from hed.errors import HedFileError
 from hed.schema.hed_schema_io import load_schema, load_schema_version
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup

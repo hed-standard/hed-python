@@ -1,6 +1,6 @@
 import os
 from hed.tools.bids.bids_file import BidsFile
-from hed.models import Sidecar, TabularInput
+from hed.models.tabular_input import TabularInput
 
 
 class BidsTabularFile(BidsFile):
