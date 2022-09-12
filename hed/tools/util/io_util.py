@@ -269,6 +269,7 @@ def parse_bids_filename(file_path):
         entity_dict[split_dict["key"]] = split_dict["value"]
     return suffix, ext, entity_dict
 
+
 def replace_new_with_old(path):
     """ Replaces path with the one whose basename ends in orig.
 
@@ -292,6 +293,7 @@ def replace_new_with_old(path):
     except:
         return False
     return True
+
 
 def _split_entity(piece):
     """Splits an piece into an entity or suffix.

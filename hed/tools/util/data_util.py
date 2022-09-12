@@ -291,6 +291,7 @@ def separate_columns(base_cols, target_cols):
             present_cols.append(col)
     return present_cols, missing_cols
 
+
 ## TODO: ------------------------------------------------------------------
 def get_indices(df, column, start, stop):
     start_event = [i for (i, v) in enumerate(df[column].tolist())

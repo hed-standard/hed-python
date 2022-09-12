@@ -8,6 +8,7 @@ from hed.tools import get_file_list, get_new_dataframe
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+
         curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
         bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                      '../../data/bids/eeg_ds003654s_hed')
