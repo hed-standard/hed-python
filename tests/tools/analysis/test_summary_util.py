@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
                            f" (Item-count/1, Face), Item-interval/0), " \
                            f"Description/Factor level indicating the first display of this face.))"
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                 "../../data/curation/tag_summary_template.json5")
+                                 "../../data/remodeling/tag_summary_template.json5")
         with open(json_path) as fp:
             cls.rules = json.load(fp)
 

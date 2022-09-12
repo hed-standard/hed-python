@@ -9,13 +9,13 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
-        event_path = '../../data/curation/sub-001_task-AuditoryVisualShift_run-01_events.tsv'
+        event_path = '../../data/remodeling/sub-001_task-AuditoryVisualShift_run-01_events.tsv'
         cls.event_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), event_path)
 
-        hed_col_path = '../../data/curation/sub-002_task-FacePerception_run-1_events.tsv'
+        hed_col_path = '../../data/remodeling/sub-002withHed_task-FacePerception_run-1_events.tsv'
         cls.event_path_hed_col = os.path.join(os.path.dirname(os.path.realpath(__file__)), hed_col_path)
 
-        sidecar_path = '../../data/curation/task-AuditoryVisualShift_events.json'
+        sidecar_path = '../../data/remodeling/task-AuditoryVisualShift_events.json'
         cls.sidecar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), sidecar_path)
 
     def test_constructor(self):

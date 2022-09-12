@@ -1,0 +1,63 @@
+{
+    "trial_type": {
+        "Description": "Description for trial_type",
+        "HED": {
+            "succesful_stop": "Sensory-presentation, Visual-presentation, Image, Label/succesful_stop",
+            "unsuccesful_stop": "Sensory-presentation, Visual-presentation, Image, Label/unsuccesful_stop",
+            "go": "Sensory-presentation, Visual-presentation, Image, Label/go"
+        },
+        "Levels": {
+            "succesful_stop": "Presentation of a face image in a trial with a stop signal in which participant inhibited response.",
+            "unsuccesful_stop": "Presentation of a face image in a trial with a stop signal in which participant did not inhibit response.",
+            "go": "Presentation of a face image in a trial with no stop signal"
+        }
+    },
+    "stop_signal_delay": {
+        "Description": "Stop-signal cue delay from onset.",
+        "HED": "((Cue, Think/Inhibit), Delay/# s)"
+    },
+    "response_time": {
+        "Description": "Response time delay from onset.",
+        "HED": "(Participant-response, Delay/# s)"
+    },
+    "response_accuracy": {
+        "Description": "Indicates whether a response correctly indicated",
+        "HED": {
+            "incorrect": "(Incorrect-action, (Identify, (Image, Sex)))",
+            "correct": "(Correct-action, (Identify, (Image, Sex)))"
+        },
+        "Levels": {
+            "incorrect": "Used the wrong hand to indicate the sex of the face image.",
+            "correct": "Used the correct hand to indicate the sex of the face image."
+        }
+    },
+    "response_hand": {
+        "Description": "Description for response_hand",
+        "HED": {
+            "left": "(Hand, (Left-side-of, Body))",
+            "right": "(Hand, (Right-side-of, Body))"
+        },
+        "Levels": {
+            "left": "A response using the left hand.",
+            "right": "A response using the right hand."
+        }
+    },
+    "sex": {
+        "Description": "The sex of the image",
+        "HED": {
+            "male": "Def/Male-image-cond",
+            "female": "Def/Female-image-cond"
+        },
+        "Levels": {
+            "male": "The image was the face of a male person.",
+            "female": "The image was the face of a female person."
+        }
+    },
+    "hed_defs": {
+        "Description": "HED user-defined terms for the dataset.",
+        "HED": {
+            "def_male": "(Definition/Male-image-cond, (Condition-variable/Image-sex, (Male, (Image, Face))))",
+            "def_female": "(Definition/Female-image-cond, (Condition-variable/Image-sex, (Female, (Image, Face))))"
+        }
+    }
+}
