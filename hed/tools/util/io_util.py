@@ -293,6 +293,31 @@ def replace_new_with_old(path):
         return False
     return True
 
+def replace_new_with_old(path):
+    """ Replaces path with the one whose basename ends in orig.
+
+    # TODO: May need to be rewritten after new backup strategy is implemented.
+    Args:
+        path (str):  Full path of the file to be replaced.
+
+    Returns:
+        bool:  True if successful replacement.
+
+    Notes:
+        The _orig file remains in place and can be deleted separately if all place all replacements are successful.
+
+    """
+    old_path = str(path)[:-4] + 'orig' + str(path)[-4:]
+    if not os.path.exists(old_path) or not os.path.isfile(old_path):
+        return False
+    try:
+        os.remove(path)
+        shutil.copy(old_path, path)
+    except:
+        return False
+    return True
+
+
 def _split_entity(piece):
     """Splits an piece into an entity or suffix.
 

@@ -8,7 +8,6 @@ from hed.tools.util.io_util import get_file_list
 from hed.tools.util.hed_logger import HedLogger
 
 
-
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
