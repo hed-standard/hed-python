@@ -65,7 +65,7 @@ class Dispatcher:
         Args:
             filename (str)      Full path of the file to be remodeled.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
-            verbose (bool)  If True, output informative messages during execution.
+            verbose (bool):  If true, print out progress reports
 
         """
 
@@ -79,7 +79,7 @@ class Dispatcher:
                                f"{str(filename)} does not correspond to a valid tab-separated value file", "")
         df = self.prep_events(df)
         for operation in self.parsed_ops:
-            df = operation.do_op(self, df, filename, sidecar=sidecar, verbose=verbose)
+            df = operation.do_op(self, df, filename, sidecar=sidecar)
         df = df.fillna('n/a')
         return df
 

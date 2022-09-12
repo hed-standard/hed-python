@@ -31,7 +31,7 @@ class SummarizeColumnNamesOp(BaseOp):
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
 
-    def do_op(self, dispatcher, df, name, sidecar=None, verbose=False):
+    def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns corresponding to values in a specified column.
 
         Args:
@@ -39,7 +39,6 @@ class SummarizeColumnNamesOp(BaseOp):
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
-            verbose (bool) If True output informative messages during operation.
 
         Returns:
             DataFrame - a new DataFrame with the factor columns appended.

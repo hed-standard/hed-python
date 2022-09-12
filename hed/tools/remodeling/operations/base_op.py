@@ -28,7 +28,7 @@ class BaseOp:
             elif not isinstance(param_value, param_type):
                 raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
 
-    def do_op(self, dispatcher, df, name, sidecar=None, verbose=False):
+    def do_op(self, dispatcher, df, name, sidecar=None):
         """ Base class method to be overridden.
 
         Args:
@@ -36,7 +36,6 @@ class BaseOp:
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
-            verbose (bool) If True output informative messages during operation.
 
         """
         return df

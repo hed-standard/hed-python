@@ -25,7 +25,7 @@ class RemoveRowsOp(BaseOp):
         self.column_name = parameters["column_name"]
         self.remove_values = parameters["remove_values"]
 
-    def do_op(self, dispatcher, df, name, sidecar=None, verbose=False):
+    def do_op(self, dispatcher, df, name, sidecar=None):
         """ Remove rows with the values indicated in the column.
 
         Args:
@@ -33,7 +33,6 @@ class RemoveRowsOp(BaseOp):
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
-            verbose (bool) If True output informative messages during operation.
 
         Returns:
             Dataframe - a new dataframe after processing.

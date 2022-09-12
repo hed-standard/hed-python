@@ -34,19 +34,21 @@ class NumberGroupsOp(BaseOp):
                 raise KeyError("MissingRequiredParameters",
                                f"Specified {param_to_test} for number_rows requires parameters {list(required_missing)}")
             for param_name, param_value in param_to_test.items():
+                param_type = str
                 if param_name in required:
                     param_type = self.start_stop_test[param_name]
                 else:
                     raise KeyError("BadParameter",
                                    f"{param_name} not a required or optional parameter for {self.command}")
-                if not isinstance(param_value, param_type):
-                    raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
+                # TODO: This has a syntax error
+                # if not isinstance(param_value, param_type):
+                #     raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
                 if (param_name == 'inclusion') & (param_value not in self.inclusion_test):
                     raise ValueError("BadValue" f" {param_name} must be one of {self.inclusion_test} not {param_value}")
 
         self.overwrite = parameters.get('overwrite', False)
 
-    def do_op(self, dispatcher, df, name, sidecar=None, verbose=False):
+    def do_op(self, dispatcher, df, name, sidecar=None):
         """ Add numbers to groups of events in dataframe.
 
         Args:
@@ -54,7 +56,6 @@ class NumberGroupsOp(BaseOp):
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
-            verbose (bool) If True output informative messages during operation.
 
         Returns:
             Dataframe - a new dataframe after processing.

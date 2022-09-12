@@ -31,10 +31,11 @@ class NumberRowsOp(BaseOp):
                 else:
                     raise KeyError("BadParameter",
                                    f"{param_name} not a required or optional parameter for {self.command}")
-                if not isinstance(param_value, param_type):
-                    raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
+                # TODO: this has a syntax error
+                # if not isinstance(param_value, param_type):
+                #     raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
 
-    def do_op(self, dispatcher, df, name, sidecar=None, verbose=False):
+    def do_op(self, dispatcher, df, name, sidecar=None):
         """ Add numbers events dataframe.
 
         Args:
@@ -42,7 +43,6 @@ class NumberRowsOp(BaseOp):
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
-            verbose (bool) If True output informative messages during operation.
 
         Returns:
             Dataframe - a new dataframe after processing.

@@ -39,7 +39,7 @@ class RemoveColumnsOp(BaseOp):
         else:
             self.error_handling = 'raise'
 
-    def do_op(self, dispatcher, df, name, sidecar=None, verbose=False):
+    def do_op(self, dispatcher, df, name, sidecar=None):
         """ Remove indicated columns from a dataframe.
 
         Args:
@@ -47,7 +47,6 @@ class RemoveColumnsOp(BaseOp):
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
-            verbose (bool) If True output informative messages during operation.
 
         Returns:
             Dataframe - a new dataframe after processing.
