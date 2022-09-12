@@ -1,8 +1,12 @@
-import unittest
 import os
-
+from io import StringIO
+import unittest
+from unittest import mock
 from hed.errors.exceptions import HedFileError
-from hed.tools import BidsTabularDictionary, get_file_list
+from hed.tools.bids.bids_tabular_dictionary import BidsTabularDictionary
+from hed.tools.util.io_util import get_file_list
+from hed.tools.util.hed_logger import HedLogger
+
 
 
 class Test(unittest.TestCase):
@@ -37,6 +41,19 @@ class Test(unittest.TestCase):
             self.assertIsInstance(value, BidsTabularDictionary,
                                   "split_by_entity dict has BidsTabularDictionary objects")
         self.assertFalse(leftovers, "split_by_entity leftovers should be empty")
+
+
+    def test_report_tsv_diffs(self):
+        dict1 = BidsTabularDictionary("Bids1", self.file_list, entities=('sub', 'run'))
+        dict2 = BidsTabularDictionary("Bids2", self.file_list, entities=('sub', 'run'))
+        logger = HedLogger()
+        self.assertEqual(6, len(dict1.key_list),
+                         "BidsTabularDictionary should have correct number of entries when key okay")
+        self.assertFalse(logger.log, "report_diffs the logger is empty before report is called")
+        with mock.patch('sys.stdout', new=StringIO()) as fake_out1:
+            self.assertIsInstance(fake_out1, StringIO, "Mock creates a StringIO")
+            dict1.report_diffs(dict2, logger)
+        self.assertTrue(logger.log, "report_diffs the logger is empty before report is called")
 
 
 if __name__ == '__main__':
