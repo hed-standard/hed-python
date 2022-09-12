@@ -3,9 +3,13 @@ from io import StringIO
 import unittest
 from unittest import mock
 from hed.errors.exceptions import HedFileError
+<<<<<<< HEAD
 from hed.tools.bids.bids_tabular_dictionary import BidsTabularDictionary
 from hed.tools.util.io_util import get_file_list
 from hed.tools.util.hed_logger import HedLogger
+=======
+from hed.tools import BidsTabularDictionary, get_file_list
+>>>>>>> 174a032fb8ca7b1979eba61bdd40bd6254df4f7a
 
 
 class Test(unittest.TestCase):

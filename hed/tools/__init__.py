@@ -23,7 +23,6 @@ from .bids.bids_sidecar_file import BidsSidecarFile
 from .bids.bids_tabular_dictionary import BidsTabularDictionary
 from .bids.bids_tabular_file import BidsTabularFile
 
-
 from .remodeling.operations.dispatcher import Dispatcher
 from .remodeling.operations.factor_column_op import FactorColumnOp
 from .remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
@@ -46,4 +45,3 @@ from .util.hed_logger import HedLogger
 from .util.data_util import get_new_dataframe, get_value_dict, replace_values, reorder_columns
 from .util.io_util import check_filename, generate_filename, extract_suffix_path, get_file_list, make_path
 from .util.io_util import get_dir_dictionary, get_file_list, get_path_components, parse_bids_filename
-

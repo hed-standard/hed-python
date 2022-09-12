@@ -8,7 +8,11 @@ from hed.tools.analysis.hed_filters import RemoveTagsFilter
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+<<<<<<< HEAD
         curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
+=======
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/curation')
+>>>>>>> 174a032fb8ca7b1979eba61bdd40bd6254df4f7a
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids/eeg_ds003654s_hed'))
         schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
