@@ -9,10 +9,6 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
-<<<<<<< HEAD
-=======
-
->>>>>>> 8eb080ed4aee98d3d2aec431f55ba87ec46d9ab6
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids/eeg_ds003654s_hed'))
         schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
