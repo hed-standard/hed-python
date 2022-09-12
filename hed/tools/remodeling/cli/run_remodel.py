@@ -15,8 +15,8 @@ def get_parser():
                         help="File extensions to allow in locating files.")
     parser.add_argument("-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs",
                         help="Directories names to exclude from search for files.")
-    parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events.tsv',
-                        help="Filename suffix including file type of items to be analyzed (events.tsv by default).")
+    parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
+                        help="Filename suffix excluding file type of items to be analyzed (events by default).")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
                         help="Format for saving any summaries, if any. If empty, then no summaries are saved.")
     parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
