@@ -2,6 +2,7 @@
 
 import os
 import shutil
+from datetime import datetime
 from pathlib import Path
 from werkzeug.utils import secure_filename
 from hed.errors import HedFileError
@@ -71,7 +72,7 @@ def find_task_files(bids_dir, task=None, suffix='*_events.tsv'):
         return [path for path in Path(bids_dir).rglob(suffix) if task in str(path)]
 
 
-def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None):
+def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None, append_datetime=False):
     """ Generate a filename for the attachment.
 
     Args:
@@ -96,8 +97,12 @@ def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=N
     if name_suffix:
         pieces = pieces + [name_suffix]
     filename = "".join(pieces)
+    if append_datetime:
+        now = datetime.now()
+        filename = filename + '_' + now.strftime('%Y_%m_%d_T_%H_%M_%S_%f')
     if filename and extension:
         filename = filename + extension
+
     return secure_filename(filename)
 
 

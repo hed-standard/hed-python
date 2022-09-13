@@ -1,3 +1,4 @@
+import os
 import json
 import pandas as pd
 import numpy as np
@@ -18,6 +19,10 @@ class Test(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls):
+        cls.events_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                           '../../../data/remodeling/sub-0013_task-stopsignal_acq-seq_events.tsv'))
+        cls.model1_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                           '../../../data/remodeling/only_splitevents_example.json'))
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                            [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
                            [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
@@ -98,6 +103,33 @@ class Test(unittest.TestCase):
         self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
                         "split_event should not change the input df values when existing column anchor")
 
+    def test_split_event_from_files(self):
+        # Test when existing column is used as anchor event
+        df = pd.read_csv(self.events_path, delimiter='\t', header=0, dtype=str, keep_default_na=False, na_values=None)
+        with open(self.model1_path) as fp:
+            command_list = json.load(fp)
+        commands, errors = Dispatcher.parse_commands(command_list)
+        self.assertFalse(errors, 'split_event should not give errors if command is correct')
+        dispatch = Dispatcher(command_list)
+        df = dispatch.prep_events(df)
+        for operation in dispatch.parsed_ops:
+            df_new = operation.do_op(dispatch, df, "Name")
+        df_new = df_new.fillna('n/a')
+        df_check = pd.read_csv(self.events_path, delimiter='\t', header=0, dtype=str,
+                               keep_default_na=False, na_values=None)
+        # parms = json.loads(self.json_parms)
+        # op = SplitEventOp(parms)
+        # df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        # df_check = pd.DataFrame(self.split, columns=self.split_columns)
+        # df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        # df_new = op.do_op(self.dispatch, df_test, name="sample_data")
+        # df_new = df_new.fillna('n/a')
+        #
+        # Test that this
+        self.assertEqual(len(df_check), len(df),
+                         "split_event should not change the length of the original dataframe")
+        self.assertEqual(len(df_check.columns), len(df.columns),
+                         "split_event should change the number of columns of the original dataframe")
 
 if __name__ == '__main__':
     unittest.main()
