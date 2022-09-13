@@ -207,7 +207,8 @@ class BidsFileGroup:
             dict: A dictionary of lists of sidecar BidsSidecarFiles
 
         """
-        dir_dict = get_dir_dictionary(self.root_path, name_suffix=self.suffix, extensions=['.json'])
+        dir_dict = get_dir_dictionary(self.root_path, name_suffix=self.suffix, extensions=['.json'],
+                                      exclude_dirs=self.exclude_dirs)
         sidecar_dir_dict = {}
         for this_dir, dir_list in dir_dict.items():
             new_dir_list = []
