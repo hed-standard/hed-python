@@ -38,11 +38,11 @@ class Test(unittest.TestCase):
         var_summary1.update_summary(self.var_type1)
         summary2 = var_summary1.get_summary(as_json=False)
         self.assertEqual(len(summary2), 3)
-        self.assertEqual(summary2['repetition-type']['number_type_events'], 52)
+        self.assertEqual(summary2['repetition-type']['events'], 52)
         var_summary1.update_summary(self.var_type1)
         summary3 = var_summary1.get_summary(as_json=False)
         self.assertEqual(len(summary3), 3)
-        self.assertEqual(summary3['repetition-type']['number_type_events'], 104)
+        self.assertEqual(summary3['repetition-type']['events'], 104)
 
 
 if __name__ == '__main__':

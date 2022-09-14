@@ -18,8 +18,8 @@ class HedVariableCounts:
         self.variable_type = variable_type.lower()
         self.direct_references = 0
         self.total_events = 0
-        self.number_type_events = 0
-        self.number_multiple_events = 0
+        self.events = 0
+        self.multiple_events = 0
         self.multiple_event_maximum = 0
         self.level_counts = {}
 
@@ -33,10 +33,10 @@ class HedVariableCounts:
         var_sum = variable_info.get_summary(full=True)
         self.direct_references += var_sum['direct_references']
         self.total_events += var_sum['total_events']
-        self.number_type_events += var_sum['number_type_events']
-        self.number_multiple_events += var_sum['number_multiple_events']
+        self.events += var_sum['events']
+        self.multiple_events += var_sum['multiple_events']
         self.multiple_event_maximum = max(self.multiple_event_maximum, var_sum['multiple_event_maximum'])
-        self._update_levels(var_sum['level_counts'])
+        self._update_levels(var_sum.get('level_counts', {}))
 
     def _update_levels(self, level_dict):
         for key, item in level_dict.items():
@@ -51,10 +51,11 @@ class HedVariableCounts:
                    'levels': len(self.level_counts.keys()),
                    'direct_references': self.direct_references,
                    'total_events': self.total_events,
-                   'number_type_events': self.number_type_events,
-                   'number_multiple_events': self.number_multiple_events,
-                   'multiple_event_maximum': self.multiple_event_maximum,
-                   'level_counts': self.level_counts}
+                   'events': self.events,
+                   'multiple_events': self.multiple_events,
+                   'multiple_event_maximum': self.multiple_event_maximum}
+        if self.level_counts:
+            summary['level_counts'] = self.level_counts
         if as_json:
             return json.dumps(summary, indent=4)
         return summary

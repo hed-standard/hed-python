@@ -54,14 +54,14 @@ class Test(unittest.TestCase):
         self.assertEqual(3, len(count1.level_counts))
         self.assertIn('unfamiliar-face-cond', count1.level_counts)
         self.assertEqual(200, count1.total_events)
-        self.assertEqual(52, count1.number_type_events)
+        self.assertEqual(52, count1.events)
         self.assertEqual(1, count1.level_counts['unfamiliar-face-cond']['files'])
         count1.update(var1)
         self.assertEqual(0, count1.direct_references, "get_summary")
         self.assertEqual(3, len(count1.level_counts))
         self.assertIn('unfamiliar-face-cond', count1.level_counts)
         self.assertEqual(400, count1.total_events)
-        self.assertEqual(104, count1.number_type_events)
+        self.assertEqual(104, count1.events)
         self.assertEqual(2, count1.level_counts['unfamiliar-face-cond']['files'])
 
 
