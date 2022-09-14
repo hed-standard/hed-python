@@ -11,7 +11,7 @@ def get_parser():
                         help="Directories names to exclude from search for files." +
                              "Note data_dir/remodel/backup will always be excluded.")
     parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
-                        help="Filename suffix including file type.")
+                        help="Filename suffix of files to be backed up.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
                         help="File extensions to allow in locating files.")
     parser.add_argument("-w", "--write-over-backup", action='store_true',

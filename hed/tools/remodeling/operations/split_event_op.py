@@ -82,5 +82,6 @@ class SplitEventOp(BaseOp):
             df_list.append(add_events)
 
         df_new = pd.concat(df_list, axis=0, ignore_index=True)
+        df_new["onset"] = df_new["onset"].apply(pd.to_numeric)
         df_new = df_new.sort_values('onset').reset_index(drop=True)
         return df_new

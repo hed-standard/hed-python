@@ -74,8 +74,8 @@ class HedTypeFactors:
         number_events, number_multiple, max_multiple = self.count_events(count_list)
         summary = {'name': self.variable_value, 'variable_type': self.variable_type, 'levels': len(self.levels.keys()),
                    'direct_references': len(self.direct_indices.keys()),
-                   'total_events': self.number_elements, 'number_type_events': number_events,
-                   'number_multiple_events': number_multiple, 'multiple_event_maximum': max_multiple}
+                   'total_events': self.number_elements, 'events': number_events,
+                   'multiple_events': number_multiple, 'multiple_event_maximum': max_multiple}
         if full:
             summary['level_counts'] = self._get_level_counts()
         return summary

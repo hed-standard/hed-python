@@ -1,7 +1,7 @@
 import os
 from abc import ABC
-from datetime import datetime
 import json
+from hed.tools.util.io_util import generate_filename
 
 
 class BaseContext(ABC):
@@ -55,8 +55,7 @@ class BaseContext(ABC):
     def save(self, save_dir, file_formats, verbose=True):
         if not file_formats:
             return
-        now = datetime.now()
-        file_base = os.path.join(save_dir, self.context_filename) + '_' + now.strftime('%Y_%m_%d_T_%H_%M_%S_%f')
+        file_base = os.path.join(save_dir, generate_filename(self.context_filename, append_datetime=True))
         for file_format in file_formats:
             if file_format == '.txt':
                 summary = self.get_text_summary(verbose=verbose)
