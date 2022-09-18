@@ -48,7 +48,7 @@ class BackupManager:
 
         Raises:
             Exceptions when file errors of any kind occur during the creation of a backup.
-            
+
         """
         if backup_name in self.backups:
             return False
