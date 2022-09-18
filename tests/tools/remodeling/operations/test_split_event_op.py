@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import numpy as np
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.split_event_op import SplitEventOp
 
 

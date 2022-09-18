@@ -173,17 +173,17 @@ class Test(unittest.TestCase):
     def test_get_path_components(self):
         base_path = '../../data/bids/eeg_ds003654s'
         file_path1 = os.path.realpath(os.path.join(base_path, 'sub-002/eeg/sub-002_FacePerception_run-1_events.tsv'))
-        comps1 = get_path_components(file_path1, base_path)
-        self.assertEqual(comps1[0], os.path.realpath(base_path),
-                         "get_path_components base_path is is the first component")
-        self.assertEqual(len(comps1), 3, "get_path_components has correct number of components")
+        comps1 = get_path_components(base_path, file_path1)
+        self.assertEqual(len(comps1), 2, "get_path_components has correct number of components")
         comps2 = get_path_components(base_path, base_path)
-        self.assertEqual(comps2[0], os.path.realpath(base_path), "get_path_components base_path is its own base_path")
-        self.assertEqual(len(comps2), 1, "get_path_components base_path has no additional components")
+        self.assertIsInstance(comps2, list)
+        self.assertFalse(comps2, "get_path_components base_path is its own base_path")
         file_path3 = os.path.join(base_path, 'temp_events.tsv')
-        comps3 = get_path_components(file_path3, base_path)
-        self.assertEqual(comps3[0], os.path.realpath(base_path), "get_path_components base_path is its own base_path")
-        self.assertEqual(len(comps3), 1, "get_path_components file in base_path has no additional components")
+        comps3 = get_path_components(base_path, file_path3)
+        self.assertFalse(comps3, "get_path_components files directly in base_path don't have components ")
+        file_path4 = 'P:/Baloney/sidecar/events.tsv'
+        with self.assertRaises(ValueError):
+            get_path_components(base_path, file_path4)
 
     def test_parse_bids_filename_full(self):
         the_path1 = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'

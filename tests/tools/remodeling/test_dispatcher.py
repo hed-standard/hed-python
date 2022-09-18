@@ -2,7 +2,7 @@ import os
 import json
 import unittest
 import pandas as pd
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
@@ -11,7 +11,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         data_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                  '../../../data/remodeling'))
+                                                  '../../data/remodeling'))
         sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                        [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
                        [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],

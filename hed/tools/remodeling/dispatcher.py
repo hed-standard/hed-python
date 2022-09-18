@@ -42,6 +42,7 @@ dispatch = {
 
 class Dispatcher:
     REMODELING_SUMMARY_PATH = 'derivatives/remodel/summaries'
+    BASE_BACKUP_NAME = 'baseback'
 
     def __init__(self, command_list, data_root=None, hed_versions=None):
         self.data_root = data_root

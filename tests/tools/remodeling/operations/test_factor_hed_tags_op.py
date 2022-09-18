@@ -2,7 +2,7 @@ import os
 import json
 import unittest
 from hed.tools.remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 
 
 class Test(unittest.TestCase):

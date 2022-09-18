@@ -23,7 +23,7 @@ from .bids.bids_sidecar_file import BidsSidecarFile
 from .bids.bids_tabular_dictionary import BidsTabularDictionary
 from .bids.bids_tabular_file import BidsTabularFile
 
-from .remodeling.operations.dispatcher import Dispatcher
+from .remodeling.dispatcher import Dispatcher
 from .remodeling.operations.factor_column_op import FactorColumnOp
 from .remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
 from .remodeling.operations.factor_hed_type_op import FactorHedTypeOp

@@ -3,7 +3,7 @@ import json
 import argparse
 from hed.tools import get_file_list, parse_bids_filename
 from hed.tools import BidsDataset
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 
 
 def get_parser():

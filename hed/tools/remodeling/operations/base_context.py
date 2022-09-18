@@ -1,5 +1,5 @@
 import os
-from abc import ABC
+from abc import ABC, abstractmethod
 import json
 from hed.tools.util.io_util import generate_filename
 
@@ -18,6 +18,7 @@ class BaseContext(ABC):
         self.context_name = context_name
         self.context_filename = context_filename
 
+    @abstractmethod
     def get_summary_details(self, as_json=False, verbose=True):
         """ Return the summary-specific information.
 

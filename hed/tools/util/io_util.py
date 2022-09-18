@@ -185,16 +185,15 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
     return file_list
 
 
-def get_path_components(this_path, root_path):
-    """ Get a list with root_path and remaining components.
+def get_path_components(root_path, this_path):
+    """ Get a list of the remaining components after root path.
 
     Args:
-        this_path (str):      The path of a file or directory descendant of root_path
         root_path (str):      A path (no trailing separator)
+        this_path (str):      The path of a file or directory descendant of root_path
 
     Returns:
-        list or None:   A list with the first element being root_path and the
-                        remaining elements directory components to the file.
+        list or None:   A list with the remaining elements directory components to the file.
 
     Notes: this_path must be a descendant of root_path.
 
@@ -208,9 +207,9 @@ def get_path_components(this_path, root_path):
     rel_path = os.path.relpath(cur_path, base_path)
     the_dir = os.path.dirname(rel_path)
     if the_dir:
-        return [base_path] + os.path.normpath(the_dir).split(os.sep)
+        return os.path.normpath(the_dir).split(os.sep)
     else:
-        return [base_path]
+        return []
 
 
 def make_path(root_path, sub_path, filename):

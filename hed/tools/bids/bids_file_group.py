@@ -62,9 +62,10 @@ class BidsFileGroup:
             list:  A list of the paths for applicable sidecars for obj starting at the root.
 
         """
+        path_components = [self.root_path] + get_path_components(self.root_path, obj.file_path)
         sidecar_list = []
         current_path = ''
-        for comp in get_path_components(obj.file_path, self.root_path):
+        for comp in path_components:
             current_path = os.path.realpath(os.path.join(current_path, comp))
             next_sidecar = self._get_sidecar_for_obj(obj, current_path)
             if next_sidecar:
