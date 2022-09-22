@@ -3,11 +3,12 @@ import json
 import shutil
 from datetime import datetime
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.io_util import extract_suffix_path, get_file_list, get_path_components
+from hed.tools.util.io_util import get_file_list, get_path_components
 
 
 class BackupManager:
-    RELATIVE_BACKUP_LOCATION = 'derivatives/remodeling/backups'
+    DEFAULT_BACKUP_NAME = 'default_back'
+    RELATIVE_BACKUP_LOCATION = 'derivatives/remodel/backups'
     BACKUP_DICTIONARY = 'backup_lock.json'
     BACKUP_ROOT = 'backup_root'
 
@@ -15,33 +16,42 @@ class BackupManager:
         if not os.path.isdir(data_root):
             raise HedFileError('NonExistentData', f"{data_root} is not an existing directory", "")
         self.data_root = data_root
-        self.backup_root = os.path.realpath(os.path.join(data_root, self.RELATIVE_BACKUP_LOCATION))
-        os.makedirs(self.backup_root, exist_ok=True)
-        self.backups = self._get_backups()
+        self.backups_root = os.path.join(data_root, self.RELATIVE_BACKUP_LOCATION)
+        os.makedirs(self.backups_root, exist_ok=True)
+        self.backups_dict = self._get_backups()
 
-    def check_missing(self, backup_name, file_list):
-        backup_dir, backup_dict, backup_root = self.get_backup_paths(backup_name)
-        if not os.path.exists(backup_dict) or not os.path.isdir(backup_root):
-            return file_list.copy()
-        with open(backup_dict, 'r') as fp:
-            backup_info = json.load(fp)
-        base_set = set([extract_suffix_path(file, self.data_root) for file in file_list])
-        back_set = set(backup_info)
-        missing_list = []
-        # in_list
-        # for file in file_list:
-        #     base_file = extract_suffix_path(file, self.data_root)
-        #     backup_file = os.path.realpath(os.path.join(backup_root, base_file))
-        #     if base_file not in backup_info or not os.path.exists(backup_file):
-        #         missing_list.append(file)
-        return missing_list
+    def check_backup_files(self, backup_name, file_paths=None):
+        """ Return the files in file_paths that are not backed up and vice-versa.
 
-    def create_backup(self, backup_name, file_list):
+        Args:
+            backup_name (str): Name of the backup.
+            file_paths (list):  List of full paths of files to be checked against the backup.
+
+        Returns:
+            list:  Files in file_paths that are not in the backup.
+            list:  Files in backup not in file_paths
+
+        Notes:
+            If file_path is None, this checks against consistency in the backup dictionary.
+
+        """
+
+        backup_paths = self.get_backup_files(backup_name)
+        if not file_paths:
+            return [], backup_paths
+        backup_path_set = set(backup_paths)
+        file_path_set = set(file_paths)
+        files_not_in_backup = list(file_path_set.difference(backup_path_set))
+        backups_not_in_files = list(backup_path_set.difference(file_path_set))
+        return files_not_in_backup, backups_not_in_files
+
+    def create_backup(self, backup_name, file_list, verbose=True):
         """ Create a new backup from file_list.
 
         Args:
-            backup_name (str):  name of the backup.
-            file_list (list):   full paths of the files to be in the backup.
+            backup_name (str or None):  Name of the backup.
+            file_list (list):   Full paths of the files to be in the backup.
+            verbose (bool):     If True, print out the files that are being backed up.
 
         Returns:
             bool:  True if the backup was successful. False if a backup of that name already exists.
@@ -50,112 +60,153 @@ class BackupManager:
             Exceptions when file errors of any kind occur during the creation of a backup.
 
         """
-        if backup_name in self.backups:
+        if not backup_name:
+            backup_name = self.DEFAULT_BACKUP_NAME
+        if self.backups_dict:
             return False
-        backup_dir, backup_dict, backup_root = self.get_backup_paths(backup_name)
         backup = {}
         time_stamp = f"{str(datetime.now())}"
+        if verbose:
+            print(f"Creating backup {backup_name}")
         for file in file_list:
-            file_comp = get_path_components(self.data_root, file) + [os.path.basename(file)]
-            backup_key = ('/').join(file_comp)
-            backup_file = os.path.realpath(os.path.join(backup_root, backup_key))
+            backup_file = self.get_backup_path(backup_name, file)
             os.makedirs(os.path.dirname(backup_file), exist_ok=True)
+            if verbose:
+                print(f"Copying {file} to {backup_file}")
             shutil.copy2(file, backup_file)
-            backup[backup_key] = time_stamp
-        self.backups[backup_name] = backup
-        with open(backup_dict, 'w') as fp:
+            backup[self.get_file_key(file)] = time_stamp
+        self.backups_dict[backup_name] = backup
+        backup_dir_path = os.path.join(self.backups_root, backup_name)
+        backup_dict_path = os.path.join(self.backups_root, backup_name, backup_dir_path, self.BACKUP_DICTIONARY)
+        with open(os.path.realpath(backup_dict_path), 'w') as fp:
             json.dump(backup, fp, indent=4)
         return True
 
     def get_backup(self, backup_name):
-        if backup_name not in self.backups:
+        """ Return the dictionary corresponding to backup_name.
+
+        Args:
+            backup_name (str): Name of the backup to be retrieved.
+
+        Returns:
+            The dictionary with the backup info.
+
+        """
+        if backup_name not in self.backups_dict:
             return None
-        return self.backups[backup_name]
+        return self.backups_dict[backup_name]
 
-    #
-    # backup_dir, backup_dict, backup_root = self.get_backup_paths(backup_name)
-    # os.makedirs(backup_root, exist_ok=True)
-    # backup = {}
-    # for file in file_list:
-    #     path_comps = get_path_components(file, self.data_root)
-    #     if len(path_comps) > 1
-    #
-    # backup_lock_file = os.path.join(backup_root, self.BACKUP_DICTIONARY)
-    # # now = datetime.now()
-    # # filename = filename + '_' + now.strftime('%Y_%m_%d_T_%H_%M_%S_%f')
-    # backup = {}
-    # for file in file_list:
-    #     file_base = os.path.relpath(file, self.data_root)
-    #     print(file_base)
+    def get_backup_files(self, backup_name, original_paths=False):
+        """ Returns a list of full paths of files contained in the backup.
 
-    # if os.path.isdir(backup_root) and os.path.exists(backup_lock):
+        Args:
+            backup_name (str):       Name of the backup.
+            original_paths (bool):   If true return the original paths.
 
-    def get_backup_paths(self, backup_name):
-        backup_dir = os.path.join(self.backup_root, backup_name)
-        backup_dict = os.path.join(backup_dir, self.BACKUP_DICTIONARY)
-        backup_root = os.path.join(backup_dir, self.BACKUP_ROOT)
-        return backup_dir, backup_dict, backup_root
+        Returns:
+            list:  Full paths of the original files backed (original_paths=True) or the paths in the backup.
+
+        Raises:
+            HedFileError - if not backup named backup_name exists.
+
+        """
+
+        backup_dict = self.backups_dict.get(backup_name, None)
+        if not backup_dict:
+            raise HedFileError("NoBackup", f"{backup_name} is not a valid backup", "")
+        if original_paths:
+            return [os.path.realpath(os.path.join(self.data_root, backup_key)) for backup_key in backup_dict.keys()]
+        return [os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_ROOT, backup_key))
+                for backup_key in backup_dict.keys()]
+
+    def get_backup_path(self, backup_name, file_name):
+        """ Retrieve the file from the backup or throw an error.
+
+        Args:
+            backup_name (str): Name of the backup
+            file_name (str): Full path of the file to be retrieved.
+
+        Returns:
+            str:  Full path of the corresponding file in the backup.
+
+        """
+        return os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_ROOT,
+                                             self.get_file_key(file_name)))
+
+    def get_file_key(self, file_name):
+        file_comp = get_path_components(self.data_root, file_name) + [os.path.basename(file_name)]
+        return '/'.join(file_comp)
+
+    def restore_backup(self, backup_name=DEFAULT_BACKUP_NAME, verbose=True):
+        """ Restore the files from backup_name to the main directory.
+
+        Args:
+            backup_name (str):  Name of the backup to restore
+            verbose (bool):  If true, print out the file names being restored.
+
+        """
+        if verbose:
+            print(f"Restoring from backup {backup_name}")
+        backup_files = self.get_backup_files(backup_name)
+        data_files = self.get_backup_files(backup_name, original_paths=True)
+        for index, file in enumerate(backup_files):
+            os.makedirs(os.path.dirname(data_files[index]), exist_ok=True)
+            if verbose:
+                print(f"Copying {file} to {data_files[index]}")
+            shutil.copy2(file, data_files[index])
 
     def _get_backups(self):
+        """ Set the manager's backup-dictionary based on backup directory contents.
+
+        Raises:
+            HedFileError - if a backup is inconsistent for any reason.
+        """
         backups = {}
-        for backup in os.listdir(self.backup_root):
-            backup_path = os.path.join(self.backup_root, backup)
-            if not os.path.isdir(backup_path):
-                raise HedFileError('BadBackupPath', f"{backup_path} is not a backup directory", "")
-            next_level = os.listdir(backup_path)
-            if len(next_level) > 2 or 'backup_root' not in next_level or 'backup_lock.json' not in next_level:
-                raise HedFileError("BadBackFormat", f"Backup {backup_path} should have just "
-                                   f"backup_root directory and backup_lock.json file", "")
-            (missing_backups, missing_files) = self.check_backup(backup_path)
-            if missing_files:
-                raise HedFileError("ExtraBackupFile", f"Backup {backup_path} backup_lock.json is missing "
-                                   f"backup files {str(missing_files)}", "")
-            if missing_backups:
-                raise HedFileError("MissingBackupFile", f"Backup {backup_path} backup_lock.json has "
-                                   f"backup files {str(missing_backups)} that are not backed up", "")
-            backups[backup] = backup_path
+        for backup in os.listdir(self.backups_root):
+            backup_root = os.path.realpath(os.path.join(self.backups_root, backup))
+            if not os.path.isdir(backup_root):
+                raise HedFileError('BadBackupPath', f"{backup_root} is not a backup directory.", "")
+            if len(os.listdir(backup_root)) != 2:
+                raise HedFileError("BadBackFormat",
+                                   f"Backup {backup_root} must only contain backup_root and backup_lock.json file.", "")
+            backup_dict, files_not_in_backup, backups_not_in_directory = self._check_backup_consistency(backup)
+            if files_not_in_backup:
+                raise HedFileError("MissingBackupFile", f"Backup {backup} has files not in backup_lock.json.", "")
+            if backups_not_in_directory:
+                raise HedFileError("ExtraFilesInBackup",
+                                   f"Backup {backup} backup_lock.json entries not in backup directory.", "")
+            backups[backup] = backup_dict
         return backups
 
-    def check_backup(self, backup_path, file_paths=None):
-        backup_root = os.path.join(backup_path, 'backup_root')
-        if not file_paths:
-            file_paths = get_file_list(backup_root)
-        file_paths = set(file_paths)
-        backup_dict = os.path.join(backup_path, 'backup_lock.json')
-        with open(backup_dict, 'r') as fp:
-            backup_info = json.load(fp)
-        backup_paths = set([os.path.realpath(os.path.join(backup_root, backup_key))
-                            for backup_key in backup_info.keys()])
-        files_not_in_backup = file_paths.difference(backup_paths)
-        backups_not_in_files = backup_paths.difference(file_paths)
-        return list(files_not_in_backup), list(backups_not_in_files)
-        # def get_backup_dict(backup_root):
-        #     backup_dict = {}
-        #     backup_lock_file = os.path.realpath(os.path.join(backup_root, 'backup_lock.json'))
-        #     with open(backup_lock_file, 'r') as fp:
-        #         backup_lock = json.load(fp)
-        # def compare_backup(self, backup_root, data_root, file_list):
-        #     backup_list =  get_file_list(backup_root)
-        #     backup_dict = {}
-        #     for file in file_list:
-        #         base_file = extract_suffix_path(file, data_root)
-        #         backup os.path.realpath(os.path.join(backup_root, base_file)
-        #         if os.path.realpath(os.path.join(backup_root, base_file))
-        # def backup_files(self):
-        #     verbose = hasattr(args, 'verbose')
-        #     exclude_dirs = args.exclude_dirs.append('remodel')
-        #     backup_path = os.path.realpath(os.path.join(args.data_dir, 'derivatives/remodel/backup'))
-        #     os.makedirs(backup_path, exist_ok=True)
-        #     file_list = get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
-        #                               exclude_dirs=exclude_dirs)
-        #     if verbose:
-        #         print(f"Data directory: {args.data_dir}\nBackup path: {backup_path}")
-        #         print(f"Processing {len(file_list)} files with suffix {args.file_suffix} "
-        #               f"and extensions {str(args.extensions)}")
-        #     for orig_file in file_list:
-        #         backup_base = extract_suffix_path(orig_file, args.data_dir)
-        #         backup_file = os.path.realpath(backup_path + backup_base)
-        #         if verbose:
-        #             print(f"Original file: {orig_file}\nBackup file: {backup_file}")
-        #         os.makedirs(os.path.dirname(backup_file), exist_ok=True)
-        #         shutil.copy2(orig_file, backup_file)
+    def _check_backup_consistency(self, backup_name):
+        """ Return the consistency of a backup.
+
+        Args:
+            backup_name (str): Name of the backup.
+
+        Returns:
+            dict:  dictionary containing the backup info.
+            list:  Files in backup directory that are not in the backup dict.
+            list:  Files in backup dictionary not in backup directory
+
+        Notes:
+            If file_path is None, this checks against consistency in the backup dictionary.
+
+        """
+
+        backup_dict_path = os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_DICTIONARY))
+        if not os.path.exists(backup_dict_path):
+            raise HedFileError("BadBackupDictionary",
+                               f"Backup dictionary for {backup_name} does not exist so backup invalid", "")
+        backup_root_path = os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_ROOT))
+        if not os.path.isdir(backup_root_path):
+            raise HedFileError("BadBackupDictionary",
+                               f"Backup dictionary for {backup_name} does not exist so backup invalid", "")
+        with open(backup_dict_path, 'r') as fp:
+            backup_dict = json.load(fp)
+        backup_paths = set([os.path.realpath(os.path.join(backup_root_path, backup_key))
+                            for backup_key in backup_dict.keys()])
+        file_paths = set(get_file_list(backup_root_path))
+        files_not_in_backup = list(file_paths.difference(backup_paths))
+        backups_not_in_directory = list(backup_paths.difference(file_paths))
+        return backup_dict, files_not_in_backup, backups_not_in_directory

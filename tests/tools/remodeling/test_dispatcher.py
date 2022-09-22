@@ -2,7 +2,9 @@ import os
 import json
 import unittest
 import pandas as pd
+import numpy as np
 from hed.tools.remodeling.dispatcher import Dispatcher
+from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
@@ -25,6 +27,8 @@ class Test(unittest.TestCase):
         df.to_csv(file_path, sep='\t', index=False)
         cls.data_path = data_path
         cls.file_path = file_path
+        cls.sample_data = sample_data
+        cls.sample_columns = sample_columns
 
     @classmethod
     def tearDownClass(cls):
@@ -33,8 +37,16 @@ class Test(unittest.TestCase):
         except OSError:
             pass
 
+    def test_dispatcher_constructor(self):
+        model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
+        with open(model_path1) as fp:
+            model1 = json.load(fp)
+        dispatch = Dispatcher(model1)
+        self.assertEqual(len(dispatch.parsed_ops), len(model1),
+                         "dispatcher command list should have one item for each command")
+
     def test_constructor_empty_commands(self):
-        disp = Dispatcher('', [])
+        disp = Dispatcher([])
         self.assertIsInstance(disp, Dispatcher, "")
         self.assertFalse(disp.parsed_ops, "constructor empty commands has empty parsed ops")
 
@@ -82,34 +94,26 @@ class Test(unittest.TestCase):
         for item in parsed_ops:
             self.assertIsInstance(item, BaseOp)
 
-    def test_dispatcher_constructor(self):
+    def test_dispatcher_run_operations(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
         with open(model_path1) as fp:
             model1 = json.load(fp)
         dispatch = Dispatcher(model1)
+        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        num_test_rows = len(df_test)
+        df_test_values = df_test.to_numpy()
+        df_new = dispatch.run_operations(self.file_path)
+        reordered_columns = ["onset", "duration", "trial_type", "response_time"]
+        self.assertTrue(reordered_columns == list(df_new.columns),
+                        "run_operations resulting df should have correct columns")
+        self.assertTrue(list(df_test.columns) == self.sample_columns,
+                        "run_operations did not change the input df columns")
+        self.assertEqual(len(df_test), num_test_rows, "run_operations did not change the input df rows")
+        self.assertFalse(np.array_equal(df_test_values, df_test.to_numpy),
+                         "run_operations does not change the values in the input df")
+        self.assertEqual(len(df_new), num_test_rows, "run_operations did not change the number of output rows")
         self.assertEqual(len(dispatch.parsed_ops), len(model1),
                          "dispatcher command list should have one item for each command")
-
-    def test_dispatcher_run_operations(self):
-        model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
-        # with open(model_path1) as fp:
-        #     model1 = json.load(fp)
-        # dispatch = Dispatcher(model1)
-        # df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        # num_test_rows = len(df_test)
-        # df_test_values = df_test.to_numpy()
-        # df_new = dispatch.run_operations(self.file_path)
-        # reordered_columns = ["onset", "duration", "trial_type", "response_time"]
-        # self.assertTrue(reordered_columns == list(df_new.columns),
-        #                 "run_operations resulting df should have correct columns")
-        # self.assertTrue(list(df_test.columns) == self.sample_columns,
-        #                 "run_operations did not change the input df columns")
-        # self.assertEqual(len(df_test), num_test_rows, "run_operations did not change the input df rows")
-        # self.assertFalse(np.array_equal(df_test_values, df_test.to_numpy),
-        #                  "run_operations does not change the values in the input df")
-        # self.assertEqual(len(df_new), num_test_rows, "run_operations did not change the number of output rows")
-        # self.assertEqual(len(dispatch.command_list), len(model1),
-        #                  "dispatcher command list should have one item for each command")
 
 
 if __name__ == '__main__':

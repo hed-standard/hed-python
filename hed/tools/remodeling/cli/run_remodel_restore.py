@@ -1,20 +1,26 @@
 import argparse
-from hed.tools.util.io_util import find_task_files, replace_new_with_old
+from hed.errors.exceptions import HedFileError
+from hed.tools.remodeling.backup_manager import BackupManager
+
+
+def get_parser():
+    parser = argparse.ArgumentParser(description="Restores the backup files for the original data.")
+    parser.add_argument("data_dir", help="Full path of dataset root directory.")
+    parser.add_argument("-n", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
+                        help="Name of the default backup for remodeling")
+    parser.add_argument("-v", "--verbose", action='store_true',
+                        help="If present, output informative messages as computation progresses.")
+    return parser
+
+
+def main(arg_list=None):
+    parser = get_parser()
+    args = parser.parse_args(arg_list)
+    backup_man = BackupManager(args.data_dir)
+    if not backup_man.get_backup(args.backup_name):
+        raise HedFileError("BackupExists", f"{args.backup_name}", "")
+    backup_man.restore_backup(args.backup_name, verbose=args.verbose)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="""Converts event files based on a json file specifying operations.""")
-    parser.add_argument("bids_dir", help="Dataset whose _orig_events.tsv become _events.tsv")
-    parser.add_argument("-t", dest="task_name", help="")
-    args = parser.parse_args()
-
-    all_events_path = find_task_files(args.bids_dir)
-
-    status = True
-    for event_path in all_events_path:
-        if not replace_new_with_old(event_path):
-            print(f"Replacement of {event_path} failed.")
-            status = False
-
-    if status:
-        print(f"The files were successfully replaced.")
+    main()

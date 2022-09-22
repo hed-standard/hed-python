@@ -3,7 +3,7 @@ import unittest
 from hed.errors.exceptions import HedFileError
 from hed.tools import check_filename, extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
     get_path_components, parse_bids_filename
-from hed.tools.util.io_util import _split_entity
+from hed.tools.util.io_util import _split_entity, get_allowed
 
 
 class Test(unittest.TestCase):
@@ -122,6 +122,18 @@ class Test(unittest.TestCase):
         dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
         self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
         self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
+
+    def test_get_allowed(self):
+        test_value = 'events.tsv'
+        value = get_allowed(test_value, 'events')
+        self.assertEqual(value, 'events', "get_allowed matches starts with when string")
+        value = get_allowed(test_value, None)
+        self.assertEqual(value, test_value, "get_allowed if None is passed for allowed, no requirement is set.")
+        test_value1 = "EventsApples.tsv"
+        value1 = get_allowed(test_value1, ["events", "annotations"])
+        self.assertEqual(value1, "events", "get_allowed is case insensitive")
+        value2 = get_allowed(test_value1, [])
+        self.assertEqual(value2, test_value1)
 
     def test_get_file_list_files(self):
         dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)),

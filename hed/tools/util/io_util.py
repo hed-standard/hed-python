@@ -13,32 +13,60 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 
     Args:
         test_file (str) :           Path of filename to test.
-        name_prefix (str, None):     An optional name_prefix for the base filename
-        name_suffix (str, None):     An optional name_suffix for the base file name
-        extensions (list, None):     An optional list of file extensions
+        name_prefix (list, str, None):  An optional name_prefix or list of prefixes to accept for the base filename
+        name_suffix (list, str, None):  An optional name_suffix or list of suffixes to accept for the base file name
+        extensions (list, str, None):   An optional extension or list of extensions to accept for the extensions
 
     Returns:
         bool: True if file has the appropriate format.
 
     Notes:
         - Everything is converted to lower case prior to testing so this test should be case insensitive.
+        - None indicates that all are accepted.
 
 
     """
 
     basename = os.path.basename(test_file.lower())
-    if name_prefix and not basename.startswith(name_prefix.lower()):
+    if name_prefix and not get_allowed(basename, allowed_values=name_prefix, starts_with=True):
         return False
     if extensions:
-        ext = list(filter(basename.endswith, extensions))
+        ext = get_allowed(basename, allowed_values=extensions, starts_with=False)
         if not ext:
             return False
-        basename = basename[:-len(ext[0])]
+        basename = basename[:-len(ext)]
     else:
         basename = os.path.splitext(basename)[0]
-    if name_suffix and not basename.endswith(name_suffix.lower()):
+    if name_suffix and not get_allowed(basename, allowed_values=name_suffix, starts_with=False):
         return False
     return True
+
+
+def get_allowed(value, allowed_values=None, starts_with=True):
+    """ Returns the portion of the value that matches a value in allowed_values or None if no match.
+
+    Args:
+        value (str): value to be matched.
+        allowed_values (list, str, or None):  Values to match.
+        starts_with (bool):  If true match is done at beginning of string, otherwise the end.
+
+    Notes:
+        - match is done in lower case.
+
+    """
+    if not allowed_values:
+        return value
+    elif not isinstance(allowed_values, list):
+        allowed_values = [allowed_values]
+    allowed_values = [item.lower() for item in allowed_values]
+    lower_value = value.lower()
+    if starts_with:
+        result = list(filter(lower_value.startswith, allowed_values))
+    else:
+        result = list(filter(lower_value.endswith, allowed_values))
+    if result:
+        result = result[0]
+    return result
 
 
 def extract_suffix_path(path, prefix_path):
@@ -62,14 +90,6 @@ def extract_suffix_path(path, prefix_path):
     if suffix_path.startswith(real_prefix):
         return_path = return_path[len(real_prefix):]
     return return_path
-
-
-def find_task_files(bids_dir, task=None, suffix='*_events.tsv'):
-    # TODO: May need to be replaced.
-    if task is None:
-        return [path for path in Path(bids_dir).rglob(suffix)]
-    else:
-        return [path for path in Path(bids_dir).rglob(suffix) if task in str(path)]
 
 
 def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None, append_datetime=False):
@@ -274,31 +294,6 @@ def parse_bids_filename(file_path):
             raise HedFileError("BadKeyValue", f"The piece {entity} is not in key-value form", "")
         entity_dict[split_dict["key"]] = split_dict["value"]
     return suffix, ext, entity_dict
-
-
-def replace_new_with_old(path):
-    """ Replaces path with the one whose basename ends in orig.
-
-    # TODO: May need to be rewritten after new backup strategy is implemented.
-    Args:
-        path (str):  Full path of the file to be replaced.
-
-    Returns:
-        bool:  True if successful replacement.
-
-    Notes:
-        The _orig file remains in place and can be deleted separately if all place all replacements are successful.
-
-    """
-    old_path = str(path)[:-4] + 'orig' + str(path)[-4:]
-    if not os.path.exists(old_path) or not os.path.isfile(old_path):
-        return False
-    try:
-        os.remove(path)
-        shutil.copy(old_path, path)
-    except:
-        return False
-    return True
 
 
 def _split_entity(piece):

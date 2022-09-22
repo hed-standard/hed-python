@@ -27,7 +27,8 @@ class Test(unittest.TestCase):
         }
 
         cls.json_parms = json.dumps(base_parameters)
-        cls.data_root = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data'))
+        cls.data_root = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                      '../../../data/remodeling'))
 
     @classmethod
     def tearDownClass(cls):
@@ -42,7 +43,7 @@ class Test(unittest.TestCase):
     def test_do_ops(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        dispatch = Dispatcher([], data_root=self.data_root)
+        dispatch = Dispatcher([], data_root=None)
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         sum_op.do_op(dispatch, df1, 'name1')
@@ -59,7 +60,7 @@ class Test(unittest.TestCase):
     def test_get_summary(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        dispatch = Dispatcher([], data_root=self.data_root)
+        dispatch = Dispatcher([], data_root=None)
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         sum_op.do_op(dispatch, df1, 'name1')
         sum_op.do_op(dispatch, df1, 'name2')

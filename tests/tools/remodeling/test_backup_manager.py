@@ -51,12 +51,9 @@ class Test(unittest.TestCase):
         pass
 
     def test_constructor(self):
-        test_man = BackupManager(self.test_root)
-        self.assertIsInstance(test_man, BackupManager, "constructor creates a BackupManager if no backups")
-        self.assertFalse(test_man.backups)
         back1_man = BackupManager(self.test_root_back1)
         self.assertIsInstance(back1_man, BackupManager, "constructor creates a BackupManager if no backups")
-        self.assertTrue(back1_man.backups)
+        self.assertTrue(back1_man.backups_dict)
 
     def test_constructor_missing_backup(self):
         remove_list = ['back2_miss_json', 'back3_miss_back', 'back4_miss_file']
@@ -92,17 +89,17 @@ class Test(unittest.TestCase):
             shutil.rmtree(remove_dir)
         with self.assertRaises(HedFileError) as context:
             BackupManager(self.test_root_bad)
-        self.assertEqual(context.exception.error_type, "ExtraBackupFile")
+        self.assertEqual(context.exception.error_type, "ExtraFilesInBackup")
 
     def test_create_backup(self):
         test_man = BackupManager(self.test_root)
         file_list = get_file_list(self.test_root)
         self.assertFalse(test_man.get_backup("test_back1"), "create_backup doesn't have the backup before creation")
-        return_val1 = test_man.create_backup("test_back1", file_list)
+        return_val1 = test_man.create_backup("test_back1", file_list, verbose=False)
         self.assertTrue(return_val1, "create_backup returns true when it has created a backup.")
         backup1 = test_man.get_backup('test_back1')
         self.assertIsInstance(backup1, dict, "create_backup creates a dictionary")
-        return_val2 = test_man.create_backup("test_back1", file_list)
+        return_val2 = test_man.create_backup("test_back1", file_list, verbose=False)
         self.assertFalse(return_val2, "create_backup returns true when it has created a backup.")
 
 

@@ -2,50 +2,24 @@ import os
 import numpy as np
 import pandas as pd
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.remodeling.operations.number_rows_op import NumberRowsOp
-from hed.tools.remodeling.operations.number_groups_op import NumberGroupsOp
-from hed.tools.remodeling.operations.remap_columns_op import RemapColumnsOp
-from hed.tools.remodeling.operations.factor_column_op import FactorColumnOp
-from hed.tools.remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
-from hed.tools.remodeling.operations.factor_hed_type_op import FactorHedTypeOp
-from hed.tools.remodeling.operations.merge_consecutive_op import MergeConsecutiveOp
-from hed.tools.remodeling.operations.remove_columns_op import RemoveColumnsOp
-from hed.tools.remodeling.operations.reorder_columns_op import ReorderColumnsOp
-from hed.tools.remodeling.operations.remove_rows_op import RemoveRowsOp
-from hed.tools.remodeling.operations.rename_columns_op import RenameColumnsOp
-from hed.tools.remodeling.operations.split_event_op import SplitEventOp
-from hed.tools.remodeling.operations.summarize_column_names_op import SummarizeColumnNamesOp
-from hed.tools.remodeling.operations.summarize_column_values_op import SummarizeColumnValuesOp
-from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp
+from hed.tools.remodeling.backup_manager import BackupManager
+from hed.tools.remodeling.operations.operation_list import operations
 from hed.errors.exceptions import HedFileError
-
-dispatch = {
-    'number_rows': NumberRowsOp,
-    'number_groups': NumberGroupsOp,
-    'factor_column': FactorColumnOp,
-    'factor_hed_tags': FactorHedTagsOp,
-    'factor_hed_type': FactorHedTypeOp,
-    'merge_consecutive': MergeConsecutiveOp,
-    'number_groups_op': NumberGroupsOp,
-    'number_rows_op': NumberRowsOp,
-    'remap_columns': RemapColumnsOp,
-    'remove_columns': RemoveColumnsOp,
-    'remove_rows': RemoveRowsOp,
-    'rename_columns': RenameColumnsOp,
-    'reorder_columns': ReorderColumnsOp,
-    'split_event': SplitEventOp,
-    'summarize_column_names': SummarizeColumnNamesOp,
-    'summarize_column_values': SummarizeColumnValuesOp,
-    'summarize_hed_type': SummarizeHedTypeOp
-}
 
 
 class Dispatcher:
     REMODELING_SUMMARY_PATH = 'derivatives/remodel/summaries'
-    BASE_BACKUP_NAME = 'baseback'
 
-    def __init__(self, command_list, data_root=None, hed_versions=None):
+    def __init__(self, command_list, data_root=None, backup_name=BackupManager.DEFAULT_BACKUP_NAME, hed_versions=None):
         self.data_root = data_root
+        self.backup_name = backup_name
+        self.backup_man = None
+        if self.data_root:
+            self.backup_man = BackupManager(data_root)
+            if not self.backup_man.get_backup(self.backup_name):
+                raise HedFileError("BackupDoesNotExist",
+                                   f"Remodeler cannot be run with a dataset without first creating the "
+                                   f"{self.backup_name} backup for {self.data_root}", "")
         op_list, errors = self.parse_commands(command_list)
         if errors:
             these_errors = self.errors_to_str(errors, 'Dispatcher failed due to invalid commands')
@@ -57,30 +31,51 @@ class Dispatcher:
             self.hed_schema = None
         self.context_dict = {}
 
-    def get_remodel_save_dir(self):
-        return os.path.realpath(os.path.join(self.data_root, Dispatcher.REMODELING_SUMMARY_PATH))
+    def get_data_file(self, file_path):
+        """ Full path of the backup file corresponding to the file path.
 
-    def run_operations(self, filename, sidecar=None, verbose=False):
+        Args:
+            file_path (str): Full path of the dataframe in the original dataset.
+
+        Returns:
+            str: Full path of the corresponding file in the backup.
+
+        """
+        if self.backup_man:
+            actual_path = self.backup_man.get_backup_path(self.backup_name, file_path)
+        else:
+            actual_path = file_path
+
+        try:
+            df = pd.read_csv(actual_path, sep='\t')
+        except Exception:
+            raise HedFileError("BadDataFile",
+                               f"{str(actual_path)} (orig: {file_path}) does not correspond to "
+                               f"a valid tab-separated value file", "")
+        df = self.prep_events(df)
+        return df
+
+    def get_remodel_save_dir(self):
+        if self.data_root:
+            return os.path.realpath(os.path.join(self.data_root, Dispatcher.REMODELING_SUMMARY_PATH))
+        raise HedFileError("NoDataRoot", f"Dispatcher must have a data root to produce directories", "")
+
+    def run_operations(self, file_path, sidecar=None, verbose=False):
         """ Run the dispatcher commands on a file.
 
         Args:
-            filename (str)      Full path of the file to be remodeled.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            file_path (str):      Full path of the file to be remodeled.
+            sidecar (Sidecar or file-like):   Only needed for HED operations.
             verbose (bool):  If true, print out progress reports
 
         """
 
         # string to functions
         if verbose:
-            print(f"Reading {filename}...")
-        try:
-            df = pd.read_csv(filename, sep='\t')
-        except Exception:
-            raise HedFileError("BadDataFrameFile",
-                               f"{str(filename)} does not correspond to a valid tab-separated value file", "")
-        df = self.prep_events(df)
+            print(f"Reading {file_path}...")
+        df = self.get_data_file(file_path)
         for operation in self.parsed_ops:
-            df = operation.do_op(self, df, filename, sidecar=sidecar)
+            df = operation.do_op(self, df, file_path, sidecar=sidecar)
         df = df.fillna('n/a')
         return df
 
@@ -116,10 +111,10 @@ class Dispatcher:
                 if "parameters" not in item:
                     raise KeyError("MissingParameters",
                                    f"Command {str(item)} does not have a parameters key")
-                if item["command"] not in dispatch:
+                if item["command"] not in operations:
                     raise KeyError("CommandCanNotBeDispatched",
                                    f"Command {item['command']} must be added to dispatch before it can be executed.")
-                new_command = dispatch[item["command"]](item["parameters"])
+                new_command = operations[item["command"]](item["parameters"])
                 commands.append(new_command)
             except Exception as ex:
                 errors.append({"index": index, "item": f"{item}", "error_type": type(ex),
