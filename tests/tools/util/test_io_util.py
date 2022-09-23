@@ -3,7 +3,7 @@ import unittest
 from hed.errors.exceptions import HedFileError
 from hed.tools import check_filename, extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
     get_path_components, parse_bids_filename
-from hed.tools.util.io_util import _split_entity, get_allowed
+from hed.tools.util.io_util import _split_entity, get_allowed, get_filtered_by_element
 
 
 class Test(unittest.TestCase):
@@ -135,6 +135,22 @@ class Test(unittest.TestCase):
         value2 = get_allowed(test_value1, [])
         self.assertEqual(value2, test_value1)
 
+    def test_get_file_list_case(self):
+        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
+        file_list = get_file_list(dir_data, name_prefix='STERNBerg', extensions=[".Tsv"])
+        for item in file_list:
+            filename = os.path.basename(item)
+            self.assertTrue(filename.startswith('sternberg'))
+
+    def test_get_file_list_exclude_dir(self):
+        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        file_list1 = get_file_list(dir_data, extensions=[".bmp"])
+        self.assertEqual(345, len(file_list1), 'get_file_list has the right number of files when no exclude')
+        file_list2 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=[])
+        self.assertEqual(len(file_list1), len(file_list2), 'get_file_list should not change when exclude_dir is empty')
+        file_list3 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=['stimuli'])
+        self.assertFalse(file_list3, 'get_file_list should return an empty list when all are excluded')
+
     def test_get_file_list_files(self):
         dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  '../../data/schema_test_data/prologue_tests')
@@ -151,14 +167,6 @@ class Test(unittest.TestCase):
                 continue
             raise HedFileError("FileShouldNotBeFound", f"get_event_files should have not have found file {file}", "")
 
-    def test_get_get_file_list_suffix(self):
-        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data')
-        file_list = get_file_list(dir_data, extensions=[".json", ".tsv"])
-        for item in file_list:
-            if item.endswith(".json") or item.endswith(".tsv"):
-                continue
-            raise HedFileError("BadFileType", "get_event_files expected only .html or .js files", "")
-
     def test_get_file_list_prefix(self):
         dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
         file_list = get_file_list(dir_data, name_prefix='sternberg', extensions=[".tsv"])
@@ -166,21 +174,27 @@ class Test(unittest.TestCase):
             filename = os.path.basename(item)
             self.assertTrue(filename.startswith('sternberg'))
 
-    def test_get_file_list_case(self):
-        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
-        file_list = get_file_list(dir_data, name_prefix='STERNBerg', extensions=[".Tsv"])
+    def test_get_file_list_suffix(self):
+        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data')
+        file_list = get_file_list(dir_data, extensions=[".json", ".tsv"])
         for item in file_list:
-            filename = os.path.basename(item)
-            self.assertTrue(filename.startswith('sternberg'))
+            if item.endswith(".json") or item.endswith(".tsv"):
+                continue
+            raise HedFileError("BadFileType", "get_event_files expected only .html or .js files", "")
 
-    def test_get_file_list_exclude_dir(self):
-        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
-        file_list1 = get_file_list(dir_data, extensions=[".bmp"])
-        self.assertEqual(345, len(file_list1), 'get_file_list has the right number of files when no exclude')
-        file_list2 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=[])
-        self.assertEqual(len(file_list1), len(file_list2), 'get_file_list should not change when exclude_dir is empty')
-        file_list3 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=['stimuli'])
-        self.assertFalse(file_list3, 'get_file_list should return an empty list when all are excluded')
+    def test_get_filtered_by_element(self):
+        file_list1 = ['D:\\big\\subj-01_task-stop_events.tsv', 'D:\\big\\subj-01_task-rest_events.tsv',
+                      'D:\\big\\subj-01_events.tsv', 'D:\\big\subj-01_task-stop_task-go_events.tsv']
+        new_list1 = get_filtered_by_element(file_list1, ['task-stop'])
+        self.assertEqual(len(new_list1), 2, "It should have the right length when one element filtered")
+        new_list2 = get_filtered_by_element(file_list1, ['task-stop', 'task-go'])
+        self.assertEqual(len(new_list2), 2, "It should have the right length when meets multiple criteria")
+        new_list3 = get_filtered_by_element(file_list1, [])
+        self.assertFalse(len(new_list3))
+        new_list3 = get_filtered_by_element(file_list1, [])
+        self.assertFalse(len(new_list3))
+        new_list4 = get_filtered_by_element([], ['task-go'])
+        self.assertFalse(len(new_list4))
 
     def test_get_path_components(self):
         base_path = '../../data/bids/eeg_ds003654s'

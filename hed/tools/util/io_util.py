@@ -159,6 +159,11 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
     return dir_dict
 
 
+def get_filtered_by_element(file_list, elements):
+    new_list = [file for file in file_list if any(substring in os.path.basename(file) for substring in elements)]
+    return new_list
+
+
 def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=None):
     """ Get list of filenames satisfying the criteria.
 
@@ -174,11 +179,11 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
          list:  The filtered file names.
 
      """
-    filtered_files = []
-    for r_file in file_list:
-        if check_filename(r_file, name_prefix=name_prefix, name_suffix=name_suffix, extensions=extensions):
-            filtered_files.append(r_file)
+    filtered_files = [file for file in file_list if
+                      check_filename(file, name_prefix=name_prefix, name_suffix=name_suffix, extensions=extensions)]
     return filtered_files
+
+
 
 
 def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dirs=None):
