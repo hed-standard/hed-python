@@ -21,7 +21,8 @@ class DefMapper(HedOps):
         """ Initialize mapper for definitions in hed strings.
 
         Args:
-            def_dicts (list or DefDict): DefDicts containing the definitions this mapper should initialize with.
+            def_dicts (list or DefinitionDict): DefinitionDicts containing the definitions this mapper
+                                                should initialize with.
 
         Notes:
             - More definitions can be added later.

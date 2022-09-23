@@ -21,7 +21,7 @@ class HedVariableManager:
 
         self.hed_schema = hed_schema
         self.definitions = definitions
-        self.context_manager = HedContextManager(hed_strings, hed_schema)
+        self.context_manager = HedContextManager(hed_strings)
         self._variable_type_map = {}   # a map of type variable into HedTypeVariable objects
 
     @property

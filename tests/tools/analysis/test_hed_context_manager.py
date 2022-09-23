@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
         cls.schema = schema
 
     def test_constructor(self):
-        manager1 = HedContextManager(self.test_strings1, self.schema)
+        manager1 = HedContextManager(self.test_strings1)
         self.assertIsInstance(manager1, HedContextManager, "The constructor should create an HedContextManager")
         self.assertEqual(len(manager1.hed_strings), 7, "The constructor should have the right number of strings")
         self.assertEqual(len(manager1.onset_list), 4, "The constructor should have right length onset list")
@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
 
     def test_constructor_from_assembled(self):
         hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        manager1 = HedContextManager(hed_strings, self.schema)
+        manager1 = HedContextManager(hed_strings)
         self.assertEqual(len(manager1.hed_strings), 200,
                          "The constructor for assembled strings has expected # of strings")
         self.assertEqual(len(manager1.onset_list), 261,
@@ -61,10 +61,10 @@ class Test(unittest.TestCase):
 
     def test_constructor_unmatched(self):
         with self.assertRaises(HedFileError):
-            HedContextManager(self.test_strings2, self.schema)
+            HedContextManager(self.test_strings2)
 
     def test_constructor_multiple_values(self):
-        manager = HedContextManager(self.test_strings3, self.schema)
+        manager = HedContextManager(self.test_strings3)
         self.assertEqual(len(manager.onset_list), 3, "Constructor should have right number of onsets")
 
 

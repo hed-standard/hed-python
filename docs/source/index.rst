@@ -10,7 +10,7 @@ Hierarchical Event Descriptor (HED) Python Tools
 Note:  this is a work in progress. More information is coming.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Contents:
 
    introduction.md

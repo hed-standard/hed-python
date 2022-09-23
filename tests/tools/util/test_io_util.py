@@ -207,6 +207,9 @@ class Test(unittest.TestCase):
         comps3 = get_path_components(base_path, file_path3)
         self.assertFalse(comps3, "get_path_components files directly in base_path don't have components ")
         file_path4 = 'P:/Baloney/sidecar/events.tsv'
+        print(f"base {base_path} and {file_path4}")
+        x = get_path_components(base_path, file_path4)
+        print(f"x = {str(x)}")
         try:
             get_path_components(base_path, file_path4)
         except ValueError:

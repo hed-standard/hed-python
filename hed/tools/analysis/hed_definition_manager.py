@@ -167,7 +167,7 @@ if __name__ == '__main__':
                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
 
-    onset_man = HedContextManager(test_strings1, schema)
+    onset_man = HedContextManager(test_strings1)
     def1 = HedString('(Condition-variable/Var1, Circle, Square)', hed_schema=schema)
     def2 = HedString('(condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere)', hed_schema=schema)
     def3 = HedString('(Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross)',
