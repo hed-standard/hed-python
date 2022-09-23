@@ -144,7 +144,7 @@ class TabularSummary:
         df = get_new_dataframe(data)
         self.total_files = self.total_files + 1
         self.total_events = self.total_events + len(df.index)
-        for col_name, col_values in df.iteritems():
+        for col_name, col_values in df.items():
             if self.skip_cols and col_name in self.skip_cols:
                 continue
             if col_name in self.value_info.keys():
@@ -211,7 +211,7 @@ class TabularSummary:
         """
         col_info = dict()
 
-        for col_name, col_values in dataframe.iteritems():
+        for col_name, col_values in dataframe.items():
             if skip_cols and col_name in skip_cols:
                 continue
             col_info[col_name] = col_values.value_counts(ascending=True).to_dict()

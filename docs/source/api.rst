@@ -62,6 +62,21 @@ HED tools
 .. autosummary:: hed.tools
    :toctree: generated/
 
+   hed.tools.analysis.file_dictionary.FileDictionary
+   hed.tools.analysis.hed_context_manager.HedContextManager
+   hed.tools.analysis.hed_definition_manager.HedDefinitionManager
+   hed.tools.analysis.hed_query_manager.HedQueryManager
+   hed.tools.analysis.hed_type_factors.HedTypeFactors
+   hed.tools.analysis.hed_type_variable.HedTypeVariable
+   hed.tools.analysis.hed_variable_manager.HedVariableManager
+   hed.tools.analysis.hed_variable_summary.HedVariableCounts
+   hed.tools.analysis.hed_variable_summary.HedVariableSummary
+   hed.tools.analysis.key_map.KeyMap
+   hed.tools.analysis.tabular_summary.TabularSummary
+   hed.tools.analysis.tag_summary.TagSummary
+   hed.tools.analysis.analysis_util
+   hed.tools.analysis.annotation_util
+   hed.tools.analysis.summary_util
    hed.tools.bids.bids_dataset.BidsDataset
    hed.tools.bids.bids_dataset_summary.BidsDatasetSummary
    hed.tools.bids.bids_file.BidsFile
@@ -71,20 +86,10 @@ HED tools
    hed.tools.bids.bids_tabular_dictionary.BidsTabularDictionary
    hed.tools.bids.bids_tabular_file.BidsTabularFile
    hed.tools.bids.bids_tabular_summary.BidsTabularSummary
-   hed.tools.analysis.definition_manager.DefinitionManager
-   hed.tools.analysis.file_dictionary.FileDictionary
-   hed.tools.analysis.key_map.KeyMap
-   hed.tools.analysis.context_manager.ContextManager
-   hed.tools.analysis.tag_summary.TagSummary
-   hed.tools.analysis.hed_type_factors.HedTypeFactors
-   hed.tools.analysis.hed_type_variable.HedTypeVariable
-   hed.tools.analysis.hed_variable_manager.HedVariableManager
-   hed.tools.analysis.hed_variable_summary.HedVariableCounts
-   hed.tools.analysis.hed_variable_summary.HedVariableSummary
-   hed.tools.analysis.analysis_util
-   hed.tools.analysis.annotation_util
-   hed.tools.analysis.summary_util
-   hed.tools.hed_logger.HedLogger
+   hed.tools.remodeling.cli.run_remodel
+   hed.tools.remodeling.cli.run_remodel_backup
+   hed.tools.remodeling.cli.run_remodel_restore
+   hed.tools.remodeling.operations.base_context.BaseContext
 
 .. currentmodule:: hed
 
@@ -95,6 +100,7 @@ HED utilities
 .. autosummary:: hed.util
    :toctree: generated/
 
+   hed.tools.util.hed_logger.HedLogger
    hed.util.data_util
    hed.util.io_util
 
