@@ -1,9 +1,9 @@
 import json
 import pandas as pd
 
-from hed import HedTag
-from hed.models import HedGroup
-from hed.schema import load_schema_version
+from hed.models.hed_tag import HedTag
+from hed.models.hed_group import HedGroup
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_definition_manager import HedDefinitionManager
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_factors import HedTypeFactors

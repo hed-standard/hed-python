@@ -9,17 +9,8 @@ Subpackages
 
    hed.tools.analysis
    hed.tools.bids
-
-Submodules
-----------
-
-hed.tools.hed\_logger module
-----------------------------
-
-.. automodule:: hed.tools.hed_logger
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   hed.tools.remodeling
+   hed.tools.util
 
 Module contents
 ---------------

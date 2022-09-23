@@ -4,12 +4,13 @@ import json
 import unittest
 from pandas import DataFrame
 from hed import schema as hedschema
-from hed.models import Sidecar
-from hed.tools import TabularSummary, check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
+from hed.models.sidecar import Sidecar
+from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
 from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, \
     _flatten_cat_col, _flatten_val_col, _get_value_entry, trim_back, trim_front, _tag_list_to_str, _update_cat_dict, \
     generate_sidecar_entry
-from hed.tools import get_file_list
+from hed.tools.analysis.tabular_summary import TabularSummary
+from hed.tools.util.io_util import get_file_list
 from hed.validator import HedValidator
 
 

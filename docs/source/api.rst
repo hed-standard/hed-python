@@ -56,10 +56,11 @@ HED schema handling
 
 .. _calibration_ref2:
 
-HED tools
----------
 
-.. autosummary:: hed.tools
+HED tools analysis
+--------------------
+
+.. autosummary:: hed.tools.analysis
    :toctree: generated/
 
    hed.tools.analysis.file_dictionary.FileDictionary
@@ -77,7 +78,19 @@ HED tools
    hed.tools.analysis.analysis_util
    hed.tools.analysis.annotation_util
    hed.tools.analysis.summary_util
-   hed.tools.bids.bids_dataset.BidsDataset
+
+
+.. currentmodule:: hed
+
+.. _calibration_ref4:
+
+
+HED tools BIDS
+--------------------
+
+.. autosummary:: hed.tools.bids
+   :toctree: generated/
+
    hed.tools.bids.bids_dataset_summary.BidsDatasetSummary
    hed.tools.bids.bids_file.BidsFile
    hed.tools.bids.bids_file_dictionary.BidsFileDictionary
@@ -86,29 +99,28 @@ HED tools
    hed.tools.bids.bids_tabular_dictionary.BidsTabularDictionary
    hed.tools.bids.bids_tabular_file.BidsTabularFile
    hed.tools.bids.bids_tabular_summary.BidsTabularSummary
-   hed.tools.remodeling.cli.run_remodel
-   hed.tools.remodeling.cli.run_remodel_backup
-   hed.tools.remodeling.cli.run_remodel_restore
-   hed.tools.remodeling.operations.base_context.BaseContext
+
 
 .. currentmodule:: hed
+
+.. _calibration_ref5:
 
 
 HED utilities
--------------
+--------------
 
-.. autosummary:: hed.util
+.. autosummary:: hed.tools.util
    :toctree: generated/
 
-   hed.tools.util.hed_logger.HedLogger
-   hed.util.data_util
-   hed.util.io_util
 
 .. currentmodule:: hed
 
 
+.. _calibration_ref6:
+
+
 HED validators
---------------
+---------------
 
 .. autosummary:: hed.validator
    :toctree: generated/

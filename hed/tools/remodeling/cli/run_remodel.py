@@ -2,8 +2,8 @@ import os
 import json
 import argparse
 from hed.errors.exceptions import HedFileError
-from hed.tools import get_file_list, parse_bids_filename
-from hed.tools import BidsDataset
+from hed.tools.util.io_util import get_file_list, parse_bids_filename
+from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
 

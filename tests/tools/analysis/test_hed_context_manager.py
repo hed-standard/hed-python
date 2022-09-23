@@ -1,9 +1,13 @@
 import os
 import unittest
-from hed import HedString, load_schema_version, Sidecar, TabularInput
-from hed.models import HedGroup
-from hed.errors import HedFileError
-from hed.tools import HedContextManager, get_assembled_strings
+from hed.errors.exceptions import HedFileError
+from hed.models.hed_group import HedGroup
+from hed.models.hed_string import HedString
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.schema.hed_schema_io import load_schema_version
+from hed.tools.analysis.hed_context_manager import HedContextManager
+from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 class Test(unittest.TestCase):

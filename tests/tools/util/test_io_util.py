@@ -1,9 +1,9 @@
 import os
 import unittest
 from hed.errors.exceptions import HedFileError
-from hed.tools import check_filename, extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
-    get_path_components, parse_bids_filename
-from hed.tools.util.io_util import _split_entity, get_allowed, get_filtered_by_element
+from hed.tools.util.io_util import check_filename, extract_suffix_path, generate_filename, \
+    get_dir_dictionary, get_file_list, get_path_components, parse_bids_filename, \
+    _split_entity, get_allowed, get_filtered_by_element
 
 
 class Test(unittest.TestCase):
@@ -117,7 +117,6 @@ class Test(unittest.TestCase):
         # filename = generate_filename('HED7.2.0.xml', name_suffix='_blech', extension='.txt')
         # self.assertEqual('HED7.2.0_blech.txt', filename, "Returns correct string when base_name has periods")
 
-
     def test_get_dir_dictionary(self):
         dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
         self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
@@ -184,7 +183,7 @@ class Test(unittest.TestCase):
 
     def test_get_filtered_by_element(self):
         file_list1 = ['D:\\big\\subj-01_task-stop_events.tsv', 'D:\\big\\subj-01_task-rest_events.tsv',
-                      'D:\\big\\subj-01_events.tsv', 'D:\\big\subj-01_task-stop_task-go_events.tsv']
+                      'D:\\big\\subj-01_events.tsv', 'D:\\big\\subj-01_task-stop_task-go_events.tsv']
         new_list1 = get_filtered_by_element(file_list1, ['task-stop'])
         self.assertEqual(len(new_list1), 2, "It should have the right length when one element filtered")
         new_list2 = get_filtered_by_element(file_list1, ['task-stop', 'task-go'])
@@ -208,9 +207,14 @@ class Test(unittest.TestCase):
         comps3 = get_path_components(base_path, file_path3)
         self.assertFalse(comps3, "get_path_components files directly in base_path don't have components ")
         file_path4 = 'P:/Baloney/sidecar/events.tsv'
-        x = get_path_components(base_path, file_path4)
-        with self.assertRaises(ValueError):
+        try:
             get_path_components(base_path, file_path4)
+        except ValueError:
+            pass
+        except Exception:
+            self.fail("parse_bids_filename threw the wrong exception when filename invalid")
+        else:
+            self.fail("parse_bids_filename should have thrown a ValueError when duplicate key")
 
     def test_parse_bids_filename_full(self):
         the_path1 = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
@@ -252,7 +256,7 @@ class Test(unittest.TestCase):
     def test_parse_bids_filename_unmatched(self):
         path1 = 'dataset_description.json'
         try:
-            suffix1, ext1, entity_dict1 = parse_bids_filename(path1)
+            parse_bids_filename(path1)
         except HedFileError:
             pass
         except Exception:
@@ -263,7 +267,7 @@ class Test(unittest.TestCase):
     def test_parse_bids_filename_invalid(self):
         path1 = 'task_sub-01_description.json'
         try:
-            suffix1, ext1, entity_dict1 = parse_bids_filename(path1)
+            parse_bids_filename(path1)
         except HedFileError:
             pass
         except Exception:

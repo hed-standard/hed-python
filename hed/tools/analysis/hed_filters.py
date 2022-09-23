@@ -1,4 +1,4 @@
-from hed.errors import get_printable_issue_string
+# from hed.errors import get_printable_issue_string
 
 
 # class StringOp:
@@ -104,7 +104,8 @@ from hed.errors import get_printable_issue_string
 #     from hed.models import HedString, DefinitionEntry, TabularInput, Sidecar
 #     from hed.tools.analysis.analysis_util import get_assembled_strings
 #     hed_schema = load_schema_version(xml_version="8.1.0")
-#     hed_string = HedString('Def/Cond1, Sensory-event, (Def/Cond2, Onset), Item, (Item, Blue), (Green, (Move, Item))', hed_schema=hed_schema)
+#     hed_string = HedString('Def/Cond1, Sensory-event, (Def/Cond2, Onset), ' +
+#                            'Item, (Item, Blue), (Green, (Move, Item))', hed_schema=hed_schema)
 #
 #     y = hed_string.lower()
 #     print(f"Before: {str(hed_string)}")

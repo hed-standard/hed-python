@@ -1,5 +1,5 @@
-from hed.errors import HedFileError
-from hed.schema import load_schema_version
+from hed.errors.exceptions import HedFileError
+from hed.schema.hed_schema_io import load_schema_version
 
 
 class OnsetGroup:

@@ -1,7 +1,8 @@
 import os
 import unittest
-from hed import HedString, load_schema_version, Sidecar, TabularInput
-from hed.models import DefinitionEntry
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools import HedContextManager, HedTypeVariable, HedVariableSummary, get_assembled_strings
 
 

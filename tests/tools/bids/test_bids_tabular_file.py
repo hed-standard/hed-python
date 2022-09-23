@@ -1,7 +1,8 @@
 import os
 import unittest
 from hed.models.tabular_input import TabularInput
-from hed.tools import BidsSidecarFile, BidsTabularFile
+from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
+from hed.tools.bids.bids_tabular_file import BidsTabularFile
 
 
 class Test(unittest.TestCase):

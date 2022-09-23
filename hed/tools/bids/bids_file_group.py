@@ -222,7 +222,7 @@ class BidsFileGroup:
 if __name__ == '__main__':
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
-    path = 'G:\WakemanHenson\WH_Released'
+    path = 'G:\\WakemanHenson\\WH_Released'
     bids = BidsFileGroup(path)
 
     # for file_obj in bids.sidecar_dict.values():

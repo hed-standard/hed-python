@@ -1,7 +1,8 @@
 """ Utilities for downstream analysis such as searching. """
 
 import pandas as pd
-from hed.models import TabularInput, TagExpressionParser
+from hed.models.tabular_input import TabularInput
+from hed.models.expression_parser import TagExpressionParser
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):

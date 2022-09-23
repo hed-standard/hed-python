@@ -1,5 +1,5 @@
 import pandas as pd
-from hed import HedFileError
+from hed.errors.exceptions import HedFileError
 
 
 class HedTypeFactors:

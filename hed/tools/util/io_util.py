@@ -1,11 +1,9 @@
 """Utilities for generating and handling file names."""
 
 import os
-import shutil
 from datetime import datetime
-from pathlib import Path
 from werkzeug.utils import secure_filename
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 
 
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):

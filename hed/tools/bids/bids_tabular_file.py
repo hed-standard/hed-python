@@ -1,6 +1,6 @@
 import os
-from hed.tools.bids.bids_file import BidsFile
 from hed.models.tabular_input import TabularInput
+from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsTabularFile(BidsFile):
@@ -38,7 +38,7 @@ class BidsTabularFile(BidsFile):
 
 
 if __name__ == '__main__':
-    from hed import HedSchemaGroup, HedValidator, load_schema, load_schema_version, Sidecar, TabularInput
+    # from hed import HedSchemaGroup, HedValidator, load_schema, load_schema_version, Sidecar, TabularInput
 
     # check_for_warnings = False
     # base_version = '8.1.0'

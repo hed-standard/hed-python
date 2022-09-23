@@ -1,5 +1,5 @@
 import json
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import get_new_dataframe
 from hed.tools.analysis.annotation_util import generate_sidecar_entry
 

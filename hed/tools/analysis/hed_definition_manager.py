@@ -1,5 +1,8 @@
 from hed.schema import load_schema_version
-from hed.models import HedString, HedTag, DefinitionEntry, DefMapper
+from hed.models.hed_string import HedString
+from hed.models.hed_tag import HedTag
+from hed.models.def_mapper import DefMapper
+from hed.models.definition_dict import DefinitionEntry
 from hed.tools.analysis.hed_context_manager import HedContextManager
 
 

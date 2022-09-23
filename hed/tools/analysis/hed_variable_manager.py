@@ -1,6 +1,6 @@
 import pandas as pd
 import json
-from hed.schema import load_schema_version
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_type_variable import HedTypeVariable
 from hed.tools.analysis.hed_context_manager import HedContextManager
 
