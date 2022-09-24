@@ -222,8 +222,13 @@ def get_path_components(root_path, this_path):
 
     """
 
-    base_path = os.path.realpath(root_path)
-    cur_path = os.path.realpath(this_path)
+    base_path = os.path.normpath(os.path.realpath(root_path))
+    cur_path = os.path.normpath(os.path.realpath(this_path))
+    common_prefix = os.path.commonprefix([base_path, cur_path])
+    print(f"Base path: {base_path} \nCurrent path: {cur_path}")
+    print("Common prefix:", {common_prefix})
+    if not common_prefix:
+        raise ValueError("NoPathInCommon", f"Paths {base_path} and {cur_path} must have items in common")
     common_path = os.path.commonpath([base_path, cur_path])
     print(f"Common path: {common_path}")
     if common_path != base_path:
