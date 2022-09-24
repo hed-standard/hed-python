@@ -225,6 +225,7 @@ def get_path_components(root_path, this_path):
     base_path = os.path.realpath(root_path)
     cur_path = os.path.realpath(this_path)
     common_path = os.path.commonpath([base_path, cur_path])
+    print(f"Common path: {common_path}")
     if common_path != base_path:
         return None
     rel_path = os.path.relpath(cur_path, base_path)

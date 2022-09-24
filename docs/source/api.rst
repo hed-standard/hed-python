@@ -64,25 +64,25 @@ HED tools
 
 .. autosummary:: hed.tools.analysis
    :toctree: generated/
-   :maxdepth: 3
 
-   hed.tools.FileDictionary
-   hed.tools.HedContextManager
-   hed.tools.HedDefinitionManager
-   hed.tools.HedQueryManager
-   hed.tools.HedTypeFactors
-   hed.tools.HedTypeVariable
-   hed.tools.HedVariableManager
-   hed.tools.HedVariableCounts
-   hed.tools.HedVariableSummary
-   hed.tools.KeyMap
-   hed.tools.TabularSummary
-   hed.tools.TagSummary
+   hed.tools.analysis.file_dictionary
+   hed.tools.analysis.hed_context_manager
+   hed.tools.analysis.hed_definition_manager
+   hed.tools.analysis.hed_type_factors
+   hed.tools.analysis.hed_type_variable
+   hed.tools.analysis.hed_variable_manager
+   hed.tools.analysis.hed_variable_summary
+   hed.tools.analysis.key_map
+   hed.tools.analysis.tabular_summary
+   hed.tools.analysis.tag_summary
+   hed.tools.analysis.analysis_util
+   hed.tools.analysis.annotation_util
+   hed.tools.analysis.summary_util
 
 
-.. currentmodule:: hed.tools
+.. currentmodule:: hed
 
-.. _calibration_ref6:
+.. _calibration_ref3:
 
 
 HED tools bids
@@ -90,24 +90,19 @@ HED tools bids
 
 .. autosummary:: hed.tools.bids
    :toctree: generated/
-   :maxdepth: 3
 
-   hed.tools.BidsDataset
-   hed.tools.BidsDatasetSummary
-   hed.tools.BidsFile
-   hed.tools.BidsFileDictionary
-   hed.tools.BidsFileGroup
-   hed.tools.BidsSidecarFile
-   hed.tools.BidsTabularDictionary
-   hed.tools.BidsTabularFile
-   hed.tools.BidsTabularSummary
+   hed.tools.bids.bids_dataset
+   hed.tools.bids.bids_dataset_summary
+   hed.tools.bids.bids_file
+   hed.tools.bids.bids_file_dictionary
+   hed.tools.bids.bids_file_group
+   hed.tools.bids.bids_sidecar_file
+   hed.tools.bids.bids_tabular_dictionary
+   hed.tools.bids.bids_tabular_file
 
+.. currentmodule:: hed
 
-
-
-.. currentmodule:: hed.tools
-
-.. _calibration_ref2:
+.. _calibration_ref4:
 
 
 HED remodel
@@ -116,21 +111,19 @@ HED remodel
 .. autosummary:: hed.tools.remodeling
    :toctree: generated/
 
-   hed.tools.BackupManager
-   hed.tools.Dispatcher
-   hed.tools.BaseContext
-   hed.tools.BaseOp
-   hed.tools.FactorColumnOp
-   hed.tools.FactorHedTagsOp
-   hed.tools.FactorHedTypeOp
-   hed.tools.analysis_util
-   hed.tools.annotation_util
-   hed.tools.summary_util
+   hed.tools.remodeling.BackupManager
+   hed.tools.remodeling.Dispatcher
+   hed.tools.remodeling.operations.BaseContext
+   hed.tools.remodeling.operations.BaseOp
+   hed.tools.remodeling.operations.FactorColumnOp
+   hed.tools.remodeling.operations.FactorHedTagsOp
+   hed.tools.remodeling.operations.FactorHedTypeOp
+
 
 
 .. currentmodule:: hed
 
-.. _calibration_ref2:
+.. _calibration_ref5:
 
 
 HED validators
