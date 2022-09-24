@@ -196,7 +196,7 @@ class Test(unittest.TestCase):
         self.assertFalse(len(new_list4))
 
     def test_get_path_components(self):
-        base_path = '../../data/bids/eeg_ds003654s'
+        base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s')
         file_path1 = os.path.realpath(os.path.join(base_path, 'sub-002/eeg/sub-002_FacePerception_run-1_events.tsv'))
         comps1 = get_path_components(base_path, file_path1)
         self.assertEqual(len(comps1), 2, "get_path_components has correct number of components")
@@ -208,16 +208,17 @@ class Test(unittest.TestCase):
         self.assertFalse(comps3, "get_path_components files directly in base_path don't have components ")
         file_path4 = 'P:/Baloney/sidecar/events.tsv'
         print(f"base {base_path} and {file_path4}")
-        x = get_path_components(base_path, file_path4)
-        print(f"x = {str(x)}")
+
         try:
-            get_path_components(base_path, file_path4)
-        except ValueError:
+            get_path_components(os.path.realpath(base_path), os.path.realpath(file_path4))
+        except ValueError as ex:
+            print(f"{ex}")
             pass
-        except Exception:
+        except Exception as ex:
+            print(f"{ex}")
             self.fail("parse_bids_filename threw the wrong exception when filename invalid")
         else:
-            self.fail("parse_bids_filename should have thrown a ValueError when duplicate key")
+            self.fail("parse_bids_filename should have thrown an exception")
 
     def test_parse_bids_filename_full(self):
         the_path1 = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
