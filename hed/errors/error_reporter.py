@@ -21,7 +21,7 @@ def _register_error_function(error_type, wrapper_func):
 def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None):
     """ Decorator for errors in error handler or inherited classes.
 
-    Args:
+    Parameters:
         error_type (str): A value from error_types or optionally another value.
         default_severity (ErrorSeverity): The default severity for the decorated error.
         actual_code (str): The actual error to report to the outside world.
@@ -35,7 +35,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
         def wrapper(*args, severity=default_severity, **kwargs):
             """ Wrapper function for error handling non-tag errors.
 
-            Args:
+            Parameters:
                 args (args): non keyword args.
                 severity (ErrorSeverity): Will override the default error value if passed.
                 kwargs (**kwargs): Any keyword args to be passed down to error message function.
@@ -56,7 +56,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
 def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=False, actual_code=None):
     """  Decorator for errors in error handler or inherited classes.
 
-    Args:
+    Parameters:
         error_type (str): A value from error_types or optionally another value.
         default_severity (ErrorSeverity): The default severity for the decorated error.
         has_sub_tag (bool): If true, this error message also wants a sub_tag passed down.  eg "This" in "This/Is/A/Tag"
@@ -72,7 +72,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
             def wrapper(tag, index_in_tag, index_in_tag_end, *args, severity=default_severity, **kwargs):
                 """ Wrapper function for error handling tag errors with sub tags.
 
-                Args:
+                Parameters:
                     tag (HedTag): The hed tag object with the problem,
                     index_in_tag (int): The index into the tag with a problem(usually 0),
                     index_in_tag_end (int): The last index into the tag with a problem(usually len(tag),

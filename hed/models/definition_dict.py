@@ -15,7 +15,7 @@ class DefinitionEntry:
     def __init__(self, name, contents, takes_value, source_context):
         """ Initialize info for a single definition.
 
-        Args:
+        Parameters:
             name (str):            The label portion of this name (not including Definition/).
             contents (HedGroup):   The contents of this definition.
             takes_value (bool):    If True, expects ONE tag to have a single # sign in it.
@@ -34,7 +34,7 @@ class DefinitionEntry:
     def get_definition(self, replace_tag, placeholder_value=None):
         """ Return a copy of the definition with the tag expanded and the placeholder plugged in.
 
-        Args:
+        Parameters:
             replace_tag (HedTag): The def hed tag to replace with an expanded version
             placeholder_value (str or None):    If present and required, will replace any pound signs
                                                 in the definition contents.

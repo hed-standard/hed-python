@@ -20,7 +20,7 @@ class DefMapper(HedOps):
     def __init__(self, def_dicts=None):
         """ Initialize mapper for definitions in hed strings.
 
-        Args:
+        Parameters:
             def_dicts (list or DefinitionDict): DefinitionDicts containing the definitions this mapper
                                                 should initialize with.
 
@@ -50,7 +50,7 @@ class DefMapper(HedOps):
     def get_def_entry(self, def_name):
         """ Get the definition entry for the definition name.
 
-        Args:
+        Parameters:
             def_name (str):  Name of the definition to retrieve.
 
         Returns:
@@ -69,7 +69,7 @@ class DefMapper(HedOps):
     def add_definitions_from_string_as_temp(self, hed_string_obj):
         """ Add definitions from hed string as temporary.
 
-        Args:
+        Parameters:
             hed_string_obj (HedString):  Hed string object to search for definitions
 
         Returns:
@@ -84,7 +84,7 @@ class DefMapper(HedOps):
     def add_definitions(self, def_dicts, add_as_temp=False):
         """ Add definitions from dict(s) to mapper
 
-        Args:
+        Parameters:
             def_dicts (list or DefinitionDict): DefDict or list of DefDicts whose definitions should be added.
             add_as_temp (bool):          If true, mark these new definitions as temporary (easily purged).
 
@@ -100,7 +100,7 @@ class DefMapper(HedOps):
     def _add_definitions_from_dict(self, def_dict, add_as_temp=False):
         """ Add the definitions found in the given definition dictionary to this mapper.
 
-         Args:
+         Parameters:
              def_dict (DefinitionDict): DefDict whose definitions should be added.
              add_as_temp (bool): If true, mark these new definitions as temporary (easily purged).
 

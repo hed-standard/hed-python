@@ -15,7 +15,7 @@ class KeyMap:
     def __init__(self, key_cols, target_cols=None, name=''):
         """ Information for remapping columns of tabular files.
 
-        Args:
+        Parameters:
             key_cols (list):       List of columns to be replaced (assumed in the DataFrame)
             target_cols(list):     List of replacement columns (assumed to not be in the DataFrame)
             name (str):            Name associated with this remap (usually a pathname of the events file).
@@ -51,7 +51,7 @@ class KeyMap:
     def make_template(self, additional_cols=None):
         """ Return a dataframe template.
 
-        Args:
+        Parameters:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
 
         Returns:

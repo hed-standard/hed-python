@@ -8,7 +8,7 @@ from hed.errors.exceptions import HedFileError
 def add_columns(df, column_list, value='n/a'):
     """ Add specified columns to df if not there.
 
-    Args:
+    Parameters:
         df (DataFrame):      Pandas dataframe.
         column_list (list):  List of columns to append to the dataframe.
         value (str):         Default fill value for the column.
@@ -23,7 +23,7 @@ def add_columns(df, column_list, value='n/a'):
 def check_match(ds1, ds2, numeric=False):
     """ Check two Pandas data series have the same values.
 
-    Args:
+    Parameters:
         ds1 (DataSeries):      Pandas data series to check.
         ds2 (DataSeries):      Pandas data series to check.
         numeric (bool):        If true, treat as numeric and do close-to comparison.
@@ -50,7 +50,7 @@ def check_match(ds1, ds2, numeric=False):
 def delete_columns(df, column_list):
     """ Delete the specified columns from a dataframe.
 
-    Args:
+    Parameters:
         df (DataFrame):      Pandas dataframe from which to delete columns.
         column_list (list):  List of candidate column names for deletion.
 
@@ -67,7 +67,7 @@ def delete_columns(df, column_list):
 def delete_rows_by_column(df, value, column_list=None):
     """ Delete rows where columns have this value.
 
-    Args:
+    Parameters:
         df (DataFrame):      Pandas dataframe from which to delete rows.
         value (str):         Specified value to indicate row should be deleted.
         column_list (list):  List of columns to search for value.
@@ -90,7 +90,7 @@ def delete_rows_by_column(df, value, column_list=None):
 def get_key_hash(key_tuple):
     """ Calculate a hash key for tuple of values.
 
-    Args:
+    Parameters:
         key_tuple (tuple, list):  The key values in the correct order for lookup.
 
     Returns:

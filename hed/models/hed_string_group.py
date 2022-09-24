@@ -16,7 +16,7 @@ class HedStringGroup(HedString):
     def __init__(self, hed_string_obj_list):
         """ Constructor for the HedStringGroup class.
 
-        Args:
+        Parameters:
             hed_string_obj_list ([HedString]): A list of component HedStrings for this combined string.
 
         """
@@ -57,7 +57,7 @@ class HedStringGroup(HedString):
     def remove(self, items_to_remove):
         """ Remove any tags/groups in items_to_remove.
 
-        Args:
+        Parameters:
             items_to_remove (list): A list of HedGroup and HedTag objects to remove.
 
         Notes:
@@ -76,7 +76,7 @@ class HedStringGroup(HedString):
     def replace(self, item_to_replace, new_contents):
         """ Replace an existing tag or group.
 
-        Args:
+        Parameters:
             item_to_replace (HedTag or HedGroup): The tag to replace.
             new_contents (HedTag or HedGroup or list): The replacements for the tag.
 

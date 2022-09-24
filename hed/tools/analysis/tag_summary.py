@@ -31,7 +31,7 @@ class TagSummary:
     def __init__(self, file_group, schema, breakout_list=None):
         """ Constructor for TagSummary.
 
-        Args:
+        Parameters:
             file_group (BidsFileGroup):  Container holding the files with a particular suffix.
             schema (HedSchema or HedSchemaGroup):  The HED schema(s) used in the summary.
             breakout_list (list or None):   Used to arrange the tags in specified groupings.
@@ -91,7 +91,7 @@ class TagSummary:
     def extract_summary_info(entry_dict, tag_name):
         """ Extract the summary of tag in this entry.
 
-        Args:
+        Parameters:
             entry_dict (dict):  Keys are individual tag node names.
             tag_name (str):     Name of an individual node.
 

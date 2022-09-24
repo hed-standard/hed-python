@@ -13,7 +13,7 @@ class BidsFileDictionary(FileDictionary):
     def __init__(self, collection_name, files, entities=('sub', 'ses', 'task', 'run')):
         """ Create the dictionary keyed to entities.
 
-        Args:
+        Parameters:
             collection_name (str):      Name of this collection.
             files (list or dict):   Full paths of files to include.
             entities (tuple):  Entity names to use in creating the keys.
@@ -50,7 +50,7 @@ class BidsFileDictionary(FileDictionary):
     def correct_file(self, the_file):
         """ Transform to BidsFile if needed.
 
-        Args:
+        Parameters:
             the_file (str or BidsFile): If a str, create a new BidsFile object, otherwise pass the original on.
 
         Returns:
@@ -69,7 +69,7 @@ class BidsFileDictionary(FileDictionary):
     def get_file_path(self, key):
         """ Return the file path corresponding to key.
 
-        Args:
+        Parameters:
             key (str):  The key to use to look up the file in this dictionary.
 
         Returns:

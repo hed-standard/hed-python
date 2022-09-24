@@ -23,7 +23,7 @@ class BackupManager:
     def check_backup_files(self, backup_name, file_paths=None):
         """ Return the files in file_paths that are not backed up and vice-versa.
 
-        Args:
+        Parameters:
             backup_name (str): Name of the backup.
             file_paths (list):  List of full paths of files to be checked against the backup.
 
@@ -48,7 +48,7 @@ class BackupManager:
     def create_backup(self, backup_name, file_list, verbose=True):
         """ Create a new backup from file_list.
 
-        Args:
+        Parameters:
             backup_name (str or None):  Name of the backup.
             file_list (list):   Full paths of the files to be in the backup.
             verbose (bool):     If True, print out the files that are being backed up.

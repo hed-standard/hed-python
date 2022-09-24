@@ -21,7 +21,7 @@ class ColumnMapper:
                  optional_tag_columns=None, requested_columns=None, warn_on_missing_column=False):
         """ Constructor for ColumnMapper.
 
-        Args:
+        Parameters:
             sidecar (Sidecar): A sidecar to gather column data from.
             tag_columns: (list):  A list of ints or strings containing the columns that contain the HED tags.
                 Sidecar column definitions will take precedent if there is a conflict with tag_columns.
@@ -73,7 +73,7 @@ class ColumnMapper:
     def validate_column_map(column_map, allow_blank_names):
         """ Validate there are no issues with column names.
 
-        Args:
+        Parameters:
             column_map(iterable): A list of column names
             allow_blank_names(bool): Only find issues if this is true
 
@@ -100,7 +100,7 @@ class ColumnMapper:
     def _set_sidecar(self, sidecar):
         """ Set the sidecar this column mapper uses
 
-        Args:
+        Parameters:
             sidecar (Sidecar or None): the sidecar to use
 
         Returns:

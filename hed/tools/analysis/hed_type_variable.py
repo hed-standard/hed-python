@@ -14,7 +14,7 @@ class HedTypeVariable:
     def __init__(self, context_manager, hed_schema, hed_definitions, variable_type="condition-variable"):
         """ Create a variable manager for one type-variable for one tabular file.
 
-        Args:
+        Parameters:
             context_manager (HedContextManager): A list of HED strings.
             hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
             hed_definitions (dict): A dictionary of DefinitionEntry objects.

@@ -31,7 +31,7 @@ class BaseInput:
                  definition_columns=None, name=None, allow_blank_names=True, hed_schema=None):
         """ Constructor for the BaseInput class.
 
-        Args:
+        Parameters:
             file (str or file-like or pandas dataframe): An xlsx/tsv file to open.
             file_type (str or None): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
                 Derived from file if file is a filename.  Ignored if pandas dataframe.

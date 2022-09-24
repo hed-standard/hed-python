@@ -20,7 +20,7 @@ class HedString(HedGroup):
     def __init__(self, hed_string, hed_schema=None, _contents=None):
         """ Constructor for the HedString class.
 
-        Args:
+        Parameters:
             hed_string (str): A HED string consisting of tags and tag groups.
             hed_schema (HedSchema or None): The schema to use to identify tags.  Can be passed later.
             _contents ([HedGroupBase and/or HedTag] or None): Create a HedString from this exact list of children.

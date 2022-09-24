@@ -7,7 +7,7 @@ from hed.tools.util.io_util import generate_filename
 class BaseContext(ABC):
     """ Abstract base class for summary contexts. Should not be instantiated.
 
-    Args:
+    Parameters:
         context_type (str)  Type of summary.
         context_name (str)  Printable name -- should be unique.
         context_filename (str)  Base filename for saving the context.
@@ -22,7 +22,7 @@ class BaseContext(ABC):
     def get_summary_details(self, as_json=False, verbose=True):
         """ Return the summary-specific information.
 
-        Args:
+        Parameters:
             as_json (bool)  If False return a dictionary otherwise return a JSON string.
             verbose (bool)  If True, may provide additional details in the summary.
 

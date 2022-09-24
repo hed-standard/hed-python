@@ -8,7 +8,7 @@ from hed.models.expression_parser import TagExpressionParser
 def assemble_hed(data_input, columns_included=None, expand_defs=False):
     """ Return assembled HED annotations in a dataframe.
 
-    Args:
+    Parameters:
         data_input (TabularInput): The tabular input file whose HED annotations are to be assembled.
         columns_included (list or None):  A list of additional column names to include.
             If None, only the list of assembled tags is included.
@@ -39,7 +39,7 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
 def get_assembled_strings(table, hed_schema=None, expand_defs=False):
     """ Return HED string objects for a tabular file.
 
-    Args:
+    Parameters:
         table (TabularInput): The input file to be searched.
         hed_schema (HedSchema or HedschemaGroup): If provided the HedStrings are converted to canonical form.
         expand_defs (bool): If True, definitions are expanded when the events are assembled.

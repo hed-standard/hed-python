@@ -9,7 +9,7 @@ class BidsTabularFile(BidsFile):
     def __init__(self, file_path):
         """ Constructor for a BIDS tabular file.
 
-        Args:
+        Parameters:
             file_path (str):  Path of the tabular file.
         """
         super().__init__(file_path)
@@ -17,7 +17,7 @@ class BidsTabularFile(BidsFile):
     def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of this tabular file.
 
-        Args:
+        Parameters:
             content_info (None):   This always uses the internal file_path to create the contents.
             overwrite:  If False, do not overwrite existing contents if any.
 

@@ -10,7 +10,7 @@ class HedVariableManager:
     def __init__(self, hed_strings, hed_schema, definitions):
         """ Create a variable manager for one tabular file for all type variables.
 
-        Args:
+        Parameters:
             hed_strings (list): A list of HED strings.
             hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
             definitions (dict): A dictionary of DefinitionEntry objects.
