@@ -129,7 +129,7 @@ class ColumnMapper:
     def set_column_prefix_dict(self, column_prefix_dictionary, finalize_mapping=True):
         """ Replace the column prefix dictionary
 
-        Args:
+        Parameters:
             column_prefix_dictionary (dict):  Dictionary with keys that are column numbers and values are HED tag
                 prefixes to prepend to the tags in that column before processing.
             finalize_mapping (bool): Re-generate the internal mapping if True, otherwise no effect until finalize.
@@ -147,7 +147,7 @@ class ColumnMapper:
     def set_tag_columns(self, tag_columns=None, optional_tag_columns=None, finalize_mapping=True):
         """ Set tag columns and optional tag columns
 
-        Args:
+        Parameters:
             tag_columns (list): A list of ints or strings containing the columns that contain the HED tags.
                                 If None, clears existing tag_columns
             optional_tag_columns (list): A list of ints or strings containing the columns that contain the HED tags,
@@ -173,7 +173,7 @@ class ColumnMapper:
     def set_requested_columns(self, requested_columns, finalize_mapping=True):
         """ Set to return only the columns listed in requested_columns
 
-        Args:
+        Parameters:
             requested_columns(list or None): If this is not None, return ONLY these columns.  Names or numbers allowed.
             finalize_mapping(bool): Finalize the mapping right now if True
 
@@ -188,7 +188,7 @@ class ColumnMapper:
     def set_column_map(self, new_column_map=None):
         """ Set the column number to name mapping.
 
-        Args:
+        Parameters:
             new_column_map (list or dict):  Either an ordered list of the column names or column_number:column name
                 dictionary. In both cases, column numbers start at 0
 
@@ -210,7 +210,7 @@ class ColumnMapper:
     def add_columns(self, column_names_or_numbers, column_type=ColumnType.HEDTags):
         """ Add blank columns in the given column category.
 
-        Args:
+        Parameters:
             column_names_or_numbers (list): A list of column names or numbers to add as the specified type.
             column_type (ColumnType property): The category of column these should be.
 
@@ -225,7 +225,7 @@ class ColumnMapper:
     def _expand_column(self, column_number, input_text):
         """ Expand the specified text based on the rules for expanding the specified column.
 
-        Args:
+        Parameters:
             column_number (int): The column number this text should be treated as from.
             input_text (str): The text to expand, generally from a single cell of a spreadsheet.
 
@@ -253,7 +253,7 @@ class ColumnMapper:
     def expand_row_tags(self, row_text):
         """ Expand all mapped columns for row.
 
-        Args:
+        Parameters:
             row_text (list): The text for the given row, one list entry per column number.
 
         Returns:
@@ -289,7 +289,7 @@ class ColumnMapper:
     def get_prefix_remove_func(self, column_number):
         """ Return a function to removes name prefixes for column
 
-        Args:
+        Parameters:
             column_number (int): Column number to look up in the prefix dictionary.
 
         Returns:
@@ -308,7 +308,7 @@ class ColumnMapper:
     def _add_column_data(self, new_column_entry):
         """ Add the metadata of a column to this column mapper.
 
-        Args:
+        Parameters:
             new_column_entry (ColumnMetadata): The column definition to add.
 
         Notes:
@@ -322,7 +322,7 @@ class ColumnMapper:
     def _set_column_prefix(final_map, column_number, new_required_prefix):
         """ Internal function to add this as a required name_prefix to a column
 
-        Args:
+        Parameters:
             final_map (dict): {column_number:prefix} Dict of column numbers with prefixes
             column_number (int): The column number with this name_prefix.
             new_required_prefix (str): The name_prefix to add to the column when loading from a spreadsheet.

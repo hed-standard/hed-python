@@ -8,7 +8,7 @@ from hed.errors.exceptions import HedFileError
 def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
     """ Return a list of the specified columns that are missing from a dataframe.
 
-    Args:
+    Parameters:
         df (DataFrame):         Spreadsheet to check the columns of.
         required_cols (tuple):  List of column names that must be present.
 
@@ -27,7 +27,7 @@ def check_df_columns(df, required_cols=('column_name', 'column_value', 'descript
 def df_to_hed(dataframe, description_tag=True):
     """ Create sidecar-like dictionary from a 4-column dataframe.
 
-    Args:
+    Parameters:
         dataframe (DataFrame):   A four-column Pandas DataFrame with specific columns.
         description_tag (bool):  If True description tag is included.
 
@@ -59,7 +59,7 @@ def df_to_hed(dataframe, description_tag=True):
 def extract_tags(hed_string, search_tag):
     """ Extract all instances of specified tag from a tag_string.
 
-        Args:
+        Parameters:
            hed_string (str):   Tag string from which to extract tag.
            search_tag (str):   HED tag to extract.
 
@@ -89,7 +89,7 @@ def extract_tags(hed_string, search_tag):
 def generate_sidecar_entry(column_name, column_values=None):
     """ Create a sidecar column dictionary for column.
 
-    Args:
+    Parameters:
         column_name (str):       Name of the column.
         column_values (list):    List of column values.
 
@@ -119,7 +119,7 @@ def generate_sidecar_entry(column_name, column_values=None):
 def hed_to_df(sidecar_dict, col_names=None):
     """ Return a 4-column dataframe of HED portions of sidecar.
 
-    Args:
+    Parameters:
         sidecar_dict (dict):      A dictionary conforming to BIDS JSON events sidecar format.
         col_names (list, None):   A list of the cols to include in the flattened side car.
 
@@ -159,7 +159,7 @@ def hed_to_df(sidecar_dict, col_names=None):
 def merge_hed_dict(sidecar_dict, hed_dict):
     """ Update a JSON sidecar based on the hed_dict values.
 
-    Args:
+    Parameters:
         sidecar_dict (dict):  Dictionary representation of a BIDS JSON sidecar.
         hed_dict(dict):       Dictionary derived from a dataframe representation of HED in sidecar.
 
@@ -180,7 +180,7 @@ def merge_hed_dict(sidecar_dict, hed_dict):
 def trim_back(tag_string):
     """ Return a trimmed copy of tag_string.
 
-    Args:
+    Parameters:
         tag_string (str):  A tag string to be trimmed.
 
     Returns:
@@ -204,7 +204,7 @@ def trim_back(tag_string):
 def trim_front(tag_string):
     """ Return a copy of tag_string with leading blanks and commas removed.
 
-    Args:
+    Parameters:
         tag_string (str):     A tag string to be trimmed.
 
     Returns:
@@ -222,7 +222,7 @@ def trim_front(tag_string):
 def _find_first_pos(tag_string):
     """ Return the position of the first comma or closing parenthesis in tag_string.
 
-    Args:
+    Parameters:
         tag_string (str):   String to be analyzed
 
     Returns:
@@ -238,7 +238,7 @@ def _find_first_pos(tag_string):
 def _find_last_pos(tag_string):
     """ Find the position of the last comma, blank, or opening parenthesis in tag_string.
 
-    Args:
+    Parameters:
         tag_string (str):   String to be analyzed
 
     Returns:
@@ -253,15 +253,16 @@ def _find_last_pos(tag_string):
 
 def _flatten_cat_col(col_key, col_dict):
     """ Flatten a sidecar entry corresponding to a categorical column.
-        Args:
-            col_key (str):    Name of the column.
-            col_dict (dict):  Dictionary corresponding to categorical of column (must include HED key).
 
-        Returns:
-            list:  A list of keys
-            list:  A list of values.
-            list:  A list of descriptions.
-            list:  A list of HED tag strings.
+    Parameters:
+        col_key (str):    Name of the column.
+        col_dict (dict):  Dictionary corresponding to categorical of column (must include HED key).
+
+    Returns:
+        list:  A list of keys
+        list:  A list of values.
+        list:  A list of descriptions.
+        list:  A list of HED tag strings.
 
     """
     keys = []
@@ -289,15 +290,16 @@ def _flatten_cat_col(col_key, col_dict):
 
 def _flatten_val_col(col_key, col_dict):
     """ Flatten a sidecar entry corresponding to a value column.
-        Args:
-            col_key (str):    Name of the column.
-            col_dict (dict):  Dictionary corresponding to value of column (must include HED key).
 
-        Returns:
-            list:  A one-element list containing the name of the column.
-            list:  The list ['n/a'].
-            list:  A one-element list containing the description.
-            list:  A one-element list containing the HED string.
+    Parameters:
+        col_key (str):    Name of the column.
+        col_dict (dict):  Dictionary corresponding to value of column (must include HED key).
+
+    Returns:
+        list:  A one-element list containing the name of the column.
+        list:  The list ['n/a'].
+        list:  A one-element list containing the description.
+        list:  A one-element list containing the HED string.
 
     """
     tags, extracted = extract_tags(col_dict['HED'], 'Description/')
@@ -311,7 +313,7 @@ def _flatten_val_col(col_key, col_dict):
 def _get_row_tags(row, description_tag=True):
     """ Return the HED string associated with row, possibly without the description.
 
-    Args:
+    Parameters:
         row (DataSeries):        Pandas data frame containing a row of a tagging spreadsheet.
         description_tag (bool):  If True, include any Description tags in the returned string.
 
@@ -342,7 +344,7 @@ def _get_row_tags(row, description_tag=True):
 def _get_value_entry(hed_entry, description_entry, description_tag=True):
     """ Return a HED dictionary representing a value entry in a HED tagging spreadsheet.
 
-    Args:
+    Parameters:
         hed_entry (str):   The string found in the HED column of the row.
         description_entry (str):  The string found in the description column of the row.
         description_tag (bool):  If True, include the description column as part of the HED entry.
@@ -369,7 +371,7 @@ def _get_value_entry(hed_entry, description_entry, description_tag=True):
 def _tag_list_to_str(extracted, removed_tag=None):
     """ Return a concatenation of the strings in extracted, with removed_tag prefix deleted.
 
-    Args:
+    Parameters:
         extracted (list):          List of tag strings to be concatenated.
         removed_tag (str, None):   A HED tag prefix to be removed before concatenation.
 

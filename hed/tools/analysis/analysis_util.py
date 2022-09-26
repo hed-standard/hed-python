@@ -56,7 +56,7 @@ def get_assembled_strings(table, hed_schema=None, expand_defs=False):
 def search_tabular(data_input, hed_schema, query, columns_included=None):
     """ Return a dataframe with results of query.
 
-    Args:
+    Parameters:
         data_input (TabularInput): The tabular input file (e.g., events) to be searched.
         hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
         query (str or list):     The str query or list of string queries to make.

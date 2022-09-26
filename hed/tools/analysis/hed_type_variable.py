@@ -76,7 +76,7 @@ class HedTypeVariable:
     def _extract_definition_variables(self, item, index):
         """ Extract the definition uses from a HedTag, HedGroup, or HedString.
 
-        Args:
+        Parameters:
             item (HedTag, HedGroup, or HedString): The item to extract variable information from.
             index (int):  Position of this item in the object's hed_strings.
 
@@ -100,7 +100,7 @@ class HedTypeVariable:
     def _update_definition_variables(self, tag, hed_vars, index):
         """Update the HedTypeFactors map with information from Def tag.
 
-        Args:
+        Parameters:
             tag (HedTag): A HedTag that is a Def tag.
             hed_vars (list): A list of names of the hed type_variables
             index (ind):  The event number associated with this.
@@ -131,7 +131,7 @@ class HedTypeVariable:
     def _extract_direct_variables(self, item, index):
         """ Extract the condition type_variables from a HedTag, HedGroup, or HedString.
 
-        Args:
+        Parameters:
             item (HedTag or HedGroup): The item from which to extract condition type_variables.
             index (int):  Position in the array.
 
@@ -147,7 +147,7 @@ class HedTypeVariable:
     def _update_variables(self, tag_list, index):
         """ Update the HedTypeFactors based on tags in the list.
 
-        Args:
+        Parameters:
             tag_list (list): A list of Condition-variable HedTags.
             index (int):  An integer representing the position in an array
 

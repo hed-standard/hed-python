@@ -53,9 +53,7 @@ class BaseContext(ABC):
 
         return sum_str
 
-    def save(self, save_dir, file_formats, verbose=True):
-        if not file_formats:
-            return
+    def save(self, save_dir, file_formats=['.txt'], verbose=True):
         file_base = os.path.join(save_dir, generate_filename(self.context_filename, append_datetime=True))
         for file_format in file_formats:
             if file_format == '.txt':
@@ -71,7 +69,7 @@ class BaseContext(ABC):
     def update_context(self, context_dict):
         """ Method to update summary for a given tabular input.
 
-        Args:
+        Parameters:
             context_dict (dict)  A context specific dictionary with the update information.
 
         """

@@ -23,7 +23,7 @@ class SidecarBase:
     def __init__(self, name=None, hed_schema=None):
         """ Initialize a sidecar baseclass
 
-        Args:
+        Parameters:
             name (str or None): Optional name identifying this sidecar, generally a filename.
             hed_schema(HedSchema or None): The schema to use by default in identifying tags
         """
@@ -44,7 +44,7 @@ class SidecarBase:
     def _hed_string_iter(self, tag_funcs, error_handler):
         """ Low level function to retrieve hed string in sidecar
 
-        Args:
+        Parameters:
             tag_funcs(list): A list of functions to apply to returned strings
             error_handler(ErrorHandler): Error handler to use for context
 
@@ -59,7 +59,7 @@ class SidecarBase:
     def _set_hed_string(self, new_hed_string, position):
         """ Low level function to update hed string in sidecar
 
-        Args:
+        Parameters:
             new_hed_string (str or HedString): The new hed_string to replace the value at position.
             position (tuple):   The value returned from hed_string_iter.
         """
@@ -68,7 +68,7 @@ class SidecarBase:
     def validate_structure(self, error_handler):
         """ Validate the raw structure of this sidecar.
 
-        Args:
+        Parameters:
             error_handler(ErrorHandler): The error handler to use for error context
 
         Returns:

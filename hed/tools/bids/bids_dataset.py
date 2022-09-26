@@ -25,7 +25,7 @@ class BidsDataset:
                  exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
         """ Constructor for a BIDS dataset.
 
-        Args:
+        Parameters:
             root_path (str):  Root path of the BIDS dataset.
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             tabular_types (list or None):  List of strings specifying types of tabular types to include.
@@ -54,7 +54,7 @@ class BidsDataset:
     def get_tabular_group(self, obj_type="events"):
         """ Return the specified tabular file group.
 
-        Args:
+        Parameters:
             obj_type (str):  Suffix of the BidsFileGroup to be returned.
 
         Returns:
@@ -69,7 +69,7 @@ class BidsDataset:
     def validate(self, types=None, check_for_warnings=True):
         """ Validate the specified file group types.
 
-        Args:
+        Parameters:
             types (list):  A list of strings indicating the file group types to be validated.
             check_for_warnings (bool):  If True, check for warnings.
 

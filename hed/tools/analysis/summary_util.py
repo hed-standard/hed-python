@@ -114,7 +114,7 @@ def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
 def unfold_tag_list(tag_list):
     """ Unfold a list to a single-level list of HedTags.
 
-     Args:
+     Parameters:
          tag_list (list):  List of HedTags and HedGroup objects.
 
      Returns:

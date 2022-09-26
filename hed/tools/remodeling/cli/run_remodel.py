@@ -27,7 +27,8 @@ from hed.tools.remodeling.backup_manager import BackupManager
 def get_parser():
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
-    parser.add_argument("-m", "--model-path", dest="json_remodel_path", help="Full path of the remodel file.")
+    parser.add_argument("-m", "--model-path", dest="model_path",
+                        help="Full path of the file with remodeling instructions.")
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
                         help="File extensions to allow in locating files.")
@@ -55,10 +56,10 @@ def parse_commands(arg_list=None):
         args.extensions = None
     args.data_dir = os.path.realpath(args.data_dir)
     args.exclude_dirs = args.exclude_dirs + ['remodel']
-    args.json_remodel_path = os.path.realpath(args.json_remodel_path)
+    args.model_path = os.path.realpath(args.model_path)
     if args.verbose:
         print(f"Data directory: {args.data_dir}\nCommand path: {args.json_remodel_path}")
-    with open(args.json_remodel_path, 'r') as fp:
+    with open(args.model_path, 'r') as fp:
         commands = json.load(fp)
     command_list, errors = Dispatcher.parse_commands(commands)
     if errors:
@@ -103,6 +104,7 @@ def run_direct_ops(dispatch, args):
                 continue
         df = dispatch.run_operations(file_path, verbose=args.verbose)
         df.to_csv(file_path, sep='\t', index=False, header=True)
+    return
 
 
 def main(arg_list=None):

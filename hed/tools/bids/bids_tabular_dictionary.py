@@ -17,7 +17,7 @@ class BidsTabularDictionary(BidsFileDictionary):
     def __init__(self, collection_name, files, entities=('sub', 'ses', 'task', 'run')):
         """ Create a dictionary of full paths.
 
-        Args:
+        Parameters:
             collection_name (str):   Name of the collection.
             files (list, dict):      Contains the full paths or BidsFile representation of files of interest.
             entities (tuple):        List of indices into base file names of pieces to assemble for the key.
@@ -35,7 +35,7 @@ class BidsTabularDictionary(BidsFileDictionary):
     def correct_file(self, the_file):
         """ Transform to BidsTabularFile if needed.
 
-        Args:
+        Parameters:
             the_file (str or BidsFile): If a str, create a new BidsTabularFile object,
                                         otherwise pass the original on.
         Returns:
@@ -56,7 +56,7 @@ class BidsTabularDictionary(BidsFileDictionary):
     def count_diffs(self, other_dict):
         """ Return keys in which the number of rows differ.
 
-        Args:
+        Parameters:
             other_dict (FileDictionary):  A file dictionary object.
 
         Returns:
@@ -79,7 +79,7 @@ class BidsTabularDictionary(BidsFileDictionary):
     def get_info(self, key):
         """ Return a dict with key, row count, and column count.
 
-        Args:
+        Parameters:
             key (str): The key for file whose information is to be returned.
 
         Returns:
@@ -96,7 +96,7 @@ class BidsTabularDictionary(BidsFileDictionary):
     def get_new_dict(self, name, files):
         """ Create a new BidsTabularDictionary.
 
-        Args:
+        Parameters:
             name (str):            Name of the new object.
             files (list, dict):    List or dictionary specifying the files to include.
 
@@ -127,7 +127,7 @@ class BidsTabularDictionary(BidsFileDictionary):
     def make_new(self, name, files):
         """ Create a dictionary with these files.
 
-        Args:
+        Parameters:
             name (str):  Name of this dictionary
             files (list or dict):  List or dictionary of files. These could be paths or objects.
 
@@ -150,7 +150,7 @@ class BidsTabularDictionary(BidsFileDictionary):
     def report_diffs(self, tsv_dict, logger=None):
         """ Reports and logs the contents and differences between this tabular dictionary and another
 
-        Args:
+        Parameters:
             tsv_dict (BidsTabularDictionary):  A dictionary representing BIDS-keyed tsv files.
             logger (HedLogger):                 A HedLogger object for reporting the values by key.
 

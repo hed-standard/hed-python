@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         derv_path = os.path.realpath(os.path.join(self.test_root, BackupManager.RELATIVE_BACKUP_LOCATION))
         self.assertFalse(os.path.exists(derv_path), 'backup directory does not exist before creation')
         arg_list = [self.test_root, '-n', BackupManager.DEFAULT_BACKUP_NAME, '-x', 'derivatives',
-                   '-f', 'events', '-x', '.tsv']
+                   '-f', 'events', '-e', '.tsv']
         cli_backup.main(arg_list)
         self.assertTrue(os.path.exists(derv_path), 'backup directory exists before creation')
         json_path = os.path.realpath(os.path.join(derv_path, BackupManager.DEFAULT_BACKUP_NAME,
