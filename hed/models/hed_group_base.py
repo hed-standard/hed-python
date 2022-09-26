@@ -14,7 +14,7 @@ class HedGroupBase:
     def __init__(self, hed_string="", startpos=None, endpos=None):
         """ Return an empty HedGroupBase object.
 
-        Args:
+        Parameters:
             hed_string (str): Source hed string for this group.
             startpos (int): Starting index of group (including parentheses) in hed_string.
             endpos (int): Ending index of group (including parentheses) in hed_string.

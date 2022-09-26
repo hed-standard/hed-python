@@ -68,14 +68,6 @@ hed.tools.bids.bids\_tabular\_file module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.bids.bids\_tabular\_summary module
---------------------------------------------
-
-.. automodule:: hed.tools.bids.bids_tabular_summary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 hed.tools.bids.bids\_timeseries\_file module
 --------------------------------------------
 

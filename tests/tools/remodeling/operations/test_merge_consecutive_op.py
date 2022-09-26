@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.merge_consecutive_op import MergeConsecutiveOp
 
 

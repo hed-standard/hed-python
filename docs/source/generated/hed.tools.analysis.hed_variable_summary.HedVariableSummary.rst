@@ -13,7 +13,7 @@
    .. autosummary::
    
       ~HedVariableSummary.__init__
-      ~HedVariableSummary.get_summaries
+      ~HedVariableSummary.get_summary
       ~HedVariableSummary.update_summary
    
    

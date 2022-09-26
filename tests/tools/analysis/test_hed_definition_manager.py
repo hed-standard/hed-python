@@ -1,8 +1,12 @@
 import os
 import unittest
-from hed import HedString, HedTag, load_schema_version, Sidecar, TabularInput
-from hed.models import DefinitionEntry
-from hed.tools import HedDefinitionManager
+from hed.models.definition_dict import DefinitionEntry
+from hed.models.hed_string import HedString
+from hed.models.hed_tag import HedTag
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.tools.analysis.hed_definition_manager import HedDefinitionManager
+from hed.schema.hed_schema_io import load_schema_version
 
 
 class Test(unittest.TestCase):

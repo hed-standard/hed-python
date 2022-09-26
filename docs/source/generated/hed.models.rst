@@ -156,14 +156,6 @@ hed.models.tabular\_input module
    :undoc-members:
    :show-inheritance:
 
-hed.models.tabular\_input\_temp module
---------------------------------------
-
-.. automodule:: hed.models.tabular_input_temp
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 hed.models.timeseries\_input module
 -----------------------------------
 

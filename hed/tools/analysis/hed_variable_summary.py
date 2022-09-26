@@ -4,7 +4,7 @@ import json
 class HedVariableCounts:
     """ Keeps a summary of one value of one type of variable.
 
-    Args:
+    Parameters:
         variable_value (str)  The value of the variable to be counted
         variable_type (str)   The type of variable.
 
@@ -26,7 +26,7 @@ class HedVariableCounts:
     def update(self, variable_info):
         """ Update the counts from a HedTypeVariable.
 
-        Args:
+        Parameters:
             variable_info (HedTypeFactor) information about the contents for a particular data file.
 
         """

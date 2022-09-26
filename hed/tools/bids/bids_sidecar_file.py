@@ -12,7 +12,7 @@ class BidsSidecarFile(BidsFile):
     def is_sidecar_for(self, obj):
         """ Return true if this is a sidecar for obj.
 
-         Args:
+         Parameters:
              obj (BidsFile):  A BidsFile object to check.
 
          Returns:
@@ -38,7 +38,7 @@ class BidsSidecarFile(BidsFile):
     def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of the sidecar.
 
-        Args:
+        Parameters:
             content_info (list, str, or None): If None, create a Sidecar from the object's file-path.
             overwrite (bool): If True, overwrite contents if already set.
 
@@ -61,7 +61,7 @@ class BidsSidecarFile(BidsFile):
     def is_hed(json_dict):
         """ Return True if the json has HED.
 
-        Args:
+        Parameters:
             json_dict (dict): A dictionary representing a JSON file or merged file.
 
         Returns:

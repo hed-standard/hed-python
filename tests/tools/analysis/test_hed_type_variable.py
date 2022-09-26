@@ -1,9 +1,15 @@
 import os
 import unittest
-from hed import HedString, HedTag, load_schema_version, Sidecar, TabularInput
-from hed.errors import HedFileError
-from hed.models import DefinitionEntry
-from hed.tools import HedTypeVariable, get_assembled_strings, HedContextManager
+from hed.errors.exceptions import HedFileError
+from hed.models.definition_dict import DefinitionEntry
+from hed.models.hed_string import HedString
+from hed.models.hed_tag import HedTag
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.schema.hed_schema_io import load_schema_version
+from hed.tools.analysis.hed_context_manager import HedContextManager
+from hed.tools.analysis.hed_type_variable import HedTypeVariable
+from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 class Test(unittest.TestCase):
@@ -52,7 +58,7 @@ class Test(unittest.TestCase):
 
     def test_constructor(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        type_var = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+        type_var = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, self.defs)
         self.assertIsInstance(type_var, HedTypeVariable,
                               "Constructor should create a HedTypeManager from strings")
         self.assertEqual(len(type_var._variable_map), 8,
@@ -61,14 +67,14 @@ class Test(unittest.TestCase):
     def test_constructor_from_tabular_input(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, definitions)
+        var_manager = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, definitions)
         self.assertIsInstance(var_manager, HedTypeVariable,
                               "Constructor should create a HedVariableManager from a tabular input")
 
     def test_constructor_variable_caps(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema,
+        var_manager = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema,
                                       definitions, variable_type="Condition-variable")
         self.assertIsInstance(var_manager, HedTypeVariable,
                               "Constructor should create a HedVariableManager variable caps")
@@ -76,14 +82,14 @@ class Test(unittest.TestCase):
     def test_constructor_variable_task(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema,
+        var_manager = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema,
                                       definitions, variable_type="task")
         self.assertIsInstance(var_manager, HedTypeVariable,
                               "Constructor should create a HedVariableManager variable task")
 
     def test_constructor_multiple_values(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings2]
-        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+        var_manager = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, self.defs)
         self.assertIsInstance(var_manager, HedTypeVariable,
                               "Constructor should create a HedVariableManager from strings")
         self.assertEqual(len(var_manager._variable_map), 3,
@@ -92,12 +98,12 @@ class Test(unittest.TestCase):
     def test_constructor_unmatched(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings3]
         with self.assertRaises(HedFileError):
-            HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+            HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, self.defs)
 
     def test_summarize_variables(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, definitions)
+        var_manager = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, definitions)
         summary = var_manager.summarize()
         self.assertIsInstance(summary, dict, "summarize produces a dictionary if not json")
         self.assertEqual(len(summary), 3, "Summarize_variables has right number of condition type_variables")
@@ -107,7 +113,7 @@ class Test(unittest.TestCase):
 
     def test_extract_definition_variables(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+        var_manager = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, self.defs)
         var_levels = var_manager._variable_map['var3'].levels
         self.assertNotIn('cond3/7', var_levels,
                          "_extract_definition_variables before extraction def/cond3/7 not in levels")
@@ -118,13 +124,13 @@ class Test(unittest.TestCase):
 
     def test_get_variable_names(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        conditions1 = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+        conditions1 = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, self.defs)
         list1 = conditions1.get_variable_names()
         self.assertEqual(len(list1), 8, "get_variable_tags list should have the right length")
 
     def test_get_variable_def_names(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        conditions1 = HedTypeVariable(HedContextManager(test_strings1, self.hed_schema), self.hed_schema, self.defs)
+        conditions1 = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, self.defs)
         list1 = conditions1.get_variable_def_names()
         self.assertEqual(len(list1), 5, "get_variable_def_names list should have the right length")
 

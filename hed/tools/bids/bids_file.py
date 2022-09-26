@@ -21,7 +21,7 @@ class BidsFile:
     def __init__(self, file_path):
         """ Constructor for a file path.
 
-        Args:
+        Parameters:
             file_path(str): Full path of the file.
 
         """
@@ -49,7 +49,7 @@ class BidsFile:
     def get_key(self, entities=None):
         """ Return a key for this BIDS file given a list of entities.
 
-        Args:
+        Parameters:
             entities (tuple):  A tuple of strings representing entities.
 
         Returns:
@@ -72,7 +72,7 @@ class BidsFile:
     def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of this object.
 
-        Args:
+        Parameters:
             content_info:      The contents appropriate for this object.
             overwrite (bool):  If False and the contents are not empty, do nothing.
 

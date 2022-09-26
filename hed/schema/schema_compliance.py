@@ -12,7 +12,7 @@ ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None):
     """ Check for hed3 compliance of a schema object.
 
-    Args:
+    Parameters:
         hed_schema (HedSchema): HedSchema object to check for hed3 compliance.
         check_for_warnings (bool): If True, check for formatting issues like invalid characters, capitalization, etc.
         name (str): If present, will use as filename for context.

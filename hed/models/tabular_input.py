@@ -14,7 +14,7 @@ class TabularInput(BaseInput):
 
         """ Constructor for the TabularInput class.
 
-        Args:
+        Parameters:
             file (str or file like): A tsv file to open.
             sidecar (str or Sidecar): A Sidecar filename or Sidecar
             extra_def_dicts ([DefinitionDict], DefinitionDict, or None): DefinitionDict objects containing all
@@ -48,7 +48,7 @@ class TabularInput(BaseInput):
     def create_def_mapper(self, column_mapper):
         """ Create the definition mapper for this file.
 
-        Args:
+        Parameters:
             column_mapper (ColumnMapper): The column mapper to gather definitions from.
 
 
@@ -70,7 +70,7 @@ class TabularInput(BaseInput):
     def reset_column_mapper(self, sidecar=None):
         """ Change the sidecars and settings.
 
-        Args:
+        Parameters:
             sidecar (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.
 
         """
@@ -82,7 +82,7 @@ class TabularInput(BaseInput):
     def validate_sidecar(self, hed_ops=None, error_handler=None, **kwargs):
         """ Validate column definitions and hed strings.
 
-        Args:
+        Parameters:
             hed_ops (list or HedOps): A list of HedOps of funcs to apply to the hed strings in the sidecars.
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
             kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.

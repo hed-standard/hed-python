@@ -1,6 +1,6 @@
 import pandas as pd
 import json
-from hed.schema import load_schema_version
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_type_variable import HedTypeVariable
 from hed.tools.analysis.hed_context_manager import HedContextManager
 
@@ -10,7 +10,7 @@ class HedVariableManager:
     def __init__(self, hed_strings, hed_schema, definitions):
         """ Create a variable manager for one tabular file for all type variables.
 
-        Args:
+        Parameters:
             hed_strings (list): A list of HED strings.
             hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
             definitions (dict): A dictionary of DefinitionEntry objects.
@@ -21,7 +21,7 @@ class HedVariableManager:
 
         self.hed_schema = hed_schema
         self.definitions = definitions
-        self.context_manager = HedContextManager(hed_strings, hed_schema)
+        self.context_manager = HedContextManager(hed_strings)
         self._variable_type_map = {}   # a map of type variable into HedTypeVariable objects
 
     @property

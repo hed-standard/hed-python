@@ -1,7 +1,11 @@
 import os
 import unittest
-from hed import load_schema_version, Sidecar, TabularInput
-from hed.tools import HedTypeFactors, HedTypeVariable, HedVariableManager, get_assembled_strings
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.schema.hed_schema_io import load_schema_version
+from hed.tools.analysis.hed_type_variable import HedTypeVariable, HedTypeFactors
+from hed.tools.analysis.hed_variable_manager import HedVariableManager
+from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 class Test(unittest.TestCase):

@@ -17,6 +17,7 @@
       ~HedTypeVariable.get_variable_def_names
       ~HedTypeVariable.get_variable_factors
       ~HedTypeVariable.get_variable_names
+      ~HedTypeVariable.get_variable_type_map
       ~HedTypeVariable.summarize
    
    

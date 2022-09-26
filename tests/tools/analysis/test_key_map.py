@@ -1,8 +1,10 @@
 import unittest
 import os
 import pandas as pd
-from hed.errors import HedFileError
-from hed.tools import KeyMap, get_file_list, get_new_dataframe
+from hed.errors.exceptions import HedFileError
+from hed.tools.analysis.key_map import KeyMap
+from hed.tools.util.data_util import get_new_dataframe
+from hed.tools.util.io_util import get_file_list
 
 
 class Test(unittest.TestCase):

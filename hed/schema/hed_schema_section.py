@@ -19,7 +19,7 @@ class HedSchemaSection:
     def __init__(self, section_key, case_sensitive=True):
         """ Construct schema section.
 
-        Args:
+        Parameters:
             section_key (str):  Name of the schema section.
             case_sensitive (bool): If True, names are case sensitive.
 
@@ -57,7 +57,7 @@ class HedSchemaSection:
     def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_prefix=""):
         """ Return entries or names with given attribute.
 
-        Args:
+        Parameters:
             attribute_name (str): The name of the attribute(generally a HedKey entry).
             return_name_only (bool): If true, return the name as a string rather than the tag entry.
             schema_prefix (str): Prepends given prefix to each name if returning names.

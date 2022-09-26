@@ -1,7 +1,8 @@
 import os
 import unittest
-from hed import HedString, load_schema_version, Sidecar, TabularInput
-from hed.models import DefinitionEntry
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools import HedContextManager, HedTypeVariable, HedVariableSummary, get_assembled_strings
 
 
@@ -25,7 +26,7 @@ class Test(unittest.TestCase):
         input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         hed_strings1 = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        self.var_type1 = HedTypeVariable(HedContextManager(hed_strings1, schema), schema, definitions,
+        self.var_type1 = HedTypeVariable(HedContextManager(hed_strings1), schema, definitions,
                                          variable_type='condition-variable')
 
     def test_get_summary(self):

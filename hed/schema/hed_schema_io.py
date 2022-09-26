@@ -15,7 +15,7 @@ from hed.schema.schema_validation_util import validate_version_string
 def from_string(schema_string, file_type=".xml", schema_prefix=None):
     """ Create a schema from the given string.
 
-    Args:
+    Parameters:
         schema_string (str):         An XML or mediawiki file as a single long string.
         file_type (str):             The extension(including the .) corresponding to a file source.
         schema_prefix (str, None):  The name_prefix all tags in this schema will accept.
@@ -50,7 +50,7 @@ def from_string(schema_string, file_type=".xml", schema_prefix=None):
 def load_schema(hed_path=None, schema_prefix=None):
     """ Load a schema from the given file or URL path.
 
-    Args:
+    Parameters:
         hed_path (str or None): A filepath or url to open a schema from.
         schema_prefix (str or None): The name_prefix all tags in this schema will accept.
 
@@ -87,7 +87,7 @@ def load_schema(hed_path=None, schema_prefix=None):
 def get_hed_xml_version(xml_file_path):
     """ Get the version number from a HED XML file.
 
-    Args:
+    Parameters:
         xml_file_path (str): The path to a HED XML file.
 
     Returns:
@@ -101,7 +101,7 @@ def get_hed_xml_version(xml_file_path):
 def _load_schema_version(xml_version=None, xml_folder=None):
     """ Return specified version or latest if not specified.
 
-    Args:
+    Parameters:
         xml_folder (str): Path to a folder containing schema.
         xml_version (str or list): HED version format string. Expected format: '[schema_prefix:][library_name_]X.Y.Z'.
 

@@ -22,7 +22,7 @@ class RemoveColumnsOp(BaseOp):
     def __init__(self, parameters):
         """ Constructor for remove columns command.
 
-        Args:
+        Parameters:
             parameters (dict): A dictionary of the parameters for this command.
 
         Raises:
@@ -42,7 +42,7 @@ class RemoveColumnsOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Remove indicated columns from a dataframe.
 
-        Args:
+        Parameters:
             dispatcher (Dispatcher) - dispatcher object for context
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.

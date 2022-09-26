@@ -1,9 +1,9 @@
 import os
 import unittest
 from hed.errors.exceptions import HedFileError
-from hed.tools import check_filename, extract_suffix_path, generate_filename, get_dir_dictionary, get_file_list, \
-    get_path_components, parse_bids_filename
-from hed.tools.util.io_util import _split_entity
+from hed.tools.util.io_util import check_filename, extract_suffix_path, generate_filename, \
+    get_dir_dictionary, get_file_list, get_path_components, parse_bids_filename, \
+    _split_entity, get_allowed, get_filtered_by_element
 
 
 class Test(unittest.TestCase):
@@ -117,42 +117,22 @@ class Test(unittest.TestCase):
         # filename = generate_filename('HED7.2.0.xml', name_suffix='_blech', extension='.txt')
         # self.assertEqual('HED7.2.0_blech.txt', filename, "Returns correct string when base_name has periods")
 
-
     def test_get_dir_dictionary(self):
         dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
         self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
         self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
 
-    def test_get_file_list_files(self):
-        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                 '../../data/schema_test_data/prologue_tests')
-        dir_pairs = os.path.realpath(dir_pairs)
-        test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
-        file_list1 = get_file_list(dir_pairs)
-        for file in file_list1:
-            if os.path.basename(file) in test_files:
-                continue
-            raise HedFileError("FileNotFound", f"get_file_list should have found file {file}", "")
-
-        for file in test_files:
-            if os.path.join(dir_pairs, file) in file_list1:
-                continue
-            raise HedFileError("FileShouldNotBeFound", f"get_event_files should have not have found file {file}", "")
-
-    def test_get_get_file_list_suffix(self):
-        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data')
-        file_list = get_file_list(dir_data, extensions=[".json", ".tsv"])
-        for item in file_list:
-            if item.endswith(".json") or item.endswith(".tsv"):
-                continue
-            raise HedFileError("BadFileType", "get_event_files expected only .html or .js files", "")
-
-    def test_get_file_list_prefix(self):
-        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
-        file_list = get_file_list(dir_data, name_prefix='sternberg', extensions=[".tsv"])
-        for item in file_list:
-            filename = os.path.basename(item)
-            self.assertTrue(filename.startswith('sternberg'))
+    def test_get_allowed(self):
+        test_value = 'events.tsv'
+        value = get_allowed(test_value, 'events')
+        self.assertEqual(value, 'events', "get_allowed matches starts with when string")
+        value = get_allowed(test_value, None)
+        self.assertEqual(value, test_value, "get_allowed if None is passed for allowed, no requirement is set.")
+        test_value1 = "EventsApples.tsv"
+        value1 = get_allowed(test_value1, ["events", "annotations"])
+        self.assertEqual(value1, "events", "get_allowed is case insensitive")
+        value2 = get_allowed(test_value1, [])
+        self.assertEqual(value2, test_value1)
 
     def test_get_file_list_case(self):
         dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
@@ -170,20 +150,75 @@ class Test(unittest.TestCase):
         file_list3 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=['stimuli'])
         self.assertFalse(file_list3, 'get_file_list should return an empty list when all are excluded')
 
+    def test_get_file_list_files(self):
+        dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 '../../data/schema_test_data/prologue_tests')
+        dir_pairs = os.path.realpath(dir_pairs)
+        test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
+        file_list1 = get_file_list(dir_pairs)
+        for file in file_list1:
+            if os.path.basename(file) in test_files:
+                continue
+            raise HedFileError("FileNotFound", f"get_file_list should have found file {file}", "")
+
+        for file in test_files:
+            if os.path.join(dir_pairs, file) in file_list1:
+                continue
+            raise HedFileError("FileShouldNotBeFound", f"get_event_files should have not have found file {file}", "")
+
+    def test_get_file_list_prefix(self):
+        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
+        file_list = get_file_list(dir_data, name_prefix='sternberg', extensions=[".tsv"])
+        for item in file_list:
+            filename = os.path.basename(item)
+            self.assertTrue(filename.startswith('sternberg'))
+
+    def test_get_file_list_suffix(self):
+        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data')
+        file_list = get_file_list(dir_data, extensions=[".json", ".tsv"])
+        for item in file_list:
+            if item.endswith(".json") or item.endswith(".tsv"):
+                continue
+            raise HedFileError("BadFileType", "get_event_files expected only .html or .js files", "")
+
+    def test_get_filtered_by_element(self):
+        file_list1 = ['D:\\big\\subj-01_task-stop_events.tsv', 'D:\\big\\subj-01_task-rest_events.tsv',
+                      'D:\\big\\subj-01_events.tsv', 'D:\\big\\subj-01_task-stop_task-go_events.tsv']
+        new_list1 = get_filtered_by_element(file_list1, ['task-stop'])
+        self.assertEqual(len(new_list1), 2, "It should have the right length when one element filtered")
+        new_list2 = get_filtered_by_element(file_list1, ['task-stop', 'task-go'])
+        self.assertEqual(len(new_list2), 2, "It should have the right length when meets multiple criteria")
+        new_list3 = get_filtered_by_element(file_list1, [])
+        self.assertFalse(len(new_list3))
+        new_list3 = get_filtered_by_element(file_list1, [])
+        self.assertFalse(len(new_list3))
+        new_list4 = get_filtered_by_element([], ['task-go'])
+        self.assertFalse(len(new_list4))
+
     def test_get_path_components(self):
-        base_path = '../../data/bids/eeg_ds003654s'
+        base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s')
         file_path1 = os.path.realpath(os.path.join(base_path, 'sub-002/eeg/sub-002_FacePerception_run-1_events.tsv'))
-        comps1 = get_path_components(file_path1, base_path)
-        self.assertEqual(comps1[0], os.path.realpath(base_path),
-                         "get_path_components base_path is is the first component")
-        self.assertEqual(len(comps1), 3, "get_path_components has correct number of components")
+        comps1 = get_path_components(base_path, file_path1)
+        self.assertEqual(len(comps1), 2, "get_path_components has correct number of components")
         comps2 = get_path_components(base_path, base_path)
-        self.assertEqual(comps2[0], os.path.realpath(base_path), "get_path_components base_path is its own base_path")
-        self.assertEqual(len(comps2), 1, "get_path_components base_path has no additional components")
+        self.assertIsInstance(comps2, list)
+        self.assertFalse(comps2, "get_path_components base_path is its own base_path")
         file_path3 = os.path.join(base_path, 'temp_events.tsv')
-        comps3 = get_path_components(file_path3, base_path)
-        self.assertEqual(comps3[0], os.path.realpath(base_path), "get_path_components base_path is its own base_path")
-        self.assertEqual(len(comps3), 1, "get_path_components file in base_path has no additional components")
+        comps3 = get_path_components(base_path, file_path3)
+        self.assertFalse(comps3, "get_path_components files directly in base_path don't have components ")
+        file_path4 = 'P:/Baloney/sidecar/events.tsv'
+        print(f"base {os.path.realpath(base_path)} and {os.path.realpath(file_path4)}")
+
+        try:
+            get_path_components(base_path, file_path4)
+        except ValueError as ex:
+            print(f"{ex}")
+            pass
+        except Exception as ex:
+            print(f"{ex}")
+            self.fail("parse_bids_filename threw the wrong exception when filename invalid")
+        else:
+            self.fail("parse_bids_filename should have thrown an exception")
 
     def test_parse_bids_filename_full(self):
         the_path1 = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
@@ -225,7 +260,7 @@ class Test(unittest.TestCase):
     def test_parse_bids_filename_unmatched(self):
         path1 = 'dataset_description.json'
         try:
-            suffix1, ext1, entity_dict1 = parse_bids_filename(path1)
+            parse_bids_filename(path1)
         except HedFileError:
             pass
         except Exception:
@@ -236,7 +271,7 @@ class Test(unittest.TestCase):
     def test_parse_bids_filename_invalid(self):
         path1 = 'task_sub-01_description.json'
         try:
-            suffix1, ext1, entity_dict1 = parse_bids_filename(path1)
+            parse_bids_filename(path1)
         except HedFileError:
             pass
         except Exception:

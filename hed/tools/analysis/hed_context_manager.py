@@ -1,5 +1,5 @@
-from hed.errors import HedFileError
-from hed.schema import load_schema_version
+from hed.errors.exceptions import HedFileError
+from hed.schema.hed_schema_io import load_schema_version
 
 
 class OnsetGroup:
@@ -15,19 +15,17 @@ class OnsetGroup:
 
 class HedContextManager:
 
-    def __init__(self, hed_strings, hed_schema):
-        """ Create an onset manager for an events file.
+    def __init__(self, hed_strings):
+        """ Create an context manager for an events file.
 
         Args:
             hed_strings (list): A list of hed_strings to be managed.
-            hed_schema (HedSchema or HedSchemaGroup): The HED schema to use.
 
         Raises:
             HedFileError: if there are any unmatched offsets.
 
         """
 
-        self.hed_schema = hed_schema
         self.hed_strings = hed_strings
         self.onset_list = []
         self.contexts = []
@@ -130,7 +128,7 @@ if __name__ == '__main__':
                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
 
-    manager = HedContextManager(test_strings1, schema)
+    manager = HedContextManager(test_strings1)
     print("to here")
     # hed_list1 = [HedString('Yellow, Green', hed_schema=schema),
     #             HedString('(Def/Cond1, Offset)', hed_schema=schema),

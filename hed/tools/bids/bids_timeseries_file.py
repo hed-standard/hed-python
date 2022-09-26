@@ -11,7 +11,7 @@ class BidsTimeseriesFile(BidsFile):
     def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of this timeseries file.
 
-        Args:
+        Parameters:
             content_info (None):   This always uses the internal file_path to create the contents.
             overwrite:  If False, do not overwrite existing contents if any.
 

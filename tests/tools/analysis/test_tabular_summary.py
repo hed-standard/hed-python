@@ -1,7 +1,8 @@
 import unittest
 import os
 from hed.errors.exceptions import HedFileError
-from hed.tools import FileDictionary, TabularSummary
+from hed.tools.analysis.file_dictionary import FileDictionary
+from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools import get_file_list, get_new_dataframe
 
 

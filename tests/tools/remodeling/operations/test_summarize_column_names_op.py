@@ -2,7 +2,7 @@ import json
 import os
 import pandas as pd
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNameSummary, SummarizeColumnNamesOp
 
 
@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
     def test_do_ops(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnNamesOp(parms)
-        dispatch = Dispatcher([], data_root=self.data_root)
+        dispatch = Dispatcher([], data_root=None)
         df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
         df1a = pd.DataFrame(self.data1, columns=self.sample_columns1)
         df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
     def test_get_summary(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnNamesOp(parms)
-        dispatch = Dispatcher([], data_root=self.data_root)
+        dispatch = Dispatcher([], data_root=None)
         df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
         df1a = pd.DataFrame(self.data1, columns=self.sample_columns1)
         df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)

@@ -31,7 +31,7 @@ class MergeConsecutiveOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Merge consecutive events of the same type
 
-        Args:
+        Parameters:
             dispatcher (Dispatcher) - dispatcher object for context
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.

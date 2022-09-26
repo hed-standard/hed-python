@@ -27,7 +27,7 @@ class TagValidator:
     def __init__(self, hed_schema=None, run_semantic_validation=True):
         """Constructor for the Tag_Validator class.
 
-        Args:
+        Parameters:
             hed_schema (HedSchema): A HedSchema object.
             run_semantic_validation (bool): True if the validator should check the HED data against a schema.
 
@@ -49,7 +49,7 @@ class TagValidator:
     def run_hed_string_validators(self, hed_string_obj):
         """Basic high level checks of the hed string
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): A HED string.
 
         Returns:

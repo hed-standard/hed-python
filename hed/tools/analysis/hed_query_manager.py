@@ -1,5 +1,6 @@
-from hed.models import HedString, TagExpressionParser
-from hed.schema import load_schema_version
+from hed.models.hed_string import HedString
+from hed.models.expression_parser import TagExpressionParser
+from hed.schema.hed_schema_io import load_schema_version
 import pandas as pd
 
 

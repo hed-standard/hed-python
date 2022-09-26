@@ -11,7 +11,6 @@ Subpackages
    hed.models
    hed.schema
    hed.tools
-   hed.util
    hed.validator
 
 Module contents

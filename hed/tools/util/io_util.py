@@ -1,11 +1,10 @@
 """Utilities for generating and handling file names."""
 
 import os
-import shutil
+import pathlib
 from datetime import datetime
-from pathlib import Path
 from werkzeug.utils import secure_filename
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 
 
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
@@ -13,32 +12,60 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 
     Args:
         test_file (str) :           Path of filename to test.
-        name_prefix (str, None):     An optional name_prefix for the base filename
-        name_suffix (str, None):     An optional name_suffix for the base file name
-        extensions (list, None):     An optional list of file extensions
+        name_prefix (list, str, None):  An optional name_prefix or list of prefixes to accept for the base filename
+        name_suffix (list, str, None):  An optional name_suffix or list of suffixes to accept for the base file name
+        extensions (list, str, None):   An optional extension or list of extensions to accept for the extensions
 
     Returns:
         bool: True if file has the appropriate format.
 
     Notes:
         - Everything is converted to lower case prior to testing so this test should be case insensitive.
+        - None indicates that all are accepted.
 
 
     """
 
     basename = os.path.basename(test_file.lower())
-    if name_prefix and not basename.startswith(name_prefix.lower()):
+    if name_prefix and not get_allowed(basename, allowed_values=name_prefix, starts_with=True):
         return False
     if extensions:
-        ext = list(filter(basename.endswith, extensions))
+        ext = get_allowed(basename, allowed_values=extensions, starts_with=False)
         if not ext:
             return False
-        basename = basename[:-len(ext[0])]
+        basename = basename[:-len(ext)]
     else:
         basename = os.path.splitext(basename)[0]
-    if name_suffix and not basename.endswith(name_suffix.lower()):
+    if name_suffix and not get_allowed(basename, allowed_values=name_suffix, starts_with=False):
         return False
     return True
+
+
+def get_allowed(value, allowed_values=None, starts_with=True):
+    """ Returns the portion of the value that matches a value in allowed_values or None if no match.
+
+    Args:
+        value (str): value to be matched.
+        allowed_values (list, str, or None):  Values to match.
+        starts_with (bool):  If true match is done at beginning of string, otherwise the end.
+
+    Notes:
+        - match is done in lower case.
+
+    """
+    if not allowed_values:
+        return value
+    elif not isinstance(allowed_values, list):
+        allowed_values = [allowed_values]
+    allowed_values = [item.lower() for item in allowed_values]
+    lower_value = value.lower()
+    if starts_with:
+        result = list(filter(lower_value.startswith, allowed_values))
+    else:
+        result = list(filter(lower_value.endswith, allowed_values))
+    if result:
+        result = result[0]
+    return result
 
 
 def extract_suffix_path(path, prefix_path):
@@ -56,20 +83,12 @@ def extract_suffix_path(path, prefix_path):
 
     """
 
-    real_prefix = os.path.realpath(prefix_path).lower()
-    suffix_path = os.path.realpath(path).lower()
-    return_path = os.path.realpath(path)
+    real_prefix = os.path.normpath(os.path.realpath(prefix_path).lower())
+    suffix_path = os.path.normpath(os.path.realpath(path).lower())
+    return_path = os.path.normpath(os.path.realpath(path))
     if suffix_path.startswith(real_prefix):
         return_path = return_path[len(real_prefix):]
     return return_path
-
-
-def find_task_files(bids_dir, task=None, suffix='*_events.tsv'):
-    # TODO: May need to be replaced.
-    if task is None:
-        return [path for path in Path(bids_dir).rglob(suffix)]
-    else:
-        return [path for path in Path(bids_dir).rglob(suffix) if task in str(path)]
 
 
 def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None, append_datetime=False):
@@ -139,6 +158,11 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
     return dir_dict
 
 
+def get_filtered_by_element(file_list, elements):
+    new_list = [file for file in file_list if any(substring in os.path.basename(file) for substring in elements)]
+    return new_list
+
+
 def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=None):
     """ Get list of filenames satisfying the criteria.
 
@@ -154,11 +178,11 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
          list:  The filtered file names.
 
      """
-    filtered_files = []
-    for r_file in file_list:
-        if check_filename(r_file, name_prefix=name_prefix, name_suffix=name_suffix, extensions=extensions):
-            filtered_files.append(r_file)
+    filtered_files = [file for file in file_list if
+                      check_filename(file, name_prefix=name_prefix, name_suffix=name_suffix, extensions=extensions)]
     return filtered_files
+
+
 
 
 def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dirs=None):
@@ -185,32 +209,40 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
     return file_list
 
 
-def get_path_components(this_path, root_path):
-    """ Get a list with root_path and remaining components.
+def get_path_components(root_path, this_path):
+    """ Get a list of the remaining components after root path.
 
     Args:
-        this_path (str):      The path of a file or directory descendant of root_path
         root_path (str):      A path (no trailing separator)
+        this_path (str):      The path of a file or directory descendant of root_path
 
     Returns:
-        list or None:   A list with the first element being root_path and the
-                        remaining elements directory components to the file.
+        list or None:   A list with the remaining elements directory components to the file.
 
     Notes: this_path must be a descendant of root_path.
 
     """
 
     base_path = os.path.realpath(root_path)
-    cur_path = os.path.realpath(this_path)
+    pure_base = pathlib.PurePosixPath(base_path)
+    cur_path = os.path.normpath(os.path.realpath(this_path))
+    pure_cur = pathlib.PurePosixPath(cur_path)
+    common_prefix = os.path.commonprefix([base_path, cur_path])
+    print(f"Base path: {base_path} \nCurrent path: {cur_path}")
+    print("Common prefix:", {common_prefix})
+    print(f"Pure base: {pure_base}\npure_cur {pure_cur} ")
+    if not common_prefix:
+        raise ValueError("NoPathInCommon", f"Paths {base_path} and {cur_path} must have items in common")
     common_path = os.path.commonpath([base_path, cur_path])
+    print(f"Common path: {common_path}")
     if common_path != base_path:
         return None
     rel_path = os.path.relpath(cur_path, base_path)
     the_dir = os.path.dirname(rel_path)
     if the_dir:
-        return [base_path] + os.path.normpath(the_dir).split(os.sep)
+        return os.path.normpath(the_dir).split(os.sep)
     else:
-        return [base_path]
+        return []
 
 
 def make_path(root_path, sub_path, filename):
@@ -275,31 +307,6 @@ def parse_bids_filename(file_path):
             raise HedFileError("BadKeyValue", f"The piece {entity} is not in key-value form", "")
         entity_dict[split_dict["key"]] = split_dict["value"]
     return suffix, ext, entity_dict
-
-
-def replace_new_with_old(path):
-    """ Replaces path with the one whose basename ends in orig.
-
-    # TODO: May need to be rewritten after new backup strategy is implemented.
-    Args:
-        path (str):  Full path of the file to be replaced.
-
-    Returns:
-        bool:  True if successful replacement.
-
-    Notes:
-        The _orig file remains in place and can be deleted separately if all place all replacements are successful.
-
-    """
-    old_path = str(path)[:-4] + 'orig' + str(path)[-4:]
-    if not os.path.exists(old_path) or not os.path.isfile(old_path):
-        return False
-    try:
-        os.remove(path)
-        shutil.copy(old_path, path)
-    except:
-        return False
-    return True
 
 
 def _split_entity(piece):

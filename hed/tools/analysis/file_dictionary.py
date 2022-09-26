@@ -15,7 +15,7 @@ class FileDictionary:
         """ Create a dictionary with full paths as values.
 
 
-        Args:
+        Parameters:
             collection_name (str): Name of the file collection for reference.
             file_list (list, None):      List containing full paths of files of interest.
             key_indices (tuple, None):   List of order of key-value pieces to assemble for the key.
@@ -58,7 +58,7 @@ class FileDictionary:
     def create_file_dict(self, file_list, key_indices, separator):
         """ Create new dict based on key indices.
 
-        Args:
+        Parameters:
             file_list (list): Paths of the files to include.
             key_indices (tuple): A tuple of integers representing order of entities for key.
             separator (str): The separator used between entities to form the key.
@@ -70,7 +70,7 @@ class FileDictionary:
     def get_file_path(self, key):
         """ Return file path corresponding to key.
 
-        Args:
+        Parameters:
             key (str): Key used to retrieve the file path.
 
         Returns:
@@ -93,7 +93,7 @@ class FileDictionary:
     def key_diffs(self, other_dict):
         """ Return symmetric key difference with other.
 
-        Args:
+        Parameters:
             other_dict (FileDictionary)  A file dictionary object
 
         Returns:

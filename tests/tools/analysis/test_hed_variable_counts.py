@@ -1,7 +1,12 @@
 import os
 import unittest
-from hed import load_schema_version, Sidecar, TabularInput
-from hed.tools import HedContextManager, HedTypeVariable, HedVariableCounts, HedVariableSummary, get_assembled_strings
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.schema.hed_schema_io import load_schema_version
+from hed.tools.analysis.hed_context_manager import HedContextManager
+from hed.tools.analysis.hed_type_variable import HedTypeVariable
+from hed.tools.analysis.hed_variable_summary import HedVariableCounts, HedVariableSummary
+from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 class Test(unittest.TestCase):
@@ -17,7 +22,7 @@ class Test(unittest.TestCase):
         input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         hed_strings1 = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
         definitions1 = input_data.get_definitions(as_strings=False).gathered_defs
-        self.var_type1 = HedTypeVariable(HedContextManager(hed_strings1, schema), schema, definitions1,
+        self.var_type1 = HedTypeVariable(HedContextManager(hed_strings1), schema, definitions1,
                                          variable_type='condition-variable')
 
     def test_get_summary_one_level(self):

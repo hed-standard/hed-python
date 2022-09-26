@@ -1,9 +1,8 @@
 import json
 import os
-import pandas as pd
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_hed_type_op import HedTypeSummary, SummarizeHedTypeOp
+from hed.tools.remodeling.dispatcher import Dispatcher
+from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp
 
 
 class Test(unittest.TestCase):

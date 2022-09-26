@@ -1,9 +1,9 @@
 import json
 import pandas as pd
 
-from hed import HedTag
-from hed.models import HedGroup
-from hed.schema import load_schema_version
+from hed.models.hed_tag import HedTag
+from hed.models.hed_group import HedGroup
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_definition_manager import HedDefinitionManager
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
@@ -14,7 +14,7 @@ class HedTypeVariable:
     def __init__(self, context_manager, hed_schema, hed_definitions, variable_type="condition-variable"):
         """ Create a variable manager for one type-variable for one tabular file.
 
-        Args:
+        Parameters:
             context_manager (HedContextManager): A list of HED strings.
             hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
             hed_definitions (dict): A dictionary of DefinitionEntry objects.
@@ -204,9 +204,9 @@ if __name__ == '__main__':
             'Cond6': DefinitionEntry('Cond6', def6, True, None)
             }
 
-    conditions1 = HedTypeVariable(HedContextManager(test_strings1, hed_schema), hed_schema, defs)
-    conditions2 = HedTypeVariable(HedContextManager(test_strings2, hed_schema), hed_schema, defs)
-    conditions3 = HedTypeVariable(HedContextManager(test_strings3, hed_schema), hed_schema, defs)
+    conditions1 = HedTypeVariable(HedContextManager(test_strings1), hed_schema, defs)
+    conditions2 = HedTypeVariable(HedContextManager(test_strings2), hed_schema, defs)
+    conditions3 = HedTypeVariable(HedContextManager(test_strings3), hed_schema, defs)
     bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                    '../../../tests/data/bids/eeg_ds003654s_hed'))
     events_path = os.path.realpath(os.path.join(bids_root_path,
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
     input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
     hed_strings = get_assembled_strings(input_data, hed_schema=hed_schema, expand_defs=False)
-    onset_man = HedContextManager(hed_strings, hed_schema=hed_schema)
+    onset_man = HedContextManager(hed_strings)
     definitions = input_data.get_definitions().gathered_defs
     var_type = HedTypeVariable(onset_man, hed_schema, definitions)
     df = var_type.get_variable_factors()

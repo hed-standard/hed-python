@@ -45,7 +45,7 @@ class SummarizeColumnValuesOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns corresponding to values in a specified column.
 
-        Args:
+        Parameters:
             dispatcher (Dispatcher) - dispatcher object for context
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.

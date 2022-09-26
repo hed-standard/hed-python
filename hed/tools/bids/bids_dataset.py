@@ -2,10 +2,10 @@ import os
 import json
 from hed.errors.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.schema.hed_schema import HedSchema
-from hed.schema.hed_schema_io import load_schema, load_schema_version
+from hed.schema.hed_schema_io import load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_file_group import BidsFileGroup
-from hed.validator import HedValidator
+from hed.validator.hed_validator import HedValidator
 
 
 LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/"
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     #                     '../../../tests/data/bids/eeg_ds003654s_hed')
     #
     # path = 'Q:\WakemanHensonON'
-    path = 'G:\WakemanHenson\WH_Released'
+    path = 'G:\\WakemanHenson\\WH_Released'
     bids = BidsDataset(path)
     issue_list = bids.validate(check_for_warnings=False)
     if issue_list:

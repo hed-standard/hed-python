@@ -1,5 +1,8 @@
 from hed.schema import load_schema_version
-from hed.models import HedString, HedTag, DefinitionEntry, DefMapper
+from hed.models.hed_string import HedString
+from hed.models.hed_tag import HedTag
+from hed.models.def_mapper import DefMapper
+from hed.models.definition_dict import DefinitionEntry
 from hed.tools.analysis.hed_context_manager import HedContextManager
 
 
@@ -164,7 +167,7 @@ if __name__ == '__main__':
                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
 
-    onset_man = HedContextManager(test_strings1, schema)
+    onset_man = HedContextManager(test_strings1)
     def1 = HedString('(Condition-variable/Var1, Circle, Square)', hed_schema=schema)
     def2 = HedString('(condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere)', hed_schema=schema)
     def3 = HedString('(Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross)',

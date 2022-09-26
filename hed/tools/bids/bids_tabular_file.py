@@ -1,6 +1,6 @@
 import os
-from hed.tools.bids.bids_file import BidsFile
 from hed.models.tabular_input import TabularInput
+from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsTabularFile(BidsFile):
@@ -9,7 +9,7 @@ class BidsTabularFile(BidsFile):
     def __init__(self, file_path):
         """ Constructor for a BIDS tabular file.
 
-        Args:
+        Parameters:
             file_path (str):  Path of the tabular file.
         """
         super().__init__(file_path)
@@ -17,7 +17,7 @@ class BidsTabularFile(BidsFile):
     def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of this tabular file.
 
-        Args:
+        Parameters:
             content_info (None):   This always uses the internal file_path to create the contents.
             overwrite:  If False, do not overwrite existing contents if any.
 
@@ -38,7 +38,7 @@ class BidsTabularFile(BidsFile):
 
 
 if __name__ == '__main__':
-    from hed import HedSchemaGroup, HedValidator, load_schema, load_schema_version, Sidecar, TabularInput
+    # from hed import HedSchemaGroup, HedValidator, load_schema, load_schema_version, Sidecar, TabularInput
 
     # check_for_warnings = False
     # base_version = '8.1.0'

@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.tools import BidsDatasetSummary
+from hed.tools.bids.bids_dataset_summary import BidsDatasetSummary
 
 
 class Test(unittest.TestCase):
