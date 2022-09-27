@@ -27,8 +27,7 @@ from hed.tools.remodeling.backup_manager import BackupManager
 def get_parser():
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
-    parser.add_argument("-m", "--model-path", dest="model_path",
-                        help="Full path of the file with remodeling instructions.")
+    parser.add_argument("model_path", help="Full path of the file with remodeling instructions.")
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
                         help="File extensions to allow in locating files.")
