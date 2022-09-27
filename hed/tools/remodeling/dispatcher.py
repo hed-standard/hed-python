@@ -1,10 +1,13 @@
 import os
+import io
 import numpy as np
 import pandas as pd
+import zipfile
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.operation_list import operations
 from hed.errors.exceptions import HedFileError
+from hed.tools.util.io_util import generate_filename
 
 
 class Dispatcher:
@@ -31,10 +34,39 @@ class Dispatcher:
             self.hed_schema = None
         self.context_dict = {}
 
+    def archive_context(self, archive=None, file_formats=['.txt', '.json'], verbose=True):
+        """ Write the context information to an stream archive and return.
+
+        Parameters:
+            archive (BytesIO or None): Open byte stream to write zipped content or None if one is to be created.
+            file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
+            verbose (bool): If true, a more extensive summary is archived.
+
+        Returns:
+            BytesIO or None: An open byte stream or None if no archive was passed and no context is available.
+
+        """
+        if not self.context_dict:
+            return archive
+        elif not archive:
+            archive = io.BytesIO()
+        for context_name, context_item in self.context_dict.items():
+            file_base = generate_filename(context_item.context_filename, append_datetime=True)
+            with zipfile.ZipFile(archive, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+                for file_format in file_formats:
+                    if file_format == '.txt':
+                        summary = context_item.get_text_summary(verbose=True)
+                    elif file_format == '.json':
+                        summary = context_item.get_summary(as_json=True)
+                    else:
+                        continue
+                    zf.writestr(file_base + file_format, str.encode(summary, 'utf-8'))
+        return archive
+
     def get_data_file(self, file_path):
         """ Full path of the backup file corresponding to the file path.
 
-        Args:
+        Parameters:
             file_path (str): Full path of the dataframe in the original dataset.
 
         Returns:
@@ -47,7 +79,7 @@ class Dispatcher:
             actual_path = file_path
 
         try:
-            df = pd.read_csv(actual_path, sep='\t')
+            df = pd.read_csv(actual_path, sep='\t', header=0)
         except Exception:
             raise HedFileError("BadDataFile",
                                f"{str(actual_path)} (orig: {file_path}) does not correspond to "
@@ -55,15 +87,16 @@ class Dispatcher:
         df = self.prep_events(df)
         return df
 
-    def get_remodel_save_dir(self):
+    def get_context_save_dir(self):
+        """"""
+
         if self.data_root:
             return os.path.realpath(os.path.join(self.data_root, Dispatcher.REMODELING_SUMMARY_PATH))
         raise HedFileError("NoDataRoot", f"Dispatcher must have a data root to produce directories", "")
 
     def run_operations(self, file_path, sidecar=None, verbose=False):
         """ Run the dispatcher commands on a file.
-
-        Args:
+        Parameters:
             file_path (str):      Full path of the file to be remodeled.
             sidecar (Sidecar or file-like):   Only needed for HED operations.
             verbose (bool):  If true, print out progress reports
@@ -79,10 +112,10 @@ class Dispatcher:
         df = df.fillna('n/a')
         return df
 
-    def save_context(self, save_formats, verbose=True):
+    def save_context(self, save_formats=['.json', '.txt'], verbose=True):
         """ Save the summary files in the specified formats.
 
-        Args:
+        Parameters:
             save_formats (list) list of formats [".txt", ."json"]
             verbose (bool) If include additional details
 
@@ -91,7 +124,7 @@ class Dispatcher:
         """
         if not save_formats:
             return
-        summary_path = self.get_remodel_save_dir()
+        summary_path = self.get_context_save_dir()
         os.makedirs(summary_path, exist_ok=True)
         for context_name, context_item in self.context_dict.items():
             context_item.save(summary_path, save_formats, verbose=verbose)
@@ -113,7 +146,8 @@ class Dispatcher:
                                    f"Command {str(item)} does not have a parameters key")
                 if item["command"] not in operations:
                     raise KeyError("CommandCanNotBeDispatched",
-                                   f"Command {item['command']} must be added to dispatch before it can be executed.")
+                                   f"Command {item['command']} must be added to operations_list"
+                                   f"before it can be executed.")
                 new_command = operations[item["command"]](item["parameters"])
                 commands.append(new_command)
             except Exception as ex:
@@ -127,7 +161,7 @@ class Dispatcher:
     def prep_events(df):
         """ Replace all n/a entries in the data frame by np.NaN for processing.
 
-        Args:
+        Parameters:
             df (DataFrame) - The DataFrame to be processed.
 
         """
@@ -146,3 +180,21 @@ class Dispatcher:
         if title:
             return title + sep + errors
         return errors
+
+    @staticmethod
+    def archive_data_file(df, file_path, archive=None):
+        if not archive:
+            archive = io.BytesIO()
+        file_name = generate_filename(os.path.basename(file_path), append_datetime=True,
+                                      extension=os.path.splitext(file_path)[1])
+        with zipfile.ZipFile(archive, mode="a", compression=zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr(file_name, str.encode(df.to_csv(None, sep='\t', index=False, header=True), 'utf-8'))
+        return archive
+
+    @staticmethod
+    def save_archive(archive, archive_path):
+        this_path = os.path.realpath(archive_path)
+        os.makedirs(os.path.dirname(this_path), exist_ok=True)
+        archive.seek(0)
+        with open(this_path, "wb") as f:  # use `wb` mode
+            f.write(archive.getvalue())

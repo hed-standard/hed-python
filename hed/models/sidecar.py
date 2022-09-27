@@ -17,7 +17,7 @@ class Sidecar(SidecarBase):
     def __init__(self, files, name=None, hed_schema=None):
         """ Construct a Sidecar object representing a JSON file.
 
-        Args:
+        Parameters:
             files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
             name (str or None): Optional name identifying this sidecar, generally a filename.
             hed_schema(HedSchema or None): The schema to use by default in identifying tags
@@ -39,7 +39,7 @@ class Sidecar(SidecarBase):
     def _hed_string_iter(self, tag_funcs, error_handler):
         """ Low level function to retrieve hed string in sidecar
 
-        Args:
+        Parameters:
             tag_funcs(list): A list of functions to apply to returned strings
             error_handler(ErrorHandler): Error handler to use for context
 
@@ -60,7 +60,7 @@ class Sidecar(SidecarBase):
     def _set_hed_string(self, new_hed_string, position):
         """ Low level function to update hed string in sidecar
 
-        Args:
+        Parameters:
             new_hed_string (str or HedString): The new hed_string to replace the value at position.
             position (tuple):   The value returned from hed_string_iter.
         """
@@ -71,7 +71,7 @@ class Sidecar(SidecarBase):
     def validate_structure(self, error_handler):
         """ Validate the raw structure of this sidecar.
 
-        Args:
+        Parameters:
             error_handler(ErrorHandler): The error handler to use for error context
 
         Returns:
@@ -87,7 +87,7 @@ class Sidecar(SidecarBase):
     def save_as_json(self, save_filename):
         """ Save column metadata to a JSON file.
 
-        Args:
+        Parameters:
             save_filename (str): Path to save file
 
         """
@@ -106,7 +106,7 @@ class Sidecar(SidecarBase):
     def load_sidecar_file(self, file):
         """ Load column metadata from a given json file.
 
-        Args:
+        Parameters:
             file (str or FileLike): If a string, this is a filename. Otherwise, it will be parsed as a file-like.
 
         Raises:
@@ -130,7 +130,7 @@ class Sidecar(SidecarBase):
     def load_sidecar_files(self, files):
         """ Load json from a given file or list
 
-        Args:
+        Parameters:
             files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
         Raises:
             HedFileError: If the file was not found or could not be parsed into JSON.
@@ -149,7 +149,7 @@ class Sidecar(SidecarBase):
     def _load_json_file(self, fp):
         """ Load the raw json of a given file
 
-        Args:
+        Parameters:
             fp (File-like): The JSON source stream.
 
         Raises:
@@ -163,7 +163,7 @@ class Sidecar(SidecarBase):
     def _generate_single_column(self, column_name, dict_for_entry, column_type=None):
         """ Create a single column metadata entry and add to this sidecar.
 
-        Args:
+        Parameters:
             column_name (str or int): The column name or number
             dict_for_entry (dict): The loaded dictionary for a given column entry (needs the "HED" key if nothing else).
             column_type (ColumnType): Optional indicator of how to treat the column.

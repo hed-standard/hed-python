@@ -71,7 +71,7 @@ class TagValidator:
                                       is_definition=False):
         """ Runs the hed_ops on the individual tags.
 
-        Args:
+        Parameters:
             original_tag (HedTag): A original tag.
             check_for_warnings (bool): If True, also check for warnings.
             allow_placeholders (bool): Allow value class or extensions to be placeholders rather than a specific value.
@@ -102,7 +102,7 @@ class TagValidator:
     def run_tag_level_validators(self, original_tag_list, is_top_level, is_group):
         """ Run hed_ops at each level in a HED string.
 
-        Args:
+        Parameters:
             original_tag_list (list): A list containing the original HedTags.
             is_top_level (bool): If True, this group is a "top level tag group".
             is_group (bool): If true, group is contained by parenthesis.
@@ -122,7 +122,7 @@ class TagValidator:
     def run_all_tags_validators(self, tags, check_for_warnings):
         """ Validate the multi-tag properties in a hed string.
 
-        Args:
+        Parameters:
             tags (list): A list containing the HedTags in a HED string.
             check_for_warnings (bool): If True, also check for warnings.
 
@@ -146,7 +146,7 @@ class TagValidator:
     def check_invalid_character_issues(self, hed_string):
         """ Report invalid characters.
 
-        Args:
+        Parameters:
             hed_string (str): A hed string.
 
         Returns:
@@ -165,7 +165,7 @@ class TagValidator:
     def check_count_tag_group_parentheses(self, hed_string):
         """ Report unmatched parentheses.
 
-        Args:
+        Parameters:
             hed_string (str): A hed string.
 
         Returns:
@@ -183,7 +183,7 @@ class TagValidator:
     def check_delimiter_issues_in_hed_string(self, hed_string):
         """ Report missing commas or commas in value tags.
 
-        Args:
+        Parameters:
             hed_string (str): A hed string.
 
         Returns:
@@ -227,7 +227,7 @@ class TagValidator:
     def check_tag_formatting(self, original_tag):
         """ Report repeated or erroneous slashes.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
 
         Returns:
@@ -245,7 +245,7 @@ class TagValidator:
     def check_tag_invalid_chars(self, original_tag, allow_placeholders):
         """ Report invalid characters in the given tag.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             allow_placeholders (bool): Allow placeholder characters(#) if True.
 
@@ -262,7 +262,7 @@ class TagValidator:
     def check_tag_exists_in_schema(self, original_tag, check_for_warnings=False):
         """ Report invalid tag or doesn't take a value.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             check_for_warnings (bool): If True, also check for warnings.
 
@@ -285,7 +285,7 @@ class TagValidator:
     def check_tag_unit_class_units_are_valid(self, original_tag, check_for_warnings):
         """ Report incorrect unit class or units.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             check_for_warnings (bool): Indicates whether to check for warnings.
 
@@ -315,7 +315,7 @@ class TagValidator:
     def check_tag_value_class_valid(self, original_tag):
         """ Report an invalid value portion.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
 
         Returns:

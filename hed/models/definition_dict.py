@@ -110,7 +110,7 @@ class DefinitionDict(HedOps):
     def check_for_definitions(self, hed_string_obj, error_handler=None):
         """ Check string for definition tags, adding them to self.
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): A single hed string to gather definitions from.
             error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
 
@@ -196,7 +196,7 @@ class DefinitionDict(HedOps):
     def get_as_strings(def_dict):
         """ Convert the entries to strings of the contents
 
-        Args:
+        Parameters:
             def_dict(DefinitionDict or dict): A dict of definitions
 
         Returns:
@@ -211,7 +211,7 @@ class DefinitionDict(HedOps):
 def add_group_to_dict(group, tag_dict=None):
     """ Add the tags and their values from a HED group to a tag dictionary.
 
-    Args:
+    Parameters:
         group (HedGroup):   Contents to add to the tag dict.
         tag_dict (dict):    The starting tag dictionary to which to add to.
 

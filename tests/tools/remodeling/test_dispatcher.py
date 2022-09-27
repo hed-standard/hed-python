@@ -1,11 +1,15 @@
 import os
+import io
 import json
+import shutil
 import unittest
 import pandas as pd
 import numpy as np
+import zipfile
+from hed.errors.exceptions import HedFileError
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.base_op import BaseOp
+from hed.tools.util.io_util import get_file_list
 
 
 class Test(unittest.TestCase):
@@ -29,6 +33,26 @@ class Test(unittest.TestCase):
         cls.file_path = file_path
         cls.sample_data = sample_data
         cls.sample_columns = sample_columns
+        cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
+        cls.test_zip_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                          '../../data/remodeling/test_root_back1.zip')
+        test_root_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                       '../../data/remodeling/test_root_back1')
+        cls.test_root_back1 = test_root_back1
+        cls.summarize_model = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                           '../../data/remodeling/test_root1_summarize_column_value_rmdl.json')
+        cls.archive_zip = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                           '../../data/remodeling/test_archive/test_archive_file.zip'))
+
+    def setUp(self):
+        with zipfile.ZipFile(self.test_zip_back1, 'r') as zip_ref:
+            zip_ref.extractall(self.extract_path)
+
+    def tearDown(self):
+        if os.path.exists(self.test_root_back1):
+            shutil.rmtree(self.test_root_back1)
+        if os.path.exists(self.archive_zip):
+            shutil.rmtree(os.path.dirname(self.archive_zip))
 
     @classmethod
     def tearDownClass(cls):
@@ -59,6 +83,58 @@ class Test(unittest.TestCase):
         self.assertEqual(errors[0]['index'], 1, "parse_command error has the correct index for missing command")
         self.assertEqual(errors[0]['error_type'], KeyError,
                          "parse_command error has the correct type for missing command")
+
+    def test_archive_context(self):
+        with open(self.summarize_model) as fp:
+            model1 = json.load(fp)
+        dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
+        file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
+                                  exclude_dirs=['derivatives'])
+        for file in file_list:
+            dispatch1.run_operations(file)
+
+        archive_io = dispatch1.archive_context()
+        self.assertIsInstance(archive_io, io.BytesIO)
+        self.assertFalse(os.path.exists(self.archive_zip))
+        os.makedirs(os.path.dirname(self.archive_zip), exist_ok=True)
+        with open(self.archive_zip, "wb") as f:  # use `wb` mode
+            f.write(archive_io.getvalue())
+        self.assertTrue(os.path.exists(self.archive_zip))
+
+    def test_archive_data_file(self):
+        file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
+                                  exclude_dirs=['derivatives'])
+        archive_one = io.BytesIO()
+        for file in file_list:
+            df = pd.read_csv(file, sep='\t', header=0)
+            self.assertIsInstance(df, pd.DataFrame)
+            Dispatcher.archive_data_file(df, file, archive=archive_one)
+        self.assertFalse(os.path.exists(self.archive_zip))
+        Dispatcher.save_archive(archive_one, self.archive_zip)
+        self.assertTrue(os.path.exists(self.archive_zip))
+
+    def test_archive_data_file_with_context(self):
+        with open(self.summarize_model) as fp:
+            model1 = json.load(fp)
+        dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
+        file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
+                                  exclude_dirs=['derivatives'])
+        for file in file_list:
+            dispatch1.run_operations(file)
+
+        archive_io = dispatch1.archive_context()
+
+    def test_get_context_save_dir(self):
+        model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
+        with open(model_path1) as fp:
+            model1 = json.load(fp)
+        dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
+        summary_path = dispatch1.get_context_save_dir()
+        self.assertEqual(summary_path,
+                         os.path.realpath(os.path.join(self.test_root_back1, Dispatcher.REMODELING_SUMMARY_PATH)))
+        dispatch2 = Dispatcher(model1)
+        with self.assertRaises(HedFileError) as context:
+            dispatch2.get_context_save_dir()
 
     def test_parse_commands_no_parameters(self):
         test = [{"command": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
@@ -94,7 +170,7 @@ class Test(unittest.TestCase):
         for item in parsed_ops:
             self.assertIsInstance(item, BaseOp)
 
-    def test_dispatcher_run_operations(self):
+    def test_run_operations(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
         with open(model_path1) as fp:
             model1 = json.load(fp)
@@ -114,6 +190,21 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df_new), num_test_rows, "run_operations did not change the number of output rows")
         self.assertEqual(len(dispatch.parsed_ops), len(model1),
                          "dispatcher command list should have one item for each command")
+
+    def test_save_context(self):
+        with open(self.summarize_model) as fp:
+            model1 = json.load(fp)
+        dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
+        file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
+                                  exclude_dirs=['derivatives'])
+        for file in file_list:
+            dispatch1.run_operations(file)
+        summary_path = dispatch1.get_context_save_dir()
+        self.assertFalse(os.path.exists(summary_path))
+        dispatch1.save_context()
+        self.assertTrue(os.path.exists(summary_path))
+        file_list1 = os.listdir(summary_path)
+        self.assertEqual(len(file_list1), 4, "run_remodel creates correct number of summary files when run.")
 
 
 if __name__ == '__main__':

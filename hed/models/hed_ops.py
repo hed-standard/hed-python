@@ -21,7 +21,7 @@ default_arguments = {
 def translate_ops(hed_ops, split_ops=False, hed_schema=None, **kwargs):
     """ Return functions to apply to a hed string object.
 
-    Args:
+    Parameters:
         hed_ops (list): A list of func or HedOps or HedSchema to apply to hed strings.
         split_ops (bool): If true, will split the operations into separate lists of tag and string operations.
         hed_schema(HedSchema or None): The schema to use by default in identifying tags
@@ -79,7 +79,7 @@ def translate_ops(hed_ops, split_ops=False, hed_schema=None, **kwargs):
 def apply_ops(hed_strings, hed_ops, **kwargs):
     """ Convenience function to update a list/dict of hed strings
 
-    Args:
+    Parameters:
         hed_strings(str, dict, list): A list/dict/str to update
         hed_ops (list or HedOps or func): A list of func or HedOps or HedSchema to apply to hed strings.
         kwargs (kwargs):  An optional dictionary of name-value pairs representing parameters passed to each HedOps

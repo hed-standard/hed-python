@@ -28,7 +28,7 @@ class RemoveRowsOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Remove rows with the values indicated in the column.
 
-        Args:
+        Parameters:
             dispatcher (Dispatcher) - dispatcher object for context
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.

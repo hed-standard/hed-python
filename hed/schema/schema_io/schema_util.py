@@ -10,7 +10,7 @@ from xml.etree import ElementTree
 def url_to_file(resource_url):
     """ Write data from a URL resource into a file. Data is decoded as unicode.
 
-    Args:
+    Parameters:
         resource_url (str): The URL to the resource.
 
     Returns:
@@ -27,7 +27,7 @@ def url_to_file(resource_url):
 def url_to_string(resource_url):
     """ Get the data from the specified url as a string.
 
-    Args:
+    Parameters:
         resource_url (str): The URL to the resource.
 
     Returns:
@@ -41,7 +41,7 @@ def url_to_string(resource_url):
 def write_strings_to_file(output_strings, extension=None):
     """ Write output strings to a temporary file.
 
-    Args:
+    Parameters:
         output_strings ([str], str):  Strings to output one per line.
         extension (str):              File extension of the temporary file.
 
@@ -61,7 +61,7 @@ def write_strings_to_file(output_strings, extension=None):
 def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
     """ Write an XML element tree object into a XML file.
 
-    Args:
+    Parameters:
         xml_tree (Element):  An element representing an XML file.
         extension (string):  The file extension to use for the temporary file.
 
@@ -78,7 +78,7 @@ def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
 def _xml_element_2_str(elem):
     """ Convert an XML element to an XML string.
 
-    Args:
+    Parameters:
         elem (Element):  An XML element.
 
     Returns:

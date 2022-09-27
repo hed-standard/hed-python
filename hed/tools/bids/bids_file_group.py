@@ -27,7 +27,7 @@ class BidsFileGroup:
                  exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
         """ Constructor for a BidsFileGroup.
 
-        Args:
+        Parameters:
             root_path (str):  Path of the root of the BIDS dataset.
             suffix (str):     Suffix indicating the type this group represents (e.g. events, or channels, etc.).
             obj_type (str):   Indicates the type of underlying file represents the contents.
@@ -55,7 +55,7 @@ class BidsFileGroup:
     def get_sidecars_from_path(self, obj):
         """ Return applicable sidecars for the object.
 
-        Args:
+        Parameters:
             obj (BidsTabularFile or BidsSidecarFile):  The BIDS file object to get the sidecars for.
 
         Returns:
@@ -75,12 +75,12 @@ class BidsFileGroup:
     def _get_sidecar_for_obj(self, obj, current_path):
         """ Return a single BidsSidecarFile relevant to obj from the sidecars in the current path.
 
-         Args:
-             obj (BidsFile):      A file whose sidecars are to be found.
-             current_path (str):  The path of the directory whose sidecars are to be checked.
+        Parameters:
+            obj (BidsFile):      A file whose sidecars are to be found.
+            current_path (str):  The path of the directory whose sidecars are to be checked.
 
-         Returns:
-             BidsSidecarFile or None:  The BidsSidecarFile in current_path relevant to obj, if any.
+        Returns:
+            BidsSidecarFile or None:  The BidsSidecarFile in current_path relevant to obj, if any.
 
          """
         sidecars = self.sidecar_dir_dict.get(current_path, None)

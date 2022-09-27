@@ -1,7 +1,6 @@
 """Utilities for generating and handling file names."""
 
 import os
-import pathlib
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from hed.errors.exceptions import HedFileError
@@ -183,8 +182,6 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
     return filtered_files
 
 
-
-
 def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dirs=None):
     """ Return paths satisfying various conditions.
 
@@ -223,18 +220,12 @@ def get_path_components(root_path, this_path):
 
     """
 
-    base_path = os.path.realpath(root_path)
-    pure_base = pathlib.PurePosixPath(base_path)
+    base_path = os.path.normpath(os.path.realpath(root_path))
     cur_path = os.path.normpath(os.path.realpath(this_path))
-    pure_cur = pathlib.PurePosixPath(cur_path)
     common_prefix = os.path.commonprefix([base_path, cur_path])
-    print(f"Base path: {base_path} \nCurrent path: {cur_path}")
-    print("Common prefix:", {common_prefix})
-    print(f"Pure base: {pure_base}\npure_cur {pure_cur} ")
     if not common_prefix:
         raise ValueError("NoPathInCommon", f"Paths {base_path} and {cur_path} must have items in common")
     common_path = os.path.commonpath([base_path, cur_path])
-    print(f"Common path: {common_path}")
     if common_path != base_path:
         return None
     rel_path = os.path.relpath(cur_path, base_path)

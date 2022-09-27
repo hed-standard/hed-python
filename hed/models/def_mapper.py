@@ -119,7 +119,7 @@ class DefMapper(HedOps):
     def expand_def_tags(self, hed_string_obj, expand_defs=True, shrink_defs=False):
         """ Validate and expand Def/Def-Expand tags.
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): The hed string to process.
             expand_defs (bool): If true, convert def tags to def-expand tag groups that include definition content.
             shrink_defs (bool): If True, replace all def-expand groups with corresponding def tags.
@@ -159,7 +159,7 @@ class DefMapper(HedOps):
 
             Also removes definitions
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): The string to search for definitions.
             check_for_definitions  (bool): If True, this will first check the hed string for any definitions.
             expand_defs (bool):        If True, replace Def tags to Def-expand tag groups.
@@ -189,7 +189,7 @@ class DefMapper(HedOps):
     def _get_definition_contents(self, def_tag, def_expand_group, def_issues):
         """ Check for issues with expanding a tag from Def to a Def-expand tag group and return the expanded tag group.
 
-        Args:
+        Parameters:
             def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
             def_expand_group (HedGroup or HedTag):
             Source group for this def-expand tag.  Same as def_tag if this is not a def-expand tag.

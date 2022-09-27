@@ -76,7 +76,7 @@ class KeyMap:
     def remap(self, data):
         """ Remap the columns of a dataframe or columnar file.
 
-        Args:
+        Parameters:
             data (DataFrame, str) :     Columnar data (either DataFrame or filename) whose columns are to be remapped.
 
         Returns:
@@ -101,7 +101,7 @@ class KeyMap:
     def _remap(self, df):
         """ Utility method that iterates through dataframes to do the remapping.
 
-        Args:
+        Parameters:
             df (DataFrame):    DataFrame in which to perform the mapping.
 
         Returns:
@@ -131,7 +131,7 @@ class KeyMap:
     def update(self, data, allow_missing=True, keep_counts=True):
         """ Update the existing map with information from data.
 
-        Args:
+        Parameters:
             data (DataFrame or str):     DataFrame or filename of an events file or event map.
             allow_missing (bool):        If true allow missing keys and add as n/a columns.
             keep_counts (bool):          If true keep a count of the times each key is present.
