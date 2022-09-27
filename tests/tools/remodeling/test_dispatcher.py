@@ -1,5 +1,4 @@
 import os
-<<<<<<< HEAD
 import io
 import json
 import shutil
@@ -11,15 +10,6 @@ from hed.errors.exceptions import HedFileError
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.util.io_util import get_file_list
-=======
-import json
-import unittest
-import pandas as pd
-import numpy as np
-from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.backup_manager import BackupManager
-from hed.tools.remodeling.operations.base_op import BaseOp
->>>>>>> 10670af68889b5f8de93f6f811f892326b5b2085
 
 
 class Test(unittest.TestCase):
@@ -43,7 +33,6 @@ class Test(unittest.TestCase):
         cls.file_path = file_path
         cls.sample_data = sample_data
         cls.sample_columns = sample_columns
-<<<<<<< HEAD
         cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
         cls.test_zip_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/remodeling/test_root_back1.zip')
@@ -64,8 +53,6 @@ class Test(unittest.TestCase):
             shutil.rmtree(self.test_root_back1)
         if os.path.exists(self.archive_zip):
             shutil.rmtree(os.path.dirname(self.archive_zip))
-=======
->>>>>>> 10670af68889b5f8de93f6f811f892326b5b2085
 
     @classmethod
     def tearDownClass(cls):
@@ -97,7 +84,6 @@ class Test(unittest.TestCase):
         self.assertEqual(errors[0]['error_type'], KeyError,
                          "parse_command error has the correct type for missing command")
 
-<<<<<<< HEAD
     def test_archive_context(self):
         with open(self.summarize_model) as fp:
             model1 = json.load(fp)
@@ -150,8 +136,6 @@ class Test(unittest.TestCase):
         with self.assertRaises(HedFileError) as context:
             dispatch2.get_context_save_dir()
 
-=======
->>>>>>> 10670af68889b5f8de93f6f811f892326b5b2085
     def test_parse_commands_no_parameters(self):
         test = [{"command": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
                 {"command": "remove_rows"}]
@@ -186,11 +170,7 @@ class Test(unittest.TestCase):
         for item in parsed_ops:
             self.assertIsInstance(item, BaseOp)
 
-<<<<<<< HEAD
     def test_run_operations(self):
-=======
-    def test_dispatcher_run_operations(self):
->>>>>>> 10670af68889b5f8de93f6f811f892326b5b2085
         model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
         with open(model_path1) as fp:
             model1 = json.load(fp)
@@ -211,7 +191,6 @@ class Test(unittest.TestCase):
         self.assertEqual(len(dispatch.parsed_ops), len(model1),
                          "dispatcher command list should have one item for each command")
 
-<<<<<<< HEAD
     def test_save_context(self):
         with open(self.summarize_model) as fp:
             model1 = json.load(fp)
@@ -227,8 +206,6 @@ class Test(unittest.TestCase):
         file_list1 = os.listdir(summary_path)
         self.assertEqual(len(file_list1), 4, "run_remodel creates correct number of summary files when run.")
 
-=======
->>>>>>> 10670af68889b5f8de93f6f811f892326b5b2085
 
 if __name__ == '__main__':
     unittest.main()

@@ -226,7 +226,6 @@ def get_path_components(root_path, this_path):
     if not common_prefix:
         raise ValueError("NoPathInCommon", f"Paths {base_path} and {cur_path} must have items in common")
     common_path = os.path.commonpath([base_path, cur_path])
-    print(f"Common path: {common_path}")
     if common_path != base_path:
         return None
     rel_path = os.path.relpath(cur_path, base_path)
