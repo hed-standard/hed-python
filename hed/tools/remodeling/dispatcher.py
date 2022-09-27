@@ -89,13 +89,13 @@ class Dispatcher:
 
     def get_context_save_dir(self):
         """"""
+
         if self.data_root:
             return os.path.realpath(os.path.join(self.data_root, Dispatcher.REMODELING_SUMMARY_PATH))
         raise HedFileError("NoDataRoot", f"Dispatcher must have a data root to produce directories", "")
 
     def run_operations(self, file_path, sidecar=None, verbose=False):
         """ Run the dispatcher commands on a file.
-
         Parameters:
             file_path (str):      Full path of the file to be remodeled.
             sidecar (Sidecar or file-like):   Only needed for HED operations.

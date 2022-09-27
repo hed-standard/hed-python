@@ -206,6 +206,7 @@ class Test(unittest.TestCase):
         file_path3 = os.path.join(base_path, 'temp_events.tsv')
         comps3 = get_path_components(base_path, file_path3)
         self.assertFalse(comps3, "get_path_components files directly in base_path don't have components ")
+
         # TODO: This test doesn't work on Linux
         # file_path4 = 'P:/Baloney/sidecar/events.tsv'
         #
