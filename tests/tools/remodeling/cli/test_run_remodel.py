@@ -60,8 +60,8 @@ class Test(unittest.TestCase):
         derv_path = os.path.realpath(os.path.join(self.test_root_back1,
                                                   BackupManager.RELATIVE_BACKUP_LOCATION, 'back1'))
         self.assertTrue(os.path.exists(derv_path), 'run_model backup exists before model can be run')
-        arg_list = [self.test_root_back1, '-n', 'back1', '-x', 'derivatives',
-                    '-f', 'events', '-e', '.tsv', '-m', self.model_rename_path]
+        arg_list = [self.test_root_back1, self.model_rename_path, '-n', 'back1', '-x', 'derivatives',
+                    '-f', 'events', '-e', '.tsv']
         test_file1 = os.path.realpath(os.path.join(self.test_root_back1, 'sub1', 'sub1_events.tsv'))
         back_file1 = os.path.realpath(os.path.join(derv_path, 'backup_root', 'sub1', 'sub1_events.tsv'))
         df_orig_before = get_new_dataframe(test_file1)
@@ -79,8 +79,8 @@ class Test(unittest.TestCase):
         self.assertFalse('value' in df_back_after.columns, "run_remodel after remodeling backup is not changed")
 
     def test_main_summarize(self):
-        arg_list = [self.test_root_back1, '-n', 'back1', '-x', 'derivatives',
-                    '-f', 'events', '-e', '.tsv', '-m', self.model_summary_path]
+        arg_list = [self.test_root_back1, self.model_summary_path, '-n', 'back1', '-x', 'derivatives',
+                    '-f', 'events', '-e', '.tsv']
         summary_path = os.path.realpath(os.path.join(self.test_root_back1, 'derivatives', 'remodel', 'summaries'))
         self.assertFalse(os.path.exists(summary_path), "run_remodel does not have a summaries directory before")
         cli_remodel.main(arg_list)
