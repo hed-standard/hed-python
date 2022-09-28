@@ -100,6 +100,8 @@ class Test(unittest.TestCase):
         with open(self.archive_zip, "wb") as f:  # use `wb` mode
             f.write(archive_io.getvalue())
         self.assertTrue(os.path.exists(self.archive_zip))
+        the_zip = zipfile.ZipFile(self.archive_zip)
+        self.assertFalse(the_zip.testzip())
 
     def test_archive_data_file(self):
         file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
@@ -108,10 +110,12 @@ class Test(unittest.TestCase):
         for file in file_list:
             df = pd.read_csv(file, sep='\t', header=0)
             self.assertIsInstance(df, pd.DataFrame)
-            Dispatcher.archive_data_file(df, file, archive=archive_one)
+            archive_one = Dispatcher.archive_data_file(df, file, archive=archive_one)
         self.assertFalse(os.path.exists(self.archive_zip))
         Dispatcher.save_archive(archive_one, self.archive_zip)
         self.assertTrue(os.path.exists(self.archive_zip))
+        the_zip = zipfile.ZipFile(self.archive_zip)
+        self.assertFalse(the_zip.testzip())
 
     def test_archive_data_file_with_context(self):
         with open(self.summarize_model) as fp:
@@ -119,10 +123,14 @@ class Test(unittest.TestCase):
         dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
         file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
                                   exclude_dirs=['derivatives'])
-        for file in file_list:
-            dispatch1.run_operations(file)
-
-        archive_io = dispatch1.archive_context()
+        df = dispatch1.run_operations(file_list[0])
+        archive_one = io.BytesIO()
+        archive_one = Dispatcher.archive_data_file(df, file_list[0], archive=archive_one)
+        archive_one = dispatch1.archive_context(archive=archive_one)
+        Dispatcher.save_archive(archive_one, self.archive_zip)
+        self.assertTrue(os.path.exists(self.archive_zip))
+        the_zip = zipfile.ZipFile(self.archive_zip)
+        self.assertFalse(the_zip.testzip())
 
     def test_get_context_save_dir(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')

@@ -52,7 +52,7 @@ class Dispatcher:
             archive = io.BytesIO()
         for context_name, context_item in self.context_dict.items():
             file_base = generate_filename(context_item.context_filename, append_datetime=True)
-            with zipfile.ZipFile(archive, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+            with zipfile.ZipFile(archive, mode="a", compression=zipfile.ZIP_DEFLATED) as zf:
                 for file_format in file_formats:
                     if file_format == '.txt':
                         summary = context_item.get_text_summary(verbose=True)

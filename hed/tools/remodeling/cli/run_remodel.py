@@ -39,7 +39,7 @@ def get_parser():
                         help="Format for saving any summaries, if any. If empty, then no summaries are saved.")
     parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
                         help="If present, the dataset is in BIDS format with sidecars. HED analysis is available.")
-    parser.add_argument("-n", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
+    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
                         help="Name of the default backup for remodeling")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
