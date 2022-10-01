@@ -1,7 +1,7 @@
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 PARAMS = {
-    "command": "reorder_columns",
+    "operation": "reorder_columns",
     "required_parameters": {
         "column_order": list,
         "ignore_missing": bool,
@@ -24,7 +24,7 @@ class ReorderColumnsOp(BaseOp):
 
     """
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_order = parameters['column_order']
         self.ignore_missing = parameters['ignore_missing']

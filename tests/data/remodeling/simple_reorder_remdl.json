@@ -1,6 +1,6 @@
 [
     {
-        "command": "remove_columns",
+        "operation": "remove_columns",
         "description": "Get rid of the sample and the value columns",
         "parameters": {
             "remove_names": ["sample", "value"],
@@ -8,7 +8,7 @@
         }
     },
     {
-        "command": "reorder_columns",
+        "operation": "reorder_columns",
         "description": "Order columns so that response_time and trial_type come after onset and duration",
         "parameters": {
             "column_order": ["onset", "duration", "trial_type", "response_time"],

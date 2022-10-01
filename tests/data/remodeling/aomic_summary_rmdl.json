@@ -1,6 +1,6 @@
 [
     {
-        "command": "summarize_column_names",
+        "operation": "summarize_column_names",
         "description": "Summarize existing column header across entire AOMIC dataset.",
         "parameters": {
             "summary_name": "AOMIC_column_headers",

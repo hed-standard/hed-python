@@ -2,7 +2,7 @@ import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 PARAMS = {
-    "command": "merge_consecutive",
+    "operation": "merge_consecutive",
     "required_parameters": {
         "column_name": str,
         "event_code": [str, int, float],
@@ -17,7 +17,7 @@ PARAMS = {
 class MergeConsecutiveOp(BaseOp):
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_name = parameters["column_name"]
         self.event_code = parameters["event_code"]

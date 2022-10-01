@@ -5,7 +5,7 @@ import pandas as pd
 import zipfile
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.remodeling.backup_manager import BackupManager
-from hed.tools.remodeling.operations.operation_list import operations
+from hed.tools.remodeling.operations.operation_list import valid_operations
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import generate_filename
 
@@ -13,7 +13,8 @@ from hed.tools.util.io_util import generate_filename
 class Dispatcher:
     REMODELING_SUMMARY_PATH = 'derivatives/remodel/summaries'
 
-    def __init__(self, command_list, data_root=None, backup_name=BackupManager.DEFAULT_BACKUP_NAME, hed_versions=None):
+    def __init__(self, operation_list, data_root=None,
+                 backup_name=BackupManager.DEFAULT_BACKUP_NAME, hed_versions=None):
         self.data_root = data_root
         self.backup_name = backup_name
         self.backup_man = None
@@ -23,10 +24,10 @@ class Dispatcher:
                 raise HedFileError("BackupDoesNotExist",
                                    f"Remodeler cannot be run with a dataset without first creating the "
                                    f"{self.backup_name} backup for {self.data_root}", "")
-        op_list, errors = self.parse_commands(command_list)
+        op_list, errors = self.parse_operations(operation_list)
         if errors:
-            these_errors = self.errors_to_str(errors, 'Dispatcher failed due to invalid commands')
-            raise ValueError("InvalidCommandList", f"{these_errors}")
+            these_errors = self.errors_to_str(errors, 'Dispatcher failed due to invalid operations')
+            raise ValueError("InvalidOperationList", f"{these_errors}")
         self.parsed_ops = op_list
         if hed_versions:
             self.hed_schema = load_schema_version(hed_versions)
@@ -95,7 +96,7 @@ class Dispatcher:
         raise HedFileError("NoDataRoot", f"Dispatcher must have a data root to produce directories", "")
 
     def run_operations(self, file_path, sidecar=None, verbose=False):
-        """ Run the dispatcher commands on a file.
+        """ Run the dispatcher operations on a file.
         Parameters:
             file_path (str):      Full path of the file to be remodeled.
             sidecar (Sidecar or file-like):   Only needed for HED operations.
@@ -130,32 +131,32 @@ class Dispatcher:
             context_item.save(summary_path, save_formats, verbose=verbose)
 
     @staticmethod
-    def parse_commands(command_list):
+    def parse_operations(operation_list):
         errors = []
-        commands = []
-        for index, item in enumerate(command_list):
+        operations = []
+        for index, item in enumerate(operation_list):
             try:
                 if not isinstance(item, dict):
-                    raise TypeError("InvalidCommandFormat",
-                                    f"Each commands must be a dictionary but command {str(item)} is {type(item)}")
-                if "command" not in item:
-                    raise KeyError("MissingCommand",
-                                   f"Command {str(item)} does not have a command key")
+                    raise TypeError("InvalidOperationFormat",
+                                    f"Each operations must be a dictionary but operation {str(item)} is {type(item)}")
+                if "operation" not in item:
+                    raise KeyError("MissingOperation",
+                                   f"operation {str(item)} does not have a operation key")
                 if "parameters" not in item:
                     raise KeyError("MissingParameters",
-                                   f"Command {str(item)} does not have a parameters key")
-                if item["command"] not in operations:
-                    raise KeyError("CommandCanNotBeDispatched",
-                                   f"Command {item['command']} must be added to operations_list"
+                                   f"Operation {str(item)} does not have a parameters key")
+                if item["operation"] not in valid_operations:
+                    raise KeyError("OperationCanNotBeDispatched",
+                                   f"Operation {item['operation']} must be added to operations_list"
                                    f"before it can be executed.")
-                new_command = operations[item["command"]](item["parameters"])
-                commands.append(new_command)
+                new_operation = valid_operations[item["operation"]](item["parameters"])
+                operations.append(new_operation)
             except Exception as ex:
                 errors.append({"index": index, "item": f"{item}", "error_type": type(ex),
                                "error_code": ex.args[0], "error_msg": ex.args[1]})
         if errors:
             return [], errors
-        return commands, []
+        return operations, []
 
     @staticmethod
     def prep_events(df):
@@ -172,7 +173,7 @@ class Dispatcher:
     def errors_to_str(messages, title="", sep='\n'):
         error_list = [0]*len(messages)
         for index, message in enumerate(messages):
-            error_list[index] = f"Command[{message.get('index', None)}] " + \
+            error_list[index] = f"Operation[{message.get('index', None)}] " + \
                                 f"has error:{message.get('error_type', None)}" + \
                                 f" with error code:{message.get('error_code', None)} " + \
                                 f"\n\terror msg:{message.get('error_msg', None)}"

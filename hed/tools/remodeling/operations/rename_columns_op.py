@@ -1,7 +1,7 @@
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 RENAME_PARAMS = {
-    "command": "rename_columns",
+    "operation": "rename_columns",
     "required_parameters": {
         "column_mapping": dict,
         "ignore_missing": bool
@@ -23,7 +23,7 @@ class RenameColumnsOp (BaseOp):
     """
 
     def __init__(self, parameters):
-        super().__init__(RENAME_PARAMS["command"], RENAME_PARAMS["required_parameters"],
+        super().__init__(RENAME_PARAMS["operation"], RENAME_PARAMS["required_parameters"],
                          RENAME_PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_mapping = parameters['column_mapping']

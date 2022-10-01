@@ -1,6 +1,6 @@
 [
     {
-        "command": "summarize_column_values",
+        "operation": "summarize_column_values",
         "description": "Summarize column values before renaming.",
         "parameters": {
             "summary_name": "test summary_values_before",
@@ -11,7 +11,7 @@
         }
     },
     {
-        "command": "rename_columns",
+        "operation": "rename_columns",
         "description": "Rename the columns.",
         "parameters": {
             "column_mapping": {
@@ -21,7 +21,7 @@
         }
     },
     {
-        "command": "summarize_column_values",
+        "operation": "summarize_column_values",
         "description": "Summarize column values after renaming.",
         "parameters": {
             "summary_name": "test summary_values_after",

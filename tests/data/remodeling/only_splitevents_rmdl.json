@@ -1,6 +1,6 @@
 [
    {
-       "command": "split_event",
+       "operation": "split_event",
        "description": "Create separate response event from response time column.",
        "parameters": {
            "anchor_column": "event_type",

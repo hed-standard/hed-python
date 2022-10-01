@@ -109,7 +109,7 @@ def generate_sidecar_entry(column_name, column_values=None):
             if column_value == "n/a":
                 continue
             value_label = re.sub(r'[^A-Za-z0-9-]+', '_', column_value)
-            levels[column_value] = f"Description for {column_value} of {column_name}"
+            levels[column_value] = f"Here describe column value {column_value} of column {column_name}"
             hed[column_value] = f"(Label/{name_label}, Label/{value_label})"
         sidecar_entry["Levels"] = levels
         sidecar_entry["HED"] = hed

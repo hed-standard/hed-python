@@ -1,6 +1,6 @@
 [
    {
-        "command": "remove_rows",
+        "operation": "remove_rows",
         "description": "Keep only go trials.",
         "parameters": {
             "column_name": "trial_type",
@@ -8,7 +8,7 @@
         }
     },
     {
-        "command": "remove_rows",
+        "operation": "remove_rows",
         "description": "Get rid of rows where response_time is n/a",
         "parameters": {
             "column_name": "response_time",
@@ -16,7 +16,7 @@
         }
     },
     {
-        "command": "split_events",
+        "operation": "split_events",
         "description": "Create event files that only have response events",
         "parameters": {
             "anchor_column": "event_type",
@@ -32,7 +32,7 @@
         }
     },
     {
-        "command": "reorder_columns",
+        "operation": "reorder_columns",
         "description": "Order columns for the output",
         "parameters": {
             "column_order": ["onset", "duration", "trial_type", "event_type", "response_hand", "sex"],

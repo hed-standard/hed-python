@@ -67,22 +67,23 @@ class Test(unittest.TestCase):
             model1 = json.load(fp)
         dispatch = Dispatcher(model1)
         self.assertEqual(len(dispatch.parsed_ops), len(model1),
-                         "dispatcher command list should have one item for each command")
+                         "dispatcher operation list should have one item for each operation")
 
-    def test_constructor_empty_commands(self):
+    def test_constructor_empty_operations(self):
         disp = Dispatcher([])
         self.assertIsInstance(disp, Dispatcher, "")
-        self.assertFalse(disp.parsed_ops, "constructor empty commands has empty parsed ops")
+        self.assertFalse(disp.parsed_ops, "constructor empty operations list has empty parsed ops")
 
-    def test_constructor_bad_no_command(self):
-        test = [{"command": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
+    def test_constructor_bad_no_operation(self):
+        test = [{"operation": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
                 {"parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}}]
-        commands, errors = Dispatcher.parse_commands(test)
-        self.assertFalse(commands, "parse_commands returns empty if no command")
-        self.assertEqual(len(errors), 1, "parse_command returns a list of one error if one command with no command")
-        self.assertEqual(errors[0]['index'], 1, "parse_command error has the correct index for missing command")
+        operations, errors = Dispatcher.parse_operations(test)
+        self.assertFalse(operations, "parse_operations returns empty if no operation")
+        self.assertEqual(len(errors), 1,
+                         "parse_operation returns a list of one error if one operation with no operation")
+        self.assertEqual(errors[0]['index'], 1, "parse_operation error has the correct index for missing operation")
         self.assertEqual(errors[0]['error_type'], KeyError,
-                         "parse_command error has the correct type for missing command")
+                         "parse_operation error has the correct type for missing operation")
 
     def test_archive_context(self):
         with open(self.summarize_model) as fp:
@@ -144,37 +145,38 @@ class Test(unittest.TestCase):
         with self.assertRaises(HedFileError) as context:
             dispatch2.get_context_save_dir()
 
-    def test_parse_commands_no_parameters(self):
-        test = [{"command": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
-                {"command": "remove_rows"}]
-        commands, errors = Dispatcher.parse_commands(test)
-        self.assertFalse(commands, "parse_commands returns empty if no parameters")
-        self.assertEqual(len(errors), 1, "parse_command returns a list of one error if one command with no parameters")
-        self.assertEqual(errors[0]['index'], 1, "parse_command error has the correct index for missing parameters")
-        self.assertEqual(errors[0]['error_type'], KeyError,
-                         "parse_command error has the correct type for missing parameters")
-
-    def test_parse_commands_missing_required(self):
-        test = [{"command": "remove_rows",
-                 "parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}},
-                {"command": "remove_rows", "parameters": {"column_name": "response_time"}}]
-        commands, errors = Dispatcher.parse_commands(test)
-        self.assertFalse(commands, "parse_commands returns empty if missing required")
+    def test_parse_operations_no_parameters(self):
+        test = [{"operation": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
+                {"operation": "remove_rows"}]
+        operations, errors = Dispatcher.parse_operations(test)
+        self.assertFalse(operations, "parse_operations returns empty if no parameters")
         self.assertEqual(len(errors), 1,
-                         "parse_command returns a list of one error if one command with missing required")
-        self.assertEqual(errors[0]['index'], 1, "parse_command error has the correct index for missing parameters")
+                         "parse_operation returns a list of one error if one operation with no parameters")
+        self.assertEqual(errors[0]['index'], 1, "parse_operation error has the correct index for missing parameters")
         self.assertEqual(errors[0]['error_type'], KeyError,
-                         "parse_command error has the correct type for missing required")
+                         "parse_operation error has the correct type for missing parameters")
+
+    def test_parse_operations_missing_required(self):
+        test = [{"operation": "remove_rows",
+                 "parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}},
+                {"operation": "remove_rows", "parameters": {"column_name": "response_time"}}]
+        operations, errors = Dispatcher.parse_operations(test)
+        self.assertFalse(operations, "parse_operations returns empty if missing required")
+        self.assertEqual(len(errors), 1,
+                         "parse_operation returns a list of one error if one operation with missing required")
+        self.assertEqual(errors[0]['index'], 1, "parse_operation error has the correct index for missing parameters")
+        self.assertEqual(errors[0]['error_type'], KeyError,
+                         "parse_operation error has the correct type for missing required")
         with self.assertRaises(ValueError):
             Dispatcher(test)
 
-    def test_parse_command_list(self):
-        test = [{"command": "remove_rows",
+    def test_parse_operation_list(self):
+        test = [{"operation": "remove_rows",
                  "parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}},
-                {"command": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}}]
+                {"operation": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}}]
         dispatch = Dispatcher(test)
         parsed_ops = dispatch.parsed_ops
-        self.assertEqual(len(parsed_ops), len(test), "dispatch has a command for each item in command list")
+        self.assertEqual(len(parsed_ops), len(test), "dispatch has a operation for each item in operation list")
         for item in parsed_ops:
             self.assertIsInstance(item, BaseOp)
 
@@ -197,7 +199,7 @@ class Test(unittest.TestCase):
                          "run_operations does not change the values in the input df")
         self.assertEqual(len(df_new), num_test_rows, "run_operations did not change the number of output rows")
         self.assertEqual(len(dispatch.parsed_ops), len(model1),
-                         "dispatcher command list should have one item for each command")
+                         "dispatcher operation list should have one item for each operation")
 
     def test_save_context(self):
         with open(self.summarize_model) as fp:
