@@ -5,7 +5,7 @@ from hed.models.expression_parser import TagExpressionParser
 from hed.tools.analysis.analysis_util import get_assembled_strings
 
 PARAMS = {
-    "command": "factor_hed_tags",
+    "operation": "factor_hed_tags",
     "required_parameters": {
         "filters": list,
         "queries": list,
@@ -30,7 +30,7 @@ class FactorHedTagsOp(BaseOp):
     """
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.filters = parameters['filters']
         self.queries = parameters['queries']

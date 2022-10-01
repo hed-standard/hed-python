@@ -1,7 +1,7 @@
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 PARAMS = {
-    "command": "remove_columns",
+    "operation": "remove_columns",
     "required_parameters": {
         "remove_names": list,
         "ignore_missing": bool
@@ -20,17 +20,17 @@ class RemoveColumnsOp(BaseOp):
     """
 
     def __init__(self, parameters):
-        """ Constructor for remove columns command.
+        """ Constructor for remove columns operation.
 
         Parameters:
-            parameters (dict): A dictionary of the parameters for this command.
+            parameters (dict): A dictionary of the parameters for this operation.
 
         Raises:
             KeyError if an invalid key is included in parameters.
             TypeError if a value in parameters has an invalid type.
 
         """
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.remove_names = parameters['remove_names']
         ignore_missing = parameters['ignore_missing']

@@ -4,7 +4,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 # TODO: Does not handle optional return columns.
 
 PARAMS = {
-    "command": "factor_column",
+    "operation": "factor_column",
     "required_parameters": {
         "column_name": str,
         "factor_values": list,
@@ -30,7 +30,7 @@ class FactorColumnOp(BaseOp):
     """
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_name = parameters['column_name']
         self.factor_values = parameters['factor_values']

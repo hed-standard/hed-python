@@ -3,7 +3,7 @@ import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 PARAMS = {
-    "command": "split_events",
+    "operation": "split_events",
     "required_parameters": {
         "anchor_column": str,
         "new_events": dict,
@@ -16,7 +16,7 @@ PARAMS = {
 class SplitEventOp(BaseOp):
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.anchor_column = parameters['anchor_column']
         self.new_events = parameters['new_events']

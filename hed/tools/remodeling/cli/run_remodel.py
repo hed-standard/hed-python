@@ -8,22 +8,6 @@ from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
 
 
-# def check_commands(commands):
-#     """ Verify that the remodeling file is correct.
-#
-#     Args:
-#         args (object
-#
-#     """
-#
-#     command_list, errors = Dispatcher.parse_commands(commands)
-#     if errors:
-#         raise ValueError("UnableToFullyParseCommands",
-#                          f"Fatal command errors, cannot continue:\n{Dispatcher.errors_to_str(errors)}")
-#     return
-#
-
-
 def get_parser():
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
@@ -46,7 +30,7 @@ def get_parser():
     return parser
 
 
-def parse_commands(arg_list=None):
+def parse_arguments(arg_list=None):
     parser = get_parser()
     args = parser.parse_args(arg_list)
     if '*' in args.file_suffix:
@@ -57,14 +41,14 @@ def parse_commands(arg_list=None):
     args.exclude_dirs = args.exclude_dirs + ['remodel']
     args.model_path = os.path.realpath(args.model_path)
     if args.verbose:
-        print(f"Data directory: {args.data_dir}\nCommand path: {args.json_remodel_path}")
+        print(f"Data directory: {args.data_dir}\nJSON remodel path: {args.json_remodel_path}")
     with open(args.model_path, 'r') as fp:
-        commands = json.load(fp)
-    command_list, errors = Dispatcher.parse_commands(commands)
+        operations = json.load(fp)
+    parsed_operations, errors = Dispatcher.parse_operations(operations)
     if errors:
-        raise ValueError("UnableToFullyParseCommands",
-                         f"Fatal command errors, cannot continue:\n{Dispatcher.errors_to_str(errors)}")
-    return args, commands
+        raise ValueError("UnableToFullyParseOperations",
+                         f"Fatal operation error, cannot continue:\n{Dispatcher.errors_to_str(errors)}")
+    return args, operations
 
 
 def run_bids_ops(dispatch, args):
@@ -107,7 +91,7 @@ def run_direct_ops(dispatch, args):
 
 
 def main(arg_list=None):
-    args, commands = parse_commands(arg_list)
+    args, operations = parse_arguments(arg_list)
     if not os.path.isdir(args.data_dir):
         raise ValueError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist")
     backup_man = BackupManager(args.data_dir)
@@ -115,7 +99,7 @@ def main(arg_list=None):
         raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
                            f"Please run_remodel_backup first", "")
     backup_man.restore_backup(args.backup_name, verbose=args.verbose)
-    dispatch = Dispatcher(commands, data_root=args.data_dir, backup_name=args.backup_name)
+    dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=args.backup_name)
     if args.use_bids:
         run_bids_ops(dispatch, args)
     else:

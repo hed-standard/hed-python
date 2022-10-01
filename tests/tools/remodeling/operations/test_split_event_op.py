@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
         cls.events_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                            '../../../data/remodeling/sub-0013_task-stopsignal_acq-seq_events.tsv'))
         cls.model1_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                           '../../../data/remodeling/only_splitevents_example.json'))
+                                           '../../../data/remodeling/only_splitevents_rmdl.json'))
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                            [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
                            [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
@@ -107,10 +107,10 @@ class Test(unittest.TestCase):
         # Test when existing column is used as anchor event
         df = pd.read_csv(self.events_path, delimiter='\t', header=0, dtype=str, keep_default_na=False, na_values=None)
         with open(self.model1_path) as fp:
-            command_list = json.load(fp)
-        commands, errors = Dispatcher.parse_commands(command_list)
-        self.assertFalse(errors, 'split_event should not give errors if command is correct')
-        dispatch = Dispatcher(command_list)
+            operation_list = json.load(fp)
+        operations, errors = Dispatcher.parse_operations(operation_list)
+        self.assertFalse(errors, 'split_event should not give errors if operation is correct')
+        dispatch = Dispatcher(operation_list)
         df = dispatch.prep_events(df)
         for operation in dispatch.parsed_ops:
             df_new = operation.do_op(dispatch, df, "Name")

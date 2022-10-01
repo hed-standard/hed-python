@@ -1,7 +1,7 @@
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 PARAMS = {
-    "command": "remove_rows",
+    "operation": "remove_rows",
     "required_parameters": {
         "column_name": str,
         "remove_values": list
@@ -20,7 +20,7 @@ class RemoveRowsOp(BaseOp):
      """
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_name = parameters["column_name"]
         self.remove_values = parameters["remove_values"]

@@ -14,7 +14,7 @@ from hed.tools.remodeling.operations.summarize_column_names_op import SummarizeC
 from hed.tools.remodeling.operations.summarize_column_values_op import SummarizeColumnValuesOp
 from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp
 
-operations = {
+valid_operations = {
     'factor_column': FactorColumnOp,
     'factor_hed_tags': FactorHedTagsOp,
     'factor_hed_type': FactorHedTypeOp,

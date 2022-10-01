@@ -3,7 +3,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.analysis.key_map import KeyMap
 
 PARAMS = {
-    "command": "remap_columns",
+    "operation": "remap_columns",
     "required_parameters": {
         "source_columns": list,
         "destination_columns": list,
@@ -21,7 +21,7 @@ class RemapColumnsOp(BaseOp):
 
     """
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.source_columns = parameters['source_columns']
         self.destination_columns = parameters['destination_columns']

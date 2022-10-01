@@ -1,6 +1,6 @@
 [
     {
-        "command": "summarize_hed_type",
+        "operation": "summarize_hed_type",
         "description": "Summarize a hed type tag such as condition-variable",
         "parameters": {
             "summary_name": "Hed type summary",

@@ -3,7 +3,7 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 PARAMS = {
-    "command": "summarize_column_headers",
+    "operation": "summarize_column_headers",
     "required_parameters": {
         "summary_name": str,
         "summary_filename": str
@@ -25,7 +25,7 @@ class SummarizeColumnNamesOp(BaseOp):
     """
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.summary_type = 'column_headers'
         self.summary_name = parameters['summary_name']

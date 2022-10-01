@@ -9,7 +9,7 @@ from hed.tools.analysis.hed_type_factors import HedTypeFactors
 # TODO: restricted factor values are not implemented yet.
 
 PARAMS = {
-    "command": "factor_hed_type",
+    "operation": "factor_hed_type",
     "required_parameters": {
         "type_tag": str,
         "type_values": list,
@@ -32,7 +32,7 @@ class FactorHedTypeOp(BaseOp):
      """
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.type_tag = parameters["type_tag"]
         self.type_values = parameters["type_values"]
@@ -41,7 +41,7 @@ class FactorHedTypeOp(BaseOp):
         if self.factor_encoding not in HedTypeFactors.ALLOWED_ENCODINGS:
             raise ValueError("BadFactorEncoding",
                              f"{self.factor_encoding} is not in the allowed encodings: " +
-                             f"{str(HedTypeFactors.ALLOWED_ENDCODINGS)}")
+                             f"{str(HedTypeFactors.ALLOWED_ENCODINGS)}")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor columns based on HED type.

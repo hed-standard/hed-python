@@ -7,7 +7,7 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 PARAMS = {
-    "command": "summarize_hed_type",
+    "operation": "summarize_hed_type",
     "required_parameters": {
         "summary_name": str,
         "summary_filename": str,
@@ -33,7 +33,7 @@ class SummarizeHedTypeOp(BaseOp):
     """
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.summary_type = 'summarize_hed_type'
         self.summary_name = parameters['summary_name']

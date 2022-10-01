@@ -2,7 +2,7 @@ import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 PARAMS = {
-    "command": "number_rows",
+    "operation": "number_rows",
     "required_parameters": {
         "number_column_name": str
     },
@@ -13,7 +13,7 @@ PARAMS = {
 class NumberRowsOp(BaseOp):
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.number_column_name = parameters['number_column_name']
         self.overwrite = parameters.get('overwrite', False)
@@ -30,7 +30,7 @@ class NumberRowsOp(BaseOp):
                     param_type = self.match_value_params[param_name]
                 else:
                     raise KeyError("BadParameter",
-                                   f"{param_name} not a required or optional parameter for {self.command}")
+                                   f"{param_name} not a required or optional parameter for {self.operation}")
                 # TODO: this has a syntax error
                 # if not isinstance(param_value, param_type):
                 #     raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")

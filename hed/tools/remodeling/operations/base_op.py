@@ -2,11 +2,11 @@
 
 class BaseOp:
 
-    def __init__(self, command, required_params, optional_params):
-        if command:
-            self.command = command
+    def __init__(self, operation, required_params, optional_params):
+        if operation:
+            self.operation = operation
         else:
-            raise ValueError("OpMustHaveCommand", "BaseOp command is empty")
+            raise ValueError("OpMustHaveOperation", "BaseOp operation is empty")
         self.required_params = required_params
         self.optional_params = optional_params
 
@@ -15,14 +15,16 @@ class BaseOp:
         required = set(self.required_params.keys())
         required_missing = required.difference(set(parameters.keys()))
         if required_missing:
-            raise KeyError("MissingRequiredParameters", f"{self.command} requires parameters {list(required_missing)}")
+            raise KeyError("MissingRequiredParameters",
+                           f"{self.operation} requires parameters {list(required_missing)}")
         for param_name, param_value in parameters.items():
             if param_name in self.required_params:
                 param_type = self.required_params[param_name]
             elif param_name in self.optional_params:
                 param_type = self.optional_params[param_name]
             else:
-                raise KeyError("BadParameter", f"{param_name} not a required or optional parameter for {self.command}")
+                raise KeyError("BadParameter",
+                               f"{param_name} not a required or optional parameter for {self.operation}")
             if isinstance(param_type, list):
                 self._check_list_type(param_value, param_type)
             elif not isinstance(param_value, param_type):
